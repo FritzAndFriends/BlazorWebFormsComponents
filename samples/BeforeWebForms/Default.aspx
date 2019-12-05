@@ -2,41 +2,58 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="jumbotron">
-        <h1>ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-        <p><a href="http://www.asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-    </div>
+    <h1>Before Web Forms</h1>
+
+    <p>
+        This is a project that contains individual pages for the BlazorWebFormsComponents developers to use 
+        to test the existing controls and see how they behave.  We will use this project to determine how best to build
+        our matching Blazor components.
+    </p>
 
     <div class="row">
-        <div class="col-md-4">
-            <h2>Getting started</h2>
-            <p>
-                ASP.NET Web Forms lets you build dynamic websites using a familiar drag-and-drop, event-driven model.
-            A design surface and hundreds of controls and components let you rapidly build sophisticated, powerful UI-driven sites with data access.
-            </p>
-            <p>
-                <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301948">Learn more &raquo;</a>
-            </p>
-        </div>
-        <div class="col-md-4">
-            <h2>Get more libraries</h2>
-            <p>
-                NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.
-            </p>
-            <p>
-                <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301949">Learn more &raquo;</a>
-            </p>
-        </div>
-        <div class="col-md-4">
-            <h2>Web Hosting</h2>
-            <p>
-                You can easily find a web hosting company that offers the right mix of features and price for your applications.
-            </p>
-            <p>
-                <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301950">Learn more &raquo;</a>
-            </p>
-        </div>
-    </div>
 
+        <div class="col-md-3">
+            <h3>Data Controls</h3>
+            <ul>
+                <li>Chart(?)                   </li>
+                <li>DataList                 </li>
+                <li>DataPager             </li>
+                <li>DetailsView           </li>
+                <li>FormView                </li>
+                <li>GridView                </li>
+                <li><a href="~/ControlSamples/ListView">ListView</a></li>
+                <li>Repeater                 </li>
+
+            </ul>
+        </div>
+
+        <div class="col-md-3">
+            <h3>Validation Controls</h3>
+            <ul>
+                
+    <li>CompareValidator                                   </li>
+    <li>CustomValidator                                      </li>
+    <li>RangeValidator                                         </li>
+    <li>RegularExpressionValidator(?)         </li>
+    <li>RequiredFieldValidator                        < /li>
+    <li>ValidationSummary                                 </li>
+
+            </ul>
+        </div>           
+
+        <div class="col-md-3">
+            <h3>Navigation Controls</h3>
+            <ul>
+            </ul>
+        </div>
+
+        <div class="col-md=3">
+                <h3>Login Controls</h3>
+            <ul>
+
+            </ul>
+        </div>
+
+    </div>
+ 
 </asp:Content>
