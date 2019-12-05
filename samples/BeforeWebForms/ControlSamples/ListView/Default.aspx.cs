@@ -1,4 +1,4 @@
-﻿using BeforeWebForms.Models;
+﻿using SharedSampleObjects.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +14,7 @@ namespace BeforeWebForms.ControlSamples.ListView
     protected void Page_Load(object sender, EventArgs e)
     {
 
-      var widgets = new Widget[]
-      {
-        new Widget { Id=1, Name="First Widget", Price=7.99M, LastUpdate=DateTime.Today.AddHours(6)},
-        new Widget { Id=2, Name="Second Widget", Price=13.99M, LastUpdate=DateTime.Today.AddHours(7)},
-        new Widget { Id=3, Name="Third Widget", Price=100.99M, LastUpdate=DateTime.Today.AddHours(14)},
-
-      };
-      simpleListView.DataSource = widgets;
+      simpleListView.DataSource = Widget.SimpleWidgetList;
       simpleListView.DataBind();
 
     }

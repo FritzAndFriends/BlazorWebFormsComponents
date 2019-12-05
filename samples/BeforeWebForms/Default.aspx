@@ -21,7 +21,7 @@
                 <li>DetailsView           </li>
                 <li>FormView                </li>
                 <li>GridView                </li>
-                <li><a href="~/ControlSamples/ListView">ListView</a></li>
+                <li><a href="/ControlSamples/ListView">ListView</a></li>
                 <li>Repeater                 </li>
 
             </ul>
@@ -35,7 +35,7 @@
     <li>CustomValidator                                      </li>
     <li>RangeValidator                                         </li>
     <li>RegularExpressionValidator(?)         </li>
-    <li>RequiredFieldValidator                        < /li>
+    <li>RequiredFieldValidator                        </li>
     <li>ValidationSummary                                 </li>
 
             </ul>
