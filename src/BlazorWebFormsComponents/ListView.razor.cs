@@ -9,7 +9,7 @@ namespace BlazorWebFormsComponents
   public partial class ListView<TItem>
   {
 
-    [Parameter]
+    [CascadingParameter(Name="ItemsCollection")]
     public IEnumerable<TItem> Items { get; set; }
 
     [Parameter]
