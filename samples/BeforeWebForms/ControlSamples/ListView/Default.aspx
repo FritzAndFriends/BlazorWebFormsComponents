@@ -6,7 +6,7 @@
 
     <p>Here is a simple listview bound to a collection of widgets.</p>
 
-    <asp:ListView ID="simpleListView" runat="server" ItemType="BeforeWebForms.Models.Widget">
+    <asp:ListView ID="simpleListView" runat="server" ItemType="SharedSampleObjects.Models.Widget">
         <LayoutTemplate>
             <table>
                 <thead>
