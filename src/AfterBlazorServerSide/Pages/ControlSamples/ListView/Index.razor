@@ -4,8 +4,8 @@
 
 <p>Here is a simple listview bound to a collection of widgets.</p>
 
-<ListView ID="simpleListView"
-          runat="server" 
+<ListView @ref="simpleListView"
+          runat="server"
           ItemType="SharedSampleObjects.Models.Widget"
           Items="Widget.SimpleWidgetList">
     <LayoutTemplate>
@@ -35,13 +35,17 @@
 
 @code {
 
-    override void OnInitialized()
-    {
+  BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
 
-        
+  protected override void OnAfterRender(bool firstRender)
+  {
 
-        base.OnInitialized();
-    }
+      simpleListView.DataSource = Widget.SimpleWidgetList;
+      simpleListView.DataBind();
+
+      base.OnAfterRender(firstRender);
+
+  }
 
 }
 
