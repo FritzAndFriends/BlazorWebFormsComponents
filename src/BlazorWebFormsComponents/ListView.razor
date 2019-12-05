@@ -15,20 +15,3 @@
         }
     </tbody>
 </table>
-
-@code {
-    [Parameter]
-    public IEnumerable<TItem> Items { get; set; }
-
-    [Parameter]
-    public RenderFragment EmptyDataTemplate { get; set; }
-
-    [Parameter]
-    public RenderFragment TableHeader { get; set; }
-
-    [Parameter]
-    public RenderFragment<TItem> RowTemplate { get; set; }
-
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IDictionary<string, object> AdditionalAttributes { get; set; }
-}
