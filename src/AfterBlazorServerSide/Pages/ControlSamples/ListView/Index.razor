@@ -16,13 +16,9 @@
 	<tbody>
 		<ListView @ref="simpleListView"
 							runat="server"
+							Context="Item"
 							ItemType="SharedSampleObjects.Models.Widget">
-			@*<LayoutTemplate>
-								<tr runat="server" id="itemPlaceHolder"></tr>
-						</tbody>
-				</table>
-		</LayoutTemplate>*@
-			<AlternatingItemTemplate Context="Item">
+			<AlternatingItemTemplate>
 				<tr class="table-dark">
 					<td>@Item.Id</td>
 					<td>@Item.Name</td>
@@ -30,7 +26,7 @@
 					<td>@Item.LastUpdate.ToString("d")</td>
 				</tr>
 			</AlternatingItemTemplate>
-			<ItemTemplate Context="Item">
+			<ItemTemplate>
 				<tr>
 					<td>@Item.Id</td>
 					<td>@Item.Name</td>

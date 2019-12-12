@@ -9,6 +9,10 @@ namespace BlazorWebFormsComponents
   public partial class ListView<ItemType>
   {
 
+    public ListView()
+    {
+    }
+
     [Parameter]
     public IEnumerable<ItemType> Items { get; set; }
 
