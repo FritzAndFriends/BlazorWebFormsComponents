@@ -6,31 +6,37 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-  public partial class ListView<TItem>
+  public partial class ListView<ItemType>
   {
 
-    [CascadingParameter(Name="ItemsCollection")]
-    public IEnumerable<TItem> Items { get; set; }
-
     [Parameter]
-    public IEnumerable<TItem> DataSource
+    public IEnumerable<ItemType> Items { get; set; }
+
+    public IEnumerable<ItemType> DataSource
     {
       get { return Items; }
-      set { Items = value; }
+      set { 
+        Items = value;
+        this.StateHasChanged();
+      }
     }
 
+    [Parameter]
+    public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
 
     [Parameter]
     public RenderFragment EmptyDataTemplate { get; set; }
 
     [Parameter]
+    public RenderFragment ItemSeparatorTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<ItemType> ItemTemplate { get; set; }
+
+    [Parameter]
+    [Obsolete("The LayoutTemplate child element is not supported in Blazor.  Instead, wrap the ListView component with the desired layout")]
     public RenderFragment LayoutTemplate { get; set; }
 
-    [Parameter]
-    public RenderFragment TableHeader { get; set; }
-
-    [Parameter]
-    public RenderFragment<TItem> ItemTemplate { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object> AdditionalAttributes { get; set; }

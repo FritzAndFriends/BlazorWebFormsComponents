@@ -6,7 +6,9 @@
 
     <p>Here is a simple listview bound to a collection of widgets.</p>
 
-    <asp:ListView ID="simpleListView" runat="server" ItemType="SharedSampleObjects.Models.Widget">
+    <asp:ListView ID="simpleListView" 
+                  runat="server" 
+                  ItemType="SharedSampleObjects.Models.Widget">
         <LayoutTemplate>
             <table>
                 <thead>
@@ -22,6 +24,14 @@
                 </tbody>
             </table>
         </LayoutTemplate>
+        <AlternatingItemTemplate>
+            <tr class="table-dark">
+                <td><%# Item.Id %></td>
+                <td><%# Item.Name %></td>
+                <td><%# Item.Price.ToString("c") %></td>
+                <td><%# Item.LastUpdate.ToString("d") %></td>
+            </tr>
+        </AlternatingItemTemplate>
         <ItemTemplate>
             <tr>
                 <td><%# Item.Id %></td>
@@ -30,6 +40,17 @@
                 <td><%# Item.LastUpdate.ToString("d") %></td>
             </tr>
         </ItemTemplate>
+        <ItemSeparatorTemplate>
+          <tr>
+            <td colspan="4" style="border-bottom: 1px solid black;">&nbsp;</td>
+          </tr>
+        </ItemSeparatorTemplate>
+        <EmptyDataTemplate>
+          <tr>
+            <td colspan="4">No widgets available</td>
+          </tr>
+        </EmptyDataTemplate>
+        <EmptyItemTemplate></EmptyItemTemplate>
     </asp:ListView>
 
     <code>&lt;table&gt;<br />
