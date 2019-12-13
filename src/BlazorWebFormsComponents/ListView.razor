@@ -10,8 +10,10 @@
 
 }
 
-
-@if (Items == null || !Items.Any())
+@if (!Visible) {
+	<!-- Control is not visible -->
+}
+else if (Items == null || !Items.Any())
 {
 	@EmptyDataTemplate
 }

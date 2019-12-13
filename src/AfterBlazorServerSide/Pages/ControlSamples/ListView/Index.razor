@@ -16,7 +16,9 @@
 	<tbody>
 		<ListView @ref="simpleListView"
 							runat="server"
+							EnableViewState="false"
 							Context="Item"
+							Visible="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<AlternatingItemTemplate>
 				<tr class="table-dark">

@@ -8,6 +8,7 @@
 
     <asp:ListView ID="simpleListView" 
                   runat="server" 
+                  Enabled="false"
                   ItemType="SharedSampleObjects.Models.Widget">
         <LayoutTemplate>
             <table>
