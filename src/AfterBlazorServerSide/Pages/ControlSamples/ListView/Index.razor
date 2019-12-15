@@ -2,46 +2,74 @@
 
 <h2>ListView Component homepage</h2>
 
+<div>
+	Other usage samples:  <a href="./ControlSamples/ListView/ModelBinding">ModelBinding Sample</a>
+</div>
+
 <p>Here is a simple listview bound to a collection of widgets.</p>
 
-<ListView ID="simpleListView"
-          runat="server" 
-          ItemType="SharedSampleObjects.Models.Widget"
-          Items="Widget.SimpleWidgetList">
-    <LayoutTemplate>
-        <table>
-            <thead>
-                <tr>
-                    <td>Id</td>
-                    <td>Name</td>
-                    <td>Price</td>
-                    <td>Last Update</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr runat="server" id="itemPlaceHolder"></tr>
-            </tbody>
-        </table>
-    </LayoutTemplate>
-    <ItemTemplate Context="Item">
-        <tr>
-            <td>@Item.Id</td>
-            <td>@Item.Name</td>
-            <td>@Item.Price.ToString("c")</td>
-            <td>@Item.LastUpdate.ToString("d")</td>
-        </tr>
-    </ItemTemplate>
-</ListView>
+<table class="table">
+	<thead>
+		<tr>
+			<td>Id</td>
+			<td>Name</td>
+			<td>Price</td>
+			<td>Last Update</td>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView @ref="simpleListView"
+							runat="server"
+							EnableViewState="false"
+							Context="Item"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<AlternatingItemTemplate>
+				<tr class="table-dark">
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</AlternatingItemTemplate>
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</ItemTemplate>
+			<ItemSeparatorTemplate>
+				@*<tr>
+					<td colspan="4" style="border-bottom: 1px solid black;">&nbsp;</td>
+				</tr>*@
+			</ItemSeparatorTemplate>
+			<EmptyDataTemplate>
+				<tr>
+					<td colspan="4">No widgets available</td>
+				</tr>
+			</EmptyDataTemplate>
+		</ListView>
+	</tbody>
+</table>
 
 @code {
 
-    override void OnInitialized()
-    {
+	BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
 
-        
+	protected override void OnAfterRender(bool firstRender)
+	{
 
-        base.OnInitialized();
-    }
+		if (firstRender)
+		{
+			simpleListView.DataSource = Widget.SimpleWidgetList;
+			simpleListView.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
 
 }
 
