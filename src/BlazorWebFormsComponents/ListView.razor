@@ -1,17 +1,42 @@
-﻿@typeparam TItem
+﻿@inherits ModelBindingComponent<ItemType>
+@typeparam ItemType
 
-<table class="table" @attributes="AdditionalAttributes">
-    @if (Items == null || !Items.Any())
-    {
-        @EmptyDataTemplate
-    }
-    <thead>
-        @TableHeader
-    </thead>
-    <tbody>
-        @foreach (var item in Items)
-        {
-            @ItemTemplate(item)
-        }
-    </tbody>
-</table>
+@if (LayoutTemplate != null) {
+	@:<!-- LayoutTemplate is not supported in Blazor.  Wrap the ListView component with the layout desired -->
+}
+
+@{ 
+
+	var rowCounter = 0;
+
+}
+
+@if (!Visible) {
+	<!-- Control is not visible -->
+}
+else if (Items == null || !Items.Any())
+{
+	@EmptyDataTemplate
+}
+else
+{
+	@foreach (var item in Items)
+	{
+
+		@if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+		{
+			@ItemTemplate(item)
+		}
+		else
+		{
+			@AlternatingItemTemplate(item)
+		}
+
+		@if (ItemSeparatorTemplate != null) {
+				@ItemSeparatorTemplate
+		}
+
+		rowCounter++;
+
+	}
+}

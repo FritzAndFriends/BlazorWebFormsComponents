@@ -6,37 +6,46 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-  public partial class ListView<TItem>
+  public partial class ListView<ItemType> : ModelBindingComponent<ItemType>
   {
 
-    [Parameter]
-    public IEnumerable<TItem> Items { get; set; }
-
-    [Parameter]
-    public IEnumerable<TItem> DataSource
+    public ListView()
     {
-      get { return Items; }
-      set { Items = value; }
     }
 
+    [Parameter]
+    public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
 
+    /// <summary>
+    /// Defines the content to render if the data source returns no data.
+    /// </summary>
     [Parameter]
     public RenderFragment EmptyDataTemplate { get; set; }
 
     [Parameter]
+    public RenderFragment ItemSeparatorTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<ItemType> ItemTemplate { get; set; }
+
+    /// <summary>
+    /// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+    /// </summary>
+    [Parameter]
+    [Obsolete("The LayoutTemplate child element is not supported in Blazor.  Instead, wrap the ListView component with the desired layout")]
     public RenderFragment LayoutTemplate { get; set; }
 
-    [Parameter]
-    public RenderFragment TableHeader { get; set; }
+    [Parameter] // TODO: Implement
+    public InsertItemPosition InsertItemPosition { get; set; }
 
-    [Parameter]
-    public RenderFragment<TItem> ItemTemplate { get; set; }
+    [Parameter] // TODO: Implement
+    public int SelectedIndex { get; set; }
 
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IDictionary<string, object> AdditionalAttributes { get; set; }
-
-    [Obsolete("This method doesn't do anything in Blazor")]
-    public void DataBind() { }
+    /// <summary>
+    /// Style is not applied by this control
+    /// </summary>
+    [Parameter, Obsolete("Style is not applied by this control")]
+    public string Style { get; set; }
 
   }
 
