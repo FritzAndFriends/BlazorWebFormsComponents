@@ -2,6 +2,10 @@
 
 <h2>ListView Component homepage</h2>
 
+<div>
+	Other usage samples:  <a href="./ControlSamples/ListView/ModelBinding">ModelBinding Sample</a>
+</div>
+
 <p>Here is a simple listview bound to a collection of widgets.</p>
 
 <table class="table">
@@ -18,7 +22,6 @@
 							runat="server"
 							EnableViewState="false"
 							Context="Item"
-							Visible="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<AlternatingItemTemplate>
 				<tr class="table-dark">
@@ -37,9 +40,9 @@
 				</tr>
 			</ItemTemplate>
 			<ItemSeparatorTemplate>
-				<tr>
+				@*<tr>
 					<td colspan="4" style="border-bottom: 1px solid black;">&nbsp;</td>
-				</tr>
+				</tr>*@
 			</ItemSeparatorTemplate>
 			<EmptyDataTemplate>
 				<tr>
@@ -52,7 +55,7 @@
 
 @code {
 
-		BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
+	BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
 
 	protected override void OnAfterRender(bool firstRender)
 	{

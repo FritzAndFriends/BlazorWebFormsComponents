@@ -6,24 +6,11 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-  public partial class ListView<ItemType> : BaseWebFormsComponent
+  public partial class ListView<ItemType> : ModelBindingComponent<ItemType>
   {
 
     public ListView()
     {
-    }
-
-    [Parameter]
-    public IEnumerable<ItemType> Items { get; set; }
-
-    [Parameter]
-    public IEnumerable<ItemType> DataSource
-    {
-      get { return Items; }
-      set { 
-        Items = value;
-        this.StateHasChanged();
-      }
     }
 
     [Parameter]
@@ -41,12 +28,12 @@ namespace BlazorWebFormsComponents
     [Parameter]
     public RenderFragment<ItemType> ItemTemplate { get; set; }
 
+    /// <summary>
+    /// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+    /// </summary>
     [Parameter]
     [Obsolete("The LayoutTemplate child element is not supported in Blazor.  Instead, wrap the ListView component with the desired layout")]
     public RenderFragment LayoutTemplate { get; set; }
-
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IDictionary<string, object> AdditionalAttributes { get; set; }
 
     [Parameter] // TODO: Implement
     public InsertItemPosition InsertItemPosition { get; set; }

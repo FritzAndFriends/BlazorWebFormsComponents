@@ -4,11 +4,15 @@
 
     <h2>ListView control homepage</h2>
 
+    <div>
+      Other usage samples:  <a href="ModelBinding.aspx">ModelBinding Sample</a>
+    </div>
+
     <p>Here is a simple listview bound to a collection of widgets.</p>
 
     <asp:ListView ID="simpleListView" 
                   runat="server" 
-                  Enabled="false"
+                  Enabled="true"
                   ItemType="SharedSampleObjects.Models.Widget">
         <LayoutTemplate>
             <table>

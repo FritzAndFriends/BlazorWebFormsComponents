@@ -1,4 +1,5 @@
-﻿@typeparam ItemType
+﻿@inherits ModelBindingComponent<ItemType>
+@typeparam ItemType
 
 @if (LayoutTemplate != null) {
 	@:<!-- LayoutTemplate is not supported in Blazor.  Wrap the ListView component with the layout desired -->

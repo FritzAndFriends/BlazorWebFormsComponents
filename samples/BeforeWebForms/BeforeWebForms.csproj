@@ -109,6 +109,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Site.css" />
     <Content Include="ControlSamples\ListView\Default.aspx" />
+    <Content Include="ControlSamples\ListView\ModelBinding.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -165,6 +166,13 @@
     </Compile>
     <Compile Include="ControlSamples\ListView\Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\ListView\ModelBinding.aspx.cs">
+      <DependentUpon>ModelBinding.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\ListView\ModelBinding.aspx.designer.cs">
+      <DependentUpon>ModelBinding.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>

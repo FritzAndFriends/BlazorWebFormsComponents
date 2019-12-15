@@ -18,5 +18,6 @@ namespace BeforeWebForms.ControlSamples.ListView
       simpleListView.DataBind();
 
     }
+
   }
 }

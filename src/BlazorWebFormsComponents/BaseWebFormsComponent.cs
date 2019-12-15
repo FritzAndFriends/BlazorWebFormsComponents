@@ -59,6 +59,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Enabled { get; set; } = true;
 
+		/// <summary>
+		/// Is the content of this component rendered and visible to your users?
+		/// </summary>
 		[Parameter]
 		public bool Visible { get; set; } = true;
 
@@ -71,6 +74,10 @@ namespace BlazorWebFormsComponents
 		[Parameter, Obsolete("Placeholders are not available in Blazor")]
 
 		public string ItemPlaceholderID { get; set; }
+
+
+		[Parameter(CaptureUnmatchedValues = true)]
+		public Dictionary<string, object> AdditionalAttributes { get; set; }
 
 	}
 
