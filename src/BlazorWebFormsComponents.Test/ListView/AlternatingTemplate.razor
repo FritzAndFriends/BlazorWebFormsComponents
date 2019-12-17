@@ -8,13 +8,9 @@
 						ItemType="Widget"
 						Context="Item">
 		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		<AlternatingItemTemplate><b>@Item.Name</b></AlternatingItemTemplate>
 	</ListView>
 </ComponentUnderTest>
-<Fragment>
-	<span>First Widget</span>
-	<span>Second Widget</span>
-	<span>Third Widget</span>
-</Fragment>
 </Fixture>
 
 
@@ -24,9 +20,9 @@
 	{
 
 		var cut = context.GetComponentUnderTest();
-		var expected = context.GetFragment();
 
-		cut.FindAll("span").Count().ShouldBe(3);
+		cut.FindAll("span").Count().ShouldBe(2, "Did not render 2 SPAN elements");
+		cut.FindAll("b").Count().ShouldBe(1, "Did not render 1 B element");
 
 	}
 
