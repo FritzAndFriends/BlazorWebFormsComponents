@@ -6,7 +6,7 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-  public partial class ListView<ItemType> : ModelBindingComponent<ItemType>
+  public partial class ListView<ItemType> : BaseModelBindingComponent<ItemType>
   {
 
     public ListView()
