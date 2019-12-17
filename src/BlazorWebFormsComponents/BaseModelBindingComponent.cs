@@ -6,7 +6,7 @@ using System.Linq;
 namespace BlazorWebFormsComponents
 {
 
-	public abstract class ModelBindingComponent<ItemType> : BaseWebFormsComponent {
+	public abstract class BaseModelBindingComponent<ItemType> : BaseWebFormsComponent {
 
 		// Cheer 300 svavablount 15/12/19 
 		// Cheer 200 nothing_else_matters 15/12/19 
