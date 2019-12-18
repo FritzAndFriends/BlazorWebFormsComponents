@@ -8,7 +8,6 @@
 
 	<PropertyGroup>
 		<PackageId>Fritz.BlazorWebFormsComponents</PackageId>
-		<Version>0.1.0</Version>
 		<Authors>Jeffrey T. Fritz</Authors>
 		<Description>A collection of Blazor components based on the default controls that ship with ASP.NET Web Forms</Description>
 		<Copyright>Copyright Jeffrey T. Fritz 2019</Copyright>
