@@ -9,5 +9,8 @@
     "buildNumber": {
       "enabled": true
     }
+  },
+  "release": {
+    "firstUnstableTag": "preview" 
   }
 }
