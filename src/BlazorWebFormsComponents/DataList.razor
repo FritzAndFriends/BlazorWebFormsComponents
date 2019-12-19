@@ -1,0 +1,23 @@
+﻿@inherits BaseModelBindingComponent<ItemType>
+@typeparam ItemType
+
+<table>
+
+@if (Items?.Any() ?? false)
+{
+
+	if (HeaderTemplate != null) {
+
+		<tr><td>@HeaderTemplate</td></tr>
+
+	}
+
+	@foreach (var item in Items)
+	{
+
+		<tr><td>@ItemTemplate(item)</td></tr>
+
+	}
+}
+
+</table>
