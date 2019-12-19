@@ -22,7 +22,7 @@
                 <li>FormView                </li>
                 <li>GridView                </li>
                 <li><a href="/ControlSamples/ListView">ListView</a></li>
-                <li>Repeater                 </li>
+                <li><a href="ControlSamples/Repeater/Default.aspx">Repeater</a></li>
 
             </ul>
         </div>

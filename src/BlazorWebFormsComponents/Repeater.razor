@@ -1,0 +1,38 @@
+﻿@inherits BaseModelBindingComponent<ItemType>
+@typeparam ItemType
+
+@HeaderTemplate
+
+@{
+
+	var rowCounter = 0;
+
+}
+
+
+@if (Items?.Any() ?? false)
+{
+
+	@foreach (var item in Items)
+	{
+
+		@if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+		{
+			@ItemTemplate(item)
+		}
+		else
+		{
+			@AlternatingItemTemplate(item)
+		}
+
+		@if (SeparatorTemplate != null)
+		{
+			@SeparatorTemplate
+		}
+
+		rowCounter++;
+
+	}
+}
+
+@FooterTemplate
