@@ -1,0 +1,59 @@
+﻿@page "/ControlSamples/Repeater"
+
+<h2>Repeater Component homepage</h2>
+
+<div>
+	@*Other usage samples:  <a href="./ControlSamples/ListView/ModelBinding">ModelBinding Sample</a>*@
+</div>
+
+<p>Here is a simple repeater bound to a collection of widgets.</p>
+
+							@*runat="server"
+							EnableViewState="false"*@
+<table>
+		<Repeater @ref="simpleRepeater"
+							Context="Item"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<AlternatingItemTemplate>
+				<tr class="table-dark">
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</AlternatingItemTemplate>
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</ItemTemplate>
+			<SeparatorTemplate>
+				<tr><td colspan="4"><hr/></td></tr>
+			</SeparatorTemplate>
+		</Repeater>
+</table>
+
+
+@code {
+
+	BlazorWebFormsComponents.Repeater<Widget> simpleRepeater { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleRepeater.DataSource = Widget.SimpleWidgetList;
+			simpleRepeater.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+}
+
