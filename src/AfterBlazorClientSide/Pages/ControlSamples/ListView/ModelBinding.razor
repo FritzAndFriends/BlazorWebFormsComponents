@@ -1,0 +1,63 @@
+﻿@page "/ControlSamples/ListView/ModelBinding"
+
+<h2>ListView ModelBinding Sample</h2>
+
+<p>Here is a listview using ModelBinding to interact with widgets.</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<td>Id</td>
+			<td>Name</td>
+			<td>Price</td>
+			<td>Last Update</td>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView @ref="simpleListView"
+							runat="server"
+							Context="Item"
+							SelectMethod="simpleListView_GetData"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<LayoutTemplate>
+			</LayoutTemplate>
+			<AlternatingItemTemplate>
+				<tr class="table-dark">
+					<td>@Item.Id </td>
+					<td>@Item.Name </td>
+					<td>@Item.Price.ToString("c") </td>
+					<td>@Item.LastUpdate.ToString("d") </td>
+				</tr>
+			</AlternatingItemTemplate>
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id </td>
+					<td>@Item.Name </td>
+					<td>@Item.Price.ToString("c") </td>
+					<td>@Item.LastUpdate.ToString("d") </td>
+				</tr>
+			</ItemTemplate>
+			<EmptyDataTemplate>
+				<tr>
+					<td colspan="4">No widgets available</td>
+				</tr>
+			</EmptyDataTemplate>
+		</ListView>
+		<tr runat="server" id="itemPlaceHolder"></tr>
+	</tbody>
+</table>
+
+
+@code {
+
+	ListView<Widget> simpleListView;
+
+	IQueryable<SharedSampleObjects.Models.Widget> simpleListView_GetData(int max, int start, string sort, out int totalRowCount) {
+
+		var outCollection = Widget.SimpleWidgetList.AsQueryable();
+		totalRowCount = outCollection.Count();
+		return outCollection;
+
+	}
+
+}
