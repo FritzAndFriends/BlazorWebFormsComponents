@@ -1,22 +1,19 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.Default" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="FlowLayout.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.FlowLayout" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <h2>DataList control homepage</h2>
+    <h2>DataList Flow Layout Sample</h2>
 
     <div>
-      Other usage samples:  <a href="FlowLayout.aspx">FlowLayout Sample</a>
+      Other usage samples:  <a href="Default.aspx">Simple Layout Sample</a>
     </div>
 
-    <p>Here is a simple datalist bound to a collection of widgets.  By default, the RepeatLayout
-      is a Table.
-    </p>
+    <p>Here is a simple datalist bound to a collection of widgets with RepeatLayout set to Flow</p>
 
     <asp:DataList ID="simpleDataList" 
                   runat="server" 
                   Enabled="true"
-                  RepeatLayout="Table"
-                  RepeatColumns="2"
+                  RepeatLayout="Flow"
                   ItemType="SharedSampleObjects.Models.Widget">
         <HeaderTemplate>
           My Widget List

@@ -2,12 +2,12 @@
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.Repeater Items="Widget.SimpleWidgetList"
+		<Repeater Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
 							Context="Item">
 			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
 			<SeparatorTemplate><hr/></SeparatorTemplate>
-		</BlazorWebFormsComponents.Repeater>
+		</Repeater>
 	</ComponentUnderTest>
 </Fixture>
 

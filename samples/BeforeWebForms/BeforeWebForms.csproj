@@ -108,6 +108,7 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="ControlSamples\DataList\FlowLayout.aspx" />
     <Content Include="ControlSamples\DataList\Default.aspx" />
     <Content Include="ControlSamples\ListView\Default.aspx" />
     <Content Include="ControlSamples\ListView\ModelBinding.aspx" />
@@ -162,6 +163,13 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="ControlSamples\DataList\FlowLayout.aspx.cs">
+      <DependentUpon>FlowLayout.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\DataList\FlowLayout.aspx.designer.cs">
+      <DependentUpon>FlowLayout.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ControlSamples\DataList\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
