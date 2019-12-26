@@ -230,8 +230,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SharedSampleObjects\SharedSampleObjects.csproj">
-      <Project>{824d4f8a-e27f-4760-a185-b99380a863f2}</Project>
+    <ProjectReference Include="..\SharedSampleObjects\SharedSampleObjects.csproj">
+      <Project>{6c602b37-5fc9-43ff-a3d8-c92b42d62f0d}</Project>
       <Name>SharedSampleObjects</Name>
     </ProjectReference>
   </ItemGroup>
