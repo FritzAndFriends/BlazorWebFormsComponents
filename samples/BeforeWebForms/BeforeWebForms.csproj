@@ -239,7 +239,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedSampleObjects\SharedSampleObjects.csproj">
-      <Project>{c72c87b7-ecff-4084-a4ad-2e413029d26c}</Project>
+      <Project>{6c602b37-5fc9-43ff-a3d8-c92b42d62f0d}</Project>
       <Name>SharedSampleObjects</Name>
     </ProjectReference>
   </ItemGroup>
