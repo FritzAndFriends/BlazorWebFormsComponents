@@ -10,7 +10,8 @@
 
     <p>Here is a simple repeater bound to a collection of widgets.</p>
 
-    <asp:Repeater ID="repeaterControl" runat="server" ItemType="SharedSampleObjects.Models.Widget"> 
+    <asp:Repeater ID="repeaterControl" runat="server" 
+      ItemType="SharedSampleObjects.Models.Widget"> 
       <HeaderTemplate>
         This is a list of widgets
       </HeaderTemplate>

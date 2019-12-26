@@ -1,0 +1,29 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.Repeater Items="Widget.SimpleWidgetList"
+							Visible="false"
+							ItemType="Widget"
+							Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			<SeparatorTemplate><hr/></SeparatorTemplate>
+		</BlazorWebFormsComponents.Repeater>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("span").Count().ShouldBe(0);
+		cut.FindAll("hr").Count().ShouldBe(0);
+
+	}
+
+
+}
