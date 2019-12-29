@@ -13,6 +13,8 @@ The DataList component is meant to emulate the asp:DataList control in markup an
     - Single Column
     - Empty List
 
+##### [Back to top](#datalist)
+
 ## Usage Notes
 
 - The following Web Forms features are ignored
@@ -21,6 +23,8 @@ The DataList component is meant to emulate the asp:DataList control in markup an
 - `ID` should be converted to `@ref` if the component is referenced in code
 - `ItemType` MUST be defined as an attribute
 - `Context` should be used to define the object used in templates.  If not defined, the default `<INSERT>` will be available. 
+
+##### [Back to top](#datalist)
 
 ## Web Forms Declarative Syntax
 
@@ -119,4 +123,9 @@ The DataList component is meant to emulate the asp:DataList control in markup an
 </asp:DataList>
 ```
 
+##### [Back to top](#datalist)
+
 ## Blazor Syntax
+
+##### [Back to top](#datalist)
+
