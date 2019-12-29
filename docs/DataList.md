@@ -15,8 +15,12 @@ The DataList component is meant to emulate the asp:DataList control in markup an
 
 ## Usage Notes
 
-- EnableViewState doesn't exist in Blazor and will be ignored
-- ID should be converted to @ref if the component is referenced in code
+- The following Web Forms features are ignored
+    - `runat="server"`
+    - `EnableViewState`
+- `ID` should be converted to `@ref` if the component is referenced in code
+- `ItemType` MUST be defined as an attribute
+- `Context` should be used to define the object used in templates.  If not defined, the default `<INSERT>` will be available. 
 
 ## Web Forms Declarative Syntax
 
