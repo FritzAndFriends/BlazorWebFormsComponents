@@ -1,6 +1,22 @@
 # DataList
 
-The DataList component is meant to emulate the asp:DataList control in markup and is defined in the [System.Web.UI.WebControls.Repeater class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.datalist?view=netframework-4.8)
+The DataList component is meant to emulate the asp:DataList control in markup and is defined in the [System.Web.UI.WebControls.DataList class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.datalist?view=netframework-4.8)
+
+[Usage Notes](#usage-notes) | [Web Forms Syntax](#web-forms-declarative-syntax) | [Blazor Syntax](#blazor-syntax)
+
+## Features supported in Blazor
+
+- Flow Layout
+    - Single Column
+    - Empty List
+ - Table Layout
+    - Single Column
+    - Empty List
+
+## Usage Notes
+
+- EnableViewState doesn't exist in Blazor and will be ignored
+- ID should be converted to @ref if the component is referenced in code
 
 ## Web Forms Declarative Syntax
 
@@ -98,3 +114,5 @@ The DataList component is meant to emulate the asp:DataList control in markup an
         </SeparatorTemplate>  
 </asp:DataList>
 ```
+
+## Blazor Syntax
