@@ -8,10 +8,9 @@
 	[Parameter]
 	public Color BackColor { get; set; }
 
-	protected override void OnParametersSet()
+	//protected override void OnParametersSet()
+	protected override void OnInitialized()
 	{
-
-		base.OnParametersSet();
 
 		if (theHeaderStyle != null)
 		{

@@ -9,7 +9,7 @@
 							RepeatLayout="Table"
 							Context="Item">
 			<ChildContent>
-				<HeaderStyle BackColor="Blue"></HeaderStyle>
+				<BlazorWebFormsComponents.HeaderStyle BackColor="Blue"></BlazorWebFormsComponents.HeaderStyle>
 			</ChildContent>
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
@@ -23,9 +23,15 @@
 	void FirstTest(IRazorTestContext context)
 	{
 
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
 		var cut = context.GetComponentUnderTest();
 
-		var theStyle = cut.Find("td[style]").Attributes["style"].Value;
+		var theHeaderElement = cut.Find("td");
+
+		theHeaderElement.HasAttribute("style").ShouldBeTrue();
+		var theStyle = theHeaderElement.GetAttribute("style");
+
 		theStyle.ShouldNotBeNull();
 		theStyle.ShouldContain("blue");
 
