@@ -1,52 +1,53 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
+
 @typeparam ItemType
 
 @switch (RepeatLayout)
 {
 
-	case "Table":
-	<table>
+	case TableRepeatLayout t:
+		<table>
 
-		@if (HeaderTemplate != null)
-		{
-
-		<tr><td>@HeaderTemplate</td></tr>
-
-		}
-
-		@if (Items?.Any() ?? false)
-		{
-			@foreach (var item in Items)
+			@if (HeaderTemplate != null)
 			{
 
-				<tr><td>@ItemTemplate(item)</td></tr>
+				<tr><td>@HeaderTemplate</td></tr>
 
 			}
-		}
 
-	</table>
+			@if (Items?.Any() ?? false)
+			{
+				@foreach (var item in Items)
+				{
+
+					<tr><td>@ItemTemplate(item)</td></tr>
+
+				}
+			}
+
+		</table>
 		break;
-	case "Flow":
+	case FlowRepeatLayout f:
 
 		<span>
 
-		@if (HeaderTemplate != null)
-		{
-
-			<span>@HeaderTemplate</span><br/>
-
-		}
-
-		@if (Items?.Any() ?? false)
-		{
-
-			@foreach (var item in Items)
+			@if (HeaderTemplate != null)
 			{
 
-				<span>@ItemTemplate(item)</span><br/>
+				<span>@HeaderTemplate</span><br />
 
 			}
-		}
+
+			@if (Items?.Any() ?? false)
+			{
+
+				@foreach (var item in Items)
+				{
+
+					<span>@ItemTemplate(item)</span><br />
+
+				}
+			}
 
 		</span>
 

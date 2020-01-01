@@ -16,54 +16,18 @@ namespace BlazorWebFormsComponents
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		[Parameter]
-		public string RepeatLayout { get; set; } = BlazorWebFormsComponents.RepeatLayout.Table;
+		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.RepeatLayout.Table;
 
 	}
 
-	public sealed class RepeatLayout {
-		
-		private RepeatLayout() { }
+	public abstract class RepeatLayout {
 
-		private static readonly RepeatLayout[] _Instances = new RepeatLayout[] {
-			new RepeatLayout { Markup = nameof(Table) },
-			new RepeatLayout { Markup = nameof(Flow) }
-		};
-
-		internal string Markup { get; private set; }
-
-		public static RepeatLayout Table
-		{
-			get
-			{
-				return _Instances[0];
-			}
-		}
-
-		public static RepeatLayout Flow
-		{
-			get
-			{
-				return _Instances[1];
-			}
-		}
-
-		public static implicit operator RepeatLayout(string theString) {
-
-			switch (theString.ToLowerInvariant()) {
-				case "table":
-					return Table;
-				case "flow":
-					return Flow;
-			}
-
-			return null;
-
-		}
-
-		public static implicit operator String(RepeatLayout layout) {
-			return layout.Markup;
-		}
+		public static TableRepeatLayout Table => new TableRepeatLayout();
+		public static FlowRepeatLayout Flow => new FlowRepeatLayout();
 
 	}
+
+	public class TableRepeatLayout : RepeatLayout { }
+	public class FlowRepeatLayout : RepeatLayout { }
 
 }
