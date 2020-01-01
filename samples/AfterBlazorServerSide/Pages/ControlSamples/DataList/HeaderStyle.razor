@@ -1,0 +1,43 @@
+﻿@page "/ControlSamples/DataList/HeaderStyle"
+@using static System.Drawing.Color
+
+<h2>DataList HeaderStyle sample</h2>
+
+<Nav />
+
+<p>Here is a simple datalist bound to a collection of widgets with simple HeaderStyle applied</p>
+
+<DataList @ref="simpleDataList"
+					runat="server"
+					EnableViewState="false"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+					<ChildContent>
+						<BlazorWebFormsComponents.HeaderStyle BackColor="Blue"></BlazorWebFormsComponents.HeaderStyle>
+					</ChildContent>
+	<HeaderTemplate>Simple Widgets</HeaderTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+@code {
+
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleDataList.DataSource = Widget.SimpleWidgetList;
+			simpleDataList.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+}
+

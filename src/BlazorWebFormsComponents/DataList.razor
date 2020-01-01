@@ -1,6 +1,11 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
+@using BlazorWebFormsComponents.Enum
 
 @typeparam ItemType
+
+	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
+		@ChildContent
+	</CascadingValue>
 
 @switch (RepeatLayout)
 {
@@ -11,7 +16,7 @@
 			@if (HeaderTemplate != null)
 			{
 
-				<tr><td>@HeaderTemplate</td></tr>
+				<tr><td style="@HeaderStyle">@HeaderTemplate</td></tr>
 
 			}
 

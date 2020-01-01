@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enum;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Drawing;
 using System.Text;
 
 namespace BlazorWebFormsComponents
@@ -12,22 +14,28 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment HeaderTemplate { get; set; }
 
+		[CascadingParameter(Name = "HeaderStyle")]
+		private TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
+
+		[Parameter]
+		public RenderFragment ChildContent { get; set; }
+
 		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		[Parameter]
-		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.RepeatLayout.Table;
+		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enum.RepeatLayout.Table;
+
+		protected override void HandleUnknownAttributes()
+		{
+
+			if (AdditionalAttributes.ContainsKey("HeaderStyle-BackColor")) {
+				HeaderStyle.BackColor = (Color)AdditionalAttributes["HeaderStyle-BackColor"];
+			}
+
+			base.HandleUnknownAttributes();
+		}
 
 	}
-
-	public abstract class RepeatLayout {
-
-		public static TableRepeatLayout Table => new TableRepeatLayout();
-		public static FlowRepeatLayout Flow => new FlowRepeatLayout();
-
-	}
-
-	public class TableRepeatLayout : RepeatLayout { }
-	public class FlowRepeatLayout : RepeatLayout { }
 
 }
