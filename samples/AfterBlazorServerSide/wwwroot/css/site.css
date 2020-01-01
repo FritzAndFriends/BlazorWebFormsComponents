@@ -5,7 +5,19 @@ html, body {
 }
 
 a, .btn-link {
-    color: #0366d6;
+  color: #0366d6;
+}
+
+a.component-link {
+  color: #0366d6;
+  text-decoration: underline;
+}
+
+a.component-link.active {
+  font-weight: bold;
+  color: inherit;
+  background-color: lightgrey;
+  text-decoration: none!important;
 }
 
 .btn-primary {
