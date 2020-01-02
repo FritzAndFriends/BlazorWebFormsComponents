@@ -26,9 +26,4 @@
     <ProjectReference Include="..\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.1.13-beta" />
-  </ItemGroup>
-
 </Project>
