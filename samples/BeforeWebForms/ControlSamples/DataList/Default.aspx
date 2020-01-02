@@ -15,7 +15,6 @@
     <asp:DataList ID="simpleDataList" 
                   runat="server" 
                   Enabled="true"
-                  HeaderStyle-BackColor=""
                   RepeatLayout="Table"
                   RepeatColumns="2"
                   ItemType="SharedSampleObjects.Models.Widget">

@@ -30,7 +30,12 @@ namespace BlazorWebFormsComponents
 		{
 
 			if (AdditionalAttributes.ContainsKey("HeaderStyle-BackColor")) {
-				HeaderStyle.BackColor = (Color)AdditionalAttributes["HeaderStyle-BackColor"];
+				HeaderStyle.BackColor = AdditionalAttributes["HeaderStyle-BackColor"].GetColorFromHtml();
+			}
+
+			if (AdditionalAttributes.ContainsKey("HeaderStyle-ForeColor"))
+			{
+				HeaderStyle.ForeColor = AdditionalAttributes["HeaderStyle-ForeColor"].GetColorFromHtml();
 			}
 
 			base.HandleUnknownAttributes();

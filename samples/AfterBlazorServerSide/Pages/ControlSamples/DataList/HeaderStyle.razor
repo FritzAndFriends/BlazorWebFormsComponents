@@ -12,9 +12,28 @@
 					EnableViewState="false"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
-					<ChildContent>
-						<BlazorWebFormsComponents.HeaderStyle BackColor="Blue"></BlazorWebFormsComponents.HeaderStyle>
-					</ChildContent>
+	<ChildContent>
+		<BlazorWebFormsComponents.HeaderStyle BackColor="Blue" ForeColor="White"></BlazorWebFormsComponents.HeaderStyle>
+	</ChildContent>
+	<HeaderTemplate>Simple Widgets</HeaderTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<br />
+<h3>Setting Values in the header style from inline attributes</h3>
+<DataList 
+					runat="server"
+					EnableViewState="false"
+					Context="Item"
+					HeaderStyle-BackColor="Blue"
+					HeaderStyle-ForeColor="White"
+					SelectMethod="GetWidgets"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ChildContent>
+		<BlazorWebFormsComponents.HeaderStyle BackColor="Blue"></BlazorWebFormsComponents.HeaderStyle>
+	</ChildContent>
 	<HeaderTemplate>Simple Widgets</HeaderTemplate>
 	<ItemTemplate>
 		@Item.Name - @Item.Price.ToString("c")
@@ -38,6 +57,16 @@
 		base.OnAfterRender(firstRender);
 
 	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+
+		totalRowCount = Widget.SimpleWidgetList.Length;
+
+		return Widget.SimpleWidgetList.AsQueryable();
+
+	}
+
 
 }
 

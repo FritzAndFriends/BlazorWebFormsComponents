@@ -8,13 +8,28 @@
 	[Parameter]
 	public Color BackColor { get; set; }
 
+	[Parameter]
+	public Color BorderColor { get; set; }
+
+	[Parameter]
+	public BorderStyle BorderStyle { get; set; }
+
+	[Parameter]
+	public Color ForeColor { get; set; }
+
 	//protected override void OnParametersSet()
 	protected override void OnInitialized()
 	{
 
 		if (theHeaderStyle != null)
 		{
+
 			theHeaderStyle.BackColor = BackColor;
+			theHeaderStyle.BorderColor = BorderColor;
+			theHeaderStyle.BorderStyle = BorderStyle;
+
+			theHeaderStyle.ForeColor = ForeColor;
+
 		}
 
 
