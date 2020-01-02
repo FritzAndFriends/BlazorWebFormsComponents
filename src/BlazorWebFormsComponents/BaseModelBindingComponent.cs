@@ -41,8 +41,12 @@ namespace BlazorWebFormsComponents
 				int totalRowCount;
 				Items = SelectMethod(int.MaxValue, 0, "", out totalRowCount);
 
-				HandleUnknownAttributes();
+			}
 
+			if (firstRender)				
+			{
+
+				HandleUnknownAttributes();
 				StateHasChanged();
 
 			}

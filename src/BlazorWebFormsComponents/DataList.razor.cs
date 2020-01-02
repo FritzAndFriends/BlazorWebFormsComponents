@@ -30,17 +30,23 @@ namespace BlazorWebFormsComponents
 		protected override void HandleUnknownAttributes()
 		{
 
-			var headerStyles = AdditionalAttributes.Keys
-				.Where(k => k.StartsWith("HeaderStyle-"))
-				.Select(k => new KeyValuePair<string, object>(k.Replace("HeaderStyle-", ""), AdditionalAttributes[k]));
-
-			if (AdditionalAttributes.ContainsKey("HeaderStyle-BackColor")) {
-				HeaderStyle.BackColor = AdditionalAttributes["HeaderStyle-BackColor"].GetColorFromHtml();
-			}
-
-			if (AdditionalAttributes.ContainsKey("HeaderStyle-ForeColor"))
+			if (AdditionalAttributes?.Count > 0)
 			{
-				HeaderStyle.ForeColor = AdditionalAttributes["HeaderStyle-ForeColor"].GetColorFromHtml();
+
+				var headerStyles = AdditionalAttributes.Keys
+					.Where(k => k.StartsWith("HeaderStyle-"))
+					.Select(k => new KeyValuePair<string, object>(k.Replace("HeaderStyle-", ""), AdditionalAttributes[k]));
+
+				if (AdditionalAttributes.ContainsKey("HeaderStyle-BackColor"))
+				{
+					HeaderStyle.BackColor = AdditionalAttributes["HeaderStyle-BackColor"].GetColorFromHtml();
+				}
+
+				if (AdditionalAttributes.ContainsKey("HeaderStyle-ForeColor"))
+				{
+					HeaderStyle.ForeColor = AdditionalAttributes["HeaderStyle-ForeColor"].GetColorFromHtml();
+				}
+
 			}
 
 			base.HandleUnknownAttributes();
