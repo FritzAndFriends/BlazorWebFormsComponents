@@ -1,9 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\AfterBlazorServerSide\Pages\ComponentList.razor" Link="Pages\ComponentList.razor" />
+		<Content Include="..\AfterBlazorServerSide\Pages\ControlSamples\**">
+			<Link>Pages\ControlSamples\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.1.0-preview4.19579.2" />
