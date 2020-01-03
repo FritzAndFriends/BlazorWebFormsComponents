@@ -37,14 +37,7 @@ namespace BlazorWebFormsComponents
 					.Where(k => k.StartsWith("HeaderStyle-"))
 					.Select(k => new KeyValuePair<string, object>(k.Replace("HeaderStyle-", ""), AdditionalAttributes[k]));
 
-				var headerStyleType = typeof(TableItemStyle);
-				foreach (var itemStyle in headerStyles)
-				{
-					var propInfo = headerStyleType.GetProperty(itemStyle.Key);
-
-					var outValue = propInfo.PropertyType == typeof(Color) ? itemStyle.Value.GetColorFromHtml() : itemStyle.Value;
-					propInfo.SetValue(HeaderStyle, Convert.ChangeType(outValue, propInfo.PropertyType));
-				}
+				HeaderStyle.FromAttributes(headerStyles);
 
 			}
 

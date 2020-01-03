@@ -15,6 +15,9 @@
 	public BorderStyle BorderStyle { get; set; }
 
 	[Parameter]
+	public Unit BorderWidth { get; set; }
+
+	[Parameter]
 	public Color ForeColor { get; set; }
 
 	//protected override void OnParametersSet()
@@ -27,6 +30,7 @@
 			theHeaderStyle.BackColor = BackColor;
 			theHeaderStyle.BorderColor = BorderColor;
 			theHeaderStyle.BorderStyle = BorderStyle;
+			theHeaderStyle.BorderWidth = BorderWidth;
 
 			theHeaderStyle.ForeColor = ForeColor;
 

@@ -1,5 +1,7 @@
 ﻿@inherits TestComponentBase
 @using static System.Drawing.Color
+@using static BlazorWebFormsComponents.BorderStyle
+@using BlazorWebFormsComponents
 
 
 <Fixture Test="FirstTest">
@@ -9,7 +11,7 @@
 							RepeatLayout="Table"
 							Context="Item">
 			<ChildContent>
-				<BlazorWebFormsComponents.HeaderStyle BackColor="Blue"></BlazorWebFormsComponents.HeaderStyle>
+				<HeaderStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
 			</ChildContent>
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
@@ -34,6 +36,7 @@
 
 		theStyle.ShouldNotBeNull();
 		theStyle.ShouldContain("blue");
+		theStyle.ShouldContain("border");
 
 	}
 
