@@ -22,6 +22,7 @@
         <HeaderTemplate>
           My Widget List
         </HeaderTemplate>
+        <FooterTemplate>End of Line</FooterTemplate>
         <ItemTemplate>
           <%# Item.Name %> <br /> <%# Item.Price.ToString("c") %>
         </ItemTemplate>

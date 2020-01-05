@@ -15,8 +15,14 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment HeaderTemplate { get; set; }
 
+		[Parameter]
+		public RenderFragment FooterTemplate { get; set; }
+
 		[CascadingParameter(Name = "HeaderStyle")]
 		private TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
+
+		[CascadingParameter(Name = "FooterStyle")]
+		private TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
 
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
@@ -33,11 +39,8 @@ namespace BlazorWebFormsComponents
 			if (AdditionalAttributes?.Count > 0)
 			{
 
-				var headerStyles = AdditionalAttributes.Keys
-					.Where(k => k.StartsWith("HeaderStyle-"))
-					.Select(k => new KeyValuePair<string, object>(k.Replace("HeaderStyle-", ""), AdditionalAttributes[k]));
-
-				HeaderStyle.FromAttributes(headerStyles);
+				HeaderStyle.FromUnknownAttributes(AdditionalAttributes, "HeaderStyle-");
+				FooterStyle.FromUnknownAttributes(AdditionalAttributes, "FooterStyle-");
 
 			}
 

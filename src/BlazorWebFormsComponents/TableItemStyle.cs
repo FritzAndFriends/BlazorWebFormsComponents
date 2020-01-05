@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 
 namespace BlazorWebFormsComponents
@@ -54,11 +55,26 @@ namespace BlazorWebFormsComponents
 			if (Font_Bold) sb.Append("font-weight:bold;");
 			if (Font_Italic) sb.Append("font-style:italic;");
 
-			return sb.ToString();
+			return sb.Length == 0 ? null : sb.ToString();
 
 		}
 
-		public void FromAttributes(IEnumerable<KeyValuePair<string,object>> attributes) 
+		public void FromUnknownAttributes(Dictionary<string,object> attributes, string prefix) {
+
+			if (attributes?.Count > 0)
+			{
+
+				var theStyles = attributes.Keys
+					.Where(k => k.StartsWith(prefix))
+					.Select(k => new KeyValuePair<string, object>(k.Substring(prefix.Length), attributes[k]));
+
+				this.FromAttributes(theStyles);
+
+			}
+
+		}
+
+		private void FromAttributes(IEnumerable<KeyValuePair<string,object>> attributes) 
 		{
 
 			var headerStyleType = typeof(TableItemStyle);

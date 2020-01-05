@@ -15,50 +15,67 @@
 	{
 
 		case TableRepeatLayout t:
-			<table>
+<table>
 
-				@if (HeaderTemplate != null)
-				{
+	@if (HeaderTemplate != null)
+	{
 
-					<tr><td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td></tr>
+		<tr><td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td></tr>
 
-				}
+	}
 
-				@if (Items?.Any() ?? false)
-				{
-					@foreach (var item in Items)
-					{
+	@if (Items?.Any() ?? false)
+	{
+		@foreach (var item in Items)
+		{
 
-						<tr><td>@ItemTemplate(item)</td></tr>
+			<tr><td>@ItemTemplate(item)</td></tr>
 
-					}
-				}
+		}
+	}
 
-			</table>
+	@if (FooterTemplate != null)
+	{
+
+		<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
+
+	}
+
+
+</table>
 			break;
 		case FlowRepeatLayout f:
 
-			<span>
+<span>
 
-				@if (HeaderTemplate != null)
-				{
+	@if (HeaderTemplate != null)
+	{
 
-					<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
+		<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
 
-				}
+	}
 
-				@if (Items?.Any() ?? false)
-				{
+	@if (Items?.Any() ?? false)
+	{
 
-					@foreach (var item in Items)
-					{
+		@foreach (var item in Items)
+		{
 
-						<span>@ItemTemplate(item)</span><br />
+			<span>@ItemTemplate(item)</span><br />
 
-					}
-				}
+		}
+	}
 
-			</span>
+	@if (FooterTemplate != null)
+	{
+
+		<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />
+
+	}
+
+
+
+</span>
 
 			break;
 

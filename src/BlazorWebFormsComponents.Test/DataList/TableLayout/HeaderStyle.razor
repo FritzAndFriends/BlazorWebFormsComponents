@@ -19,6 +19,18 @@
 	</ComponentUnderTest>
 </Fixture>
 
+<Fixture Test="EmptyStyleTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
 
 @code {
 
@@ -37,6 +49,19 @@
 		theStyle.ShouldNotBeNull();
 		theStyle.ShouldContain("blue");
 		theStyle.ShouldContain("border");
+
+	}
+
+	void EmptyStyleTest(IRazorTestContext context)
+	{
+
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
+		var cut = context.GetComponentUnderTest();
+
+		var theHeaderElement = cut.Find("td");
+
+		theHeaderElement.HasAttribute("style").ShouldBeFalse();
 
 	}
 
