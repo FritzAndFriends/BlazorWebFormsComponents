@@ -26,8 +26,6 @@ namespace BlazorWebFormsComponents
 
 		public bool Font_Italic { get; set; }
 
-		public string Font_Name { get; set; }
-
 		public string Font_Names { get; set; }
 
 		public bool Font_Overline { get; set; }
@@ -54,6 +52,17 @@ namespace BlazorWebFormsComponents
 
 			if (Font_Bold) sb.Append("font-weight:bold;");
 			if (Font_Italic) sb.Append("font-style:italic;");
+			if (!string.IsNullOrEmpty(Font_Names)) sb.Append($"font-family:{Font_Names};");
+			if (Font_Underline || Font_Overline || Font_Strikeout) {
+				sb.Append("text-decoration:");
+
+				var td = new StringBuilder();
+				if (Font_Underline) td.Append("underline ");
+				if (Font_Overline) td.Append("overline ");
+				if (Font_Strikeout) td.Append("line-through");
+				sb.Append(td.ToString().Trim());
+				sb.Append(";");
+			}
 
 			return sb.Length == 0 ? null : sb.ToString();
 
@@ -89,7 +98,7 @@ namespace BlazorWebFormsComponents
 					null => null,
 					{ Name: nameof(Color) } => itemStyle.Value.GetColorFromHtml(),
 					{ Name: nameof(Unit) } => new Unit(itemStyle.Value.ToString()),
-					{ Name: nameof(FontUnit) } => FontUnit.Parse(itemStyle.Value),
+					{ Name: nameof(FontUnit) } => FontUnit.Parse(itemStyle.Value.ToString()),
 					{ IsEnum: true } => Enum.Parse(propInfo.PropertyType, itemStyle.Value.ToString()),
 					_ => itemStyle.Value
 				};

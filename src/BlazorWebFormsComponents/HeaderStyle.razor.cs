@@ -53,10 +53,9 @@ namespace BlazorWebFormsComponents
 				{
 					if (AdditionalAttributes.ContainsKey("Font-Bold")) theStyle.Font_Bold = bool.Parse(AdditionalAttributes["Font-Bold"].ToString());
 					if (AdditionalAttributes.ContainsKey("Font-Italic")) theStyle.Font_Italic = bool.Parse(AdditionalAttributes["Font-Italic"].ToString());
-					if (AdditionalAttributes.ContainsKey("Font-Name")) theStyle.Font_Name = AdditionalAttributes["Font-Name"].ToString();
 					if (AdditionalAttributes.ContainsKey("Font-Names")) theStyle.Font_Names = AdditionalAttributes["Font-Names"].ToString();
 					if (AdditionalAttributes.ContainsKey("Font-Overline")) theStyle.Font_Overline = bool.Parse(AdditionalAttributes["Font-Overline"].ToString());
-					if (AdditionalAttributes.ContainsKey("Font-Size")) theStyle.Font_Size = FontUnit.Parse(AdditionalAttributes["Font-Size"]);
+					if (AdditionalAttributes.ContainsKey("Font-Size")) theStyle.Font_Size = FontUnit.Parse(AdditionalAttributes["Font-Size"].ToString());
 					if (AdditionalAttributes.ContainsKey("Font-Strikeout")) theStyle.Font_Strikeout = bool.Parse(AdditionalAttributes["Font-Strikeout"].ToString());
 					if (AdditionalAttributes.ContainsKey("Font-Underline")) theStyle.Font_Underline = bool.Parse(AdditionalAttributes["Font-Underline"].ToString());
 				}

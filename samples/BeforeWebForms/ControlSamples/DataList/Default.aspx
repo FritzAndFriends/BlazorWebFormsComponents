@@ -12,20 +12,20 @@
       is a Table.
     </p>
 
-    <asp:DataList ID="simpleDataList" 
-                  runat="server" 
-                  Enabled="true"
-                  RepeatLayout="Table"
-                  RepeatColumns="2"
-                  ItemType="SharedSampleObjects.Models.Widget">
-        <HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true"  />
-        <HeaderTemplate>
-          My Widget List
-        </HeaderTemplate>
-        <FooterTemplate>End of Line</FooterTemplate>
-        <ItemTemplate>
-          <%# Item.Name %> <br /> <%# Item.Price.ToString("c") %>
-        </ItemTemplate>
-    </asp:DataList>
+	<asp:DataList ID="simpleDataList"
+		runat="server"
+		RepeatColumns="2"
+		ItemType="SharedSampleObjects.Models.Widget">
+		<HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
+		<HeaderTemplate>
+			My Widget List
+		</HeaderTemplate>
+		<FooterTemplate>End of Line</FooterTemplate>
+		<ItemTemplate>
+			<%# Item.Name %>
+			<br />
+			<%# Item.Price.ToString("c") %>
+		</ItemTemplate>
+	</asp:DataList>
 
 </asp:Content>
