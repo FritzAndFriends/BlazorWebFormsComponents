@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents
 {
 
 	[Serializable]
-	public class Unit 
+	public struct Unit 
 	{
 
 
@@ -22,8 +22,6 @@ namespace BlazorWebFormsComponents
 
 		private readonly UnitType type;
 		private readonly double value;
-
-		private Unit() { }
 
 		/// <devdoc>
 		/// <para>Initializes a new instance of the <see cref='System.Web.UI.WebControls.Unit'/> structure with the specified 32-bit signed integer as 

@@ -4,10 +4,8 @@ using System.Globalization;
 
 namespace BlazorWebFormsComponents
 {
-	public class FontUnit
+	public struct FontUnit
 	{
-
-		private FontUnit() 	{ 	}
 
 		/// <devdoc>
 		/// <para>Specifies an empty <see cref='System.Web.UI.WebControls.FontUnit'/>. This field is read only. </para>
@@ -311,6 +309,9 @@ namespace BlazorWebFormsComponents
 		/// </devdoc>
 		public static FontUnit Parse(string s, CultureInfo culture)
 		{
+
+			if (string.IsNullOrEmpty(s)) return FontUnit.Empty;
+
 			return new FontUnit(s, culture);
 		}
 

@@ -30,7 +30,7 @@ namespace BlazorWebFormsComponents
 
 		public bool Font_Overline { get; set; }
 
-		public FontUnit Font_Size { get; set; }
+		public FontUnit Font_Size { get; set; } = FontUnit.Empty;
 
 		public bool Font_Strikeout { get; set; }
 
@@ -53,6 +53,7 @@ namespace BlazorWebFormsComponents
 			if (Font_Bold) sb.Append("font-weight:bold;");
 			if (Font_Italic) sb.Append("font-style:italic;");
 			if (!string.IsNullOrEmpty(Font_Names)) sb.Append($"font-family:{Font_Names};");
+			if (Font_Size != FontUnit.Empty) sb.Append($"font-size:{Font_Size.ToString()};");
 			if (Font_Underline || Font_Overline || Font_Strikeout) {
 				sb.Append("text-decoration:");
 
