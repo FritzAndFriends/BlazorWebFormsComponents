@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents
 {
 
 	[Serializable]
-	public struct Unit
+	public class Unit 
 	{
 
 
@@ -23,6 +23,7 @@ namespace BlazorWebFormsComponents
 		private readonly UnitType type;
 		private readonly double value;
 
+		private Unit() { }
 
 		/// <devdoc>
 		/// <para>Initializes a new instance of the <see cref='System.Web.UI.WebControls.Unit'/> structure with the specified 32-bit signed integer as 
@@ -437,5 +438,21 @@ namespace BlazorWebFormsComponents
 		{
 			return Unit.Pixel(n);
 		}
+
+		/// <devdoc>
+		/// <para>Implicitly creates a <see cref='System.Web.UI.WebControls.Unit'/> of type <see langword='Pixel'/> from a string that looks like a specified 32-bit unsigned integer.</para>
+		/// </devdoc>
+		public static explicit operator Unit(string n)
+		{
+
+			if (int.TryParse(n, out int intValue))
+			{
+				return Unit.Pixel(intValue);
+			}
+
+			throw new ArgumentException("Unit attempted to set a non-numeric type");
+
+		}
+
 	}
 }

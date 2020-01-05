@@ -1,4 +1,4 @@
-﻿using BlazorWebFormsComponents.Enum;
+﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ namespace BlazorWebFormsComponents
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		[Parameter]
-		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enum.RepeatLayout.Table;
+		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 
 		protected override void HandleUnknownAttributes()
 		{

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BlazorWebFormsComponents.Enum
+namespace BlazorWebFormsComponents.Enums
 {
 	public abstract class RepeatLayout
 	{

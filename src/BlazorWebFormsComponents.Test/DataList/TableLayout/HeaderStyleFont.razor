@@ -1,17 +1,18 @@
 ﻿@inherits TestComponentBase
 @using static System.Drawing.Color
+@using static BlazorWebFormsComponents.BorderStyle
+@using BlazorWebFormsComponents
 
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							HeaderStyle-BackColor="Blue"
-							HeaderStyle-BorderColor="White"
-							HeaderStyle-BorderStyle="Solid"
-							HeaderStyle-BorderWidth="2"
 							RepeatLayout="Table"
 							Context="Item">
+			<ChildContent>
+				<HeaderStyle Font-Bold="true" Font-Italic="true" ></HeaderStyle>
+			</ChildContent>
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
 		</DataList>
@@ -34,8 +35,8 @@
 		var theStyle = theHeaderElement.GetAttribute("style");
 
 		theStyle.ShouldNotBeNull();
-		theStyle.ShouldContain("blue");
-		theStyle.ShouldContain("border: 2px solid white;");
+		theStyle.ShouldContain("font-style:italic;");
+		theStyle.ShouldContain("font-weight:bold;");
 
 	}
 

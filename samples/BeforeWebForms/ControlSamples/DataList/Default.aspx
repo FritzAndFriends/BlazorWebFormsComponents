@@ -18,6 +18,7 @@
                   RepeatLayout="Table"
                   RepeatColumns="2"
                   ItemType="SharedSampleObjects.Models.Widget">
+        <HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true"  />
         <HeaderTemplate>
           My Widget List
         </HeaderTemplate>
