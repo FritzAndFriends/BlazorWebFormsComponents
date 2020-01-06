@@ -33,6 +33,13 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 
+		[Parameter]
+		public bool ShowHeader { get; set; } = true;
+
+		[Parameter]
+		public bool ShowFooter { get; set; } = true;
+
+
 		protected override void HandleUnknownAttributes()
 		{
 
