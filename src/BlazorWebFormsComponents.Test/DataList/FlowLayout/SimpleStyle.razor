@@ -5,7 +5,8 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							RepeatLayout="Table"
+							Style="background-color: lime;"
+							RepeatLayout="Flow"
 							Context="Item">
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
@@ -21,11 +22,11 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(4);
-		cut.Find("td").TextContent.ShouldBe("My Widget List");
+		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
 
-		cut.Find("table").HasAttribute("style").ShouldBeTrue();
-		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
+		cut.Find("span").HasAttribute("style").ShouldBeTrue();
+		cut.Find("span").GetAttribute("style").ShouldContain("background-color: lime;");
 
 	}
 

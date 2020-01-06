@@ -15,7 +15,7 @@
 	{
 
 		case TableRepeatLayout t:
-<table>
+<table style="border-collapse:collapse;@Style">
 
 	@if (HeaderTemplate != null && ShowHeader)
 	{
@@ -46,7 +46,7 @@
 			break;
 		case FlowRepeatLayout f:
 
-<span>
+<span style="@Style">
 
 	@if (HeaderTemplate != null && ShowHeader)
 	{

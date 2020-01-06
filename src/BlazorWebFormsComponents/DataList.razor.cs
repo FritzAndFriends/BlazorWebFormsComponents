@@ -39,6 +39,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool ShowFooter { get; set; } = true;
 
+		[Parameter]
+		public string Style { get; set; }
+
 
 		protected override void HandleUnknownAttributes()
 		{
