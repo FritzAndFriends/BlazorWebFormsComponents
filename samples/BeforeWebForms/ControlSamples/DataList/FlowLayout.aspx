@@ -14,6 +14,7 @@
                   runat="server" 
                   Enabled="true"
                   ToolTip="This is my tooltip"
+                  UseAccessibleHeader="true"
                   RepeatLayout="Flow"
                   ItemType="SharedSampleObjects.Models.Widget">
         <HeaderTemplate>

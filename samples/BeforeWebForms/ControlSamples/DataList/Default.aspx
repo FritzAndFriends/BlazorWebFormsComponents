@@ -16,6 +16,7 @@
 		runat="server"
 		RepeatColumns="2"
 		ToolTip="This is my tooltip"
+		UseAccessibleHeader="true"
 		ItemType="SharedSampleObjects.Models.Widget">
 		<HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
 		<HeaderTemplate>

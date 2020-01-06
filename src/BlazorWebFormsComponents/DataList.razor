@@ -20,7 +20,16 @@
 	@if (HeaderTemplate != null && ShowHeader)
 	{
 
-		<tr><td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td></tr>
+	<tr>
+		@if (UseAccessibleHeader)
+		{
+			<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
+		}
+		else
+		{
+			<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
+		}
+		</tr>
 
 	}
 
