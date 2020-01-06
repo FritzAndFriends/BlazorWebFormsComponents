@@ -1,0 +1,70 @@
+﻿@inherits TestComponentBase
+@using static System.Drawing.Color
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using BlazorWebFormsComponents
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Context="Item">
+			<ChildContent>
+				<HeaderStyle CssClass="myClass"></HeaderStyle>
+			</ChildContent>
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="NullTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Context="Item">
+			<ChildContent>
+				<HeaderStyle></HeaderStyle>
+			</ChildContent>
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
+		var cut = context.GetComponentUnderTest();
+
+		var theHeaderElement = cut.Find("td");
+
+		theHeaderElement.HasAttribute("class").ShouldBeTrue();
+		var theClass = theHeaderElement.GetAttribute("class");
+
+		theClass.ShouldNotBeNull();
+		theClass.ShouldBe("myClass");
+
+	}
+
+	void NullTest(IRazorTestContext context)
+	{
+
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
+		var cut = context.GetComponentUnderTest();
+
+		var theHeaderElement = cut.Find("td");
+
+		theHeaderElement.HasAttribute("class").ShouldBeFalse();
+		
+	}
+
+}

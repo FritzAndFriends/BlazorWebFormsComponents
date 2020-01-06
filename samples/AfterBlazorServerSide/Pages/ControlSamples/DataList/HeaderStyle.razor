@@ -1,0 +1,75 @@
+﻿@page "/ControlSamples/DataList/HeaderStyle"
+@using static System.Drawing.Color
+
+<h2>DataList HeaderStyle sample</h2>
+
+<Nav />
+
+<p>Here is a simple datalist bound to a collection of widgets with simple HeaderStyle applied</p>
+
+<DataList @ref="simpleDataList"
+					runat="server"
+					EnableViewState="false"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ChildContent>
+		<BlazorWebFormsComponents.HeaderStyle BackColor="Blue" ForeColor="White"></BlazorWebFormsComponents.HeaderStyle>
+	</ChildContent>
+	<HeaderTemplate>Simple Widgets</HeaderTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<br />
+<h3>Setting Values in the header style from inline attributes</h3>
+<DataList 
+					runat="server"
+					EnableViewState="false"
+					Context="Item"
+					HeaderStyle-BackColor="Blue"
+					HeaderStyle-ForeColor="White"
+					HeaderStyle-BorderColor="White"
+					HeaderStyle-BorderStyle="Solid"
+					HeaderStyle-BorderWidth="2"
+					SelectMethod="GetWidgets"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ChildContent>
+		<BlazorWebFormsComponents.HeaderStyle BackColor="Blue"></BlazorWebFormsComponents.HeaderStyle>
+	</ChildContent>
+	<HeaderTemplate>Simple Widgets</HeaderTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+@code {
+
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleDataList.DataSource = Widget.SimpleWidgetList;
+			simpleDataList.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+
+		totalRowCount = Widget.SimpleWidgetList.Length;
+
+		return Widget.SimpleWidgetList.AsQueryable();
+
+	}
+
+
+}
+

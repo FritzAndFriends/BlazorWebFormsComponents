@@ -1,11 +1,23 @@
-﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 a, .btn-link {
-    color: #0366d6;
+  color: #0366d6;
+}
+
+a.component-link {
+  color: #0366d6;
+  text-decoration: underline;
+}
+
+a.component-link.active {
+  font-weight: bold;
+  color: inherit;
+  background-color: lightgrey;
+  text-decoration: none!important;
 }
 
 .btn-primary {

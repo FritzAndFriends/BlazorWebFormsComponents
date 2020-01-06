@@ -37,8 +37,16 @@ namespace BlazorWebFormsComponents
 
 			if (firstRender && SelectMethod != null) {
 
+				// Model Binding
 				int totalRowCount;
 				Items = SelectMethod(int.MaxValue, 0, "", out totalRowCount);
+
+			}
+
+			if (firstRender)				
+			{
+
+				HandleUnknownAttributes();
 				StateHasChanged();
 
 			}
@@ -47,6 +55,7 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		protected virtual void HandleUnknownAttributes() { }
 
 	}
 

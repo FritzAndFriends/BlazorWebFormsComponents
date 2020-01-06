@@ -2,12 +2,13 @@
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
-		<Repeater Items="Widget.SimpleWidgetList"
+		<DataList Items="null"
 							ItemType="Widget"
+							RepeatLayout="Flow"
 							Context="Item">
-			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
-			<SeparatorTemplate><hr/></SeparatorTemplate>
-		</Repeater>
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
 	</ComponentUnderTest>
 </Fixture>
 
@@ -19,8 +20,7 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(3);
-		cut.FindAll("hr").Count().ShouldBe(3);
+		cut.GetMarkup().Trim().ShouldBe(string.Empty);
 
 	}
 

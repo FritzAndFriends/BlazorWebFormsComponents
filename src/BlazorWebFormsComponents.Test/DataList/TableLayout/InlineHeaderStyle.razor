@@ -1,0 +1,43 @@
+﻿@inherits TestComponentBase
+@using static System.Drawing.Color
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							HeaderStyle-BackColor="Blue"
+							HeaderStyle-BorderColor="White"
+							HeaderStyle-BorderStyle="Solid"
+							HeaderStyle-BorderWidth="2"
+							RepeatLayout="Table"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
+		var cut = context.GetComponentUnderTest();
+
+		var theHeaderElement = cut.Find("td");
+
+		theHeaderElement.HasAttribute("style").ShouldBeTrue();
+		var theStyle = theHeaderElement.GetAttribute("style");
+
+		theStyle.ShouldNotBeNull();
+		theStyle.ShouldContain("blue");
+		theStyle.ShouldContain("border: 2px solid white;");
+
+	}
+
+
+}
