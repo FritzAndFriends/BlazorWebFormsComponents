@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlazorWebFormsComponents.Enums;
+using System;
 using System.Drawing;
 using System.Globalization;
 

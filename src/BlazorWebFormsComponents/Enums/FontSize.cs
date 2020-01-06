@@ -1,4 +1,4 @@
-﻿namespace BlazorWebFormsComponents
+﻿namespace BlazorWebFormsComponents.Enums
 {
 	/// <devdoc>
 	///    <para>

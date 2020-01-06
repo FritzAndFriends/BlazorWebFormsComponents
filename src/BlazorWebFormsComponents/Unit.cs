@@ -3,6 +3,7 @@ using System.Globalization;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Security.Permissions;
+using BlazorWebFormsComponents.Enums;
 
 namespace BlazorWebFormsComponents
 {

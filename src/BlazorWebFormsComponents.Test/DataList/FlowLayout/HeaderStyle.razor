@@ -8,10 +8,10 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							RepeatLayout="Table"
+							RepeatLayout="Flow"
 							Context="Item">
 			<ChildContent>
-				<HeaderStyle CssClass="myClass"></HeaderStyle>
+				<HeaderStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
 			</ChildContent>
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
@@ -19,15 +19,12 @@
 	</ComponentUnderTest>
 </Fixture>
 
-<Fixture Test="NullTest">
+<Fixture Test="EmptyStyleTest">
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							RepeatLayout="Table"
+							RepeatLayout="Flow"
 							Context="Item">
-			<ChildContent>
-				<HeaderStyle></HeaderStyle>
-			</ChildContent>
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
 		</DataList>
@@ -44,27 +41,29 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		var theHeaderElement = cut.Find("td");
+		var theHeaderElement = cut.FindAll("span")[1];
 
-		theHeaderElement.HasAttribute("class").ShouldBeTrue();
-		var theClass = theHeaderElement.GetAttribute("class");
+		theHeaderElement.HasAttribute("style").ShouldBeTrue();
+		var theStyle = theHeaderElement.GetAttribute("style");
 
-		theClass.ShouldNotBeNull();
-		theClass.ShouldBe("myClass");
+		theStyle.ShouldNotBeNull();
+		theStyle.ShouldContain("blue");
+		theStyle.ShouldContain("border");
 
 	}
 
-	void NullTest(IRazorTestContext context)
+	void EmptyStyleTest(IRazorTestContext context)
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
 		var cut = context.GetComponentUnderTest();
 
-		var theHeaderElement = cut.Find("td");
+		var theHeaderElement = cut.FindAll("span")[1];
 
-		theHeaderElement.HasAttribute("class").ShouldBeFalse();
-		
+		theHeaderElement.HasAttribute("style").ShouldBeFalse();
+
 	}
+
 
 }

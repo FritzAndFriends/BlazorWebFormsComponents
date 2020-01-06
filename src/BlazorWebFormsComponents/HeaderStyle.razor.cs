@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -34,6 +35,19 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Color ForeColor { get; set; }
 
+		[Parameter]
+		public Unit Height { get; set; }
+
+		[Parameter]
+		public HorizontalAlign HorizontalAlign { get; set; }
+
+		[Parameter]
+		public VerticalAlign VerticalAlign { get; set; }
+
+		[Parameter]
+		public Unit Width { get; set; }
+
+
 		//protected override void OnParametersSet()
 		protected override void OnInitialized()
 		{
@@ -48,6 +62,11 @@ namespace BlazorWebFormsComponents
 				theStyle.CssClass = CssClass;
 
 				theStyle.ForeColor = ForeColor;
+
+				theStyle.Height = Height;
+				theStyle.HorizontalAlign = HorizontalAlign;
+				theStyle.VerticalAlign = VerticalAlign;
+				theStyle.Width = Width;
 
 				if (AdditionalAttributes != null)
 				{

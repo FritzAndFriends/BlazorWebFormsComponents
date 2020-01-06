@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-  public partial class ListView<ItemType> : BaseModelBindingComponent<ItemType>
+	public partial class ListView<ItemType> : BaseModelBindingComponent<ItemType>
   {
 
     public ListView()

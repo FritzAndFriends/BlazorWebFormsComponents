@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -37,6 +38,14 @@ namespace BlazorWebFormsComponents
 		public bool Font_Underline { get; set; }
 
 		public Color ForeColor { get; set; }
+
+		public Unit Height { get; set; }
+
+		public HorizontalAlign HorizontalAlign { get; set; }
+
+		public VerticalAlign VerticalAlign { get; set; }
+
+		public Unit Width { get; set; }
 
 		public override string ToString()
 		{

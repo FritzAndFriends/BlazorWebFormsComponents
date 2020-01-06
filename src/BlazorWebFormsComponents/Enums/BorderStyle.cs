@@ -1,4 +1,4 @@
-﻿namespace BlazorWebFormsComponents
+﻿namespace BlazorWebFormsComponents.Enums
 {
 	public enum BorderStyle
 	{

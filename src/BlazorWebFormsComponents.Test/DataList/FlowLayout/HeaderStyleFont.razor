@@ -8,7 +8,7 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							RepeatLayout="Table"
+							RepeatLayout="Flow"
 							Context="Item">
 			<ChildContent>
 				<HeaderStyle Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
@@ -29,7 +29,7 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		var theHeaderElement = cut.Find("td");
+		var theHeaderElement = cut.FindAll("span")[1];
 
 		theHeaderElement.HasAttribute("style").ShouldBeTrue();
 		var theStyle = theHeaderElement.GetAttribute("style");

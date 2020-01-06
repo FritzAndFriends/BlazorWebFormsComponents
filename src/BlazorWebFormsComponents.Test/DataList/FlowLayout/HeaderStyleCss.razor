@@ -8,7 +8,7 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							RepeatLayout="Table"
+							RepeatLayout="Flow"
 							Context="Item">
 			<ChildContent>
 				<HeaderStyle CssClass="myClass"></HeaderStyle>
@@ -23,7 +23,7 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
-							RepeatLayout="Table"
+							RepeatLayout="Flow"
 							Context="Item">
 			<ChildContent>
 				<HeaderStyle></HeaderStyle>
@@ -44,7 +44,7 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		var theHeaderElement = cut.Find("td");
+		var theHeaderElement = cut.FindAll("span")[1];
 
 		theHeaderElement.HasAttribute("class").ShouldBeTrue();
 		var theClass = theHeaderElement.GetAttribute("class");
@@ -61,7 +61,7 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		var theHeaderElement = cut.Find("td");
+		var theHeaderElement = cut.FindAll("span")[1];
 
 		theHeaderElement.HasAttribute("class").ShouldBeFalse();
 		
