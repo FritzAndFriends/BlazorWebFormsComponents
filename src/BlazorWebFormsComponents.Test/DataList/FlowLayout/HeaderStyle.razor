@@ -1,0 +1,69 @@
+﻿@inherits TestComponentBase
+@using static System.Drawing.Color
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using BlazorWebFormsComponents
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Flow"
+							Context="Item">
+			<ChildContent>
+				<HeaderStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
+			</ChildContent>
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="EmptyStyleTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Flow"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
+		var cut = context.GetComponentUnderTest();
+
+		var theHeaderElement = cut.FindAll("span")[1];
+
+		theHeaderElement.HasAttribute("style").ShouldBeTrue();
+		var theStyle = theHeaderElement.GetAttribute("style");
+
+		theStyle.ShouldNotBeNull();
+		theStyle.ShouldContain("blue");
+		theStyle.ShouldContain("border");
+
+	}
+
+	void EmptyStyleTest(IRazorTestContext context)
+	{
+
+		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+
+		var cut = context.GetComponentUnderTest();
+
+		var theHeaderElement = cut.FindAll("span")[1];
+
+		theHeaderElement.HasAttribute("style").ShouldBeFalse();
+
+	}
+
+
+}

@@ -1,0 +1,84 @@
+﻿@inherits BaseModelBindingComponent<ItemType>
+@using BlazorWebFormsComponents.Enums
+
+@typeparam ItemType
+
+@if (Items != null)
+{
+
+	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
+		@ChildContent
+	</CascadingValue>
+
+
+	@switch (RepeatLayout)
+	{
+
+		case TableRepeatLayout t:
+<table>
+
+	@if (HeaderTemplate != null)
+	{
+
+		<tr><td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td></tr>
+
+	}
+
+	@if (Items?.Any() ?? false)
+	{
+		@foreach (var item in Items)
+		{
+
+			<tr><td>@ItemTemplate(item)</td></tr>
+
+		}
+	}
+
+	@if (FooterTemplate != null)
+	{
+
+		<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
+
+	}
+
+
+</table>
+			break;
+		case FlowRepeatLayout f:
+
+<span>
+
+	@if (HeaderTemplate != null)
+	{
+
+		<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
+
+	}
+
+	@if (Items?.Any() ?? false)
+	{
+
+		@foreach (var item in Items)
+		{
+
+			<span>@ItemTemplate(item)</span><br />
+
+		}
+	}
+
+	@if (FooterTemplate != null)
+	{
+
+		<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />
+
+	}
+
+
+
+</span>
+
+			break;
+
+	}
+
+}

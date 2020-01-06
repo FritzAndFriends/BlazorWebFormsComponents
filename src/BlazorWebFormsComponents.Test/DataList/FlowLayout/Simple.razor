@@ -1,0 +1,30 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Flow"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
+
+	}
+
+
+}

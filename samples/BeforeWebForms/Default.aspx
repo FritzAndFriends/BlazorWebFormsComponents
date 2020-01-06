@@ -16,7 +16,7 @@
             <h3>Data Controls</h3>
             <ul>
                 <li>Chart(?)                   </li>
-                <li>DataList                 </li>
+                <li><a href="ControlSamples/DataList/Default.aspx">DataList</a></li>
                 <li>DataPager             </li>
                 <li>DetailsView           </li>
                 <li>FormView                </li>
