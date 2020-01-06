@@ -42,6 +42,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string Style { get; set; }
 
+		[Parameter]
+		public string ToolTip { get; set; }
+
 
 		protected override void HandleUnknownAttributes()
 		{

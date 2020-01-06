@@ -13,6 +13,7 @@
     <asp:DataList ID="simpleDataList" 
                   runat="server" 
                   Enabled="true"
+                  ToolTip="This is my tooltip"
                   RepeatLayout="Flow"
                   ItemType="SharedSampleObjects.Models.Widget">
         <HeaderTemplate>
