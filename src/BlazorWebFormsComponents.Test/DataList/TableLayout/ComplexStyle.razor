@@ -1,0 +1,37 @@
+﻿@inherits TestComponentBase
+@using static System.Drawing.Color
+
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							BackColor="Red"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(4);
+		cut.Find("td").TextContent.ShouldBe("My Widget List");
+
+		cut.Find("table").HasAttribute("style").ShouldBeTrue();
+		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
+		cut.Find("table").GetAttribute("style").ShouldContain("background-color:red;");
+
+	}
+
+
+}

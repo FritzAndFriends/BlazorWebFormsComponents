@@ -5,7 +5,7 @@
     <h2>DataList control homepage</h2>
 
     <div>
-      Other usage samples:  <a href="FlowLayout.aspx">FlowLayout Sample</a>
+      Other usage samples:  <a href="FlowLayout.aspx">FlowLayout Sample</a> <a href="StyleAttributes.aspx">Styles</a>
     </div>
 
     <p>Here is a simple datalist bound to a collection of widgets.  By default, the RepeatLayout
@@ -17,6 +17,8 @@
 		RepeatColumns="2"
 		ToolTip="This is my tooltip"
 		UseAccessibleHeader="true"
+		Caption="This is my caption"
+		CaptionAlign="Top"
 		ItemType="SharedSampleObjects.Models.Widget">
 		<HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
 		<HeaderTemplate>

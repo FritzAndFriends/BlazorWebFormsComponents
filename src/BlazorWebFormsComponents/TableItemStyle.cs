@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public class TableItemStyle
+	public class TableItemStyle : IHasStyle
 	{
 
 		internal TableItemStyle() { }
@@ -50,31 +50,10 @@ namespace BlazorWebFormsComponents
 		public override string ToString()
 		{
 
-			var sb = new StringBuilder();
-			if (BackColor != default(Color)) sb.Append($"background-color: {ColorTranslator.ToHtml(BackColor)};");
-			if (ForeColor != default(Color)) sb.Append($"color: {ColorTranslator.ToHtml(ForeColor)};");
-			if (BorderStyle != BorderStyle.None && BorderStyle != BorderStyle.NotSet && BorderWidth.Value > 0 && BorderColor != default(Color)) {
+			var theStyle = this.ToStyleString();
+			if (string.IsNullOrEmpty(theStyle)) return null;
 
-				sb.Append($"border: {BorderWidth.ToString()} {BorderStyle.ToString().ToLowerInvariant()} {ColorTranslator.ToHtml(BorderColor)};");
-
-			}
-
-			if (Font_Bold) sb.Append("font-weight:bold;");
-			if (Font_Italic) sb.Append("font-style:italic;");
-			if (!string.IsNullOrEmpty(Font_Names)) sb.Append($"font-family:{Font_Names};");
-			if (Font_Size != FontUnit.Empty) sb.Append($"font-size:{Font_Size.ToString()};");
-			if (Font_Underline || Font_Overline || Font_Strikeout) {
-				sb.Append("text-decoration:");
-
-				var td = new StringBuilder();
-				if (Font_Underline) td.Append("underline ");
-				if (Font_Overline) td.Append("overline ");
-				if (Font_Strikeout) td.Append("line-through");
-				sb.Append(td.ToString().Trim());
-				sb.Append(";");
-			}
-
-			return sb.Length == 0 ? null : sb.ToString();
+			return theStyle;
 
 		}
 
@@ -119,4 +98,5 @@ namespace BlazorWebFormsComponents
 		}
 
 	}
+
 }

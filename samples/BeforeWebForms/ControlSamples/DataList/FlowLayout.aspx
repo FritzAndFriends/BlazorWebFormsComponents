@@ -2,27 +2,31 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <h2>DataList Flow Layout Sample</h2>
+	<h2>DataList Flow Layout Sample</h2>
 
-    <div>
-      Other usage samples:  <a href="Default.aspx">Simple Layout Sample</a>
-    </div>
+	<div>
+		Other usage samples:  <a href="Default.aspx">Simple Layout Sample</a>  <a href="StyleAttributes.aspx">Styles</a>
+	</div>
 
-    <p>Here is a simple datalist bound to a collection of widgets with RepeatLayout set to Flow</p>
+	<p>Here is a simple datalist bound to a collection of widgets with RepeatLayout set to Flow</p>
 
-    <asp:DataList ID="simpleDataList" 
-                  runat="server" 
-                  Enabled="true"
-                  ToolTip="This is my tooltip"
-                  UseAccessibleHeader="true"
-                  RepeatLayout="Flow"
-                  ItemType="SharedSampleObjects.Models.Widget">
-        <HeaderTemplate>
-          My Widget List
-        </HeaderTemplate>
-        <ItemTemplate>
-          <%# Item.Name %> <br /> <%# Item.Price.ToString("c") %>
-        </ItemTemplate>
-    </asp:DataList>
+	<asp:DataList ID="simpleDataList"
+		runat="server"
+		Enabled="true"
+		Caption="This is my caption"
+		CaptionAlign="Top"
+		ToolTip="This is my tooltip"
+		UseAccessibleHeader="true"
+		RepeatLayout="Flow"
+		ItemType="SharedSampleObjects.Models.Widget">
+		<HeaderTemplate>
+			My Widget List
+		</HeaderTemplate>
+		<ItemTemplate>
+			<%# Item.Name %>
+			<br />
+			<%# Item.Price.ToString("c") %>
+		</ItemTemplate>
+	</asp:DataList>
 
 </asp:Content>

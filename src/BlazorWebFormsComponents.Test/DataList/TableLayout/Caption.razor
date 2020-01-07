@@ -1,0 +1,36 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.VerticalAlign
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Caption="This is my caption"
+							CaptionAlign="Top"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(4);
+		cut.Find("td").TextContent.ShouldBe("My Widget List");
+
+		cut.FindAll("caption").Count().ShouldBe(1);
+		cut.Find("caption").TextContent.ShouldBe("This is my caption");
+
+	}
+
+
+}

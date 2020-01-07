@@ -15,10 +15,14 @@
 	{
 
 		case TableRepeatLayout t:
-<table style="border-collapse:collapse;@Style" title="@ToolTip">
+<table accesskey="@AccessKey" style="border-collapse:collapse;@CalculatedStyle" title="@ToolTip">
 
 	@if (HeaderTemplate != null && ShowHeader)
 	{
+
+		if (!string.IsNullOrEmpty(Caption)) {
+			<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
+		}
 
 	<tr>
 		@if (UseAccessibleHeader)
@@ -55,7 +59,7 @@
 			break;
 		case FlowRepeatLayout f:
 
-<span style="@Style" title="@ToolTip">
+<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip">
 
 	@if (HeaderTemplate != null && ShowHeader)
 	{
