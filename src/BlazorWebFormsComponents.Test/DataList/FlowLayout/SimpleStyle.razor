@@ -5,6 +5,7 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
+							Style="background-color: lime;"
 							RepeatLayout="Flow"
 							Context="Item">
 			<HeaderTemplate>My Widget List</HeaderTemplate>
@@ -24,7 +25,8 @@
 		cut.FindAll("span").Count().ShouldBe(5);
 		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
 
-		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+		cut.Find("span").HasAttribute("style").ShouldBeTrue();
+		cut.Find("span").GetAttribute("style").ShouldContain("background-color: lime;");
 
 	}
 

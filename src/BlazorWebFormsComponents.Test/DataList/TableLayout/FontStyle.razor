@@ -1,4 +1,6 @@
 ﻿@inherits TestComponentBase
+@using static System.Drawing.Color
+
 
 
 <Fixture Test="FirstTest">
@@ -6,6 +8,9 @@
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
 							RepeatLayout="Table"
+							Font-Bold="true"
+							Font-Italic="true"
+							Font-Strikeout="true"
 							Context="Item">
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
@@ -26,10 +31,9 @@
 
 		cut.Find("table").HasAttribute("style").ShouldBeTrue();
 		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
-
-		cut.Find("table").HasAttribute("title").ShouldBeFalse();
-		cut.Find("table").HasAttribute("cellspacing").ShouldBeFalse();
-		cut.Find("table").HasAttribute("cellpadding").ShouldBeFalse();
+		cut.Find("table").GetAttribute("style").ShouldContain("font-weight:bold;");
+		cut.Find("table").GetAttribute("style").ShouldContain("line-through");
+		cut.Find("table").GetAttribute("style").ShouldContain("font-style:italic;");
 
 	}
 
