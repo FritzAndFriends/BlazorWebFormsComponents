@@ -72,12 +72,12 @@ namespace BlazorWebFormsComponents
 		public static StringBuilder ToStyleString(this IHasStyle hasStyle, StringBuilder sb)
 		{
 
-			if (hasStyle.BackColor != default(Color)) sb.Append($"background-color: {ColorTranslator.ToHtml(hasStyle.BackColor)};");
-			if (hasStyle.ForeColor != default(Color)) sb.Append($"color: {ColorTranslator.ToHtml(hasStyle.ForeColor)};");
+			if (hasStyle.BackColor != default(Color)) sb.Append($"background-color:{ColorTranslator.ToHtml(hasStyle.BackColor).Trim()};");
+			if (hasStyle.ForeColor != default(Color)) sb.Append($"color:{ColorTranslator.ToHtml(hasStyle.ForeColor)};");
 			if (hasStyle.BorderStyle != BorderStyle.None && hasStyle.BorderStyle != BorderStyle.NotSet && hasStyle.BorderWidth.Value > 0 && hasStyle.BorderColor != default(Color))
 			{
 
-				sb.Append($"border: {hasStyle.BorderWidth.ToString()} {hasStyle.BorderStyle.ToString().ToLowerInvariant()} {ColorTranslator.ToHtml(hasStyle.BorderColor)};");
+				sb.Append($"border:{hasStyle.BorderWidth.ToString()} {hasStyle.BorderStyle.ToString().ToLowerInvariant()} {ColorTranslator.ToHtml(hasStyle.BorderColor)};");
 
 			}
 

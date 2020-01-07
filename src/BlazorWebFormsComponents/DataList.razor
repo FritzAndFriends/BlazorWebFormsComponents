@@ -15,7 +15,7 @@
 	{
 
 		case TableRepeatLayout t:
-<table accesskey="@AccessKey" cellpadding="@CellPadding" cellspacing="@CellSpacing" style="border-collapse:collapse;@CalculatedStyle" title="@ToolTip">
+<table accesskey="@AccessKey" cellpadding="@(CellPadding == default ? null : (int?)CellPadding)" cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)" style="border-collapse:collapse;@CalculatedStyle" title="@ToolTip">
 
 	@if (HeaderTemplate != null && ShowHeader)
 	{
