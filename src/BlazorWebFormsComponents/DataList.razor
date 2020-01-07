@@ -15,12 +15,25 @@
 	{
 
 		case TableRepeatLayout t:
-<table>
+<table accesskey="@AccessKey" cellpadding="@(CellPadding == default ? null : (int?)CellPadding)" cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)" style="border-collapse:collapse;@CalculatedStyle" title="@ToolTip">
 
-	@if (HeaderTemplate != null)
+	@if (HeaderTemplate != null && ShowHeader)
 	{
 
-		<tr><td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td></tr>
+		if (!string.IsNullOrEmpty(Caption)) {
+			<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
+		}
+
+	<tr>
+		@if (UseAccessibleHeader)
+		{
+			<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
+		}
+		else
+		{
+			<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
+		}
+		</tr>
 
 	}
 
@@ -34,7 +47,7 @@
 		}
 	}
 
-	@if (FooterTemplate != null)
+	@if (FooterTemplate != null && ShowFooter)
 	{
 
 		<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
@@ -46,9 +59,9 @@
 			break;
 		case FlowRepeatLayout f:
 
-<span>
+<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip">
 
-	@if (HeaderTemplate != null)
+	@if (HeaderTemplate != null && ShowHeader)
 	{
 
 		<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
@@ -66,7 +79,7 @@
 		}
 	}
 
-	@if (FooterTemplate != null)
+	@if (FooterTemplate != null && ShowFooter)
 	{
 
 		<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />

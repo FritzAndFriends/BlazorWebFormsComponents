@@ -7,11 +7,23 @@ The DataList component is meant to emulate the asp:DataList control in markup an
 ## Features supported in Blazor
 
 - Flow Layout
-    - Single Column
     - Empty List
+    - FooterStyle
+    - FooterTemplate
+    - HeaderStyle
+    - HeaderTemplate
+    - Tooltip
+    - Single Column
  - Table Layout
-    - Single Column
+    - Accessible Headers
     - Empty List
+    - FooterStyle
+    - FooterTemplate
+    - HeaderStyle
+    - HeaderTemplate
+    - Tooltip
+    - Single Column
+    - Tooltip
 
 ##### [Back to top](#datalist)
 

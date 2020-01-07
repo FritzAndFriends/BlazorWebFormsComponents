@@ -1,0 +1,59 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="ShowTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							ShowHeader="true"
+							ShowFooter="true"
+							RepeatLayout="Table"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+			<FooterTemplate>End of Line</FooterTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="HideTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							ShowHeader="false"
+							ShowFooter="false"
+							RepeatLayout="Table"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+			<FooterTemplate>End of Line</FooterTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void ShowTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(5);
+		cut.Find("td").TextContent.ShouldBe("My Widget List");
+		cut.FindAll("td")[4].TextContent.ShouldBe("End of Line");
+
+	}
+
+	void HideTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(3);
+		cut.Find("td").TextContent.ShouldNotBe("My Widget List");
+
+	}
+
+
+}
