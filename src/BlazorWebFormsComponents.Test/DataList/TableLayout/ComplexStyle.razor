@@ -7,6 +7,8 @@
 	<ComponentUnderTest>
 		<DataList Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
+							CellSpacing="2"
+							CellPadding="3"
 							RepeatLayout="Table"
 							BackColor="Red"
 							Context="Item">
@@ -30,6 +32,12 @@
 		cut.Find("table").HasAttribute("style").ShouldBeTrue();
 		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
 		cut.Find("table").GetAttribute("style").ShouldContain("background-color:red;");
+
+		cut.Find("table").HasAttribute("cellpadding").ShouldBeTrue();
+		cut.Find("table").HasAttribute("cellspacing").ShouldBeTrue();
+
+		cut.Find("table").GetAttribute("cellspacing").ShouldBe("2");
+		cut.Find("table").GetAttribute("cellpadding").ShouldBe("3");
 
 	}
 

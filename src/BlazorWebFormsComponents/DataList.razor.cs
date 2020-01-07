@@ -22,6 +22,12 @@ namespace BlazorWebFormsComponents
 		public VerticalAlign CaptionAlign { get; set; } = VerticalAlign.NotSet;
 
 		[Parameter]
+		public int CellPadding { get; set; }
+
+		[Parameter]
+		public int CellSpacing { get; set; }
+
+		[Parameter]
 		public RenderFragment HeaderTemplate { get; set; }
 
 		[Parameter]

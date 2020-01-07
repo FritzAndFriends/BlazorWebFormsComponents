@@ -15,6 +15,8 @@
 		Enabled="true"
 		Caption="This is my caption"
 		CaptionAlign="Top"
+		CellPadding="2"
+		CellSpacing="3"
 		ToolTip="This is my tooltip"
 		UseAccessibleHeader="true"
 		RepeatLayout="Flow"
