@@ -47,13 +47,20 @@
 	{
 
 		var even = true;
+		var first = true;
 
 		@foreach (var item in Items)
 		{
 
+			if (!first && SeparatorTemplate != null) {
+				<tr><td>@SeparatorTemplate</td></tr>
+			}
+
+
 			<tr><td>@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td></tr>
 
 			even = !even;
+			first = false;
 
 		}
 	}

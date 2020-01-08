@@ -14,7 +14,7 @@
 
 	<asp:DataList ID="simpleDataList"
 		runat="server"
-		RepeatColumns="2"
+		RepeatColumns="1"
 		ToolTip="This is my tooltip"
 		UseAccessibleHeader="true"
 		Caption="This is my caption"
@@ -33,6 +33,7 @@
 			<br />
 			<%# Item.Price.ToString("c") %>
 		</ItemTemplate>
+		<SeparatorTemplate>Hi!  I'm a separator!  I keep things apart</SeparatorTemplate>
 	</asp:DataList>
 
 </asp:Content>

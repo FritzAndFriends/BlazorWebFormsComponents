@@ -157,7 +157,7 @@ namespace BlazorWebFormsComponents
 			{
 				// This is invariant because it acts like an enum with a number together. 
 				// The enum part is invariant, but the number uses current culture. 
-				char firstChar = Char.ToLower(value[0], CultureInfo.InvariantCulture);
+				var firstChar = Char.ToLower(value[0], CultureInfo.InvariantCulture);
 				if (firstChar == 'x')
 				{
 					if (String.Equals(value, "xx-small", StringComparison.OrdinalIgnoreCase) ||
@@ -267,7 +267,7 @@ namespace BlazorWebFormsComponents
 			if (obj == null || !(obj is FontUnit))
 				return false;
 
-			FontUnit f = (FontUnit)obj;
+			var f = (FontUnit)obj;
 
 			if ((f.type == type) && (f.value == value))
 			{
@@ -343,7 +343,7 @@ namespace BlazorWebFormsComponents
 
 		public string ToString(IFormatProvider formatProvider)
 		{
-			string s = String.Empty;
+			var s = String.Empty;
 
 			if (IsEmpty)
 				return s;
@@ -402,7 +402,7 @@ namespace BlazorWebFormsComponents
 		/// </devdoc>
 		public static string EnumToString(Type enumType, object enumValue)
 		{
-			string value = Enum.Format(enumType, enumValue, "G");
+			var value = Enum.Format(enumType, enumValue, "G");
 
 			// 
 

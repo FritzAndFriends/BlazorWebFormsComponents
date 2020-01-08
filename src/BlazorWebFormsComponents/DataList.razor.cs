@@ -68,6 +68,9 @@ namespace BlazorWebFormsComponents
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 
 		[Parameter]
+		public RenderFragment SeparatorTemplate { get; set; }
+
+		[Parameter]
 		public bool ShowHeader { get; set; } = true;
 
 		[Parameter]
