@@ -45,10 +45,15 @@
 
 	@if (Items?.Any() ?? false)
 	{
+
+		var even = true;
+
 		@foreach (var item in Items)
 		{
 
-			<tr><td>@ItemTemplate(item)</td></tr>
+			<tr><td>@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td></tr>
+
+			even = !even;
 
 		}
 	}
@@ -77,10 +82,14 @@
 	@if (Items?.Any() ?? false)
 	{
 
+		var even = true;
+
 		@foreach (var item in Items)
 		{
 
-			<span>@ItemTemplate(item)</span><br />
+<span>@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span><br />
+
+			even = !even;
 
 		}
 	}

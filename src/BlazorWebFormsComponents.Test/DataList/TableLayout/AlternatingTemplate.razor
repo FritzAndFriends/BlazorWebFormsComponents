@@ -1,0 +1,32 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+			<AlternatingItemTemplate>== @Item.Name ==</AlternatingItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(4);
+
+		cut.FindAll("td").Count(c => c.TextContent.StartsWith("== ") && c.TextContent.EndsWith(" ==")).ShouldBe(1);
+
+	}
+
+
+}

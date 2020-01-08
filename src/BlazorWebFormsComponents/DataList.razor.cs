@@ -62,6 +62,9 @@ namespace BlazorWebFormsComponents
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		[Parameter]
+		public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+
+		[Parameter]
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 
 		[Parameter]
