@@ -1,0 +1,36 @@
+﻿@page "/ControlSamples/Validation"
+
+<h3>Component</h3>
+@using BlazorWebFormsComponents.Validations;
+
+
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+
+    <InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
+
+    <button type="submit">Submit</button>
+
+    <RequiredValidator ControlToValidate="@Name" Text="Name is required." ErrorMessage="Name is required but in summary!" />
+
+    <AspNetValidationSummary />
+</EditForm>
+
+
+
+@code {
+    ForwardRef<InputText> Name = new ForwardRef<InputText>();
+
+    private ExampleModel exampleModel = new ExampleModel();
+
+    private void HandleValidSubmit()
+    {
+
+        Console.WriteLine("OnValidSubmit");
+    }
+
+    public class ExampleModel
+    {
+        public string Name { get; set; }
+    }
+}

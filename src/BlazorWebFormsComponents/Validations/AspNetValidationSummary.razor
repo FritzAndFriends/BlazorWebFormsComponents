@@ -1,0 +1,24 @@
+﻿@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+
+@inherits ComponentBase
+
+
+@if (CurrentEditContext.GetValidationMessages()?.Any() ?? false)
+{
+    <ul>
+        @foreach (var message in CurrentEditContext.GetValidationMessages())
+        {
+            <li>@message.Split(',')[1]</li>
+        }
+    </ul>
+}
+
+@code {
+    [CascadingParameter] EditContext CurrentEditContext { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        CurrentEditContext.OnValidationStateChanged += (sender, eventArgs) => StateHasChanged();
+    }
+}
