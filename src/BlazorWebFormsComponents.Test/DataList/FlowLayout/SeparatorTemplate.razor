@@ -1,0 +1,35 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Flow"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+			<SeparatorTemplate>====</SeparatorTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("span").Count().ShouldBe(7);
+
+		cut.FindAll("span").Count(c => c.TextContent == "====").ShouldBe(2);
+
+		cut.FindAll("span")[3].TextContent.ShouldBe("====");
+		cut.FindAll("span")[5].TextContent.ShouldBe("====");
+
+	}
+
+
+}

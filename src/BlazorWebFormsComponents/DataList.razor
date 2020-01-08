@@ -90,13 +90,19 @@
 	{
 
 		var even = true;
+		var first = true;
 
 		@foreach (var item in Items)
 		{
 
+			if (!first && SeparatorTemplate != null) {
+				<span>@SeparatorTemplate</span>
+			}
+
 <span>@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span><br />
 
 			even = !even;
+			first = false;
 
 		}
 	}
