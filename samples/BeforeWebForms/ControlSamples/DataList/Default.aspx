@@ -34,6 +34,9 @@
 			<%# Item.Price.ToString("c") %>
 		</ItemTemplate>
 		<SeparatorTemplate>Hi!  I'm a separator!  I keep things apart</SeparatorTemplate>
+		<ItemStyle BackColor="Yellow" />
+		<AlternatingItemStyle BackColor="Wheat" />
+		<SeparatorStyle BackColor="Black" ForeColor="PapayaWhip" />
 	</asp:DataList>
 
 </asp:Content>

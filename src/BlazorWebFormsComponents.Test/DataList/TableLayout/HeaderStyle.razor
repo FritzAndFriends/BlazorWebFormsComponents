@@ -37,8 +37,6 @@
 	void FirstTest(IRazorTestContext context)
 	{
 
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
-
 		var cut = context.GetComponentUnderTest();
 
 		var theHeaderElement = cut.Find("td");

@@ -47,6 +47,8 @@ namespace BlazorWebFormsComponents
 
 		public Unit Width { get; set; }
 
+		public bool Wrap { get; set; }
+
 		public override string ToString()
 		{
 

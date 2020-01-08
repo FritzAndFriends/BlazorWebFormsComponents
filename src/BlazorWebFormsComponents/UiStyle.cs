@@ -45,7 +45,6 @@ namespace BlazorWebFormsComponents
 		public Unit Width { get; set; }
 
 
-		//protected override void OnParametersSet()
 		protected override void OnInitialized()
 		{
 

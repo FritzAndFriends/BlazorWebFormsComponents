@@ -58,14 +58,25 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
+		[CascadingParameter(Name = "ItemStyle")]
+		private TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
+
 		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		[Parameter]
 		public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
 
+		[CascadingParameter(Name = "AlternatingItemStyle")]
+		private TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
+
+
 		[Parameter]
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
+
+		[CascadingParameter(Name = "SeparatorStyle")]
+		private TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
+
 
 		[Parameter]
 		public RenderFragment SeparatorTemplate { get; set; }
@@ -113,6 +124,9 @@ namespace BlazorWebFormsComponents
 
 				HeaderStyle.FromUnknownAttributes(AdditionalAttributes, "HeaderStyle-");
 				FooterStyle.FromUnknownAttributes(AdditionalAttributes, "FooterStyle-");
+				ItemStyle.FromUnknownAttributes(AdditionalAttributes, "ItemStyle-");
+				AlternatingItemStyle.FromUnknownAttributes(AdditionalAttributes, "AlternatingItemStyle-");
+				SeparatorStyle.FromUnknownAttributes(AdditionalAttributes, "SeparatorStyle-");
 
 			}
 
