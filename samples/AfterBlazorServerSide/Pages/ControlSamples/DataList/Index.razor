@@ -1,4 +1,5 @@
 ﻿@page "/ControlSamples/DataList"
+@using static System.Drawing.Color
 
 <h2>DataList Component homepage</h2>
 
@@ -13,6 +14,9 @@
 							ItemType="SharedSampleObjects.Models.Widget">
             <HeaderTemplate>Simple Widgets</HeaderTemplate>
             <FooterTemplate>End of Line</FooterTemplate>
+      <ChildContent>
+        <ItemStyle BackColor="Wheat" />
+      </ChildContent>
 			<ItemTemplate>
                     @Item.Name - @Item.Price.ToString("c")
 			</ItemTemplate>

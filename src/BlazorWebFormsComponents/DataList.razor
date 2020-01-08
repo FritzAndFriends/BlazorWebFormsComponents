@@ -7,91 +7,130 @@
 {
 
 	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
-		@ChildContent
+		<CascadingValue Name="FooterStyle" Value="FooterStyle">
+			<CascadingValue Name="ItemStyle" Value="ItemStyle">
+				<CascadingValue Name="AlternatingItemStyle" Value="AlternatingItemStyle">
+					<CascadingValue Name="SeparatorStyle" Value="SeparatorStyle">
+						@ChildContent
+					</CascadingValue>
+				</CascadingValue>
+			</CascadingValue>
+		</CascadingValue>
 	</CascadingValue>
 
 
-	@switch (RepeatLayout)
-	{
+					@switch (RepeatLayout)
+					{
 
-		case TableRepeatLayout t:
-<table accesskey="@AccessKey" cellpadding="@(CellPadding == default ? null : (int?)CellPadding)" cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)" style="border-collapse:collapse;@CalculatedStyle" title="@ToolTip">
+						case TableRepeatLayout t:
+							<table accesskey="@AccessKey"
+										 cellpadding="@(CellPadding == default ? null : (int?)CellPadding)"
+										 cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)"
+										 rules="@CalculatedGridLines"
+										 style="border-collapse:collapse;@CalculatedStyle"
+										 tabindex="@(TabIndex == default ? null : (short?)TabIndex)"
+										 title="@ToolTip">
 
-	@if (HeaderTemplate != null && ShowHeader)
-	{
+								@if (HeaderTemplate != null && ShowHeader)
+								{
 
-		if (!string.IsNullOrEmpty(Caption)) {
-			<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
-		}
+									if (!string.IsNullOrEmpty(Caption))
+									{
+										<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
+									}
 
-	<tr>
-		@if (UseAccessibleHeader)
-		{
-			<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
-		}
-		else
-		{
-			<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
-		}
-		</tr>
+									<tr>
+										@if (UseAccessibleHeader)
+										{
+											<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
+										}
+										else
+										{
+											<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
+										}
+									</tr>
 
-	}
+								}
 
-	@if (Items?.Any() ?? false)
-	{
-		@foreach (var item in Items)
-		{
+								@if (Items?.Any() ?? false)
+								{
 
-			<tr><td>@ItemTemplate(item)</td></tr>
+									var even = true;
+									var first = true;
 
-		}
-	}
+									@foreach (var item in Items)
+									{
 
-	@if (FooterTemplate != null && ShowFooter)
-	{
-
-		<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
-
-	}
-
-
-</table>
-			break;
-		case FlowRepeatLayout f:
-
-<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip">
-
-	@if (HeaderTemplate != null && ShowHeader)
-	{
-
-		<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
-
-	}
-
-	@if (Items?.Any() ?? false)
-	{
-
-		@foreach (var item in Items)
-		{
-
-			<span>@ItemTemplate(item)</span><br />
-
-		}
-	}
-
-	@if (FooterTemplate != null && ShowFooter)
-	{
-
-		<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />
-
-	}
+										if (!first && SeparatorTemplate != null)
+										{
+											<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
+										}
 
 
+										<tr><td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td></tr>
 
-</span>
+										even = !even;
+										first = false;
 
-			break;
+									}
+								}
 
-	}
+								@if (FooterTemplate != null && ShowFooter)
+								{
 
-}
+									<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
+
+								}
+
+
+							</table>
+							break;
+						case FlowRepeatLayout f:
+
+							<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
+
+								@if (HeaderTemplate != null && ShowHeader)
+								{
+
+									<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
+
+								}
+
+								@if (Items?.Any() ?? false)
+								{
+
+									var even = true;
+									var first = true;
+
+									@foreach (var item in Items)
+									{
+
+										if (!first && SeparatorTemplate != null)
+										{
+											<span style="@SeparatorStyle">@SeparatorTemplate</span>
+										}
+
+										<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span><br />
+
+										even = !even;
+										first = false;
+
+									}
+								}
+
+								@if (FooterTemplate != null && ShowFooter)
+								{
+
+									<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />
+
+								}
+
+
+
+							</span>
+
+							break;
+
+					}
+
+					}

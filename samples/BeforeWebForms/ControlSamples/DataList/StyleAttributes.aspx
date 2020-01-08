@@ -22,6 +22,7 @@
 		BorderWidth="2px"
 		BorderColor="Firebrick"
 		Font-Bold="true"
+		GridLines="Vertical"
 		UseAccessibleHeader="true"
 		ItemType="SharedSampleObjects.Models.Widget">
 		<HeaderTemplate>
