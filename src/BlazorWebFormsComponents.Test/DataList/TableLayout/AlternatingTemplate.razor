@@ -9,6 +9,7 @@
 							Context="Item">
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
+			<AlternatingItemTemplate>== @Item.Name ==</AlternatingItemTemplate>
 		</DataList>
 	</ComponentUnderTest>
 </Fixture>
@@ -22,16 +23,8 @@
 		var cut = context.GetComponentUnderTest();
 
 		cut.FindAll("td").Count().ShouldBe(4);
-		cut.Find("td").TextContent.ShouldBe("My Widget List");
 
-		cut.Find("table").HasAttribute("style").ShouldBeTrue();
-		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
-
-		cut.Find("table").HasAttribute("title").ShouldBeFalse();
-		cut.Find("table").HasAttribute("cellspacing").ShouldBeFalse();
-		cut.Find("table").HasAttribute("cellpadding").ShouldBeFalse();
-
-		cut.Find("table").HasAttribute("tabindex").ShouldBeFalse();
+		cut.FindAll("td").Count(c => c.TextContent.StartsWith("== ") && c.TextContent.EndsWith(" ==")).ShouldBe(1);
 
 	}
 

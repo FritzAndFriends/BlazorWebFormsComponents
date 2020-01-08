@@ -114,13 +114,13 @@ namespace BlazorWebFormsComponents
 
 				// This is invariant because it acts like an enum with a number together. 
 				// The enum part is invariant, but the number uses current culture. 
-				string trimLcase = value.Trim().ToLower(CultureInfo.InvariantCulture);
-				int len = trimLcase.Length;
+				var trimLcase = value.Trim().ToLower(CultureInfo.InvariantCulture);
+				var len = trimLcase.Length;
 
-				int lastDigit = -1;
-				for (int i = 0; i < len; i++)
+				var lastDigit = -1;
+				for (var i = 0; i < len; i++)
 				{
-					char ch = trimLcase[i];
+					var ch = trimLcase[i];
 					if (((ch < '0') || (ch > '9')) && (ch != '-') && (ch != '.') && (ch != ','))
 						break;
 					lastDigit = i;
@@ -140,7 +140,7 @@ namespace BlazorWebFormsComponents
 					type = defaultType;
 				}
 
-				string numericPart = trimLcase.Substring(0, lastDigit + 1);
+				var numericPart = trimLcase.Substring(0, lastDigit + 1);
 				// Cannot use Double.FromString, because we don't use it in the ToString implementation
 				try
 				{
@@ -227,7 +227,7 @@ namespace BlazorWebFormsComponents
 			{
 				return false;
 			}
-			Unit u = (Unit)obj;
+			var u = (Unit)obj;
 
 			// compare internal values to avoid "defaulting" in the case of "Empty"
 			//
@@ -444,7 +444,7 @@ namespace BlazorWebFormsComponents
 		public static explicit operator Unit(string n)
 		{
 
-			if (int.TryParse(n, out int intValue))
+			if (int.TryParse(n, out var intValue))
 			{
 				return Unit.Pixel(intValue);
 			}

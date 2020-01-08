@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing;
 using System.Linq;
+using System.Net.Cache;
 using System.Text;
 
 namespace BlazorWebFormsComponents
@@ -28,6 +29,21 @@ namespace BlazorWebFormsComponents
 		public int CellSpacing { get; set; }
 
 		[Parameter]
+		public GridLines GridLines { get; set; } = GridLines.None;
+
+		private static readonly Dictionary<GridLines, string?> _GridLines = new Dictionary<GridLines, string?> {
+			{GridLines.None, null },
+			{GridLines.Horizontal, "rows" },
+			{GridLines.Vertical, "cols" },
+			{GridLines.Both, "both" }
+		};
+		protected string? CalculatedGridLines {  get {
+
+				return _GridLines[this.GridLines];
+
+		} }
+
+		[Parameter]
 		public RenderFragment HeaderTemplate { get; set; }
 
 		[Parameter]
@@ -42,11 +58,28 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
+		[CascadingParameter(Name = "ItemStyle")]
+		private TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
+
 		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		[Parameter]
+		public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+
+		[CascadingParameter(Name = "AlternatingItemStyle")]
+		private TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
+
+
+		[Parameter]
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
+
+		[CascadingParameter(Name = "SeparatorStyle")]
+		private TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
+
+
+		[Parameter]
+		public RenderFragment SeparatorTemplate { get; set; }
 
 		[Parameter]
 		public bool ShowHeader { get; set; } = true;
@@ -91,6 +124,9 @@ namespace BlazorWebFormsComponents
 
 				HeaderStyle.FromUnknownAttributes(AdditionalAttributes, "HeaderStyle-");
 				FooterStyle.FromUnknownAttributes(AdditionalAttributes, "FooterStyle-");
+				ItemStyle.FromUnknownAttributes(AdditionalAttributes, "ItemStyle-");
+				AlternatingItemStyle.FromUnknownAttributes(AdditionalAttributes, "AlternatingItemStyle-");
+				SeparatorStyle.FromUnknownAttributes(AdditionalAttributes, "SeparatorStyle-");
 
 			}
 

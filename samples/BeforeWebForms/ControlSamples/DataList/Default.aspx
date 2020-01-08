@@ -14,13 +14,14 @@
 
 	<asp:DataList ID="simpleDataList"
 		runat="server"
-		RepeatColumns="2"
+		RepeatColumns="1"
 		ToolTip="This is my tooltip"
 		UseAccessibleHeader="true"
 		Caption="This is my caption"
 		CaptionAlign="Top"
 		CellPadding="2"
 		CellSpacing="3"
+		TabIndex="1"
 		ItemType="SharedSampleObjects.Models.Widget">
 		<HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
 		<HeaderTemplate>
@@ -32,6 +33,10 @@
 			<br />
 			<%# Item.Price.ToString("c") %>
 		</ItemTemplate>
+		<SeparatorTemplate>Hi!  I'm a separator!  I keep things apart</SeparatorTemplate>
+		<ItemStyle BackColor="Yellow" />
+		<AlternatingItemStyle BackColor="Wheat" />
+		<SeparatorStyle BackColor="Black" ForeColor="PapayaWhip" />
 	</asp:DataList>
 
 </asp:Content>

@@ -59,6 +59,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Enabled { get; set; } = true;
 
+		[Parameter]
+		public short TabIndex { get; set; }
+
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
 		/// </summary>

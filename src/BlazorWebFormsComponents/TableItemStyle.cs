@@ -47,6 +47,8 @@ namespace BlazorWebFormsComponents
 
 		public Unit Width { get; set; }
 
+		public bool Wrap { get; set; }
+
 		public override string ToString()
 		{
 
@@ -82,7 +84,7 @@ namespace BlazorWebFormsComponents
 				var formattedKey = itemStyle.Key.Replace("-", "_");
 				var propInfo = headerStyleType.GetProperty(formattedKey);
 
-				object outValue = propInfo.PropertyType switch
+				var outValue = propInfo.PropertyType switch
 				{
 					null => null,
 					{ Name: nameof(Color) } => itemStyle.Value.GetColorFromHtml(),
