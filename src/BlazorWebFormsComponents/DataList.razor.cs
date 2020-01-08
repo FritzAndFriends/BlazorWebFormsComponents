@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing;
 using System.Linq;
+using System.Net.Cache;
 using System.Text;
 
 namespace BlazorWebFormsComponents
@@ -26,6 +27,21 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public int CellSpacing { get; set; }
+
+		[Parameter]
+		public GridLines GridLines { get; set; } = GridLines.None;
+
+		private static readonly Dictionary<GridLines, string?> _GridLines = new Dictionary<GridLines, string?> {
+			{GridLines.None, null },
+			{GridLines.Horizontal, "rows" },
+			{GridLines.Vertical, "cols" },
+			{GridLines.Both, "both" }
+		};
+		protected string? CalculatedGridLines {  get {
+
+				return _GridLines[this.GridLines];
+
+		} }
 
 		[Parameter]
 		public RenderFragment HeaderTemplate { get; set; }
