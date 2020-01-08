@@ -31,6 +31,8 @@
 		cut.Find("table").HasAttribute("cellspacing").ShouldBeFalse();
 		cut.Find("table").HasAttribute("cellpadding").ShouldBeFalse();
 
+		cut.Find("table").HasAttribute("tabindex").ShouldBeFalse();
+
 	}
 
 

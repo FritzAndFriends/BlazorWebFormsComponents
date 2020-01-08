@@ -20,6 +20,7 @@
 	cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)" 
 	rules="@CalculatedGridLines" 
 	style="border-collapse:collapse;@CalculatedStyle" 
+	tabindex="@(TabIndex == default ? null : (short?)TabIndex)"
 	title="@ToolTip">
 
 	@if (HeaderTemplate != null && ShowHeader)
@@ -64,7 +65,7 @@
 			break;
 		case FlowRepeatLayout f:
 
-<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip">
+<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip" 	tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
 
 	@if (HeaderTemplate != null && ShowHeader)
 	{
