@@ -1,0 +1,55 @@
+﻿@page "/ControlSamples/ValidationSummary"
+@using static System.Drawing.Color
+
+<h3>Required Field Validator</h3>
+@using BlazorWebFormsComponents.Validations;
+
+
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+	Write something
+	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
+	<RequiredFieldValidator Type="string"
+													ControlToValidate="@Name"
+													ForeColor="Red"
+													Text="Name is required."
+													ErrorMessage="Name is required but in summary!" />
+
+	<InputNumber id="number" @ref="Number.Current" @bind-Value="exampleModel.Number" />
+	<RequiredFieldValidator Type="int?"
+													ControlToValidate="@Number"
+													Text="Number is required."
+													ErrorMessage="Number is required but in summary!" />
+
+	<button type="submit">Submit</button>
+
+	<h5>Bold Bullet List</h5>
+	<AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" />
+
+	<h5>Lime List</h5>
+	<AspNetValidationSummary ForeColor="Lime" DisplayMode="List" />
+
+	<h5>Italic Single Paragraph</h5>
+	<AspNetValidationSummary Font_Italic="true" DisplayMode="SingleParagraph" />
+
+</EditForm>
+
+
+
+@code {
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+	ForwardRef<InputBase<int?>> Number = new ForwardRef<InputBase<int?>>();
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		Console.WriteLine("OnValidSubmit");
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+		public int? Number { get; set; }
+	}
+}

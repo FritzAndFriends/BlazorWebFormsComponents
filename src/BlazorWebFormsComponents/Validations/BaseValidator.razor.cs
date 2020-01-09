@@ -72,7 +72,7 @@ namespace BlazorWebFormsComponents.Validations
 
 			var value = typeof(InputBase<Type>).GetProperty("CurrentValueAsString", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(ControlToValidate.Current) as string;
 
-			if (Validate(value))
+			if (!Enabled || Validate(value))
 			{
 				IsValid = true;
 			}

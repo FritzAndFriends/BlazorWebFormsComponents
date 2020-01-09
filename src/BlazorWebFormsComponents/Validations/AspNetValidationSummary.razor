@@ -1,24 +1,29 @@
-﻿@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Components.Forms
+﻿@inherits BaseWebFormsComponent
+@using BlazorWebFormsComponents.Enums
 
-@inherits ComponentBase
-
-
-@if (CurrentEditContext.GetValidationMessages()?.Any() ?? false)
-{
-    <ul>
-        @foreach (var message in CurrentEditContext.GetValidationMessages())
-        {
-            <li>@message.Split(',')[1]</li>
-        }
-    </ul>
-}
-
-@code {
-    [CascadingParameter] EditContext CurrentEditContext { get; set; }
-
-    protected override void OnParametersSet()
-    {
-        CurrentEditContext.OnValidationStateChanged += (sender, eventArgs) => StateHasChanged();
-    }
-}
+<div style="@(CalculatedStyle + (IsValid ? null : "display:none;"))">
+	@if (IsValid)
+	{
+		@switch (DisplayMode)
+		{
+			case BulletListDisplayMode b:
+				<ul>
+					@foreach (var message in CurrentEditContext.GetValidationMessages())
+					{
+						<li>@message.Split(',')[1]</li>
+					}
+				</ul>
+				break;
+			case ListDisplayMode l:
+				@foreach (var message in CurrentEditContext.GetValidationMessages())
+				{
+					@message.Split(',')[1]
+					<br>
+				}
+				break;
+			case SingleParagraphDisplayMode s:
+				@string.Join(" ", CurrentEditContext.GetValidationMessages().Select(m => m.Split(',')[1]))
+				break;
+		}
+	}
+</div>
