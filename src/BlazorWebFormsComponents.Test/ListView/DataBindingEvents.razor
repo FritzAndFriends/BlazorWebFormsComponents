@@ -8,6 +8,7 @@
 						ItemType="Widget"
 						OnDataBinding="DataBinding"
 						OnDataBound="DataBound"
+						OnItemDataBound="ItemDataBound"
 						Context="Item">
 		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
 	</ListView>
@@ -19,6 +20,7 @@
 
 	int databinding = 0;
 	int databound = 0;
+	int itemDatabound = 0;
 
 	void FirstTest(IRazorTestContext context)
 	{
@@ -27,6 +29,7 @@
 
 		databinding.ShouldBeGreaterThan(0);
 		databound.ShouldBeGreaterThan(0);
+		itemDatabound.ShouldBeGreaterThanOrEqualTo(3);
 
 		cut.FindAll("span").Count().ShouldBe(3);
 
@@ -38,6 +41,10 @@
 
 	void DataBound(EventArgs args) {
 		databound++;
+	}
+
+	void ItemDataBound(EventArgs args) {
+		itemDatabound++;
 	}
 
 

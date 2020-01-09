@@ -39,6 +39,13 @@ namespace BlazorWebFormsComponents
     [Obsolete("The LayoutTemplate child element is not supported in Blazor.  Instead, wrap the ListView component with the desired layout")]
     public RenderFragment LayoutTemplate { get; set; }
 
+		/// <summary>
+		/// 🚨🚨 LayoutTemplate and the OnLayoutCreated event is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+		/// </summary>
+		[Parameter]
+		[Obsolete("The layout is not managed by this component, therefore this event will not be raised")]
+		public EventHandler OnLayoutCreated { get; set; }
+
 		#endregion
 
 		[Parameter] // TODO: Implement

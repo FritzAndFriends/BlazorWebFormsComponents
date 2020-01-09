@@ -40,6 +40,8 @@ else
 				@ItemSeparatorTemplate
 		}
 
+		if (OnItemDataBound.HasDelegate) OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+
 		rowCounter++;
 
 	}
