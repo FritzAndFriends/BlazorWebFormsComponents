@@ -1,0 +1,37 @@
+﻿@page "/ControlSamples/RegularExpressionValidator"
+
+<h3>Regular Expression Validator</h3>
+@using BlazorWebFormsComponents.Validations;
+
+
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+
+	<label>Write a 5 digit number</label>
+	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
+	<RegularExpressionValidator ValidationExpression="^[0-9]{5}$"
+															ControlToValidate="@Name"
+															Text="Not a 5 digit number."
+															ErrorMessage="Not a 5 digit number but in summary!" />
+
+	<button type="submit">Submit</button>
+
+</EditForm>
+
+
+
+@code {
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		Console.WriteLine("OnValidSubmit");
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}
