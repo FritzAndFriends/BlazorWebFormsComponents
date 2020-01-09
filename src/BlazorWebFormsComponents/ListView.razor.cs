@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -14,7 +15,9 @@ namespace BlazorWebFormsComponents
     {
     }
 
-    [Parameter]
+		#region Templates
+
+		[Parameter]
     public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
 
     /// <summary>
@@ -36,7 +39,9 @@ namespace BlazorWebFormsComponents
     [Obsolete("The LayoutTemplate child element is not supported in Blazor.  Instead, wrap the ListView component with the desired layout")]
     public RenderFragment LayoutTemplate { get; set; }
 
-    [Parameter] // TODO: Implement
+		#endregion
+
+		[Parameter] // TODO: Implement
     public InsertItemPosition InsertItemPosition { get; set; }
 
     [Parameter] // TODO: Implement
@@ -48,6 +53,6 @@ namespace BlazorWebFormsComponents
     [Parameter, Obsolete("Style is not applied by this control")]
     public string Style { get; set; }
 
-  }
+	}
 
 }

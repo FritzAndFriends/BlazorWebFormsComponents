@@ -1,0 +1,62 @@
+﻿@inherits TestComponentBase
+
+<Fixture
+	Test="FirstTest"
+>
+<ComponentUnderTest>
+	<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						OnInit="Init"
+						OnLoad="Load"
+						OnPreRender="PreRender"
+						OnUnload="Unload"
+						Context="Item">
+		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+	</ListView>
+</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	int initialized = 0;
+	int loaded = 0;
+	int preRendered = 0;
+	int unloaded = 0;
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		initialized.ShouldBe(1);
+		loaded.ShouldBe(1);
+		preRendered.ShouldBe(1);
+		unloaded.ShouldBe(1);
+
+		cut.FindAll("span").Count().ShouldBe(3);
+
+	}
+
+	void Init(EventArgs args)
+	{
+		initialized++;
+	}
+
+	void Load(EventArgs args)
+	{
+		loaded++;
+	}
+
+	void PreRender(EventArgs args)
+	{
+		preRendered++;
+	}
+
+	void Unload(EventArgs args)
+	{
+		unloaded++;
+	}
+
+
+}
