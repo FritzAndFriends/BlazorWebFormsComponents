@@ -20,8 +20,12 @@ else if (Items == null || !Items.Any())
 }
 else
 {
+
+	if (OnDataBinding.HasDelegate) OnDataBinding.InvokeAsync(EventArgs.Empty);
+
 	@foreach (var item in Items)
 	{
+
 
 		@if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
 		{
@@ -39,4 +43,7 @@ else
 		rowCounter++;
 
 	}
+
+	if (OnDataBound.HasDelegate) OnDataBound.InvokeAsync(EventArgs.Empty);
+
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace BlazorWebFormsComponents
 {
 
-	public abstract class BaseWebFormsComponent : ComponentBase
+	public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
 	{
 
 		#region Obsolete Attributes / Properties
@@ -110,6 +110,12 @@ namespace BlazorWebFormsComponents
 		public EventCallback<EventArgs> OnUnload { get; set; }
 		private bool _UnloadTriggered = false;
 
+		/// <summary>
+		/// Event handler to mimic the Web Forms OnDisposed handler and triggered in the Dispose method of this class
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnDisposed { get; set; }
+
 		#endregion
 
 		#region Blazor Events
@@ -140,8 +146,40 @@ namespace BlazorWebFormsComponents
 
 		}
 
+
 		#endregion
 
+		#region IDisposable Support
+		private bool disposedValue = false; // To detect redundant calls
+
+		private async Task Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					if (OnDisposed.HasDelegate) await OnDisposed.InvokeAsync(EventArgs.Empty);
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		~BaseWebFormsComponent()
+		{
+			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+			Dispose(false).GetAwaiter().GetResult();
+		}
+
+		// This code added to correctly implement the disposable pattern.
+		public async ValueTask DisposeAsync()
+		{
+
+			await Dispose(true);
+			GC.SuppressFinalize(this);
+
+		}
+		#endregion
 
 
 	}

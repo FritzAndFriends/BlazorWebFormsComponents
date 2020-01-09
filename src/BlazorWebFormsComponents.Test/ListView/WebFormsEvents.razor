@@ -4,12 +4,13 @@
 	Test="FirstTest"
 >
 <ComponentUnderTest>
-	<ListView Items="Widget.SimpleWidgetList"
+	<ListView Items="Widget.SimpleWidgetList" @ref="theListView"
 						ItemType="Widget"
 						OnInit="Init"
 						OnLoad="Load"
 						OnPreRender="PreRender"
 						OnUnload="Unload"
+						OnDisposed="MyDispose"
 						Context="Item">
 		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
 	</ListView>
@@ -19,10 +20,14 @@
 
 @code {
 
+	ListView<Widget> theListView;
+
 	int initialized = 0;
 	int loaded = 0;
 	int preRendered = 0;
 	int unloaded = 0;
+
+	bool disposed = false;
 
 	void FirstTest(IRazorTestContext context)
 	{
@@ -35,6 +40,10 @@
 		unloaded.ShouldBe(1);
 
 		cut.FindAll("span").Count().ShouldBe(3);
+
+		theListView.DisposeAsync().GetAwaiter().GetResult();
+
+		disposed.ShouldBeTrue();
 
 	}
 
@@ -56,6 +65,10 @@
 	void Unload(EventArgs args)
 	{
 		unloaded++;
+	}
+
+	void MyDispose(EventArgs args) {
+		disposed = true;
 	}
 
 
