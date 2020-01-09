@@ -1,9 +1,9 @@
-﻿@inherits  BaseWebFormsComponent
+﻿@inherits BaseWebFormsComponent
 @typeparam Type
 
-@if (!IsValid)
+@if (Enabled && !IsValid)
 {
-	<span>
+	<span style="@CalculatedStyle">
 		@if (string.IsNullOrWhiteSpace(Text))
 		{
 			@ErrorMessage
