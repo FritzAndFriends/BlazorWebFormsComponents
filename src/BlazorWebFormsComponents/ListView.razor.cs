@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
-
+ 
 	public partial class ListView<ItemType> : BaseModelBindingComponent<ItemType>
   {
 
@@ -59,6 +59,23 @@ namespace BlazorWebFormsComponents
     /// </summary>
     [Parameter, Obsolete("Style is not applied by this control")]
     public string Style { get; set; }
+
+
+		[Parameter]
+		public RenderFragment ChildContent { get; set; }
+
+		[CascadingParameter(Name = "Host")]
+		public BaseWebFormsComponent HostComponent { get; set; }
+
+
+		protected override void OnInitialized()
+		{
+
+			HostComponent = this;
+
+			base.OnInitialized();
+
+		}
 
 	}
 

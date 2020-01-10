@@ -181,6 +181,9 @@ namespace BlazorWebFormsComponents
 		}
 		#endregion
 
+		public bool LayoutTemplateRendered { get; set; } = false;
+
+
 
 	}
 

@@ -1,6 +1,15 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
 @typeparam ItemType
 
+	<CascadingValue Name="Host" Value="HostComponent">
+			@if (!LayoutTemplateRendered)
+			{
+				@ChildContent
+			}
+</CascadingValue>
+
+Above are the ChildContents
+
 @if (LayoutTemplate != null) {
 	@:<!-- LayoutTemplate is not supported in Blazor.  Wrap the ListView component with the layout desired -->
 }
