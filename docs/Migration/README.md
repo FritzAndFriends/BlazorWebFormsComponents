@@ -4,6 +4,10 @@ Migration from ASP<span></span>.NET Web Forms to Blazor is not simple and this r
 
 We, the maintainers of this project, believe that with a little ingenuity the markup from a Web Forms application can be copied over with minimal changes and function similarly to its original purpose.  We believe that well formatted and maintained code in Web Forms should be easily migrated.  Applications that are a significant mix of C# and markup will have a more difficult time going through this process.
 
+## Readiness Planning
+
+Migrating an application to Blazor is not a trivial process and it would be great to have some indication ahead of time how much work is needed and what steps you need to take to prepare to migrate.  Check our migration [readiness document](migration_readiness.md) to help determine how much work will be needed for your application to begin the process.
+
 ## Known Required Changes
 
 There are several changes that are going to need to be made to the markup in your ASPX and ASCX files in order to get them working.  Some of these are obvious changes, and some are considerations necessary for the razor templating and Blazor rendering engine.
@@ -32,7 +36,7 @@ The concept of a MasterPage does not exist in Blazor.  Instead, your ASPX pages 
 
 ### No Namespaces, No Tag-Prefixes 
 
-Namespaces and tag-prefixes are gone.  You can do a Find and Replace on asp: and remove those from your markup.
+Namespaces and tag-prefixes are gone.  You can do a Find and Replace on `asp:` and remove those from your markup.
 
 ## Strategies
 
