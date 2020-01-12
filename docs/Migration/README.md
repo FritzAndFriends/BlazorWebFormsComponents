@@ -34,16 +34,37 @@ The concept of a MasterPage does not exist in Blazor.  Instead, your ASPX pages 
 
 ### Page Directive Changes
 
+### No <%#: DataBinding expressions 
+
+Databinding expressions in Web Forms let you evaluate the content of the elements and format them appropriately for presentation.  For editor controls, it also allows you to setup a 2-way binding so that you can receive values entered into the same variable bound to the control.
+
+In Blazor, for repeater-style components, just format the variable using context, Item, and simple formatting like this:
+
+```csharp
+@Item.ShipDate.ToString("D")
+```
+
+For editor components, simply `@bind` the variable to the component.  This will give you two-way data-binding and the ability to handle changes in the editor component AS it changes.
+
+```html
+<input type="text" name="foo" @bind="bar" />
+```
+
 ### No Namespaces, No Tag-Prefixes 
 
 Namespaces and tag-prefixes are gone.  You can do a Find and Replace on `asp:` and remove those from your markup.
+
+### Redirect Color to WebColor
+
+This change should **NOT** require any coding modifications.  In Web Forms, you could refer to `System.Drawing.Color` objects when setting `BackColor`, `BorderColor`, and `ForeColor` to name a few properties.  You could _ALSO_ freely use HTML hex-color notation freely in these fields.  
+The `System.Drawing.Color` object does not have a converter that allows you to convert between these two formats, so we wrapped the object and made `BlazorWebFormsComponents.WebColor` that performs the same task and allows the interchange of `System.Drawing.Color` object with HTML hex notation.
 
 ## Strategies
 
 - A simple initial site migration
 - Intertwined code
 - Model-Binding
-- .NET Standard to the rescue!
+- [.NET Standard to the rescue!](Strategies/NET-Standard.md)
 - Other considerations
   - MasterPage
     - Rearchitecting Web Application Layout
