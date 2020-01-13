@@ -1,5 +1,5 @@
 ﻿@inherits TestComponentBase
-@using static System.Drawing.Color
+@using static BlazorWebFormsComponents.WebColor
 
 
 
@@ -10,7 +10,7 @@
 							CellSpacing="2"
 							CellPadding="3"
 							RepeatLayout="Table"
-							BackColor="Red"
+							BackColor="@("#ff0000")"
 							Context="Item">
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
