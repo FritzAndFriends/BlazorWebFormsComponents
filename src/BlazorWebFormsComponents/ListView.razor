@@ -1,17 +1,8 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
 @typeparam ItemType
 
-@if (LayoutTemplate != null) {
-	@:<!-- LayoutTemplate is not supported in Blazor.  Wrap the ListView component with the layout desired -->
-}
-
-@{ 
-
-	var rowCounter = 0;
-
-}
-
-@if (!Visible) {
+@if (!Visible)
+{
 	<!-- Control is not visible -->
 }
 else if (Items == null || !Items.Any())
@@ -20,23 +11,48 @@ else if (Items == null || !Items.Any())
 }
 else
 {
-	@foreach (var item in Items)
+
+	@if (LayoutTemplate is null)
 	{
-
-		@if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
-		{
-			@ItemTemplate(item)
-		}
-		else
-		{
-			@AlternatingItemTemplate(item)
-		}
-
-		@if (ItemSeparatorTemplate != null) {
-				@ItemSeparatorTemplate
-		}
-
-		rowCounter++;
-
+		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
+
+	@LayoutTemplate(
+			@: @if (Items != null)
+					{
+						var rowCounter = 0;
+
+						OnDataBinding.InvokeAsync(EventArgs.Empty);
+
+						foreach (var item in Items)
+						{
+
+							if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+							{
+								@ItemTemplate(item)
+							}
+							else
+							{
+								@AlternatingItemTemplate(item)
+							}
+					/**/
+					/**/
+
+							if (ItemSeparatorTemplate != null)
+							{
+								@ItemSeparatorTemplate
+							}
+					/**/
+					/**/
+					/**/
+
+							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+
+							rowCounter++;
+
+						}
+
+						OnDataBound.InvokeAsync(EventArgs.Empty);
+					}
+			)
 }

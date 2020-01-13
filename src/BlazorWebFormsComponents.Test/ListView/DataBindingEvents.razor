@@ -1,0 +1,51 @@
+﻿@inherits TestComponentBase
+
+<Fixture
+	Test="FirstTest"
+>
+<ComponentUnderTest>
+	<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						OnDataBinding="DataBinding"
+						OnDataBound="DataBound"
+						OnItemDataBound="ItemDataBound"
+						Context="Item">
+		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+	</ListView>
+</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	int databinding = 0;
+	int databound = 0;
+	int itemDatabound = 0;
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		databinding.ShouldBeGreaterThan(0);
+		databound.ShouldBeGreaterThan(0);
+		itemDatabound.ShouldBeGreaterThanOrEqualTo(3);
+
+		cut.FindAll("span").Count().ShouldBe(3);
+
+	}
+
+	void DataBinding(EventArgs args) {
+		databinding++;
+	}
+
+	void DataBound(EventArgs args) {
+		databound++;
+	}
+
+	void ItemDataBound(ListViewItemEventArgs args) {
+		itemDatabound++;
+	}
+
+
+}

@@ -3,11 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 
-	public abstract class BaseWebFormsComponent : ComponentBase
+	public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
 	{
 
 		#region Obsolete Attributes / Properties
@@ -81,6 +82,108 @@ namespace BlazorWebFormsComponents
 
 		[Parameter(CaptureUnmatchedValues = true)]
 		public Dictionary<string, object> AdditionalAttributes { get; set; }
+
+		#region Custom Events
+
+		/// <summary>
+		/// Event handler to mimic the Web Forms OnInit handler, and is triggered at the beginning of the OnInitialize Blazor event
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnInit { get; set; }
+
+		/// <summary>
+		/// Event handler to mimic the Web Forms OnLoad handler, and is triggered at the end of the OnInitialize Blazor event
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnLoad { get; set; }
+
+		/// <summary>
+		/// Event handler to mimic the Web Forms OnPreRender handler, and is triggered at the end of the OnInitialize Blazor event after Load
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnPreRender { get; set; }
+
+		/// <summary>
+		/// Event handler to mimic the Web Forms OnUnload handler, and is triggered at the end of the OnAfterRender Blazor event
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnUnload { get; set; }
+		private bool _UnloadTriggered = false;
+
+		/// <summary>
+		/// Event handler to mimic the Web Forms OnDisposed handler and triggered in the Dispose method of this class
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnDisposed { get; set; }
+
+		#endregion
+
+		#region Blazor Events
+
+		protected override async Task OnInitializedAsync()
+		{
+
+			if (OnInit.HasDelegate) await OnInit.InvokeAsync(EventArgs.Empty);
+
+			await base.OnInitializedAsync();
+
+			if (OnLoad.HasDelegate) await OnLoad.InvokeAsync(EventArgs.Empty);
+
+			if (OnPreRender.HasDelegate) await OnPreRender.InvokeAsync(EventArgs.Empty);
+
+		}
+
+		protected override async Task OnAfterRenderAsync(bool firstRender)
+		{
+
+			await base.OnAfterRenderAsync(firstRender);
+
+			if (OnUnload.HasDelegate && !_UnloadTriggered)
+			{
+				await OnUnload.InvokeAsync(EventArgs.Empty);
+				_UnloadTriggered = true;
+			}
+
+		}
+
+
+		#endregion
+
+		#region IDisposable Support
+		private bool disposedValue = false; // To detect redundant calls
+
+		private async Task Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					if (OnDisposed.HasDelegate) await OnDisposed.InvokeAsync(EventArgs.Empty);
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		~BaseWebFormsComponent()
+		{
+			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+			Dispose(false).GetAwaiter().GetResult();
+		}
+
+		// This code added to correctly implement the disposable pattern.
+		public async ValueTask DisposeAsync()
+		{
+
+			await Dispose(true);
+			GC.SuppressFinalize(this);
+
+		}
+		#endregion
+
+		public bool LayoutTemplateRendered { get; set; } = false;
+
+
 
 	}
 
