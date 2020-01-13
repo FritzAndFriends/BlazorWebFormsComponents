@@ -1,10 +1,8 @@
 ﻿using BlazorWebFormsComponents.Enums;
-using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
@@ -13,9 +11,9 @@ namespace BlazorWebFormsComponents
 
 		internal TableItemStyle() { }
 
-		public Color BackColor { get; set; }
+		public WebColor BackColor { get; set; }
 
-		public Color BorderColor { get; set; }
+		public WebColor BorderColor { get; set; }
 
 		public BorderStyle BorderStyle { get; set; }
 
@@ -37,7 +35,7 @@ namespace BlazorWebFormsComponents
 
 		public bool Font_Underline { get; set; }
 
-		public Color ForeColor { get; set; }
+		public WebColor ForeColor { get; set; }
 
 		public Unit Height { get; set; }
 
@@ -87,7 +85,7 @@ namespace BlazorWebFormsComponents
 				var outValue = propInfo.PropertyType switch
 				{
 					null => null,
-					{ Name: nameof(Color) } => itemStyle.Value.GetColorFromHtml(),
+					{ Name: nameof(WebColor) } => itemStyle.Value.GetWebColorFromHtml(),
 					{ Name: nameof(Unit) } => new Unit(itemStyle.Value.ToString()),
 					{ Name: nameof(FontUnit) } => FontUnit.Parse(itemStyle.Value.ToString()),
 					{ IsEnum: true } => Enum.Parse(propInfo.PropertyType, itemStyle.Value.ToString()),
