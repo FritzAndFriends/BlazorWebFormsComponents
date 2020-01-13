@@ -1,0 +1,32 @@
+﻿@inherits BaseWebFormsComponent
+@using BlazorWebFormsComponents.Enums
+
+@if (Enabled)
+{
+	<div style="@(CalculatedStyle + (IsValid ? null : "display:none;"))">
+		@if (IsValid)
+		{
+			@switch (DisplayMode)
+			{
+				case BulletListDisplayMode b:
+					<ul>
+						@foreach (var message in ValidationMessages)
+						{
+							<li>@message</li>
+						}
+					</ul>
+					break;
+				case ListDisplayMode l:
+					@foreach (var message in ValidationMessages)
+					{
+						@message
+						<br>
+					}
+					break;
+				case SingleParagraphDisplayMode s:
+					@string.Join(" ", ValidationMessages)
+					break;
+			}
+		}
+	</div>
+}
