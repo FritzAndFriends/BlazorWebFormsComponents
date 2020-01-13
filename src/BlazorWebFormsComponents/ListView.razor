@@ -1,15 +1,6 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
 @typeparam ItemType
 
-<CascadingValue Name="Host" Value="HostComponent">
-	@if (!LayoutTemplateRendered)
-	{
-		@ChildContent
-	}
-</CascadingValue>
-
-Above are the ChildContents
-
 @if (!Visible)
 {
 	<!-- Control is not visible -->
