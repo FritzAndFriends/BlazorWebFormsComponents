@@ -1,5 +1,5 @@
 ﻿@page "/ControlSamples/DataList/ComplexStyle"
-@using static System.Drawing.Color
+@using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 
 <h2>DataList HeaderStyle sample</h2>
@@ -11,7 +11,7 @@
 <DataList @ref="simpleDataList"
 					runat="server"
 					EnableViewState="false"
-					BackColor="Gray"
+					BackColor="@("#808080")"
 					BorderColor="Firebrick"
 					BorderStyle="Groove"
 					BorderWidth="2"

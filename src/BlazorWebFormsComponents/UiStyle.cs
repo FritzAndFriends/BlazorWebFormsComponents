@@ -1,7 +1,6 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace BlazorWebFormsComponents
 {
@@ -15,10 +14,10 @@ namespace BlazorWebFormsComponents
 		public Dictionary<string, object> AdditionalAttributes { get; set; }
 
 		[Parameter]
-		public Color BackColor { get; set; }
+		public WebColor BackColor { get; set; }
 
 		[Parameter]
-		public Color BorderColor { get; set; }
+		public WebColor BorderColor { get; set; }
 
 		[Parameter]
 		public BorderStyle BorderStyle { get; set; }
@@ -30,7 +29,7 @@ namespace BlazorWebFormsComponents
 		public string CssClass { get; set; }
 
 		[Parameter]
-		public Color ForeColor { get; set; }
+		public WebColor ForeColor { get; set; }
 
 		[Parameter]
 		public Unit Height { get; set; }

@@ -1,5 +1,5 @@
 ﻿@inherits TestComponentBase
-@using static System.Drawing.Color
+@using static BlazorWebFormsComponents.WebColor
 
 
 
@@ -10,7 +10,7 @@
 							CellSpacing="2"
 							CellPadding="3"
 							RepeatLayout="Table"
-							BackColor="Red"
+							BackColor="@("#ff0000")"
 							Context="Item">
 			<HeaderTemplate>My Widget List</HeaderTemplate>
 			<ItemTemplate>@Item.Name</ItemTemplate>
@@ -32,7 +32,7 @@
 		cut.Find("table").HasAttribute("style").ShouldBeTrue();
 		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
 		cut.Find("table").GetAttribute("style").ShouldContain("background-color:");
-		cut.Find("table").GetAttribute("style").ShouldContain("red");
+		cut.Find("table").GetAttribute("style").ShouldContain("#FF0000");
 
 		cut.Find("table").HasAttribute("cellpadding").ShouldBeTrue();
 		cut.Find("table").HasAttribute("cellspacing").ShouldBeTrue();

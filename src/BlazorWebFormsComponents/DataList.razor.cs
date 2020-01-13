@@ -98,8 +98,8 @@ namespace BlazorWebFormsComponents
 
 		protected string CalculatedStyle { get; set; }
 
-		[Parameter] public Color BackColor { get; set; }
-		[Parameter] public Color BorderColor { get; set; }
+		[Parameter] public WebColor BackColor { get; set; }
+		[Parameter] public WebColor BorderColor { get; set; }
 		[Parameter]public BorderStyle BorderStyle { get; set; }
 		[Parameter]public Unit BorderWidth { get; set; }
 		[Parameter]public string CssClass { get; set; }
@@ -110,7 +110,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]public FontUnit Font_Size { get; set; }
 		[Parameter]public bool Font_Strikeout { get; set; }
 		[Parameter]public bool Font_Underline { get; set; }
-		[Parameter]public Color ForeColor { get; set; }
+		[Parameter]public WebColor ForeColor { get; set; }
 		[Parameter]public Unit Height { get; set; }
 		[Parameter]public HorizontalAlign HorizontalAlign { get; set; }
 		[Parameter]public VerticalAlign VerticalAlign { get; set; }
