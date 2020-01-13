@@ -17,7 +17,7 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public string ErrorMessage { get; set; }
 		[Parameter] public WebColor ForeColor { get; set; }
 
-		public bool IsValid { get; set; } = true;
+		protected bool IsValid { get; set; } = true;
 
 		[Parameter] public WebColor BackColor { get; set; }
 		[Parameter] public WebColor BorderColor { get; set; }
