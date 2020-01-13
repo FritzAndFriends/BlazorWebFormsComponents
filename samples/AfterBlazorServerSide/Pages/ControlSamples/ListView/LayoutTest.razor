@@ -14,49 +14,53 @@
 							ItemType="SharedSampleObjects.Models.Widget">
 			<ItemTemplate>
 				<tr>
-					<td>@Item.Id</td>
+					<th>@Item.Id</th>
 					<td>@Item.Name</td>
 					<td>@Item.Price.ToString("c")</td>
 					<td>@Item.LastUpdate.ToString("d")</td>
 				</tr>
 			</ItemTemplate>
-			<ChildContent>
-				<LayoutTemplate>
-				<b>CHILD CONTENTS!</b><br/>@**
-					<table class="table" id="robert">
-						<thead>
-							<tr>
-								<td>Id</td>
-								<td>Name</td>
-								<td>Price</td>
-								<td>Last Update</td>
-							</tr>
-						</thead>
-						<tbody>
-							<tr id="foo"></tr>
-						</tbody>
-					</table>  **@
-				</LayoutTemplate> 
-			</ChildContent>
+			<AlternatingItemTemplate>
+				<tr class="bg-light">
+					<th>@Item.Id</th>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</AlternatingItemTemplate>
+			<LayoutTemplate Context="itemPlaceHolder">				
+				<table class="table" id="robert">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Name</th>
+							<th>Price</th>
+							<th>Last Update</th>
+						</tr>
+					</thead>
+					<tbody>
+						@itemPlaceHolder
+					</tbody>
+				</table>
+			</LayoutTemplate> 
 		</ListView>
 
 @code {
 
-	BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
+		BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
 
-	protected override void OnAfterRender(bool firstRender)
-	{
-
-		if (firstRender)
+		protected override void OnAfterRender(bool firstRender)
 		{
-			simpleListView.DataSource = Widget.SimpleWidgetList;
-			simpleListView.DataBind();
+			base.OnAfterRender(firstRender);
+
+			if (firstRender)
+			{
+				simpleListView.DataSource = Widget.SimpleWidgetList;
+				simpleListView.DataBind();
+			}
+
+			//base.OnParametersSet();
+
 		}
-
-		//base.OnParametersSet();
-		base.OnAfterRender(firstRender);
-
-	}
-
 }
 

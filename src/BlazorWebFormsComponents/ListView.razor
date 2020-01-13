@@ -1,26 +1,17 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
 @typeparam ItemType
 
-	<CascadingValue Name="Host" Value="HostComponent">
-			@if (!LayoutTemplateRendered)
-			{
-				@ChildContent
-			}
+<CascadingValue Name="Host" Value="HostComponent">
+	@if (!LayoutTemplateRendered)
+	{
+		@ChildContent
+	}
 </CascadingValue>
 
 Above are the ChildContents
 
-@if (LayoutTemplate != null) {
-	@:<!-- LayoutTemplate is not supported in Blazor.  Wrap the ListView component with the layout desired -->
-}
-
-@{ 
-
-	var rowCounter = 0;
-
-}
-
-@if (!Visible) {
+@if (!Visible)
+{
 	<!-- Control is not visible -->
 }
 else if (Items == null || !Items.Any())
@@ -30,31 +21,47 @@ else if (Items == null || !Items.Any())
 else
 {
 
-	if (OnDataBinding.HasDelegate) OnDataBinding.InvokeAsync(EventArgs.Empty);
-
-	@foreach (var item in Items)
+	@if (LayoutTemplate is null)
 	{
-
-
-		@if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
-		{
-			@ItemTemplate(item)
-		}
-		else
-		{
-			@AlternatingItemTemplate(item)
-		}
-
-		@if (ItemSeparatorTemplate != null) {
-				@ItemSeparatorTemplate
-		}
-
-		if (OnItemDataBound.HasDelegate) OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-
-		rowCounter++;
-
+		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
 
-	if (OnDataBound.HasDelegate) OnDataBound.InvokeAsync(EventArgs.Empty);
+	@LayoutTemplate(
+			@: @if (Items != null)
+					{
+						var rowCounter = 0;
 
+						OnDataBinding.InvokeAsync(EventArgs.Empty);
+
+						foreach (var item in Items)
+						{
+
+							if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+							{
+								@ItemTemplate(item)
+							}
+							else
+							{
+								@AlternatingItemTemplate(item)
+							}
+					/**/
+					/**/
+
+							if (ItemSeparatorTemplate != null)
+							{
+								@ItemSeparatorTemplate
+							}
+					/**/
+					/**/
+					/**/
+
+							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+
+							rowCounter++;
+
+						}
+
+						OnDataBound.InvokeAsync(EventArgs.Empty);
+					}
+			)
 }
