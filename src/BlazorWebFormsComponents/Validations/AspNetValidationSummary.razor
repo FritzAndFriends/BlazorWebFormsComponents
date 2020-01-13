@@ -1,29 +1,32 @@
 ﻿@inherits BaseWebFormsComponent
 @using BlazorWebFormsComponents.Enums
 
-<div style="@(CalculatedStyle + (IsValid ? null : "display:none;"))">
-	@if (IsValid)
-	{
-		@switch (DisplayMode)
+@if (Enabled)
+{
+	<div style="@(CalculatedStyle + (IsValid ? null : "display:none;"))">
+		@if (IsValid)
 		{
-			case BulletListDisplayMode b:
-				<ul>
-					@foreach (var message in CurrentEditContext.GetValidationMessages())
+			@switch (DisplayMode)
+			{
+				case BulletListDisplayMode b:
+					<ul>
+						@foreach (var message in ValidationMessages)
+						{
+							<li>@message</li>
+						}
+					</ul>
+					break;
+				case ListDisplayMode l:
+					@foreach (var message in ValidationMessages)
 					{
-						<li>@message.Split(',')[1]</li>
+						@message
+						<br>
 					}
-				</ul>
-				break;
-			case ListDisplayMode l:
-				@foreach (var message in CurrentEditContext.GetValidationMessages())
-				{
-					@message.Split(',')[1]
-					<br>
-				}
-				break;
-			case SingleParagraphDisplayMode s:
-				@string.Join(" ", CurrentEditContext.GetValidationMessages().Select(m => m.Split(',')[1]))
-				break;
+					break;
+				case SingleParagraphDisplayMode s:
+					@string.Join(" ", ValidationMessages))
+					break;
+			}
 		}
-	}
-</div>
+	</div>
+}

@@ -40,7 +40,7 @@ namespace BlazorWebFormsComponents.Validations
 
 		protected override void OnInitialized()
 		{
-			// ValidationMessageStore is sealed. I have a feeling I will need to implement my own.
+
 			var messages = new ValidationMessageStore(CurrentEditContext);
 
 			CurrentEditContext.OnValidationRequested += (sender, eventArgs) => EventHandler((EditContext)sender, messages);
@@ -61,13 +61,13 @@ namespace BlazorWebFormsComponents.Validations
 			}
 			else
 			{
-				throw new Exception();
+				throw new InvalidOperationException("You shoud not have seen this message, but now that you do" +
+					"Listen carefully! I want you to open an issue here https://github.com/fritzAndFriends/BlazorWebFormsComponents/issues " +
+					"with a title 'ValueExpression.Body is not MemberExpression' and a sample code to reproduce this. Thanks!");
 			}
 
 			var fieldIdentifier = CurrentEditContext.Field(name);
 
-			// TODO : The field could have multiple validator
-			// I Have to find a way to clear message only for this validator.
 			messages.Clear(fieldIdentifier);
 
 			var value = typeof(InputBase<Type>).GetProperty("CurrentValueAsString", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(ControlToValidate.Current) as string;

@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using BlazorWebFormsComponents.Enums;
 using System.Drawing;
 using System.Linq;
+using System.Text;
+using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public partial class AspNetValidationSummary : BaseWebFormsComponent, IHasStyle
+	public partial class AspNetValidationSummary : BaseWebFormsComponent, IHasStyle, IDisposable
 	{
+		private EditContext _previousEditContext;
+		private readonly EventHandler<ValidationStateChangedEventArgs> _validationStateChangedHandler;
+
 		[CascadingParameter] EditContext CurrentEditContext { get; set; }
 
 		[Parameter] public ValidationSummaryDisplayMode DisplayMode { get; set; } = ValidationSummaryDisplayMode.BulletList;
@@ -34,12 +37,31 @@ namespace BlazorWebFormsComponents.Validations
 
 		protected string CalculatedStyle { get; set; }
 
-		public bool IsValid => CurrentEditContext.GetValidationMessages()?.Any() ?? false;
+		public bool IsValid => CurrentEditContext.GetValidationMessages().Any();
+
+		public IEnumerable<string> ValidationMessages => CurrentEditContext.GetValidationMessages().Select(x => x.Split(',')[1]);
+
+		public AspNetValidationSummary()
+		{
+			_validationStateChangedHandler = (sender, eventArgs) => StateHasChanged();
+		}
+
 		protected override void OnParametersSet()
 		{
 
-			CurrentEditContext.OnValidationStateChanged += (sender, eventArgs) => StateHasChanged();
+			if (CurrentEditContext == null)
+			{
+				throw new InvalidOperationException($"{nameof(ValidationSummary)} requires a cascading parameter " +
+						$"of type {nameof(EditContext)}. For example, you can use {nameof(ValidationSummary)} inside " +
+						$"an {nameof(EditForm)}.");
+			}
 
+			if (CurrentEditContext != _previousEditContext)
+			{
+				DetachValidationStateChangedListener();
+				CurrentEditContext.OnValidationStateChanged += _validationStateChangedHandler;
+				_previousEditContext = CurrentEditContext;
+			}
 		}
 
 		protected override void OnInitialized()
@@ -54,6 +76,20 @@ namespace BlazorWebFormsComponents.Validations
 			CalculatedStyle = styleBuilder.ToString();
 
 			base.OnInitialized();
+
+		}
+
+		public void Dispose()
+		{
+			DetachValidationStateChangedListener();
+		}
+
+		private void DetachValidationStateChangedListener()
+		{
+			if (_previousEditContext != null)
+			{
+				_previousEditContext.OnValidationStateChanged -= _validationStateChangedHandler;
+			}
 		}
 	}
 }

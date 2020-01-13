@@ -15,11 +15,15 @@
 													Text="Name is required."
 													ErrorMessage="Name is required but in summary!" />
 
-	<InputNumber id="number" @ref="Number.Current" @bind-Value="exampleModel.Number" />
-	<RequiredFieldValidator Type="int?"
-													ControlToValidate="@Number"
-													Text="Number is required."
-													ErrorMessage="Number is required but in summary!" />
+	<RegularExpressionValidator ValidationExpression="^[0-9]{5}$"
+															ControlToValidate="@Name"
+															Text="Not a 5 digit number."
+															ErrorMessage="Not a 5 digit number but in summary!" />
+
+	<RegularExpressionValidator ValidationExpression="^[0-3]{5}$"
+															ControlToValidate="@Name"
+															Text="Not a 5 digit number with 0-3."
+															ErrorMessage="Not a 5 digit number with 0-3 but in summary!" />
 
 	<button type="submit">Submit</button>
 
@@ -38,7 +42,6 @@
 
 @code {
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
-	ForwardRef<InputBase<int?>> Number = new ForwardRef<InputBase<int?>>();
 
 	private ExampleModel exampleModel = new ExampleModel();
 
