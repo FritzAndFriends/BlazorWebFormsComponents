@@ -62,7 +62,7 @@ namespace BlazorWebFormsComponents.Validations
 			else
 			{
 				throw new InvalidOperationException("You shoud not have seen this message, but now that you do" +
-					"Listen carefully! I want you to open an issue here https://github.com/fritzAndFriends/BlazorWebFormsComponents/issues " +
+					"I want you to open an issue here https://github.com/fritzAndFriends/BlazorWebFormsComponents/issues " +
 					"with a title 'ValueExpression.Body is not MemberExpression' and a sample code to reproduce this. Thanks!");
 			}
 
