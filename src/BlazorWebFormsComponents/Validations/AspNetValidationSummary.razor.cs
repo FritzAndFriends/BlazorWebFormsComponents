@@ -17,12 +17,12 @@ namespace BlazorWebFormsComponents.Validations
 		[CascadingParameter] EditContext CurrentEditContext { get; set; }
 
 		[Parameter] public ValidationSummaryDisplayMode DisplayMode { get; set; } = ValidationSummaryDisplayMode.BulletList;
-		[Parameter] public Color BackColor { get; set; }
-		[Parameter] public Color BorderColor { get; set; }
+		[Parameter] public WebColor BackColor { get; set; }
+		[Parameter] public WebColor BorderColor { get; set; }
 		[Parameter] public BorderStyle BorderStyle { get; set; }
 		[Parameter] public Unit BorderWidth { get; set; }
 		[Parameter] public string CssClass { get; set; }
-		[Parameter] public Color ForeColor { get; set; }
+		[Parameter] public WebColor ForeColor { get; set; }
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public HorizontalAlign HorizontalAlign { get; set; }
 		[Parameter] public VerticalAlign VerticalAlign { get; set; }

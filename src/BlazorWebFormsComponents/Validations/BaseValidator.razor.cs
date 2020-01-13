@@ -15,12 +15,12 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public ForwardRef<InputBase<Type>> ControlToValidate { get; set; }
 		[Parameter] public string Text { get; set; }
 		[Parameter] public string ErrorMessage { get; set; }
-		[Parameter] public Color ForeColor { get; set; }
+		[Parameter] public WebColor ForeColor { get; set; }
 
 		public bool IsValid { get; set; } = true;
 
-		[Parameter] public Color BackColor { get; set; }
-		[Parameter] public Color BorderColor { get; set; }
+		[Parameter] public WebColor BackColor { get; set; }
+		[Parameter] public WebColor BorderColor { get; set; }
 		[Parameter] public BorderStyle BorderStyle { get; set; }
 		[Parameter] public Unit BorderWidth { get; set; }
 		[Parameter] public string CssClass { get; set; }
