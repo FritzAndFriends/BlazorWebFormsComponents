@@ -31,7 +31,7 @@ Throughout this document, we will refer to several framework and technology term
 - Minimal code embedded in ASPX files - this code will need to be updated to work with the components, where they were using full-featured controls.
 - No calls through the control hierarchy.  E.g. `FindControl()`
 - Any hybrid applications that contains both MVC and Web Forms user interface content will take some extra work to be converted, as the MVC components will need to be converted to ASP<span></span>.NET Core
-- `System.Confuguration.ConfigurationManager` access will need to be rewritten to use `Microsoft.Extentsions.Configuration.IConfiguration` objects that are injected
+- `System.Confuguration.ConfigurationManager` access will need to be rewritten to use `Microsoft.Extensions.Configuration.IConfiguration` objects that are injected
   - Push configuration access to a repository class object that can be migrated to the new Configuration model in .NET Core
 - `HttpContext.Current` access will need to be reevaluated.  Direct `HttpContext` access should be avoided in Blazor
 - Custom components will need to be rewritten
