@@ -57,6 +57,19 @@ namespace BlazorWebFormsComponents
 
 		protected virtual void HandleUnknownAttributes() { }
 
+		#region Data Binding Events
+
+		[Parameter]
+		public EventCallback<EventArgs> OnDataBinding { get; set; }
+
+		[Parameter]
+		public EventCallback<EventArgs> OnDataBound { get; set; }
+
+		[Parameter]
+		public EventCallback<ListViewItemEventArgs> OnItemDataBound { get; set; }
+
+		#endregion
+
 	}
 
 }

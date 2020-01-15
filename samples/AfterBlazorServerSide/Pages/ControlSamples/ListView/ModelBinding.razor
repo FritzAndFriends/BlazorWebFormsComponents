@@ -2,6 +2,8 @@
 
 <h2>ListView ModelBinding Sample</h2>
 
+<Nav />
+
 <p>Here is a listview using ModelBinding to interact with widgets.</p>
 
 <table class="table">
@@ -51,7 +53,8 @@
 
 	ListView<Widget> simpleListView;
 
-	IQueryable<SharedSampleObjects.Models.Widget> simpleListView_GetData(int max, int start, string sort, out int totalRowCount) {
+	IQueryable<SharedSampleObjects.Models.Widget> simpleListView_GetData(int max, int start, string sort, out int totalRowCount)
+	{
 
 		var outCollection = Widget.SimpleWidgetList.AsQueryable();
 		totalRowCount = outCollection.Count();

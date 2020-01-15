@@ -1,0 +1,66 @@
+﻿@page "/ControlSamples/ListView/LayoutTest"
+
+<h2>ListView Component homepage</h2>
+
+<Nav />
+
+<p>Testing a layout for the ListView</p>
+
+		<ListView @ref="simpleListView"
+							runat="server"
+							EnableViewState="false"
+							Context="Item"
+							ItemPlaceholderID="foo"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<ItemTemplate>
+				<tr>
+					<th>@Item.Id</th>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</ItemTemplate>
+			<AlternatingItemTemplate>
+				<tr class="bg-light">
+					<th>@Item.Id</th>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</AlternatingItemTemplate>
+			<LayoutTemplate Context="itemPlaceHolder">				
+				<table class="table" id="robert">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Name</th>
+							<th>Price</th>
+							<th>Last Update</th>
+						</tr>
+					</thead>
+					<tbody>
+						@itemPlaceHolder
+					</tbody>
+				</table>
+			</LayoutTemplate> 
+		</ListView>
+
+@code {
+
+		BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
+
+		protected override void OnAfterRender(bool firstRender)
+		{
+			base.OnAfterRender(firstRender);
+
+			if (firstRender)
+			{
+				simpleListView.DataSource = Widget.SimpleWidgetList;
+				simpleListView.DataBind();
+			}
+
+			//base.OnParametersSet();
+
+		}
+}
+

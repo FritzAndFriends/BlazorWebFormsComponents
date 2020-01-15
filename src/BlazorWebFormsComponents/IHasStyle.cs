@@ -15,9 +15,9 @@ namespace BlazorWebFormsComponents
 		// Cheer 100 ramblinggeek 07/1/20 
 
 
-		Color BackColor { get; set; }
+		WebColor BackColor { get; set; }
 
-		Color BorderColor { get; set; }
+		WebColor BorderColor { get; set; }
 
 		BorderStyle BorderStyle { get; set; }
 
@@ -25,7 +25,7 @@ namespace BlazorWebFormsComponents
 
 		string CssClass { get; set; }
 
-		Color ForeColor { get; set; }
+		WebColor ForeColor { get; set; }
 
 		Unit Height { get; set; }
 
@@ -72,12 +72,12 @@ namespace BlazorWebFormsComponents
 		public static StringBuilder ToStyleString(this IHasStyle hasStyle, StringBuilder sb)
 		{
 
-			if (hasStyle.BackColor != default(Color)) sb.Append($"background-color:{ColorTranslator.ToHtml(hasStyle.BackColor).Trim()};");
-			if (hasStyle.ForeColor != default(Color)) sb.Append($"color:{ColorTranslator.ToHtml(hasStyle.ForeColor)};");
-			if (hasStyle.BorderStyle != BorderStyle.None && hasStyle.BorderStyle != BorderStyle.NotSet && hasStyle.BorderWidth.Value > 0 && hasStyle.BorderColor != default(Color))
+			if (hasStyle.BackColor != default(WebColor)) sb.Append($"background-color:{ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim()};");
+			if (hasStyle.ForeColor != default(WebColor)) sb.Append($"color:{ColorTranslator.ToHtml(hasStyle.ForeColor.ToColor())};");
+			if (hasStyle.BorderStyle != BorderStyle.None && hasStyle.BorderStyle != BorderStyle.NotSet && hasStyle.BorderWidth.Value > 0 && hasStyle.BorderColor != default(WebColor))
 			{
 
-				sb.Append($"border:{hasStyle.BorderWidth.ToString()} {hasStyle.BorderStyle.ToString().ToLowerInvariant()} {ColorTranslator.ToHtml(hasStyle.BorderColor)};");
+				sb.Append($"border:{hasStyle.BorderWidth.ToString()} {hasStyle.BorderStyle.ToString().ToLowerInvariant()} {ColorTranslator.ToHtml(hasStyle.BorderColor.ToColor())};");
 
 			}
 
