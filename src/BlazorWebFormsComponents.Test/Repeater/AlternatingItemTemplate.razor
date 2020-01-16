@@ -19,8 +19,11 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(2);
-		cut.FindAll("b").Count().ShouldBe(1);
+		var itemCountShouldBe = (int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m);
+		var alternatingItemCountShouldBe = Widget.SimpleWidgetList.Length - itemCountShouldBe;
+
+		cut.FindAll("span").Count().ShouldBe(itemCountShouldBe);
+		cut.FindAll("b").Count().ShouldBe(alternatingItemCountShouldBe);
 
 	}
 

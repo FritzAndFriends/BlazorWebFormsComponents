@@ -74,6 +74,12 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 
+		[Parameter]
+		public RepeatDirection RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.RepeatDirection.Vertical;
+
+		[Parameter]
+		public int RepeatColumns { get; set; } = 1;
+
 		[CascadingParameter(Name = "SeparatorStyle")]
 		private TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
 
@@ -150,6 +156,8 @@ namespace BlazorWebFormsComponents
 			} else {
 				CalculatedStyle = styleBuilder.ToString();
 			}
+
+			if (RepeatColumns <= 0) RepeatColumns = 1;
 
 			base.OnInitialized();
 		}

@@ -39,8 +39,6 @@
 		preRendered.ShouldBe(1);
 		unloaded.ShouldBe(1);
 
-		cut.FindAll("span").Count().ShouldBe(3);
-
 		theListView.DisposeAsync().GetAwaiter().GetResult();
 
 		disposed.ShouldBeTrue();

@@ -26,9 +26,6 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(4);
-		cut.Find("td").TextContent.ShouldBe("My Widget List");
-
 		cut.Find("table").HasAttribute("style").ShouldBeTrue();
 		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
 		cut.Find("table").GetAttribute("style").ShouldContain("background-color:");

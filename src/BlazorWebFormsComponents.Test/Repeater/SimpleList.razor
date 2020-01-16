@@ -1,6 +1,6 @@
 ﻿@inherits TestComponentBase
 
-<Fixture Test="FirstTest">
+<Fixture Tests="new Test[] { ItemTest, AlternatingItemTest }">
 	<ComponentUnderTest>
 		<Repeater Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
@@ -14,13 +14,21 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void ItemTest(IRazorTestContext context)
 	{
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(3);
-		cut.FindAll("hr").Count().ShouldBe(3);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
+
+	}
+
+	void AlternatingItemTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("hr").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 
 	}
 

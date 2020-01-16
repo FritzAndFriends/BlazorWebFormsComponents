@@ -1,0 +1,45 @@
+﻿@page "/ControlSamples/DataList/VerticalTableTwoColumns"
+@using static BlazorWebFormsComponents.Enums.RepeatLayout
+@using static BlazorWebFormsComponents.Enums.RepeatDirection
+
+<h2>DataList Simple Flow Layout Sample</h2>
+
+<Nav />
+
+<p>Here is a simple datalist with two vertical columns in table mode</p>
+
+<DataList @ref="simpleDataList"
+					runat="server"
+					EnableViewState="false"
+					RepeatLayout="Table"
+					RepeatDirection="Vertical"
+					RepeatColumns="2"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<HeaderTemplate>Simple Widgets</HeaderTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+	<SeparatorTemplate>---</SeparatorTemplate>
+</DataList>
+
+@code {
+
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleDataList.DataSource = Widget.SimpleWidgetList;
+			simpleDataList.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+}
+

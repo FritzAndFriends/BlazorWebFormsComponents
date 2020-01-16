@@ -23,67 +23,85 @@
 					{
 
 						case TableRepeatLayout t:
-							<table accesskey="@AccessKey"
-										 cellpadding="@(CellPadding == default ? null : (int?)CellPadding)"
-										 cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)"
-										 rules="@CalculatedGridLines"
-										 style="border-collapse:collapse;@CalculatedStyle"
-										 tabindex="@(TabIndex == default ? null : (short?)TabIndex)"
-										 title="@ToolTip">
+<table accesskey="@AccessKey"
+			 cellpadding="@(CellPadding == default ? null : (int?)CellPadding)"
+			 cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)"
+			 rules="@CalculatedGridLines"
+			 style="border-collapse:collapse;@CalculatedStyle"
+			 tabindex="@(TabIndex == default ? null : (short?)TabIndex)"
+			 title="@ToolTip">
 
-								@if (HeaderTemplate != null && ShowHeader)
-								{
+	@if (HeaderTemplate != null && ShowHeader)
+	{
 
-									if (!string.IsNullOrEmpty(Caption))
-									{
-										<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
-									}
+		if (!string.IsNullOrEmpty(Caption))
+		{
+			<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
+		}
 
-									<tr>
-										@if (UseAccessibleHeader)
-										{
-											<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
-										}
-										else
-										{
-											<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
-										}
-									</tr>
+		<tr>
+			@if (UseAccessibleHeader)
+			{
+				<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
+			}
+			else
+			{
+				<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
+			}
+		</tr>
 
-								}
+	}
 
-								@if (Items?.Any() ?? false)
-								{
+	@if (Items?.Any() ?? false)
+	{
 
-									var even = true;
-									var first = true;
+		var even = true;
+		var first = true;
 
-									@foreach (var item in Items)
-									{
+		@for (var row = 0; row < Math.Ceiling(Items.Count() / (decimal)RepeatColumns); row++)
+		{
 
-										if (!first && SeparatorTemplate != null)
-										{
-											<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
-										}
+			if (!first && RepeatColumns==1 && SeparatorTemplate != null)
+			{
+				<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
+			}
+
+			<tr>
+
+				@for (var columnCounter = 0; columnCounter < Items.Count(); columnCounter += (int)Math.Ceiling(Items.Count()/(decimal)RepeatColumns))
+				{
+
+					var item = Items.Skip(row + columnCounter).FirstOrDefault();
+					if (item == null) break;
+
+					<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
+
+					if (RepeatColumns > 1 && SeparatorTemplate != null)
+					{
+						<td style="@SeparatorStyle">@SeparatorTemplate</td>
+					}
 
 
-										<tr><td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td></tr>
+					even = !even;
 
-										even = !even;
-										first = false;
+				}
 
-									}
-								}
+				@{first = false; }
 
-								@if (FooterTemplate != null && ShowFooter)
-								{
+				</tr>
 
-									<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
+			}
+	}
 
-								}
+	@if (FooterTemplate != null && ShowFooter)
+	{
+
+		<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
+
+	}
 
 
-							</table>
+</table>
 							break;
 						case FlowRepeatLayout f:
 

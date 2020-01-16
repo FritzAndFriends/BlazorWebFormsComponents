@@ -2,19 +2,20 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <h2>DataList control homepage</h2>
+    <h2>DataList Columns Demo</h2>
 
     <div>
       Other usage samples:  <a href="FlowLayout.aspx">FlowLayout Sample</a> <a href="StyleAttributes.aspx">Styles</a>
     </div>
 
     <p>Here is a simple datalist bound to a collection of widgets.  By default, the RepeatLayout
-      is a Table.
+      is a Table with a vertical layout.  This sample is using 3 columns
     </p>
 
 	<asp:DataList ID="simpleDataList"
 		runat="server"
-		RepeatColumns="2"
+		RepeatColumns="3"
+			RepeatDirection="Vertical"
 		ToolTip="This is my tooltip"
 		UseAccessibleHeader="true"
 		Caption="This is my caption"

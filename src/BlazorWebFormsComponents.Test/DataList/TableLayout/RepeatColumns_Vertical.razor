@@ -1,0 +1,80 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.RepeatDirection
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							RepeatColumns="2"
+							RepeatDirection="Vertical"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Id</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="FirstTestWithSeparator">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							RepeatColumns="2"
+							RepeatDirection="Vertical"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Id</ItemTemplate>
+			<SeparatorTemplate>---</SeparatorTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length + 1);
+		cut.Find("td").TextContent.ShouldBe("My Widget List");
+
+		//Examine the layout
+
+		// Vertical layout with 2 columns - count the rows
+		cut.FindAll("tr").Count().ShouldBe(1 + ((int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m)));
+
+		// the first row AFTER the header should contain item 1 and item (widgetlist.length/2 + 1)
+		cut.FindAll("tr")[1].InnerHtml.ShouldContain("<td>1</td>");
+		cut.FindAll("tr")[1].InnerHtml.ShouldContain($"<td>{1 + ((int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m))}</td>");
+
+	}
+
+	void FirstTestWithSeparator(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length*2 + 1);
+		cut.Find("td").TextContent.ShouldBe("My Widget List");
+
+		//Examine the layout
+
+		// Vertical layout with 2 columns - count the rows
+		cut.FindAll("tr").Count().ShouldBe(1 + ((int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m)));
+
+		// the first row AFTER the header should contain item 1 and item (widgetlist.length/2 + 1)
+		var rowHtml = cut.FindAll("tr")[1].InnerHtml;
+		rowHtml.ShouldContain("<td>1</td>");
+
+		var re = new System.Text.RegularExpressions.Regex("<td>---</td>");
+		re.Matches(rowHtml).Count.ShouldBe(2);
+
+		cut.FindAll("tr")[1].InnerHtml.ShouldContain($"<td>{1 + ((int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m))}</td>");
+
+	}
+
+
+}

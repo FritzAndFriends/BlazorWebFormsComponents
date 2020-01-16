@@ -22,8 +22,8 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(6);
-		cut.FindAll("td").Count(c => c.TextContent == "====").ShouldBe(2);
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length*2);
+		cut.FindAll("td").Count(c => c.TextContent == "====").ShouldBe(Widget.SimpleWidgetList.Length-1);
 
 		cut.FindAll("td")[2].TextContent.ShouldBe("====");
 		cut.FindAll("td")[4].TextContent.ShouldBe("====");

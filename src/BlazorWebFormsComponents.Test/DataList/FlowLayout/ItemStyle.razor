@@ -25,10 +25,10 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(5);
-		cut.FindAll("span").Count(c => c.HasAttribute("style")).ShouldBe(3);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
+		cut.FindAll("span").Count(c => c.HasAttribute("style")).ShouldBe(Widget.SimpleWidgetList.Length);
 
-		cut.FindAll("span").Count(c => c.HasAttribute("style") && c.GetAttribute("style").Contains("background-color")).ShouldBe(3);
+		cut.FindAll("span").Count(c => c.HasAttribute("style") && c.GetAttribute("style").Contains("background-color")).ShouldBe(Widget.SimpleWidgetList.Length);
 
 	}
 
