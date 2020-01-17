@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class SeparatorStyle : UiStyle
+	public partial class SeparatorStyle : UiTableItemStyle
 	{
 
 		[CascadingParameter(Name = "SeparatorStyle")]

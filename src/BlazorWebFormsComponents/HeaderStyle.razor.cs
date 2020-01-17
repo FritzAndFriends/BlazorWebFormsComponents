@@ -5,7 +5,7 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-	public partial class HeaderStyle : UiStyle
+	public partial class HeaderStyle : UiTableItemStyle
 	{
 
 		[CascadingParameter(Name = "HeaderStyle")]

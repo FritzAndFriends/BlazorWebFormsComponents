@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class AlternatingItemStyle : UiStyle
+	public partial class AlternatingItemStyle : UiTableItemStyle
 	{
 
 		[CascadingParameter(Name = "AlternatingItemStyle")]

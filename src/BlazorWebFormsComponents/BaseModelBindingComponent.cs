@@ -43,19 +43,9 @@ namespace BlazorWebFormsComponents
 
 			}
 
-			if (firstRender)				
-			{
-
-				HandleUnknownAttributes();
-				StateHasChanged();
-
-			}
-
 			base.OnAfterRender(firstRender);
 
 		}
-
-		protected virtual void HandleUnknownAttributes() { }
 
 		#region Data Binding Events
 
