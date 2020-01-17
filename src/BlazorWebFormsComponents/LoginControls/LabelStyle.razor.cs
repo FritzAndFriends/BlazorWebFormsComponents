@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class LabelStyle : UiStyle
+	public partial class LabelStyle : UiTableItemStyle
 	{
 		[CascadingParameter(Name = "LabelStyle")]
 		protected TableItemStyle theLabelStyle

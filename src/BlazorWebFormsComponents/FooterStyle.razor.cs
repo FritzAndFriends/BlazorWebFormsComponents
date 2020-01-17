@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class FooterStyle : UiStyle
+	public partial class FooterStyle : UiTableItemStyle
 	{
 
 		[CascadingParameter(Name = "FooterStyle")]

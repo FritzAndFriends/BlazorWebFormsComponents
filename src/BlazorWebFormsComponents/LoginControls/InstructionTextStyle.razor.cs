@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class InstructionTextStyle : UiStyle
+	public partial class InstructionTextStyle : UiTableItemStyle
 	{
 		[CascadingParameter(Name = "InstructionTextStyle")]
 		protected TableItemStyle theInstructionTextStyle

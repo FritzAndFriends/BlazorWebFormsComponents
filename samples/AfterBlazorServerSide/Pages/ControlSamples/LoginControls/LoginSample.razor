@@ -2,16 +2,42 @@
 
 <h3>Login</h3>
 @using BlazorWebFormsComponents.Validations;
+@using BlazorWebFormsComponents.LoginControls;
 
 
-<BlazorWebFormsComponents.LoginControls.Login InstructionText="How to loddddgin!!">
+<Login InstructionText="How to loddddgin!!"
+			 LoginButtonType="Image"
+			 OnAuthenticate="OnAuthenticate"
+			 OnLoggedIn="OnLoggedIn"
+			 OnLoggingIn="OnLoggingIn"
+			 OnLoginError="OnLoginError">
 	<ChildContent>
-		<BlazorWebFormsComponents.LoginControls.InstructionTextStyle BackColor="@("FF0000")" CssClass="sdd" ></BlazorWebFormsComponents.LoginControls.InstructionTextStyle>
+		<InstructionTextStyle BackColor="@("#FF0000")"
+													CssClass="sdd" />
+		<ValidatorTextStyle ForeColor="@("#0000ff")"/>
 	</ChildContent>
-</BlazorWebFormsComponents.LoginControls.Login>
+</Login>
 
 
 
 @code {
+	public void OnAuthenticate(AuthenticateEventArgs args)
+	{
+		args.Authenticated = true;
+	}
 
+	public void OnLoggedIn(EventArgs args)
+	{
+
+	}
+
+	public void OnLoginError(EventArgs args)
+	{
+
+	}
+
+	public void OnLoggingIn(LoginCancelEventArgs args)
+	{
+		args.Cancel = true;
+	}
 }

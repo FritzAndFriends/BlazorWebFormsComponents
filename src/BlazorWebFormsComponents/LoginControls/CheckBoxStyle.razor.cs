@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class CheckBoxStyle : UiStyle
+	public partial class CheckBoxStyle : UiTableItemStyle
 	{
 		[CascadingParameter(Name = "CheckBoxStyle")]
 		protected TableItemStyle theCheckBoxStyle
