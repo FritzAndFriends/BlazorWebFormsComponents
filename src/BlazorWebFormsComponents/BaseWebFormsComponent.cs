@@ -144,7 +144,17 @@ namespace BlazorWebFormsComponents
 				_UnloadTriggered = true;
 			}
 
+			if (firstRender)
+			{
+
+				HandleUnknownAttributes();
+				StateHasChanged();
+
+			}
+
 		}
+
+		protected virtual void HandleUnknownAttributes() { }
 
 
 		#endregion

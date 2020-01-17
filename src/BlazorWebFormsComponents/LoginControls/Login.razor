@@ -1,0 +1,171 @@
+﻿@inherits BaseWebFormsComponent
+
+@using BlazorWebFormsComponents.Validations;
+@using Microsoft.AspNetCore.Components.Forms;
+@using BlazorWebFormsComponents.Enums;
+
+
+<Microsoft.AspNetCore.Components.Forms.EditForm Model="Model" OnValidSubmit="ValidSubmit">
+
+	<CascadingValue Name="FailureTextStyle" Value="FailureTextStyle">
+		<CascadingValue Name="TitleTextStyle" Value="TitleTextStyle">
+			<CascadingValue Name="LabelStyle" Value="LabelStyle">
+				<CascadingValue Name="CheckBoxStyle" Value="CheckBoxStyle">
+					<CascadingValue Name="HyperLinkStyle" Value="HyperLinkStyle">
+						<CascadingValue Name="InstructionTextStyle" Value="InstructionTextStyle">
+							<CascadingValue Name="TextBoxStyle" Value="TextBoxStyle">
+								<CascadingValue Name="LoginButtonStyle" Value="LoginButtonStyle">
+									<CascadingValue Name="ValidatorTextStyle" Value="ValidatorTextStyle">
+										@ChildContent
+									</CascadingValue>
+								</CascadingValue>
+							</CascadingValue>
+						</CascadingValue>
+					</CascadingValue>
+				</CascadingValue>
+			</CascadingValue>
+		</CascadingValue>
+	</CascadingValue>
+
+	@if (VisibleWhenLoggedIn || !UserAuthenticated)
+	{
+		<table cellspacing="0" cellpadding="@(BorderPadding)" id="@(ID)" style="border-collapse:collapse;">
+			<tbody>
+				<tr>
+					<td>
+						<table cellpadding="0">
+							<tbody>
+								@if (!string.IsNullOrEmpty(TitleText))
+								{
+									<tr>
+										<td align="center" colspan="2" style="@TitleTextStyle" class="@TitleTextStyle.CssClass">@TitleText</td>
+									</tr>
+								}
+								@if (!string.IsNullOrEmpty(InstructionText))
+								{
+									<tr>
+										<td align="center" colspan="2" style="@InstructionTextStyle" class="@InstructionTextStyle.CssClass">@InstructionText</td>
+									</tr>
+								}
+								<tr>
+									<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+										<label for="@(ID + "_UserName")">@UserNameLabelText</label>
+									</td>
+									<td>
+										<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
+										<RequiredFieldValidator @ref="UsernameValidator" ControlToValidate="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
+									</td>
+								</tr>
+								<tr>
+									<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+										<label for="@(ID + "_Password")">@PasswordLabelText</label>
+									</td>
+									<td>
+										<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
+										<RequiredFieldValidator @ref="PasswordValidator" ControlToValidate="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
+									</td>
+								</tr>
+								@if (DisplayRememberMe)
+								{
+									<tr>
+										<td colspan="2" style="@CheckBoxStyle" class="@CheckBoxStyle.CssClass">
+											<InputCheckbox @bind-Value="@Model.RememberMe" id="@(ID + "_RememberMe")" name="@(ID + "$RememberMe")" />
+											<label for="@(ID + "_RememberMe")">@RememberMeText</label>
+										</td>
+									</tr>
+								}
+								@if (ShowFailureText)
+								{
+									<tr>
+										<td align="center" colspan="2" style="@FailureTextStyle" class="@FailureTextStyle.CssClass">
+											@FailureText
+										</td>
+									</tr>
+								}
+								<tr>
+									<td align="right" colspan="2" style="@HyperLinkStyle" class="@HyperLinkStyle.CssClass">
+										@switch (LoginButtonType)
+										{
+											case ButtonButtonType b:
+												<input type="submit" style="@LoginButtonStyle" class="@LoginButtonStyle.CssClass" name="@(ID + "$LoginButton")" value=@(LoginButtonText) id="@(ID + "_LoginButton")" />
+												break;
+											case LinkButtonType l:
+												<a style="@LoginButtonStyle" class="@LoginButtonStyle.CssClass" id="@(ID + "_LoginLinkButton")">@LoginButtonText</a>
+												break;
+											case ImageButtonType i:
+												<input style="@LoginButtonStyle" class="@LoginButtonStyle.CssClass" type="image" name="@(ID + "$LoginImageButton")" src="@(LoginButtonImageUrl)" alt=@(LoginButtonText) id="@(ID + "_LoginImageButton")" />
+												break;
+										}
+									</td>
+								</tr>
+								@if (HasHelp || HasPasswordRevocery || HasCreateUser)
+								{
+									<tr>
+										<td colspan="2">
+											@if (!string.IsNullOrEmpty(CreateUserIconUrl))
+											{
+												<img src="@CreateUserIconUrl" alt="@CreateUserText">
+											}
+											@if (!string.IsNullOrEmpty(CreateUserText))
+											{
+												<a id="@(ID + "_CreateUserLink")" href="@CreateUserUrl">@CreateUserText</a>
+											}
+
+
+											@if (HasCreateUser && (HasPasswordRevocery || HasHelp))
+											{
+												<br>
+											}
+
+
+											@if (!string.IsNullOrEmpty(PasswordRecoveryIconUrl))
+											{
+												<img src="@PasswordRecoveryIconUrl" alt="@PasswordRecoveryText">
+											}
+											@if (!string.IsNullOrEmpty(PasswordRecoveryText))
+											{
+												<a id="@(ID + "_PasswordRecoveryLink")" href="@PasswordRecoveryUrl">@PasswordRecoveryText</a>
+											}
+
+
+											@if ((HasCreateUser || HasPasswordRevocery) && HasHelp)
+											{
+												<br>
+											}
+
+
+											@if (!string.IsNullOrEmpty(HelpPageIconUrl))
+											{
+												<img src="@HelpPageIconUrl" alt="@HelpPageText">
+											}
+											@if (!string.IsNullOrEmpty(HelpPageText))
+											{
+												<a id="@(ID + "_HelpLink")" href="@HelpPageUrl">@HelpPageText</a>
+											}
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	}
+</Microsoft.AspNetCore.Components.Forms.EditForm>
+
+@code {
+	public ForwardRef<InputBase<string>> UsernameInput = new ForwardRef<InputBase<string>>();
+	public ForwardRef<InputBase<string>> PasswordInput = new ForwardRef<InputBase<string>>();
+
+
+
+
+	public class LoginModel
+	{
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public bool RememberMe { get; set; }
+	}
+
+}
