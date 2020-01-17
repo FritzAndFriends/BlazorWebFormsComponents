@@ -23,7 +23,7 @@
             NavigateUrl="Home.aspx" 
             Text="Home"
             Target="Content" 
-            Expanded="True">
+            Expanded="true">
              
             <asp:TreeNode Value="Page 1" 
               NavigateUrl="Page1.aspx" 

@@ -1,0 +1,20 @@
+﻿@page "/ControlSamples/TreeView"
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>TreeView Component homepage</h2>
+
+<Nav />
+
+<p>Here is a simple static tree view</p>
+
+<TreeView ID="SampleTreeView" runat="server">
+	<Nodes>
+		<TreeNode Value="Home" 
+            NavigateUrl="Home.aspx" 
+            Text="Home"
+            Target="Content" 
+            Expanded="true">
+
+		</TreeNode>
+	</Nodes>
+</TreeView>
