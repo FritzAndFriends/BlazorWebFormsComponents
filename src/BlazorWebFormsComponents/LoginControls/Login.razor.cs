@@ -201,7 +201,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-			UserAuthenticated = authState.User.Identity.IsAuthenticated;
+			UserAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
 
 			await base.OnInitializedAsync();
 

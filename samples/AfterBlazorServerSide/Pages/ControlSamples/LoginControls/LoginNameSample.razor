@@ -12,5 +12,12 @@
 
 @code
 {
+		protected override void OnInitialized()
+		{
 
+			StaticAuthStateProvider.Login("James Bond");
+
+			base.OnInitialized();
+
+		}
 }

@@ -1,0 +1,24 @@
+﻿@inherits BaseWebFormsComponent
+
+@if (UserAuthenticated)
+{
+	@if (!string.IsNullOrEmpty(LogoutText) && string.IsNullOrEmpty(LogoutImageUrl))
+	{
+		<a style="@CalculatedStyle" class="@CssClass" id="@(ID + "_status")" @onclick="LogoutHandle">@LogoutText</a>
+	}
+	else if (!string.IsNullOrEmpty(LogoutImageUrl))
+	{
+		<input style="@CalculatedStyle" class="@CssClass" id="@(ID + "_status")" type="image" @onclick="LogoutHandle" src="@LogoutImageUrl" alt="@LogoutText">
+	}
+}
+else
+{
+	@if (!string.IsNullOrEmpty(LoginText) && string.IsNullOrEmpty(LoginImageUrl))
+	{
+		<a style="@CalculatedStyle" class="@CssClass" id="@(ID + "_status")" @onclick="LoginHandle">@LoginText</a>
+	}
+	else if (!string.IsNullOrEmpty(LoginImageUrl))
+	{
+		<input style="@CalculatedStyle" class="@CssClass" id="@(ID + "_status")" type="image" @onclick="LoginHandle" src="@LoginImageUrl" alt="@LoginText">
+	}
+}

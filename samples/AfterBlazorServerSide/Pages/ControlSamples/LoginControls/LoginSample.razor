@@ -5,39 +5,17 @@
 @using BlazorWebFormsComponents.LoginControls;
 
 
-<Login InstructionText="How to loddddgin!!"
-			 LoginButtonType="Image"
-			 OnAuthenticate="OnAuthenticate"
-			 OnLoggedIn="OnLoggedIn"
-			 OnLoggingIn="OnLoggingIn"
-			 OnLoginError="OnLoginError">
+<Login InstructionText="How to Login!!">
 	<ChildContent>
 		<InstructionTextStyle BackColor="@("#FF0000")"
 													CssClass="sdd" />
-		<ValidatorTextStyle ForeColor="@("#0000ff")"/>
+		<ValidatorTextStyle ForeColor="@("#0000ff")" />
 	</ChildContent>
 </Login>
 
 
 
-@code {
-	public void OnAuthenticate(AuthenticateEventArgs args)
-	{
-		args.Authenticated = true;
-	}
+@code
+{
 
-	public void OnLoggedIn(EventArgs args)
-	{
-
-	}
-
-	public void OnLoginError(EventArgs args)
-	{
-
-	}
-
-	public void OnLoggingIn(LoginCancelEventArgs args)
-	{
-		args.Cancel = true;
-	}
 }

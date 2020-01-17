@@ -19,6 +19,7 @@ namespace BlazorWebFormsComponents.LoginControls
 		public string CalculatedStyle => this.ToStyleString();
 
 		private bool UserAuthenticated { get; set; }
+
 		private string DisplayName { get; set; }
 
 		#region IHasStyle
@@ -46,8 +47,14 @@ namespace BlazorWebFormsComponents.LoginControls
 
 			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-			UserAuthenticated = authState.User.Identity.IsAuthenticated;
-			DisplayName = string.Format(FormatString, authState.User.Identity.Name);
+			UserAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
+
+			if (UserAuthenticated)
+			{
+
+				DisplayName = string.Format(FormatString, authState.User.Identity.Name);
+
+			}
 
 			await base.OnInitializedAsync();
 

@@ -4,12 +4,12 @@ using System.Text;
 
 namespace BlazorWebFormsComponents.Enums
 {
-	public class ButtonType
+	public abstract class ButtonType
 	{
 
-		public static ButtonButtonType Button => new ButtonButtonType();
-		public static ImageButtonType Image => new ImageButtonType();
-		public static LinkButtonType Link => new LinkButtonType();
+		public static ButtonButtonType Button { get; } = new ButtonButtonType();
+		public static ImageButtonType Image { get; } = new ImageButtonType();
+		public static LinkButtonType Link { get; } = new LinkButtonType();
 
 	}
 

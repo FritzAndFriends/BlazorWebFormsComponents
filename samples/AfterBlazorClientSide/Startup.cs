@@ -8,7 +8,7 @@ namespace AfterBlazorClientSide
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+			services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
 		}
 
 		public void Configure(IComponentsApplicationBuilder app)
