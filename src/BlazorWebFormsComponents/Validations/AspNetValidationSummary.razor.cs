@@ -24,8 +24,6 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public string CssClass { get; set; }
 		[Parameter] public WebColor ForeColor { get; set; }
 		[Parameter] public Unit Height { get; set; }
-		[Parameter] public HorizontalAlign HorizontalAlign { get; set; }
-		[Parameter] public VerticalAlign VerticalAlign { get; set; }
 		[Parameter] public Unit Width { get; set; }
 		[Parameter] public bool Font_Bold { get; set; }
 		[Parameter] public bool Font_Italic { get; set; }

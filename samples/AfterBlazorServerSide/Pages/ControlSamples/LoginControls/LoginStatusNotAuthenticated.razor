@@ -1,0 +1,22 @@
+﻿@page "/ControlSamples/LoginStatusNotAuthenticated"
+
+@using BlazorWebFormsComponents.LoginControls;
+
+<h3>LoginStatus Not Authenticated</h3>
+
+
+<LoginStatus BackColor="@("#FF00FF")"
+						 LoginPageUrl="LoginPageUrl"/>
+
+
+@code
+{
+		protected override void OnInitialized()
+		{
+
+			StaticAuthStateProvider.Logout();
+
+			base.OnInitialized();
+
+		}
+}
