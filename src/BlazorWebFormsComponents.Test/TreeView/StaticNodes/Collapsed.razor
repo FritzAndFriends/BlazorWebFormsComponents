@@ -1,0 +1,60 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="CollapsedTest">
+	<ComponentUnderTest>
+		<TreeView id="SampleTreeView"
+							runat="server">
+
+			<Nodes>
+
+				<TreeNode Value="Home"
+									NavigateUrl="Home.aspx"
+									Text="Home"
+									Target="Content"
+									Expanded="false">
+
+					<TreeNode Value="Page 1"
+										NavigateUrl="Page1.aspx"
+										Text="Page1"
+										Target="Content">
+
+						<TreeNode Value="Section 1"
+											NavigateUrl="Section1.aspx"
+											Text="Section 1"
+											Target="Content" />
+
+					</TreeNode>
+
+					<TreeNode Value="Page 2"
+										NavigateUrl="Page2.aspx"
+										Text="Page 2"
+										Target="Content">
+
+					</TreeNode>
+
+				</TreeNode>
+
+			</Nodes>
+
+		</TreeView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void CollapsedTest(IRazorTestContext context)
+	{
+
+		var cut = context.GetComponentUnderTest();
+
+		cut.FindAll("table").Count().ShouldBe(1);
+
+		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href"));
+		anchors.Count().ShouldBe(1);
+
+		anchors.First().GetAttribute("href").ShouldBe("Home.aspx");
+
+	}
+
+}

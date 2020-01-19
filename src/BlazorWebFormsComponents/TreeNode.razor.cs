@@ -21,7 +21,7 @@ namespace BlazorWebFormsComponents
 		public string Value { get; set; }
 
 		[Parameter]
-		public bool Expanded { get; set; } = false;
+		public bool Expanded { get; set; } = true;
 
 		protected byte Depth { get; set; } = 0;
 
