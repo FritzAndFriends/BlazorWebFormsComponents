@@ -13,11 +13,8 @@ namespace BlazorWebFormsComponents
 	/// <devdoc>
 	///    Translates colors to and from GDI+ <see cref='System.Drawing.Color'/> objects.
 	/// </devdoc>
-	public sealed class ColorTranslator
+	internal sealed class ColorTranslator
 	{
-		private const int Win32RedShift = 0;
-		private const int Win32GreenShift = 8;
-		private const int Win32BlueShift = 16;
 
 		private static Hashtable htmlSysColorTable;
 
