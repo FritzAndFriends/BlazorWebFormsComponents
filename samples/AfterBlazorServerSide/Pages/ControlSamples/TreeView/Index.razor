@@ -9,12 +9,19 @@
 
 <TreeView ID="SampleTreeView" runat="server">
 	<Nodes>
-		<TreeNode Value="Home" 
-            NavigateUrl="Home.aspx" 
-            Text="Home"
-            Target="Content" 
-            Expanded="true">
+		<TreeNode Value="Home"
+							NavigateUrl="/"
+							Text="Home"
+							Target="Content"
+							Expanded="true">
+			<TreeNode Value="Foo" Text="Foo"></TreeNode>
+			<TreeNode Value="Bar" Text="Bar">
+				<TreeNode Value="Baz" Text="Baz">
+					<TreeNode Value="BlazorMisterMagoo" Text="BlazorMisterMagoo">
 
+					</TreeNode>
+				</TreeNode>
+			</TreeNode>
 		</TreeNode>
 	</Nodes>
 </TreeView>
