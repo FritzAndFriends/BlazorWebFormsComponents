@@ -1,3 +1,7 @@
-﻿<CascadingValue Name="ParentTreeView" Value="this">
+﻿@inherits BlazorWebFormsComponents.BaseWebFormsComponent
+
+<div class="@CssClass">
+<CascadingValue Name="ParentTreeView" Value="this">
 	@Nodes
 </CascadingValue>
+</div>

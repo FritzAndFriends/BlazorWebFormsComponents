@@ -16,6 +16,7 @@
 
       <asp:TreeView id="SampleTreeView"
         ShowExpandCollapse="false"
+        CssClass="Foo"
         runat="server">
          
         <Nodes>
