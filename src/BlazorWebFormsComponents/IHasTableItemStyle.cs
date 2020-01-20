@@ -104,7 +104,7 @@ namespace BlazorWebFormsComponents
 
 			((IHasStyle)hasStyle).ToStyleString(sb);
 
-			if (hasStyle.Wrap) sb.Append("white-space:nowrap;");
+			if (!hasStyle.Wrap) sb.Append("white-space:nowrap;");
 
 			return sb;
 
