@@ -11,7 +11,7 @@
 			<td><div style="width:20px;height:1px;"></div></td>
 		}
 
-		@if (ChildContent != null)
+		@if (ChildContent != null && ParentTreeView.ShowExpandCollapse)
 		{
 			<td>
 				<a @onclick="() => Expanded = !Expanded">
@@ -24,7 +24,7 @@
 			<td><div style="width:20px;height:1px;"></div></td>
 		}
 		<td style="white-space: nowrap;">
-			<a href="@NavigateUrl" target="@Target" id="MainContent_SampleTreeViewt0">@Text</a>
+			<a href="@NavigateUrl" target="@Target" title="@ToolTip" id="MainContent_SampleTreeViewt0">@Text</a>
 		</td>
 	</tr>
 </table>

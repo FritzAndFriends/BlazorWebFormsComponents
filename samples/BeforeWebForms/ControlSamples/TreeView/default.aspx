@@ -14,7 +14,8 @@
     <a href="https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8#examples">https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8#examples</a></a>
     </p>
 
-      <asp:TreeView id="SampleTreeView" 
+      <asp:TreeView id="SampleTreeView"
+        ShowExpandCollapse="false"
         runat="server">
          
         <Nodes>
@@ -25,10 +26,11 @@
             Target="Content" 
             Expanded="true">
              
-            <asp:TreeNode Value="Page 1" 
+            <asp:TreeNode Value="Page 1 Value" 
               NavigateUrl="Page1.aspx" 
               Text="Page1"
-              Target="Content">
+              Target="Content"
+              ToolTip="ToolTop" ImageToolTip="ImageToolTip">
                
               <asp:TreeNode Value="Section 1" 
                 NavigateUrl="Section1.aspx" 

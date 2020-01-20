@@ -18,6 +18,9 @@ namespace BlazorWebFormsComponents
 		public string Text { get; set; }
 
 		[Parameter]
+		public string ToolTip { get; set; } = null;
+
+		[Parameter]
 		public string Value { get; set; }
 
 		[Parameter]
@@ -37,6 +40,9 @@ namespace BlazorWebFormsComponents
 				Depth = (byte)((_Parent?.Depth ?? 0) + 1);
 			}
 		}
+
+		[CascadingParameter(Name ="ParentTreeView")]
+		public TreeView ParentTreeView { get; set; }
 
 	}
 }

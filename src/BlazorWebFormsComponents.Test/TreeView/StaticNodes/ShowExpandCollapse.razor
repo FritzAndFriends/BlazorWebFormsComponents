@@ -3,6 +3,7 @@
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
 		<TreeView id="SampleTreeView"
+							ShowExpandCollapse="false"
 							runat="server">
 
 			<Nodes>
@@ -48,18 +49,7 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("table").Count().ShouldBe(4);
-
-		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href"));
-		anchors.Count().ShouldBe(4);
-
-		anchors.First().GetAttribute("href").ShouldBe("Home.aspx");
-		anchors.Skip(1).First().GetAttribute("href").ShouldBe("Page1.aspx");
-		anchors.Skip(2).First().GetAttribute("href").ShouldBe("Section1.aspx");
-		anchors.Skip(3).First().GetAttribute("href").ShouldBe("Page2.aspx");
-
-		anchors.First().GetAttribute("title").ShouldBe("Home Tooltip");
-
+		cut.FindAll("img").Count().ShouldBe(0);
 
 	}
 
