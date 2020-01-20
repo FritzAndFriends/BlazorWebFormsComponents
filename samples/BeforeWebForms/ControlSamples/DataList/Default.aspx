@@ -23,7 +23,7 @@
 		CellSpacing="3"
 		TabIndex="1"
 		ItemType="SharedSampleObjects.Models.Widget">
-		<HeaderStyle CssClass="myClass" Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
+		<HeaderStyle CssClass="myClass" Wrap="true" Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
 		<HeaderTemplate>
 			My Widget List
 		</HeaderTemplate>
@@ -34,7 +34,7 @@
 			<%# Item.Price.ToString("c") %>
 		</ItemTemplate>
 		<SeparatorTemplate>Hi!  I'm a separator!  I keep things apart</SeparatorTemplate>
-		<ItemStyle BackColor="Yellow" />
+		<ItemStyle BackColor="Yellow" Wrap="false" />
 		<AlternatingItemStyle BackColor="Wheat" />
 		<SeparatorStyle BackColor="Black" ForeColor="PapayaWhip" />
 	</asp:DataList>
