@@ -1,6 +1,6 @@
 # TreeView
 
-The TreeView component is meant to emulate the asp:TreeView control in markup and is defined in the [System.Web.UI.WebControls.TreeView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.datalist?view=netframework-4.8)
+The TreeView component is meant to emulate the asp:TreeView control in markup and is defined in the [System.Web.UI.WebControls.TreeView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8)
 
 [Usage Notes](#usage-notes) | [Web Forms Syntax](#web-forms-declarative-syntax) | [Blazor Syntax](#blazor-syntax)
 
