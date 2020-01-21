@@ -83,7 +83,7 @@ namespace BlazorWebFormsComponents.LoginControls
 			if (!logoutCancelEventArgs.Cancel)
 			{
 
-				await OnLoggedOut.InvokeAsync(logoutCancelEventArgs);
+				await OnLoggedOut.InvokeAsync(EventArgs.Empty);
 
 				if (LogoutAction == Redirect)
 				{
