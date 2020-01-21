@@ -14,7 +14,7 @@
 		@if (ChildContent != null && ParentTreeView.ShowExpandCollapse)
 		{
 			<td>
-				<a @onclick="() => Expanded = !Expanded">
+				<a href="javascript:void()" @onclick="() => Expanded = !Expanded">
 					<img src="@nodeImg" alt="@nodeText" title="@nodeText" style="border-width: 0;" />
 				</a>
 			</td>
@@ -24,6 +24,19 @@
 			<td><div style="width:20px;height:1px;"></div></td>
 		}
 		<td style="white-space: nowrap;">
+
+			@if (ParentTreeView.ShowCheckBoxes != Enums.TreeNodeTypes.None) {
+
+				var isRoot = (ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Root) && Depth == 0);
+				var isParent = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Parent) && (Depth > 0 && !(ChildContent is null));
+				var isLeaf = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Leaf) && (ChildContent is null);
+
+				@if (ShowCheckBox && (isRoot || isParent || isLeaf)) {
+					<input type="checkbox" checked="@(Checked ? "checked" : null)" />
+				}
+
+			}
+
 			<a href="@NavigateUrl" target="@Target" title="@ToolTip" id="MainContent_SampleTreeViewt0">@Text</a>
 		</td>
 	</tr>

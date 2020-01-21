@@ -1,8 +1,10 @@
 ﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.TreeNodeTypes
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
 		<TreeView id="SampleTreeView"
+							ShowCheckBoxes="Root"
 							runat="server">
 
 			<Nodes>
@@ -48,17 +50,10 @@
 
 		var cut = context.GetComponentUnderTest();
 
-		cut.FindAll("table").Count().ShouldBe(4);
+		var checkboxes = cut.FindAll("input").Where(c => c.GetAttribute("type") == "checkbox");
+		checkboxes.Count().ShouldBe(1);
 
-		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href") && !c.GetElementsByTagName("img").Any());
-		anchors.Count().ShouldBe(4);
-
-		anchors.First().GetAttribute("href").ShouldBe("Home.aspx");
-		anchors.Skip(1).First().GetAttribute("href").ShouldBe("Page1.aspx");
-		anchors.Skip(2).First().GetAttribute("href").ShouldBe("Section1.aspx");
-		anchors.Skip(3).First().GetAttribute("href").ShouldBe("Page2.aspx");
-
-		anchors.First().GetAttribute("title").ShouldBe("Home Tooltip");
+		cut.FindAll("td")[1].GetElementsByTagName("input").Count().ShouldBe(1);
 
 
 	}

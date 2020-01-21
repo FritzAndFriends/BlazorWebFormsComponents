@@ -6,13 +6,14 @@ The TreeView component is meant to emulate the asp:TreeView control in markup an
 
 ## Features supported in Blazor
 
-
+- Static Tree Nodes
+- Checkbox display
 
 ##### [Back to top](#treeview)
 
 ## Usage Notes
 
-
+- ShowCheckBoxes attribute, when specifying multiple values, should be separated by a vertical pipe `|` instead of commas
 
 ##### [Back to top](#treeview)
 

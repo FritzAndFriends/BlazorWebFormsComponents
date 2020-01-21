@@ -9,7 +9,18 @@ namespace BlazorWebFormsComponents
 	{
 
 		[Parameter]
+		public bool Checked { get; set; } = false;
+
+		protected byte Depth { get; set; } = 0;
+
+		[Parameter]
+		public bool Expanded { get; set; } = true;
+
+		[Parameter]
 		public string NavigateUrl { get; set; }
+
+		[Parameter]
+		public bool ShowCheckBox { get; set; } = true;
 
 		[Parameter]
 		public string Target { get; set; }
@@ -22,11 +33,6 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string Value { get; set; }
-
-		[Parameter]
-		public bool Expanded { get; set; } = true;
-
-		protected byte Depth { get; set; } = 0;
 
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }

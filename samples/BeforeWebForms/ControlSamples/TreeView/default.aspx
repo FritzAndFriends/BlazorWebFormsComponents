@@ -15,7 +15,8 @@
     </p>
 
       <asp:TreeView id="SampleTreeView"
-        ShowExpandCollapse="false"
+        ShowExpandCollapse="true"
+        ShowCheckBoxes="All"
         CssClass="Foo"
         runat="server">
          
@@ -24,7 +25,9 @@
           <asp:TreeNode Value="Home" 
             NavigateUrl="Home.aspx" 
             Text="Home"
-            Target="Content" 
+            Target="Content"
+            Checked="true"
+            ShowCheckBox="false"
             Expanded="true">
              
             <asp:TreeNode Value="Page 1 Value" 

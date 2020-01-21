@@ -50,7 +50,7 @@
 
 		cut.FindAll("table").Count().ShouldBe(1);
 
-		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href"));
+		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href") && !c.GetElementsByTagName("img").Any());
 		anchors.Count().ShouldBe(1);
 
 		anchors.First().GetAttribute("href").ShouldBe("Home.aspx");

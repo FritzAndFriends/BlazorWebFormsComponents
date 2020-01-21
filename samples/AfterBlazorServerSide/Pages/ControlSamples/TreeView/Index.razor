@@ -1,5 +1,6 @@
 ﻿@page "/ControlSamples/TreeView"
 @using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.TreeNodeTypes
 
 <h2>TreeView Component homepage</h2>
 
@@ -7,7 +8,8 @@
 
 <p>Here is a simple static tree view</p>
 
-<TreeView ID="SampleTreeView" runat="server">
+<TreeView ID="SampleTreeView" runat="server"
+	ShowCheckBoxes="Root|Parent">
 	<Nodes>
 		<TreeNode Value="Home"
 							NavigateUrl="/"

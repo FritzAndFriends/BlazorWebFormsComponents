@@ -13,6 +13,9 @@ namespace BlazorWebFormsComponents
 		public RenderFragment Nodes { get; set; }
 
 		[Parameter]
+		public TreeNodeTypes ShowCheckBoxes { get; set; }
+
+		[Parameter]
 		public bool ShowExpandCollapse { get; set; } = true;
 
 		#region IHasStyle
