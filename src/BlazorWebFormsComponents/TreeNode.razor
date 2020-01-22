@@ -14,7 +14,7 @@
 		@if (ChildContent != null && ParentTreeView.ShowExpandCollapse)
 		{
 			<td>
-				<a href="javascript:void()" @onclick="() => Expanded = !Expanded">
+				<a href="javascript:void()" @onclick="HandleNodeExpand">
 					<img src="@nodeImg" alt="@nodeText" title="@nodeText" style="border-width: 0;" />
 				</a>
 			</td>
@@ -32,7 +32,7 @@
 				var isLeaf = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Leaf) && (ChildContent is null);
 
 				@if (ShowCheckBox && (isRoot || isParent || isLeaf)) {
-					<input type="checkbox" checked="@(Checked ? "checked" : null)" />
+					<input type="checkbox" checked="@(Checked ? "checked" : null)" @onchange="args => { HandleCheckbox(this, args); }" />
 				}
 
 			}

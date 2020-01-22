@@ -11,7 +11,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Checked { get; set; } = false;
 
-		protected byte Depth { get; set; } = 0;
+		public byte Depth { get; set; } = 0;
 
 		[Parameter]
 		public bool Expanded { get; set; } = true;
@@ -49,6 +49,36 @@ namespace BlazorWebFormsComponents
 
 		[CascadingParameter(Name ="ParentTreeView")]
 		public TreeView ParentTreeView { get; set; }
+
+		#region Event Handlers
+
+		protected override void OnParametersSet() {
+
+			if (!ParentTreeView.Nodes.Contains(this))
+			{
+				ParentTreeView.Nodes.Add(this);
+			}
+		
+		}
+
+		public void HandleNodeExpand() {
+
+			Expanded = !Expanded;
+
+			if (Expanded) ParentTreeView.OnTreeNodeExpanded?.Invoke(this, new TreeNodeEventArgs(this));
+			else ParentTreeView.OnTreeNodeCollapsed?.Invoke(this, new TreeNodeEventArgs(this));
+
+		}
+
+		public void HandleCheckbox(object sender, ChangeEventArgs args) {
+
+			this.Checked = (bool)args.Value;
+
+			ParentTreeView.OnTreeNodeCheckChanged?.Invoke(this, new TreeNodeEventArgs(this));
+
+		}
+
+		#endregion
 
 	}
 }

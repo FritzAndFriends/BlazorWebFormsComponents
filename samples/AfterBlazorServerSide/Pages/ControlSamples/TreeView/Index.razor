@@ -9,6 +9,7 @@
 <p>Here is a simple static tree view</p>
 
 <TreeView ID="SampleTreeView" runat="server"
+	OnTreeNodeCheckChanged="CheckChanged"
 	ShowCheckBoxes="Root|Parent">
 	<Nodes>
 		<TreeNode Value="Home"
@@ -27,3 +28,18 @@
 		</TreeNode>
 	</Nodes>
 </TreeView>
+
+Checkboxes clicked:  @clickCount
+
+@code {
+
+	public int clickCount { get; set; } = 0;
+
+	private void CheckChanged(object sender, TreeNodeEventArgs args) {
+
+		clickCount++;
+		base.StateHasChanged();
+
+	}
+
+}

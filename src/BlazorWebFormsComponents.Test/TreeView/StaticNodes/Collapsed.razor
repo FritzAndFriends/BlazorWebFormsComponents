@@ -3,6 +3,7 @@
 <Fixture Test="CollapsedTest">
 	<ComponentUnderTest>
 		<TreeView id="SampleTreeView"
+							OnTreeNodeExpanded="RecordExpanded"
 							runat="server">
 
 			<Nodes>
@@ -43,6 +44,8 @@
 
 @code {
 
+	private TreeNode _ExpandedNode;
+
 	void CollapsedTest(IRazorTestContext context)
 	{
 
@@ -54,6 +57,20 @@
 		anchors.Count().ShouldBe(1);
 
 		anchors.First().GetAttribute("href").ShouldBe("Home.aspx");
+
+		var expando = cut.FindAll("a").Where(c => c.HasAttribute("href") && c.GetElementsByTagName("img").Any()).FirstOrDefault();
+		expando.ShouldNotBeNull();
+		expando.Click(new MouseEventArgs());
+
+		_ExpandedNode.ShouldNotBeNull();
+		((int)_ExpandedNode.Depth).ShouldBe(0);
+
+
+	}
+
+	void RecordExpanded(object sender, TreeNodeEventArgs args) {
+
+		_ExpandedNode = args.Node;
 
 	}
 

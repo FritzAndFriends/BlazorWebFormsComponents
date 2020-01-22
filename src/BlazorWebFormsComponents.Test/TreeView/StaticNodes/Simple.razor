@@ -46,9 +46,10 @@
 	void FirstTest(IRazorTestContext context)
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = context.GetComponentUnderTest<TreeView>();
 
 		cut.FindAll("table").Count().ShouldBe(4);
+		cut.Instance.Nodes.Count.ShouldBe(4);
 
 		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href") && !c.GetElementsByTagName("img").Any());
 		anchors.Count().ShouldBe(4);
