@@ -22,11 +22,11 @@
 	void FirstTest()
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = GetComponentUnderTest<EditForm>();
 
 		cut.Find("input").Change("whatever!");
 
-		cut.Find("form").Submit();
+		WaitForNextRender(() => cut.Find("form").Submit());
 
 		_validSubmit.ShouldBeFalse();
 		_invalidSubmit.ShouldBeTrue();
