@@ -46,10 +46,10 @@
 
 	private TreeNode _ExpandedNode;
 
-	void CollapsedTest(IRazorTestContext context)
+	void CollapsedTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.FindAll("table").Count().ShouldBe(1);
 

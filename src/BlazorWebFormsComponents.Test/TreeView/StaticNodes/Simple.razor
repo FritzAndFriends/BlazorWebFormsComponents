@@ -43,10 +43,10 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
-		var cut = context.GetComponentUnderTest<TreeView>();
+		var cut = GetComponentUnderTest<TreeView>();
 
 		cut.FindAll("table").Count().ShouldBe(4);
 		cut.Instance.Nodes.Count.ShouldBe(4);

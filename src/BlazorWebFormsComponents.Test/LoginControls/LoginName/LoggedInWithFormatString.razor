@@ -12,7 +12,7 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
 		var principal = new ClaimsPrincipal();
@@ -22,8 +22,8 @@
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		context.Services.AddService<AuthenticationStateProvider>(autheMock.Object);
-		var cut = context.GetComponentUnderTest();
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		var cut = GetComponentUnderTest();
 
 		cut.FindAll("span").Count().ShouldBe(1);
 

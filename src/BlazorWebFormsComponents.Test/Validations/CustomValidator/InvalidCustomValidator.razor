@@ -19,10 +19,10 @@
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.Find("input").Change("whatever!");
 
