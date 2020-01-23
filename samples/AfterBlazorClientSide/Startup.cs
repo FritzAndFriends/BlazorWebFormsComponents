@@ -6,6 +6,9 @@ namespace AfterBlazorClientSide
 {
 	public class Startup
 	{
+
+		public static string ApplicationName => "Blazor WebAssembly";
+
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
