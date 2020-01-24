@@ -7,11 +7,11 @@
 							DataSource="bookXml"
 							runat="server">
 
-			@*<DataBindings>
+			<DataBindings>
 				<TreeNodeBinding DataMember="Book" TextField="Title" />
 				<TreeNodeBinding DataMember="Chapter" TextField="Heading" />
 				<TreeNodeBinding DataMember="Section" TextField="Heading" />
-			</DataBindings>*@
+			</DataBindings>
 
 		</TreeView>
 
@@ -44,6 +44,10 @@
 
 	void FirstTest()
 	{
+
+		var cut = GetComponentUnderTest<TreeView>();
+		cut.FindAll("table").Count().ShouldBe(6, "Did not render all 6 nodes of the XML document");
+
 	}
 
 }
