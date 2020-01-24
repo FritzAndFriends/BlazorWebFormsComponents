@@ -3,8 +3,6 @@
 <h3>Custom Validator</h3>
 @using BlazorWebFormsComponents.Validations;
 
-
-
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
 
 	<label>Write something that starts with 'A'</label>
@@ -18,8 +16,6 @@
 
 </EditForm>
 
-
-
 @code {
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 
@@ -29,10 +25,12 @@
 	{
 		Console.WriteLine("OnValidSubmit");
 	}
+
 	private bool DoesItStartWithA(string value)
 	{
 		return value.StartsWith("A", StringComparison.InvariantCultureIgnoreCase);
 	}
+
 	public class ExampleModel
 	{
 		public string Name { get; set; }
