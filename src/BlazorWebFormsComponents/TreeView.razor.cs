@@ -1,9 +1,14 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
@@ -15,6 +20,12 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
+
+		[Parameter]
+		public DataBindings DataBindings { get; set; }
+
+		[Parameter]
+		public object DataSource { get; set; }
 
 		[Parameter]
 		public TreeNodeTypes ShowCheckBoxes { get; set; }
@@ -44,6 +55,15 @@ namespace BlazorWebFormsComponents
 
 		#region Events
 
+		protected override async Task OnAfterRenderAsync(bool firstRender)
+		{
+
+			await base.OnAfterRenderAsync(firstRender);
+
+			if (firstRender && DataSource != null) await DataBind();
+
+		}
+
 		[Parameter]
 		public EventHandler<TreeNodeEventArgs> OnTreeNodeExpanded { get; set; }
 
@@ -55,5 +75,74 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
+		#region DataBinding
+
+		public RenderFragment ChildNodesRenderFragment { get; set; }
+
+		private new Task DataBind() {
+
+			if (DataSource is XmlDocument) return DataBindXml(DataSource as XmlDocument);
+
+			return Task.CompletedTask;
+
+		}
+
+		private Task DataBindXml(XmlDocument src) {
+
+			var treeNodeCounter = 0;
+			var elements = src.SelectNodes("/*");
+
+			ChildNodesRenderFragment = b =>
+			{
+				b.OpenRegion(100);
+
+				AddElements(b, elements);
+
+				b.CloseRegion();
+			};
+
+			StateHasChanged();
+
+			return Task.CompletedTask;
+
+			void AddElements(RenderTreeBuilder builder, XmlNodeList siblings) {
+
+				foreach (XmlNode node in siblings)
+				{
+
+					if (!(node is XmlElement)) continue;
+					var element = node as XmlElement;
+
+					var thisBinding = _TreeNodeBindings.FirstOrDefault(b => b.DataMember == element.LocalName);
+
+					if (thisBinding != null) {
+
+						builder.OpenComponent<TreeNode>(treeNodeCounter++);
+
+						builder.AddAttribute(treeNodeCounter++, "Text", element.GetAttribute(thisBinding.TextField));
+
+						if (element.HasChildNodes) AddElements(builder, element.ChildNodes);
+
+						builder.CloseComponent();
+					}
+				}
+
+			}
+
+		}
+
+		private List<TreeNodeBinding> _TreeNodeBindings = new List<TreeNodeBinding>();
+		internal void AddTreeNodeBinding(TreeNodeBinding treeNodeBinding)
+		{
+			_TreeNodeBindings.Add(treeNodeBinding);
+		}
+
+		#endregion
+
 	}
+
+
 }
+
+
+
