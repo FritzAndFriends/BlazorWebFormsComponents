@@ -7,9 +7,9 @@ namespace BlazorWebFormsComponents.Enums
 	public abstract class ValidationSummaryDisplayMode
 	{
 
-		public static ListDisplayMode List => new ListDisplayMode();
-		public static BulletListDisplayMode BulletList => new BulletListDisplayMode();
-		public static SingleParagraphDisplayMode SingleParagraph => new SingleParagraphDisplayMode();
+		public static ListDisplayMode List { get; } = new ListDisplayMode();
+		public static BulletListDisplayMode BulletList { get; } = new BulletListDisplayMode();
+		public static SingleParagraphDisplayMode SingleParagraph { get; } = new SingleParagraphDisplayMode();
 
 	}
 

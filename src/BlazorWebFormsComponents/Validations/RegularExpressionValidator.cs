@@ -21,9 +21,7 @@ namespace BlazorWebFormsComponents.Validations
 
 			if (MatchTimeout.HasValue)
 			{
-				// Not sure if MatchTimeout is in seconds
-				// Also don't know the default RegexOptions
-				return Regex.IsMatch(value, ValidationExpression, RegexOptions.None, TimeSpan.FromSeconds(MatchTimeout.Value));
+				return Regex.IsMatch(value, ValidationExpression, RegexOptions.None, TimeSpan.FromMilliseconds(MatchTimeout.Value));
 			}
 			else
 			{

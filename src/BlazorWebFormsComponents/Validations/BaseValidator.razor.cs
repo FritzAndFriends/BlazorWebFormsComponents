@@ -17,7 +17,7 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public string ErrorMessage { get; set; }
 		[Parameter] public WebColor ForeColor { get; set; }
 
-		public bool IsValid { get; set; } = true;
+		protected bool IsValid { get; set; } = true;
 
 		[Parameter] public WebColor BackColor { get; set; }
 		[Parameter] public WebColor BorderColor { get; set; }
@@ -36,7 +36,17 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public bool Font_Strikeout { get; set; }
 		[Parameter] public bool Font_Underline { get; set; }
 
-		protected string CalculatedStyle { get; set; }
+		/// <summary>
+		/// Override all style properties if it's not null
+		/// </summary>
+		[Parameter]
+		public IHasStyle Style
+		{
+			get => this;
+			set { value?.CopyTo(this); }
+		}
+
+		protected string CalculatedStyle => this.ToStyleString();
 
 		protected override void OnInitialized()
 		{
@@ -47,9 +57,17 @@ namespace BlazorWebFormsComponents.Validations
 
 			this.SetFontsFromAttributes(AdditionalAttributes);
 
-			CalculatedStyle = this.ToStyleString();
-
 			base.OnInitialized();
+
+		}
+
+		protected override void OnParametersSet()
+		{
+
+
+
+			base.OnParametersSet();
+
 		}
 
 		public void EventHandler(EditContext editContext, ValidationMessageStore messages)

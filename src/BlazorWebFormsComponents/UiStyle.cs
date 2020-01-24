@@ -4,11 +4,15 @@ using System.Collections.Generic;
 
 namespace BlazorWebFormsComponents
 {
-	public abstract class UiStyle : ComponentBase, IHasLayoutStyle
+	public abstract class UiStyle : UiStyle<Style>
 	{
 
-		protected TableItemStyle theStyle { get; set; }
+	}
 
+	public abstract class UiStyle<TStyle> : ComponentBase, IHasLayoutStyle where TStyle : Style
+	{
+
+		protected TStyle theStyle { get; set; }
 
 		[Parameter(CaptureUnmatchedValues = true)]
 		public Dictionary<string, object> AdditionalAttributes { get; set; }
@@ -35,14 +39,7 @@ namespace BlazorWebFormsComponents
 		public Unit Height { get; set; }
 
 		[Parameter]
-		public HorizontalAlign HorizontalAlign { get; set; }
-
-		[Parameter]
-		public VerticalAlign VerticalAlign { get; set; }
-
-		[Parameter]
 		public Unit Width { get; set; }
-
 
 		protected override void OnInitialized()
 		{
@@ -59,8 +56,6 @@ namespace BlazorWebFormsComponents
 				theStyle.ForeColor = ForeColor;
 
 				theStyle.Height = Height;
-				theStyle.HorizontalAlign = HorizontalAlign;
-				theStyle.VerticalAlign = VerticalAlign;
 				theStyle.Width = Width;
 
 				theStyle.SetFontsFromAttributes(AdditionalAttributes);
@@ -70,6 +65,6 @@ namespace BlazorWebFormsComponents
 
 		}
 
-
 	}
+
 }

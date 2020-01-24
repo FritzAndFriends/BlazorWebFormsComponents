@@ -7,8 +7,8 @@ namespace BlazorWebFormsComponents.Enums
 	public abstract class RepeatLayout
 	{
 
-		public static TableRepeatLayout Table => new TableRepeatLayout();
-		public static FlowRepeatLayout Flow => new FlowRepeatLayout();
+		public static TableRepeatLayout Table { get; } = new TableRepeatLayout();
+		public static FlowRepeatLayout Flow { get; } = new FlowRepeatLayout();
 
 	}
 

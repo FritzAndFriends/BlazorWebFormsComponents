@@ -1,0 +1,25 @@
+﻿@page "/ControlSamples/LoginStatusAuthenticated"
+
+@using BlazorWebFormsComponents.LoginControls;
+@using static BlazorWebFormsComponents.Enums.LogoutAction;
+
+<h3>LoginStatus Authenticated</h3>
+
+
+<LoginStatus BackColor="@("#FF00FF")"
+						 LogoutPageUrl="LoginPageUrl"
+						 LogoutAction="Redirect" />
+
+
+
+@code
+{
+	protected override void OnInitialized()
+	{
+
+		StaticAuthStateProvider.Login("James Bond");
+
+		base.OnInitialized();
+
+	}
+}
