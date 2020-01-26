@@ -91,7 +91,7 @@ namespace BlazorWebFormsComponents
 		private Task DataBindXml(XmlDocument src)
 		{
 
-			var treeNodeCounter = 2;
+			var treeNodeCounter = 0;
 			var elements = src.SelectNodes("/*");
 
 			ChildNodesRenderFragment = b =>
@@ -127,10 +127,10 @@ namespace BlazorWebFormsComponents
 
 						if (element.HasChildNodes)
 						{
-							builder.AddAttribute(treeNodeCounter++, "ChildContent", (Microsoft.AspNetCore.Components.RenderFragment)((__builder5) =>
+							builder.AddAttribute(treeNodeCounter++, "ChildContent", (Microsoft.AspNetCore.Components.RenderFragment)((_builder) =>
 							{
 
-								AddElements(__builder5, element.ChildNodes);
+								AddElements(_builder, element.ChildNodes);
 							}));
 						}
 						builder.CloseComponent();
