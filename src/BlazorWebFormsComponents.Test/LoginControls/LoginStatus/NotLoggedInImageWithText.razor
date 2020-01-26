@@ -1,0 +1,41 @@
+﻿@inherits TestComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims;
+@using Moq;
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.LoginStatus LoginText="Click to login" LoginImageUrl="login.png" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+		void FirstTest()
+		{
+
+			var principal = new ClaimsPrincipal();
+
+			var autheMock = new Mock<AuthenticationStateProvider>();
+			autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+			Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+
+			var navMock = new Mock<NavigationManager>();
+			Services.AddSingleton<NavigationManager>(navMock.Object);
+
+			var cut = GetComponentUnderTest();
+
+			cut.FindAll("a").Count().ShouldBe(0);
+			cut.FindAll("input").Count().ShouldBe(1);
+
+			var input = cut.Find("input");
+
+			input.Attributes["type"].Value.ShouldBe("image");
+			input.Attributes["alt"].Value.ShouldBe("Click to login");
+			input.Attributes["src"].Value.ShouldBe("login.png");
+
+		}
+
+}

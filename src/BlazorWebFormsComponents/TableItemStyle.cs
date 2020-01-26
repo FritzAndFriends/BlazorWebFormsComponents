@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 
 		public VerticalAlign VerticalAlign { get; set; }
 
-		public bool Wrap { get; set; }
+		public bool Wrap { get; set; } = true;
 
 		public override string ToString()
 		{

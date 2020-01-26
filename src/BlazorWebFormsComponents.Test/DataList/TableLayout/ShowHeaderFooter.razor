@@ -34,10 +34,10 @@
 
 @code {
 
-	void ShowTest(IRazorTestContext context)
+	void ShowTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.FindAll("td").Count().ShouldBe(5);
 		cut.Find("td").TextContent.ShouldBe("My Widget List");
@@ -45,10 +45,10 @@
 
 	}
 
-	void HideTest(IRazorTestContext context)
+	void HideTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.FindAll("td").Count().ShouldBe(3);
 		cut.Find("td").TextContent.ShouldNotBe("My Widget List");

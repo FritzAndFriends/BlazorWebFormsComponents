@@ -1,0 +1,40 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using BlazorWebFormsComponents
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Context="Item">
+			<ChildContent>
+				<HeaderStyle BackColor="@("#0000ff")" Wrap="false"></HeaderStyle>
+			</ChildContent>
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		var theHeaderElement = cut.Find("td");
+
+		theHeaderElement.HasAttribute("style").ShouldBeTrue();
+		var theStyle = theHeaderElement.GetAttribute("style");
+
+		theStyle.ShouldNotBeNull();
+		theStyle.ShouldContain("white-space:nowrap");
+
+	}
+
+}
