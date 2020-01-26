@@ -79,7 +79,8 @@ namespace BlazorWebFormsComponents
 
 		public RenderFragment ChildNodesRenderFragment { get; set; }
 
-		private new Task DataBind() {
+		private new Task DataBind()
+		{
 
 			if (DataSource is XmlDocument) return DataBindXml(DataSource as XmlDocument);
 
@@ -87,9 +88,10 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private Task DataBindXml(XmlDocument src) {
+		private Task DataBindXml(XmlDocument src)
+		{
 
-			var treeNodeCounter = 0;
+			var treeNodeCounter = 2;
 			var elements = src.SelectNodes("/*");
 
 			ChildNodesRenderFragment = b =>
@@ -105,7 +107,8 @@ namespace BlazorWebFormsComponents
 
 			return Task.CompletedTask;
 
-			void AddElements(RenderTreeBuilder builder, XmlNodeList siblings) {
+			void AddElements(RenderTreeBuilder builder, XmlNodeList siblings)
+			{
 
 				foreach (XmlNode node in siblings)
 				{
@@ -115,14 +118,21 @@ namespace BlazorWebFormsComponents
 
 					var thisBinding = _TreeNodeBindings.FirstOrDefault(b => b.DataMember == element.LocalName);
 
-					if (thisBinding != null) {
+					if (thisBinding != null)
+					{
 
 						builder.OpenComponent<TreeNode>(treeNodeCounter++);
 
-						builder.AddAttribute(++treeNodeCounter, "Text", element.GetAttribute(thisBinding.TextField));
+						builder.AddAttribute(treeNodeCounter++, "Text", element.GetAttribute(thisBinding.TextField));
 
-						if (element.HasChildNodes) AddElements(builder, element.ChildNodes);
+						if (element.HasChildNodes)
+						{
+							builder.AddAttribute(treeNodeCounter++, "ChildContent", (Microsoft.AspNetCore.Components.RenderFragment)((__builder5) =>
+							{
 
+								AddElements(__builder5, element.ChildNodes);
+							}));
+						}
 						builder.CloseComponent();
 					}
 				}
