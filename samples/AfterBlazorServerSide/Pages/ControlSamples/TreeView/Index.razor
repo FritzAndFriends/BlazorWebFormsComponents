@@ -1,0 +1,42 @@
+﻿@page "/ControlSamples/TreeView"
+@using static BlazorWebFormsComponents.Enums.TreeNodeTypes
+
+<h2>TreeView Component homepage</h2>
+
+<p>Here is a simple static tree view</p>
+
+<TreeView ID="SampleTreeView" runat="server"
+	OnTreeNodeCheckChanged="CheckChanged"
+	ShowCheckBoxes="Root|Parent">
+	<Nodes>
+		<TreeNode Value="Home"
+							NavigateUrl="/"
+							Text="Home"
+							Target="Content"
+							Expanded="true">
+			<TreeNode Value="Foo" Text="Foo"></TreeNode>
+			<TreeNode Value="Bar" Text="Bar">
+				<TreeNode Value="Baz" Text="Baz">
+					<TreeNode Value="BlazorMisterMagoo" Text="BlazorMisterMagoo">
+
+					</TreeNode>
+				</TreeNode>
+			</TreeNode>
+		</TreeNode>
+	</Nodes>
+</TreeView>
+
+Checkboxes clicked:  @clickCount
+
+@code {
+
+	public int clickCount { get; set; } = 0;
+
+	private void CheckChanged(object sender, TreeNodeEventArgs args) {
+
+		clickCount++;
+		base.StateHasChanged();
+
+	}
+
+}

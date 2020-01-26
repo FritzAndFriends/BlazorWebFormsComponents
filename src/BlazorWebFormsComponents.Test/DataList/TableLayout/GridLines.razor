@@ -44,30 +44,30 @@
 
 @code {
 
-	void BothTest(IRazorTestContext context)
+	void BothTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("both");
 
 	}
 
-	void RowsTest(IRazorTestContext context)
+	void RowsTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("rows");
 
 	}
 
-	void ColsTest(IRazorTestContext context)
+	void ColsTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("cols");

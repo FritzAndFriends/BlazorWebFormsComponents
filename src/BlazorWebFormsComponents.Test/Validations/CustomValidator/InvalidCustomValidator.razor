@@ -8,31 +8,26 @@
 			<CustomValidator ServerValidate="@(x => false)"
 											 ControlToValidate="@Name"
 											 Text="there's no escape!" />
-
 		</EditForm>
 	</ComponentUnderTest>
 </Fixture>
-
-
 @code {
 	bool _validSubmit = false;
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
-
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest<EditForm>();
 
 		cut.Find("input").Change("whatever!");
 
-		cut.Find("form").Submit();
+		WaitForNextRender(() => cut.Find("form").Submit());
 
 		_validSubmit.ShouldBeFalse();
 		_invalidSubmit.ShouldBeTrue();
 			
 		cut.Find("span").FirstChild.TextContent.ShouldContain("there's no escape!");
-
 	}
 
 	private ExampleModel exampleModel = new ExampleModel();

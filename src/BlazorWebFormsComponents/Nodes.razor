@@ -1,0 +1,13 @@
+﻿@ChildContent
+
+@code {
+
+	[Parameter]
+	public RenderFragment ChildContent { get; set; }
+
+	[CascadingParameter(Name = "ParentTreeView")]
+	public TreeView ParentTreeView { get; set; }
+
+	// TODO:   Add handling for the databound collection of nodes that was passed in
+
+}

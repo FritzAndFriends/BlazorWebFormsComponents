@@ -1,0 +1,56 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<TreeView id="SampleTreeView"
+							ShowExpandCollapse="false"
+							runat="server">
+
+			<Nodes>
+
+				<TreeNode Value="Home"
+									NavigateUrl="Home.aspx"
+									Text="Home"
+									Target="Content"
+									ToolTip="Home Tooltip"
+									Expanded="true">
+
+					<TreeNode Value="Page 1"
+										NavigateUrl="Page1.aspx"
+										Text="Page1"
+										Target="Content">
+
+						<TreeNode Value="Section 1"
+											NavigateUrl="Section1.aspx"
+											Text="Section 1"
+											Target="Content" />
+
+					</TreeNode>
+
+					<TreeNode Value="Page 2"
+										NavigateUrl="Page2.aspx"
+										Text="Page 2"
+										Target="Content">
+
+					</TreeNode>
+
+				</TreeNode>
+
+			</Nodes>
+
+		</TreeView>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		cut.FindAll("img").Count().ShouldBe(0);
+
+	}
+
+}

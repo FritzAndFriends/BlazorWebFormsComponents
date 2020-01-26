@@ -22,6 +22,8 @@ namespace AfterBlazorServerSide
 
     public IConfiguration Configuration { get; }
 
+		public static string ApplicationName => "Blazor Server-Side";
+
     // This method gets called by the runtime. Use this method to add services to the container.
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     public void ConfigureServices(IServiceCollection services)
