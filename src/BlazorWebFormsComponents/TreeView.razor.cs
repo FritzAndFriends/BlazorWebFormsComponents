@@ -94,7 +94,7 @@ namespace BlazorWebFormsComponents
 
 			ChildNodesRenderFragment = b =>
 			{
-				b.OpenRegion(100);
+				b.OpenRegion(1);
 
 				AddElements(b, elements);
 
@@ -119,7 +119,7 @@ namespace BlazorWebFormsComponents
 
 						builder.OpenComponent<TreeNode>(treeNodeCounter++);
 
-						builder.AddAttribute(treeNodeCounter++, "Text", element.GetAttribute(thisBinding.TextField));
+						builder.AddAttribute(++treeNodeCounter, "Text", element.GetAttribute(thisBinding.TextField));
 
 						if (element.HasChildNodes) AddElements(builder, element.ChildNodes);
 

@@ -19,21 +19,21 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
 		var principal = new ClaimsPrincipal();
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		context.Services.AddService<AuthenticationStateProvider>(autheMock.Object);
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
 		var navMock = new Mock<NavigationManager>();
-		context.Services.AddService<NavigationManager>(navMock.Object);
+		Services.AddSingleton<NavigationManager>(navMock.Object);
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
-		cut.GetMarkup().Trim().ShouldBe("Anonymous");
+		cut.Markup.Trim().ShouldBe("Anonymous");
 
 	}
 
