@@ -75,7 +75,7 @@ Tell us how you are currently using the web forms framework so that we can build
 
 All code for a component should have an assigned issue that matches it.  This way we can prevent contributors from working on the same feature at the same time.
 
-Any code that is written to support a component are required to be accompanied with unit tests at the time the pull request is submitted.  Pull requests without unit tests will be delayed and asked for unit tests to prove their functionality.
+Any code that is written to support a component are required to be accompanied with unit tests at the time the pull request is submitted.  Pull requests without unit tests will be delayed and asked for unit tests to prove their functionality.  We use the [Razor Components Testing Library](https://www.nuget.org/packages/Razor.Components.Testing.Library/) to test our components.
 
 Code for components' features should also include some definition in the `/docs` folder so that our users can identify and understand which feature is supported.
 
