@@ -82,17 +82,23 @@ namespace BlazorWebFormsComponents
 		private new Task DataBind()
 		{
 
-			if (DataSource is XmlDocument) return DataBindXml(DataSource as XmlDocument);
+			if (DataSource is XmlDocument xmlDoc) {
+
+				if (xmlDoc.SelectSingleNode("/*").LocalName == "siteMap")
+					return DataBindSiteMap(xmlDoc);
+				else 
+					return DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
+
+			}
 
 			return Task.CompletedTask;
 
 		}
 
-		private Task DataBindXml(XmlDocument src)
+		private Task DataBindXml(XmlNodeList elements)
 		{
 
 			var treeNodeCounter = 0;
-			var elements = src.SelectNodes("/*");
 
 			ChildNodesRenderFragment = b =>
 			{
@@ -113,6 +119,7 @@ namespace BlazorWebFormsComponents
 				foreach (XmlNode node in siblings)
 				{
 
+
 					if (!(node is XmlElement)) continue;
 					var element = node as XmlElement;
 
@@ -131,6 +138,7 @@ namespace BlazorWebFormsComponents
 							{
 
 								AddElements(_builder, element.ChildNodes);
+
 							}));
 						}
 						builder.CloseComponent();
@@ -141,7 +149,15 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private List<TreeNodeBinding> _TreeNodeBindings = new List<TreeNodeBinding>();
+		private Task DataBindSiteMap(XmlDocument src) {
+
+			_TreeNodeBindings.First().DataMember = "siteMapNode";
+
+			return DataBindXml(src.SelectNodes("/siteMap/siteMapNode"));
+
+		}
+
+		private HashSet<TreeNodeBinding> _TreeNodeBindings = new HashSet<TreeNodeBinding>();
 		internal void AddTreeNodeBinding(TreeNodeBinding treeNodeBinding)
 		{
 			_TreeNodeBindings.Add(treeNodeBinding);
