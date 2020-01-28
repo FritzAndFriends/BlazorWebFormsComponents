@@ -65,8 +65,8 @@ namespace BlazorWebFormsComponents
 
 			Expanded = !Expanded;
 
-			if (Expanded) ParentTreeView.OnTreeNodeExpanded?.Invoke(this, new TreeNodeEventArgs(this));
-			else ParentTreeView.OnTreeNodeCollapsed?.Invoke(this, new TreeNodeEventArgs(this));
+			if (Expanded) ParentTreeView.OnTreeNodeExpanded.InvokeAsync(new TreeNodeEventArgs(this));
+			else ParentTreeView.OnTreeNodeCollapsed.InvokeAsync(new TreeNodeEventArgs(this));
 
 		}
 
@@ -74,7 +74,7 @@ namespace BlazorWebFormsComponents
 
 			this.Checked = (bool)args.Value;
 
-			ParentTreeView.OnTreeNodeCheckChanged?.Invoke(this, new TreeNodeEventArgs(this));
+			ParentTreeView.OnTreeNodeCheckChanged.InvokeAsync(new TreeNodeEventArgs(this));
 
 		}
 

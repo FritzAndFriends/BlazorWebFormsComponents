@@ -12,7 +12,7 @@ using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeView : BaseWebFormsComponent, IHasStyle
+	public partial class TreeView : BaseDataBindingComponent, IHasStyle
 	{
 
 		[Parameter]
@@ -65,13 +65,16 @@ namespace BlazorWebFormsComponents
 		}
 
 		[Parameter]
-		public EventHandler<TreeNodeEventArgs> OnTreeNodeExpanded { get; set; }
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeDataBound { get; set; }
 
 		[Parameter]
-		public EventHandler<TreeNodeEventArgs> OnTreeNodeCollapsed { get; set; }
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeCheckChanged { get; set; }
 
 		[Parameter]
-		public EventHandler<TreeNodeEventArgs> OnTreeNodeCheckChanged { get; set; }
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeCollapsed { get; set; }
+
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeExpanded { get; set; }
 
 		#endregion
 
@@ -82,14 +85,18 @@ namespace BlazorWebFormsComponents
 		private new Task DataBind()
 		{
 
+			OnDataBinding.InvokeAsync(EventArgs.Empty);
+
 			if (DataSource is XmlDocument xmlDoc) {
 
 				if (xmlDoc.SelectSingleNode("/*").LocalName == "siteMap")
-					return DataBindSiteMap(xmlDoc);
+					DataBindSiteMap(xmlDoc);
 				else 
-					return DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
+					DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
 
 			}
+
+			OnDataBound.InvokeAsync(EventArgs.Empty);
 
 			return Task.CompletedTask;
 
@@ -142,6 +149,8 @@ namespace BlazorWebFormsComponents
 							}));
 						}
 						builder.CloseComponent();
+						OnTreeNodeDataBound.InvokeAsync(new TreeNodeEventArgs(null));
+
 					}
 				}
 

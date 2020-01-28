@@ -77,6 +77,9 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		[Parameter]
+		public EventCallback<ListViewItemEventArgs> OnItemDataBound { get; set; }
+
 	}
 
 }
