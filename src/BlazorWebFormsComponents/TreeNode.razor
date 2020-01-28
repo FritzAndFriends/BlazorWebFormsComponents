@@ -14,7 +14,7 @@
 		@if (ChildContent != null && ParentTreeView.ShowExpandCollapse)
 		{
 			<td>
-				<a href="javascript:void()" @onclick="HandleNodeExpand">
+				<a href="" @onclick="HandleNodeExpand" @onclick:preventDefault @onclick:stopPropagation>
 					<img src="@nodeImg" alt="@nodeText" title="@nodeText" style="border-width: 0;" />
 				</a>
 			</td>
