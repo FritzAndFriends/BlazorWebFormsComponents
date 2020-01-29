@@ -22,12 +22,14 @@
          
         <Nodes>
         
-          <asp:TreeNode Value="Home" 
+          <asp:TreeNode Value="Home"
+            ImageToolTip="This is the home image tooltip"
+            ImageUrl="~/Content/Images/csharp_56.png"
             NavigateUrl="Home.aspx" 
             Text="Home"
             Target="Content"
             Checked="true"
-            ShowCheckBox="false"
+            ShowCheckBox="true"
             Expanded="true">
              
             <asp:TreeNode Value="Page 1 Value" 
