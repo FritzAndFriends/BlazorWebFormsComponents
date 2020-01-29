@@ -12,6 +12,7 @@ The TreeView component is meant to emulate the asp:TreeView control in markup an
 - TreeNode checkbox checked / unchecked events
 - XmlDocument databinding
 - SiteMap databinding as an XmlDocument
+- Databinding events
 
 ##### [Back to top](#treeview)
 

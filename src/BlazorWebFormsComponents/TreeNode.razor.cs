@@ -17,6 +17,12 @@ namespace BlazorWebFormsComponents
 		public bool Expanded { get; set; } = true;
 
 		[Parameter]
+		public string ImageToolTip { get; set; }
+
+		[Parameter]
+		public string ImageUrl { get; set; }
+
+		[Parameter]
 		public string NavigateUrl { get; set; }
 
 		[Parameter]
