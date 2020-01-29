@@ -138,6 +138,8 @@ namespace BlazorWebFormsComponents
 						builder.OpenComponent<TreeNode>(treeNodeCounter++);
 
 						builder.AddAttribute(treeNodeCounter++, "Text", element.GetAttribute(thisBinding.TextField));
+						if (!string.IsNullOrEmpty(thisBinding.ToolTipField))
+							builder.AddAttribute(treeNodeCounter++, "ToolTipField", element.GetAttribute(thisBinding.ToolTipField));
 
 						if (element.HasChildNodes)
 						{
