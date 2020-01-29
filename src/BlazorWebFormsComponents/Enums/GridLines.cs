@@ -5,7 +5,7 @@ using System.Text;
 namespace BlazorWebFormsComponents.Enums
 {
 
-	public enum GridLines
+  public enum GridLines
 	{
 
 		None = 0,

@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using BlazorWebFormsComponents.Enums;
 
 namespace BlazorWebFormsComponents
 {
@@ -11,10 +12,16 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Checked { get; set; } = false;
 
+		// TODO: Implement
+		[Parameter]
 		public byte Depth { get; set; } = 0;
 
 		[Parameter]
 		public bool Expanded { get; set; } = true;
+
+		// TODO: Implement
+		[Parameter]
+		public string FormatString { get; set; }
 
 		[Parameter]
 		public string ImageToolTip { get; set; }
@@ -24,6 +31,18 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string NavigateUrl { get; set; }
+
+		// TODO: Implement
+		[Parameter]
+		public bool PopulateOnDemand { get; set; }
+
+		// TODO: Implement
+		[Parameter]
+		public TreeNodeSelectAction SelectAction { get; set; }
+
+		// TODO: Implement
+		[Parameter]
+		public bool Selected { get; set; }
 
 		[Parameter]
 		public bool ShowCheckBox { get; set; } = true;

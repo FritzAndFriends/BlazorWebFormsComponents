@@ -137,9 +137,21 @@ namespace BlazorWebFormsComponents
 
 						builder.OpenComponent<TreeNode>(treeNodeCounter++);
 
+						if (!string.IsNullOrEmpty(thisBinding.ImageToolTipField))
+							builder.AddAttribute(treeNodeCounter++, "ImageToolTip", element.GetAttribute(thisBinding.ImageToolTipField));
+						if (!string.IsNullOrEmpty(thisBinding.ImageUrlField))
+							builder.AddAttribute(treeNodeCounter++, "ImageUrl", element.GetAttribute(thisBinding.ImageUrlField));
+						if (!string.IsNullOrEmpty(thisBinding.NavigateUrlField))
+							builder.AddAttribute(treeNodeCounter++, "NavigateUrl", element.GetAttribute(thisBinding.NavigateUrlField));
+						if (!string.IsNullOrEmpty(thisBinding.TargetField))
+							builder.AddAttribute(treeNodeCounter++, "Target", element.GetAttribute(thisBinding.TargetField));
+
+						// Text must be present, no need to test
 						builder.AddAttribute(treeNodeCounter++, "Text", element.GetAttribute(thisBinding.TextField));
+
 						if (!string.IsNullOrEmpty(thisBinding.ToolTipField))
-							builder.AddAttribute(treeNodeCounter++, "ToolTipField", element.GetAttribute(thisBinding.ToolTipField));
+							builder.AddAttribute(treeNodeCounter++, "ToolTip", element.GetAttribute(thisBinding.ToolTipField));
+
 
 						if (element.HasChildNodes)
 						{
