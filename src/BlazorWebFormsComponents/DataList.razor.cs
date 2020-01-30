@@ -1,4 +1,5 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorComponentUtilities;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -136,18 +137,7 @@ namespace BlazorWebFormsComponents
 
 			this.SetFontsFromAttributes(AdditionalAttributes);
 
-			var styleBuilder = new StringBuilder();
-			styleBuilder.Append(Style);
-			if (!Style?.EndsWith(";") ?? false) styleBuilder.Append(";");
-
-			this.ToStyleString(styleBuilder);
-
-			if (RepeatLayout is FlowRepeatLayout)
-			{
-				CalculatedStyle = styleBuilder.Length == 0 ? null : styleBuilder.ToString();
-			} else {
-				CalculatedStyle = styleBuilder.ToString();
-			}
+			CalculatedStyle = this.ToStyle().AddStyle(Style).NullIfEmpty();
 
 			base.OnInitialized();
 		}
