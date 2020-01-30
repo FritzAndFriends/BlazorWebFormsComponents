@@ -94,42 +94,22 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public static string ToStyleString(this IHasTableItemStyle hasStyle)
-		{
+		public static StyleBuilder ToStyle(this IHasTableItemStyle hasStyle) =>
+			((IHasStyle)hasStyle).ToStyle().AddStyle("white-space", "nowrap", !hasStyle.Wrap);
 
-			return ToStyleString(hasStyle, new StringBuilder()).ToString();
 
-		}
-
-		public static StringBuilder ToStyleString(this IHasTableItemStyle hasStyle, StringBuilder sb)
-		{
-
-			((IHasStyle)hasStyle).ToStyleString(sb);
-
-			if (!hasStyle.Wrap) sb.Append("white-space:nowrap;");
-
-			return sb;
-
-		}
-
-		public static string ToStyleString(this IHasStyle hasStyle)
-		{
-
-			return ToStyleString(hasStyle, new StringBuilder()).ToString();
-
-		}
-
-		public static StringBuilder ToStyleString(this IHasStyle hasStyle, StringBuilder sb)
-		{
-			var style = StyleBuilder.Default(sb.ToString())
-							.AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
+		public static StyleBuilder ToStyle(this IHasStyle hasStyle) => 
+			StyleBuilder.Empty().AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
 							when: hasStyle.BackColor != default(WebColor))
+
 					.AddStyle("color", () => ColorTranslator.ToHtml(hasStyle.ForeColor.ToColor()).Trim(),
 							when: hasStyle.ForeColor != default(WebColor))
+
 					.AddStyle("border", v => v.AddValue(hasStyle.BorderWidth.ToString())
 						.AddValue(hasStyle.BorderStyle.ToString().ToLowerInvariant())
 						.AddValue(() => ColorTranslator.ToHtml(hasStyle.BorderColor.ToColor()), HasBorders(hasStyle)),
 							when: HasBorders(hasStyle))
+
 					.AddStyle("font-weight", "bold", hasStyle.Font_Bold)
 					.AddStyle("font-style", "italic", hasStyle.Font_Italic)
 					.AddStyle("font-family", hasStyle.Font_Names, !string.IsNullOrEmpty(hasStyle.Font_Names))
@@ -137,13 +117,7 @@ namespace BlazorWebFormsComponents
 					.AddStyle("text-decoration", v => v.AddValue("underline", hasStyle.Font_Underline)
 						.AddValue("overline", hasStyle.Font_Overline)
 						.AddValue("line-through", hasStyle.Font_Strikeout)
-						, HasTextDecorations(hasStyle))
-					.ToString();
-
-			sb.Append(style);
-			return sb;
-
-		}
+						, HasTextDecorations(hasStyle));
 
 		private static bool HasTextDecorations(IHasStyle hasStyle) =>
 				hasStyle.Font_Underline ||

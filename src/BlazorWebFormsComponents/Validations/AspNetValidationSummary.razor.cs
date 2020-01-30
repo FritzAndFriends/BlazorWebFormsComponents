@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -33,7 +34,7 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public bool Font_Strikeout { get; set; }
 		[Parameter] public bool Font_Underline { get; set; }
 
-		protected string CalculatedStyle { get; set; }
+		protected StyleBuilder CalculatedStyle { get; set; }
 
 		public bool IsValid => CurrentEditContext.GetValidationMessages().Any();
 
@@ -67,11 +68,7 @@ namespace BlazorWebFormsComponents.Validations
 
 			this.SetFontsFromAttributes(AdditionalAttributes);
 
-			var styleBuilder = new StringBuilder();
-
-			this.ToStyleString(styleBuilder);
-
-			CalculatedStyle = styleBuilder.ToString();
+			CalculatedStyle = this.ToStyle();
 
 			base.OnInitialized();
 

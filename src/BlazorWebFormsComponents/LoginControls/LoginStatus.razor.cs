@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -43,7 +44,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		#endregion
 
-		public string CalculatedStyle => this.ToStyleString();
+		public StyleBuilder CalculatedStyle => this.ToStyle();
 
 		private bool UserAuthenticated { get; set; }
 
