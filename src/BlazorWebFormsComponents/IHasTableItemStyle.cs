@@ -1,4 +1,6 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorComponentUtilities;
+using BlazorWebFormsComponents.Enums;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -119,55 +121,62 @@ namespace BlazorWebFormsComponents
 
 		public static StringBuilder ToStyleString(this IHasStyle hasStyle, StringBuilder sb)
 		{
+			var style = StyleBuilder.Default(sb.ToString())
+							.AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
+							when: hasStyle.BackColor != default(WebColor))
+					.AddStyle("color", () => ColorTranslator.ToHtml(hasStyle.ForeColor.ToColor()).Trim(),
+							when: hasStyle.ForeColor != default(WebColor))
+					.AddStyle("border", v => v.AddValue(hasStyle.BorderWidth.ToString())
+						.AddValue(hasStyle.BorderStyle.ToString().ToLowerInvariant())
+						.AddValue(() => ColorTranslator.ToHtml(hasStyle.BorderColor.ToColor()), HasBorders(hasStyle)),
+							when: HasBorders(hasStyle))
+					.AddStyle("font-weight", "bold", hasStyle.Font_Bold)
+					.AddStyle("font-style", "italic", hasStyle.Font_Italic)
+					.AddStyle("font-family", hasStyle.Font_Names, !string.IsNullOrEmpty(hasStyle.Font_Names))
+					.AddStyle("font-size", hasStyle.Font_Size.ToString(), hasStyle.Font_Size != FontUnit.Empty)
+					.AddStyle("text-decoration", v => v.AddValue("underline", hasStyle.Font_Underline)
+						.AddValue("overline", hasStyle.Font_Overline)
+						.AddValue("line-through", hasStyle.Font_Strikeout)
+						, HasTextDecorations(hasStyle))
+					.ToString();
 
-			if (hasStyle.BackColor != default(WebColor)) sb.Append($"background-color:{ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim()};");
-			if (hasStyle.ForeColor != default(WebColor)) sb.Append($"color:{ColorTranslator.ToHtml(hasStyle.ForeColor.ToColor())};");
-			if (hasStyle.BorderStyle != BorderStyle.None && hasStyle.BorderStyle != BorderStyle.NotSet && hasStyle.BorderWidth.Value > 0 && hasStyle.BorderColor != default(WebColor))
-			{
-
-				sb.Append($"border:{hasStyle.BorderWidth.ToString()} {hasStyle.BorderStyle.ToString().ToLowerInvariant()} {ColorTranslator.ToHtml(hasStyle.BorderColor.ToColor())};");
-
-			}
-
-			if (hasStyle.Font_Bold) sb.Append("font-weight:bold;");
-			if (hasStyle.Font_Italic) sb.Append("font-style:italic;");
-			if (!string.IsNullOrEmpty(hasStyle.Font_Names)) sb.Append($"font-family:{hasStyle.Font_Names};");
-			if (hasStyle.Font_Size != FontUnit.Empty) sb.Append($"font-size:{hasStyle.Font_Size.ToString()};");
-			if (hasStyle.Font_Underline || hasStyle.Font_Overline || hasStyle.Font_Strikeout)
-			{
-				sb.Append("text-decoration:");
-
-				var td = new StringBuilder();
-				if (hasStyle.Font_Underline) td.Append("underline ");
-				if (hasStyle.Font_Overline) td.Append("overline ");
-				if (hasStyle.Font_Strikeout) td.Append("line-through");
-				sb.Append(td.ToString().Trim());
-				sb.Append(";");
-			}
-
+			sb.Append(style);
 			return sb;
 
-
 		}
+
+		private static bool HasTextDecorations(IHasStyle hasStyle) =>
+				hasStyle.Font_Underline ||
+				hasStyle.Font_Overline ||
+				hasStyle.Font_Strikeout;
+
+		private static bool HasBorders(IHasStyle hasStyle) =>
+						hasStyle.BorderStyle != BorderStyle.None &&
+						hasStyle.BorderStyle != BorderStyle.NotSet &&
+						hasStyle.BorderWidth.Value > 0 &&
+						hasStyle.BorderColor != default(WebColor);
 
 		public static void SetFontsFromAttributes(this IHasFontStyle hasStyle, Dictionary<string, object> additionalAttributes)
 		{
 
 			if (additionalAttributes != null)
 			{
-				if (additionalAttributes.ContainsKey("Font-Bold")) hasStyle.Font_Bold = bool.Parse(additionalAttributes["Font-Bold"].ToString());
-				if (additionalAttributes.ContainsKey("Font-Italic")) hasStyle.Font_Italic = bool.Parse(additionalAttributes["Font-Italic"].ToString());
-				if (additionalAttributes.ContainsKey("Font-Names")) hasStyle.Font_Names = additionalAttributes["Font-Names"].ToString();
-				if (additionalAttributes.ContainsKey("Font-Overline")) hasStyle.Font_Overline = bool.Parse(additionalAttributes["Font-Overline"].ToString());
-				if (additionalAttributes.ContainsKey("Font-Size")) hasStyle.Font_Size = FontUnit.Parse(additionalAttributes["Font-Size"].ToString());
-				if (additionalAttributes.ContainsKey("Font-Strikeout")) hasStyle.Font_Strikeout = bool.Parse(additionalAttributes["Font-Strikeout"].ToString());
-				if (additionalAttributes.ContainsKey("Font-Underline")) hasStyle.Font_Underline = bool.Parse(additionalAttributes["Font-Underline"].ToString());
-			}
+				hasStyle.Font_Bold =        additionalAttributes.GetValue("Font-Bold", bool.Parse, hasStyle.Font_Bold);
+				hasStyle.Font_Italic =      additionalAttributes.GetValue("Font-Italic", bool.Parse, hasStyle.Font_Italic);
+				hasStyle.Font_Underline =   additionalAttributes.GetValue("Font-Underline", bool.Parse, hasStyle.Font_Underline);
 
+				hasStyle.Font_Names =       additionalAttributes.GetValue("Font-Names", a => a, hasStyle.Font_Names);
+				hasStyle.Font_Overline =    additionalAttributes.GetValue("Font-Overline", bool.Parse, hasStyle.Font_Overline);
+				hasStyle.Font_Size =        additionalAttributes.GetValue("Font-Size", FontUnit.Parse, hasStyle.Font_Size);
+				hasStyle.Font_Strikeout =   additionalAttributes.GetValue("Font-Strikeout", bool.Parse, hasStyle.Font_Strikeout);
+			}
 
 		}
 
-	}
+		public static T GetValue<T>(this Dictionary<string, object> additionalAttributes, string key, Func<string, T> parser, T defaultValue) =>
+				additionalAttributes.TryGetValue(key, out var x) ? parser(x.ToString()) : defaultValue;
 
+
+	}
 
 }
