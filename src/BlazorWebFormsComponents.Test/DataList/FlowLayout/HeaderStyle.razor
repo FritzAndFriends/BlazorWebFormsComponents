@@ -34,12 +34,12 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		var theHeaderElement = cut.FindAll("span")[1];
 
@@ -52,12 +52,12 @@
 
 	}
 
-	void EmptyStyleTest(IRazorTestContext context)
+	void EmptyStyleTest()
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		var theHeaderElement = cut.FindAll("span")[1];
 

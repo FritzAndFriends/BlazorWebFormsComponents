@@ -112,8 +112,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]public bool Font_Underline { get; set; }
 		[Parameter]public WebColor ForeColor { get; set; }
 		[Parameter]public Unit Height { get; set; }
-		[Parameter]public HorizontalAlign HorizontalAlign { get; set; }
-		[Parameter]public VerticalAlign VerticalAlign { get; set; }
 		[Parameter] public Unit Width { get; set; }
 
 		protected override void HandleUnknownAttributes()

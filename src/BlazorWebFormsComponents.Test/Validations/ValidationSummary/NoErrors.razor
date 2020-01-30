@@ -1,0 +1,33 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<EditForm Model="@exampleModel">
+			<AspNetValidationSummary />
+		</EditForm>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		cut.FindAll("div").Count().ShouldBe(1);
+
+		cut.Find("div").HasAttribute("style").ShouldBeTrue();
+		cut.Find("div").GetAttribute("style").ShouldContain("display:none;");
+
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+
+}

@@ -114,6 +114,7 @@
     <Content Include="ControlSamples\ListView\Default.aspx" />
     <Content Include="ControlSamples\ListView\ModelBinding.aspx" />
     <Content Include="ControlSamples\Repeater\Default.aspx" />
+    <Content Include="ControlSamples\TreeView\default.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -205,6 +206,13 @@
     </Compile>
     <Compile Include="ControlSamples\Repeater\Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\TreeView\default.aspx.cs">
+      <DependentUpon>default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\TreeView\default.aspx.designer.cs">
+      <DependentUpon>default.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>

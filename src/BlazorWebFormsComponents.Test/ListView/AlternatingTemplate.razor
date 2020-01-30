@@ -16,10 +16,10 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.FindAll("span").Count().ShouldBe(2, "Did not render 2 SPAN elements");
 		cut.FindAll("b").Count().ShouldBe(1, "Did not render 1 B element");

@@ -10,7 +10,10 @@
 		<Content Include="..\AfterBlazorServerSide\Pages\ControlSamples\**">
 			<Link>Pages\ControlSamples\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
-  </ItemGroup>
+		<Content Include="..\AfterBlazorServerSide\Shared\**">
+			<Link>Shared\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Content>
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.1.0-preview4.19579.2" />

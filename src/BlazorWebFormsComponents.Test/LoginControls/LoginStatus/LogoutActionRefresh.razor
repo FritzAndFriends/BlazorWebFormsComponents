@@ -1,0 +1,40 @@
+﻿@inherits TestComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims;
+@using Moq;
+@using Moq.Protected;
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutPageUrl="logout" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+
+		var navigationManager = new MockNavigationManager();
+		
+		Services.AddSingleton<NavigationManager>(navigationManager);
+
+		var cut = GetComponentUnderTest();
+
+		cut.Find("a").Click();
+
+		navigationManager.LastUri.ShouldBe(null);
+
+	}
+
+}

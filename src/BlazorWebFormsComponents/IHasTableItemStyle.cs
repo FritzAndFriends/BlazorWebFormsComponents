@@ -6,7 +6,20 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
+	public interface IHasTableItemStyle : IHasLayoutTableItemStyle, IHasFontStyle { }
+
 	public interface IHasStyle : IHasLayoutStyle, IHasFontStyle { }
+
+	public interface IHasLayoutTableItemStyle : IHasLayoutStyle
+	{
+
+		HorizontalAlign HorizontalAlign { get; set; }
+
+		VerticalAlign VerticalAlign { get; set; }
+
+		bool Wrap { get; set; }
+
+	}
 
 	public interface IHasLayoutStyle
 	{
@@ -29,15 +42,12 @@ namespace BlazorWebFormsComponents
 
 		Unit Height { get; set; }
 
-		HorizontalAlign HorizontalAlign { get; set; }
-
-		VerticalAlign VerticalAlign { get; set; }
-
 		Unit Width { get; set; }
 
 	}
 
-	public interface IHasFontStyle {
+	public interface IHasFontStyle
+	{
 
 
 		bool Font_Bold { get; set; }
@@ -61,11 +71,49 @@ namespace BlazorWebFormsComponents
 	public static class IHasStyleExtensions
 	{
 
+		public static void CopyTo(this IHasStyle source, IHasStyle destination)
+		{
+
+			destination.BackColor = source.BackColor;
+			destination.BorderColor = source.BorderColor;
+			destination.BorderStyle = source.BorderStyle;
+			destination.BorderWidth = source.BorderWidth;
+			destination.CssClass = source.CssClass;
+			destination.ForeColor = source.ForeColor;
+			destination.Height = source.Height;
+			destination.Width = source.Width;
+			destination.Font_Bold = source.Font_Bold;
+			destination.Font_Italic = source.Font_Italic;
+			destination.Font_Names = source.Font_Names;
+			destination.Font_Overline = source.Font_Overline;
+			destination.Font_Size = source.Font_Size;
+			destination.Font_Strikeout = source.Font_Strikeout;
+			destination.Font_Underline = source.Font_Underline;
+
+		}
+
+		public static string ToStyleString(this IHasTableItemStyle hasStyle)
+		{
+
+			return ToStyleString(hasStyle, new StringBuilder()).ToString();
+
+		}
+
+		public static StringBuilder ToStyleString(this IHasTableItemStyle hasStyle, StringBuilder sb)
+		{
+
+			((IHasStyle)hasStyle).ToStyleString(sb);
+
+			if (!hasStyle.Wrap) sb.Append("white-space:nowrap;");
+
+			return sb;
+
+		}
+
 		public static string ToStyleString(this IHasStyle hasStyle)
 		{
 
 			return ToStyleString(hasStyle, new StringBuilder()).ToString();
-			
 
 		}
 
@@ -102,7 +150,8 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public static void SetFontsFromAttributes(this IHasFontStyle hasStyle, Dictionary<string,object> additionalAttributes) {
+		public static void SetFontsFromAttributes(this IHasFontStyle hasStyle, Dictionary<string, object> additionalAttributes)
+		{
 
 			if (additionalAttributes != null)
 			{

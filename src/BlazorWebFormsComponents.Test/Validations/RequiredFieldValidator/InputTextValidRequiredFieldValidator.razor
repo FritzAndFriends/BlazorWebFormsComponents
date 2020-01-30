@@ -1,0 +1,54 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+			Write something
+			<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
+			<RequiredFieldValidator Type="string"
+															ControlToValidate="@Name"
+															Text="Name is required." />
+
+		</EditForm>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		cut.Find("input").Change("something");
+
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeTrue();
+		_invalidSubmit.ShouldBeFalse();
+
+		cut.FindAll("span").Count().ShouldBe(0);
+
+	}
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		_validSubmit = true;
+	}
+
+	private void HandleInvalidSubmit()
+	{
+		_invalidSubmit = true;
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}

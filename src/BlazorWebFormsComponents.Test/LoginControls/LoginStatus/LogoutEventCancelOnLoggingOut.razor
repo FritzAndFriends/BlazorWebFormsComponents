@@ -1,0 +1,58 @@
+﻿@inherits TestComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims;
+@using Moq;
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.LoginStatus OnLoggingOut="LoggingOut" OnLoggedOut="LoggedOut" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	bool _loggingOut = false;
+	bool _loggedOut = false;
+
+	void FirstTest()
+	{
+
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+
+		var navMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navMock.Object);
+
+		var cut = GetComponentUnderTest();
+
+		cut.Find("a").Click();
+
+
+		_loggingOut.ShouldBeTrue();
+		_loggedOut.ShouldBeFalse();
+
+	}
+
+	void LoggingOut(BlazorWebFormsComponents.LoginControls.LoginCancelEventArgs args)
+	{
+
+		args.Cancel = true;
+		_loggingOut = true;
+
+	}
+
+	void LoggedOut(EventArgs args)
+	{
+
+		_loggedOut = true;
+
+	}
+
+}

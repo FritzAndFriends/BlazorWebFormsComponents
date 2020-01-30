@@ -1,0 +1,64 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+			Write something
+			<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
+			<RequiredFieldValidator Type="string"
+															ControlToValidate="@Name"
+															ErrorMessage="Name is required." />
+
+			<RegularExpressionValidator ValidationExpression="^[a-z]{6}$"
+																	ControlToValidate="@Name"
+																	ErrorMessage="6 char only" />
+
+			<AspNetValidationSummary DisplayMode="BulletList" />
+
+		</EditForm>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		cut.Find("input").Change("");
+
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeFalse();
+		_invalidSubmit.ShouldBeTrue();
+
+		cut.FindAll("ul").Count().ShouldBe(1);
+		cut.FindAll("li").Count().ShouldBe(2);
+
+		cut.FindAll("li")[0].TextContent.ShouldContain("Name is required.");
+		cut.FindAll("li")[1].TextContent.ShouldContain("6 char only");
+
+	}
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		_validSubmit = true;
+	}
+
+	private void HandleInvalidSubmit()
+	{
+		_invalidSubmit = true;
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}
