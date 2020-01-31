@@ -1,4 +1,5 @@
 ﻿using BlazorWebFormsComponents.Enums;
+using BlazorComponentUtilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,10 +21,7 @@ namespace BlazorWebFormsComponents
 		public override string ToString()
 		{
 
-			var theStyle = ((IHasTableItemStyle)this).ToStyleString();
-			if (string.IsNullOrEmpty(theStyle)) return null;
-
-			return theStyle;
+			return ((IHasTableItemStyle)this).ToStyle().NullIfEmpty();
 
 		}
 

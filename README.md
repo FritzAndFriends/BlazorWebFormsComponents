@@ -14,6 +14,8 @@ This is not for everyone, not everyone needs to migrate their application.  They
 
 [Strategies for your migration and steps ahead](docs/Migration/README.md) are available as part of this repository.
 
+Portions of the [original .NET Framework](https://github.com/microsoft/referencesource) are contributed to this project under their MIT license.
+
 ## Blazor Components for Controls
 
 There are a significant number of controls in ASP.NET Web Forms, and we will focus on creating components in the following order:

@@ -1,4 +1,5 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorComponentUtilities;
+using BlazorWebFormsComponents.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,15 +41,7 @@ namespace BlazorWebFormsComponents
 
 		public Unit Width { get; set; }
 
-		public override string ToString()
-		{
-
-			var theStyle = this.ToStyleString();
-			if (string.IsNullOrEmpty(theStyle)) return null;
-
-			return theStyle;
-
-		}
+		public override string ToString() => this.ToStyle().NullIfEmpty();
 
 		public void FromUnknownAttributes(Dictionary<string,object> attributes, string prefix) {
 
