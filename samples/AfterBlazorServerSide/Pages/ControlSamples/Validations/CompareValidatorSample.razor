@@ -1,0 +1,36 @@
+﻿@page "/ControlSamples/CompareValidator"
+
+<h3>Compare Validator</h3>
+@using BlazorWebFormsComponents.Validations;
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+
+	<label>Write a number greater than 10</label>
+	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
+	<CompareValidator ControlToValidate="@Name"
+										Type="Integer"
+										Operator="GreaterThan"
+										ValueToCompare="10"
+										Text="Number must be greater than 10"
+										ErrorMessage="Number must be greater than 10 but in summary!" />
+
+	<button type="submit">Submit</button>
+
+
+</EditForm>
+
+@code {
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		Console.WriteLine("OnValidSubmit");
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}
