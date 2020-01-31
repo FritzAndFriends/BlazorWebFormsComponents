@@ -28,6 +28,9 @@ namespace BlazorWebFormsComponents
 		public object DataSource { get; set; }
 
 		[Parameter]
+		public TreeViewImageSet ImageSet { get; set; } = TreeViewImageSet.Default;
+
+		[Parameter]
 		public TreeNodeTypes ShowCheckBoxes { get; set; }
 
 		[Parameter]

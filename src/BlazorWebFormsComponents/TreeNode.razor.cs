@@ -9,6 +9,8 @@ namespace BlazorWebFormsComponents
 	public partial class TreeNode : BaseWebFormsComponent
 	{
 
+		public const string ImageLocation = "_content/Fritz.BlazorWebFormsComponents/TreeView/";
+
 		[Parameter]
 		public bool Checked { get; set; } = false;
 

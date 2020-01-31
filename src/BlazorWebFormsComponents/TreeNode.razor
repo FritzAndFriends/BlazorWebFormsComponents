@@ -1,5 +1,5 @@
 ﻿@{
-	string nodeImg = Expanded ? "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" : "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif";
+	string nodeImg = Expanded ? $"{ImageLocation}{ParentTreeView.ImageSet.Expand}" : $"{ImageLocation}{ParentTreeView.ImageSet.Collapse}";
 	string nodeText = Expanded ? $"Collapse {Text}" : $"Expand {Text}";
 }
 @if ((Parent?.Expanded) ?? true)
