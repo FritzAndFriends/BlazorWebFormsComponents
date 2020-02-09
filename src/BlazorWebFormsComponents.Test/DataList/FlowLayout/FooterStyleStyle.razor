@@ -1,0 +1,34 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using BlazorWebFormsComponents
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Flow"
+							Context="Item">
+			<ChildContent>
+				<FooterStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></FooterStyle>
+			</ChildContent>
+			<FooterTemplate>FooterTemplate</FooterTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	void FirstTest()
+	{
+		var cut = GetComponentUnderTest();
+		Console.WriteLine(cut.Markup);
+		var footer = cut.Find("span").Children.FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
+		footer.HasAttribute("style").ShouldBeTrue();
+		var style = footer.GetAttribute("style");
+
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color:Blue");
+		style.ShouldContain("border:2px solid");
+	}
+}
