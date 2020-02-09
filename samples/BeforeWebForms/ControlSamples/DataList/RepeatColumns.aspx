@@ -1,35 +1,32 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="StyleAttributes.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.StyleAttributes" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="RepeatColumns.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.RepeatColumns" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <h2>DataList Styles</h2>
+    <h2>DataList Repeat Columns Sample</h2>
 
     <div>
         usage samples <a href="Default.aspx">Default Sample</a>|<a href="FlowLayout.aspx">FlowLayout Sample</a>|<a href="StyleAttributes.aspx">Styles</a>|<a href="RepeatColumns.aspx">Repeat Columns Sample</a>
     </div>
 
-    <p>
-    Here is a simple datalist bound to a collection of widgets.  We're testing and showing the various
-		style attributes that can be set on the DataList
-    </p>
+    <p>Here is a simple datalist bound to a collection of widgets with RepeatLayout set to Flow</p>
 
     <asp:DataList ID="simpleDataList"
         runat="server"
-        RepeatColumns="2"
+        Enabled="true"
+        Caption="This is my caption"
+        CaptionAlign="Top"
+        CellPadding="2"
+        CellSpacing="3"
         ToolTip="This is my tooltip"
-        AccessKey="S"
-        BackColor="Gray"
-        BorderStyle="Solid"
-        BorderWidth="2px"
-        BorderColor="Firebrick"
-        Font-Bold="true"
-        GridLines="Vertical"
         UseAccessibleHeader="true"
+        RepeatDirection="Vertical"
+        RepeatLayout="Table"
+        RepeatColumns="3"
         ItemType="SharedSampleObjects.Models.Widget">
+        <HeaderStyle />
         <HeaderTemplate>
             My Widget List
         </HeaderTemplate>
-        <FooterTemplate>End of Line</FooterTemplate>
         <ItemTemplate>
             <%# Item.Name %>
             <br />
