@@ -1,0 +1,42 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.Widgets(10)"
+							ItemType="Widget"
+							Caption="DataListCaption"
+							RepeatDirection="Vertical"
+							RepeatLayout="Flow"
+							RepeatColumns="4"
+							GridLines="Vertical"
+							Context="Item">
+			<HeaderTemplate>HeaderTemplate</HeaderTemplate>
+			<ItemTemplate>@Item.Id</ItemTemplate>
+			<FooterTemplate>FooterTemplate</FooterTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	void FirstTest()
+	{
+		var cut = GetComponentUnderTest();
+		Console.WriteLine(cut.Markup);
+
+		//DataListSpan
+		//  HeaderSpan
+		//    Checking 20 items in 4 Repeating Columns
+		//      1 ; 4 ; 7 ; 9
+		//      2 ; 5 ; 8 ; 10
+		//      3 ; 6 ;  
+		//  FooterSpan
+
+		var dataListNodes = cut.FindAll("span").FirstOrDefault(x => x.HasChildNodes);
+		var dataListChildren = dataListNodes.Children.ToList();
+		var header = dataListChildren[0];
+		header.InnerHtml.ShouldBe("HeaderTemplate");
+		dataListChildren[1].InnerHtml.ShouldBe(string.Empty);
+		cut.FindAll("br").Count().ShouldBe(4);
+	}
+}
