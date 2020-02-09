@@ -71,9 +71,14 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter(Name = "AlternatingItemStyle")]
 		private TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
 
-
 		[Parameter]
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
+
+		[Parameter]
+		public RepeatDirection RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.RepeatDirection.Vertical;
+
+		[Parameter]
+		public int RepeatColumns { get; set; } = 1;
 
 		[CascadingParameter(Name = "SeparatorStyle")]
 		private TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();

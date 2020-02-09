@@ -1,0 +1,120 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.Widgets(12)"
+							ItemType="Widget"
+							RepeatDirection="Horizontal"
+							RepeatLayout="Flow"
+							RepeatColumns="4"
+							Context="Item">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+		Console.WriteLine(cut.Markup);
+
+		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
+
+		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+
+	}
+
+
+}
+@*
+
+	<span title="This is my tooltip" id="MainContent_simpleDataList" itemtype="SharedSampleObjects.Models.Widget"><span>
+							My Widget List
+					</span><br><span>
+							one Widget
+							<br>
+							£88.00
+					</span><span>
+							eight Widget
+							<br>
+							£57.00
+					</span><span>
+							fifteen Widget
+							<br>
+							£83.00
+					</span><br><span>
+							two Widget
+							<br>
+							£82.00
+					</span><span>
+							nine Widget
+							<br>
+							£25.00
+					</span><span>
+							sixteen Widget
+							<br>
+							£60.00
+					</span><br><span>
+							three Widget
+							<br>
+							£80.00
+					</span><span>
+							ten Widget
+							<br>
+							£74.00
+					</span><span>
+							seventeen Widget
+							<br>
+							£8.00
+					</span><br><span>
+							four Widget
+							<br>
+							£13.00
+					</span><span>
+							eleven Widget
+							<br>
+							£16.00
+					</span><span>
+							eighteen Widget
+							<br>
+							£55.00
+					</span><br><span>
+							five Widget
+							<br>
+							£42.00
+					</span><span>
+							twelve Widget
+							<br>
+							£27.00
+					</span><span>
+							nineteen Widget
+							<br>
+							£59.00
+					</span><br><span>
+							six Widget
+							<br>
+							£33.00
+					</span><span>
+							thirteen Widget
+							<br>
+							£35.00
+					</span><span>
+							twenty Widget
+							<br>
+							£44.00
+					</span><br><span>
+							seven Widget
+							<br>
+							£44.00
+					</span><span>
+							fourteen Widget
+							<br>
+							£5.00
+					</span></span>*@

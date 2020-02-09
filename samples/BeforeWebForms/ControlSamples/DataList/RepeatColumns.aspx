@@ -19,8 +19,9 @@
         CellSpacing="3"
         ToolTip="This is my tooltip"
         UseAccessibleHeader="true"
-        RepeatDirection="Vertical"
+        GridLines="Vertical"
         RepeatLayout="Table"
+        RepeatDirection="Vertical"
         RepeatColumns="3"
         ItemType="SharedSampleObjects.Models.Widget">
         <HeaderStyle />
