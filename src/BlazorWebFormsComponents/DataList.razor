@@ -1,11 +1,9 @@
 ﻿@inherits BaseModelBindingComponent<ItemType>
-@using BlazorWebFormsComponents.Enums
-
 @typeparam ItemType
+@using BlazorWebFormsComponents.Enums
 
 @if (Items != null)
 {
-
 	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
 		<CascadingValue Name="FooterStyle" Value="FooterStyle">
 			<CascadingValue Name="ItemStyle" Value="ItemStyle">
@@ -17,7 +15,6 @@
 			</CascadingValue>
 		</CascadingValue>
 	</CascadingValue>
-
 
 	@switch (RepeatLayout)
 	{
@@ -66,73 +63,61 @@
 							<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
 						}
 
-
 						<tr><td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td></tr>
 						OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
 						even = !even;
 						first = false;
-
 					}
+
 					OnDataBound.InvokeAsync(EventArgs.Empty);
 				}
 
 				@if (FooterTemplate != null && ShowFooter)
 				{
-
 					<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
-
 				}
-
 
 			</table>
 			break;
 		case FlowRepeatLayout f:
-
 			<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
-
 				@if (HeaderTemplate != null && ShowHeader)
 				{
-
 					<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
-
 				}
 
 				@if (Items?.Any() ?? false)
 				{
-
 					var even = true;
 					var first = true;
 					OnDataBinding.InvokeAsync(EventArgs.Empty);
-					@foreach (var item in Items)
+					var idx = 1;
+					@foreach(var item in Items)
 					{
-
 						if (!first && SeparatorTemplate != null)
 						{
 							<span style="@SeparatorStyle">@SeparatorTemplate</span>
 						}
 
-						<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span><br />
+						<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
 						OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+						@if(idx % RepeatColumns == 0)
+						{
+							<br>
+						}
+
 						even = !even;
 						first = false;
-
+						idx++;
 					}
+
 					OnDataBound.InvokeAsync(EventArgs.Empty);
 				}
-
 				@if (FooterTemplate != null && ShowFooter)
 				{
-
 					<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />
-
 				}
-
-
-
 			</span>
-
 			break;
-
 	}
-
 }

@@ -1,11 +1,14 @@
 ﻿namespace BlazorWebFormsComponents.Enums
 {
-  public abstract class RepeatDirection
+  public abstract class DataListEnum
 	{
-		public static HorizontalRepeatDirection Horizontal { get; } = new HorizontalRepeatDirection();
-		public static VerticalRepeatDirection Vertical { get; } = new VerticalRepeatDirection();
+		public static HorizontalDataList Horizontal { get; } = new HorizontalDataList();
+		public static VerticalDataList Vertical { get; } = new VerticalDataList();
+		public static NoneDataList None { get; } = new NoneDataList();
+		public static BothDataList Both { get; } = new BothDataList();
 	}
-	public class HorizontalRepeatDirection : RepeatDirection { }
-	public class VerticalRepeatDirection : RepeatDirection { }
-
+	public class HorizontalDataList : DataListEnum { }
+	public class VerticalDataList : DataListEnum { }
+	public class NoneDataList : DataListEnum { }
+	public class BothDataList : DataListEnum { }
 }

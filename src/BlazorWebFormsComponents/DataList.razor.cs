@@ -1,13 +1,7 @@
 ﻿using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Drawing;
-using System.Linq;
-using System.Net.Cache;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
@@ -30,13 +24,13 @@ namespace BlazorWebFormsComponents
 		public int CellSpacing { get; set; }
 
 		[Parameter]
-		public GridLines GridLines { get; set; } = GridLines.None;
+		public DataListEnum GridLines { get; set; } = DataListEnum.None;
 
-		private static readonly Dictionary<GridLines, string?> _GridLines = new Dictionary<GridLines, string?> {
-			{GridLines.None, null },
-			{GridLines.Horizontal, "rows" },
-			{GridLines.Vertical, "cols" },
-			{GridLines.Both, "both" }
+		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
+			{DataListEnum.None, null },
+			{DataListEnum.Horizontal, "rows" },
+			{DataListEnum.Vertical, "cols" },
+			{DataListEnum.Both, "both" }
 		};
 		protected string? CalculatedGridLines {  get {
 
@@ -75,7 +69,7 @@ namespace BlazorWebFormsComponents
 		public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 
 		[Parameter]
-		public RepeatDirection RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.RepeatDirection.Vertical;
+		public DataListEnum RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.DataListEnum.Vertical;
 
 		[Parameter]
 		public int RepeatColumns { get; set; } = 1;

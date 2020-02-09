@@ -21,22 +21,16 @@
 </DataList>
 
 @code {
-
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
 
 	protected override void OnAfterRender(bool firstRender)
 	{
-
 		if (firstRender)
 		{
 			simpleDataList.DataSource = Widget.SimpleWidgetList;
 			simpleDataList.DataBind();
 		}
-
-		//base.OnParametersSet();
 		base.OnAfterRender(firstRender);
-
 	}
-
 }
 

@@ -3,7 +3,7 @@
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
-		<DataList Items="Widget.Widgets(12)"
+		<DataList Items="Widget.Widgets(10)"
 							ItemType="Widget"
 							Caption="DataListCaption"
 							RepeatDirection="Horizontal"
@@ -26,7 +26,7 @@
 		var cut = GetComponentUnderTest();
 		Console.WriteLine(cut.Markup);
 
-		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("td").Count().ShouldBe(12);
 		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
 
 		cut.Find("span").HasAttribute("title").ShouldBeFalse();

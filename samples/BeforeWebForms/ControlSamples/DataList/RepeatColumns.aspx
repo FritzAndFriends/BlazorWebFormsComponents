@@ -20,18 +20,16 @@
         ToolTip="This is my tooltip"
         UseAccessibleHeader="true"
         GridLines="Vertical"
-        RepeatLayout="Table"
+        RepeatLayout="Flow"
         RepeatDirection="Vertical"
-        RepeatColumns="3"
+        RepeatColumns="4"
         ItemType="SharedSampleObjects.Models.Widget">
         <HeaderStyle />
         <HeaderTemplate>
             My Widget List
         </HeaderTemplate>
         <ItemTemplate>
-            <%# Item.Name %>
-            <br />
-            <%# Item.Price.ToString("c") %>
+            <%# Item.Id %>
         </ItemTemplate>
     </asp:DataList>
 

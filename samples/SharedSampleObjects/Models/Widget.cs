@@ -24,7 +24,7 @@ namespace SharedSampleObjects.Models
 			            .Split(';');
 			var widgets = Enumerable.Range(0, n).Select(i => new Widget()
 			{
-				Id = n,
+				Id = i+1,
 				Name = $"{words[i % 100]} Widget",
 				Price = (rnd.Next(100, 10000) / 100),
 				LastUpdate = DateTime.Today.AddHours(-rnd.Next(0, 300))
