@@ -1,5 +1,5 @@
 ﻿@{
-	string nodeImg = Expanded ? $"{ImageLocation}{ParentTreeView.ImageSet.Expand}" : $"{ImageLocation}{ParentTreeView.ImageSet.Collapse}";
+	string nodeImg = string.IsNullOrEmpty(ParentTreeView.ImageSet.Collapse) ? $"{ImageLocation}Default_NoExpand.gif" :  (Expanded ? $"{ImageLocation}{ParentTreeView.ImageSet.Collapse}" : $"{ImageLocation}{ParentTreeView.ImageSet.Expand}");
 	string nodeText = Expanded ? $"Collapse {Text}" : $"Expand {Text}";
 }
 @if ((Parent?.Expanded) ?? true)

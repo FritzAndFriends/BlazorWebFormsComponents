@@ -1,4 +1,5 @@
 ﻿@using BlazorWebFormsComponents
+@using static BlazorWebFormsComponents.Enums.TreeViewImageSet 
 
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">BlazorWebFormsComponents<br/>@Startup.ApplicationName</a>
@@ -8,7 +9,7 @@
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-   <TreeView CssClass="nav-item">
+   <TreeView CssClass="nav-item" ImageSet="Windows">
     <Nodes>
 
       <TreeNode Text="Home" NavigateUrl="/">

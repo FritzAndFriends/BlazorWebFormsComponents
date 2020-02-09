@@ -18,6 +18,7 @@
         ShowExpandCollapse="true"
         ShowCheckBoxes="All"
         ShowLines="true"
+        ImageSet="WindowsHelp"
         CssClass="Foo"
         runat="server">
          
