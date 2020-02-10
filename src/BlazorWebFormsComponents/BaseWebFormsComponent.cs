@@ -69,8 +69,8 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Visible { get; set; } = true;
 
-    [Obsolete("This method doesn't do anything in Blazor")]
-    public void DataBind() { }
+		[Obsolete("This method doesn't do anything in Blazor")]
+		public void DataBind() { }
 
 		/// <summary>
 		/// 🚨🚨 Placeholders are not available in Blazor 🚨🚨
@@ -123,13 +123,16 @@ namespace BlazorWebFormsComponents
 		protected override async Task OnInitializedAsync()
 		{
 
-			if (OnInit.HasDelegate) await OnInit.InvokeAsync(EventArgs.Empty);
+			if (OnInit.HasDelegate)
+				await OnInit.InvokeAsync(EventArgs.Empty);
 
 			await base.OnInitializedAsync();
 
-			if (OnLoad.HasDelegate) await OnLoad.InvokeAsync(EventArgs.Empty);
+			if (OnLoad.HasDelegate)
+				await OnLoad.InvokeAsync(EventArgs.Empty);
 
-			if (OnPreRender.HasDelegate) await OnPreRender.InvokeAsync(EventArgs.Empty);
+			if (OnPreRender.HasDelegate)
+				await OnPreRender.InvokeAsync(EventArgs.Empty);
 
 		}
 
@@ -162,13 +165,16 @@ namespace BlazorWebFormsComponents
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
 
-		private async Task Dispose(bool disposing)
+		protected virtual async ValueTask Dispose(bool disposing)
 		{
 			if (!disposedValue)
 			{
 				if (disposing)
 				{
-					if (OnDisposed.HasDelegate) await OnDisposed.InvokeAsync(EventArgs.Empty);
+					if (OnDisposed.HasDelegate)
+					{
+						await OnDisposed.InvokeAsync(EventArgs.Empty);
+					}
 				}
 
 				disposedValue = true;
@@ -182,12 +188,10 @@ namespace BlazorWebFormsComponents
 		}
 
 		// This code added to correctly implement the disposable pattern.
-		public async ValueTask DisposeAsync()
+		public ValueTask DisposeAsync()
 		{
-
-			await Dispose(true);
 			GC.SuppressFinalize(this);
-
+			return Dispose(true);
 		}
 		#endregion
 

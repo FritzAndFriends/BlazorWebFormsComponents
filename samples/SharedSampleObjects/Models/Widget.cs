@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace SharedSampleObjects.Models
 {
-  public class Widget
+	public class Widget
   {
 
     public int Id { get; set; }

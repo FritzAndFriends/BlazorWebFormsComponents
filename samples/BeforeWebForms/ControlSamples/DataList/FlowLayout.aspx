@@ -21,6 +21,7 @@
 		UseAccessibleHeader="true"
 		RepeatLayout="Flow"
 		ItemType="SharedSampleObjects.Models.Widget">
+		<HeaderStyle />
 		<HeaderTemplate>
 			My Widget List
 		</HeaderTemplate>

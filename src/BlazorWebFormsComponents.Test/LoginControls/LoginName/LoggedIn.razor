@@ -1,0 +1,35 @@
+﻿@inherits TestComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims;
+@using Moq;
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.LoginName />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.Add(new Microsoft.Extensions.DependencyInjection.ServiceDescriptor(typeof(AuthenticationStateProvider),autheMock.Object));
+
+		var cut = GetComponentUnderTest();
+
+		cut.FindAll("span").Count().ShouldBe(1);
+
+		cut.Find("span").FirstChild.TextContent.ShouldBe("James Bond");
+
+	}
+
+}

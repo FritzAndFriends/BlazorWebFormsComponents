@@ -1,0 +1,51 @@
+﻿@inherits TestComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims;
+@using Moq;
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.LoginView>
+			<AnonymousTemplate>
+				Anonymous
+			</AnonymousTemplate>
+			<ChildContent>
+				<BlazorWebFormsComponents.LoginControls.RoleGroup Roles="Agent">
+					Agent
+				</BlazorWebFormsComponents.LoginControls.RoleGroup>
+				<BlazorWebFormsComponents.LoginControls.RoleGroup Roles="Spy,Agent">
+					Spy,Agent
+				</BlazorWebFormsComponents.LoginControls.RoleGroup>
+			</ChildContent>
+		</BlazorWebFormsComponents.LoginControls.LoginView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[]
+		{
+			new Claim(ClaimTypes.Name, "Dr. Heinz Doofenshmirtz")
+		}, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+
+		var navMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navMock.Object);
+
+		var cut = GetComponentUnderTest();
+
+		cut.Markup.Trim().ShouldBeEmpty();
+
+	}
+
+}

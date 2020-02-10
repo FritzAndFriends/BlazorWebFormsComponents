@@ -17,10 +17,10 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		cut.FindAll("span").Count().ShouldBe(5);
 		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");

@@ -37,12 +37,12 @@
 
 @code {
 
-	void FirstTest(IRazorTestContext context)
+	void FirstTest()
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		var theHeaderElement = cut.Find("td");
 
@@ -54,12 +54,12 @@
 
 	}
 
-	void NullTest(IRazorTestContext context)
+	void NullTest()
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
-		var cut = context.GetComponentUnderTest();
+		var cut = GetComponentUnderTest();
 
 		var theHeaderElement = cut.Find("td");
 

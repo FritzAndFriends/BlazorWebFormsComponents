@@ -1,0 +1,53 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest" Setup="Setup">
+	<ComponentUnderTest>
+
+		<TreeView @ref="BookTreeView"
+							DataSource="bookXml"
+							runat="server">
+
+			<DataBindings>
+				<TreeNodeBinding DataMember="Book" TextField="Title" />
+				<TreeNodeBinding DataMember="Chapter" TextField="Heading" />
+				<TreeNodeBinding DataMember="Section" TextField="Heading" />
+			</DataBindings>
+
+		</TreeView>
+
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+
+	public TreeView BookTreeView;
+
+	System.Xml.XmlDocument bookXml = new System.Xml.XmlDocument();
+
+	void Setup()
+	{
+
+		bookXml.LoadXml(@"<Book Title=""Book Title"">
+											<Chapter Heading=""Chapter 1"">
+												<Section Heading=""Section 1"">
+												</Section>
+												<Section Heading=""Section 2"">
+												</Section>
+											</Chapter>
+											<Chapter Heading=""Chapter 2"">
+												<Section Heading=""Section 1"">
+												</Section>
+											</Chapter>
+											</Book>");
+
+	}
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest<TreeView>();
+		cut.FindAll("table").Count().ShouldBe(6, "Did not render all 6 nodes of the XML document");
+
+	}
+
+}

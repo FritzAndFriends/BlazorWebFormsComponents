@@ -1,28 +1,74 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">AfterBlazorServerSide</a>
+﻿@using BlazorWebFormsComponents
+
+<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">BlazorWebFormsComponents<br/>@Startup.ApplicationName</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        @*<li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>*@
-    </ul>
+   <TreeView CssClass="nav-item">
+    <Nodes>
+
+      <TreeNode Text="Home" NavigateUrl="/">
+
+        <TreeNode Text="Data Components">
+
+					<TreeNode Text="DataList" NavigateUrl="/ControlSamples/DataList">
+						<TreeNode NavigateUrl="/ControlSamples/DataList" Text="Simple Table" />
+						<TreeNode NavigateUrl="/ControlSamples/DataList/Flow" Text="Simple Flow" />
+						<TreeNode NavigateUrl="/ControlSamples/DataList/HeaderStyle" Text="Header Style" />
+						<TreeNode NavigateUrl="/ControlSamples/DataList/ComplexStyle" Text="Complex Style" />
+					</TreeNode>
+
+					<TreeNode Text="ListView" NavigateUrl="/ControlSamples/ListView">
+						<TreeNode NavigateUrl="/ControlSamples/ListView" Text="Simple List View"></TreeNode>
+						<TreeNode NavigateUrl="./ControlSamples/ListView/ModelBinding" Text="ModelBinding Sample"></TreeNode>
+						<TreeNode NavigateUrl="./ControlSamples/ListView/LayoutTest" Text="Layout Test"></TreeNode>
+					</TreeNode>
+
+          <TreeNode Text="Repeater" NavigateUrl="/ControlSamples/Repeater">
+
+          </TreeNode>
+
+        </TreeNode>        
+
+        <TreeNode Text="Validation Components">
+
+          <TreeNode Text="Custom Validator" NavigateUrl="/ControlSamples/CustomValidator"></TreeNode>
+          <TreeNode Text="Regular Expression" NavigateUrl="/ControlSamples/RegularExpressionValidator"></TreeNode>
+          <TreeNode Text="Required Field" NavigateUrl="/ControlSamples/RequiredFieldValidator"></TreeNode>
+          <TreeNode Text="Validation Summary" NavigateUrl="/ControlSamples/ValidationSummary"></TreeNode>
+
+        </TreeNode>
+
+        <TreeNode Text="Navigation Components">
+
+					<TreeNode Text="TreeView" NavigateUrl="/ControlSamples/TreeView">
+  						<TreeNode Text="Static TreeView" NavigateUrl="/ControlSamples/TreeView"></TreeNode>
+              <TreeNode Text="XML Data Source" NavigateUrl="/ControlSamples/TreeView/XmlDataSource"></TreeNode>
+					</TreeNode>
+
+					</TreeNode>
+
+        <TreeNode Text="Login Components">
+
+          <TreeNode Text="LoginName" NavigateUrl="/ControlSamples/LoginName"></TreeNode>
+          <TreeNode Text="Login" NavigateUrl="/ControlSamples/Login"></TreeNode>
+					<TreeNode Text="LoginStatus">
+
+						<TreeNode Text="Authenticated" NavigateUrl="/ControlSamples/LoginStatusAuthenticated"></TreeNode>
+						<TreeNode Text="Not Authenticated" NavigateUrl="/ControlSamples/LoginStatusNotAuthenticated"></TreeNode>
+
+					</TreeNode>
+
+        </TreeNode>
+
+      </TreeNode>
+
+    </Nodes>
+   </TreeView>
 </div>
 
 @code {
