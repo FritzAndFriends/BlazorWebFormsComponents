@@ -1,36 +1,92 @@
 ﻿@page "/ControlSamples/DataList/RepeatColumns"
 
-<h2>DataList Simple Flow Layout Sample</h2>
+<h2>DataList Repeat Layout Sample</h2>
 
 <Nav />
 
-<p>Here is a simple datalist bound to a collection of widgets in Flow layout mode.</p>
+<p>Here is a flow datalist bound to a collection of 25 widgets in 4 Columns layout mode.</p>
 
-<DataList @ref="simpleDataList"
+<DataList @ref="simpleDataList1"
 					runat="server"
 					EnableViewState="false"
 					RepeatDirection="Vertical"
 					RepeatLayout="Flow"
-					RepeatColumns="3"
+					RepeatColumns="4"
+					GridLines="Both"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
-	<HeaderTemplate>Simple Widgets</HeaderTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<p>Here is a table datalist bound to a collection of 25 widgets in 4 Columns layout mode.</p>
+
+<DataList @ref="simpleDataList2"
+					runat="server"
+					EnableViewState="false"
+					RepeatDirection="Vertical"
+					RepeatLayout="Table"
+					RepeatColumns="4"
+					GridLines="Both"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<p>Here is a table datalist bound to a collection of 25 widgets in 5 Columns Vertically .</p>
+
+<DataList @ref="simpleDataList3"
+					runat="server"
+					EnableViewState="false"
+					RepeatDirection="Vertical"
+					RepeatLayout="Table"
+					RepeatColumns="5"
+					GridLines="Both"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<p>Here is a table datalist bound to a collection of 25 widgets in 5 Columns Horizontally.</p>
+
+<DataList @ref="simpleDataList4"
+					runat="server"
+					EnableViewState="false"
+					RepeatDirection="Horizontal"
+					RepeatLayout="Table"
+					RepeatColumns="5"
+					GridLines="Both"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
 	<ItemTemplate>
 		@Item.Name - @Item.Price.ToString("c")
 	</ItemTemplate>
 </DataList>
 
 @code {
-	BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList1 { get; set; }
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList2 { get; set; }
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList3 { get; set; }
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList4 { get; set; }
 
 	protected override void OnAfterRender(bool firstRender)
 	{
 		if (firstRender)
 		{
-			simpleDataList.DataSource = Widget.SimpleWidgetList;
-			simpleDataList.DataBind();
+			simpleDataList1.DataSource = Widget.Widgets(25);
+			simpleDataList2.DataSource = Widget.Widgets(25);
+			simpleDataList3.DataSource = Widget.Widgets(25);
+			simpleDataList4.DataSource = Widget.Widgets(25);
+			simpleDataList1.DataBind();
+			simpleDataList2.DataBind();
+			simpleDataList3.DataBind();
+			simpleDataList4.DataBind();
 		}
 		base.OnAfterRender(firstRender);
 	}
 }
-

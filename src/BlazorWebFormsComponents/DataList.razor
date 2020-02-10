@@ -27,56 +27,63 @@
 						 style="border-collapse:collapse;@CalculatedStyle"
 						 tabindex="@(TabIndex == default ? null : (short?)TabIndex)"
 						 title="@ToolTip">
-
-				@if (HeaderTemplate != null && ShowHeader)
-				{
-
-					if (!string.IsNullOrEmpty(Caption))
+				<tbody>
+					@if (HeaderTemplate != null && ShowHeader)
 					{
-						<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
+						if (!string.IsNullOrEmpty(Caption))
+						{
+							<caption align="@(CaptionAlign == VerticalAlign.NotSet ? null : CaptionAlign.ToString())">@Caption</caption>
+						}
+
+						<tr>
+							@if (UseAccessibleHeader)
+							{
+								<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
+							}
+							else
+							{
+								<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
+							}
+
+						</tr>
 					}
 
-					<tr>
-						@if (UseAccessibleHeader)
-						{
-							<th style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</th>
-						}
-						else
-						{
-							<td style="@HeaderStyle" class="@HeaderStyle.CssClass">@HeaderTemplate</td>
-						}
-					</tr>
-
-				}
-
-				@if (Items?.Any() ?? false)
-				{
-					var even = true;
-					var first = true;
-					OnDataBinding.InvokeAsync(EventArgs.Empty);
-
-					@foreach (var item in Items)
+					@if (Items?.Any() ?? false)
 					{
-
-						if (!first && SeparatorTemplate != null)
+						var even = true;
+						var first = true;
+						OnDataBinding.InvokeAsync(EventArgs.Empty);
+						var idx = 1;
+						var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection).ToList();
+						do
 						{
-							<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
+							if (!first && SeparatorTemplate != null)
+							{
+								<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
+							}
+							<tr>
+								@{
+									do
+									{
+										var item = IndexedItems[idx - 1];
+										<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
+										OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+										even = !even;
+										idx++;
+										first = false;
+									} while ((idx-1) % RepeatColumns != 0 && idx <= IndexedItems.Count());
+								}
+							</tr>
+
+						} while (idx <= IndexedItems.Count());
+						OnDataBound.InvokeAsync(EventArgs.Empty);
+
+						@if (FooterTemplate != null && ShowFooter)
+						{
+							<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
 						}
-
-						<tr><td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td></tr>
-						OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-						even = !even;
-						first = false;
 					}
-
-					OnDataBound.InvokeAsync(EventArgs.Empty);
-				}
-
-				@if (FooterTemplate != null && ShowFooter)
-				{
-					<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
-				}
-
+				</tbody>
 			</table>
 			break;
 		case FlowRepeatLayout f:
@@ -93,7 +100,7 @@
 					OnDataBinding.InvokeAsync(EventArgs.Empty);
 					var idx = 1;
 					var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection);
-					@foreach(var item in IndexedItems)
+					@foreach (var item in IndexedItems)
 					{
 						if (!first && SeparatorTemplate != null)
 						{
@@ -102,7 +109,7 @@
 
 						<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
 						OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-						@if(idx % RepeatColumns == 0)
+						@if (idx % RepeatColumns == 0)
 						{
 							<br>
 						}

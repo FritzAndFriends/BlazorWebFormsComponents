@@ -10,9 +10,7 @@
 							RepeatLayout="Table"
 							RepeatColumns="4"
 							Context="Item">
-			<HeaderTemplate>HeaderTemplate</HeaderTemplate>
-			<HeaderTemplate>FooterTemplate</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
+			<ItemTemplate>@Item.Id</ItemTemplate>
 		</DataList>
 	</ComponentUnderTest>
 </Fixture>
@@ -26,141 +24,19 @@
 		var cut = GetComponentUnderTest();
 		Console.WriteLine(cut.Markup);
 
-		cut.FindAll("td").Count().ShouldBe(12);
-		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
+		cut.FindAll("td").Count().ShouldBe(10);
 
-		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+		//DataListSpan
+		//  HeaderSpan
+		//    Checking 10 items in 4 Repeating Columns
+		//      1 ; 2 ; 3 ; 4
+		//      5 ; 6 ; 7 ; 8
+		//      9 ; 10
+		//  FooterSpan
 
+		var dataListNodes = cut.FindAll("td").FirstOrDefault(x => x.HasChildNodes);
+		var dataListChildren = cut.FindAll("td").ToList();
+		string.Join(' ', dataListChildren.Select(x => x.InnerHtml)).ShouldBe("1 2 3 4 5 6 7 8 9 10");
+		cut.FindAll("tr").Count().ShouldBe(3);
 	}
-
-
 }
-@*  
-<table title="This is my tooltip" id="MainContent_simpleDataList" border="1" rules="cols" cellspacing="3" cellpadding="2" itemtype="SharedSampleObjects.Models.Widget">
-	<caption align="Top">
-		This is my caption
-	</caption>
-	<tbody>
-		<tr>
-			<th colspan="3" scope="col">
-				My Widget List
-			</th>
-		</tr>
-		<tr>
-			<td>
-				one Widget
-				<br>
-				£80.00
-			</td>
-			<td>
-				eight Widget
-				<br>
-				£39.00
-			</td>
-			<td>
-				fifteen Widget
-				<br>
-				£79.00
-			</td>
-		</tr>
-		<tr>
-			<td>
-				two Widget
-				<br>
-				£35.00
-			</td>
-			<td>
-				nine Widget
-				<br>
-				£33.00
-			</td>
-			<td>
-				sixteen Widget
-				<br>
-				£9.00
-			</td>
-		</tr>
-		<tr>
-			<td>
-				three Widget
-				<br>
-				£45.00
-			</td>
-			<td>
-				ten Widget
-				<br>
-				£89.00
-			</td>
-			<td>
-				seventeen Widget
-				<br>
-				£2.00
-			</td>
-		</tr>
-		<tr>
-			<td>
-				four Widget
-				<br>
-				£18.00
-			</td>
-			<td>
-				eleven Widget
-				<br>
-				£10.00
-			</td>
-			<td>
-				eighteen Widget
-				<br>
-				£99.00
-			</td>
-		</tr>
-		<tr>
-			<td>
-				five Widget
-				<br>
-				£79.00
-			</td>
-			<td>
-				twelve Widget
-				<br>
-				£92.00
-			</td>
-			<td>
-				nineteen Widget
-				<br>
-				£69.00
-			</td>
-		</tr>
-		<tr>
-			<td>
-				six Widget
-				<br>
-				£94.00
-			</td>
-			<td>
-				thirteen Widget
-				<br>
-				£76.00
-			</td>
-			<td>
-				twenty Widget
-				<br>
-				£1.00
-			</td>
-		</tr>
-		<tr>
-			<td>
-				seven Widget
-				<br>
-				£61.00
-			</td>
-			<td>
-				fourteen Widget
-				<br>
-				£36.00
-			</td>
-			<td></td>
-		</tr>
-	</tbody>
-</table>
-*@

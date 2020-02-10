@@ -6,17 +6,17 @@
 
 <p>Here is a simple datalist bound to a collection of widgets in Flow layout mode.</p>
 
-		<DataList @ref="simpleDataList"
-							runat="server"
-							EnableViewState="false"
-              RepeatLayout="Flow"
-							Context="Item"
-							ItemType="SharedSampleObjects.Models.Widget">
-            <HeaderTemplate>Simple Widgets</HeaderTemplate>
-			<ItemTemplate>
-                    @Item.Name - @Item.Price.ToString("c")
-			</ItemTemplate>
-		</DataList>
+<DataList @ref="simpleDataList"
+          runat="server"
+          EnableViewState="false"
+          RepeatLayout="Flow"
+          Context="Item"
+          ItemType="SharedSampleObjects.Models.Widget">
+  <HeaderTemplate>Simple Widgets</HeaderTemplate>
+  <ItemTemplate>
+    @Item.Name - @Item.Price.ToString("c")
+  </ItemTemplate>
+</DataList>
 
 @code {
 
@@ -25,16 +25,17 @@
   protected override void OnAfterRender(bool firstRender)
   {
 
-      if (firstRender)
-      {
-          simpleDataList.DataSource = Widget.SimpleWidgetList;
-          simpleDataList.DataBind();
-      }
+    if (firstRender)
+    {
+      simpleDataList.DataSource = Widget.SimpleWidgetList;
+      simpleDataList.DataBind();
+    }
 
-      //base.OnParametersSet();
-      base.OnAfterRender(firstRender);
+    //base.OnParametersSet();
+    base.OnAfterRender(firstRender);
 
   }
 
 }
+
 

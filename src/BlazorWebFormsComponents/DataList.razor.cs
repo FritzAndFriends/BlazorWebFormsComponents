@@ -85,7 +85,6 @@ namespace BlazorWebFormsComponents
 				for (var rowC = 0; rowC < rowMax; rowC++)
 				{
 					var pos = (rowC * columns) + colC;
-					System.Console.WriteLine($"{iter} - {pos} - {rowC} - {colC} - {columns} - {rowMax}");
 					indexList[pos] = iter;
 					iter++;
 				}
