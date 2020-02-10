@@ -92,7 +92,8 @@
 					var first = true;
 					OnDataBinding.InvokeAsync(EventArgs.Empty);
 					var idx = 1;
-					@foreach(var item in Items)
+					var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection);
+					@foreach(var item in IndexedItems)
 					{
 						if (!first && SeparatorTemplate != null)
 						{
