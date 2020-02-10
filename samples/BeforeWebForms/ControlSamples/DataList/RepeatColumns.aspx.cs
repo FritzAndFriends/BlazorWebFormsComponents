@@ -11,7 +11,7 @@ namespace BeforeWebForms.ControlSamples.DataList
 	{
 		protected void Page_Load(object sender, EventArgs e)
 		{
-			simpleDataList.DataSource = SharedSampleObjects.Models.Widget.Widgets(10);
+			simpleDataList.DataSource = SharedSampleObjects.Models.Widget.Widgets(11);
 			simpleDataList.DataBind();
 		}
 	}

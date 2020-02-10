@@ -38,6 +38,6 @@
 		header.InnerHtml.ShouldBe("HeaderTemplate");
 		dataListChildren[1].InnerHtml.ShouldBe(string.Empty);
 		string.Join(' ', dataListChildren.Skip(2).Take(14).Select(x => x.InnerHtml)).ShouldBe("1 4 7 10  2 5 8 11  3 6 9 12");
-		cut.FindAll("br").Count().ShouldBe(5);
+		cut.FindAll("br").Count().ShouldBe(4);
 	}
 }

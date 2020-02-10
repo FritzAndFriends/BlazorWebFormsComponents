@@ -3,12 +3,12 @@
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
-		<DataList Items="Widget.Widgets(10)"
+		<DataList Items="Widget.Widgets(3)"
 							ItemType="Widget"
 							Caption="DataListCaption"
 							RepeatDirection="Vertical"
 							RepeatLayout="Flow"
-							RepeatColumns="4"
+							RepeatColumns="1"
 							GridLines="Vertical"
 							Context="Item">
 			<HeaderTemplate>HeaderTemplate</HeaderTemplate>
@@ -26,17 +26,19 @@
 
 		//DataListSpan
 		//  HeaderSpan
-		//    Checking 20 items in 4 Repeating Columns
-		//      1 ; 4 ; 7 ; 9
-		//      2 ; 5 ; 8 ; 10
-		//      3 ; 6 ;  
+		//    Checking 3 items in 1 Repeating Columns
+		//      1
+		//      2
+		//      3
 		//  FooterSpan
 
 		var dataListNodes = cut.FindAll("span").FirstOrDefault(x => x.HasChildNodes);
 		var dataListChildren = dataListNodes.Children.ToList();
 		var header = dataListChildren[0];
+		var footer = dataListChildren[8];
 		header.InnerHtml.ShouldBe("HeaderTemplate");
 		dataListChildren[1].InnerHtml.ShouldBe(string.Empty);
 		cut.FindAll("br").Count().ShouldBe(4);
+		footer.InnerHtml.ShouldBe("FooterTemplate");
 	}
 }

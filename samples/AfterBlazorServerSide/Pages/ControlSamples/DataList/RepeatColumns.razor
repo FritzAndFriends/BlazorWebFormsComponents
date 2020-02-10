@@ -6,6 +6,23 @@
 <hr />
 <p>Here is a flow datalist bound to a collection of 9 widgets in 3 Columns layout mode.</p>
 
+<DataList @ref="simpleDataList0"
+					runat="server"
+					EnableViewState="false"
+					RepeatDirection="Vertical"
+					RepeatLayout="Flow"
+					RepeatColumns="3"
+					GridLines="Both"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<HeaderTemplate>DataList Header </HeaderTemplate>
+	<FooterTemplate>DataList Footer </FooterTemplate>
+	<ItemTemplate> @Item.Id</ItemTemplate>
+</DataList>
+
+<hr />
+<p>Here is a flow datalist bound to a collection of 9 widgets in 3 Columns layout mode.</p>
+
 <DataList @ref="simpleDataList1"
 					runat="server"
 					EnableViewState="false"
@@ -15,9 +32,9 @@
 					GridLines="Both"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
-	<ItemTemplate>
-		@Item.Name - @Item.Price.ToString("c")
-	</ItemTemplate>
+	<HeaderTemplate>DataList Header </HeaderTemplate>
+	<FooterTemplate>DataList Footer </FooterTemplate>
+	<ItemTemplate> @Item.Id</ItemTemplate>
 </DataList>
 
 <hr />
@@ -88,6 +105,7 @@
 </DataList>
 
 @code {
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList0 { get; set; }
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList1 { get; set; }
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList2 { get; set; }
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList3 { get; set; }
@@ -98,11 +116,13 @@
 	{
 		if (firstRender)
 		{
+			simpleDataList0.DataSource = Widget.Widgets(8);
 			simpleDataList1.DataSource = Widget.Widgets(9);
 			simpleDataList2.DataSource = Widget.Widgets(10);
 			simpleDataList3.DataSource = Widget.Widgets(9);
 			simpleDataList4.DataSource = Widget.Widgets(9);
 			simpleDataList5.DataSource = Widget.Widgets(4);
+			simpleDataList0.DataBind();
 			simpleDataList1.DataBind();
 			simpleDataList2.DataBind();
 			simpleDataList3.DataBind();

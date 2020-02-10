@@ -4,6 +4,8 @@
 
 @if (Items != null)
 {
+	var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection).ToList();
+
 	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
 		<CascadingValue Name="FooterStyle" Value="FooterStyle">
 			<CascadingValue Name="ItemStyle" Value="ItemStyle">
@@ -54,13 +56,13 @@
 						var first = true;
 						OnDataBinding.InvokeAsync(EventArgs.Empty);
 						var idx = 1;
-						var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection).ToList();
 						do
 						{
 							if (!first && SeparatorTemplate != null)
 							{
 								<tr><td style="@SeparatorStyle">@SeparatorTemplate</td></tr>
 							}
+
 							<tr>
 								@{
 									do
@@ -71,18 +73,20 @@
 										even = !even;
 										idx++;
 										first = false;
-									} while ((idx-1) % RepeatColumns != 0 && idx <= IndexedItems.Count());
+									} while ((idx - 1) % RepeatColumns != 0 && idx <= IndexedItems.Count());
 								}
 							</tr>
 
 						} while (idx <= IndexedItems.Count());
-						OnDataBound.InvokeAsync(EventArgs.Empty);
 
+						OnDataBound.InvokeAsync(EventArgs.Empty);
 						@if (FooterTemplate != null && ShowFooter)
 						{
 							<tr><td style="@FooterStyle" class="@FooterStyle.CssClass">@FooterTemplate</td></tr>
 						}
+
 					}
+
 				</tbody>
 			</table>
 			break;
@@ -92,38 +96,34 @@
 				{
 					<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
 				}
-
 				@if (Items?.Any() ?? false)
 				{
 					var even = true;
 					var first = true;
 					OnDataBinding.InvokeAsync(EventArgs.Empty);
 					var idx = 1;
-					var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection);
-					@foreach (var item in IndexedItems)
+					do
 					{
 						if (!first && SeparatorTemplate != null)
 						{
 							<span style="@SeparatorStyle">@SeparatorTemplate</span>
 						}
-
-						<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
-						OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-						@if (idx % RepeatColumns == 0)
+						do
 						{
-							<br>
-						}
-
-						even = !even;
-						first = false;
-						idx++;
-					}
-
+							var item = IndexedItems[idx - 1];
+							<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
+							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+							even = !even;
+							first = false;
+							idx++;
+						} while ((idx - 1) % RepeatColumns != 0 && idx <= IndexedItems.Count());
+						<br />
+					} while (idx <= IndexedItems.Count());
 					OnDataBound.InvokeAsync(EventArgs.Empty);
 				}
 				@if (FooterTemplate != null && ShowFooter)
 				{
-					<span class="@FooterStyle.CssClass" style="@FooterStyle">@FooterTemplate</span><br />
+					<span class="@FooterStyle.CssClass" style="FooterStyle">@FooterTemplate</span>
 				}
 			</span>
 			break;
