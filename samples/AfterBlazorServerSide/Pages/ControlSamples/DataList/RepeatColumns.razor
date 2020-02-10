@@ -3,15 +3,15 @@
 <h2>DataList Repeat Layout Sample</h2>
 
 <Nav />
-
-<p>Here is a flow datalist bound to a collection of 25 widgets in 4 Columns layout mode.</p>
+<hr />
+<p>Here is a flow datalist bound to a collection of 9 widgets in 3 Columns layout mode.</p>
 
 <DataList @ref="simpleDataList1"
 					runat="server"
 					EnableViewState="false"
 					RepeatDirection="Vertical"
 					RepeatLayout="Flow"
-					RepeatColumns="4"
+					RepeatColumns="3"
 					GridLines="Both"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
@@ -20,7 +20,8 @@
 	</ItemTemplate>
 </DataList>
 
-<p>Here is a table datalist bound to a collection of 25 widgets in 4 Columns layout mode.</p>
+<hr />
+<p>Here is a table datalist bound to a collection of 10 widgets in 4 Columns layout mode.</p>
 
 <DataList @ref="simpleDataList2"
 					runat="server"
@@ -36,14 +37,15 @@
 	</ItemTemplate>
 </DataList>
 
-<p>Here is a table datalist bound to a collection of 25 widgets in 5 Columns Vertically .</p>
+<hr />
+<p>Here is a table datalist bound to a collection of 9 widgets in 3 Columns Vertically .</p>
 
 <DataList @ref="simpleDataList3"
 					runat="server"
 					EnableViewState="false"
 					RepeatDirection="Vertical"
 					RepeatLayout="Table"
-					RepeatColumns="5"
+					RepeatColumns="3"
 					GridLines="Both"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
@@ -52,14 +54,31 @@
 	</ItemTemplate>
 </DataList>
 
-<p>Here is a table datalist bound to a collection of 25 widgets in 5 Columns Horizontally.</p>
+<hr />
+<p>Here is a table datalist bound to a collection of 9 widgets in 3 Columns Horizontally.</p>
 
 <DataList @ref="simpleDataList4"
 					runat="server"
 					EnableViewState="false"
 					RepeatDirection="Horizontal"
 					RepeatLayout="Table"
-					RepeatColumns="5"
+					RepeatColumns="3"
+					GridLines="Both"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<hr />
+<p>Here is a table datalist bound to a collection of 4 widgets in No Columns Horizontally.</p>
+
+<DataList @ref="simpleDataList5"
+					runat="server"
+					EnableViewState="false"
+					RepeatDirection="Horizontal"
+					RepeatLayout="Table"
 					GridLines="Both"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
@@ -73,19 +92,22 @@
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList2 { get; set; }
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList3 { get; set; }
 	BlazorWebFormsComponents.DataList<Widget> simpleDataList4 { get; set; }
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList5 { get; set; }
 
 	protected override void OnAfterRender(bool firstRender)
 	{
 		if (firstRender)
 		{
-			simpleDataList1.DataSource = Widget.Widgets(25);
-			simpleDataList2.DataSource = Widget.Widgets(25);
-			simpleDataList3.DataSource = Widget.Widgets(25);
-			simpleDataList4.DataSource = Widget.Widgets(25);
+			simpleDataList1.DataSource = Widget.Widgets(9);
+			simpleDataList2.DataSource = Widget.Widgets(10);
+			simpleDataList3.DataSource = Widget.Widgets(9);
+			simpleDataList4.DataSource = Widget.Widgets(9);
+			simpleDataList5.DataSource = Widget.Widgets(4);
 			simpleDataList1.DataBind();
 			simpleDataList2.DataBind();
 			simpleDataList3.DataBind();
 			simpleDataList4.DataBind();
+			simpleDataList5.DataBind();
 		}
 		base.OnAfterRender(firstRender);
 	}
