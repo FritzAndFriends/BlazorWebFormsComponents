@@ -1,7 +1,7 @@
 ﻿@inherits TestComponentBase
 
 <Fixture
-	Test="FirstTest"
+	TestAsync="FirstTest" 
 >
 <ComponentUnderTest>
 	<ListView Items="Widget.SimpleWidgetList" @ref="theListView"
@@ -29,7 +29,7 @@
 
 	bool disposed = false;
 
-	void FirstTest()
+	async Task FirstTest()
 	{
 
 		var cut = GetComponentUnderTest();
@@ -41,7 +41,7 @@
 
 		cut.FindAll("span").Count().ShouldBe(3);
 
-		theListView.DisposeAsync().GetAwaiter().GetResult();
+		await theListView.DisposeAsync();
 
 		disposed.ShouldBeTrue();
 

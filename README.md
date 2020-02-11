@@ -49,3 +49,11 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - PasswordRecovery
 
 We will NOT be converting any DataSource objects, Wizard components, skins or themes.  Once this first collection of 23 controls is written, we can consider additional features like modern tag formatting.
+
+## Compiling the project
+
+There are three different types of .NET projects in this repository:  .NET Framework, .NET Core, and .NET Standard.  The sample projects are in the `/samples` folder, while the unit test project is next to the component library in the `/src` folder.  From the root of the repository, you should be able to execute:
+
+`dotnet restore` to restore packages
+
+`dotnet run --project samples/AfterBlazorServerSide` to start the Blazor Server-Side samples
