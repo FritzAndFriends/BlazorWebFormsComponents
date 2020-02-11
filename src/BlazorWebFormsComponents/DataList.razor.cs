@@ -88,7 +88,7 @@ namespace BlazorWebFormsComponents
 
 			}
 
-			return returnList.ToList();
+			return returnList;
 		}
 
 		protected override void HandleUnknownAttributes()
