@@ -1,0 +1,75 @@
+﻿@page "/ControlSamples/DataList/FooterStyle"
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>DataList FooterStyle sample</h2>
+
+<Nav />
+
+<p>Here is a simple datalist bound to a collection of widgets with simple FooterStyle applied</p>
+
+<DataList @ref="simpleDataList"
+					runat="server"
+					EnableViewState="false"
+					Context="Item"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ChildContent>
+		<BlazorWebFormsComponents.FooterStyle BackColor="Blue" ForeColor="White"></BlazorWebFormsComponents.FooterStyle>
+	</ChildContent>
+	<FooterTemplate>Simple Widgets</FooterTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+<br />
+<h3>Setting Values in the footer style from inline attributes</h3>
+<DataList 
+					runat="server"
+					EnableViewState="false"
+					Context="Item"
+					FooterStyle-BackColor="@("#C84630")"
+					FooterStyle-ForeColor="White"
+					FooterStyle-BorderColor="White"
+					FooterStyle-BorderStyle="Solid"
+					FooterStyle-BorderWidth="2"
+					SelectMethod="GetWidgets"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<ChildContent>
+		<BlazorWebFormsComponents.FooterStyle BackColor="Blue"></BlazorWebFormsComponents.FooterStyle>
+	</ChildContent>
+	<FooterTemplate>Simple Widgets</FooterTemplate>
+	<ItemTemplate>
+		@Item.Name - @Item.Price.ToString("c")
+	</ItemTemplate>
+</DataList>
+
+@code {
+
+	BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleDataList.DataSource = Widget.SimpleWidgetList;
+			simpleDataList.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+
+		totalRowCount = Widget.SimpleWidgetList.Length;
+
+		return Widget.SimpleWidgetList.AsQueryable();
+
+	}
+
+
+}
+
