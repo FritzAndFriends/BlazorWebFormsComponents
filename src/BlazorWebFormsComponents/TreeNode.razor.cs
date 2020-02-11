@@ -28,8 +28,17 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string ImageToolTip { get; set; }
 
+		private string _ImageUrl;
 		[Parameter]
-		public string ImageUrl { get; set; }
+		public string ImageUrl {
+			get { return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
+						string.IsNullOrEmpty(ParentTreeView.ImageSet.RootNode) ? "" :
+							(IsRoot ? $"{ImageLocation}{ParentTreeView.ImageSet.RootNode}" :
+								IsParent ? $"{ImageLocation}{ParentTreeView.ImageSet.ParentNode}" :
+								$"{ImageLocation}{ParentTreeView.ImageSet.LeafNode}");
+			}
+			set { _ImageUrl = value; }
+		}
 
 		[Parameter]
 		public string NavigateUrl { get; set; }
@@ -76,6 +85,17 @@ namespace BlazorWebFormsComponents
 
 		[CascadingParameter(Name ="ParentTreeView")]
 		public TreeView ParentTreeView { get; set; }
+
+
+		protected bool IsRoot
+		{
+			get { return Parent is null; }
+		}
+
+		protected bool IsParent
+		{
+			get { return !IsRoot && (ChildContent != null); }
+		}
 
 		#region Event Handlers
 

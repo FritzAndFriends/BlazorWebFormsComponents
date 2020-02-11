@@ -1,9 +1,10 @@
 ﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.TreeViewImageSet
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
 		<TreeView id="SampleTreeView"
-							ShowExpandCollapse="false"
+							ImageSet="_Default"
 							runat="server">
 
 			<Nodes>
@@ -46,12 +47,17 @@
 
 	void FirstTest()
 	{
+		// Arrange/Act
+		var cut = GetComponentUnderTest<TreeView>();
+		var collapseImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif";
 
-		var cut = GetComponentUnderTest();
+		// Asserts
+		var images = cut.FindAll("img");
+		images.Count().ShouldBe(4);
 
-		Console.WriteLine(cut.Markup);
+		images[0].GetAttribute("src").ShouldBe(collapseImg);
+		images[1].GetAttribute("src").ShouldBe(collapseImg);
 
-		cut.FindAll("img").Count().ShouldBe(0);
 
 	}
 

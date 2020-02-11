@@ -17,8 +17,8 @@
       <asp:TreeView id="SampleTreeView"
         ShowExpandCollapse="true"
         ShowCheckBoxes="All"
-        ShowLines="true"
-        ImageSet="WindowsHelp"
+        ShowLines="false"
+        ImageSet="Events"
         CssClass="Foo"
         runat="server">
          

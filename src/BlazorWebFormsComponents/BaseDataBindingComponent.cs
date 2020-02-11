@@ -14,6 +14,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public EventCallback<EventArgs> OnDataBound { get; set; }
 
+		[Parameter]
+		public EventCallback<ListViewItemEventArgs> OnItemDataBound { get; set; }
+
 		#endregion
 
 
