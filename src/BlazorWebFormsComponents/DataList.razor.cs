@@ -57,43 +57,38 @@ namespace BlazorWebFormsComponents
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public Unit Width { get; set; }
 
-		private IEnumerable<ItemType> ElementIndex(int columns, IEnumerable<ItemType> items, DataListEnum direction)
+		private IList<ItemType> ElementIndex(int columns, IEnumerable<ItemType> items, DataListEnum direction)
 		{
+			var itemList = items.ToList();
 			if (direction == DataListEnum.Horizontal)
 			{
-				foreach (var item in items)
-				{
-					yield return item;
-				}
-				yield break;
+				return itemList;
 			}
 
-			var innerItems = items.ToList();
-			var count = innerItems.Count();
+			var count = itemList.Count();
 			var fullRows = count / columns;
 			var extraRowItemCount = count % columns;
 			var rowMax = fullRows + ((extraRowItemCount > 0) ? 1 : 0);
 
 			var iter = 0;
-			var indexList = new int[count];
+			var returnList = new ItemType[count];
 			for (var colC = 0; colC < columns; colC++)
 			{
 				if (colC == extraRowItemCount && extraRowItemCount != 0)
 				{
 					rowMax--;
 				}
+
 				for (var rowC = 0; rowC < rowMax; rowC++)
 				{
 					var pos = (rowC * columns) + colC;
-					indexList[pos] = iter;
+					returnList[pos] = itemList[iter];
 					iter++;
 				}
+
 			}
 
-			for (var i = 0; i < count; i++)
-			{
-				yield return innerItems[indexList[i]];
-			}
+			return returnList.ToList();
 		}
 
 		protected override void HandleUnknownAttributes()

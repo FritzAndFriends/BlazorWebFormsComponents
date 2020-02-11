@@ -4,7 +4,7 @@
 
 @if (Items != null)
 {
-	var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection).ToList();
+	var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection);
 
 	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
 		<CascadingValue Name="FooterStyle" Value="FooterStyle">
