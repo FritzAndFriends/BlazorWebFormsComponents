@@ -70,20 +70,20 @@ namespace BlazorWebFormsComponents
 			var extraRowItemCount = count % columns;
 			var rowMax = fullRows + ((extraRowItemCount > 0) ? 1 : 0);
 
-			var iter = 0;
+			var currentItemIdx = 0;
 			var returnList = new ItemType[count];
-			for (var colC = 0; colC < columns; colC++)
+			for (var col = 0; col < columns; col++)
 			{
-				if (colC == extraRowItemCount && extraRowItemCount != 0)
+				if (col == extraRowItemCount && extraRowItemCount != 0)
 				{
 					rowMax--;
 				}
 
-				for (var rowC = 0; rowC < rowMax; rowC++)
+				for (var row = 0; row < rowMax; row++)
 				{
-					var pos = (rowC * columns) + colC;
-					returnList[pos] = itemList[iter];
-					iter++;
+					var pos = (row * columns) + col;
+					returnList[pos] = itemList[currentItemIdx];
+					currentItemIdx++;
 				}
 
 			}
