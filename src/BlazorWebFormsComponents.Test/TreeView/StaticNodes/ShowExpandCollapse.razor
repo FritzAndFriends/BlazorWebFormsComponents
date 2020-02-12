@@ -51,7 +51,8 @@
 
 		Console.WriteLine(cut.Markup);
 
-		cut.FindAll("img").Count().ShouldBe(0);
+		cut.FindAll("img").Count().ShouldBe(3);
+		cut.Find("img").GetAttribute("src").ShouldBe("_content/Fritz.BlazorWebFormsComponents/TreeView/Default_NoExpand.gif");
 
 	}
 

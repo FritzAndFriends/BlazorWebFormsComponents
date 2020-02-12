@@ -15,10 +15,9 @@
     </p>
 
       <asp:TreeView id="SampleTreeView"
-        ShowExpandCollapse="true"
+        ShowExpandCollapse="false"
         ShowCheckBoxes="All"
         ShowLines="false"
-        ImageSet="Events"
         CssClass="Foo"
         runat="server">
          
@@ -38,6 +37,7 @@
               NavigateUrl="Page1.aspx" 
               Text="Page1"
               Target="Content"
+              Expanded="false"
               ToolTip="ToolTop" ImageToolTip="ImageToolTip">
                
               <asp:TreeNode Value="Section 1" 
