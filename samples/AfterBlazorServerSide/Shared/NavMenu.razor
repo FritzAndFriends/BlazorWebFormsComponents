@@ -1,4 +1,5 @@
 ﻿@using BlazorWebFormsComponents
+@using static BlazorWebFormsComponents.Enums.TreeViewImageSet 
 
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">BlazorWebFormsComponents<br/>@Startup.ApplicationName</a>
@@ -8,28 +9,29 @@
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-   <TreeView CssClass="nav-item">
+   <TreeView CssClass="nav-item" ImageSet="_Default">
     <Nodes>
 
       <TreeNode Text="Home" NavigateUrl="/">
 
         <TreeNode Text="Data Components">
 
-					<TreeNode Text="DataList" NavigateUrl="/ControlSamples/DataList">
+					<TreeNode Text="DataList" NavigateUrl="/ControlSamples/DataList" Expanded="false">
 						<TreeNode NavigateUrl="/ControlSamples/DataList" Text="Simple Table" />
 						<TreeNode NavigateUrl="/ControlSamples/DataList/Flow" Text="Simple Flow" />
 						<TreeNode NavigateUrl="/ControlSamples/DataList/HeaderStyle" Text="Header Style" />
 						<TreeNode NavigateUrl="/ControlSamples/DataList/FooterStyle" Text="Footer Style" />
 						<TreeNode NavigateUrl="/ControlSamples/DataList/ComplexStyle" Text="Complex Style" />
+						<TreeNode NavigateUrl="/ControlSamples/DataList/RepeatColumns" Text="Repeat Columns" />
 					</TreeNode>
 
-					<TreeNode Text="ListView" NavigateUrl="/ControlSamples/ListView">
+					<TreeNode Text="ListView" NavigateUrl="/ControlSamples/ListView" Expanded="false">
 						<TreeNode NavigateUrl="/ControlSamples/ListView" Text="Simple List View"></TreeNode>
 						<TreeNode NavigateUrl="./ControlSamples/ListView/ModelBinding" Text="ModelBinding Sample"></TreeNode>
 						<TreeNode NavigateUrl="./ControlSamples/ListView/LayoutTest" Text="Layout Test"></TreeNode>
 					</TreeNode>
 
-          <TreeNode Text="Repeater" NavigateUrl="/ControlSamples/Repeater">
+          <TreeNode Text="Repeater" NavigateUrl="/ControlSamples/Repeater" Expanded="false">
 
           </TreeNode>
 
@@ -46,9 +48,14 @@
 
         <TreeNode Text="Navigation Components">
 
-					<TreeNode Text="TreeView" NavigateUrl="/ControlSamples/TreeView">
-  						<TreeNode Text="Static TreeView" NavigateUrl="/ControlSamples/TreeView"></TreeNode>
-              <TreeNode Text="XML Data Source" NavigateUrl="/ControlSamples/TreeView/XmlDataSource"></TreeNode>
+					<TreeNode Text="TreeView" NavigateUrl="/ControlSamples/TreeView" Expanded="false">
+						<TreeNode Text="Arrows ImageSet" NavigateUrl="/ControlSamples/TreeView/ArrowsImages"></TreeNode>
+						<TreeNode Text="Bullets ImageSet" NavigateUrl="/ControlSamples/TreeView/BulletImages"></TreeNode>
+						<TreeNode Text="Bullets No Expand" NavigateUrl="/ControlSamples/TreeView/BulletsNoExpand"></TreeNode>
+						<TreeNode Text="Images" NavigateUrl="/ControlSamples/TreeView/Images"></TreeNode>
+						<TreeNode Text="Static TreeView" NavigateUrl="/ControlSamples/TreeView"></TreeNode>
+						<TreeNode Text="SiteMap Data Source" NavigateUrl="/ControlSamples/TreeView/SiteMapDataSource"></TreeNode>
+						<TreeNode Text="XML Data Source" NavigateUrl="/ControlSamples/TreeView/XmlDataSource"></TreeNode>
 					</TreeNode>
 
 					</TreeNode>
@@ -57,7 +64,7 @@
 
           <TreeNode Text="LoginName" NavigateUrl="/ControlSamples/LoginName"></TreeNode>
           <TreeNode Text="Login" NavigateUrl="/ControlSamples/Login"></TreeNode>
-					<TreeNode Text="LoginStatus">
+					<TreeNode Text="LoginStatus" Expanded="false">
 
 						<TreeNode Text="Authenticated" NavigateUrl="/ControlSamples/LoginStatusAuthenticated"></TreeNode>
 						<TreeNode Text="Not Authenticated" NavigateUrl="/ControlSamples/LoginStatusNotAuthenticated"></TreeNode>

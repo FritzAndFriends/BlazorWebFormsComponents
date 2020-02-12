@@ -1,0 +1,63 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest" Setup="Setup">
+	<ComponentUnderTest>
+
+		<TreeView @ref="BookTreeView"
+							DataSource="bookXml"
+							OnDataBinding="OnDataBinding"
+							OnDataBound="OnDataBound"
+							runat="server">
+
+			<DataBindings>
+				<TreeNodeBinding DataMember="Book" TextField="Title" />
+			</DataBindings>
+
+		</TreeView>
+
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+
+	public TreeView BookTreeView;
+
+	System.Xml.XmlDocument bookXml = new System.Xml.XmlDocument();
+	System.Diagnostics.Stopwatch stopwatch;
+	long dataBindingTicks = 0;
+	long dataBoundTicks = 0;
+
+	void Setup()
+	{
+
+		bookXml.LoadXml(@"<Book Title=""Book Title"" />");
+
+		stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+	}
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest<TreeView>();
+		var test = cut.Markup;
+
+		stopwatch.Stop();
+
+		dataBindingTicks.ShouldNotBe(0, "OnDataBinding event did not trigger");
+		dataBoundTicks.ShouldNotBe(0, "OnDataBound event did not trigger");
+		dataBoundTicks.ShouldBeGreaterThan(dataBindingTicks);
+
+	}
+
+	void OnDataBinding()
+	{
+		dataBindingTicks = stopwatch.ElapsedTicks;
+	}
+
+	void OnDataBound()
+	{
+		dataBoundTicks = stopwatch.ElapsedTicks;
+	}
+
+}
