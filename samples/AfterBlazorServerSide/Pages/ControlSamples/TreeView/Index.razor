@@ -32,7 +32,7 @@ Checkboxes clicked:  @clickCount
 
 	public int clickCount { get; set; } = 0;
 
-	private void CheckChanged(object sender, TreeNodeEventArgs args) {
+	private void CheckChanged(TreeNodeEventArgs args) {
 
 		clickCount++;
 		base.StateHasChanged();

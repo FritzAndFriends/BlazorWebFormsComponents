@@ -2,22 +2,58 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using BlazorWebFormsComponents.Enums;
 
 namespace BlazorWebFormsComponents
 {
 	public partial class TreeNode : BaseWebFormsComponent
 	{
 
+		public const string ImageLocation = "_content/Fritz.BlazorWebFormsComponents/TreeView/";
+
 		[Parameter]
 		public bool Checked { get; set; } = false;
 
+		// TODO: Implement
+		[Parameter]
 		public byte Depth { get; set; } = 0;
 
 		[Parameter]
 		public bool Expanded { get; set; } = true;
 
+		// TODO: Implement
+		[Parameter]
+		public string FormatString { get; set; }
+
+		[Parameter]
+		public string ImageToolTip { get; set; }
+
+		private string _ImageUrl;
+		[Parameter]
+		public string ImageUrl {
+			get { return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
+						string.IsNullOrEmpty(ParentTreeView.ImageSet.RootNode) ? "" :
+							(IsRoot ? $"{ImageLocation}{ParentTreeView.ImageSet.RootNode}" :
+								IsParent ? $"{ImageLocation}{ParentTreeView.ImageSet.ParentNode}" :
+								$"{ImageLocation}{ParentTreeView.ImageSet.LeafNode}");
+			}
+			set { _ImageUrl = value; }
+		}
+
 		[Parameter]
 		public string NavigateUrl { get; set; }
+
+		// TODO: Implement
+		[Parameter]
+		public bool PopulateOnDemand { get; set; }
+
+		// TODO: Implement
+		[Parameter]
+		public TreeNodeSelectAction SelectAction { get; set; }
+
+		// TODO: Implement
+		[Parameter]
+		public bool Selected { get; set; }
 
 		[Parameter]
 		public bool ShowCheckBox { get; set; } = true;
@@ -50,6 +86,17 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter(Name ="ParentTreeView")]
 		public TreeView ParentTreeView { get; set; }
 
+
+		protected bool IsRoot
+		{
+			get { return Parent is null; }
+		}
+
+		protected bool IsParent
+		{
+			get { return !IsRoot && (ChildContent != null); }
+		}
+
 		#region Event Handlers
 
 		protected override void OnParametersSet() {
@@ -65,8 +112,8 @@ namespace BlazorWebFormsComponents
 
 			Expanded = !Expanded;
 
-			if (Expanded) ParentTreeView.OnTreeNodeExpanded?.Invoke(this, new TreeNodeEventArgs(this));
-			else ParentTreeView.OnTreeNodeCollapsed?.Invoke(this, new TreeNodeEventArgs(this));
+			if (Expanded) ParentTreeView.OnTreeNodeExpanded.InvokeAsync(new TreeNodeEventArgs(this));
+			else ParentTreeView.OnTreeNodeCollapsed.InvokeAsync(new TreeNodeEventArgs(this));
 
 		}
 
@@ -74,7 +121,7 @@ namespace BlazorWebFormsComponents
 
 			this.Checked = (bool)args.Value;
 
-			ParentTreeView.OnTreeNodeCheckChanged?.Invoke(this, new TreeNodeEventArgs(this));
+			ParentTreeView.OnTreeNodeCheckChanged.InvokeAsync(new TreeNodeEventArgs(this));
 
 		}
 
