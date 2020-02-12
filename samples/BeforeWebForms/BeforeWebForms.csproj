@@ -8,7 +8,7 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-		<RuntimeIdentifiers>win</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win</RuntimeIdentifiers>
     <ProjectGuid>{CA277C6F-A3DD-4FAF-9B7C-56E7B844CEF7}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
@@ -109,6 +109,7 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="ControlSamples\DataList\RepeatColumns.aspx" />
     <Content Include="ControlSamples\DataList\StyleAttributes.aspx" />
     <Content Include="ControlSamples\DataList\FlowLayout.aspx" />
     <Content Include="ControlSamples\DataList\Default.aspx" />
@@ -166,6 +167,13 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="ControlSamples\DataList\RepeatColumns.aspx.cs">
+      <DependentUpon>RepeatColumns.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\DataList\RepeatColumns.aspx.designer.cs">
+      <DependentUpon>RepeatColumns.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ControlSamples\DataList\StyleAttributes.aspx.cs">
       <DependentUpon>StyleAttributes.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
