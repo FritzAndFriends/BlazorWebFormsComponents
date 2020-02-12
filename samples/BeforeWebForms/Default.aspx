@@ -19,7 +19,7 @@
                 <li><a href="ControlSamples/DataList/Default.aspx">DataList</a></li>
                 <li>DataPager</li>
                 <li>DetailsView</li>
-                <li>FormView</li>
+                <li><a href="ControlSamples/FormView">FormView</a></li>
                 <li>GridView</li>
                 <li><a href="/ControlSamples/ListView">ListView</a></li>
                 <li><a href="ControlSamples/Repeater/Default.aspx">Repeater</a></li>
