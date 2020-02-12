@@ -1,1 +1,12 @@
-<Playlist Version="1.0"><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.Checkboxes.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesLeaf.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesParent.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesRoot.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesTreeNodeShowCheckbox.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.Collapsed.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.ShowExpandCollapse.RazorTest" /><Add Test="BlazorWebFormsComponents.Test.TreeView.StaticNodes.Simple.RazorTest" /></Playlist>
+<Playlist Version="2.0">
+  <Rule Match="Any">
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.Checkboxes.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesLeaf.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesParent.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesRoot.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.CheckboxesTreeNodeShowCheckbox.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.Collapsed.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.ShowExpandCollapse.RazorTest" />
+    <Property Name="Test" Value="BlazorWebFormsComponents.Test.TreeView.StaticNodes.Simple.RazorTest" />
+  </Rule>
+</Playlist>

@@ -15,25 +15,29 @@
     </p>
 
       <asp:TreeView id="SampleTreeView"
-        ShowExpandCollapse="true"
+        ShowExpandCollapse="false"
         ShowCheckBoxes="All"
+        ShowLines="false"
         CssClass="Foo"
         runat="server">
          
         <Nodes>
         
-          <asp:TreeNode Value="Home" 
+          <asp:TreeNode Value="Home"
+            ImageToolTip="This is the home image tooltip"
+            ImageUrl="~/Content/Images/csharp_56.png"
             NavigateUrl="Home.aspx" 
             Text="Home"
             Target="Content"
             Checked="true"
-            ShowCheckBox="false"
+            ShowCheckBox="true"
             Expanded="true">
              
             <asp:TreeNode Value="Page 1 Value" 
               NavigateUrl="Page1.aspx" 
               Text="Page1"
               Target="Content"
+              Expanded="false"
               ToolTip="ToolTop" ImageToolTip="ImageToolTip">
                
               <asp:TreeNode Value="Section 1" 

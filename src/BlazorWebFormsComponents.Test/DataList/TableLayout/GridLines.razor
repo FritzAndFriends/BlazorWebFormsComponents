@@ -1,6 +1,5 @@
 ﻿@inherits TestComponentBase
-@using static BlazorWebFormsComponents.Enums.GridLines
-
+@using static BlazorWebFormsComponents.Enums.DataListEnum
 
 <Fixture Test="BothTest">
 	<ComponentUnderTest>
@@ -41,38 +40,25 @@
 	</ComponentUnderTest>
 </Fixture>
 
-
 @code {
-
 	void BothTest()
 	{
-
 		var cut = GetComponentUnderTest();
-
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("both");
-
 	}
 
 	void RowsTest()
 	{
-
 		var cut = GetComponentUnderTest();
-
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("rows");
-
 	}
 
 	void ColsTest()
 	{
-
 		var cut = GetComponentUnderTest();
-
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("cols");
-
 	}
-
-
 }

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -49,7 +50,7 @@ namespace BlazorWebFormsComponents.Validations
 
 		public abstract bool Validate(string value);
 
-		protected string CalculatedStyle => this.ToStyleString();
+		protected StyleBuilder CalculatedStyle => this.ToStyle();
 
 		protected override void OnInitialized()
 		{
