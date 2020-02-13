@@ -119,6 +119,7 @@
     <Content Include="ControlSamples\ListView\ModelBinding.aspx" />
     <Content Include="ControlSamples\Repeater\Default.aspx" />
     <Content Include="ControlSamples\TreeView\default.aspx" />
+    <Content Include="ControlSamples\TreeView\WithGridLines.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -231,6 +232,13 @@
     </Compile>
     <Compile Include="ControlSamples\TreeView\default.aspx.designer.cs">
       <DependentUpon>default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\TreeView\WithGridLines.aspx.cs">
+      <DependentUpon>WithGridLines.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\TreeView\WithGridLines.aspx.designer.cs">
+      <DependentUpon>WithGridLines.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>

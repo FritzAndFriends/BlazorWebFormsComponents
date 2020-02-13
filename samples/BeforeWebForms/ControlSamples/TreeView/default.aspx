@@ -5,9 +5,7 @@
     <h2>Treeview control homepage</h2>
 
     <div>
-      <%--
-      Other usage samples:  <a href="FlowLayout.aspx">FlowLayout Sample</a> <a href="StyleAttributes.aspx">Styles</a>
-      --%>
+      Other usage samples:  <a href="WithGridLines.aspx">GridLines Sample</a>
     </div>
 
     <p>Here is a simple treeview with inline nodes.  This sample is lifted DIRECTLY from the documentation at:
