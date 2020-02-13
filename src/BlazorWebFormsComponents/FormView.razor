@@ -1,0 +1,16 @@
+﻿@inherits BaseModelBindingComponent<ItemType>
+@typeparam ItemType
+<table cellspacing="0" style="border-collapse:collapse;">
+	<tr>
+		<td colspan="2">
+			@ItemTemplate(CurrentItem)
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				@** TODO: PAGER *@
+			</table>
+		</td>
+	</tr>
+</table>

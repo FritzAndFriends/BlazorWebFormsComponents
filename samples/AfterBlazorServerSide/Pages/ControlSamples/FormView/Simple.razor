@@ -1,0 +1,43 @@
+﻿@page "/ControlSamples/FormView/Simple"
+
+<h2>Simple FormView</h2>
+
+<p>Here is a simple form view</p>
+
+<FormView @ref="WidgetFormView"
+							AllowPaging="true"
+							DataKeyNames="Id"
+							OnPageIndexChanging="WidgetFormView_PageIndexChanging"
+							ItemType="Widget" Context="Item"
+							runat="server">
+
+	<ItemTemplate>
+
+		<table>
+			<tr>
+				<td>
+
+					<h3>@Item.Name") %>&nbsp;@Item.Price.ToString("C")  &nbsp;&nbsp;(@Item.Id)</h3>
+
+				</td>
+			</tr>
+		</table>
+
+	</ItemTemplate>
+
+</FormView>
+@code {
+
+	protected FormView<Widget> WidgetFormView;
+
+	protected override Task OnAfterRenderAsync(bool firstRender)
+	{
+
+		if (firstRender) 
+			WidgetFormView.Items = Widget.SimpleWidgetList;
+
+		return base.OnAfterRenderAsync(firstRender);
+
+	}
+
+}
