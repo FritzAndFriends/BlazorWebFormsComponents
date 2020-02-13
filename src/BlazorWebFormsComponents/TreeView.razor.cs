@@ -36,6 +36,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool ShowExpandCollapse { get; set; } = true;
 
+		[Parameter]
+		public bool ShowLines { get; set; } = false;
+
 		#region IHasStyle
 
 		[Parameter] public WebColor BackColor { get; set; }
