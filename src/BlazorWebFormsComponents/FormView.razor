@@ -16,7 +16,30 @@
 	<tr>
 		<td>
 			<table>
-				@** TODO: PAGER *@
+
+				<tr>
+					@if (Items == null)
+					{
+						<td>Loading...</td>
+					}
+					else
+					{
+					@for (int i = 1; i <= Items.Count(); i++)
+					{
+						if (i == Position)
+						{
+							<td><span>@i</span></td>
+						}
+						else
+						{
+							var thisPosition = i;
+							<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
+						}
+
+					}
+					}
+				</tr>
+
 			</table>
 		</td>
 	</tr>

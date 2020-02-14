@@ -14,7 +14,16 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment<ItemType>	ItemTemplate { get; set; }
 
-		public ItemType CurrentItem { get; set; } = null;
+		public ItemType CurrentItem { get; set; }
+
+		private int _Position = 1;
+		protected int Position {
+			get { return _Position; }
+			set {
+				_Position = value;
+				CurrentItem = Items.Skip(value - 1).FirstOrDefault();
+			}
+		} 
 
 		//protected override Task OnParametersSetAsync()
 		//{
@@ -26,7 +35,7 @@ namespace BlazorWebFormsComponents
 
 			if (firstRender)
 			{
-				if ((CurrentItem is null) && Items != null && Items.Any()) CurrentItem = Items.FirstOrDefault();
+				if ((CurrentItem is null) && Items != null && Items.Any()) Position = 1;
 			}
 
 			await base.OnAfterRenderAsync(firstRender);
