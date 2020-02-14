@@ -3,7 +3,14 @@
 <table cellspacing="0" style="border-collapse:collapse;">
 	<tr>
 		<td colspan="2">
-			@ItemTemplate(CurrentItem)
+			@if (CurrentItem == null)
+			{
+				<span>Loading...</span>
+			}
+			else
+			{
+				@ItemTemplate(CurrentItem)
+			}
 		</td>
 	</tr>
 	<tr>
