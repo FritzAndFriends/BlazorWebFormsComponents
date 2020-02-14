@@ -1,0 +1,67 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.TreeViewImageSet
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<TreeView id="SampleTreeView"
+							ImageSet="Arrows"
+							runat="server">
+
+			<Nodes>
+
+				<TreeNode Value="Home"
+									NavigateUrl="Home.aspx"
+									Text="Home"
+									Target="Content"
+									ToolTip="Home Tooltip"
+									Expanded="true">
+
+					<TreeNode Value="Page 1"
+										NavigateUrl="Page1.aspx"
+										Text="Page1"
+										Target="Content">
+
+						<TreeNode Value="Section 1"
+											NavigateUrl="Section1.aspx"
+											Text="Section 1"
+											Target="Content" />
+
+					</TreeNode>
+
+					<TreeNode Value="Page 2"
+										NavigateUrl="Page2.aspx"
+										Text="Page 2"
+										Target="Content">
+
+					</TreeNode>
+
+				</TreeNode>
+
+			</Nodes>
+
+		</TreeView>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+
+	void FirstTest()
+	{
+		// Arrange/Act
+		var cut = GetComponentUnderTest<TreeView>();
+		var collapseImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Arrows_Collapse.gif";
+		var noExpandImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Arrows_NoExpand.gif";
+
+		// Asserts
+		var images = cut.FindAll("img");
+		images.Count().ShouldBe(4);
+
+		images[0].GetAttribute("src").ShouldBe(collapseImg);
+		images[1].GetAttribute("src").ShouldBe(collapseImg);
+		images[2].GetAttribute("src").ShouldBe(noExpandImg);
+		images[3].GetAttribute("src").ShouldBe(noExpandImg);
+
+
+	}
+
+}

@@ -1,0 +1,48 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<TreeView id="SampleTreeView"
+							ShowExpandCollapse="false"
+							runat="server">
+
+			<Nodes>
+
+				<TreeNode Value="Home"
+									ImageToolTip="@ImageToolTip"
+									ImageUrl="@ImageUrl"
+									Text="Home"
+									Target="Content"
+									ToolTip="Home Tooltip"
+									Expanded="true" />
+
+			</Nodes>
+
+		</TreeView>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+
+	private string ImageToolTip = "Hugo made me sound like a hamster";
+	private string ImageUrl = "something_something.jpg";
+
+	void FirstTest()
+	{
+		// Arrange/Act
+		var cut = GetComponentUnderTest<TreeView>();
+
+		// Asserts
+		cut.Find("img").ShouldNotBeNull();
+		var img = cut.Find("img");
+		img.GetAttribute("src").ShouldBe(ImageUrl);
+		img.GetAttribute("title").ShouldBe(ImageToolTip);
+		img.GetAttribute("alt").ShouldBe(ImageToolTip);
+
+		img.ParentElement.LocalName.ShouldBe("td");
+
+		cut.FindAll("td").Length.ShouldBe(2);
+
+	}
+
+}

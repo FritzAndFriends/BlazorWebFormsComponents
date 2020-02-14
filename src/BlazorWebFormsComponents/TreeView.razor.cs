@@ -12,7 +12,7 @@ using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeView : BaseWebFormsComponent, IHasStyle
+	public partial class TreeView : BaseDataBindingComponent, IHasStyle
 	{
 
 		[Parameter]
@@ -28,10 +28,16 @@ namespace BlazorWebFormsComponents
 		public object DataSource { get; set; }
 
 		[Parameter]
+		public TreeViewImageSet ImageSet { get; set; } = TreeViewImageSet._Default;
+
+		[Parameter]
 		public TreeNodeTypes ShowCheckBoxes { get; set; }
 
 		[Parameter]
 		public bool ShowExpandCollapse { get; set; } = true;
+
+		[Parameter]
+		public bool ShowLines { get; set; } = false;
 
 		#region IHasStyle
 
@@ -65,13 +71,16 @@ namespace BlazorWebFormsComponents
 		}
 
 		[Parameter]
-		public EventHandler<TreeNodeEventArgs> OnTreeNodeExpanded { get; set; }
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeDataBound { get; set; }
 
 		[Parameter]
-		public EventHandler<TreeNodeEventArgs> OnTreeNodeCollapsed { get; set; }
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeCheckChanged { get; set; }
 
 		[Parameter]
-		public EventHandler<TreeNodeEventArgs> OnTreeNodeCheckChanged { get; set; }
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeCollapsed { get; set; }
+
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> OnTreeNodeExpanded { get; set; }
 
 		#endregion
 
@@ -82,17 +91,27 @@ namespace BlazorWebFormsComponents
 		private new Task DataBind()
 		{
 
-			if (DataSource is XmlDocument) return DataBindXml(DataSource as XmlDocument);
+			OnDataBinding.InvokeAsync(EventArgs.Empty);
+
+			if (DataSource is XmlDocument xmlDoc) {
+
+				if (xmlDoc.SelectSingleNode("/*").LocalName == "siteMap")
+					DataBindSiteMap(xmlDoc);
+				else 
+					DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
+
+			}
+
+			OnDataBound.InvokeAsync(EventArgs.Empty);
 
 			return Task.CompletedTask;
 
 		}
 
-		private Task DataBindXml(XmlDocument src)
+		private Task DataBindXml(XmlNodeList elements)
 		{
 
 			var treeNodeCounter = 0;
-			var elements = src.SelectNodes("/*");
 
 			ChildNodesRenderFragment = b =>
 			{
@@ -113,6 +132,7 @@ namespace BlazorWebFormsComponents
 				foreach (XmlNode node in siblings)
 				{
 
+
 					if (!(node is XmlElement)) continue;
 					var element = node as XmlElement;
 
@@ -123,7 +143,21 @@ namespace BlazorWebFormsComponents
 
 						builder.OpenComponent<TreeNode>(treeNodeCounter++);
 
+						if (!string.IsNullOrEmpty(thisBinding.ImageToolTipField))
+							builder.AddAttribute(treeNodeCounter++, "ImageToolTip", element.GetAttribute(thisBinding.ImageToolTipField));
+						if (!string.IsNullOrEmpty(thisBinding.ImageUrlField))
+							builder.AddAttribute(treeNodeCounter++, "ImageUrl", element.GetAttribute(thisBinding.ImageUrlField));
+						if (!string.IsNullOrEmpty(thisBinding.NavigateUrlField))
+							builder.AddAttribute(treeNodeCounter++, "NavigateUrl", element.GetAttribute(thisBinding.NavigateUrlField));
+						if (!string.IsNullOrEmpty(thisBinding.TargetField))
+							builder.AddAttribute(treeNodeCounter++, "Target", element.GetAttribute(thisBinding.TargetField));
+
+						// Text must be present, no need to test
 						builder.AddAttribute(treeNodeCounter++, "Text", element.GetAttribute(thisBinding.TextField));
+
+						if (!string.IsNullOrEmpty(thisBinding.ToolTipField))
+							builder.AddAttribute(treeNodeCounter++, "ToolTip", element.GetAttribute(thisBinding.ToolTipField));
+
 
 						if (element.HasChildNodes)
 						{
@@ -131,9 +165,12 @@ namespace BlazorWebFormsComponents
 							{
 
 								AddElements(_builder, element.ChildNodes);
+
 							}));
 						}
 						builder.CloseComponent();
+						OnTreeNodeDataBound.InvokeAsync(new TreeNodeEventArgs(null));
+
 					}
 				}
 
@@ -141,7 +178,15 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private List<TreeNodeBinding> _TreeNodeBindings = new List<TreeNodeBinding>();
+		private Task DataBindSiteMap(XmlDocument src) {
+
+			_TreeNodeBindings.First().DataMember = "siteMapNode";
+
+			return DataBindXml(src.SelectNodes("/siteMap/siteMapNode"));
+
+		}
+
+		private HashSet<TreeNodeBinding> _TreeNodeBindings = new HashSet<TreeNodeBinding>();
 		internal void AddTreeNodeBinding(TreeNodeBinding treeNodeBinding)
 		{
 			_TreeNodeBindings.Add(treeNodeBinding);

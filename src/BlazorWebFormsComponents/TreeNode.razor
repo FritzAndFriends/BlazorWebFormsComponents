@@ -1,37 +1,80 @@
 ﻿@{
-	string nodeImg = Expanded ? "_content/Fritz.BlazorWebFormsComponents/TreeView/node_expanded.gif" : "_content/Fritz.BlazorWebFormsComponents/TreeView/node_collapsed.gif";
 	string nodeText = Expanded ? $"Collapse {Text}" : $"Expand {Text}";
 }
 @if ((Parent?.Expanded) ?? true)
 {
 <table cellpadding="0" cellspacing="0" style="border-width: 0;">
 	<tr>
-		@for (var i = 0; i < Depth; i++)
-		{
-			<td><div style="width:20px;height:1px;"></div></td>
+		@{
+			var currentParent = Parent;
+			var indentBuilder = new System.Text.StringBuilder();
+			var indentItems = new List<string>();
 		}
+		@while (currentParent != null)
+		{
+			indentBuilder.Append("<td>");
+			if (!ParentTreeView.ShowLines || currentParent.Parent == null)
+			{
+				indentBuilder.Append(@"<div style=""width:20px;height:1px;""></div>");
+			}
+			else if (!currentParent?.IsLast() ?? false)
+			{
+				indentBuilder.Append($"<img src=\"{ImageLocation}Default_I.gif\" />");
+			} else
+			{
+				indentBuilder.Append(@"<div style=""width:20px;height:1px;""></div>");
+			}
+			indentBuilder.Append("</td>");
+			indentItems.Add(indentBuilder.ToString());
+			indentBuilder.Clear();
+			currentParent = currentParent.Parent;
+		}
+	 	@((MarkupString)string.Join("",indentItems.ToArray().Reverse()))
 
-		@if (ChildContent != null && ParentTreeView.ShowExpandCollapse)
+
+		@if ((IsRoot || IsParent) && ParentTreeView.ShowExpandCollapse && ChildContent != null)
 		{
 			<td>
-				<a href="javascript:void()" @onclick="HandleNodeExpand">
-					<img src="@nodeImg" alt="@nodeText" title="@nodeText" style="border-width: 0;" />
+				<a href="" @onclick="HandleNodeExpand" @onclick:preventDefault @onclick:stopPropagation>
+					<img src="@NodeImage" alt="@nodeText" title="@nodeText" style="border-width: 0;" />
 				</a>
 			</td>
 		}
-		else
+		else if (!(Parent is null)) // && ParentTreeView.ShowExpandCollapse)
 		{
-			<td><div style="width:20px;height:1px;"></div></td>
+			<td><img src="@NoExpandImage" alt="" /></td>
 		}
+
+		@if (!string.IsNullOrEmpty(ImageUrl))
+		{
+
+			if (string.IsNullOrEmpty(NavigateUrl))
+			{
+				<td>
+					<img src="@ImageUrl" alt="@ImageToolTip" title="@ImageToolTip" style="border-width:0;" />
+				</td>
+			}
+			else
+			{
+				<td>
+					<a href="@NavigateUrl" target="@Target" title="@ToolTip" id="MainContent_SampleTreeViewt0">
+						<img src="@ImageUrl" alt="@ImageToolTip" title="@ImageToolTip" style="border-width:0;" />
+					</a>
+				</td>
+			}
+		}
+
 		<td style="white-space: nowrap;">
 
-			@if (ParentTreeView.ShowCheckBoxes != Enums.TreeNodeTypes.None) {
+			@if (ParentTreeView.ShowCheckBoxes != Enums.TreeNodeTypes.None)
+			{
 
 				var isRoot = (ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Root) && Depth == 0);
 				var isParent = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Parent) && (Depth > 0 && !(ChildContent is null));
 				var isLeaf = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Leaf) && (ChildContent is null);
 
-				@if (ShowCheckBox && (isRoot || isParent || isLeaf)) {
+				@if (ShowCheckBox && (isRoot || isParent || isLeaf))
+				{
 					<input type="checkbox" checked="@(Checked ? "checked" : null)" @onchange="args => { HandleCheckbox(this, args); }" />
 				}
 

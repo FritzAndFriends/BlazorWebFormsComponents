@@ -3,27 +3,40 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29521.150
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWebFormsComponents", "BlazorWebFormsComponents\BlazorWebFormsComponents.csproj", "{7E35A14A-C0EF-4705-B892-F1704ECC6B31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWebFormsComponents", "src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj", "{7E35A14A-C0EF-4705-B892-F1704ECC6B31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{240E45D9-B9FF-42E8-B0C1-332861E02DBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeWebForms", "..\samples\BeforeWebForms\BeforeWebForms.csproj", "{CA277C6F-A3DD-4FAF-9B7C-56E7B844CEF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeWebForms", "samples\BeforeWebForms\BeforeWebForms.csproj", "{CA277C6F-A3DD-4FAF-9B7C-56E7B844CEF7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{FD758025-7F6D-4EE8-9837-98C0E0BFCB6B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWebFormsComponents.Test", "BlazorWebFormsComponents.Test\BlazorWebFormsComponents.Test.csproj", "{70EC4DF2-FE9B-49F4-B385-040E45BC7764}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWebFormsComponents.Test", "src\BlazorWebFormsComponents.Test\BlazorWebFormsComponents.Test.csproj", "{70EC4DF2-FE9B-49F4-B385-040E45BC7764}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Version", "Version", "{CF13A094-3FCB-470C-8450-1E1B4B05400D}"
 	ProjectSection(SolutionItems) = preProject
-		..\Directory.Build.props = ..\Directory.Build.props
-		..\version.json = ..\version.json
+		Directory.Build.props = Directory.Build.props
+		version.json = version.json
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedSampleObjects", "..\samples\SharedSampleObjects\SharedSampleObjects.csproj", "{6C602B37-5FC9-43FF-A3D8-C92B42D62F0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedSampleObjects", "samples\SharedSampleObjects\SharedSampleObjects.csproj", "{6C602B37-5FC9-43FF-A3D8-C92B42D62F0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterBlazorClientSide", "..\samples\AfterBlazorClientSide\AfterBlazorClientSide.csproj", "{7218D3E2-38BD-429D-9D84-15E688BDC4A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterBlazorClientSide", "samples\AfterBlazorClientSide\AfterBlazorClientSide.csproj", "{7218D3E2-38BD-429D-9D84-15E688BDC4A1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterBlazorServerSide", "..\samples\AfterBlazorServerSide\AfterBlazorServerSide.csproj", "{1669CD22-5CCE-4D96-A02B-31D81B5EFB2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterBlazorServerSide", "samples\AfterBlazorServerSide\AfterBlazorServerSide.csproj", "{1669CD22-5CCE-4D96-A02B-31D81B5EFB2B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionInfo", "SolutionInfo", "{230A010B-4503-4DBA-8F60-8EF13CA0A4DF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		CODE-OF-CONDUCT.md = CODE-OF-CONDUCT.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
+		LICENSE = LICENSE
+		nuget.config = nuget.config
+		README.md = README.md
+		version.json = version.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
