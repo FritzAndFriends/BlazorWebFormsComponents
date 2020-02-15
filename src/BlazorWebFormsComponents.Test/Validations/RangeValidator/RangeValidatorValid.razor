@@ -1,0 +1,64 @@
+﻿@inherits TestComponentBase
+<h3>Range Validator</h3>
+@using BlazorWebFormsComponents.Validations;
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+
+			<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
+			<RangeValidator ControlToValidate="@Value"
+											Type="Integer"
+											MinimumValue="0"
+											MaximumValue="10"
+											Text="Invalid"
+											ErrorMessage="ErrorMessage!" />
+
+			<button type="submit">Submit</button>
+
+		</EditForm>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+  bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> Value = new ForwardRef<InputBase<string>>();
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		_validSubmit = true;
+	}
+
+	private void HandleInvalidSubmit()
+	{
+		_invalidSubmit = true;
+	}
+
+	public class ExampleModel
+	{
+		public string Value { get; set; }
+	}
+}
+
+@code {
+		void FirstTest()
+		{
+
+			// Arrange
+			var cut = GetComponentUnderTest();
+
+			// Act
+			cut.Find("input").Change("1");
+			cut.Find("form").Submit();
+
+			// Assert
+			Console.WriteLine(cut.Markup);
+			_validSubmit.ShouldBeTrue();
+			_invalidSubmit.ShouldBeFalse();
+
+			cut.FindAll("span").Count().ShouldBe(0);
+		}
+}
