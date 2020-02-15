@@ -35,11 +35,7 @@
             </tr>
         </GroupTemplate>
         <GroupSeparatorTemplate>
-            <tr runat="server">
-                <td colspan="3">
-                    <hr />
-                </td>
-            </tr>
+            <tr runat="server"> <td colspan="4">GroupingSeperator</td> </tr>
         </GroupSeparatorTemplate>
         <ItemTemplate>
             <tr>
@@ -49,11 +45,6 @@
                 <td><%# Item.LastUpdate.ToString("d") %></td>
             </tr>
         </ItemTemplate>
-        <ItemSeparatorTemplate>
-            <tr>
-                <td colspan="4" style="border-bottom: 1px solid black;">&nbsp;</td>
-            </tr>
-        </ItemSeparatorTemplate>
         <EmptyDataTemplate>
             <tr>
                 <td colspan="4">No widgets available</td>

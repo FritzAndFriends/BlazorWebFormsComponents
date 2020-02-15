@@ -1,0 +1,79 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<table>
+			<thead> <tr> <td>Id</td> <td>Name</td> <td>Price</td> <td>Last Update</td> </tr> </thead>
+			<tbody>
+				<ListView Items="data"
+									GroupItemCount="2"
+									ItemType="Widget"
+									Context="Item">
+					<ItemTemplate>
+						<tr> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
+					</ItemTemplate>
+					<GroupTemplate>
+						<tr runat="server">
+							<td runat="server" id="itemPlaceHolder" />
+						</tr>
+					</GroupTemplate>
+					<GroupSeparatorTemplate>
+						<tr runat="server"> <td colspan="4"> <hr /> </td> </tr>
+					</GroupSeparatorTemplate>
+				</ListView>
+			</tbody>
+		</table>
+	</ComponentUnderTest>
+</Fixture>
+
+@code{
+	public Widget[] data = Widget.Widgets(8)
+				.Select((x, i) => new Widget
+				{
+					Id = x.Id,
+					Name = x.Name,
+					LastUpdate = x.LastUpdate,
+					Price = i % 2
+				}).ToArray();
+}
+
+@code {
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+		Console.WriteLine(cut.Markup);
+
+			// 8 x 2 => I I G I I G I I G I I 
+			// 8 x 3 => I I I G I I I G I I 
+			// 7 x 3 => I I I G I I I G I
+
+		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(8);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(3);
+	}
+}
+
+@*
+	<table>
+		<thead>
+			<tr> <td>Id</td> <td>Name</td> <td>Price</td> <td>Last Update</td> </tr>
+		</thead>
+		<tbody>
+			<tr> </tr>
+			<tr> <td>1</td> <td>one Widget</td> <td>£0.00</td> <td>12/02/2020</td> </tr>
+			<tr> <td>2</td> <td>two Widget</td> <td>£1.00</td> <td>05/02/2020</td> </tr>
+			<tr> <td colspan="4">GroupingSeperator<td> </tr>
+			<tr> </tr>
+			<tr> <td>3</td> <td>three Widget</td> <td>£0.00</td> <td>02/02/2020</td> </tr>
+			<tr> <td>4</td> <td>four Widget</td> <td>£1.00</td> <td>02/02/2020</td> </tr>
+			<tr> <td colspan="4">GroupingSeperator<td> </tr>
+			<tr> </tr>
+			<tr> <td>5</td> <td>five Widget</td> <td>£0.00</td> <td>09/02/2020</td> </tr>
+			<tr> <td>6</td> <td>six Widget</td> <td>£1.00</td> <td>13/02/2020</td> </tr>
+			<tr> <td colspan="4">GroupingSeperator<td> </tr>
+			<tr> </tr>
+			<tr> <td>7</td> <td>seven Widget</td> <td>£0.00</td> <td>05/02/2020</td> </tr>
+			<tr> <td>8</td> <td>eight Widget</td> <td>£1.00</td> <td>11/02/2020</td> </tr>
+		</tbody>
+	</table>
+*@

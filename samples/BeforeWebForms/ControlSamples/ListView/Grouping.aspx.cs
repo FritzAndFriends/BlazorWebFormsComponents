@@ -8,7 +8,7 @@ namespace BeforeWebForms.ControlSamples.ListView
 	{
 		protected void Page_Load(object sender, EventArgs e)
 		{
-			simpleListView.DataSource = Widget.Widgets(6)
+			simpleListView.DataSource = Widget.Widgets(8)
 				.Select((x, i) => new Widget
 				{
 					Id= x.Id,

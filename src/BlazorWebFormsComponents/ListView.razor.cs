@@ -16,21 +16,12 @@ namespace BlazorWebFormsComponents
 		}
 
 		#region Templates
-
-		[Parameter]
-		public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
-
-		/// <summary>
-		/// Defines the content to render if the data source returns no data.
-		/// </summary>
-		[Parameter]
-		public RenderFragment EmptyDataTemplate { get; set; }
-
-		[Parameter]
-		public RenderFragment ItemSeparatorTemplate { get; set; }
-
-		[Parameter]
-		public RenderFragment<ItemType> ItemTemplate { get; set; }
+		[Parameter] public RenderFragment EmptyDataTemplate { get; set; }
+		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
+		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+		[Parameter] public RenderFragment ItemSeparatorTemplate { get; set; }
+		[Parameter] public RenderFragment<ItemType> GroupTemplate { get; set; }
+		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
 
 		/// <summary>
 		/// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
@@ -48,12 +39,14 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
+		[Parameter] public int GroupItemCount { get; set; } = 0;
+
 		[Parameter] // TODO: Implement
 		public InsertItemPosition InsertItemPosition { get; set; }
 
 		[Parameter] // TODO: Implement
 		public int SelectedIndex { get; set; }
-
+		
 		/// <summary>
 		/// Style is not applied by this control
 		/// </summary>

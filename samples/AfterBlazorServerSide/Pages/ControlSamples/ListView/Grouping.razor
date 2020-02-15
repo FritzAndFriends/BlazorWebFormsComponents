@@ -1,0 +1,75 @@
+﻿@page "/ControlSamples/ListView/Grouping"
+
+<h2>ListView Grouping Sample</h2>
+
+<Nav />
+
+<p>Here is a listview grouped by price</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<td>Id</td>
+			<td>Name</td>
+			<td>Price</td>
+			<td>Last Update</td>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView @ref="simpleListView"
+							runat="server"
+							EnableViewState="false"
+							Context="Item"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<LayoutTemplate>
+				<table>
+					<thead>
+						<tr>
+							<td>Id</td>
+							<td>Name</td>
+							<td>Price</td>
+							<td>Last Update</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr runat="server" id="groupPlaceHolder"></tr>
+					</tbody>
+				</table>
+			</LayoutTemplate>
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</ItemTemplate>
+			<EmptyDataTemplate>
+				<tr>
+					<td colspan="4">No widgets available</td>
+				</tr>
+			</EmptyDataTemplate>
+		</ListView>
+	</tbody>
+</table>
+
+@code {
+
+	BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleListView.DataSource = Widget.SimpleWidgetList;
+			simpleListView.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+}
+
