@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace BlazorWebFormsComponents.Validations
+namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
-	public class CurrencyComparer : IComparer
+  public class CurrencyComparer : IComparer
 	{
 		public bool TryConvert(string text, bool cultureInvariant, out object value)
 		{
@@ -61,7 +61,7 @@ namespace BlazorWebFormsComponents.Validations
 			if (groupChar[0] == 160)
 				groupChar = " ";
 			var digits = info.CurrencyDecimalDigits;
-			var hasDigits = (digits > 0);
+			var hasDigits = digits > 0;
 			var currencyExpression =
 					"^\\s*([-\\+])?((\\d" + beginGroupSize + "(\\" + groupChar + "\\d" + subsequentGroupSize + ")+)|\\d*)"
 					+ (hasDigits ? "\\" + decimalChar + "?(\\d{0," + digits.ToString(NumberFormatInfo.InvariantInfo) + "})" : string.Empty)
@@ -81,7 +81,7 @@ namespace BlazorWebFormsComponents.Validations
 
 			return m.Groups[1].Value
 						 + m.Groups[2].Value.Replace(groupChar, string.Empty)
-						 + ((hasDigits && m.Groups[5].Length > 0) ? "." + m.Groups[5].Value : string.Empty);
+						 + (hasDigits && m.Groups[5].Length > 0 ? "." + m.Groups[5].Value : string.Empty);
 		}
 
 		private static int GetCurrencyGroupSize(NumberFormatInfo info)
