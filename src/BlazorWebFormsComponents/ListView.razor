@@ -20,14 +20,14 @@ else
 	@LayoutTemplate(
 			@: @if (Items != null)
 					{
-						var rowCounter = 0;
 
 						OnDataBinding.InvokeAsync(EventArgs.Empty);
 
-						foreach (var item in Items)
+						foreach (var item in ItemsList)
 						{
 
-							if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+							<CascadingValue Name="CurrentDataBoundItem" Value="item">
+							@if (AlternatingItemTemplate == null || ItemsList.FindIndex(i => i.Equals(item)) % 2 == 0) // || rowCounter % 2 == 0)
 							{
 								@ItemTemplate(item)
 							}
@@ -35,6 +35,7 @@ else
 							{
 								@AlternatingItemTemplate(item)
 							}
+							</CascadingValue>
 					/**/
 					/**/
 
@@ -47,8 +48,6 @@ else
 					/**/
 
 							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-
-							rowCounter++;
 
 						}
 

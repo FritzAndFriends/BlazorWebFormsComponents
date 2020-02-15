@@ -1,4 +1,5 @@
 ﻿@page "/ControlSamples/ListView"
+@using static BlazorWebFormsComponents.Helpers
 
 <h2>ListView Component homepage</h2>
 
@@ -24,8 +25,8 @@
 			<AlternatingItemTemplate>
 				<tr class="table-dark">
 					<td>@Item.Id</td>
-					<td>@Item.Name</td>
-					<td>@Item.Price.ToString("c")</td>
+					<td>@Eval("Name")</td>
+					<td>@Eval("Price", "{0:C}")</td>
 					<td>@Item.LastUpdate.ToString("d")</td>
 				</tr>
 			</AlternatingItemTemplate>

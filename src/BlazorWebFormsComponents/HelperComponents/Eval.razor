@@ -1,0 +1,24 @@
+﻿@using System.Reflection
+@Output() 
+@code {
+
+	[CascadingParameter(Name = "CurrentDataBoundItem")]
+	public object TheItem { get; set; }
+
+	[Parameter]
+	public string PropertyName { get; set; }
+
+	[Parameter]
+	public string Format { get; set; } = "{0}";
+
+	string Output()
+	{
+
+		var theType = TheItem.GetType();
+		var theProp = theType.GetProperty(PropertyName);
+
+		return string.Format(Format, theProp.GetValue(TheItem));
+
+	}
+
+}
