@@ -30,9 +30,9 @@
             </table>
         </LayoutTemplate>
         <GroupTemplate>
-            <tr runat="server" >
-                <td runat="server" id ="itemPlaceHolder"/>
-            </tr>
+						<tr><td colspan="4">GroupStart</td></tr>
+						<data runat="server" id="itemPlaceHolder" /> 
+						<tr><td colspan="4">GroupEnd</td></tr>
         </GroupTemplate>
         <GroupSeparatorTemplate>
             <tr runat="server"> <td colspan="4">GroupingSeperator</td> </tr>

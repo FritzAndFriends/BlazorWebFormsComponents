@@ -13,12 +13,12 @@
 						<tr> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
 					</ItemTemplate>
 					<GroupTemplate>
-						<tr runat="server">
-							<td runat="server" id="itemPlaceHolder" />
-						</tr>
+						<tr><td colspan="4">GroupStart</td></tr>
+						<data id="itemPlaceHolder" />
+						<tr><td colspan="4">GroupEnd</td></tr>
 					</GroupTemplate>
 					<GroupSeparatorTemplate>
-						<tr runat="server"> <td colspan="4"> <hr /> </td> </tr>
+						<tr> <td colspan="4"> <hr /> </td> </tr>
 					</GroupSeparatorTemplate>
 				</ListView>
 			</tbody>
@@ -44,9 +44,9 @@
 		var cut = GetComponentUnderTest();
 		Console.WriteLine(cut.Markup);
 
-			// 8 x 2 => I I G I I G I I G I I 
-			// 8 x 3 => I I I G I I I G I I 
-			// 7 x 3 => I I I G I I I G I
+		// 8 x 2 => I I G I I G I I G I I
+		// 8 x 3 => I I I G I I I G I I
+		// 7 x 3 => I I I G I I I G I
 
 		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(8);
 		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(3);
@@ -54,26 +54,30 @@
 }
 
 @*
-	<table>
-		<thead>
-			<tr> <td>Id</td> <td>Name</td> <td>Price</td> <td>Last Update</td> </tr>
-		</thead>
-		<tbody>
-			<tr> </tr>
-			<tr> <td>1</td> <td>one Widget</td> <td>£0.00</td> <td>12/02/2020</td> </tr>
-			<tr> <td>2</td> <td>two Widget</td> <td>£1.00</td> <td>05/02/2020</td> </tr>
-			<tr> <td colspan="4">GroupingSeperator<td> </tr>
-			<tr> </tr>
-			<tr> <td>3</td> <td>three Widget</td> <td>£0.00</td> <td>02/02/2020</td> </tr>
-			<tr> <td>4</td> <td>four Widget</td> <td>£1.00</td> <td>02/02/2020</td> </tr>
-			<tr> <td colspan="4">GroupingSeperator<td> </tr>
-			<tr> </tr>
-			<tr> <td>5</td> <td>five Widget</td> <td>£0.00</td> <td>09/02/2020</td> </tr>
-			<tr> <td>6</td> <td>six Widget</td> <td>£1.00</td> <td>13/02/2020</td> </tr>
-			<tr> <td colspan="4">GroupingSeperator<td> </tr>
-			<tr> </tr>
-			<tr> <td>7</td> <td>seven Widget</td> <td>£0.00</td> <td>05/02/2020</td> </tr>
-			<tr> <td>8</td> <td>eight Widget</td> <td>£1.00</td> <td>11/02/2020</td> </tr>
-		</tbody>
-	</table>
+<table>
+	<thead>
+		<tr> <td>Id</td> <td>Name</td> <td>Price</td> <td>Last Update</td> </tr>
+	</thead>
+	<tbody>
+		<tr><td colspan="4">GroupStart</td></tr>
+			<tr> <td>1</td> <td>one Widget</td> <td>£0.00</td> <td>11/02/2020</td> </tr>
+			<tr> <td>2</td> <td>two Widget</td> <td>£1.00</td> <td>03/02/2020</td> </tr>
+		<tr><td colspan="4">GroupEnd</td></tr>
+		<tr> <td colspan="4">GroupingSeperator</td> </tr>
+		<tr><td colspan="4">GroupStart</td></tr>
+			<tr> <td>3</td> <td>three Widget</td> <td>£0.00</td> <td>11/02/2020</td> </tr>
+			<tr> <td>4</td> <td>four Widget</td> <td>£1.00</td> <td>12/02/2020</td> </tr>
+		<tr><td colspan="4">GroupEnd</td></tr>
+		<tr> <td colspan="4">GroupingSeperator</td> </tr>
+		<tr><td colspan="4">GroupStart</td></tr>
+			<tr> <td>5</td> <td>five Widget</td> <td>£0.00</td> <td>10/02/2020</td> </tr>
+			<tr> <td>6</td> <td>six Widget</td> <td>£1.00</td> <td>10/02/2020</td> </tr>
+		<tr><td colspan="4">GroupEnd</td></tr>
+		<tr> <td colspan="4">GroupingSeperator</td> </tr>
+		<tr><td colspan="4">GroupStart</td></tr>
+			<tr> <td>7</td> <td>seven Widget</td> <td>£0.00</td> <td>08/02/2020</td> </tr>
+			<tr> <td>8</td> <td>eight Widget</td> <td>£1.00</td> <td>10/02/2020</td> </tr>
+		<tr><td colspan="4">GroupEnd</td></tr>
+	</tbody>
+</table>
 *@

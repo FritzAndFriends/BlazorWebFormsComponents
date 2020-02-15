@@ -19,40 +19,40 @@ else
 
 	@LayoutTemplate(
 			@: @if (Items != null)
+			{
+				var rowCounter = 0;
+
+				OnDataBinding.InvokeAsync(EventArgs.Empty);
+
+				foreach (var item in Items)
+				{
+	        @GroupSeparatorTemplate
+					if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
 					{
-						var rowCounter = 0;
-
-						OnDataBinding.InvokeAsync(EventArgs.Empty);
-
-						foreach (var item in Items)
-						{
-
-							if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
-							{
-								@ItemTemplate(item)
-							}
-							else
-							{
-								@AlternatingItemTemplate(item)
-							}
-					/**/
-					/**/
-
-							if (ItemSeparatorTemplate != null)
-							{
-								@ItemSeparatorTemplate
-							}
-					/**/
-					/**/
-					/**/
-
-							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-
-							rowCounter++;
-
-						}
-
-						OnDataBound.InvokeAsync(EventArgs.Empty);
+						@ItemTemplate(item)
 					}
-			)
+					else
+					{
+						@AlternatingItemTemplate(item)
+					}
+					/**/
+					/**/
+
+					if (ItemSeparatorTemplate != null)
+					{
+						@ItemSeparatorTemplate
+					}
+					/**/
+					/**/
+					/**/
+
+					OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+
+					rowCounter++;
+
+			  }
+
+				OnDataBound.InvokeAsync(EventArgs.Empty);
+	  }
+	)
 }
