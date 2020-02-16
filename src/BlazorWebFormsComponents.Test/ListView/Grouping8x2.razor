@@ -9,6 +9,12 @@
 									GroupItemCount="2"
 									ItemType="Widget"
 									Context="Item">
+					<ItemSeparatorTemplate>
+						<tr><td colspan="4">---</td></tr>
+					</ItemSeparatorTemplate>
+					<AlternatingItemTemplate>
+						<tr> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
+					</AlternatingItemTemplate>
 					<ItemTemplate>
 						<tr> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
 					</ItemTemplate>
