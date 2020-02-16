@@ -5,7 +5,7 @@
     <h2>ListView control homepage</h2>
 
     <div>
-      Other usage samples:  <a href="ModelBinding.aspx">ModelBinding Sample</a>
+      <a href="Default.aspx">Default</a> | <a href="Grouping.aspx">Grouping</a> | <a href="ModelBinding.aspx">ModelBinding</a>
     </div>
 
     <p>Here is a simple listview bound to a collection of widgets.</p>
