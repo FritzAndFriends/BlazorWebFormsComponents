@@ -2,7 +2,11 @@
 
 <asp:Content runat="server" ContentPlaceHolderID="MainContent">
 
-    <h2>ListView ModelBinding Sample</h2>
+    <h2>ListView control homepage</h2>
+
+    <div>
+      <a href="Default.aspx">Default</a> | <a href="Grouping.aspx">Grouping</a> | <a href="ModelBinding.aspx">ModelBinding</a>
+    </div>
 
     <p>Here is a listview using ModelBinding to interact with widgets.</p>
 

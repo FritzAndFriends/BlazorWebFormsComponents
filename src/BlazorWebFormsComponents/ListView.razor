@@ -11,47 +11,91 @@ else if (Items == null || !Items.Any())
 }
 else
 {
-
 	@if (LayoutTemplate is null)
 	{
 		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
 
 	@LayoutTemplate(
-			@: @if (Items != null)
+					@: @if (Items != null)
 					{
 
-						OnDataBinding.InvokeAsync(EventArgs.Empty);
-
-						foreach (var item in ItemsList)
+						if (GroupItemCount == 0)
 						{
+							OnDataBinding.InvokeAsync(EventArgs.Empty);
 
-							<CascadingValue Name="CurrentDataBoundItem" Value="item">
-							@if (AlternatingItemTemplate == null || ItemsList.FindIndex(i => i.Equals(item)) % 2 == 0) // || rowCounter % 2 == 0)
+							foreach (var item in Items)
 							{
-								@ItemTemplate(item)
-							}
-							else
-							{
-								@AlternatingItemTemplate(item)
-							}
-							</CascadingValue>
-					/**/
-					/**/
+								if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+								{
+									@ItemTemplate(item)
+								}
+								else
+								{
+									@AlternatingItemTemplate(item)
+								}
 
-							if (ItemSeparatorTemplate != null)
-							{
-								@ItemSeparatorTemplate
+								if (ItemSeparatorTemplate != null)
+								{
+									@ItemSeparatorTemplate
+								}
+								rowCounter++;
+
+								OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
 							}
-					/**/
-					/**/
-					/**/
 
-							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-
+							OnDataBound.InvokeAsync(EventArgs.Empty);
 						}
+						else
+						{
+							var itemEnumerator = Items.GetEnumerator();
+							itemEnumerator.Reset();
+							var isBusy = itemEnumerator.MoveNext();
 
-						OnDataBound.InvokeAsync(EventArgs.Empty);
+							var itemCounter = 0;
+							var buildCounter = 1;
+							var groupCounter = 0;
+
+							do
+							{
+								RenderFragment renderFragment = builder =>
+								{
+									builder.OpenRegion(buildCounter);
+									buildCounter++;
+									do
+									{
+										var item = itemEnumerator.Current;
+										if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+										{
+											builder.AddContent(buildCounter, @ItemTemplate(item));
+											buildCounter++;
+										}
+										else
+										{
+											builder.AddContent(buildCounter, @AlternatingItemTemplate(item));
+											buildCounter++;
+										}
+
+										if (ItemSeparatorTemplate != null)
+										{
+											builder.AddContent(buildCounter, @ItemSeparatorTemplate);
+										}
+										rowCounter++;
+										buildCounter++;
+										groupCounter++;
+										isBusy = itemEnumerator.MoveNext();
+									} while (isBusy && groupCounter < GroupItemCount);
+									builder.CloseRegion();
+								};
+								@GroupTemplate(renderFragment);
+								if (isBusy)
+								{
+									@GroupSeparatorTemplate
+								}
+								groupCounter = 0;
+
+							} while (isBusy);
+						}
 					}
-			)
+		)
 }

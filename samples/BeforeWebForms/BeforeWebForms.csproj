@@ -114,6 +114,7 @@
     <Content Include="ControlSamples\DataList\StyleAttributes.aspx" />
     <Content Include="ControlSamples\DataList\FlowLayout.aspx" />
     <Content Include="ControlSamples\DataList\Default.aspx" />
+    <Content Include="ControlSamples\ListView\Grouping.aspx" />
     <Content Include="ControlSamples\ListView\Default.aspx" />
     <Content Include="ControlSamples\ListView\ModelBinding.aspx" />
     <Content Include="ControlSamples\Repeater\Default.aspx" />
@@ -196,6 +197,13 @@
     </Compile>
     <Compile Include="ControlSamples\DataList\Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\ListView\Grouping.aspx.cs">
+      <DependentUpon>Grouping.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\ListView\Grouping.aspx.designer.cs">
+      <DependentUpon>Grouping.aspx</DependentUpon>
     </Compile>
     <Compile Include="ControlSamples\ListView\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
