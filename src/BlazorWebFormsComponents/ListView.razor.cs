@@ -21,10 +21,9 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
 		[Parameter] public RenderFragment ItemSeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
-		[Parameter] public RenderFragment<RenderFragment> MyGroupTemplate { get; set; }
+		[Parameter] public RenderFragment<RenderFragment> GroupTemplate { get; set; }
 		[Parameter] public RenderFragment ItemPlaceHolder { get; set; }
-
-		/// <summary>
+				/// <summary>
 		/// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
 		/// </summary>
 		[Parameter]

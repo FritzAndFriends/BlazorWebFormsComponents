@@ -85,7 +85,7 @@ else
 										isBusy = itemEnumerator.MoveNext();
 									} while (isBusy && groupCounter < GroupItemCount);
 								};
-								@MyGroupTemplate(renderFragment);
+								@GroupTemplate(renderFragment);
 								if (isBusy)
 								{
 									@GroupSeparatorTemplate

@@ -12,11 +12,11 @@
 					<ItemTemplate>
 						<tr> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
 					</ItemTemplate>
-					<MyGroupTemplate Context="ItemPlaceHolder">
+					<GroupTemplate Context="ItemPlaceHolder">
 						<tr><td colspan="4">GroupStart</td></tr>
 						@ItemPlaceHolder
 						<tr><td colspan="4">GroupEnd</td></tr>
-					</MyGroupTemplate>
+					</GroupTemplate>
 					<GroupSeparatorTemplate>
 						<tr><td colspan="4">GroupingSeperator</td></tr>
 					</GroupSeparatorTemplate>
