@@ -14,26 +14,6 @@ namespace BlazorWebFormsComponents
 	public static class Helpers
 	{
 
-		public static RenderFragment Eval(string fieldName, string format = "")
-		{
-
-			RenderFragment fragment = builder =>
-			{
-
-				builder.OpenComponent<HelperComponents.Eval>(0);
-				builder.AddAttribute(1, "PropertyName", fieldName);
-				if (format != string.Empty)
-				{
-					builder.AddAttribute(2, "Format", format);
-				}
-				builder.CloseComponent();
-
-			};
-
-			return fragment;
-
-		}
-
 		private static MarkupString StackWalker()
 		{
 			var sb = new StringBuilder();
