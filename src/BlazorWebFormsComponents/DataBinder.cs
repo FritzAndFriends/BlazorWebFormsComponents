@@ -27,7 +27,7 @@ namespace BlazorWebFormsComponents
 		}
 
 		/// <summary>
-		/// 🚨🚨 This does NOT return a string and is expected to be used without a predicate 🚨🚨
+		/// 🚨🚨 This does <b>NOT</b> return a string and is expected to be used without a predicate 🚨🚨
 		/// </summary>
 		/// <param name="fieldName"></param>
 		/// <param name="format"></param>
@@ -52,14 +52,27 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		/// <summary>
+		/// GetDataItem is not supported with Blazor. Please use @context or @item notation to get the item.  See https://github.com/FritzAndFriends/BlazorWebFormsComponents/docs for more details
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		[Obsolete("GetDataItem is not supported with Blazor", true)]
 		public static object GetDataItem(object obj)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException("GetDataItem is not supported with Blazor. Please use @context or @item notation to get the item.  See LINK for more details");
 		}
 
+		/// <summary>
+		/// GetDataItem is not supported with Blazor. Please use @context or @item notation to get the item.  See LINK for more details
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <param name="foundDataItem"></param>
+		/// <returns></returns>
+		[Obsolete("GetDataItem is not supported with Blazor", true)]
 		public static object GetDataItem(object obj, out bool foundDataItem)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException("GetDataItem is not supported with Blazor. Please use @context or @item notation to get the item.  See LINK for more details");
 		}
 
 		/// <summary>

@@ -3,6 +3,7 @@ using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace BlazorWebFormsComponents
 {
@@ -110,5 +111,6 @@ namespace BlazorWebFormsComponents
 			CalculatedStyle = this.ToStyle().AddStyle(Style).NullIfEmpty();
 			base.OnInitialized();
 		}
+
 	}
 }

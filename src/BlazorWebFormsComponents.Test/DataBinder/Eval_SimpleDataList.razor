@@ -1,0 +1,33 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.RepeatLayout
+@using static BlazorWebFormsComponents.Enums.DataListEnum
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Flow">
+			<HeaderTemplate>My Widget List</HeaderTemplate>
+			<ItemTemplate>@DataBinder.Eval("Name")</ItemTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
+
+		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+
+	}
+
+
+}

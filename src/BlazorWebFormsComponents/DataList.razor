@@ -52,7 +52,6 @@
 
 					@if (Items?.Any() ?? false)
 					{
-						var even = true;
 						var first = true;
 						OnDataBinding.InvokeAsync(EventArgs.Empty);
 						var idx = 1;
@@ -68,9 +67,13 @@
 									do
 									{
 										var item = IndexedItems[idx - 1];
-										<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
+										<CascadingValue Name="CurrentDataBoundItem" Value="item">
+											@{
+												var even = IndexedItems.IndexOf(item) % 2 == 0;
+											}
+											<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
+										</CascadingValue>
 										OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-										even = !even;
 										idx++;
 										first = false;
 									} while ((idx - 1) % RepeatColumns != 0 && idx <= IndexedItems.Count());
@@ -98,7 +101,6 @@
 				}
 				@if (Items?.Any() ?? false)
 				{
-					var even = true;
 					var first = true;
 					OnDataBinding.InvokeAsync(EventArgs.Empty);
 					var idx = 1;
@@ -111,9 +113,13 @@
 						do
 						{
 							var item = IndexedItems[idx - 1];
-							<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
+							<CascadingValue Name="CurrentDataBoundItem" Value="item">
+								@{
+									var even = IndexedItems.IndexOf(item) % 2 == 0;
+								}
+								<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
+							</CascadingValue>
 							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-							even = !even;
 							first = false;
 							idx++;
 						} while ((idx - 1) % RepeatColumns != 0 && idx <= IndexedItems.Count());
