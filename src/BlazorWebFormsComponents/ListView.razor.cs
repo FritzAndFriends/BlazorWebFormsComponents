@@ -1,6 +1,9 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BlazorWebFormsComponents
 {
@@ -17,8 +20,9 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
 		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
 		[Parameter] public RenderFragment ItemSeparatorTemplate { get; set; }
-		[Parameter] public RenderFragment<ItemType> GroupTemplate { get; set; }
 		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
+		[Parameter] public RenderFragment<RenderFragment> MyGroupTemplate { get; set; }
+		[Parameter] public RenderFragment ItemPlaceHolder { get; set; }
 
 		/// <summary>
 		/// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
@@ -43,7 +47,7 @@ namespace BlazorWebFormsComponents
 
 		[Parameter] // TODO: Implement
 		public int SelectedIndex { get; set; }
-		
+
 		/// <summary>
 		/// Style is not applied by this control
 		/// </summary>
@@ -51,22 +55,14 @@ namespace BlazorWebFormsComponents
 		public string Style { get; set; }
 
 
-		[Parameter]
-		public RenderFragment ChildContent { get; set; }
+		[Parameter] public RenderFragment ChildContent { get; set; }
 
-		[CascadingParameter(Name = "Host")]
-		public BaseWebFormsComponent HostComponent { get; set; }
-
+		[CascadingParameter(Name = "Host")] public BaseWebFormsComponent HostComponent { get; set; }
 
 		protected override void OnInitialized()
 		{
-
 			HostComponent = this;
-
 			base.OnInitialized();
-
 		}
-
 	}
-
 }

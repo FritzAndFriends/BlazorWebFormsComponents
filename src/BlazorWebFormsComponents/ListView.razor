@@ -11,48 +11,89 @@ else if (Items == null || !Items.Any())
 }
 else
 {
-
 	@if (LayoutTemplate is null)
 	{
 		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
 
 	@LayoutTemplate(
-			@: @if (Items != null)
-			{
-				var rowCounter = 0;
-
-				OnDataBinding.InvokeAsync(EventArgs.Empty);
-
-				foreach (var item in Items)
-				{
-	        @GroupSeparatorTemplate
-					if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+					@: @if (Items != null)
 					{
-						@ItemTemplate(item)
+						var rowCounter = 0;
+
+						if (GroupItemCount == 0)
+						{
+							OnDataBinding.InvokeAsync(EventArgs.Empty);
+
+							foreach (var item in Items)
+							{
+								if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+								{
+									@ItemTemplate(item)
+								}
+								else
+								{
+									@AlternatingItemTemplate(item)
+								}
+
+								if (ItemSeparatorTemplate != null)
+								{
+									@ItemSeparatorTemplate
+								}
+								rowCounter++;
+
+								OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+							}
+
+							OnDataBound.InvokeAsync(EventArgs.Empty);
+						}
+						else
+						{
+							var itemEnumerator = Items.GetEnumerator();
+							itemEnumerator.Reset();
+							var isBusy = itemEnumerator.MoveNext();
+
+							var itemCounter = 0;
+							var buildCounter = 1;
+							var groupCounter = 0;
+
+							do
+							{
+								RenderFragment renderFragment = builder =>
+								{
+									do
+									{
+										var item = itemEnumerator.Current;
+										if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
+										{
+											builder.AddContent(buildCounter, @ItemTemplate(item));
+											buildCounter++;
+										}
+										else
+										{
+											builder.AddContent(buildCounter, @AlternatingItemTemplate(item));
+											buildCounter++;
+										}
+
+										if (ItemSeparatorTemplate != null)
+										{
+											builder.AddContent(buildCounter, @ItemSeparatorTemplate);
+										}
+										rowCounter++;
+										buildCounter++;
+										groupCounter++;
+										isBusy = itemEnumerator.MoveNext();
+									} while (isBusy && groupCounter < GroupItemCount);
+								};
+								@MyGroupTemplate(renderFragment);
+								if (isBusy)
+								{
+									@GroupSeparatorTemplate
+								}
+								groupCounter = 0;
+
+							} while (isBusy);
+						}
 					}
-					else
-					{
-						@AlternatingItemTemplate(item)
-					}
-					/**/
-					/**/
-
-					if (ItemSeparatorTemplate != null)
-					{
-						@ItemSeparatorTemplate
-					}
-					/**/
-					/**/
-					/**/
-
-					OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
-
-					rowCounter++;
-
-			  }
-
-				OnDataBound.InvokeAsync(EventArgs.Empty);
-	  }
-	)
+		)
 }

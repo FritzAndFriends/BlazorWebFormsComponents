@@ -12,13 +12,13 @@
 					<ItemTemplate>
 						<tr> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
 					</ItemTemplate>
-					<GroupTemplate>
+					<MyGroupTemplate Context="ItemPlaceHolder">
 						<tr><td colspan="4">GroupStart</td></tr>
-						<data id="itemPlaceHolder" />
+						@ItemPlaceHolder
 						<tr><td colspan="4">GroupEnd</td></tr>
-					</GroupTemplate>
+					</MyGroupTemplate>
 					<GroupSeparatorTemplate>
-						<tr> <td colspan="4"> <hr /> </td> </tr>
+						<tr><td colspan="4">GroupingSeperator</td></tr>
 					</GroupSeparatorTemplate>
 				</ListView>
 			</tbody>
@@ -43,6 +43,7 @@
 
 		var cut = GetComponentUnderTest();
 		Console.WriteLine(cut.Markup);
+		
 
 		// 8 x 2 => I I G I I G I I G I I
 		// 8 x 3 => I I I G I I I G I I
@@ -50,6 +51,8 @@
 
 		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(8);
 		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(3);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupStart")).ShouldBe(4);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupEnd")).ShouldBe(4);
 	}
 }
 
