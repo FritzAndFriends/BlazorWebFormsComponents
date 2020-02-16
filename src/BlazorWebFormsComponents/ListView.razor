@@ -61,6 +61,8 @@ else
 							{
 								RenderFragment renderFragment = builder =>
 								{
+									builder.OpenRegion(buildCounter);
+									buildCounter++;
 									do
 									{
 										var item = itemEnumerator.Current;
@@ -84,6 +86,7 @@ else
 										groupCounter++;
 										isBusy = itemEnumerator.MoveNext();
 									} while (isBusy && groupCounter < GroupItemCount);
+									builder.CloseRegion();
 								};
 								@GroupTemplate(renderFragment);
 								if (isBusy)
