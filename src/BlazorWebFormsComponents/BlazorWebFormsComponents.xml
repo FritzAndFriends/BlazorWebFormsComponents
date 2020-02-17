@@ -1,0 +1,587 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BlazorWebFormsComponents</name>
+    </assembly>
+    <members>
+        <member name="P:BlazorWebFormsComponents.BaseModelBindingComponent`1.SelectMethod">
+            <summary>
+            Data retrieval method to databind the collection to
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.ID">
+            <summary>
+            🚨🚨 Use @ref instead of ID 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.EnableViewState">
+            <summary>
+            🚨🚨 ViewState is not available in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.runat">
+            <summary>
+            🚨🚨 runat is not available in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.DataKeys">
+            <summary>
+            🚨🚨 DataKeys are not used in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.DataSourceID">
+            <summary>
+            🚨🚨 DataSource controls are not used in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.EnableTheming">
+            <summary>
+            🚨🚨 Theming is not available in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.SkinID">
+            <summary>
+            🚨🚨 Theming is not available in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.Visible">
+            <summary>
+            Is the content of this component rendered and visible to your users?
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.ItemPlaceholderID">
+            <summary>
+            🚨🚨 Placeholders are not available in Blazor 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.OnInit">
+            <summary>
+            Event handler to mimic the Web Forms OnInit handler, and is triggered at the beginning of the OnInitialize Blazor event
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.OnLoad">
+            <summary>
+            Event handler to mimic the Web Forms OnLoad handler, and is triggered at the end of the OnInitialize Blazor event
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.OnPreRender">
+            <summary>
+            Event handler to mimic the Web Forms OnPreRender handler, and is triggered at the end of the OnInitialize Blazor event after Load
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.OnUnload">
+            <summary>
+            Event handler to mimic the Web Forms OnUnload handler, and is triggered at the end of the OnAfterRender Blazor event
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.OnDisposed">
+            <summary>
+            Event handler to mimic the Web Forms OnDisposed handler and triggered in the Dispose method of this class
+            </summary>
+        </member>
+        <member name="T:BlazorWebFormsComponents.ColorTranslator">
+            <!-- Failed to insert some or all of included XML --><include file="doc\ColorTranslator.uex" path="docs/doc[@for=&quot;ColorTranslator&quot;]/*" />
+            <devdoc>
+               Translates colors to and from GDI+ <see cref="T:System.Drawing.Color" /> objects.
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.ColorTranslator.FromHtml(System.String)">
+            <!-- Failed to insert some or all of included XML --><include file="doc\ColorTranslator.uex" path="docs/doc[@for=&quot;ColorTranslator.FromHtml&quot;]/*" />
+            <devdoc>
+               Translates an Html color representation to
+               a GDI+ <see cref="T:System.Drawing.Color" />.
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.ColorTranslator.ToHtml(System.Drawing.Color)">
+            <!-- Failed to insert some or all of included XML --><include file="doc\ColorTranslator.uex" path="docs/doc[@for=&quot;ColorTranslator.ToHtml&quot;]/*" />
+            <devdoc>
+               <para>
+                  Translates the specified <see cref="T:System.Drawing.Color" /> to an Html string color representation.
+               </para>
+            </devdoc>
+        </member>
+        <member name="T:BlazorWebFormsComponents.DataBinder">
+            <summary>
+            This emulates the DataBinder from Web Forms, but is NOT recommended for long term use
+            </summary>
+        </member>
+        <member name="M:BlazorWebFormsComponents.DataBinder.Eval(System.Object,System.String,System.String)">
+            <summary>
+            🚨🚨 This does NOT return a string and is expected to be used without a predicate 🚨🚨
+            </summary>
+            <param name="container"></param>
+            <param name="expression"></param>
+            <param name="format"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorWebFormsComponents.DataBinder.Eval(System.String,System.String)">
+            <summary>
+            🚨🚨 This does <b>NOT</b> return a string and is expected to be used without a predicate 🚨🚨
+            </summary>
+            <param name="fieldName"></param>
+            <param name="format"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorWebFormsComponents.DataBinder.GetDataItem(System.Object)">
+            <summary>
+            GetDataItem is not supported with Blazor. Please use @context or @item notation to get the item.  See https://github.com/FritzAndFriends/BlazorWebFormsComponents/docs for more details
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorWebFormsComponents.DataBinder.GetDataItem(System.Object,System.Boolean@)">
+            <summary>
+            GetDataItem is not supported with Blazor. Please use @context or @item notation to get the item.  See LINK for more details
+            </summary>
+            <param name="obj"></param>
+            <param name="foundDataItem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorWebFormsComponents.DataBinder.GetPropertyValue(System.Object,System.String)">
+            <summary>
+            This method acts directly on the object requested, and we're not sure why you wouldn't call `container.propName` directly
+            </summary>
+            <param name="container"></param>
+            <param name="propName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:BlazorWebFormsComponents.Enums.FontSize">
+            <devdoc>
+               <para>
+                  Specifies the font size.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.NotSet">
+            <devdoc>
+               <para>
+                  The font size is not set.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.AsUnit">
+            <devdoc>
+               <para>The font size is specified as point values.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.Smaller">
+            <devdoc>
+               <para>
+                  The font size is smaller.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.Larger">
+            <devdoc>
+               <para>
+                  The font size is larger.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.XXSmall">
+            <devdoc>
+               <para>
+                  The font size is extra extra small.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.XSmall">
+            <devdoc>
+               <para>
+                  The font size is extra small.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.Small">
+            <devdoc>
+               <para> The font size is small.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.Medium">
+            <devdoc>
+               <para>
+                  The font size is medium.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.Large">
+            <devdoc>
+               <para>
+                  The font size is large.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.XLarge">
+            <devdoc>
+               <para>
+                  The font size is extra large.
+               </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.FontSize.XXLarge">
+            <devdoc>
+               <para>
+                  The font size is extra extra large.
+               </para>
+            </devdoc>
+        </member>
+        <member name="T:BlazorWebFormsComponents.Enums.UnitType">
+            <devdoc>
+               <para> Specifies the unit types.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Pixel">
+            <devdoc>
+               A pixel.
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Point">
+            <devdoc>
+               A point.
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Pica">
+            <devdoc>
+               A pica.
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Inch">
+            <devdoc>
+               An inch.
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Mm">
+            <devdoc>
+               A millimeter.
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Cm">
+            <devdoc>
+               <para>A centimeter.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Percentage">
+            <devdoc>
+               A percentage.
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Em">
+            <devdoc>
+               <para> 
+                  A unit of font width relative to its parent element's font.</para>
+               <para>For example, if the font size of a phrase is 2em and it is within a paragraph 
+                  whose font size is 10px, then the font size of the phrase is 20px.</para>
+               <para>Refer to the World Wide Web Consortium Website for more information. </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Enums.UnitType.Ex">
+            <devdoc>
+               <para>A unit of font height relative to its parent 
+                  element's font.</para>
+               <para>Refer to the World Wide Web Consortium Website for more 
+                  information. </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.Empty">
+            <devdoc>
+            <para>Specifies an empty <see cref='!:System.Web.UI.WebControls.FontUnit'/>. This field is read only. </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.Smaller">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with 
+            <see langword='FontSize.Smaller'/> font. This field is read only. </para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.Larger">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Larger'/> 
+            font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.XXSmall">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with 
+            <see langword='FontSize.XXSmall'/> font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.XSmall">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.XSmall'/> 
+            font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.Small">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Small'/> 
+            font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.Medium">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Medium'/> 
+            font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.Large">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Large'/> 
+            font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.XLarge">
+            <devdoc>
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.XLarge'/> 
+            font. This field is read only.</para>
+            </devdoc>
+        </member>
+        <member name="F:BlazorWebFormsComponents.FontUnit.XXLarge">
+            <devdoc>
+               Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with
+            <see langword='FontSize.XXLarge'/> font. This field is read only.
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(BlazorWebFormsComponents.Enums.FontSize)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.FontUnit'/> class with a <see cref='!:System.Web.UI.WebControls.FontSize'/>.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(BlazorWebFormsComponents.Unit)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.FontUnit'/> class with a <see cref='!:System.Web.UI.WebControls.Unit'/>.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(System.Int32)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.FontUnit'/> class with an integer value.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(System.Double)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.FontUnit'/> class with a double value.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(System.Double,BlazorWebFormsComponents.Enums.UnitType)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.FontUnit'/> class with a double value.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(System.String)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.FontUnit'/> class with a string.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.#ctor(System.String,System.Globalization.CultureInfo)">
+            <devdoc>
+               <para>[To be supplied.]</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.FontUnit.IsEmpty">
+            <devdoc>
+               <para>Indicates whether the font size has been set.</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.FontUnit.Type">
+            <devdoc>
+               <para>Indicates the font size by type.</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.FontUnit.Unit">
+            <devdoc>
+            <para>Indicates the font size by <see cref='!:System.Web.UI.WebControls.Unit'/>.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.Equals(System.Object)">
+            <devdoc>
+            <para>Determines if the specified <see cref='T:System.Object' qualify='true'/> is equivilent to the <see cref='!:System.Web.UI.WebControls.FontUnit'/> represented by this instance.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.op_Equality(BlazorWebFormsComponents.FontUnit,BlazorWebFormsComponents.FontUnit)">
+            <devdoc>
+            <para>Compares two <see cref='!:System.Web.UI.WebControls.FontUnit'/> objects for equality.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.op_Inequality(BlazorWebFormsComponents.FontUnit,BlazorWebFormsComponents.FontUnit)">
+            <devdoc>
+            <para>Compares two <see cref='!:System.Web.UI.WebControls.FontUnit'/> objects 
+               for inequality.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.Parse(System.String)">
+            <devdoc>
+               <para>[To be supplied.]</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.Parse(System.String,System.Globalization.CultureInfo)">
+            <devdoc>
+               <para>[To be supplied.]</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.Point(System.Int32)">
+            <devdoc>
+            <para>Creates a <see cref='!:System.Web.UI.WebControls.FontUnit'/> of type Point from an integer value.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.ToString">
+            <devdoc>
+            <para>Convert a <see cref='!:System.Web.UI.WebControls.FontUnit'/> to a string.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.op_Implicit(System.Int32)~BlazorWebFormsComponents.FontUnit">
+            <devdoc>
+            <para>Implicitly creates a <see cref='!:System.Web.UI.WebControls.FontUnit'/> of type Point from an integer value.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.FontUnit.EnumToString(System.Type,System.Object)">
+            <devdoc>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.ListView`1.LayoutTemplate">
+            <summary>
+            🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.ListView`1.OnLayoutCreated">
+            <summary>
+            🚨🚨 LayoutTemplate and the OnLayoutCreated event is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.ListView`1.Style">
+            <summary>
+            Style is not applied by this control
+            </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.LoginControls.Login.MembershipProvider">
+            <summary>
+            🚨🚨 Use OnAuthenticate event to implement an authentication system 🚨🚨
+            </summary>
+        </member>
+        <member name="F:BlazorWebFormsComponents.Unit.Empty">
+            <devdoc>
+              Specifies an empty unit.
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.Int32)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified 32-bit signed integer as 
+               the unit value and <see langword='Pixel'/> as the (default) unit type.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.Double)">
+            <devdoc>
+            <para> Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the 
+               specified double-precision
+               floating point number as the unit value and <see langword='Pixel'/>
+               as the (default) unit type.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.Double,BlazorWebFormsComponents.Enums.UnitType)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified 
+               double-precision floating point number as the unit value and the specified
+            <see cref='!:System.Web.UI.WebControls.UnitType'/> as the unit type.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.String)">
+            <devdoc>
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified text 
+               string that contains the unit value and unit type. If the unit type is not
+               specified, the default is <see langword='Pixel'/>
+               . </para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.String,System.Globalization.CultureInfo)">
+            <devdoc>
+               <para>[To be supplied.]</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.Unit.IsEmpty">
+            <devdoc>
+            <para>Gets a value indicating whether the <see cref='!:System.Web.UI.WebControls.Unit'/> is empty.</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.Unit.Type">
+            <devdoc>
+            <para>Gets or sets the type of the <see cref='!:System.Web.UI.WebControls.Unit'/> .</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.Unit.Value">
+            <devdoc>
+            <para>Gets the value of the <see cref='!:System.Web.UI.WebControls.Unit'/> .</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.Equals(System.Object)">
+            <devdoc>
+            <para>Compares this <see cref='!:System.Web.UI.WebControls.Unit'/> with the specified object.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.op_Equality(BlazorWebFormsComponents.Unit,BlazorWebFormsComponents.Unit)">
+            <devdoc>
+               <para>Compares two units to find out if they have the same value and type.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.op_Inequality(BlazorWebFormsComponents.Unit,BlazorWebFormsComponents.Unit)">
+            <devdoc>
+               <para>Compares two units to find out if they have different
+                  values and/or types.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.GetStringFromType(BlazorWebFormsComponents.Enums.UnitType)">
+            <devdoc>
+             Converts UnitType to persistence string.
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.GetTypeFromString(System.String)">
+            <devdoc>
+             Converts persistence string to UnitType.
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.Parse(System.String)">
+            <devdoc>
+               <para>[To be supplied.]</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.Parse(System.String,System.Globalization.CultureInfo)">
+            <devdoc>
+               <para>[To be supplied.]</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.Percentage(System.Double)">
+            <devdoc>
+            <para>Creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Percentage'/> from the specified 32-bit signed integer.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.Pixel(System.Int32)">
+            <devdoc>
+            <para>Creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Pixel'/> from the specified 32-bit signed integer.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.Point(System.Int32)">
+            <devdoc>
+            <para>Creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Point'/> from the 
+               specified 32-bit signed integer.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.ToString">
+            <internalonly/>
+            <devdoc>
+            <para>Converts a <see cref='!:System.Web.UI.WebControls.Unit'/> to a <see cref='T:System.String' qualify='true'/> .</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.op_Implicit(System.Int32)~BlazorWebFormsComponents.Unit">
+            <devdoc>
+            <para>Implicitly creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Pixel'/> from the specified 32-bit unsigned integer.</para>
+            </devdoc>
+        </member>
+        <member name="M:BlazorWebFormsComponents.Unit.op_Explicit(System.String)~BlazorWebFormsComponents.Unit">
+            <devdoc>
+            <para>Implicitly creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Pixel'/> from a string that looks like a specified 32-bit unsigned integer.</para>
+            </devdoc>
+        </member>
+        <member name="P:BlazorWebFormsComponents.Validations.BaseValidator`1.Style">
+            <summary>
+            Override all style properties if it's not null
+            </summary>
+        </member>
+    </members>
+</doc>
