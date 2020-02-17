@@ -40,4 +40,3 @@ Throughout this document, we will refer to several framework and technology term
 - MasterPages can be converted to Layout components
 - Mobile device detection is not available as part of Blazor.  `Site.mobile.master` will not be directly used by the framework.
   - Instead of using an alternate rendering strategy for mobile, we recommend you embrace an adaptive rendering strategy to ensure that mobile device visitors to your application get a good experience
-
