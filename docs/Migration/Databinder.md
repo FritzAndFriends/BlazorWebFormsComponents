@@ -2,7 +2,7 @@
 
 In Web Forms applications, there is a somewhat standard approach of formatting and placing data in controls by using the DataBinder object.  The DataBinder would be used in ItemTemplate, AlternatingItemTemplate, and other control templates to indicate where data would be formatted and placed.  [Microsoft's original documentation about the DataBinder](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.databinder.eval?view=netframework-4.8) are available.
 
-## Typical ASP.NET Syntax
+## ASP<span></span>.NET Syntax, Support and Migration
 
 There are several common techniques that the DataBinder was used and various levels of support are provided:
 
@@ -13,6 +13,49 @@ There are several common techniques that the DataBinder was used and various lev
 | `DataBinder.Eval(Container.DataItem, "PropertyName", "FormatString")` | Output the formatted value of `PropertyName` of the current item with the `FormatString` | *Fully Supported for Container.DataItem* |
 | `Eval("PropertyName", "FormatString")` | Output the formatted value of `PropertyName` of the current item with the `FormatString` | *Fully Supported when using static* |
 
+[Back to top](#DataBinder)
+
 ## Support and Migration
 
 The DataBinder is not recommended by Microsoft in Web Forms for use in high-performance applications due to the amount of reflection used to output and format content.  Similarly, we do not recommend long-term use of the DataBinder and have marked it with an `Obsolete` flag indicating that there are methods to easily migrate syntax to be more Razor-performance-friendly.
+
+[Back to top](#DataBinder)
+
+### Usage
+
+To migrate your Web Forms control that is referencing the DataBinder to Blazor, start with syntax similar to the following:
+
+```html
+<ItemTemplate>
+  <li><%#: DataBinder.Eval(Container.DataItem, "Price", "{0:C}") %></li>
+</ItemTemplate>
+```
+
+All of the databound components in this library support DataBinder syntax and can easily be converted by replacing the angle brackets with razor notation like the following:
+
+```html
+<ItemTemplate>
+  <li>@DataBinder.Eval(Container.DataItem, "Price", "{0:C}")</li>
+</ItemTemplate>
+```
+
+That's a VERY simple conversion and its clear how we can continue to deliver the same feature and formatting using Blazor.  You can even shorten the syntax to use the simple `Eval` keyword and get the same effect.  Just include a `@using static` keyword near the top of your Blazor page with this syntax and you can using the shortened format of `Eval`.
+
+```html
+@using static BlazorWebFormsComponents.DataBinder
+...
+<ItemTemplate>
+  <li>@Eval("Price", "{0:C}")</li>
+</ItemTemplate>
+```
+
+*Note:* Your Blazor application will emit compiler warnings while you continue to use the DataBinder. 
+
+[Back to top](#DataBinder)
+
+### Migration
+
+Migrating from the DataBinder to a more performant and simple Razor syntax is quite easy using an `ItemContext` and referencing the iterated item directly.  This approach has the additional benefit of providing type-safety and compiler checking on the content of your Blazor pages. 
+
+[Back to top](#DataBinder)
+
