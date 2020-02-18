@@ -68,7 +68,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		/// <value></value>
 		[Obsolete("ViewState is supported for compatibility and is discouraged for future use")]
-		public readonly Dictionary<string,object> ViewState { get; set; } = new Dictionary<string, object>();
+		public Dictionary<string,object> ViewState { get; } = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
