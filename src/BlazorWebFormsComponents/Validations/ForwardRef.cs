@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BlazorWebFormsComponents.Validations
+﻿namespace BlazorWebFormsComponents.Validations
 {
 	public class ForwardRef<T>
 	{

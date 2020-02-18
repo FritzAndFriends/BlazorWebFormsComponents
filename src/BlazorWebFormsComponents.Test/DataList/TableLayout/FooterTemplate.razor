@@ -1,0 +1,24 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							RepeatLayout="Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+			<FooterTemplate>FooterTemplate</FooterTemplate>
+		</DataList>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	void FirstTest()
+	{
+		var cut = GetComponentUnderTest();
+		Console.WriteLine(cut.Markup);
+		cut.FindAll("td").Count().ShouldBe(4);
+		cut.FindAll("td").Count(c => c.TextContent == "FooterTemplate").ShouldBe(1);
+		cut.FindAll("td").Last().TextContent.ShouldBe("FooterTemplate");
+	}
+}

@@ -1,0 +1,31 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.DataBinder
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<ListView Items="Widget.SimpleWidgetList"
+							ItemType="Widget">
+			<ItemTemplate><span>@Eval("Name")</span><span>@Eval("Price", "{0:C}")</span></ItemTemplate>
+		</ListView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+		Console.WriteLine(cut.Markup);
+
+		var spans = cut.FindAll("span");
+
+		var theWidget = Widget.SimpleWidgetList[0];
+
+		spans[0].TextContent.ShouldBe(theWidget.Name);
+		spans[1].TextContent.ShouldBe(theWidget.Price.ToString("C"));
+
+	}
+
+}

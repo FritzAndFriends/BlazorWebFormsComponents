@@ -1,0 +1,45 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest" Setup="Setup">
+	<ComponentUnderTest>
+		<Repeater @ref="MyRepeater" Items="Widget.SimpleWidgetList"
+							ItemType="Widget" OnUnload="OnRepeaterInit"
+							Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			<SeparatorTemplate><hr /></SeparatorTemplate>
+		</Repeater>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	public Repeater<Widget> MyRepeater { get; set; }
+	int randomNumber;
+	const string ViewStateKey = "RandomNumber";
+
+	void Setup()
+	{
+
+		randomNumber = new Random().Next(100, 1000000);
+
+	}
+
+	void OnRepeaterInit(EventArgs args)
+	{
+
+		MyRepeater.ViewState.Add(ViewStateKey, randomNumber);
+
+	}
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		MyRepeater.ViewState[ViewStateKey].ShouldBe(randomNumber);
+
+	}
+
+
+}
