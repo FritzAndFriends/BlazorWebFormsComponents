@@ -31,7 +31,7 @@
         </LayoutTemplate>
         <AlternatingItemTemplate>
             <tr class="table-dark">
-                <td><%# Item.Id %></td>
+                <td><%# DataBinder.Eval(Container.DataItem, "Id", "{0:C}") %></td>
                 <td><%# Item.Name %></td>
                 <td><%# Item.Price.ToString("c") %></td>
                 <td><%# Item.LastUpdate.ToString("d") %></td>
