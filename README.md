@@ -12,7 +12,7 @@ We believe that Web Forms applications that have been well maintained and provid
 
 This is not for everyone, not everyone needs to migrate their application.  They can continue being supported as Web Forms for a very long time (2029 EOL at the time of this writing) and the applications that are considered for migration to Blazor may be better suited with a complete re-write.  For those applications that need to be migrated, this library should help make that process simpler by providing components with the same names, markup, and functionality as previously available.
 
-[Strategies for your migration and steps ahead](docs/Migration/README.md) are available as part of this repository.
+[Get started with your migration, steps ahead, and strategy documentation](docs/Migration/readme.md) for various controls and tools used are available.
 
 Portions of the [original .NET Framework](https://github.com/microsoft/referencesource) are contributed to this project under their MIT license.
 
