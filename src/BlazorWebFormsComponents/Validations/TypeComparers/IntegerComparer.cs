@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace BlazorWebFormsComponents.Validations
+namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
 	public class IntegerComparer : IComparer
 	{

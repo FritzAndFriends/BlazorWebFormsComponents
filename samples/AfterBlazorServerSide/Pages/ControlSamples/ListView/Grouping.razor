@@ -1,0 +1,72 @@
+﻿@page "/ControlSamples/ListView/Grouping"
+
+<h2>ListView Grouping Sample</h2>
+
+<Nav />
+
+<p>Here is a listview of 8 items grouped into 3's</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<td>Id</td>
+			<td>Name</td>
+			<td>Price</td>
+			<td>Last Update</td>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView @ref="simpleListView"
+							runat="server"
+							EnableViewState="false"
+							GroupItemCount="3"
+							Context="Item"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</ItemTemplate>
+			<AlternatingItemTemplate>
+				<tr class="table-dark"> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price.ToString("c")</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
+			</AlternatingItemTemplate>
+			<GroupTemplate Context="ItemPlaceHolder">
+				<tr><td colspan="4">GroupStart</td></tr>
+				@ItemPlaceHolder
+				<tr><td colspan="4">GroupEnd</td></tr>
+			</GroupTemplate>
+			<GroupSeparatorTemplate>
+				<tr><td colspan="4">GroupingSeperator</td></tr>
+			</GroupSeparatorTemplate>
+			<EmptyDataTemplate>
+				<tr>
+					<td colspan="4">No widgets available</td>
+				</tr>
+			</EmptyDataTemplate>
+		</ListView>
+	</tbody>
+</table>
+
+@code {
+
+	BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleListView.DataSource = Widget.Widgets(8);
+			simpleListView.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+}
+

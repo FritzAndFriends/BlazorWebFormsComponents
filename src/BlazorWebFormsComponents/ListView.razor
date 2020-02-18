@@ -11,48 +11,99 @@ else if (Items == null || !Items.Any())
 }
 else
 {
-
 	@if (LayoutTemplate is null)
 	{
 		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
 
 	@LayoutTemplate(
-			@: @if (Items != null)
-					{
-						var rowCounter = 0;
+									@: @if (Items != null)
+													{
+														var rowCounter = 0;
 
-						OnDataBinding.InvokeAsync(EventArgs.Empty);
+														if (GroupItemCount == 0)
+														{
+															OnDataBinding.InvokeAsync(EventArgs.Empty);
 
-						foreach (var item in Items)
-						{
+															foreach (var item in Items)
+															{
+												<CascadingValue Name="CurrentDataBoundItem" Value="item">
 
-							if (AlternatingItemTemplate == null || rowCounter % 2 == 0)
-							{
-								@ItemTemplate(item)
-							}
-							else
-							{
-								@AlternatingItemTemplate(item)
-							}
-					/**/
-					/**/
+													@if (AlternatingItemTemplate == null || ItemsList.IndexOf(item) % 2 == 0)
+																	{
+														@ItemTemplate(item)
+																	}
+																	else
+																	{
+														@AlternatingItemTemplate(item)
+																	}
+													/**/
+												</CascadingValue>
 
-							if (ItemSeparatorTemplate != null)
-							{
-								@ItemSeparatorTemplate
-							}
-					/**/
-					/**/
-					/**/
+																if (ItemSeparatorTemplate != null)
+																{
+													@ItemSeparatorTemplate
+																}
+																rowCounter++;
 
-							OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+																OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+															}
 
-							rowCounter++;
+															OnDataBound.InvokeAsync(EventArgs.Empty);
+														}
+														else
+														{
+															var itemEnumerator = Items.GetEnumerator();
+															itemEnumerator.Reset();
+															var isBusy = itemEnumerator.MoveNext();
 
-						}
+															var itemCounter = 0;
+															var buildCounter = 1;
+															var groupCounter = 0;
 
-						OnDataBound.InvokeAsync(EventArgs.Empty);
-					}
-			)
+															do
+															{
+																RenderFragment renderFragment = builder =>
+								{
+																builder.OpenRegion(buildCounter);
+																buildCounter++;
+																do
+																{
+																	var item = itemEnumerator.Current;
+													<CascadingValue Name="CurrentDataBoundItem" Value="item">
+
+														@if (AlternatingItemTemplate == null || ItemsList.IndexOf(item) % 2 == 0)
+																		{
+																			builder.AddContent(buildCounter, @ItemTemplate(item));
+																			buildCounter++;
+																		}
+																		else
+																		{
+																			builder.AddContent(buildCounter, @AlternatingItemTemplate(item));
+																			buildCounter++;
+																		}
+													</CascadingValue>
+
+																	if (ItemSeparatorTemplate != null)
+																	{
+																		builder.AddContent(buildCounter, @ItemSeparatorTemplate);
+																	}
+																	rowCounter++;
+																	buildCounter++;
+																	groupCounter++;
+																	isBusy = itemEnumerator.MoveNext();
+																} while (isBusy && groupCounter < GroupItemCount);
+																builder.CloseRegion();
+															};
+												@GroupTemplate(renderFragment);
+																if (isBusy)
+																{
+													@GroupSeparatorTemplate
+																}
+																groupCounter = 0;
+
+															} while (isBusy);
+														}
+													}
+									)
 }
