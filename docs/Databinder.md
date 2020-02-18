@@ -1,6 +1,6 @@
 # DataBinder 
 
-In Web Forms applications, there is a somewhat standard approach of formatting and placing data in controls by using the DataBinder object.  The DataBinder would be used in ItemTemplate, AlternatingItemTemplate, and other control templates to indicate where data would be formatted and placed.  [Microsoft's original documentation about the DataBinder](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.databinder.eval?view=netframework-4.8) are available.
+In Web Forms applications, there is a somewhat standard approach of formatting and placing data in controls by using the DataBinder object.  The DataBinder would be used in ItemTemplate, AlternatingItemTemplate, and other control templates to indicate where data would be formatted and placed.  [Microsoft's original documentation about the DataBinder](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.databinder?view=netframework-4.8) are available.
 
 ## ASP<span></span>.NET Syntax, Support and Migration
 
@@ -12,6 +12,8 @@ There are several common techniques that the DataBinder was used and various lev
 | `Eval("PropertyName")` | Output the `PropertyName` of the current item | *Fully Supported when using static* |
 | `DataBinder.Eval(Container.DataItem, "PropertyName", "FormatString")` | Output the formatted value of `PropertyName` of the current item with the `FormatString` | *Fully Supported for Container.DataItem* |
 | `Eval("PropertyName", "FormatString")` | Output the formatted value of `PropertyName` of the current item with the `FormatString` | *Fully Supported when using static* |
+| `DataBinder.GetDataItem` | Output the item currently operated on | Not supported: Replace with calls to `@context` | 
+| `DataBinder.GetPropertyValue(Container.DataItem, "PropertyName")` | Get the property requested as an object for further handling | Only supported when passing in `@context` for the first argument. **Recommendation**: replace with `@context.PropertyName` to directly access the property in a strongly-typed manner |
 
 [Back to top](#DataBinder)
 
@@ -53,9 +55,8 @@ That's a VERY simple conversion and its clear how we can continue to deliver the
 
 [Back to top](#DataBinder)
 
-### Migration
+### Moving On
 
-Migrating from the DataBinder to a more performant and simple Razor syntax is quite easy using an `ItemContext` and referencing the iterated item directly.  This approach has the additional benefit of providing type-safety and compiler checking on the content of your Blazor pages. 
+Moving on from the DataBinder to a more performant and simple Razor syntax is quite easy using an `ItemContext` and referencing the iterated item directly.  This approach has the additional benefit of providing type-safety and compiler checking on the content of your Blazor pages. 
 
 [Back to top](#DataBinder)
-
