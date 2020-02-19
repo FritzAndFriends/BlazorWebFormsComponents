@@ -52,9 +52,10 @@ We will NOT be converting any DataSource objects, Wizard components, skins or th
 
 ## Utility Features
 
-There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  These features include:
+There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  Importantly, these features are NOT implemented the same way that they are in Web Forms, but rather have the same API and behave in a proper Blazor fashion.  These features include:
 
   - [DataBinder](docs/Databinder.md)
+  - [ViewState](docs/ViewState.md)
 
 ## Compiling the project
 
