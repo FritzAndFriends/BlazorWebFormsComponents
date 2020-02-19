@@ -9,9 +9,11 @@
 			}
 			else
 			{
-				@ItemTemplate(CurrentItem)
+				<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
+					@ItemTemplate(CurrentItem)
+				</CascadingValue>
 			}
-		</td>
+			</td>
 	</tr>
 	<tr>
 		<td>
