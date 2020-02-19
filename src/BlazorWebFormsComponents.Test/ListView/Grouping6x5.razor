@@ -6,7 +6,7 @@
 			<thead> <tr> <td>Id</td> <td>Name</td> <td>Price</td> <td>Last Update</td> </tr> </thead>
 			<tbody>
 				<ListView Items="data"
-									GroupItemCount="3"
+									GroupItemCount="5"
 									ItemType="Widget"
 									Context="Item">
 					<ItemSeparatorTemplate>
@@ -33,7 +33,7 @@
 </Fixture>
 
 @code{
-	public Widget[] data = Widget.Widgets(7);
+	public Widget[] data = Widget.Widgets(6);
 }
 
 @code {
@@ -48,13 +48,13 @@
 		// 7 x 3 => I is I is I G I is I is I G I is is
 		// 6 x 5 => I is I is I is I is I G I is is is is 
 
-		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(7);
-		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(2);
-		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupStart")).ShouldBe(3);
-		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupEnd")).ShouldBe(3);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(6);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(1);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupStart")).ShouldBe(2);
+		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupEnd")).ShouldBe(2);
 		cut.FindAll("em").Count(e => Convert.ToInt32(e.TextContent) % 2 == 0).ShouldBe(3);
 		string.Join(",", cut.FindAll("tr").Select((x, i) => new { pred = x.TextContent.Contains("ItemSeparator"), i })
-			.Where(x => x.pred).Select(x => x.i)).ShouldBe("3,5,11,13,19,20");
+			.Where(x => x.pred).Select(x => x.i)).ShouldBe("3,5,7,9,15,16,17,18");
 	}
 }
 @*d

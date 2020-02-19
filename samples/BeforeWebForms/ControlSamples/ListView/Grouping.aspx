@@ -12,7 +12,7 @@
 
     <asp:ListView ID="simpleListView"
         runat="server"
-        GroupItemCount="3"
+        GroupItemCount="5"
         ItemType="SharedSampleObjects.Models.Widget">
         <LayoutTemplate>
             <table>
