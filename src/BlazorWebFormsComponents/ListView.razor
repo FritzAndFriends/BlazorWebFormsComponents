@@ -56,15 +56,14 @@ else
 							buildCounter++;
 							for (var i = 0; i < GroupItemCount ; i++)
 							{
+								var builderTemplate = oddOrEvenTemplate(even);
 								var item = itemIterator.Current;
-								//<CascadingValue Name="CurrentDataBoundItem" Value="item">
 										if (item != null)
 										{
-											var builderTemplate = oddOrEvenTemplate(even)(item);
-											builder.AddContent(buildCounter, builderTemplate);
-											buildCounter++;
+								<CascadingValue Name="CurrentDataBoundItem" Value="item">
+												@builderTemplate(item)
+								</CascadingValue>
 										}
-								//</CascadingValue>
 								if (ItemSeparatorTemplate != null && i < GroupItemCount - 1)
 								{
 									builder.AddContent(buildCounter, @ItemSeparatorTemplate);
