@@ -17,6 +17,10 @@ For your existing Web Forms applications, unless you are executing unsafe code o
 1. Your business logic code is now isolated from your presentation code, and should be more testable.  Write some unit tests to verify that your business logic is behaving properly.
 1. If you'd like to write a mobile application to work with your web application, you can re-use your .NET Standard project with the Xamarin frameworks.
 
+## API Portability
+
+Portability is not guaranteed when you migrate business logic to .NET Standard.  APIs have been changed or even removed in some cases.  You should test your libraries and application for portability and take direction for possible migration paths using the official [.NET Portability Analyzer](https://docs.microsoft.com/en-us/dotnet/standard/analyzers/portability-analyzer). 
+
 ## Sample 1: Update an existing class library
 
 The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.5.  You can find the source and directions for this sample in the [samples/netstandard-1](samples/netstandard-1) folder.
