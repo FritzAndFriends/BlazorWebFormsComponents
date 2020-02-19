@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,11 +24,6 @@ namespace BlazorWebFormsComponents
 			}
 		} 
 
-		//protected override Task OnParametersSetAsync()
-		//{
-		//	return base.OnParametersSetAsync();
-		//}
-
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
 
@@ -41,6 +35,13 @@ namespace BlazorWebFormsComponents
 			await base.OnAfterRenderAsync(firstRender);
 
 		}
+
+		#region FormView Events
+
+		[Parameter]
+		public EventCallback<FormViewModeEventArgs> ModeChanging { get; set; }
+
+		#endregion
 
 	}
 

@@ -22,5 +22,10 @@ namespace BeforeWebForms.ControlSamples.FormView
 		{
 
 		}
+
+	protected void WidgetFormView_ModeChanging(object sender, FormViewModeEventArgs e)
+	{
+
 	}
+  }
 }

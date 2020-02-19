@@ -16,7 +16,18 @@
 		AllowPaging="true"
 		DataKeyNames="Id"
 		OnPageIndexChanging="WidgetFormView_PageIndexChanging"
+		OnModeChanging="WidgetFormView_ModeChanging"
 		runat="server">
+
+		<InsertItemTemplate>
+
+			INSERT MODE
+
+			<br />
+
+			<asp:LinkButton runat="server" ID="CancelButton" Text="Cancel" CommandName="Cancel"></asp:LinkButton>
+
+		</InsertItemTemplate>
 
 		<ItemTemplate>
 
@@ -28,6 +39,14 @@
 
 					</td>
 				</tr>
+				<tr>
+          <td colspan="2">
+            <asp:linkbutton id="NewButton"
+              text="New"
+              commandname="New"
+              runat="server"/> 
+          </td>
+        </tr>
 			</table>
 
 		</ItemTemplate>
