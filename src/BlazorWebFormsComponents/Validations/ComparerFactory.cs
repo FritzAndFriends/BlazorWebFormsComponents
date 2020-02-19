@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Validations.TypeComparers;
+using StringComparer = BlazorWebFormsComponents.Validations.TypeComparers.StringComparer;
 
 namespace BlazorWebFormsComponents.Validations
 {
@@ -25,17 +27,10 @@ namespace BlazorWebFormsComponents.Validations
 
 			if (_comparers.TryGetValue(dataType, out var comparer))
 			{
-
 				return comparer;
-
-			}
-			else
-			{
-
-				throw new ArgumentOutOfRangeException(nameof(dataType));
-
 			}
 
+			throw new ArgumentOutOfRangeException(nameof(dataType));
 		}
 	}
 }

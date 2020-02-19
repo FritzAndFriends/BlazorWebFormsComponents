@@ -19,7 +19,6 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
-
 	}
 
 }

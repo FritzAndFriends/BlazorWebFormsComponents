@@ -1,12 +1,10 @@
-﻿@page "/ControlSamples/ListView"
-@using static BlazorWebFormsComponents.DataBinder
-@using SharedSampleObjects.Models
+﻿@page "/ControlSamples/ListView/Grouping"
 
-<h2>ListView Component homepage</h2>
+<h2>ListView Grouping Sample</h2>
 
 <Nav />
 
-<p>Here is a simple listview bound to a collection of widgets.</p>
+<p>Here is a listview of 8 items grouped into 3's</p>
 
 <table class="table">
 	<thead>
@@ -21,16 +19,9 @@
 		<ListView @ref="simpleListView"
 							runat="server"
 							EnableViewState="false"
+							GroupItemCount="3"
 							Context="Item"
 							ItemType="SharedSampleObjects.Models.Widget">
-			<AlternatingItemTemplate>
-				<tr class="table-dark">
-					<td>@Item.Id</td>
-					<td>@Eval("Name")</td>
-					<td>@Eval("Price", "{0:C}")</td>
-					<td>@Eval("LastUpdate", "{0:d}")</td>
-				</tr>
-			</AlternatingItemTemplate>
 			<ItemTemplate>
 				<tr>
 					<td>@Item.Id</td>
@@ -39,11 +30,17 @@
 					<td>@Item.LastUpdate.ToString("d")</td>
 				</tr>
 			</ItemTemplate>
-			<ItemSeparatorTemplate>
-				@*<tr>
-					<td colspan="4" style="border-bottom: 1px solid black;">&nbsp;</td>
-				</tr>*@
-			</ItemSeparatorTemplate>
+			<AlternatingItemTemplate>
+				<tr class="table-dark"> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price.ToString("c")</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
+			</AlternatingItemTemplate>
+			<GroupTemplate Context="ItemPlaceHolder">
+				<tr><td colspan="4">GroupStart</td></tr>
+				@ItemPlaceHolder
+				<tr><td colspan="4">GroupEnd</td></tr>
+			</GroupTemplate>
+			<GroupSeparatorTemplate>
+				<tr><td colspan="4">GroupingSeperator</td></tr>
+			</GroupSeparatorTemplate>
 			<EmptyDataTemplate>
 				<tr>
 					<td colspan="4">No widgets available</td>
@@ -62,7 +59,7 @@
 
 		if (firstRender)
 		{
-			simpleListView.DataSource = Widget.SimpleWidgetList;
+			simpleListView.DataSource = Widget.Widgets(8);
 			simpleListView.DataBind();
 		}
 

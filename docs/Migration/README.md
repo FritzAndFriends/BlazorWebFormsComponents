@@ -38,6 +38,7 @@ Namespaces and tag-prefixes are gone.  You can do a Find and Replace on asp: and
 
 - A simple initial site migration
 - Intertwined code
+- [DataBinder](Databinder.md)
 - Model-Binding
 - .NET Standard to the rescue!
 - Other considerations

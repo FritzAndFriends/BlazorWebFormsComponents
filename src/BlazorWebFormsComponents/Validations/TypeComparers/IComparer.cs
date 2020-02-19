@@ -1,4 +1,4 @@
-﻿namespace BlazorWebFormsComponents.Validations
+﻿namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
 	public interface IComparer
 	{

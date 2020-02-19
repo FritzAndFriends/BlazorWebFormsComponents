@@ -1,0 +1,27 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<Repeater Items="Widget.SimpleWidgetList"
+							ItemType="Widget">
+			<ItemTemplate><span>@DataBinder.Eval("Name")</span></ItemTemplate>
+			<SeparatorTemplate><hr/></SeparatorTemplate>
+		</Repeater>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		var cut = GetComponentUnderTest();
+
+		cut.FindAll("span").Count().ShouldBe(3);
+		cut.FindAll("hr").Count().ShouldBe(3);
+
+	}
+
+
+}
