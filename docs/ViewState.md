@@ -34,7 +34,7 @@ protected BarType Foo { get; set; }
 
 The interaction above would be updated to the following syntax in your component's class:
 
-``c#
+```c#
 // Store bar for retrieval later
 Foo = bar;
 
