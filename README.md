@@ -50,6 +50,13 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
 We will NOT be converting any DataSource objects, Wizard components, skins or themes.  Once this first collection of 23 controls is written, we can consider additional features like modern tag formatting.
 
+## Utility Features
+
+There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  Importantly, these features are NOT implemented the same way that they are in Web Forms, but rather have the same API and behave in a proper Blazor fashion.  These features include:
+
+  - [DataBinder](docs/Databinder.md)
+  - [ViewState](docs/ViewState.md)
+
 ## Compiling the project
 
 There are three different types of .NET projects in this repository:  .NET Framework, .NET Core, and .NET Standard.  The sample projects are in the `/samples` folder, while the unit test project is next to the component library in the `/src` folder.  From the root of the repository, you should be able to execute:

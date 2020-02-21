@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
 		<LangVersion>8.0</LangVersion>
+	  <DocumentationFile>BlazorWebFormsComponents.xml</DocumentationFile>
   </PropertyGroup>
 
 	<PropertyGroup>
@@ -15,7 +16,6 @@
 		<PackageProjectUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</PackageProjectUrl>
 		<PackageTags>blazor</PackageTags>
   </PropertyGroup>
-
 
   <ItemGroup>
     <PackageReference Include="BlazorComponentUtilities" Version="1.6.0" />

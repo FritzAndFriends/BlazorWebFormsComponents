@@ -63,6 +63,7 @@ The `System.Drawing.Color` object does not have a converter that allows you to c
 
 - A simple initial site migration
 - Intertwined code
+- [DataBinder](Databinder.md)
 - Model-Binding
 - [.NET Standard to the rescue!](NET-Standard.md)
 - Other considerations

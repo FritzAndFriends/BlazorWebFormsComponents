@@ -11,6 +11,9 @@
 *.ncrunchproject
 *.ncrunchsolution
 
+# Project XML documentation
+BlazorWebFormsComponents.xml
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 .ionide/

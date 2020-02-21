@@ -20,9 +20,9 @@ namespace BlazorWebFormsComponents
 		public string ID { get; set; }
 
 		/// <summary>
-		/// 🚨🚨 ViewState is not available in Blazor 🚨🚨
+		/// While ViewState is supported by this library, this parameter does nothing
 		/// </summary>
-		[Parameter(), Obsolete("ViewState is not available in Blazor")]
+		[Parameter(), Obsolete("ViewState is supported, but EnableViewState does nothing")]
 		public bool EnableViewState { get; set; }
 
 		/// <summary>
@@ -62,6 +62,13 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public short TabIndex { get; set; }
+
+		/// <summary>
+		/// ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
+		/// </summary>
+		/// <value></value>
+		[Obsolete("ViewState is supported for compatibility and is discouraged for future use")]
+		public Dictionary<string,object> ViewState { get; } = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?

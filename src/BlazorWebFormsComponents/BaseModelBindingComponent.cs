@@ -20,7 +20,12 @@ namespace BlazorWebFormsComponents
 		public SelectHandler SelectMethod { get; set; }
 
     [Parameter]
-    public IEnumerable<ItemType> Items { get; set; }
+    public IEnumerable<ItemType> Items {
+			get { return ItemsList; }
+			set { ItemsList = value?.ToList(); }
+		}
+
+		protected List<ItemType> ItemsList { get; set; }
 
     [Parameter]
     public IEnumerable<ItemType> DataSource

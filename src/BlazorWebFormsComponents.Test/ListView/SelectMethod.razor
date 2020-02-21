@@ -15,22 +15,16 @@
 
 @code {
 
-	void FirstTest()
-	{
+		void FirstTest()
+		{
+			var cut = GetComponentUnderTest();
+			Console.WriteLine(cut.Markup);
+			cut.FindAll("span").Count().ShouldBe(3);
+		}
 
-		var cut = GetComponentUnderTest();
-
-		cut.FindAll("span").Count().ShouldBe(3);
-
-	}
-
-	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) {
-
-		totalRowCount = Widget.SimpleWidgetList.Length;
-
-		return Widget.SimpleWidgetList.AsQueryable();
-
-	}
-
-
+		IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+		{
+			totalRowCount = Widget.SimpleWidgetList.Length;
+			return Widget.SimpleWidgetList.AsQueryable();
+		}
 }

@@ -1,9 +1,9 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace BlazorWebFormsComponents
 {
@@ -16,23 +16,14 @@ namespace BlazorWebFormsComponents
 		}
 
 		#region Templates
-
-		[Parameter]
-		public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
-
-		/// <summary>
-		/// Defines the content to render if the data source returns no data.
-		/// </summary>
-		[Parameter]
-		public RenderFragment EmptyDataTemplate { get; set; }
-
-		[Parameter]
-		public RenderFragment ItemSeparatorTemplate { get; set; }
-
-		[Parameter]
-		public RenderFragment<ItemType> ItemTemplate { get; set; }
-
-		/// <summary>
+		[Parameter] public RenderFragment EmptyDataTemplate { get; set; }
+		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
+		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+		[Parameter] public RenderFragment ItemSeparatorTemplate { get; set; }
+		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
+		[Parameter] public RenderFragment<RenderFragment> GroupTemplate { get; set; }
+		[Parameter] public RenderFragment ItemPlaceHolder { get; set; }
+				/// <summary>
 		/// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
 		/// </summary>
 		[Parameter]
@@ -48,6 +39,8 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
+		[Parameter] public int GroupItemCount { get; set; } = 0;
+
 		[Parameter] // TODO: Implement
 		public InsertItemPosition InsertItemPosition { get; set; }
 
@@ -61,22 +54,14 @@ namespace BlazorWebFormsComponents
 		public string Style { get; set; }
 
 
-		[Parameter]
-		public RenderFragment ChildContent { get; set; }
+		[Parameter] public RenderFragment ChildContent { get; set; }
 
-		[CascadingParameter(Name = "Host")]
-		public BaseWebFormsComponent HostComponent { get; set; }
-
+		[CascadingParameter(Name = "Host")] public BaseWebFormsComponent HostComponent { get; set; }
 
 		protected override void OnInitialized()
 		{
-
 			HostComponent = this;
-
 			base.OnInitialized();
-
 		}
-
 	}
-
 }

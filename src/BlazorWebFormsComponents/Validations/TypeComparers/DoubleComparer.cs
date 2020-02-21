@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace BlazorWebFormsComponents.Validations
+namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
 	public class DoubleComparer : IComparer
 	{
@@ -70,7 +70,7 @@ namespace BlazorWebFormsComponents.Validations
 
 			return m.Groups[1].Value
 						 + (m.Groups[2].Length > 0 ? m.Groups[2].Value : "0")
-						 + ((m.Groups[3].Length > 0) ? "." + m.Groups[3].Value : string.Empty);
+						 + (m.Groups[3].Length > 0 ? "." + m.Groups[3].Value : string.Empty);
 		}
 
 		public int CompareTo(object value, object valueToCompare)

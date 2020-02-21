@@ -1,0 +1,6 @@
+﻿@inherits BaseModelBindingComponent<ItemType>
+@typeparam ItemType
+@ChildContent
+@code{
+	[CascadingParameter] public RenderFragment<ItemType> ChildContent { get; set; }
+}

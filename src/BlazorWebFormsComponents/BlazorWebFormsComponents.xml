@@ -16,7 +16,7 @@
         </member>
         <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.EnableViewState">
             <summary>
-            🚨🚨 ViewState is not available in Blazor 🚨🚨
+            While ViewState is supported by this library, this parameter does nothing
             </summary>
         </member>
         <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.runat">
@@ -43,6 +43,12 @@
             <summary>
             🚨🚨 Theming is not available in Blazor 🚨🚨
             </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.ViewState">
+            <summary>
+            ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
+            </summary>
+            <value></value>
         </member>
         <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.Visible">
             <summary>
@@ -267,18 +273,18 @@
         </member>
         <member name="F:BlazorWebFormsComponents.Enums.UnitType.Em">
             <devdoc>
-               <para> 
+               <para>
                   A unit of font width relative to its parent element's font.</para>
-               <para>For example, if the font size of a phrase is 2em and it is within a paragraph 
+               <para>For example, if the font size of a phrase is 2em and it is within a paragraph
                   whose font size is 10px, then the font size of the phrase is 20px.</para>
                <para>Refer to the World Wide Web Consortium Website for more information. </para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.Enums.UnitType.Ex">
             <devdoc>
-               <para>A unit of font height relative to its parent 
+               <para>A unit of font height relative to its parent
                   element's font.</para>
-               <para>Refer to the World Wide Web Consortium Website for more 
+               <para>Refer to the World Wide Web Consortium Website for more
                   information. </para>
             </devdoc>
         </member>
@@ -289,49 +295,49 @@
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.Smaller">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with
             <see langword='FontSize.Smaller'/> font. This field is read only. </para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.Larger">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Larger'/> 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Larger'/>
             font. This field is read only.</para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.XXSmall">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with
             <see langword='FontSize.XXSmall'/> font. This field is read only.</para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.XSmall">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.XSmall'/> 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.XSmall'/>
             font. This field is read only.</para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.Small">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Small'/> 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Small'/>
             font. This field is read only.</para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.Medium">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Medium'/> 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Medium'/>
             font. This field is read only.</para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.Large">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Large'/> 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.Large'/>
             font. This field is read only.</para>
             </devdoc>
         </member>
         <member name="F:BlazorWebFormsComponents.FontUnit.XLarge">
             <devdoc>
-            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.XLarge'/> 
+            <para>Specifies a <see cref='!:System.Web.UI.WebControls.FontUnit'/> with <see langword='FontSize.XLarge'/>
             font. This field is read only.</para>
             </devdoc>
         </member>
@@ -403,7 +409,7 @@
         </member>
         <member name="M:BlazorWebFormsComponents.FontUnit.op_Inequality(BlazorWebFormsComponents.FontUnit,BlazorWebFormsComponents.FontUnit)">
             <devdoc>
-            <para>Compares two <see cref='!:System.Web.UI.WebControls.FontUnit'/> objects 
+            <para>Compares two <see cref='!:System.Web.UI.WebControls.FontUnit'/> objects
                for inequality.</para>
             </devdoc>
         </member>
@@ -463,13 +469,13 @@
         </member>
         <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.Int32)">
             <devdoc>
-            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified 32-bit signed integer as 
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified 32-bit signed integer as
                the unit value and <see langword='Pixel'/> as the (default) unit type.</para>
             </devdoc>
         </member>
         <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.Double)">
             <devdoc>
-            <para> Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the 
+            <para> Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the
                specified double-precision
                floating point number as the unit value and <see langword='Pixel'/>
                as the (default) unit type.</para>
@@ -477,14 +483,14 @@
         </member>
         <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.Double,BlazorWebFormsComponents.Enums.UnitType)">
             <devdoc>
-            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified 
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified
                double-precision floating point number as the unit value and the specified
             <see cref='!:System.Web.UI.WebControls.UnitType'/> as the unit type.</para>
             </devdoc>
         </member>
         <member name="M:BlazorWebFormsComponents.Unit.#ctor(System.String)">
             <devdoc>
-            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified text 
+            <para>Initializes a new instance of the <see cref='!:System.Web.UI.WebControls.Unit'/> structure with the specified text
                string that contains the unit value and unit type. If the unit type is not
                specified, the default is <see langword='Pixel'/>
                . </para>
@@ -558,7 +564,7 @@
         </member>
         <member name="M:BlazorWebFormsComponents.Unit.Point(System.Int32)">
             <devdoc>
-            <para>Creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Point'/> from the 
+            <para>Creates a <see cref='!:System.Web.UI.WebControls.Unit'/> of type <see langword='Point'/> from the
                specified 32-bit signed integer.</para>
             </devdoc>
         </member>
