@@ -6,6 +6,12 @@
       
       window.title = title;
 
+    },
+
+    getTitle = function() {
+
+      return window.title;
+
     }
 
   }
