@@ -1,4 +1,5 @@
-﻿@page "/"
+﻿@inherits BasePage
+@page "/"
 
 <h1>After Blazor - Client Side - WebAssembly</h1>
 
@@ -9,3 +10,13 @@
 </p>
 
 <ComponentList></ComponentList>
+
+@code {
+
+		protected override void OnInitialized()
+		{
+			Title = "This is the title for my page: " + (Page != null ? "Received" : "Not");
+			base.OnInitialized();
+		}
+
+}

@@ -4,6 +4,11 @@
         <name>BlazorWebFormsComponents</name>
     </assembly>
     <members>
+        <member name="P:BlazorWebFormsComponents.BaseLayout.Title">
+            <summary>
+            Get or set the HTML page title  
+            </summary> 
+        </member>
         <member name="P:BlazorWebFormsComponents.BaseModelBindingComponent`1.SelectMethod">
             <summary>
             Data retrieval method to databind the collection to
@@ -16,7 +21,7 @@
         </member>
         <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.EnableViewState">
             <summary>
-            🚨🚨 ViewState is not available in Blazor 🚨🚨
+            While ViewState is supported by this library, this parameter does nothing
             </summary>
         </member>
         <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.runat">
@@ -43,6 +48,12 @@
             <summary>
             🚨🚨 Theming is not available in Blazor 🚨🚨
             </summary>
+        </member>
+        <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.ViewState">
+            <summary>
+            ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
+            </summary>
+            <value></value>
         </member>
         <member name="P:BlazorWebFormsComponents.BaseWebFormsComponent.Visible">
             <summary>

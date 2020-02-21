@@ -1,24 +1,20 @@
-using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
+	public abstract class BasePage : ComponentBase
+	{
 
-  public partial class BasePage : ComponentBase {
+		[CascadingParameter(Name = "Page")]
+		protected BaseLayout Page { get; set; }
 
-    public BasePage(IJSRuntime jsInterop)
-    {
-        
-      this.JsInterop = jsInterop;
+		public string Title
+		{
+			get { return Page.Title; }
+			set { Page.Title = value; }
+		}
 
-    }
 
-    public IJSRuntime JsInterop { get; }
+	}
 
-  }
-    
 }

@@ -2,15 +2,15 @@
 
   var Page = {
 
-    setTitle = function(title) {
+    setTitle: function(title) {
       
-      window.title = title;
+			document.title = title;
 
     },
 
-    getTitle = function() {
+    getTitle: function() {
 
-      return window.title;
+      return document.title;
 
     }
 
