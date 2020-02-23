@@ -1,4 +1,4 @@
-﻿@inherits BlazorWebFormsComponents.BasePage
+﻿@inherits BlazorWebFormsComponents.Page
 @page "/"
 
 <h1>After Blazor - Server Side</h1>
@@ -16,7 +16,7 @@
 	protected override void OnInitialized()
 	{
 
-		Title = "This is the title for my page: " + (Page != null ? "Received" : "Not");
+		Title = "This is the title for my page: " + (BasePageLayout != null ? "Received" : "Not");
 
 		base.OnInitialized();
 

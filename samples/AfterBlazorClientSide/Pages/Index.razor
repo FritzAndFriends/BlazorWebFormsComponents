@@ -1,4 +1,4 @@
-﻿@inherits BasePage
+﻿@inherits Page
 @page "/"
 
 <h1>After Blazor - Client Side - WebAssembly</h1>
@@ -15,7 +15,7 @@
 
 		protected override void OnInitialized()
 		{
-			Title = "This is the title for my page: " + (Page != null ? "Received" : "Not");
+			Title = "This is the title for my page: " + (BasePageLayout != null ? "Received" : "Not");
 			base.OnInitialized();
 		}
 
