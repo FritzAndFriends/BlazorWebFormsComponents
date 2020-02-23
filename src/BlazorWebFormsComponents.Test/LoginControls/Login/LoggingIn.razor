@@ -1,0 +1,48 @@
+﻿@inherits TestComponentBase
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+<Fixture TestAsync="LoggingInTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoggingIn="Login_LoggingIn" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	Login loginControl = new Login();
+	bool isLoginCanceled = false;
+
+	async Task LoggingInTest()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
+		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+
+		var navigationManagerMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+
+		var cut = GetComponentUnderTest();
+
+		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs { Cancel = false });
+
+		isLoginCanceled.ShouldBeFalse();
+
+		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs { Cancel = true });
+
+		isLoginCanceled.ShouldBeTrue();
+	}
+
+	void Login_LoggingIn(LoginCancelEventArgs args)
+	{
+		isLoginCanceled = args.Cancel;
+	}
+
+}

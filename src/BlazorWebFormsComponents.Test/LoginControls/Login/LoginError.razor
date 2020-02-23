@@ -1,0 +1,44 @@
+﻿@inherits TestComponentBase
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+<Fixture TestAsync="LoginErrorTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoginError="Login_LoginError" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	Login loginControl = new Login();
+	bool isLoginError = false;
+
+	async Task LoginErrorTest()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
+		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+
+		var navigationManagerMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+
+		var cut = GetComponentUnderTest();
+
+		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
+
+		isLoginError.ShouldBeTrue();
+	}
+
+	void Login_LoginError(EventArgs args)
+	{
+		isLoginError = true;
+	}
+
+}

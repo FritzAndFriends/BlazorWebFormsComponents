@@ -36,7 +36,7 @@ namespace BlazorWebFormsComponents.LoginControls
 		[Parameter] public string LoginButtonImageUrl { get; set; }
 		[Parameter] public string LoginButtonText { get; set; } = "Log In";
 		[Parameter] public ButtonType LoginButtonType { get; set; } = ButtonType.Button;
-
+		[Parameter] public string Password { get; set; }
 		[Parameter] public string PasswordLabelText { get; set; } = "Password:";
 		[Parameter] public string PasswordRecoveryText { get; set; }
 		[Parameter] public string PasswordRecoveryUrl { get; set; }
@@ -196,6 +196,7 @@ namespace BlazorWebFormsComponents.LoginControls
 			Model = new LoginModel
 			{
 				Username = UserName,
+				Password = Password,
 				RememberMe = RememberMeSet
 			};
 
