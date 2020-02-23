@@ -24,7 +24,7 @@ namespace BlazorWebFormsComponents
 		/// </summary> 
 		public string Title
 		{
-			get { return JsInterop.InvokeAsync<string>("bwfc.Page.GetTitle", new object[] { }).GetAwaiter().GetResult(); }
+			get { return JsInterop.InvokeAsync<string>("bwfc.Page.getTitle", new object[] { }).GetAwaiter().GetResult(); }
 			set { JsInterop.InvokeVoidAsync("bwfc.Page.setTitle", new string[] { value }); }
 		}
 
