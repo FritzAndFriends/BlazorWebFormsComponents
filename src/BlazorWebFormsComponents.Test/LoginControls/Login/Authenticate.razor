@@ -1,0 +1,59 @@
+﻿@inherits TestComponentBase
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+<Fixture TestAsync="AuthenticateTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnAuthenticate="Login_Authenticate" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	Login loginControl = new Login();
+	bool isAuthenticated = false;
+
+	async Task AuthenticateTest()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
+		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+
+		var navigationManagerMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+
+		var cut = GetComponentUnderTest();
+
+		loginControl.UserName = "admin";
+		loginControl.Password = "123";
+		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
+
+		isAuthenticated.ShouldBeFalse();
+
+		loginControl.UserName = "admin";
+		loginControl.Password = "SecRet P@ssw0rd";
+		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
+
+		isAuthenticated.ShouldBeTrue();
+	}
+
+	void Login_Authenticate(AuthenticateEventArgs args)
+	{
+		if (loginControl.UserName == "admin" && loginControl.Password == "SecRet P@ssw0rd")
+		{
+			isAuthenticated = args.Authenticated = true;
+		}
+		else
+		{
+			isAuthenticated = args.Authenticated = false;
+		}
+	}
+
+}
