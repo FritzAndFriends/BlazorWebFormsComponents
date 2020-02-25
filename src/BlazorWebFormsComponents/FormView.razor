@@ -9,16 +9,18 @@
 			}
 			else
 			{
+				@OnDataBinding.InvokeAsync(EventArgs.Empty);
 				<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
 					@ItemTemplate(CurrentItem)
 				</CascadingValue>
+				@OnDataBound.InvokeAsync(EventArgs.Empty);
 			}
 			</td>
 	</tr>
 	<tr>
 		<td>
 			<table>
-
+				@** BEGIN PAGER **@
 				<tr>
 					@if (Items == null)
 					{

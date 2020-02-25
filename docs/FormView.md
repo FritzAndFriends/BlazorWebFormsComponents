@@ -6,6 +6,10 @@ The FormView component is meant to emulate the asp:FormView control in markup an
 
 ## Features supported in Blazor
 
+  - Readonly Form
+  - Numerical Pager
+  - OnDataBinding and OnDataBound events trigger
+
 ##### [Back to top](#formview)
 
 ## Usage Notes

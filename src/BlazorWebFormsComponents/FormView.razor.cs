@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
-
+ 
 	public partial class FormView<ItemType> : BaseModelBindingComponent<ItemType> where ItemType : class, new()
 	{
 
