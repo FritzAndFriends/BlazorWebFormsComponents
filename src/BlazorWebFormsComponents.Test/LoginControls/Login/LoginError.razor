@@ -4,18 +4,31 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture TestAsync="LoginErrorTest">
+<Fixture Test="LoginErrorTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoginError="Login_LoginError" />
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoggedIn=@Login_LoggedIn ID="TestLoggedIn" OnAuthenticate=@AuthenticateError />
 	</ComponentUnderTest>
 </Fixture>
 
 
 @code {
 	Login loginControl = new Login();
-	bool isLoginError = false;
+	bool isLogginError = false;
+	bool failedAuthentication = false;
 
-	async Task LoginErrorTest()
+	void Login_LoggedIn(EventArgs args)
+	{
+		isLogginError = true;
+	}
+	void AuthenticateError(AuthenticateEventArgs args)
+	{
+		args.Authenticated = false;
+		failedAuthentication = true;
+	}
+}
+
+@code{
+	void LoginErrorTest()
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -30,15 +43,11 @@
 		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
 
 		var cut = GetComponentUnderTest();
+		cut.Find("#TestLoggedIn_UserName").Change("James Bond");
+		cut.Find("#TestLoggedIn_Password").Change("Squirrels");
+		cut.Find("form").Submit();
 
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
-		isLoginError.ShouldBeTrue();
+		isLogginError.ShouldBeFalse();
+		failedAuthentication.ShouldBeTrue();
 	}
-
-	void Login_LoginError(EventArgs args)
-	{
-		isLoginError = true;
-	}
-
 }

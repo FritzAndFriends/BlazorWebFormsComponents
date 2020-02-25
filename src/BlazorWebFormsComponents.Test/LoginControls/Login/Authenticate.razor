@@ -4,56 +4,60 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture TestAsync="AuthenticateTest">
+<Fixture Test="AuthenticateTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnAuthenticate="Login_Authenticate" />
+		<BlazorWebFormsComponents.LoginControls.Login @ref=@loginControl OnLoggedIn=@Login_LoggedIn ID="TestLoggedIn" OnAuthenticate=@Login_Authenticate />
 	</ComponentUnderTest>
 </Fixture>
 
 
 @code {
-	Login loginControl = new Login();
-	bool isAuthenticated = false;
+		Login loginControl = new Login();
+		bool isLogginError = false;
+		bool isAuthenticated = false;
 
-	async Task AuthenticateTest()
-	{
-		var principal = new ClaimsPrincipal();
-		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
-		principal.AddIdentity(identity);
-
-		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
-		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
-
-		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
-
-		var navigationManagerMock = new Mock<NavigationManager>();
-		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
-
-		var cut = GetComponentUnderTest();
-
-		loginControl.UserName = "admin";
-		loginControl.Password = "123";
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
-		isAuthenticated.ShouldBeFalse();
-
-		loginControl.UserName = "admin";
-		loginControl.Password = "SecRet P@ssw0rd";
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
-		isAuthenticated.ShouldBeTrue();
-	}
-
-	void Login_Authenticate(AuthenticateEventArgs args)
-	{
-		if (loginControl.UserName == "admin" && loginControl.Password == "SecRet P@ssw0rd")
+		void Login_LoggedIn(EventArgs args)
 		{
-			isAuthenticated = args.Authenticated = true;
+			isLogginError = true;
 		}
-		else
+		void Login_Authenticate(AuthenticateEventArgs args)
 		{
+			if (args.loginModel.Username == "TheSquirrel" && args.loginModel.Password == "nut5")
+			{
+				isAuthenticated = args.Authenticated = true;
+				return;
+			}
+
 			isAuthenticated = args.Authenticated = false;
 		}
-	}
+}
 
+@code {
+
+		void AuthenticateTest()
+		{
+			var principal = new ClaimsPrincipal();
+			var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+			principal.AddIdentity(identity);
+
+			var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
+			authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+			Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+
+			var navigationManagerMock = new Mock<NavigationManager>();
+			Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+
+			var cut = GetComponentUnderTest();
+
+			cut.Find("#TestLoggedIn_UserName").Change("TheSquirrel");
+			cut.Find("#TestLoggedIn_Password").Change("nuts");
+			cut.Find("form").Submit();
+			cut.Markup.ShouldContain("Your login attempt was not successful");
+
+			cut.Find("#TestLoggedIn_UserName").Change("TheSquirrel");
+			cut.Find("#TestLoggedIn_Password").Change("nut5");
+			cut.Find("form").Submit();
+			cut.Markup.ShouldNotContain("Your login attempt was not successful");
+		}
 }

@@ -5,7 +5,7 @@
 @using BlazorWebFormsComponents.Enums;
 
 
-<Microsoft.AspNetCore.Components.Forms.EditForm Model="Model" OnValidSubmit="ValidSubmit">
+<Microsoft.AspNetCore.Components.Forms.EditForm Model="Model" OnValidSubmit=@ValidSubmit>
 
 	<CascadingValue Name="FailureTextStyle" Value="FailureTextStyle">
 		<CascadingValue Name="TitleTextStyle" Value="TitleTextStyle">
@@ -74,6 +74,7 @@
 										</td>
 									</tr>
 								}
+
 								@if (ShowFailureText)
 								{
 									<tr>
@@ -111,28 +112,25 @@
 												<a id="@(ID + "_CreateUserLink")" href="@CreateUserUrl">@CreateUserText</a>
 											}
 
-
 											@if (HasCreateUser && (HasPasswordRevocery || HasHelp))
 											{
 												<br>
 											}
 
-
 											@if (!string.IsNullOrEmpty(PasswordRecoveryIconUrl))
 											{
 												<img src="@PasswordRecoveryIconUrl" alt="@PasswordRecoveryText">
 											}
+
 											@if (!string.IsNullOrEmpty(PasswordRecoveryText))
 											{
 												<a id="@(ID + "_PasswordRecoveryLink")" href="@PasswordRecoveryUrl">@PasswordRecoveryText</a>
 											}
 
-
 											@if ((HasCreateUser || HasPasswordRevocery) && HasHelp)
 											{
 												<br>
 											}
-
 
 											@if (!string.IsNullOrEmpty(HelpPageIconUrl))
 											{
@@ -155,17 +153,13 @@
 </Microsoft.AspNetCore.Components.Forms.EditForm>
 
 @code {
-	public ForwardRef<InputBase<string>> UsernameInput = new ForwardRef<InputBase<string>>();
-	public ForwardRef<InputBase<string>> PasswordInput = new ForwardRef<InputBase<string>>();
+		public ForwardRef<InputBase<string>> UsernameInput = new ForwardRef<InputBase<string>>();
+		public ForwardRef<InputBase<string>> PasswordInput = new ForwardRef<InputBase<string>>();
 
-
-
-
-	public class LoginModel
-	{
-		public string Username { get; set; }
-		public string Password { get; set; }
-		public bool RememberMe { get; set; }
-	}
-
+		public class LoginModel
+		{
+			public string Username { get; set; }
+			public string Password { get; set; }
+			public bool RememberMe { get; set; }
+		}
 }

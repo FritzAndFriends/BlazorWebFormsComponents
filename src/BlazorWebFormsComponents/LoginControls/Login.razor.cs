@@ -138,7 +138,7 @@ namespace BlazorWebFormsComponents.LoginControls
 			else
 			{
 
-				var authenticateEventArgs = new AuthenticateEventArgs();
+				var authenticateEventArgs = new AuthenticateEventArgs() { loginModel = Model };
 				await OnAuthenticate.InvokeAsync(authenticateEventArgs);
 
 				if (authenticateEventArgs.Authenticated)
