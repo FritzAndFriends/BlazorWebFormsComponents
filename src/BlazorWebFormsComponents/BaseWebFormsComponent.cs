@@ -135,6 +135,8 @@ namespace BlazorWebFormsComponents
 
 			await base.OnInitializedAsync();
 
+			ID = ComponentIdGenerator.Generate(this);
+
 			if (OnLoad.HasDelegate)
 				await OnLoad.InvokeAsync(EventArgs.Empty);
 
