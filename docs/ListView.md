@@ -2,6 +2,29 @@
 
 The ListView component is meant to emulate the asp:ListView control in markup and is defined in the [System.Web.UI.WebControls.ListView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.listview?view=netframework-4.8)
 
+[Usage Notes](#usage-notes) | [Web Forms Syntax](#web-forms-declarative-syntax) | [Blazor Syntax](#blazor-syntax)
+
+## Features supported in Blazor
+ - Alternating Item Templates
+ - Alternating Item Styles
+ - Empty Data Template
+ - Empty Item Template
+ - Grouping
+ - Item Templates
+ - Item Styles
+ - Model Binding
+   - OnSelect Method
+ - LayoutTemplate
+ - DataBinder within the ItemTemplate and AlternatingItemTemplate
+
+##### [Back to top](#listview)
+
+## Usage Notes
+
+ - LayoutTemplate requires a `Context` attribute that defines the placeholder for the items
+
+##### [Back to top](#listview)
+
 ## Web Forms Declarative Syntax
 
 ```html
@@ -85,3 +108,9 @@ The ListView component is meant to emulate the asp:ListView control in markup an
     </SelectedItemTemplate>  
 </asp:ListView>
 ```
+
+##### [Back to top](#listview)
+
+## Blazor Syntax
+
+##### [Back to top](#listview)
