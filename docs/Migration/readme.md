@@ -125,16 +125,30 @@ References to `<asp:` components can be easily edited to use the matching compon
 
 ## Step 6 - Pages
 
-Page migration is a process very similar to UserControls, except working on files with the `.aspx` extension.
+Page migration is a process very similar to UserControls, except working on files with the `.aspx` extension.  There is a Page component available in BlazorWebFormsComponents that will aid in providing Web Forms features to Blazor pages. 
 
-The page starts with a directive to connect the markup to .NET  code like the following:
+If you choose to use the Page component, you will need to add a script element to your application host page like the following:
+
+```html
+<script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
+```
+
+You should then decorate the top of your Blazor pages with an inherits statement declaring that they inherit from the `BlazorWebFormsComponents.Page` class
+
+```razor
+@inherits BlazorWebFormsComponents.Page
+```
+
+For more information, read the documentation about the [Page component](../Page.md).
+
+The web forms page starts with a directive to connect the markup to .NET code like the following:
 
 ```html
 <%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms._Default" %>
 ```
 
 These features defined here will be migrated / removed as follows:
-  - `Title` is not used in Blazor.  [We're looking into a work-around](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/100)
+  - `Title` is not used in Blazor, but you can set the title of a Page using the protected `Title` property.
   - `Language` is not used - everything on the razor template is C#
   - `MasterPageFile` is now a Layout and defined by default in the `App.razor` file.  You can override it by adding a `@layout MyLayout` directive at the top of the file
   - `AutoEventWireup` is not used in Blazor
@@ -168,5 +182,3 @@ Use the tool from Telerik at: https://converter.telerik.com/
 ## Follow-up: Move components to Razor Component Library
 
 [Back to top](#Migration---Getting-Started)
-
-
