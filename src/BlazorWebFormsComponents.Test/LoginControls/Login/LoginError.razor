@@ -4,9 +4,9 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture TestAsync="LoginErrorTest">
+<Fixture Test="LoginErrorTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoginError="Login_LoginError" />
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoginError="Login_LoginError" OnAuthenticate="Login_Authenticate" />
 	</ComponentUnderTest>
 </Fixture>
 
@@ -15,7 +15,7 @@
 	Login loginControl = new Login();
 	bool isLoginError = false;
 
-	async Task LoginErrorTest()
+	void LoginErrorTest()
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -31,14 +31,20 @@
 
 		var cut = GetComponentUnderTest();
 
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
+		cut.Find("#loginControl_UserName").Change("admin");
+		cut.Find("#loginControl_Password").Change("Fake Password");
+		cut.Find("form").Submit();
 		isLoginError.ShouldBeTrue();
 	}
 
 	void Login_LoginError(EventArgs args)
 	{
 		isLoginError = true;
+	}
+
+	void Login_Authenticate(AuthenticateEventArgs args)
+	{
+			args.Authenticated = false;
 	}
 
 }

@@ -4,9 +4,9 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture TestAsync="LoggingInTest">
+<Fixture Test="LoggingInTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoggingIn="Login_LoggingIn" />
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoggingIn="Login_LoggingIn" />
 	</ComponentUnderTest>
 </Fixture>
 
@@ -15,7 +15,7 @@
 	Login loginControl = new Login();
 	bool isLoginCanceled = false;
 
-	async Task LoggingInTest()
+	void LoggingInTest()
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -31,18 +31,27 @@
 
 		var cut = GetComponentUnderTest();
 
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs { Cancel = false });
-
-		isLoginCanceled.ShouldBeFalse();
-
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs { Cancel = true });
-
+		cut.Find("#loginControl_UserName").Change("admin");
+		cut.Find("#loginControl_Password").Change("Fake Password");
+		cut.Find("form").Submit();
 		isLoginCanceled.ShouldBeTrue();
+
+		cut.Find("#loginControl_UserName").Change("admin");
+		cut.Find("#loginControl_Password").Change("SecRet P@ssw0rd");
+		cut.Find("form").Submit();
+		isLoginCanceled.ShouldBeFalse();
 	}
 
 	void Login_LoggingIn(LoginCancelEventArgs args)
 	{
-		isLoginCanceled = args.Cancel;
+		if(loginControl.UserName == "admin" && loginControl.Password == "SecRet P@ssw0rd")
+		{
+			isLoginCanceled = args.Cancel = false;
+		}
+		else
+		{
+			isLoginCanceled = args.Cancel = true;
+		}
 	}
 
 }

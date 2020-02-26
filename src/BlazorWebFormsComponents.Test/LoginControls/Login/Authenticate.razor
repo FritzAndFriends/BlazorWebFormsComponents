@@ -4,18 +4,17 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture TestAsync="AuthenticateTest">
+<Fixture Test="AuthenticateTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnAuthenticate="Login_Authenticate" />
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnAuthenticate="Login_Authenticate" />
 	</ComponentUnderTest>
 </Fixture>
-
 
 @code {
 	Login loginControl = new Login();
 	bool isAuthenticated = false;
 
-	async Task AuthenticateTest()
+	void AuthenticateTest()
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -31,16 +30,16 @@
 
 		var cut = GetComponentUnderTest();
 
-		loginControl.UserName = "admin";
-		loginControl.Password = "123";
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
+		cut.Find("#loginControl_UserName").Change("admin");
+		cut.Find("#loginControl_Password").Change("Fake Password");
+		cut.Find("form").Submit();
+		cut.Markup.ShouldContain("Your login attempt was not successful");
 		isAuthenticated.ShouldBeFalse();
 
-		loginControl.UserName = "admin";
-		loginControl.Password = "SecRet P@ssw0rd";
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
+		cut.Find("#loginControl_UserName").Change("admin");
+		cut.Find("#loginControl_Password").Change("SecRet P@ssw0rd");
+		cut.Find("form").Submit();
+		cut.Markup.ShouldNotContain("Your login attempt was not successful");
 		isAuthenticated.ShouldBeTrue();
 	}
 

@@ -36,16 +36,16 @@ namespace BlazorWebFormsComponents.LoginControls
 		[Parameter] public string LoginButtonImageUrl { get; set; }
 		[Parameter] public string LoginButtonText { get; set; } = "Log In";
 		[Parameter] public ButtonType LoginButtonType { get; set; } = ButtonType.Button;
-		[Parameter] public string Password { get; set; }
+		[Parameter] public string Password { get => Model?.Password ?? string.Empty; set => Model.Password = value; }
 		[Parameter] public string PasswordLabelText { get; set; } = "Password:";
 		[Parameter] public string PasswordRecoveryText { get; set; }
 		[Parameter] public string PasswordRecoveryUrl { get; set; }
 		[Parameter] public string PasswordRecoveryIconUrl { get; set; }
 		[Parameter] public string PasswordRequiredErrorMessage { get; set; } = "Password is required.";
-		[Parameter] public bool RememberMeSet { get; set; }
+		[Parameter] public bool RememberMeSet { get => Model?.RememberMe ?? false; set => Model.RememberMe = value; }
 		[Parameter] public string RememberMeText { get; set; } = "Remember me next time.";
 		[Parameter] public string TitleText { get; set; } = "Log In";
-		[Parameter] public string UserName { get; set; }
+		[Parameter] public string UserName { get => Model?.Username ?? string.Empty; set => Model.Username = value; }
 		[Parameter] public string UserNameLabelText { get; set; } = "User Name:";
 		[Parameter] public string UserNameRequiredErrorMessage { get; set; } = "User Name is required.";
 		[Parameter] public bool VisibleWhenLoggedIn { get; set; } = true;

@@ -4,9 +4,9 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture TestAsync="LoggedInTest">
+<Fixture Test="LoggedInTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" OnLoggedIn="Login_LoggedIn" />
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoggedIn="Login_LoggedIn" OnAuthenticate="Login_Authenticate" />
 	</ComponentUnderTest>
 </Fixture>
 
@@ -15,7 +15,7 @@
 	Login loginControl = new Login();
 	bool isLoggedIn = false;
 
-	async Task LoggedInTest()
+	void LoggedInTest()
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -31,14 +31,20 @@
 
 		var cut = GetComponentUnderTest();
 
-		await loginControl.OnLoggingIn.InvokeAsync(new LoginCancelEventArgs());
-
+		cut.Find("#loginControl_UserName").Change("admin");
+		cut.Find("#loginControl_Password").Change("Fake Password");
+		cut.Find("form").Submit();
 		isLoggedIn.ShouldBeTrue();
 	}
 
 	void Login_LoggedIn(EventArgs args)
 	{
 		isLoggedIn = true;
+	}
+
+	void Login_Authenticate(AuthenticateEventArgs args)
+	{
+			args.Authenticated = true;
 	}
 
 }
