@@ -30,14 +30,14 @@
 
 		var cut = GetComponentUnderTest();
 
-		cut.Find("#loginControl_UserName").Change("admin");
-		cut.Find("#loginControl_Password").Change("Fake Password");
+		cut.Find("#loginControl_UserName").Change(Credential.InvalidCredential.Username);
+		cut.Find("#loginControl_Password").Change(Credential.InvalidCredential.Username);
 		cut.Find("form").Submit();
 		cut.Markup.ShouldContain("Your login attempt was not successful");
 		isAuthenticated.ShouldBeFalse();
 
-		cut.Find("#loginControl_UserName").Change("admin");
-		cut.Find("#loginControl_Password").Change("SecRet P@ssw0rd");
+		cut.Find("#loginControl_UserName").Change(Credential.ValidCredential.Username);
+		cut.Find("#loginControl_Password").Change(Credential.ValidCredential.Password);
 		cut.Find("form").Submit();
 		cut.Markup.ShouldNotContain("Your login attempt was not successful");
 		isAuthenticated.ShouldBeTrue();
@@ -45,7 +45,7 @@
 
 	void Login_Authenticate(AuthenticateEventArgs args)
 	{
-		if (loginControl.UserName == "admin" && loginControl.Password == "SecRet P@ssw0rd")
+		if (loginControl.UserName == Credential.ValidCredential.Username && loginControl.Password == Credential.ValidCredential.Password)
 		{
 			isAuthenticated = args.Authenticated = true;
 		}

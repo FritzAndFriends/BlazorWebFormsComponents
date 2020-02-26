@@ -31,20 +31,20 @@
 
 		var cut = GetComponentUnderTest();
 
-		cut.Find("#loginControl_UserName").Change("admin");
-		cut.Find("#loginControl_Password").Change("Fake Password");
+		cut.Find("#loginControl_UserName").Change(Credential.InvalidCredential.Username);
+		cut.Find("#loginControl_Password").Change(Credential.InvalidCredential.Password);
 		cut.Find("form").Submit();
 		isLoginCanceled.ShouldBeTrue();
 
-		cut.Find("#loginControl_UserName").Change("admin");
-		cut.Find("#loginControl_Password").Change("SecRet P@ssw0rd");
+		cut.Find("#loginControl_UserName").Change(Credential.ValidCredential.Username);
+		cut.Find("#loginControl_Password").Change(Credential.ValidCredential.Password);
 		cut.Find("form").Submit();
 		isLoginCanceled.ShouldBeFalse();
 	}
 
 	void Login_LoggingIn(LoginCancelEventArgs args)
 	{
-		if(loginControl.UserName == "admin" && loginControl.Password == "SecRet P@ssw0rd")
+		if(loginControl.UserName == Credential.ValidCredential.Username && loginControl.Password == Credential.ValidCredential.Password)
 		{
 			isLoginCanceled = args.Cancel = false;
 		}
