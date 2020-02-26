@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter(Name = "Page")]
 		protected BaseLayout BasePageLayout { get; set; }
 
-		public string Title
+		protected string Title
 		{
 			get { return BasePageLayout.Title; }
 			set { BasePageLayout.Title = value; }
