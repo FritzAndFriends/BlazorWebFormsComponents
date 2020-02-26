@@ -12,7 +12,7 @@
 
     <asp:ListView ID="simpleListView"
         runat="server"
-        GroupItemCount="2"
+        GroupItemCount="5"
         ItemType="SharedSampleObjects.Models.Widget">
         <LayoutTemplate>
             <table>
@@ -45,6 +45,15 @@
                 <td><%# Item.LastUpdate.ToString("d") %></td>
             </tr>
         </ItemTemplate>
+        <ItemSeparatorTemplate><tr><td colspan="4">---</td></tr></ItemSeparatorTemplate>
+      	<AlternatingItemTemplate>
+          <tr>
+            <td><em><%# Item.Id %></em></td>
+            <td><%# Item.Name %></td>
+            <td><%# Item.Price %></td>
+            <td><%# Item.LastUpdate.ToString("d") %></td>
+          </tr>
+				</AlternatingItemTemplate>
         <EmptyDataTemplate>
             <tr>
                 <td colspan="4">No widgets available</td>

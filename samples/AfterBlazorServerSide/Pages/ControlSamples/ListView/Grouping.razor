@@ -30,6 +30,9 @@
 					<td>@Item.LastUpdate.ToString("d")</td>
 				</tr>
 			</ItemTemplate>
+			<ItemSeparatorTemplate>
+				<tr><td colspan="4">ItemSeperator</td></tr>
+			</ItemSeparatorTemplate>
 			<AlternatingItemTemplate>
 				<tr class="table-dark"> <td>@Item.Id</td> <td>@Item.Name</td> <td>@Item.Price.ToString("c")</td> <td>@Item.LastUpdate.ToString("d")</td> </tr>
 			</AlternatingItemTemplate>
