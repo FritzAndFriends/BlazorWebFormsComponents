@@ -88,7 +88,7 @@ namespace BlazorWebFormsComponents
 
 
 		[Parameter(CaptureUnmatchedValues = true)]
-		public Dictionary<string, object> AdditionalAttributes { get; set; }
+		public Dictionary<string, object> AdditionalAttributes { get; set; } = new Dictionary<string, object>();
 
 		#region Custom Events
 

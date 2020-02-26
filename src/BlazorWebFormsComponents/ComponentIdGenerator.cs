@@ -23,11 +23,6 @@ namespace BlazorWebFormsComponents
 				return generatedId;
 			}
 
-			if (component.AdditionalAttributes == null)
-			{
-				return GenerateId(component);
-			}
-
 			generatedId = component.AdditionalAttributes.ContainsKey("name")
 						? component.AdditionalAttributes["name"].ToString()
 						: GenerateId(component);
