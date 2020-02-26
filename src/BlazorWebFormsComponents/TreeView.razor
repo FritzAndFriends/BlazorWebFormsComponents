@@ -1,6 +1,6 @@
 ﻿@inherits BlazorWebFormsComponents.BaseDataBindingComponent
 
-<div class="@CssClass">
+<div id="@ID" name="@ID" class="@CssClass">
 <CascadingValue Name="ParentTreeView" Value="this">
 @ChildContent
 @ChildNodesRenderFragment
