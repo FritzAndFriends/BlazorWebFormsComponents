@@ -1,0 +1,41 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="System.IO"#>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+
+namespace BlazorWebFormsComponents
+{		
+	public static class Constants
+	{
+<#
+
+const string FunctionPattern = "function(";
+
+			string text;
+			var fileName = @"E:\Dev\OpenSource\BlazorWebFormsComponents\src\BlazorWebFormsComponents\wwwroot\js\Basepage.js";
+			var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+			using (var streamReader = new StreamReader(fileStream, Encoding.UTF8))
+			{
+				text = streamReader.ReadToEnd();
+			}
+
+			var lines = text.Split(new[] { '\r', '\n' });
+
+			var functionLine = string.Empty;
+			foreach (var line in lines)
+			{
+				if (line.Contains(FunctionPattern))
+				{
+					var end = line.IndexOf(FunctionPattern);
+					functionLine = line.Substring(0, end);
+				}
+			}
+
+			var functionName = functionLine.Trim().Trim(':');
+
+#>
+			public static string BwfcPageGetTitle = "bwfc.Page.<#= functionName #>";
+			public static string BwfcPageSetTitle = "bwfc.Page.setTitle";
+	}
+}

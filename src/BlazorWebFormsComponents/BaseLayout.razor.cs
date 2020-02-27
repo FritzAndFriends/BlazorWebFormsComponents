@@ -11,27 +11,27 @@ using System.Threading.Tasks;
 namespace BlazorWebFormsComponents
 {
 
-	public partial class BaseLayout : LayoutComponentBase {
+	public partial class BaseLayout : LayoutComponentBase
+	{
 
 
 		private readonly Queue<Action> _JavaScriptQueue = new Queue<Action>();
 
 		[Inject]
-    public IJSRuntime JsInterop { get; set; }
+		public IJSRuntime JsInterop { get; set; }
 
 		/// <summary>
 		/// Get or set the HTML page title  
 		/// </summary> 
 		public string Title
 		{
-			get { return JsInterop.InvokeAsync<string>("bwfc.Page.getTitle", new object[] { }).GetAwaiter().GetResult(); }
-			set { JsInterop.InvokeVoidAsync("bwfc.Page.setTitle", new string[] { value }); }
+			get { return JsInterop.InvokeAsync<string>(Constants.BwfcPageGetTitle, new object[] { }).GetAwaiter().GetResult(); }
+			set { JsInterop.InvokeVoidAsync(Constants.BwfcPageSetTitle, new string[] { value }); }
 		}
 
 		public string MyProperty { get; set; } = "Foo for you!";
 
 		private bool _Rendered = false;
-
 
 
 		private T ExecuteJavaScript<T>(string method, object[] parameters)
