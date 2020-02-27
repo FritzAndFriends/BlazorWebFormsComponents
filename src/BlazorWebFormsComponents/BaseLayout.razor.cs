@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 namespace BlazorWebFormsComponents
 {
 
-	public partial class BaseLayout : LayoutComponentBase
-	{
+	public partial class BaseLayout : LayoutComponentBase {
 
 
 		private readonly Queue<Action> _JavaScriptQueue = new Queue<Action>();
@@ -32,6 +31,7 @@ namespace BlazorWebFormsComponents
 		public string MyProperty { get; set; } = "Foo for you!";
 
 		private bool _Rendered = false;
+
 
 
 		private T ExecuteJavaScript<T>(string method, object[] parameters)
