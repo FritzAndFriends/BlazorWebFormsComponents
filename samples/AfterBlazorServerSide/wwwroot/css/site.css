@@ -40,7 +40,21 @@ app {
 
 .main {
     flex: 1;
+		padding-bottom: 50px;
 }
+
+footer {
+	border-top: 1px solid purple;
+	background-color: #EEE;
+	font-size: 0.7em;
+	font-weight: bold;
+	text-align: center;
+	position: fixed;
+	height: auto;
+	bottom: 0;
+	width: 100%;
+}
+
 
     .main .top-row {
         background-color: #f7f7f7;

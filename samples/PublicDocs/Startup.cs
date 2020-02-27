@@ -1,7 +1,9 @@
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +16,7 @@ namespace PublicDocs
 {
 	public class Startup
 	{
+
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -54,5 +57,6 @@ namespace PublicDocs
 				endpoints.MapFallbackToPage("/_Host");
 			});
 		}
+
 	}
 }
