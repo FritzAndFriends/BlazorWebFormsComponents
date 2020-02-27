@@ -3,6 +3,8 @@
 <#@ assembly name="System.IO"#>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
 
 namespace BlazorWebFormsComponents
 {		
@@ -10,7 +12,7 @@ namespace BlazorWebFormsComponents
 	{
 <#
 
-const string FunctionPattern = "function(";
+const string FunctionPattern = " function(";
 
 			string text;
 			var fileName = @"E:\Dev\OpenSource\BlazorWebFormsComponents\src\BlazorWebFormsComponents\wwwroot\js\Basepage.js";
@@ -22,20 +24,22 @@ const string FunctionPattern = "function(";
 
 			var lines = text.Split(new[] { '\r', '\n' });
 
-			var functionLine = string.Empty;
+			var functionLines = new List<string>();
 			foreach (var line in lines)
 			{
 				if (line.Contains(FunctionPattern))
 				{
-					var end = line.IndexOf(FunctionPattern);
-					functionLine = line.Substring(0, end);
+					functionLines.Add(line.Substring(0, line.IndexOf(FunctionPattern)).Trim(new []{' ', ':'}));
 				}
 			}
 
-			var functionName = functionLine.Trim().Trim(':');
-
+			foreach (var functionLine in functionLines)
+			{
+				var functionName = functionLine.Trim().Trim(':');
 #>
-			public static string BwfcPageGetTitle = "bwfc.Page.<#= functionName #>";
-			public static string BwfcPageSetTitle = "bwfc.Page.setTitle";
+			  public static string <#= functionName #> = "bwfc.Page.<#= functionName #>";
+<#
+			}
+#>
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,12 +24,20 @@ namespace StuntDouble
 
 			var lines = text.Split(new[] { '\r', '\n' });
 
-			var functionLines = lines.Where(l => l.Contains(FunctionPattern)).Select((l) => l.Substring(0, l.IndexOf(FunctionPattern)));
+			var functionLines = new List<string>();
+			foreach (var line in lines)
+			{
+				if (line.Contains(FunctionPattern))
+				{
+					functionLines.Add(line.Substring(0, line.IndexOf(FunctionPattern)).Trim(new []{' ', ':'}));
+				}
+			}
+
+			// var functionLines = lines.Where(l => l.Contains(FunctionPattern)).Select((l) => l.Substring(0, l.IndexOf(FunctionPattern)));
 
 			// var functionLine = string.Empty;
 			//foreach (var line in lines)
 			//{
-
 
 			//	if (line.Contains(FunctionPattern))
 			//	{

@@ -25,8 +25,8 @@ namespace BlazorWebFormsComponents
 		/// </summary> 
 		public string Title
 		{
-			get { return JsInterop.InvokeAsync<string>(Constants.BwfcPageGetTitle, new object[] { }).GetAwaiter().GetResult(); }
-			set { JsInterop.InvokeVoidAsync(Constants.BwfcPageSetTitle, new string[] { value }); }
+			get { return JsInterop.InvokeAsync<string>(Constants.getTitle, new object[] { }).GetAwaiter().GetResult(); }
+			set { JsInterop.InvokeVoidAsync(Constants.setTitle, new string[] { value }); }
 		}
 
 		public string MyProperty { get; set; } = "Foo for you!";

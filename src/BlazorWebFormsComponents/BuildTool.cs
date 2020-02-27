@@ -3,7 +3,7 @@ namespace BlazorWebFormsComponents
 {		
 	public static class Constants
 	{
-			public static string BwfcPageGetTitle = "bwfc.Page.getTitle";
-			public static string BwfcPageSetTitle = "bwfc.Page.setTitle";
+			  public static string setTitle = "bwfc.Page.setTitle";
+			  public static string getTitle = "bwfc.Page.getTitle";
 	}
 }
