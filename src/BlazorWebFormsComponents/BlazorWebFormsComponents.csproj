@@ -34,18 +34,9 @@
 
 
   <ItemGroup>
-    <None Include="BuildTool.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BuildTool.tt</DependentUpon>
-    </None>
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <None Update="BuildTool.tt">
+    <None Update="JavaScriptConstants.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BuildTool.cs</LastGenOutput>
+      <LastGenOutput>JavaScriptConstants.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -56,10 +47,10 @@
 
 
   <ItemGroup>
-    <Compile Update="BuildTool.cs">
+    <Compile Update="JavaScriptConstants.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>BuildTool.tt</DependentUpon>
+      <DependentUpon>JavaScriptConstants.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
