@@ -58,7 +58,7 @@
 		cut.Find("img").MarkupMatches(GetFragment("AfterImage"));
 		cut.Find("a").Click();
 		cut.Find("img").MarkupMatches(GetFragment("BeforeImage"));
-		cut.FindAll("table").Length.ShouldBe(1);
+		cut.FindAll("table").Count.ShouldBe(1);
 
 	}
 
