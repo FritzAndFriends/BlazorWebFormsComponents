@@ -33,7 +33,7 @@ else
 					foreach(var item in Items)
 					{
 					  <CascadingValue Name="CurrentDataBoundItem" Value="item">
-						@oddOrEvenTemplate(even)(item);
+						@oddOrEvenTemplate(even)(item)
 						@{ even = !even; }
 						</CascadingValue>
 						if (ItemSeparatorTemplate != null)
