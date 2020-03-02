@@ -1,0 +1,2 @@
+#!/bin/bash
+dotnet watch -p watchtest.csproj msbuild /t:test
