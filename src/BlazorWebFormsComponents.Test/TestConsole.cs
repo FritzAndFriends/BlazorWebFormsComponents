@@ -6,7 +6,8 @@ namespace BlazorWebFormsComponents.Test {
 
     public static void WriteLine(string text) {
 
-      if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production")
+      string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+      if (string.IsNullOrEmpty(envName) || envName != "Production")
         Console.WriteLine(text);
 
     }
