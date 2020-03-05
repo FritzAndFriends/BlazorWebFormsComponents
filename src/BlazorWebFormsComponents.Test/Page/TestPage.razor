@@ -1,0 +1,15 @@
+@inherits BlazorWebFormsComponents.Page
+
+<h1>Test Page</h1>
+
+@code {
+
+public const string TestTitle = "Test Title";
+
+protected override void OnInitialized() {
+
+  base.Title = TestTitle;
+
+}
+
+}

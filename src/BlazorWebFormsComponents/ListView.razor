@@ -85,7 +85,10 @@ else
 						
 					} while (isBusy);
 
-				}
-			}
-		)
+														}
+													}
+									)
+
+	if (OnLayoutCreated?.GetInvocationList().Any() ?? false) OnLayoutCreated.Invoke(null, EventArgs.Empty);
+
 }

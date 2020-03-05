@@ -23,18 +23,17 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment<RenderFragment> GroupTemplate { get; set; }
 		[Parameter] public RenderFragment ItemPlaceHolder { get; set; }
-				/// <summary>
-		/// 🚨🚨 LayoutTemplate is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+		
+		/// <summary>
+		/// The layout of the ListView, a set of HTML to contain the repeated elements of the ItemTemplate and AlternativeItemTemplate 
 		/// </summary>
 		[Parameter]
-		//[Obsolete("The LayoutTemplate child element is not supported in Blazor.  Instead, wrap the ListView component with the desired layout")]
 		public RenderFragment<RenderFragment> LayoutTemplate { get; set; }
 
 		/// <summary>
-		/// 🚨🚨 LayoutTemplate and the OnLayoutCreated event is not available.  Please wrap the ListView component with the desired layout 🚨🚨
+		/// Triggers when the layout template is completed construction 
 		/// </summary>
 		[Parameter]
-		[Obsolete("The layout is not managed by this component, therefore this event will not be raised")]
 		public EventHandler OnLayoutCreated { get; set; }
 
 		#endregion
