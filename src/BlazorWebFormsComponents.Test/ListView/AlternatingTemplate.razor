@@ -1,8 +1,6 @@
 ﻿@inherits TestComponentBase
 
-<Fixture
-	Test="FirstTest"
->
+<Fixture Test="FirstTest" >
 <ComponentUnderTest>
 	<ListView Items="Widget.SimpleWidgetList"
 						ItemType="Widget"
@@ -13,18 +11,12 @@
 </ComponentUnderTest>
 </Fixture>
 
-
 @code {
-
 	void FirstTest()
 	{
-
 		var cut = GetComponentUnderTest();
-
+		Console.WriteLine(cut.Markup);
 		cut.FindAll("span").Count().ShouldBe(2, "Did not render 2 SPAN elements");
 		cut.FindAll("b").Count().ShouldBe(1, "Did not render 1 B element");
-
 	}
-
-
 }
