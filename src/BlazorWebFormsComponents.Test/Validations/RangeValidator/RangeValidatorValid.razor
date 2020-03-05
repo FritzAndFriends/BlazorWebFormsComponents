@@ -55,7 +55,7 @@
 			cut.Find("form").Submit();
 
 			// Assert
-			Console.WriteLine(cut.Markup);
+			TestConsole.WriteLine(cut.Markup);
 			_validSubmit.ShouldBeTrue();
 			_invalidSubmit.ShouldBeFalse();
 

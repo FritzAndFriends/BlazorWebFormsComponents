@@ -18,7 +18,7 @@
 	void FirstTest()
 	{
 		var cut = GetComponentUnderTest();
-		Console.WriteLine(cut.Markup);
+		TestConsole.WriteLine(cut.Markup);
 		var footer = cut.Find("span").Children.FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
 
 		footer.HasAttribute("style").ShouldBeFalse();
