@@ -1,2 +1,2 @@
 #!/bin/bash
-dotnet watch -p watch.csproj msbuild /t:test -verbosity:quiet
+dotnet watch -p watch.csproj msbuild /t:test -verbosity:quiet -p:configuration=Release
