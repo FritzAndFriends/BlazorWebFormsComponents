@@ -1,8 +1,13 @@
-﻿@page "/ControlSamples/GridView/Default"
+﻿@page "/ControlSamples/GridView"
 
 <h2>GridView Default Example</h2>
 
-<GridView  ItemType="Customer" DataKeyNames="CustomerID" SelectMethod="GetCustomers">
+<Nav />
+
+<GridView  ItemType="Customer"
+					AutogenerateColumns="false"
+					DataKeyNames="CustomerID"
+					SelectMethod="GetCustomers">
 	<Columns>
 		<BoundField DataField="CustomerID" HeaderText="ID" ItemType="Customer" />
 		<BoundField DataField="CompanyName" HeaderText="CompanyName" ItemType="Customer" />

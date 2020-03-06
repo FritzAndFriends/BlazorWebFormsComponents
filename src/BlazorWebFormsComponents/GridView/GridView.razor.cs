@@ -7,7 +7,7 @@ namespace BlazorWebFormsComponents.GridView
 {
   public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>
   {
-		[Parameter] public bool AutogenerateColumns { get; set; }
+		[Parameter] public bool AutogenerateColumns { get; set; } = true;
 
 		[Parameter] public string EmptyDataText { get; set; }
 
@@ -21,12 +21,13 @@ namespace BlazorWebFormsComponents.GridView
 
 		[Parameter] public RenderFragment ChildContent { get; set; }
 
-		[CascadingParameter(Name = "Host")] public BaseWebFormsComponent HostComponent { get; set; }
-
 		protected override void OnInitialized()
 		{
-			HostComponent = this;
 			base.OnInitialized();
+			if (AutogenerateColumns)
+			{
+				GridViewColumnGenerator.AutogenerateColumns(this);
+			}
 		}
 
 
