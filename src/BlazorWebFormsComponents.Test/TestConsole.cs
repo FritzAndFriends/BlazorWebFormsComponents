@@ -1,19 +1,19 @@
 using System;
 
 namespace BlazorWebFormsComponents.Test {
-
   public static class TestConsole {
-		
-    private static string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-    private static bool hasTargetEnvironment = (string.IsNullOrEmpty(envName) || envName != "Production");
-
     public static void WriteLine(string text) {
 
-			System.Diagnostics.Debug.WriteLineIf(hasTargetEnvironment, text);
-			return;
+#if DEBUG
+			Console.WriteLine($"Are you using `dotnet test -c Debug , perhaps you meant to use -c Release");
+			Console.WriteLine($"Remember that dotnet test defaults -c to Debug");
+			Console.WriteLine($"Console WriteLine with DEBUG {text}");
+		#else
+			Console.WriteLine("Console WriteLine without DEBUG ");
+#endif
+			System.Diagnostics.Debug.WriteLine("Debug.WriteLine should only happen in DEBUG mode");
+			System.Diagnostics.Debug.WriteLine($"Debug.WriteLine {text}");
 
     }
-
   }
-
 }
