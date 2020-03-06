@@ -1,0 +1,21 @@
+@page "/ControlSamples/Button"
+
+<h2>Button component home page</h2>
+
+<button @onclick="OnClick">Click me!</button>
+
+<span style="font-weight: bold">@TheContent</span>
+
+@code {
+
+	public string TheContent { get; set; } = "Not clicked yet!";
+
+	void OnClick() {
+		
+		TheContent = "I've been clicked";
+
+	}
+
+		
+
+}
