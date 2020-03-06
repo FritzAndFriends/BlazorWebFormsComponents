@@ -1,0 +1,63 @@
+﻿@typeparam ItemType
+@inherits BaseModelBindingComponent<ItemType>
+@using Interfaces
+@if (GridColumns.Any())
+{
+	<table class="@CssClass">
+		<thead>
+			<tr>
+				@foreach (IColumn<ItemType> column in GridColumns)
+				{
+					<th>@column.HeaderText</th>
+				}
+			</tr>
+		</thead>
+		<tbody>
+			@if (Items != null)
+			{
+				if (Items.Any())
+				{
+					foreach (ItemType item in Items)
+					{
+						<tr @key="item">
+							@foreach (IColumn<ItemType> column in GridColumns)
+							{
+								<td @key="column">
+									@if (column is BoundField<ItemType>)
+									{
+											var datafield = (BoundField<ItemType>)column;
+											var properties = datafield.DataField.Split('.');
+											object obj = item;
+											@foreach (var property in properties)
+											{
+
+												var propertyInfo = obj.GetType().GetProperty(property);
+												obj = propertyInfo.GetValue(obj);
+											}
+											if (datafield.DataFormatString != null)
+											{
+												@String.Format(datafield.DataFormatString, @obj.ToString())
+											}
+										else
+										{
+											@obj.ToString();
+										}
+									}
+									else
+									{
+										var templateField = (TemplateField<ItemType>)column;
+										@templateField.ItemTemplate(item)
+									}
+								</td>
+							}
+						</tr>
+					}
+				}
+			}
+		</tbody>
+	</table>
+}
+
+<CascadingValue Value="this" Name="GridView">
+	@Columns
+</CascadingValue>
