@@ -21,14 +21,17 @@ namespace BlazorWebFormsComponents {
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
-		protected void Click(MouseEventArgs args) {
+		protected void Click() {
 
-			Console.WriteLine($"OnCommand: {OnCommand.GetType()}");
+			Console.WriteLine($"OnCommand: {OnCommand?.GetType()}");
 			if (OnCommand != null) {
 				OnCommand.Invoke(null, new CommandEventArgs(CommandName, CommandArgument));
 			} else {
-				OnClick.InvokeAsync(args);
+				OnClick.InvokeAsync(new MouseEventArgs());
 			}
+
+			Console.WriteLine("Calling StateHasChanged");
+			StateHasChanged();
 
 		}
 

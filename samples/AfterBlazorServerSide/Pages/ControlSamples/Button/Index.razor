@@ -2,14 +2,22 @@
 
 <h2>Button component home page</h2>
 
-<Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" xOnClick="OnClick">Click me!</Button>
+<Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" OnClick="OnClick">Click me!</Button>
 
 <span style="font-weight: bold">@TheContent</span>
 
 @code {
 
+	[Parameter]
 	public string TheContent { get; set; } = "Not clicked yet!";
 	public string bar = "bar";
+
+/*
+  protected override void OnInitialized() {
+		TheContent = "Initialized";
+		Console.WriteLine("Initialized");
+	}
+*/
 
 	void OnClick() {
 
@@ -21,7 +29,7 @@
 
 		Console.WriteLine("Command fired");
 		TheContent = $"Command '{args.CommandName}'";
-
+		// StateHasChanged();
 	}
 
 
