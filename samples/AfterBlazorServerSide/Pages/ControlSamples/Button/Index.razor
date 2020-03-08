@@ -2,20 +2,28 @@
 
 <h2>Button component home page</h2>
 
-<button @onclick="OnClick">Click me!</button>
+<Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" xOnClick="OnClick">Click me!</Button>
 
 <span style="font-weight: bold">@TheContent</span>
 
 @code {
 
 	public string TheContent { get; set; } = "Not clicked yet!";
+	public string bar = "bar";
 
 	void OnClick() {
-		
+
 		TheContent = "I've been clicked";
 
 	}
 
-		
+	void OnCommand(object sender, CommandEventArgs args) {
+
+		Console.WriteLine("Command fired");
+		TheContent = $"Command '{args.CommandName}'";
+
+	}
+
+
 
 }
