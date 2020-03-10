@@ -7,6 +7,7 @@ namespace BlazorWebFormsComponents.GridView
 {
   public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>
   {
+
 		[Parameter] public bool AutogenerateColumns { get; set; } = true;
 
 		[Parameter] public string EmptyDataText { get; set; }
@@ -15,12 +16,14 @@ namespace BlazorWebFormsComponents.GridView
 
 		[Parameter] public string CssClass { get; set; }
 
-		[Parameter] public RenderFragment Columns { get; set; }
-
 		public List<IColumn<ItemType>> GridColumns { get; } = new List<IColumn<ItemType>>();
 
-		[Parameter] public RenderFragment ChildContent { get; set; }
+		#region Templates
+		[Parameter] public RenderFragment Columns { get; set; }
 
+		[Parameter] public RenderFragment ChildContent { get; set; }
+		#endregion
+		
 		protected override void OnInitialized()
 		{
 			base.OnInitialized();
