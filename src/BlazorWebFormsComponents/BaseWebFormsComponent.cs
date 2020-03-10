@@ -60,6 +60,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Enabled { get; set; } = true;
 
+		[CascadingParameter(Name="ParentComponent")]
+		public virtual BaseWebFormsComponent Parent { get; set; }
+
 		[Parameter]
 		public short TabIndex { get; set; }
 
@@ -125,7 +128,16 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
+		[Parameter]
+		public RenderFragment ChildComponents { get; set; }
+
 		#region Blazor Events
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder) {
+
+			// builder.
+
+		}
 
 		protected override async Task OnInitializedAsync()
 		{
