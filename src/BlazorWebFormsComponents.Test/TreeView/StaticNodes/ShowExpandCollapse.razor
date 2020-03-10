@@ -49,7 +49,7 @@
 
 		var cut = GetComponentUnderTest();
 
-		TestConsole.WriteLine(cut.Markup);
+		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		cut.FindAll("img").Count().ShouldBe(3);
 		cut.Find("img").GetAttribute("src").ShouldBe("_content/Fritz.BlazorWebFormsComponents/TreeView/Default_NoExpand.gif");

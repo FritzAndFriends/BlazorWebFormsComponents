@@ -20,7 +20,7 @@
 	void FirstTest()
 	{
 		var cut = GetComponentUnderTest();
-		TestConsole.WriteLine(cut.Markup);
+		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
 		footer.HasAttribute("class").ShouldBeTrue();
 		var @class = footer.GetAttribute("class");
