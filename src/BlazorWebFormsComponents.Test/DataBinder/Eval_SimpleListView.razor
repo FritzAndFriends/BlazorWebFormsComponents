@@ -17,7 +17,7 @@
 	{
 
 		var cut = GetComponentUnderTest();
-		TestConsole.WriteLine(cut.Markup);
+		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		var spans = cut.FindAll("span");
 
