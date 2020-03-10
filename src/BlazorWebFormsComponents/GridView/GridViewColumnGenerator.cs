@@ -1,23 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BlazorWebFormsComponents.GridView
+﻿namespace BlazorWebFormsComponents.GridView
 {
+	/// <summary>
+	/// The GridView Column Generator
+	/// </summary>
   public static class GridViewColumnGenerator
   {
-		public static void AutogenerateColumns<ItemType>(GridView<ItemType> gridView)
+		/// <summary>
+		/// Generate columns for a given GridView based on the properties of given Type
+		/// </summary>
+		/// <typeparam name="ItemType"> The type </typeparam>
+		/// <param name="gridView"> The GridView </param>
+		public static void GenerateColumns<ItemType>(GridView<ItemType> gridView)
 		{
 			var type = typeof(ItemType);
 			var propertiesInfo = type.GetProperties();
 			foreach (var propertyInfo in propertiesInfo)
 			{
-				var newColumn = new BoundField<ItemType> {
+				var newColumn = new BoundField {
 					DataField = propertyInfo.Name,
-					GridView = gridView,
+					ParentColumnsCollection = gridView,
 					HeaderText = propertyInfo.Name
 				};
-				gridView.GridColumns.Add(newColumn);
+				gridView.ColumnList.Add(newColumn);
 			}
 		}
 	}

@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace BeforeWebForms2.ControlSamples.GridView
+namespace BeforeWebForms.ControlSamples.GridView
 {
   public partial class TemplateFields : System.Web.UI.Page
   {

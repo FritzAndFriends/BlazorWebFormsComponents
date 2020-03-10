@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TemplateFields.aspx.cs" Inherits="BeforeWebForms2.ControlSamples.GridView.TemplateFields" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TemplateFields.aspx.cs" Inherits="BeforeWebForms.ControlSamples.GridView.TemplateFields" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
   <h2>GridView Control</h2>

@@ -9,13 +9,13 @@
 					DataKeyNames="CustomerID"
 					SelectMethod="GetCustomers">
 	<Columns>
-		<BoundField DataField="CustomerID" HeaderText="ID" ItemType="Customer" />
-		<BoundField DataField="CompanyName" HeaderText="CompanyName" ItemType="Customer" />
-		<BoundField DataField="FirstName" HeaderText="FirstName" ItemType="Customer" />
-		<BoundField DataField="LastName" HeaderText="LastName"  ItemType="Customer" />
-		<TemplateField ItemType="Customer">
+		<BoundField DataField="CustomerID" HeaderText="ID" />
+		<BoundField DataField="CompanyName" HeaderText="CompanyName" />
+		<BoundField DataField="FirstName" HeaderText="FirstName"/>
+		<BoundField DataField="LastName" HeaderText="LastName"/>
+		<TemplateField>
 			<ItemTemplate Context="Item">
-				<button type="button">Click Me!</button>
+				<button type="button">Click Me! @Item.FirstName</button>
 			</ItemTemplate>
 		</TemplateField>
 	</Columns>

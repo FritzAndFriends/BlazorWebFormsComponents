@@ -15,5 +15,7 @@ namespace BlazorWebFormsComponents
 		{
 			OnClick?.Invoke();
 		}
+
+
 	}
 }
