@@ -3,20 +3,25 @@
 <Fixture
 	Test="FirstTest"
 >
-<ComponentUnderTest>
-	<ListView Items="Widget.SimpleWidgetList"
-						ItemType="Widget"
-						Context="Item">
-		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
-		<LayoutTemplate Context="itemPlaceholder">
-			<div>
-				<b>Header <Button @ref="MyButton">My Button</Button></b>
-				<br/>
-				@itemPlaceholder
-			</div>
-		</LayoutTemplate>
-	</ListView>
-</ComponentUnderTest>
+	<ComponentUnderTest>
+		@*<ListView Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			<LayoutTemplate Context="itemPlaceholder">
+				<div>
+					<b>Header <Button @ref="MyButton">My Button</Button></b>
+					<br/>
+					@itemPlaceholder
+				</div>
+			</LayoutTemplate>
+		</ListView>
+		*@
+
+		<Button>
+			<Button @ref="MyButton">My Button</Button>
+		</Button>
+	</ComponentUnderTest>
 </Fixture>
 
 @code {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -135,7 +136,12 @@ namespace BlazorWebFormsComponents
 
 		protected override void BuildRenderTree(RenderTreeBuilder builder) {
 
-			// builder.
+			builder.OpenComponent<CascadingValue<BaseWebFormsComponent>>(0);
+			builder.AddAttribute(1, "Name", "ParentComponent");
+			builder.AddAttribute(2, "Value", this);
+			builder.AddContent(3, "<b>Built with BaseWebFormsComponent</b>");
+			base.BuildRenderTree(builder);
+			builder.CloseComponent();
 
 		}
 
