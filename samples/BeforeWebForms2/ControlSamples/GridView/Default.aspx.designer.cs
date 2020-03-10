@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BeforeWebForms2.ControlSamples.GridView
+namespace BeforeWebForms.ControlSamples.GridView
 {
 
 

@@ -1,4 +1,4 @@
-﻿namespace BeforeWebForms2.ControlSamples.GridView
+﻿namespace BeforeWebForms.ControlSamples.GridView
 {
   public class Customer
 	{

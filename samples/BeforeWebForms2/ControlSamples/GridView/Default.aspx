@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms2.ControlSamples.GridView.Default" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.GridView.Default" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
   <h2>GridView control homepage</h2>
@@ -13,7 +13,7 @@
     autogeneratecolumns="False"
     emptydatatext="No data available."
     selectMethod="GetCustomers"
-    ItemType="BeforeWebForms2.ControlSamples.GridView.Customer"
+    ItemType="BeforeWebForms.ControlSamples.GridView.Customer"
     runat="server" DataKeyNames="CustomerID">
       <Columns>
           <asp:BoundField DataField="CustomerID" HeaderText="CustomerID" 
@@ -26,7 +26,7 @@
               SortExpression="LastName" />
         <asp:TemplateField>
 			        <ItemTemplate>
-				        <button type="button">Click Me!</button>
+				        <button type="button">Click Me! <%#:Item.FirstName %></button>
 			         </ItemTemplate>
 		    </asp:TemplateField>
       </Columns>

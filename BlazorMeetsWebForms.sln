@@ -36,7 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionInfo", "SolutionInf
 		version.json = version.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeWebForms2", "samples\BeforeWebForms2\BeforeWebForms2.csproj", "{F3C9E926-380D-4363-9705-792C8BAF9E75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeWebForms", "samples\BeforeWebForms2\BeforeWebForms.csproj", "{F3C9E926-380D-4363-9705-792C8BAF9E75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
