@@ -217,7 +217,7 @@ namespace BlazorWebFormsComponents
 		private const string PARENTCOMPONENTNAME = "ParentComponent";
 		//if you added ChildContent to this class, we could just nameof(ChildContent)
 		private const string CHILDCONTENTNAME = "ChildContent";
-
+private readonly RenderFragment _baseRenderFragment;
 		public BaseWebFormsComponent ()
 		{
 			// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
