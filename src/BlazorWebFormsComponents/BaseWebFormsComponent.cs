@@ -212,35 +212,31 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		public bool LayoutTemplateRendered { get; set; } = false;
-		private static readonly FieldInfo _renderFragmentField = typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
 		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";
 		private const string PARENTCOMPONENTNAME = "ParentComponent";
-		//if you added ChildContent to this class, we could just nameof(ChildContent)
-private readonly RenderFragment _baseRenderFragment;
+
+		// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
+		private static readonly FieldInfo _renderFragmentField = typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
+		private readonly RenderFragment _baseRenderFragment;
+
 		public BaseWebFormsComponent ()
 		{
-			// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
-
 			// Grab a copy of the default RenderFragment to go into the CascadingValue
 			_baseRenderFragment = (RenderFragment)_renderFragmentField.GetValue(this);
 
 			// Override the default RenderFragment with our Special Sauce version
-			_renderFragmentField.SetValue(this, ParentWrappingBuildRenderTree);
-				{
-					builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
-					builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
-					builder.AddAttribute(3, nameof(CascadingValue<object>.Value), this);
-					builder.AddAttribute(4, CHILDCONTENTNAME, _standardRender);
-					builder.CloseComponent();
-				}));
+			_renderFragmentField.SetValue(this, (RenderFragment)ParentWrappingBuildRenderTree);
+
+			void ParentWrappingBuildRenderTree(RenderTreeBuilder builder)
+			{
+				builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
+				builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
+				builder.AddAttribute(3, nameof(CascadingValue<object>.Value), this);
+				builder.AddAttribute(4, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
+				builder.AddAttribute(5, nameof(CascadingValue<object>.IsFixed), true);
+				builder.CloseComponent();
+			}
 		}
-private void ParentWrappingBuildRenderTree(RenderTreeBuilder builder)
-{
-    builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
-    builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
-    builder.AddAttribute(3, nameof(CascadingValue<object>.Value), this);
-    builder.AddAttribute(4, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
-}
 	}
 
 }
