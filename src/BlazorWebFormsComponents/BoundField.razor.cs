@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace BlazorWebFormsComponents.GridView
+namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// Bounds an object's property to a column by its property name 

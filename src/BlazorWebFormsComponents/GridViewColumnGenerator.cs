@@ -1,4 +1,4 @@
-﻿namespace BlazorWebFormsComponents.GridView
+﻿namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// The GridView Column Generator
