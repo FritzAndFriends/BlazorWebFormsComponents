@@ -1,0 +1,57 @@
+﻿@inherits TestComponentBase
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+<Fixture Test="LoggingInTest">
+	<ComponentUnderTest>
+		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoggingIn="Login_LoggingIn" />
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	Login loginControl = new Login();
+	bool isLoginCanceled = false;
+
+	void LoggingInTest()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
+
+		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
+		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+
+		var navigationManagerMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+
+		var cut = GetComponentUnderTest();
+
+		cut.Find("#loginControl_UserName").Change(Credential.InvalidCredential.Username);
+		cut.Find("#loginControl_Password").Change(Credential.InvalidCredential.Password);
+		cut.Find("form").Submit();
+		isLoginCanceled.ShouldBeTrue();
+
+		cut.Find("#loginControl_UserName").Change(Credential.ValidCredential.Username);
+		cut.Find("#loginControl_Password").Change(Credential.ValidCredential.Password);
+		cut.Find("form").Submit();
+		isLoginCanceled.ShouldBeFalse();
+	}
+
+	void Login_LoggingIn(LoginCancelEventArgs args)
+	{
+		if(loginControl.UserName == Credential.ValidCredential.Username && loginControl.Password == Credential.ValidCredential.Password)
+		{
+			isLoginCanceled = args.Cancel = false;
+		}
+		else
+		{
+			isLoginCanceled = args.Cancel = true;
+		}
+	}
+
+}

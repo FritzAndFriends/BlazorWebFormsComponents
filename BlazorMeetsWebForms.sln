@@ -38,6 +38,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionInfo", "SolutionInf
 		version.json = version.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "watch", "watch", "{A4769DEE-1006-4D87-B20E-E875C556B3E8}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\watch.csproj = scripts\watch.csproj
+		scripts\watchtest = scripts\watchtest
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

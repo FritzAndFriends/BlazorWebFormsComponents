@@ -10,6 +10,7 @@
 *.sln.docstates
 *.ncrunchproject
 *.ncrunchsolution
+*.swp
 
 # Project XML documentation
 BlazorWebFormsComponents.xml

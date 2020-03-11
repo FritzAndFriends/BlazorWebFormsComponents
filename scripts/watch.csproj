@@ -1,0 +1,12 @@
+﻿<Project>
+	<ItemGroup>
+		<TestProjects Include="..\src\**\*.csproj" />
+		<Watch Include="..\src\**\*.cs;..\src\**\*.razor;..\src\**\*.csproj" Exclude="..\src\**\bin\**;..\src\**\obj\**" />
+	</ItemGroup>
+
+	<Target Name="test">
+		<MSBuild Targets="VSTest" Projects="@(TestProjects)" />
+	</Target>
+
+	<Import Project="$(MSBuildExtensionsPath)\Microsoft.Common.targets" />
+</Project>
