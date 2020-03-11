@@ -63,7 +63,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Enabled { get; set; } = true;
 
-		[CascadingParameter(Name="ParentComponent")]
+		[CascadingParameter(Name= PARENTCOMPONENTNAME)]
 		public virtual BaseWebFormsComponent Parent { get; set; }
 
 		[Parameter]
@@ -135,17 +135,6 @@ namespace BlazorWebFormsComponents
 		public RenderFragment ChildComponents { get; set; }
 
 		#region Blazor Events
-
-		protected override void BuildRenderTree(RenderTreeBuilder builder) {
-
-			builder.OpenComponent<CascadingValue<BaseWebFormsComponent>>(0);
-			builder.AddAttribute(1, "Name", "ParentComponent");
-			builder.AddAttribute(2, "Value", this);
-			builder.AddContent(3, "<b>Built with BaseWebFormsComponent</b>");
-			base.BuildRenderTree(builder);
-			builder.CloseComponent();
-
-		}
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -223,28 +212,27 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		public bool LayoutTemplateRendered { get; set; } = false;
+		private static FieldInfo _renderFragmentField;
+		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";
+		private const string PARENTCOMPONENTNAME = "ParentComponent";
+		//if you added ChildContent to this class, we could just nameof(ChildContent)
+		private const string CHILDCONTENTNAME = "ChildContent";
 
 		public BaseWebFormsComponent ()
 		{
-			// Get Access to the ComponentBase fields we need to wrap every component in a CascadingValue
-			var _renderFragmentField = typeof(ComponentBase).GetField("_renderFragment", BindingFlags.NonPublic | BindingFlags.Instance);
-			var _hasPendingQueuedRenderField = typeof(ComponentBase).GetField("_hasPendingQueuedRender", BindingFlags.NonPublic | BindingFlags.Instance);
-			var _hasNeverRenderedField = typeof(ComponentBase).GetField("_hasNeverRendered", BindingFlags.NonPublic | BindingFlags.Instance);
+			// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
+			_renderFragmentField ??= typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
 
-			// Create a RenderFragment to go into the CascadingValue
-			RenderFragment _standardRender = builder2 => {
-				_hasPendingQueuedRenderField.SetValue(this,false);
-				_hasNeverRenderedField.SetValue(this, false);
-				BuildRenderTree(builder2);
-			};
+			// Grab a copy of the default RenderFragment to go into the CascadingValue
+			var _standardRender = (RenderFragment)_renderFragmentField.GetValue(this);
 
 			// Override the default RenderFragment with our Special Sauce version
 			_renderFragmentField.SetValue(this, (RenderFragment)(builder =>
 				{
 					builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
-					builder.AddAttribute(2, "Name", "ParentComponent");
-					builder.AddAttribute(3, "Value", this);
-					builder.AddAttribute(4, "ChildContent", _standardRender);
+					builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
+					builder.AddAttribute(3, nameof(CascadingValue<object>.Value), this);
+					builder.AddAttribute(4, CHILDCONTENTNAME, _standardRender);
 					builder.CloseComponent();
 				}));
 		}
