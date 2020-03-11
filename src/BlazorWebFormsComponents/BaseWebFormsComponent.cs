@@ -221,7 +221,6 @@ namespace BlazorWebFormsComponents
 		public BaseWebFormsComponent ()
 		{
 			// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
-			_renderFragmentField ??= typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
 
 			// Grab a copy of the default RenderFragment to go into the CascadingValue
 			var _standardRender = (RenderFragment)_renderFragmentField.GetValue(this);
