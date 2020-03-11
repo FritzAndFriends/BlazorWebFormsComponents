@@ -11,7 +11,7 @@ using IComponent = Microsoft.AspNetCore.Components.IComponent;
 namespace BlazorWebFormsComponents
 {
 
-	public abstract class BaseWebFormsComponent : CustomComponentBase, IAsyncDisposable
+	public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
 	{
 
 		#region Obsolete Attributes / Properties
@@ -226,21 +226,27 @@ namespace BlazorWebFormsComponents
 
 		public BaseWebFormsComponent ()
 		{
+			// Get Access to the ComponentBase fields we need to wrap every component in a CascadingValue
+			var _renderFragmentField = typeof(ComponentBase).GetField("_renderFragment", BindingFlags.NonPublic | BindingFlags.Instance);
+			var _hasPendingQueuedRenderField = typeof(ComponentBase).GetField("_hasPendingQueuedRender", BindingFlags.NonPublic | BindingFlags.Instance);
+			var _hasNeverRenderedField = typeof(ComponentBase).GetField("_hasNeverRendered", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			// Create a RenderFragment to go into the CascadingValue
 			RenderFragment _standardRender = builder2 => {
-				_hasPendingQueuedRender = false;
-				_hasNeverRendered = false;
+				_hasPendingQueuedRenderField.SetValue(this,false);
+				_hasNeverRenderedField.SetValue(this, false);
 				BuildRenderTree(builder2);
-				// Include this to see it working
-				//builder2.AddContent(9999,"All your bases are loaded");
 			};
-			_renderFragment = builder =>
+
+			// Override the default RenderFragment with our Special Sauce version
+			_renderFragmentField.SetValue(this, (RenderFragment)(builder =>
 				{
 					builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
 					builder.AddAttribute(2, "Name", "ParentComponent");
 					builder.AddAttribute(3, "Value", this);
 					builder.AddAttribute(4, "ChildContent", _standardRender);
 					builder.CloseComponent();
-				};
+				}));
 		}
 
 	}
