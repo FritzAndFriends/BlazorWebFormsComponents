@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace BlazorWebFormsComponents.GridView
+namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// A template field column

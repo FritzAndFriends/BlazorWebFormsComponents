@@ -7,7 +7,8 @@
 <GridView  ItemType="Customer"
 					AutogenerateColumns="false"
 					DataKeyNames="CustomerID"
-					SelectMethod="GetCustomers">
+					SelectMethod="GetCustomers"
+					EmptyDataText="No data available">
 	<Columns>
 		<BoundField DataField="CustomerID" HeaderText="ID" />
 		<BoundField DataField="CompanyName" HeaderText="CompanyName" />
@@ -23,7 +24,7 @@
 
 @code{
 		public IQueryable<Customer> GetCustomers(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-	{
+		{
 			var customers = new List<Customer>();
 			var c1 = new Customer
 			{
@@ -56,5 +57,5 @@
 
 			totalRowCount = customers.Count();
 			return customers.AsQueryable();
-	}
+		}
 }

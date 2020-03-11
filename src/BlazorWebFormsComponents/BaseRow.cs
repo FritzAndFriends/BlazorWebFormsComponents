@@ -1,7 +1,7 @@
 ﻿using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorWebFormsComponents.GridView
+namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// Base abstract row class

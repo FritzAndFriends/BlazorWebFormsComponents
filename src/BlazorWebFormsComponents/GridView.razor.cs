@@ -1,10 +1,8 @@
 ﻿using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
-namespace BlazorWebFormsComponents.GridView
+namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// Blazor version of WebForms GridView control
