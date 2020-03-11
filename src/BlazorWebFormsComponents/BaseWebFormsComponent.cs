@@ -216,7 +216,6 @@ namespace BlazorWebFormsComponents
 		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";
 		private const string PARENTCOMPONENTNAME = "ParentComponent";
 		//if you added ChildContent to this class, we could just nameof(ChildContent)
-		private const string CHILDCONTENTNAME = "ChildContent";
 private readonly RenderFragment _baseRenderFragment;
 		public BaseWebFormsComponent ()
 		{
