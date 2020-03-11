@@ -212,7 +212,7 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		public bool LayoutTemplateRendered { get; set; } = false;
-		private static FieldInfo _renderFragmentField;
+		private static readonly FieldInfo _renderFragmentField = typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
 		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";
 		private const string PARENTCOMPONENTNAME = "ParentComponent";
 		//if you added ChildContent to this class, we could just nameof(ChildContent)
