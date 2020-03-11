@@ -226,7 +226,7 @@ private readonly RenderFragment _baseRenderFragment;
 			_baseRenderFragment = (RenderFragment)_renderFragmentField.GetValue(this);
 
 			// Override the default RenderFragment with our Special Sauce version
-			_renderFragmentField.SetValue(this, (RenderFragment)(builder =>
+			_renderFragmentField.SetValue(this, ParentWrappingBuildRenderTree);
 				{
 					builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
 					builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
