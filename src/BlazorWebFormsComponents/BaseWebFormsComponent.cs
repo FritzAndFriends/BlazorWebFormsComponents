@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
+using IComponent = Microsoft.AspNetCore.Components.IComponent;
 
 namespace BlazorWebFormsComponents
 {
 
-	public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
+	public abstract class BaseWebFormsComponent : CustomComponentBase, IAsyncDisposable
 	{
 
 		#region Obsolete Attributes / Properties
@@ -222,7 +224,24 @@ namespace BlazorWebFormsComponents
 
 		public bool LayoutTemplateRendered { get; set; } = false;
 
-
+		public BaseWebFormsComponent ()
+		{
+			RenderFragment _standardRender = builder2 => {
+				_hasPendingQueuedRender = false;
+				_hasNeverRendered = false;
+				BuildRenderTree(builder2);
+				// Include this to see it working
+				//builder2.AddContent(9999,"All your bases are loaded");
+			};
+			_renderFragment = builder =>
+				{
+					builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
+					builder.AddAttribute(2, "Name", "ParentComponent");
+					builder.AddAttribute(3, "Value", this);
+					builder.AddAttribute(4, "ChildContent", _standardRender);
+					builder.CloseComponent();
+				};
+		}
 
 	}
 
