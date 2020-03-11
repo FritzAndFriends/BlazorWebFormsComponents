@@ -235,7 +235,13 @@ private readonly RenderFragment _baseRenderFragment;
 					builder.CloseComponent();
 				}));
 		}
-
+private void ParentWrappingBuildRenderTree(RenderTreeBuilder builder)
+{
+    builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
+    builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
+    builder.AddAttribute(3, nameof(CascadingValue<object>.Value), this);
+    builder.AddAttribute(4, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
+}
 	}
 
 }
