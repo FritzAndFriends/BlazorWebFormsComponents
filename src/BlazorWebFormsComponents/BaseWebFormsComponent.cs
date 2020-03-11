@@ -223,7 +223,7 @@ private readonly RenderFragment _baseRenderFragment;
 			// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
 
 			// Grab a copy of the default RenderFragment to go into the CascadingValue
-			var _standardRender = (RenderFragment)_renderFragmentField.GetValue(this);
+			_baseRenderFragment = (RenderFragment)_renderFragmentField.GetValue(this);
 
 			// Override the default RenderFragment with our Special Sauce version
 			_renderFragmentField.SetValue(this, (RenderFragment)(builder =>
