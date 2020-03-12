@@ -1,0 +1,61 @@
+﻿@page "/ControlSamples/GridView"
+
+<h2>GridView Default Example</h2>
+
+<Nav />
+
+<GridView  ItemType="Customer"
+					AutogenerateColumns="false"
+					DataKeyNames="CustomerID"
+					SelectMethod="GetCustomers"
+					EmptyDataText="No data available">
+	<Columns>
+		<BoundField DataField="CustomerID" HeaderText="ID" />
+		<BoundField DataField="CompanyName" HeaderText="CompanyName" />
+		<BoundField DataField="FirstName" HeaderText="FirstName"/>
+		<BoundField DataField="LastName" HeaderText="LastName"/>
+		<TemplateField>
+			<ItemTemplate Context="Item">
+				<button type="button">Click Me! @Item.FirstName</button>
+			</ItemTemplate>
+		</TemplateField>
+	</Columns>
+</GridView>
+
+@code{
+		public IQueryable<Customer> GetCustomers(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+		{
+			var customers = new List<Customer>();
+			var c1 = new Customer
+			{
+				CustomerID = 1,
+				FirstName = "John",
+				LastName = "Smith",
+				CompanyName = "Virus"
+			};
+
+			var c2 = new Customer
+			{
+				CustomerID = 2,
+				FirstName = "Jose",
+				LastName = "Rodriguez",
+				CompanyName = "Boring"
+			};
+
+
+			var c3 = new Customer
+			{
+				CustomerID = 3,
+				FirstName = "Jason",
+				LastName = "Ramirez",
+				CompanyName = "Fun Machines"
+			};
+
+			customers.Add(c1);
+			customers.Add(c2);
+			customers.Add(c3);
+
+			totalRowCount = customers.Count();
+			return customers.AsQueryable();
+		}
+}
