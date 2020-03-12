@@ -1,0 +1,39 @@
+﻿@inherits BaseRow
+@using Interfaces
+
+<tr @key="DataItem">
+	@foreach (IColumn column in Columns)
+	{
+	<td @key="column">
+		@if (column is BoundField)
+		{
+			var datafield = (BoundField)column;
+			var properties = datafield.DataField.Split('.');
+			object obj = DataItem;
+			@foreach (var property in properties)
+			{
+
+				var propertyInfo = obj.GetType().GetProperty(property);
+				obj = propertyInfo.GetValue(obj);
+			}
+			if (datafield.DataFormatString != null)
+			{
+				@String.Format(datafield.DataFormatString, @obj.ToString())
+			}
+			else
+			{
+				@obj.ToString();
+			}
+		}
+		else
+		{
+			var templateField = (TemplateField)column;
+			<CascadingValue Value="this" Name="ParentControl">
+				@templateField.ItemTemplate(DataItem)
+			</CascadingValue>
+
+		}
+	</td>
+	}
+</tr>
+
