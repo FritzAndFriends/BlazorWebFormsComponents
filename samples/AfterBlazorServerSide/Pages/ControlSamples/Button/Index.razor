@@ -25,11 +25,11 @@
 
 	}
 
-	void OnCommand(object sender, CommandEventArgs args) {
+	void OnCommand(CommandEventArgs args) {
 
 		Console.WriteLine("Command fired");
 		TheContent = $"Command '{args.CommandName}'";
-		// StateHasChanged();
+
 	}
 
 

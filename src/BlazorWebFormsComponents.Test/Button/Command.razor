@@ -1,0 +1,38 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<Button CommandName="Foo" CommandArgument="CommandArgument" OnCommand="OnCommand">Click me!</Button>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	public string TheContent { get; set; } = "No Command yet!";
+	public string CommandArgument = "bar";
+
+	void OnCommand(CommandEventArgs args)
+	{
+
+		TheContent = $"Command '{args.CommandName}' : '{args.CommandArgument.ToString()}'";
+
+	}
+
+	void FirstTest()
+	{
+		// Given
+		var cut = GetComponentUnderTest();
+
+		TheContent.ShouldBe("No Command yet!");
+
+		// When
+		cut.Find("button").Click();
+
+		// Then
+		TheContent.ShouldBe("Command 'Foo' : 'bar'");
+
+	}
+
+}
