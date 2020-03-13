@@ -74,7 +74,17 @@ namespace BlazorWebFormsComponents
 		/// Is the content of this component rendered and visible to your users?
 		/// </summary>
 		[Parameter]
-		public bool Visible { get; set; } = true;
+		public bool Visible {
+			get
+			{
+				return visible;
+			}
+			set
+			{
+				visible = value;
+				StateHasChanged();
+			}
+		}
 
 		[Obsolete("This method doesn't do anything in Blazor")]
 		public void DataBind() { }
@@ -127,6 +137,13 @@ namespace BlazorWebFormsComponents
 
 		#region Blazor Events
 
+		protected override void OnInitialized()
+		{
+			// Adds this component to its parent's children
+			ParentControl?.Controls.Add(this); 
+			base.OnInitialized();
+		}
+
 		protected override async Task OnInitializedAsync()
 		{
 
@@ -171,6 +188,7 @@ namespace BlazorWebFormsComponents
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
+		private bool visible = true;
 
 		protected virtual async ValueTask Dispose(bool disposing)
 		{
@@ -183,7 +201,8 @@ namespace BlazorWebFormsComponents
 						await OnDisposed.InvokeAsync(EventArgs.Empty);
 					}
 				}
-
+				// Remove this control from its parent control
+				ParentControl?.Controls.Remove(this);
 				disposedValue = true;
 			}
 		}
@@ -205,7 +224,25 @@ namespace BlazorWebFormsComponents
 		public bool LayoutTemplateRendered { get; set; } = false;
 
 
+		/// <summary>
+		/// The component's parent
+		/// </summary>
+		[CascadingParameter(Name = "ParentControl")] public BaseWebFormsComponent ParentControl { get; set; }
 
+		/// <summary>
+		/// The list of child controls
+		/// </summary>
+		public List<BaseWebFormsComponent> Controls { get; set; } = new List<BaseWebFormsComponent>();
+
+		/// <summary>
+		/// Finds a child control by its ID
+		/// </summary>
+		/// <param name="controlId"> the ID of the child</param>
+		/// <returns></returns>
+		public BaseWebFormsComponent FindControl(string controlId)
+		{
+			return Controls.Find(control => control.ID == controlId);
+		}
 	}
 
 }
