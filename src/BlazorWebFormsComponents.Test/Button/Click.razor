@@ -1,0 +1,37 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<Button OnClick="OnClick">Click me!</Button>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	public string TheContent { get; set; } = "Not clicked yet!";
+
+	void OnClick()
+	{
+
+		TheContent = "I've been clicked";
+
+	}
+
+	void FirstTest()
+	{
+		// Given
+		var cut = GetComponentUnderTest();
+
+		TheContent.ShouldBe("Not clicked yet!");
+
+		// When
+		cut.Find("button").Click();
+
+		// Then
+		TheContent.ShouldBe("I've been clicked");
+
+	}
+
+}

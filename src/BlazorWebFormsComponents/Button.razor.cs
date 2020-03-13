@@ -7,7 +7,7 @@ namespace BlazorWebFormsComponents {
 	public partial class Button : BaseWebFormsComponent {
 
 		[Parameter]
-		public EventHandler<CommandEventArgs> OnCommand { get; set; }
+		public EventCallback<CommandEventArgs> OnCommand { get; set; }
 
 		[Parameter]
 		public string CommandName { get; set; }
@@ -23,15 +23,12 @@ namespace BlazorWebFormsComponents {
 
 		protected void Click() {
 
-			Console.WriteLine($"OnCommand: {OnCommand?.GetType()}");
-			if (OnCommand != null) {
-				OnCommand.Invoke(null, new CommandEventArgs(CommandName, CommandArgument));
+			Console.WriteLine($"OnCommand: {OnCommand.GetType()}");
+			if (OnCommand.HasDelegate) {
+				OnCommand.InvokeAsync(new CommandEventArgs(CommandName, CommandArgument));
 			} else {
 				OnClick.InvokeAsync(new MouseEventArgs());
 			}
-
-			Console.WriteLine("Calling StateHasChanged");
-			StateHasChanged();
 
 		}
 
