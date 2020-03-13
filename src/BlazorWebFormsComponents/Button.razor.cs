@@ -23,7 +23,6 @@ namespace BlazorWebFormsComponents {
 
 		protected void Click() {
 
-			Console.WriteLine($"OnCommand: {OnCommand.GetType()}");
 			if (OnCommand.HasDelegate) {
 				OnCommand.InvokeAsync(new CommandEventArgs(CommandName, CommandArgument));
 			} else {
