@@ -1,0 +1,30 @@
+﻿@inherits TestComponentBase
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<GridView ItemType="Widget"
+							SelectMethod="GetWidgets"
+							AutogenerateColumns="true"
+							EmptyDataText="TestText">
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+
+		void FirstTest()
+		{
+			var cut = GetComponentUnderTest();
+			var tableHeaders = cut.FindAll("th").ToList();
+			tableHeaders.Count.ShouldBe(6, "Did not render 6 TH elements");
+			cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(1, "Did not render 1 TR elements");
+			cut.FindAll("td").Count().ShouldBe(1, "Did not render 0 TD elements");
+			cut.Find("td").TextContent.Replace("\t", string.Empty).Replace("\n", string.Empty).ShouldBe("TestText");
+		}
+
+		IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+		{
+			totalRowCount = 0;
+			var widgetList = new List<Widget>();
+			return widgetList.AsQueryable();
+		}
+}
