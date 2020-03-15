@@ -14,8 +14,6 @@ namespace BlazorWebFormsComponents
 	public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
 	{
 
-<<<<<<< HEAD
-=======
 		#region Constructor
 
 		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";
@@ -46,7 +44,6 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
->>>>>>> dev
 		#region Obsolete Attributes / Properties
 
 		/// <summary>
@@ -172,11 +169,8 @@ namespace BlazorWebFormsComponents
 		protected override async Task OnInitializedAsync()
 		{
 
-<<<<<<< HEAD
-=======
 			Parent?.Controls.Add(this);
 
->>>>>>> dev
 			if (OnInit.HasDelegate)
 				await OnInit.InvokeAsync(EventArgs.Empty);
 
@@ -250,32 +244,6 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		public bool LayoutTemplateRendered { get; set; } = false;
-<<<<<<< HEAD
-		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";
-		private const string PARENTCOMPONENTNAME = "ParentComponent";
-
-		// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
-		private static readonly FieldInfo _renderFragmentField = typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
-		private readonly RenderFragment _baseRenderFragment;
-
-		public BaseWebFormsComponent ()
-		{
-			// Grab a copy of the default RenderFragment to go into the CascadingValue
-			_baseRenderFragment = (RenderFragment)_renderFragmentField.GetValue(this);
-
-			// Override the default RenderFragment with our Special Sauce version
-			_renderFragmentField.SetValue(this, (RenderFragment)ParentWrappingBuildRenderTree);
-
-			void ParentWrappingBuildRenderTree(RenderTreeBuilder builder)
-			{
-				builder.OpenComponent(1, typeof(CascadingValue<BaseWebFormsComponent>));
-				builder.AddAttribute(2, nameof(CascadingValue<object>.Name), PARENTCOMPONENTNAME);
-				builder.AddAttribute(3, nameof(CascadingValue<object>.Value), this);
-				builder.AddAttribute(4, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
-				builder.AddAttribute(5, nameof(CascadingValue<object>.IsFixed), true);
-				builder.CloseComponent();
-			}
-=======
 
 		/// <summary>
 		/// The list of child controls
@@ -290,7 +258,6 @@ namespace BlazorWebFormsComponents
 		public BaseWebFormsComponent FindControl(string controlId)
 		{
 			return Controls.Find(control => control.ID == controlId);
->>>>>>> dev
 		}
 	}
 
