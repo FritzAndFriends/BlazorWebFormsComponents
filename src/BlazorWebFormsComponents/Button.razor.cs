@@ -5,6 +5,9 @@ using System;
 namespace BlazorWebFormsComponents {
 
 	public partial class Button : BaseWebFormsComponent {
+
+		[Parameter]
+		public string OnClientClick { get; set; }
 
 		[Parameter]
 		public EventCallback<CommandEventArgs> OnCommand { get; set; }
@@ -17,9 +20,9 @@ namespace BlazorWebFormsComponents {
 
 		[Parameter]
 		public EventCallback<MouseEventArgs> OnClick { get; set; }
-
-		[Parameter]
-		public RenderFragment ChildContent { get; set; }
+
+		[Parameter]
+		public string Text { get; set; }
 
 		protected void Click() {
 
