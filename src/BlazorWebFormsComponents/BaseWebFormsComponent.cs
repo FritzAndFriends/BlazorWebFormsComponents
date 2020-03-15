@@ -169,6 +169,8 @@ namespace BlazorWebFormsComponents
 		protected override async Task OnInitializedAsync()
 		{
 
+			Parent?.Controls.Add(this);
+
 			if (OnInit.HasDelegate)
 				await OnInit.InvokeAsync(EventArgs.Empty);
 
