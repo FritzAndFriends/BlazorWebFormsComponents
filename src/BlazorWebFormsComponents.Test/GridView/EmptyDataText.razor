@@ -14,7 +14,7 @@
 		void FirstTest()
 		{
 			var cut = GetComponentUnderTest();
-			var tableHeaders = cut.FindAll("th").ToList();
+			var tableHeaders = cut.FindAll("th");
 			tableHeaders[0].TextContent.ShouldBe("Id");
 			tableHeaders[1].TextContent.ShouldBe("Name");
 			tableHeaders[2].TextContent.ShouldBe("Price");
