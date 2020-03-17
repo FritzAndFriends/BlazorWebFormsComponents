@@ -265,6 +265,15 @@ namespace BlazorWebFormsComponents
 		{
 			return Controls.Find(control => control.ID == controlId);
 		}
+
+		protected event EventHandler BubbledEvent;
+		protected virtual void OnBubbledEvent(object sender, EventArgs args) {
+
+			BubbledEvent?.Invoke(sender, args);
+			Parent?.OnBubbledEvent(sender,args);
+
+		}
+
 	}
 
 }
