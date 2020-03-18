@@ -1,0 +1,25 @@
+@inherits BlazorWebFormsComponents.BaseWebFormsComponent
+@using System.Linq
+
+<Button CommandName="Foo" CommandArgument="@("Bar")" OnCommand="() => {}" Text="Test Button" />
+
+@code {
+
+public Dictionary<string, int> EventRaised = new Dictionary<string,int>();
+
+protected override void OnInitialized() {
+
+	BubbledEvent += (o, args) => {
+
+		var cmd = (CommandEventArgs)args;
+
+		var count = !EventRaised.ContainsKey(cmd.CommandName) ? 0 : EventRaised[cmd.CommandName];
+		EventRaised[cmd.CommandName] = count+1;
+
+	};
+
+	//OnBubbledEvent(null, new CommandEventArgs("test", "test"));
+
+}
+
+}

@@ -28,7 +28,9 @@ namespace BlazorWebFormsComponents {
 
 			if (OnCommand.HasDelegate) {
 
-				OnCommand.InvokeAsync(new CommandEventArgs(CommandName, CommandArgument));
+				var args = new CommandEventArgs(CommandName, CommandArgument);
+				OnCommand.InvokeAsync(args);
+				OnBubbledEvent(this, args);
 			} else {
 				OnClick.InvokeAsync(new MouseEventArgs());
 			}
