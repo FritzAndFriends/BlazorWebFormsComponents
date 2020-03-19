@@ -12,7 +12,7 @@ We believe that Web Forms applications that have been well maintained and provid
 
 This is not for everyone, not everyone needs to migrate their application.  They can continue being supported as Web Forms for a very long time (2029 EOL at the time of this writing) and the applications that are considered for migration to Blazor may be better suited with a complete re-write.  For those applications that need to be migrated, this library should help make that process simpler by providing components with the same names, markup, and functionality as previously available.
 
-[Strategies for your migration and steps ahead](docs/Migration/README.md) are available as part of this repository.
+[Get started with your migration, steps ahead, and strategy documentation](docs/Migration/readme.md) for various controls and tools used are available.
 
 Portions of the [original .NET Framework](https://github.com/microsoft/referencesource) are contributed to this project under their MIT license.
 
@@ -20,6 +20,8 @@ Portions of the [original .NET Framework](https://github.com/microsoft/reference
 
 There are a significant number of controls in ASP.NET Web Forms, and we will focus on creating components in the following order:
 
+  - Editor Controls
+	  - [Button](docs/Button.md)
   - Data Controls
     - Chart(?)
     - [DataList](docs/DataList.md)
@@ -52,9 +54,10 @@ We will NOT be converting any DataSource objects, Wizard components, skins or th
 
 ## Utility Features
 
-There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  These features include:
+There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  Importantly, these features are NOT implemented the same way that they are in Web Forms, but rather have the same API and behave in a proper Blazor fashion.  These features include:
 
   - [DataBinder](docs/Databinder.md)
+  - [ViewState](docs/ViewState.md)
 
 ## Compiling the project
 

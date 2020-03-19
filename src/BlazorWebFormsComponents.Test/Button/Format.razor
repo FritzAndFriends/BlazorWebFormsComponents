@@ -1,0 +1,11 @@
+﻿@inherits TestComponentBase
+
+
+<SnapshotTest Description="Verify HTML format of Button">
+	<TestInput>
+		<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />
+	</TestInput>
+	<ExpectedOutput>
+		<button onclientclick="window.navigate('bing.com')">Click Me!</button>
+	</ExpectedOutput>
+</SnapshotTest>

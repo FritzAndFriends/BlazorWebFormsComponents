@@ -18,7 +18,7 @@
 		void FirstTest()
 		{
 			var cut = GetComponentUnderTest();
-			Console.WriteLine(cut.Markup);
+			System.Diagnostics.Debug.WriteLine(cut.Markup);
 			cut.FindAll("span").Count().ShouldBe(3);
 		}
 

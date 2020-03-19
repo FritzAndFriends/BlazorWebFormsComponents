@@ -1,0 +1,54 @@
+﻿@page "/ControlSamples/GridView/TemplateFields"
+
+<h2>GridView Control</h2>
+
+<Nav></Nav>
+
+<GridView @ref="TemplateFieldGridView"
+					AutogenerateColumns="false"
+					ItemType="SharedSampleObjects.Models.Widget">
+	<Columns>
+		<TemplateField HeaderText="Name">
+			<ItemTemplate Context="Item">
+				<Label ID="lblName" Text="@Item.Name"></Label>
+			</ItemTemplate>
+		</TemplateField>
+		<TemplateField HeaderText="Price">
+			<ItemTemplate Context="Item">
+				<Label ID="lblPrice" Text="@Item.Price"></Label>
+			</ItemTemplate>
+		</TemplateField>
+	</Columns>
+</GridView>
+
+<Button OnClick="Unnamed_Click">Click Me!</Button>
+
+@code{
+
+	BlazorWebFormsComponents.GridView<Widget> TemplateFieldGridView { get; set; }
+
+	private static bool PriceVisibility { get; set; } = true;
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			TemplateFieldGridView.DataSource = Widget.Widgets(8);
+			TemplateFieldGridView.DataBind();
+		}
+
+		base.OnAfterRender(firstRender);
+
+	}
+
+	protected void Unnamed_Click()
+	{
+		foreach (GridViewRow row in TemplateFieldGridView.Rows)
+		{
+			var label = row.FindControl("lblPrice") as Label;
+			label.Visible = !PriceVisibility;
+		}
+		PriceVisibility = !PriceVisibility;
+	}
+}

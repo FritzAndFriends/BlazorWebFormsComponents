@@ -43,7 +43,7 @@
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
 		var cut = GetComponentUnderTest();
-			Console.WriteLine(cut.Markup);
+			System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		var theHeaderElement = cut.FindAll("span")[1];
 

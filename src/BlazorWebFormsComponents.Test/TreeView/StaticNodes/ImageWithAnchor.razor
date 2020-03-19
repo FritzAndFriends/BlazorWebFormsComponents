@@ -39,7 +39,7 @@
 		img.GetAttribute("title").ShouldBe(ImageToolTip);
 		img.GetAttribute("alt").ShouldBe(ImageToolTip);
 
-		cut.FindAll("td").Length.ShouldBe(2);
+		cut.FindAll("td").Count.ShouldBe(2);
 		img.ParentElement.LocalName.ShouldBe("a");
 
 
