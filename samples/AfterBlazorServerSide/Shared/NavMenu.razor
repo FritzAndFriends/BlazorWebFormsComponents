@@ -1,4 +1,4 @@
-﻿@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents
 @using static BlazorWebFormsComponents.Enums.TreeViewImageSet
 
 <div class="top-row pl-4 navbar navbar-dark">
@@ -14,6 +14,11 @@
 
       <TreeNode Text="Home" NavigateUrl="/">
 
+				<TreeNode Text="Editor Components">
+					<TreeNode Text="Button" NavigateUrl="/ControlSamples/Button">
+						<TreeNode Text="JavaScript Click" NavigateUrl="/ControlSamples/Button/JavaScript" />
+					</TreeNode>
+				</TreeNode>
         <TreeNode Text="Data Components">
 
 					<TreeNode Text="DataList" NavigateUrl="/ControlSamples/DataList" Expanded="false">
