@@ -4,7 +4,7 @@
 	Test="FirstTest"
 >
 	<ComponentUnderTest>
-		@*<ListView Items="Widget.SimpleWidgetList"
+		<ListView Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
 							Context="Item">
 			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
@@ -16,11 +16,7 @@
 				</div>
 			</LayoutTemplate>
 		</ListView>
-		*@
 
-		<Button>
-			<Button @ref="MyButton">My Button</Button>
-		</Button>
 	</ComponentUnderTest>
 </Fixture>
 

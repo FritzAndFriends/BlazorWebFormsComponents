@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -166,6 +167,9 @@ namespace BlazorWebFormsComponents
 
 		#region Blazor Events
 
+		[Inject]
+		public IJSRuntime JsRuntime { get; set; }
+
 		protected override async Task OnInitializedAsync()
 		{
 
@@ -200,6 +204,8 @@ namespace BlazorWebFormsComponents
 
 				HandleUnknownAttributes();
 				StateHasChanged();
+
+				JsRuntime.InvokeVoidAsync("bwfc.Page.OnAfterRender", new object[] { });
 
 			}
 
@@ -259,6 +265,15 @@ namespace BlazorWebFormsComponents
 		{
 			return Controls.Find(control => control.ID == controlId);
 		}
+
+		protected event EventHandler BubbledEvent;
+		protected virtual void OnBubbledEvent(object sender, EventArgs args) {
+
+			BubbledEvent?.Invoke(sender, args);
+			Parent?.OnBubbledEvent(sender,args);
+
+		}
+
 	}
 
 }
