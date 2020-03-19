@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -58,5 +59,8 @@ namespace AfterBlazorServerSide
         endpoints.MapFallbackToPage("/_Host");
       });
     }
-  }
+
+		public static Version ComponentVersion = typeof(IHasStyle).Assembly.GetName().Version;
+
+	}
 }

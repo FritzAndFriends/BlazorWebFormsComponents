@@ -1,5 +1,5 @@
 ﻿@page "/"
-@namespace AfterBlazorServerSide.Pages
+@namespace PublicDocs.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = null;
@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AfterBlazorServerSide</title>
+    <title>PublicDocs</title>
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
@@ -31,15 +31,11 @@
 		<a class="dismiss">🗙</a>
 	</div>
 
+
 	<footer>
-
-		This site was built with ♥♥ and <a href="https://blazor.net">Blazor</a>, <a href="https://dot.net">Open Source C#</a>, <a href="https://www.asp.net">ASP.NET 3.1</a>, and the <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents/">BlazorWebFormsComponents</a>
-		<br />
-		<strong>BlazorWebFormsComponents @($"v{Startup.ComponentVersion.Major}.{Startup.ComponentVersion.Minor}.{Startup.ComponentVersion.Revision}")</strong>
-
+		This site was built with Blazor, Open Source C#, ASP.NET 3.1, and the <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents/">BlazorWebFormsComponents</a>
 	</footer>
 
-		<script src="_framework/blazor.server.js"></script>
-		<script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
+	<script src="_framework/blazor.server.js"></script>
 </body>
 </html>
