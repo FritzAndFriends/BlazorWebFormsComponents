@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
- 
+
 	public partial class FormView<ItemType> : BaseModelBindingComponent<ItemType> where ItemType : class, new()
 	{
+
+		[Parameter]
+		public RenderFragment<ItemType>	EditItemTemplate { get; set; }
 
 		[Parameter]
 		public RenderFragment<ItemType>	ItemTemplate { get; set; }
@@ -22,7 +25,7 @@ namespace BlazorWebFormsComponents
 				_Position = value;
 				CurrentItem = Items.Skip(value - 1).FirstOrDefault();
 			}
-		} 
+		}
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{

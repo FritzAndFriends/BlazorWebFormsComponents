@@ -1,10 +1,8 @@
-﻿@page "/ControlSamples/FormView/Simple"
+﻿@page "/ControlSamples/FormView/Edit"
 
-<h2>Simple FormView</h2>
+<h2>FormView With Edit Capabilities</h2>
 
-<Nav></Nav>
-
-<p>Here is a simple form view</p>
+<p>This is a FormView with Edit capabilities</p>
 
 <FormView @ref="WidgetFormView"
 							AllowPaging="true"
@@ -22,9 +20,31 @@
 
 				</td>
 			</tr>
+			<tr>
+				<td>
+					<Button CommandName="Edit" Text="Edit"/>
+				</td>
+			</tr>
 		</table>
 
 	</ItemTemplate>
+
+	<EditItemTemplate>
+		<table>
+			<tr>
+				<td>Name:</td><td><input @bind="Item.Name" /></td>
+			</tr>
+			<tr>
+				<td>Price:</td><td><input @bind="Item.Price" /></td>
+			</tr>
+			<tr>
+				<td>
+					<Button Text="Update" CommandName="Update" />&nbsp;
+					<Button Text="Cancel" CommandName="Cancel" />
+				</td>
+			</tr>
+		</table>
+	</EditItemTemplate>
 
 </FormView>
 @code {
