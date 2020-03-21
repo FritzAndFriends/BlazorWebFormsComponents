@@ -4,6 +4,7 @@ using System;
 
 namespace BlazorWebFormsComponents {
 
+
 	public partial class Button : BaseWebFormsComponent {
 
 		[Parameter]
@@ -26,13 +27,21 @@ namespace BlazorWebFormsComponents {
 
 		protected void Click() {
 
-			if (OnCommand.HasDelegate) {
+			if (!string.IsNullOrEmpty(CommandName))
+			{
 
 				var args = new CommandEventArgs(CommandName, CommandArgument);
-				OnCommand.InvokeAsync(args);
+
+				if (OnCommand.HasDelegate) {
+					OnCommand.InvokeAsync(args);
+				}
+
 				OnBubbledEvent(this, args);
+
 			} else {
+
 				OnClick.InvokeAsync(new MouseEventArgs());
+
 			}
 
 		}

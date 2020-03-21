@@ -11,11 +11,18 @@
 			{
 				OnDataBinding.InvokeAsync(EventArgs.Empty);
 				<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
-					@ItemTemplate(CurrentItem)
-				</CascadingValue>
-				OnDataBound.InvokeAsync(EventArgs.Empty);
-			}
-			</td>
+					@switch (CurrentMode) {
+						case Enums.FormViewMode.ReadOnly:
+							@ItemTemplate(CurrentItem);
+							break;
+						case Enums.FormViewMode.Edit:
+							@EditItemTemplate(CurrentItem);
+							break;
+					}
+						</CascadingValue>
+						OnDataBound.InvokeAsync(EventArgs.Empty);
+						}
+					</td>
 	</tr>
 	<tr>
 		<td>
@@ -28,19 +35,19 @@
 					}
 					else
 					{
-					@for (int i = 1; i <= Items.Count(); i++)
+						@for (int i = 1; i <= Items.Count(); i++)
 					{
-						if (i == Position)
-						{
+							if (i == Position)
+							{
 							<td><span>@i</span></td>
-						}
-						else
-						{
-							var thisPosition = i;
+							}
+							else
+							{
+								var thisPosition = i;
 							<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
-						}
+							}
 
-					}
+						}
 					}
 				</tr>
 
