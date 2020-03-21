@@ -1,23 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Threading.Tasks;
-
-namespace BlazorWebFormsComponents
+﻿namespace BlazorWebFormsComponents
 {
-	public partial class LinkButton : BaseWebFormsComponent
+	public partial class LinkButton : ButtonBaseComponent
 	{
-		[Parameter]
-		public string PostBackUrl { get; set; }
 
-		[Parameter]
-		public string Text { get; set; }
-
-		[Parameter]
-		public Action OnClick { get; set; }
-
-		private async Task TriggerClick()
-		{
-			OnClick?.Invoke();
-		}
 	}
 }

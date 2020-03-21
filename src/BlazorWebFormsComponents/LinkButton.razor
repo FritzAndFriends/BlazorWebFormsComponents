@@ -1,10 +1,10 @@
-﻿@inherits BaseWebFormsComponent
+﻿@inherits ButtonBaseComponent
 
 @if (PostBackUrl == null)
 {
-	<a id="@ID" @onclick="@TriggerClick">@Text</a>
+	<a id="@ID" @onclick="@Click">@Text</a>
 }
 else
 {
-	<a id="@ID" @onclick="@TriggerClick" href="@PostBackUrl">@Text</a>
+	<a id="@ID" @onclick="@Click" href="@PostBackUrl">@Text</a>
 }
