@@ -1,6 +1,7 @@
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-namespace BlazorWebFormsComponents {	public partial class Image : BaseWebFormsComponent
+namespace BlazorWebFormsComponents
+{	public partial class Image : BaseWebFormsComponent
 	{
 		[Parameter]
 		public string AlternateText { get; set; }
