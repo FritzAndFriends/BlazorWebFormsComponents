@@ -23,7 +23,7 @@ namespace BlazorWebFormsComponents
 		public FormView()
 		{
 
-			// Listen for bubbled events 
+			// Listen for bubbled events
 			BubbledEvent += FormView_BubbledEvent;
 
 		}
@@ -39,7 +39,7 @@ namespace BlazorWebFormsComponents
 		public FormViewMode CurrentMode { get; private set; }
 
 		[Parameter]
-		public FormViewMode DefaultMode { get; set; }
+		public FormViewMode DefaultMode { get; set; } = FormViewMode.ReadOnly;
 
 		private int _Position = 1;
 		protected int Position
@@ -99,6 +99,8 @@ namespace BlazorWebFormsComponents
 					break;
 
 			}
+
+			StateHasChanged();
 
 		}
 
