@@ -29,7 +29,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - DataPager
     - DetailsView
     - FormView
-    - GridView
+    - [GridView](docs/GridView.md)
     - [ListView](docs/ListView.md)
     - [Repeater](docs/Repeater.md)
   - Validation Controls
