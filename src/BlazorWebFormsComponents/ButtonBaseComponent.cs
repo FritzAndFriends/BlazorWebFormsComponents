@@ -18,6 +18,9 @@ namespace BlazorWebFormsComponents
 		public string Text { get; set; }
 
 		[Parameter]
+		public string OnClientClick { get; set; }
+
+		[Parameter]
 		public EventCallback<MouseEventArgs> OnClick { get; set; }
 
 		[Parameter]
