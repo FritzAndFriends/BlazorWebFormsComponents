@@ -1,6 +1,6 @@
 # ImageButton
 
-It may seem strange that we have a ImageButton component when there already is an HTML input with image type and Blazor has features that enable C# interactions with that image, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.image?view=netframework-4.8
+It may seem strange that we have a ImageButton component when there already is an HTML input with image type and Blazor has features that enable C# interactions with that image, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.imagebutton?view=netframework-4.8
 
 ## Blazor Features Supported
 
