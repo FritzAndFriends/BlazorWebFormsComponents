@@ -1,4 +1,5 @@
-﻿@{
+﻿@inherits ComponentBase
+@{
 	string nodeText = Expanded ? $"Collapse {Text}" : $"Expand {Text}";
 }
 @if ((Parent?.Expanded) ?? true)

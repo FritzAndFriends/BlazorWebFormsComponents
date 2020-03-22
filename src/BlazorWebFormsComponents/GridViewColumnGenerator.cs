@@ -1,4 +1,7 @@
-﻿namespace BlazorWebFormsComponents
+﻿using System.Linq;
+using System.Reflection;
+
+namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// The GridView Column Generator
@@ -13,7 +16,7 @@
 		public static void GenerateColumns<ItemType>(GridView<ItemType> gridView)
 		{
 			var type = typeof(ItemType);
-			var propertiesInfo = type.GetProperties();
+			var propertiesInfo = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).OrderBy(x => x.MetadataToken);
 			foreach (var propertyInfo in propertiesInfo)
 			{
 				var newColumn = new BoundField {

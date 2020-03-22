@@ -14,14 +14,18 @@
 		{
 			var cut = GetComponentUnderTest();
 			var tableHeaders = cut.FindAll("th").ToList();
-			tableHeaders[0].TextContent.ShouldBe("Id");
+			tableHeaders.Count.ShouldBe(4, "Did not render 4 TH elements");
+
+			try {
+				tableHeaders[0].TextContent.ShouldBe("Id");
+			} catch (Exception ex) {
+				Console.WriteLine("HTML rendered: " + cut.Markup);
+				throw;
+			}
+
 			tableHeaders[1].TextContent.ShouldBe("Name");
 			tableHeaders[2].TextContent.ShouldBe("Price");
 			tableHeaders[3].TextContent.ShouldBe("LastUpdate");
-			tableHeaders[4].TextContent.ShouldBe("EmptyWidgetList");
-			tableHeaders[5].TextContent.ShouldBe("SimpleWidgetList");
-			tableHeaders.Count.ShouldBe(6, "Did not render 6 TH elements");
-			cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(3, "Did not render 3 TR elements");
 		}
 
 		IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
