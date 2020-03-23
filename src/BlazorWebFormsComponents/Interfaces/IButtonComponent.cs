@@ -9,6 +9,8 @@ namespace BlazorWebFormsComponents
 
 		public object CommandArgument { get; set; }
 
+		public string OnClientClick { get; set; }
+
 		public string PostBackUrl { get; set; }
 
 		public string Text { get; set; }
