@@ -24,7 +24,9 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
   - Editor Controls
 	  - [Button](docs/Button.md)
-    - LinkButton
+		- [Image](docs/Image.md)
+		- [ImageButton](docs/ImageButton.md)
+    - [LinkButton](docs/LinkButton.md)
   - Data Controls
     - Chart(?)
     - [DataList](docs/DataList.md)
