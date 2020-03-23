@@ -2,23 +2,9 @@
 
 @if (NavigationUrl == null)
 {
-	if (Target == null)
-	{
-		<a id="@ID">@Text</a>
-	}
-	else
-	{
-		<a id="@ID" target="@Target">@Text</a>
-	}
+	<a id="@ID">@Text</a>
 }
 else
 {
-	if (Target == null)
-	{
-		<a id="@ID" href="@NavigationUrl">@Text</a>
-	}
-	else
-	{
-		<a id="@ID" target="@Target" href="@NavigationUrl">@Text</a>
-	}
+	<a id="@ID" target="@Target" href="@NavigationUrl">@Text</a>
 }

@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents
 		public string NavigationUrl { get; set; }
 
 		[Parameter]
-		public string Target { get; set; }
+		public string Target { get; set; } = string.Empty;
 
 		[Parameter]
 		public string Text { get; set; }
