@@ -1,0 +1,10 @@
+﻿@inherits TestComponentBase
+
+<SnapshotTest Description="Verify HTML format of LinkButton">
+	<TestInput>
+		<LinkButton Text="Go to Bing!!" PostBackUrl="https://www.bing.com" />
+	</TestInput>
+	<ExpectedOutput>
+		<a href="https://www.bing.com">Go to Bing!!</a>
+	</ExpectedOutput>
+</SnapshotTest>
