@@ -1,0 +1,10 @@
+﻿@inherits ButtonBaseComponent
+
+@if (PostBackUrl == null)
+{
+	<a id="@ID" @onclick="@Click" OnClientClick="@OnClientClick">@Text</a>
+}
+else
+{
+	<a id="@ID" @onclick="@Click" OnClientClick="@OnClientClick" href="@PostBackUrl">@Text</a>
+}

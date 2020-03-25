@@ -1,0 +1,15 @@
+﻿@using System.Net
+@using BlazorWebFormsComponents.Enums
+
+@inherits BaseWebFormsComponent
+
+@functions {
+	public string RenderedText => Mode == LiteralMode.Encode
+		? WebUtility.HtmlEncode(Text)
+		: Text;
+}
+
+@if (Visible)
+{
+	@((MarkupString)RenderedText)
+}
