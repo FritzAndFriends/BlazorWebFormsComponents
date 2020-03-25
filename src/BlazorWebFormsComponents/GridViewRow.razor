@@ -28,9 +28,7 @@
 		else
 		{
 			var templateField = (TemplateField)column;
-			<CascadingValue Value="this" Name="ParentControl">
-				@templateField.ItemTemplate(DataItem)
-			</CascadingValue>
+			@templateField.ItemTemplate(DataItem)
 
 		}
 	</td>
