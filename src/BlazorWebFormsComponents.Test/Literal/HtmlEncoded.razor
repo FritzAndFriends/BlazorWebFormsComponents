@@ -1,0 +1,14 @@
+﻿@inherits TestComponentBase
+
+@{
+		var renderedText = "<b>This is encoded text</b>";
+}
+
+<SnapshotTest Description="Verify HTML format of Literal is encoded">
+	<TestInput>
+		<Literal Text="<b>This is encoded text</b>" />
+	</TestInput>
+	<ExpectedOutput>
+		@((MarkupString)renderedText)
+	</ExpectedOutput>
+</SnapshotTest>
