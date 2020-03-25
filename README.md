@@ -22,6 +22,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
   - Editor Controls
 	  - [Button](docs/Button.md)
+		- [HyperLink](docs/HyperLink.md)
 		- [Image](docs/Image.md)
 		- [ImageButton](docs/ImageButton.md)
 		- [Label](docs/Label.md)
