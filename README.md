@@ -26,6 +26,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 		- [ImageButton](docs/ImageButton.md)
 		- [Label](docs/Label.md)
     - [LinkButton](docs/LinkButton.md)
+		- [Literal](docs/Literal.md)
   - Data Controls
     - Chart(?)
     - [DataList](docs/DataList.md)
