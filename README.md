@@ -21,6 +21,7 @@ Portions of the [original .NET Framework](https://github.com/microsoft/reference
 There are a significant number of controls in ASP.NET Web Forms, and we will focus on creating components in the following order:
 
   - Editor Controls
+    - [AdRotator](docs/AdRotator.md)
 	  - [Button](docs/Button.md)
 		- [HyperLink](docs/HyperLink.md)
 		- [Image](docs/Image.md)
