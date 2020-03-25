@@ -1,4 +1,4 @@
-# Button
+# Label
 
 It may seem strange that we have a Label component when there already is an HTML span and Blazor has features that enable C# interactions with that label, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.label?view=netframework-4.8
 
