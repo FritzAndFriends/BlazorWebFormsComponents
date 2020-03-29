@@ -23,7 +23,7 @@
         
           <asp:TreeNode Value="Home"
             ImageToolTip="This is the home image tooltip"
-            ImageUrl="~/Content/Images/csharp_56.png"
+            ImageUrl="~/Content/Images/C#.png"
             NavigateUrl="Home.aspx" 
             Text="Home"
             Target="Content"
