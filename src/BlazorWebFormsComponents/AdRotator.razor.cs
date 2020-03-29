@@ -21,6 +21,11 @@ namespace BlazorWebFormsComponents
 
 		internal Advertisment GetActiveAdvertisment()
 		{
+			if (_advertisments == null || _advertisments.Count() == 0)
+			{
+				return null;
+			}
+
 			var rnd = new Random().Next(_advertisments.Count());
 
 			return _advertisments.ElementAt(rnd);

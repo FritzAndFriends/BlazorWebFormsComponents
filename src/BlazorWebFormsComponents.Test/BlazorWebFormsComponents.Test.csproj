@@ -5,6 +5,18 @@
     <RazorLangVersion>3.0</RazorLangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Ads1.xml" />
+    <None Remove="Ads2.xml" />
+    <None Remove="Ads3.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Ads3.xml" />
+    <Content Include="Ads2.xml" />
+    <Content Include="Ads1.xml" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="bunit" Version="1.0.0-beta-6" />
