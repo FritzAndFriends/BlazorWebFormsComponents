@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Blazor.Hosting;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
@@ -14,6 +14,7 @@ namespace AfterBlazorClientSide
 			builder.RootComponents.Add<App>("app");
 
 			builder.Services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
+			builder.Services.AddBaseAddressHttpClient();
 
 			await builder.Build().RunAsync();
 
