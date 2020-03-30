@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeNode : BaseWebFormsComponent
+	public partial class TreeNode : ComponentBase
 	{
 
 		public const string ImageLocation = "_content/Fritz.BlazorWebFormsComponents/TreeView/";
@@ -17,7 +17,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Checked { get; set; } = false;
 
-		// TODO: Implement
 		[Parameter]
 		public byte Depth { get; set; } = 0;
 
@@ -189,7 +188,7 @@ namespace BlazorWebFormsComponents
 			{
 				ParentTreeView.Nodes.Add(this);
 			}
-		
+
 		}
 
 		public void HandleNodeExpand() {

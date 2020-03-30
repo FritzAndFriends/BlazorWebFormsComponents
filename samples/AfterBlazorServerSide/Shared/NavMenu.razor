@@ -1,5 +1,5 @@
 ﻿@using BlazorWebFormsComponents
-@using static BlazorWebFormsComponents.Enums.TreeViewImageSet 
+@using static BlazorWebFormsComponents.Enums.TreeViewImageSet
 
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">BlazorWebFormsComponents<br/>@Startup.ApplicationName</a>
@@ -13,7 +13,16 @@
     <Nodes>
 
       <TreeNode Text="Home" NavigateUrl="/">
-
+				<TreeNode Text="Editor Components">
+					<TreeNode Text="AdRotator" NavigateUrl="/ControlSamples/AdRotator" />
+					<TreeNode Text="Button" NavigateUrl="/ControlSamples/Button">
+						<TreeNode Text="JavaScript Click" NavigateUrl="/ControlSamples/Button/JavaScript" />
+					</TreeNode>
+					<TreeNode Text="LinkButton" NavigateUrl="/ControlSamples/LinkButton">
+						<TreeNode Text="JavaScript Click" NavigateUrl="/ControlSamples/LinkButton/JavaScript" />
+					</TreeNode>
+					<TreeNode Text="Literal" NavigateUrl="/ControlSamples/Literal" />
+				</TreeNode>
         <TreeNode Text="Data Components">
 
 					<TreeNode Text="DataList" NavigateUrl="/ControlSamples/DataList" Expanded="false">
@@ -36,7 +45,7 @@
 
           </TreeNode>
 
-        </TreeNode>        
+        </TreeNode>
 
         <TreeNode Text="Validation Components">
 
