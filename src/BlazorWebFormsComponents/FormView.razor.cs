@@ -97,6 +97,10 @@ namespace BlazorWebFormsComponents
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
 					break;
+				case "update":
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode }).GetAwaiter().GetResult();
+					CurrentMode = DefaultMode;
+					break;
 
 			}
 
