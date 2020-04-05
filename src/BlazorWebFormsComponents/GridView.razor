@@ -4,33 +4,33 @@
 @if (ColumnList.Any())
 {
 	<table class="@CssClass">
-			<thead>
+		<thead>
+			<tr>
+				@foreach (IColumn<ItemType> column in ColumnList)
+				{
+					<th>@column.HeaderText</th>
+				}
+			</tr>
+		</thead>
+		<tbody>
+			@if (Items != null && Items.Any())
+			{
+				@foreach (ItemType item in Items)
+				{
+					<CascadingValue Value="this" Name="RowCollection">
+						<GridViewRow DataItem="item" Columns="ColumnList" />
+					</CascadingValue>
+				}
+			}
+			else
+			{
 				<tr>
-					@foreach (IColumn column in ColumnList)
-					{
-						<th>@column.HeaderText</th>
-					}
+					<td colspan=@ColumnList.Count>
+						@EmptyDataText
+					</td>
 				</tr>
-			</thead>
-			<tbody>
-				@if (Items != null && Items.Any())
-				{
-					@foreach (ItemType item in Items)
-					{
-						<CascadingValue Value="this" Name="RowCollection">
-							<GridViewRow DataItem="item" Columns="ColumnList" />
-						</CascadingValue>
-					}
-				}
-				else
-				{
-					<tr>
-						<td colspan=@ColumnList.Count>
-							@EmptyDataText
-						</td>
-					</tr>
-				}
-			</tbody>	
+			}
+		</tbody>
 	</table>
 }
 
