@@ -1,6 +1,6 @@
 ﻿@inherits TestComponentBase
 
-<Fixture Test="FirstTest">
+<Fixture Test="bindAttribute159">
 	<ComponentUnderTest>
 		<GridView ItemType="Widget"
 							AutogenerateColumns="false"
@@ -8,6 +8,11 @@
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+				<TemplateField ItemType="Widget" HeaderText="Name">
+					<ItemTemplate Context="Item">
+						<input type="text" @bind="@Item.Name" />
+					</ItemTemplate>
+				</TemplateField>
 			</Columns>
 		</GridView>
 	</ComponentUnderTest>
@@ -15,7 +20,7 @@
 
 
 @code {
-	void FirstTest()
+	void bindAttribute159()
 	{
 		var cut = GetComponentUnderTest();
 		var tableHeaders = cut.FindAll("th");
