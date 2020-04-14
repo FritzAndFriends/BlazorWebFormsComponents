@@ -5,7 +5,7 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Bounds an object's property to a column by its property name 
 	/// </summary>
-	public partial class BoundField :  BaseColumn 
+	public partial class BoundField<ItemType> :  BaseColumn<ItemType>
 	{
 
 		/// <summary>

@@ -1,0 +1,38 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<GridView ItemType="Widget"
+							AutogenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+				<TemplateField ItemType="Widget" HeaderText="Name">
+					<ItemTemplate Context="Item">
+						<input type="text" @bind="@Item.Name" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	void FirstTest()
+	{
+		var cut = GetComponentUnderTest();
+		System.Diagnostics.Debug.WriteLine(cut.Markup);
+
+		Assert.True(true, "bind attribute wasn't compiling");
+
+	}
+
+	IQueryable<Widget>
+	GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = 1;
+		return Widget.SimpleWidgetList.Take(1).AsQueryable();
+	}
+}
