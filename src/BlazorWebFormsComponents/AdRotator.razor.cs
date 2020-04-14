@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Components;
 
@@ -11,8 +9,6 @@ namespace BlazorWebFormsComponents
 {
 	public partial class AdRotator : BaseWebFormsComponent
 	{
-		private static IEnumerable<Advertisment> _advertisments = Enumerable.Empty<Advertisment>();
-
 		[Parameter]
 		public string AdvertisementFile { get; set; }
 
@@ -21,26 +17,21 @@ namespace BlazorWebFormsComponents
 
 		internal Advertisment GetActiveAdvertisment()
 		{
-			if (_advertisments == null || _advertisments.Count() == 0)
+			var advertisments = GetAdvertismentsFileContent(AdvertisementFile);
+
+			if (advertisments == null || advertisments.Count() == 0)
 			{
 				return null;
 			}
 
-			var rnd = new Random().Next(_advertisments.Count());
+			var rnd = new Random().Next(advertisments.Count());
 
-			return _advertisments.ElementAt(rnd);
+			return advertisments.ElementAt(rnd);
 		}
 
-		protected async override void OnInitialized()
+		private static IEnumerable<Advertisment> GetAdvertismentsFileContent(string fileName)
 		{
-			await base.OnInitializedAsync();
-
-			_advertisments = await GetAdvertismentsFileContentAsync(AdvertisementFile);
-		}
-
-		private static async Task<IEnumerable<Advertisment>> GetAdvertismentsFileContentAsync(string fileName)
-		{
-			var xmlDocument = await XDocument.LoadAsync(new StreamReader(fileName), LoadOptions.None, CancellationToken.None);
+			var xmlDocument = XDocument.Load(new StreamReader(fileName));
 
 			return xmlDocument.Descendants("Ad")
 				.Select(a => new Advertisment

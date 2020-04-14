@@ -6,15 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Ads1.xml" />
-    <None Remove="Ads2.xml" />
-    <None Remove="Ads3.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Ads3.xml" />
-    <Content Include="Ads2.xml" />
-    <Content Include="Ads1.xml" />
+    <Content Include="Ads3.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ads2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ads1.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 
