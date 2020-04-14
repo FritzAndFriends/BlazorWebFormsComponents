@@ -46,7 +46,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// The columns template of the GridView
 		/// </summary>
-		[Parameter] public RenderFragment Columns { get; set; }
+		[Parameter] public RenderFragment<ItemType> Columns { get; set; }
 
 		/// <summary>
 		/// The ChildContent of the GridView

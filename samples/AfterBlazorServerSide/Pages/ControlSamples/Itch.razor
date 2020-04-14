@@ -1,0 +1,20 @@
+﻿@typeparam MyType
+
+
+<h3>Itch</h3>
+
+@foreach (var item in Widgets)
+{
+	ItemTemplate(item);
+}
+
+
+@code {
+
+	[Parameter]
+	public IEnumerable<MyType> Widgets { get; set; }
+
+	[Parameter]
+	public RenderFragment<MyType> ItemTemplate { get; set;  }
+
+}

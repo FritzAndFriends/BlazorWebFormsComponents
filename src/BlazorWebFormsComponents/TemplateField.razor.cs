@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.ComponentModel;
 
 namespace BlazorWebFormsComponents
 {
@@ -11,5 +12,9 @@ namespace BlazorWebFormsComponents
 		/// The item template
 		/// </summary>
 		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
+
+		[Parameter] public ItemType Item { get; set; }
+
 	}
+
 }

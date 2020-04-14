@@ -1,0 +1,21 @@
+﻿<h3>Scratch</h3>
+
+<Itch Widgets="MyWidgets" Context="Item">
+	<ItemTemplate>
+		<Foo Bar="Item"></Foo>
+	</ItemTemplate>
+</Itch>
+
+@code {
+
+	IEnumerable<Widget> MyWidgets { get; set; }
+
+	protected override void OnInitialized()
+	{
+
+		MyWidgets = Widget.SimpleWidgetList;
+
+		base.OnInitialized();
+	}
+
+}
