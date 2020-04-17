@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System;
 
 namespace AfterBlazorClientSide
 {
@@ -14,7 +16,9 @@ namespace AfterBlazorClientSide
 			builder.RootComponents.Add<App>("app");
 
 			builder.Services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
-			builder.Services.AddBaseAddressHttpClient();
+			builder.Services.AddSingleton(
+				new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }
+			);
 
 			await builder.Build().RunAsync();
 
