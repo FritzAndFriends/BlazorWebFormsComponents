@@ -23,7 +23,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
   - Editor Controls
     - [AdRotator](docs/AdRotator.md)
     - [Button](docs/Button.md)
-    - [HiddenField(docs/HiddenField.md)]
+    - [HiddenField](docs/HiddenField.md)]
     - [HyperLink](docs/HyperLink.md)
     - [Image](docs/Image.md)
     - [ImageButton](docs/ImageButton.md)

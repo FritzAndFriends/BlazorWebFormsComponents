@@ -6,13 +6,13 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Base abstract row class
 	/// </summary>
-  public abstract class BaseRow : BaseWebFormsComponent, IRow
+  public abstract class BaseRow<ItemType> : BaseWebFormsComponent, IRow<ItemType>
   {
 		///<inheritdoc/>
-		[CascadingParameter(Name = "RowCollection")] public IRowCollection RowCollection { get; set; }
+		[CascadingParameter(Name = "RowCollection")] public IRowCollection<ItemType> RowCollection { get; set; }
 
 		///<inheritdoc/>
-		[Parameter] public object DataItem { get; set; }
+		[Parameter] public ItemType DataItem { get; set; }
 
 		public void Dispose()
 		{

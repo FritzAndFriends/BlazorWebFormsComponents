@@ -1,0 +1,11 @@
+﻿<Advertisements>  
+  <Ad>  
+    <ImageUrl>bing.png</ImageUrl>  
+    <Height>50</Height>  
+    <Width>50</Width>  
+    <NavigateUrl>http://www.bing.com</NavigateUrl>  
+    <AlternateText>Bing</AlternateText>  
+    <Impressions>90</Impressions>  
+    <Keyword>Bing</Keyword>  
+  </Ad>  
+</Advertisements>  

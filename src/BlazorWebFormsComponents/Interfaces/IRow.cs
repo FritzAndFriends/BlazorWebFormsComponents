@@ -3,16 +3,16 @@
 	/// <summary>
 	/// Generic row interface
 	/// </summary>
-  public interface IRow
+  public interface IRow<ItemType>
   {
 		/// <summary>
 		/// The parent IRowCollection where the IRow resides
 		/// </summary>
-		IRowCollection RowCollection { get; set; }
+		IRowCollection<ItemType> RowCollection { get; set; }
 
 		/// <summary>
 		/// The object bound to the row
 		/// </summary>
-		object DataItem { get; set; }
+		ItemType DataItem { get; set; }
 	}
 }

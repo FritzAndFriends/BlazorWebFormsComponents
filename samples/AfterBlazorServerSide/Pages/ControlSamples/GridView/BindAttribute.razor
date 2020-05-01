@@ -1,5 +1,6 @@
-﻿@page "/ControlSamples/GridView"
-<h2>GridView Default Example</h2>
+﻿@page "/ControlSamples/GridView/BindAttribute"
+
+<h2>Bug159Example</h2>
 
 <Nav />
 
@@ -11,13 +12,12 @@
 	<Columns>
 		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
 		<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="CompanyName" />
-		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="FirstName"/>
-		<BoundField ItemType="Customer" DataField="LastName" HeaderText="LastName"/>
+		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="FirstName" />
+		<BoundField ItemType="Customer" DataField="LastName" HeaderText="LastName" />
 		<TemplateField ItemType="Customer">
 			<ItemTemplate Context="Item">
-				<button type="button">Click Me! @Item.FirstName</button>
+				<input type="text" @bind="@Item.FirstName" />
 			</ItemTemplate>
 		</TemplateField>
 	</Columns>
 </GridView>
-

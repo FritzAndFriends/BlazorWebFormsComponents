@@ -1,5 +1,4 @@
 ﻿@page "/ControlSamples/GridView/TemplateFields"
-
 <h2>GridView Control</h2>
 
 <Nav></Nav>
@@ -8,14 +7,14 @@
 					AutogenerateColumns="false"
 					ItemType="SharedSampleObjects.Models.Widget">
 	<Columns>
-		<TemplateField HeaderText="Name">
+		<TemplateField HeaderText="Name" ItemType="SharedSampleObjects.Models.Widget">
 			<ItemTemplate Context="Item">
 				<Label ID="lblName" Text="@Item.Name"></Label>
 			</ItemTemplate>
 		</TemplateField>
-		<TemplateField HeaderText="Price">
+		<TemplateField HeaderText="Price" ItemType="SharedSampleObjects.Models.Widget">
 			<ItemTemplate Context="Item">
-				<Label ID="lblPrice" Text="@Item.Price"></Label>
+				<Label ID="lblPrice" Text="@Item.Price.ToString()"></Label>
 			</ItemTemplate>
 		</TemplateField>
 	</Columns>
@@ -44,7 +43,7 @@
 
 	protected void Unnamed_Click()
 	{
-		foreach (GridViewRow row in TemplateFieldGridView.Rows)
+		foreach (GridViewRow<Widget> row in TemplateFieldGridView.Rows)
 		{
 			var label = row.FindControl("lblPrice") as Label;
 			label.Visible = !PriceVisibility;
