@@ -1,0 +1,52 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<FormView AllowPaging="true"
+							DataKeyNames="Id"
+							OnPageIndexChanging="WidgetFormView_PageIndexChanging"
+							runat="server"
+							ItemType="Widget"
+							Items="Widget.SimpleWidgetList">
+			<ItemTemplate>
+
+				<table id="theItemTemplate">
+					<tr>
+						<td>@DataBinder.Eval("Name")</td><td>@DataBinder.Eval("Price", "{0:C}")</td><td>@DataBinder.Eval("Id")</td>
+					</tr>
+				</table>
+
+			</ItemTemplate>
+
+		</FormView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void FirstTest()
+	{
+
+		// Arrange
+		var theWidget = Widget.SimpleWidgetList[0];
+
+		var cut = GetComponentUnderTest();
+
+		var tableCells = cut.FindAll("#theItemTemplate td");
+		tableCells.Count().ShouldBe(3);
+
+		tableCells[0].TextContent.ShouldBe(theWidget.Name);
+		tableCells[1].TextContent.ShouldBe(theWidget.Price.ToString("C"));
+		tableCells[2].TextContent.ShouldBe(theWidget.Id.ToString());
+
+
+	}
+
+	void WidgetFormView_PageIndexChanging()
+	{
+
+	}
+
+
+}

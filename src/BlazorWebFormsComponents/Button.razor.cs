@@ -1,4 +1,5 @@
-namespace BlazorWebFormsComponents {	public partial class Button : ButtonBaseComponent
+namespace BlazorWebFormsComponents {
+	public partial class Button : ButtonBaseComponent
 	{
 
 	}

@@ -5,7 +5,7 @@
     <h1>Before Web Forms</h1>
 
     <p>
-        This is a project that contains individual pages for the BlazorWebFormsComponents developers to use 
+        This is a project that contains individual pages for the BlazorWebFormsComponents developers to use
         to test the existing controls and see how they behave.  We will use this project to determine how best to build
         our matching Blazor components.
     </p>
@@ -19,7 +19,7 @@
                 <li><a href="ControlSamples/DataList/Default.aspx">DataList</a></li>
                 <li>DataPager</li>
                 <li>DetailsView</li>
-                <li>FormView</li>
+                <li><a href="ControlSamples/FormView">FormView</a></li>
                 <li><a href="ControlSamples/GridView/Default.aspx">GridView</a></li>
                 <li><a href="/ControlSamples/ListView">ListView</a></li>
                 <li><a href="ControlSamples/Repeater/Default.aspx">Repeater</a></li>
@@ -37,7 +37,7 @@
               <li>RequiredFieldValidator</li>
               <li>ValidationSummary</li>
             </ul>
-        </div>           
+        </div>
 
         <div class="col-md-3">
             <h3>Navigation Controls</h3>
@@ -56,5 +56,5 @@
         </div>
 
     </div>
- 
+
 </asp:Content>
