@@ -70,5 +70,13 @@
 
 	}
 
+	void FormUpdating(FormViewUpdateEventArgs args) {
+		raisedItemUpdatingEvent = true;
+	}
+
+	void FormUpdated(FormViewUpdatedEventArgs args) {
+		raisedItemUpdatedEvent = true;
+	}
+
 
 }

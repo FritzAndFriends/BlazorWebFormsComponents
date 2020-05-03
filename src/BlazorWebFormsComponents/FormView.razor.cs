@@ -98,7 +98,9 @@ namespace BlazorWebFormsComponents
 					CurrentMode = FormViewMode.Edit;
 					break;
 				case "update":
+					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update")).GetAwaiter().GetResult();
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode }).GetAwaiter().GetResult();
+					OnItemUpdated.InvokeAsync(new FormViewUpdatedEventArgs(0, null)).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					break;
 
@@ -108,7 +110,15 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		#endregion
 
+		#region Custom Events
+
+		[Parameter]
+		public EventCallback<FormViewUpdateEventArgs> OnItemUpdating { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewUpdatedEventArgs> OnItemUpdated { get; set; }
 
 		#endregion
 
