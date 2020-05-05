@@ -1,0 +1,8 @@
+@inherits BaseWebFormsComponent
+
+<li>
+	<a title="@Title" class="@($"level{Depth}")" href="@NavigateUrl" target="_blank">@Text</a>
+</li>
+<CascadingValue Name="Depth" Value="@(Depth+1)">
+	@ChildContent
+</CascadingValue>

@@ -1,0 +1,20 @@
+@page "/ControlSamples/Menu"
+
+<h2>Menu Component homepage</h2>
+
+<Nav />
+
+<p>Here is a simple vertical menu showing two menu items.</p>
+
+	<Menu id="NavigationMenu"
+			orientation="Vertical"
+			font-names="Arial"
+			target="_blank"
+			runat="server">
+
+			<Items>
+				<MenuItem navigateurl="Music.aspx" text="Music" tooltip="Music" />
+				<MenuItem navigateurl="Movies.aspx" text="Movies" tooltip="Movies" />
+			</Items>
+
+	</Menu>

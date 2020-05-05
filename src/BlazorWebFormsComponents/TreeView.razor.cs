@@ -97,7 +97,7 @@ namespace BlazorWebFormsComponents
 
 				if (xmlDoc.SelectSingleNode("/*").LocalName == "siteMap")
 					DataBindSiteMap(xmlDoc);
-				else 
+				else
 					DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
 
 			}

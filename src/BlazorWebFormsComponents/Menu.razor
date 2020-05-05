@@ -1,0 +1,9 @@
+@inherits BaseWebFormsComponent
+
+<div id="@ID">
+	<ul class="level1">
+			<CascadingValue Name="ParentMenu" Value="this">
+				@ChildContent
+			</CascadingValue>
+ 	</ul>
+</div>

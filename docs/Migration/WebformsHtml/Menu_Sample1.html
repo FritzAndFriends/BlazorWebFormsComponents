@@ -1,61 +1,129 @@
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<!-- For the hover styles of the Menu control to  -->
+<!-- work correctly, you must include this head   -->
+<!-- element.                                     -->
+
+<head>
+	<title>
+		Menu Declarative Example
+	</title>
+	<style type="text/css">
+		/* <![CDATA[ */
+		#NavigationMenu img.icon {
+			border-style: none;
+			vertical-align: middle;
+		}
+
+		#NavigationMenu img.separator {
+			border-style: none;
+			display: block;
+		}
+
+		#NavigationMenu ul {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			width: auto;
+		}
+
+		#NavigationMenu ul.dynamic {
+			z-index: 1;
+		}
+
+		#NavigationMenu a {
+			font-family: Arial;
+			text-decoration: none;
+			white-space: nowrap;
+			display: block;
+		}
+
+		#NavigationMenu a.static {
+			background-color: LightSteelBlue;
+			color: Black;
+			text-decoration: none;
+		}
+
+		#NavigationMenu a.popout {
+			background-image: url("/WebResource.axd?d=YAYach_zykzn7tRotFpEUqSPA9MEmFRyPHYtoaCVH37B7aaNoMijSRjWcF939BuYHN_tNXE5llWxZsKC5822lsdr2gGM4d8McqPVhnk-mY01&t=637100650300000000");
+			background-repeat: no-repeat;
+			background-position: right center;
+			padding-right: 14px;
+		}
+
+		#NavigationMenu a.dynamic {
+			background-color: Black;
+			color: Silver;
+			text-decoration: none;
+		}
+
+		#NavigationMenu a.level2 {
+			padding-left: 10px;
+		}
+
+		#NavigationMenu a.static.highlighted {
+			background-color: LightSkyBlue;
+		}
+
+		#NavigationMenu a.dynamic.highlighted {
+			color: Black;
+			background-color: LightSkyBlue;
+		}
+
+		/* ]]> */
+	</style>
+</head>
+
+<body>
+	<form method="post" action="./" id="form1">
+		<div class="aspNetHidden">
+			<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE"
+				value="tS9gq3eBRSYvM4waKGqdyWFvKXyVJwGA+ccgod8xNgMqr/YYPs2V+jQlVS9eDbwqRaFAQcHX501yzG5hGGyra16Kv2mXe3Blqyf3aJmf5d0=" />
+		</div>
 
 
+		<script
+			src="/WebResource.axd?d=fqV81KWLWhVg-lLAb4IT60r-1ociujtLvoPrDDX-IdB1mvhDhb86XS0jipOpQ7vkw2bYG5AB_Z4A4ctWdtibsFeAUIClrs7M-7AnI6y7Lbc1&amp;t=637100650300000000"
+			type="text/javascript"></script>
+		<div class="aspNetHidden">
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" >
+			<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="AEC31F20" />
+		</div>
 
-  <!-- For the hover styles of the Menu control to  -->
-  <!-- work correctly, you must include this head   -->
-  <!-- element.                                     -->
-  <head><title>
-	Menu Declarative Example
-</title><style type="text/css">
-	/* <![CDATA[ */
-	#NavigationMenu img.icon { border-style:none;vertical-align:middle; }
-	#NavigationMenu img.separator { border-style:none;display:block; }
-	#NavigationMenu ul { list-style:none;margin:0;padding:0;width:auto; }
-	#NavigationMenu ul.dynamic { z-index:1; }
-	#NavigationMenu a { font-family:Arial;text-decoration:none;white-space:nowrap;display:block; }
-	#NavigationMenu a.static { background-color:LightSteelBlue;color:Black;text-decoration:none; }
-	#NavigationMenu a.popout { background-image:url("/WebResource.axd?d=YAYach_zykzn7tRotFpEUqSPA9MEmFRyPHYtoaCVH37B7aaNoMijSRjWcF939BuYHN_tNXE5llWxZsKC5822lsdr2gGM4d8McqPVhnk-mY01&t=637100650300000000");background-repeat:no-repeat;background-position:right center;padding-right:14px; }
-	#NavigationMenu a.dynamic { background-color:Black;color:Silver;text-decoration:none; }
-	#NavigationMenu a.level2 { padding-left:10px; }
-	#NavigationMenu a.static.highlighted { background-color:LightSkyBlue; }
-	#NavigationMenu a.dynamic.highlighted { color:Black;background-color:LightSkyBlue; }
-	/* ]]> */
-</style></head>
+		<h3>Menu Declarative Example</h3>
 
-  <body>
-    <form method="post" action="./" id="form1">
-<div class="aspNetHidden">
-<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="tS9gq3eBRSYvM4waKGqdyWFvKXyVJwGA+ccgod8xNgMqr/YYPs2V+jQlVS9eDbwqRaFAQcHX501yzG5hGGyra16Kv2mXe3Blqyf3aJmf5d0=" />
-</div>
+		<!-- Use declarative syntax to create the   -->
+		<!-- menu structure. Submenu items are      -->
+		<!-- created by nesting them in parent menu -->
+		<!-- items.                                 -->
+		<a href="#NavigationMenu_SkipLink"
+			style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">Skip Navigation Links</a>
+		<div id="NavigationMenu">
+			<ul class="level1">
+				<li><a title="Home" class="level1" href="Home.aspx" target="_blank">Home</a></li>
+				<li><a title="Music" class="popout level2" href="Music.aspx" target="_blank">Music</a>
+					<ul class="level3">
+						<li><a title="Classical" class="level3" href="Classical.aspx" target="_blank">Classical</a></li>
+						<li><a title="Rock" class="level3" href="Rock.aspx" target="_blank">Rock</a></li>
+						<li><a title="Jazz" class="level3" href="Jazz.aspx" target="_blank">Jazz</a></li>
+					</ul>
+				</li>
+				<li><a title="Movies" class="popout level2" href="Movies.aspx" target="_blank">Movies</a>
+					<ul class="level3">
+						<li><a title="Action" class="level3" href="Action.aspx" target="_blank">Action</a></li>
+						<li><a title="Drama" class="level3" href="Drama.aspx" target="_blank">Drama</a></li>
+						<li><a title="Musical" class="level3" href="Musical.aspx" target="_blank">Musical</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div><a id="NavigationMenu_SkipLink"></a>
 
 
-<script src="/WebResource.axd?d=fqV81KWLWhVg-lLAb4IT60r-1ociujtLvoPrDDX-IdB1mvhDhb86XS0jipOpQ7vkw2bYG5AB_Z4A4ctWdtibsFeAUIClrs7M-7AnI6y7Lbc1&amp;t=637100650300000000" type="text/javascript"></script>
-<div class="aspNetHidden">
+		<script
+			type='text/javascript'>new Sys.WebForms.Menu({ element: 'NavigationMenu', disappearAfter: 2000, orientation: 'vertical', tabIndex: 0, disabled: false });</script>
+	</form>
+</body>
 
-	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="AEC31F20" />
-</div>
-
-      <h3>Menu Declarative Example</h3>
-
-      <!-- Use declarative syntax to create the   -->
-      <!-- menu structure. Submenu items are      -->
-      <!-- created by nesting them in parent menu -->
-      <!-- items.                                 -->
-      <a href="#NavigationMenu_SkipLink" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">Skip Navigation Links</a><div id="NavigationMenu">
-	<ul class="level1">
-		<li><a title="Home" class="level1" href="Home.aspx" target="_blank">Home</a></li><li><a title="Music" class="popout level2" href="Music.aspx" target="_blank">Music</a><ul class="level3">
-			<li><a title="Classical" class="level3" href="Classical.aspx" target="_blank">Classical</a></li><li><a title="Rock" class="level3" href="Rock.aspx" target="_blank">Rock</a></li><li><a title="Jazz" class="level3" href="Jazz.aspx" target="_blank">Jazz</a></li>
-		</ul></li><li><a title="Movies" class="popout level2" href="Movies.aspx" target="_blank">Movies</a><ul class="level3">
-			<li><a title="Action" class="level3" href="Action.aspx" target="_blank">Action</a></li><li><a title="Drama" class="level3" href="Drama.aspx" target="_blank">Drama</a></li><li><a title="Musical" class="level3" href="Musical.aspx" target="_blank">Musical</a></li>
-		</ul></li>
-	</ul>
-</div><a id="NavigationMenu_SkipLink"></a>
-
-    
-<script type='text/javascript'>new Sys.WebForms.Menu({ element: 'NavigationMenu', disappearAfter: 2000, orientation: 'vertical', tabIndex: 0, disabled: false });</script></form>
-  </body>
 </html>
