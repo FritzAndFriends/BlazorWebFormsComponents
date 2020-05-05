@@ -15,6 +15,8 @@ namespace BlazorWebFormsComponents
 	public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
 	{
 
+		public const string StaticFilesLocation = "_content/Fritz.BlazorWebFormsComponents/";
+
 		#region Constructor
 
 		private const string BASEFRAGMENTFIELDNAME = "_renderFragment";

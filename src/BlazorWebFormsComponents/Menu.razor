@@ -7,3 +7,68 @@
 			</CascadingValue>
  	</ul>
 </div>
+
+<!-- Menu component style -->
+<style type="text/css">
+		@($"#{ID} img.icon") {
+			border-style: none;
+			vertical-align: middle;
+		}
+
+		@($"#{ID} img.separator") {
+			border-style: none;
+			display: block;
+		}
+
+		@($"#{ID} ul") {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			width: auto;
+		}
+
+		@($"#{ID} ul.dynamic") {
+			z-index: 1;
+		}
+
+		@($"#{ID} a") {
+			font-family: Arial;
+			text-decoration: none;
+			white-space: nowrap;
+			display: block;
+		}
+
+		@($"#{ID} a.static") {
+			background-color: LightSteelBlue;
+			color: Black;
+			text-decoration: none;
+		}
+
+		@($"#{ID} a.popout") {
+			background-image: url("/WebResource.axd?d=YAYach_zykzn7tRotFpEUqSPA9MEmFRyPHYtoaCVH37B7aaNoMijSRjWcF939BuYHN_tNXE5llWxZsKC5822lsdr2gGM4d8McqPVhnk-mY01&t=637100650300000000");
+			background-repeat: no-repeat;
+			background-position: right center;
+			padding-right: 14px;
+		}
+
+		@($"#{ID} a.dynamic") {
+			background-color: Black;
+			color: Silver;
+			text-decoration: none;
+		}
+
+		@($"#{ID} a.level2") {
+			padding-left: 10px;
+		}
+
+		@($"#{ID} a.static.highlighted") {
+			background-color: LightSkyBlue;
+		}
+
+		@($"#{ID} a.dynamic.highlighted") {
+			color: Black;
+			background-color: LightSkyBlue;
+		}
+
+
+</style>

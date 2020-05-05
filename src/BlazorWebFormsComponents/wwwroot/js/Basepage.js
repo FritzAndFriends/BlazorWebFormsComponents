@@ -17,7 +17,13 @@
 		OnAfterRender: function() {
 			console.debug("Running Window.load function");
 			FormatClientClick();
-		}
+		},
+
+		AddScriptElement: function(location) {
+			var el = document.createElement("script");
+			el.setAttribute("src", location);
+			document.head.appendChild(el);
+		},
 
   };
 
