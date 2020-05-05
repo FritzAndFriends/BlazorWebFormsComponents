@@ -42,7 +42,7 @@
         <div class="col-md-3">
             <h3>Navigation Controls</h3>
             <ul>
-                <li>Menu</li>
+                <li><a href="ControlSamples/Menu">Menu</a></li>
                 <li>SiteMapPath</li>
                 <li><a href="ControlSamples/TreeView">TreeView</a></li>
             </ul>
