@@ -1,6 +1,6 @@
 ﻿@inherits TestComponentBase
 
-<Fixture Tests="new Action[]{ CollapsedTest, HideTest}">
+<Fixture Tests="new Action<Fixture>[]{ CollapsedTest, HideTest}">
 	<ComponentUnderTest>
 		<TreeView id="SampleTreeView"
 							OnTreeNodeExpanded="RecordExpanded"
@@ -37,27 +37,27 @@
 
 	private TreeNode _ExpandedNode;
 
-	void CollapsedTest()
+	void CollapsedTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 
-		cut.Find("img").MarkupMatches(GetFragment("BeforeImage"));
+		cut.Find("img").MarkupMatches(fixture.GetFragment("BeforeImage"));
 		cut.Find("a").Click();
 
-		cut.Find("img").MarkupMatches(GetFragment("AfterImage"));
+		cut.Find("img").MarkupMatches(fixture.GetFragment("AfterImage"));
 		cut.Find("table + table");
 
 	}
 
-	void HideTest()
+	void HideTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 
-		cut.Find("img").MarkupMatches(GetFragment("AfterImage"));
+		cut.Find("img").MarkupMatches(fixture.GetFragment("AfterImage"));
 		cut.Find("a").Click();
-		cut.Find("img").MarkupMatches(GetFragment("BeforeImage"));
+		cut.Find("img").MarkupMatches(fixture.GetFragment("BeforeImage"));
 		cut.FindAll("table").Count.ShouldBe(1);
 
 	}

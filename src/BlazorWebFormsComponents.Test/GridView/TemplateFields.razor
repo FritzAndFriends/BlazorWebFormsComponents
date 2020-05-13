@@ -23,9 +23,9 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.Write(cut.Markup);
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe("Name");

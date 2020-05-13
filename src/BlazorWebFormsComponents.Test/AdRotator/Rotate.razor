@@ -7,9 +7,9 @@
 </Fixture>
 
 @code {
-	void RotateTest()
+	void RotateTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		var img = cut.Find("img");
 		var alternatText = img.Attributes["alt"].Value;
 

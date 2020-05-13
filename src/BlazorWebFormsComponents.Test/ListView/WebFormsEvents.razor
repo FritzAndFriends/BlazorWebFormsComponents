@@ -29,10 +29,10 @@
 
 	bool disposed = false;
 
-	async Task FirstTest()
+	async Task FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		initialized.ShouldBe(1);
 		loaded.ShouldBe(1);

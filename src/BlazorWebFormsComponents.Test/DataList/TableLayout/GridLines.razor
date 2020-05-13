@@ -41,23 +41,23 @@
 </Fixture>
 
 @code {
-	void BothTest()
+	void BothTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("both");
 	}
 
-	void RowsTest()
+	void RowsTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("rows");
 	}
 
-	void ColsTest()
+	void ColsTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		cut.Find("table").HasAttribute("rules");
 		cut.Find("table").GetAttribute("rules").ShouldBe("cols");
 	}
