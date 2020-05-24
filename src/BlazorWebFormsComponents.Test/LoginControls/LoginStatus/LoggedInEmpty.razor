@@ -3,16 +3,15 @@
 @using System.Security.Claims;
 @using Moq;
 
-<Fixture Test="FirstTest">
+<Fixture Setup="Setup" Test="FirstTest">
 	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutText="" LogoutImageUrl=""/>
+		<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutText="" LogoutImageUrl="" />
 	</ComponentUnderTest>
 </Fixture>
 
-
 @code {
 
-	void FirstTest()
+	void Setup(Fixture fixture)
 	{
 
 		var principal = new ClaimsPrincipal();
@@ -22,16 +21,19 @@
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
 		var navMock = new Mock<NavigationManager>();
-		Services.AddSingleton<NavigationManager>(navMock.Object);
+		fixture.Services.AddSingleton<NavigationManager>(navMock.Object);
 
-		var cut = GetComponentUnderTest();
+	}
+
+	void FirstTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.FindAll("input").Count().ShouldBe(0);
 		cut.FindAll("a").Count().ShouldBe(0);
-
 	}
 
 }

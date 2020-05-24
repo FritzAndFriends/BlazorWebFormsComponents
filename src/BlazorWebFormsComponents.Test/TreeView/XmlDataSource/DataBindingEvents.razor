@@ -27,19 +27,17 @@
 	long dataBindingTicks = 0;
 	long dataBoundTicks = 0;
 
-	void Setup()
+	void Setup(Fixture fixture)
 	{
-
 		bookXml.LoadXml(@"<Book Title=""Book Title"" />");
 
 		stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
 	}
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 		var test = cut.Markup;
 
 		stopwatch.Stop();

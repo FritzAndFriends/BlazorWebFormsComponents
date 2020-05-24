@@ -37,12 +37,9 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
-
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
-
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 			System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		var theHeaderElement = cut.FindAll("span")[1];
@@ -55,12 +52,9 @@
 
 	}
 
-	void NullTest()
+	void NullTest(Fixture fixture)
 	{
-
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
-
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		var theHeaderElement = cut.FindAll("span")[1];
 

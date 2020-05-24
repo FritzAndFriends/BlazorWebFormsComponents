@@ -41,10 +41,10 @@
 }
 
 @code{
-	void ShouldTriggerEvents()
+	void ShouldTriggerEvents(Fixture fixture)
 	{
 		// Arrange
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		Debug.WriteLine(cut.Markup);
 
 		// Assert

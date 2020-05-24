@@ -15,9 +15,9 @@
 
 
 @code {
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe("ID");
 		tableHeaders[1].TextContent.ShouldBe("Widget Name");

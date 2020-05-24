@@ -24,9 +24,9 @@
 
 Button MyButton { get; set; }
 
-void FirstTest() {
+void FirstTest(Fixture fixture) {
 
-	var cut = GetComponentUnderTest();
+	var cut = fixture.GetComponentUnderTest();
 	cut.FindAll("button").Count().ShouldNotBe(0);
 
 	MyButton.ShouldNotBeNull();

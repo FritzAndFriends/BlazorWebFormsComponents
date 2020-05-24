@@ -26,10 +26,10 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.FindAll("#theItemTemplate td").Count().ShouldBe(3);
 		cut.FindAll("a").Count().ShouldBe(2);

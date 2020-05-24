@@ -25,7 +25,7 @@
 
 	System.Xml.XmlDocument SiteMapSource = new System.Xml.XmlDocument();
 
-	void Setup()
+	void Setup(Fixture fixture)
 	{
 
 		SiteMapSource.LoadXml(@"<siteMap>  
@@ -39,10 +39,10 @@
 
 	}
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest<TreeView>(); 
+		var cut = fixture.GetComponentUnderTest<TreeView>(); 
 		cut.FindAll("table").Count().ShouldBe(4, "Did not render all 4 pages of the SiteMap");
 		cut.FindAll("a").Count(a => !a.GetElementsByTagName("img").Any()).ShouldBe(4, "Did not create all 4 links of the SiteMap");
 		

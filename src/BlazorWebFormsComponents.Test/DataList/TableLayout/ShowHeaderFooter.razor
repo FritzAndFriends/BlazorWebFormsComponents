@@ -34,10 +34,10 @@
 
 @code {
 
-	void ShowTest()
+	void ShowTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.FindAll("td").Count().ShouldBe(5);
 		cut.Find("td").TextContent.ShouldBe("My Widget List");
@@ -45,10 +45,10 @@
 
 	}
 
-	void HideTest()
+	void HideTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.FindAll("td").Count().ShouldBe(3);
 		cut.Find("td").TextContent.ShouldNotBe("My Widget List");
