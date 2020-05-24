@@ -1,4 +1,5 @@
 @inherits TestComponentBase
+@inject IJSRuntime JS
 
 <Fixture Test="FirstTest">
 
@@ -23,9 +24,9 @@
 
 @code {
 
-	void FirstTest() {
+	void FirstTest(Fixture fixture) {
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		var menuItems =	cut.FindAll("a");
 		menuItems.Count().ShouldBe(2);

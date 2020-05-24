@@ -11,7 +11,7 @@ namespace BlazorWebFormsComponents
   public partial class Menu : BaseWebFormsComponent {
 
 		[Inject]
-    public IJSRuntime jSRuntime { get; set; }
+    public IJSRuntime JS { get; set; }
 
 		[Parameter]
 		public MenuItemsCollection Items { get; set; } = new MenuItemsCollection();
@@ -19,11 +19,16 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
-		protected override async Task OnInitializedAsync() {
+		protected override async Task OnAfterRenderAsync(bool firstRender) {
 
-			await JsRuntime.InvokeVoidAsync("bwfc.Page.AddScriptElement", $"{StaticFilesLocation}Menu/Menu.js");
+			if (firstRender)
+			{
+				await JS.InvokeVoidAsync("bwfc.Page.AddScriptElement", $"{StaticFilesLocation}Menu/Menu.js", $"new Sys.WebForms.Menu({{ element: '{ID}', disappearAfter: 2000, orientation: 'vertical', tabIndex: 0, disabled: false }});");
+				// await JS.InvokeVoidAsync("eval", $"new Sys.WebForms.Menu({{ element: '{ID}', disappearAfter: 2000, orientation: 'vertical', tabIndex: 0, disabled: false }});");
+				// await JsRuntime.InvokeVoidAsync("eval", "\" console.log('hello');\"");
+			}
 
-			await base.OnInitializedAsync();
+			await base.OnAfterRenderAsync(firstRender);
 
 		}
 

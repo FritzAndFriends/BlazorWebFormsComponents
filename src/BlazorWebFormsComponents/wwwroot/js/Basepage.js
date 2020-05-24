@@ -19,10 +19,15 @@
 			FormatClientClick();
 		},
 
-		AddScriptElement: function(location) {
+		AddScriptElement: function(location, callback) {
 			var el = document.createElement("script");
 			el.setAttribute("src", location);
 			document.head.appendChild(el);
+
+			if (callback != null) {
+				el.addEventListener("load", function() { eval(callback); });
+			}
+
 		},
 
   };
