@@ -8,7 +8,7 @@
   </ItemGroup>
 
 	<PropertyGroup>
-		<BlazorWebAssemblyVersion>3.2.0-rc1.20223.4</BlazorWebAssemblyVersion>
+		<BlazorWebAssemblyVersion>3.2.0</BlazorWebAssemblyVersion>
 	</PropertyGroup>
 
 </Project>
