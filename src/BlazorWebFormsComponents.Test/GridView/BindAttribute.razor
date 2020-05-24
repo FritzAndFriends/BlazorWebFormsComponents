@@ -20,9 +20,9 @@
 
 
 @code {
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		Assert.True(true, "bind attribute wasn't compiling");

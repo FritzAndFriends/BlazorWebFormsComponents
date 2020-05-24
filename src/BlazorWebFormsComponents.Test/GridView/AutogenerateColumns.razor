@@ -10,27 +10,21 @@
 </Fixture>
 
 @code {
-		void FirstTest()
-		{
-			var cut = GetComponentUnderTest();
-			var tableHeaders = cut.FindAll("th").ToList();
-			tableHeaders.Count.ShouldBe(4, "Did not render 4 TH elements");
+	void FirstTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
 
-			try {
-				tableHeaders[0].TextContent.ShouldBe("Id");
-			} catch (Exception ex) {
-				Console.WriteLine("HTML rendered: " + cut.Markup);
-				throw;
-			}
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(4, "Did not render 4 TH elements");
+		tableHeaders[0].TextContent.ShouldBe("Id");
+		tableHeaders[1].TextContent.ShouldBe("Name");
+		tableHeaders[2].TextContent.ShouldBe("Price");
+		tableHeaders[3].TextContent.ShouldBe("LastUpdate");
+	}
 
-			tableHeaders[1].TextContent.ShouldBe("Name");
-			tableHeaders[2].TextContent.ShouldBe("Price");
-			tableHeaders[3].TextContent.ShouldBe("LastUpdate");
-		}
-
-		IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-		{
-			totalRowCount = Widget.SimpleWidgetList.Length;
-			return Widget.SimpleWidgetList.AsQueryable();
-		}
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
 }

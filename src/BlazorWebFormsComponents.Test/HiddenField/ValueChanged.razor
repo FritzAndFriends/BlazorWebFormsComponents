@@ -16,10 +16,10 @@
 		TheContent = _newValue;
 	}
 
-	void HiddenFieldvalueChangedTest()
+	void HiddenFieldvalueChangedTest(Fixture fixture)
 	{
 		// Given
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		TheContent.ShouldBe("The value not changed yet!");
 

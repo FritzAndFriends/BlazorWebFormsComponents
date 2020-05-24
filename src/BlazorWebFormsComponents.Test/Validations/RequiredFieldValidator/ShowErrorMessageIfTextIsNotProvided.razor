@@ -19,10 +19,10 @@
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.Find("input").Change("  ");
 

@@ -22,10 +22,10 @@
 	int databound = 0;
 	int itemDatabound = 0;
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		databinding.ShouldBeGreaterThan(0);
 		databound.ShouldBeGreaterThan(0);

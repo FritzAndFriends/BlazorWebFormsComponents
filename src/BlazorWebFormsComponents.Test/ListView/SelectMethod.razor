@@ -15,9 +15,9 @@
 
 @code {
 
-		void FirstTest()
+		void FirstTest(Fixture fixture)
 		{
-			var cut = GetComponentUnderTest();
+			var cut = fixture.GetComponentUnderTest();
 			System.Diagnostics.Debug.WriteLine(cut.Markup);
 			cut.FindAll("span").Count().ShouldBe(3);
 		}

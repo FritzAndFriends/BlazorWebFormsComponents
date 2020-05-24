@@ -24,7 +24,7 @@
 
 	System.Xml.XmlDocument bookXml = new System.Xml.XmlDocument();
 
-	void Setup()
+	void Setup(Fixture fixture)
 	{
 
 		bookXml.LoadXml(@"<Book Title=""Book Title"">
@@ -42,10 +42,10 @@
 
 	}
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 		cut.FindAll("table").Count().ShouldBe(6, "Did not render all 6 nodes of the XML document");
 
 	}

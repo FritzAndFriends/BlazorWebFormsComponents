@@ -45,14 +45,14 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
 		// ImageSets that don't have Expand/Collapse images should show the Default images
 
 
 		// Arrange/Act
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 		var collapseImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif";
 		var noExpandImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_NoExpand.gif";
 

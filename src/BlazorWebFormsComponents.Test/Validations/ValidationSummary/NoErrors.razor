@@ -13,12 +13,12 @@
 
 	private ExampleModel exampleModel = new ExampleModel();
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("div").Count().ShouldBe(1);
+		cut.FindAll("div").Count.ShouldBe(1);
 
 		cut.Find("div").HasAttribute("style").ShouldBeTrue();
 		cut.Find("div").GetAttribute("style").ShouldContain("display:none;");

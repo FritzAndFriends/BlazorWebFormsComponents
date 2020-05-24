@@ -1,8 +1,6 @@
 @inherits TestComponentBase
 
-<Fixture
-	Test="FirstTest"
->
+<Fixture Test="FirstTest">
 	<ComponentUnderTest>
 		<ListView Items="Widget.SimpleWidgetList"
 							ItemType="Widget"
@@ -11,7 +9,7 @@
 			<LayoutTemplate Context="itemPlaceholder">
 				<div>
 					<b>Header <Button @ref="MyButton">My Button</Button></b>
-					<br/>
+					<br />
 					@itemPlaceholder
 				</div>
 			</LayoutTemplate>
@@ -22,13 +20,14 @@
 
 @code {
 
-Button MyButton { get; set; }
+	Button MyButton { get; set; }
 
-void FirstTest() {
+	void FirstTest(Fixture fixture)
+	{
 
-	var cut = GetComponentUnderTest<ListView<Widget>>();
-	cut.Instance.Controls.Count().ShouldBe(1);
+		var cut = fixture.GetComponentUnderTest<ListView<Widget>>();
+		cut.Instance.Controls.Count().ShouldBe(1);
 
-}
+	}
 
 }

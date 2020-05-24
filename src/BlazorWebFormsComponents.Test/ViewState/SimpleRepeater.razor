@@ -11,35 +11,29 @@
 	</ComponentUnderTest>
 </Fixture>
 
-
 @code {
 
 	public Repeater<Widget> MyRepeater { get; set; }
 	int randomNumber;
 	const string ViewStateKey = "RandomNumber";
 
-	void Setup()
+	void Setup(Fixture fixture)
 	{
-
 		randomNumber = new Random().Next(100, 1000000);
-
 	}
 
 	void OnRepeaterInit(EventArgs args)
 	{
-
 		MyRepeater.ViewState.Add(ViewStateKey, randomNumber);
-
 	}
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		MyRepeater.ViewState[ViewStateKey].ShouldBe(randomNumber);
 
 	}
-
 
 }

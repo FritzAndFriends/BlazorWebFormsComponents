@@ -19,9 +19,9 @@
 </Fixture>
 
 @code {
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
 		footer.HasAttribute("style").ShouldBeTrue();
