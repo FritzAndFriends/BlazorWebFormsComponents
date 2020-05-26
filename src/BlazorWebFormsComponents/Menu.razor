@@ -1,4 +1,5 @@
 @inherits BaseWebFormsComponent
+@using BlazorComponentUtilities
 
 <div id="@ID">
 	<ul class="level1">
@@ -39,9 +40,7 @@
 		}
 
 		@($"#{ID} a.static") {
-			background-color: LightSteelBlue;
-			color: Black;
-			text-decoration: none;
+			@StaticMenuItemStyle.ToStyle().Build()
 		}
 
 		@($"#{ID} a.popout") {
@@ -52,22 +51,19 @@
 		}
 
 		@($"#{ID} a.dynamic") {
-			background-color: Black;
-			color: Silver;
-			text-decoration: none;
+			@DynamicMenuItemStyle.ToStyle().ToString()
 		}
 
 		@($"#{ID} a.level2") {
-			padding-left: 10px;
+			padding-left: @($"{StaticSubmenuIndent}px");
 		}
 
 		@($"#{ID} a.static.highlighted") {
-			background-color: LightSkyBlue;
+			@StaticHoverStyle.ToStyle().ToString()
 		}
 
 		@($"#{ID} a.dynamic.highlighted") {
-			color: Black;
-			background-color: LightSkyBlue;
+			@DynamicHoverStyle.ToStyle().ToString()
 		}
 
 

@@ -98,8 +98,12 @@ namespace BlazorWebFormsComponents
 			((IHasStyle)hasStyle).ToStyle().AddStyle("white-space", "nowrap", !hasStyle.Wrap);
 
 
-		public static StyleBuilder ToStyle(this IHasStyle hasStyle) => 
-			StyleBuilder.Empty().AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
+		public static StyleBuilder ToStyle(this IHasStyle hasStyle)
+		{
+
+			Console.WriteLine($"Background color: {hasStyle.BackColor}");
+
+			return StyleBuilder.Empty().AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
 							when: hasStyle.BackColor != default(WebColor))
 
 					.AddStyle("color", () => ColorTranslator.ToHtml(hasStyle.ForeColor.ToColor()).Trim(),
@@ -118,6 +122,7 @@ namespace BlazorWebFormsComponents
 						.AddValue("overline", hasStyle.Font_Overline)
 						.AddValue("line-through", hasStyle.Font_Strikeout)
 						, HasTextDecorations(hasStyle));
+		}
 
 		private static bool HasTextDecorations(IHasStyle hasStyle) =>
 				hasStyle.Font_Underline ||
