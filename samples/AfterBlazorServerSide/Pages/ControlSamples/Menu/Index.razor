@@ -13,7 +13,18 @@
 			runat="server">
 
 			<Items>
-				<MenuItem navigateurl="Music.aspx" text="Music" tooltip="Music" />
+                <MenuItem navigateurl="Music.aspx" text="Music" tooltip="Music">
+                    <MenuItem navigateurl="Classical.aspx"
+                                  text="Classical"
+                                  tooltip="Classical" />
+                    <MenuItem navigateurl="Rock.aspx"
+                                  text="Rock"
+                                  tooltip="Rock" />
+                    <MenuItem navigateurl="Jazz.aspx"
+                                  text="Jazz"
+                                  tooltip="Jazz" />
+										
+                </MenuItem>
 				<MenuItem navigateurl="Movies.aspx" text="Movies" tooltip="Movies" />
 			</Items>
 

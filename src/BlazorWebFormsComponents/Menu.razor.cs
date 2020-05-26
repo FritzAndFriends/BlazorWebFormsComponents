@@ -24,8 +24,6 @@ namespace BlazorWebFormsComponents
 			if (firstRender)
 			{
 				await JS.InvokeVoidAsync("bwfc.Page.AddScriptElement", $"{StaticFilesLocation}Menu/Menu.js", $"new Sys.WebForms.Menu({{ element: '{ID}', disappearAfter: 2000, orientation: 'vertical', tabIndex: 0, disabled: false }});");
-				// await JS.InvokeVoidAsync("eval", $"new Sys.WebForms.Menu({{ element: '{ID}', disappearAfter: 2000, orientation: 'vertical', tabIndex: 0, disabled: false }});");
-				// await JsRuntime.InvokeVoidAsync("eval", "\" console.log('hello');\"");
 			}
 
 			await base.OnAfterRenderAsync(firstRender);
