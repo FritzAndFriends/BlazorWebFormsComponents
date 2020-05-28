@@ -1,5 +1,6 @@
 @page "/ControlSamples/Menu"
 
+
 <h2>Menu Component homepage</h2>
 
 <Nav />
@@ -15,13 +16,14 @@
       target="_blank"
       runat="server">
 
-    <StaticMenuItemStyle BackColor="WebColor.LightSteelBlue"
-                         ForeColor="WebColor.Black" />
-    <StaticHoverStyle backcolor="LightSkyBlue" />
-    <DynamicMenuItemStyle backcolor="Black"
-                          forecolor="Silver" />
-    <DynamicHoverStyle backcolor="LightSkyBlue"
-                       forecolor="Black" />
+    <StaticMenuItemStyle BackColor="@("LightSteelBlue")"
+                         ForeColor="@("Black")" />
+    <StaticHoverStyle BackColor="WebColor.LightSkyBlue" />
+    <DynamicMenuItemStyle BackColor="WebColor.Black"
+                          ForeColor="WebColor.Silver" />
+    <DynamicHoverStyle BackColor="WebColor.LightSkyBlue"
+                       ForeColor="WebColor.Black" />
+
 
     <Items>
         <MenuItem navigateurl="Home.aspx"

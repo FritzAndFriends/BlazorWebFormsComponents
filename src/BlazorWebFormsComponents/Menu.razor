@@ -40,7 +40,7 @@
 		}
 
 		@($"#{ID} a.static") {
-			@StaticMenuItemStyle.ToStyle().Build()
+			@StaticMenuItemStyle?.ToStyle().ToString()
 		}
 
 		@($"#{ID} a.popout") {
@@ -59,7 +59,7 @@
 		}
 
 		@($"#{ID} a.static.highlighted") {
-			@StaticHoverStyle.ToStyle().ToString()
+			@StaticHoverStyle?.ToStyle().ToString()
 		}
 
 		@($"#{ID} a.dynamic.highlighted") {

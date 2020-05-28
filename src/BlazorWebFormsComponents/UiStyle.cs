@@ -1,5 +1,6 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace BlazorWebFormsComponents
@@ -52,11 +53,18 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Unit Width { get; set; }
 
+		[Inject]
+		public ILoggerFactory LoggerFactory { get; set; }
+
 		protected override void OnInitialized()
 		{
 
+			var thisLogger = LoggerFactory.CreateLogger("Style");
+			thisLogger.LogError($"Backcolor inside the UiStyle is: {BackColor.ToColor().ToString()}");
+
 			if (theStyle != null)
 			{
+
 
 				theStyle.BackColor = BackColor;
 				theStyle.BorderColor = BorderColor;

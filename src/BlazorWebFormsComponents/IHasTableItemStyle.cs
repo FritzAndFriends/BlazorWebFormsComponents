@@ -26,8 +26,8 @@ namespace BlazorWebFormsComponents
 	public interface IHasLayoutStyle
 	{
 
-		// Cheer 1042 codingbandit 07/1/20 
-		// Cheer 100 ramblinggeek 07/1/20 
+		// Cheer 1042 codingbandit 07/1/20
+		// Cheer 100 ramblinggeek 07/1/20
 
 
 		WebColor BackColor { get; set; }
@@ -101,8 +101,6 @@ namespace BlazorWebFormsComponents
 		public static StyleBuilder ToStyle(this IHasStyle hasStyle)
 		{
 
-			Console.WriteLine($"Background color: {hasStyle.BackColor}");
-
 			return StyleBuilder.Empty().AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
 							when: hasStyle.BackColor != default(WebColor))
 
@@ -157,5 +155,6 @@ namespace BlazorWebFormsComponents
 
 
 	}
+
 
 }

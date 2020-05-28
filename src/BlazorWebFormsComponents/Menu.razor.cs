@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using BlazorComponentUtilities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -29,17 +30,40 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Items Items { get; set; }
 
-		[Parameter]
-		public Style DynamicHoverStyle { get; set; } = new Style();
+		private DynamicHoverStyle _DynamicHoverStyle = new DynamicHoverStyle();
+		public DynamicHoverStyle DynamicHoverStyle {
+			get { return _DynamicHoverStyle;}
+			set { _DynamicHoverStyle = value;
+				StateHasChanged();
+			}
+		}
 
-		[Parameter]
-		public Style DynamicMenuItemStyle { get; set; } = new Style();
+		private DynamicMenuItemStyle _DynamicMenuItemStyle = new DynamicMenuItemStyle();
+		public DynamicMenuItemStyle DynamicMenuItemStyle {
+			get { return _DynamicMenuItemStyle;}
+			set { _DynamicMenuItemStyle = value;
+				this.StateHasChanged();
+			}
+		}
 
-		[Parameter]
-		public Style StaticHoverStyle { get; set; } = new Style();
+		private StaticHoverStyle _StaticHoverStyle = new StaticHoverStyle();
+		public StaticHoverStyle StaticHoverStyle {
+			get { return _StaticHoverStyle;}
+			set {
+				_StaticHoverStyle = value;
+				StateHasChanged();
+			}
+		}
 
-		[Parameter]
-		public StaticMenuItemStyle StaticMenuItemStyle { get; set; } = new StaticMenuItemStyle();
+		private StaticMenuItemStyle _StaticMenuItemStyle = new StaticMenuItemStyle();
+		public StaticMenuItemStyle StaticMenuItemStyle {
+			get { return _StaticMenuItemStyle;}
+			set {
+				_StaticMenuItemStyle = value;
+				StateHasChanged();
+			}
+		}
+
 
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
