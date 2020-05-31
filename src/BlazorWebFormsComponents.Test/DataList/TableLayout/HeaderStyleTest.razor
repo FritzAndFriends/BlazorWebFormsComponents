@@ -37,6 +37,7 @@
 	void FirstTest(Fixture fixture)
 	{
 
+		fixture.Services.AddLogging();
 		var cut = fixture.GetComponentUnderTest();
 
 		var theHeaderElement = cut.Find("td");

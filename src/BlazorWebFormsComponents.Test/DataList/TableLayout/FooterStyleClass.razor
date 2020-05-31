@@ -1,5 +1,6 @@
 ﻿@inherits TestComponentBase
-@using BlazorWebFormsComponents
+@using Microsoft.Extensions.Logging
+@using Microsoft.Extensions.Logging.Abstractions
 
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
@@ -19,6 +20,7 @@
 @code {
 	void FirstTest(Fixture fixture)
 	{
+		fixture.Services.AddLogging();
 		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));

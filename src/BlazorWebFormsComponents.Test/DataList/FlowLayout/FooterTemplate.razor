@@ -15,6 +15,7 @@
 @code {
 	void FirstTest(Fixture fixture)
 	{
+		fixture.Services.AddLogging();
 		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		cut.FindAll("span").Count().ShouldBe(5);

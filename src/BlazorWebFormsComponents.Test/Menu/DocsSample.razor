@@ -1,5 +1,4 @@
 @inherits TestComponentBase
-@inject IJSRuntime JS
 
 <Fixture Test="FirstTest">
 
@@ -26,7 +25,11 @@
 
 	void FirstTest(Fixture fixture) {
 
+		var jsMock = fixture.Services.AddMockJsRuntime();
+
 		var cut = fixture.GetComponentUnderTest();
+
+		jsMock.VerifyInvoke("bwfc.Page.AddScriptElement", calledTimes: 1);
 
 		var menuItems =	cut.FindAll("a");
 		menuItems.Count().ShouldBe(2);

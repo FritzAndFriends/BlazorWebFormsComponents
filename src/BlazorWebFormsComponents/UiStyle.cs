@@ -60,7 +60,10 @@ namespace BlazorWebFormsComponents
 		{
 
 			var thisLogger = LoggerFactory.CreateLogger("Style");
-			thisLogger.LogError($"Backcolor inside the UiStyle is: {BackColor.ToColor().ToString()}");
+			if (BackColor != null)
+			{
+				thisLogger.LogError($"Backcolor inside the UiStyle is: {BackColor.ToColor().ToString()}");
+			}
 
 			if (theStyle != null)
 			{

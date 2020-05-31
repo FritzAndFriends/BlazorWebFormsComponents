@@ -26,7 +26,7 @@
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
-
+		fixture.Services.AddLogging();
 		var cut = fixture.GetComponentUnderTest();
 
 		var theHeaderElement = cut.Find("td");
