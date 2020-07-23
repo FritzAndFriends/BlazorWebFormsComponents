@@ -43,10 +43,10 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 		// Arrange/Act
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 
 		// Asserts
 		cut.FindAll("table").Count().ShouldBe(4);

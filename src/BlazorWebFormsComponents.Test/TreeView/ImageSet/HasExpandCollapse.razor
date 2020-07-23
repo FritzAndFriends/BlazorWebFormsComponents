@@ -45,10 +45,10 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 		// Arrange/Act
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 		var collapseImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Arrows_Collapse.gif";
 		var noExpandImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Arrows_NoExpand.gif";
 

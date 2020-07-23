@@ -19,19 +19,19 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
 		var principal = new ClaimsPrincipal();
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
 		var navMock = new Mock<NavigationManager>();
-		Services.AddSingleton<NavigationManager>(navMock.Object);
+		fixture.Services.AddSingleton<NavigationManager>(navMock.Object);
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.Markup.Trim().ShouldBe("Anonymous");
 

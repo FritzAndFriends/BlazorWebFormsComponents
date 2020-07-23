@@ -11,9 +11,9 @@
 @code {
 
 
-void FirstTest() {
+void FirstTest(Fixture fixture) {
 
-	var cut = GetComponentUnderTest<TestBubbleComponent>();
+	var cut = fixture.GetComponentUnderTest<TestBubbleComponent>();
 	cut.Find("button").Click();
 
 	cut.Instance.EventRaised.Count().ShouldBe(1);

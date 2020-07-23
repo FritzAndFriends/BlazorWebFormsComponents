@@ -27,10 +27,10 @@
 	private string ImageToolTip = "Hugo made me sound like a hamster";
 	private string ImageUrl = "something_something.jpg";
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 		// Arrange/Act
-		var cut = GetComponentUnderTest<TreeView>();
+		var cut = fixture.GetComponentUnderTest<TreeView>();
 
 		// Asserts
 		cut.Find("img").ShouldNotBeNull();
