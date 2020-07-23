@@ -1,0 +1,101 @@
+﻿@inherits TestComponentBase
+@using static BlazorWebFormsComponents.WebColor
+
+@* Replicating the second sample from:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu?view=netframework-4.8 *@
+
+<Fixture Test="FirstTest" Setup="Setup">
+
+	<ComponentUnderTest>
+
+
+		<Menu id="NavigationMenu"
+					DisappearAfter="2000"
+					StaticDisplayLevels="2"
+					StaticSubmenuIndent="10"
+					orientation="Vertical"
+					font-names="Arial"
+					target="_blank"
+					DataSource="MenuSource"
+					runat="server">
+
+			<StaticMenuItemStyle BackColor="LightSteelBlue"
+													 ForeColor="Black" />
+			<StaticHoverStyle BackColor="LightSkyBlue" />
+			<DynamicMenuItemStyle BackColor="Black"
+														ForeColor="Silver" />
+			<DynamicHoverStyle BackColor="LightSkyBlue"
+												 ForeColor="Black" />
+
+		</Menu>
+
+	</ComponentUnderTest>
+
+	<Fragment Id="dataSourceRaw">
+		<siteMap>
+			<siteMapNode url="~\Home.aspx"
+									 title="Home"
+									 description="Home">
+				<siteMapNode url="~\Music.aspx"
+										 title="Music"
+										 description="Music">
+					<siteMapNode url="~\Classical.aspx"
+											 title="Classical"
+											 description="Classical" />
+					<siteMapNode url="~\Rock.aspx"
+											 title="Rock"
+											 description="Rock" />
+					<siteMapNode url="~\Jazz.aspx"
+											 title="Jazz"
+											 description="Jazz" />
+				</siteMapNode>
+				<siteMapNode url="~\Movies.aspx"
+										 title="Movies"
+										 description="Movies">
+					<siteMapNode url="~\Action.aspx"
+											 title="Action"
+											 description="Action" />
+					<siteMapNode url="~\Drama.aspx"
+											 title="Drama"
+											 description="Drama" />
+					<siteMapNode url="~\Musical.aspx"
+											 title="Musical"
+											 description="Musical" />
+				</siteMapNode>
+			</siteMapNode>
+		</siteMap>
+	</Fragment>
+
+</Fixture>
+
+@code {
+
+	System.Xml.XmlDocument MenuSource = new System.Xml.XmlDocument();
+	MockJsRuntimeInvokeHandler jsMock;
+
+	void Setup(Fixture fixture)
+	{
+
+		jsMock = fixture.Services.AddMockJsRuntime();
+		MenuSource.LoadXml(fixture.GetFragment().Markup);
+
+	}
+
+	void FirstTest(Fixture fixture)
+	{
+
+		var cut = fixture.GetComponentUnderTest();
+
+		jsMock.VerifyInvoke("bwfc.Page.AddScriptElement", calledTimes: 1);
+
+		var menuItems = cut.FindAll("a");
+		menuItems.Count().ShouldBe(9);
+
+		//foreach (var item in menuItems)
+		//{
+		//	item.GetAttribute("class").ShouldBe("level1");
+		//}
+
+
+	}
+
+}
