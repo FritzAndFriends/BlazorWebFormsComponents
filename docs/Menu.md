@@ -6,13 +6,14 @@ The Menu component is meant to emulate the asp:Menu control in markup and is def
 
 ## Features supported in Blazor
 
-- None yet... still working on it!
+- Simple static menu, as shown in the [ASP.NET example](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu?view=netframework-4.8#examples)
+- Simple databinding to a Sitemap as shown in the [ASP.NET example](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu?view=netframework-4.8#examples)
 
 ##### [Back to top](#menu)
 
 ## Usage Notes
 
-- Everything is awesome!
+- Databinding only works with sitemap.  Sitemap must be loaded and set as an XML document on DataSource
 
 ##### [Back to top](#menu)
 
