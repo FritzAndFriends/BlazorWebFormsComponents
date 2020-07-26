@@ -30,6 +30,7 @@
 		}
 
 		@($"#{ID} ul.dynamic") {
+			@DynamicMenuStyle?.ToStyle().ToString()
 			z-index: 1;
 		}
 
@@ -44,12 +45,13 @@
 			@StaticMenuItemStyle?.ToStyle().ToString()
 		}
 
-		@($"#{ID} a.popout") {
-			background-image: url("/WebResource.axd?d=YAYach_zykzn7tRotFpEUqSPA9MEmFRyPHYtoaCVH37B7aaNoMijSRjWcF939BuYHN_tNXE5llWxZsKC5822lsdr2gGM4d8McqPVhnk-mY01&t=637100650300000000");
-			background-repeat: no-repeat;
-			background-position: right center;
-			padding-right: 14px;
-		}
+		@($"#{ID} a.popout")
+	{
+		background-image: url(data:image/gif;base64,R0lGODlhDwAPAID/AMDAwAAAACH5BAEAAAAALAAAAAAPAA8AQAIXhI+ZwaHrnpxUtjhZ3fzh2mzXp4RgRxUAOw==);
+		background-repeat: no-repeat;
+		background-position: right center;
+		padding-right: 14px;
+	}
 
 		@($"#{ID} a.dynamic") {
 			@DynamicMenuItemStyle.ToStyle().ToString()

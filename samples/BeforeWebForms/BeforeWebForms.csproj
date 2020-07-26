@@ -119,6 +119,7 @@
     <Content Include="ControlSamples\ListView\Default.aspx" />
     <Content Include="ControlSamples\ListView\ModelBinding.aspx" />
     <Content Include="ControlSamples\Menu\Default.aspx" />
+    <Content Include="ControlSamples\Menu\DynamicMenuStyle.aspx" />
     <Content Include="ControlSamples\Repeater\Default.aspx" />
     <Content Include="ControlSamples\TreeView\default.aspx" />
     <Content Include="ControlSamples\TreeView\WithGridLines.aspx" />
@@ -249,6 +250,13 @@
     </Compile>
     <Compile Include="ControlSamples\ListView\ModelBinding.aspx.designer.cs">
       <DependentUpon>ModelBinding.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\Menu\DynamicMenuStyle.aspx.cs">
+      <DependentUpon>DynamicMenuStyle.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\Menu\DynamicMenuStyle.aspx.designer.cs">
+      <DependentUpon>DynamicMenuStyle.aspx</DependentUpon>
     </Compile>
     <Compile Include="ControlSamples\Repeater\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>

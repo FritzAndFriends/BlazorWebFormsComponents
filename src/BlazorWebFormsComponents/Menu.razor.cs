@@ -47,10 +47,24 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		private DynamicMenuStyle _DynamicMenuStyle = new DynamicMenuStyle();
+		public DynamicMenuStyle DynamicMenuStyle
+		{
+			get { return _DynamicMenuStyle; }
+			set
+			{
+				_DynamicMenuStyle = value;
+				this.StateHasChanged();
+			}
+		}
+
 		private DynamicMenuItemStyle _DynamicMenuItemStyle = new DynamicMenuItemStyle();
-		public DynamicMenuItemStyle DynamicMenuItemStyle {
+		public DynamicMenuItemStyle DynamicMenuItemStyle
+		{
 			get { return _DynamicMenuItemStyle; }
-			set { _DynamicMenuItemStyle = value;
+			set
+			{
+				_DynamicMenuItemStyle = value;
 				this.StateHasChanged();
 			}
 		}

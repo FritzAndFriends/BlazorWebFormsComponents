@@ -22,6 +22,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string Title { get; set; }
 
+		[Parameter]
+		public string ToolTip { get; set; }
+
 		[CascadingParameter(Name="Depth")]
 		public int Depth { get; set; } = 1;
 
