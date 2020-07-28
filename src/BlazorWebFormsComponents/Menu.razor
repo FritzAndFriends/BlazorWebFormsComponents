@@ -57,6 +57,13 @@
 			@DynamicMenuItemStyle.ToStyle().ToString()
 		}
 
+@if (DynamicSelectedStyle != new DynamicSelectedStyle()) {
+	@($"#{ID} a.dynamic.selected")
+	@: {
+		@DynamicSelectedStyle.ToStyle().ToString()
+	@:} 
+}
+
 		@($"#{ID} a.level2") {
 			padding-left: @($"{StaticSubmenuIndent}px");
 		}
