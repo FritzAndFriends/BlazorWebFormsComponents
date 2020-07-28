@@ -126,4 +126,14 @@ namespace BlazorWebFormsComponents
 
 	}
 
+	public class DynamicSelectedStyle : MenuItemStyle {
+
+		protected override void OnInitialized()
+		{
+			base.OnInitialized();
+			ParentMenu.DynamicSelectedStyle = this;
+		}
+
+	}
+
 }

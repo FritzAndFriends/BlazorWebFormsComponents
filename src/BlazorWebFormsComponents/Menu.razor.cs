@@ -69,6 +69,17 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		private DynamicSelectedStyle _DynamicSelectedStyle = new DynamicSelectedStyle();
+		public DynamicSelectedStyle DynamicSelectedStyle
+		{
+			get { return _DynamicSelectedStyle; }
+			set
+			{
+				_DynamicSelectedStyle = value;
+				this.StateHasChanged();
+			}
+		}
+
 		private StaticHoverStyle _StaticHoverStyle = new StaticHoverStyle();
 		public StaticHoverStyle StaticHoverStyle {
 			get { return _StaticHoverStyle; }
