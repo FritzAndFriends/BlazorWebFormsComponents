@@ -19,10 +19,10 @@
 
 	}
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 		// Given
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		TheContent.ShouldBe("Not clicked yet!");
 

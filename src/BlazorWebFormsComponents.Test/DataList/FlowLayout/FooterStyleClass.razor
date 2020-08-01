@@ -17,9 +17,9 @@
 </Fixture>
 
 @code {
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.Find("span").Children.FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
 		var @class = footer.GetAttribute("class");

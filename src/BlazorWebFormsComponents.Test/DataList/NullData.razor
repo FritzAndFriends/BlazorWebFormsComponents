@@ -15,10 +15,10 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.Markup.Trim().ShouldBe(string.Empty);
 

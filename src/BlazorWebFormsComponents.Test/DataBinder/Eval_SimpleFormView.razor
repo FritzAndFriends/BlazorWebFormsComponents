@@ -25,13 +25,13 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
 		// Arrange
 		var theWidget = Widget.SimpleWidgetList[0];
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		var tableCells = cut.FindAll("#theItemTemplate td");
 		tableCells.Count().ShouldBe(3);
