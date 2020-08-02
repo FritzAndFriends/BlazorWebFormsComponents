@@ -1,5 +1,3 @@
-# HiddenField
-
 The HiddenField component is meant to emulate the asp:HiddenField control in markup and is defined in the [System.Web.UI.WebControls.HiddenField class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.hiddenfield?view=netframework-4.8)
 
 ## Blazor Features Supported

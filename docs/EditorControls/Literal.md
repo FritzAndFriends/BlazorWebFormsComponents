@@ -1,5 +1,3 @@
-# LinkButton
-
 The Literal component is meant to emulate the asp:Literal control in markup and is defined in the https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.literal?view=netframework-4.8
 
 ## Blazor Features Supported
