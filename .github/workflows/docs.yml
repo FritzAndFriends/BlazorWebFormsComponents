@@ -59,7 +59,7 @@ jobs:
           pages_threshold: major_outage
       -
         name: Deploy
-        #if: success() && github.event_name != 'pull_request' && (endsWith(github.ref, github.event.repository.default_branch) || steps.prepare.outputs.release == 'true')
+        #if: success() && github.event_name != 'pull_request' && (endsWith(github.ref, 'main') || steps.prepare.outputs.release == 'true')
         if: success() && github.event_name != 'pull_request' # Remove after merge and use the previous condition
         uses: crazy-max/ghaction-github-pages@v2.1.1
         with:
