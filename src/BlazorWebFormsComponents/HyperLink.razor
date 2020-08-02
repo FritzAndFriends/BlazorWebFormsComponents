@@ -1,0 +1,10 @@
+﻿@inherits BaseWebFormsComponent
+
+@if (NavigationUrl == null)
+{
+	<a id="@ID">@Text</a>
+}
+else
+{
+	<a id="@ID" target="@Target" href="@NavigationUrl">@Text</a>
+}
