@@ -22,10 +22,10 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
 		cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
 
-		cut.FindAll("span").Count(c => c.TextContent.StartsWith("== ") && c.TextContent.EndsWith(" ==")).ShouldBe(1);
+		cut.FindAll("span").Count(c => c.TextContent.StartsWith("== ") && c.TextContent.EndsWith(" ==")).ShouldBe((int)Math.Floor(Widget.SimpleWidgetList.Length/2.0m));
 
 	}
 

@@ -32,7 +32,7 @@
 		var cut = fixture.GetComponentUnderTest();
 
 		cut.FindAll("#theItemTemplate td").Count().ShouldBe(3);
-		cut.FindAll("a").Count().ShouldBe(2);
+		cut.FindAll("a").Count().ShouldBe(Widget.SimpleWidgetList.Length-1);
 
 	}
 

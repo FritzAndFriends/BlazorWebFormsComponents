@@ -31,8 +31,8 @@
 		tableHeaders[0].TextContent.ShouldBe("Name");
 		tableHeaders[1].TextContent.ShouldBe("Price");
 		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
-		cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(3, "Did not render 3 TR elements");
-		cut.FindAll("td label").Count().ShouldBe(6, "Did not render 6 labels");
+		cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
+		cut.FindAll("td label").Count().ShouldBe(Widget.SimpleWidgetList.Length*2, $"Did not render {Widget.SimpleWidgetList.Length*2} labels");
 	}
 
 	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)

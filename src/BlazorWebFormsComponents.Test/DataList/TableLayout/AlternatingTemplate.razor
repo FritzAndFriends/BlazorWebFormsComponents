@@ -22,9 +22,9 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(4);
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
 
-		cut.FindAll("td").Count(c => c.TextContent.StartsWith("== ") && c.TextContent.EndsWith(" ==")).ShouldBe(1);
+		cut.FindAll("td").Count(c => c.TextContent.StartsWith("== ") && c.TextContent.EndsWith(" ==")).ShouldBe((int)Math.Floor(Widget.SimpleWidgetList.Length/2.0m));
 
 	}
 

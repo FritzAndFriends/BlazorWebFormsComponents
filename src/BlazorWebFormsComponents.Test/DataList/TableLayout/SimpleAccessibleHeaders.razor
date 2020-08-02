@@ -22,7 +22,7 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(3);
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 		cut.FindAll("th").Count().ShouldBe(1);
 		cut.Find("th").TextContent.ShouldBe("My Widget List");
 

@@ -19,8 +19,8 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(2);
-		cut.FindAll("b").Count().ShouldBe(1);
+		cut.FindAll("span").Count().ShouldBe((int)Math.Ceiling(Widget.SimpleWidgetList.Length/2.0m));
+		cut.FindAll("b").Count().ShouldBe((int)Math.Floor(Widget.SimpleWidgetList.Length/2.0m));
 
 	}
 
