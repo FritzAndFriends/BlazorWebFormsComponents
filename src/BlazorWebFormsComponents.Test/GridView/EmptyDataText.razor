@@ -11,9 +11,9 @@
 
 @code {
 
-		void FirstTest()
+		void FirstTest(Fixture fixture)
 		{
-			var cut = GetComponentUnderTest();
+			var cut = fixture.GetComponentUnderTest();
 			var tableHeaders = cut.FindAll("th").ToList();
 			tableHeaders.Count.ShouldBe(4, "Did not render 4 TH elements");
 			cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(1, "Did not render 1 TR elements");

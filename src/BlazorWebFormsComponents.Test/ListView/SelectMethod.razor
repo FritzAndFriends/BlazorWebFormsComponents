@@ -15,11 +15,11 @@
 
 @code {
 
-		void FirstTest()
+		void FirstTest(Fixture fixture)
 		{
-			var cut = GetComponentUnderTest();
+			var cut = fixture.GetComponentUnderTest();
 			System.Diagnostics.Debug.WriteLine(cut.Markup);
-			cut.FindAll("span").Count().ShouldBe(3);
+			cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 		}
 
 		IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)

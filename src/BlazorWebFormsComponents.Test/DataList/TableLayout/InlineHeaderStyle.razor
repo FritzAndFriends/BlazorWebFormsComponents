@@ -21,12 +21,12 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
 		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		var theHeaderElement = cut.Find("td");
 

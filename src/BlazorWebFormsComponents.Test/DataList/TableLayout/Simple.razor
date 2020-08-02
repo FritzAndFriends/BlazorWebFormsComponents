@@ -16,12 +16,12 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(4);
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
 		cut.Find("td").TextContent.ShouldBe("My Widget List");
 
 		cut.Find("table").HasAttribute("style").ShouldBeTrue();

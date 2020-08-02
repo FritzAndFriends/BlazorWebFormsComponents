@@ -44,11 +44,11 @@
 }
 
 @code {
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
 		// Arrange
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		// Act
 		cut.Find("input").Change("11");

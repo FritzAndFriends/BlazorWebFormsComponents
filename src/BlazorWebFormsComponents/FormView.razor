@@ -1,0 +1,57 @@
+﻿@inherits BaseModelBindingComponent<ItemType>
+@typeparam ItemType
+<table cellspacing="0" style="border-collapse:collapse;">
+	<tr>
+		<td colspan="2">
+			@if (CurrentItem == null)
+			{
+				<span>Loading...</span>
+			}
+			else
+			{
+				OnDataBinding.InvokeAsync(EventArgs.Empty);
+				<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
+					@switch (CurrentMode) {
+						case Enums.FormViewMode.ReadOnly:
+							@ItemTemplate(CurrentItem);
+							break;
+						case Enums.FormViewMode.Edit:
+							@EditItemTemplate(CurrentItem);
+							break;
+					}
+						</CascadingValue>
+						OnDataBound.InvokeAsync(EventArgs.Empty);
+						}
+					</td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				@** BEGIN PAGER **@
+				<tr>
+					@if (Items == null)
+					{
+						<td>Loading...</td>
+					}
+					else
+					{
+						@for (int i = 1; i <= Items.Count(); i++)
+					{
+							if (i == Position)
+							{
+							<td><span>@i</span></td>
+							}
+							else
+							{
+								var thisPosition = i;
+							<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
+							}
+
+						}
+					}
+				</tr>
+
+			</table>
+		</td>
+	</tr>
+</table>

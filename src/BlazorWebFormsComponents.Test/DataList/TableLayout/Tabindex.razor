@@ -17,10 +17,10 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.Find("table").HasAttribute("tabindex").ShouldBeTrue();
 		cut.Find("table").GetAttribute("tabindex").ShouldBe("1");

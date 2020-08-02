@@ -6,14 +6,14 @@
 							AutogenerateColumns="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<Columns>
-				<TemplateField HeaderText="Name">
+				<TemplateField ItemType="Widget" HeaderText="Name">
 					<ItemTemplate Context="Item">
-						<label></label>
+						<label Text="@Item.Name"></label>
 					</ItemTemplate>
 				</TemplateField>
-				<TemplateField HeaderText="Price">
+				<TemplateField ItemType="Widget" HeaderText="Price">
 					<ItemTemplate Context="Item">
-						<button></button>
+						<label ID="lblPrice" Text="@Item.Price.ToString()"></label>
 					</ItemTemplate>
 				</TemplateField>
 			</Columns>
@@ -23,21 +23,21 @@
 
 @code {
 
-		void FirstTest()
-		{
-			var cut = GetComponentUnderTest();
-			var tableHeaders = cut.FindAll("th");
-			tableHeaders[0].TextContent.ShouldBe("Name");
-			tableHeaders[1].TextContent.ShouldBe("Price");
-			tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
-			cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(3, "Did not render 3 TR elements");
-			cut.FindAll("td").Count(e => e.InnerHtml.Contains("label")).ShouldBe(3, "Did not render 3 labels");
-			cut.FindAll("td").Count(e => e.InnerHtml.Contains("button")).ShouldBe(3, "Did not render 3 buttons");
-		}
+	void FirstTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		System.Diagnostics.Debug.Write(cut.Markup);
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe("Name");
+		tableHeaders[1].TextContent.ShouldBe("Price");
+		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
+		cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
+		cut.FindAll("td label").Count().ShouldBe(Widget.SimpleWidgetList.Length*2, $"Did not render {Widget.SimpleWidgetList.Length*2} labels");
+	}
 
-		IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-		{
-			totalRowCount = Widget.SimpleWidgetList.Length;
-			return Widget.SimpleWidgetList.AsQueryable();
-		}
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
 }

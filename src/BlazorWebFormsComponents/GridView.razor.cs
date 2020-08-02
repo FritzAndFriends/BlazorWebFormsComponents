@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents
 	/// Blazor version of WebForms GridView control
 	/// </summary>
 	/// <typeparam name="ItemType"></typeparam>
-  public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>, IRowCollection, IColumnCollection
+  public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>
   {
 
 		/// <summary>
@@ -32,15 +32,15 @@ namespace BlazorWebFormsComponents
 		[Parameter] public string CssClass { get; set; }
 
 		///<inheritdoc/>
-		public List<IColumn> ColumnList { get; set; } = new List<IColumn>();
+		public List<IColumn<ItemType>> ColumnList { get; set; } = new List<IColumn<ItemType>>();
 
 		/// <summary>
 		/// The Rows of the GridView
 		/// </summary>
-		public List<IRow> Rows { get => RowList; set => RowList = value; }
+		public List<IRow<ItemType>> Rows { get => RowList; set => RowList = value; }
 
 		///<inheritdoc/>
-		public List<IRow> RowList { get; set; } = new List<IRow>();
+		public List<IRow<ItemType>> RowList { get; set; } = new List<IRow<ItemType>>();
 
 		#region Templates
 		/// <summary>
@@ -63,28 +63,28 @@ namespace BlazorWebFormsComponents
 		}
 
 		///<inheritdoc/>
-		public void AddColumn(IColumn column)
+		public void AddColumn(IColumn<ItemType> column)
 		{
 			ColumnList.Add(column);
 			StateHasChanged();
 		}
 
 		///<inheritdoc/>
-		public void RemoveColumn(IColumn column)
+		public void RemoveColumn(IColumn<ItemType> column)
 		{
 			ColumnList.Remove(column);
 			StateHasChanged();
 		}
 
 		///<inheritdoc/>
-		public void RemoveRow(IRow row)
+		public void RemoveRow(IRow<ItemType> row)
 		{
 			Rows.Remove(row);
 			StateHasChanged();
 		}
 
 		///<inheritdoc/>
-		public void AddRow(IRow row)
+		public void AddRow(IRow<ItemType> row)
 		{
 			Rows.Add(row);
 			StateHasChanged();

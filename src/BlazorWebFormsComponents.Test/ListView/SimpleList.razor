@@ -15,12 +15,12 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(3);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 
 	}
 

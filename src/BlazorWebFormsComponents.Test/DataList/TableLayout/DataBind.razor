@@ -41,16 +41,16 @@
 }
 
 @code{
-	void ShouldTriggerEvents()
+	void ShouldTriggerEvents(Fixture fixture)
 	{
 		// Arrange
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 		Debug.WriteLine(cut.Markup);
 
 		// Assert
 		databinding.ShouldBeGreaterThan(0);
 		databound.ShouldBeGreaterThan(0);
-		itemDatabound.ShouldBeGreaterThanOrEqualTo(3);
-		cut.FindAll("span").Count().ShouldBe(3);
+		itemDatabound.ShouldBeGreaterThanOrEqualTo(Widget.SimpleWidgetList.Length);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 	}
 }

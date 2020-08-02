@@ -1,0 +1,10 @@
+@inherits BaseWebFormsComponent
+
+@{
+	var activeAdvertisment = GetActiveAdvertisment();
+}
+
+@if (activeAdvertisment != null)
+{
+	<a href="@activeAdvertisment.NavigateUrl" target="@Target"><img src="@activeAdvertisment.ImageUrl" width="@activeAdvertisment.Width" height="@activeAdvertisment.Height" alt="@activeAdvertisment.AlternateText" /></a>
+}

@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Generic column interface
 	/// </summary>
-  public interface IColumn
+  public interface IColumn<ItemType>
   {
 		/// <summary>
 		/// The header text of the column
@@ -13,6 +13,6 @@
 		/// <summary>
 		/// The parent IColumnCollection where the IColumn resides
 		/// </summary>
-		IColumnCollection ParentColumnsCollection { get; set; }
+		IColumnCollection<ItemType> ParentColumnsCollection { get; set; }
 	}
 }
