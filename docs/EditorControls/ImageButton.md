@@ -1,9 +1,11 @@
-# LinkButton
-
-It may seem strange that we have a LinkButton component when there already is an HTML anchor and Blazor has features that enable C# interactions with that link, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.linkbutton?view=netframework-4.8
+It may seem strange that we have a ImageButton component when there already is an HTML input with image type and Blazor has features that enable C# interactions with that image, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.imagebutton?view=netframework-4.8
 
 ## Blazor Features Supported
 
+- `AlternateText` alternate text displayed when the image is unavailable
+- `DescriptionUrl` the location to a detailed description for the image
+- `ImageAlign`  the alignment of the image in relation to other elements on the Web page
+- `ImageUrl` The URL of the image
 - `OnClick` event handler
 - `OnClientClick` JavaScript pointer
 - `OnCommand` event handler with event bubbling
@@ -12,8 +14,9 @@ It may seem strange that we have a LinkButton component when there already is an
 ## WebForms Syntax
 
 ```html
-<asp:LinkButton
+<asp:ImageButton
     AccessKey="string"
+    AlternateText="string"
     BackColor="color name|#dddddd"
     BorderColor="color name|#dddddd"
     BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
@@ -23,20 +26,16 @@ It may seem strange that we have a LinkButton component when there already is an
     CommandArgument="string"
     CommandName="string"
     CssClass="string"
+    DescriptionUrl="uri"
     Enabled="True|False"
     EnableTheming="True|False"
     EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
     ForeColor="color name|#dddddd"
     Height="size"
     ID="string"
+    ImageAlign="NotSet|Left|Right|Baseline|Top|Middle|Bottom|
+        AbsBottom|AbsMiddle|TextTop"
+    ImageUrl="uri"
     OnClick="Click event handler"
     OnClientClick="string"
     OnCommand="Command event handler"
@@ -51,7 +50,6 @@ It may seem strange that we have a LinkButton component when there already is an
     SkinID="string"
     Style="string"
     TabIndex="integer"
-    Text="string"
     ToolTip="string"
     ValidationGroup="string"
     Visible="True|False"

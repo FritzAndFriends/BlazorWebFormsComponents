@@ -1,3 +1,1 @@
-# MasterPages
-
 >> Content to come!

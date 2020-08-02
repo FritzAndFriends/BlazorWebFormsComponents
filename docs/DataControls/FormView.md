@@ -1,8 +1,4 @@
-# FormView
-
 The FormView component is meant to emulate the asp:FormView control in markup and is defined in the [System.Web.UI.WebControls.FormView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.formview?view=netframework-4.8)
-
-[Usage Notes](#usage-notes) | [Web Forms Syntax](#web-forms-declarative-syntax) | [Blazor Syntax](#blazor-syntax)
 
 ## Features supported in Blazor
 
@@ -10,11 +6,7 @@ The FormView component is meant to emulate the asp:FormView control in markup an
   - Numerical Pager
   - OnDataBinding and OnDataBound events trigger
 
-##### [Back to top](#formview)
-
 ## Usage Notes
-
-
 
 ## Web Forms Declarative Syntax
 
@@ -146,8 +138,4 @@ The FormView component is meant to emulate the asp:FormView control in markup an
 </asp:FormView>
 ```
 
-##### [Back to top](#formview)
-
 ## Blazor Syntax
-
-##### [Back to top](#formview)
