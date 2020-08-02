@@ -90,3 +90,9 @@ nav:
     - ViewState: UtilityFeatures/ViewState.md
   - Migration:
       - Getting started: Migration/readme.md
+      - Migration Strategies: Migration/Strategies.md
+      - Custom Controls: Migration/Custom-Controls.md
+      - Master Pages: Migration/MasterPages.md
+      - .NET Standard to the Rescue: Migration/NET-Standard.md
+      - User Controls: Migration/User-Controls.md
+      - Web Forms Application Migration Readiness: Migration/migration_readiness.md
