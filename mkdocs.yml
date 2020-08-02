@@ -1,0 +1,98 @@
+site_name: BlazorWebFormsComponents
+site_description: A collection of Blazor components that emulate the web forms components of the same name
+site_author: Jeffrey T. Fritz
+site_url: https://fritzandfriends.github.io/BlazorWebFormsComponents/
+edit_uri: edit/dev/docs/
+docs_dir: docs
+
+repo_name: FritzAndFriends/BlazorWebFormsComponents
+repo_url: https://github.com/FritzAndFriends/BlazorWebFormsComponents
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/FritzAndFriends/BlazorWebFormsComponents
+
+theme:
+    name: material
+    language: en
+    palette:
+      scheme: default
+      primary: indigo
+      accent: indigo
+    font:
+      text: Roboto
+      code: Roboto Mono
+    logo: assets/logo.png
+    favicon: assets/favicon.ico
+    include_search_page: false
+    search_index_only: true
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - markdown_include.include:
+      base_path: docs
+  - meta
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - toc:
+      permalink: true
+
+plugins:
+  - exclude:
+      glob:
+        - "_overrides/*"
+        - "Dockerfile"
+  - git-revision-date-localized:
+      type: iso_datetime
+  - macros
+  - search:
+      prebuild_index: python
+      lang:
+        - en
+
+nav:
+  - Home: README.md
+  - Editor Controls:
+    - AdRotator: EditorControls/AdRotator.md
+    - Button: EditorControls/Button.md
+    - HiddenField: EditorControls/HiddenField.md
+    - HyperLink: EditorControls/HyperLink.md
+    - Image: EditorControls/Image.md
+    - ImageButton: EditorControls/ImageButton.md
+    - Label: EditorControls/Label.md
+    - LinkButton: EditorControls/LinkButton.md
+    - Literal: EditorControls/Literal.md
+  - Data Controls:
+    - DataList: DataControls/DataList.md
+    - FormView: DataControls/FormView.md
+    - GridView: DataControls/GridView.md
+    - ListView: DataControls/ListView.md
+    - Repeater: DataControls/Repeater.md
+  - Validation Controls:
+    - CustomValidator: ValidationControls/CustomValidator.md
+    - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md
+    - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md
+    - ValidationSummary: ValidationControls/ValidationSummary.md
+  - Navigation Controls:
+    - TreeView: NavigationControls/TreeView.md
+  - Utility Features:
+    - Databinder: UtilityFeatures/Databinder.md
+    - ViewState: UtilityFeatures/ViewState.md
+  - Migration:
+      - Getting started: Migration/readme.md
+      - Migration Strategies: Migration/Strategies.md
+      - Custom Controls: Migration/Custom-Controls.md
+      - Master Pages: Migration/MasterPages.md
+      - .NET Standard to the Rescue: Migration/NET-Standard.md
+      - User Controls: Migration/User-Controls.md
+      - Web Forms Application Migration Readiness: Migration/migration_readiness.md

@@ -1,8 +1,4 @@
-# TreeView
-
 The TreeView component is meant to emulate the asp:TreeView control in markup and is defined in the [System.Web.UI.WebControls.TreeView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8)
-
-[Usage Notes](#usage-notes) | [Web Forms Syntax](#web-forms-declarative-syntax) | [Blazor Syntax](#blazor-syntax)
 
 ## Features supported in Blazor
 
@@ -14,13 +10,9 @@ The TreeView component is meant to emulate the asp:TreeView control in markup an
 - SiteMap databinding as an XmlDocument
 - Databinding events
 
-##### [Back to top](#treeview)
-
 ## Usage Notes
 
 - ShowCheckBoxes attribute, when specifying multiple values, should be separated by a vertical pipe `|` instead of commas
-
-##### [Back to top](#treeview)
 
 ## Web Forms Declarative Syntax
 
@@ -291,9 +283,5 @@ The TreeView component is meant to emulate the asp:TreeView control in markup an
 </asp:TreeView>
 ```
 
-##### [Back to top](#treeview)
-
 ## Blazor Syntax
-
-##### [Back to top](#treeview)
 

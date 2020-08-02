@@ -1,17 +1,16 @@
-# Label
-
-It may seem strange that we have a Label component when there already is an HTML span and Blazor has features that enable C# interactions with that label, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.label?view=netframework-4.8
+It may seem strange that we have a HyperLink component when there already is an HTML anchor and Blazor has features that enable C# interactions with that link, but we need to activate other features that were once present in Web Forms.  Original Web Forms documentation is at:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.hyperlink?view=netframework-4.8
 
 ## Blazor Features Supported
 
-- `Text` the text content of the Label component
+- `NavigationUrl` the URL to link when HyperLink component is clicked
+- `Text` the text content of the HyperLink component
+- `Target` the target window or frame in which to display the Web page content linked to when the HyperLink component is clicked
 
 ## WebForms Syntax
 
 ```html
-<asp:Label
+<asp:HyperLink
     AccessKey="string"
-    AssociatedControlID="string"
     BackColor="color name|#dddddd"
     BorderColor="color name|#dddddd"
     BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
@@ -32,6 +31,8 @@ It may seem strange that we have a Label component when there already is an HTML
     ForeColor="color name|#dddddd"
     Height="size"
     ID="string"
+    ImageUrl="uri"
+    NavigateUrl="uri"
     OnDataBinding="DataBinding event handler"
     OnDisposed="Disposed event handler"
     OnInit="Init event handler"
@@ -42,6 +43,7 @@ It may seem strange that we have a Label component when there already is an HTML
     SkinID="string"
     Style="string"
     TabIndex="integer"
+    Target="string|_blank|_parent|_search|_self|_top"
     Text="string"
     ToolTip="string"
     Visible="True|False"

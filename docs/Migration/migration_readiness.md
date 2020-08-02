@@ -1,5 +1,3 @@
-# Web Forms Application Migration Readiness
-
 This document is intended as a primer for prospective teams to review in preparation for migrating their Web Forms applications to Server-Side Blazor.  We believe the migration is a multi-step process and this application review and preparation is the first step in migrating / rewriting an application using Blazor.
 
 ## Definitions
