@@ -2,7 +2,7 @@
 
 A collection of Blazor components that emulate the web forms components of the same name
 
-[![Build status](https://dev.azure.com/FritzAndFriends/BlazorWebFormsComponents/_apis/build/status/BlazorWebFormsComponents-.NET%20Standard-CI)](https://dev.azure.com/FritzAndFriends/BlazorWebFormsComponents/_build/latest?definitionId=14)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build status](https://dev.azure.com/FritzAndFriends/BlazorWebFormsComponents/_apis/build/status/BlazorWebFormsComponents-.NET%20Standard-CI)](https://dev.azure.com/FritzAndFriends/BlazorWebFormsComponents/_build/latest?definitionId=14)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  ![docs](https://github.com/FritzAndFriends/BlazorWebFormsComponents/workflows/docs/badge.svg)
 
 [![Nuget](https://img.shields.io/nuget/v/Fritz.BlazorWebFormsComponents?color=violet)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Fritz.BlazorWebFormsComponents)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Live Sample](https://img.shields.io/badge/-Live%20Sample-purple)](https://blazorwebformscomponents.azurewebsites.net)
 
@@ -12,7 +12,7 @@ We believe that Web Forms applications that have been well maintained and provid
 
 This is not for everyone, not everyone needs to migrate their application.  They can continue being supported as Web Forms for a very long time (2029 EOL at the time of this writing) and the applications that are considered for migration to Blazor may be better suited with a complete re-write.  For those applications that need to be migrated, this library should help make that process simpler by providing components with the same names, markup, and functionality as previously available.
 
-[Get started with your migration, steps ahead, and strategy documentation](docs/Migration/readme.md) for various controls and tools used are available.  Live versions of these components are availalbe on the [Live Samples website](https://blazorwebformscomponents.azurewebsites.net)
+[Documentation is available online](https://fritzandfriends.github.io/BlazorWebFormsComponents/).  [Get started with your migration, steps ahead, and strategy documentation](docs/Migration/readme.md) for various controls and tools used are available.  Live versions of these components are availalbe on the [Live Samples website](https://blazorwebformscomponents.azurewebsites.net)
 
 Portions of the [original .NET Framework](https://github.com/microsoft/referencesource) are contributed to this project under their MIT license.
 
@@ -21,35 +21,35 @@ Portions of the [original .NET Framework](https://github.com/microsoft/reference
 There are a significant number of controls in ASP.NET Web Forms, and we will focus on creating components in the following order:
 
   - Editor Controls
-    - [AdRotator](docs/AdRotator.md)
-    - [Button](docs/Button.md)
-    - [HiddenField](docs/HiddenField.md)
-    - [HyperLink](docs/HyperLink.md)
-    - [Image](docs/Image.md)
-    - [ImageButton](docs/ImageButton.md)
-    - [Label](docs/Label.md)
-    - [LinkButton](docs/LinkButton.md)
-    - [Literal](docs/Literal.md)
+    - [AdRotator](docs/EditorControls/AdRotator.md)
+    - [Button](docs/EditorControls/Button.md)
+    - [HiddenField](docs/EditorControls/HiddenField.md)
+    - [HyperLink](docs/EditorControls/HyperLink.md)
+    - [Image](docs/EditorControls/Image.md)
+    - [ImageButton](docs/EditorControls/ImageButton.md)
+    - [Label](docs/EditorControls/Label.md)
+    - [LinkButton](docs/EditorControls/LinkButton.md)
+    - [Literal](docs/EditorControls/Literal.md)
   - Data Controls
     - Chart(?)
-    - [DataList](docs/DataList.md)
+    - [DataList](docs/DataControls/DataList.md)
     - DataPager
     - DetailsView
-    - [FormView](docs/FormView.md)
-    - [GridView](docs/GridView.md)
-    - [ListView](docs/ListView.md)
-    - [Repeater](docs/Repeater.md)
+    - [FormView](docs/DataControls/FormView.md)
+    - [GridView](docs/DataControls/GridView.md)
+    - [ListView](docs/DataControls/ListView.md)
+    - [Repeater](docs/DataControls/Repeater.md)
   - Validation Controls
     - CompareValidator
-    - [CustomValidator](docs/CustomValidator.md)
+    - [CustomValidator](docs/ValidationControls/CustomValidator.md)
     - RangeValidator
-    - [RegularExpressionValidator](docs/RegularExpressionValidator.md)
-    - [RequiredFieldValidator](docs/RequiredFieldValidator.md)
-    - [ValidationSummary](docs/ValidationSummary.md)
+    - [RegularExpressionValidator](docs/ValidationControls/RegularExpressionValidator.md)
+    - [RequiredFieldValidator](docs/ValidationControls/RequiredFieldValidator.md)
+    - [ValidationSummary](docs/ValidationControls/ValidationSummary.md)
   - Navigation Controls
     - Menu
     - SiteMapPath
-    - [TreeView](docs/TreeView.md)
+    - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
     - ChangePassword
     - Login
@@ -64,8 +64,8 @@ We will NOT be converting any DataSource objects, Wizard components, skins or th
 
 There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  Importantly, these features are NOT implemented the same way that they are in Web Forms, but rather have the same API and behave in a proper Blazor fashion.  These features include:
 
-  - [DataBinder](docs/Databinder.md)
-  - [ViewState](docs/ViewState.md)
+  - [DataBinder](docs/UtilityFeatures/Databinder.md)
+  - [ViewState](docs/UtilityFeatures/ViewState.md)
 
 ## Compiling the project
 
