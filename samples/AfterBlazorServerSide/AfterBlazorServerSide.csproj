@@ -5,6 +5,7 @@
     <UserSecretsId>52f991fe-af6a-4f37-b2a1-d0219aa062e7</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <Configurations>Debug;Release;WebForms</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

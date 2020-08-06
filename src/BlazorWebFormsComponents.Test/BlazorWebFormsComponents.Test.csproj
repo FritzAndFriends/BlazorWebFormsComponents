@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<RazorLangVersion>3.0</RazorLangVersion>
+		<Configurations>Debug;Release;WebForms</Configurations>
 	</PropertyGroup>
 
 
