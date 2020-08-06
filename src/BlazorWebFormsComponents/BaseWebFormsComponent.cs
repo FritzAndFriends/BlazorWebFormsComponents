@@ -205,7 +205,7 @@ namespace BlazorWebFormsComponents
 				HandleUnknownAttributes();
 				StateHasChanged();
 
-				JsRuntime.InvokeVoidAsync("bwfc.Page.OnAfterRender", new object[] { });
+				JsRuntime.InvokeVoidAsync(JsScripts.Page.OnAfterRender, new object[] { });
 
 			}
 
