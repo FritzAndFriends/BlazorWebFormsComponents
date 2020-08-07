@@ -1,0 +1,64 @@
+﻿@using System.Data
+@using BlazorWebFormsComponents.Extensions
+@inherits TestComponentBase
+
+<Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
+	<ComponentUnderTest>
+		<GridView DataSource="dataTable.AsDynamicEnumerable()" AutogenerateColumns="true">
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
+	<ComponentUnderTest>
+		<GridView ItemType="dynamic" DataSource="dataTable.AsDynamicEnumerable()" AutogenerateColumns="false">
+			<Columns>
+					<BoundField ItemType="dynamic" DataField="Name" HeaderText="Item Name" />
+					<BoundField ItemType="dynamic" DataField="Quantity" HeaderText="Item Quantity" />
+				</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	DataTable dataTable = new DataTable();
+
+	void DataTableAsDataSourceWithAutoGenerateColumns(Fixture fixture)
+	{
+		dataTable = GetDataTable();
+
+		var cut = fixture.GetComponentUnderTest();
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe("Id");
+		tableHeaders[1].TextContent.ShouldBe("Name");
+		tableHeaders[2].TextContent.ShouldBe("Quantity");
+		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
+	}
+
+	void DataTableAsDataSourceWithoutAutoGenerateColumns(Fixture fixture)
+	{
+		dataTable = GetDataTable();
+
+		var cut = fixture.GetComponentUnderTest();
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe("Item Name");
+		tableHeaders[1].TextContent.ShouldBe("Item Quantity");
+		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
+	}
+
+	DataTable GetDataTable()
+	{
+		dataTable.Columns.AddRange(new DataColumn[3]
+		{
+			new DataColumn("Id", typeof(int)),
+			new DataColumn("Name", typeof(string)),
+			new DataColumn("Quantity",typeof(string))
+		});
+
+		dataTable.Rows.Add(1, "Flour", "500 Kg");
+		dataTable.Rows.Add(2, "Tea", "20 Kg");
+		dataTable.Rows.Add(3, "Rice", "1000 Kg");
+
+		return dataTable;
+	}
+}
