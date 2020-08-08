@@ -16,6 +16,9 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</PackageProjectUrl>
 		<PackageTags>blazor</PackageTags>
+		<PackageIcon>logo128.png</PackageIcon>
+		<RepositoryUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</RepositoryUrl>
+		<RepositoryType>GitHub</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +31,13 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\docs\assets\logo128.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
