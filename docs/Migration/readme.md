@@ -54,9 +54,28 @@ This will allow you to reference the components from the library directly.  With
 
 Master Pages in Web Forms are a combination of two concepts in Blazor: a host page and a Blazor layout.  In Blazor Server-Side the host page is a razor page by default in `Pages/_Host.cshtml` that bootstraps the Blazor application and hosts all static CSS and JavaScript references.
 
-You will want to place any CSS or JavaScript references from your MasterPages into this host page.  The rest of your MasterPage layout will need to be migrated to a layout razor file.  In the simplest scenario where you have one MasterPage with *ONLY* HTML content and it has one main content area, you will want to overwrite the content in `Shared/MainLayout.razor`
+You will want to place any CSS or JavaScript references from your MasterPages into this host page.  The rest of your MasterPage layout inside the `BODY` tag will need to be migrated to a layout razor file.  In the simplest scenario where you have one MasterPage with *ONLY* HTML content and it has one main content area, you will want to overwrite the content in `Shared/MainLayout.razor`
 
-For more complex scenarios, read the [MasterPages strategy documentation](MasterPages.md).
+The default layout for your application will be defined in the `App.razor` file in a `RouteView` element as follows:
+
+```xml
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+```
+
+You can add additional rules in this file to route and choose different layouts as appropriate for your application.
+
+For more complex scenarios and a walk-through with samples, read the [MasterPages strategy documentation](Strategy/MasterPages.md).
+
+[Back to top](#Migration---Getting-Started)
 
 ## Step 5 - User Controls
 
@@ -78,8 +97,29 @@ References to `<asp:` components can be easily edited to use the matching compon
 
 ## Step 6 - Pages
 
- - Copy `ASPX` and `ASPX.cs` files into `Pages` folder
- - Rename and convert to `razor` and `razor.cs`
+Page migration is a process very similar to UserControls, except working on files with the `.aspx` extension.
+
+The page starts with a directive to connect the markup to .NET  code like the following:
+
+```html
+<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms._Default" %>
+```
+
+These features defined here will be migrated / removed as follows:
+  - `Title` is not used in Blazor.  [We're looking into a work-around](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/100)
+  - `Language` is not used - everything on the razor template is C#
+  - `MasterPageFile` is now a Layout and defined by default in the `App.razor` file.  You can override it by adding a `@layout MyLayout` directive at the top of the file
+  - `AutoEventWireup` is not used in Blazor
+  - `CodeBehind` is not used in Blazor
+  - `Inherits` is converted to an `@inherits` directive that specifies the base class that the Blazor component should inherit from, typically `ComponentBase`.
+
+Additionally, pages are defined with a route in Blazor.  You will need to add a page directive to the top of the `.razor` file with syntax to declare what URL segment this page is listening on:
+
+```
+@page "/Home"
+```
+
+See the official Blazor documentation for more information on the [Page directive](https://docs.microsoft.com/en-us/aspnet/core/razor-pages/?view=aspnetcore-3.1&tabs=visual-studio#custom-routes) and how to handle routing.
 
 ## Step 7 - Custom Controls
 

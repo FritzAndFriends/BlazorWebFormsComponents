@@ -6,6 +6,8 @@ A collection of Blazor components that emulate the web forms components of the s
 
 [![Nuget](https://img.shields.io/nuget/v/Fritz.BlazorWebFormsComponents?color=violet)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Fritz.BlazorWebFormsComponents)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Live Sample](https://img.shields.io/badge/-Live%20Sample-purple)](https://blazorwebformscomponents.azurewebsites.net)
 
+[Live Samples running on Azure](https://blazorwebformscomponents.azurewebsites.net)
+
 ## Approach + Considerations
 
 We believe that Web Forms applications that have been well maintained and provide value should have a path forward to the new user-interface frameworks with minimal changes.  This is not an application converted nor is it a patch that can be applied to your project that magically makes it work with ASP<span></span>.NET Core.  This repository contains a library and series of strategies that will allow you to re-use much of your markup, much of your business code and help shorten your application re-write process.
