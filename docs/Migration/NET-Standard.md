@@ -1,10 +1,10 @@
 .NET Standard is the definition of a contract, a series of APIs, that all .NET frameworks must implement to be considered a .NET framework.  .NET Framework, .NET Core, Xamarin, and Mono all implement various .NET Standard versions (or specifications) and this now becomes a vehicle for you to build your class libraries to be re-usable across various version of .NET.
 
->> Needs links to the .NET Standard specifications and repository on GitHub
+[.NET Standard specifications](https://github.com/dotnet/standard) are managed in the open with definitions fore APIs and frameworks that .NET can be used with.
 
 Class libraries can be built and target different version specifications of .NET Standard.  You can target _ANY_ version of .NET Standard and gain compatibility across .NET Framework and .NET Core, but we recommend you target at least _.NET Standard 2.0_
 
->> Add image showing compatibility table of .NET Standard
+![.NET Standard Version Table](../assets/netstandard-version-table.png)
 
 ## Implications
 
@@ -21,12 +21,8 @@ Portability is not guaranteed when you migrate business logic to .NET Standard. 
 
 ## Sample 1: Update an existing class library
 
-The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.5.
-
-### Sample
-
-This is a simple migration sample, demonstrating migrating a class-library from .NET Framework 4.5 to .NET Standard 2.0
+The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.5.  You can find it in [samples/netstandard-1](../samples/netstandard-1/README.md) folder.
 
 ## Sample 2: Refactoring Business Logic
 
-The second sample shows how to take an existing ASP<span></span>.NET application and refactor our some business logic as a .NET Standard project.  You can find the source and directions for this sample in the [samples/netstandard-2](samples/netstandard-2) folder.
+The second sample shows how to take an existing ASP<span></span>.NET application and refactor our some business logic as a .NET Standard project.  You can find the source and directions for this sample in the [samples/netstandard-2](../samples/netstandard-2/README.md) folder.
