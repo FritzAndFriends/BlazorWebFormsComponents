@@ -21,10 +21,10 @@
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<int>> Number = new ForwardRef<InputBase<int>>();
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.Find("input").Change("6");
 

@@ -1,0 +1,10 @@
+﻿@inherits TestComponentBase
+
+<SnapshotTest Description="Verify HTML format of HiddenField">
+	<TestInput>
+		<HiddenField Value="Token" />
+	</TestInput>
+	<ExpectedOutput>
+		<input type="hidden" value="Token" />
+	</ExpectedOutput>
+</SnapshotTest>

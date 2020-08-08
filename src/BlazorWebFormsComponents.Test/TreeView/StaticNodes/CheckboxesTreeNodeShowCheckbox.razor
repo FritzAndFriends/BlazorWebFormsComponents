@@ -46,10 +46,10 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
 		var checkboxes = cut.FindAll("input").Where(c => c.GetAttribute("type") == "checkbox");
 		checkboxes.Count().ShouldBe(3);

@@ -138,6 +138,7 @@ namespace BlazorWebFormsComponents
 					case KnownColor.Window: colorString = "window"; break;
 					case KnownColor.WindowFrame: colorString = "windowframe"; break;
 					case KnownColor.WindowText: colorString = "windowtext"; break;
+					// Something evil you say?
 				}
 			}
 			else if (c.IsNamedColor)

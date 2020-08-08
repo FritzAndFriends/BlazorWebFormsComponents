@@ -1,35 +1,14 @@
-# Migration - Getting Started
-
-Migration might not be the correct term for this process, it could appear to be more of a rewrite using Blazor.  In this article, you will learn how to get started rewriting your Web Forms application using Blazor with the Blazor Web Forms Components package.
+Migration might not be the correct term for this process, it could appear to be more of a rewrite using Blazor. In this article, you will learn how to get started rewriting your Web Forms application using Blazor with the Blazor Web Forms Components package.
 
 The output project from this operation will be a .NET Core 3.1 project running server-side Blazor.  This is the current desired result as this is the supported LTS version of .NET Core and Blazor that was published in December 2019.  With the schedule of .NET releases (as of Feb. 2020), we should expect to update to the next LTS version, .NET 6 between November 2021 and November 2022.
-
-<!-- TOC depthFrom:2 -->
-
-- [Step 0 - Acknowledgement](#step-0---acknowledgement)
-- [Step 1 - Readiness](#step-1---readiness)
-- [Step 2 - Migrate Business Logic to .NET Standard](#step-2---migrate-business-logic-to-net-standard)
-- [Step 3 - Create a new Blazor Server Project](#step-3---create-a-new-blazor-server-project)
-- [Step 4 - Master Pages](#step-4---master-pages)
-- [Step 5 - User Controls](#step-5---user-controls)
-- [Step 6 - Pages](#step-6---pages)
-- [Step 7 - Custom Controls](#step-7---custom-controls)
-- [Step X - Convert inline Visual Basic](#step-x---convert-inline-visual-basic)
-- [Follow-up: Move components to Razor Component Library](#follow-up-move-components-to-razor-component-library)
-
-<!-- /TOC -->
 
 ## Step 0 - Acknowledgement
 
 The first step is a step of acknowledgement.  This process is not 100% and is not guaranteed to deliver a Blazor application without some amount of rewriting.  Applications are written in many different ways, and the tools provided here are attempting to get your project *CLOSE* to Blazor so that you have to rewrite as little code as possible.
 
-[Back to top](#Migration---Getting-Started)
-
 ## Step 1 - Readiness
 
 There are good application architectures and there are not-so-good application architectures to be considered for migration to Blazor.  We've written another document to help you evaluate the [readiness of your application for migration](migration_readiness.md).  It is recommended you read through that documentation to understand what makes an application better prepared for migration to Blazor.
-
-[Back to top](#Migration---Getting-Started)
 
 ## Step 2 - Migrate Business Logic to .NET Standard
 
@@ -40,8 +19,6 @@ There are good application architectures and there are not-so-good application a
 There is a separate [strategy document](NET-Standard.md) with instructions to migrate your code to .NET Standard libraries.  The goal of the exercise is to place all of your business logic into .NET Standard 2.0 libraries.  This version of .NET Standard will allow you to reference the libraries in both your existing Web Forms application and in your new Blazor application.
 
 **A side benefit**: this is a good architecture practice that should allow you to test your business logic independently from your web project.  Try starting a unit test project with xUnit, NUnit or MSTest to exercise some of your business logic.  You will be able to run your tests either in the Visual Studio Test Runner or at the command line using `dotnet test`
-
-[Back to top](#Migration---Getting-Started)
 
 ## Step 3 - Create a new Blazor Server Project
 
@@ -72,8 +49,6 @@ Next, add a using statement in the existing `./_Imports.razor` file for the Blaz
 `@using BlazorWebFormsComponents`
 
 This will allow you to reference the components from the library directly.  Without this statement you would have to create tags that look like `<BlazorWebFormsComponents.ListView` and that's just ugly.  We want the simpler `<ListView` syntax that matches the markup used in ASP<span></span>.NET
-
-[Back to top](#Migration---Getting-Started)
 
 ## Step 4 - Master Pages
 
@@ -118,10 +93,7 @@ We recommend copying your HTML and code into a `YOURCOMPONENT.razor` file with t
 
 References to `<asp:` components can be easily edited to use the matching components with these steps:
 
-
 [More information and advanced techniques can be found in the User Controls strategy document](User-Controls.md)
-
-[Back to top](#Migration---Getting-Started)
 
 ## Step 6 - Pages
 
@@ -149,24 +121,14 @@ Additionally, pages are defined with a route in Blazor.  You will need to add a 
 
 See the official Blazor documentation for more information on the [Page directive](https://docs.microsoft.com/en-us/aspnet/core/razor-pages/?view=aspnetcore-3.1&tabs=visual-studio#custom-routes) and how to handle routing.
 
-[Back to top](#Migration---Getting-Started)
-
 ## Step 7 - Custom Controls
 
 At this time, these controls will need to be re-written to target the ComponentBase class instead.  We have an [issue opened to look into making migration of these classes easier](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/92), but it is targeted for later in the project.
 
 More information and strategy for re-writing these controls can be found in the [custom controls strategy document](Custom-Controls.md).
 
-[Back to top](#Migration---Getting-Started)
-
 ## Step X - Convert inline Visual Basic
 
 Use the tool from Telerik at: https://converter.telerik.com/
 
-[Back to top](#Migration---Getting-Started)
-
 ## Follow-up: Move components to Razor Component Library
-
-[Back to top](#Migration---Getting-Started)
-
-

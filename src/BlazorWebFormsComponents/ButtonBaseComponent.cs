@@ -28,7 +28,7 @@ namespace BlazorWebFormsComponents
 
 		protected void Click()
 		{
-			if (OnCommand.HasDelegate)
+			if (!string.IsNullOrEmpty(CommandName))
 			{
 				var args = new CommandEventArgs(CommandName, CommandArgument);
 				OnCommand.InvokeAsync(args);

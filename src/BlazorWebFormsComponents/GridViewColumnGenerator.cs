@@ -19,7 +19,7 @@ namespace BlazorWebFormsComponents
 			var propertiesInfo = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).OrderBy(x => x.MetadataToken);
 			foreach (var propertyInfo in propertiesInfo)
 			{
-				var newColumn = new BoundField {
+				var newColumn = new BoundField<ItemType> {
 					DataField = propertyInfo.Name,
 					ParentColumnsCollection = gridView,
 					HeaderText = propertyInfo.Name

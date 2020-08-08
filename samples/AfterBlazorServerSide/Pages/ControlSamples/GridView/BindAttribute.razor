@@ -1,0 +1,23 @@
+﻿@page "/ControlSamples/GridView/BindAttribute"
+
+<h2>Bug159Example</h2>
+
+<Nav />
+
+<GridView ItemType="Customer"
+					AutogenerateColumns="false"
+					DataKeyNames="CustomerID"
+					SelectMethod="Customer.GetCustomers"
+					EmptyDataText="No data available">
+	<Columns>
+		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+		<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="CompanyName" />
+		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="FirstName" />
+		<BoundField ItemType="Customer" DataField="LastName" HeaderText="LastName" />
+		<TemplateField ItemType="Customer">
+			<ItemTemplate Context="Item">
+				<input type="text" @bind="@Item.FirstName" />
+			</ItemTemplate>
+		</TemplateField>
+	</Columns>
+</GridView>

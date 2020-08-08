@@ -1,24 +1,16 @@
 ﻿@inherits TestComponentBase
 
-<Fixture Tests="new Action[]{ CollapsedTest, HideTest}">
+<Fixture Test="CollapsedTest">
 	<ComponentUnderTest>
-		<TreeView id="SampleTreeView"
-							OnTreeNodeExpanded="RecordExpanded"
-							runat="server">
-
+		<TreeView id="SampleTreeView" runat="server">
 			<Nodes>
-
 				<TreeNode Value="Parent"
 									Text="Parent"
 									Expanded="false">
-
 					<TreeNode Value="Child"
 										Text="Child" />
-
 				</TreeNode>
-
 			</Nodes>
-
 		</TreeView>
 	</ComponentUnderTest>
 
@@ -30,43 +22,58 @@
 		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">
 	</Fragment>
 
+	@code {
+
+		private TreeNode _ExpandedNode;
+
+		void CollapsedTest(Fixture fixture)
+		{
+			var cut = fixture.GetComponentUnderTest<TreeView>();
+			cut.Find("img").MarkupMatches(fixture.GetFragment("BeforeImage"));
+
+			cut.Find("a").Click();
+
+			cut.Find("img").MarkupMatches(fixture.GetFragment("AfterImage"));
+		}
+	}
+
 </Fixture>
 
 
-@code {
+<Fixture Test="HideTest">
+	<ComponentUnderTest>
+		<TreeView id="SampleTreeView" runat="server">
+			<Nodes>
+				<TreeNode Value="Parent"
+									Text="Parent"
+									Expanded="true">
+					<TreeNode Value="Child"
+										Text="Child" />
+				</TreeNode>
+			</Nodes>
+		</TreeView>
+	</ComponentUnderTest>
 
-	private TreeNode _ExpandedNode;
+	<Fragment Id="BeforeImage">
+		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">
+	</Fragment>
 
-	void CollapsedTest()
-	{
+	<Fragment Id="AfterImage">
+		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">
+	</Fragment>
 
-		var cut = GetComponentUnderTest<TreeView>();
+	@code {
 
-		cut.Find("img").MarkupMatches(GetFragment("BeforeImage"));
-		cut.Find("a").Click();
+		void HideTest(Fixture fixture)
+		{
+			var cut = fixture.GetComponentUnderTest<TreeView>();
+			cut.Find("img").MarkupMatches(fixture.GetFragment("AfterImage"));
 
-		cut.Find("img").MarkupMatches(GetFragment("AfterImage"));
-		cut.Find("table + table");
+			cut.Find("a").Click();
 
+			cut.Find("img").MarkupMatches(fixture.GetFragment("BeforeImage"));
+			cut.FindAll("table").Count.ShouldBe(1);
+		}
 	}
 
-	void HideTest()
-	{
-
-		var cut = GetComponentUnderTest<TreeView>();
-
-		cut.Find("img").MarkupMatches(GetFragment("AfterImage"));
-		cut.Find("a").Click();
-		cut.Find("img").MarkupMatches(GetFragment("BeforeImage"));
-		cut.FindAll("table").Count.ShouldBe(1);
-
-	}
-
-	void RecordExpanded(TreeNodeEventArgs args)
-	{
-
-		_ExpandedNode = args.Node;
-
-	}
-
-}
+</Fixture>

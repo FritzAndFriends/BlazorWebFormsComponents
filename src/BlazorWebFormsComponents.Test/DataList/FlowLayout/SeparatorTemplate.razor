@@ -17,17 +17,17 @@
 
 @code {
 
-	void FirstTest()
+	void FirstTest(Fixture fixture)
 	{
 
-		var cut = GetComponentUnderTest();
+		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(7);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length*2+1);
 
-		cut.FindAll("span").Count(c => c.TextContent == "====").ShouldBe(2);
+		cut.FindAll("span").Count(c => c.TextContent == "====").ShouldBe(Widget.SimpleWidgetList.Length-1);
 
 		cut.FindAll("span")[3].TextContent.ShouldBe("====");
-		cut.FindAll("span")[5].TextContent.ShouldBe("====");
+		cut.FindAll("span")[7].TextContent.ShouldBe("====");
 
 	}
 

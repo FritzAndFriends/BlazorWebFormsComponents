@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-  public abstract class BaseColumn : BaseWebFormsComponent, IColumn
+  public abstract class BaseColumn<ItemType> : BaseWebFormsComponent, IColumn<ItemType>
 	{
 		///<inheritdoc/>
 		[CascadingParameter(Name = "ColumnCollection")]
-		public IColumnCollection ParentColumnsCollection { get; set; }
+		public IColumnCollection<ItemType> ParentColumnsCollection { get; set; }
 
 		///<inheritdoc/>
 		[Parameter] public string HeaderText { get; set; }

@@ -1,0 +1,10 @@
+﻿@inherits TestComponentBase
+
+<SnapshotTest Description="Verify HTML format of HyperLink">
+	<TestInput>
+		<HyperLink Text="Go to Bing!!" NavigationUrl="https://www.bing.com" />
+	</TestInput>
+	<ExpectedOutput>
+		<a href="https://www.bing.com" target="">Go to Bing!!</a>
+	</ExpectedOutput>
+</SnapshotTest>

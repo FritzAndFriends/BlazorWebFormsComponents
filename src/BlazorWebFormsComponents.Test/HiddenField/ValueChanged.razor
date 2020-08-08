@@ -1,0 +1,32 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="HiddenFieldvalueChangedTest">
+	<ComponentUnderTest>
+		<HiddenField Value="Tokn" OnValueChanged="OnValueChanged"></HiddenField>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	private string _newValue = "The value changed!!";
+
+	public string TheContent { get; set; } = "The value not changed yet!";
+
+	void OnValueChanged()
+	{
+		TheContent = _newValue;
+	}
+
+	void HiddenFieldvalueChangedTest(Fixture fixture)
+	{
+		// Given
+		var cut = fixture.GetComponentUnderTest();
+
+		TheContent.ShouldBe("The value not changed yet!");
+
+		// When
+		cut.Find("input").Change(_newValue);
+
+		// Then
+		TheContent.ShouldBe(_newValue);
+	}
+}

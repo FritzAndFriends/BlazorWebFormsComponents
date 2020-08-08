@@ -4,7 +4,7 @@
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture Test="LoginErrorTest">
+<Fixture Setup="Setup" Test="LoginErrorTest">
 	<ComponentUnderTest>
 		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoginError="Login_LoginError" OnAuthenticate="Login_Authenticate" />
 	</ComponentUnderTest>
@@ -15,7 +15,7 @@
 	Login loginControl = new Login();
 	bool isLoginError = false;
 
-	void LoginErrorTest()
+	void Setup(Fixture fixture)
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -24,12 +24,15 @@
 		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
 		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+		fixture.Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
 
 		var navigationManagerMock = new Mock<NavigationManager>();
-		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+		fixture.Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
+	}
 
-		var cut = GetComponentUnderTest();
+	void LoginErrorTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
 
 		cut.Find("#loginControl_UserName").Change(Credential.InvalidCredential.Username);
 		cut.Find("#loginControl_Password").Change(Credential.InvalidCredential.Password);
@@ -44,7 +47,7 @@
 
 	void Login_Authenticate(AuthenticateEventArgs args)
 	{
-			args.Authenticated = false;
+		args.Authenticated = false;
 	}
 
 }

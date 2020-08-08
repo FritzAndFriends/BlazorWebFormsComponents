@@ -1,6 +1,6 @@
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Interfaces;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 namespace BlazorWebFormsComponents
 {	public partial class ImageButton : ButtonBaseComponent, IImageComponent
 	{

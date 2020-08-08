@@ -1,5 +1,3 @@
-# .NET Standard to the Rescue
-
 .NET Standard is the definition of a contract, a series of APIs, that all .NET frameworks must implement to be considered a .NET framework.  .NET Framework, .NET Core, Xamarin, and Mono all implement various .NET Standard versions (or specifications) and this now becomes a vehicle for you to build your class libraries to be re-usable across various version of .NET.
 
 >> Needs links to the .NET Standard specifications and repository on GitHub
@@ -23,7 +21,11 @@ Portability is not guaranteed when you migrate business logic to .NET Standard. 
 
 ## Sample 1: Update an existing class library
 
-The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.5.  You can find the source and directions for this sample in the [samples/netstandard-1](samples/netstandard-1) folder.
+The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.5.
+
+### Sample
+
+This is a simple migration sample, demonstrating migrating a class-library from .NET Framework 4.5 to .NET Standard 2.0
 
 ## Sample 2: Refactoring Business Logic
 
