@@ -21,7 +21,7 @@ Portability is not guaranteed when you migrate business logic to .NET Standard. 
 
 ## Sample 1: Update an existing class library
 
-The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.5.  You can find it in [samples/netstandard-1](../samples/netstandard-1/README.md) folder.
+The first sample demonstrates updating a simple class library to .NET Standard.  In this model, we're assuming that you already have your business logic code properly separated from your user-interface and managed inside a class-library project that targets .NET Framework 4.6.1.  You can find it in [samples/netstandard-1](../samples/netstandard-1/README.md) folder.
 
 ## Sample 2: Refactoring Business Logic
 
