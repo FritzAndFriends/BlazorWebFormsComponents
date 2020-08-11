@@ -20,8 +20,14 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public byte Depth { get; set; } = 0;
 
+		private bool _Expanded = true;
+		private bool? _UserExpanded;
 		[Parameter]
-		public bool Expanded { get; set; } = true;
+		public bool Expanded
+		{
+			get { return _UserExpanded.HasValue ? _UserExpanded.Value : _Expanded; }
+			set { _Expanded = value; }
+		}
 
 		// TODO: Implement
 		[Parameter]
@@ -179,8 +185,10 @@ namespace BlazorWebFormsComponents
 
 			Parent?.AddChildNode(this);
 
+
 			return base.OnInitializedAsync();
 		}
+
 
 		protected override void OnParametersSet() {
 
@@ -193,7 +201,7 @@ namespace BlazorWebFormsComponents
 
 		public void HandleNodeExpand() {
 
-			Expanded = !Expanded;
+			_UserExpanded = !Expanded;
 
 			if (Expanded) ParentTreeView.OnTreeNodeExpanded.InvokeAsync(new TreeNodeEventArgs(this));
 			else ParentTreeView.OnTreeNodeCollapsed.InvokeAsync(new TreeNodeEventArgs(this));
