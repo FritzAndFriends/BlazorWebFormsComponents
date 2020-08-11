@@ -9,7 +9,7 @@ namespace BlazorWebFormsComponents.Extensions
 {
 	public static class DataTableExtensions
 	{
-		public static IEnumerable<dynamic> AsDynamicEnumerable(this DataTable table)
+		internal static IEnumerable<dynamic> AsDynamicEnumerable(this DataTable table)
 		{
 			if (table == null)
 			{
