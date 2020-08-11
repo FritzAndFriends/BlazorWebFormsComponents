@@ -1,17 +1,16 @@
 ﻿@using System.Data
-@using BlazorWebFormsComponents.Extensions
 @inherits TestComponentBase
 
 <Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView DataSource="dataTable.AsDynamicEnumerable()" AutogenerateColumns="true">
+		<GridView ItemType="dynamic" DataSource="dataTable" AutogenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="dynamic" DataSource="dataTable.AsDynamicEnumerable()" AutogenerateColumns="false">
+		<GridView ItemType="dynamic" DataSource="dataTable" AutogenerateColumns="false">
 			<Columns>
 					<BoundField ItemType="dynamic" DataField="Name" HeaderText="Item Name" />
 					<BoundField ItemType="dynamic" DataField="Quantity" HeaderText="Item Quantity" />
@@ -22,7 +21,7 @@
 
 <Fixture Test="DataTableAsDataSource">
 	<ComponentUnderTest>
-		<GridView DataSource="dataTable.AsEnumerable()" AutogenerateColumns="true">
+		<GridView ItemType="dynamic" DataSource="dataTable.AsEnumerable()" AutogenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>

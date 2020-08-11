@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using Microsoft.AspNetCore.Components;
+using BlazorWebFormsComponents.Extensions;
 
 namespace BlazorWebFormsComponents
 {
@@ -28,12 +32,23 @@ namespace BlazorWebFormsComponents
 		protected List<ItemType> ItemsList { get; set; }
 
     [Parameter]
-    public IEnumerable<ItemType> DataSource
+    public object DataSource
     {
       get { return Items; }
-      set { 
-        Items = value;
-        this.StateHasChanged();
+      set
+			{
+				if (!typeof(IEnumerable).IsAssignableFrom(value.GetType()) && value.GetType() != typeof(DataTable))
+				{
+					throw new InvalidOperationException("The DataSource must have an object of type IEnumerable or DataTable.");
+				}
+
+				if(value.GetType() == typeof(DataTable))
+				{
+					value = (value as DataTable).AsDynamicEnumerable();
+				}
+
+				Items = value as IEnumerable<ItemType>;
+				this.StateHasChanged();
       }
     }
 
