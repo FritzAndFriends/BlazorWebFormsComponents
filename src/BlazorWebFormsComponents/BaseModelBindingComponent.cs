@@ -37,15 +37,13 @@ namespace BlazorWebFormsComponents
       get { return Items; }
       set
 			{
-				if (!typeof(IEnumerable).IsAssignableFrom(value.GetType()) && value.GetType() != typeof(DataTable))
+				if (!typeof(IEnumerable).IsAssignableFrom(value.GetType()) && value.GetType() != typeof(DataSet) && value.GetType() != typeof(DataTable))
 				{
-					throw new InvalidOperationException("The DataSource must have an object of type IEnumerable or DataTable.");
+					throw new InvalidOperationException("The DataSource must have an object of type IEnumerable, DataSet or DataTable.");
 				}
 
-				if(value.GetType() == typeof(DataTable))
-				{
-					value = (value as DataTable).AsDynamicEnumerable();
-				}
+				TryBindToDataSet(ref value);
+				TryBindToDataTable(ref value);
 
 				Items = value as IEnumerable<ItemType>;
 				this.StateHasChanged();
@@ -65,6 +63,30 @@ namespace BlazorWebFormsComponents
 
 			base.OnAfterRender(firstRender);
 
+		}
+
+		private static void TryBindToDataSet(ref object value)
+		{
+			if (value.GetType() == typeof(DataSet))
+			{
+				var dataSet = (value as DataSet);
+				if (dataSet.Tables.Count > 0)
+				{
+					value = (dataSet.Tables[0] as object as DataTable).AsDynamicEnumerable();
+				}
+				else
+				{
+					value = Enumerable.Empty<ItemType>();
+				}
+			}
+		}
+
+		private static void TryBindToDataTable(ref object value)
+		{
+			if (value.GetType() == typeof(DataTable))
+			{
+				value = (value as DataTable).AsDynamicEnumerable();
+			}
 		}
 
 	}
