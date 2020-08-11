@@ -1,0 +1,35 @@
+@page "/ControlSamples/Button/Style"
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>Button style demo</h2>
+
+<Nav></Nav>
+
+<style>
+	.rounded-corners {
+		border-radius: 25px;
+		background: #73AD21;
+		color: #FFF;
+		padding: 20px;
+		width: 200px;
+		height: 150px;
+	}
+</style>
+
+<p>
+	<Button Text="Blue Button with White text" BackColor="Blue" ForeColor="White" />
+</p>
+
+<p>
+	<Button Text="Red Button with Yellow text in Serif Font" BackColor="Red" ForeColor="Yellow" Font_Names="Serif" />
+</p>
+
+<p>
+	<Button Text="Rounded Corners" CssClass="rounded-corners" />
+</p>
+
+<p>
+	<Button Text="Purple Button with White Text and Bold Font" BackColor="Purple" ForeColor="White" Font_Bold="true" />
+</p>
+
+

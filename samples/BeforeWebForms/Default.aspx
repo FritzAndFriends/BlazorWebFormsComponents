@@ -25,6 +25,11 @@
                 <li><a href="ControlSamples/Repeater/Default.aspx">Repeater</a></li>
 
             </ul>
+
+            <h3>Editor Controls</h3>
+            <ul>
+              <li><a href="ControlSamples/Button/Default.aspx">Button</a></li>
+            </ul>
         </div>
 
         <div class="col-md-3">

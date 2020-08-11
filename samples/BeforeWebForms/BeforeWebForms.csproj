@@ -107,6 +107,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Images\C#.png" />
     <Content Include="Content\Site.css" />
+    <Content Include="ControlSamples\Button\default.aspx" />
     <Content Include="ControlSamples\DataList\RepeatColumns.aspx" />
     <Content Include="ControlSamples\DataList\StyleAttributes.aspx" />
     <Content Include="ControlSamples\DataList\FlowLayout.aspx" />
@@ -171,6 +172,13 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="ControlSamples\Button\default.aspx.cs">
+      <DependentUpon>default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\Button\default.aspx.designer.cs">
+      <DependentUpon>default.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ControlSamples\DataList\RepeatColumns.aspx.cs">
       <DependentUpon>RepeatColumns.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
