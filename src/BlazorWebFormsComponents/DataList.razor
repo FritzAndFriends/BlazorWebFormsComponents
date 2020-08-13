@@ -66,10 +66,10 @@
 								@{
 									do
 									{
-										var item = IndexedItems[idx - 1];
+										var item = IndexedItems.Skip(idx - 1).FirstOrDefault<object>();
 										<CascadingValue Name="CurrentDataBoundItem" Value="item">
 											@{
-												var even = IndexedItems.IndexOf(item) % 2 == 0;
+												var even = idx % 2 == 0;
 											}
 											<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
 										</CascadingValue>
@@ -111,7 +111,7 @@
 						}
 						do
 						{
-							var item = IndexedItems[idx - 1];
+							object item = IndexedItems[idx - 1];
 							<CascadingValue Name="CurrentDataBoundItem" Value="item">
 								@{
 									var even = IndexedItems.IndexOf(item) % 2 == 0;

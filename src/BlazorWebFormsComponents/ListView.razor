@@ -16,7 +16,7 @@ else
 		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
 
-	Func<bool, RenderFragment<ItemType>> oddOrEvenTemplate =
+	Func<bool, RenderFragment<dynamic>> oddOrEvenTemplate =
 		(isEven) => isEven ? ItemTemplate : AlternatingItemTemplate ?? ItemTemplate;
 
 	@LayoutTemplate(
@@ -30,7 +30,7 @@ else
 				if (GroupItemCount == 0)
 				{
 					OnDataBinding.InvokeAsync(EventArgs.Empty);
-					foreach(var item in Items)
+					foreach(object item in Items)
 					{
 					  <CascadingValue Name="CurrentDataBoundItem" Value="item">
 						@oddOrEvenTemplate(even)(item)
@@ -57,7 +57,7 @@ else
 							for (var i = 0; i < GroupItemCount ; i++)
 							{
 								var builderTemplate = oddOrEvenTemplate(even);
-								var item = itemIterator.Current;
+								var item = itemIterator.Current as object;
 										if (item != null)
 										{
 								<CascadingValue Name="CurrentDataBoundItem" Value="item">

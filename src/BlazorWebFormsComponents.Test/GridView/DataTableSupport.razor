@@ -3,17 +3,17 @@
 
 <Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="dynamic" DataSource="dataTable" AutogenerateColumns="true">
+		<GridView ItemType="DataRow" DataSource="dataTable" AutogenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="dynamic" DataSource="dataTable" AutogenerateColumns="false">
+		<GridView ItemType="DataRow" DataSource="dataTable" AutogenerateColumns="false">
 			<Columns>
-					<BoundField ItemType="dynamic" DataField="Name" HeaderText="Item Name" />
-					<BoundField ItemType="dynamic" DataField="Quantity" HeaderText="Item Quantity" />
+					<BoundField ItemType="DataRow" DataField="Name" HeaderText="Item Name" />
+					<BoundField ItemType="DataRow" DataField="Quantity" HeaderText="Item Quantity" />
 				</Columns>
 		</GridView>
 	</ComponentUnderTest>
@@ -21,14 +21,14 @@
 
 <Fixture Test="DataTableWithEnumerableOfDataRowAsDataSource">
 	<ComponentUnderTest>
-		<GridView ItemType="dynamic" DataSource="dataTable.AsEnumerable()" AutogenerateColumns="true">
+		<GridView ItemType="DataRow" DataSource="dataTable.AsEnumerable()" AutogenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataSetAsDataSource">
 	<ComponentUnderTest>
-		<GridView ItemType="dynamic" DataSource="dataSet" AutogenerateColumns="true">
+		<GridView ItemType="DataRow" DataSource="dataSet" AutogenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>

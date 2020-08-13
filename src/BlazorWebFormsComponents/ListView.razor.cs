@@ -17,8 +17,8 @@ namespace BlazorWebFormsComponents
 
 		#region Templates
 		[Parameter] public RenderFragment EmptyDataTemplate { get; set; }
-		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
-		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+		[Parameter] public RenderFragment<dynamic> ItemTemplate { get; set; }
+		[Parameter] public RenderFragment<dynamic> AlternatingItemTemplate { get; set; }
 		[Parameter] public RenderFragment ItemSeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment<RenderFragment> GroupTemplate { get; set; }

@@ -5,14 +5,14 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class Repeater<ItemType> : BaseModelBindingComponent<ItemType>
+	public partial class Repeater : BaseModelBindingComponent<dynamic>
 	{
 
 		[Parameter]
-		public RenderFragment<ItemType> ItemTemplate { get; set; }
+		public RenderFragment<dynamic> ItemTemplate { get; set; }
 
 		[Parameter]
-		public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+		public RenderFragment<dynamic> AlternatingItemTemplate { get; set; }
 
 		[Parameter]
 		public RenderFragment HeaderTemplate { get; set; }

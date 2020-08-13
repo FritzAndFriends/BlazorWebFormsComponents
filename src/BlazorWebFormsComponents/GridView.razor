@@ -15,7 +15,7 @@
 		<tbody>
 			@if (Items != null && Items.Any())
 			{
-				@foreach (ItemType item in Items)
+				@foreach (object item in Items)
 				{
 					<CascadingValue Value="this" Name="RowCollection">
 						<GridViewRow DataItem="item" Columns="ColumnList" />

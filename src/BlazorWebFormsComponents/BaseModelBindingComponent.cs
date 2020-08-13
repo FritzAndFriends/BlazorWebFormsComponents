@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 		// Cheer 300 svavablount 15/12/19 
 		// Cheer 200 nothing_else_matters 15/12/19 
 
-		public delegate IQueryable<ItemType> SelectHandler(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount); 
+		public delegate IQueryable<dynamic> SelectHandler(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount); 
 
 		/// <summary>
 		/// Data retrieval method to databind the collection to
@@ -23,13 +23,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public SelectHandler SelectMethod { get; set; }
 
-    [Parameter]
-    public IEnumerable<ItemType> Items {
-			get { return ItemsList; }
-			set { ItemsList = value?.ToList(); }
-		}
-
-		protected List<ItemType> ItemsList { get; set; }
+    public IEnumerable<dynamic> Items { get; set; }
 
     [Parameter]
     public object DataSource
@@ -45,7 +39,7 @@ namespace BlazorWebFormsComponents
 				TryBindToDataSet(ref value);
 				TryBindToDataTable(ref value);
 
-				Items = value as IEnumerable<ItemType>;
+				Items = value as IEnumerable<dynamic>;
 				this.StateHasChanged();
       }
     }
@@ -72,7 +66,7 @@ namespace BlazorWebFormsComponents
 				var dataSet = (value as DataSet);
 				if (dataSet.Tables.Count > 0)
 				{
-					value = (dataSet.Tables[0] as object as DataTable).AsDynamicEnumerable();
+					value = (dataSet.Tables[0] as object as DataTable).AsEnumerable();
 				}
 				else
 				{
@@ -85,7 +79,7 @@ namespace BlazorWebFormsComponents
 		{
 			if (value.GetType() == typeof(DataTable))
 			{
-				value = (value as DataTable).AsDynamicEnumerable();
+				value = (value as DataTable).AsEnumerable();
 			}
 		}
 

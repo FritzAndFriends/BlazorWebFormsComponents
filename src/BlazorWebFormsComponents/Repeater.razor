@@ -1,5 +1,4 @@
-﻿@inherits BaseModelBindingComponent<ItemType>
-@typeparam ItemType
+﻿@inherits BaseModelBindingComponent<dynamic>
 
 @if (Visible && Enabled)
 {
@@ -9,11 +8,12 @@
 	@if (Items?.Any() ?? false)
 	{
 
-		@foreach (var item in Items)
+		var counter = 0;
+		@foreach (object item in Items)
 		{
-
+			counter++;
 			<CascadingValue Name="CurrentDataBoundItem" Value="item">
-				@if (AlternatingItemTemplate == null || ItemsList.FindIndex(i => i.Equals(item)) % 2 == 0)
+				@if (AlternatingItemTemplate == null || counter % 2 == 0)
 				{
 					@ItemTemplate(item)
 				}

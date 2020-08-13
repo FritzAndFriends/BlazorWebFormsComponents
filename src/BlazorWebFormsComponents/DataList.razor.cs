@@ -29,8 +29,8 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter(Name = "FooterStyle")] private TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
 		[Parameter] public RenderFragment ChildContent { get; set; }
 		[CascadingParameter(Name = "ItemStyle")] private TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
-		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
-		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
+		[Parameter] public RenderFragment<dynamic> ItemTemplate { get; set; }
+		[Parameter] public RenderFragment<dynamic> AlternatingItemTemplate { get; set; }
 		[CascadingParameter(Name = "AlternatingItemStyle")] private TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
 		[Parameter] public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 		[Parameter] public DataListEnum RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.DataListEnum.Vertical;
@@ -58,7 +58,7 @@ namespace BlazorWebFormsComponents
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public Unit Width { get; set; }
 
-		private IList<ItemType> ElementIndex(int columns, IEnumerable<ItemType> items, DataListEnum direction)
+		private IList<dynamic> ElementIndex(int columns, IEnumerable<dynamic> items, DataListEnum direction)
 		{
 			var itemList = items.ToList();
 			if (direction == DataListEnum.Horizontal)
@@ -72,7 +72,7 @@ namespace BlazorWebFormsComponents
 			var rowMax = fullRows + ((extraRowItemCount > 0) ? 1 : 0);
 
 			var currentItemIdx = 0;
-			var returnList = new ItemType[count];
+			var returnList = new dynamic[count];
 			for (var col = 0; col < columns; col++)
 			{
 				if (col == extraRowItemCount && extraRowItemCount != 0)

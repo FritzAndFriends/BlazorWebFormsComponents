@@ -29,12 +29,12 @@ namespace BlazorWebFormsComponents
 		}
 
 		[Parameter]
-		public RenderFragment<ItemType> EditItemTemplate { get; set; }
+		public RenderFragment<dynamic> EditItemTemplate { get; set; }
 
 		[Parameter]
-		public RenderFragment<ItemType> ItemTemplate { get; set; }
+		public RenderFragment<dynamic> ItemTemplate { get; set; }
 
-		public ItemType CurrentItem { get; set; }
+		public object CurrentItem { get; set; }
 
 		public FormViewMode CurrentMode { get; private set; }
 
