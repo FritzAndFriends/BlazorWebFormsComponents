@@ -1,4 +1,4 @@
-One of the first steps in our [recommended migration strategy](../../migration/NET-Standard.md) focuses on migrating class libraries from .NET Framework (netfx) 3.5 and later to .NET Standard 2.0+
+One of the first steps in our [recommended migration strategy](../../Migration/NET-Standard.md) focuses on migrating class libraries from .NET Framework (netfx) 3.5 and later to .NET Standard 2.0+
 
 ## Scenario
 
