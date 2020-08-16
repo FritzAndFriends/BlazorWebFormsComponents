@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace BlazorWebFormsComponents
@@ -21,7 +22,9 @@ namespace BlazorWebFormsComponents
 			var propertiesInfo = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 			if (propertiesInfo.Count() == 0)
 			{
-				propertiesInfo = gridView.DataSource.First()?.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public) ?? Enumerable.Empty<PropertyInfo>().ToArray();
+				propertiesInfo = (gridView.DataSource as IEnumerable<ItemType>).First()?.GetType()
+					.GetProperties(BindingFlags.Instance | BindingFlags.Public) ?? Enumerable.Empty<PropertyInfo>()
+					.ToArray();
 			}
 
 			foreach (var propertyInfo in propertiesInfo.Where(p => p.Name != IndexerPropertyName).OrderBy(x => x.MetadataToken))

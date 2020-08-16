@@ -1,31 +1,145 @@
 ﻿/* Move down content because we have a fixed navbar that is 50px tall */
 body {
-    padding-top: 50px;
-    padding-bottom: 20px;
-}
-
-/* Wrapping element */
-/* Set some basic padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+	padding-top: 10px;
+	padding-bottom: 20px;
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* Set widths on the form inputs since otherwise they're 100% wide */
 input,
 select,
 textarea {
-    max-width: 280px;
+	max-width: 280px;
 }
-
 
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
-    .jumbotron {
-        margin-top: 20px;
-    }
+	.jumbotron {
+		margin-top: 20px;
+	}
+}
 
-    .body-content {
-        padding: 0;
-    }
+a, .btn-link {
+	color: #0366d6;
+}
+
+	a.component-link {
+		color: #0366d6;
+		text-decoration: underline;
+	}
+
+		a.component-link.active {
+			font-weight: bold;
+			color: inherit;
+			background-color: lightgrey;
+			text-decoration: none !important;
+		}
+
+.btn-primary {
+	color: #fff;
+	background-color: #1b6ec2;
+	border-color: #1861ac;
+}
+
+.top-row {
+	height: 3.5rem;
+	display: flex;
+}
+
+.main {
+	flex: 1;
+	padding-bottom: 50px;
+}
+
+footer {
+	border-top: 1px solid purple;
+	background-color: #EEE;
+	font-size: 0.7em;
+	font-weight: bold;
+	text-align: center;
+	position: fixed;
+	height: auto;
+	bottom: 0;
+	width: 100%;
+}
+
+.main .top-row {
+	background-color: #f7f7f7;
+	border-bottom: 1px solid #d6d5d5;
+	justify-content: flex-start;
+}
+
+	.main .top-row > a, .main .top-row .btn-link {
+		white-space: nowrap;
+		margin-left: 1.5rem;
+	}
+
+	.main .top-row a:first-child {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+.sidebar {
+	background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+	padding: 0;
+	margin: 0;
+}
+
+	.sidebar .top-row {
+		background-color: rgba(0,0,0,0.4);
+		color: white;
+		font-size: 1.0rem;
+		text-align: right;
+		height: 3.5rem;
+		justify-content: center;
+		padding: 3px 0 0 0;
+	}
+
+	.sidebar .navbar-brand {
+		font-size: 1.0rem;
+		text-align: right;
+		color: white;
+		vertical-align: top;
+	}
+
+	.sidebar .nav-item {
+		font-size: 0.9rem;
+		padding-bottom: 0.5rem;
+	}
+
+		.sidebar .nav-item a {
+			color: #d7d7d7;
+			height: 3rem;
+			align-items: center;
+			line-height: 1rem;
+		}
+
+			.sidebar .nav-item a.active {
+				background-color: rgba(255,255,255,0.25);
+				color: white;
+			}
+
+			.sidebar .nav-item a:hover {
+				background-color: rgba(255,255,255,0.1);
+				color: white;
+			}
+
+.content {
+	padding-top: 1.1rem;
+}
+
+.verticalNav {
+	overflow-y: scroll;
+}
+
+.valid.modified:not([type=checkbox]) {
+	outline: 1px solid #26b050;
+}
+
+.invalid {
+	outline: 1px solid red;
+}
+
+.validation-message {
+	color: red;
 }
