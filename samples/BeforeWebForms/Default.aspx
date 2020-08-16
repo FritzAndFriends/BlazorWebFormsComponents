@@ -33,7 +33,7 @@
                 <li>DetailsView</li>
                 <li><a href="ControlSamples/FormView">FormView</a></li>
                 <li><a href="ControlSamples/GridView/Default.aspx">GridView</a></li>
-                <li><a href="/ControlSamples/ListView">ListView</a></li>
+                <li><a href="ControlSamples/ListView">ListView</a></li>
                 <li><a href="ControlSamples/Repeater/Default.aspx">Repeater</a></li>
             </ul>
         </div>
