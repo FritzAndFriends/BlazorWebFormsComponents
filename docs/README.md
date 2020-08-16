@@ -16,6 +16,4 @@ with the original controls delivered with ASP.NET Web Forms.
 
 ## Contents
 
-This folder contains information about each of the components that emulate the original controls, as well as
-documentation about how to use them together to enhance your existing application.  Hopefully, with a little bit of
-work you will be able to make the conversion to Blazor.
+This folder contains information about each of the components that emulate the original controls, as well as documentation about how to use them together to enhance your existing application.  There are migration documents that provide an overall strategy and documentation around various architectures and features that will help you.  Hopefully, with a little bit of work you will be able to make the conversion to Blazor.

@@ -14,14 +14,14 @@
 											Text="Invalid"
 											ErrorMessage="ErrorMessage!" />
 
-			<button type="submit">Submit</button>
+			<button type="submit" @onclick="OnClick">Submit</button>
 
 		</EditForm>
 	</ComponentUnderTest>
 </Fixture>
 
 @code {
-  bool _validSubmit = false;
+	bool _validSubmit = false;
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<string>> Value = new ForwardRef<InputBase<string>>();
 
@@ -30,6 +30,9 @@
 	private void HandleValidSubmit()
 	{
 		_validSubmit = true;
+	}
+
+	private void OnClick() {
 	}
 
 	private void HandleInvalidSubmit()

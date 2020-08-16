@@ -5,6 +5,10 @@ namespace BlazorWebFormsComponents
 {
 	public abstract class ButtonBaseComponent : BaseWebFormsComponent, IButtonComponent
 	{
+
+		[Parameter]
+		public bool CausesValidation { get; set; } = true;
+
 		[Parameter]
 		public string CommandName { get; set; }
 

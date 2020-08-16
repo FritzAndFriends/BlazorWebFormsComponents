@@ -71,6 +71,10 @@ Tell us how you are currently using the web forms framework so that we can build
 1. Send a pull request with your desired scenario as a unit test in `src/BlazorWebFormsComponents.Test`
 1. [Report an issue](https://github.com/FritzAndFriends/BlazorWebFormsComponents/Issues) with the details of a bug that you have found.  Be sure to tag it as a `Bug` so that we can triage and track it
 
+### Write some Web Forms sample code
+
+Demonstrate how an existing control is being used in the `BeforeWebForms` project.  The content of this sample project will be compiled and uploaded to the https://beforewebforms.azurewebsites.net location.
+
 ### Write code for a component
 
 All code for a component should have an assigned issue that matches it.  This way we can prevent contributors from working on the same feature at the same time.
