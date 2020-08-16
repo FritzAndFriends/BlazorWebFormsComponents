@@ -11,6 +11,18 @@
     </p>
 
     <div class="row">
+        <div class="col-md-12">
+            <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents">BlazorWebFormsComponents GitHub</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <a href="https://fritzandfriends.github.io/BlazorWebFormsComponents/">Online BlazorWebFormsComponents Documentation</a>
+        </div>
+    </div>
+
+    <div class="row">
 
         <div class="col-md-3">
             <h3>Data Controls</h3>
