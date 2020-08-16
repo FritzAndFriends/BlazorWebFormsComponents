@@ -11,5 +11,12 @@
 
 	</p>
 
+	<p>
+
+		This button does NOT cause validation:
+		<asp:Button runat="server" ID="noValidationButton" CausesValidation="false" Text="No Validation for you!" />
+
+	</p>
+
 
 </asp:Content>

@@ -5,6 +5,8 @@ It may seem strange that we have a Button component when there already is an HTM
 - OnClick event handler
 - OnClientClick JavaScript pointer
 - OnCommand event handler with event bubbling
+- Button Style attributes and CssClass formatting
+- CausesValidation will control whether  Form validation is triggered on click
 
 ## WebForms Syntax
 

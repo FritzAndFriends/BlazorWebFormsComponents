@@ -24,5 +24,7 @@ namespace BlazorWebFormsComponents {
 
 		private string CalculatedStyle => this.ToStyle().Build().NullIfEmpty();
 
+		internal string CalculatedButtonType => CausesValidation ? "submit" : "button";
+
 	}
 }
