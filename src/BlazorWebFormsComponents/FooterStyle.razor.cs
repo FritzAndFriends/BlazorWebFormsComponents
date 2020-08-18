@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents
 {
-	public partial class FooterStyle : UiTableItemStyle
+  public partial class FooterStyle : UiTableItemStyle
+  {
+	[CascadingParameter(Name = "FooterStyle")]
+	protected TableItemStyle theFooterStyle
 	{
-		[CascadingParameter(Name = "FooterStyle")]
-		protected TableItemStyle theFooterStyle
-		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
-		}
+	  get { return base.theStyle; }
+	  set { base.theStyle = value; }
 	}
+  }
 }

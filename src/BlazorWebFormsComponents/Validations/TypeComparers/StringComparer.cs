@@ -2,21 +2,21 @@
 
 namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
-	public class StringComparer : IComparer
+  public class StringComparer : IComparer
+  {
+	public bool TryConvert(string text, bool cultureInvariant, out object value)
 	{
-		public bool TryConvert(string text, bool cultureInvariant, out object value)
-		{
 
-			value = text;
-			return true;
+	  value = text;
+	  return true;
 
-		}
-
-		public int CompareTo(object value, object valueToCompare)
-		{
-
-			return string.Compare((string)value, (string)valueToCompare, false, CultureInfo.CurrentCulture);
-
-		}
 	}
+
+	public int CompareTo(object value, object valueToCompare)
+	{
+
+	  return string.Compare((string)value, (string)valueToCompare, false, CultureInfo.CurrentCulture);
+
+	}
+  }
 }

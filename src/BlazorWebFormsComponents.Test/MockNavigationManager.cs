@@ -8,21 +8,21 @@ namespace BlazorWebFormsComponents.Test
   public class MockNavigationManager : NavigationManager
   {
 
-		public MockNavigationManager()
-		{
+	public MockNavigationManager()
+	{
 
-			Initialize("http://localhost/", "http://localhost/");
+	  Initialize("http://localhost/", "http://localhost/");
 
-		}
+	}
 
-		public string LastUri { get; set; }
+	public string LastUri { get; set; }
 
-		protected override void NavigateToCore(string uri, bool forceLoad)
-		{
+	protected override void NavigateToCore(string uri, bool forceLoad)
+	{
 
-		  LastUri = uri;
+	  LastUri = uri;
 
-		}
+	}
 
   }
 

@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class CheckBoxStyle : UiTableItemStyle
+  public partial class CheckBoxStyle : UiTableItemStyle
+  {
+	[CascadingParameter(Name = "CheckBoxStyle")]
+	protected TableItemStyle theCheckBoxStyle
 	{
-		[CascadingParameter(Name = "CheckBoxStyle")]
-		protected TableItemStyle theCheckBoxStyle
-		{
-			get { return theStyle; }
-			set { theStyle = value; }
-		}
+	  get { return theStyle; }
+	  set { theStyle = value; }
 	}
+  }
 }

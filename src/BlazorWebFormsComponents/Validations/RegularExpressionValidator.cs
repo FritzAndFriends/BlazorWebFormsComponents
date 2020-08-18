@@ -6,27 +6,27 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public class RegularExpressionValidator : BaseValidator<string>
+  public class RegularExpressionValidator : BaseValidator<string>
+  {
+	[Parameter] public string ValidationExpression { get; set; }
+
+	[Parameter] public int? MatchTimeout { get; set; }
+
+	public override bool Validate(string value)
 	{
-		[Parameter] public string ValidationExpression { get; set; }
+	  if (value == null)
+	  {
+		value = string.Empty;
+	  }
 
-		[Parameter] public int? MatchTimeout { get; set; }
-
-		public override bool Validate(string value)
-		{
-			if (value == null)
-			{
-				value = string.Empty;
-			}
-
-			if (MatchTimeout.HasValue)
-			{
-				return Regex.IsMatch(value, ValidationExpression, RegexOptions.None, TimeSpan.FromMilliseconds(MatchTimeout.Value));
-			}
-			else
-			{
-				return Regex.IsMatch(value, ValidationExpression, RegexOptions.None);
-			}
-		}
+	  if (MatchTimeout.HasValue)
+	  {
+		return Regex.IsMatch(value, ValidationExpression, RegexOptions.None, TimeSpan.FromMilliseconds(MatchTimeout.Value));
+	  }
+	  else
+	  {
+		return Regex.IsMatch(value, ValidationExpression, RegexOptions.None);
+	  }
 	}
+  }
 }

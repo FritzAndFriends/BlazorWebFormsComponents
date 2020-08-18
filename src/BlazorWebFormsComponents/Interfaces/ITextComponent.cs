@@ -2,6 +2,6 @@
 {
   public interface ITextComponent
   {
-		string Text { get; set; }
+	string Text { get; set; }
   }
 }

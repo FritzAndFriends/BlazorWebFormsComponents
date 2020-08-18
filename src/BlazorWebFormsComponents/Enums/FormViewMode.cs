@@ -4,12 +4,12 @@ using System.Text;
 
 namespace BlazorWebFormsComponents.Enums
 {
-	public enum FormViewMode
-	{
+  public enum FormViewMode
+  {
 
-		ReadOnly=0,
-		Edit=1, 	
-		Insert=2,
+	ReadOnly = 0,
+	Edit = 1,
+	Insert = 2,
 
-	}
+  }
 }

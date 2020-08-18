@@ -1,17 +1,19 @@
 using Microsoft.AspNetCore.Components;
 using System;
 
-namespace BlazorWebFormsComponents {	public partial class HiddenField : BaseWebFormsComponent
+namespace BlazorWebFormsComponents
+{
+  public partial class HiddenField : BaseWebFormsComponent
+  {
+	[Parameter]
+	public string Value { get; set; }
+
+	[Parameter]
+	public EventCallback<EventArgs> OnValueChanged { get; set; }
+
+	protected void Changed()
 	{
-		[Parameter]
-		public string Value { get; set; }
-
-		[Parameter]
-		public EventCallback<EventArgs> OnValueChanged { get; set; }
-
-		protected void Changed()
-		{
-			OnValueChanged.InvokeAsync(new EventArgs());
-		}
+	  OnValueChanged.InvokeAsync(new EventArgs());
 	}
+  }
 }

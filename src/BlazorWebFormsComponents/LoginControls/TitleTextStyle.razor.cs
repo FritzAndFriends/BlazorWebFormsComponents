@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class TitleTextStyle : UiTableItemStyle
+  public partial class TitleTextStyle : UiTableItemStyle
+  {
+	[CascadingParameter(Name = "TitleTextStyle")]
+	protected TableItemStyle theTitleTextStyle
 	{
-		[CascadingParameter(Name = "TitleTextStyle")]
-		protected TableItemStyle theTitleTextStyle
-		{
-			get { return theStyle; }
-			set { theStyle = value; }
-		}
+	  get { return theStyle; }
+	  set { theStyle = value; }
 	}
+  }
 }

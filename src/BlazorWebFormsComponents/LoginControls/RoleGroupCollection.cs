@@ -22,7 +22,7 @@ namespace BlazorWebFormsComponents.LoginControls
 		{
 		  if (user.IsInRole(roles[j]))
 		  {
-				return roleGroup;
+			return roleGroup;
 		  }
 		}
 	  }

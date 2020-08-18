@@ -1,7 +1,7 @@
 ﻿namespace BlazorWebFormsComponents
 {
-	public partial class LinkButton : ButtonBaseComponent
-	{
+  public partial class LinkButton : ButtonBaseComponent
+  {
 
-	}
+  }
 }

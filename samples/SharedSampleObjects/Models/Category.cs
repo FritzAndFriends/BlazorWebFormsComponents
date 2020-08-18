@@ -2,19 +2,22 @@
 
 namespace SharedSampleObjects.Models
 {
-	public class Category {
+  public class Category
+  {
 
-		public int Id { get; set; }
+	public int Id { get; set; }
 
-		public string Name { get; set; }
+	public string Name { get; set; }
 
-		public IEnumerable<Widget> Widgets { get; set; }
+	public IEnumerable<Widget> Widgets { get; set; }
 
-		public static Category[] SimpleCategoryList {
+	public static Category[] SimpleCategoryList
+	{
 
-			get {
+	  get
+	  {
 
-				return new Category[] {
+		return new Category[] {
 
 					new Category {
 						Id=1, Name="Category 1", Widgets=new Widget[]
@@ -35,9 +38,9 @@ namespace SharedSampleObjects.Models
 
 				};
 
-			}
-
-		}
+	  }
 
 	}
+
+  }
 }
