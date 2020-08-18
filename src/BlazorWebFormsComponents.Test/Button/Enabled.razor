@@ -1,0 +1,28 @@
+﻿@inherits TestComponentBase
+@using BlazorWebFormsComponents
+
+<Fixture Test="Button_Enabled">
+	<ComponentUnderTest>
+		<Button Text="Button" Enabled="true" />
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="Button_Disabled">
+	<ComponentUnderTest>
+		<Button Text="Button" Enabled="false" />
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	void Button_Enabled(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		cut.Find("button").HasAttribute("disabled").ShouldBeFalse();
+	}
+
+	void Button_Disabled(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		cut.Find("button").HasAttribute("disabled").ShouldBeTrue();
+	}
+}
