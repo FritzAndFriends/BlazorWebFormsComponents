@@ -23,25 +23,25 @@ namespace BlazorWebFormsComponents.LoginControls
 	  if (!(_user.Identity?.IsAuthenticated ?? false))
 	  {
 
-			return AnonymousTemplate;
+		return AnonymousTemplate;
 
 	  }
 	  else
 	  {
 
-			var roleGroup = RoleGroups.GetRoleGroup(_user);
-			if (roleGroup != null)
-			{
+		var roleGroup = RoleGroups.GetRoleGroup(_user);
+		if (roleGroup != null)
+		{
 
-			  return roleGroup.ChildContent;
+		  return roleGroup.ChildContent;
 
-			}
-			else
-			{
+		}
+		else
+		{
 
-				return LoggedInTemplate;
+		  return LoggedInTemplate;
 
-			}
+		}
 
 	  }
 

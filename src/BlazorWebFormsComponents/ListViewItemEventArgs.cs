@@ -5,16 +5,16 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-	public class ListViewItemEventArgs : EventArgs
+  public class ListViewItemEventArgs : EventArgs
+  {
+
+	public ListViewItemEventArgs(object item)
 	{
-
-		public ListViewItemEventArgs(object item)
-		{
-			this.Item = item;
-		}
-
-		object Item { get; set; }
-
+	  this.Item = item;
 	}
+
+	object Item { get; set; }
+
+  }
 
 }

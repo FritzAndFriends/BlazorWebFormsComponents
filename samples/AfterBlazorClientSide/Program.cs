@@ -7,30 +7,30 @@ using System;
 
 namespace AfterBlazorClientSide
 {
-	public class Program
+  public class Program
+  {
+	public static async Task Main(string[] args)
 	{
-		public static async Task Main(string[] args)
-		{
 
-			var builder = WebAssemblyHostBuilder.CreateDefault(args);
-			builder.RootComponents.Add<App>("app");
+	  var builder = WebAssemblyHostBuilder.CreateDefault(args);
+	  builder.RootComponents.Add<App>("app");
 
-			builder.Services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
-			builder.Services.AddSingleton(
-				new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }
-			);
+	  builder.Services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
+	  builder.Services.AddSingleton(
+		  new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }
+	  );
 
-			await builder.Build().RunAsync();
-
-		}
+	  await builder.Build().RunAsync();
 
 	}
 
-	public static class Startup
-	{
+  }
 
-		public static string ApplicationName => "Blazor WebAssembly";
+  public static class Startup
+  {
 
-	}
+	public static string ApplicationName => "Blazor WebAssembly";
+
+  }
 
 }

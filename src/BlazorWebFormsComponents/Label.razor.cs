@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Components;
 namespace BlazorWebFormsComponents
 {
   public partial class Label : BaseWebFormsComponent, ITextComponent
-	{ 
-		[Parameter]
-		public string Text { get; set; }
-	}
+  {
+	[Parameter]
+	public string Text { get; set; }
+  }
 }

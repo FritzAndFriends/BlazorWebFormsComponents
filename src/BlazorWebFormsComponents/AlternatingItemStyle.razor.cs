@@ -5,16 +5,16 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class AlternatingItemStyle : UiTableItemStyle
+  public partial class AlternatingItemStyle : UiTableItemStyle
+  {
+
+	[CascadingParameter(Name = "AlternatingItemStyle")]
+	protected TableItemStyle theAlternatingItemStyle
 	{
-
-		[CascadingParameter(Name = "AlternatingItemStyle")]
-		protected TableItemStyle theAlternatingItemStyle
-		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
-		}
-
-
+	  get { return base.theStyle; }
+	  set { base.theStyle = value; }
 	}
+
+
+  }
 }

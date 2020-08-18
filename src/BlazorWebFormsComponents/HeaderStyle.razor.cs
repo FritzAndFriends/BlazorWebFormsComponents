@@ -5,14 +5,15 @@ using System.Text;
 namespace BlazorWebFormsComponents
 {
 
-	public partial class HeaderStyle : UiTableItemStyle
+  public partial class HeaderStyle : UiTableItemStyle
+  {
+
+	[CascadingParameter(Name = "HeaderStyle")]
+	protected TableItemStyle theHeaderStyle
 	{
-
-		[CascadingParameter(Name = "HeaderStyle")]
-		protected TableItemStyle theHeaderStyle { 
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
-		}
-
+	  get { return base.theStyle; }
+	  set { base.theStyle = value; }
 	}
+
+  }
 }

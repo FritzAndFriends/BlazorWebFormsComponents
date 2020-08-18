@@ -3,34 +3,34 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public class CompareValidator<InputType> : BaseCompareValidator<InputType>
+  public class CompareValidator<InputType> : BaseCompareValidator<InputType>
+  {
+
+	[Parameter] public ValidationCompareOperator Operator { get; set; } = ValidationCompareOperator.Equal;
+
+	[Parameter] public string ValueToCompare { get; set; }
+
+	public override bool Validate(string value)
 	{
 
-		[Parameter] public ValidationCompareOperator Operator { get; set; } = ValidationCompareOperator.Equal;
+	  if (value is null)
+	  {
 
-		[Parameter] public string ValueToCompare { get; set; }
+		return true;
 
-		public override bool Validate(string value)
-		{
+	  }
 
-			if (value is null)
-			{
+	  if (value.Trim().Length == 0)
+	  {
 
-				return true;
+		return true;
 
-			}
+	  }
 
-			if (value.Trim().Length == 0)
-			{
-
-				return true;
-
-			}
-
-			return Compare(value, false, ValueToCompare, CultureInvariantValues, Operator, Type);
-
-		}
+	  return Compare(value, false, ValueToCompare, CultureInvariantValues, Operator, Type);
 
 	}
+
+  }
 
 }

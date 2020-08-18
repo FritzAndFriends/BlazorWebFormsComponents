@@ -5,16 +5,16 @@ using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class SeparatorStyle : UiTableItemStyle
+  public partial class SeparatorStyle : UiTableItemStyle
+  {
+
+	[CascadingParameter(Name = "SeparatorStyle")]
+	protected TableItemStyle theSeparatorStyle
 	{
-
-		[CascadingParameter(Name = "SeparatorStyle")]
-		protected TableItemStyle theSeparatorStyle
-		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
-		}
-
-
+	  get { return base.theStyle; }
+	  set { base.theStyle = value; }
 	}
+
+
+  }
 }
