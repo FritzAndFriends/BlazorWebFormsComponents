@@ -26,5 +26,7 @@ namespace BlazorWebFormsComponents {
 
 		internal string CalculatedButtonType => CausesValidation ? "submit" : "button";
 
+		internal string CalculatedCssClass => Enabled ? CssClass : string.Concat(CssClass, " aspNetDisabled").Trim();
+
 	}
 }
