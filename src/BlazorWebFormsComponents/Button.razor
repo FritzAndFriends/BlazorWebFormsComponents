@@ -1,3 +1,10 @@
 @inherits ButtonBaseComponent
 
-<button type="@CalculatedButtonType" @onclick="Click" OnClientClick="@OnClientClick" style="@CalculatedStyle" class="@CssClass">@Text</button>
+@if (Enabled)
+{
+	<button type="@CalculatedButtonType" @onclick="Click" OnClientClick="@OnClientClick" style="@CalculatedStyle" class="@CssClass">@Text</button>
+}
+else
+{
+	<button type="@CalculatedButtonType" @onclick="Click" OnClientClick="@OnClientClick" style="@CalculatedStyle" class="@CssClass" disabled>@Text</button>
+}
