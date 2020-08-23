@@ -10,8 +10,8 @@ namespace BlazorWebFormsComponents
 	public partial class AdRotator : BaseWebFormsComponent
 	{
 		private static readonly string DefaultAlternateTextField = "AlternateText";
-		private static readonly string DefaultImageUrlField = "AlternateText";
-		private static readonly string DefaultNavigateUrlField = "AlternateText";
+		private static readonly string DefaultImageUrlField = "ImageUrl";
+		private static readonly string DefaultNavigateUrlField = "NavigateUrl";
 
 		[Parameter]
 		public string AlternateTextField { get; set; } = DefaultAlternateTextField;
