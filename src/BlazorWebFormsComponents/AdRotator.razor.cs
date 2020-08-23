@@ -78,7 +78,7 @@ namespace BlazorWebFormsComponents
 
 			if (KeywordFilter != string.Empty)
 			{
-				advertisments = advertisments.Where(a => a.Keyword == KeywordFilter);
+				advertisments = advertisments.Where(a => a.Keyword.Equals(KeywordFilter, StringComparison.OrdinalIgnoreCase));
 			}
 
 			if (advertisments.Count() == 0)
