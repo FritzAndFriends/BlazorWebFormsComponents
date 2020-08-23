@@ -1,20 +1,29 @@
-﻿<Advertisements>  
-  <Ad>  
-    <ImageUrl>/img/C#.png</ImageUrl>  
-    <Height>343</Height>  
-    <Width>397</Width>  
-    <NavigateUrl>http://www.microsoft.com</NavigateUrl>  
-    <AlternateText>CSharp</AlternateText>  
-    <Impressions>90</Impressions>  
-    <Keyword>c#</Keyword>  
-  </Ad>  
-  <Ad>  
+﻿<Advertisements>
+  <Ad>
+    <ImageUrl>/img/C#.png</ImageUrl>
+    <Height>343</Height>
+    <Width>397</Width>
+    <NavigateUrl>http://www.microsoft.com</NavigateUrl>
+    <AlternateText>CSharp</AlternateText>
+    <Impressions>90</Impressions>
+    <Keyword>c#</Keyword>
+  </Ad>
+  <Ad>
     <ImageUrl>/img/VB.png</ImageUrl>
 		<Height>343</Height>
 		<Width>397</Width>
-		<NavigateUrl>http://www.microsoft.com</NavigateUrl>  
-    <AlternateText>Visual Basic</AlternateText>  
-    <Impressions>80</Impressions>  
-    <Keyword>vb</Keyword>  
-  </Ad>  
+		<NavigateUrl>http://www.microsoft.com</NavigateUrl>
+    <AlternateText>Visual Basic</AlternateText>
+    <Impressions>80</Impressions>
+    <Keyword>vb</Keyword>
+  </Ad>
+	<Ad>
+		<ImageUrl>/img/VB.png</ImageUrl>
+		<Height>343</Height>
+		<Width>397</Width>
+		<NavigateUrl>http://www.microsoft.com</NavigateUrl>
+		<AlternateText>VB</AlternateText>
+		<Impressions>60</Impressions>
+		<Keyword>vb</Keyword>
+	</Ad>
 </Advertisements>  

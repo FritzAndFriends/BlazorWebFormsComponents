@@ -1,18 +1,18 @@
 ﻿@inherits TestComponentBase
 
-<Fixture Test="RotateTest">
+<Fixture Test="KewordFilterTest">
 	<ComponentUnderTest>
 		<AdRotator AdvertisementFile="Ads2.xml" Target="_blank"></AdRotator>
 	</ComponentUnderTest>
 </Fixture>
 
 @code {
-	void RotateTest(Fixture fixture)
+	void KewordFilterTest(Fixture fixture)
 	{
 		var cut = fixture.GetComponentUnderTest();
 		var img = cut.Find("img");
 		var alternateText = img.Attributes["alt"].Value;
 
-		Assert.Contains(alternateText, new[] { "CSharp", "Visual Basic" });
+		Assert.Contains(alternateText, new[] { "Visual Basic", "VB" });
 	}
 }
