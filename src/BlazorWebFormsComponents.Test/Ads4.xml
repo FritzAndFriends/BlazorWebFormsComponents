@@ -1,0 +1,21 @@
+﻿<Advertisements>
+	<Ad>
+		<Image>/img/C#.png</Image>
+		<Height>343</Height>
+		<Width>397</Width>
+		<Url>http://www.microsoft.com</Url>
+		<Alt>CSharp</Alt>
+		<Impressions>90</Impressions>
+		<Keyword>c#</Keyword>
+
+	</Ad>
+	<Ad>
+		<Image>/img/VB.png</Image>
+		<Height>343</Height>
+		<Width>397</Width>
+		<Url>http://www.microsoft.com</Url>
+		<Alt>Visual Basic</Alt>
+		<Impressions>80</Impressions>
+		<Keyword>vb</Keyword>
+	</Ad>
+</Advertisements>
