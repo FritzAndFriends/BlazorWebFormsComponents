@@ -36,11 +36,19 @@ namespace BlazorWebFormsComponents
 				adProperties.Add(property.Name, property.GetValue(advertisment).ToString());
 			}
 
-			AdCreated(new AdCreatedEventArgs(adProperties) {
+			var adArgs = new AdCreatedEventArgs(adProperties)
+			{
 				AlternateText = advertisment.AlternateText,
 				ImageUrl = advertisment.ImageUrl,
 				NavigateUrl = advertisment.NavigateUrl
-			});
+			};
+
+			AdCreated(adArgs);
+
+			// Override Ad properties before render
+			advertisment.AlternateText = adArgs.AlternateText;
+			advertisment.ImageUrl = adArgs.ImageUrl;
+			advertisment.NavigateUrl = adArgs.NavigateUrl;
 
 			return advertisment;
 		}
