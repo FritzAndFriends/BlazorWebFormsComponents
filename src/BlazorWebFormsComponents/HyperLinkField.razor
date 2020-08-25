@@ -1,0 +1,10 @@
+﻿@typeparam ItemType
+@inherits BaseColumn<ItemType>
+
+@code
+{
+	RenderFragment RenderAnchor(string text, string url, string target)
+	{
+		return@<text><a href="@url" target="@target">@text</a></text>;
+	}
+}

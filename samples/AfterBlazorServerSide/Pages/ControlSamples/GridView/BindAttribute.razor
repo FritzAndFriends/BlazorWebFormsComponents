@@ -19,5 +19,8 @@
 				<input type="text" @bind="@Item.FirstName" />
 			</ItemTemplate>
 		</TemplateField>
+		<HyperLinkField ItemType="Customer"
+										DataTextFormatString="Search for {0}" DataTextField="CompanyName"
+										DataNavigateUrlFields="CompanyName, FirstName, LastName" DataNavigateUrlFormatString="https://www.bing.com/search?q={0} {1} {2}" />
 	</Columns>
 </GridView>
