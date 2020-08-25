@@ -16,6 +16,6 @@ namespace BlazorWebFormsComponents.Interfaces
 	/// The parent IColumnCollection where the IColumn resides
 	/// </summary>
 	IColumnCollection<ItemType> ParentColumnsCollection { get; set; }
-		RenderFragment Render(ItemType item);
+	RenderFragment Render(ItemType item);
   }
 }
