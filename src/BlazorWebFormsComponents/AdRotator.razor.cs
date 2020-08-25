@@ -55,13 +55,6 @@ namespace BlazorWebFormsComponents
 			{
 				return null;
 			}
-      
-			var advertisments = GetAdvertismentsFileContent(AdvertisementFile);
-
-			if (advertisments == null || advertisments.Count() == 0)
-			{
-				return null;
-			}
 
 			var rnd = new Random().Next(advertisments.Count());
 			var advertisment = advertisments.ElementAt(rnd);
