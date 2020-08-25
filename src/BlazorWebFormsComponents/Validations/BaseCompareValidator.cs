@@ -3,53 +3,53 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Validations
 {
-  public abstract class BaseCompareValidator<InputType> : BaseValidator<InputType>
-  {
-
-	[Parameter] public ValidationDataType Type { get; set; } = ValidationDataType.String;
-
-	[Parameter] public bool CultureInvariantValues { get; set; }
-
-	public override abstract bool Validate(string value);
-
-	protected bool Compare(string leftText, bool cultureInvariantLeftText, string rightText, bool cultureInvariantRightText, ValidationCompareOperator op, ValidationDataType type)
+	public abstract class BaseCompareValidator<InputType> : BaseValidator<InputType>
 	{
 
-	  var comparer = new ComparerFactory().GetComparer(type);
+		[Parameter] public ValidationDataType Type { get; set; } = ValidationDataType.String;
 
-	  if (!comparer.TryConvert(leftText, cultureInvariantLeftText, out var leftValue))
-	  {
+		[Parameter] public bool CultureInvariantValues { get; set; }
 
-		return false;
+		public override abstract bool Validate(string value);
 
-	  }
+		protected bool Compare(string leftText, bool cultureInvariantLeftText, string rightText, bool cultureInvariantRightText, ValidationCompareOperator op, ValidationDataType type)
+		{
 
-	  if (op == ValidationCompareOperator.DataTypeCheck)
-	  {
+			var comparer = new ComparerFactory().GetComparer(type);
 
-		return true;
+			if (!comparer.TryConvert(leftText, cultureInvariantLeftText, out var leftValue))
+			{
 
-	  }
+				return false;
 
-	  if (!comparer.TryConvert(rightText, cultureInvariantRightText, out var rightValue))
-	  {
+			}
 
-		return true;
+			if (op == ValidationCompareOperator.DataTypeCheck)
+			{
 
-	  }
+				return true;
 
-	  var compareResult = comparer.CompareTo(leftValue, rightValue);
-	  return op switch
-	  {
-		EqualCompareOperator _ => compareResult == 0,
-		NotEqualCompareOperator _ => compareResult != 0,
-		GreaterThanCompareOperator _ => compareResult > 0,
-		GreaterThanEqualCompareOperator _ => compareResult >= 0,
-		LessThanCompareOperator _ => compareResult < 0,
-		LessThanEqualCompareOperator _ => compareResult <= 0,
-		_ => true
-	  };
+			}
+
+			if (!comparer.TryConvert(rightText, cultureInvariantRightText, out var rightValue))
+			{
+
+				return true;
+
+			}
+
+			var compareResult = comparer.CompareTo(leftValue, rightValue);
+			return op switch
+			{
+				EqualCompareOperator _ => compareResult == 0,
+				NotEqualCompareOperator _ => compareResult != 0,
+				GreaterThanCompareOperator _ => compareResult > 0,
+				GreaterThanEqualCompareOperator _ => compareResult >= 0,
+				LessThanCompareOperator _ => compareResult < 0,
+				LessThanEqualCompareOperator _ => compareResult <= 0,
+				_ => true
+			};
+		}
 	}
-  }
 
 }

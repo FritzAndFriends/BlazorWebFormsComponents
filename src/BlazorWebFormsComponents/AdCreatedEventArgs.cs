@@ -3,8 +3,8 @@ using System.Collections;
 
 namespace BlazorWebFormsComponents
 {
-  public class AdCreatedEventArgs : EventArgs
-  {
+	public class AdCreatedEventArgs : EventArgs
+	{
 		public AdCreatedEventArgs(IDictionary adProperties)
 		{
 			AdProperties = adProperties;

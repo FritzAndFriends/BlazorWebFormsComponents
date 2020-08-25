@@ -3,36 +3,36 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Validations
 {
-  public class RangeValidator<InputType> : BaseCompareValidator<InputType>
-  {
-
-	[Parameter] public string MaximumValue { get; set; }
-
-	[Parameter] public string MinimumValue { get; set; }
-
-
-	public override bool Validate(string value)
+	public class RangeValidator<InputType> : BaseCompareValidator<InputType>
 	{
 
-	  if (value is null)
-	  {
+		[Parameter] public string MaximumValue { get; set; }
 
-		return true;
+		[Parameter] public string MinimumValue { get; set; }
 
-	  }
 
-	  if (value.Trim().Length == 0)
-	  {
+		public override bool Validate(string value)
+		{
 
-		return true;
+			if (value is null)
+			{
 
-	  }
+				return true;
 
-	  return Compare(value, false, MinimumValue, CultureInvariantValues, ValidationCompareOperator.GreaterThanEqual, Type) &&
-					  Compare(value, false, MaximumValue, CultureInvariantValues, ValidationCompareOperator.LessThanEqual, Type);
+			}
+
+			if (value.Trim().Length == 0)
+			{
+
+				return true;
+
+			}
+
+			return Compare(value, false, MinimumValue, CultureInvariantValues, ValidationCompareOperator.GreaterThanEqual, Type) &&
+							Compare(value, false, MaximumValue, CultureInvariantValues, ValidationCompareOperator.LessThanEqual, Type);
+
+		}
 
 	}
-
-  }
 
 }
