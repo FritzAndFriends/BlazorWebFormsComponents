@@ -98,7 +98,7 @@
                                     </asp:TreeNode>
 
                                     <asp:TreeNode Text=" Navigation Components" Expanded="true">
-                                        <asp:TreeNode Text=" Menu" />
+                                        <asp:TreeNode Text=" Menu" NavigateUrl="ControlSamples/Menu/Default.aspx" />
                                         <asp:TreeNode Text=" Site Map Path" />
                                         <asp:TreeNode Text=" TreeView" Expanded="true">
                                             <asp:TreeNode Text=" Simple TreeView" NavigateUrl="ControlSamples/TreeView/Default.aspx" />
