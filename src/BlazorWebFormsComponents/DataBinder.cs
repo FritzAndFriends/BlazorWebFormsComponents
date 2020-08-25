@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
-using System.Collections.Generic;
-using System.Net.WebSockets;
-using System.Text;
+using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
@@ -76,31 +74,35 @@ namespace BlazorWebFormsComponents
 	}
 
 	/// <summary>
-	/// This method acts directly on the object requested, and we're not sure why you wouldn't call `container.propName` directly
+	/// Gets the value of the property specified by <paramref name="propName"/> on the object specified by <paramref name="container"/>.
 	/// </summary>
 	/// <param name="container"></param>
 	/// <param name="propName"></param>
 	/// <returns></returns>
 	public static object GetPropertyValue(object container, string propName)
 	{
+		if (container is null)
+		{
+			throw new ArgumentNullException(nameof(container));
+		}
 
-	  var theType = container.GetType();
-	  var prop = theType.GetProperty(propName);
+		var theType = container.GetType();
+		var prop = theType.GetProperties().FirstOrDefault(p => string.Equals(p.Name, propName, StringComparison.OrdinalIgnoreCase));
+		if (prop == null)
+		{
+			throw new ArgumentException($"A property named '{propName}' could not be found on type {theType.FullName}.", nameof(propName));
+		}
 
-	  return prop.GetValue(container);
-
+		return prop.GetValue(container);
 	}
 
 	public static string GetPropertyValue(object container, string propName, string format)
 	{
+		var rawValue = GetPropertyValue(container, propName);
 
-	  var theType = container.GetType();
-	  var prop = theType.GetProperty(propName);
-
-	  return string.Format(format, prop.GetValue(container));
-
+		return string.Format(format, rawValue);
 	}
 
-  }
+	}
 
 }

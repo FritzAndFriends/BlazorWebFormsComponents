@@ -7,7 +7,6 @@ namespace BlazorWebFormsComponents
 	/// </summary>
 	public partial class BoundField<ItemType> : BaseColumn<ItemType>
 	{
-
 		/// <summary>
 		/// Specifies the name of the object's property bound to the column
 		/// </summary>
@@ -26,17 +25,15 @@ namespace BlazorWebFormsComponents
 			object obj = item;
 			foreach (var property in properties)
 			{
-
-				var propertyInfo = obj.GetType().GetProperty(property);
-				obj = propertyInfo.GetValue(obj);
+				obj = DataBinder.GetPropertyValue(obj, property);
 			}
 			if (DataFormatString != null)
 			{
-				return RenderString(string.Format(DataFormatString, obj.ToString()));
+				return RenderString(string.Format(DataFormatString, obj?.ToString()));
 			}
 			else
 			{
-				return RenderString(obj.ToString());
+				return RenderString(obj?.ToString());
 			}
 		}
 	}
