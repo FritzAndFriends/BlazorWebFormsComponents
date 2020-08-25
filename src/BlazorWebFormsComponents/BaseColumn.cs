@@ -17,6 +17,8 @@ namespace BlazorWebFormsComponents
 	  ParentColumnsCollection.RemoveColumn(this);
 	}
 
+	public abstract RenderFragment Render(ItemType item);
+
 	///<inheritdoc/>
 	protected override void OnInitialized()
 	{

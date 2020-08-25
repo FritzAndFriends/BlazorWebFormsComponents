@@ -275,6 +275,14 @@ namespace BlazorWebFormsComponents
 
 	}
 
-  }
-
+		/// <summary>
+		/// Helper method to render the string specified by <paramref name="content"/> as a <see cref="RenderFragment"/>.
+		/// </summary>
+		/// <param name="content"></param>
+		/// <returns></returns>
+		protected RenderFragment RenderString(string content)
+		{
+			return builder => builder.AddContent(0, content);
+		}
+	}
 }
