@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-  public partial class LoginButtonStyle : UiStyle
-  {
-	[CascadingParameter(Name = "LoginButtonStyle")]
-	protected Style theLoginButtonStyle
+	public partial class LoginButtonStyle : UiStyle
 	{
-	  get { return theStyle; }
-	  set { theStyle = value; }
+		[CascadingParameter(Name = "LoginButtonStyle")]
+		protected Style theLoginButtonStyle
+		{
+			get { return theStyle; }
+			set { theStyle = value; }
+		}
 	}
-  }
 }

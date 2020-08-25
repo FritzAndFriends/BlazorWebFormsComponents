@@ -1,18 +1,18 @@
 ﻿namespace BlazorWebFormsComponents.Interfaces
 {
-  /// <summary>
-  /// Generic row interface
-  /// </summary>
-  public interface IRow<ItemType>
-  {
 	/// <summary>
-	/// The parent IRowCollection where the IRow resides
+	/// Generic row interface
 	/// </summary>
-	IRowCollection<ItemType> RowCollection { get; set; }
+	public interface IRow<ItemType>
+	{
+		/// <summary>
+		/// The parent IRowCollection where the IRow resides
+		/// </summary>
+		IRowCollection<ItemType> RowCollection { get; set; }
 
-	/// <summary>
-	/// The object bound to the row
-	/// </summary>
-	ItemType DataItem { get; set; }
-  }
+		/// <summary>
+		/// The object bound to the row
+		/// </summary>
+		ItemType DataItem { get; set; }
+	}
 }

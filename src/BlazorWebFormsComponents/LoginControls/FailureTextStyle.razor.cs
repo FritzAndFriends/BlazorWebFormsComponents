@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-  public partial class FailureTextStyle : UiTableItemStyle
-  {
-	[CascadingParameter(Name = "FailureTextStyle")]
-	protected TableItemStyle theFailureTextStyle
+	public partial class FailureTextStyle : UiTableItemStyle
 	{
-	  get { return theStyle; }
-	  set { theStyle = value; }
+		[CascadingParameter(Name = "FailureTextStyle")]
+		protected TableItemStyle theFailureTextStyle
+		{
+			get { return theStyle; }
+			set { theStyle = value; }
+		}
 	}
-  }
 }
