@@ -11,5 +11,10 @@ namespace BlazorWebFormsComponents
 	/// The item template
 	/// </summary>
 	[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
-  }
+
+		public override RenderFragment Render(ItemType item)
+		{
+			return ItemTemplate(item);
+		}
+	}
 }
