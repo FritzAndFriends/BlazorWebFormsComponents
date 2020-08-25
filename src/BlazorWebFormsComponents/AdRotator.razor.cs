@@ -18,13 +18,7 @@ namespace BlazorWebFormsComponents
 		public string AdvertisementFile { get; set; }
 
 		[Parameter]
-		public string Target { get; set; }
-
-		[Parameter]
 		public string AlternateTextField { get; set; } = DefaultAlternateTextField;
-
-		[Parameter]
-		public string AdvertisementFile { get; set; }
 
 		[Parameter]
 		public string ImageUrlField { get; set; } = DefaultImageUrlField;
@@ -39,7 +33,7 @@ namespace BlazorWebFormsComponents
 		public EventCallback<AdCreatedEventArgs> OnAdCreated { get; set; }
     
     internal Advertisment GetActiveAdvertisment()
-		{
+	{
       if (string.IsNullOrEmpty(AlternateTextField))
 			{
 				throw new ArgumentException("AlternateTextField can't be null or empty.", nameof(AlternateTextField));
