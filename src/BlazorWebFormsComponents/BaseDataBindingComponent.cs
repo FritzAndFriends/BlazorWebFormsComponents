@@ -9,9 +9,6 @@ namespace BlazorWebFormsComponents
 		#region Data Binding Events
 
 		[Parameter]
-		public EventCallback<EventArgs> OnDataBinding { get; set; }
-
-		[Parameter]
 		public EventCallback<EventArgs> OnDataBound { get; set; }
 
 		[Parameter]
