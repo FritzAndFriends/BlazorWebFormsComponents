@@ -1,10 +1,9 @@
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace BlazorWebFormsComponents
 {
@@ -13,7 +12,7 @@ namespace BlazorWebFormsComponents
 		private static readonly string DefaultAlternateTextField = "AlternateText";
 		private static readonly string DefaultImageUrlField = "ImageUrl";
 		private static readonly string DefaultNavigateUrlField = "NavigateUrl";
-    
+
 		[Parameter]
 		public string AdvertisementFile { get; set; }
 
@@ -28,13 +27,13 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string Target { get; set; }
-    
-    [Parameter]
+
+		[Parameter]
 		public EventCallback<AdCreatedEventArgs> OnAdCreated { get; set; }
-    
-    internal Advertisment GetActiveAdvertisment()
-	{
-      if (string.IsNullOrEmpty(AlternateTextField))
+
+		internal Advertisment GetActiveAdvertisment()
+		{
+			if (string.IsNullOrEmpty(AlternateTextField))
 			{
 				throw new ArgumentException("AlternateTextField can't be null or empty.", nameof(AlternateTextField));
 			}

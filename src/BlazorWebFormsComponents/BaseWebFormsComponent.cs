@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-using IComponent = Microsoft.AspNetCore.Components.IComponent;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -131,14 +128,15 @@ namespace BlazorWebFormsComponents
 		public Dictionary<string, object> AdditionalAttributes { get; set; }
 
 		#region Custom Events
+		
+		[Parameter]
+		public EventCallback<EventArgs> OnDataBinding { get; set; }
 
 		/// <summary>
 		/// Event handler to mimic the Web Forms OnInit handler, and is triggered at the beginning of the OnInitialize Blazor event
 		/// </summary>
 		[Parameter]
 		public EventCallback<EventArgs> OnInit { get; set; }
-
-		public EventCallback<EventArgs> OnDataBinding { get; set; }
 
 		/// <summary>
 		/// Event handler to mimic the Web Forms OnLoad handler, and is triggered at the end of the OnInitialize Blazor event
@@ -218,6 +216,8 @@ namespace BlazorWebFormsComponents
 
 		protected virtual void HandleUnknownAttributes() { }
 
+			if (OnInit.HasDelegate)
+				await OnInit.InvokeAsync(EventArgs.Empty);
 
 		#endregion
 
@@ -280,11 +280,19 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		/// <summary>
+		/// Helper method to render the string specified by <paramref name="content"/> as a <see cref="RenderFragment"/>.
+		/// </summary>
+		/// <param name="content"></param>
+		/// <returns></returns>
+		protected RenderFragment RenderString(string content)
+		{
+			return builder => builder.AddContent(0, content);
+		}
+		
 		protected void DataBinding(EventArgs e)
 		{
 			OnDataBinding.InvokeAsync(e);
 		}
-
 	}
-
 }
