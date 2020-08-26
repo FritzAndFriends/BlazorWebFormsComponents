@@ -216,9 +216,6 @@ namespace BlazorWebFormsComponents
 
 		protected virtual void HandleUnknownAttributes() { }
 
-			if (OnInit.HasDelegate)
-				await OnInit.InvokeAsync(EventArgs.Empty);
-
 		#endregion
 
 		#region IDisposable Support
