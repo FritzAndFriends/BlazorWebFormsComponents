@@ -88,6 +88,11 @@
                                         <asp:TreeNode NavigateUrl="ControlSamples/Repeater/Default.aspx" Text=" Repeater" Expanded="true" />
                                     </asp:TreeNode>
 
+                                    <asp:TreeNode Text=" Editor Components" Expanded="true">
+                                      <asp:TreeNode Text=" Button" NavigateUrl="~/ControlSamples/Button/default.aspx" />
+                                      <asp:TreeNode Text=" Hyperlink" NavigateUrl="~/ControlSamples/Hyperlink/default.aspx" />
+                                    </asp:TreeNode>
+
                                     <asp:TreeNode Text=" Validation Components" Expanded="false">
                                         <asp:TreeNode Text=" Custom Validator" />
                                         <asp:TreeNode Text=" Regular Expression" />
