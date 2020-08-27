@@ -96,3 +96,5 @@ nav:
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - User Controls: Migration/User-Controls.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
+      - Samples:
+          - .NET Standard Simple: samples/netstandard-1/README.md
