@@ -63,6 +63,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Font_Underline { get; set; }
 
+		[Parameter]
+		public string ToolTip { get; set; }
+
 		private string CalculatedStyle => this.ToStyle().Build().NullIfEmpty();
 	}
 }

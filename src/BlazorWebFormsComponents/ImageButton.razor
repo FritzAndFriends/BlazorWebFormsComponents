@@ -1,13 +1,30 @@
 @inherits ButtonBaseComponent
+@{
+	var hasToolTip = !string.IsNullOrEmpty(ToolTip);
+}
 
 @if (Visible)
 {
 	if (Enabled)
 	{
-		<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+		if (hasToolTip)
+		{
+			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" title="@ToolTip" @onclick="Click" />
+		}
+		else
+		{
+			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+		}
 	}
 	else
 	{
-		<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" />
+		if (hasToolTip)
+		{
+			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" title="@ToolTip" @onclick="Click" />
+		}
+		else
+		{
+			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" />
+		}
 	}
 }
