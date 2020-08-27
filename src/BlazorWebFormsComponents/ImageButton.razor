@@ -1,3 +1,6 @@
 @inherits ButtonBaseComponent
 
-<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+@if (Visible)
+{
+	<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+}
