@@ -2,5 +2,12 @@
 
 @if (Visible)
 {
-	<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+	if (Enabled)
+	{
+		<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+	}
+	else
+	{
+		<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" />
+	}
 }
