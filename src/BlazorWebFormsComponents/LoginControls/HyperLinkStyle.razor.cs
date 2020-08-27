@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-  public partial class HyperLinkStyle : UiTableItemStyle
-  {
-	[CascadingParameter(Name = "HyperLinkStyle")]
-	protected TableItemStyle theHyperLinkStyle
+	public partial class HyperLinkStyle : UiTableItemStyle
 	{
-	  get { return theStyle; }
-	  set { theStyle = value; }
+		[CascadingParameter(Name = "HyperLinkStyle")]
+		protected TableItemStyle theHyperLinkStyle
+		{
+			get { return theStyle; }
+			set { theStyle = value; }
+		}
 	}
-  }
 }

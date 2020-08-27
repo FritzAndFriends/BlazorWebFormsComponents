@@ -1,0 +1,25 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="AdCreatedTest">
+	<ComponentUnderTest>
+		<AdRotator AdvertisementFile="Ads2.xml" Target="_blank" OnAdCreated="AdRotator_AdCreated"></AdRotator>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	void AdCreatedTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		var img = cut.Find("img");
+		var alternatText = img.Attributes["alt"].Value;
+
+		Assert.Equal(alternatText, "AlternateText has been changed from AdCreate event!!");
+	}
+
+	void AdRotator_AdCreated(AdCreatedEventArgs e)
+	{
+			e.AlternateText = "AlternateText has been changed from AdCreate event!!";
+
+			Assert.Equal("http://www.microsoft.com", e.NavigateUrl);
+	}
+}
