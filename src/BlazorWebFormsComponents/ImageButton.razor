@@ -9,22 +9,50 @@
 	{
 		if (hasToolTip)
 		{
-			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" title="@ToolTip" @onclick="Click" />
+			if (ImageAlign == Enums.ImageAlign.NotSet)
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" title="@ToolTip" @onclick="Click" />
+			}
+			else
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" title="@ToolTip" align="@ImageAlign.ToString().ToLower()" @onclick="Click" />
+			}
 		}
 		else
 		{
-			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+			if (ImageAlign == Enums.ImageAlign.NotSet)
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
+			}
+			else
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" align="@ImageAlign.ToString().ToLower()" @onclick="Click" />
+			}
 		}
 	}
 	else
 	{
 		if (hasToolTip)
 		{
-			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" title="@ToolTip" @onclick="Click" />
+			if (ImageAlign == Enums.ImageAlign.NotSet)
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" title="@ToolTip" />
+			}
+			else
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" title="@ToolTip" align="@ImageAlign.ToString().ToLower()" @onclick="Click" />
+			}
 		}
 		else
 		{
-			<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" />
+			if (ImageAlign == Enums.ImageAlign.NotSet)
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" />
+			}
+			else
+			{
+				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" align="@ImageAlign.ToString().ToLower()" />
+			}
 		}
 	}
 }
