@@ -8,16 +8,16 @@ using System.Web.UI.WebControls;
 
 namespace BeforeWebForms.ControlSamples.ListView
 {
-  public partial class Default : System.Web.UI.Page
-  {
+	public partial class Default : System.Web.UI.Page
+	{
 
-    protected void Page_Load(object sender, EventArgs e)
-    {
+		protected void Page_Load(object sender, EventArgs e)
+		{
 
-      simpleListView.DataSource = Widget.SimpleWidgetList;
-      simpleListView.DataBind();
+			simpleListView.DataSource = Widget.SimpleWidgetList;
+			simpleListView.DataBind();
 
-    }
+		}
 
-  }
+	}
 }

@@ -3,37 +3,37 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-  public abstract class UiTableItemStyle : UiStyle<TableItemStyle>, IHasLayoutTableItemStyle
-  {
-
-	[Parameter]
-	public HorizontalAlign HorizontalAlign { get; set; }
-
-	[Parameter]
-	public VerticalAlign VerticalAlign { get; set; }
-
-	[Parameter]
-	public bool Wrap { get; set; } = true;
-
-
-	protected override void OnInitialized()
+	public abstract class UiTableItemStyle : UiStyle<TableItemStyle>, IHasLayoutTableItemStyle
 	{
 
-	  if (theStyle != null)
-	  {
+		[Parameter]
+		public HorizontalAlign HorizontalAlign { get; set; }
 
-		base.OnInitialized();
+		[Parameter]
+		public VerticalAlign VerticalAlign { get; set; }
 
-		theStyle.HorizontalAlign = HorizontalAlign;
-		theStyle.VerticalAlign = VerticalAlign;
-		theStyle.Wrap = Wrap;
+		[Parameter]
+		public bool Wrap { get; set; } = true;
 
-		theStyle.SetFontsFromAttributes(AdditionalAttributes);
 
-	  }
+		protected override void OnInitialized()
+		{
+
+			if (theStyle != null)
+			{
+
+				base.OnInitialized();
+
+				theStyle.HorizontalAlign = HorizontalAlign;
+				theStyle.VerticalAlign = VerticalAlign;
+				theStyle.Wrap = Wrap;
+
+				theStyle.SetFontsFromAttributes(AdditionalAttributes);
+
+			}
+
+		}
 
 	}
-
-  }
 
 }

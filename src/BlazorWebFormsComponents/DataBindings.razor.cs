@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
-using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
-  public partial class DataBindings
-  {
+	public partial class DataBindings
+	{
 
-	[Parameter]
-	public RenderFragment ChildContent { get; set; }
+		[Parameter]
+		public RenderFragment ChildContent { get; set; }
 
-	[CascadingParameter(Name = "ParentTreeView")]
-	public TreeView ParentTreeView { get; set; }
+		[CascadingParameter(Name = "ParentTreeView")]
+		public TreeView ParentTreeView { get; set; }
 
-  }
+	}
 
 
 }

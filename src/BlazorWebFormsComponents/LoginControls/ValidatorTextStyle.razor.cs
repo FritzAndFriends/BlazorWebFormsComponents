@@ -2,13 +2,13 @@
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-  public partial class ValidatorTextStyle : UiStyle
-  {
-	[CascadingParameter(Name = "ValidatorTextStyle")]
-	protected Style theValidatorTextStyle
+	public partial class ValidatorTextStyle : UiStyle
 	{
-	  get { return theStyle; }
-	  set { theStyle = value; }
+		[CascadingParameter(Name = "ValidatorTextStyle")]
+		protected Style theValidatorTextStyle
+		{
+			get { return theStyle; }
+			set { theStyle = value; }
+		}
 	}
-  }
 }

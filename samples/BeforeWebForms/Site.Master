@@ -88,6 +88,11 @@
                                         <asp:TreeNode NavigateUrl="ControlSamples/Repeater/Default.aspx" Text=" Repeater" Expanded="true" />
                                     </asp:TreeNode>
 
+                                    <asp:TreeNode Text=" Editor Components" Expanded="true">
+                                      <asp:TreeNode Text=" Button" NavigateUrl="~/ControlSamples/Button/default.aspx" />
+                                      <asp:TreeNode Text=" Hyperlink" NavigateUrl="~/ControlSamples/Hyperlink/default.aspx" />
+                                    </asp:TreeNode>
+
                                     <asp:TreeNode Text=" Validation Components" Expanded="false">
                                         <asp:TreeNode Text=" Custom Validator" />
                                         <asp:TreeNode Text=" Regular Expression" />
@@ -98,7 +103,7 @@
                                     </asp:TreeNode>
 
                                     <asp:TreeNode Text=" Navigation Components" Expanded="true">
-                                        <asp:TreeNode Text=" Menu" />
+                                        <asp:TreeNode Text=" Menu" NavigateUrl="ControlSamples/Menu/Default.aspx" />
                                         <asp:TreeNode Text=" Site Map Path" />
                                         <asp:TreeNode Text=" TreeView" Expanded="true">
                                             <asp:TreeNode Text=" Simple TreeView" NavigateUrl="ControlSamples/TreeView/Default.aspx" />

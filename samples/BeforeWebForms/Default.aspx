@@ -40,6 +40,7 @@
             <h3>Editor Controls</h3>
             <ul>
               <li><a href="ControlSamples/Button/Default.aspx">Button</a></li>
+              <li><a href="ControlSamples/Hyperlink/Default.aspx">Hyperlink</a></li>
             </ul>
         </div>
 
