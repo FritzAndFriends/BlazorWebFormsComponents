@@ -1,6 +1,15 @@
 ﻿@using static BlazorWebFormsComponents.Enums.ImageAlign
 @inherits TestComponentBase
 
+	<SnapshotTest>
+		<TestInput>
+			<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="NotSet" />
+		</TestInput>
+		<ExpectedOutput>
+			<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
+		</ExpectedOutput>
+	</SnapshotTest>
+
 <SnapshotTest>
 	<TestInput>
 		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />
