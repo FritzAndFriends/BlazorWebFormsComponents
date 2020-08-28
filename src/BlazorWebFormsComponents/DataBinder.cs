@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
-using System.Linq;
+using System.ComponentModel;
 
 namespace BlazorWebFormsComponents
 {
-
 	/// <summary>
 	/// This emulates the DataBinder from Web Forms, but is NOT recommended for long term use
 	/// </summary>
@@ -32,7 +31,6 @@ namespace BlazorWebFormsComponents
 		/// <returns></returns>
 		public static RenderFragment Eval(string fieldName, string format = "")
 		{
-
 			RenderFragment fragment = builder =>
 			{
 
@@ -47,7 +45,6 @@ namespace BlazorWebFormsComponents
 			};
 
 			return fragment;
-
 		}
 
 		/// <summary>
@@ -86,11 +83,10 @@ namespace BlazorWebFormsComponents
 				throw new ArgumentNullException(nameof(container));
 			}
 
-			var theType = container.GetType();
-			var prop = theType.GetProperties().FirstOrDefault(p => string.Equals(p.Name, propName, StringComparison.OrdinalIgnoreCase));
+			var prop = TypeDescriptor.GetProperties(container).Find(propName, ignoreCase: true);
 			if (prop == null)
 			{
-				throw new ArgumentException($"A property named '{propName}' could not be found on type {theType.FullName}.", nameof(propName));
+				throw new ArgumentException($"A property named '{propName}' could not be found on type {container.GetType().FullName}.", nameof(propName));
 			}
 
 			return prop.GetValue(container);
@@ -102,7 +98,5 @@ namespace BlazorWebFormsComponents
 
 			return string.Format(format, rawValue);
 		}
-
 	}
-
 }
