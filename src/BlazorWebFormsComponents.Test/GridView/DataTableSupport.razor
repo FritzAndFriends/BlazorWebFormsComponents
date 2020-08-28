@@ -3,14 +3,14 @@
 
 <Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable" AutogenerateColumns="true">
+		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable" AutogenerateColumns="false">
+		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="false">
 			<Columns>
 					<BoundField ItemType="object" DataField="Name" HeaderText="Item Name" />
 					<BoundField ItemType="object" DataField="Quantity" HeaderText="Item Quantity" />
@@ -21,14 +21,14 @@
 
 <Fixture Test="DataTableWithEnumerableOfDataRowAsDataSource">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutogenerateColumns="true">
+		<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutoGenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataSetAsDataSource">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataSet" AutogenerateColumns="true">
+		<GridView ItemType="object" DataSource="dataSet" AutoGenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
