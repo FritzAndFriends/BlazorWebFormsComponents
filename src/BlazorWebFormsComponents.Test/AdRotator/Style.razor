@@ -3,7 +3,7 @@
 
 <Fixture Test="StyleTest">
 	<ComponentUnderTest>
-		<AdRotator AdvertisementFile="Ads2.xml" BorderColor="Blue" BorderWidth="2" Target="_blank"></AdRotator>
+		<AdRotator AdvertisementFile="Ads2.xml" BackColor="Blue" ForeColor="White" Target="_blank"></AdRotator>
 	</ComponentUnderTest>
 </Fixture>
 
@@ -16,7 +16,7 @@
 
 		var style = anchor.GetAttribute("style");
 		style.ShouldNotBeNull();
-		style.ShouldContain("border-color:Blue");
-		style.ShouldContain("border-width:2");
+		style.ShouldContain("background-color:Blue");
+		style.ShouldContain("color:White");
 	}
 }
