@@ -20,5 +20,8 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string ToolTip { get; set; }
+
+		[Parameter]
+		public bool GenerateEmptyAlternateText { get; set; }
 	}
 }
