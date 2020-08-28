@@ -3,56 +3,35 @@
 	var hasToolTip = !string.IsNullOrEmpty(ToolTip);
 }
 
+@functions {
+		RenderFragment CreateImageButtonComponent() => builder =>
+		{
+			builder.OpenElement(0, "input");
+			builder.AddMultipleAttributes(1, new Dictionary<string, object> {
+				{ "type", "image" }, { "src", ImageUrl }, { "alt", AlternateText }, { "longdesc", DescriptionUrl }, { "style", CalculatedStyle }, { "class", CssClass }
+			});
+			builder.AddAttribute(2, "onclick", OnClick);
+
+			if(!Enabled)
+			{
+				builder.AddAttribute(3, "disabled", "disabled");
+			}
+
+			if(!string.IsNullOrEmpty(ToolTip))
+			{
+				builder.AddAttribute(4, "title", ToolTip);
+			}
+
+			if(ImageAlign != Enums.ImageAlign.NotSet)
+			{
+				builder.AddAttribute(4, "align", ImageAlign.ToString().ToLower());
+			}
+
+			builder.CloseElement();
+		};
+}
+
 @if (Visible)
 {
-	if (Enabled)
-	{
-		if (hasToolTip)
-		{
-			if (ImageAlign == Enums.ImageAlign.NotSet)
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" title="@ToolTip" @onclick="Click" />
-			}
-			else
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" title="@ToolTip" align="@ImageAlign.ToString().ToLower()" @onclick="Click" />
-			}
-		}
-		else
-		{
-			if (ImageAlign == Enums.ImageAlign.NotSet)
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" @onclick="Click" />
-			}
-			else
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" align="@ImageAlign.ToString().ToLower()" @onclick="Click" />
-			}
-		}
-	}
-	else
-	{
-		if (hasToolTip)
-		{
-			if (ImageAlign == Enums.ImageAlign.NotSet)
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" title="@ToolTip" />
-			}
-			else
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" title="@ToolTip" align="@ImageAlign.ToString().ToLower()" @onclick="Click" />
-			}
-		}
-		else
-		{
-			if (ImageAlign == Enums.ImageAlign.NotSet)
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" />
-			}
-			else
-			{
-				<input type="image" src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" style="@CalculatedStyle" class="@CssClass" disabled="disabled" @onclick="Click" align="@ImageAlign.ToString().ToLower()" />
-			}
-		}
-	}
+	@CreateImageButtonComponent()
 }
