@@ -1,3 +1,6 @@
 @inherits BaseWebFormsComponent
 
-<img src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" />
+@if (Visible)
+{
+	<img src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" />
+}
