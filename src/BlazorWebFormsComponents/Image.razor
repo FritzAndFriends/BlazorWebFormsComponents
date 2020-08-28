@@ -21,6 +21,11 @@
 			element.AppendFormat(" title=\"{0}\"", ToolTip);
 		}
 
+		if(ImageAlign != Enums.ImageAlign.NotSet)
+		{
+			element.AppendFormat(" align=\"{0}\"", ImageAlign.ToString().ToLower());
+		}
+
 		element.Append(" />");
 }
 

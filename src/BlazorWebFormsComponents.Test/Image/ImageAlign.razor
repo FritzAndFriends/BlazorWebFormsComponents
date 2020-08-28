@@ -1,0 +1,83 @@
+﻿@using static BlazorWebFormsComponents.Enums.ImageAlign
+@inherits TestComponentBase
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="left" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Right" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="right" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Baseline" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="baseline" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Top" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="top" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Middle" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="middle" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Bottom" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="bottom" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsBottom" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absbottom" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsMiddle" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absmiddle" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="TextTop" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="texttop" />
+	</ExpectedOutput>
+</SnapshotTest>
