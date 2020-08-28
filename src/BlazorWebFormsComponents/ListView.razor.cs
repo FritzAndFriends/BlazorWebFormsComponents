@@ -1,11 +1,12 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System;
 
 namespace BlazorWebFormsComponents
 {
 
-	public partial class ListView<ItemType> : BaseModelBindingComponent<ItemType>
+	public partial class ListView<ItemType> : DataBoundComponent<ItemType>
 	{
 
 		public ListView()
@@ -52,12 +53,20 @@ namespace BlazorWebFormsComponents
 
 		[Parameter] public RenderFragment ChildContent { get; set; }
 
+		[Parameter]
+		public EventCallback<ListViewItemEventArgs> OnItemDataBound { get; set; }
+
 		[CascadingParameter(Name = "Host")] public BaseWebFormsComponent HostComponent { get; set; }
 
 		protected override void OnInitialized()
 		{
 			HostComponent = this;
 			base.OnInitialized();
+		}
+
+		protected virtual void ItemDataBound(ListViewItemEventArgs e)
+		{
+			OnItemDataBound.InvokeAsync(e);
 		}
 	}
 }

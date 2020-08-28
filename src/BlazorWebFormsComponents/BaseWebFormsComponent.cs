@@ -62,17 +62,14 @@ namespace BlazorWebFormsComponents
 		[Parameter(), Obsolete("runat is not available in Blazor")]
 		public string runat { get; set; }
 
+		[Parameter]
+		public EventCallback<EventArgs> OnDataBinding { get; set; }
+
 		/// <summary>
 		/// 🚨🚨 DataKeys are not used in Blazor 🚨🚨
 		/// </summary>
 		[Parameter(), Obsolete("DataKeys are not used in Blazor")]
 		public string DataKeys { get; set; }
-
-		/// <summary>
-		/// 🚨🚨 DataSource controls are not used in Blazor 🚨🚨
-		/// </summary>
-		[Parameter, Obsolete("DataSource controls are not used in Blazor")]
-		public string DataSourceID { get; set; }
 
 		/// <summary>
 		/// 🚨🚨 Theming is not available in Blazor 🚨🚨
@@ -161,6 +158,11 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public RenderFragment ChildComponents { get; set; }
+
+		protected virtual void DataBinding(EventArgs e)
+		{
+			OnDataBinding.InvokeAsync(e);
+		}
 
 		#region Blazor Events
 

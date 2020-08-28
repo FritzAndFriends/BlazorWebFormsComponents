@@ -1,4 +1,5 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
@@ -9,7 +10,7 @@ using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeView : BaseDataBindingComponent, IHasStyle
+	public partial class TreeView : BaseDataBoundComponent, IHasStyle
 	{
 
 		[Parameter]
@@ -20,9 +21,6 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public DataBindings DataBindings { get; set; }
-
-		[Parameter]
-		public object DataSource { get; set; }
 
 		[Parameter]
 		public TreeViewImageSet ImageSet { get; set; } = TreeViewImageSet._Default;
