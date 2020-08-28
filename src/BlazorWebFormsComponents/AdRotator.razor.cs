@@ -15,10 +15,10 @@ namespace BlazorWebFormsComponents
 		private static readonly string DefaultAlternateTextField = "AlternateText";
 		private static readonly string DefaultImageUrlField = "ImageUrl";
 		private static readonly string DefaultNavigateUrlField = "NavigateUrl";
-		
+
 		[Parameter]
 		public string AdvertisementFile { get; set; }
-		
+
 		[Parameter]
 		public string AlternateTextField { get; set; } = DefaultAlternateTextField;
 
@@ -33,6 +33,9 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string Target { get; set; }
+
+		[Parameter]
+		public EventCallback<AdCreatedEventArgs> OnAdCreated { get; set; }
 
 		[Parameter]
 		public WebColor BackColor { get; set; }
@@ -97,10 +100,10 @@ namespace BlazorWebFormsComponents
 			{
 				throw new ArgumentException("AlternateTextField can't be null or empty.", nameof(NavigateUrlField));
 			}
-			
+
 			var advertisments = GetAdvertismentsFileContent(AdvertisementFile);
 
-			if (advertisments == null || advertisments.Count())
+			if (advertisments == null || advertisments.Count() == 0)
 			{
 				return null;
 			}
