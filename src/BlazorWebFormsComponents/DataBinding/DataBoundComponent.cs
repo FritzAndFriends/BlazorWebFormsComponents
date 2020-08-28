@@ -12,9 +12,6 @@ namespace BlazorWebFormsComponents.DataBinding
 		[Parameter]
 		public string DataMember { get; set; }
 
-		//[Parameter]
-		//public string ItemType { get; set; }
-
 		[Parameter]
 		public SelectHandler<TItemType> SelectMethod { get; set; }
 
