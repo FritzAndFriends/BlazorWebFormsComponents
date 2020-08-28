@@ -2,5 +2,12 @@
 
 @if (Visible)
 {
-	<img src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" />
+	if (string.IsNullOrEmpty(ToolTip))
+	{
+		<img src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" />
+	}
+	else
+	{
+		<img src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" title="@ToolTip" />
+	}
 }

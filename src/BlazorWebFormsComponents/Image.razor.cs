@@ -17,5 +17,8 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string ImageUrl { get; set; }
+
+		[Parameter]
+		public string ToolTip { get; set; }
 	}
 }
