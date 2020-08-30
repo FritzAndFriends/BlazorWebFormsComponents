@@ -28,5 +28,11 @@ namespace BlazorWebFormsComponents {
 
 		internal string CalculatedCssClass => Enabled ? CssClass : string.Concat(CssClass, " aspNetDisabled").Trim();
 
+		[Parameter]
+		public string ToolTip { get; set; }
+
+		[Parameter]
+		public bool Visible { get; set; }
+
 	}
 }
