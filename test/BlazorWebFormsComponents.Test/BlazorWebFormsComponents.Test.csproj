@@ -28,7 +28,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\samples\SharedSampleObjects\SharedSampleObjects.csproj" />
-		<ProjectReference Include="..\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+		<ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
 	</ItemGroup>
 
   <ItemGroup>
