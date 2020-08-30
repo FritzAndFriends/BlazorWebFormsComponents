@@ -1,4 +1,5 @@
 ﻿using BlazorComponentUtilities;
+using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class DataList<ItemType> : BaseModelBindingComponent<ItemType>, IHasStyle
+	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IHasStyle
 	{
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },
@@ -56,6 +57,9 @@ namespace BlazorWebFormsComponents
 		[Parameter] public WebColor ForeColor { get; set; }
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public Unit Width { get; set; }
+
+		[Parameter]
+		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }
 
 		private IList<ItemType> ElementIndex(int columns, IEnumerable<ItemType> items, DataListEnum direction)
 		{
@@ -111,5 +115,9 @@ namespace BlazorWebFormsComponents
 			base.OnInitialized();
 		}
 
+		protected virtual void ItemDataBound(DataListItemEventArgs e)
+		{
+			OnItemDataBound.InvokeAsync(e);
+		}
 	}
 }

@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.DataBinding;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class Repeater<ItemType> : BaseModelBindingComponent<ItemType>
+	public partial class Repeater<ItemType> : DataBoundComponent<ItemType>
 	{
 
 		[Parameter]

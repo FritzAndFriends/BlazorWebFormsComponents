@@ -1,37 +1,31 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System;
 
-namespace BlazorWebFormsComponents
+namespace BlazorWebFormsComponents.DataBinding
 {
-	public abstract class BaseModelBindingComponent<ItemType> : BaseDataBindingComponent
+	public class DataBoundComponent<TItemType> : BaseDataBoundComponent
 	{
-
-		// Cheer 300 svavablount 15/12/19 
-		// Cheer 200 nothing_else_matters 15/12/19 
-
-		public delegate IQueryable<ItemType> SelectHandler(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount);
-
-		/// <summary>
-		/// Data retrieval method to databind the collection to
-		/// </summary>
 		[Parameter]
-		public SelectHandler SelectMethod { get; set; }
+		public string DataMember { get; set; }
 
 		[Parameter]
-		public IEnumerable<ItemType> Items
+		public SelectHandler<TItemType> SelectMethod { get; set; }
+
+		[Parameter]
+		public IEnumerable<TItemType> Items
 		{
 			get { return ItemsList; }
 			set { ItemsList = value?.ToList(); }
 		}
 
-		protected List<ItemType> ItemsList { get; set; }
+		protected List<TItemType> ItemsList { get; set; }
 
 		[Parameter]
-		public object DataSource
+		public override object DataSource
 		{
 			get { return Items; }
 			set
@@ -41,9 +35,9 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
-		private IEnumerable<ItemType> GetDataSource(object dataSource)
+		private IEnumerable<TItemType> GetDataSource(object dataSource)
 		{
-			if (dataSource is IEnumerable<ItemType> enumerableOfItemType)
+			if (dataSource is IEnumerable<TItemType> enumerableOfItemType)
 			{
 				// If data source is already the right type, return it
 				return enumerableOfItemType;
@@ -55,12 +49,12 @@ namespace BlazorWebFormsComponents
 				return GetListSourceData(listSource);
 			}
 
-			throw new InvalidOperationException($"The DataSource must implement IEnumerable<{typeof(ItemType).FullName}> (such as most list types) or IListSource (such as DataSet or DataTable).");
+			throw new InvalidOperationException($"The DataSource must implement IEnumerable<{typeof(TItemType).FullName}> (such as most list types) or IListSource (such as DataSet or DataTable).");
 		}
 
-		private IEnumerable<ItemType> GetListSourceData(IListSource listSource)
+		private IEnumerable<TItemType> GetListSourceData(IListSource listSource)
 		{
-			if (typeof(ItemType) != typeof(object))
+			if (typeof(TItemType) != typeof(object))
 			{
 				throw new InvalidOperationException("Binding to an IListSource (such as DataSet or DataTable) requires that 'ItemType' be set to 'object'.");
 			}
@@ -74,7 +68,7 @@ namespace BlazorWebFormsComponents
 			if (!listSource.ContainsListCollection)
 			{
 				// If this is the actual list, get it, and return it
-				return list.OfType<object>() as IEnumerable<ItemType>;
+				return list.OfType<object>() as IEnumerable<TItemType>;
 			}
 			else
 			{
@@ -82,7 +76,7 @@ namespace BlazorWebFormsComponents
 
 				if (list is ITypedList typedList)
 				{
-					var propDescs = typedList.GetItemProperties(new PropertyDescriptor[0]);
+					var propDescs = typedList.GetItemProperties(Array.Empty<PropertyDescriptor>());
 					if (propDescs == null || propDescs.Count == 0)
 					{
 						throw new InvalidOperationException("The list returned by the IListSource (such as DataSet or DataTable) has no members. For example, the DataSet might have no DataTables in it.");
@@ -96,7 +90,7 @@ namespace BlazorWebFormsComponents
 
 						if ((innerList != null) && (innerList is IEnumerable innerListEnumerable))
 						{
-							return innerListEnumerable.OfType<object>() as IEnumerable<ItemType>;
+							return innerListEnumerable.OfType<object>() as IEnumerable<TItemType>;
 						}
 					}
 
