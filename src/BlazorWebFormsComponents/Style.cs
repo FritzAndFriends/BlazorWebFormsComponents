@@ -21,19 +21,7 @@ namespace BlazorWebFormsComponents
 
 		public string CssClass { get; set; }
 
-		public bool Font_Bold { get; set; }
-
-		public bool Font_Italic { get; set; }
-
-		public string Font_Names { get; set; }
-
-		public bool Font_Overline { get; set; }
-
-		public FontUnit Font_Size { get; set; } = FontUnit.Empty;
-
-		public bool Font_Strikeout { get; set; }
-
-		public bool Font_Underline { get; set; }
+		public FontInfo Font { get; set; } = new FontInfo();
 
 		public WebColor ForeColor { get; set; }
 

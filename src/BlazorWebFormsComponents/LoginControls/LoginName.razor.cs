@@ -30,13 +30,7 @@ namespace BlazorWebFormsComponents.LoginControls
 		[Parameter] public WebColor ForeColor { get; set; }
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public Unit Width { get; set; }
-		[Parameter] public bool Font_Bold { get; set; }
-		[Parameter] public bool Font_Italic { get; set; }
-		[Parameter] public string Font_Names { get; set; }
-		[Parameter] public bool Font_Overline { get; set; }
-		[Parameter] public FontUnit Font_Size { get; set; }
-		[Parameter] public bool Font_Strikeout { get; set; }
-		[Parameter] public bool Font_Underline { get; set; }
+		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
 
 		#endregion
 
