@@ -1,6 +1,7 @@
 using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using System;
 
 namespace BlazorWebFormsComponents
 {
@@ -28,6 +29,9 @@ namespace BlazorWebFormsComponents
 		internal string CalculatedButtonType => CausesValidation ? "submit" : "button";
 
 		internal string CalculatedCssClass => Enabled ? CssClass : string.Concat(CssClass, " aspNetDisabled").Trim();
+
+		[Parameter, Obsolete("In Blazor this behaves the same whether activated or not")]
+		public bool UseSubmitBehavior { get; set; }
 
 		[Parameter]
 		public string ToolTip { get; set; }
