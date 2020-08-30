@@ -14,7 +14,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		///	Specify if the GridView component will autogenerate its columns
 		/// </summary>
-		[Parameter] public bool AutogenerateColumns { get; set; } = true;
+		[Parameter] public bool AutoGenerateColumns { get; set; } = true;
 
 		/// <summary>
 		/// Text to show when there are no items to show
@@ -56,7 +56,7 @@ namespace BlazorWebFormsComponents
 		protected override void OnInitialized()
 		{
 			base.OnInitialized();
-			if (AutogenerateColumns)
+			if (AutoGenerateColumns)
 			{
 				GridViewColumnGenerator.GenerateColumns(this);
 			}
