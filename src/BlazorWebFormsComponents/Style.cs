@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public class Style : IHasStyle
+	public class Style : IStyle
 	{
 
 		internal Style() { }

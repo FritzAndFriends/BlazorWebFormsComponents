@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IHasStyle
+	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IStyle
 	{
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },

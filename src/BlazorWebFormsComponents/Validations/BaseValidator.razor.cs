@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public abstract partial class BaseValidator<Type> : BaseWebFormsComponent, IHasStyle
+	public abstract partial class BaseValidator<Type> : Component
 	{
 		// BANG used because we know it will set during OnInitialized and thus no need to worry about null
 		private ValidationMessageStore _messageStore = default!;
@@ -19,27 +19,8 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public ForwardRef<InputBase<Type>> ControlToValidate { get; set; }
 		[Parameter] public string Text { get; set; }
 		[Parameter] public string ErrorMessage { get; set; }
-		[Parameter] public WebColor ForeColor { get; set; }
-		[Parameter] public WebColor BackColor { get; set; }
-		[Parameter] public WebColor BorderColor { get; set; }
-		[Parameter] public BorderStyle BorderStyle { get; set; }
-		[Parameter] public Unit BorderWidth { get; set; }
-		[Parameter] public string CssClass { get; set; }
-		[Parameter] public Unit Height { get; set; }
 		[Parameter] public HorizontalAlign HorizontalAlign { get; set; }
 		[Parameter] public VerticalAlign VerticalAlign { get; set; }
-		[Parameter] public Unit Width { get; set; }
-		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
-
-		/// <summary>
-		/// Override all style properties if it's not null
-		/// </summary>
-		[Parameter]
-		public IHasStyle Style
-		{
-			get => this;
-			set { value?.CopyTo(this); }
-		}
 
 		public abstract bool Validate(string value);
 

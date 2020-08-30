@@ -7,7 +7,7 @@ namespace BlazorWebFormsComponents
 {
 	public static class HasStyleExtensions
 	{
-		public static void CopyTo(this IHasStyle source, IHasStyle destination)
+		public static void CopyTo(this IStyle source, IStyle destination)
 		{
 
 			destination.BackColor = source.BackColor;
@@ -28,11 +28,11 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public static StyleBuilder ToStyle(this IHasTableItemStyle hasStyle) =>
-			((IHasStyle)hasStyle).ToStyle().AddStyle("white-space", "nowrap", !hasStyle.Wrap);
+		public static StyleBuilder ToStyle(this ITableItemStyle hasStyle) =>
+			((IStyle)hasStyle).ToStyle().AddStyle("white-space", "nowrap", !hasStyle.Wrap);
 
 
-		public static StyleBuilder ToStyle(this IHasStyle hasStyle) =>
+		public static StyleBuilder ToStyle(this IStyle hasStyle) =>
 			StyleBuilder.Empty().AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
 							when: hasStyle.BackColor != default(WebColor))
 
@@ -53,12 +53,12 @@ namespace BlazorWebFormsComponents
 						.AddValue("line-through", hasStyle.Font.Strikeout)
 						, HasTextDecorations(hasStyle));
 
-		private static bool HasTextDecorations(IHasStyle hasStyle) =>
+		private static bool HasTextDecorations(IStyle hasStyle) =>
 				hasStyle.Font.Underline ||
 				hasStyle.Font.Overline ||
 				hasStyle.Font.Strikeout;
 
-		private static bool HasBorders(IHasStyle hasStyle) =>
+		private static bool HasBorders(IStyle hasStyle) =>
 						hasStyle.BorderStyle != BorderStyle.None &&
 						hasStyle.BorderStyle != BorderStyle.NotSet &&
 						hasStyle.BorderWidth.Value > 0 &&

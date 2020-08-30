@@ -9,7 +9,7 @@ using static BlazorWebFormsComponents.Enums.LogoutAction;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class LoginStatus : BaseWebFormsComponent, IHasStyle
+	public partial class LoginStatus : Component
 	{
 		[Parameter] public LogoutAction LogoutAction { get; set; } = Refresh;
 
@@ -45,20 +45,6 @@ namespace BlazorWebFormsComponents.LoginControls
 		public StyleBuilder CalculatedStyle => this.ToStyle();
 
 		private bool UserAuthenticated { get; set; }
-
-		#region IHasStyle
-
-		[Parameter] public WebColor BackColor { get; set; }
-		[Parameter] public WebColor BorderColor { get; set; }
-		[Parameter] public BorderStyle BorderStyle { get; set; }
-		[Parameter] public Unit BorderWidth { get; set; }
-		[Parameter] public string CssClass { get; set; }
-		[Parameter] public WebColor ForeColor { get; set; }
-		[Parameter] public Unit Height { get; set; }
-		[Parameter] public Unit Width { get; set; }
-		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
-
-		#endregion
 
 		private void LoginHandle(MouseEventArgs args)
 		{

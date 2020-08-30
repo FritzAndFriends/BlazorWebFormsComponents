@@ -2,13 +2,8 @@
 
 namespace BlazorWebFormsComponents
 {
-	public interface IHasLayoutStyle
+	public interface ILayoutStyle
 	{
-
-		// Cheer 1042 codingbandit 07/1/20 
-		// Cheer 100 ramblinggeek 07/1/20 
-
-
 		WebColor BackColor { get; set; }
 
 		WebColor BorderColor { get; set; }
@@ -24,7 +19,5 @@ namespace BlazorWebFormsComponents
 		Unit Height { get; set; }
 
 		Unit Width { get; set; }
-
 	}
-
 }

@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeView : BaseDataBoundComponent, IHasStyle
+	public partial class TreeView : BaseDataBoundComponent, IStyle
 	{
 
 		[Parameter]

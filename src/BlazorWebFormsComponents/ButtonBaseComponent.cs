@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace BlazorWebFormsComponents
 {
-	public abstract class ButtonBaseComponent : BaseWebFormsComponent, IButtonComponent
+	public abstract class ButtonBaseComponent : Component, IButtonComponent
 	{
 
 		[Parameter]
