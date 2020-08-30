@@ -73,7 +73,7 @@ The default layout for your application will be defined in the `App.razor` file 
 
 You can add additional rules in this file to route and choose different layouts as appropriate for your application.
 
-For more complex scenarios and a walk-through with samples, read the [MasterPages strategy documentation](Strategy/MasterPages.md).
+For more complex scenarios and a walk-through with samples, read the [MasterPages strategy documentation](MasterPages.md).
 
 [Back to top](#Migration---Getting-Started)
 

@@ -3,8 +3,8 @@
 	/// <summary>
 	/// Generic row interface
 	/// </summary>
-  public interface IRow<ItemType>
-  {
+	public interface IRow<ItemType>
+	{
 		/// <summary>
 		/// The parent IRowCollection where the IRow resides
 		/// </summary>

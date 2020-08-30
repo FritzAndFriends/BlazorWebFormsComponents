@@ -1,9 +1,5 @@
-﻿using BlazorWebFormsComponents.Enums;
-using BlazorComponentUtilities;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using BlazorComponentUtilities;
+using BlazorWebFormsComponents.Enums;
 
 namespace BlazorWebFormsComponents
 {

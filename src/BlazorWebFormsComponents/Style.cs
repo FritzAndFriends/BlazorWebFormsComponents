@@ -43,7 +43,8 @@ namespace BlazorWebFormsComponents
 
 		public override string ToString() => this.ToStyle().NullIfEmpty();
 
-		public void FromUnknownAttributes(Dictionary<string,object> attributes, string prefix) {
+		public void FromUnknownAttributes(Dictionary<string, object> attributes, string prefix)
+		{
 
 			if (attributes?.Count > 0)
 			{
@@ -58,7 +59,7 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private void FromAttributes(IEnumerable<KeyValuePair<string,object>> attributes) 
+		private void FromAttributes(IEnumerable<KeyValuePair<string, object>> attributes)
 		{
 
 			var headerStyleType = typeof(TableItemStyle);

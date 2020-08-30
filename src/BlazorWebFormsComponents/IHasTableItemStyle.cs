@@ -2,8 +2,6 @@
 using BlazorWebFormsComponents.Enums;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
@@ -98,7 +96,7 @@ namespace BlazorWebFormsComponents
 			((IHasStyle)hasStyle).ToStyle().AddStyle("white-space", "nowrap", !hasStyle.Wrap);
 
 
-		public static StyleBuilder ToStyle(this IHasStyle hasStyle) => 
+		public static StyleBuilder ToStyle(this IHasStyle hasStyle) =>
 			StyleBuilder.Empty().AddStyle("background-color", () => ColorTranslator.ToHtml(hasStyle.BackColor.ToColor()).Trim(),
 							when: hasStyle.BackColor != default(WebColor))
 
@@ -135,14 +133,14 @@ namespace BlazorWebFormsComponents
 
 			if (additionalAttributes != null)
 			{
-				hasStyle.Font_Bold =        additionalAttributes.GetValue("Font-Bold", bool.Parse, hasStyle.Font_Bold);
-				hasStyle.Font_Italic =      additionalAttributes.GetValue("Font-Italic", bool.Parse, hasStyle.Font_Italic);
-				hasStyle.Font_Underline =   additionalAttributes.GetValue("Font-Underline", bool.Parse, hasStyle.Font_Underline);
+				hasStyle.Font_Bold = additionalAttributes.GetValue("Font-Bold", bool.Parse, hasStyle.Font_Bold);
+				hasStyle.Font_Italic = additionalAttributes.GetValue("Font-Italic", bool.Parse, hasStyle.Font_Italic);
+				hasStyle.Font_Underline = additionalAttributes.GetValue("Font-Underline", bool.Parse, hasStyle.Font_Underline);
 
-				hasStyle.Font_Names =       additionalAttributes.GetValue("Font-Names", a => a, hasStyle.Font_Names);
-				hasStyle.Font_Overline =    additionalAttributes.GetValue("Font-Overline", bool.Parse, hasStyle.Font_Overline);
-				hasStyle.Font_Size =        additionalAttributes.GetValue("Font-Size", FontUnit.Parse, hasStyle.Font_Size);
-				hasStyle.Font_Strikeout =   additionalAttributes.GetValue("Font-Strikeout", bool.Parse, hasStyle.Font_Strikeout);
+				hasStyle.Font_Names = additionalAttributes.GetValue("Font-Names", a => a, hasStyle.Font_Names);
+				hasStyle.Font_Overline = additionalAttributes.GetValue("Font-Overline", bool.Parse, hasStyle.Font_Overline);
+				hasStyle.Font_Size = additionalAttributes.GetValue("Font-Size", FontUnit.Parse, hasStyle.Font_Size);
+				hasStyle.Font_Strikeout = additionalAttributes.GetValue("Font-Strikeout", bool.Parse, hasStyle.Font_Strikeout);
 			}
 
 		}

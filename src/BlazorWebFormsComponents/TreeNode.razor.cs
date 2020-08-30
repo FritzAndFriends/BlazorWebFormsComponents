@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
 using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using BlazorWebFormsComponents.Enums;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -38,8 +36,11 @@ namespace BlazorWebFormsComponents
 
 		private string _ImageUrl;
 		[Parameter]
-		public string ImageUrl {
-			get { return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
+		public string ImageUrl
+		{
+			get
+			{
+				return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
 						string.IsNullOrEmpty(ParentTreeView.ImageSet.RootNode) ? "" :
 							(IsRoot ? $"{ImageLocation}{ParentTreeView.ImageSet.RootNode}" :
 								IsParent ? $"{ImageLocation}{ParentTreeView.ImageSet.ParentNode}" :
@@ -83,9 +84,11 @@ namespace BlazorWebFormsComponents
 
 		private TreeNode _Parent;
 		[CascadingParameter(Name = "ParentTreeNode")]
-		public TreeNode Parent {
+		public TreeNode Parent
+		{
 			get { return _Parent; }
-			set {
+			set
+			{
 				_Parent = value;
 				Depth = (byte)((_Parent?.Depth ?? 0) + 1);
 			}
@@ -190,7 +193,8 @@ namespace BlazorWebFormsComponents
 		}
 
 
-		protected override void OnParametersSet() {
+		protected override void OnParametersSet()
+		{
 
 			if (!ParentTreeView.Nodes.Contains(this))
 			{
@@ -199,7 +203,8 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public void HandleNodeExpand() {
+		public void HandleNodeExpand()
+		{
 
 			_UserExpanded = !Expanded;
 
@@ -208,7 +213,8 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public void HandleCheckbox(object sender, ChangeEventArgs args) {
+		public void HandleCheckbox(object sender, ChangeEventArgs args)
+		{
 
 			this.Checked = (bool)args.Value;
 

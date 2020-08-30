@@ -1,9 +1,6 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace BlazorWebFormsComponents
 {
@@ -23,7 +20,7 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment<RenderFragment> GroupTemplate { get; set; }
 		[Parameter] public RenderFragment ItemPlaceHolder { get; set; }
-		
+
 		/// <summary>
 		/// The layout of the ListView, a set of HTML to contain the repeated elements of the ItemTemplate and AlternativeItemTemplate 
 		/// </summary>

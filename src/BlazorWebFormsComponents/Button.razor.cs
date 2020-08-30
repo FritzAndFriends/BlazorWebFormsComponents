@@ -2,7 +2,8 @@ using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorWebFormsComponents {
+namespace BlazorWebFormsComponents
+{
 	public partial class Button : ButtonBaseComponent, IHasStyle
 	{
 

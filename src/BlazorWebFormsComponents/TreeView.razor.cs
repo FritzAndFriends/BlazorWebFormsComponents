@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -93,11 +90,12 @@ namespace BlazorWebFormsComponents
 
 			OnDataBinding.InvokeAsync(EventArgs.Empty);
 
-			if (DataSource is XmlDocument xmlDoc) {
+			if (DataSource is XmlDocument xmlDoc)
+			{
 
 				if (xmlDoc.SelectSingleNode("/*").LocalName == "siteMap")
 					DataBindSiteMap(xmlDoc);
-				else 
+				else
 					DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
 
 			}
@@ -178,7 +176,8 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private Task DataBindSiteMap(XmlDocument src) {
+		private Task DataBindSiteMap(XmlDocument src)
+		{
 
 			_TreeNodeBindings.First().DataMember = "siteMapNode";
 

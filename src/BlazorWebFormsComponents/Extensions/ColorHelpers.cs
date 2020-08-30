@@ -16,9 +16,9 @@
 
 namespace BlazorWebFormsComponents
 {
-    public static class ColorHelpers
-    {
-        public static WebColor GetWebColorFromHtml(this object obj)
+	public static class ColorHelpers
+	{
+		public static WebColor GetWebColorFromHtml(this object obj)
 		{
 			if (obj is WebColor) return (WebColor)obj;
 			if (!(obj is string)) return WebColor.Empty;
@@ -26,5 +26,5 @@ namespace BlazorWebFormsComponents
 			var theString = obj.ToString();
 			return new WebColor(theString);
 		}
-    }
+	}
 }

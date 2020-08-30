@@ -2,14 +2,17 @@ using System;
 using System.Collections.Specialized;
 
 
-namespace BlazorWebFormsComponents {
+namespace BlazorWebFormsComponents
+{
 
 	/// <summary>
 	/// Provides data for the ItemUpdating event.
 	/// </summary>
-	public class FormViewUpdateEventArgs : EventArgs {
+	public class FormViewUpdateEventArgs : EventArgs
+	{
 
-		public FormViewUpdateEventArgs(object commandArgument) {
+		public FormViewUpdateEventArgs(object commandArgument)
+		{
 
 			this.CommandArgument = commandArgument;
 

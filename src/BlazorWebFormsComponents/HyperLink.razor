@@ -1,10 +1,15 @@
 ﻿@inherits BaseWebFormsComponent
 
-@if (NavigationUrl == null)
+@if (Visible)
 {
-	<a id="@ID">@Text</a>
-}
-else
-{
-	<a id="@ID" target="@Target" href="@NavigationUrl">@Text</a>
+
+	@if (NavigationUrl == null)
+	{
+		<a id="@ID" class="@CssClass" style="@CalculatedStyle" title="@ToolTip">@Text</a>
+	}
+	else
+	{
+		<a id="@ID" href="@NavigationUrl" target="@Target" title="@ToolTip" class="@CssClass" style="@CalculatedStyle">@Text</a>
+	}
+
 }

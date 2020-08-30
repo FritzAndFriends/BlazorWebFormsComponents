@@ -1,6 +1,7 @@
 namespace BlazorWebFormsComponents.Enums
 {
-  public enum TreeNodeSelectAction {
+	public enum TreeNodeSelectAction
+	{
 
 		// Raises the SelectedNodeChanged event when a node is selected.
 		Select = 0,

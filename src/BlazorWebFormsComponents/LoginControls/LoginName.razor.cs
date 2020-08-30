@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using BlazorComponentUtilities;
+﻿using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {

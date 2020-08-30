@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BlazorWebFormsComponents
+﻿namespace BlazorWebFormsComponents
 {
 
 	/// <summary>
@@ -15,7 +11,8 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Scripts that run in the Page JavaScript object
 		/// </summary>
-		internal static class Page {
+		internal static class Page
+		{
 
 			private const string _Base = "bwfc.Page.";
 

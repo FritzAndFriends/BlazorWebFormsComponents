@@ -1,0 +1,20 @@
+﻿@inherits TestComponentBase
+@using BlazorWebFormsComponents
+
+<SnapshotTest>
+	<TestInput>
+		<ImageButton ImageUrl="/img/VB.png" AlternateText="Blue Button" Visible="true" />
+	</TestInput>
+	<ExpectedOutput>
+		<input type="image" src="/img/VB.png" alt="Blue Button" longdesc="">
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<ImageButton ImageUrl="/img/VB.png" AlternateText="Blue Button" Visible="false" />
+	</TestInput>
+	<ExpectedOutput>
+
+	</ExpectedOutput>
+</SnapshotTest>

@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-using IComponent = Microsoft.AspNetCore.Components.IComponent;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -94,7 +91,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Enabled { get; set; } = true;
 
-		[CascadingParameter(Name= PARENTCOMPONENTNAME)]
+		[CascadingParameter(Name = PARENTCOMPONENTNAME)]
 		public virtual BaseWebFormsComponent Parent { get; set; }
 
 		[Parameter]
@@ -105,7 +102,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		/// <value></value>
 		[Obsolete("ViewState is supported for compatibility and is discouraged for future use")]
-		public Dictionary<string,object> ViewState { get; } = new Dictionary<string, object>();
+		public Dictionary<string, object> ViewState { get; } = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
@@ -267,13 +264,22 @@ namespace BlazorWebFormsComponents
 		}
 
 		protected event EventHandler BubbledEvent;
-		protected virtual void OnBubbledEvent(object sender, EventArgs args) {
+		protected virtual void OnBubbledEvent(object sender, EventArgs args)
+		{
 
 			BubbledEvent?.Invoke(sender, args);
-			Parent?.OnBubbledEvent(sender,args);
+			Parent?.OnBubbledEvent(sender, args);
 
 		}
 
+		/// <summary>
+		/// Helper method to render the string specified by <paramref name="content"/> as a <see cref="RenderFragment"/>.
+		/// </summary>
+		/// <param name="content"></param>
+		/// <returns></returns>
+		protected RenderFragment RenderString(string content)
+		{
+			return builder => builder.AddContent(0, content);
+		}
 	}
-
 }

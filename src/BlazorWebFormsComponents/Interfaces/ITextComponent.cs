@@ -1,7 +1,7 @@
 ﻿namespace BlazorWebFormsComponents.Interfaces
 {
-  public interface ITextComponent
-  {
+	public interface ITextComponent
+	{
 		string Text { get; set; }
-  }
+	}
 }

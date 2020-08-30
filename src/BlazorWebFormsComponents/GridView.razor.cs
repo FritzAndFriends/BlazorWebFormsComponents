@@ -8,8 +8,8 @@ namespace BlazorWebFormsComponents
 	/// Blazor version of WebForms GridView control
 	/// </summary>
 	/// <typeparam name="ItemType"></typeparam>
-  public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>
-  {
+	public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>
+	{
 
 		/// <summary>
 		///	Specify if the GridView component will autogenerate its columns
