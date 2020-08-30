@@ -32,8 +32,5 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string ToolTip { get; set; }
 
-		[Parameter]
-		public bool Visible { get; set; }
-
 	}
 }
