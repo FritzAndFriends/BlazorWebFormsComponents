@@ -19,7 +19,7 @@
 		var img = cut.Find("img");
 		var alternateText = img.Attributes["alt"].Value;
 
-		Assert.Contains(alternateText, new[] { "CSharp", "Visual Basic" });
+		Assert.Contains(alternateText, new[] { "CSharp", "Visual Basic", "VB" });
 	}
 
 	void RotateTestWithCustomFieldsAttributes(Fixture fixture)
