@@ -3,7 +3,7 @@ using BlazorWebFormsComponents.Enums;
 
 namespace BlazorWebFormsComponents
 {
-	public class TableItemStyle : Style, IHasTableItemStyle
+	public class TableItemStyle : Style, ITableItemStyle
 	{
 
 		internal TableItemStyle() { }
@@ -17,7 +17,7 @@ namespace BlazorWebFormsComponents
 		public override string ToString()
 		{
 
-			return ((IHasTableItemStyle)this).ToStyle().NullIfEmpty();
+			return ((ITableItemStyle)this).ToStyle().NullIfEmpty();
 
 		}
 
