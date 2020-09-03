@@ -1,0 +1,18 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="KewordFilterTest">
+	<ComponentUnderTest>
+		<AdRotator AdvertisementFile="Ads2.xml" KeywordFilter="VB" Target="_blank"></AdRotator>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	void KewordFilterTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		var img = cut.Find("img");
+		var alternateText = img.Attributes["alt"].Value;
+
+		Assert.Contains(alternateText, new[] { "Visual Basic", "VB" });
+	}
+}

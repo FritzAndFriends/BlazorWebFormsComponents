@@ -17,9 +17,9 @@
 	{
 		var cut = fixture.GetComponentUnderTest();
 		var img = cut.Find("img");
-		var alternatText = img.Attributes["alt"].Value;
+		var alternateText = img.Attributes["alt"].Value;
 
-		Assert.Contains(alternatText, new[] { "CSharp", "Visual Basic" });
+		Assert.Contains(alternateText, new[] { "CSharp", "Visual Basic", "VB" });
 	}
 
 	void RotateTestWithCustomFieldsAttributes(Fixture fixture)

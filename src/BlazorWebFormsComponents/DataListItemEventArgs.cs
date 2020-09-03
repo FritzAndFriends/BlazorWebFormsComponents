@@ -2,9 +2,9 @@
 
 namespace BlazorWebFormsComponents
 {
-	public class ListViewItemEventArgs : EventArgs
+	public class DataListItemEventArgs : EventArgs
 	{
-		public ListViewItemEventArgs(object item)
+		public DataListItemEventArgs(object item)
 		{
 			Item = item;
 		}

@@ -3,14 +3,14 @@
 
 <Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable" AutogenerateColumns="true">
+		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable" AutogenerateColumns="false">
+		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="false">
 			<Columns>
 					<BoundField ItemType="object" DataField="Name" HeaderText="Item Name" />
 					<BoundField ItemType="object" DataField="Quantity" HeaderText="Item Quantity" />
@@ -21,14 +21,14 @@
 
 <Fixture Test="DataTableWithEnumerableOfDataRowAsDataSource">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutogenerateColumns="true">
+		<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutoGenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
 
 <Fixture Test="DataSetAsDataSource">
 	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataSet" AutogenerateColumns="true">
+		<GridView ItemType="object" DataSource="dataSet" AutoGenerateColumns="true">
 		</GridView>
 	</ComponentUnderTest>
 </Fixture>
@@ -80,10 +80,8 @@
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe(nameof(DataRow.RowError));
 		tableHeaders[1].TextContent.ShouldBe(nameof(DataRow.RowState));
-		tableHeaders[2].TextContent.ShouldBe(nameof(DataRow.Table));
-		tableHeaders[3].TextContent.ShouldBe(nameof(DataRow.ItemArray));
-		tableHeaders[4].TextContent.ShouldBe(nameof(DataRow.HasErrors));
-		tableHeaders.Count.ShouldBe(5, "Did not render 5 TH elements");
+		tableHeaders[2].TextContent.ShouldBe(nameof(DataRow.HasErrors));
+		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
 	}
 
 	DataSet GetDataSet()
