@@ -4,6 +4,7 @@ root = true
 end_of_line = crlf
 indent_style = tab
 indent_size = 2
+tab_width = 2 # Should be same as indent_size, but needed to work around https://github.com/dotnet/roslyn/issues/22601
 trim_trailing_whitespace = true
 insert_final_newline = true
 

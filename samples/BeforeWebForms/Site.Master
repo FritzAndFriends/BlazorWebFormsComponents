@@ -5,7 +5,7 @@
 <html lang="en">
 <head runat="server">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%--    <meta name="viewport" content="width=device-width, initial-scale=1.0" />--%>
     <title><%: Page.Title %> - BeforeWebForms Sample</title>
 
     <asp:PlaceHolder runat="server">
@@ -37,9 +37,9 @@
             </Scripts>
         </asp:ScriptManager>
 
-        <div class="container">
+        <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-2 sidebar">
+                <div class="col-sm-3 col-md-3 col-lg-2 col-xl-1 sidebar">
                     <div class="top-row">
                         BlazorWebFormsComponents<br />
                         BeforeWebForms Sample
@@ -88,6 +88,11 @@
                                         <asp:TreeNode NavigateUrl="ControlSamples/Repeater/Default.aspx" Text=" Repeater" Expanded="true" />
                                     </asp:TreeNode>
 
+                                    <asp:TreeNode Text=" Editor Components" Expanded="true">
+                                      <asp:TreeNode Text=" Button" NavigateUrl="~/ControlSamples/Button/default.aspx" />
+                                      <asp:TreeNode Text=" Hyperlink" NavigateUrl="~/ControlSamples/Hyperlink/default.aspx" />
+                                    </asp:TreeNode>
+
                                     <asp:TreeNode Text=" Validation Components" Expanded="false">
                                         <asp:TreeNode Text=" Custom Validator" />
                                         <asp:TreeNode Text=" Regular Expression" />
@@ -98,7 +103,7 @@
                                     </asp:TreeNode>
 
                                     <asp:TreeNode Text=" Navigation Components" Expanded="true">
-                                        <asp:TreeNode Text=" Menu" />
+                                        <asp:TreeNode Text=" Menu" NavigateUrl="ControlSamples/Menu/Default.aspx" />
                                         <asp:TreeNode Text=" Site Map Path" />
                                         <asp:TreeNode Text=" TreeView" Expanded="true">
                                             <asp:TreeNode Text=" Simple TreeView" NavigateUrl="ControlSamples/TreeView/Default.aspx" />
@@ -128,7 +133,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-10">
+                <div class="col-sm-9 col-md-9 col-lg-10 col-xl-11">
                     <div class="main">
                         <div class="top-row">
                             <a target="_blank" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/">BlazorWebFormsComponents Reference Documentation</a>

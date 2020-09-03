@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Validations
 {
-  public abstract class BaseCompareValidator<InputType> : BaseValidator<InputType>
+	public abstract class BaseCompareValidator<InputType> : BaseValidator<InputType>
 	{
 
 		[Parameter] public ValidationDataType Type { get; set; } = ValidationDataType.String;

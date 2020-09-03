@@ -1,6 +1,7 @@
-﻿@typeparam ItemType
-@inherits BaseModelBindingComponent<ItemType>
+﻿@using BlazorWebFormsComponents.DataBinding
 @using Interfaces
+@typeparam ItemType
+@inherits DataBoundComponent<ItemType>
 @if (ColumnList.Any())
 {
 	<table class="@CssClass">

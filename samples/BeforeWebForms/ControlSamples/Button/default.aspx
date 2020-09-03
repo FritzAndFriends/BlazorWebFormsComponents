@@ -19,4 +19,21 @@
 	</p>
 
 
+	<p>
+
+		This button is not Enabled:
+		<asp:Button runat="server" ID="notEnabled" Enabled="false" Text="I am not enabled for clicking" />
+
+		<br />
+		This button is Enabled:
+		<asp:Button runat="server" ID="Button1" Enabled="true" Text="I am enabled for clicking" />
+
+	</p>
+
+	<p>
+		This button posts to Bing
+		<asp:Button runat="server" ID="bingPostButton" PostBackUrl="www.bing.com" Text="Post to Bing" />
+	</p>
+
+
 </asp:Content>

@@ -1,4 +1,5 @@
-﻿@inherits BaseModelBindingComponent<ItemType>
+﻿@using BlazorWebFormsComponents.DataBinding
+@inherits DataBoundComponent<ItemType>
 @typeparam ItemType
 
 @if (!Visible)
@@ -29,7 +30,8 @@ else
 				itemIterator.MoveNext();
 				if (GroupItemCount == 0)
 				{
-					OnDataBinding.InvokeAsync(EventArgs.Empty);
+					DataBinding(EventArgs.Empty);
+
 					foreach(var item in Items)
 					{
 					  <CascadingValue Name="CurrentDataBoundItem" Value="item">
@@ -40,9 +42,11 @@ else
 						{
 							@ItemSeparatorTemplate
 						}
-						OnItemDataBound.InvokeAsync(new ListViewItemEventArgs(item));
+
+						ItemDataBound(new ListViewItemEventArgs(item));
 					}
-					OnDataBound.InvokeAsync(EventArgs.Empty);
+
+					DataBound(EventArgs.Empty);
 				}
 				else
 				{

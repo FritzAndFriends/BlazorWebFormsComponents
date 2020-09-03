@@ -1,15 +1,13 @@
-﻿using System;
-using System.Globalization;
+﻿using BlazorWebFormsComponents.Enums;
+using System;
 using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Security.Permissions;
-using BlazorWebFormsComponents.Enums;
+using System.Globalization;
 
 namespace BlazorWebFormsComponents
 {
 
 	[Serializable]
-	public struct Unit 
+	public struct Unit
 	{
 
 

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.AspNetCore.Components;
+using System;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Validations
 {

@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
@@ -9,7 +7,8 @@ namespace BlazorWebFormsComponents
 	{
 
 		[CascadingParameter(Name = "HeaderStyle")]
-		protected TableItemStyle theHeaderStyle { 
+		protected TableItemStyle theHeaderStyle
+		{
 			get { return base.theStyle; }
 			set { base.theStyle = value; }
 		}

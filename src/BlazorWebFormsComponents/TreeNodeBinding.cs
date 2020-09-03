@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
-	public class TreeNodeBinding : ComponentBase {
+	public class TreeNodeBinding : ComponentBase
+	{
 
-		[CascadingParameter(Name ="ParentTreeView")]
+		[CascadingParameter(Name = "ParentTreeView")]
 		public TreeView ParentTreeView { get; set; }
 
 		[Parameter]
@@ -37,7 +38,8 @@ namespace BlazorWebFormsComponents
 			return base.OnParametersSetAsync();
 		}
 
-		public override string ToString() {
+		public override string ToString()
+		{
 
 			return $"<TreeNodeBinding DataMember=\"{DataMember}\" TextField=\"{TextField}\" NavigateUrlField=\"{NavigateUrlField}\"/>";
 

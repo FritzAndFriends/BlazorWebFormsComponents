@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
@@ -138,7 +136,7 @@ namespace BlazorWebFormsComponents
 					case KnownColor.Window: colorString = "window"; break;
 					case KnownColor.WindowFrame: colorString = "windowframe"; break;
 					case KnownColor.WindowText: colorString = "windowtext"; break;
-					// Something evil you say?
+						// Something evil you say?
 				}
 			}
 			else if (c.IsNamedColor)

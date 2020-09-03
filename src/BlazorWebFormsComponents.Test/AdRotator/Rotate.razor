@@ -6,13 +6,30 @@
 	</ComponentUnderTest>
 </Fixture>
 
+<Fixture Test="RotateTestWithCustomFieldsAttributes">
+	<ComponentUnderTest>
+		<AdRotator AdvertisementFile="Ads4.xml" AlternateTextField="Alt" ImageUrlField="Image" NavigateUrlField="Url" Target="_blank"></AdRotator>
+	</ComponentUnderTest>
+</Fixture>
+
 @code {
 	void RotateTest(Fixture fixture)
 	{
 		var cut = fixture.GetComponentUnderTest();
 		var img = cut.Find("img");
+		var alternateText = img.Attributes["alt"].Value;
+
+		Assert.Contains(alternateText, new[] { "CSharp", "Visual Basic", "VB" });
+	}
+
+	void RotateTestWithCustomFieldsAttributes(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		var anchor = cut.Find("a");
+		var img = cut.Find("img");
 		var alternatText = img.Attributes["alt"].Value;
 
+		Assert.True(anchor.HasAttribute("href"));
 		Assert.Contains(alternatText, new[] { "CSharp", "Visual Basic" });
 	}
 }

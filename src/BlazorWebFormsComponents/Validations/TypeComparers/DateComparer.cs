@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
-  public class DateComparer : IComparer
+	public class DateComparer : IComparer
 	{
 		public bool TryConvert(string text, bool cultureInvariant, out object value)
 		{

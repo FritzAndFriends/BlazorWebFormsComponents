@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using System;
 
-namespace BlazorWebFormsComponents {	public partial class HiddenField : BaseWebFormsComponent
+namespace BlazorWebFormsComponents
+{
+	public partial class HiddenField : BaseWebFormsComponent
 	{
 		[Parameter]
 		public string Value { get; set; }

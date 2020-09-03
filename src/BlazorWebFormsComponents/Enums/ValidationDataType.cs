@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BlazorWebFormsComponents.Enums
+﻿namespace BlazorWebFormsComponents.Enums
 {
 	public abstract class ValidationDataType
 	{

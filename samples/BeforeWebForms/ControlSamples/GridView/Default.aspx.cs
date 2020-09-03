@@ -9,21 +9,21 @@ namespace BeforeWebForms.ControlSamples.GridView
 {
 
 	public partial class Default : System.Web.UI.Page
-  {
-
-	protected void Page_Load(object sender, EventArgs e)
 	{
 
-	}
+		protected void Page_Load(object sender, EventArgs e)
+		{
 
-	// The return type can be changed to IEnumerable, however to support
-	// paging and sorting, the following parameters must be added:
-	//     int maximumRows
-	//     int startRowIndex
-	//     out int totalRowCount
-	//     string sortByExpression
-	public List<Customer> GetCustomers()
-	{
+		}
+
+		// The return type can be changed to IEnumerable, however to support
+		// paging and sorting, the following parameters must be added:
+		//     int maximumRows
+		//     int startRowIndex
+		//     out int totalRowCount
+		//     string sortByExpression
+		public List<Customer> GetCustomers()
+		{
 			var customers = new List<Customer>();
 			var c1 = new Customer
 			{
@@ -55,6 +55,6 @@ namespace BeforeWebForms.ControlSamples.GridView
 			customers.Add(c3);
 
 			return customers;
+		}
 	}
-  }
 }

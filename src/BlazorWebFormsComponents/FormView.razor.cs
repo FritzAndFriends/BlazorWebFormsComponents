@@ -1,15 +1,14 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 
-	public partial class FormView<ItemType> : BaseModelBindingComponent<ItemType> where ItemType : class, new()
+	public partial class FormView<ItemType> : DataBoundComponent<ItemType> where ItemType : class, new()
 	{
 
 		private static readonly Dictionary<string, FormViewMode> CommandNameModeLookup = new Dictionary<string, FormViewMode> {
