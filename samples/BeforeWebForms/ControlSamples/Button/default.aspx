@@ -30,5 +30,10 @@
 
 	</p>
 
+	<p>
+		This button posts to Bing
+		<asp:Button runat="server" ID="bingPostButton" PostBackUrl="www.bing.com" Text="Post to Bing" />
+	</p>
+
 
 </asp:Content>
