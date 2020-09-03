@@ -30,8 +30,8 @@ namespace BlazorWebFormsComponents
 
 		internal string CalculatedCssClass => Enabled ? CssClass : string.Concat(CssClass, " aspNetDisabled").Trim();
 
-		[Parameter, Obsolete("In Blazor PostbackURL is not supported")]
-		public string PostBackUrl { get; set; }
+		[Obsolete("In Blazor PostbackURL is not supported")]
+		public override string PostBackUrl { get; set; }
 
 		[Parameter, Obsolete("In Blazor this behaves the same whether activated or not")]
 		public bool UseSubmitBehavior { get; set; }
