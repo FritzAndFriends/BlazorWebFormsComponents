@@ -42,7 +42,6 @@
               <li><a href="ControlSamples/Button/Default.aspx">Button</a></li>
               <li><a href="ControlSamples/Hyperlink/Default.aspx">Hyperlink</a></li>
             </ul>
-        </div>
 
         <div class="col-md-3">
             <h3>Validation Controls</h3>

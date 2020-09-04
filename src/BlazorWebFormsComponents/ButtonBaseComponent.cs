@@ -16,7 +16,7 @@ namespace BlazorWebFormsComponents
 		public object CommandArgument { get; set; }
 
 		[Parameter]
-		public string PostBackUrl { get; set; }
+		public virtual string PostBackUrl { get; set; }
 
 		[Parameter]
 		public string Text { get; set; }
