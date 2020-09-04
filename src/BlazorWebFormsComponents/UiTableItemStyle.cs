@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-	public abstract class UiTableItemStyle : UiStyle<TableItemStyle>, ILayoutTableItemStyle
+	public abstract class UiTableItemStyle : UiStyle<TableItemStyle>, IHasLayoutTableItemStyle
 	{
 
 		[Parameter]

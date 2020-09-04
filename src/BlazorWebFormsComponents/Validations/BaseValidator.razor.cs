@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public abstract partial class BaseValidator<Type> : Component
+	public abstract partial class BaseValidator<Type> : BaseStyledComponent
 	{
 		// BANG used because we know it will set during OnInitialized and thus no need to worry about null
 		private ValidationMessageStore _messageStore = default!;

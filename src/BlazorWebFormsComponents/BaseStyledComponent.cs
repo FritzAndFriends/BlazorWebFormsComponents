@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-	public class Component : BaseWebFormsComponent, IStyle
+	public abstract class BaseStyledComponent : BaseWebFormsComponent, IStyle
 	{
 		[Parameter]
 		public WebColor BackColor { get; set; }

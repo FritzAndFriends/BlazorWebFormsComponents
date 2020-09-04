@@ -9,7 +9,7 @@ namespace BlazorWebFormsComponents
 
 	}
 
-	public abstract class UiStyle<TStyle> : ComponentBase, ILayoutStyle where TStyle : Style
+	public abstract class UiStyle<TStyle> : ComponentBase, IHasLayoutStyle where TStyle : Style
 	{
 
 		protected TStyle theStyle { get; set; }

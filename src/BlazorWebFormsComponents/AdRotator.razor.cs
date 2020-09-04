@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class AdRotator : Component
+	public partial class AdRotator : BaseStyledComponent
 	{
 		private static readonly string DefaultAlternateTextField = "AlternateText";
 		private static readonly string DefaultImageUrlField = "ImageUrl";

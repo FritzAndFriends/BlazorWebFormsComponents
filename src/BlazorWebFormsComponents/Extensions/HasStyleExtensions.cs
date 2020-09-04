@@ -28,7 +28,7 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public static StyleBuilder ToStyle(this ITableItemStyle hasStyle) =>
+		public static StyleBuilder ToStyle(this IHasTableItemStyle hasStyle) =>
 			((IStyle)hasStyle).ToStyle().AddStyle("white-space", "nowrap", !hasStyle.Wrap);
 
 

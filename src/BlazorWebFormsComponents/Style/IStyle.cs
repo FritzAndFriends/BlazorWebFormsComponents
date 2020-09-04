@@ -1,6 +1,6 @@
 ﻿namespace BlazorWebFormsComponents
 {
-	public interface IStyle : ILayoutStyle, IFontStyle
+	public interface IStyle : IHasLayoutStyle, IFontStyle
 	{
 		
 	}

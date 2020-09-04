@@ -9,7 +9,7 @@ using static BlazorWebFormsComponents.Enums.LogoutAction;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class LoginStatus : Component
+	public partial class LoginStatus : BaseStyledComponent
 	{
 		[Parameter] public LogoutAction LogoutAction { get; set; } = Refresh;
 

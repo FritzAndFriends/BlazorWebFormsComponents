@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents
 {
-	public interface ILayoutStyle
+	public interface IHasLayoutStyle
 	{
 		WebColor BackColor { get; set; }
 

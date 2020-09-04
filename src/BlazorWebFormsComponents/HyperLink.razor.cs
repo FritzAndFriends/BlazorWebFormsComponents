@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents
 {
-	public partial class HyperLink : Component
+	public partial class HyperLink : BaseStyledComponent
 	{
 		[Parameter]
 		public string NavigationUrl { get; set; }

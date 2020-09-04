@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents
 {
-	public interface ILayoutTableItemStyle : ILayoutStyle
+	public interface IHasLayoutTableItemStyle : IHasLayoutStyle
 	{
 		HorizontalAlign HorizontalAlign { get; set; }
 

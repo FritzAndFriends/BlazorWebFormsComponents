@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public partial class AspNetValidationSummary : Component, IDisposable
+	public partial class AspNetValidationSummary : BaseStyledComponent, IDisposable
 	{
 		private EditContext _previousEditContext;
 		private readonly EventHandler<ValidationStateChangedEventArgs> _validationStateChangedHandler;

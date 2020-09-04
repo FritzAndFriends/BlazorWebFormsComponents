@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class LoginName : Component
+	public partial class LoginName : BaseStyledComponent
 	{
 		[Inject]
 		protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
