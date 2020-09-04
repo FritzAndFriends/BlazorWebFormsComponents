@@ -7,6 +7,8 @@ namespace BlazorWebFormsComponents
 	{
 		internal string CalculatedButtonType => CausesValidation ? "submit" : "button";
 
+		internal string CalculatedCssClass => Enabled ? CssClass : string.Concat(CssClass, " aspNetDisabled").Trim();
+
 		[Obsolete("In Blazor PostbackURL is not supported")]
 		public override string PostBackUrl { get; set; }
 
