@@ -1,0 +1,20 @@
+﻿@inherits TestComponentBase
+
+
+<SnapshotTest Description="Verify Tooltip added to Button">
+	<TestInput>
+		<Button Text="Click Me!" ToolTip="Go To Bing!" OnClientClick="window.navigate('bing.com')" />
+	</TestInput>
+	<ExpectedOutput>
+		<button type="submit" title="Go To Bing!" onclientclick="window.navigate('bing.com')">Click Me!</button>
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest Description="Verify Tooltip not added to Button">
+	<TestInput>
+		<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />
+	</TestInput>
+	<ExpectedOutput>
+		<button type="submit" onclientclick="window.navigate('bing.com')">Click Me!</button>
+	</ExpectedOutput>
+</SnapshotTest>
