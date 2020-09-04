@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Components;
+using System;
+
 namespace BlazorWebFormsComponents
 {
 	public partial class Button : ButtonBaseComponent
