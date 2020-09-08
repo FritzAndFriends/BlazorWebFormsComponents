@@ -55,7 +55,7 @@ namespace AfterBlazorServerSide
 			});
 		}
 
-		public static Version ComponentVersion = typeof(IHasStyle).Assembly.GetName().Version;
+		public static Version ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
 
 	}
 }
