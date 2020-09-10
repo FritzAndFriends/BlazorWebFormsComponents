@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.IO;
+using WingtipToys.Lib;
 
 namespace WingtipToys.Logic
 {
@@ -14,12 +15,11 @@ namespace WingtipToys.Logic
     { }
 
     // Log an Exception
-    public static void LogException(Exception exc, string source)
+    public static void LogException(Exception exc, string source, ILogFileAccess logFileAccess)
     {
       // Include logic for logging exceptions
       // Get the absolute path to the log file
-      string logFile = "App_Data/ErrorLog.txt";
-      logFile = HttpContext.Current.Server.MapPath(logFile);
+      string logFile = logFileAccess.LogFileName; 
 
       // Open the log file for append and write the log
       StreamWriter sw = new StreamWriter(logFile, true);

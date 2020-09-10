@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using WingtipToys.Lib;
 using WingtipToys.Models;
 
 namespace WingtipToys.Logic
@@ -13,6 +14,12 @@ namespace WingtipToys.Logic
     private ProductContext _db = new ProductContext();
 
     public const string CartSessionKey = "CartId";
+    private readonly ICartStateAccess _CartAccess;
+
+    public ShoppingCartActions(ICartStateAccess cartAccess)
+    {
+      _CartAccess = cartAccess;
+    }
 
     public void AddToCart(int id)
     {
@@ -56,23 +63,7 @@ namespace WingtipToys.Logic
       }
     }
 
-    public string GetCartId()
-    {
-      if (HttpContext.Current.Session[CartSessionKey] == null)
-      {
-        if (!string.IsNullOrWhiteSpace(HttpContext.Current.User.Identity.Name))
-        {
-          HttpContext.Current.Session[CartSessionKey] = HttpContext.Current.User.Identity.Name;
-        }
-        else
-        {
-          // Generate a new random GUID using System.Guid class.     
-          Guid tempCartId = Guid.NewGuid();
-          HttpContext.Current.Session[CartSessionKey] = tempCartId.ToString();
-        }
-      }
-      return HttpContext.Current.Session[CartSessionKey].ToString();
-    }
+    public string GetCartId() => _CartAccess.CartId;
 
     public List<CartItem> GetCartItems()
     {
@@ -94,14 +85,6 @@ namespace WingtipToys.Logic
                          select (int?)cartItems.Quantity *
                          cartItems.Product.UnitPrice).Sum();
       return total ?? decimal.Zero;
-    }
-    public ShoppingCartActions GetCart(HttpContext context)
-    {
-      using (var cart = new ShoppingCartActions())
-      {
-        cart.ShoppingCartId = cart.GetCartId();
-        return cart;
-      }
     }
 
     public void UpdateShoppingCartDatabase(String cartId, ShoppingCartUpdates[] CartItemUpdates)
@@ -218,7 +201,7 @@ namespace WingtipToys.Logic
       {
         item.CartId = userName;
       }
-      HttpContext.Current.Session[CartSessionKey] = userName;
+      _CartAccess.CartId = userName;
       _db.SaveChanges();
     }
   }
