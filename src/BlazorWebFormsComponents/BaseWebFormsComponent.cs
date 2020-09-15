@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -43,6 +45,12 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		#region Obsolete Attributes / Properties
+
+		[Inject]
+		public LinkGenerator LinkGenerator { get; set; }
+
+		[Inject]
+		public IHttpContextAccessor HttpContextAccessor { get; set; }
 
 		/// <summary>
 		/// 🚨🚨 Use @ref instead of ID 🚨🚨
