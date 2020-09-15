@@ -1,0 +1,75 @@
+﻿@inherits LayoutComponentBase
+@using BlazorWebFormsComponents.LoginControls
+@using Microsoft.AspNetCore.Http
+@using static BlazorWebFormsComponents.Enums.LogoutAction 
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" runat="server" href="~/">Wingtip Toys</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li>
+					<a id="adminLink" visible="false"
+						 href="~/Admin/AdminPage">Admin</a>
+				</li>
+				<li><a href="~/">Home</a></li>
+				<li><a href="~/About">About</a></li>
+				<li><a href="~/Contact">Contact</a></li>
+				<li><a href="~/ProductList">Products</a></li>
+				<li><a href="~/ShoppingCart" ID="cartCount">&nbsp;</a></li>
+			</ul>
+			<LoginView runat="server" ViewStateMode="Disabled">
+				<AnonymousTemplate>
+					<ul class="nav navbar-nav navbar-right">
+						<li><a runat="server" href="~/Account/Register">Register</a></li>
+						<li><a runat="server" href="~/Account/Login">Log in</a></li>
+					</ul>
+				</AnonymousTemplate>
+				<LoggedInTemplate>
+					<ul class="nav navbar-nav navbar-right">
+`						<li><a runat="server" href="~/Account/Manage" title="Manage your account">Hello, <LoginName />!</a></li>
+						<li>
+							<LoginStatus runat="server" LogoutAction="Redirect" LogoutText="Log off" LogoutPageUrl="~/" OnLoggingOut="Unnamed_LoggingOut" />
+						</li>
+					</ul>
+				</LoggedInTemplate>
+			</LoginView>
+		</div>
+	</div>
+</div>
+<div id="TitleContent" style="text-align: center">
+	<a runat="server" href="~/">
+		<Image ID="Image1" runat="server" ImageUrl="~/Images/logo.jpg" BorderStyle="None" />
+	</a>
+	<br />
+</div>
+<div id="CategoryMenu" style="text-align: center">
+	<ListView ID="categoryList"
+		ItemType="WingtipToys.Models.Category"
+		runat="server"
+		SelectMethod="GetCategories">
+		<ItemTemplate Context="Item">
+			<b style="font-size: large; font-style: normal">
+				<a href="<%#: GetRouteUrl(" ProductsByCategoryRoute", new {categoryName=Item.CategoryName}) %>
+					">
+					@Item.CategoryName
+				</a>
+			</b>
+		</ItemTemplate>
+		<ItemSeparatorTemplate>  |  </ItemSeparatorTemplate>
+	</ListView>
+</div>
+<div class="container body-content">
+	@Body
+	<hr />
+	<footer>
+		<p>&copy; @DateTime.Now.Year - Wingtip Toys</p>
+	</footer>
+</div>
