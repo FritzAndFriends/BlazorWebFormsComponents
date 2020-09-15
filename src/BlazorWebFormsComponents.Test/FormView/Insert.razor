@@ -1,0 +1,55 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="InsertTest">
+	<ComponentUnderTest>
+		<FormView AllowPaging="true"
+							DataKeyNames="Id"
+							OnPageIndexChanging="WidgetFormView_PageIndexChanging"
+							runat="server"
+							Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							Context="Item">
+			<ItemTemplate>
+
+				<table id="theItemTemplate">
+					<tr>
+						<td>@Item.Name</td><td>@Item.Price.ToString("C")</td><td>@Item.Id</td>
+					</tr>
+					<tr>
+						<td><Button CommandName="Insert" Text="Insert" /></td>
+					</tr>
+				</table>
+
+			</ItemTemplate>
+			<InsertItemTemplate>
+				<label>@Item.Name</label>
+			</InsertItemTemplate>
+
+		</FormView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+		void InsertTest(Fixture fixture)
+		{
+
+			var cut = fixture.GetComponentUnderTest();
+
+			var insertButton = cut.Find("button");
+			insertButton.ShouldNotBeNull();
+			insertButton.Click();
+
+			cut.Find("label").ShouldNotBeNull();
+			cut.FindAll("button").Count().ShouldBe(0);
+
+		}
+
+		void WidgetFormView_PageIndexChanging()
+		{
+
+		}
+
+
+}

@@ -31,6 +31,9 @@ namespace BlazorWebFormsComponents
 		public RenderFragment<ItemType> EditItemTemplate { get; set; }
 
 		[Parameter]
+		public RenderFragment<ItemType> InsertItemTemplate { get; set; }
+
+		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
 		public ItemType CurrentItem { get; set; }
@@ -95,6 +98,10 @@ namespace BlazorWebFormsComponents
 				case "edit":
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
+					break;
+				case "insert":
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert }).GetAwaiter().GetResult();
+					CurrentMode = FormViewMode.Insert;
 					break;
 				case "update":
 					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update")).GetAwaiter().GetResult();
