@@ -8,13 +8,14 @@ namespace BlazorWebFormsComponents
 	public abstract class BaseModelBindingComponent<ItemType> : BaseDataBindingComponent
 	{
 
-		// Cheer 300 svavablount 15/12/19 
-		// Cheer 200 nothing_else_matters 15/12/19 
+		// Cheer 300 svavablount 15/12/19
+		// Cheer 200 nothing_else_matters 15/12/19
 
-		public delegate IQueryable<ItemType> SelectHandler(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount); 
+		public delegate IQueryable<ItemType> SelectHandler(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount);
 
 		/// <summary>
-		/// Data retrieval method to databind the collection to
+		/// Data retrieval method to databind the collection to.
+		/// Matches the SelectHandler delegate:  IQueryable<T> Select(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
 		/// </summary>
 		[Parameter]
 		public SelectHandler SelectMethod { get; set; }
@@ -31,7 +32,7 @@ namespace BlazorWebFormsComponents
     public IEnumerable<ItemType> DataSource
     {
       get { return Items; }
-      set { 
+      set {
         Items = value;
         this.StateHasChanged();
       }
