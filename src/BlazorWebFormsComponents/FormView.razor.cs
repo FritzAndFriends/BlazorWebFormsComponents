@@ -99,8 +99,14 @@ namespace BlazorWebFormsComponents
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
 					break;
+				case "delete":
+					//ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Del}).GetAwaiter().GetResult();
+					//CurrentMode = FormViewMode.Edit;
+					break;
 				case "insert":
+					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert }).GetAwaiter().GetResult();
+					OnItemInserted.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Insert;
 					break;
 				case "update":
@@ -119,6 +125,12 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		#region Custom Events
+
+		[Parameter]
+		public EventCallback<FormViewInsertEventArgs> OnItemInserting { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewInsertEventArgs> OnItemInserted { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewUpdateEventArgs> OnItemUpdating { get; set; }
