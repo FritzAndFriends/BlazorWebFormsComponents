@@ -25,4 +25,4 @@ The first sample demonstrates updating a simple class library to .NET Standard. 
 
 ## Sample 2: Refactoring Business Logic
 
-The second sample shows how to take an existing ASP<span></span>.NET application and refactor our some business logic as a .NET Standard project.  You can find the source and directions for this sample in the [samples/netstandard-2](../samples/netstandard-2/README.md) folder.
+The second sample shows how to take an existing ASP<span></span>.NET application and refactor our some business logic as a .NET Standard project.  You can find the source and directions for this sample in the samples/netstandard-2 (coming soon) folder.

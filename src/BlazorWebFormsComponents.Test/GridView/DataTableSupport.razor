@@ -1,0 +1,110 @@
+﻿@using System.Data
+@inherits TestComponentBase
+
+<Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
+	<ComponentUnderTest>
+		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="true">
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
+	<ComponentUnderTest>
+		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="false">
+			<Columns>
+					<BoundField ItemType="object" DataField="Name" HeaderText="Item Name" />
+					<BoundField ItemType="object" DataField="Quantity" HeaderText="Item Quantity" />
+				</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="DataTableWithEnumerableOfDataRowAsDataSource">
+	<ComponentUnderTest>
+		<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutoGenerateColumns="true">
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="DataSetAsDataSource">
+	<ComponentUnderTest>
+		<GridView ItemType="object" DataSource="dataSet" AutoGenerateColumns="true">
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+@code {
+	DataSet dataSet = new DataSet();
+	DataTable dataTable = new DataTable();
+
+	void DataSetAsDataSource(Fixture fixture)
+	{
+		dataSet = GetDataSet();
+
+		var cut = fixture.GetComponentUnderTest();
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe("Id");
+		tableHeaders[1].TextContent.ShouldBe("Name");
+		tableHeaders[2].TextContent.ShouldBe("Quantity");
+		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
+	}
+
+	void DataTableAsDataSourceWithAutoGenerateColumns(Fixture fixture)
+	{
+		dataTable = GetDataTable();
+
+		var cut = fixture.GetComponentUnderTest();
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe("Id");
+		tableHeaders[1].TextContent.ShouldBe("Name");
+		tableHeaders[2].TextContent.ShouldBe("Quantity");
+		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
+	}
+
+	void DataTableAsDataSourceWithoutAutoGenerateColumns(Fixture fixture)
+	{
+		dataTable = GetDataTable();
+
+		var cut = fixture.GetComponentUnderTest();
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe("Item Name");
+		tableHeaders[1].TextContent.ShouldBe("Item Quantity");
+		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
+	}
+
+  void DataTableWithEnumerableOfDataRowAsDataSource(Fixture fixture)
+	{
+		dataTable = GetDataTable();
+
+		var cut = fixture.GetComponentUnderTest();
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[0].TextContent.ShouldBe(nameof(DataRow.RowError));
+		tableHeaders[1].TextContent.ShouldBe(nameof(DataRow.RowState));
+		tableHeaders[2].TextContent.ShouldBe(nameof(DataRow.HasErrors));
+		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
+	}
+
+	DataSet GetDataSet()
+	{
+		var dataTable1 = GetDataTable();
+		dataSet.Tables.Add(dataTable1);
+
+		return dataSet;
+	}
+
+	DataTable GetDataTable()
+	{
+		dataTable.Columns.AddRange(new DataColumn[3]
+		{
+			new DataColumn("Id", typeof(int)),
+			new DataColumn("Name", typeof(string)),
+			new DataColumn("Quantity",typeof(string))
+		});
+
+		dataTable.Rows.Add(1, "Flour", "500 Kg");
+		dataTable.Rows.Add(2, "Tea", "20 Kg");
+		dataTable.Rows.Add(3, "Rice", "1000 Kg");
+
+		return dataTable;
+	}
+}

@@ -32,11 +32,11 @@ The concept of a MasterPage does not exist in Blazor.  Instead, your ASPX pages 
 
 ### Page Directive Changes
 
-### No <%#: DataBinding expressions
+### <%#: DataBinding expressions require update
 
 Databinding expressions in Web Forms let you evaluate the content of the elements and format them appropriately for presentation.  For editor controls, it also allows you to setup a 2-way binding so that you can receive values entered into the same variable bound to the control.
 
-In Blazor, for repeater-style components, just format the variable using context, Item, and simple formatting like this:
+In Blazor, for repeater-style components, the simplest solution is to just format the variable using context, Item, and formatting:
 
 ```csharp
 @Item.ShipDate.ToString("D")
@@ -47,6 +47,8 @@ For editor components, simply `@bind` the variable to the component.  This will 
 ```html
 <input type="text" name="foo" @bind="bar" />
 ```
+
+More details about DataBinding and using the `DataBinder` utility object are available in the [DataBinder docs](../UtilityFeatures/Databinder.md).
 
 ### No Namespaces, No Tag-Prefixes
 

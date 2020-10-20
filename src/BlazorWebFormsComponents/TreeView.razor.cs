@@ -1,18 +1,16 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeView : BaseDataBindingComponent, IHasStyle
+	public partial class TreeView : BaseDataBoundComponent, IStyle
 	{
 
 		[Parameter]
@@ -23,9 +21,6 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public DataBindings DataBindings { get; set; }
-
-		[Parameter]
-		public object DataSource { get; set; }
 
 		[Parameter]
 		public TreeViewImageSet ImageSet { get; set; } = TreeViewImageSet._Default;
@@ -49,13 +44,7 @@ namespace BlazorWebFormsComponents
 		[Parameter] public WebColor ForeColor { get; set; }
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public Unit Width { get; set; }
-		[Parameter] public bool Font_Bold { get; set; }
-		[Parameter] public bool Font_Italic { get; set; }
-		[Parameter] public string Font_Names { get; set; }
-		[Parameter] public bool Font_Overline { get; set; }
-		[Parameter] public FontUnit Font_Size { get; set; }
-		[Parameter] public bool Font_Strikeout { get; set; }
-		[Parameter] public bool Font_Underline { get; set; }
+		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
 
 		#endregion
 
@@ -93,11 +82,12 @@ namespace BlazorWebFormsComponents
 
 			OnDataBinding.InvokeAsync(EventArgs.Empty);
 
-			if (DataSource is XmlDocument xmlDoc) {
+			if (DataSource is XmlDocument xmlDoc)
+			{
 
 				if (xmlDoc.SelectSingleNode("/*").LocalName == "siteMap")
 					DataBindSiteMap(xmlDoc);
-				else 
+				else
 					DataBindXml((DataSource as XmlDocument).SelectNodes("/*"));
 
 			}
@@ -178,7 +168,8 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private Task DataBindSiteMap(XmlDocument src) {
+		private Task DataBindSiteMap(XmlDocument src)
+		{
 
 			_TreeNodeBindings.First().DataMember = "siteMapNode";
 

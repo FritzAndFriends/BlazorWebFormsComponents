@@ -3,17 +3,17 @@
 <Fixture Test="FirstTest">
 	<ComponentUnderTest>
 		<GridView SelectMethod="GetWidgets"
-							AutogenerateColumns="false"
+							AutoGenerateColumns="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<Columns>
 				<TemplateField ItemType="Widget" HeaderText="Name">
 					<ItemTemplate Context="Item">
-						<label Text="@Item.Name"></label>
+						<Label Text="@Item.Name"></Label>
 					</ItemTemplate>
 				</TemplateField>
 				<TemplateField ItemType="Widget" HeaderText="Price">
 					<ItemTemplate Context="Item">
-						<label ID="lblPrice" Text="@Item.Price.ToString()"></label>
+						<Label ID="lblPrice" Text="@Item.Price.ToString()"></Label>
 					</ItemTemplate>
 				</TemplateField>
 			</Columns>
@@ -32,7 +32,7 @@
 		tableHeaders[1].TextContent.ShouldBe("Price");
 		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
 		cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
-		cut.FindAll("td label").Count().ShouldBe(Widget.SimpleWidgetList.Length*2, $"Did not render {Widget.SimpleWidgetList.Length*2} labels");
+		cut.FindAll("#lblPrice").Count().ShouldBe(Widget.SimpleWidgetList.Length, $"Rendered wrong number of price labels");
 	}
 
 	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)

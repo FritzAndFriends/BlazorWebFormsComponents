@@ -1,6 +1,8 @@
-﻿@inherits BaseModelBindingComponent<ItemType>
+﻿@using BlazorWebFormsComponents.DataBinding
+@inherits DataBoundComponent<ItemType>
 @typeparam ItemType
 @ChildContent
 @code{
-	[CascadingParameter] public RenderFragment<ItemType> ChildContent { get; set; }
+	[CascadingParameter]
+	public RenderFragment<ItemType> ChildContent { get; set; }
 }

@@ -1,13 +1,13 @@
 ﻿using BlazorComponentUtilities;
+using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class DataList<ItemType> : BaseModelBindingComponent<ItemType>, IHasStyle
+	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IStyle
 	{
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },
@@ -47,16 +47,13 @@ namespace BlazorWebFormsComponents
 		[Parameter] public BorderStyle BorderStyle { get; set; }
 		[Parameter] public Unit BorderWidth { get; set; }
 		[Parameter] public string CssClass { get; set; }
-		[Parameter] public bool Font_Bold { get; set; }
-		[Parameter] public bool Font_Italic { get; set; }
-		[Parameter] public string Font_Names { get; set; }
-		[Parameter] public bool Font_Overline { get; set; }
-		[Parameter] public FontUnit Font_Size { get; set; }
-		[Parameter] public bool Font_Strikeout { get; set; }
-		[Parameter] public bool Font_Underline { get; set; }
+		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
 		[Parameter] public WebColor ForeColor { get; set; }
 		[Parameter] public Unit Height { get; set; }
 		[Parameter] public Unit Width { get; set; }
+
+		[Parameter]
+		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }
 
 		private IList<ItemType> ElementIndex(int columns, IEnumerable<ItemType> items, DataListEnum direction)
 		{
@@ -112,5 +109,9 @@ namespace BlazorWebFormsComponents
 			base.OnInitialized();
 		}
 
+		protected virtual void ItemDataBound(DataListItemEventArgs e)
+		{
+			OnItemDataBound.InvokeAsync(e);
+		}
 	}
 }

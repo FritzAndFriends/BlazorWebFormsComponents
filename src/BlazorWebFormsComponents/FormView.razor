@@ -1,4 +1,5 @@
-﻿@inherits BaseModelBindingComponent<ItemType>
+﻿@using BlazorWebFormsComponents.DataBinding
+@inherits DataBoundComponent<ItemType>
 @typeparam ItemType
 <table cellspacing="0" style="border-collapse:collapse;">
 	<tr>
@@ -9,7 +10,8 @@
 			}
 			else
 			{
-				OnDataBinding.InvokeAsync(EventArgs.Empty);
+				DataBinding(EventArgs.Empty);
+
 				<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
 					@switch (CurrentMode) {
 						case Enums.FormViewMode.ReadOnly:
@@ -17,10 +19,14 @@
 							break;
 						case Enums.FormViewMode.Edit:
 							@EditItemTemplate(CurrentItem);
+									break;
+							case Enums.FormViewMode.Insert:
+								@InsertItemTemplate(CurrentItem);
 							break;
 					}
 						</CascadingValue>
-						OnDataBound.InvokeAsync(EventArgs.Empty);
+
+							DataBound(EventArgs.Empty);
 						}
 					</td>
 	</tr>

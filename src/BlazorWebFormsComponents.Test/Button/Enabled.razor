@@ -1,0 +1,27 @@
+﻿@inherits TestComponentBase
+
+
+<Fixture Test="ButtonEnabled">
+	<ComponentUnderTest>
+		<Button Enabled="false">This is not an enabled button</Button>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+
+	void ButtonEnabled(Fixture fixture)
+	{
+		// Given
+		var cut = fixture.GetComponentUnderTest();
+
+		// When
+		var theButton = cut.Find("button");
+
+		// Then
+		theButton.ClassList.Contains("aspNetDisabled").ShouldBeTrue("Did not assign the aspNetDisabled CSS class to a disabled button");
+		theButton.GetAttribute("disabled").ShouldBe("disabled", "Did not assigned the disabled attribute properly");
+
+	}
+
+}

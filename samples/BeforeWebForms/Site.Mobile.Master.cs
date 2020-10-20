@@ -7,11 +7,11 @@ using System.Web.UI.WebControls;
 
 namespace BeforeWebForms
 {
-    public partial class Site_Mobile : System.Web.UI.MasterPage
-    {
-        protected void Page_Load(object sender, EventArgs e)
-        {
+	public partial class Site_Mobile : System.Web.UI.MasterPage
+	{
+		protected void Page_Load(object sender, EventArgs e)
+		{
 
-        }
-    }
+		}
+	}
 }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-  public partial class Literal : BaseWebFormsComponent, ITextComponent
+	public partial class Literal : BaseWebFormsComponent, ITextComponent
 	{
 		[Parameter]
 		public LiteralMode Mode { get; set; }

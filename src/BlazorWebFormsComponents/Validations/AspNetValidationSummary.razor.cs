@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using BlazorComponentUtilities;
-using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlazorWebFormsComponents.Validations
 {
-	public partial class AspNetValidationSummary : BaseWebFormsComponent, IHasStyle, IDisposable
+	public partial class AspNetValidationSummary : BaseStyledComponent, IDisposable
 	{
 		private EditContext _previousEditContext;
 		private readonly EventHandler<ValidationStateChangedEventArgs> _validationStateChangedHandler;
@@ -18,23 +15,6 @@ namespace BlazorWebFormsComponents.Validations
 		[CascadingParameter] EditContext CurrentEditContext { get; set; }
 
 		[Parameter] public ValidationSummaryDisplayMode DisplayMode { get; set; } = ValidationSummaryDisplayMode.BulletList;
-		[Parameter] public WebColor BackColor { get; set; }
-		[Parameter] public WebColor BorderColor { get; set; }
-		[Parameter] public BorderStyle BorderStyle { get; set; }
-		[Parameter] public Unit BorderWidth { get; set; }
-		[Parameter] public string CssClass { get; set; }
-		[Parameter] public WebColor ForeColor { get; set; }
-		[Parameter] public Unit Height { get; set; }
-		[Parameter] public Unit Width { get; set; }
-		[Parameter] public bool Font_Bold { get; set; }
-		[Parameter] public bool Font_Italic { get; set; }
-		[Parameter] public string Font_Names { get; set; }
-		[Parameter] public bool Font_Overline { get; set; }
-		[Parameter] public FontUnit Font_Size { get; set; }
-		[Parameter] public bool Font_Strikeout { get; set; }
-		[Parameter] public bool Font_Underline { get; set; }
-
-		protected StyleBuilder CalculatedStyle { get; set; }
 
 		public bool IsValid => CurrentEditContext.GetValidationMessages().Any();
 
@@ -67,8 +47,6 @@ namespace BlazorWebFormsComponents.Validations
 		{
 
 			this.SetFontsFromAttributes(AdditionalAttributes);
-
-			CalculatedStyle = this.ToStyle();
 
 			base.OnInitialized();
 

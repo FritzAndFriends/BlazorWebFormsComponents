@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-
-namespace BlazorWebFormsComponents.Enums
+﻿namespace BlazorWebFormsComponents.Enums
 {
 
 	public abstract class TreeViewImageSet
 	{
 
-		public static ArrowsTreeViewImageSet Arrows { get; } = new ArrowsTreeViewImageSet() { HasImages_Node=false };
+		public static ArrowsTreeViewImageSet Arrows { get; } = new ArrowsTreeViewImageSet() { HasImages_Node = false };
 		public static BulletedListTreeViewImageSet BulletedList { get; } = new BulletedListTreeViewImageSet() { HasImages_Collapse = false };
 		public static BulletedList2TreeViewImageSet BulletedList2 { get; } = new BulletedList2TreeViewImageSet() { HasImages_Collapse = false };
 		public static BulletedList3TreeViewImageSet BulletedList3 { get; } = new BulletedList3TreeViewImageSet() { HasImages_Collapse = false };
 		public static BulletedList4TreeViewImageSet BulletedList4 { get; } = new BulletedList4TreeViewImageSet() { HasImages_Collapse = false };
 		public static ContactsTreeViewImageSet Contacts { get; } = new ContactsTreeViewImageSet() { HasImages_Node = false };
-		public static DefaultTreeViewImageSet _Default { get; } = new DefaultTreeViewImageSet() { HasImages_Node =false };
+		public static DefaultTreeViewImageSet _Default { get; } = new DefaultTreeViewImageSet() { HasImages_Node = false };
 		public static EventsTreeViewImageSet Events { get; } = new EventsTreeViewImageSet() { HasImages_Collapse = false };
 		public static FAQTreeViewImageSet FAQ { get; } = new FAQTreeViewImageSet() { HasImages_Collapse = false };
 		public static InboxTreeViewImageSet Inbox { get; } = new InboxTreeViewImageSet() { HasImages_Collapse = false };
@@ -28,8 +23,8 @@ namespace BlazorWebFormsComponents.Enums
 
 		public virtual string Collapse => HasImages_Collapse ? FormatFilename("Collapse") : FormatDefaultFilename("Collapse");
 		public virtual string Expand => HasImages_Collapse ? FormatFilename("Expand") : FormatDefaultFilename("Expand");
-		public virtual string NoExpand  => HasImages_Collapse ? FormatFilename("NoExpand") : FormatDefaultFilename("NoExpand");
-		public virtual string LeafNode => HasImages_Node ? FormatFilename("LeafNode") : ""; 
+		public virtual string NoExpand => HasImages_Collapse ? FormatFilename("NoExpand") : FormatDefaultFilename("NoExpand");
+		public virtual string LeafNode => HasImages_Node ? FormatFilename("LeafNode") : "";
 		public virtual string RootNode => HasImages_Node ? FormatFilename("RootNode") : "";
 		public virtual string ParentNode => HasImages_Node ? FormatFilename("ParentNode") : "";
 

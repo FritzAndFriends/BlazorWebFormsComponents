@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-  public partial class RoleGroup : BaseWebFormsComponent
-  {
+	public partial class RoleGroup : BaseWebFormsComponent
+	{
 		[Parameter] public string Roles { get; set; }
 		[Parameter] public RenderFragment ChildContent { get; set; }
 
@@ -28,5 +25,5 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		}
 
-  }
+	}
 }

@@ -1,15 +1,14 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 
-	public partial class FormView<ItemType> : BaseModelBindingComponent<ItemType> where ItemType : class, new()
+	public partial class FormView<ItemType> : DataBoundComponent<ItemType> where ItemType : class, new()
 	{
 
 		private static readonly Dictionary<string, FormViewMode> CommandNameModeLookup = new Dictionary<string, FormViewMode> {
@@ -30,6 +29,9 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public RenderFragment<ItemType> EditItemTemplate { get; set; }
+
+		[Parameter]
+		public RenderFragment<ItemType> InsertItemTemplate { get; set; }
 
 		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
@@ -96,6 +98,10 @@ namespace BlazorWebFormsComponents
 				case "edit":
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
+					break;
+				case "insert":
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert }).GetAwaiter().GetResult();
+					CurrentMode = FormViewMode.Insert;
 					break;
 				case "update":
 					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update")).GetAwaiter().GetResult();

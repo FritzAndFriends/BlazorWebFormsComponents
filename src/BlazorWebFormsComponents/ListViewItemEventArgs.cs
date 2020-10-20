@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
-
 	public class ListViewItemEventArgs : EventArgs
 	{
-
 		public ListViewItemEventArgs(object item)
 		{
-			this.Item = item;
+			Item = item;
 		}
 
-		object Item { get; set; }
-
+		public object Item { get; }
 	}
-
 }

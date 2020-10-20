@@ -1,4 +1,5 @@
-﻿using BlazorWebFormsComponents.Interfaces;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 
@@ -8,13 +9,13 @@ namespace BlazorWebFormsComponents
 	/// Blazor version of WebForms GridView control
 	/// </summary>
 	/// <typeparam name="ItemType"></typeparam>
-  public partial class GridView<ItemType> : BaseModelBindingComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>
-  {
+	public partial class GridView<ItemType> : DataBoundComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>
+	{
 
 		/// <summary>
 		///	Specify if the GridView component will autogenerate its columns
 		/// </summary>
-		[Parameter] public bool AutogenerateColumns { get; set; } = true;
+		[Parameter] public bool AutoGenerateColumns { get; set; } = true;
 
 		/// <summary>
 		/// Text to show when there are no items to show
@@ -56,7 +57,7 @@ namespace BlazorWebFormsComponents
 		protected override void OnInitialized()
 		{
 			base.OnInitialized();
-			if (AutogenerateColumns)
+			if (AutoGenerateColumns)
 			{
 				GridViewColumnGenerator.GenerateColumns(this);
 			}

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace BlazorWebFormsComponents.Validations.TypeComparers
 {
-  public class CurrencyComparer : IComparer
+	public class CurrencyComparer : IComparer
 	{
 		public bool TryConvert(string text, bool cultureInvariant, out object value)
 		{

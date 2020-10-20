@@ -5,6 +5,13 @@ It may seem strange that we have a Button component when there already is an HTM
 - OnClick event handler
 - OnClientClick JavaScript pointer
 - OnCommand event handler with event bubbling
+- Button Style attributes and CssClass formatting
+- CausesValidation will control whether  Form validation is triggered on click
+
+## WebForms Features Not Supported
+
+- PostBackUrl is not supported as you will be triggering Button click events on the same page
+- UseSubmitBehavior is not supported as Blazor buttons trigger click events and you can inspect the Form regardless
 
 ## WebForms Syntax
 

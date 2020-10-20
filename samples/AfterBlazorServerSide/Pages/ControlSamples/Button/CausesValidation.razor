@@ -1,0 +1,42 @@
+@page "/ControlSamples/Button/CausesValidation"
+@using BlazorWebFormsComponents.Validations
+
+<h2>Causes Validation demo</h2>
+
+<Nav></Nav>
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="@HandleSubmit">
+
+	<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
+	<RangeValidator ControlToValidate="@Value"
+									Type="Integer"
+									MinimumValue="0"
+									MaximumValue="10"
+									Text="Invalid"
+									ErrorMessage="ErrorMessage!" />
+
+	<Button CausesValidation="false" Text="Submit"></Button>
+
+	<p>@ValidationMessage</p>
+
+</EditForm>
+
+@code {
+
+	private Model exampleModel = new Model();
+	ForwardRef<InputBase<string>> Value = new ForwardRef<InputBase<string>>();
+	private string ValidationMessage = "No validation yet";
+
+	public void HandleSubmit() {
+
+		ValidationMessage = "Validation Inspected";
+
+	}
+
+	public class Model {
+		public string Value { get; set; }
+	}
+
+}
+
+

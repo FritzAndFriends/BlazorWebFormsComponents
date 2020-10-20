@@ -1,0 +1,19 @@
+﻿@inherits TestComponentBase
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="true" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="false" />
+	</TestInput>
+	<ExpectedOutput>
+
+	</ExpectedOutput>
+</SnapshotTest>

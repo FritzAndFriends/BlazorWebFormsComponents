@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public class Style : IHasStyle
+	public class Style : IStyle
 	{
 
 		internal Style() { }
@@ -21,19 +21,7 @@ namespace BlazorWebFormsComponents
 
 		public string CssClass { get; set; }
 
-		public bool Font_Bold { get; set; }
-
-		public bool Font_Italic { get; set; }
-
-		public string Font_Names { get; set; }
-
-		public bool Font_Overline { get; set; }
-
-		public FontUnit Font_Size { get; set; } = FontUnit.Empty;
-
-		public bool Font_Strikeout { get; set; }
-
-		public bool Font_Underline { get; set; }
+		public FontInfo Font { get; set; } = new FontInfo();
 
 		public WebColor ForeColor { get; set; }
 
@@ -43,7 +31,8 @@ namespace BlazorWebFormsComponents
 
 		public override string ToString() => this.ToStyle().NullIfEmpty();
 
-		public void FromUnknownAttributes(Dictionary<string,object> attributes, string prefix) {
+		public void FromUnknownAttributes(Dictionary<string, object> attributes, string prefix)
+		{
 
 			if (attributes?.Count > 0)
 			{
@@ -58,7 +47,7 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		private void FromAttributes(IEnumerable<KeyValuePair<string,object>> attributes) 
+		private void FromAttributes(IEnumerable<KeyValuePair<string, object>> attributes)
 		{
 
 			var headerStyleType = typeof(TableItemStyle);

@@ -1,9 +1,9 @@
-﻿@inherits BaseWebFormsComponent
-@using BlazorWebFormsComponents.Enums
+﻿@using BlazorWebFormsComponents.Enums
+@inherits BaseStyledComponent
 
 @if (Enabled && Visible)
 {
-	<div style="@(CalculatedStyle + (IsValid ? null : "display:none;"))">
+	<div style="@(Style + (IsValid ? null : "display:none;"))">
 		@if (IsValid)
 		{
 			@switch (DisplayMode)

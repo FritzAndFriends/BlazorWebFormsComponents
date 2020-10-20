@@ -63,6 +63,14 @@ Design for this project is ultimately decided by the project lead, [Jeff Fritz](
 
 We are always looking for help on this project.  There are many millions of applications built that target ASP<span></span>.NET Web Forms, and we need your help building and identifying scenarios that need to be supported.  There are several ways that you can help:
 
+### Tool suggestions for contributing
+
+1. [Visual Studio](https://visualstudio.microsoft.com/) (Windows)
+2. [Visual Studio Code](https://visualstudio.microsoft.com/) (Windows, Linux, Mac)
+3. [Visual Studio For Mac](https://visualstudio.microsoft.com/)
+4. Any text editor (Windows, Linux, Mac)
+5. Any Web browser.
+
 ### Tell us your story
 
 Tell us how you are currently using the web forms framework so that we can build to meet your needs.  This means one of several types of contributions:
@@ -70,6 +78,10 @@ Tell us how you are currently using the web forms framework so that we can build
 1. Send a pull request with a sample page that shows your scenario in the `samples/BeforeWebForms` project
 1. Send a pull request with your desired scenario as a unit test in `src/BlazorWebFormsComponents.Test`
 1. [Report an issue](https://github.com/FritzAndFriends/BlazorWebFormsComponents/Issues) with the details of a bug that you have found.  Be sure to tag it as a `Bug` so that we can triage and track it
+
+### Write some Web Forms sample code
+
+Demonstrate how an existing control is being used in the `BeforeWebForms` project.  The content of this sample project will be compiled and uploaded to the https://beforewebforms.azurewebsites.net location.
 
 ### Write code for a component
 
@@ -82,3 +94,7 @@ Code for components' features should also include some definition in the `/docs`
 ### Write documentation
 
 The documentation for the migration and consumption of these components will be significant in scope and need to cover many scenarios.  We are always looking for help to add content to the `/docs` section of the repository with proper links back through to the main `/README.md`.
+
+### Recources
+
+[cmjchrisjones Blog: Contributing To Someone else's git repository](https://cmjchrisjones.dev/posts/contributing-to-someone-elses-git-repository/)

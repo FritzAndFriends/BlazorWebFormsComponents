@@ -29,6 +29,9 @@
 				        <button type="button">Click Me! <%#:Item.FirstName %></button>
 			         </ItemTemplate>
 		    </asp:TemplateField>
+        <asp:HyperLinkField
+          DataTextFormatString="Search for {0}" DataTextField="CompanyName"
+          DataNavigateUrlFields="CompanyName, FirstName, LastName" DataNavigateUrlFormatString="https://www.bing.com/search?q={0} {1} {2}" />
       </Columns>
   </asp:gridview>
 </asp:Content>

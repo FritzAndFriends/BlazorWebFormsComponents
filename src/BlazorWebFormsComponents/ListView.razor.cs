@@ -1,14 +1,12 @@
-﻿using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace BlazorWebFormsComponents
 {
 
-	public partial class ListView<ItemType> : BaseModelBindingComponent<ItemType>
+	public partial class ListView<ItemType> : DataBoundComponent<ItemType>
 	{
 
 		public ListView()
@@ -23,7 +21,7 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment GroupSeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment<RenderFragment> GroupTemplate { get; set; }
 		[Parameter] public RenderFragment ItemPlaceHolder { get; set; }
-		
+
 		/// <summary>
 		/// The layout of the ListView, a set of HTML to contain the repeated elements of the ItemTemplate and AlternativeItemTemplate 
 		/// </summary>
@@ -55,12 +53,20 @@ namespace BlazorWebFormsComponents
 
 		[Parameter] public RenderFragment ChildContent { get; set; }
 
+		[Parameter]
+		public EventCallback<ListViewItemEventArgs> OnItemDataBound { get; set; }
+
 		[CascadingParameter(Name = "Host")] public BaseWebFormsComponent HostComponent { get; set; }
 
 		protected override void OnInitialized()
 		{
 			HostComponent = this;
 			base.OnInitialized();
+		}
+
+		protected virtual void ItemDataBound(ListViewItemEventArgs e)
+		{
+			OnItemDataBound.InvokeAsync(e);
 		}
 	}
 }
