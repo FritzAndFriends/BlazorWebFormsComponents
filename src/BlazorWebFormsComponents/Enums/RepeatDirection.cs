@@ -1,6 +1,6 @@
 ﻿namespace BlazorWebFormsComponents.Enums
 {
-  public abstract class DataListEnum
+	public abstract class DataListEnum
 	{
 		public static HorizontalDataList Horizontal { get; } = new HorizontalDataList();
 		public static VerticalDataList Vertical { get; } = new VerticalDataList();

@@ -39,7 +39,7 @@
 		preRendered.ShouldBe(1);
 		unloaded.ShouldBe(1);
 
-		cut.FindAll("span").Count().ShouldBe(3);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 
 		await theListView.DisposeAsync();
 

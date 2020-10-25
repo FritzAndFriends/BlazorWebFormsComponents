@@ -1,3 +1,35 @@
+@using System.Text
 @inherits BaseWebFormsComponent
+@{
+		var element = new StringBuilder($"<img src=\"{ImageUrl}\"");
+		if(!string.IsNullOrEmpty(AlternateText))
+		{
+			element.AppendFormat(" alt=\"{0}\"", AlternateText);
+		}
+		else
+		{
+			if(GenerateEmptyAlternateText)
+			{
+				element.AppendFormat(" alt=\"{0}\"", AlternateText);
+			}
+		}
 
-<img src="@ImageUrl" alt="@AlternateText" longdesc="@DescriptionUrl" />
+		element.AppendFormat(" longdesc=\"{0}\"", DescriptionUrl);
+
+		if (!string.IsNullOrEmpty(ToolTip))
+		{
+			element.AppendFormat(" title=\"{0}\"", ToolTip);
+		}
+
+		if(ImageAlign != Enums.ImageAlign.NotSet)
+		{
+			element.AppendFormat(" align=\"{0}\"", ImageAlign.ToString().ToLower());
+		}
+
+		element.Append(" />");
+}
+
+@if (Visible)
+{
+	@((MarkupString)element.ToString())
+}

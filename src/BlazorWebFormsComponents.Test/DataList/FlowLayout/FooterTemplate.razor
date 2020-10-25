@@ -18,7 +18,7 @@
 		fixture.Services.AddLogging();
 		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
-		cut.FindAll("span").Count().ShouldBe(5);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
 		cut.FindAll("span").Count(c => c.TextContent == "FooterTemplate").ShouldBe(1);
 		cut.FindAll("span").Last().TextContent.ShouldBe("FooterTemplate");
 	}

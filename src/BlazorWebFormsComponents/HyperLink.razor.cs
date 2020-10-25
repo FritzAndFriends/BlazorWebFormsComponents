@@ -2,7 +2,7 @@
 
 namespace BlazorWebFormsComponents
 {
-	public partial class HyperLink : BaseWebFormsComponent
+	public partial class HyperLink : BaseStyledComponent
 	{
 		[Parameter]
 		public string NavigationUrl { get; set; }
@@ -10,7 +10,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string Target { get; set; } = string.Empty;
 
-		[Parameter]
+		[Parameter] 
 		public string Text { get; set; }
+
+		[Parameter] public string ToolTip { get; set; }
 	}
 }

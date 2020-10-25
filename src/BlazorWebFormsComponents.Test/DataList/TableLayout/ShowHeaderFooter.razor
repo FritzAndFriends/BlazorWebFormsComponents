@@ -39,9 +39,9 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(5);
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
 		cut.Find("td").TextContent.ShouldBe("My Widget List");
-		cut.FindAll("td")[4].TextContent.ShouldBe("End of Line");
+		cut.FindAll("td")[Widget.SimpleWidgetList.Length+1].TextContent.ShouldBe("End of Line");
 
 	}
 
@@ -50,7 +50,7 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("td").Count().ShouldBe(3);
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 		cut.Find("td").TextContent.ShouldNotBe("My Widget List");
 
 	}

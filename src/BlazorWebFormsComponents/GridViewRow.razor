@@ -6,32 +6,7 @@
 	@foreach (IColumn<ItemType> column in Columns)
 	{
 		<td @key="column">
-			@if (column is BoundField<ItemType>)
-			{
-				var datafield = (BoundField<ItemType>)column;
-				var properties = datafield.DataField.Split('.');
-				object obj = DataItem;
-				@foreach (var property in properties)
-				{
-
-					var propertyInfo = obj.GetType().GetProperty(property);
-					obj = propertyInfo.GetValue(obj);
-				}
-				if (datafield.DataFormatString != null)
-				{
-					@String.Format(datafield.DataFormatString, @obj.ToString())
-				}
-				else
-				{
-					@obj.ToString();
-				}
-			}
-			else
-			{
-				var templateField = (TemplateField<ItemType>)column;
-				@templateField.ItemTemplate(DataItem)
-			}
+			@column.Render(DataItem)
 		</td>
 	}
 </tr>
-

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Validations.TypeComparers;
+using System;
+using System.Collections.Generic;
 using StringComparer = BlazorWebFormsComponents.Validations.TypeComparers.StringComparer;
 
 namespace BlazorWebFormsComponents.Validations

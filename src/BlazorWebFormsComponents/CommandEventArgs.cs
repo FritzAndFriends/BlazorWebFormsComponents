@@ -1,17 +1,21 @@
 using System;
 
-namespace BlazorWebFormsComponents {
+namespace BlazorWebFormsComponents
+{
 
-	public class CommandEventArgs : EventArgs {
+	public class CommandEventArgs : EventArgs
+	{
 
-		public CommandEventArgs(string commandName, object commandArgument) {
+		public CommandEventArgs(string commandName, object commandArgument)
+		{
 
 			CommandName = commandName;
 			CommandArgument = commandArgument;
 
 		}
 
-		public CommandEventArgs(CommandEventArgs args) {
+		public CommandEventArgs(CommandEventArgs args)
+		{
 
 			this.CommandName = args.CommandName;
 			this.CommandArgument = args.CommandArgument;

@@ -1,6 +1,6 @@
 ﻿namespace BeforeWebForms.ControlSamples.GridView
 {
-  public class Customer
+	public class Customer
 	{
 		public int CustomerID { get; set; }
 

@@ -13,14 +13,12 @@
 
 	string Output()
 	{
+		if (TheItem == null)
+		{
+			throw new NullReferenceException("The Item being bound was not received by the DataBinder");
+		}
 
-		if (TheItem == null) throw new NullReferenceException("The Item being bound was not received by the DataBinder");
-
-		var theType = TheItem.GetType();
-		var theProp = theType.GetProperty(PropertyName);
-
-		return string.Format(Format, theProp.GetValue(TheItem));
-
+		return DataBinder.GetPropertyValue(TheItem, PropertyName, Format);
 	}
 
 }

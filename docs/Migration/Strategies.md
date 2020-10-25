@@ -1,12 +1,10 @@
-# Migration Strategies
-
 Migration from ASP<span></span>.NET Web Forms to Blazor is not simple and this repository attempts to make it easier for developers to reuse as much of their Web Forms application as possible.  The two technologies are 'concept compatible', but run on different implementations of the .NET runtime (.NET Framework vs. .NET Core / .NET 5+)
 
 We, the maintainers of this project, believe that with a little ingenuity the markup from a Web Forms application can be copied over with minimal changes and function similarly to its original purpose.  We believe that well formatted and maintained code in Web Forms should be easily migrated.  Applications that are a significant mix of C# and markup will have a more difficult time going through this process.
 
 ## Readiness Planning
 
-Migrating an application to Blazor is not a trivial process and it would be great to have some indication ahead of time how much work is needed and what steps you need to take to prepare to migrate.  Check our migration [readiness document](../migration_readiness.md) to help determine how much work will be needed for your application to begin the process.
+Migrating an application to Blazor is not a trivial process and it would be great to have some indication ahead of time how much work is needed and what steps you need to take to prepare to migrate.  Check our migration [readiness document](migration_readiness.md) to help determine how much work will be needed for your application to begin the process.
 
 ## Known Required Changes
 
@@ -34,11 +32,11 @@ The concept of a MasterPage does not exist in Blazor.  Instead, your ASPX pages 
 
 ### Page Directive Changes
 
-### No <%#: DataBinding expressions 
+### <%#: DataBinding expressions require update
 
 Databinding expressions in Web Forms let you evaluate the content of the elements and format them appropriately for presentation.  For editor controls, it also allows you to setup a 2-way binding so that you can receive values entered into the same variable bound to the control.
 
-In Blazor, for repeater-style components, just format the variable using context, Item, and simple formatting like this:
+In Blazor, for repeater-style components, the simplest solution is to just format the variable using context, Item, and formatting:
 
 ```csharp
 @Item.ShipDate.ToString("D")
@@ -50,20 +48,22 @@ For editor components, simply `@bind` the variable to the component.  This will 
 <input type="text" name="foo" @bind="bar" />
 ```
 
-### No Namespaces, No Tag-Prefixes 
+More details about DataBinding and using the `DataBinder` utility object are available in the [DataBinder docs](../UtilityFeatures/Databinder.md).
+
+### No Namespaces, No Tag-Prefixes
 
 Namespaces and tag-prefixes are gone.  You can do a Find and Replace on `asp:` and remove those from your markup.
 
 ### Redirect Color to WebColor
 
-This change should **NOT** require any coding modifications.  In Web Forms, you could refer to `System.Drawing.Color` objects when setting `BackColor`, `BorderColor`, and `ForeColor` to name a few properties.  You could _ALSO_ freely use HTML hex-color notation freely in these fields.  
+This change should **NOT** require any coding modifications.  In Web Forms, you could refer to `System.Drawing.Color` objects when setting `BackColor`, `BorderColor`, and `ForeColor` to name a few properties.  You could _ALSO_ freely use HTML hex-color notation freely in these fields.
 The `System.Drawing.Color` object does not have a converter that allows you to convert between these two formats, so we wrapped the object and made `BlazorWebFormsComponents.WebColor` that performs the same task and allows the interchange of `System.Drawing.Color` object with HTML hex notation.
 
 ## Strategies
 
 - A simple initial site migration
 - Intertwined code
-- [DataBinder](Databinder.md)
+- [DataBinder](../UtilityFeatures/Databinder.md)
 - Model-Binding
 - [.NET Standard to the rescue!](NET-Standard.md)
 - Other considerations

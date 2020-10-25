@@ -1,0 +1,37 @@
+﻿@inherits TestComponentBase
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" GenerateEmptyAlternateText="true" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" GenerateEmptyAlternateText="false" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="" GenerateEmptyAlternateText="true" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" alt="" longdesc="" />
+	</ExpectedOutput>
+</SnapshotTest>
+
+<SnapshotTest>
+	<TestInput>
+		<Image ImageUrl="/img/vb.jpg" AlternateText="" GenerateEmptyAlternateText="false" />
+	</TestInput>
+	<ExpectedOutput>
+		<img src="/img/vb.jpg" longdesc="" />
+	</ExpectedOutput>
+</SnapshotTest>

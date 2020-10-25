@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
 using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using BlazorWebFormsComponents.Enums;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -20,8 +18,14 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public byte Depth { get; set; } = 0;
 
+		private bool _Expanded = true;
+		private bool? _UserExpanded;
 		[Parameter]
-		public bool Expanded { get; set; } = true;
+		public bool Expanded
+		{
+			get { return _UserExpanded.HasValue ? _UserExpanded.Value : _Expanded; }
+			set { _Expanded = value; }
+		}
 
 		// TODO: Implement
 		[Parameter]
@@ -32,8 +36,11 @@ namespace BlazorWebFormsComponents
 
 		private string _ImageUrl;
 		[Parameter]
-		public string ImageUrl {
-			get { return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
+		public string ImageUrl
+		{
+			get
+			{
+				return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
 						string.IsNullOrEmpty(ParentTreeView.ImageSet.RootNode) ? "" :
 							(IsRoot ? $"{ImageLocation}{ParentTreeView.ImageSet.RootNode}" :
 								IsParent ? $"{ImageLocation}{ParentTreeView.ImageSet.ParentNode}" :
@@ -77,9 +84,11 @@ namespace BlazorWebFormsComponents
 
 		private TreeNode _Parent;
 		[CascadingParameter(Name = "ParentTreeNode")]
-		public TreeNode Parent {
+		public TreeNode Parent
+		{
 			get { return _Parent; }
-			set {
+			set
+			{
 				_Parent = value;
 				Depth = (byte)((_Parent?.Depth ?? 0) + 1);
 			}
@@ -179,10 +188,13 @@ namespace BlazorWebFormsComponents
 
 			Parent?.AddChildNode(this);
 
+
 			return base.OnInitializedAsync();
 		}
 
-		protected override void OnParametersSet() {
+
+		protected override void OnParametersSet()
+		{
 
 			if (!ParentTreeView.Nodes.Contains(this))
 			{
@@ -191,16 +203,18 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public void HandleNodeExpand() {
+		public void HandleNodeExpand()
+		{
 
-			Expanded = !Expanded;
+			_UserExpanded = !Expanded;
 
 			if (Expanded) ParentTreeView.OnTreeNodeExpanded.InvokeAsync(new TreeNodeEventArgs(this));
 			else ParentTreeView.OnTreeNodeCollapsed.InvokeAsync(new TreeNodeEventArgs(this));
 
 		}
 
-		public void HandleCheckbox(object sender, ChangeEventArgs args) {
+		public void HandleCheckbox(object sender, ChangeEventArgs args)
+		{
 
 			this.Checked = (bool)args.Value;
 

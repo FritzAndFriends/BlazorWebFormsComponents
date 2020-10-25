@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace BlazorWebFormsComponents.Interfaces
 {
 	/// <summary>
 	/// Generic column collection interface
 	/// </summary>
-  public interface IColumnCollection<ItemType>
-  {
+	public interface IColumnCollection<ItemType>
+	{
 		/// <summary>
 		/// The list of IColumns
 		/// </summary>

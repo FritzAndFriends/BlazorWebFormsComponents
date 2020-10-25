@@ -3,8 +3,12 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace BlazorWebFormsComponents
 {
-	public abstract class ButtonBaseComponent : BaseWebFormsComponent, IButtonComponent
+	public abstract class ButtonBaseComponent : BaseStyledComponent, IButtonComponent
 	{
+
+		[Parameter]
+		public bool CausesValidation { get; set; } = true;
+
 		[Parameter]
 		public string CommandName { get; set; }
 
@@ -12,7 +16,7 @@ namespace BlazorWebFormsComponents
 		public object CommandArgument { get; set; }
 
 		[Parameter]
-		public string PostBackUrl { get; set; }
+		public virtual string PostBackUrl { get; set; }
 
 		[Parameter]
 		public string Text { get; set; }

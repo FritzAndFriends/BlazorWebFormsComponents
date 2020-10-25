@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents.Interfaces
 {
-  public interface IImageComponent
-  {
+	public interface IImageComponent
+	{
 		[Parameter]
 		string AlternateText { get; set; }
 

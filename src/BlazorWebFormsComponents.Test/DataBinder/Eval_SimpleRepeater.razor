@@ -18,8 +18,8 @@
 
 		var cut = fixture.GetComponentUnderTest();
 
-		cut.FindAll("span").Count().ShouldBe(3);
-		cut.FindAll("hr").Count().ShouldBe(3);
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
+		cut.FindAll("hr").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 
 	}
 

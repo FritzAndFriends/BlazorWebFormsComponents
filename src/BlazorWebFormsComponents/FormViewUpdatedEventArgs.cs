@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Specialized;
 
-namespace BlazorWebFormsComponents {
+namespace BlazorWebFormsComponents
+{
 
-	public class FormViewUpdatedEventArgs : EventArgs {
+	public class FormViewUpdatedEventArgs : EventArgs
+	{
 
 		public FormViewUpdatedEventArgs(int affectedRows, Exception e = null)
 		{

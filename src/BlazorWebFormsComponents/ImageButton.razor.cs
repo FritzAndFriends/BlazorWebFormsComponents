@@ -2,7 +2,8 @@ using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 namespace BlazorWebFormsComponents
-{	public partial class ImageButton : ButtonBaseComponent, IImageComponent
+{
+	public partial class ImageButton : ButtonBaseComponent, IImageComponent
 	{
 		[Parameter]
 		public string AlternateText { get; set; }
@@ -15,5 +16,8 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string ImageUrl { get; set; }
+
+		[Parameter]
+		public string ToolTip { get; set; }
 	}
 }

@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BlazorWebFormsComponents
 {
@@ -16,7 +14,8 @@ namespace BlazorWebFormsComponents
 
 		#region Collection Features
 
-		public TreeNode this[int index] {
+		public TreeNode this[int index]
+		{
 			get { return _Nodes[index]; }
 			set { _Nodes[index] = value; }
 		}
@@ -30,7 +29,8 @@ namespace BlazorWebFormsComponents
 			_Nodes.Add(item);
 		}
 
-		public void AddAt(int index, TreeNode item) {
+		public void AddAt(int index, TreeNode item)
+		{
 			Insert(index, item);
 		}
 
@@ -83,7 +83,8 @@ namespace BlazorWebFormsComponents
 
 	}
 
-	public class TreeNodeEventArgs : EventArgs {
+	public class TreeNodeEventArgs : EventArgs
+	{
 
 		public TreeNodeEventArgs(TreeNode node)
 		{

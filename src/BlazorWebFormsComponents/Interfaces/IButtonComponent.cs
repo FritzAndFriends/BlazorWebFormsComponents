@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace BlazorWebFormsComponents
 {
-  public interface IButtonComponent
-  {
+	public interface IButtonComponent
+	{
 		public string CommandName { get; set; }
 
 		public object CommandArgument { get; set; }

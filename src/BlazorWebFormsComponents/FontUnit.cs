@@ -1,6 +1,5 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using System;
-using System.Drawing;
 using System.Globalization;
 
 namespace BlazorWebFormsComponents
@@ -394,9 +393,9 @@ namespace BlazorWebFormsComponents
 		}
 
 		/*
- * Converts a numeric enumerated value into its persisted form, which is the
- * code name with underscores replaced by hyphens.
- */
+	* Converts a numeric enumerated value into its persisted form, which is the
+	* code name with underscores replaced by hyphens.
+	*/
 
 		/// <devdoc>
 		/// </devdoc>

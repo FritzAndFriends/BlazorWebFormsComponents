@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-  public abstract class BaseColumn<ItemType> : BaseWebFormsComponent, IColumn<ItemType>
+	public abstract class BaseColumn<ItemType> : BaseWebFormsComponent, IColumn<ItemType>
 	{
 		///<inheritdoc/>
 		[CascadingParameter(Name = "ColumnCollection")]
@@ -16,6 +16,8 @@ namespace BlazorWebFormsComponents
 		{
 			ParentColumnsCollection.RemoveColumn(this);
 		}
+
+		public abstract RenderFragment Render(ItemType item);
 
 		///<inheritdoc/>
 		protected override void OnInitialized()

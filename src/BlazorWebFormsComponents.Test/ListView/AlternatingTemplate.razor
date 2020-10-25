@@ -16,7 +16,7 @@
 	{
 		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
-		cut.FindAll("span").Count().ShouldBe(2, "Did not render 2 SPAN elements");
-		cut.FindAll("b").Count().ShouldBe(1, "Did not render 1 B element");
+		cut.FindAll("span").Count().ShouldBe((int)Math.Ceiling(Widget.SimpleWidgetList.Length/2.0m), $"Did not render {(int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m)} SPAN elements");
+		cut.FindAll("b").Count().ShouldBe((int)Math.Floor(Widget.SimpleWidgetList.Length / 2.0m), $"Did not render {(int)Math.Floor(Widget.SimpleWidgetList.Length / 2.0m)} B element");
 	}
 }
