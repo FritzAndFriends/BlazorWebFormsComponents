@@ -14,7 +14,7 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// A menubar component capable of making hierarchical menus for navigating your application
 	/// </summary>
-	public partial class Menu : BaseDataBindingComponent
+	public partial class Menu : BaseWebFormsComponent
 	{
 
 		#region Injected Properties
@@ -116,6 +116,9 @@ namespace BlazorWebFormsComponents
 		}
 
 		#region Databinding
+
+		[Parameter]
+		public EventCallback<EventArgs> OnDataBound { get; set; }
 
 		public RenderFragment ChildNodesRenderFragment { get; set; }
 

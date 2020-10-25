@@ -1,4 +1,4 @@
-@inherits BaseDataBindingComponent
+@inherits BaseWebFormsComponent
 @using BlazorComponentUtilities
 
 <div id="@ID">
@@ -61,7 +61,7 @@
 	@($"#{ID} a.dynamic.selected")
 	@: {
 		@DynamicSelectedStyle.ToStyle().ToString()
-	@:} 
+	@:}
 }
 
 		@($"#{ID} a.level2") {

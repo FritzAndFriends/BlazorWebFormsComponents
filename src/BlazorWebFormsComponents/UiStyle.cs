@@ -10,15 +10,18 @@ namespace BlazorWebFormsComponents
 
 	}
 
-  public abstract class UiInlineStyle : UiStyle<Style>, IHasStyle
+  public abstract class UiInlineStyle : UiStyle<Style>, IStyle
   {
-		public bool Font_Bold { get; set; }
-		public bool Font_Italic { get; set; }
-		public string Font_Names { get; set; }
-		public bool Font_Overline { get; set; }
-		public FontUnit Font_Size { get; set; }
-		public bool Font_Strikeout { get; set; }
-		public bool Font_Underline { get; set; }
+
+		public FontInfo Font { get; set; }
+
+		// public bool Font_Bold { get; set; }
+		// public bool Font_Italic { get; set; }
+		// public string Font_Names { get; set; }
+		// public bool Font_Overline { get; set; }
+		// public FontUnit Font_Size { get; set; }
+		// public bool Font_Strikeout { get; set; }
+		// public bool Font_Underline { get; set; }
   }
 
   public abstract class UiStyle<TStyle> : ComponentBase, IHasLayoutStyle where TStyle : Style

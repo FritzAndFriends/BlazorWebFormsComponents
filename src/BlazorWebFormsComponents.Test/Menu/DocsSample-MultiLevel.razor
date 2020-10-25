@@ -61,7 +61,8 @@
 
 	void FirstTest(Fixture fixture) {
 
-		var jsMock = fixture.Services.AddMockJsRuntime();
+		using var ctx = new TestContext();
+		var jsMock = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
 
 		var cut = fixture.GetComponentUnderTest();
 

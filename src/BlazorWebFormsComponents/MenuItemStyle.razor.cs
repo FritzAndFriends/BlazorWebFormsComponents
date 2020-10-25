@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class MenuItemStyle : ComponentBase, IHasStyle
+	public partial class MenuItemStyle : ComponentBase, IStyle
 	{
 
 		[Parameter(CaptureUnmatchedValues = true)]
@@ -30,20 +30,9 @@ namespace BlazorWebFormsComponents
 		public Unit Height { get; set; }
 		[Parameter]
 		public Unit Width { get; set; }
+
 		[Parameter]
-		public bool Font_Bold { get; set; }
-		[Parameter]
-		public bool Font_Italic { get; set; }
-		[Parameter]
-		public string Font_Names { get; set; }
-		[Parameter]
-		public bool Font_Overline { get; set; }
-		[Parameter]
-		public FontUnit Font_Size { get; set; }
-		[Parameter]
-		public bool Font_Strikeout { get; set; }
-		[Parameter]
-		public bool Font_Underline { get; set; }
+		public FontInfo Font { get; set; }
 
 		protected void SetPropertiesFromUnknownAttributes() {
 

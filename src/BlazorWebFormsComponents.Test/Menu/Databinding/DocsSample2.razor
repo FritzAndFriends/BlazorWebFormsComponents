@@ -70,12 +70,13 @@
 @code {
 
 	System.Xml.XmlDocument MenuSource = new System.Xml.XmlDocument();
-	MockJsRuntimeInvokeHandler jsMock;
+	MockJSRuntimeInvokeHandler jsMock;
 
 	void Setup(Fixture fixture)
 	{
 
-		jsMock = fixture.Services.AddMockJsRuntime();
+		using var ctx = new TestContext();
+		jsMock = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
 		MenuSource.LoadXml(fixture.GetFragment().Markup);
 
 	}
