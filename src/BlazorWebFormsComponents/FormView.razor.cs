@@ -1,6 +1,7 @@
 ﻿using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -100,8 +101,16 @@ namespace BlazorWebFormsComponents
 					CurrentMode = FormViewMode.Edit;
 					break;
 				case "delete":
-					//ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Del}).GetAwaiter().GetResult();
-					//CurrentMode = FormViewMode.Edit;
+					Exception caughtException = null;
+					try {
+						OnItemDeleting.InvokeAsync(new FormViewDeleteEventArgs(Position)).GetAwaiter().GetResult();
+					} catch (Exception ex) {
+						caughtException = ex;
+					}
+					// do we do the deletion?
+					OnItemDeleted.InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException)).GetAwaiter().GetResult();
+					CurrentMode = DefaultMode;
+					Position = (Position == 0) ? 0 : Position - 1;
 					break;
 				case "insert":
 					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
@@ -125,6 +134,12 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		#region Custom Events
+
+		[Parameter]
+		public EventCallback<FormViewDeleteEventArgs> OnItemDeleting { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewDeletedEventArgs> OnItemDeleted { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewInsertEventArgs> OnItemInserting { get; set; }
