@@ -1,5 +1,9 @@
 The GridView component is meant to emulate the asp:GridView control in markup and is defined in the [System.Web.UI.WebControls.GridView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.gridview?view=netframework-4.8)
 
+## Features supported in Blazor
+- Readonly grid
+- Bound, Hyperlink, and Template columns
+
 ## Web Forms Declarative Syntax
 
 ```html
@@ -367,6 +371,18 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
                     Visible=bool
         >
         </BoundField>
+        <HyperLinkField
+            AccessibleHeaderText="string"
+            DataNavigateUrlFields="string"
+            DataNavigateUrlFormatString="string"
+            DataTextField="string"
+            DataTextFormatString="string"
+            HeaderText="string"
+            NavigateUrl="uri"
+            Target="string|_blank|_parent|_search|_self|_top"
+            Text="string"
+            Visible="True|False">
+        </HyperLinkField>
         <TemplateField
                  HeaderText=string
                  Visible=bool

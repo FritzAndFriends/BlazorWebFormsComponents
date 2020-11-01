@@ -1,0 +1,64 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="RendersLink">
+	<ComponentUnderTest>
+		<GridView SelectMethod="GetWidgets"
+							AutoGenerateColumns="false"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<Columns>
+				<BoundField ItemType="SharedSampleObjects.Models.Widget"
+										DataField="Id" />
+				<HyperLinkField	ItemType="SharedSampleObjects.Models.Widget"
+														DataTextField="Price"
+														DataTextFormatString="{0:c}"
+														DataNavigateUrlFields="Id"
+														DataNavigateUrlFormatString="~\details.aspx?WidgetId={0}"
+														HeaderText="Price"
+														Target="_blank" />
+			</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+
+@code {
+
+	void RendersLink(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+		System.Diagnostics.Debug.Write(cut.Markup);
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[1].TextContent.ShouldBe("Price");
+		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH element");
+
+		var rows = cut.FindAll("tr");
+		rows.Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
+
+		cut.FindAll("a").Count().ShouldBe(Widget.SimpleWidgetList.Length, $"Rendered wrong number of price anchors");
+
+		// inspect the anchor tags
+		foreach (var r in rows.Where(r => r.InnerHtml.Contains("td")))
+		{
+
+			r.ChildNodes.Count().ShouldBe(2);
+
+			var widgetId = (r.ChildNodes[0] as AngleSharp.Dom.IElement).InnerHtml;
+			var aTag = (r.ChildNodes[1] as AngleSharp.Dom.IElement).FirstChild as AngleSharp.Dom.IElement;
+			aTag.ShouldNotBeNull();
+			aTag.TagName.ShouldBe("a", StringCompareShould.IgnoreCase);
+			aTag.GetAttribute("href").ShouldBe($"~\\details.aspx?WidgetId={widgetId}");
+			aTag.GetAttribute("target").ShouldBe("_blank")
+
+		}
+
+	}
+
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+
+}
