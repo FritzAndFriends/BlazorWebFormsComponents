@@ -17,5 +17,6 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public string ToolTip { get; set; }
+
 	}
 }
