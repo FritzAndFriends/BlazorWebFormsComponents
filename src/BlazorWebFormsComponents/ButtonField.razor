@@ -1,0 +1,11 @@
+﻿@typeparam ItemType
+@inherits BaseColumn<ItemType>
+
+
+@code
+{
+	RenderFragment RenderButton(string text)
+	{
+		return @<text><Button CommandName="@CommandName" CommandArgument="@DataItemIndex">@text</Button></text>;
+	}
+}

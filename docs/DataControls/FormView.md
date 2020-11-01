@@ -5,6 +5,8 @@ The FormView component is meant to emulate the asp:FormView control in markup an
   - Readonly Form
   - Numerical Pager
   - OnDataBinding and OnDataBound events trigger
+  - ModeChanging and ModeChanged events
+  - Insert, Edit, Update, Delete actions and supporting events
 
 ## Usage Notes
 

@@ -1,4 +1,6 @@
 ﻿@page "/ControlSamples/GridView"
+@using BlazorWebFormsComponents.Enums
+
 <h2>GridView Default Example</h2>
 
 <Nav />
@@ -18,6 +20,7 @@
 				<button type="button">Click Me! @Item.FirstName</button>
 			</ItemTemplate>
 		</TemplateField>
+		<ButtonField ItemType="Customer" ButtonType="ButtonType.Button" DataTextField="CompanyName" DataTextFormatString="{0}" CommandName="Customer"></ButtonField>
 	</Columns>
 </GridView>
 

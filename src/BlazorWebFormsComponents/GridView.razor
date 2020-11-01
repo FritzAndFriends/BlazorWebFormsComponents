@@ -16,11 +16,14 @@
 		<tbody>
 			@if (Items != null && Items.Any())
 			{
+				var index = 0;
 				@foreach (ItemType item in Items)
 				{
 					<CascadingValue Value="this" Name="RowCollection">
-						<GridViewRow DataItem="item" Columns="ColumnList" />
+						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="index" />
 					</CascadingValue>
+
+					index++;
 				}
 			}
 			else
