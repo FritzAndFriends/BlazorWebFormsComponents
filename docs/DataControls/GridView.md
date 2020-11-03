@@ -395,3 +395,7 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
 </GridView>
 
 ```
+
+## Blazor Notes
+
+The GridView does not yet support a Pager.
