@@ -59,6 +59,19 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		public void OnCommand(object src, string commandName, object commandArg) {
+
+			var handler = (base.ParentColumnsCollection as GridView<ItemType>)?.OnRowCommand;
+			if (handler == null) return;
+
+			handler.Value.InvokeAsync(new GridViewCommandEventArgs {
+				CommandArgument = commandArg,
+				CommandName = commandName,
+				CommandSource = src
+			}).GetAwaiter().GetResult();
+
+		}
+
 		public RenderFragment RenderImage()
 		{
 
@@ -83,5 +96,17 @@ namespace BlazorWebFormsComponents
 			}
 			return fields;
 		}
+	}
+
+	public class GridViewCommandEventArgs {
+
+		public object CommandArgument { get; set; }
+
+		public string CommandName { get; set; }
+
+		public object CommandSource { get; set; }
+
+		public bool Handled { get; set; }
+
 	}
 }
