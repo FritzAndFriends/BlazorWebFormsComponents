@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedSampleObjects.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -16,37 +17,7 @@ namespace BeforeWebForms.ControlSamples.GridView
 
 		public List<Customer> GetCustomers()
 		{
-			var customers = new List<Customer>();
-			var c1 = new Customer
-			{
-				CustomerID = 1,
-				FirstName = "John",
-				LastName = "Smith",
-				CompanyName = "Virus"
-			};
-
-			var c2 = new Customer
-			{
-				CustomerID = 2,
-				FirstName = "Jose",
-				LastName = "Rodriguez",
-				CompanyName = "Boring"
-			};
-
-
-			var c3 = new Customer
-			{
-				CustomerID = 3,
-				FirstName = "Jason",
-				LastName = "Ramirez",
-				CompanyName = "Fun Machines"
-			};
-
-			customers.Add(c1);
-			customers.Add(c2);
-			customers.Add(c3);
-
-			return customers;
+			return Customer.GetCustomers(5, 0, "foo", out _).ToList();
 		}
 	}
 }

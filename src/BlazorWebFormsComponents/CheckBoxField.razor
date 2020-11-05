@@ -1,0 +1,10 @@
+﻿@typeparam ItemType
+@inherits BaseColumn<ItemType>
+
+@code
+{
+	RenderFragment RenderCheckbox(bool value) =>
+		@<text><input type="checkbox" disabled="disabled" checked="@(value ? "checked" : null )">
+		<label>@Text</label></text>;
+
+}

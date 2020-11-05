@@ -1,0 +1,49 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<GridView ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="InStock"></BoundField>
+				<CheckBoxField ItemType="Widget" DataField="InStock" HeaderText="In Stock" Text="In Stock?" />
+			</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	void FirstTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+
+		// Check headers
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[1].TextContent.ShouldBe("In Stock");
+
+		// Check first data row to see that it bound stuff correctly.
+		var checkbox = cut.Find("input");
+		var inStock = bool.Parse(checkbox.ParentElement.ParentElement.ChildNodes[0].TextContent);
+
+		checkbox.GetAttribute("disabled").ShouldBe("disabled");
+
+		if (inStock) {
+			checkbox.GetAttribute("checked").ShouldBe("checked");
+		} else {
+			checkbox.GetAttribute("checked").ShouldBeNull();
+		}
+
+		// Check the label to match the text on the CheckboxField
+		cut.Find("label").TextContent.ShouldBe("In Stock?");
+
+
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

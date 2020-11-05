@@ -13,6 +13,8 @@ namespace SharedSampleObjects.Models
 
 		public string CompanyName { get; set; }
 
+		public bool Active { get; set; }
+
 		public static IQueryable<Customer> GetCustomers(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
 		{
 			var customers = new List<Customer>();
@@ -21,7 +23,8 @@ namespace SharedSampleObjects.Models
 				CustomerID = 1,
 				FirstName = "John",
 				LastName = "Smith",
-				CompanyName = "Virus"
+				CompanyName = "Virus",
+				Active=true
 			};
 
 			var c2 = new Customer

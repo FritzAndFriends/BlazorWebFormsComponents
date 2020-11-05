@@ -14,6 +14,8 @@ namespace SharedSampleObjects.Models
 
 		public DateTime LastUpdate { get; set; }
 
+		public bool InStock { get; set; }
+
 		public static Widget[] EmptyWidgetList { get; } = new Widget[] { };
 
 		public static Widget[] Widgets(int n)
@@ -26,7 +28,8 @@ namespace SharedSampleObjects.Models
 				Id = i + 1,
 				Name = $"{words[i % 100]} Widget",
 				Price = (rnd.Next(100, 10000) / 100),
-				LastUpdate = DateTime.Today.AddHours(-rnd.Next(0, 300))
+				LastUpdate = DateTime.Today.AddHours(-rnd.Next(0, 300)),
+				InStock = (rnd.Next(100, 10000) % 2 == 1)
 			}).ToArray();
 			return widgets;
 		}

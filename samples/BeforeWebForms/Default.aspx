@@ -42,7 +42,7 @@
               <li><a href="ControlSamples/Button/Default.aspx">Button</a></li>
               <li><a href="ControlSamples/Hyperlink/Default.aspx">Hyperlink</a></li>
             </ul>
-
+        </div>
         <div class="col-md-3">
             <h3>Validation Controls</h3>
             <ul>
@@ -53,9 +53,7 @@
                 <li>RequiredFieldValidator</li>
                 <li>ValidationSummary</li>
             </ul>
-        </div>
 
-        <div class="col-md-3">
             <h3>Navigation Controls</h3>
             <ul>
                 <li>Menu</li>

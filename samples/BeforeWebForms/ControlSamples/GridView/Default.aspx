@@ -13,7 +13,7 @@
     autogeneratecolumns="False"
     emptydatatext="No data available."
     selectMethod="GetCustomers"
-    ItemType="BeforeWebForms.ControlSamples.GridView.Customer"
+    ItemType="SharedSampleObjects.Models.Customer"
     runat="server" DataKeyNames="CustomerID">
       <Columns>
           <asp:BoundField DataField="CustomerID" HeaderText="CustomerID" 
@@ -32,6 +32,12 @@
         <asp:HyperLinkField
           DataTextFormatString="Search for {0}" DataTextField="CompanyName"
           DataNavigateUrlFields="CompanyName, FirstName, LastName" DataNavigateUrlFormatString="https://www.bing.com/search?q={0} {1} {2}" />
+        <asp:CheckBoxField
+          DataField="Active"
+          HeaderText="Checkboxes"
+          ReadOnly="false"
+          Text="This is a checkbox field" />
+
       </Columns>
   </asp:gridview>
 </asp:Content>

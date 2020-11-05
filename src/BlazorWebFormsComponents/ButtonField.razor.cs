@@ -71,17 +71,6 @@ namespace BlazorWebFormsComponents
 			}).GetAwaiter().GetResult();
 
 		}
-
-		private object[] GetDataFields(ItemType item, string dataFieldNames)
-		{
-			var dataFields = dataFieldNames.Split(',').Select(s => s.Trim()).ToList();
-			var fields = new object[dataFields.Count];
-			for (var i = 0; i < dataFields.Count; i++)
-			{
-				fields[i] = DataBinder.GetPropertyValue(item, dataFields[i]);
-			}
-			return fields;
-		}
 	}
 
 	public class GridViewCommandEventArgs {

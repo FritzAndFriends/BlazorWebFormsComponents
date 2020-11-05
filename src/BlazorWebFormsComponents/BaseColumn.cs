@@ -1,5 +1,6 @@
 ﻿using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
+using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
@@ -23,6 +24,17 @@ namespace BlazorWebFormsComponents
 		protected override void OnInitialized()
 		{
 			ParentColumnsCollection.AddColumn(this);
+		}
+
+		protected object[] GetDataFields(ItemType item, string dataFieldNames)
+		{
+			var dataFields = dataFieldNames.Split(',').Select(s => s.Trim()).ToList();
+			var fields = new object[dataFields.Count];
+			for (var i = 0; i < dataFields.Count; i++)
+			{
+				fields[i] = DataBinder.GetPropertyValue(item, dataFields[i]);
+			}
+			return fields;
 		}
 	}
 }
