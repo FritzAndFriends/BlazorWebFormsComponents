@@ -72,20 +72,6 @@ namespace BlazorWebFormsComponents
 
 		}
 
-		public RenderFragment RenderImage()
-		{
-
-			return RenderString("");
-
-		}
-
-		public RenderFragment RenderLink(string text)
-		{
-
-			return RenderString($"");
-
-		}
-
 		private object[] GetDataFields(ItemType item, string dataFieldNames)
 		{
 			var dataFields = dataFieldNames.Split(',').Select(s => s.Trim()).ToList();
