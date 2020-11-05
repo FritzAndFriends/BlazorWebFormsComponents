@@ -4,8 +4,16 @@
 
 @code
 {
-	RenderFragment RenderButton(string text)
-	{
-		return @<text><Button CommandName="@CommandName" CommandArgument="@DataItemIndex">@text</Button></text>;
-	}
+	RenderFragment RenderButton(string text) =>
+	@<text><Button CommandName="@CommandName" CommandArgument="@DataItemIndex" OnCommand="a => OnCommand(this, a.CommandName, a.CommandArgument)">@text</Button></text>;
+
+	RenderFragment RenderImage() =>
+	@<text><ImageButton ImageUrl="@ImageUrl"
+											CommandName="@CommandName"
+											CommandArgument="@DataItemIndex"
+											OnCommand="a => OnCommand(this, a.CommandName, a.CommandArgument)"></ImageButton></text>;
+
+	RenderFragment RenderLink(string text) =>
+	@<text><LinkButton CommandName="@CommandName" CommandArgument="@DataItemIndex" OnCommand="a => OnCommand(this, a.CommandName, a.CommandArgument)">@text</LinkButton></text>;
+
 }

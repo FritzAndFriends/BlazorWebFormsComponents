@@ -1,8 +1,13 @@
 The GridView component is meant to emulate the asp:GridView control in markup and is defined in the [System.Web.UI.WebControls.GridView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.gridview?view=netframework-4.8)
 
 ## Features supported in Blazor
+
 - Readonly grid
-- Bound, Hyperlink, and Template columns
+- Bound, Button, Hyperlink, and Template columns
+
+### Blazor Notes
+
+- The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
 
 ## Web Forms Declarative Syntax
 
