@@ -1,0 +1,31 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<GridView ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<CheckBoxField ItemType="Widget" DataField="InStock" HeaderText="In Stock" />
+			</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	void FirstTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+
+		// Verify no labels were generated
+		cut.FindAll("label").Count().ShouldBe(0);
+
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

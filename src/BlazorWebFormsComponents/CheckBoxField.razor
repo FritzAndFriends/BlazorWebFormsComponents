@@ -5,6 +5,8 @@
 {
 	RenderFragment RenderCheckbox(bool value) =>
 		@<text><input type="checkbox" disabled="disabled" checked="@(value ? "checked" : null )">
-		<label>@Text</label></text>;
+		@if (!string.IsNullOrEmpty(Text)) {
+		<label>@Text</label>
+		}</text>;
 
 }
