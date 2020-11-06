@@ -9,6 +9,9 @@
 			<Columns>
 				<BoundField ItemType="SharedSampleObjects.Models.Widget"
 										DataField="Id" />
+				<BoundField ItemType="SharedSampleObjects.Models.Widget"
+										DataField="Price"
+										DataFormatString="{0:c}" />
 				<ButtonField ItemType="SharedSampleObjects.Models.Widget"
 										 ButtonType="ButtonType.Button"
 										 CommandName="PriceCommand"
@@ -50,8 +53,8 @@
 		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.Write(cut.Markup);
 		var tableHeaders = cut.FindAll("th");
-		tableHeaders[1].TextContent.ShouldBe("Price");
-		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH element");
+		tableHeaders[2].TextContent.ShouldBe("Price");
+		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH element");
 
 		var rows = cut.FindAll("tr");
 		rows.Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
@@ -62,7 +65,9 @@
 		foreach (var r in rows.Where(r => r.InnerHtml.Contains("td")))
 		{
 
-			r.ChildNodes.Count().ShouldBe(2);
+			r.ChildNodes.Count().ShouldBe(3);
+			var thePrice = r.ChildNodes[1].TextContent;
+			r.ChildNodes[2].ChildNodes[0].TextContent.ShouldBe(thePrice);
 
 		}
 

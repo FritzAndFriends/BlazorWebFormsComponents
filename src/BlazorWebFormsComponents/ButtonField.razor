@@ -5,7 +5,7 @@
 @code
 {
 	RenderFragment RenderButton(string text) =>
-	@<text><Button CommandName="@CommandName" CommandArgument="@DataItemIndex" OnCommand="a => OnCommand(this, a.CommandName, a.CommandArgument)">@text</Button></text>;
+	@<text><Button CommandName="@CommandName" CommandArgument="@DataItemIndex" OnCommand="a => OnCommand(this, a.CommandName, a.CommandArgument)" Text="@text"></Button></text>;
 
 	RenderFragment RenderImage() =>
 	@<text><ImageButton ImageUrl="@ImageUrl"
