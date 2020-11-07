@@ -8,6 +8,7 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 ### Blazor Notes
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
+- CommandField not yet supported, and will be implemented after read/write functionality
 
 ## Web Forms Declarative Syntax
 
