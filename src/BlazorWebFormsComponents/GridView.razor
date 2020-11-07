@@ -4,15 +4,21 @@
 @inherits DataBoundComponent<ItemType>
 @if (ColumnList.Any())
 {
+
+	<text>Style: @(ColumnList[0].HeaderStyle.ForeColor)</text>
+
 	<table class="@CssClass">
-		<thead>
-			<tr>
-				@foreach (IColumn<ItemType> column in ColumnList)
-				{
-					<th>@column.HeaderText</th>
-				}
-			</tr>
-		</thead>
+
+		@if (ShowHeader) {
+			<thead>
+				<tr>
+					@foreach (IColumn<ItemType> column in ColumnList)
+					{
+						<th class="@column.HeaderStyle.CssClass" style="@column.HeaderStyle">@column.HeaderText</th>
+					}
+				</tr>
+			</thead>
+		}
 		<tbody>
 			@if (Items != null && Items.Any())
 			{
@@ -35,6 +41,16 @@
 				</tr>
 			}
 		</tbody>
+		@if (ShowFooter) {
+			<tfoot>
+				<tr>
+					@foreach (IColumn<ItemType> column in ColumnList)
+					{
+							<td>@column.FooterText</td>
+					}
+				</tr>
+			</tfoot>
+		}
 	</table>
 }
 

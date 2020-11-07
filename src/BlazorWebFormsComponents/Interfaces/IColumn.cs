@@ -7,10 +7,26 @@ namespace BlazorWebFormsComponents.Interfaces
 	/// </summary>
 	public interface IColumn<ItemType>
 	{
+
+		/// <summary>
+		/// The footer text of the column
+		/// </summary>
+		string FooterText { get; set; }
+
+		/// <summary>
+		/// The style to apply to the Footer of the column
+		/// </summary>
+		TableItemStyle FooterStyle { get; set; }
+
 		/// <summary>
 		/// The header text of the column
 		/// </summary>
 		string HeaderText { get; set; }
+
+		/// <summary>
+		/// The style to apply to the Header of the column
+		/// </summary>
+		TableItemStyle HeaderStyle { get; set; }
 
 		/// <summary>
 		/// The parent IColumnCollection where the IColumn resides

@@ -11,10 +11,16 @@
 					SelectMethod="Customer.GetCustomers"
 					EmptyDataText="No data available">
 	<Columns>
-		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID">
+	<ChildContent>
+			<BlazorWebFormsComponents.HeaderStyle ForeColor="@WebColor.Blue" />
+	</ChildContent>
+		</BoundField>
 		<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="CompanyName" />
 		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="FirstName"/>
-		<BoundField ItemType="Customer" DataField="LastName" HeaderText="LastName"/>
+		<BoundField ItemType="Customer" DataField="LastName" HeaderText="LastName">
+			<HeaderStyle ForeColor="@WebColor.Red" />
+		</BoundField>
 		<TemplateField ItemType="Customer">
 			<ItemTemplate Context="Item">
 				<button type="button">Click Me! @Item.FirstName</button>

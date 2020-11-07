@@ -43,6 +43,16 @@ namespace BlazorWebFormsComponents
 		///<inheritdoc/>
 		public List<IRow<ItemType>> RowList { get; set; } = new List<IRow<ItemType>>();
 
+		/// <summary>
+		/// Gets or sets a value indicating whether the footer row is displayed
+		/// </summary>
+		public bool ShowFooter { get; set; } = false;
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the header row is displayed
+		/// </summary>
+		public bool ShowHeader { get; set; } = true;
+
 		#region Templates
 		/// <summary>
 		/// The columns template of the GridView

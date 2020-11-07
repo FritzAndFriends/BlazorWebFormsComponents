@@ -11,7 +11,16 @@ namespace BlazorWebFormsComponents
 		public IColumnCollection<ItemType> ParentColumnsCollection { get; set; }
 
 		///<inheritdoc/>
+		[Parameter] public string FooterText { get; set; }
+
+		///<inheritdoc/>
+		[CascadingParameter(Name="FooterStyle")] public TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
+
+		///<inheritdoc/>
 		[Parameter] public string HeaderText { get; set; }
+
+		///<inheritdoc/>
+		[CascadingParameter(Name="HeaderStyle")] public TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
 
 		public void Dispose()
 		{
