@@ -1,0 +1,10 @@
+@typeparam ItemType
+@inherits BaseColumn<ItemType>
+
+@code
+{
+	RenderFragment RenderImage(string altText, string imageUrl)
+	{
+		return @<text><Image ImageUrl="@imageUrl" AlternateText="@altText"></Image></text>;
+	}
+}

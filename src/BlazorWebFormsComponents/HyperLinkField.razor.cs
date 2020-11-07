@@ -5,7 +5,7 @@ using System.Linq;
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
-	/// Bounds an object's property to a column by its property name 
+	/// Bounds an object's property to a column by its property name
 	/// </summary>
 	public partial class HyperLinkField<ItemType> : BaseColumn<ItemType>
 	{
@@ -67,15 +67,15 @@ namespace BlazorWebFormsComponents
 			return RenderAnchor(text, url, target);
 		}
 
-		private object[] GetDataFields(ItemType item, string dataFieldNames)
-		{
-			var dataFields = dataFieldNames.Split(',').Select(s => s.Trim()).ToList();
-			var fields = new object[dataFields.Count];
-			for (var i = 0; i < dataFields.Count; i++)
-			{
-				fields[i] = DataBinder.GetPropertyValue(item, dataFields[i]);
-			}
-			return fields;
-		}
+		// private object[] GetDataFields(ItemType item, string dataFieldNames)
+		// {
+		// 	var dataFields = dataFieldNames.Split(',').Select(s => s.Trim()).ToList();
+		// 	var fields = new object[dataFields.Count];
+		// 	for (var i = 0; i < dataFields.Count; i++)
+		// 	{
+		// 		fields[i] = DataBinder.GetPropertyValue(item, dataFields[i]);
+		// 	}
+		// 	return fields;
+		// }
 	}
 }

@@ -1,0 +1,42 @@
+﻿@inherits TestComponentBase
+
+<Fixture Test="FirstTest">
+	<ComponentUnderTest>
+		<GridView ItemType="ImageRecord"
+							AutoGenerateColumns="false"
+							SelectMethod="GetImages">
+			<Columns>
+				<ImageField ItemType="ImageRecord" DataImageUrlField="Url" DataAlternateTextField="AltText" HeaderText="Image" />
+			</Columns>
+		</GridView>
+	</ComponentUnderTest>
+</Fixture>
+
+
+@code {
+	void FirstTest(Fixture fixture)
+	{
+		var cut = fixture.GetComponentUnderTest();
+
+		// Check first data row to see that it bound stuff correctly.
+		var img = cut.Find("img");
+		img.GetAttribute("src").ShouldBe("https://bing.com");
+		img.GetAttribute("alt").ShouldBe("Bing");
+
+	}
+
+	IQueryable<ImageRecord> GetImages(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = 2;
+		return new ImageRecord[] {
+			new ImageRecord { Url="https://bing.com", AltText="Bing"},
+			new ImageRecord { Url=null, AltText=null}
+		}.AsQueryable();
+	}
+
+	public class ImageRecord {
+		public string Url { get; set; }
+
+		public string AltText { get; set; }
+	}
+}

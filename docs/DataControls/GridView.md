@@ -3,7 +3,7 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 ## Features supported in Blazor
 
 - Readonly grid
-- Bound, Button, Checkbox, Hyperlink, and Template columns
+- Bound, Button, Checkbox, Hyperlink, Image, and Template columns
 
 ### Blazor Notes
 
