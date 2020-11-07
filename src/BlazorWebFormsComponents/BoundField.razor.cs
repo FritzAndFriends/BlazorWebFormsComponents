@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Globalization;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
-	/// Binds an object's property to a column by its property name 
+	/// Binds an object's property to a column by its property name
 	/// </summary>
 	public partial class BoundField<ItemType> : BaseColumn<ItemType>
 	{
@@ -29,7 +30,8 @@ namespace BlazorWebFormsComponents
 			}
 			if (DataFormatString != null)
 			{
-				return RenderString(string.Format(DataFormatString, obj?.ToString()));
+				var outString = string.Format(DataFormatString, obj ?? "");
+				return RenderString(outString);
 			}
 			else
 			{
