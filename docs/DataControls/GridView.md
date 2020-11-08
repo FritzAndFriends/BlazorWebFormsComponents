@@ -4,6 +4,7 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 
 - Readonly grid
 - Bound, Button, Checkbox, Hyperlink, Image, and Template columns
+- Header and Footer text content of each column
 
 ### Blazor Notes
 
