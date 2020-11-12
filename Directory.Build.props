@@ -8,8 +8,8 @@
   </ItemGroup>
 
 	<PropertyGroup>
-		<BlazorWebAssemblyVersion>5.0.0-rc.2.*</BlazorWebAssemblyVersion>
-		<AspNetCoreVersion>5.0.0-rc.2.*</AspNetCoreVersion>
+		<BlazorWebAssemblyVersion>5.0.0</BlazorWebAssemblyVersion>
+		<AspNetCoreVersion>5.0.0</AspNetCoreVersion>
 	</PropertyGroup>
 
 </Project>
