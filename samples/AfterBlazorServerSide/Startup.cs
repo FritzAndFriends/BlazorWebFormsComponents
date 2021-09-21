@@ -1,61 +1,39 @@
+using AfterBlazorServerSide;
 using BlazorWebFormsComponents;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
 
-namespace AfterBlazorServerSide
+var builder = WebApplication.CreateBuilder(args);
+
+var services = builder.Services;
+
+services.AddRazorPages();
+services.AddServerSideBlazor();
+services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
+	app.UseDeveloperExceptionPage();
+}
+else
+{
+	app.UseExceptionHandler("/Error");
+	app.UseHsts();
+}
 
-		public IConfiguration Configuration { get; }
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-		public static string ApplicationName => "Blazor Server-Side";
+app.UseRouting();
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddRazorPages();
-			services.AddServerSideBlazor();
-			services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
-		}
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
-			else
-			{
-				app.UseExceptionHandler("/Error");
-				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-				app.UseHsts();
-			}
+await app.RunAsync();
 
-			app.UseHttpsRedirection();
-			app.UseStaticFiles();
-
-			app.UseRouting();
-
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapBlazorHub();
-				endpoints.MapFallbackToPage("/_Host");
-			});
-		}
-
-		public static Version ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
-
-	}
+class AppStatics
+{
+	public static string ApplicationName => "Blazor Server-Side";
+	public static Version ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
 }
