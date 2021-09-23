@@ -32,7 +32,7 @@ app.MapFallbackToPage("/_Host");
 
 await app.RunAsync();
 
-class AppStatics
+partial class Program
 {
 	public static string ApplicationName => "Blazor Server-Side";
 	public static Version ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
