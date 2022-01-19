@@ -41,10 +41,10 @@
 		foreach (var r in rows.Where(r => r.InnerHtml.Contains("td")))
 		{
 
-			r.ChildNodes.Count().ShouldBe(2);
+			r.Children.Count().ShouldBe(2);
 
-			var widgetId = (r.ChildNodes[0] as AngleSharp.Dom.IElement).InnerHtml;
-			var aTag = (r.ChildNodes[1] as AngleSharp.Dom.IElement).FirstChild as AngleSharp.Dom.IElement;
+			var widgetId = (r.Children[0] as AngleSharp.Dom.IElement).InnerHtml.Trim();
+			var aTag = (r.Children[1] as AngleSharp.Dom.IElement).Children[0] as AngleSharp.Dom.IElement;
 			aTag.ShouldNotBeNull();
 			aTag.TagName.ShouldBe("a", StringCompareShould.IgnoreCase);
 			aTag.GetAttribute("href").ShouldBe($"~\\details.aspx?WidgetId={widgetId}");

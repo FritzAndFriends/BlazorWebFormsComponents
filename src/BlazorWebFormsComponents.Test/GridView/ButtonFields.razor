@@ -62,7 +62,7 @@
 		foreach (var r in rows.Where(r => r.InnerHtml.Contains("td")))
 		{
 
-			r.ChildNodes.Count().ShouldBe(2);
+			r.Children.Count().ShouldBe(2);
 
 		}
 
