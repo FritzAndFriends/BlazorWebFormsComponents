@@ -10,7 +10,7 @@
 			builder.AddMultipleAttributes(1, new Dictionary<string, object> {
 				{ "type", "image" }, { "src", ImageUrl }, { "alt", AlternateText }, { "longdesc", DescriptionUrl }, { "style", Style }, { "class", CssClass }
 			});
-			builder.AddAttribute(2, "onclick", OnClick);
+			builder.AddAttribute(2, "onclick", new Action(() => Click()));
 
 			if(!Enabled)
 			{

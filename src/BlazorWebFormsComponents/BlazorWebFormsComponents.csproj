@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
 		<LangVersion>8.0</LangVersion>
 	  <DocumentationFile>BlazorWebFormsComponents.xml</DocumentationFile>
@@ -12,7 +12,7 @@
 		<PackageId>Fritz.BlazorWebFormsComponents</PackageId>
 		<Authors>Jeffrey T. Fritz</Authors>
 		<Description>A collection of Blazor components based on the default controls that ship with ASP.NET Web Forms</Description>
-		<Copyright>Copyright Jeffrey T. Fritz 2019,2020</Copyright>
+		<Copyright>Copyright Jeffrey T. Fritz 2019-2022</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</PackageProjectUrl>
 		<PackageTags>blazor</PackageTags>
