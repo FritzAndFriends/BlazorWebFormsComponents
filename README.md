@@ -24,16 +24,36 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
   - Editor Controls
     - [AdRotator](docs/EditorControls/AdRotator.md)
+    - BulletedList
     - [Button](docs/EditorControls/Button.md)
+    - Calendar
+    - CheckBox
+    - CheckBoxList
+    - DropDownList
+    - FileUpload
     - [HiddenField](docs/EditorControls/HiddenField.md)
     - [HyperLink](docs/EditorControls/HyperLink.md)
     - [Image](docs/EditorControls/Image.md)
     - [ImageButton](docs/EditorControls/ImageButton.md)
+    - ImageMap
     - [Label](docs/EditorControls/Label.md)
     - [LinkButton](docs/EditorControls/LinkButton.md)
+    - ListBox
     - [Literal](docs/EditorControls/Literal.md)
+    - Localize
+    - MultiView
+    - Panel
+    - PlaceHolder
+    - RadioButton
+    - RadioButtonList
+    - Substitution
+    - Table
+    - TextBox
+    - View
+    - Xml
   - Data Controls
     - Chart(?)
+    - DataGrid
     - [DataList](docs/DataControls/DataList.md)
     - DataPager
     - DetailsView
@@ -42,9 +62,9 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [ListView](docs/DataControls/ListView.md)
     - [Repeater](docs/DataControls/Repeater.md)
   - Validation Controls
-    - CompareValidator
+    - [CompareValidator](docs/ValidationControls/CompareValidator.md)
     - [CustomValidator](docs/ValidationControls/CustomValidator.md)
-    - RangeValidator
+    - [RangeValidator](docs/ValidationControls/RangeValidator.md)
     - [RegularExpressionValidator](docs/ValidationControls/RegularExpressionValidator.md)
     - [RequiredFieldValidator](docs/ValidationControls/RequiredFieldValidator.md)
     - [ValidationSummary](docs/ValidationControls/ValidationSummary.md)
@@ -54,13 +74,14 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
     - ChangePassword
-    - Login
-    - LoginName
-    - LoginStatus
-    - LoginView
+    - CreateUserWizard
+    - [Login](docs/LoginControls/Login.md)
+    - [LoginName](docs/LoginControls/LoginName.md)
+    - [LoginStatus](docs/LoginControls/LoginStatus.md)
+    - [LoginView](docs/LoginControls/LoginView.md)
     - PasswordRecovery
 
-We will NOT be converting any DataSource objects, Wizard components, skins or themes.  Once this first collection of 23 controls is written, we can consider additional features like modern tag formatting.
+We will NOT be converting any DataSource objects (SqlDataSource, ObjectDataSource, EntityDataSource, LinqDataSource, XmlDataSource, SiteMapDataSource, AccessDataSource), Wizard components, skins or themes.  Once this first collection of controls is written, we can consider additional features like modern tag formatting.
 
 ## Utility Features
 

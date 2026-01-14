@@ -79,12 +79,19 @@ nav:
     - ListView: DataControls/ListView.md
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
+    - CompareValidator: ValidationControls/CompareValidator.md
     - CustomValidator: ValidationControls/CustomValidator.md
+    - RangeValidator: ValidationControls/RangeValidator.md
     - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md
     - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md
     - ValidationSummary: ValidationControls/ValidationSummary.md
   - Navigation Controls:
     - TreeView: NavigationControls/TreeView.md
+  - Login Controls:
+    - Login: LoginControls/Login.md
+    - LoginName: LoginControls/LoginName.md
+    - LoginStatus: LoginControls/LoginStatus.md
+    - LoginView: LoginControls/LoginView.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
