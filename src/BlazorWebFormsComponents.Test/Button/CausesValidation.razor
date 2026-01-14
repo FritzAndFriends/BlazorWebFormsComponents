@@ -1,39 +1,40 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="ButtonDoesValidate">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="@HandleSubmit">
-
-			<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
-			<RangeValidator ControlToValidate="@Value"
-											Type="Integer"
-											MinimumValue="0"
-											MaximumValue="10"
-											Text="Invalid"
-											ErrorMessage="ErrorMessage!" />
-
-			<Button>Submit</Button>
-
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
 	ForwardRef<InputBase<string>> Value = new ForwardRef<InputBase<string>>();
 
-
 	private ExampleModel exampleModel = new ExampleModel();
 	private bool _SubmitHandled = false;
 
+	private void HandleSubmit()
+	{
+		_SubmitHandled = true;
+	}
 
-	void ButtonDoesValidate(Fixture fixture)
+	public class ExampleModel
+	{
+		public string Value { get; set; }
+	}
+
+	[Fact]
+	public void Button_CausesValidationTrue_RendersSubmitType()
 	{
 		// Arrange
-		var cut = fixture.GetComponentUnderTest();
+		exampleModel = new ExampleModel();
 		_SubmitHandled = false;
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="@HandleSubmit">
+				<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
+				<RangeValidator ControlToValidate="@Value"
+								Type="Integer"
+								MinimumValue="0"
+								MaximumValue="10"
+								Text="Invalid"
+								ErrorMessage="ErrorMessage!" />
+				<Button>Submit</Button>
+			</EditForm>
+		);
 
 		// Act
 		cut.Find("input").Change("100");
@@ -41,18 +42,6 @@
 
 		// Assert
 		typeAttribute.ShouldBe("submit");
-
-	}
-
-	private void HandleSubmit()
-	{
-		_SubmitHandled = true;
-	}
-
-
-	public class ExampleModel
-	{
-		public string Value { get; set; }
 	}
 
 }

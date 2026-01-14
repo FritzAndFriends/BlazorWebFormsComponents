@@ -1,30 +1,18 @@
-﻿@inherits TestComponentBase
+﻿@using Bunit
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<LinkButton OnClick="OnClick">Click me!</LinkButton>
-	</ComponentUnderTest>
-</Fixture>
-
-@code{
-	public string TheContent { get; set; } = "Not clicked yet!";
-
-	void OnClick()
-	{
-		TheContent = "I've been clicked";
-	}
-
-	void FirstTest(Fixture fixture)
-	{
-		// Given
-		var cut = fixture.GetComponentUnderTest();
-
-		TheContent.ShouldBe("Not clicked yet!");
-
-		// When
-		cut.Find("a").Click();
-
-		// Then
-		TheContent.ShouldBe("I've been clicked");
-	}
+@code {
+    [Fact]
+    public void Click_ChangesContent()
+    {
+        using var ctx = new Bunit.TestContext();
+        var theContent = "Not clicked yet!";
+        void OnClick() => theContent = "I've been clicked";
+        var cut = ctx.RenderComponent<LinkButton>(parameters => parameters
+            .Add(p => p.OnClick, EventCallback.Factory.Create(this, OnClick))
+            .AddChildContent("Click me!"));
+        theContent.ShouldBe("Not clicked yet!");
+        cut.Find("a").Click();
+        theContent.ShouldBe("I've been clicked");
+    }
 }
+

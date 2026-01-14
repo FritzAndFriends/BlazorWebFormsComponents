@@ -1,33 +1,21 @@
-﻿@inherits TestComponentBase
+﻿@using Bunit
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<LinkButton CommandName="Foo" CommandArgument="CommandArgument" OnCommand="OnCommand">Click me!</LinkButton>
-	</ComponentUnderTest>
-</Fixture>
-
-@code{
-	public string TheContent { get; set; } = "No Command yet!";
-
-	public string CommandArgument = "bar";
-
-	void OnCommand(CommandEventArgs args)
-	{
-		TheContent = $"Command '{args.CommandName}' : '{args.CommandArgument.ToString()}'";
-	}
-
-	void FirstTest(Fixture fixture)
-	{
-		// Given
-		var cut = fixture.GetComponentUnderTest();
-
-		TheContent.ShouldBe("No Command yet!");
-
-		// When
-		cut.Find("a").Click();
-
-		// Then
-		TheContent.ShouldBe("Command 'Foo' : 'bar'");
-
-	}
+@code {
+    [Fact]
+    public void Command_ChangesContent()
+    {
+        using var ctx = new Bunit.TestContext();
+        var theContent = "No Command yet!";
+        var commandArgument = "bar";
+        void OnCommand(CommandEventArgs args) => theContent = $"Command '{args.CommandName}' : '{args.CommandArgument.ToString()}";
+        var cut = ctx.RenderComponent<LinkButton>(parameters => parameters
+            .Add(p => p.CommandName, "Foo")
+            .Add(p => p.CommandArgument, commandArgument)
+            .Add(p => p.OnCommand, EventCallback.Factory.Create<CommandEventArgs>(this, OnCommand))
+            .AddChildContent("Click me!"));
+        theContent.ShouldBe("No Command yet!");
+        cut.Find("a").Click();
+        theContent.ShouldBe("Command 'Foo' : 'bar'");
+    }
 }
+

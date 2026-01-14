@@ -1,30 +1,20 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="RotateTest">
-	<ComponentUnderTest>
-		<AdRotator AdvertisementFile="Ads2.xml" Target="_blank"></AdRotator>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="RotateTestWithCustomFieldsAttributes">
-	<ComponentUnderTest>
-		<AdRotator AdvertisementFile="Ads4.xml" AlternateTextField="Alt" ImageUrlField="Image" NavigateUrlField="Url" Target="_blank"></AdRotator>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
-	void RotateTest(Fixture fixture)
+	[Fact]
+	public void AdRotator_Rotate_ShowsRandomAd()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<AdRotator AdvertisementFile="Ads2.xml" Target="_blank" />);
 		var img = cut.Find("img");
 		var alternateText = img.Attributes["alt"].Value;
 
 		Assert.Contains(alternateText, new[] { "CSharp", "Visual Basic", "VB" });
 	}
 
-	void RotateTestWithCustomFieldsAttributes(Fixture fixture)
+	[Fact]
+	public void AdRotator_Rotate_WithCustomFieldsAttributes()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<AdRotator AdvertisementFile="Ads4.xml" AlternateTextField="Alt" ImageUrlField="Image" NavigateUrlField="Url" Target="_blank" />);
 		var anchor = cut.Find("a");
 		var img = cut.Find("img");
 		var alternatText = img.Attributes["alt"].Value;

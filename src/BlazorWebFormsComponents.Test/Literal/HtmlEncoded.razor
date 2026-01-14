@@ -1,14 +1,10 @@
-﻿@inherits TestComponentBase
+@inherits BunitContext
 
-@{
-		var renderedText = "<b>This is encoded text</b>";
+@code {
+[Fact]
+public void Literal_EncodesHtmlByDefault()
+{
+var cut = Render(@<Literal Text="<b>This is encoded text</b>" />);
+cut.MarkupMatches(@<text>&lt;b&gt;This is encoded text&lt;/b&gt;</text>);
 }
-
-<SnapshotTest Description="Verify HTML format of Literal is encoded">
-	<TestInput>
-		<Literal Text="<b>This is encoded text</b>" />
-	</TestInput>
-	<ExpectedOutput>
-		@((MarkupString)renderedText)
-	</ExpectedOutput>
-</SnapshotTest>
+}

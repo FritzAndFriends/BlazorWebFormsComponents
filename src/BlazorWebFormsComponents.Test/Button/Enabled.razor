@@ -1,27 +1,19 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="ButtonEnabled">
-	<ComponentUnderTest>
-		<Button Enabled="false">This is not an enabled button</Button>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
-	void ButtonEnabled(Fixture fixture)
+	[Fact]
+	public void Button_Disabled_HasDisabledAttributeAndCssClass()
 	{
-		// Given
-		var cut = fixture.GetComponentUnderTest();
+		// Arrange
+		var cut = Render(@<Button Enabled="false">This is not an enabled button</Button>);
 
-		// When
+		// Act
 		var theButton = cut.Find("button");
 
-		// Then
+		// Assert
 		theButton.ClassList.Contains("aspNetDisabled").ShouldBeTrue("Did not assign the aspNetDisabled CSS class to a disabled button");
 		theButton.GetAttribute("disabled").ShouldBe("disabled", "Did not assigned the disabled attribute properly");
-
 	}
 
 }

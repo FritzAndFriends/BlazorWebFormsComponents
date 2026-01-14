@@ -1,22 +1,18 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<GridView ItemType="Widget"
-							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
-			<Columns>
-				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
-				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
-				<TemplateField ItemType="Widget" HeaderText="Name">
-					<ItemTemplate Context="Item">
-						<input type="text" @bind="@Item.Name" />
-					</ItemTemplate>
-				</TemplateField>
-			</Columns>
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
+<GridView ItemType="Widget"
+        AutoGenerateColumns="false"
+        SelectMethod="GetWidgets">
+    <Columns>
+        <BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+        <BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+        <TemplateField ItemType="Widget" HeaderText="Name">
+            <ItemTemplate Context="Item">
+                <input type="text" @bind="@Item.Name" />
+            </ItemTemplate>
+        </TemplateField>
+    </Columns>
+</GridView>
 
 
 @code {

@@ -1,18 +1,12 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using BlazorWebFormsComponents
 
-<Fixture Test="ImageButton_Style">
-	<ComponentUnderTest>
-		<ImageButton ImageUrl="/img/VB.png" AlternateText="Blue Button" BackColor="Blue" ForeColor="White" />
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void ImageButton_Style(Fixture fixture)
+	[Fact]
+	public void ImageButton_Style_RendersBackColorAndForeColor()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ImageButton ImageUrl="/img/VB.png" AlternateText="Blue Button" BackColor="Blue" ForeColor="White" />);
 
 		cut.Find("input").HasAttribute("style").ShouldBeTrue();
 		var style = cut.Find("input").GetAttribute("style");
@@ -20,6 +14,5 @@
 		style.ShouldNotBeNull();
 		style.ShouldContain("background-color:Blue");
 		style.ShouldContain("color:White");
-
 	}
 }

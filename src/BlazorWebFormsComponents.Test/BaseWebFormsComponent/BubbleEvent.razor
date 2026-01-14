@@ -1,19 +1,14 @@
-@inherits TestComponentBase
+@inherits BunitContext
 
-<Fixture
-	Test="FirstTest"
->
-<ComponentUnderTest>
-	<TestBubbleComponent></TestBubbleComponent>
-</ComponentUnderTest>
-</Fixture>
+
 
 @code {
 
 
-void FirstTest(Fixture fixture) {
+[Fact]
+public void TestBubbleComponent_EventRaised_EventIsHandled() {
 
-	var cut = fixture.GetComponentUnderTest<TestBubbleComponent>();
+	var cut = Render(@<TestBubbleComponent />);
 	cut.Find("button").Click();
 
 	cut.Instance.EventRaised.Count().ShouldBe(1);

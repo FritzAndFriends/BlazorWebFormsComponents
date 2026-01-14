@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the migration plan for upgrading the BlazorWebFormsComponents test project from **bUnit 1.0.0-beta-10** (deprecated) to **bUnit 2.5.x** (current stable).
+This document outlines the migration plan for upgrading the BlazorWebFormsComponents test project from **bUnit 1.0.0-beta-10** (deprecated) to **bUnit 2.5.3** (current stable).
 
 ### Why This Migration is Required
 
@@ -29,107 +29,584 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 - ✅ Package restore successful
 - ⚠️ Build shows 412 errors (expected - test files need migration)
 
----
+### Stream A Progress (This Session)
+- ✅ Button/Click.razor - migrated
+- ✅ Button/Command.razor - migrated
+- ✅ Button/Enabled.razor - migrated
+- ✅ Button/Format.razor - migrated
+- ✅ Button/Style.razor - migrated
+- ✅ Button/Tooltip.razor - migrated (2 tests)
+- ✅ Button/Visible.razor - migrated
+- ✅ Button/CausesValidation.razor - migrated
+- ✅ Button/CausesValidationFalse.razor - migrated
+- ✅ HiddenField/Format.razor - migrated
+- ✅ HiddenField/ValueChanged.razor - migrated
+- ✅ HyperLink/Format.razor - migrated
+- ✅ HyperLink/Style.razor - migrated (3 tests)
 
-## Migration Scope
+**Stream A Status**: ✅ **COMPLETE** - 13 files, 16 tests migrated
+**Build Errors**: 412 → 389 (23 errors resolved)
 
-### Files Requiring Migration
+### Stream B Progress (Copilot CLI - Partial)
+**Image folder:**
+- ✅ Image/GenerateEmptyAlternateText.razor - migrated (4 tests)
+- ✅ Image/ImageAlign.razor - migrated (10 tests)
+- ✅ Image/ToolTip.razor - migrated
+- ✅ Image/Visible.razor - migrated (2 tests)
 
-| Category | Count | Complexity |
-|----------|-------|------------|
-| Test .razor files | **198** | Medium |
-| _Imports.razor | 1 | Low |
-| .csproj | 1 | Low |
-| copilot-instructions.md | 1 | Low |
-| **Total** | **201** | |
+**Literal folder:**
+- ✅ Literal/BasicFormat.razor - migrated
+- ✅ Literal/HtmlEncoded.razor - migrated
+- ✅ Literal/HtmlNotEncoded.razor - migrated
 
-### Test Files by Component
+**LinkButton folder:**
+- ✅ LinkButton/Click.razor - migrated
+- ✅ LinkButton/Command.razor - migrated
+- ✅ LinkButton/Format.razor - migrated
 
-| Component | File Count |
-|-----------|------------|
-| AdRotator | 6 |
-| BaseWebFormsComponent | 4 |
-| Button | 9 |
-| DataBinder | 4 |
-| DataList (FlowLayout) | 18 |
-| DataList (TableLayout) | 23 |
-| DataList (other) | 1 |
-| FormView | 5 |
-| GridView | 9 |
-| HiddenField | 2 |
-| HyperLink | 2 |
-| Image | 4 |
-| ImageButton | 6 |
-| LinkButton | 3 |
-| ListView | 9 |
-| Literal | 3 |
-| LoginControls | 24 |
-| Repeater | 5 |
-| TreeView | 15 |
-| Validations | 33 |
-| ViewState | 1 |
+**Stream B Status**: ✅ **COMPLETE** - 10 files, 22 tests migrated
+**Build Errors**: 389 → 353 (36 errors resolved)
 
----
+### Stream C Progress (VS Code Copilot Edits)
+**ImageButton folder:**
+- ✅ ImageButton/Click.razor - migrated (1 test)
+- ✅ ImageButton/Enabled.razor - migrated (2 tests)
+- ✅ ImageButton/ImageAlign.razor - migrated (10 tests)
+- ✅ ImageButton/Style.razor - migrated (1 test)
+- ✅ ImageButton/ToolTip.razor - migrated (2 tests)
+- ✅ ImageButton/Visible.razor - migrated (2 tests)
 
-## Phase 1: Package and Configuration Updates
+**AdRotator folder:**
+- ✅ AdRotator/AdCreated.razor - migrated (1 test)
+- ✅ AdRotator/Format.razor - migrated (1 test)
+- ✅ AdRotator/KeywordFilter.razor - migrated (1 test)
+- ✅ AdRotator/NoAds.razor - migrated (1 test)
+- ✅ AdRotator/Rotate.razor - migrated (2 tests)
+- ✅ AdRotator/Style.razor - migrated (1 test)
 
-### 1.1 Update BlazorWebFormsComponents.Test.csproj
-
-**Current:**
-```xml
-<PackageReference Include="bunit" Version="1.0.0-beta-10" />
-```
-
-**Updated:**
-```xml
-<PackageReference Include="bunit" Version="2.5.3" />
-```
-
-### 1.2 Update _Imports.razor
-
-**Current:**
-```razor
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.Extensions.DependencyInjection
-@using Bunit
-@using Shouldly
-@using SharedSampleObjects.Models
-@using BlazorWebFormsComponents
-@using BlazorWebFormsComponents.Validations
-@using Xunit
-@using static BlazorWebFormsComponents.Enums.ValidationSummaryDisplayMode
-@using static BlazorWebFormsComponents.Enums.ValidationCompareOperator
-@using static BlazorWebFormsComponents.Enums.ValidationDataType
-```
-
-**Updated:**
-```razor
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.Extensions.DependencyInjection
-@using AngleSharp.Dom
-@using Bunit
-@using Bunit.TestDoubles
-@using Shouldly
-@using SharedSampleObjects.Models
-@using BlazorWebFormsComponents
-@using BlazorWebFormsComponents.Validations
-@using Xunit
-@using static BlazorWebFormsComponents.Enums.ValidationSummaryDisplayMode
-@using static BlazorWebFormsComponents.Enums.ValidationCompareOperator
-@using static BlazorWebFormsComponents.Enums.ValidationDataType
-```
-
-**Changes:**
-- Add `@using AngleSharp.Dom` (for DOM element types)
-- Add `@using Bunit.TestDoubles` (for fake services)
+**Stream C Status**: ✅ **COMPLETE** - 12 files, 25 tests migrated
+**Build Errors**: 353 → 321 (32 errors resolved)
 
 ---
 
-## Phase 2: Test File Migration Pattern
+## Parallel Execution Strategy
 
-### Old Pattern (bUnit beta)
+This migration supports **concurrent work streams** using multiple GitHub Copilot interfaces.
+
+### Work Distribution
+
+| Tool | Components Assigned | Files | Parallel Stream |
+|------|---------------------|-------|-----------------|
+| **VS Code Copilot Chat** (this session) | Button, HiddenField, HyperLink | 13 | Stream A |
+| **Copilot CLI** (Terminal 1) | Image, Literal, LinkButton | 10 | Stream B |
+| **VS Code Copilot Edits** | ImageButton, AdRotator | 12 | Stream C |
+| **Copilot CLI** (Terminal 2) | BaseWebFormsComponent, Repeater, FormView, ViewState | 15 | Stream D |
+| **New VS Code Chat** | DataList FlowLayout | 18 | Stream E |
+| **New VS Code Chat** | DataList TableLayout | 23 | Stream F |
+| **Copilot CLI** (Terminal 3) | ListView, GridView | 18 | Stream G |
+| **New VS Code Chat** | TreeView | 15 | Stream H |
+| **Copilot CLI** (Terminal 4) | All Validations | 33 | Stream I |
+| **New VS Code Chat** | All LoginControls | 27 | Stream J |
+| **Copilot CLI** (Terminal 5) | DataBinder | 4 | Stream K |
+
+### CLI Commands for Parallel Terminals
+
+**IMPORTANT FOR COPILOT CLI:**
+- Do NOT use `glob` or wildcard patterns - they don't work correctly on Windows
+- Use `Get-ChildItem` or explicit file paths instead
+- Read each file individually using `Get-Content` or VS Code's file reading
+- After completing migrations, update this document's progress section
+
+Launch these in separate PowerShell windows:
+
+**Terminal 1 - Stream B (Image, Literal, LinkButton - 10 files):**
+```powershell
+cd d:\BlazorWebFormsComponents
+```
+
+Then use GitHub Copilot Chat in VS Code with this prompt:
+```
+I need you to migrate bUnit tests to version 2.x for Stream B.
+
+TASK: Edit these specific files in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\:
+- Image/GenerateEmptyAlternateText.razor
+- Image/ImageAlign.razor
+- Image/ToolTip.razor
+- Image/Visible.razor
+- Literal/BasicFormat.razor
+- Literal/HtmlEncoded.razor
+- Literal/HtmlNotEncoded.razor
+- LinkButton/Click.razor
+- LinkButton/Command.razor
+- LinkButton/Format.razor
+
+TRANSFORMATION RULES:
+1. Change @inherits TestComponentBase to @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrapper elements entirely
+3. Remove <SnapshotTest> elements and convert to [Fact] methods using MarkupMatches()
+4. Change void MethodName(Fixture fixture) to [Fact] public void MethodName()
+5. Replace fixture.GetComponentUnderTest() with Render(@<Component />)
+6. Use test names like: ComponentName_Scenario_ExpectedResult
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md Stream B progress section.
+```
+
+**Terminal 2 - Stream D (BaseWebFormsComponent, Repeater, FormView, ViewState - 15 files):**
+```powershell
+cd d:\BlazorWebFormsComponents
+```
+
+Use this prompt in VS Code Copilot Chat:
+```
+I need you to migrate bUnit tests to version 2.x for Stream D.
+
+TASK: Edit these specific files in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\:
+
+BaseWebFormsComponent folder:
+- BubbleEvent.razor
+- Controls.razor
+- Parent.razor
+(Skip TestBubbleComponent.razor - it's a helper component, not a test)
+
+Repeater folder:
+- AlternatingItemTemplate.razor
+- Empty.razor
+- HeaderAndFooter.razor
+- SimpleList.razor
+- Visible.razor
+
+FormView folder:
+- Delete.razor
+- Edit.razor
+- Insert.razor
+- Simple.razor
+- Update.razor
+
+ViewState folder:
+- SimpleRepeater.razor
+
+TRANSFORMATION RULES:
+1. Change @inherits TestComponentBase to @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrapper elements entirely
+3. Change void MethodName(Fixture fixture) to [Fact] public void MethodName()
+4. Replace fixture.GetComponentUnderTest() with Render(@<Component />)
+5. Use test names like: ComponentName_Scenario_ExpectedResult
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md Stream D progress section.
+```
+
+**Terminal 3 - Stream G (ListView, GridView - 18 files):**
+```powershell
+cd d:\BlazorWebFormsComponents
+```
+
+Use this prompt in VS Code Copilot Chat:
+```
+I need you to migrate bUnit tests to version 2.x for Stream G.
+
+TASK: Edit these specific files in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\:
+
+ListView folder:
+- AlternatingTemplate.razor
+- DataBindingEvents.razor
+- Grouping6x5.razor
+- Grouping7x3.razor
+- Grouping8x2.razor
+- Layout.razor
+- SelectMethod.razor
+- SimpleList.razor
+- WebFormsEvents.razor
+
+GridView folder:
+- BindAttribute.razor
+- ButtonFields.razor
+- ButtonFields_Image.razor
+- ButtonFields_Link.razor
+- DataBoundFields.razor
+- DataTableSupport.razor
+- EmptyDataText.razor
+- HyperlinkFields.razor
+- TemplateFields.razor
+
+TRANSFORMATION RULES:
+1. Change @inherits TestComponentBase to @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrapper elements entirely
+3. Change void MethodName(Fixture fixture) to [Fact] public void MethodName()
+4. Replace fixture.GetComponentUnderTest() with Render(@<Component />)
+5. Use test names like: ComponentName_Scenario_ExpectedResult
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md Stream G progress section.
+```
+
+**Terminal 4 - Stream I (Validations - 33 files):**
+```powershell
+cd d:\BlazorWebFormsComponents
+```
+
+Use this prompt in VS Code Copilot Chat:
+```
+I need you to migrate bUnit tests to version 2.x for Stream I - Validations.
+
+TASK: Edit all .razor files in these subdirectories of d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\Validations\:
+
+- CompareValidator/IntegerDataType/Invalid/ (7 files)
+- CompareValidator/IntegerDataType/Valid/ (7 files)
+- CustomValidator/ (4 files)
+- RangeValidator/ (2 files)
+- RegularExpressionValidator/ (3 files)
+- RequiredFieldValidator/ (6 files)
+- ValidationSummary/ (4 files)
+
+TRANSFORMATION RULES:
+1. Change @inherits TestComponentBase to @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrapper elements entirely
+3. Change void MethodName(Fixture fixture) to [Fact] public void MethodName()
+4. Replace fixture.GetComponentUnderTest() with Render(@<Component />)
+5. Use test names like: ValidatorName_Scenario_ExpectedResult
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md Stream I progress section.
+```
+
+**Terminal 5 - Stream K (DataBinder - 4 files):**
+```powershell
+cd d:\BlazorWebFormsComponents
+```
+
+Use this prompt in VS Code Copilot Chat:
+```
+I need you to migrate bUnit tests to version 2.x for Stream K.
+
+TASK: Edit these specific files in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\DataBinder\:
+- Eval_SimpleDataList.razor
+- Eval_SimpleFormView.razor
+- Eval_SimpleListView.razor
+- Eval_SimpleRepeater.razor
+
+TRANSFORMATION RULES:
+1. Change @inherits TestComponentBase to @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrapper elements entirely
+3. Change void MethodName(Fixture fixture) to [Fact] public void MethodName()
+4. Replace fixture.GetComponentUnderTest() with Render(@<Component />)
+5. Use test names like: DataBinder_Scenario_ExpectedResult
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md Stream K progress section.
+```
+
+### VS Code Copilot Edits Prompt (Stream C)
+
+Open Command Palette → "Copilot: Open Copilot Edits" and enter:
+
+```
+Migrate bUnit tests to version 2.x for Stream C.
+
+FILES TO EDIT in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\:
+
+ImageButton folder:
+- Click.razor
+- Enabled.razor
+- ImageAlign.razor
+- Style.razor
+- ToolTip.razor
+- Visible.razor
+
+AdRotator folder:
+- AdCreated.razor
+- Format.razor
+- KeywordFilter.razor
+- NoAds.razor
+- Rotate.razor
+- Style.razor
+
+TRANSFORMATION RULES:
+1. Replace @inherits TestComponentBase with @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> XML elements entirely
+3. Remove <SnapshotTest> elements and convert to [Fact] methods using MarkupMatches()
+4. Convert void MethodName(Fixture fixture) to [Fact] public void MethodName()
+5. Replace fixture.GetComponentUnderTest() with Render(@<Component />)
+6. Use descriptive test names: ComponentName_Scenario_ExpectedResult
+
+After completing all files, update docs/Migration/bUnit-Migration-Plan.md:
+- Add Stream C progress section showing completed files
+- Update build error count
+```
+
+### New Chat Session Prompts
+
+**Stream E - DataList FlowLayout (18 files):**
+```
+Migrate bUnit tests to version 2.x for Stream E - DataList FlowLayout.
+
+FILES TO EDIT in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\DataList\FlowLayout\:
+- AlternatingTemplate.razor
+- DataBind.razor
+- Empty.razor
+- FooterStyleClass.razor
+- FooterStyleEmpty.razor
+- FooterStyleStyle.razor
+- FooterTemplate.razor
+- HeaderStyleClass.razor
+- HeaderStyleFont.razor
+- HeaderStyleTest.razor
+- InlineHeaderStyle.razor
+- ItemStyleTest.razor
+- SeparatorTemplate.razor
+- Simple.razor
+- SimpleStyle.razor
+- Tooltip.razor
+
+Plus RepeatColumns subfolder:
+- HorizontalColumns1.razor
+- HorizontalColumns10in4.razor
+- HorizontalColumns12In4.razor
+- VerticalColumns1.razor
+- VerticalColumns10in4.razor
+- VerticalColumns12in4.razor
+
+TRANSFORMATION RULES:
+1. @inherits TestComponentBase becomes @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrappers entirely
+3. Remove <SnapshotTest> elements and convert to [Fact] methods using MarkupMatches()
+4. Add [Fact] attribute, make methods public
+5. Use Render(@<DataList ...>) instead of fixture.GetComponentUnderTest()
+6. Test names: DataList_FlowLayout_[Scenario]_[ExpectedResult]
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md:
+- Add Stream E progress section
+- Update build error count
+```
+
+**Stream F - DataList TableLayout (23 files):**
+```
+Migrate bUnit tests to version 2.x for Stream F - DataList TableLayout.
+
+FILES TO EDIT in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\DataList\TableLayout\:
+- AlternatingTemplate.razor
+- Caption.razor
+- ComplexStyle.razor
+- DataBind.razor
+- Empty.razor
+- FontStyle.razor
+- FooterStyleClass.razor
+- FooterStyleEmpty.razor
+- FooterStyleStyle.razor
+- FooterTemplate.razor
+- GridLines.razor
+- HeaderStyleCss.razor
+- HeaderStyleFont.razor
+- HeaderStyleTest.razor
+- HeaderStyleWrap.razor
+- InlineHeaderStyle.razor
+- ItemStyleTest.razor
+- RepeatColumnsHorizontal.razor
+- RepeatColumnsVertical.razor
+- SeparatorTemplate.razor
+- ShowHeaderFooter.razor
+- Simple.razor
+- SimpleAccessibleHeaders.razor
+- SimpleStyle.razor
+- Tabindex.razor
+- Tooltip.razor
+
+TRANSFORMATION RULES:
+1. @inherits TestComponentBase becomes @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrappers entirely
+3. Remove <SnapshotTest> elements and convert to [Fact] methods using MarkupMatches()
+4. Add [Fact] attribute, make methods public
+5. Use Render(@<DataList ...>) instead of fixture.GetComponentUnderTest()
+6. Test names: DataList_TableLayout_[Scenario]_[ExpectedResult]
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md:
+- Add Stream F progress section
+- Update build error count
+```
+
+**Stream H - TreeView (15 files):**
+```
+Migrate bUnit tests to version 2.x for Stream H - TreeView.
+
+FILES TO EDIT in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\TreeView\:
+
+Root folder:
+- PersistExpandedState_68.razor
+
+ImageSet subfolder:
+- Default.razor
+- HasExpandCollapse.razor
+- NoCollapse.razor
+
+SiteMapDataSource subfolder:
+- SimpleFromTheDocs.razor
+
+StaticNodes subfolder:
+- Checkboxes.razor
+- CheckboxesLeaf.razor
+- CheckboxesParent.razor
+- CheckboxesRoot.razor
+- CheckboxesTreeNodeShowCheckbox.razor
+- Collapsed.razor
+- Image.razor
+- ImageWithAnchor.razor
+- ShowExpandCollapse.razor
+- Simple.razor
+
+XmlDataSource subfolder:
+- DataBindingEvents.razor
+- SimpleFromTheDocs.razor
+
+TRANSFORMATION RULES:
+1. @inherits TestComponentBase becomes @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrappers entirely
+3. Remove <SnapshotTest> elements and convert to [Fact] methods using MarkupMatches()
+4. Add [Fact] attribute, make methods public
+5. Use Render(@<TreeView ...>) instead of fixture.GetComponentUnderTest()
+6. Test names: TreeView_[Scenario]_[ExpectedResult]
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md:
+- Add Stream H progress section
+- Update build error count
+```
+
+**Stream J - LoginControls (27 files):**
+```
+Migrate bUnit tests to version 2.x for Stream J - LoginControls.
+
+FILES TO EDIT in d:\BlazorWebFormsComponents\src\BlazorWebFormsComponents.Test\LoginControls\:
+
+Login subfolder:
+- Authenticate.razor
+- LoggedIn.razor
+- LoggingIn.razor
+- LoginError.razor
+
+LoginName subfolder:
+- LoggedIn.razor
+- LoggedInWithFormatString.razor
+- NotLoggedIn.razor
+
+LoginStatus subfolder:
+- LoggedInDefault.razor
+- LoggedInEmpty.razor
+- LoggedInImageWithText.razor
+- LoggedInText.razor
+- LogoutActionRedirect.razor
+- LogoutActionRefresh.razor
+- LogoutEvent.razor
+- LogoutEventCancelOnLoggingOut.razor
+- NotLoggedInDefault.razor
+- NotLoggedInEmpty.razor
+- NotLoggedInImageWithText.razor
+- NotLoggedInText.razor
+
+LoginView subfolder:
+- AnonymusUser.razor
+- AnonymusUserWithNoRoleGroup.razor
+- DisplayNoContentWhenNothingHaveBeenSet.razor
+- LoggedInUserWithNoRoleGroup.razor
+- RoleGroupFirstGroupOnMultipleMatch.razor
+- RoleGroupFirstMatch.razor
+- RoleGroupNoMatchWithLoggedInTemplate.razor
+- RoleGroupNoMatchWithoutLoggedInTemplate.razor
+
+TRANSFORMATION RULES:
+1. @inherits TestComponentBase becomes @inherits BunitContext
+2. Remove <Fixture Test="..."> and <ComponentUnderTest> wrappers entirely
+3. Add [Fact] attribute, make methods public
+4. Use Render(@<Component ...>) instead of fixture.GetComponentUnderTest()
+5. For authentication tests, use:
+   var authContext = this.AddTestAuthorization();
+   authContext.SetAuthorized("TestUser");
+   authContext.SetRoles("RoleName");
+6. Test names: [ComponentName]_[Scenario]_[ExpectedResult]
+
+After completing, update docs/Migration/bUnit-Migration-Plan.md:
+- Add Stream J progress section
+- Update build error count
+```
+
+### Progress Tracking Checklist
+
+#### Stream A: Low Complexity Basics (13 files) - This Session
+- [ ] Button (9 files)
+- [ ] HiddenField (2 files)
+- [ ] HyperLink (2 files)
+
+#### Stream B: Simple Components (10 files) - CLI Terminal 1
+- [ ] Image (4 files)
+- [ ] Literal (3 files)
+- [ ] LinkButton (3 files)
+
+#### Stream C: Interactive Components (12 files) - Copilot Edits
+- [ ] ImageButton (6 files)
+- [ ] AdRotator (6 files)
+
+#### Stream D: Foundation & Templated (15 files) - CLI Terminal 2
+- [x] BaseWebFormsComponent (3 files, TestBubbleComponent.razor skipped)
+- [x] Repeater (5 files)
+- [x] FormView (5 files)
+- [x] ViewState (1 file)
+
+#### Stream E: DataList Flow (18 files) - New Chat
+- [ ] FlowLayout tests (18 files)
+
+#### Stream F: DataList Table (23 files) - New Chat
+- [ ] TableLayout tests (23 files)
+
+#### Stream G: Grid Components (18 files) - CLI Terminal 3
+- [ ] ListView (9 files)
+- [ ] GridView (9 files)
+
+#### Stream H: Navigation (15 files) - New Chat
+- [ ] TreeView (15 files)
+
+#### Stream I: Form Validation (33 files) - CLI Terminal 4
+- [ ] RequiredFieldValidator (6 files)
+- [ ] RegularExpressionValidator (3 files)
+- [ ] CustomValidator (4 files)
+- [ ] CompareValidator (14 files)
+- [ ] RangeValidator (2 files)
+- [ ] ValidationSummary (4 files)
+
+#### Stream J: Authentication (27 files) - New Chat
+- [ ] Login (4 files)
+- [ ] LoginName (3 files)
+- [ ] LoginStatus (12 files)
+- [ ] LoginView (8 files)
+
+#### Stream K: Data Binding (4 files) - CLI Terminal 5
+- [ ] DataBinder (4 files)
+
+### Post-Migration Verification
+
+After each stream completes, run:
+
+```powershell
+# Compile check
+dotnet build src/BlazorWebFormsComponents.Test --no-restore
+
+# Discover tests
+dotnet test src/BlazorWebFormsComponents.Test --list-tests --filter "FullyQualifiedName~ComponentName"
+
+# Execute component tests
+dotnet test src/BlazorWebFormsComponents.Test --filter "FullyQualifiedName~ComponentName"
+```
+
+### Final Integration
+
+When all streams complete:
+
+```powershell
+# Full build
+dotnet build src/BlazorWebFormsComponents.Test
+
+# Complete test run
+dotnet test src/BlazorWebFormsComponents.Test --verbosity normal
+```
+
+---
+
+## Core Migration Pattern Reference
+
+### Before (Deprecated Beta API)
 
 ```razor
 @inherits TestComponentBase
@@ -144,356 +621,50 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
     void TestMethodName(Fixture fixture)
     {
         var cut = fixture.GetComponentUnderTest();
-
-        // Assertions
         cut.Find("element").TextContent.ShouldBe("expected");
     }
 }
 ```
 
-### New Pattern (bUnit 2.x)
+### After (bUnit 2.x API)
 
 ```razor
 @inherits BunitContext
 
 @code {
     [Fact]
-    public void TestMethodName()
+    public void MyComponent_WithParameter_RendersExpectedContent()
     {
-        // Arrange & Act
         var cut = Render(@<MyComponent Parameter="value" />);
 
-        // Assert
         cut.Find("element").TextContent.ShouldBe("expected");
     }
 }
 ```
 
-### Migration Checklist Per File
+### Key Transformations
 
-- [ ] Change `@inherits TestComponentBase` → `@inherits BunitContext`
-- [ ] Remove `<Fixture Test="...">` wrapper
-- [ ] Remove `<ComponentUnderTest>` wrapper
-- [ ] Convert method signature: `void TestName(Fixture fixture)` → `[Fact] public void TestName()`
-- [ ] Change `fixture.GetComponentUnderTest()` → `Render(@<Component />)`
-- [ ] Move component markup from `<ComponentUnderTest>` into `Render(@<.../>)` call
-- [ ] Move any `@code` state (fields, helper methods) to remain in `@code` block
-- [ ] Verify test passes
-
----
-
-## Phase 3: Migration Examples
-
-### Example 1: Simple Component Test
-
-**Before (Button/Click.razor):**
-```razor
-@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-    <ComponentUnderTest>
-        <Button OnClick="OnClick">Click me!</Button>
-    </ComponentUnderTest>
-</Fixture>
-
-@code {
-    public string TheContent { get; set; } = "Not clicked yet!";
-
-    void OnClick()
-    {
-        TheContent = "I've been clicked";
-    }
-
-    void FirstTest(Fixture fixture)
-    {
-        var cut = fixture.GetComponentUnderTest();
-        TheContent.ShouldBe("Not clicked yet!");
-        cut.Find("button").Click();
-        TheContent.ShouldBe("I've been clicked");
-    }
-}
-```
-
-**After:**
-```razor
-@inherits BunitContext
-
-@code {
-    public string TheContent { get; set; } = "Not clicked yet!";
-
-    void OnClick()
-    {
-        TheContent = "I've been clicked";
-    }
-
-    [Fact]
-    public void Button_Click_UpdatesContent()
-    {
-        // Arrange & Act
-        var cut = Render(@<Button OnClick="OnClick">Click me!</Button>);
-        TheContent.ShouldBe("Not clicked yet!");
-
-        // Act
-        cut.Find("button").Click();
-
-        // Assert
-        TheContent.ShouldBe("I've been clicked");
-    }
-}
-```
-
-### Example 2: Data-Bound Component Test
-
-**Before (DataList/FlowLayout/Simple.razor):**
-```razor
-@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-    <ComponentUnderTest>
-        <DataList Items="Widget.SimpleWidgetList"
-                  ItemType="Widget"
-                  RepeatLayout="Flow"
-                  Context="Item">
-            <HeaderTemplate>My Widget List</HeaderTemplate>
-            <ItemTemplate>@Item.Name</ItemTemplate>
-        </DataList>
-    </ComponentUnderTest>
-</Fixture>
-
-@code {
-    void FirstTest(Fixture fixture)
-    {
-        var cut = fixture.GetComponentUnderTest();
-        cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
-        cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
-        cut.Find("span").HasAttribute("title").ShouldBeFalse();
-    }
-}
-```
-
-**After:**
-```razor
-@inherits BunitContext
-
-@code {
-    [Fact]
-    public void DataList_FlowLayout_RendersSimpleList()
-    {
-        // Arrange & Act
-        var cut = Render(
-            @<DataList Items="Widget.SimpleWidgetList"
-                       ItemType="Widget"
-                       RepeatLayout="Flow"
-                       Context="Item">
-                <HeaderTemplate>My Widget List</HeaderTemplate>
-                <ItemTemplate>@Item.Name</ItemTemplate>
-            </DataList>
-        );
-
-        // Assert
-        cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length + 2);
-        cut.FindAll("span").Skip(1).First().TextContent.ShouldBe("My Widget List");
-        cut.Find("span").HasAttribute("title").ShouldBeFalse();
-    }
-}
-```
-
-### Example 3: Form Validation Test
-
-**Before (Validations/RequiredFieldValidator/InputTextInvalidRequiredFieldValidator.razor):**
-```razor
-@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-    <ComponentUnderTest>
-        <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-            Write something
-            <InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
-            <RequiredFieldValidator Type="string"
-                                    ControlToValidate="@Name"
-                                    Text="Name is required." />
-        </EditForm>
-    </ComponentUnderTest>
-</Fixture>
-
-@code {
-    bool _validSubmit = false;
-    bool _invalidSubmit = false;
-    ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
-
-    void FirstTest(Fixture fixture)
-    {
-        var cut = fixture.GetComponentUnderTest();
-        cut.Find("input").Change("  ");
-        cut.Find("form").Submit();
-        _validSubmit.ShouldBeFalse();
-        _invalidSubmit.ShouldBeTrue();
-        cut.Find("span").FirstChild.TextContent.ShouldContain("Name is required.");
-    }
-
-    private ExampleModel exampleModel = new ExampleModel();
-    private void HandleValidSubmit() => _validSubmit = true;
-    private void HandleInvalidSubmit() => _invalidSubmit = true;
-
-    public class ExampleModel
-    {
-        public string Name { get; set; }
-    }
-}
-```
-
-**After:**
-```razor
-@inherits BunitContext
-
-@code {
-    bool _validSubmit = false;
-    bool _invalidSubmit = false;
-    ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
-    private ExampleModel exampleModel = new ExampleModel();
-
-    private void HandleValidSubmit() => _validSubmit = true;
-    private void HandleInvalidSubmit() => _invalidSubmit = true;
-
-    public class ExampleModel
-    {
-        public string Name { get; set; }
-    }
-
-    [Fact]
-    public void RequiredFieldValidator_EmptyInput_ShowsErrorMessage()
-    {
-        // Arrange
-        var cut = Render(
-            @<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-                Write something
-                <InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
-                <RequiredFieldValidator Type="string"
-                                        ControlToValidate="@Name"
-                                        Text="Name is required." />
-            </EditForm>
-        );
-
-        // Act
-        cut.Find("input").Change("  ");
-        cut.Find("form").Submit();
-
-        // Assert
-        _validSubmit.ShouldBeFalse();
-        _invalidSubmit.ShouldBeTrue();
-        cut.Find("span").FirstChild.TextContent.ShouldContain("Name is required.");
-    }
-}
-```
-
----
-
-## Phase 4: Test Naming Conventions
-
-### New Naming Standard
-
-Follow the pattern: `ComponentName_Scenario_ExpectedBehavior`
-
-**Examples:**
-- `Button_Click_InvokesHandler`
-- `DataList_EmptyItems_RendersEmptyTemplate`
-- `RequiredFieldValidator_EmptyInput_ShowsErrorMessage`
-- `GridView_WithDataSource_RendersAllRows`
-
-### Rename During Migration
-
-| Old Name | New Name |
-|----------|----------|
-| `FirstTest` | Descriptive name based on test purpose |
-| `TestName` | `ComponentName_Scenario_ExpectedBehavior` |
-
----
-
-## Phase 5: Execution Order
-
-### Priority Order (by complexity and dependencies)
-
-1. **Low complexity, foundational** (do first)
-   - Button (9 files)
-   - HiddenField (2 files)
-   - HyperLink (2 files)
-   - Image (4 files)
-   - Literal (3 files)
-   - LinkButton (3 files)
-
-2. **Medium complexity**
-   - ImageButton (6 files)
-   - AdRotator (6 files)
-   - BaseWebFormsComponent (4 files)
-   - Repeater (5 files)
-   - FormView (5 files)
-   - ViewState (1 file)
-
-3. **High complexity - Data Controls**
-   - DataBinder (4 files)
-   - DataList FlowLayout (18 files)
-   - DataList TableLayout (23 files)
-   - ListView (9 files)
-   - GridView (9 files)
-
-4. **High complexity - TreeView**
-   - TreeView (15 files)
-
-5. **High complexity - Validations**
-   - RequiredFieldValidator (6 files)
-   - RegularExpressionValidator (3 files)
-   - CustomValidator (4 files)
-   - CompareValidator (14 files)
-   - RangeValidator (2 files)
-   - ValidationSummary (4 files)
-
-6. **High complexity - Login Controls**
-   - LoginName (3 files)
-   - LoginStatus (12 files)
-   - LoginView (8 files)
-   - Login (4 files)
+| Old Pattern | New Pattern |
+|-------------|-------------|
+| `@inherits TestComponentBase` | `@inherits BunitContext` |
+| `<Fixture Test="Name">` | Remove entirely |
+| `<ComponentUnderTest>` | Remove entirely |
+| `void Name(Fixture fixture)` | `[Fact] public void Name()` |
+| `fixture.GetComponentUnderTest()` | `Render(@<Component />)` |
+| `FirstTest` | `Component_Scenario_Expected` |
 
 ---
 
 ## Phase 6: Copilot Instructions Update
 
-Update `.github/copilot-instructions.md` testing section:
+After migration, update `.github/copilot-instructions.md`:
 
-### Replace Testing Conventions Section
+### New Testing Section Content
 
-**Old:**
-```markdown
-### bUnit Test Pattern
-```razor
-@inherits TestComponentBase
-
-<Fixture Test="TestName">
-    <ComponentUnderTest>
-        <Button OnClick="OnClick">Click me!</Button>
-    </ComponentUnderTest>
-</Fixture>
-
-@code {
-    void TestName(Fixture fixture)
-    {
-        // Given
-        var cut = fixture.GetComponentUnderTest();
-
-        // When
-        cut.Find("button").Click();
-
-        // Then
-        TheContent.ShouldBe("expected value");
-    }
-}
-```
-```
-
-**New:**
 ```markdown
 ### bUnit Test Pattern (v2.x)
 
-Tests use bUnit v2.x with the `BunitContext` base class pattern:
+Tests inherit from `BunitContext` and use the `Render()` method:
 
 ```razor
 @inherits BunitContext
@@ -502,135 +673,83 @@ Tests use bUnit v2.x with the `BunitContext` base class pattern:
     [Fact]
     public void ComponentName_Scenario_ExpectedBehavior()
     {
-        // Arrange & Act
-        var cut = Render(@<Button OnClick="OnClick">Click me!</Button>);
+        var cut = Render(@<Button OnClick="HandleClick">Submit</Button>);
 
-        // Act
         cut.Find("button").Click();
 
-        // Assert
-        TheContent.ShouldBe("expected value");
+        ClickCount.ShouldBe(1);
     }
+
+    private int ClickCount = 0;
+    private void HandleClick() => ClickCount++;
 }
 ```
 
-### Test Naming Convention
+### Test Method Naming
 
-Follow the pattern: `ComponentName_Scenario_ExpectedBehavior`
+Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
-Examples:
 - `Button_Click_InvokesHandler`
-- `DataList_EmptyItems_RendersEmptyTemplate`
-- `RequiredFieldValidator_EmptyInput_ShowsErrorMessage`
+- `DataList_EmptySource_ShowsEmptyTemplate`
+- `RequiredFieldValidator_BlankInput_DisplaysError`
 
-### Key bUnit v2.x Patterns
-
-- Inherit from `BunitContext` (not `TestComponentBase`)
-- Use `Render(@<Component />)` inline Razor template syntax
-- Add `[Fact]` attribute to all test methods
-- Test methods must be `public`
-- Use Shouldly for assertions (`value.ShouldBe(expected)`)
-
-### Registering Services
+### Service Registration
 
 ```razor
 @code {
     [Fact]
-    public void MyTest()
+    public void Component_WithService_BehavesCorrectly()
     {
-        // Register services before rendering
-        Services.AddSingleton<IMyService>(new MockMyService());
+        Services.AddSingleton<IMyService>(new FakeService());
 
         var cut = Render(@<MyComponent />);
-        // ...
     }
 }
 ```
 
-### Testing with Authentication
+### Authentication Testing
 
 ```razor
 @code {
     [Fact]
-    public void MyAuthTest()
+    public void SecureComponent_AuthenticatedUser_ShowsContent()
     {
-        // Setup fake authentication
-        var authContext = this.AddTestAuthorization();
-        authContext.SetAuthorized("TestUser");
-        authContext.SetRoles("Admin");
+        var auth = this.AddTestAuthorization();
+        auth.SetAuthorized("testuser");
+        auth.SetRoles("Admin", "User");
 
-        var cut = Render(@<MyComponent />);
-        // ...
+        var cut = Render(@<SecureComponent />);
     }
 }
 ```
-```
-
----
-
-## Verification Steps
-
-After each batch of migrations:
-
-1. **Build the test project:**
-   ```bash
-   dotnet build src/BlazorWebFormsComponents.Test
-   ```
-
-2. **Run test discovery:**
-   ```bash
-   dotnet test src/BlazorWebFormsComponents.Test --list-tests
-   ```
-
-3. **Execute tests:**
-   ```bash
-   dotnet test src/BlazorWebFormsComponents.Test
-   ```
-
-4. **Verify test count matches expectations**
-
----
-
-## Rollback Plan
-
-If migration causes issues:
-
-1. Revert package changes in `.csproj`
-2. Revert `_Imports.razor`
-3. Restore original test files from git
-
-```bash
-git checkout -- src/BlazorWebFormsComponents.Test/
 ```
 
 ---
 
 ## Success Criteria
 
-- [ ] All 198 test files migrated to bUnit v2.x pattern
-- [ ] `dotnet test` discovers and runs all tests
-- [ ] All tests pass (or failures are documented as known issues)
-- [ ] `_Imports.razor` updated with new using statements
-- [ ] `.csproj` references bUnit 2.5.3
-- [ ] Copilot instructions updated with new test patterns
-- [ ] Documentation updated
+- [ ] 198 test files converted to BunitContext pattern
+- [ ] All tests discoverable via `dotnet test --list-tests`
+- [ ] Test execution completes (pass/fail documented)
+- [ ] _Imports.razor includes AngleSharp.Dom and Bunit.TestDoubles
+- [ ] .csproj references bUnit 2.5.3
+- [ ] copilot-instructions.md reflects new patterns
 
 ---
 
-## Timeline Estimate
+## Estimated Timeline
 
-| Phase | Estimated Time |
-|-------|----------------|
-| Phase 1: Package updates | 15 minutes |
-| Phase 2-5: Test file migration (198 files) | 4-6 hours |
-| Phase 6: Copilot instructions | 30 minutes |
-| Testing & verification | 1 hour |
-| **Total** | **6-8 hours** |
+| Work Stream | Duration |
+|-------------|----------|
+| Parallel streams (11 concurrent) | 2-3 hours |
+| Integration & verification | 30 minutes |
+| Copilot instructions update | 15 minutes |
+| **Total with parallelization** | **~3 hours** |
 
 ---
 
-## Notes
+## Rollback Command
 
-- Some tests may have helper components (like `TestBubbleComponent.razor`) that are not test files - these should be left as-is
-- The `ElementExtensions.cs` and `MockNavigationManager.cs` files are helper classes, not tests
-- Consider running tests in batches to catch issues early
+```powershell
+git checkout -- src/BlazorWebFormsComponents.Test/
+```

@@ -1,29 +1,19 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using BlazorWebFormsComponents
 
-<Fixture Test="ImageButton_HasToolTip">
-	<ComponentUnderTest>
-		<ImageButton ImageUrl="/img/VB.png" ToolTip="Visual Basic" />
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="ImageButton_HasNotToolTip">
-	<ComponentUnderTest>
-		<ImageButton ImageUrl="/img/VB.png" />
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void ImageButton_HasToolTip(Fixture fixture)
+	[Fact]
+	public void ImageButton_WithToolTip_HasTitleAttribute()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ImageButton ImageUrl="/img/VB.png" ToolTip="Visual Basic" />);
 
 		cut.Find("input").HasAttribute("title").ShouldBeTrue();
 	}
 
-	void ImageButton_HasNotToolTip(Fixture fixture)
+	[Fact]
+	public void ImageButton_WithoutToolTip_NoTitleAttribute()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ImageButton ImageUrl="/img/VB.png" />);
 
 		cut.Find("input").HasAttribute("title").ShouldBeFalse();
 	}
