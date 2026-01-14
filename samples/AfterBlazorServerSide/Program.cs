@@ -2,6 +2,7 @@ using AfterBlazorServerSide;
 using AfterBlazorServerSide.Components;
 using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,5 +42,9 @@ await app.RunAsync();
 partial class Program
 {
     public static string ApplicationName => "Blazor Server-Side";
-    public static Version? ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
+    public static string? ComponentVersion = typeof(BlazorWebFormsComponents.Button)
+        .Assembly
+        .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()
+        ?.InformationalVersion
+        ?.Split('+')[0]; // Gets "0.13.0" without the commit hash
 }
