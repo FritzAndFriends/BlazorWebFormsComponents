@@ -1,39 +1,43 @@
 using AfterBlazorServerSide;
+using AfterBlazorServerSide.Components;
 using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.WebHost.UseStaticWebAssets();
+
 var services = builder.Services;
 
-services.AddRazorPages();
-services.AddServerSideBlazor();
+services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-	app.UseDeveloperExceptionPage();
+    app.UseDeveloperExceptionPage();
 }
 else
 {
-	app.UseExceptionHandler("/Error");
-	app.UseHsts();
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseAntiforgery();
 
-app.UseRouting();
-
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(typeof(BlazorWebFormsComponents.IStyle).Assembly);
 
 await app.RunAsync();
 
 partial class Program
 {
-	public static string ApplicationName => "Blazor Server-Side";
-	public static Version ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
+    public static string ApplicationName => "Blazor Server-Side";
+    public static Version? ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
 }

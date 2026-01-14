@@ -21,6 +21,9 @@ BlazorWebFormsComponents.xml
 .ionide/
 .vscode/
 
+# Playwright MCP files
+.playwright-mcp/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

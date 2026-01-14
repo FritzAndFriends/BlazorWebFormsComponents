@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <footer>
+        This site was built with ♥♥ and <a href="https://blazor.net">Blazor</a>, <a href="https://dot.net">Open Source C#</a>, <a href="https://www.asp.net">ASP.NET 10.0</a>, and the <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents/">BlazorWebFormsComponents</a>
+        <br />
+        <strong>BlazorWebFormsComponents @($"v{Program.ComponentVersion?.Major}.{Program.ComponentVersion?.Minor}.{Program.ComponentVersion?.Revision}")</strong>
+    </footer>
+
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
+</body>
+
+</html>
