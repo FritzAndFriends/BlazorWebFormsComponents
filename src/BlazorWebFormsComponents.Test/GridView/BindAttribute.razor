@@ -1,28 +1,26 @@
 ﻿@inherits BunitContext
 
-<GridView ItemType="Widget"
-        AutoGenerateColumns="false"
-        SelectMethod="GetWidgets">
-    <Columns>
-        <BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
-        <BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
-        <TemplateField ItemType="Widget" HeaderText="Name">
-            <ItemTemplate Context="Item">
-                <input type="text" @bind="@Item.Name" />
-            </ItemTemplate>
-        </TemplateField>
-    </Columns>
-</GridView>
-
-
 @code {
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void GridView_BindAttribute_CompilesCorrectly()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<GridView ItemType="Widget"
+			AutoGenerateColumns="false"
+			SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+				<TemplateField ItemType="Widget" HeaderText="Name">
+					<ItemTemplate Context="Item">
+						<input type="text" @bind="@Item.Name" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		Assert.True(true, "bind attribute wasn't compiling");
-
 	}
 
 	IQueryable<Widget>

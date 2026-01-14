@@ -1,8 +1,11 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="RendersLink">
-	<ComponentUnderTest>
-		<GridView SelectMethod="GetWidgets"
+@code {
+
+	[Fact]
+	public void GridView_HyperLinkField_RendersLinksCorrectly()
+	{
+		var cut = Render(@<GridView SelectMethod="GetWidgets"
 							AutoGenerateColumns="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<Columns>
@@ -16,17 +19,8 @@
 														HeaderText="Price"
 														Target="_blank" />
 			</Columns>
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
+		</GridView>);
 
-
-
-@code {
-
-	void RendersLink(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.Write(cut.Markup);
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[1].TextContent.ShouldBe("Price");
@@ -51,7 +45,6 @@
 			aTag.GetAttribute("target").ShouldBe("_blank");
 
 		}
-
 	}
 
 

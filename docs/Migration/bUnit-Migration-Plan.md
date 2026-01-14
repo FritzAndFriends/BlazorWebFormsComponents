@@ -24,9 +24,9 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 | Phase 6: Copilot Instructions | ⏳ Pending | - |
 
 ### Overall Statistics (as of 2026-01-14)
-- **Files Migrated**: 51 of 197 test files (26%)
-- **Files Remaining**: 146 test files
-- **Build Errors**: 320 remaining (down from 412 initial)
+- **Files Migrated**: 69 of 197 test files (35%)
+- **Files Remaining**: 128 test files
+- **Build Errors**: 281 remaining (down from 412 initial)
 - **Commit**: `aaadbcd` - "Refactor tests for BlazorWebFormsComponents to use Bunit framework"
 
 ### Phase 1 Completion Notes
@@ -120,30 +120,30 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 
 **Stream D Status**: ✅ **COMPLETE** - 14 files migrated
 
-### Stream G Progress (Partial)
-**ListView folder:**
-- ✅ ListView/AlternatingTemplate.razor - migrated
-- ⏳ ListView/DataBindingEvents.razor - pending
-- ⏳ ListView/Grouping6x5.razor - pending
-- ⏳ ListView/Grouping7x3.razor - pending
-- ⏳ ListView/Grouping8x2.razor - pending
-- ⏳ ListView/Layout.razor - pending
-- ⏳ ListView/SelectMethod.razor - pending
-- ⏳ ListView/SimpleList.razor - pending
-- ⏳ ListView/WebFormsEvents.razor - pending
+### Stream G Progress ✅ COMPLETE
+**ListView folder (9 files):**
+- ✅ ListView/AlternatingTemplate.razor - migrated (1 test)
+- ✅ ListView/DataBindingEvents.razor - migrated (1 test)
+- ✅ ListView/Grouping6x5.razor - migrated (1 test)
+- ✅ ListView/Grouping7x3.razor - migrated (1 test)
+- ✅ ListView/Grouping8x2.razor - migrated (1 test)
+- ✅ ListView/Layout.razor - migrated (1 test)
+- ✅ ListView/SelectMethod.razor - migrated (1 test)
+- ✅ ListView/SimpleList.razor - migrated (1 test)
+- ✅ ListView/WebFormsEvents.razor - migrated (1 async test)
 
-**GridView folder:**
-- ✅ GridView/BindAttribute.razor - migrated
-- ⏳ GridView/ButtonFields.razor - pending
-- ⏳ GridView/ButtonFields_Image.razor - pending
-- ⏳ GridView/ButtonFields_Link.razor - pending
-- ⏳ GridView/DataBoundFields.razor - pending
-- ⏳ GridView/DataTableSupport.razor - pending
-- ⏳ GridView/EmptyDataText.razor - pending
-- ⏳ GridView/HyperlinkFields.razor - pending
-- ⏳ GridView/TemplateFields.razor - pending
+**GridView folder (9 files):**
+- ✅ GridView/BindAttribute.razor - migrated (1 test)
+- ✅ GridView/ButtonFields.razor - migrated (2 tests)
+- ✅ GridView/ButtonFields_Image.razor - migrated (2 tests)
+- ✅ GridView/ButtonFields_Link.razor - migrated (2 tests)
+- ✅ GridView/DataBoundFields.razor - migrated (1 test)
+- ✅ GridView/DataTableSupport.razor - migrated (4 tests)
+- ✅ GridView/EmptyDataText.razor - migrated (1 test)
+- ✅ GridView/HyperlinkFields.razor - migrated (1 test)
+- ✅ GridView/TemplateFields.razor - migrated (1 test)
 
-**Stream G Status**: 🔄 **IN PROGRESS** - 2 of 18 files migrated
+**Stream G Status**: ✅ **COMPLETE** - 18 files migrated (17 tests total)
 
 ---
 
@@ -610,9 +610,9 @@ After completing, update docs/Migration/bUnit-Migration-Plan.md:
 #### Stream F: DataList Table (26 files) ⏳ PENDING
 - [ ] TableLayout tests (26 files)
 
-#### Stream G: Grid Components (18 files) 🔄 IN PROGRESS
-- [ ] ListView (1/9 files migrated)
-- [ ] GridView (1/9 files migrated)
+#### Stream G: Grid Components (18 files) ✅ COMPLETE
+- [x] ListView (9 files)
+- [x] GridView (9 files)
 
 #### Stream H: Navigation (17 files) ⏳ PENDING
 - [ ] TreeView root (1 file)
@@ -795,7 +795,7 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 ## Success Criteria
 
-- [ ] ~197 test files converted to BunitContext pattern (51 complete, 146 remaining)
+- [ ] ~197 test files converted to BunitContext pattern (69 complete, 128 remaining)
 - [ ] All tests discoverable via `dotnet test --list-tests`
 - [ ] Test execution completes (pass/fail documented)
 - [x] _Imports.razor includes AngleSharp.Dom and Bunit.TestDoubles
@@ -810,13 +810,13 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 |--------|-------|--------|
 | Stream E (DataList FlowLayout) | 22 | ⏳ Pending |
 | Stream F (DataList TableLayout) | 26 | ⏳ Pending |
-| Stream G (ListView, GridView) | 16 | 🔄 In Progress (2 done) |
+| Stream G (ListView, GridView) | 18 | ✅ Complete |
 | Stream H (TreeView) | 17 | ⏳ Pending |
 | Stream I (Validations) | 33 | ⏳ Pending |
 | Stream J (LoginControls) | 27 | ⏳ Pending |
 | Stream K (DataBinder) | 4 | ⏳ Pending |
 | Uncategorized | 1 | ⏳ Pending |
-| **Total Remaining** | **146** | - |
+| **Total Remaining** | **128** | - |
 
 ---
 
@@ -824,8 +824,8 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 | Work Stream | Duration |
 |-------------|----------|
-| Completed streams (A-D + partial G) | ✅ Done |
-| Remaining streams (E-K) | ~2 hours |
+| Completed streams (A-D, G) | ✅ Done |
+| Remaining streams (E, F, H-K) | ~2 hours |
 | Integration & verification | 30 minutes |
 | Copilot instructions update | 15 minutes |
 | **Total remaining work** | **~2.5 hours** |

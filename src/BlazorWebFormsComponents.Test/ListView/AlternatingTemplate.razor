@@ -1,22 +1,15 @@
 ﻿@inherits BunitContext
 
-<ListView Items="Widget.SimpleWidgetList"
-        ItemType="Widget"
-        Context="Item">
-    <ItemTemplate><span>@Item.Name</span></ItemTemplate>
-    <AlternatingItemTemplate><b>@Item.Name</b></AlternatingItemTemplate>
-</ListView>
-
 @code {
 	[Fact]
-public void ListView_AlternatingTemplate_RendersCorrectElements()
-{
-    var cut = Render(@<ListView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
-        <ItemTemplate><span>@Item.Name</span></ItemTemplate>
-        <AlternatingItemTemplate><b>@Item.Name</b></AlternatingItemTemplate>
-    </ListView>);
-    System.Diagnostics.Debug.WriteLine(cut.Markup);
-    cut.FindAll("span").Count().ShouldBe((int)Math.Ceiling(Widget.SimpleWidgetList.Length/2.0m), $"Did not render {(int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m)} SPAN elements");
-    cut.FindAll("b").Count().ShouldBe((int)Math.Floor(Widget.SimpleWidgetList.Length / 2.0m), $"Did not render {(int)Math.Floor(Widget.SimpleWidgetList.Length / 2.0m)} B element");
-}
+	public void ListView_AlternatingTemplate_RendersCorrectElements()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			<AlternatingItemTemplate><b>@Item.Name</b></AlternatingItemTemplate>
+		</ListView>);
+		System.Diagnostics.Debug.WriteLine(cut.Markup);
+		cut.FindAll("span").Count().ShouldBe((int)Math.Ceiling(Widget.SimpleWidgetList.Length/2.0m), $"Did not render {(int)Math.Ceiling(Widget.SimpleWidgetList.Length / 2.0m)} SPAN elements");
+		cut.FindAll("b").Count().ShouldBe((int)Math.Floor(Widget.SimpleWidgetList.Length / 2.0m), $"Did not render {(int)Math.Floor(Widget.SimpleWidgetList.Length / 2.0m)} B element");
+	}
 }
