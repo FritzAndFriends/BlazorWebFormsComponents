@@ -42,7 +42,7 @@
 		// 8 x 2 => I is I G I is I G I is I G I is I
 		// 8 x 3 => I is I is I G I is I is I G I is I is
 		// 7 x 3 => I is I is I G I is I is I G I is is
-		// 6 x 5 => I is I is I is I is I G I is is is is 
+		// 6 x 5 => I is I is I is I is I G I is is is is
 
 		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(7);
 		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(2);
