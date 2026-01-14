@@ -67,9 +67,8 @@ We are always looking for help on this project.  There are many millions of appl
 
 1. [Visual Studio](https://visualstudio.microsoft.com/) (Windows)
 2. [Visual Studio Code](https://visualstudio.microsoft.com/) (Windows, Linux, Mac)
-3. [Visual Studio For Mac](https://visualstudio.microsoft.com/)
-4. Any text editor (Windows, Linux, Mac)
-5. Any Web browser.
+3. Any text editor (Windows, Linux, Mac)
+4. Any Web browser.
 
 ### Tell us your story
 
