@@ -22,10 +22,10 @@
 		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.Find("span").Children.FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
-		var @class = footer.GetAttribute("class");
+		var cssClass = footer.GetAttribute("class");
 
-		@class.ShouldNotBeNull();
-		@class.ShouldBe("myClass");
+		cssClass.ShouldNotBeNull();
+		cssClass.ShouldBe("myClass");
 
 	}
 }

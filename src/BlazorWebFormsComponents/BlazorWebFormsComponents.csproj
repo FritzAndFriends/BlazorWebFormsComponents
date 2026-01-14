@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <RazorLangVersion>3.0</RazorLangVersion>
-		<LangVersion>8.0</LangVersion>
+    <TargetFramework>net10.0</TargetFramework>
 	  <DocumentationFile>BlazorWebFormsComponents.xml</DocumentationFile>
 	  <Configurations>Debug;Release;WebForms</Configurations>
   </PropertyGroup>
