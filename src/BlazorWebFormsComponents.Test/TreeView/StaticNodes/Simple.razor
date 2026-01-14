@@ -49,15 +49,13 @@
 		cut.FindAll("table").Count().ShouldBe(4);
 		cut.FindComponent<TreeView>().Instance.Nodes.Count.ShouldBe(4);
 
-		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href") && !c.GetElementsByTagName("img").Any());
+		var anchors = cut.FindAll("a").Where(c => c.HasAttribute("href") && !c.GetElementsByTagName("img").Any()).ToList();
 		anchors.Count().ShouldBe(4);
 
-		anchors.ShouldAllBe(
-						x => x.ShouldLinkTo("Home.aspx"),
-						x => x.ShouldLinkTo("Page1.aspx"),
-						x => x.ShouldLinkTo("Section1.aspx"),
-						x => x.ShouldLinkTo("Page2.aspx")
-		);
+		anchors[0].ShouldLinkTo("Home.aspx");
+		anchors[1].ShouldLinkTo("Page1.aspx");
+		anchors[2].ShouldLinkTo("Section1.aspx");
+		anchors[3].ShouldLinkTo("Page2.aspx");
 
 		anchors.First().GetAttribute("title").ShouldBe("Home Tooltip");
 	}

@@ -1,27 +1,20 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<Repeater Items="Widget.SimpleWidgetList"
-							ItemType="Widget">
-			<ItemTemplate><span>@DataBinder.Eval("Name")</span></ItemTemplate>
-			<SeparatorTemplate><hr/></SeparatorTemplate>
-		</Repeater>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataBinder_Eval_SimpleRepeater_RendersItemsWithSeparators()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<Repeater Items="Widget.SimpleWidgetList"
+							ItemType="Widget">
+				<ItemTemplate><span>@DataBinder.Eval("Name")</span></ItemTemplate>
+				<SeparatorTemplate><hr/></SeparatorTemplate>
+			</Repeater>
+		);
 
 		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
 		cut.FindAll("hr").Count().ShouldBe(Widget.SimpleWidgetList.Length);
-
 	}
-
 
 }

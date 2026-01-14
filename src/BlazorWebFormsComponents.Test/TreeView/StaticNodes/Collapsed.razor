@@ -20,14 +20,11 @@
 			</TreeView>
 		);
 
-		var beforeImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">;
-		var afterImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">;
-
-		cut.Find("img").MarkupMatches(beforeImage);
+		cut.Find("img").MarkupMatches(@<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;" />);
 
 		cut.Find("a").Click();
 
-		cut.Find("img").MarkupMatches(afterImage);
+		cut.Find("img").MarkupMatches(@<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;" />);
 	}
 
 	[Fact]
@@ -46,14 +43,11 @@
 			</TreeView>
 		);
 
-		var beforeImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">;
-		var afterImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">;
-
-		cut.Find("img").MarkupMatches(afterImage);
+		cut.Find("img").MarkupMatches(@<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;" />);
 
 		cut.Find("a").Click();
 
-		cut.Find("img").MarkupMatches(beforeImage);
+		cut.Find("img").MarkupMatches(@<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;" />);
 		cut.FindAll("table").Count.ShouldBe(1);
 	}
 }

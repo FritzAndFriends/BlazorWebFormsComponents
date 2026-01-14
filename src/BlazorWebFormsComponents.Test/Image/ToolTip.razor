@@ -1,23 +1,17 @@
-﻿@using Bunit
-@using BlazorWebFormsComponents
+﻿@inherits BunitContext
 
 @code {
     [Fact]
     public void Image_HasToolTip()
     {
-        using var ctx = new Bunit.TestContext();
-        var cut = ctx.RenderComponent<Image>(parameters => parameters
-            .Add(p => p.ImageUrl, "/img/VB.png")
-            .Add(p => p.ToolTip, "Visual Basic"));
+        var cut = Render(@<Image ImageUrl="/img/VB.png" ToolTip="Visual Basic" />);
         cut.Find("img").HasAttribute("title").ShouldBeTrue();
     }
 
     [Fact]
     public void Image_HasNotToolTip()
     {
-        using var ctx = new Bunit.TestContext();
-        var cut = ctx.RenderComponent<Image>(parameters => parameters
-            .Add(p => p.ImageUrl, "/img/VB.png"));
+        var cut = Render(@<Image ImageUrl="/img/VB.png" />);
         cut.Find("img").HasAttribute("title").ShouldBeFalse();
     }
 }

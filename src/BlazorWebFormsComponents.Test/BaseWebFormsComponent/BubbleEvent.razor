@@ -11,8 +11,8 @@ public void TestBubbleComponent_EventRaised_EventIsHandled() {
 	var cut = Render(@<TestBubbleComponent />);
 	cut.Find("button").Click();
 
-	cut.Instance.EventRaised.Count().ShouldBe(1);
-	cut.Instance.EventRaised.ContainsKey("Foo").ShouldBeTrue();
+	cut.FindComponent<TestBubbleComponent>().Instance.EventRaised.Count().ShouldBe(1);
+	cut.FindComponent<TestBubbleComponent>().Instance.EventRaised.ContainsKey("Foo").ShouldBeTrue();
 
 }
 

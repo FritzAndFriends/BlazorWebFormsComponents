@@ -1,18 +1,14 @@
-﻿@using Bunit
+﻿@inherits BunitContext
 
 @code {
+    private string theContent = "No Command yet!";
+    private void OnCommand(CommandEventArgs args) => theContent = $"Command '{args.CommandName}' : '{args.CommandArgument}'";
+
     [Fact]
     public void Command_ChangesContent()
     {
-        using var ctx = new Bunit.TestContext();
-        var theContent = "No Command yet!";
-        var commandArgument = "bar";
-        void OnCommand(CommandEventArgs args) => theContent = $"Command '{args.CommandName}' : '{args.CommandArgument.ToString()}";
-        var cut = ctx.RenderComponent<LinkButton>(parameters => parameters
-            .Add(p => p.CommandName, "Foo")
-            .Add(p => p.CommandArgument, commandArgument)
-            .Add(p => p.OnCommand, EventCallback.Factory.Create<CommandEventArgs>(this, OnCommand))
-            .AddChildContent("Click me!"));
+        theContent = "No Command yet!";
+        var cut = Render(@<LinkButton CommandName="Foo" CommandArgument="@("bar")" OnCommand="OnCommand">Click me!</LinkButton>);
         theContent.ShouldBe("No Command yet!");
         cut.Find("a").Click();
         theContent.ShouldBe("Command 'Foo' : 'bar'");

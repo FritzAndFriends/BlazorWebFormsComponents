@@ -19,7 +19,7 @@ public void ListView_WithLayoutTemplate_RendersControls()
 			</div>
 		</LayoutTemplate>
 	</ListView>);
-	cut.Instance.Controls.Count().ShouldBe(1);
+	cut.FindComponent<ListView<Widget>>().Instance.Controls.Count().ShouldBe(1);
 }
 
 }

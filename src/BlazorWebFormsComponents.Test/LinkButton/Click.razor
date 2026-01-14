@@ -1,15 +1,14 @@
-﻿@using Bunit
+﻿@inherits BunitContext
 
 @code {
+    private string theContent = "Not clicked yet!";
+    private void OnClick() => theContent = "I've been clicked";
+
     [Fact]
     public void Click_ChangesContent()
     {
-        using var ctx = new Bunit.TestContext();
-        var theContent = "Not clicked yet!";
-        void OnClick() => theContent = "I've been clicked";
-        var cut = ctx.RenderComponent<LinkButton>(parameters => parameters
-            .Add(p => p.OnClick, EventCallback.Factory.Create(this, OnClick))
-            .AddChildContent("Click me!"));
+        theContent = "Not clicked yet!";
+        var cut = Render(@<LinkButton OnClick="OnClick">Click me!</LinkButton>);
         theContent.ShouldBe("Not clicked yet!");
         cut.Find("a").Click();
         theContent.ShouldBe("I've been clicked");

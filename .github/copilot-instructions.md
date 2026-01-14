@@ -157,34 +157,88 @@ Tests are organized by component in folders matching component names:
     ...
 ```
 
-### bUnit Test Pattern
-```razor
-@inherits TestComponentBase
+### bUnit Test Pattern (v2.x)
 
-<Fixture Test="TestName">
-    <ComponentUnderTest>
-        <Button OnClick="OnClick">Click me!</Button>
-    </ComponentUnderTest>
-</Fixture>
+Tests inherit from `BunitContext` and use the `Render()` method with Razor syntax:
+
+```razor
+@inherits BunitContext
 
 @code {
-    void TestName(Fixture fixture)
+    [Fact]
+    public void ComponentName_Scenario_ExpectedBehavior()
     {
-        // Given
-        var cut = fixture.GetComponentUnderTest();
+        var cut = Render(@<Button OnClick="HandleClick">Submit</Button>);
 
-        // When
         cut.Find("button").Click();
 
-        // Then
-        TheContent.ShouldBe("expected value");
+        ClickCount.ShouldBe(1);
+    }
+
+    private int ClickCount = 0;
+    private void HandleClick() => ClickCount++;
+}
+```
+
+### Test Method Naming
+
+Use the pattern: `ComponentName_Scenario_ExpectedBehavior`
+
+Examples:
+- `Button_Click_InvokesHandler`
+- `DataList_EmptySource_ShowsEmptyTemplate`
+- `RequiredFieldValidator_BlankInput_DisplaysError`
+
+### Service Registration
+
+```razor
+@code {
+    [Fact]
+    public void Component_WithService_BehavesCorrectly()
+    {
+        Services.AddSingleton<IMyService>(new FakeService());
+
+        var cut = Render(@<MyComponent />);
+    }
+}
+```
+
+### Authentication Testing
+
+```razor
+@code {
+    [Fact]
+    public void SecureComponent_AuthenticatedUser_ShowsContent()
+    {
+        var auth = this.AddTestAuthorization();
+        auth.SetAuthorized("testuser");
+        auth.SetRoles("Admin", "User");
+
+        var cut = Render(@<SecureComponent />);
+    }
+}
+```
+
+### Accessing Component Instance
+
+When testing component properties or state, use `FindComponent<T>()`:
+
+```razor
+@code {
+    [Fact]
+    public void TreeView_StaticNodes_HasCorrectNodeCount()
+    {
+        var cut = Render(@<TreeView>...</TreeView>);
+
+        cut.FindComponent<TreeView>().Instance.Nodes.Count.ShouldBe(4);
     }
 }
 ```
 
 ### Assertions
 - Use Shouldly for assertions (`value.ShouldBe(expected)`)
-- Follow Given-When-Then pattern in test methods
+- Use `MarkupMatches()` for HTML comparison
+- Follow Arrange-Act-Assert pattern in test methods
 
 ## Design Principles
 
