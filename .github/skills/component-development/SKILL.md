@@ -1,11 +1,6 @@
 ---
-description: Guidance for creating Blazor components that emulate ASP.NET Web Forms controls
-applyTo: "**/src/BlazorWebFormsComponents/**"
-tags:
-  - blazor
-  - components
-  - web-forms
-  - migration
+name: component-development
+description: Guidance for creating Blazor components that emulate ASP.NET Web Forms controls. Use this when implementing new components or extending existing ones in the BlazorWebFormsComponents library.
 ---
 
 # Component Development Skill for BlazorWebFormsComponents

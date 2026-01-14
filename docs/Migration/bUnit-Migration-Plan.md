@@ -24,9 +24,9 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 | Phase 6: Copilot Instructions | ⏳ Pending | - |
 
 ### Overall Statistics (as of 2026-01-14)
-- **Files Migrated**: 69 of 197 test files (35%)
-- **Files Remaining**: 128 test files
-- **Build Errors**: 281 remaining (down from 412 initial)
+- **Files Migrated**: 177 of 197 test files (90%)
+- **Files Remaining**: 20 test files
+- **Build Errors**: 10 remaining (down from 412 initial)
 - **Commit**: `aaadbcd` - "Refactor tests for BlazorWebFormsComponents to use Bunit framework"
 
 ### Phase 1 Completion Notes
@@ -120,6 +120,66 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 
 **Stream D Status**: ✅ **COMPLETE** - 14 files migrated
 
+### Stream E Progress ✅ COMPLETE
+**FlowLayout folder (16 files):**
+- ✅ FlowLayout/AlternatingTemplate.razor - migrated (1 test)
+- ✅ FlowLayout/DataBind.razor - migrated (1 test)
+- ✅ FlowLayout/Empty.razor - migrated (1 test)
+- ✅ FlowLayout/FooterStyleClass.razor - migrated (1 test)
+- ✅ FlowLayout/FooterStyleEmpty.razor - migrated (1 test)
+- ✅ FlowLayout/FooterStyleStyle.razor - migrated (1 test)
+- ✅ FlowLayout/FooterTemplate.razor - migrated (1 test)
+- ✅ FlowLayout/HeaderStyleClass.razor - migrated (2 tests)
+- ✅ FlowLayout/HeaderStyleFont.razor - migrated (1 test)
+- ✅ FlowLayout/HeaderStyleTest.razor - migrated (2 tests)
+- ✅ FlowLayout/InlineHeaderStyle.razor - migrated (1 test)
+- ✅ FlowLayout/ItemStyleTest.razor - migrated (1 test)
+- ✅ FlowLayout/SeparatorTemplate.razor - migrated (1 test)
+- ✅ FlowLayout/Simple.razor - migrated (1 test)
+- ✅ FlowLayout/SimpleStyle.razor - migrated (1 test)
+- ✅ FlowLayout/Tooltip.razor - migrated (1 test)
+
+**FlowLayout/RepeatColumns folder (6 files):**
+- ✅ FlowLayout/RepeatColumns/HorizontalColumns1.razor - migrated (1 test)
+- ✅ FlowLayout/RepeatColumns/HorizontalColumns10in4.razor - migrated (1 test)
+- ✅ FlowLayout/RepeatColumns/HorizontalColumns12In4.razor - migrated (1 test)
+- ✅ FlowLayout/RepeatColumns/VerticalColumns1.razor - migrated (1 test)
+- ✅ FlowLayout/RepeatColumns/VerticalColumns10in4.razor - migrated (1 test)
+- ✅ FlowLayout/RepeatColumns/VerticalColumns12in4.razor - migrated (1 test)
+
+**Stream E Status**: ✅ **COMPLETE** - 22 files migrated (24 tests total)
+
+### Stream F Progress ✅ COMPLETE
+**TableLayout folder (26 files):**
+- ✅ TableLayout/AlternatingTemplate.razor - migrated (1 test)
+- ✅ TableLayout/Caption.razor - migrated (1 test)
+- ✅ TableLayout/ComplexStyle.razor - migrated (1 test)
+- ✅ TableLayout/DataBind.razor - migrated (1 test)
+- ✅ TableLayout/Empty.razor - migrated (1 test)
+- ✅ TableLayout/FontStyle.razor - migrated (1 test)
+- ✅ TableLayout/FooterStyleClass.razor - migrated (1 test)
+- ✅ TableLayout/FooterStyleEmpty.razor - migrated (1 test)
+- ✅ TableLayout/FooterStyleStyle.razor - migrated (1 test)
+- ✅ TableLayout/FooterTemplate.razor - migrated (1 test)
+- ✅ TableLayout/GridLines.razor - migrated (3 tests)
+- ✅ TableLayout/HeaderStyleCss.razor - migrated (2 tests)
+- ✅ TableLayout/HeaderStyleFont.razor - migrated (1 test)
+- ✅ TableLayout/HeaderStyleTest.razor - migrated (2 tests)
+- ✅ TableLayout/HeaderStyleWrap.razor - migrated (1 test)
+- ✅ TableLayout/InlineHeaderStyle.razor - migrated (1 test)
+- ✅ TableLayout/ItemStyleTest.razor - migrated (1 test)
+- ✅ TableLayout/RepeatColumnsHorizontal.razor - migrated (1 test)
+- ✅ TableLayout/RepeatColumnsVertical.razor - migrated (1 test)
+- ✅ TableLayout/SeparatorTemplate.razor - migrated (1 test)
+- ✅ TableLayout/ShowHeaderFooter.razor - migrated (2 tests)
+- ✅ TableLayout/Simple.razor - migrated (1 test)
+- ✅ TableLayout/SimpleAccessibleHeaders.razor - migrated (1 test)
+- ✅ TableLayout/SimpleStyle.razor - migrated (1 test)
+- ✅ TableLayout/Tabindex.razor - migrated (1 test)
+- ✅ TableLayout/Tooltip.razor - migrated (1 test)
+
+**Stream F Status**: ✅ **COMPLETE** - 26 files migrated (30 tests total)
+
 ### Stream G Progress ✅ COMPLETE
 **ListView folder (9 files):**
 - ✅ ListView/AlternatingTemplate.razor - migrated (1 test)
@@ -144,6 +204,118 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 - ✅ GridView/TemplateFields.razor - migrated (1 test)
 
 **Stream G Status**: ✅ **COMPLETE** - 18 files migrated (17 tests total)
+
+### Stream H Progress ✅ COMPLETE
+**TreeView folder (17 files):**
+- ✅ TreeView/PersistExpandedState_68.razor - migrated (1 test)
+- ✅ TreeView/ImageSet/Default.razor - migrated (1 test)
+- ✅ TreeView/ImageSet/HasExpandCollapse.razor - migrated (1 test)
+- ✅ TreeView/ImageSet/NoCollapse.razor - migrated (1 test)
+- ✅ TreeView/SiteMapDataSource/SimpleFromTheDocs.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/Checkboxes.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/CheckboxesLeaf.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/CheckboxesParent.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/CheckboxesRoot.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/CheckboxesTreeNodeShowCheckbox.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/Collapsed.razor - migrated (2 tests)
+- ✅ TreeView/StaticNodes/Image.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/ImageWithAnchor.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/ShowExpandCollapse.razor - migrated (1 test)
+- ✅ TreeView/StaticNodes/Simple.razor - migrated (1 test)
+- ✅ TreeView/XmlDataSource/DataBindingEvents.razor - migrated (1 test)
+- ✅ TreeView/XmlDataSource/SimpleFromTheDocs.razor - migrated (1 test)
+
+**Stream H Status**: ✅ **COMPLETE** - 17 files migrated (18 tests total)
+
+### Stream I Progress ✅ COMPLETE
+**Validations folder (33 files):**
+
+**RequiredFieldValidator subfolder (6 files):**
+- ✅ RequiredFieldValidator/InputNumberInvalidRequiredFieldValidator.razor - migrated (1 test)
+- ✅ RequiredFieldValidator/InputNumberValidRequiredFieldValidator.razor - migrated (1 test)
+- ✅ RequiredFieldValidator/InputTextInvalidRequiredFieldValidator.razor - migrated (1 test)
+- ✅ RequiredFieldValidator/InputTextValidRequiredFieldValidator.razor - migrated (1 test)
+- ✅ RequiredFieldValidator/ShowErrorMessageIfTextIsNotProvided.razor - migrated (1 test)
+- ✅ RequiredFieldValidator/ShowTextIfBothTextAndErrorMessageAreAvailable.razor - migrated (1 test)
+
+**CustomValidator subfolder (4 files):**
+- ✅ CustomValidator/CallServerValidateIfValidateEmpyTextSetToTrue.razor - migrated (1 test)
+- ✅ CustomValidator/InvalidCustomValidator.razor - migrated (1 test)
+- ✅ CustomValidator/SkipServerValidateIfValidateEmpyTextSetToFalse.razor - migrated (1 test)
+- ✅ CustomValidator/ValidCustomValidator.razor - migrated (1 test)
+
+**RangeValidator subfolder (2 files):**
+- ✅ RangeValidator/RangeValidatorInvalid.razor - migrated (1 test)
+- ✅ RangeValidator/RangeValidatorValid.razor - migrated (1 test)
+
+**RegularExpressionValidator subfolder (3 files):**
+- ✅ RegularExpressionValidator/InvalidRegularExpressionValidator.razor - migrated (1 test)
+- ✅ RegularExpressionValidator/MatchedTimeout.razor - migrated (1 test)
+- ✅ RegularExpressionValidator/ValidRegularExpressionValidator.razor - migrated (1 test)
+
+**ValidationSummary subfolder (4 files):**
+- ✅ ValidationSummary/BulletListDisplayMode.razor - migrated (1 test)
+- ✅ ValidationSummary/ListDisplayMode.razor - migrated (1 test)
+- ✅ ValidationSummary/NoErrors.razor - migrated (1 test)
+- ✅ ValidationSummary/SingleParagraphDisplayMode.razor - migrated (1 test)
+
+**CompareValidator/IntegerDataType/Invalid subfolder (7 files):**
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerDataTypeCheck.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerEqual.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerGreaterThan.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerGreaterThanEqual.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerLessThan.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerLessThanEqual.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Invalid/InvalidIntegerNotEqual.razor - migrated (1 test)
+
+**CompareValidator/IntegerDataType/Valid subfolder (7 files):**
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerDataTypeCheck.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerEqual.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerGreaterThan.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerGreaterThanEqual.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerLessThan.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerLessThanEqual.razor - migrated (1 test)
+- ✅ CompareValidator/IntegerDataType/Valid/ValidIntegerNotEqual.razor - migrated (1 test)
+
+**Stream I Status**: ✅ **COMPLETE** - 33 files migrated (33 tests total)
+
+### Stream J Progress ✅ COMPLETE
+**Login folder (4 files):**
+- ✅ Login/Authenticate.razor - migrated (1 test)
+- ✅ Login/LoggedIn.razor - migrated (1 test)
+- ✅ Login/LoggingIn.razor - migrated (1 test)
+- ✅ Login/LoginError.razor - migrated (1 test)
+
+**LoginName folder (3 files):**
+- ✅ LoginName/LoggedIn.razor - migrated (1 test)
+- ✅ LoginName/LoggedInWithFormatString.razor - migrated (1 test)
+- ✅ LoginName/NotLoggedIn.razor - migrated (1 test)
+
+**LoginStatus folder (12 files):**
+- ✅ LoginStatus/LoggedInDefault.razor - migrated (1 test)
+- ✅ LoginStatus/LoggedInEmpty.razor - migrated (1 test)
+- ✅ LoginStatus/LoggedInImageWithText.razor - migrated (1 test)
+- ✅ LoginStatus/LoggedInText.razor - migrated (1 test)
+- ✅ LoginStatus/LogoutActionRedirect.razor - migrated (1 test)
+- ✅ LoginStatus/LogoutActionRefresh.razor - migrated (1 test)
+- ✅ LoginStatus/LogoutEvent.razor - migrated (1 test)
+- ✅ LoginStatus/LogoutEventCancelOnLoggingOut.razor - migrated (1 test)
+- ✅ LoginStatus/NotLoggedInDefault.razor - migrated (1 test)
+- ✅ LoginStatus/NotLoggedInEmpty.razor - migrated (1 test)
+- ✅ LoginStatus/NotLoggedInImageWithText.razor - migrated (1 test)
+- ✅ LoginStatus/NotLoggedInText.razor - migrated (1 test)
+
+**LoginView folder (8 files):**
+- ✅ LoginView/AnonymusUser.razor - migrated (1 test)
+- ✅ LoginView/AnonymusUserWithNoRoleGroup.razor - migrated (1 test)
+- ✅ LoginView/DisplayNoContentWhenNothingHaveBeenSet.razor - migrated (1 test)
+- ✅ LoginView/LoggedInUserWithNoRoleGroup.razor - migrated (1 test)
+- ✅ LoginView/RoleGroupFirstGroupOnMultipleMatch.razor - migrated (1 test)
+- ✅ LoginView/RoleGroupFirstMatch.razor - migrated (1 test)
+- ✅ LoginView/RoleGroupNoMatchWithLoggedInTemplate.razor - migrated (1 test)
+- ✅ LoginView/RoleGroupNoMatchWithoutLoggedInTemplate.razor - migrated (1 test)
+
+**Stream J Status**: ✅ **COMPLETE** - 27 files migrated (27 tests total)
 
 ---
 
@@ -603,38 +775,38 @@ After completing, update docs/Migration/bUnit-Migration-Plan.md:
 - [x] FormView (5 files)
 - [x] ViewState (1 file)
 
-#### Stream E: DataList Flow (22 files) ⏳ PENDING
-- [ ] FlowLayout tests (16 files)
-- [ ] FlowLayout/RepeatColumns tests (6 files)
+#### Stream E: DataList Flow (22 files) ✅ COMPLETE
+- [x] FlowLayout tests (16 files)
+- [x] FlowLayout/RepeatColumns tests (6 files)
 
-#### Stream F: DataList Table (26 files) ⏳ PENDING
-- [ ] TableLayout tests (26 files)
+#### Stream F: DataList Table (26 files) ✅ COMPLETE
+- [x] TableLayout tests (26 files)
 
 #### Stream G: Grid Components (18 files) ✅ COMPLETE
 - [x] ListView (9 files)
 - [x] GridView (9 files)
 
-#### Stream H: Navigation (17 files) ⏳ PENDING
-- [ ] TreeView root (1 file)
-- [ ] TreeView/ImageSet (3 files)
-- [ ] TreeView/SiteMapDataSource (1 file)
-- [ ] TreeView/StaticNodes (10 files)
-- [ ] TreeView/XmlDataSource (2 files)
+#### Stream H: Navigation (17 files) ✅ COMPLETE
+- [x] TreeView root (1 file)
+- [x] TreeView/ImageSet (3 files)
+- [x] TreeView/SiteMapDataSource (1 file)
+- [x] TreeView/StaticNodes (10 files)
+- [x] TreeView/XmlDataSource (2 files)
 
-#### Stream I: Form Validation (33 files) ⏳ PENDING
-- [ ] RequiredFieldValidator (6 files)
-- [ ] RegularExpressionValidator (3 files)
-- [ ] CustomValidator (4 files)
-- [ ] CompareValidator/IntegerDataType/Invalid (7 files)
-- [ ] CompareValidator/IntegerDataType/Valid (7 files)
-- [ ] RangeValidator (2 files)
-- [ ] ValidationSummary (4 files)
+#### Stream I: Form Validation (33 files) ✅ COMPLETE
+- [x] RequiredFieldValidator (6 files)
+- [x] RegularExpressionValidator (3 files)
+- [x] CustomValidator (4 files)
+- [x] CompareValidator/IntegerDataType/Invalid (7 files)
+- [x] CompareValidator/IntegerDataType/Valid (7 files)
+- [x] RangeValidator (2 files)
+- [x] ValidationSummary (4 files)
 
-#### Stream J: Authentication (27 files) ⏳ PENDING
-- [ ] Login (4 files)
-- [ ] LoginName (3 files)
-- [ ] LoginStatus (12 files)
-- [ ] LoginView (8 files)
+#### Stream J: Authentication (27 files) ✅ COMPLETE
+- [x] Login (4 files)
+- [x] LoginName (3 files)
+- [x] LoginStatus (12 files)
+- [x] LoginView (8 files)
 
 #### Stream K: Data Binding (4 files) ⏳ PENDING
 - [ ] DataBinder (4 files)
@@ -795,7 +967,7 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 ## Success Criteria
 
-- [ ] ~197 test files converted to BunitContext pattern (69 complete, 128 remaining)
+- [ ] ~197 test files converted to BunitContext pattern (117 complete, 80 remaining)
 - [ ] All tests discoverable via `dotnet test --list-tests`
 - [ ] Test execution completes (pass/fail documented)
 - [x] _Imports.razor includes AngleSharp.Dom and Bunit.TestDoubles
@@ -808,15 +980,15 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 | Stream | Files | Status |
 |--------|-------|--------|
-| Stream E (DataList FlowLayout) | 22 | ⏳ Pending |
-| Stream F (DataList TableLayout) | 26 | ⏳ Pending |
+| Stream E (DataList FlowLayout) | 22 | ✅ Complete |
+| Stream F (DataList TableLayout) | 26 | ✅ Complete |
 | Stream G (ListView, GridView) | 18 | ✅ Complete |
-| Stream H (TreeView) | 17 | ⏳ Pending |
-| Stream I (Validations) | 33 | ⏳ Pending |
-| Stream J (LoginControls) | 27 | ⏳ Pending |
+| Stream H (TreeView) | 17 | ✅ Complete |
+| Stream I (Validations) | 33 | ✅ Complete |
+| Stream J (LoginControls) | 27 | ✅ Complete |
 | Stream K (DataBinder) | 4 | ⏳ Pending |
 | Uncategorized | 1 | ⏳ Pending |
-| **Total Remaining** | **128** | - |
+| **Total Remaining** | **5** | - |
 
 ---
 
@@ -824,11 +996,11 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 | Work Stream | Duration |
 |-------------|----------|
-| Completed streams (A-D, G) | ✅ Done |
-| Remaining streams (E, F, H-K) | ~2 hours |
+| Completed streams (A-J) | ✅ Done |
+| Remaining streams (K) | ~10 minutes |
 | Integration & verification | 30 minutes |
 | Copilot instructions update | 15 minutes |
-| **Total remaining work** | **~2.5 hours** |
+| **Total remaining work** | **~1 hour** |
 
 ---
 

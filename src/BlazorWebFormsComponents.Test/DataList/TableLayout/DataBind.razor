@@ -1,56 +1,29 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
 @using System.Diagnostics;
 
-<Fixture Test="ShouldTriggerEvents">
-	<ComponentUnderTest>
-		<DataList ID="simpleDataList"
-							Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							OnDataBound="DataBound"
-							OnDataBinding="DataBinding"
-							OnItemDataBound="ItemDataBound"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
+@code {
+    int databinding = 0;
+    int databound = 0;
+    int itemDatabound = 0;
 
-@code{
+    void DataBinding(EventArgs args) => databinding++;
+    void DataBound(EventArgs args) => databound++;
+    void ItemDataBound(DataListItemEventArgs args) => itemDatabound++;
 
-	int databinding = 0;
-	int databound = 0;
-	int itemDatabound = 0;
-
-	void DataBinding(EventArgs args)
-	{
-		databinding++;
-	}
-
-	void DataBound(EventArgs args)
-	{
-		databound++;
-	}
-
-	void ItemDataBound(DataListItemEventArgs args)
-	{
-		itemDatabound++;
-	}
+    [Fact]
+    public void DataList_TableLayout_DataBind_EventsTriggered()
+    {
+        var cut = Render(@<DataList ID="simpleDataList" Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" OnDataBound="DataBound" OnDataBinding="DataBinding" OnItemDataBound="ItemDataBound" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate><span>@Item.Name</span></ItemTemplate>
+        </DataList>);
+        databinding.ShouldBeGreaterThan(0);
+        databound.ShouldBeGreaterThan(0);
+        itemDatabound.ShouldBeGreaterThanOrEqualTo(Widget.SimpleWidgetList.Length);
+        cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
+    }
 }
 
-@code{
-	void ShouldTriggerEvents(Fixture fixture)
-	{
-		// Arrange
-		var cut = fixture.GetComponentUnderTest();
-		Debug.WriteLine(cut.Markup);
 
-		// Assert
-		databinding.ShouldBeGreaterThan(0);
-		databound.ShouldBeGreaterThan(0);
-		itemDatabound.ShouldBeGreaterThanOrEqualTo(Widget.SimpleWidgetList.Length);
-		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
-	}
-}
+

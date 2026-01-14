@@ -1,30 +1,20 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 
-<Fixture Setup="Setup" Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginName />
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
-
-	void Setup(Fixture fixture)
+	[Fact]
+	public void LoginName_NotLoggedIn_RendersNoSpan()
 	{
 		var principal = new ClaimsPrincipal();
 
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
-	}
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
-	void FirstTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.LoginName />);
 
 		cut.FindAll("span").Count().ShouldBe(0);
 	}

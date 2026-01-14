@@ -1,10 +1,6 @@
 ---
-description: Guidance for writing MkDocs documentation for BlazorWebFormsComponents
-applyTo: "**/docs/**"
-tags:
-  - documentation
-  - mkdocs
-  - markdown
+name: documentation
+description: Guidance for writing MkDocs documentation for BlazorWebFormsComponents. Use this when creating or updating component documentation, migration guides, or utility feature docs in the /docs folder.
 ---
 
 # Documentation Skill for BlazorWebFormsComponents

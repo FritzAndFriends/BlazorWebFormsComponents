@@ -1,35 +1,23 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Style="background-color: lime;"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
+    [Fact]
+    public void DataList_TableLayout_SimpleStyle_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+                                    ItemType="Widget"
+                                    RepeatLayout="Table"
+                                    Style="background-color: lime;"
+                                    Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
 
-	void FirstTest(Fixture fixture)
-	{
+        cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
+        cut.Find("td").TextContent.ShouldBe("My Widget List");
 
-		var cut = fixture.GetComponentUnderTest();
-
-		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
-		cut.Find("td").TextContent.ShouldBe("My Widget List");
-
-		cut.Find("table").HasAttribute("style").ShouldBeTrue();
-		cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
-		cut.Find("table").GetAttribute("style").ShouldContain("background-color: lime;");
-
-	}
-
-
+        cut.Find("table").HasAttribute("style").ShouldBeTrue();
+        cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
+        cut.Find("table").GetAttribute("style").ShouldContain("background-color: lime;");
+    }
 }

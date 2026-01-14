@@ -1,64 +1,40 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.Enums.DataListEnum
 
-<Fixture Test="BothTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							GridLines="Both"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="RowsTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							GridLines="Horizontal"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="ColsTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							GridLines="Vertical"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void BothTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-		cut.Find("table").HasAttribute("rules");
-		cut.Find("table").GetAttribute("rules").ShouldBe("both");
-	}
+    [Fact]
+    public void DataList_TableLayout_GridLines_Both_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" GridLines="Both" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        cut.Find("table").HasAttribute("rules");
+        cut.Find("table").GetAttribute("rules").ShouldBe("both");
+    }
 
-	void RowsTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-		cut.Find("table").HasAttribute("rules");
-		cut.Find("table").GetAttribute("rules").ShouldBe("rows");
-	}
+    [Fact]
+    public void DataList_TableLayout_GridLines_Rows_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" GridLines="Horizontal" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        cut.Find("table").HasAttribute("rules");
+        cut.Find("table").GetAttribute("rules").ShouldBe("rows");
+    }
 
-	void ColsTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-		cut.Find("table").HasAttribute("rules");
-		cut.Find("table").GetAttribute("rules").ShouldBe("cols");
-	}
+    [Fact]
+    public void DataList_TableLayout_GridLines_Cols_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" GridLines="Vertical" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        cut.Find("table").HasAttribute("rules");
+        cut.Find("table").GetAttribute("rules").ShouldBe("cols");
+    }
 }
+
+
+

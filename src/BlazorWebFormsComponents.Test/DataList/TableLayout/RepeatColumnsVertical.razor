@@ -1,35 +1,29 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.Widgets(10)"
-							ItemType="Widget"
-							RepeatDirection="Vertical"
-							RepeatLayout="Table"
-							RepeatColumns="4"
-							Context="Item">
-			<ItemTemplate>@Item.Id</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
-	void FirstTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-		System.Diagnostics.Debug.WriteLine(cut.Markup);
+    [Fact]
+    public void DataList_TableLayout_RepeatColumnsVertical_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.Widgets(10)"
+                                    ItemType="Widget"
+                                    RepeatDirection="Vertical"
+                                    RepeatLayout="Table"
+                                    RepeatColumns="4"
+                                    Context="Item">
+            <ItemTemplate>@Item.Id</ItemTemplate>
+        </DataList>);
 
-		//DataListSpan
-		//  HeaderSpan
-		//    Checking 10 items in 4 Repeating Columns
-		//      1 ; 4 ; 7 ; 9
-		//      2 ; 5 ; 8 ; 10
-		//      3 ; 6 ;
-		//  FooterSpan
+        //DataListSpan
+        //  HeaderSpan
+        //    Checking 10 items in 4 Repeating Columns
+        //      1 ; 4 ; 7 ; 9
+        //      2 ; 5 ; 8 ; 10
+        //      3 ; 6 ;
+        //  FooterSpan
 
-		var dataListNodes = cut.FindAll("td").FirstOrDefault(x => x.HasChildNodes);
-		var dataListChildren = cut.FindAll("td").ToList();
-		string.Join(' ', dataListChildren.Select(x => x.InnerHtml)).ShouldBe("1 4 7 9 2 5 8 10 3 6");
-		cut.FindAll("tr").Count().ShouldBe(3);
-	}
+        var dataListNodes = cut.FindAll("td").FirstOrDefault(x => x.HasChildNodes);
+        var dataListChildren = cut.FindAll("td").ToList();
+        string.Join(' ', dataListChildren.Select(x => x.InnerHtml)).ShouldBe("1 4 7 9 2 5 8 10 3 6");
+        cut.FindAll("tr").Count().ShouldBe(3);
+    }
 }

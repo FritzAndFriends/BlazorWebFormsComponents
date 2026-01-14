@@ -1,30 +1,25 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-			Write something
-			<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
-			<CompareValidator InputType="int"
-												ControlToValidate="@Number"
-												ValueToCompare="5"
-												Type="Integer"
-												Operator="LessThanEqual"
-												Text="invalid" />
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 	bool _validSubmit = false;
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<int>> Number = new ForwardRef<InputBase<int>>();
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void CompareValidator_ValidLessThanEqual_NoError()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				Write something
+				<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
+				<CompareValidator InputType="int"
+													ControlToValidate="@Number"
+													ValueToCompare="5"
+													Type="Integer"
+													Operator="LessThanEqual"
+													Text="invalid" />
+			</EditForm>
+		);
 
 		cut.Find("input").Change("5");
 

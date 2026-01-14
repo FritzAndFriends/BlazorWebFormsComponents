@@ -1,13 +1,11 @@
 ---
-applyTo: "src/BlazorWebFormsComponents.Test/**/*.razor"
-description: "Migrate bUnit test files from deprecated beta API to bUnit 2.x stable API"
+name: bunit-test-migration
+description: Migrate bUnit test files from deprecated beta API (1.0.0-beta-10) to bUnit 2.x stable API. Use this when working on .razor test files in BlazorWebFormsComponents.Test that contain old patterns like TestComponentBase, Fixture, or SnapshotTest.
 ---
 
-# bUnit Test Migration (Beta → 2.x)
+# bUnit Test Migration Skill (Beta → 2.x)
 
-## Purpose
-
-Migrate test files from deprecated bUnit 1.0.0-beta-10 API to bUnit 2.5.3 stable API.
+This skill provides guidance for migrating test files from the deprecated bUnit 1.0.0-beta-10 API to bUnit 2.5.3 stable API. Use this when you encounter test files using the old `TestComponentBase`, `<Fixture>`, or `<SnapshotTest>` patterns.
 
 ## When to Apply
 

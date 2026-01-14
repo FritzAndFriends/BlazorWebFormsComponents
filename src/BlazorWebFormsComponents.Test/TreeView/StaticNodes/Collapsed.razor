@@ -1,79 +1,59 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="CollapsedTest">
-	<ComponentUnderTest>
-		<TreeView id="SampleTreeView" runat="server">
-			<Nodes>
-				<TreeNode Value="Parent"
-									Text="Parent"
-									Expanded="false">
-					<TreeNode Value="Child"
-										Text="Child" />
-				</TreeNode>
-			</Nodes>
-		</TreeView>
-	</ComponentUnderTest>
+@code {
 
-	<Fragment Id="BeforeImage">
-		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">
-	</Fragment>
+	private TreeNode _ExpandedNode;
 
-	<Fragment Id="AfterImage">
-		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">
-	</Fragment>
+	[Fact]
+	public void TreeView_Collapsed_ClickToExpandShowsCollapseImage()
+	{
+		var cut = Render(
+			@<TreeView id="SampleTreeView" runat="server">
+				<Nodes>
+					<TreeNode Value="Parent"
+										Text="Parent"
+										Expanded="false">
+						<TreeNode Value="Child"
+											Text="Child" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
 
-	@code {
+		var beforeImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">;
+		var afterImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">;
 
-		private TreeNode _ExpandedNode;
+		cut.Find("img").MarkupMatches(beforeImage);
 
-		void CollapsedTest(Fixture fixture)
-		{
-			var cut = fixture.GetComponentUnderTest<TreeView>();
-			cut.Find("img").MarkupMatches(fixture.GetFragment("BeforeImage"));
+		cut.Find("a").Click();
 
-			cut.Find("a").Click();
-
-			cut.Find("img").MarkupMatches(fixture.GetFragment("AfterImage"));
-		}
+		cut.Find("img").MarkupMatches(afterImage);
 	}
 
-</Fixture>
+	[Fact]
+	public void TreeView_Expanded_ClickToCollapseHidesChildren()
+	{
+		var cut = Render(
+			@<TreeView id="SampleTreeView" runat="server">
+				<Nodes>
+					<TreeNode Value="Parent"
+										Text="Parent"
+										Expanded="true">
+						<TreeNode Value="Child"
+											Text="Child" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
 
+		var beforeImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">;
+		var afterImage = @<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">;
 
-<Fixture Test="HideTest">
-	<ComponentUnderTest>
-		<TreeView id="SampleTreeView" runat="server">
-			<Nodes>
-				<TreeNode Value="Parent"
-									Text="Parent"
-									Expanded="true">
-					<TreeNode Value="Child"
-										Text="Child" />
-				</TreeNode>
-			</Nodes>
-		</TreeView>
-	</ComponentUnderTest>
+		cut.Find("img").MarkupMatches(afterImage);
 
-	<Fragment Id="BeforeImage">
-		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Expand.gif" alt="Expand Parent" title="Expand Parent" style="border-width: 0;">
-	</Fragment>
+		cut.Find("a").Click();
 
-	<Fragment Id="AfterImage">
-		<img src="_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif" alt="Collapse Parent" title="Collapse Parent" style="border-width: 0;">
-	</Fragment>
-
-	@code {
-
-		void HideTest(Fixture fixture)
-		{
-			var cut = fixture.GetComponentUnderTest<TreeView>();
-			cut.Find("img").MarkupMatches(fixture.GetFragment("AfterImage"));
-
-			cut.Find("a").Click();
-
-			cut.Find("img").MarkupMatches(fixture.GetFragment("BeforeImage"));
-			cut.FindAll("table").Count.ShouldBe(1);
-		}
+		cut.Find("img").MarkupMatches(beforeImage);
+		cut.FindAll("table").Count.ShouldBe(1);
 	}
-
-</Fixture>
+}
