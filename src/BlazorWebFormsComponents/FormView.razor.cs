@@ -1,6 +1,7 @@
 ﻿using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,9 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public RenderFragment<ItemType> EditItemTemplate { get; set; }
+
+		[Parameter]
+		public RenderFragment<ItemType> InsertItemTemplate { get; set; }
 
 		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
@@ -96,6 +100,24 @@ namespace BlazorWebFormsComponents
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
 					break;
+				case "delete":
+					Exception caughtException = null;
+					try {
+						OnItemDeleting.InvokeAsync(new FormViewDeleteEventArgs(Position)).GetAwaiter().GetResult();
+					} catch (Exception ex) {
+						caughtException = ex;
+					}
+					// do we do the deletion?
+					OnItemDeleted.InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException)).GetAwaiter().GetResult();
+					CurrentMode = DefaultMode;
+					Position = (Position == 0) ? 0 : Position - 1;
+					break;
+				case "insert":
+					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert }).GetAwaiter().GetResult();
+					OnItemInserted.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
+					CurrentMode = FormViewMode.Insert;
+					break;
 				case "update":
 					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update")).GetAwaiter().GetResult();
 					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode }).GetAwaiter().GetResult();
@@ -112,6 +134,18 @@ namespace BlazorWebFormsComponents
 		#endregion
 
 		#region Custom Events
+
+		[Parameter]
+		public EventCallback<FormViewDeleteEventArgs> OnItemDeleting { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewDeletedEventArgs> OnItemDeleted { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewInsertEventArgs> OnItemInserting { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewInsertEventArgs> OnItemInserted { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewUpdateEventArgs> OnItemUpdating { get; set; }

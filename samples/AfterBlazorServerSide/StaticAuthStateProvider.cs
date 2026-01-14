@@ -7,7 +7,7 @@ namespace AfterBlazorServerSide
 	public class StaticAuthStateProvider : AuthenticationStateProvider
 	{
 
-		private static ClaimsPrincipal _user = new ClaimsPrincipal();
+		private static ClaimsPrincipal _user = new();
 
 		public static void Login(string name)
 		{

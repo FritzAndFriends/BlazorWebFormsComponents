@@ -1,21 +1,39 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+using AfterBlazorServerSide;
+using BlazorWebFormsComponents;
+using Microsoft.AspNetCore.Components.Authorization;
 
-namespace AfterBlazorServerSide
+var builder = WebApplication.CreateBuilder(args);
+
+var services = builder.Services;
+
+services.AddRazorPages();
+services.AddServerSideBlazor();
+services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
+	app.UseDeveloperExceptionPage();
+}
+else
+{
+	app.UseExceptionHandler("/Error");
+	app.UseHsts();
+}
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStaticWebAssets();
-					webBuilder.UseStartup<Startup>();
-				});
-	}
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
+
+await app.RunAsync();
+
+partial class Program
+{
+	public static string ApplicationName => "Blazor Server-Side";
+	public static Version ComponentVersion = typeof(IStyle).Assembly.GetName().Version;
 }

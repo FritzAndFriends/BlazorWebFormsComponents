@@ -63,6 +63,9 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		[Parameter]
+		public EventCallback<GridViewCommandEventArgs> OnRowCommand { get; set; }
+
 		///<inheritdoc/>
 		public void AddColumn(IColumn<ItemType> column)
 		{

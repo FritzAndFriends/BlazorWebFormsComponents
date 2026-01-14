@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
 		<LangVersion>8.0</LangVersion>
 	  <DocumentationFile>BlazorWebFormsComponents.xml</DocumentationFile>
@@ -12,7 +12,7 @@
 		<PackageId>Fritz.BlazorWebFormsComponents</PackageId>
 		<Authors>Jeffrey T. Fritz</Authors>
 		<Description>A collection of Blazor components based on the default controls that ship with ASP.NET Web Forms</Description>
-		<Copyright>Copyright Jeffrey T. Fritz 2019,2020</Copyright>
+		<Copyright>Copyright Jeffrey T. Fritz 2019-2022</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</PackageProjectUrl>
 		<PackageTags>blazor</PackageTags>
@@ -23,11 +23,11 @@
 
   <ItemGroup>
     <PackageReference Include="BlazorComponentUtilities" Version="1.6.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.0" />
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.2" />
   </ItemGroup>
 
   <ItemGroup>

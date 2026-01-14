@@ -26,7 +26,7 @@ namespace AfterBlazorClientSide
 
 	}
 
-	public static class Startup
+	public static class AppStatics
 	{
 
 		public static string ApplicationName => "Blazor WebAssembly";
