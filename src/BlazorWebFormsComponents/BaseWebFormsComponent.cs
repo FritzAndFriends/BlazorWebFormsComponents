@@ -169,6 +169,32 @@ namespace BlazorWebFormsComponents
 		[Inject]
 		public IJSRuntime JsRuntime { get; set; }
 
+		/// <summary>
+		/// Service provider to resolve optional services
+		/// </summary>
+		[Inject]
+		private IServiceProvider ServiceProvider { get; set; }
+
+		/// <summary>
+		/// Lazy-resolved optional JS interop service that handles automatic script loading.
+		/// If not registered, falls back to requiring manual script tag.
+		/// </summary>
+		private BlazorWebFormsJsInterop _jsInterop;
+		private bool _jsInteropResolved;
+		
+		protected BlazorWebFormsJsInterop JsInterop
+		{
+			get
+			{
+				if (!_jsInteropResolved)
+				{
+					_jsInterop = ServiceProvider?.GetService(typeof(BlazorWebFormsJsInterop)) as BlazorWebFormsJsInterop;
+					_jsInteropResolved = true;
+				}
+				return _jsInterop;
+			}
+		}
+
 		protected override async Task OnInitializedAsync()
 		{
 
@@ -204,7 +230,18 @@ namespace BlazorWebFormsComponents
 				HandleUnknownAttributes();
 				StateHasChanged();
 
-				JsRuntime.InvokeVoidAsync(JsScripts.Page.OnAfterRender, new object[] { });
+				// Use the JS interop service if available (auto-loads script)
+				// Otherwise fall back to direct call (requires manual script tag)
+				if (JsInterop is not null)
+				{
+					await JsInterop.OnAfterRenderAsync();
+				}
+				else
+				{
+					// Fire-and-forget to maintain backward compatibility
+					// The script tag must be manually added to the layout
+					_ = JsRuntime.InvokeVoidAsync(JsScripts.Page.OnAfterRender, new object[] { });
+				}
 
 			}
 

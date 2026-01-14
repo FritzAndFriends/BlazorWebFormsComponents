@@ -87,6 +87,7 @@ nav:
     - TreeView: NavigationControls/TreeView.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
+    - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
     - ViewState: UtilityFeatures/ViewState.md
   - Migration:
       - Getting started: Migration/readme.md

@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseStaticWebAssets();
 
+builder.Services.AddBlazorWebFormsComponents();
+
 var services = builder.Services;
 
 services.AddRazorComponents()
