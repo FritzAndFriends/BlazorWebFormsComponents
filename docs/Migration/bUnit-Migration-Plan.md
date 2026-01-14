@@ -23,13 +23,19 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 | Phase 2-5: Test File Migration | 🔄 In Progress | - |
 | Phase 6: Copilot Instructions | ⏳ Pending | - |
 
+### Overall Statistics (as of 2026-01-14)
+- **Files Migrated**: 51 of 197 test files (26%)
+- **Files Remaining**: 146 test files
+- **Build Errors**: 320 remaining (down from 412 initial)
+- **Commit**: `aaadbcd` - "Refactor tests for BlazorWebFormsComponents to use Bunit framework"
+
 ### Phase 1 Completion Notes
 - ✅ Updated `BlazorWebFormsComponents.Test.csproj` - bUnit 1.0.0-beta-10 → 2.5.3
 - ✅ Updated `_Imports.razor` - Added `AngleSharp.Dom` and `Bunit.TestDoubles`
 - ✅ Package restore successful
-- ⚠️ Build shows 412 errors (expected - test files need migration)
 
-### Stream A Progress (This Session)
+### Stream A Progress ✅ COMPLETE
+**Button folder (9 files):**
 - ✅ Button/Click.razor - migrated
 - ✅ Button/Command.razor - migrated
 - ✅ Button/Enabled.razor - migrated
@@ -39,36 +45,38 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 - ✅ Button/Visible.razor - migrated
 - ✅ Button/CausesValidation.razor - migrated
 - ✅ Button/CausesValidationFalse.razor - migrated
+
+**HiddenField folder (2 files):**
 - ✅ HiddenField/Format.razor - migrated
 - ✅ HiddenField/ValueChanged.razor - migrated
+
+**HyperLink folder (2 files):**
 - ✅ HyperLink/Format.razor - migrated
 - ✅ HyperLink/Style.razor - migrated (3 tests)
 
-**Stream A Status**: ✅ **COMPLETE** - 13 files, 16 tests migrated
-**Build Errors**: 412 → 389 (23 errors resolved)
+**Stream A Status**: ✅ **COMPLETE** - 13 files migrated
 
-### Stream B Progress (Copilot CLI - Partial)
-**Image folder:**
+### Stream B Progress ✅ COMPLETE
+**Image folder (4 files):**
 - ✅ Image/GenerateEmptyAlternateText.razor - migrated (4 tests)
 - ✅ Image/ImageAlign.razor - migrated (10 tests)
-- ✅ Image/ToolTip.razor - migrated
+- ✅ Image/ToolTip.razor - migrated (2 tests, uses `new Bunit.TestContext()` pattern)
 - ✅ Image/Visible.razor - migrated (2 tests)
 
-**Literal folder:**
+**Literal folder (3 files):**
 - ✅ Literal/BasicFormat.razor - migrated
 - ✅ Literal/HtmlEncoded.razor - migrated
 - ✅ Literal/HtmlNotEncoded.razor - migrated
 
-**LinkButton folder:**
-- ✅ LinkButton/Click.razor - migrated
-- ✅ LinkButton/Command.razor - migrated
+**LinkButton folder (3 files):**
+- ✅ LinkButton/Click.razor - migrated (uses `new Bunit.TestContext()` pattern)
+- ✅ LinkButton/Command.razor - migrated (uses `new Bunit.TestContext()` pattern)
 - ✅ LinkButton/Format.razor - migrated
 
-**Stream B Status**: ✅ **COMPLETE** - 10 files, 22 tests migrated
-**Build Errors**: 389 → 353 (36 errors resolved)
+**Stream B Status**: ✅ **COMPLETE** - 10 files migrated
 
-### Stream C Progress (VS Code Copilot Edits)
-**ImageButton folder:**
+### Stream C Progress ✅ COMPLETE
+**ImageButton folder (6 files):**
 - ✅ ImageButton/Click.razor - migrated (1 test)
 - ✅ ImageButton/Enabled.razor - migrated (2 tests)
 - ✅ ImageButton/ImageAlign.razor - migrated (10 tests)
@@ -76,7 +84,7 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 - ✅ ImageButton/ToolTip.razor - migrated (2 tests)
 - ✅ ImageButton/Visible.razor - migrated (2 tests)
 
-**AdRotator folder:**
+**AdRotator folder (6 files):**
 - ✅ AdRotator/AdCreated.razor - migrated (1 test)
 - ✅ AdRotator/Format.razor - migrated (1 test)
 - ✅ AdRotator/KeywordFilter.razor - migrated (1 test)
@@ -84,8 +92,58 @@ The test project uses bUnit's experimental beta API (`TestComponentBase`, `<Fixt
 - ✅ AdRotator/Rotate.razor - migrated (2 tests)
 - ✅ AdRotator/Style.razor - migrated (1 test)
 
-**Stream C Status**: ✅ **COMPLETE** - 12 files, 25 tests migrated
-**Build Errors**: 353 → 321 (32 errors resolved)
+**Stream C Status**: ✅ **COMPLETE** - 12 files migrated
+
+### Stream D Progress ✅ COMPLETE
+**BaseWebFormsComponent folder (3 files):**
+- ✅ BaseWebFormsComponent/BubbleEvent.razor - migrated
+- ✅ BaseWebFormsComponent/Controls.razor - migrated
+- ✅ BaseWebFormsComponent/Parent.razor - migrated
+- ⏭️ TestBubbleComponent.razor - skipped (helper component, not a test)
+
+**Repeater folder (5 files):**
+- ✅ Repeater/AlternatingItemTemplate.razor - migrated
+- ✅ Repeater/Empty.razor - migrated
+- ✅ Repeater/HeaderAndFooter.razor - migrated
+- ✅ Repeater/SimpleList.razor - migrated
+- ✅ Repeater/Visible.razor - migrated
+
+**FormView folder (5 files):**
+- ✅ FormView/Delete.razor - migrated
+- ✅ FormView/Edit.razor - migrated
+- ✅ FormView/Insert.razor - migrated
+- ✅ FormView/Simple.razor - migrated
+- ✅ FormView/Update.razor - migrated
+
+**ViewState folder (1 file):**
+- ✅ ViewState/SimpleRepeater.razor - migrated
+
+**Stream D Status**: ✅ **COMPLETE** - 14 files migrated
+
+### Stream G Progress (Partial)
+**ListView folder:**
+- ✅ ListView/AlternatingTemplate.razor - migrated
+- ⏳ ListView/DataBindingEvents.razor - pending
+- ⏳ ListView/Grouping6x5.razor - pending
+- ⏳ ListView/Grouping7x3.razor - pending
+- ⏳ ListView/Grouping8x2.razor - pending
+- ⏳ ListView/Layout.razor - pending
+- ⏳ ListView/SelectMethod.razor - pending
+- ⏳ ListView/SimpleList.razor - pending
+- ⏳ ListView/WebFormsEvents.razor - pending
+
+**GridView folder:**
+- ✅ GridView/BindAttribute.razor - migrated
+- ⏳ GridView/ButtonFields.razor - pending
+- ⏳ GridView/ButtonFields_Image.razor - pending
+- ⏳ GridView/ButtonFields_Link.razor - pending
+- ⏳ GridView/DataBoundFields.razor - pending
+- ⏳ GridView/DataTableSupport.razor - pending
+- ⏳ GridView/EmptyDataText.razor - pending
+- ⏳ GridView/HyperlinkFields.razor - pending
+- ⏳ GridView/TemplateFields.razor - pending
+
+**Stream G Status**: 🔄 **IN PROGRESS** - 2 of 18 files migrated
 
 ---
 
@@ -525,55 +583,64 @@ After completing, update docs/Migration/bUnit-Migration-Plan.md:
 
 ### Progress Tracking Checklist
 
-#### Stream A: Low Complexity Basics (13 files) - This Session
-- [ ] Button (9 files)
-- [ ] HiddenField (2 files)
-- [ ] HyperLink (2 files)
+#### Stream A: Low Complexity Basics (13 files) ✅ COMPLETE
+- [x] Button (9 files)
+- [x] HiddenField (2 files)
+- [x] HyperLink (2 files)
 
-#### Stream B: Simple Components (10 files) - CLI Terminal 1
-- [ ] Image (4 files)
-- [ ] Literal (3 files)
-- [ ] LinkButton (3 files)
+#### Stream B: Simple Components (10 files) ✅ COMPLETE
+- [x] Image (4 files)
+- [x] Literal (3 files)
+- [x] LinkButton (3 files)
 
-#### Stream C: Interactive Components (12 files) - Copilot Edits
-- [ ] ImageButton (6 files)
-- [ ] AdRotator (6 files)
+#### Stream C: Interactive Components (12 files) ✅ COMPLETE
+- [x] ImageButton (6 files)
+- [x] AdRotator (6 files)
 
-#### Stream D: Foundation & Templated (15 files) - CLI Terminal 2
+#### Stream D: Foundation & Templated (14 files) ✅ COMPLETE
 - [x] BaseWebFormsComponent (3 files, TestBubbleComponent.razor skipped)
 - [x] Repeater (5 files)
 - [x] FormView (5 files)
 - [x] ViewState (1 file)
 
-#### Stream E: DataList Flow (18 files) - New Chat
-- [ ] FlowLayout tests (18 files)
+#### Stream E: DataList Flow (22 files) ⏳ PENDING
+- [ ] FlowLayout tests (16 files)
+- [ ] FlowLayout/RepeatColumns tests (6 files)
 
-#### Stream F: DataList Table (23 files) - New Chat
-- [ ] TableLayout tests (23 files)
+#### Stream F: DataList Table (26 files) ⏳ PENDING
+- [ ] TableLayout tests (26 files)
 
-#### Stream G: Grid Components (18 files) - CLI Terminal 3
-- [ ] ListView (9 files)
-- [ ] GridView (9 files)
+#### Stream G: Grid Components (18 files) 🔄 IN PROGRESS
+- [ ] ListView (1/9 files migrated)
+- [ ] GridView (1/9 files migrated)
 
-#### Stream H: Navigation (15 files) - New Chat
-- [ ] TreeView (15 files)
+#### Stream H: Navigation (17 files) ⏳ PENDING
+- [ ] TreeView root (1 file)
+- [ ] TreeView/ImageSet (3 files)
+- [ ] TreeView/SiteMapDataSource (1 file)
+- [ ] TreeView/StaticNodes (10 files)
+- [ ] TreeView/XmlDataSource (2 files)
 
-#### Stream I: Form Validation (33 files) - CLI Terminal 4
+#### Stream I: Form Validation (33 files) ⏳ PENDING
 - [ ] RequiredFieldValidator (6 files)
 - [ ] RegularExpressionValidator (3 files)
 - [ ] CustomValidator (4 files)
-- [ ] CompareValidator (14 files)
+- [ ] CompareValidator/IntegerDataType/Invalid (7 files)
+- [ ] CompareValidator/IntegerDataType/Valid (7 files)
 - [ ] RangeValidator (2 files)
 - [ ] ValidationSummary (4 files)
 
-#### Stream J: Authentication (27 files) - New Chat
+#### Stream J: Authentication (27 files) ⏳ PENDING
 - [ ] Login (4 files)
 - [ ] LoginName (3 files)
 - [ ] LoginStatus (12 files)
 - [ ] LoginView (8 files)
 
-#### Stream K: Data Binding (4 files) - CLI Terminal 5
+#### Stream K: Data Binding (4 files) ⏳ PENDING
 - [ ] DataBinder (4 files)
+
+#### Uncategorized Files ⏳ PENDING
+- [ ] DataList/NullData.razor (1 file)
 
 ### Post-Migration Verification
 
@@ -728,12 +795,28 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 ## Success Criteria
 
-- [ ] 198 test files converted to BunitContext pattern
+- [ ] ~197 test files converted to BunitContext pattern (51 complete, 146 remaining)
 - [ ] All tests discoverable via `dotnet test --list-tests`
 - [ ] Test execution completes (pass/fail documented)
-- [ ] _Imports.razor includes AngleSharp.Dom and Bunit.TestDoubles
-- [ ] .csproj references bUnit 2.5.3
+- [x] _Imports.razor includes AngleSharp.Dom and Bunit.TestDoubles
+- [x] .csproj references bUnit 2.5.3
 - [ ] copilot-instructions.md reflects new patterns
+
+---
+
+## Remaining Work Summary
+
+| Stream | Files | Status |
+|--------|-------|--------|
+| Stream E (DataList FlowLayout) | 22 | ⏳ Pending |
+| Stream F (DataList TableLayout) | 26 | ⏳ Pending |
+| Stream G (ListView, GridView) | 16 | 🔄 In Progress (2 done) |
+| Stream H (TreeView) | 17 | ⏳ Pending |
+| Stream I (Validations) | 33 | ⏳ Pending |
+| Stream J (LoginControls) | 27 | ⏳ Pending |
+| Stream K (DataBinder) | 4 | ⏳ Pending |
+| Uncategorized | 1 | ⏳ Pending |
+| **Total Remaining** | **146** | - |
 
 ---
 
@@ -741,10 +824,11 @@ Pattern: `ComponentName_Scenario_ExpectedBehavior`
 
 | Work Stream | Duration |
 |-------------|----------|
-| Parallel streams (11 concurrent) | 2-3 hours |
+| Completed streams (A-D + partial G) | ✅ Done |
+| Remaining streams (E-K) | ~2 hours |
 | Integration & verification | 30 minutes |
 | Copilot instructions update | 15 minutes |
-| **Total with parallelization** | **~3 hours** |
+| **Total remaining work** | **~2.5 hours** |
 
 ---
 
