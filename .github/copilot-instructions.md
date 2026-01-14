@@ -256,7 +256,53 @@ When adding new components:
 2. Inherit from appropriate base class
 3. Add unit tests in matching folder under `/src/BlazorWebFormsComponents.Test/`
 4. Add sample page in `/samples/AfterBlazorServerSide/Pages/ControlSamples/`
-5. Document in `/docs/` folder
+5. Document in `/docs/` folder (see Documentation Requirements below)
+
+## Documentation Requirements
+
+**IMPORTANT**: All features, fixes, and new components MUST include documentation updates.
+
+### When to Update Documentation
+
+- **New Component**: Create documentation file and add to `mkdocs.yml`
+- **New Feature**: Update the component's documentation to describe the feature
+- **Bug Fix**: Update documentation if the fix changes behavior or usage
+- **Breaking Change**: Document migration steps in the component's documentation
+
+### Documentation Checklist
+
+For every completed feature, fix, or new component:
+
+1. **Create or update the markdown documentation file** in the appropriate `/docs/` subfolder:
+   - Editor Controls → `/docs/EditorControls/`
+   - Data Controls → `/docs/DataControls/`
+   - Validation Controls → `/docs/ValidationControls/`
+   - Navigation Controls → `/docs/NavigationControls/`
+   - Login Controls → `/docs/LoginControls/`
+
+2. **Add entry to `mkdocs.yml`** if the documentation file is new:
+   - Add under the appropriate section in the `nav:` block
+   - Follow alphabetical ordering within sections
+   - Format: `- ComponentName: Category/ComponentName.md`
+
+3. **Update README.md** if adding a new component:
+   - Add link to documentation in the component list
+   - Format: `[ComponentName](docs/Category/ComponentName.md)`
+
+### Example: Adding a New Component
+
+```bash
+# 1. Create documentation file
+docs/EditorControls/NewComponent.md
+
+# 2. Add to mkdocs.yml nav section
+nav:
+  - Editor Controls:
+    - NewComponent: EditorControls/NewComponent.md
+
+# 3. Add link in README.md under Editor Controls
+- [NewComponent](docs/EditorControls/NewComponent.md)
+```
 
 ## Building and Running
 
