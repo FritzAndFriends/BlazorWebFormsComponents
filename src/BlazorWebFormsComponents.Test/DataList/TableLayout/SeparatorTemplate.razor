@@ -1,34 +1,19 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-			<SeparatorTemplate>====</SeparatorTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
+    [Fact]
+    public void DataList_TableLayout_SeparatorTemplate_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+            <SeparatorTemplate>====</SeparatorTemplate>
+        </DataList>);
 
-	void FirstTest(Fixture fixture)
-	{
+        cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length*2);
+        cut.FindAll("td").Count(c => c.TextContent == "====").ShouldBe(Widget.SimpleWidgetList.Length-1);
 
-		var cut = fixture.GetComponentUnderTest();
-
-		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length*2);
-		cut.FindAll("td").Count(c => c.TextContent == "====").ShouldBe(Widget.SimpleWidgetList.Length-1);
-
-		cut.FindAll("td")[2].TextContent.ShouldBe("====");
-		cut.FindAll("td")[4].TextContent.ShouldBe("====");
-
-	}
-
-
+        cut.FindAll("td")[2].TextContent.ShouldBe("====");
+        cut.FindAll("td")[4].TextContent.ShouldBe("====");
+    }
 }

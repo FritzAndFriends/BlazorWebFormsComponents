@@ -1,22 +1,14 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 @using Moq.Protected;
 @using static BlazorWebFormsComponents.Enums.LogoutAction
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutPageUrl="logout" LogoutAction="Redirect" />
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
-
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void LoginStatus_LogoutActionRedirect_NavigatesToLogoutPage()
 	{
-
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
 		principal.AddIdentity(identity);
@@ -24,18 +16,16 @@
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
 		var navigationManager = new MockNavigationManager();
 
-		fixture.Services.AddSingleton<NavigationManager>(navigationManager);
+		Services.AddSingleton<NavigationManager>(navigationManager);
 
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutPageUrl="logout" LogoutAction="Redirect" />);
 
 		cut.Find("a").Click();
 
 		navigationManager.LastUri.ShouldBe("logout");
-
 	}
-
 }

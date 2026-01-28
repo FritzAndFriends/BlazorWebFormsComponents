@@ -1,8 +1,16 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<table>
+@code{
+	public Widget[] data = Widget.Widgets(6);
+}
+
+@code {
+
+	[Fact]
+	public void ListView_Grouping6x5_RendersCorrectGroupStructure()
+	{
+		var cut = Render(
+		@<table>
 			<thead> <tr> <td>Id</td> <td>Name</td> <td>Price</td> <td>Last Update</td> </tr> </thead>
 			<tbody>
 				<ListView Items="data"
@@ -28,26 +36,14 @@
 					</GroupSeparatorTemplate>
 				</ListView>
 			</tbody>
-		</table>
-	</ComponentUnderTest>
-</Fixture>
+		</table>);
 
-@code{
-	public Widget[] data = Widget.Widgets(6);
-}
-
-@code {
-
-	void FirstTest(Fixture fixture)
-	{
-
-		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		// 8 x 2 => I is I G I is I G I is I G I is I
 		// 8 x 3 => I is I is I G I is I is I G I is I is
 		// 7 x 3 => I is I is I G I is I is I G I is is
-		// 6 x 5 => I is I is I is I is I G I is is is is 
+		// 6 x 5 => I is I is I is I is I G I is is is is
 
 		cut.FindAll("td").Count(e => e.TextContent.Contains("Widget")).ShouldBe(6);
 		cut.FindAll("td").Count(e => e.TextContent.Contains("GroupingSeperator")).ShouldBe(1);

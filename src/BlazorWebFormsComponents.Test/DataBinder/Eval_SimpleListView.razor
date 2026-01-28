@@ -1,23 +1,17 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.DataBinder
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<ListView Items="Widget.SimpleWidgetList"
-							ItemType="Widget">
-			<ItemTemplate><span>@Eval("Name")</span><span>@Eval("Price", "{0:C}")</span></ItemTemplate>
-		</ListView>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataBinder_Eval_SimpleListView_RendersFormattedValues()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
-		System.Diagnostics.Debug.WriteLine(cut.Markup);
+		var cut = Render(
+			@<ListView Items="Widget.SimpleWidgetList"
+							ItemType="Widget">
+				<ItemTemplate><span>@Eval("Name")</span><span>@Eval("Price", "{0:C}")</span></ItemTemplate>
+			</ListView>
+		);
 
 		var spans = cut.FindAll("span");
 
@@ -25,7 +19,6 @@
 
 		spans[0].TextContent.ShouldBe(theWidget.Name);
 		spans[1].TextContent.ShouldBe(theWidget.Price.ToString("C"));
-
 	}
 
 }

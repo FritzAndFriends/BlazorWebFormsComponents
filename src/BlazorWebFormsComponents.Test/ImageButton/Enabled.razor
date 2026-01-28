@@ -1,29 +1,19 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using BlazorWebFormsComponents
 
-<Fixture Test="ImageButton_Enabled">
-	<ComponentUnderTest>
-		<ImageButton ImageUrl="/img/VB.png" Enabled="true" />
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="ImageButton_Disabled">
-	<ComponentUnderTest>
-		<ImageButton ImageUrl="/img/VB.png" Enabled="false" />
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void ImageButton_Enabled(Fixture fixture)
+	[Fact]
+	public void ImageButton_Enabled_NoDisabledAttribute()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ImageButton ImageUrl="/img/VB.png" Enabled="true" />);
 
 		cut.Find("input").HasAttribute("disabled").ShouldBeFalse();
 	}
 
-	void ImageButton_Disabled(Fixture fixture)
+	[Fact]
+	public void ImageButton_Disabled_HasDisabledAttribute()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ImageButton ImageUrl="/img/VB.png" Enabled="false" />);
 
 		cut.Find("input").HasAttribute("disabled").ShouldBeTrue();
 	}

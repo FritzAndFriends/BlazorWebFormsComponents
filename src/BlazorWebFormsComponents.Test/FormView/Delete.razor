@@ -1,31 +1,6 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<FormView AllowPaging="true"
-							DataKeyNames="Id"
-							OnItemDeleting="FormDeleting"
-							OnItemDeleted="FormDeleted"
-							runat="server"
-							Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							Context="Item">
-			<ItemTemplate>
 
-				<table id="theItemTemplate">
-					<tr>
-						<td>@Item.Name</td><td>@Item.Price.ToString("C")</td><td>@Item.Id</td>
-					</tr>
-					<tr>
-						<td><Button CommandName="Delete" Text="Delete" /></td>
-					</tr>
-				</table>
-
-			</ItemTemplate>
-
-		</FormView>
-	</ComponentUnderTest>
-</Fixture>
 
 
 @code {
@@ -34,19 +9,27 @@
 	bool raisedItemDeletingEvent = false;
 	bool raisedItemDeletedEvent = false;
 
-	void FirstTest(Fixture fixture)
-	{
-
-		var cut = fixture.GetComponentUnderTest();
-
-		var deleteButton = cut.Find("button");
-		deleteButton.Click();
-
-		raisedItemDeletingEvent.ShouldBeTrue("Did not raise the ItemDeleting event");
-		raisedItemDeletedEvent.ShouldBeTrue("Did not raise the ItemDeleted event");
-		cut.Find("#theItemTemplate").ShouldNotBeNull("Didn't change back to read-only mode");
-
-	}
+	[Fact]
+public void FormView_DeleteButton_DeletesItemAndRaisesEvents()
+{
+	var cut = Render(@<FormView AllowPaging="true" DataKeyNames="Id" OnItemDeleting="FormDeleting" OnItemDeleted="FormDeleted" runat="server" Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+		<ItemTemplate>
+			<table id="theItemTemplate">
+				<tr>
+					<td>@Item.Name</td><td>@Item.Price.ToString("C")</td><td>@Item.Id</td>
+				</tr>
+				<tr>
+					<td><Button CommandName="Delete" Text="Delete" /></td>
+				</tr>
+			</table>
+		</ItemTemplate>
+	</FormView>);
+	var deleteButton = cut.Find("button");
+	deleteButton.Click();
+	raisedItemDeletingEvent.ShouldBeTrue("Did not raise the ItemDeleting event");
+	raisedItemDeletedEvent.ShouldBeTrue("Did not raise the ItemDeleted event");
+	cut.Find("#theItemTemplate").ShouldNotBeNull("Didn't change back to read-only mode");
+}
 
 	void FormDeleting(FormViewDeleteEventArgs args) {
 		raisedItemDeletingEvent = true;

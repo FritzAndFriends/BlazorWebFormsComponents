@@ -1,47 +1,18 @@
 ﻿@using System.Data
-@inherits TestComponentBase
-
-<Fixture Test="DataTableAsDataSourceWithAutoGenerateColumns">
-	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="true">
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="DataTableAsDataSourceWithoutAutoGenerateColumns">
-	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="false">
-			<Columns>
-					<BoundField ItemType="object" DataField="Name" HeaderText="Item Name" />
-					<BoundField ItemType="object" DataField="Quantity" HeaderText="Item Quantity" />
-				</Columns>
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="DataTableWithEnumerableOfDataRowAsDataSource">
-	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutoGenerateColumns="true">
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="DataSetAsDataSource">
-	<ComponentUnderTest>
-		<GridView ItemType="object" DataSource="dataSet" AutoGenerateColumns="true">
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
+@inherits BunitContext
 
 @code {
 	DataSet dataSet = new DataSet();
 	DataTable dataTable = new DataTable();
 
-	void DataSetAsDataSource(Fixture fixture)
+	[Fact]
+	public void GridView_DataSet_AutoGeneratesColumnsCorrectly()
 	{
 		dataSet = GetDataSet();
 
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<GridView ItemType="object" DataSource="dataSet" AutoGenerateColumns="true">
+		</GridView>);
+
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe("Id");
 		tableHeaders[1].TextContent.ShouldBe("Name");
@@ -49,11 +20,14 @@
 		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
 	}
 
-	void DataTableAsDataSourceWithAutoGenerateColumns(Fixture fixture)
+	[Fact]
+	public void GridView_DataTable_AutoGeneratesColumnsCorrectly()
 	{
 		dataTable = GetDataTable();
 
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="true">
+		</GridView>);
+
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe("Id");
 		tableHeaders[1].TextContent.ShouldBe("Name");
@@ -61,22 +35,32 @@
 		tableHeaders.Count.ShouldBe(3, "Did not render 3 TH elements");
 	}
 
-	void DataTableAsDataSourceWithoutAutoGenerateColumns(Fixture fixture)
+	[Fact]
+	public void GridView_DataTable_WithBoundFieldsRendersCorrectly()
 	{
 		dataTable = GetDataTable();
 
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<GridView ItemType="object" DataSource="dataTable" AutoGenerateColumns="false">
+			<Columns>
+					<BoundField ItemType="object" DataField="Name" HeaderText="Item Name" />
+					<BoundField ItemType="object" DataField="Quantity" HeaderText="Item Quantity" />
+				</Columns>
+		</GridView>);
+
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe("Item Name");
 		tableHeaders[1].TextContent.ShouldBe("Item Quantity");
 		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH elements");
 	}
 
-  void DataTableWithEnumerableOfDataRowAsDataSource(Fixture fixture)
+	[Fact]
+	public void GridView_DataTableEnumerable_RendersDataRowProperties()
 	{
 		dataTable = GetDataTable();
 
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<GridView ItemType="object" DataSource="dataTable.AsEnumerable()" AutoGenerateColumns="true">
+		</GridView>);
+
 		var tableHeaders = cut.FindAll("th");
 		tableHeaders[0].TextContent.ShouldBe(nameof(DataRow.RowError));
 		tableHeaders[1].TextContent.ShouldBe(nameof(DataRow.RowState));

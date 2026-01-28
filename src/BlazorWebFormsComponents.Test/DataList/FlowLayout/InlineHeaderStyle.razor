@@ -1,32 +1,24 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							HeaderStyle-BackColor="Blue"
-							HeaderStyle-BorderColor="White"
-							HeaderStyle-BorderStyle="Solid"
-							HeaderStyle-BorderWidth="2"
-							RepeatLayout="Flow"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataList_FlowLayout_InlineHeaderStyle_AppliesStyle()
 	{
-
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								HeaderStyle-BackColor="Blue"
+								HeaderStyle-BorderColor="White"
+								HeaderStyle-BorderStyle="Solid"
+								HeaderStyle-BorderWidth="2"
+								RepeatLayout="Flow"
+								Context="Item">
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 
 		var theHeaderElement = cut.FindAll("span")[1];
 
@@ -36,8 +28,6 @@
 		theStyle.ShouldNotBeNull();
 		theStyle.ShouldContain("blue");
 		theStyle.ShouldContain("border:2px solid white;");
-
 	}
-
 
 }

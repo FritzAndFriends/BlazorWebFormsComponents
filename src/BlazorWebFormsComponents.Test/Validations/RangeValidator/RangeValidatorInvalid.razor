@@ -1,24 +1,6 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 <h3>Range Validator</h3>
 @using BlazorWebFormsComponents.Validations;
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-
-			<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
-			<RangeValidator ControlToValidate="@Value"
-											Type="Integer"
-											MinimumValue="0"
-											MaximumValue="10"
-											Text="Invalid"
-											ErrorMessage="ErrorMessage!" />
-
-			<button type="submit">Submit</button>
-
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
 
 @code {
   bool _validSubmit = false;
@@ -41,14 +23,25 @@
 	{
 		public string Value { get; set; }
 	}
-}
 
-@code {
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void RangeValidator_InvalidInput_ShowsError()
 	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
 
-		// Arrange
-		var cut = fixture.GetComponentUnderTest();
+				<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
+				<RangeValidator ControlToValidate="@Value"
+								Type="Integer"
+								MinimumValue="0"
+								MaximumValue="10"
+								Text="Invalid"
+								ErrorMessage="ErrorMessage!" />
+
+				<button type="submit">Submit</button>
+
+			</EditForm>
+		);
 
 		// Act
 		cut.Find("input").Change("11");

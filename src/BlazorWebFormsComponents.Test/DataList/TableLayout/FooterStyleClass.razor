@@ -1,33 +1,21 @@
-﻿@inherits TestComponentBase
-@using Microsoft.Extensions.Logging
-@using Microsoft.Extensions.Logging.Abstractions
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<ChildContent>
-				<FooterStyle CssClass="myClass"></FooterStyle>
-			</ChildContent>
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
+@using BlazorWebFormsComponents
 
 @code {
-	void FirstTest(Fixture fixture)
-	{
-		fixture.Services.AddLogging();
-		var cut = fixture.GetComponentUnderTest();
-		System.Diagnostics.Debug.WriteLine(cut.Markup);
-		var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
-		footer.HasAttribute("class").ShouldBeTrue();
-		var @class = footer.GetAttribute("class");
-
-		@class.ShouldNotBeNull();
-		@class.ShouldBe("myClass");
-	}
+    [Fact]
+    public void DataList_TableLayout_FooterStyleClass_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <ChildContent>
+                <FooterStyle CssClass="myClass"></FooterStyle>
+            </ChildContent>
+            <FooterTemplate>FooterTemplate</FooterTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
+        footer.HasAttribute("class").ShouldBeTrue();
+        var cssClass = footer.GetAttribute("class");
+        cssClass.ShouldNotBeNull();
+        cssClass.ShouldBe("myClass");
+    }
 }

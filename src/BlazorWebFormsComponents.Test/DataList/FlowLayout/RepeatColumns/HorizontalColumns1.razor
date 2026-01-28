@@ -1,27 +1,24 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.Widgets(3)"
-							ItemType="Widget"
-							Caption="DataListCaption"
-							RepeatDirection="Horizontal"
-							RepeatLayout="Flow"
-							RepeatColumns="1"
-							GridLines="Horizontal"
-							Context="Item">
-			<HeaderTemplate>HeaderTemplate</HeaderTemplate>
-			<ItemTemplate>@Item.Id</ItemTemplate>
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
-	void FirstTest(Fixture fixture)
+
+	[Fact]
+	public void DataList_FlowLayout_HorizontalColumns1_RendersCorrectly()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.Widgets(3)"
+								ItemType="Widget"
+								Caption="DataListCaption"
+								RepeatDirection="Horizontal"
+								RepeatLayout="Flow"
+								RepeatColumns="1"
+								GridLines="Horizontal"
+								Context="Item">
+				<HeaderTemplate>HeaderTemplate</HeaderTemplate>
+				<ItemTemplate>@Item.Id</ItemTemplate>
+				<FooterTemplate>FooterTemplate</FooterTemplate>
+			</DataList>
+		);
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		//DataListSpan
@@ -41,4 +38,5 @@
 		cut.FindAll("br").Count().ShouldBe(4);
 		footer.InnerHtml.ShouldBe("FooterTemplate");
 	}
+
 }

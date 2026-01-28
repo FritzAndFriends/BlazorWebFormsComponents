@@ -1,45 +1,25 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<ChildContent>
-				<HeaderStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
-			</ChildContent>
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="EmptyStyleTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataList_FlowLayout_HeaderStyle_AppliesStyle()
 	{
-
-		fixture.Services.AddLogging();
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<ChildContent>
+					<HeaderStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
+				</ChildContent>
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 
 		var theHeaderElement = cut.FindAll("span")[1];
 
@@ -49,18 +29,24 @@
 		theStyle.ShouldNotBeNull();
 		theStyle.ShouldContain("blue");
 		theStyle.ShouldContain("border");
-
 	}
 
-	void EmptyStyleTest(Fixture fixture)
+	[Fact]
+	public void DataList_FlowLayout_HeaderStyle_Empty_NoStyleAttribute()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 
 		var theHeaderElement = cut.FindAll("span")[1];
 
 		theHeaderElement.HasAttribute("style").ShouldBeFalse();
-
 	}
-
 
 }

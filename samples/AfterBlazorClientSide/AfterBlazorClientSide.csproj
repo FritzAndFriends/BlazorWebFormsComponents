@@ -1,26 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <RazorLangVersion>3.0</RazorLangVersion>
+    <TargetFramework>net10.0</TargetFramework>
     <Configurations>Debug;Release;WebForms</Configurations>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\AfterBlazorServerSide\Pages\ComponentList.razor" Link="Pages\ComponentList.razor" />
-		<Content Include="..\AfterBlazorServerSide\Pages\ControlSamples\**">
-			<Link>Pages\ControlSamples\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Content Include="..\AfterBlazorServerSide\Components\Pages\ComponentList.razor" Link="Pages\ComponentList.razor" />
+    <Content Include="..\AfterBlazorServerSide\Components\Pages\ControlSamples\**">
+      <Link>Pages\ControlSamples\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
-		<Content Include="..\AfterBlazorServerSide\Shared\**">
-			<Link>Shared\%(RecursiveDir)%(Filename)%(Extension)</Link>
-		</Content>
-	</ItemGroup>
+    <Content Include="..\AfterBlazorServerSide\Components\Layout\**">
+      <Link>Layout\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.Http.Json" Version="$(BlazorWebAssemblyVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(BlazorWebAssemblyVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="$(BlazorWebAssemblyVersion)" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.JSInterop.WebAssembly" Version="$(BlazorWebAssemblyVersion)" />
   </ItemGroup>
 
   <ItemGroup>

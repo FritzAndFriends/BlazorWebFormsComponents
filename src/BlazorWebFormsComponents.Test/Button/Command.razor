@@ -1,12 +1,4 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<Button CommandName="Foo" CommandArgument="CommandArgument" OnCommand="OnCommand">Click me!</Button>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
@@ -15,24 +7,23 @@
 
 	void OnCommand(CommandEventArgs args)
 	{
-
 		TheContent = $"Command '{args.CommandName}' : '{args.CommandArgument.ToString()}'";
-
 	}
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void Button_Command_InvokesHandlerWithArguments()
 	{
-		// Given
-		var cut = fixture.GetComponentUnderTest();
+		// Arrange
+		TheContent = "No Command yet!";
+		var cut = Render(@<Button CommandName="Foo" CommandArgument="CommandArgument" OnCommand="OnCommand">Click me!</Button>);
 
 		TheContent.ShouldBe("No Command yet!");
 
-		// When
+		// Act
 		cut.Find("button").Click();
 
-		// Then
+		// Assert
 		TheContent.ShouldBe("Command 'Foo' : 'bar'");
-
 	}
 
 }

@@ -1,10 +1,11 @@
-﻿@inherits TestComponentBase
+@inherits BunitContext
+@using BlazorWebFormsComponents.Enums
 
-<SnapshotTest Description="Verify HTML format of Literal is not encoded">
-	<TestInput>
-		<Literal Text="<b>This is bold text</b>" />
-	</TestInput>
-	<ExpectedOutput>
-		<b>This is bold text</b>
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+[Fact]
+public void Literal_WithModePassThrough_RendersRawHtml()
+{
+var cut = Render(@<Literal Text="<b>This is bold text</b>" Mode="LiteralMode.PassThrough" />);
+cut.MarkupMatches(@<b>This is bold text</b>);
+}
+}

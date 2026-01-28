@@ -1,74 +1,51 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-<Fixture Test="HyperLink_Style">
-	<ComponentUnderTest>
-		<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" BackColor="Blue" ForeColor="White" />
-	</ComponentUnderTest>
+@code {
 
-	@code {
-		void HyperLink_Style(Fixture fixture)
-		{
+	private string RandomTooltip = new Random(828).Next(10000, 1000000).ToString();
 
-			var cut = fixture.GetComponentUnderTest();
+	[Fact]
+	public void HyperLink_WithBackColorAndForeColor_AppliesStyleAttribute()
+	{
+		// Arrange
+		var cut = Render(@<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" BackColor="Blue" ForeColor="White" />);
 
-			cut.Find("a").HasAttribute("style").ShouldBeTrue();
-			var style = cut.Find("a").GetAttribute("style");
+		// Act & Assert
+		cut.Find("a").HasAttribute("style").ShouldBeTrue();
+		var style = cut.Find("a").GetAttribute("style");
 
-			style.ShouldNotBeNull();
-			style.ShouldContain("background-color:Blue");
-			style.ShouldContain("color:White");
-
-		}
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color:Blue");
+		style.ShouldContain("color:White");
 	}
 
-</Fixture>
+	[Fact]
+	public void HyperLink_WithToolTip_RendersTitleAttribute()
+	{
+		// Arrange
+		var cut = Render(@<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" ToolTip="@RandomTooltip" />);
 
-<Fixture Test="HyperLink_Tooltip">
-	<ComponentUnderTest>
-		<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" ToolTip="@RandomTooltip" />
-	</ComponentUnderTest>
+		// Act & Assert
+		cut.Find("a").HasAttribute("title").ShouldBeTrue();
+		var attr = cut.Find("a").GetAttribute("title");
 
-	@code {
-
-		private string RandomTooltip = new Random(828).Next(10000, 1000000).ToString();
-
-
-		void HyperLink_Tooltip(Fixture fixture)
-		{
-
-			var cut = fixture.GetComponentUnderTest();
-
-			cut.Find("a").HasAttribute("title").ShouldBeTrue();
-			var attr = cut.Find("a").GetAttribute("title");
-
-			attr.ShouldNotBeNull();
-			attr.ShouldBe(RandomTooltip);
-
-		}
-
+		attr.ShouldNotBeNull();
+		attr.ShouldBe(RandomTooltip);
 	}
-</Fixture>
 
-<Fixture Test="HyperLink_Visible">
-	<ComponentUnderTest>
-		<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" Visible="false" />
-	</ComponentUnderTest>
+	[Fact]
+	public void HyperLink_VisibleFalse_RendersNothing()
+	{
+		// Arrange
+		var cut = Render(@<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" Visible="false" />);
 
-	@code {
-
-		void HyperLink_Visible(Fixture fixture)
-		{
-
-			var cut = fixture.GetComponentUnderTest();
-
-			cut.FindAll("a").Count().ShouldBe(0, "Still rendered the anchor even though its not visible");
-
-		}
-
+		// Assert
+		cut.FindAll("a").Count().ShouldBe(0, "Still rendered the anchor even though its not visible");
 	}
-</Fixture>
+
+}
 
 

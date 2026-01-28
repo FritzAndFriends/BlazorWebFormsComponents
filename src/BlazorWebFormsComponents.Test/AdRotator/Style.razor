@@ -1,16 +1,11 @@
 ﻿@using static BlazorWebFormsComponents.WebColor
-@inherits TestComponentBase
-
-<Fixture Test="StyleTest">
-	<ComponentUnderTest>
-		<AdRotator AdvertisementFile="Ads2.xml" BackColor="Blue" ForeColor="White" Target="_blank"></AdRotator>
-	</ComponentUnderTest>
-</Fixture>
+@inherits BunitContext
 
 @code {
-	void StyleTest(Fixture fixture)
+	[Fact]
+	public void AdRotator_Style_RendersBackColorAndForeColor()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<AdRotator AdvertisementFile="Ads2.xml" BackColor="Blue" ForeColor="White" Target="_blank" />);
 		var anchor = cut.Find("a");
 		anchor.HasAttribute("style").ShouldBeTrue();
 

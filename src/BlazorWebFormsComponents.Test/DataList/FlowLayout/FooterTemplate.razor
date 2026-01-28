@@ -1,25 +1,23 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<ItemTemplate>@Item.Name</ItemTemplate>
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
-	void FirstTest(Fixture fixture)
+
+	[Fact]
+	public void DataList_FlowLayout_FooterTemplate_RendersFooter()
 	{
-		fixture.Services.AddLogging();
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<ItemTemplate>@Item.Name</ItemTemplate>
+				<FooterTemplate>FooterTemplate</FooterTemplate>
+			</DataList>
+		);
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
 		cut.FindAll("span").Count(c => c.TextContent == "FooterTemplate").ShouldBe(1);
 		cut.FindAll("span").Last().TextContent.ShouldBe("FooterTemplate");
 	}
+
 }

@@ -1,0 +1,85 @@
+﻿@inherits BunitContext
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void GridView_ButtonField_RendersButtonsCorrectly()
+	{
+		var cut = Render(@<GridView SelectMethod="GetWidgets"
+							AutoGenerateColumns="false"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<Columns>
+				<BoundField ItemType="SharedSampleObjects.Models.Widget"
+										DataField="Id" />
+				<ButtonField ItemType="SharedSampleObjects.Models.Widget"
+										 ButtonType="ButtonType.Button"
+										 CommandName="PriceCommand"
+										 DataTextField="Price"
+										 DataTextFormatString="{0:c}"
+										 HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		System.Diagnostics.Debug.Write(cut.Markup);
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders[1].TextContent.ShouldBe("Price");
+		tableHeaders.Count.ShouldBe(2, "Did not render 2 TH element");
+
+		var rows = cut.FindAll("tr");
+		rows.Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
+
+		cut.FindAll("button").Count().ShouldBe(Widget.SimpleWidgetList.Length, $"Rendered wrong number of price anchors");
+
+		// inspect the button tags
+		foreach (var r in rows.Where(r => r.InnerHtml.Contains("td")))
+		{
+
+			r.Children.Count().ShouldBe(2);
+
+		}
+	}
+
+	GridViewCommandEventArgs argsSet = null;
+
+	[Fact]
+	public void GridView_ButtonField_HandlesCommandCorrectly()
+	{
+		var cut = Render(@<GridView SelectMethod="GetWidgets"
+							AutoGenerateColumns="false"
+							OnRowCommand="RowCommand"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<Columns>
+				<BoundField ItemType="SharedSampleObjects.Models.Widget"
+										DataField="Id" />
+				<ButtonField ItemType="SharedSampleObjects.Models.Widget"
+										 ButtonType="ButtonType.Button"
+										 CommandName="PriceCommand"
+										 DataTextField="Price"
+										 DataTextFormatString="{0:c}"
+										 HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		System.Diagnostics.Debug.Write(cut.Markup);
+		var firstButton = cut.Find("button");
+		firstButton.Click();
+
+		argsSet.ShouldNotBeNull();
+		argsSet.CommandArgument.ShouldBe(0);
+		argsSet.CommandName.ShouldBe("PriceCommand");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+
+	void RowCommand(GridViewCommandEventArgs args) {
+
+		argsSet = args;
+
+	}
+
+}

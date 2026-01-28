@@ -1,10 +1,12 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<GridView ItemType="Widget"
-							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+@code {
+	[Fact]
+	public void GridView_BindAttribute_CompilesCorrectly()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+			AutoGenerateColumns="false"
+			SelectMethod="GetWidgets">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
@@ -14,19 +16,11 @@
 					</ItemTemplate>
 				</TemplateField>
 			</Columns>
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
+		</GridView>);
 
-
-@code {
-	void FirstTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		Assert.True(true, "bind attribute wasn't compiling");
-
 	}
 
 	IQueryable<Widget>

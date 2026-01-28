@@ -1,37 +1,21 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-			<ChildContent>
-				<ItemStyle BackColor="Red" />
-			</ChildContent>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+    [Fact]
+    public void DataList_TableLayout_ItemStyle_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+            <ChildContent>
+                <ItemStyle BackColor="Red" />
+            </ChildContent>
+        </DataList>);
 
-	void FirstTest(Fixture fixture)
-	{
+        cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
+        cut.FindAll("td").Count(c => c.HasAttribute("style")).ShouldBe(Widget.SimpleWidgetList.Length);
 
-		fixture.Services.AddLogging();
-		var cut = fixture.GetComponentUnderTest();
-
-		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
-		cut.FindAll("td").Count(c => c.HasAttribute("style")).ShouldBe(Widget.SimpleWidgetList.Length);
-
-		cut.FindAll("td").Count(c => c.HasAttribute("style") && c.GetAttribute("style").Contains("background-color")).ShouldBe(Widget.SimpleWidgetList.Length);
-
-	}
-
-
+        cut.FindAll("td").Count(c => c.HasAttribute("style") && c.GetAttribute("style").Contains("background-color")).ShouldBe(Widget.SimpleWidgetList.Length);
+    }
 }

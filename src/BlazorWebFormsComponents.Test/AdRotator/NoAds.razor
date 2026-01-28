@@ -1,10 +1,10 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<SnapshotTest Description="Verify HTML format of AdRotator">
-	<TestInput>
-		<AdRotator AdvertisementFile="Ads3.xml" Target="_blank"></AdRotator>
-	</TestInput>
-	<ExpectedOutput>
-		@string.Empty
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+	[Fact]
+	public void AdRotator_NoAds_RendersEmpty()
+	{
+		var cut = Render(@<AdRotator AdvertisementFile="Ads3.xml" Target="_blank" />);
+		cut.MarkupMatches(@<text>@string.Empty</text>);
+	}
+}

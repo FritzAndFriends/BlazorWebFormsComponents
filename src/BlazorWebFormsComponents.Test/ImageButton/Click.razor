@@ -1,0 +1,23 @@
+﻿@inherits BunitContext
+@using BlazorWebFormsComponents
+
+@code {
+	[Fact]
+	public void ImageButton_Command_InvokesHandler()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/VB.png" Enabled="false" OnCommand="Clicked" CommandName="Name" CommandArgument='"Arg"' />);
+		cut.Find("input").Click();
+
+		commandName.ShouldBe("Name");
+		commandArg.ShouldBe("Arg");
+	}
+
+	string commandName = string.Empty;
+	string commandArg = string.Empty;
+
+	void Clicked(CommandEventArgs args)
+	{
+		commandName = args.CommandName;
+		commandArg = args.CommandArgument.ToString();
+	}
+}

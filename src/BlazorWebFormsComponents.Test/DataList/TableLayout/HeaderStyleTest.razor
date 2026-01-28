@@ -1,68 +1,40 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<ChildContent>
-				<HeaderStyle BackColor="@("#0000ff")" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
-			</ChildContent>
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="EmptyStyleTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+    [Fact]
+    public void DataList_TableLayout_HeaderStyle_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <ChildContent>
+                <HeaderStyle BackColor="@("#0000ff")" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
+            </ChildContent>
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
 
-	void FirstTest(Fixture fixture)
-	{
+        var theHeaderElement = cut.Find("td");
 
-		fixture.Services.AddLogging();
-		var cut = fixture.GetComponentUnderTest();
+        theHeaderElement.HasAttribute("style").ShouldBeTrue();
+        var theStyle = theHeaderElement.GetAttribute("style");
 
-		var theHeaderElement = cut.Find("td");
+        theStyle.ShouldNotBeNull();
+        theStyle.ShouldContain("#0000FF");
+        theStyle.ShouldContain("border");
+    }
 
-		theHeaderElement.HasAttribute("style").ShouldBeTrue();
-		var theStyle = theHeaderElement.GetAttribute("style");
+    [Fact]
+    public void DataList_TableLayout_HeaderStyle_Empty_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
 
-		theStyle.ShouldNotBeNull();
-		theStyle.ShouldContain("#0000FF");
-		theStyle.ShouldContain("border");
+        var theHeaderElement = cut.Find("td");
 
-	}
-
-	void EmptyStyleTest(Fixture fixture)
-	{
-
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
-
-		var cut = fixture.GetComponentUnderTest();
-
-		var theHeaderElement = cut.Find("td");
-
-		theHeaderElement.HasAttribute("style").ShouldBeFalse();
-
-	}
-
-
+        theHeaderElement.HasAttribute("style").ShouldBeFalse();
+    }
 }

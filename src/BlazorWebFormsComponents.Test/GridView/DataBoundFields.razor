@@ -1,8 +1,11 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<GridView ItemType="Widget"
+@code {
+	[Fact]
+	public void GridView_DataBoundFields_RendersCorrectly()
+	{
+		const int expectedColumns = 4;
+		var cut = Render(@<GridView ItemType="Widget"
 							AutoGenerateColumns="false"
 							SelectMethod="GetWidgets">
 			<Columns>
@@ -13,16 +16,7 @@
 												DataTextField="Name" DataTextFormatString="Search for {0}"
 												DataNavigateUrlFields="ID,NAME" DataNavigateUrlFormatString="https://example.com/search?q={0} {1}" />
 			</Columns>
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
-
-
-@code {
-	void FirstTest(Fixture fixture)
-	{
-		const int expectedColumns = 4;
-		var cut = fixture.GetComponentUnderTest();
+		</GridView>);
 
 		// Check headers
 		var tableHeaders = cut.FindAll("th");
@@ -44,7 +38,7 @@
 		var nameCellHtml = firstDataRowCells[1].InnerHtml.Trim();
 		nameCellHtml.ShouldBe("First Widget");
 		var updateYearCellHtml = firstDataRowCells[2].InnerHtml.Trim();
-		updateYearCellHtml.ShouldBe("2020");
+		updateYearCellHtml.ShouldBe(Widget.SimpleWidgetList.First().LastUpdate.Year.ToString());
 		var searchUrlCellHtml = firstDataRowCells[3].InnerHtml.Trim();
 		searchUrlCellHtml.ShouldBe("<a href=\"https://example.com/search?q=1 First Widget\">Search for First Widget</a>");
 	}
