@@ -2,7 +2,7 @@ namespace BlazorWebFormsComponents.Enums
 {
 	public enum TextAlign
 	{
-		Left,
-		Right
+		Left = 1,
+		Right = 2
 	}
 }

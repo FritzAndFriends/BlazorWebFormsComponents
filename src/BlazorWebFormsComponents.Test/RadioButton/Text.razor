@@ -1,0 +1,42 @@
+
+@code {
+
+	[Fact]
+	public void RadioButton_WithText_RendersSpanWithInputAndLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option A" />);
+
+		// Assert
+		cut.Find("span").ShouldNotBeNull();
+		cut.Find("input[type='radio']").ShouldNotBeNull();
+		cut.Find("label").TextContent.ShouldBe("Option A");
+	}
+
+	[Fact]
+	public void RadioButton_NoText_RendersInputOnly()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton GroupName="Test" />);
+
+		// Assert
+		cut.Find("input[type='radio']").ShouldNotBeNull();
+		Should.Throw<ElementNotFoundException>(() => cut.Find("span"));
+	}
+
+	[Fact]
+	public void RadioButton_WithText_LabelHasForAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" />);
+
+		// Assert
+		var input = cut.Find("input");
+		var label = cut.Find("label");
+		var inputId = input.GetAttribute("id");
+		
+		inputId.ShouldNotBeNullOrEmpty();
+		label.GetAttribute("for").ShouldBe(inputId);
+	}
+
+}
