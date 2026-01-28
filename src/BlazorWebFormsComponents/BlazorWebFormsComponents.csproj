@@ -10,7 +10,7 @@
 		<PackageId>Fritz.BlazorWebFormsComponents</PackageId>
 		<Authors>Jeffrey T. Fritz</Authors>
 		<Description>A collection of Blazor components based on the default controls that ship with ASP.NET Web Forms</Description>
-		<Copyright>Copyright Jeffrey T. Fritz 2019-2022</Copyright>
+		<Copyright>Copyright Jeffrey T. Fritz 2019-2026</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</PackageProjectUrl>
 		<PackageTags>blazor</PackageTags>
