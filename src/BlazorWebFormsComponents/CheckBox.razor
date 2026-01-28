@@ -1,0 +1,24 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	@if (!string.IsNullOrEmpty(Text))
+	{
+		<span class="@CssClass" style="@Style">
+			@if (TextAlign == Enums.TextAlign.Left)
+			{
+				<label for="@_inputId">@Text</label>
+				<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" @onchange="HandleChange" />
+			}
+			else
+			{
+				<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" @onchange="HandleChange" />
+				<label for="@_inputId">@Text</label>
+			}
+		</span>
+	}
+	else
+	{
+		<input type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" @onchange="HandleChange" />
+	}
+}
