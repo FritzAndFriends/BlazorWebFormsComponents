@@ -1,0 +1,54 @@
+@code {
+
+	[Fact]
+	public void CheckBox_DefaultState_IsUnchecked()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Accept terms" />);
+
+		// Assert
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("checked").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CheckBox_WithCheckedTrue_RendersCheckedAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Already checked" Checked="true" />);
+
+		// Assert
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("checked").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CheckBox_Click_TogglesCheckedState()
+	{
+		// Arrange
+		bool checkedValue = false;
+		var cut = Render(@<CheckBox @bind-Checked="checkedValue" Text="Toggle me" />);
+
+		// Act
+		cut.Find("input").Change(true);
+
+		// Assert
+		checkedValue.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CheckBox_ClickTwice_TogglesBackToUnchecked()
+	{
+		// Arrange
+		bool checkedValue = false;
+		var cut = Render(@<CheckBox @bind-Checked="checkedValue" Text="Toggle me" />);
+
+		// Act
+		cut.Find("input").Change(true);
+		cut.Find("input").Change(false);
+
+		// Assert
+		checkedValue.ShouldBeFalse();
+	}
+
+}

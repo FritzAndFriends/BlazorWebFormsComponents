@@ -1,0 +1,26 @@
+@code {
+
+	[Fact]
+	public void CheckBox_NoText_RendersInputOnly()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox />);
+
+		// Assert
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+		Should.Throw<ElementNotFoundException>(() => cut.Find("span"));
+		Should.Throw<ElementNotFoundException>(() => cut.Find("label"));
+	}
+
+	[Fact]
+	public void CheckBox_NoText_AppliesStylesDirectlyToInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox CssClass="my-checkbox" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.ClassList.ShouldContain("my-checkbox");
+	}
+
+}

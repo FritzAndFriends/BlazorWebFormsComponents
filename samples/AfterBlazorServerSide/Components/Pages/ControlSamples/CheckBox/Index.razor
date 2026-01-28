@@ -1,0 +1,48 @@
+@page "/ControlSamples/CheckBox"
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>CheckBox Component Samples</h2>
+
+<Nav></Nav>
+
+<h3>Basic CheckBox</h3>
+<CheckBox Text="I agree to terms" @bind-Checked="agreed" />
+<p>Agreed: <strong>@agreed</strong></p>
+
+<h3>Pre-checked CheckBox</h3>
+<CheckBox Text="Already checked" Checked="true" />
+
+<h3>Text Alignment</h3>
+<CheckBox Text="Label on right (default)" />
+<br />
+<CheckBox Text="Label on left" TextAlign="TextAlign.Left" />
+
+<h3>Disabled CheckBox</h3>
+<CheckBox Text="Cannot change (enabled)" Enabled="true" Checked="true" />
+<br />
+<CheckBox Text="Cannot change (disabled)" Enabled="false" Checked="true" />
+
+<h3>CheckBox without Text</h3>
+<CheckBox @bind-Checked="noTextValue" />
+<p>Value: <strong>@noTextValue</strong></p>
+
+<h3>Styled CheckBox</h3>
+<CheckBox Text="Custom CSS class" CssClass="custom-check" />
+<br />
+<CheckBox Text="Colored background" BackColor="LightYellow" ForeColor="DarkGreen" />
+
+<h3>Event Handling</h3>
+<CheckBox Text="Click to trigger event" OnCheckedChanged="HandleCheckedChanged" />
+<p>Event fired: <strong>@eventCount</strong> times</p>
+
+@code {
+	private bool agreed = false;
+	private bool noTextValue = false;
+	private int eventCount = 0;
+
+	private void HandleCheckedChanged(ChangeEventArgs e)
+	{
+		eventCount++;
+	}
+}

@@ -1,0 +1,54 @@
+
+@code {
+
+	[Fact]
+	public void RadioButton_WithGroupName_SetsNameAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Small" GroupName="Size" />);
+
+		// Assert
+		cut.Find("input").GetAttribute("name").ShouldBe("Size");
+	}
+
+	[Fact]
+	public void RadioButton_GroupedButtons_ShareSameName()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<div>
+				<RadioButton Text="A" GroupName="Options" />
+				<RadioButton Text="B" GroupName="Options" />
+				<RadioButton Text="C" GroupName="Options" />
+			</div>
+		);
+
+		// Assert
+		var inputs = cut.FindAll("input[type='radio']");
+		inputs.Count.ShouldBe(3);
+		inputs.All(i => i.GetAttribute("name") == "Options").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RadioButton_WithoutGroupName_HasUniqueName()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<div>
+				<RadioButton Text="A" />
+				<RadioButton Text="B" />
+			</div>
+		);
+
+		// Assert
+		var inputs = cut.FindAll("input[type='radio']");
+		inputs.Count.ShouldBe(2);
+		var name1 = inputs[0].GetAttribute("name");
+		var name2 = inputs[1].GetAttribute("name");
+		
+		name1.ShouldNotBeNullOrEmpty();
+		name2.ShouldNotBeNullOrEmpty();
+		name1.ShouldNotBe(name2);
+	}
+
+}
