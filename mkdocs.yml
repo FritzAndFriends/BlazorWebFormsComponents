@@ -74,6 +74,7 @@ nav:
     - Label: EditorControls/Label.md
     - LinkButton: EditorControls/LinkButton.md
     - Literal: EditorControls/Literal.md
+    - TextBox: EditorControls/TextBox.md
     - RadioButton: EditorControls/RadioButton.md
   - Data Controls:
     - DataList: DataControls/DataList.md

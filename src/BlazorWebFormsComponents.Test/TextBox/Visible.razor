@@ -1,0 +1,22 @@
+@code {
+
+	[Fact]
+	public void TextBox_VisibleFalse_RendersNothing()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Visible="false" Text="Hidden" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void TextBox_VisibleTrue_RendersInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Visible="true" Text="Visible" />);
+
+		// Assert
+		cut.Find("input").ShouldNotBeNull();
+	}
+}
