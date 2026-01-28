@@ -282,6 +282,7 @@
     </Compile>
     <Compile Include="ControlSamples\Menu\DynamicSelectedStyle.aspx.designer.cs">
       <DependentUpon>DynamicSelectedStyle.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ControlSamples\Menu\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

@@ -40,7 +40,10 @@ namespace BlazorWebFormsComponents.Validations
 		protected override ValueTask Dispose(bool disposing)
 		{
 			// Unsubscribe to avoid memory leaks.
-			CurrentEditContext.OnValidationRequested -= EventHandler;
+			if (CurrentEditContext != null)
+			{
+				CurrentEditContext.OnValidationRequested -= EventHandler;
+			}
 			return base.Dispose(disposing);
 		}
 

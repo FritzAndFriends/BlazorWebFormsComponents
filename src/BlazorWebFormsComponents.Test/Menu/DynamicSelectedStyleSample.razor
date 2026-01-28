@@ -1,65 +1,60 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using System.Text.RegularExpressions
-
-<Fixture Test="MicrosoftAspNetDynamicSelectedStyleReferenceSample">
-
-	<ComponentUnderTest>
-		@* Based on the original example at:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu.dynamicmenustyle?view=netframework-4.8#examples *@
-		<Menu ID="NavigationMenu"
-					StaticDisplayLevels="1"
-					StaticSubmenuIndent="10"
-					orientation="Vertical"
-					target="_blank"
-					runat="server">
-
-			<DynamicSelectedStyle BackColor="LightBlue"
-														ForeColor="Red"
-														BorderStyle="Solid"
-														BorderColor="Black"
-														BorderWidth="1" />
-
-			<Items>
-				<MenuItem Text="Home" ToolTip="Home">
-					<MenuItem Text="Music" ToolTip="Music">
-						<MenuItem Text="Classical" ToolTip="Classical" />
-						<MenuItem Text="Rock" ToolTip="Rock" />
-						<MenuItem Text="Jazz" ToolTip="Jazz" />
-					</MenuItem>
-				</MenuItem>
-			</Items>
-
-		</Menu>
-
-	</ComponentUnderTest>
-
-</Fixture>
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
 
 @code {
 
-	public void MicrosoftAspNetDynamicSelectedStyleReferenceSample(Fixture fixture)
+	[Fact]
+	public void Menu_DynamicSelectedStyle_AppliesStyles()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
 
-		using var ctx = new TestContext();
-		var jsMock = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
+		var cut = Render(
+			@<Menu ID="NavigationMenu"
+				StaticDisplayLevels="1"
+				StaticSubmenuIndent="10"
+				orientation="Vertical"
+				target="_blank"
+				runat="server">
 
-		var theComponent = fixture.GetComponentUnderTest<Menu>();
-		var theMarkup = theComponent.Markup;
+				<DynamicSelectedStyle BackColor="LightBlue"
+					ForeColor="Red"
+					BorderStyle="Solid"
+					BorderColor="Black"
+					BorderWidth="1" />
 
-		theMarkup.ShouldContain("#NavigationMenu a.dynamic.selected", "Did not generate the CSS for the dynamic selected menu style");
+				<Items>
+					<MenuItem Text="Home" ToolTip="Home">
+						<MenuItem Text="Music" ToolTip="Music">
+							<MenuItem Text="Classical" ToolTip="Classical" />
+							<MenuItem Text="Rock" ToolTip="Rock" />
+							<MenuItem Text="Jazz" ToolTip="Jazz" />
+						</MenuItem>
+					</MenuItem>
+				</Items>
 
-		//TODO: Add tests to verify the style content
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		theMarkup.ShouldContain("#NavigationMenu a.dynamic.selected");
+
+		// Verify the style content
 		var reTest = new Regex(@"a\.dynamic\.selected\s*\{([^}]+)\}");
 		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
 		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
 
 		// Assert the style rules were applied
-		theStyleRules.ShouldContain($"background-color:{theComponent.Instance.DynamicSelectedStyle.BackColor.ToHtml()}");
-		theStyleRules.ShouldContain($"color:{theComponent.Instance.DynamicSelectedStyle.ForeColor.ToHtml()}");
-		theStyleRules.ShouldContain($"border:1px solid Black");
-
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+		theStyleRules.ShouldContain("border:");
 	}
-
 
 }

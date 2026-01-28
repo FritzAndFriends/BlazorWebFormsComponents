@@ -32,7 +32,7 @@ namespace BlazorWebFormsComponents
 		public Unit Width { get; set; }
 
 		[Parameter]
-		public FontInfo Font { get; set; }
+		public FontInfo Font { get; set; } = new FontInfo();
 
 		protected void SetPropertiesFromUnknownAttributes() {
 

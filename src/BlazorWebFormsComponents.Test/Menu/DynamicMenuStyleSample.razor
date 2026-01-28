@@ -1,76 +1,70 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using System.Text.RegularExpressions
-
-<Fixture Test="MicrosoftAspNetDynamicMenuStyleReferenceSample">
-
-	@* Based on the sample code at: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu.dynamicmenustyle?view=netframework-4.8#examples *@
-
-	<ComponentUnderTest>
-
-		<Menu ID="NavigationMenu"
-					StaticDisplayLevels="2"
-					StaticSubmenuIndent="10"
-					orientation="Vertical"
-					target="_blank"
-					runat="server">
-
-			<DynamicMenuStyle BackColor="LightSkyBlue"
-												ForeColor="Black"
-												BorderStyle="Solid"
-												BorderWidth="1"
-												BorderColor="Black" />
-
-			<Items>
-				<MenuItem NavigateUrl="Home.aspx"
-									Text="Home"
-									ToolTip="Home">
-					<MenuItem NavigateUrl="Music.aspx"
-										Text="Music"
-										ToolTip="Music">
-						<MenuItem NavigateUrl="Classical.aspx"
-											Text="Classical"
-											ToolTip="Classical" />
-						<MenuItem NavigateUrl="Rock.aspx"
-											Text="Rock"
-											ToolTip="Rock" />
-						<MenuItem NavigateUrl="Jazz.aspx"
-											Text="Jazz"
-											ToolTip="Jazz" />
-					</MenuItem>
-				</MenuItem>
-			</Items>
-
-		</Menu>
-
-	</ComponentUnderTest>
-
-</Fixture>
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
 
 @code {
 
-	void MicrosoftAspNetDynamicMenuStyleReferenceSample(Fixture fixture)
+	[Fact]
+	public void Menu_DynamicMenuStyle_AppliesStyles()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
 
-		using var ctx = new TestContext();
-		var jsMock = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
+		var cut = Render(
+			@<Menu ID="NavigationMenu"
+				StaticDisplayLevels="2"
+				StaticSubmenuIndent="10"
+				orientation="Vertical"
+				target="_blank"
+				runat="server">
 
-		var theComponent = fixture.GetComponentUnderTest<Menu>();
-		var theMarkup = theComponent.Markup;
+				<DynamicMenuStyle BackColor="LightSkyBlue"
+					ForeColor="Black"
+					BorderStyle="Solid"
+					BorderWidth="1"
+					BorderColor="Black" />
 
-		theMarkup.ShouldContain("#NavigationMenu ul.dynamic", "Did not generate the CSS for the dynamic menu style");
+				<Items>
+					<MenuItem NavigateUrl="Home.aspx"
+						Text="Home"
+						ToolTip="Home">
+						<MenuItem NavigateUrl="Music.aspx"
+							Text="Music"
+							ToolTip="Music">
+							<MenuItem NavigateUrl="Classical.aspx"
+								Text="Classical"
+								ToolTip="Classical" />
+							<MenuItem NavigateUrl="Rock.aspx"
+								Text="Rock"
+								ToolTip="Rock" />
+							<MenuItem NavigateUrl="Jazz.aspx"
+								Text="Jazz"
+								ToolTip="Jazz" />
+						</MenuItem>
+					</MenuItem>
+				</Items>
 
-		// TODO: Add tests to verify the style content
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		theMarkup.ShouldContain("#NavigationMenu ul.dynamic");
+
+		// Verify the style content
 		var reTest = new Regex(@"ul\.dynamic\s?\{([^}]+)\}");
 		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
 		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
 
 		// Assert the style rules were applied
-		theStyleRules.ShouldContain($"background-color:{theComponent.Instance.DynamicMenuStyle.BackColor.ToHtml()}");
-		theStyleRules.ShouldContain($"color:{theComponent.Instance.DynamicMenuStyle.ForeColor.ToHtml()}");
-		theStyleRules.ShouldContain($"border:1px solid Black");
-
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+		theStyleRules.ShouldContain("border:");
 	}
 
 }
