@@ -1,0 +1,24 @@
+@page "/ControlSamples/CheckBox/Style"
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>CheckBox Style Samples</h2>
+
+<Nav></Nav>
+
+<h3>CSS Classes</h3>
+<CheckBox Text="Primary class" CssClass="btn-primary" />
+<br />
+<CheckBox Text="Success class" CssClass="btn-success" />
+
+<h3>Colors</h3>
+<CheckBox Text="Light blue background" BackColor="LightBlue" ForeColor="Navy" />
+<br />
+<CheckBox Text="Yellow background" BackColor="Yellow" ForeColor="Red" />
+
+<h3>Width and Height</h3>
+<CheckBox Text="Custom width" Width="Unit.Pixel(300)" BackColor="LightGray" />
+
+@code {
+
+}

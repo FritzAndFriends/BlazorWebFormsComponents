@@ -1,0 +1,51 @@
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	[Fact]
+	public void RadioButton_WithCssClass_AppliesClassToSpan()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Styled" CssClass="custom-radio" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.ClassList.ShouldContain("custom-radio");
+	}
+
+	[Fact]
+	public void RadioButton_WithBackColor_AppliesStyleToSpan()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Colored" BackColor="Blue" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	[Fact]
+	public void RadioButton_NoText_WithCssClass_AppliesClassToInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton GroupName="Test" CssClass="custom-radio" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		input.ClassList.ShouldContain("custom-radio");
+	}
+
+	[Fact]
+	public void RadioButton_NoText_WithBackColor_AppliesStyleToInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton GroupName="Test" BackColor="Red" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		input.HasAttribute("style").ShouldBeTrue();
+		input.GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+}

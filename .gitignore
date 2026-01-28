@@ -345,3 +345,4 @@ ASALocalRun/
 .DS_Store
 .AppleDouble
 .LSOverride
+*.exe

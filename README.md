@@ -27,9 +27,9 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - BulletedList
     - [Button](docs/EditorControls/Button.md)
     - Calendar
-    - CheckBox
+    - [CheckBox](docs/EditorControls/CheckBox.md)
     - CheckBoxList
-    - DropDownList
+    - [DropDownList](docs/EditorControls/DropDownList.md)
     - FileUpload
     - [HiddenField](docs/EditorControls/HiddenField.md)
     - [HyperLink](docs/EditorControls/HyperLink.md)
@@ -44,7 +44,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - MultiView
     - Panel
     - PlaceHolder
-    - RadioButton
+    - [RadioButton](docs/EditorControls/RadioButton.md)
     - RadioButtonList
     - Substitution
     - Table
