@@ -1,0 +1,41 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void CheckBox_TextAlignRight_RendersInputBeforeLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Label on right" TextAlign="Enums.TextAlign.Right" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.FirstElementChild.TagName.ShouldBe("INPUT");
+		span.LastElementChild.TagName.ShouldBe("LABEL");
+	}
+
+	[Fact]
+	public void CheckBox_TextAlignLeft_RendersLabelBeforeInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Label on left" TextAlign="Enums.TextAlign.Left" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.FirstElementChild.TagName.ShouldBe("LABEL");
+		span.LastElementChild.TagName.ShouldBe("INPUT");
+	}
+
+	[Fact]
+	public void CheckBox_DefaultTextAlign_IsRight()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Default alignment" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.FirstElementChild.TagName.ShouldBe("INPUT");
+		span.LastElementChild.TagName.ShouldBe("LABEL");
+	}
+
+}
