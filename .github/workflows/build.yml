@@ -4,16 +4,20 @@ on:
   push:
     branches:
       - 'main'
+      - 'dev'
       - 'v*'
   pull_request:
     branches:
       - 'main'
+      - 'dev'
       - 'v*'
+  workflow_dispatch:
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,3 +57,12 @@ jobs:
         with:
           name: test-results
           path: src/BlazorWebFormsComponents.Test/TestResults/*.trx
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Unit Test Results
+          path: src/BlazorWebFormsComponents.Test/TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: true
