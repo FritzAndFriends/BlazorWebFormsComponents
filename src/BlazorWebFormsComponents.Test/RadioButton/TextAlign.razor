@@ -1,0 +1,40 @@
+
+@code {
+
+	[Fact]
+	public void RadioButton_TextAlignLeft_RendersLabelBeforeInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Left label" TextAlign="Enums.TextAlign.Left" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.FirstElementChild.TagName.ShouldBe("LABEL");
+		span.LastElementChild.TagName.ShouldBe("INPUT");
+	}
+
+	[Fact]
+	public void RadioButton_TextAlignRight_RendersInputBeforeLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Right label" TextAlign="Enums.TextAlign.Right" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.FirstElementChild.TagName.ShouldBe("INPUT");
+		span.LastElementChild.TagName.ShouldBe("LABEL");
+	}
+
+	[Fact]
+	public void RadioButton_DefaultTextAlign_RendersInputBeforeLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Default" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.FirstElementChild.TagName.ShouldBe("INPUT");
+		span.LastElementChild.TagName.ShouldBe("LABEL");
+	}
+
+}
