@@ -1,15 +1,10 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="KewordFilterTest">
-	<ComponentUnderTest>
-		<AdRotator AdvertisementFile="Ads2.xml" KeywordFilter="VB" Target="_blank"></AdRotator>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
-	void KewordFilterTest(Fixture fixture)
+	[Fact]
+	public void AdRotator_KeywordFilter_FiltersAdsByKeyword()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<AdRotator AdvertisementFile="Ads2.xml" KeywordFilter="VB" Target="_blank" />);
 		var img = cut.Find("img");
 		var alternateText = img.Attributes["alt"].Value;
 

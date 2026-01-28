@@ -1,32 +1,24 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							ToolTip="This is my tool tip"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataList_FlowLayout_Tooltip_RendersTitle()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								ToolTip="This is my tool tip"
+								Context="Item">
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 
 		var theElement = cut.Find("span");
 		theElement.HasAttribute("title").ShouldBeTrue();
 		theElement.GetAttribute("title").ShouldBe("This is my tool tip");
-
 	}
-
 
 }

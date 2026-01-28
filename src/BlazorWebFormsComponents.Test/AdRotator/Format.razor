@@ -1,10 +1,10 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<SnapshotTest Description="Verify HTML format of AdRotator">
-	<TestInput>
-		<AdRotator AdvertisementFile="Ads1.xml" Target="_blank"></AdRotator>
-	</TestInput>
-	<ExpectedOutput>
-		<a href="http://www.bing.com" target="_blank"><img src="bing.png" width="50" height="50" alt="Bing" /></a>
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+	[Fact]
+	public void AdRotator_Format_RendersCorrectHtml()
+	{
+		var cut = Render(@<AdRotator AdvertisementFile="Ads1.xml" Target="_blank" />);
+		cut.MarkupMatches(@<a href="http://www.bing.com" target="_blank"><img src="bing.png" width="50" height="50" alt="Bing" /></a>);
+	}
+}

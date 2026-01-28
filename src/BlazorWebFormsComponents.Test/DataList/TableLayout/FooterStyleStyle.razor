@@ -1,34 +1,24 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<ChildContent>
-				<FooterStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></FooterStyle>
-			</ChildContent>
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void FirstTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-		System.Diagnostics.Debug.WriteLine(cut.Markup);
-		var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
-		footer.HasAttribute("style").ShouldBeTrue();
-		var style = footer.GetAttribute("style");
-
-		style.ShouldNotBeNull();
-		style.ShouldContain("background-color:Blue");
-		style.ShouldContain("border:2px solid");
-	}
+    [Fact]
+    public void DataList_TableLayout_FooterStyleStyle_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <ChildContent>
+                <FooterStyle BackColor="Blue" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></FooterStyle>
+            </ChildContent>
+            <FooterTemplate>FooterTemplate</FooterTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        var footer = cut.FindAll("td").FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
+        footer.HasAttribute("style").ShouldBeTrue();
+        var style = footer.GetAttribute("style");
+        style.ShouldNotBeNull();
+        style.ShouldContain("background-color:Blue");
+        style.ShouldContain("border:2px solid");
+    }
 }

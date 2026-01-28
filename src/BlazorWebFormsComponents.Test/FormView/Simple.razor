@@ -1,40 +1,25 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<FormView AllowPaging="true"
-							DataKeyNames="Id"
-							OnPageIndexChanging="WidgetFormView_PageIndexChanging"
-							runat="server"
-							Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							Context="Item">
-			<ItemTemplate>
 
-				<table id="theItemTemplate">
-					<tr>
-						<td>@Item.Name</td><td>@Item.Price.ToString("C")</td><td>@Item.Id</td>
-					</tr>
-				</table>
-
-			</ItemTemplate>
-
-		</FormView>
-	</ComponentUnderTest>
-</Fixture>
 
 
 @code {
 
-	void FirstTest(Fixture fixture)
-	{
-
-		var cut = fixture.GetComponentUnderTest();
-
-		cut.FindAll("#theItemTemplate td").Count().ShouldBe(3);
-		cut.FindAll("a").Count().ShouldBe(Widget.SimpleWidgetList.Length-1);
-
-	}
+	[Fact]
+public void FormView_Simple_RendersCorrectCellsAndLinks()
+{
+	var cut = Render(@<FormView AllowPaging="true" DataKeyNames="Id" OnPageIndexChanging="WidgetFormView_PageIndexChanging" runat="server" Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+		<ItemTemplate>
+			<table id="theItemTemplate">
+				<tr>
+					<td>@Item.Name</td><td>@Item.Price.ToString("C")</td><td>@Item.Id</td>
+				</tr>
+			</table>
+		</ItemTemplate>
+	</FormView>);
+	cut.FindAll("#theItemTemplate td").Count().ShouldBe(3);
+	cut.FindAll("a").Count().ShouldBe(Widget.SimpleWidgetList.Length-1);
+}
 
 	void WidgetFormView_PageIndexChanging()
 	{

@@ -1,43 +1,29 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using static BlazorWebFormsComponents.WebColor
 
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							HeaderStyle-BackColor="Blue"
-							HeaderStyle-BorderColor="White"
-							HeaderStyle-BorderStyle="Solid"
-							HeaderStyle-BorderWidth="2"
-							RepeatLayout="Table"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+    [Fact]
+    public void DataList_TableLayout_InlineHeaderStyle_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+                                    ItemType="Widget"
+                                    HeaderStyle-BackColor="Blue"
+                                    HeaderStyle-BorderColor="White"
+                                    HeaderStyle-BorderStyle="Solid"
+                                    HeaderStyle-BorderWidth="2"
+                                    RepeatLayout="Table"
+                                    Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
 
-	void FirstTest(Fixture fixture)
-	{
+        var theHeaderElement = cut.Find("td");
 
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+        theHeaderElement.HasAttribute("style").ShouldBeTrue();
+        var theStyle = theHeaderElement.GetAttribute("style");
 
-		var cut = fixture.GetComponentUnderTest();
-
-		var theHeaderElement = cut.Find("td");
-
-		theHeaderElement.HasAttribute("style").ShouldBeTrue();
-		var theStyle = theHeaderElement.GetAttribute("style");
-
-		theStyle.ShouldNotBeNull();
-		theStyle.ShouldContain("blue");
-		theStyle.ShouldContain("border:2px solid white;");
-
-	}
-
-
+        theStyle.ShouldNotBeNull();
+        theStyle.ShouldContain("blue");
+        theStyle.ShouldContain("border:2px solid white;");
+    }
 }

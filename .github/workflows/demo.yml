@@ -1,0 +1,57 @@
+name: Build Demo Sites
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'v*'
+    paths:
+      - 'src/**'
+      - 'samples/**'
+      - '.github/workflows/demo.yml'
+  pull_request:
+    branches:
+      - 'main'
+      - 'v*'
+    paths:
+      - 'src/**'
+      - 'samples/**'
+      - '.github/workflows/demo.yml'
+
+jobs:
+  build-demos:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
+          dotnet restore samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj
+
+      - name: Publish Server-Side Demo
+        run: dotnet publish samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --output ./publish/server-side
+
+      - name: Publish Client-Side Demo (WebAssembly)
+        run: dotnet publish samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj --configuration Release --output ./publish/client-side
+
+      - name: Upload Server-Side Demo artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-server-side
+          path: ./publish/server-side
+
+      - name: Upload Client-Side Demo artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-client-side
+          path: ./publish/client-side

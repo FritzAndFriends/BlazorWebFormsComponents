@@ -1,28 +1,21 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="null"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataList_NullData_RendersEmptyMarkup()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="null"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 
 		cut.Markup.Trim().ShouldBe(string.Empty);
-
 	}
-
 
 }

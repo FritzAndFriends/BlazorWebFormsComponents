@@ -1,12 +1,4 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<Button OnClick="OnClick">Click me!</Button>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
@@ -14,24 +6,23 @@
 
 	void OnClick()
 	{
-
 		TheContent = "I've been clicked";
-
 	}
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void Button_Click_InvokesHandler()
 	{
-		// Given
-		var cut = fixture.GetComponentUnderTest();
+		// Arrange
+		TheContent = "Not clicked yet!";
+		var cut = Render(@<Button OnClick="OnClick">Click me!</Button>);
 
 		TheContent.ShouldBe("Not clicked yet!");
 
-		// When
+		// Act
 		cut.Find("button").Click();
 
-		// Then
+		// Assert
 		TheContent.ShouldBe("I've been clicked");
-
 	}
 
 }

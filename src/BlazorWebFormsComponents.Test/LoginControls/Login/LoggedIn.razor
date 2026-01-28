@@ -1,21 +1,15 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using System.Security.Claims;
 @using Microsoft.AspNetCore.Components.Authorization
 @using BlazorWebFormsComponents.LoginControls;
 @using Moq;
 
-<Fixture Setup="Setup" Test="LoggedInTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoggedIn="Login_LoggedIn" OnAuthenticate="Login_Authenticate" />
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
 	Login loginControl = new Login();
 	bool isLoggedIn = false;
 
-	void Setup(Fixture fixture)
+	[Fact]
+	public void Login_LoggedIn_FiresEvent()
 	{
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
@@ -24,15 +18,12 @@
 		var authenticationStateProviderMock = new Mock<AuthenticationStateProvider>();
 		authenticationStateProviderMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		fixture.Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
+		Services.AddSingleton<AuthenticationStateProvider>(authenticationStateProviderMock.Object);
 
 		var navigationManagerMock = new Mock<NavigationManager>();
-		fixture.Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
-	}
+		Services.AddSingleton<NavigationManager>(navigationManagerMock.Object);
 
-	void LoggedInTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.Login @ref="loginControl" ID="loginControl" OnLoggedIn="Login_LoggedIn" OnAuthenticate="Login_Authenticate" />);
 
 		cut.Find("#loginControl_UserName").Change(Credential.InvalidCredential.Username);
 		cut.Find("#loginControl_Password").Change(Credential.InvalidCredential.Password);
@@ -49,5 +40,4 @@
 	{
 		args.Authenticated = true;
 	}
-
 }

@@ -95,6 +95,24 @@ References to `<asp:` components can be easily edited to use the matching compon
 
 [More information and advanced techniques can be found in the User Controls strategy document](User-Controls.md)
 
+## Step 5.5 - JavaScript Setup (Optional)
+
+BlazorWebFormsComponents requires a small JavaScript file to support features like `OnClientClick`. The easiest way to include it is to register the service in your `Program.cs`:
+
+```csharp
+builder.Services.AddBlazorWebFormsComponents();
+```
+
+This automatically loads the JavaScript module when components render - no manual script tags needed!
+
+Alternatively, you can add the script manually to your layout:
+
+```html
+<script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
+```
+
+For more options and details, see the [JavaScript Setup documentation](../UtilityFeatures/JavaScriptSetup.md).
+
 ## Step 6 - Pages
 
 Page migration is a process very similar to UserControls, except working on files with the `.aspx` extension.

@@ -1,40 +1,32 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginView>
-			<AnonymousTemplate>
-				Anonymous
-			</AnonymousTemplate>
-			<LoggedInTemplate>
-				LoggedIn
-			</LoggedInTemplate>
-		</BlazorWebFormsComponents.LoginControls.LoginView>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
-
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void LoginView_AnonymousUserWithNoRoleGroup_DisplaysAnonymousTemplate()
 	{
-
 		var principal = new ClaimsPrincipal();
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
 		var navMock = new Mock<NavigationManager>();
-		fixture.Services.AddSingleton<NavigationManager>(navMock.Object);
+		Services.AddSingleton<NavigationManager>(navMock.Object);
 
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView>
+				<AnonymousTemplate>
+					Anonymous
+				</AnonymousTemplate>
+				<LoggedInTemplate>
+					LoggedIn
+				</LoggedInTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
 
 		cut.Markup.Trim().ShouldBe("Anonymous");
-
 	}
-
 }

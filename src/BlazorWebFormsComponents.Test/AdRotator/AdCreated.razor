@@ -1,15 +1,10 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="AdCreatedTest">
-	<ComponentUnderTest>
-		<AdRotator AdvertisementFile="Ads2.xml" Target="_blank" OnAdCreated="AdRotator_AdCreated"></AdRotator>
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
-	void AdCreatedTest(Fixture fixture)
+	[Fact]
+	public void AdRotator_AdCreated_EventModifiesAlternateText()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<AdRotator AdvertisementFile="Ads2.xml" Target="_blank" OnAdCreated="AdRotator_AdCreated" />);
 		var img = cut.Find("img");
 		var alternatText = img.Attributes["alt"].Value;
 
@@ -18,8 +13,8 @@
 
 	void AdRotator_AdCreated(AdCreatedEventArgs e)
 	{
-			e.AlternateText = "AlternateText has been changed from AdCreate event!!";
+		e.AlternateText = "AlternateText has been changed from AdCreate event!!";
 
-			Assert.Equal("http://www.microsoft.com", e.NavigateUrl);
+		Assert.Equal("http://www.microsoft.com", e.NavigateUrl);
 	}
 }

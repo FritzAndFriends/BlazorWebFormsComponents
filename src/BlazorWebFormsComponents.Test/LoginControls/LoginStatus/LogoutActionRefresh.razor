@@ -1,40 +1,30 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 @using Moq.Protected;
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutPageUrl="logout" />
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+	[Fact]
+	public void LoginStatus_LogoutActionRefresh_DoesNotNavigate()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
+		principal.AddIdentity(identity);
 
-		void FirstTest(Fixture fixture)
-		{
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-			var principal = new ClaimsPrincipal();
-			var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
-			principal.AddIdentity(identity);
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
-			var autheMock = new Mock<AuthenticationStateProvider>();
-			autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+		var navigationManager = new MockNavigationManager();
 
-			fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		Services.AddSingleton<NavigationManager>(navigationManager);
 
-			var navigationManager = new MockNavigationManager();
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutPageUrl="logout" />);
 
-			fixture.Services.AddSingleton<NavigationManager>(navigationManager);
+		cut.Find("a").Click();
 
-			var cut = fixture.GetComponentUnderTest();
-
-			cut.Find("a").Click();
-
-			navigationManager.LastUri.ShouldBe(null);
-
-		}
-
+		navigationManager.LastUri.ShouldBe(null);
+	}
 }

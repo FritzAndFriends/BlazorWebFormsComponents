@@ -1,31 +1,29 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @using BlazorWebFormsComponents
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<ChildContent>
-				<FooterStyle CssClass="myClass"></FooterStyle>
-			</ChildContent>
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void FirstTest(Fixture fixture)
+
+	[Fact]
+	public void DataList_FlowLayout_FooterStyleClass_AppliesCssClass()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<ChildContent>
+					<FooterStyle CssClass="myClass"></FooterStyle>
+				</ChildContent>
+				<FooterTemplate>FooterTemplate</FooterTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.Find("span").Children.FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
-		var @class = footer.GetAttribute("class");
+		var cssClass = footer.GetAttribute("class");
 
-		@class.ShouldNotBeNull();
-		@class.ShouldBe("myClass");
-
+		cssClass.ShouldNotBeNull();
+		cssClass.ShouldBe("myClass");
 	}
+
 }

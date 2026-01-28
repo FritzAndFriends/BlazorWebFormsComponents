@@ -1,28 +1,16 @@
-﻿@inherits TestComponentBase
-
-<Fixture
-	Test="FirstTest"
->
-<ComponentUnderTest>
-	<ListView Items="Widget.SimpleWidgetList"
-						ItemType="Widget"
-						Context="Item">
-		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
-	</ListView>
-</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void ListView_SimpleList_RendersAllItems()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
 
 		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
-
 	}
-
-
 }

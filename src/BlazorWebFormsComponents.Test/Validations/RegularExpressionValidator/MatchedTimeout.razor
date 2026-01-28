@@ -1,29 +1,23 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-			Write something
-			<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
-			<RegularExpressionValidator ValidationExpression="^(a)+$"
-																	MatchTimeout="1"
-																	ControlToValidate="@Name"
-																	Text="6 char only" />
-
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
-
+﻿@inherits BunitContext
 
 @code {
 	bool _validSubmit = false;
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void RegularExpressionValidator_LongInput_ThrowsTimeout()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				Write something
+				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
+				<RegularExpressionValidator ValidationExpression="^(a)+$"
+																MatchTimeout="1"
+																ControlToValidate="@Name"
+																Text="6 char only" />
+			</EditForm>
+		);
 
 		cut.Find("input").Change(new string('a', 1_000_000));
 

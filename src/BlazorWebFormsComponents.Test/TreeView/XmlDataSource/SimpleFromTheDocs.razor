@@ -1,22 +1,4 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest" Setup="Setup">
-	<ComponentUnderTest>
-
-		<TreeView @ref="BookTreeView"
-							DataSource="bookXml"
-							runat="server">
-
-			<DataBindings>
-				<TreeNodeBinding DataMember="Book" TextField="Title" />
-				<TreeNodeBinding DataMember="Chapter" TextField="Heading" />
-				<TreeNodeBinding DataMember="Section" TextField="Heading" />
-			</DataBindings>
-
-		</TreeView>
-
-	</ComponentUnderTest>
-</Fixture>
+﻿@inherits BunitContext
 
 @code {
 
@@ -24,9 +6,9 @@
 
 	System.Xml.XmlDocument bookXml = new System.Xml.XmlDocument();
 
-	void Setup(Fixture fixture)
+	[Fact]
+	public void TreeView_XmlDataSource_RendersAllNodesFromXmlDocument()
 	{
-
 		bookXml.LoadXml(@"<Book Title=""Book Title"">
 											<Chapter Heading=""Chapter 1"">
 												<Section Heading=""Section 1"">
@@ -40,14 +22,21 @@
 											</Chapter>
 											</Book>");
 
-	}
+		var cut = Render(
+			@<TreeView @ref="BookTreeView"
+								DataSource="bookXml"
+								runat="server">
 
-	void FirstTest(Fixture fixture)
-	{
+				<DataBindings>
+					<TreeNodeBinding DataMember="Book" TextField="Title" />
+					<TreeNodeBinding DataMember="Chapter" TextField="Heading" />
+					<TreeNodeBinding DataMember="Section" TextField="Heading" />
+				</DataBindings>
 
-		var cut = fixture.GetComponentUnderTest<TreeView>();
+			</TreeView>
+		);
+
 		cut.FindAll("table").Count().ShouldBe(6, "Did not render all 6 nodes of the XML document");
-
 	}
 
 }

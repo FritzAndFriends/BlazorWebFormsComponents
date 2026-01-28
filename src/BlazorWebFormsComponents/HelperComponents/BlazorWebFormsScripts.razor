@@ -1,0 +1,40 @@
+@namespace BlazorWebFormsComponents
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+@code {
+    private IJSObjectReference? _module;
+    private bool _loaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_loaded)
+        {
+            try
+            {
+                // Dynamically import the JS module - no script tag needed!
+                _module = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                    "import",
+                    "./_content/Fritz.BlazorWebFormsComponents/js/Basepage.module.js");
+                _loaded = true;
+            }
+            catch (JSException ex)
+            {
+                // Log but don't throw - script might be loaded another way
+                Console.WriteLine($"BlazorWebFormsComponents: JS module load info: {ex.Message}");
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public new async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            await _module.DisposeAsync();
+        }
+        await base.DisposeAsync();
+    }
+}

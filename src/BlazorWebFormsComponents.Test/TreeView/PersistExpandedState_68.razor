@@ -1,52 +1,48 @@
-﻿@inherits TestComponentBase
+﻿@inherits BunitContext
 @** Addresses issue #68 -- Remember the collapsed state across clicks *@
 
-<Fixture Test="PersistExpandedState">
-	<ComponentUnderTest>
-		<TreeView id="SampleTreeView" runat="server">
-			<Nodes>
-				<TreeNode Value="Parent"
-									Text="Parent"
-									Expanded="false">
-					<TreeNode Value="Child" Text="Child">
-						<TreeNode Value="GrandChild_1" Text="GrandChild_1" />
-						<TreeNode Value="GrandChild_2" Text="GrandChild_2" />
+@code {
+
+	private TreeNode _ExpandedNode;
+
+	[Fact]
+	public void TreeView_PersistExpandedState_MaintainsCollapsedStateAcrossClicks()
+	{
+		var cut = Render(
+			@<TreeView id="SampleTreeView" runat="server">
+				<Nodes>
+					<TreeNode Value="Parent"
+										Text="Parent"
+										Expanded="false">
+						<TreeNode Value="Child" Text="Child">
+							<TreeNode Value="GrandChild_1" Text="GrandChild_1" />
+							<TreeNode Value="GrandChild_2" Text="GrandChild_2" />
+						</TreeNode>
 					</TreeNode>
-				</TreeNode>
-			</Nodes>
-		</TreeView>
-	</ComponentUnderTest>
+				</Nodes>
+			</TreeView>
+		);
 
-	@code {
+		var rootNode = cut.FindComponents<TreeNode>().First(n => n.Instance.Value == "Parent");
+		var childNode = cut.FindComponents<TreeNode>().First(n => n.Instance.Text == "Child");
 
-		private TreeNode _ExpandedNode;
+		// Expand the root node
+		rootNode.Find("a").Click();
+		rootNode.Instance.Expanded.ShouldBeTrue("Root node was not expanded");
 
-		void PersistExpandedState(Fixture fixture)
-		{
-			var cut = fixture.GetComponentUnderTest<TreeView>();
-			var rootNode = cut.FindComponents<TreeNode>().First(n => n.Instance.Value == "Parent");
-			var childNode = cut.FindComponents<TreeNode>().First(n => n.Instance.Text == "Child");
+		// Collapse the child node
+		childNode.Find("a").Click();
+		childNode.Instance.Expanded.ShouldBeFalse("Child node was not collapsed");
 
-			// Expand the root node
-			rootNode.Find("a").Click();
-			rootNode.Instance.Expanded.ShouldBeTrue("Root node was not expanded");
+		// Collapse the root node
+		rootNode.Find("a").Click();
+		rootNode.Instance.Expanded.ShouldBeFalse("Root node was not collapsed");
 
-			// Collapse the child node
-			childNode.Find("a").Click();
-			childNode.Instance.Expanded.ShouldBeFalse("Child node was not collapsed");
+		// Expand the root node again
+		rootNode.Find("a").Click();
+		rootNode.Instance.Expanded.ShouldBeTrue("Root node was not expanded a second time");
 
-			// Collapse the root node
-			rootNode.Find("a").Click();
-			rootNode.Instance.Expanded.ShouldBeFalse("Root node was not collapsed");
-
-			// Expand the root node again
-			rootNode.Find("a").Click();
-			rootNode.Instance.Expanded.ShouldBeTrue("Root node was not expanded a second time");
-
-			// The Child node should still be collapsed
-			childNode.Instance.Expanded.ShouldBeFalse("Child node did not persist the collapsed state");
-
-		}
+		// The Child node should still be collapsed
+		childNode.Instance.Expanded.ShouldBeFalse("Child node did not persist the collapsed state");
 	}
-
-</Fixture>
+}
