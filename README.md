@@ -48,7 +48,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - RadioButtonList
     - Substitution
     - Table
-    - TextBox
+    - [TextBox](docs/EditorControls/TextBox.md)
     - View
     - Xml
   - Data Controls
