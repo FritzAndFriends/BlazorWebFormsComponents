@@ -4,7 +4,7 @@
 <h1>TextBox Samples</h1>
 
 <h2>Single Line TextBox</h2>
-<TextBox @bind-Text="singleText" CssClass="form-control" />
+<TextBox Text="@singleText" CssClass="form-control" />
 <p>Value: @singleText</p>
 
 <h2>Password TextBox</h2>
@@ -17,7 +17,7 @@
 <TextBox TextMode="TextBoxMode.Number" Placeholder="Enter number" />
 
 <h2>MultiLine TextBox</h2>
-<TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" @bind-Text="multiLineText" />
+<TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" Text="@multiLineText" />
 <p>Value: @multiLineText</p>
 
 <h2>ReadOnly TextBox</h2>
