@@ -1,0 +1,44 @@
+
+@code {
+
+	[Fact]
+	public void DropDownList_WithCssClass_RendersCssClass()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Styled", "1")
+		};
+
+		// Act
+		var cut = Render(@<DropDownList TItem="object" StaticItems="items" CssClass="form-select" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.GetAttribute("class").ShouldBe("form-select");
+	}
+
+	[Fact]
+	public void DropDownList_WithInlineStyle_RendersStyleAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Colored dropdown", "1")
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="object"
+						  StaticItems="items"
+						  BackColor="new WebColor(System.Drawing.Color.LightYellow)" />
+		);
+
+		// Assert
+		var select = cut.Find("select");
+		var style = select.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color");
+	}
+
+}
