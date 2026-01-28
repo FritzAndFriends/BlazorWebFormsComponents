@@ -44,6 +44,9 @@ namespace BlazorWebFormsComponents
 						.AddValue(() => ColorTranslator.ToHtml(hasStyle.BorderColor.ToColor()), HasBorders(hasStyle)),
 							when: HasBorders(hasStyle))
 
+					.AddStyle("width", hasStyle.Width.ToString(), hasStyle.Width != Unit.Empty)
+					.AddStyle("height", hasStyle.Height.ToString(), hasStyle.Height != Unit.Empty)
+
 					.AddStyle("font-weight", "bold", hasStyle.Font.Bold)
 					.AddStyle("font-style", "italic", hasStyle.Font.Italic)
 					.AddStyle("font-family", hasStyle.Font.Names, !string.IsNullOrEmpty(hasStyle.Font.Names))
