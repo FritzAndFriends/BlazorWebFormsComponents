@@ -24,3 +24,17 @@
 	</Columns>
 </GridView>
 
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;GridView ItemType="Customer" AutoGenerateColumns="false" DataKeyNames="CustomerID"&gt;<br />
+&nbsp;&nbsp;&lt;Columns&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;BoundField ItemType="Customer" DataField="CompanyName" HeaderText="CompanyName" /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;TemplateField ItemType="Customer"&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ItemTemplate Context="Item"&gt;...&lt;/ItemTemplate&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/TemplateField&gt;<br />
+&nbsp;&nbsp;&lt;/Columns&gt;<br />
+&lt;/GridView&gt;
+</code>

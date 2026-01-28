@@ -44,3 +44,14 @@
 		public int? Number { get; set; }
 	}
 }
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;EditForm Model="@@exampleModel" OnValidSubmit="@@HandleValidSubmit"&gt;<br />
+&nbsp;&nbsp;&lt;InputText id="name" @@ref="Name.Current" @@bind-Value="exampleModel.Name" /&gt;<br />
+&nbsp;&nbsp;&lt;RequiredFieldValidator Type="string" ControlToValidate="@@Name" ForeColor="Red" Text="Name is required." /&gt;<br />
+&nbsp;&nbsp;&lt;button type="submit"&gt;Submit&lt;/button&gt;<br />
+&lt;/EditForm&gt;
+</code>

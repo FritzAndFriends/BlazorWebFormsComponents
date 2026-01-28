@@ -56,3 +56,12 @@
 		public int? Number { get; set; }
 	}
 }
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;RequiredFieldValidator Type="string" ControlToValidate="@@Name" Text="Name is required." ErrorMessage="Name is required but in summary!" /&gt;<br />
+&lt;RegularExpressionValidator ValidationExpression="^[0-9]{5}$" ControlToValidate="@@Name" Text="Not a 5 digit number." /&gt;<br />
+&lt;AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" /&gt;
+</code>

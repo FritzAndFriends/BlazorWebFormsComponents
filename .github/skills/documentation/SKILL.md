@@ -248,6 +248,149 @@ Link to related documentation:
 - Live samples: `[Live Demo](https://blazorwebformscomponents.azurewebsites.net)`
 - Microsoft docs: Full URL to docs.microsoft.com
 
+## Sample Page Template (AfterBlazorServerSide Project)
+
+When creating sample pages in `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/`, follow this structure to help developers see both the working demo AND the code that creates it:
+
+```razor
+@page "/samples/[componentname]/[scenario]"
+
+<PageTitle>[ComponentName] - [Scenario]</PageTitle>
+
+<h1>[ComponentName] Sample</h1>
+
+<p>[Brief description of what this sample demonstrates]</p>
+
+<div class="demo-container">
+    <h2>Demo</h2>
+
+    @* The actual working component demo *@
+    <Button Text="Click Me" OnClick="HandleClick" />
+
+    @if (ClickCount > 0)
+    {
+        <p>Button clicked @ClickCount times</p>
+    }
+</div>
+
+<div class="code-container">
+    <h2>Source Code</h2>
+
+    <pre><code class="language-razor">@@page "/samples/[componentname]/[scenario]"
+
+&lt;h1&gt;[ComponentName] Sample&lt;/h1&gt;
+
+&lt;Button Text="Click Me" OnClick="HandleClick" /&gt;
+
+@@if (ClickCount &gt; 0)
+{
+    &lt;p&gt;Button clicked @@ClickCount times&lt;/p&gt;
+}
+
+@@code {
+    private int ClickCount = 0;
+
+    private void HandleClick()
+    {
+        ClickCount++;
+    }
+}</code></pre>
+</div>
+
+@code {
+    private int ClickCount = 0;
+
+    private void HandleClick()
+    {
+        ClickCount++;
+    }
+}
+```
+
+### Sample Page Guidelines
+
+1. **Two Sections Required:**
+   - **Demo Section** - The working, interactive component
+   - **Source Code Section** - A readable code block showing exactly what's in the demo
+
+2. **Code Block Formatting:**
+   - Use `<pre><code class="language-razor">` for syntax highlighting
+   - HTML-encode special characters: `<` becomes `&lt;`, `>` becomes `&gt;`
+   - Preserve `@` symbols by doubling them: `@@code`, `@@if`, `@@page`
+   - Show the COMPLETE code including `@code` block with event handlers
+   - Include all relevant markup from the demo section
+
+3. **Keep Demo and Code in Sync:**
+   - The code block must match the demo exactly
+   - If you change the demo, update the code block
+   - Don't simplify or abbreviate the code block
+
+4. **Organization:**
+   - Use clear headings: "Demo" and "Source Code"
+   - Add brief description at the top explaining what the sample demonstrates
+   - Use CSS classes `demo-container` and `code-container` for styling
+
+5. **Complex Samples:**
+   - For samples with multiple code files, show the main component code
+   - Link to GitHub for complete source if needed
+   - Use tabs or accordion for multiple code examples
+
+### Example: Data-Bound Component Sample
+
+```razor
+@page "/samples/gridview/basic"
+
+<PageTitle>GridView - Basic Example</PageTitle>
+
+<h1>GridView Sample</h1>
+
+<p>This sample demonstrates basic GridView usage with static data.</p>
+
+<div class="demo-container">
+    <h2>Demo</h2>
+
+    <GridView DataSource="@Products" AutoGenerateColumns="true" />
+</div>
+
+<div class="code-container">
+    <h2>Source Code</h2>
+
+    <pre><code class="language-razor">@@page "/samples/gridview/basic"
+
+&lt;GridView DataSource="@@Products" AutoGenerateColumns="true" /&gt;
+
+@@code {
+    private List&lt;Product&gt; Products = new()
+    {
+        new Product { Id = 1, Name = "Product A", Price = 10.99m },
+        new Product { Id = 2, Name = "Product B", Price = 20.99m }
+    };
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+}</code></pre>
+</div>
+
+@code {
+    private List<Product> Products = new()
+    {
+        new Product { Id = 1, Name = "Product A", Price = 10.99m },
+        new Product { Id = 2, Name = "Product B", Price = 20.99m }
+    };
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+}
+```
+
 ## Quality Checklist
 
 Before submitting documentation:
@@ -260,3 +403,12 @@ Before submitting documentation:
 - [ ] Links to Microsoft reference documentation
 - [ ] No broken internal links
 - [ ] Spell-checked
+
+Before submitting sample pages:
+- [ ] Includes both demo and source code sections
+- [ ] Code block exactly matches the demo
+- [ ] HTML entities properly encoded in code block
+- [ ] `@` symbols doubled in code block
+- [ ] Includes complete `@code` block with all handlers
+- [ ] Brief description explains what sample demonstrates
+- [ ] Sample is accessible from navigation or component list
