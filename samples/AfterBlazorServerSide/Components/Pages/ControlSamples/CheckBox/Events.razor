@@ -1,0 +1,56 @@
+@page "/ControlSamples/CheckBox/Events"
+
+<h2>CheckBox Event Samples</h2>
+
+<Nav></Nav>
+
+<h3>OnCheckedChanged Event</h3>
+<CheckBox Text="Click to trigger event" OnCheckedChanged="HandleEvent" />
+<p>Last event time: <strong>@lastEventTime</strong></p>
+
+<h3>Two-way Binding</h3>
+<CheckBox Text="Option 1" @bind-Checked="option1" />
+<CheckBox Text="Option 2" @bind-Checked="option2" />
+<CheckBox Text="Option 3" @bind-Checked="option3" />
+<p>Selected options: 
+	@if (option1) { <span>Option 1 </span> }
+	@if (option2) { <span>Option 2 </span> }
+	@if (option3) { <span>Option 3 </span> }
+	@if (!option1 && !option2 && !option3) { <span>None</span> }
+</p>
+
+<h3>Form Submission</h3>
+<EditForm Model="formData" OnValidSubmit="HandleSubmit">
+	<CheckBox Text="Accept terms and conditions" @bind-Checked="formData.AcceptTerms" />
+	<br />
+	<CheckBox Text="Subscribe to newsletter" @bind-Checked="formData.Subscribe" />
+	<br />
+	<Button Text="Submit" CausesValidation="true" OnClick="HandleSubmit" />
+</EditForm>
+<p>Submission result: <strong>@submitResult</strong></p>
+
+@code {
+	private string lastEventTime = "Never";
+	private bool option1 = false;
+	private bool option2 = false;
+	private bool option3 = false;
+
+	private FormData formData = new FormData();
+	private string submitResult = "";
+
+	private void HandleEvent(ChangeEventArgs e)
+	{
+		lastEventTime = DateTime.Now.ToString("HH:mm:ss");
+	}
+
+	private void HandleSubmit()
+	{
+		submitResult = $"Terms: {formData.AcceptTerms}, Newsletter: {formData.Subscribe}";
+	}
+
+	private class FormData
+	{
+		public bool AcceptTerms { get; set; }
+		public bool Subscribe { get; set; }
+	}
+}
