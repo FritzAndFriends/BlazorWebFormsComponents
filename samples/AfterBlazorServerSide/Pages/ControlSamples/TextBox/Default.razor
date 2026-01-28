@@ -48,3 +48,14 @@
     private string singleText = "Default Text";
     private string multiLineText = "Line 1\nLine 2\nLine 3";
 }
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;TextBox Text="@@singleText" CssClass="form-control" /&gt;<br />
+&lt;TextBox TextMode="TextBoxMode.Password" Placeholder="Enter password" /&gt;<br />
+&lt;TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" Text="@@multiLineText" /&gt;<br />
+&lt;TextBox Text="Cannot edit this" ReadOnly="true" CssClass="form-control" /&gt;<br />
+&lt;TextBox Text="Disabled textbox" Enabled="false" CssClass="form-control" /&gt;
+</code>

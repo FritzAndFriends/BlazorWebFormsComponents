@@ -85,3 +85,13 @@
         selectedSize = size;
     }
 }
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;RadioButton Text="Single option" Checked="@@singleChecked" CheckedChanged="@@HandleCheckedChanged" /&gt;<br />
+&lt;RadioButton Text="Small" GroupName="Size" Checked="@@(selectedSize == "Small")" OnCheckedChanged="@@(() =&gt; OnSizeChange("Small"))" /&gt;<br />
+&lt;RadioButton Text="Label on left" GroupName="Align" TextAlign="Enums.TextAlign.Left" /&gt;<br />
+&lt;RadioButton Text="Cannot select" Enabled="false" /&gt;
+</code>

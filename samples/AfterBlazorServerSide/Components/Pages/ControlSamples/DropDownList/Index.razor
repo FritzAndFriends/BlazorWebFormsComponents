@@ -103,3 +103,12 @@
         public string Name { get; set; }
     }
 }
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;DropDownList TItem="object" StaticItems="staticItems" @@bind-SelectedValue="selectedValue" /&gt;<br />
+&lt;DropDownList TItem="Product" Items="products" DataTextField="Name" DataValueField="Id" @@bind-SelectedValue="selectedProduct" /&gt;<br />
+&lt;DropDownList TItem="object" StaticItems="staticItems" Enabled="false" SelectedValue="2" /&gt;
+</code>
