@@ -1,0 +1,23 @@
+@code {
+
+	[Fact]
+	public void CheckBox_VisibleTrue_RendersCheckBox()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Visible" Visible="true" />);
+
+		// Assert
+		cut.Find("span").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CheckBox_VisibleFalse_DoesNotRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Hidden" Visible="false" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+}

@@ -1,0 +1,31 @@
+@code {
+
+	[Fact]
+	public void CheckBox_WithText_RendersSpanWithInputAndLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Accept terms" />);
+
+		// Assert
+		cut.Find("span").ShouldNotBeNull();
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+		cut.Find("label").TextContent.ShouldBe("Accept terms");
+	}
+
+	[Fact]
+	public void CheckBox_WithText_LabelHasForAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Accept terms" />);
+
+		// Assert
+		var input = cut.Find("input");
+		var label = cut.Find("label");
+		var inputId = input.GetAttribute("id");
+		var labelFor = label.GetAttribute("for");
+
+		inputId.ShouldNotBeNullOrEmpty();
+		labelFor.ShouldBe(inputId);
+	}
+
+}
