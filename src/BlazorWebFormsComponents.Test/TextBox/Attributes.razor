@@ -1,0 +1,70 @@
+@using TBM = BlazorWebFormsComponents.Enums.TextBoxMode
+
+@code {
+
+	[Fact]
+	public void TextBox_WithMaxLength_RendersMaxLengthAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox MaxLength="10" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("maxlength").ShouldBe("10");
+	}
+
+	[Fact]
+	public void TextBox_WithColumns_RendersSizeAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Columns="20" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("size").ShouldBe("20");
+	}
+
+	[Fact]
+	public void TextBox_ReadOnly_RendersReadonlyAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox ReadOnly="true" Text="Cannot edit" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.HasAttribute("readonly").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void TextBox_Disabled_RendersDisabledAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Enabled="false" Text="Disabled" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.HasAttribute("disabled").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void TextBox_WithTabIndex_RendersTabIndexAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TabIndex="5" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("tabindex").ShouldBe("5");
+	}
+
+	[Fact]
+	public void TextBox_MultiLineWithMaxLength_DoesNotRenderMaxLength()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" MaxLength="100" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.HasAttribute("maxlength").ShouldBeFalse();
+	}
+}

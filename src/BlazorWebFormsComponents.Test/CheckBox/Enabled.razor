@@ -1,0 +1,36 @@
+@code {
+
+	[Fact]
+	public void CheckBox_EnabledFalse_RendersDisabledAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Cannot change" Enabled="false" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.HasAttribute("disabled").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CheckBox_EnabledTrue_DoesNotRenderDisabledAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Can change" Enabled="true" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.HasAttribute("disabled").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CheckBox_DefaultEnabled_IsTrue()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Default state" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.HasAttribute("disabled").ShouldBeFalse();
+	}
+
+}

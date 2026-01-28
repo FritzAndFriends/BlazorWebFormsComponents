@@ -1,0 +1,41 @@
+@code {
+
+	private int eventCallCount = 0;
+	private bool lastCheckedValue = false;
+
+	private void HandleCheckedChanged(ChangeEventArgs e)
+	{
+		eventCallCount++;
+		lastCheckedValue = (bool)e.Value;
+	}
+
+	[Fact]
+	public void CheckBox_OnCheckedChanged_FiresWhenClicked()
+	{
+		// Arrange
+		eventCallCount = 0;
+		var cut = Render(@<CheckBox Text="Click me" OnCheckedChanged="HandleCheckedChanged" />);
+
+		// Act
+		cut.Find("input").Change(true);
+
+		// Assert
+		eventCallCount.ShouldBe(1);
+		lastCheckedValue.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CheckBox_CheckedChanged_FiresWithTwoWayBinding()
+	{
+		// Arrange
+		bool checkedValue = false;
+		var cut = Render(@<CheckBox Text="Bind me" @bind-Checked="checkedValue" />);
+
+		// Act
+		cut.Find("input").Change(true);
+
+		// Assert
+		checkedValue.ShouldBeTrue();
+	}
+
+}

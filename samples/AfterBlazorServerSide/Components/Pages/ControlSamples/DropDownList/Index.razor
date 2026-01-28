@@ -1,0 +1,105 @@
+@page "/ControlSamples/DropDownList"
+
+<h1>DropDownList Component Samples</h1>
+
+<h2>Basic DropDownList with Static Items</h2>
+<DropDownList TItem="object" StaticItems="staticItems" @bind-SelectedValue="selectedStatic" />
+<p>Selected Value: <strong>@selectedStatic</strong></p>
+
+<h2>With Pre-selected Value</h2>
+<DropDownList TItem="object" StaticItems="preselectedItems" SelectedValue="banana" />
+
+<h2>Data-bound DropDownList</h2>
+<DropDownList TItem="Product"
+              Items="products"
+              DataTextField="Name"
+              DataValueField="Id"
+              @bind-SelectedValue="selectedProduct" />
+<p>Selected Product ID: <strong>@selectedProduct</strong></p>
+<p>Selected Product: <strong>@(products.FirstOrDefault(p => p.Id == selectedProduct)?.Name ?? "None")</strong></p>
+
+<h2>Disabled DropDownList</h2>
+<DropDownList TItem="object" StaticItems="staticItems" Enabled="false" SelectedValue="2" />
+
+<h2>With CSS Class</h2>
+<DropDownList TItem="object" StaticItems="styledItems" CssClass="form-select" />
+<br />
+<small>Note: The form-select class is from Bootstrap and provides styling.</small>
+
+<h2>With Inline Styles</h2>
+<DropDownList TItem="object"
+              StaticItems="colorItems"
+              BackColor="new WebColor(System.Drawing.Color.LightYellow)"
+              ForeColor="new WebColor(System.Drawing.Color.Navy)"
+              Font="new FontInfo { Bold = true }" />
+
+<h2>With Change Event</h2>
+<DropDownList TItem="object"
+              StaticItems="eventItems"
+              @bind-SelectedValue="eventSelection"
+              OnSelectedIndexChanged="HandleSelectionChanged" />
+<p>Last selection: <strong>@lastSelection</strong> at @lastChangeTime.ToString("HH:mm:ss")</p>
+
+@code {
+    private string selectedStatic = "";
+    private string selectedProduct = "";
+    private string eventSelection = "";
+    private string lastSelection = "None";
+    private DateTime lastChangeTime = DateTime.Now;
+
+    private ListItemCollection staticItems = new()
+    {
+        new ListItem("Select...", ""),
+        new ListItem("Option One", "1"),
+        new ListItem("Option Two", "2"),
+        new ListItem("Option Three", "3")
+    };
+
+    private ListItemCollection preselectedItems = new()
+    {
+        new ListItem("Apple", "apple"),
+        new ListItem("Banana", "banana"),
+        new ListItem("Cherry", "cherry")
+    };
+
+    private ListItemCollection styledItems = new()
+    {
+        new ListItem("Styled Option", "1"),
+        new ListItem("Another Option", "2")
+    };
+
+    private ListItemCollection colorItems = new()
+    {
+        new ListItem("Colored dropdown item", "1"),
+        new ListItem("Another colored item", "2")
+    };
+
+    private ListItemCollection eventItems = new()
+    {
+        new ListItem("Select one...", ""),
+        new ListItem("First", "1"),
+        new ListItem("Second", "2"),
+        new ListItem("Third", "3")
+    };
+
+    private List<Product> products = new()
+    {
+        new Product { Id = "1", Name = "Widget" },
+        new Product { Id = "2", Name = "Gadget" },
+        new Product { Id = "3", Name = "Gizmo" },
+        new Product { Id = "4", Name = "Doohickey" }
+    };
+
+    private void HandleSelectionChanged(ChangeEventArgs e)
+    {
+        lastSelection = e.Value?.ToString() ?? "None";
+        lastChangeTime = DateTime.Now;
+        StateHasChanged();
+    }
+
+    public class Product
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+}

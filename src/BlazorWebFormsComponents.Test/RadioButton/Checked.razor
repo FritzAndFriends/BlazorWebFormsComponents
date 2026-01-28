@@ -1,0 +1,41 @@
+
+@code {
+
+	[Fact]
+	public void RadioButton_Checked_RendersCheckedAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" Checked="true" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		input.HasAttribute("checked").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RadioButton_NotChecked_DoesNotRenderCheckedAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" Checked="false" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		input.HasAttribute("checked").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void RadioButton_OnChange_InvokesCheckedChangedCallback()
+	{
+		// Arrange
+		bool receivedValue = false;
+		var cut = Render(@<RadioButton Text="Option" CheckedChanged="@((value) => receivedValue = value)" />);
+
+		// Act
+		var input = cut.Find("input[type='radio']");
+		input.Change(true);
+
+		// Assert
+		receivedValue.ShouldBeTrue();
+	}
+
+}

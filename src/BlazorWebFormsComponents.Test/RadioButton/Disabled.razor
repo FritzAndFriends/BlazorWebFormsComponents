@@ -1,0 +1,26 @@
+
+@code {
+
+	[Fact]
+	public void RadioButton_DisabledFalse_NoDisabledAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" Enabled="true" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		input.HasAttribute("disabled").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void RadioButton_DisabledTrue_HasDisabledAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" Enabled="false" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		input.HasAttribute("disabled").ShouldBeTrue();
+	}
+
+}

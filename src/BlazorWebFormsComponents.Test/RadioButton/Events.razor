@@ -1,0 +1,29 @@
+
+@code {
+
+	private bool eventFired = false;
+	private ChangeEventArgs receivedArgs = null;
+
+	[Fact]
+	public void RadioButton_OnCheckedChanged_FiresOnChange()
+	{
+		// Arrange
+		eventFired = false;
+		var cut = Render(@<RadioButton Text="Option" OnCheckedChanged="HandleCheckedChanged" />);
+
+		// Act
+		var input = cut.Find("input[type='radio']");
+		input.Change(true);
+
+		// Assert
+		eventFired.ShouldBeTrue();
+		receivedArgs.ShouldNotBeNull();
+	}
+
+	private void HandleCheckedChanged(ChangeEventArgs e)
+	{
+		eventFired = true;
+		receivedArgs = e;
+	}
+
+}

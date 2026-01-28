@@ -1,0 +1,68 @@
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using TBM = BlazorWebFormsComponents.Enums.TextBoxMode
+
+@code {
+
+	[Fact]
+	public void TextBox_WithBackColor_RendersStyleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox BackColor="LightYellow" />);
+
+		// Assert
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void TextBox_WithForeColor_RendersStyleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox ForeColor="Navy" />);
+
+		// Assert
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("color");
+	}
+
+	[Fact]
+	public void TextBox_WithBorderColor_RendersStyleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox BorderColor="Blue" BorderWidth="Unit.Pixel(2)" BorderStyle="Solid" />);
+
+		// Assert
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("border");
+	}
+
+	[Fact]
+	public void TextBox_WithWidth_RendersStyleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Width="Unit.Pixel(200)" />);
+
+		// Assert
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("width");
+	}
+
+	[Fact]
+	public void TextBox_MultiLineWithStyle_RendersStyleOnTextarea()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" BackColor="Beige" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		var style = textarea.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+}

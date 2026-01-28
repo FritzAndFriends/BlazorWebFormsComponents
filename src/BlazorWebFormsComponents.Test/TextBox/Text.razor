@@ -1,0 +1,47 @@
+@code {
+
+	[Fact]
+	public void TextBox_SingleLine_RendersInputText()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Text="Hello World" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("text");
+		input.GetAttribute("value").ShouldBe("Hello World");
+	}
+
+	[Fact]
+	public void TextBox_SingleLineWithCssClass_RendersClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Text="Hello" CssClass="form-control" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("class").ShouldBe("form-control");
+	}
+
+	[Fact]
+	public void TextBox_SingleLineWithPlaceholder_RendersPlaceholder()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Placeholder="Enter text here" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("placeholder").ShouldBe("Enter text here");
+	}
+
+	[Fact]
+	public void TextBox_EmptyText_RendersEmptyValue()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("value").ShouldBe("");
+	}
+}

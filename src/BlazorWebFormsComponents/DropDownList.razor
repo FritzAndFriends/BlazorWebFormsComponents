@@ -1,0 +1,16 @@
+@using BlazorWebFormsComponents.DataBinding
+@typeparam TItem
+@inherits DataBoundComponent<TItem>
+
+@if (Visible)
+{
+	<select class="@CssClass" style="@Style"
+			disabled="@(!Enabled)" @onchange="HandleChange">
+		@foreach (var item in GetItems())
+		{
+			<option value="@item.Value" selected="@(item.Value == SelectedValue)">
+				@item.Text
+			</option>
+		}
+	</select>
+}

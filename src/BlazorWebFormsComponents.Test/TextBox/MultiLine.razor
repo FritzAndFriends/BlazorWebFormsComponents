@@ -1,0 +1,62 @@
+@using TBM = BlazorWebFormsComponents.Enums.TextBoxMode
+
+@code {
+
+	[Fact]
+	public void TextBox_MultiLine_RendersTextarea()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" Text="Line 1
+Line 2
+Line 3" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.TextContent.ShouldBe("Line 1\nLine 2\nLine 3");
+	}
+
+	[Fact]
+	public void TextBox_MultiLineWithRows_RendersRowsAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" Rows="5" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.GetAttribute("rows").ShouldBe("5");
+	}
+
+	[Fact]
+	public void TextBox_MultiLineWithColumns_RendersColsAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" Columns="40" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.GetAttribute("cols").ShouldBe("40");
+	}
+
+	[Fact]
+	public void TextBox_MultiLineWithRowsAndCols_RendersBothAttributes()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" Rows="5" Columns="40" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.GetAttribute("rows").ShouldBe("5");
+		textarea.GetAttribute("cols").ShouldBe("40");
+	}
+
+	[Fact]
+	public void TextBox_MultiLineWithCssClass_RendersClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.MultiLine" CssClass="my-textarea" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.GetAttribute("class").ShouldBe("my-textarea");
+	}
+}

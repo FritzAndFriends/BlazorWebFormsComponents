@@ -1,0 +1,24 @@
+
+@code {
+
+	[Fact]
+	public void RadioButton_Visible_RendersElement()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" Visible="true" />);
+
+		// Assert
+		cut.Find("span").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void RadioButton_NotVisible_DoesNotRenderElement()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option" Visible="false" />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+}

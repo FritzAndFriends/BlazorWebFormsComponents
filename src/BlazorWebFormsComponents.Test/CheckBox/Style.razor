@@ -1,0 +1,47 @@
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+
+@code {
+
+	[Fact]
+	public void CheckBox_WithCssClass_AppliesClassToSpan()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Styled checkbox" CssClass="custom-check" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.ClassList.ShouldContain("custom-check");
+	}
+
+	[Fact]
+	public void CheckBox_WithBackColorAndForeColor_AppliesStyleToSpan()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Colored" BackColor="LightBlue" ForeColor="Navy" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		var style = span.GetAttribute("style");
+
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color:LightBlue");
+		style.ShouldContain("color:Navy");
+	}
+
+	[Fact]
+	public void CheckBox_NoText_AppliesStylesToInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox BackColor="Yellow" CssClass="custom-input" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.ClassList.ShouldContain("custom-input");
+		input.HasAttribute("style").ShouldBeTrue();
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Yellow");
+	}
+
+}

@@ -1,0 +1,71 @@
+@using TBM = BlazorWebFormsComponents.Enums.TextBoxMode
+
+@code {
+
+	[Fact]
+	public void TextBox_PasswordMode_RendersPasswordInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.Password" Text="secret" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("password");
+		input.GetAttribute("value").ShouldBe("secret");
+	}
+
+	[Fact]
+	public void TextBox_EmailMode_RendersEmailInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.Email" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("email");
+	}
+
+	[Fact]
+	public void TextBox_NumberMode_RendersNumberInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.Number" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("number");
+	}
+
+	[Fact]
+	public void TextBox_DateMode_RendersDateInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.Date" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("date");
+	}
+
+	[Fact]
+	public void TextBox_UrlMode_RendersUrlInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.Url" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("url");
+	}
+
+	[Fact]
+	public void TextBox_PhoneMode_RendersTelInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox TextMode="TBM.Phone" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("type").ShouldBe("tel");
+	}
+}

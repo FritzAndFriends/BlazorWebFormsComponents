@@ -1,0 +1,49 @@
+
+@code {
+
+	[Fact]
+	public void DropDownList_WithStaticItems_RendersSelectWithOptions()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("First", "1"),
+			new ListItem("Second", "2"),
+			new ListItem("Third", "3")
+		};
+
+		// Act
+		var cut = Render(@<DropDownList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.ShouldNotBeNull();
+		
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(3);
+		options[0].TextContent.ShouldBe("First");
+		options[0].GetAttribute("value").ShouldBe("1");
+		options[1].TextContent.ShouldBe("Second");
+		options[1].GetAttribute("value").ShouldBe("2");
+		options[2].TextContent.ShouldBe("Third");
+		options[2].GetAttribute("value").ShouldBe("3");
+	}
+
+	[Fact]
+	public void DropDownList_EmptyItems_RendersEmptySelect()
+	{
+		// Arrange
+		var items = new ListItemCollection();
+
+		// Act
+		var cut = Render(@<DropDownList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.ShouldNotBeNull();
+		
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(0);
+	}
+
+}
