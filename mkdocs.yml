@@ -65,6 +65,7 @@ nav:
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
     - Button: EditorControls/Button.md
+    - DropDownList: EditorControls/DropDownList.md
     - HiddenField: EditorControls/HiddenField.md
     - HyperLink: EditorControls/HyperLink.md
     - Image: EditorControls/Image.md
