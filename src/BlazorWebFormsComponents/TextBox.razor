@@ -1,0 +1,13 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	@if (TextMode == TextBoxMode.MultiLine)
+	{
+		<textarea @attributes="CalculatedAttributes">@Text</textarea>
+	}
+	else
+	{
+		<input type="@CalculatedType" value="@Text" @attributes="CalculatedAttributes" />
+	}
+}
