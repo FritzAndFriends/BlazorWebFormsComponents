@@ -170,6 +170,8 @@ namespace BlazorWebFormsComponents
 
 		public Color ToColor() => _color;
 
+		public string ToHtml() => ColorTranslator.ToHtml(_color);
+
 		public static implicit operator WebColor(Color c)
 		{
 			return new WebColor(c);

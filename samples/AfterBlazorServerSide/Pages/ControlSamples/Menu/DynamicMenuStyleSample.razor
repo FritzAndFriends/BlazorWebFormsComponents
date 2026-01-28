@@ -1,0 +1,42 @@
+﻿@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+
+<h3>DynamicMenuStyle Sample</h3>
+
+<Nav />
+
+<Menu ID="NavigationMenu"
+			StaticDisplayLevels="2"
+			StaticSubmenuIndent="10"
+			orientation="Vertical"
+			target="_blank"
+			runat="server">
+
+	<DynamicMenuStyle BackColor="LightSkyBlue"
+										ForeColor="Black"
+										BorderStyle="Solid"
+										BorderWidth="1"
+										BorderColor="Black" />
+
+	<Items>
+		<MenuItem NavigateUrl="Home.aspx"
+							Text="Home"
+							ToolTip="Home">
+			<MenuItem NavigateUrl="Music.aspx"
+								Text="Music"
+								ToolTip="Music">
+				<MenuItem NavigateUrl="Classical.aspx"
+									Text="Classical"
+									ToolTip="Classical" />
+				<MenuItem NavigateUrl="Rock.aspx"
+									Text="Rock"
+									ToolTip="Rock" />
+				<MenuItem NavigateUrl="Jazz.aspx"
+									Text="Jazz"
+									ToolTip="Jazz" />
+			</MenuItem>
+		</MenuItem>
+	</Items>
+
+</Menu>
+

@@ -1,0 +1,39 @@
+@inherits BunitContext
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
+
+@code {
+
+	[Fact]
+	public void Menu_BasicRender_ShowsMenuItems()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+
+		var cut = Render(
+			@<Menu id="NavigationMenu"
+				orientation="Vertical"
+				font-names="Arial"
+				target="_blank"
+				runat="server">
+
+				<Items>
+					<MenuItem navigateurl="Music.aspx" text="Music" tooltip="Music" />
+					<MenuItem navigateurl="Movies.aspx" text="Movies" tooltip="Movies" />
+				</Items>
+
+			</Menu>
+		);
+
+		var menuItems = cut.FindAll("a");
+		menuItems.Count().ShouldBe(2);
+
+		foreach (var item in menuItems)
+		{
+			item.GetAttribute("class").ShouldBe("level1");
+		}
+	}
+
+}

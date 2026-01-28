@@ -1,0 +1,75 @@
+﻿@page "/ControlSamples/Menu/DatabindingSitemap"
+@using static BlazorWebFormsComponents.WebColor 
+
+<h2>Databinding a Menu using a Sitemap</h2>
+
+<Nav />
+
+<p>Here is a menu databound to a Sitemap XML document</p>
+
+<Menu id="NavigationMenu"
+			DisappearAfter="2000"
+			StaticDisplayLevels="2"
+			StaticSubmenuIndent="10"
+			orientation="Vertical"
+			font-names="Arial"
+			target="_blank"
+			DataSource="MenuSource"
+			runat="server">
+
+	<StaticMenuItemStyle BackColor="LightSteelBlue"
+											 ForeColor="Black" />
+	<StaticHoverStyle BackColor="LightSkyBlue" />
+	<DynamicMenuItemStyle BackColor="Black"
+												ForeColor="Silver" />
+	<DynamicHoverStyle BackColor="LightSkyBlue"
+										 ForeColor="Black" />
+
+</Menu>
+
+@code {
+
+	private System.Xml.XmlDocument MenuSource = new System.Xml.XmlDocument();
+
+	protected override void OnInitialized() {
+
+		MenuSource.LoadXml(@"	<siteMap>
+		<siteMapNode url=""~\Home.aspx""
+								 title=""Home""
+								 description=""Home"">
+			<siteMapNode url=""~\Music.aspx""
+									 title=""Music""
+									 description=""Music"">
+				<siteMapNode url=""~\Classical.aspx""
+										 title=""Classical""
+										 description=""Classical"" />
+				<siteMapNode url=""~\Rock.aspx""
+										 title=""Rock""
+										 description=""Rock"" />
+				<siteMapNode url=""~\Jazz.aspx""
+										 title=""Jazz""
+										 description=""Jazz"" />
+			</siteMapNode>
+			<siteMapNode url=""~\Movies.aspx""
+									 title=""Movies""
+									 description=""Movies"">
+				<siteMapNode url=""~\Action.aspx""
+										 title=""Action""
+										 description=""Action"" />
+				<siteMapNode url=""~\Drama.aspx""
+										 title=""Drama""
+										 description=""Drama"" />
+				<siteMapNode url=""~\Musical.aspx""
+										 title=""Musical""
+										 description=""Musical"" />
+			</siteMapNode>
+		</siteMapNode>
+	</siteMap>
+");
+
+		base.OnInitialized();
+
+	}
+
+
+}

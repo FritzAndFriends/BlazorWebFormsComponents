@@ -90,6 +90,10 @@ Any code that is written to support a component are required to be accompanied w
 
 Code for components' features should also include some definition in the `/docs` folder so that our users can identify and understand which feature is supported.
 
+### Style Usage
+
+There is a rich component styling framework that is part of this library for you to use while building these components. When using these styles, create a component for the style type needed. In the OnInitialized method of the style component, set the style in the parent component appropriately.  See the `MenuItemStyle.razor.cs` file for an example of this behavior.
+
 ### Write documentation
 
 The documentation for the migration and consumption of these components will be significant in scope and need to cover many scenarios.  We are always looking for help to add content to the `/docs` section of the repository with proper links back through to the main `/README.md`.

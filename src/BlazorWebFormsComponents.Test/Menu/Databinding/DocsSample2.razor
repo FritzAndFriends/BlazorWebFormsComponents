@@ -1,0 +1,60 @@
+﻿@inherits BunitContext
+@using static BlazorWebFormsComponents.WebColor
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
+
+@* Replicating the second sample from:  https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu?view=netframework-4.8 *@
+
+@code {
+
+	[Fact]
+	public void Menu_Databinding_ShowsMenuItems()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+
+		var menuSource = new System.Xml.XmlDocument();
+		menuSource.LoadXml(@"<siteMap>
+			<siteMapNode url=""~\Home.aspx"" title=""Home"" description=""Home"">
+				<siteMapNode url=""~\Music.aspx"" title=""Music"" description=""Music"">
+					<siteMapNode url=""~\Classical.aspx"" title=""Classical"" description=""Classical"" />
+					<siteMapNode url=""~\Rock.aspx"" title=""Rock"" description=""Rock"" />
+					<siteMapNode url=""~\Jazz.aspx"" title=""Jazz"" description=""Jazz"" />
+				</siteMapNode>
+				<siteMapNode url=""~\Movies.aspx"" title=""Movies"" description=""Movies"">
+					<siteMapNode url=""~\Action.aspx"" title=""Action"" description=""Action"" />
+					<siteMapNode url=""~\Drama.aspx"" title=""Drama"" description=""Drama"" />
+					<siteMapNode url=""~\Musical.aspx"" title=""Musical"" description=""Musical"" />
+				</siteMapNode>
+			</siteMapNode>
+		</siteMap>");
+
+		var cut = Render(
+			@<Menu id="NavigationMenu"
+				DisappearAfter="2000"
+				StaticDisplayLevels="2"
+				StaticSubmenuIndent="10"
+				orientation="Vertical"
+				font-names="Arial"
+				target="_blank"
+				DataSource="menuSource"
+				runat="server">
+
+				<StaticMenuItemStyle BackColor="LightSteelBlue"
+					ForeColor="Black" />
+				<StaticHoverStyle BackColor="LightSkyBlue" />
+				<DynamicMenuItemStyle BackColor="Black"
+					ForeColor="Silver" />
+				<DynamicHoverStyle BackColor="LightSkyBlue"
+					ForeColor="Black" />
+
+			</Menu>
+		);
+
+		var menuItems = cut.FindAll("a");
+		menuItems.Count().ShouldBe(9);
+	}
+
+}

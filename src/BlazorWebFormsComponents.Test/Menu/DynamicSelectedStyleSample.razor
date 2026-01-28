@@ -1,0 +1,60 @@
+﻿@inherits BunitContext
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using System.Text.RegularExpressions
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
+
+@code {
+
+	[Fact]
+	public void Menu_DynamicSelectedStyle_AppliesStyles()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+
+		var cut = Render(
+			@<Menu ID="NavigationMenu"
+				StaticDisplayLevels="1"
+				StaticSubmenuIndent="10"
+				orientation="Vertical"
+				target="_blank"
+				runat="server">
+
+				<DynamicSelectedStyle BackColor="LightBlue"
+					ForeColor="Red"
+					BorderStyle="Solid"
+					BorderColor="Black"
+					BorderWidth="1" />
+
+				<Items>
+					<MenuItem Text="Home" ToolTip="Home">
+						<MenuItem Text="Music" ToolTip="Music">
+							<MenuItem Text="Classical" ToolTip="Classical" />
+							<MenuItem Text="Rock" ToolTip="Rock" />
+							<MenuItem Text="Jazz" ToolTip="Jazz" />
+						</MenuItem>
+					</MenuItem>
+				</Items>
+
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		theMarkup.ShouldContain("#NavigationMenu a.dynamic.selected");
+
+		// Verify the style content
+		var reTest = new Regex(@"a\.dynamic\.selected\s*\{([^}]+)\}");
+		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		// Assert the style rules were applied
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+		theStyleRules.ShouldContain("border:");
+	}
+
+}

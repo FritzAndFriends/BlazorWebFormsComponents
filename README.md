@@ -69,7 +69,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [RequiredFieldValidator](docs/ValidationControls/RequiredFieldValidator.md)
     - [ValidationSummary](docs/ValidationControls/ValidationSummary.md)
   - Navigation Controls
-    - Menu
+    - [Menu](docs/Menu.md)
     - SiteMapPath
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
