@@ -28,9 +28,7 @@ It may seem strange that we have a HyperLink component when there already is an 
 - `Font-Underline` - underline text decoration
 
 ### Other Properties
-- `Enabled` - whether the hyperlink is enabled (default: true)
 - `Visible` - whether the hyperlink is visible (default: true)
-- `TabIndex` - tab order for keyboard navigation
 
 ### Event Handlers
 - `OnDataBinding` - event handler for data binding
@@ -44,6 +42,8 @@ It may seem strange that we have a HyperLink component when there already is an 
 
 - `ImageUrl` - The Blazor HyperLink component does not support image links. Use the Image component wrapped in an anchor tag instead.
 - `AccessKey` - Not supported in Blazor
+- `Enabled` - While the property exists for compatibility, it does not affect the hyperlink's behavior (the link is not disabled)
+- `TabIndex` - While the property exists in the base class, it is not rendered on the hyperlink element
 - `EnableTheming` - Theming is not available in Blazor
 - `EnableViewState` - ViewState is supported for compatibility but this parameter does nothing
 - `SkinID` - Theming is not available in Blazor
