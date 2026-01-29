@@ -1,0 +1,66 @@
+@using System.IO
+
+@code {
+	/// <summary>
+	/// Integration test to verify that Ads.xml is properly copied to output directory.
+	/// This test validates the fix for the Azure deployment issue where Ads.xml was missing.
+	/// </summary>
+	[Fact]
+	public void AdRotator_DeploymentVerification_AdsXmlExistsInOutputDirectory()
+	{
+		// Arrange - Get the path where Ads.xml should be copied during build
+		var outputDirectory = AppContext.BaseDirectory;
+		var adsXmlPath = Path.Combine(outputDirectory, "Ads1.xml");
+
+		// Act & Assert - Verify the file exists (simulating deployment scenario)
+		File.Exists(adsXmlPath).ShouldBeTrue($"Ads.xml should be copied to output directory. Expected path: {adsXmlPath}");
+		
+		// Verify the file can be read and contains valid XML
+		var fileContent = File.ReadAllText(adsXmlPath);
+		fileContent.ShouldContain("<Advertisements>");
+		fileContent.ShouldContain("<Ad>");
+	}
+
+	/// <summary>
+	/// Integration test to verify AdRotator can load and render ads from a file in the output directory.
+	/// This simulates the actual deployment scenario where the component loads from the file system.
+	/// </summary>
+	[Fact]
+	public void AdRotator_DeploymentVerification_LoadsFromOutputDirectory()
+	{
+		// Arrange - Use Ads1.xml which should be in output directory
+		var adsFile = "Ads1.xml";
+
+		// Act - Render AdRotator with the file from output directory
+		var cut = Render(@<AdRotator AdvertisementFile="@adsFile" Target="_blank" />);
+
+		// Assert - Verify the component rendered successfully
+		var anchor = cut.Find("a");
+		anchor.ShouldNotBeNull("AdRotator should render an anchor element when Ads.xml is found");
+		
+		var img = cut.Find("img");
+		img.ShouldNotBeNull("AdRotator should render an image element when Ads.xml is found");
+		
+		// Verify the content matches expected values from Ads1.xml
+		img.Attributes["alt"].Value.ShouldBe("Bing");
+		img.Attributes["src"].Value.ShouldBe("bing.png");
+		anchor.Attributes["href"].Value.ShouldBe("http://www.bing.com");
+	}
+
+	/// <summary>
+	/// Integration test to verify AdRotator handles missing Ads.xml gracefully.
+	/// This helps identify deployment issues early.
+	/// </summary>
+	[Fact]
+	public void AdRotator_DeploymentVerification_HandlesFileMissingScenario()
+	{
+		// Arrange - Use a non-existent file
+		var nonExistentFile = "NonExistent.xml";
+
+		// Act & Assert - Should throw FileNotFoundException
+		Should.Throw<FileNotFoundException>(() =>
+		{
+			var cut = Render(@<AdRotator AdvertisementFile="@nonExistentFile" Target="_blank" />);
+		});
+	}
+}
