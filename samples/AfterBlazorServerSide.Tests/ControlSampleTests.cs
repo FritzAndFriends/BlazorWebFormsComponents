@@ -114,11 +114,8 @@ public class ControlSampleTests
             Assert.NotNull(altText);
             Assert.NotEmpty(altText);
 
-            // Assert - Ad is wrapped in an anchor tag with href
-            var adLinkElement = await page.QuerySelectorAsync("a[href]");
-            Assert.NotNull(adLinkElement);
-            
-            var href = await adLinkElement.GetAttributeAsync("href");
+            // Assert - Ad image is wrapped in an anchor tag with href (check parent element)
+            var href = await adImage.EvaluateAsync<string>("el => el.parentElement?.tagName === 'A' ? el.parentElement.getAttribute('href') : null");
             Assert.NotNull(href);
             Assert.NotEmpty(href);
         }
