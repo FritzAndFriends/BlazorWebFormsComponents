@@ -23,7 +23,7 @@
 			new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global" }
 		};
 
-		Customer selectedCustomer = null;
+		Customer? selectedCustomer = null;
 
 		var cut = Render(@<GridView ItemType="Customer"
 			AutoGenerateColumns="false"
