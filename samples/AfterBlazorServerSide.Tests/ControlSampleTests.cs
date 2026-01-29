@@ -85,10 +85,6 @@ public class ControlSampleTests
     /// Validates that AdRotator displays an ad with the correct attributes.
     /// This specifically tests that Ads.xml is properly deployed and accessible.
     /// </summary>
-    /// <summary>
-    /// Validates that AdRotator displays an ad with the correct attributes.
-    /// This specifically tests that Ads.xml is properly deployed and accessible.
-    /// </summary>
     [Fact]
     public async Task AdRotator_DisplaysAd_WithCorrectAttributes()
     {
@@ -108,20 +104,17 @@ public class ControlSampleTests
             Assert.NotNull(response);
             Assert.True(response.Ok, $"Page failed to load with status: {response.Status}");
 
-            // Assert - AdRotator component rendered (look for anchor with image inside)
-            // The AdRotator renders as: <a href="..."><img src="..." alt="..." /></a>
-            var adElements = await page.QuerySelectorAllAsync("a img[alt]");
-            Assert.NotEmpty(adElements);
-
-            // Assert - At least one ad image has valid alt text (proving Ads.xml was loaded)
-            var adImage = adElements.First();
+            // Assert - AdRotator component rendered (look for images from Ads.xml)
+            // The AdRotator renders as: <a href="..."><img src="/img/CSharp.png" OR "/img/VB.png" alt="..." /></a>
+            // Look for the specific image sources that come from Ads.xml
+            var adImage = await page.QuerySelectorAsync("img[src='/img/CSharp.png'], img[src='/img/VB.png']");
+            Assert.NotNull(adImage);
             Assert.True(await adImage.IsVisibleAsync(), "Ad image should be visible");
             
+            // Verify alt text is one of the expected values from Ads.xml
             var altText = await adImage.GetAttributeAsync("alt");
             Assert.NotNull(altText);
             Assert.NotEmpty(altText);
-            
-            // Verify alt text is one of the expected values from Ads.xml
             Assert.Contains(altText, new[] { "CSharp", "Visual Basic" });
         }
         finally
