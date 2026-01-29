@@ -25,25 +25,26 @@ theme:
       code: Roboto Mono
     logo: assets/logo.png
     favicon: assets/favicon.ico
-    include_search_page: false
-    search_index_only: true
 
 extra_css:
   - assets/stylesheets/extra.css
 
 markdown_extensions:
   - admonition
-  - codehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
   - footnotes
   - markdown_include.include:
       base_path: docs
   - meta
   - pymdownx.details
-  - pymdownx.tabbed
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.superfences
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
 
@@ -56,7 +57,6 @@ plugins:
       type: iso_datetime
   - macros
   - search:
-      prebuild_index: python
       lang:
         - en
 
