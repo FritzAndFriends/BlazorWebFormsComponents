@@ -1,10 +1,14 @@
-﻿@inherits TestComponentBase
 
+@code {
 
-<SnapshotTest Description="Verify HTML format of Button">
-	<TestInput>
-		<Button Text="Click Me!" Visible="false" OnClientClick="window.navigate('bing.com')" />
-	</TestInput>
-	<ExpectedOutput>
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void Button_VisibleFalse_RendersNothing()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me!" Visible="false" OnClientClick="window.navigate('bing.com')" />);
+
+		// Assert
+		cut.MarkupMatches(string.Empty);
+	}
+
+}

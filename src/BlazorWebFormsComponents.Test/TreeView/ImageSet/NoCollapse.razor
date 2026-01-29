@@ -1,58 +1,53 @@
-﻿@inherits TestComponentBase
 @using static BlazorWebFormsComponents.Enums.TreeViewImageSet
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<TreeView id="SampleTreeView"
-							ImageSet="BulletedList"
-							runat="server">
-
-			<Nodes>
-
-				<TreeNode Value="Home"
-									NavigateUrl="Home.aspx"
-									Text="Home"
-									Target="Content"
-									ToolTip="Home Tooltip"
-									Expanded="true">
-
-					<TreeNode Value="Page 1"
-										NavigateUrl="Page1.aspx"
-										Text="Page1"
-										Target="Content">
-
-						<TreeNode Value="Section 1"
-											NavigateUrl="Section1.aspx"
-											Text="Section 1"
-											Target="Content" />
-
-					</TreeNode>
-
-					<TreeNode Value="Page 2"
-										NavigateUrl="Page2.aspx"
-										Text="Page 2"
-										Target="Content">
-
-					</TreeNode>
-
-				</TreeNode>
-
-			</Nodes>
-
-		</TreeView>
-	</ComponentUnderTest>
-</Fixture>
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void TreeView_ImageSet_BulletedList_FallsBackToDefaultExpandCollapseImages()
 	{
-
 		// ImageSets that don't have Expand/Collapse images should show the Default images
 
-
 		// Arrange/Act
-		var cut = fixture.GetComponentUnderTest<TreeView>();
+		var cut = Render(
+			@<TreeView id="SampleTreeView"
+								ImageSet="BulletedList"
+								runat="server">
+
+				<Nodes>
+
+					<TreeNode Value="Home"
+										NavigateUrl="Home.aspx"
+										Text="Home"
+										Target="Content"
+										ToolTip="Home Tooltip"
+										Expanded="true">
+
+						<TreeNode Value="Page 1"
+											NavigateUrl="Page1.aspx"
+											Text="Page1"
+											Target="Content">
+
+							<TreeNode Value="Section 1"
+												NavigateUrl="Section1.aspx"
+												Text="Section 1"
+												Target="Content" />
+
+						</TreeNode>
+
+						<TreeNode Value="Page 2"
+											NavigateUrl="Page2.aspx"
+											Text="Page 2"
+											Target="Content">
+
+						</TreeNode>
+
+					</TreeNode>
+
+				</Nodes>
+
+			</TreeView>
+		);
+
 		var collapseImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_Collapse.gif";
 		var noExpandImg = "_content/Fritz.BlazorWebFormsComponents/TreeView/Default_NoExpand.gif";
 
@@ -68,8 +63,6 @@
 		images[5].GetAttribute("src").ShouldBe("_content/Fritz.BlazorWebFormsComponents/TreeView/BulletedList_LeafNode.gif");
 		images[6].GetAttribute("src").ShouldBe(noExpandImg);
 		images[7].GetAttribute("src").ShouldBe("_content/Fritz.BlazorWebFormsComponents/TreeView/BulletedList_LeafNode.gif");
-
-
 	}
 
 }

@@ -1,11 +1,14 @@
-﻿@inherits TestComponentBase
 
+@code {
 
-<SnapshotTest Description="Verify HTML format of Button">
-	<TestInput>
-		<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />
-	</TestInput>
-	<ExpectedOutput>
-		<button type="submit" onclientclick="window.navigate('bing.com')">Click Me!</button>
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void Button_WithTextAndOnClientClick_RendersCorrectHtml()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />);
+
+		// Assert
+		cut.MarkupMatches(@<button type="submit" onclientclick="window.navigate('bing.com')">Click Me!</button>);
+	}
+
+}

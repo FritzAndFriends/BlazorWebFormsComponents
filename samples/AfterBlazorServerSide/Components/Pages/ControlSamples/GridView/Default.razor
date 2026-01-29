@@ -1,0 +1,40 @@
+﻿@page "/ControlSamples/GridView"
+@using BlazorWebFormsComponents.Enums
+
+<h2>GridView Default Example</h2>
+
+<Nav />
+
+<GridView ItemType="Customer"
+					AutoGenerateColumns="false"
+					DataKeyNames="CustomerID"
+					SelectMethod="Customer.GetCustomers"
+					EmptyDataText="No data available">
+	<Columns>
+		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+		<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="CompanyName" />
+		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="FirstName"/>
+		<BoundField ItemType="Customer" DataField="LastName" HeaderText="LastName"/>
+		<TemplateField ItemType="Customer">
+			<ItemTemplate Context="Item">
+				<button type="button">Click Me! @Item.FirstName</button>
+			</ItemTemplate>
+		</TemplateField>
+		<ButtonField ItemType="Customer" ButtonType="ButtonType.Button" DataTextField="CompanyName" DataTextFormatString="{0}" CommandName="Customer"></ButtonField>
+	</Columns>
+</GridView>
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;GridView ItemType="Customer" AutoGenerateColumns="false" DataKeyNames="CustomerID"&gt;<br />
+&nbsp;&nbsp;&lt;Columns&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;BoundField ItemType="Customer" DataField="CompanyName" HeaderText="CompanyName" /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;TemplateField ItemType="Customer"&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ItemTemplate Context="Item"&gt;...&lt;/ItemTemplate&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/TemplateField&gt;<br />
+&nbsp;&nbsp;&lt;/Columns&gt;<br />
+&lt;/GridView&gt;
+</code>

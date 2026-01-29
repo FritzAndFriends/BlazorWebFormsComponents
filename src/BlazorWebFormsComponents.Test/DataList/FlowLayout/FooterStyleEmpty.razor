@@ -1,26 +1,24 @@
-﻿@inherits TestComponentBase
 @using BlazorWebFormsComponents
 @using System.Linq;
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void FirstTest(Fixture fixture)
+
+	[Fact]
+	public void DataList_FlowLayout_FooterStyleEmpty_NoStyleAttribute()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<FooterTemplate>FooterTemplate</FooterTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 		var footer = cut.Find("span").Children.FirstOrDefault(x => x.InnerHtml.Contains("FooterTemplate"));
 
 		footer.HasAttribute("style").ShouldBeFalse();
 	}
+
 }

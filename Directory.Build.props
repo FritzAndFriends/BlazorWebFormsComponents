@@ -2,14 +2,14 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning">
-      <Version>3.3.37</Version>
+      <Version>3.9.50</Version>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
 	<PropertyGroup>
-		<BlazorWebAssemblyVersion>6.0.0</BlazorWebAssemblyVersion>
-		<AspNetCoreVersion>6.0.0</AspNetCoreVersion>
+		<BlazorWebAssemblyVersion>10.0.0</BlazorWebAssemblyVersion>
+		<AspNetCoreVersion>10.0.0</AspNetCoreVersion>
 	</PropertyGroup>
 
 </Project>

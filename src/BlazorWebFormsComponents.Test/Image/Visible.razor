@@ -1,19 +1,16 @@
-﻿@inherits TestComponentBase
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="true" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+[Fact]
+public void Image_Visible_True_RendersImage()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="true" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="false" />
-	</TestInput>
-	<ExpectedOutput>
-
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_Visible_False_RendersNothing()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="false" />);
+cut.MarkupMatches(@<text></text>);
+}
+}

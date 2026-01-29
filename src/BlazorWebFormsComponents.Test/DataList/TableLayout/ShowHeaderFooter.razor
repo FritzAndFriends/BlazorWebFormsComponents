@@ -1,59 +1,39 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="ShowTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							ShowHeader="true"
-							ShowFooter="true"
-							RepeatLayout="Table"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-			<FooterTemplate>End of Line</FooterTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="HideTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							ShowHeader="false"
-							ShowFooter="false"
-							RepeatLayout="Table"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-			<FooterTemplate>End of Line</FooterTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
+    [Fact]
+    public void DataList_TableLayout_ShowHeaderFooter_Show_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+                                    ItemType="Widget"
+                                    ShowHeader="true"
+                                    ShowFooter="true"
+                                    RepeatLayout="Table"
+                                    Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+            <FooterTemplate>End of Line</FooterTemplate>
+        </DataList>);
 
-	void ShowTest(Fixture fixture)
-	{
+        cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
+        cut.Find("td").TextContent.ShouldBe("My Widget List");
+        cut.FindAll("td")[Widget.SimpleWidgetList.Length+1].TextContent.ShouldBe("End of Line");
+    }
 
-		var cut = fixture.GetComponentUnderTest();
+    [Fact]
+    public void DataList_TableLayout_ShowHeaderFooter_Hide_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+                                    ItemType="Widget"
+                                    ShowHeader="false"
+                                    ShowFooter="false"
+                                    RepeatLayout="Table"
+                                    Context="Item">
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+            <FooterTemplate>End of Line</FooterTemplate>
+        </DataList>);
 
-		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+2);
-		cut.Find("td").TextContent.ShouldBe("My Widget List");
-		cut.FindAll("td")[Widget.SimpleWidgetList.Length+1].TextContent.ShouldBe("End of Line");
-
-	}
-
-	void HideTest(Fixture fixture)
-	{
-
-		var cut = fixture.GetComponentUnderTest();
-
-		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length);
-		cut.Find("td").TextContent.ShouldNotBe("My Widget List");
-
-	}
-
-
+        cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length);
+        cut.Find("td").TextContent.ShouldNotBe("My Widget List");
+    }
 }

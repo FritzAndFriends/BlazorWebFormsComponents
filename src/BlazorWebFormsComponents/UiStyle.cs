@@ -1,5 +1,6 @@
 ﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace BlazorWebFormsComponents
@@ -9,7 +10,21 @@ namespace BlazorWebFormsComponents
 
 	}
 
-	public abstract class UiStyle<TStyle> : ComponentBase, IHasLayoutStyle where TStyle : Style
+  public abstract class UiInlineStyle : UiStyle<Style>, IStyle
+  {
+
+		public FontInfo Font { get; set; }
+
+		// public bool Font_Bold { get; set; }
+		// public bool Font_Italic { get; set; }
+		// public string Font_Names { get; set; }
+		// public bool Font_Overline { get; set; }
+		// public FontUnit Font_Size { get; set; }
+		// public bool Font_Strikeout { get; set; }
+		// public bool Font_Underline { get; set; }
+  }
+
+  public abstract class UiStyle<TStyle> : ComponentBase, IHasLayoutStyle where TStyle : Style
 	{
 
 		protected TStyle theStyle { get; set; }
@@ -41,11 +56,21 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Unit Width { get; set; }
 
+		[Inject]
+		public ILoggerFactory LoggerFactory { get; set; }
+
 		protected override void OnInitialized()
 		{
 
+			var thisLogger = LoggerFactory.CreateLogger("Style");
+			if (BackColor != null)
+			{
+				thisLogger.LogError($"Backcolor inside the UiStyle is: {BackColor.ToColor().ToString()}");
+			}
+
 			if (theStyle != null)
 			{
+
 
 				theStyle.BackColor = BackColor;
 				theStyle.BorderColor = BorderColor;

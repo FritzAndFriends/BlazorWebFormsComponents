@@ -1,24 +1,5 @@
-﻿@inherits TestComponentBase
 <h3>Range Validator</h3>
 @using BlazorWebFormsComponents.Validations;
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-
-			<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
-			<RangeValidator ControlToValidate="@Value"
-											Type="Integer"
-											MinimumValue="0"
-											MaximumValue="10"
-											Text="Invalid"
-											ErrorMessage="ErrorMessage!" />
-
-			<button type="submit" @onclick="OnClick">Submit</button>
-
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
 
 @code {
 	bool _validSubmit = false;
@@ -44,24 +25,35 @@
 	{
 		public string Value { get; set; }
 	}
-}
 
-@code {
-		void FirstTest(Fixture fixture)
-		{
+	[Fact]
+	public void RangeValidator_ValidInput_NoError()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
 
-			// Arrange
-			var cut = fixture.GetComponentUnderTest();
+				<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
+				<RangeValidator ControlToValidate="@Value"
+								Type="Integer"
+								MinimumValue="0"
+								MaximumValue="10"
+								Text="Invalid"
+								ErrorMessage="ErrorMessage!" />
 
-			// Act
-			cut.Find("input").Change("1");
-			cut.Find("form").Submit();
+				<button type="submit" @onclick="OnClick">Submit</button>
 
-			// Assert
-			System.Diagnostics.Debug.WriteLine(cut.Markup);
-			_validSubmit.ShouldBeTrue();
-			_invalidSubmit.ShouldBeFalse();
+			</EditForm>
+		);
 
-			cut.FindAll("span").Count().ShouldBe(0);
-		}
+		// Act
+		cut.Find("input").Change("1");
+		cut.Find("form").Submit();
+
+		// Assert
+		System.Diagnostics.Debug.WriteLine(cut.Markup);
+		_validSubmit.ShouldBeTrue();
+		_invalidSubmit.ShouldBeFalse();
+
+		cut.FindAll("span").Count().ShouldBe(0);
+	}
 }

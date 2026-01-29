@@ -1,28 +1,21 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-			Write something
-			<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
-			<RequiredFieldValidator Type="int?"
-															ControlToValidate="@Number"
-															Text="Name is required." />
-
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 	bool _validSubmit = false;
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<int?>> Number = new ForwardRef<InputBase<int?>>();
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void RequiredFieldValidator_InputNumber_ValidInput_NoError()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				Write something
+				<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
+				<RequiredFieldValidator Type="int?"
+															ControlToValidate="@Number"
+															Text="Name is required." />
+			</EditForm>
+		);
 
 		cut.Find("input").Change("47");
 

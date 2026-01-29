@@ -1,47 +1,29 @@
-﻿@inherits TestComponentBase
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<ChildContent>
-				<HeaderStyle Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
-			</ChildContent>
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+    [Fact]
+    public void DataList_TableLayout_HeaderStyleFont_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <ChildContent>
+                <HeaderStyle Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
+            </ChildContent>
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
 
-	void FirstTest(Fixture fixture)
-	{
+        var theHeaderElement = cut.Find("td");
 
-		//context.WaitForNextRender(() => { }, TimeSpan.FromSeconds(2));
+        theHeaderElement.HasAttribute("style").ShouldBeTrue();
+        var theStyle = theHeaderElement.GetAttribute("style");
 
-		var cut = fixture.GetComponentUnderTest();
-
-		var theHeaderElement = cut.Find("td");
-
-		theHeaderElement.HasAttribute("style").ShouldBeTrue();
-		var theStyle = theHeaderElement.GetAttribute("style");
-
-		theStyle.ShouldNotBeNull();
-		theStyle.ShouldContain("font-style:italic;");
-		theStyle.ShouldContain("font-weight:bold;");
-		theStyle.ShouldContain("font-family:arial black;");
-		theStyle.ShouldContain("font-size:X-Large;");
-		theStyle.ShouldContain("text-decoration:underline overline line-through;");
-
-	}
-
-
+        theStyle.ShouldNotBeNull();
+        theStyle.ShouldContain("font-style:italic;");
+        theStyle.ShouldContain("font-weight:bold;");
+        theStyle.ShouldContain("font-family:arial black;");
+        theStyle.ShouldContain("font-size:X-Large;");
+        theStyle.ShouldContain("text-decoration:underline overline line-through;");
+    }
 }

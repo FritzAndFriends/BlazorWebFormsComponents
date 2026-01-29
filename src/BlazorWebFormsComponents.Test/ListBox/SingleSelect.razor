@@ -1,0 +1,41 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void ListBox_SingleSelectionMode_DoesNotRenderMultipleAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" SelectionMode="ListSelectionMode.Single" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.HasAttribute("multiple").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ListBox_DefaultSelectionMode_IsSingle()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.HasAttribute("multiple").ShouldBeFalse();
+	}
+
+}

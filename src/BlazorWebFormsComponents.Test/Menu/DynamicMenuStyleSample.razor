@@ -1,0 +1,69 @@
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using System.Text.RegularExpressions
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
+
+@code {
+
+	[Fact]
+	public void Menu_DynamicMenuStyle_AppliesStyles()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+
+		var cut = Render(
+			@<Menu ID="NavigationMenu"
+				StaticDisplayLevels="2"
+				StaticSubmenuIndent="10"
+				orientation="Vertical"
+				target="_blank"
+				runat="server">
+
+				<DynamicMenuStyle BackColor="LightSkyBlue"
+					ForeColor="Black"
+					BorderStyle="Solid"
+					BorderWidth="1"
+					BorderColor="Black" />
+
+				<Items>
+					<MenuItem NavigateUrl="Home.aspx"
+						Text="Home"
+						ToolTip="Home">
+						<MenuItem NavigateUrl="Music.aspx"
+							Text="Music"
+							ToolTip="Music">
+							<MenuItem NavigateUrl="Classical.aspx"
+								Text="Classical"
+								ToolTip="Classical" />
+							<MenuItem NavigateUrl="Rock.aspx"
+								Text="Rock"
+								ToolTip="Rock" />
+							<MenuItem NavigateUrl="Jazz.aspx"
+								Text="Jazz"
+								ToolTip="Jazz" />
+						</MenuItem>
+					</MenuItem>
+				</Items>
+
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		theMarkup.ShouldContain("#NavigationMenu ul.dynamic");
+
+		// Verify the style content
+		var reTest = new Regex(@"ul\.dynamic\s?\{([^}]+)\}");
+		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		// Assert the style rules were applied
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+		theStyleRules.ShouldContain("border:");
+	}
+
+}

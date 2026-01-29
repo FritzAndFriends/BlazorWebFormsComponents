@@ -21,6 +21,9 @@ BlazorWebFormsComponents.xml
 .ionide/
 .vscode/
 
+# Playwright MCP files
+.playwright-mcp/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -342,3 +345,4 @@ ASALocalRun/
 .DS_Store
 .AppleDouble
 .LSOverride
+*.exe

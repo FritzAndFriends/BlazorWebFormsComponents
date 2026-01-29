@@ -1,7 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.DependencyInjection
+@using AngleSharp.Dom
 @using Bunit
+@using Bunit.TestDoubles
 @using Shouldly
 @using SharedSampleObjects.Models
 @using BlazorWebFormsComponents
@@ -10,3 +12,4 @@
 @using static BlazorWebFormsComponents.Enums.ValidationSummaryDisplayMode
 @using static BlazorWebFormsComponents.Enums.ValidationCompareOperator
 @using static BlazorWebFormsComponents.Enums.ValidationDataType
+@inherits BlazorWebFormsComponents.Test.BlazorWebFormsTestContext

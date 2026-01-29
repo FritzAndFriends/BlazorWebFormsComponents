@@ -1,26 +1,25 @@
-﻿@inherits TestComponentBase
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-<Fixture Test="Button_Style">
-	<ComponentUnderTest>
-		<Button Text="Blue Button" BackColor="Blue" ForeColor="White" />
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-	void Button_Style(Fixture fixture)
+
+	[Fact]
+	public void Button_WithBackColorAndForeColor_AppliesStyleAttribute()
 	{
+		// Arrange
+		var cut = Render(@<Button Text="Blue Button" BackColor="Blue" ForeColor="White" />);
 
-		var cut = fixture.GetComponentUnderTest();
+		// Act
+		var button = cut.Find("button");
 
-		cut.Find("button").HasAttribute("style").ShouldBeTrue();
-		var style = cut.Find("button").GetAttribute("style");
+		// Assert
+		button.HasAttribute("style").ShouldBeTrue();
+		var style = button.GetAttribute("style");
 
 		style.ShouldNotBeNull();
 		style.ShouldContain("background-color:Blue");
 		style.ShouldContain("color:White");
-
 	}
+
 }

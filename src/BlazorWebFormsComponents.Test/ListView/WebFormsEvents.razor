@@ -1,22 +1,3 @@
-﻿@inherits TestComponentBase
-
-<Fixture
-	TestAsync="FirstTest" 
->
-<ComponentUnderTest>
-	<ListView Items="Widget.SimpleWidgetList" @ref="theListView"
-						ItemType="Widget"
-						OnInit="Init"
-						OnLoad="Load"
-						OnPreRender="PreRender"
-						OnUnload="Unload"
-						OnDisposed="MyDispose"
-						Context="Item">
-		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
-	</ListView>
-</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 
@@ -29,10 +10,19 @@
 
 	bool disposed = false;
 
-	async Task FirstTest(Fixture fixture)
+	[Fact]
+	public async Task ListView_WebFormsEvents_FiresAllLifecycleEvents()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList" @ref="theListView"
+						ItemType="Widget"
+						OnInit="Init"
+						OnLoad="Load"
+						OnPreRender="PreRender"
+						OnUnload="Unload"
+						OnDisposed="MyDispose"
+						Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
 
 		initialized.ShouldBe(1);
 		loaded.ShouldBe(1);
@@ -44,7 +34,6 @@
 		await theListView.DisposeAsync();
 
 		disposed.ShouldBeTrue();
-
 	}
 
 	void Init(EventArgs args)
@@ -70,6 +59,4 @@
 	void MyDispose(EventArgs args) {
 		disposed = true;
 	}
-
-
 }

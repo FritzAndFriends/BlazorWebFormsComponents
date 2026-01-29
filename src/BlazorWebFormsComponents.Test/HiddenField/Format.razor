@@ -1,10 +1,14 @@
-﻿@inherits TestComponentBase
 
-<SnapshotTest Description="Verify HTML format of HiddenField">
-	<TestInput>
-		<HiddenField Value="Token" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="hidden" value="Token" />
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+
+	[Fact]
+	public void HiddenField_WithValue_RendersCorrectHtml()
+	{
+		// Arrange & Act
+		var cut = Render(@<HiddenField Value="Token" />);
+
+		// Assert
+		cut.MarkupMatches(@<input type="hidden" value="Token" />);
+	}
+
+}

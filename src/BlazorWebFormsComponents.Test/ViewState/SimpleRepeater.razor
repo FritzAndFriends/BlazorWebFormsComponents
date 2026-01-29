@@ -1,15 +1,5 @@
-﻿@inherits TestComponentBase
 
-<Fixture Test="FirstTest" Setup="Setup">
-	<ComponentUnderTest>
-		<Repeater @ref="MyRepeater" Items="Widget.SimpleWidgetList"
-							ItemType="Widget" OnUnload="OnRepeaterInit"
-							Context="Item">
-			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
-			<SeparatorTemplate><hr /></SeparatorTemplate>
-		</Repeater>
-	</ComponentUnderTest>
-</Fixture>
+
 
 @code {
 
@@ -17,23 +7,25 @@
 	int randomNumber;
 	const string ViewStateKey = "RandomNumber";
 
-	void Setup(Fixture fixture)
-	{
-		randomNumber = new Random().Next(100, 1000000);
-	}
+	void Setup()
+{
+	randomNumber = new Random().Next(100, 1000000);
+}
 
 	void OnRepeaterInit(EventArgs args)
 	{
 		MyRepeater.ViewState.Add(ViewStateKey, randomNumber);
 	}
 
-	void FirstTest(Fixture fixture)
-	{
-
-		var cut = fixture.GetComponentUnderTest();
-
-		MyRepeater.ViewState[ViewStateKey].ShouldBe(randomNumber);
-
-	}
+	[Fact]
+public void Repeater_ViewState_PersistsRandomNumber()
+{
+	Setup();
+	var cut = Render(@<Repeater @ref="MyRepeater" Items="Widget.SimpleWidgetList" ItemType="Widget" OnUnload="OnRepeaterInit" Context="Item">
+		<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		<SeparatorTemplate><hr /></SeparatorTemplate>
+	</Repeater>);
+	MyRepeater.ViewState[ViewStateKey].ShouldBe(randomNumber);
+}
 
 }

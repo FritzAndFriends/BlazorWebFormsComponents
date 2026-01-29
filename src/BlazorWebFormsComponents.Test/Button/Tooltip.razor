@@ -1,20 +1,24 @@
-﻿@inherits TestComponentBase
 
+@code {
 
-<SnapshotTest Description="Verify Tooltip added to Button">
-	<TestInput>
-		<Button Text="Click Me!" ToolTip="Go To Bing!" OnClientClick="window.navigate('bing.com')" />
-	</TestInput>
-	<ExpectedOutput>
-		<button type="submit" title="Go To Bing!" onclientclick="window.navigate('bing.com')">Click Me!</button>
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void Button_WithToolTip_RendersTitleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me!" ToolTip="Go To Bing!" OnClientClick="window.navigate('bing.com')" />);
 
-<SnapshotTest Description="Verify Tooltip not added to Button">
-	<TestInput>
-		<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />
-	</TestInput>
-	<ExpectedOutput>
-		<button type="submit" onclientclick="window.navigate('bing.com')">Click Me!</button>
-	</ExpectedOutput>
-</SnapshotTest>
+		// Assert
+		cut.MarkupMatches(@<button type="submit" title="Go To Bing!" onclientclick="window.navigate('bing.com')">Click Me!</button>);
+	}
+
+	[Fact]
+	public void Button_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />);
+
+		// Assert
+		cut.MarkupMatches(@<button type="submit" onclientclick="window.navigate('bing.com')">Click Me!</button>);
+	}
+
+}

@@ -1,28 +1,21 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
-			Write something
-			<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
-			<CustomValidator ServerValidate="@(x => true)"
-											 ControlToValidate="@Name"
-											 Text="can't see me!" />
-
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 	bool _validSubmit = false;
 	bool _invalidSubmit = false;
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void CustomValidator_ValidInput_NoError()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				Write something
+				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
+				<CustomValidator ServerValidate="@(x => true)"
+												 ControlToValidate="@Name"
+												 Text="can't see me!" />
+			</EditForm>
+		);
 
 		cut.Find("input").Change("whatever!");
 

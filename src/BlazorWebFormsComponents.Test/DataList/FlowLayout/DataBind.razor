@@ -1,24 +1,7 @@
-﻿@inherits TestComponentBase
 
 @using System.Diagnostics;
 
-<Fixture Test="ShouldTriggerEvents">
-	<ComponentUnderTest>
-		<DataList ID="simpleDataList"
-							Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							OnDataBound="DataBound"
-							OnDataBinding="DataBinding"
-							OnItemDataBound="ItemDataBound"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate><item>@Item.Name</item></ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-@code{
+@code {
 
 	int databinding = 0;
 	int databound = 0;
@@ -38,13 +21,24 @@
 	{
 		itemDatabound++;
 	}
-}
 
-@code{
-	void ShouldTriggerEvents(Fixture fixture)
+	[Fact]
+	public void DataList_FlowLayout_DataBind_TriggersEvents()
 	{
 		// Arrange
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList ID="simpleDataList"
+								Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								OnDataBound="DataBound"
+								OnDataBinding="DataBinding"
+								OnItemDataBound="ItemDataBound"
+								Context="Item">
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate><item>@Item.Name</item></ItemTemplate>
+			</DataList>
+		);
 		Debug.WriteLine(cut.Markup);
 
 		// Assert

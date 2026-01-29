@@ -1,62 +1,36 @@
-﻿@inherits TestComponentBase
 @using static BlazorWebFormsComponents.WebColor
 @using static BlazorWebFormsComponents.Enums.BorderStyle
 @using BlazorWebFormsComponents
 
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<ChildContent>
-				<HeaderStyle CssClass="myClass"></HeaderStyle>
-			</ChildContent>
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="NullTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Table"
-							Context="Item">
-			<ChildContent>
-				<HeaderStyle></HeaderStyle>
-			</ChildContent>
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+    [Fact]
+    public void DataList_TableLayout_HeaderStyleCss_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <ChildContent>
+                <HeaderStyle CssClass="myClass"></HeaderStyle>
+            </ChildContent>
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        var theHeaderElement = cut.Find("td");
+        theHeaderElement.HasAttribute("class").ShouldBeTrue();
+        var theClass = theHeaderElement.GetAttribute("class");
+        theClass.ShouldNotBeNull();
+        theClass.ShouldBe("myClass");
+    }
 
-	void FirstTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-
-		var theHeaderElement = cut.Find("td");
-
-		theHeaderElement.HasAttribute("class").ShouldBeTrue();
-		var theClass = theHeaderElement.GetAttribute("class");
-
-		theClass.ShouldNotBeNull();
-		theClass.ShouldBe("myClass");
-	}
-
-	void NullTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-
-		var theHeaderElement = cut.Find("td");
-
-		theHeaderElement.HasAttribute("class").ShouldBeFalse();		
-	}
-
+    [Fact]
+    public void DataList_TableLayout_HeaderStyleCss_Null_RendersCorrectly()
+    {
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+            <ChildContent>
+                <HeaderStyle></HeaderStyle>
+            </ChildContent>
+            <HeaderTemplate>My Widget List</HeaderTemplate>
+            <ItemTemplate>@Item.Name</ItemTemplate>
+        </DataList>);
+        var theHeaderElement = cut.Find("td");
+        theHeaderElement.HasAttribute("class").ShouldBeFalse();
+    }
 }

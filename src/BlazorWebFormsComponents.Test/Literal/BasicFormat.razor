@@ -1,10 +1,9 @@
-﻿@inherits TestComponentBase
 
-<SnapshotTest Description="Verify HTML format of Literal">
-	<TestInput>
-		<Literal Text="This is normal text" />
-	</TestInput>
-	<ExpectedOutput>
-		This is normal text
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+[Fact]
+public void Literal_RendersPlainText()
+{
+var cut = Render(@<Literal Text="This is normal text" />);
+cut.MarkupMatches(@<text>This is normal text</text>);
+}
+}

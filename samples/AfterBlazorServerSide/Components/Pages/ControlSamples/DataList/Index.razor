@@ -1,0 +1,54 @@
+﻿@page "/ControlSamples/DataList"
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>DataList Component homepage</h2>
+
+<Nav />
+
+<p>Here is a simple datalist bound to a collection of widgets.</p>
+
+		<DataList @ref="simpleDataList"
+							runat="server"
+							EnableViewState="false"
+							Context="Item"
+							ItemType="SharedSampleObjects.Models.Widget">
+            <HeaderTemplate>Simple Widgets</HeaderTemplate>
+            <FooterTemplate>End of Line</FooterTemplate>
+      <ChildContent>
+        <ItemStyle BackColor="Wheat" />
+      </ChildContent>
+			<ItemTemplate>
+                    @Item.Name - @Item.Price.ToString("c")
+			</ItemTemplate>
+		</DataList>
+
+@code {
+
+  BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+
+  protected override void OnAfterRender(bool firstRender)
+  {
+
+      if (firstRender)
+      {
+          simpleDataList.DataSource = Widget.SimpleWidgetList;
+          simpleDataList.DataBind();
+      }
+
+      //base.OnParametersSet();
+      base.OnAfterRender(firstRender);
+
+  }
+
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;DataList Context="Item" ItemType="Widget"&gt;<br />
+&nbsp;&nbsp;&lt;HeaderTemplate&gt;Simple Widgets&lt;/HeaderTemplate&gt;<br />
+&nbsp;&nbsp;&lt;FooterTemplate&gt;End of Line&lt;/FooterTemplate&gt;<br />
+&nbsp;&nbsp;&lt;ItemTemplate&gt;@@Item.Name - @@Item.Price.ToString("c")&lt;/ItemTemplate&gt;<br />
+&lt;/DataList&gt;
+</code>

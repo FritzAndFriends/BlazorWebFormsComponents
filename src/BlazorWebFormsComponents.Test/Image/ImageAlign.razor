@@ -1,92 +1,73 @@
-﻿@using static BlazorWebFormsComponents.Enums.ImageAlign
-@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.ImageAlign
 
-	<SnapshotTest>
-		<TestInput>
-			<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="NotSet" />
-		</TestInput>
-		<ExpectedOutput>
-			<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
-		</ExpectedOutput>
-	</SnapshotTest>
+@code {
+[Fact]
+public void Image_ImageAlign_NotSet_NoAlignAttribute()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="NotSet" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="left" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_Left()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="left" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Right" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="right" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_Right()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Right" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="right" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Baseline" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="baseline" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_Baseline()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Baseline" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="baseline" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Top" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="top" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_Top()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Top" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="top" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Middle" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="middle" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_Middle()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Middle" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="middle" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Bottom" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="bottom" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_Bottom()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Bottom" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="bottom" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsBottom" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absbottom" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_AbsBottom()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsBottom" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absbottom" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsMiddle" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absmiddle" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_AbsMiddle()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsMiddle" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absmiddle" />);
+}
 
-<SnapshotTest>
-	<TestInput>
-		<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="TextTop" />
-	</TestInput>
-	<ExpectedOutput>
-		<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="texttop" />
-	</ExpectedOutput>
-</SnapshotTest>
+[Fact]
+public void Image_ImageAlign_TextTop()
+{
+var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="TextTop" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="texttop" />);
+}
+}

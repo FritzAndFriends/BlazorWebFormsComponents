@@ -1,0 +1,80 @@
+@inherits BaseWebFormsComponent
+@using BlazorComponentUtilities
+
+<div id="@ID">
+	<ul class="level1">
+			<CascadingValue Name="ParentMenu" Value="this">
+				@ChildContent
+				@ChildNodesRenderFragment
+			</CascadingValue>
+ 	</ul>
+</div>
+
+<!-- Menu component style -->
+<style type="text/css">
+		@($"#{ID} img.icon") {
+			border-style: none;
+			vertical-align: middle;
+		}
+
+		@($"#{ID} img.separator") {
+			border-style: none;
+			display: block;
+		}
+
+		@($"#{ID} ul") {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			width: auto;
+		}
+
+		@($"#{ID} ul.dynamic") {
+			@DynamicMenuStyle?.ToStyle().ToString()
+			z-index: 1;
+		}
+
+		@($"#{ID} a") {
+			font-family: Arial;
+			text-decoration: none;
+			white-space: nowrap;
+			display: block;
+		}
+
+		@($"#{ID} a.static") {
+			@StaticMenuItemStyle?.ToStyle().ToString()
+		}
+
+		@($"#{ID} a.popout")
+	{
+		background-image: url(data:image/gif;base64,R0lGODlhDwAPAID/AMDAwAAAACH5BAEAAAAALAAAAAAPAA8AQAIXhI+ZwaHrnpxUtjhZ3fzh2mzXp4RgRxUAOw==);
+		background-repeat: no-repeat;
+		background-position: right center;
+		padding-right: 14px;
+	}
+
+		@($"#{ID} a.dynamic") {
+			@DynamicMenuItemStyle.ToStyle().ToString()
+		}
+
+@if (DynamicSelectedStyle != new DynamicSelectedStyle()) {
+	@($"#{ID} a.dynamic.selected")
+	@: {
+		@DynamicSelectedStyle.ToStyle().ToString()
+	@:}
+}
+
+		@($"#{ID} a.level2") {
+			padding-left: @($"{StaticSubmenuIndent}px");
+		}
+
+		@($"#{ID} a.static.highlighted") {
+			@StaticHoverStyle?.ToStyle().ToString()
+		}
+
+		@($"#{ID} a.dynamic.highlighted") {
+			@DynamicHoverStyle.ToStyle().ToString()
+		}
+
+
+</style>

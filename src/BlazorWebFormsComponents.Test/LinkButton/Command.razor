@@ -1,33 +1,16 @@
-﻿@inherits TestComponentBase
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<LinkButton CommandName="Foo" CommandArgument="CommandArgument" OnCommand="OnCommand">Click me!</LinkButton>
-	</ComponentUnderTest>
-</Fixture>
+@code {
+    private string theContent = "No Command yet!";
+    private void OnCommand(CommandEventArgs args) => theContent = $"Command '{args.CommandName}' : '{args.CommandArgument}'";
 
-@code{
-	public string TheContent { get; set; } = "No Command yet!";
-
-	public string CommandArgument = "bar";
-
-	void OnCommand(CommandEventArgs args)
-	{
-		TheContent = $"Command '{args.CommandName}' : '{args.CommandArgument.ToString()}'";
-	}
-
-	void FirstTest(Fixture fixture)
-	{
-		// Given
-		var cut = fixture.GetComponentUnderTest();
-
-		TheContent.ShouldBe("No Command yet!");
-
-		// When
-		cut.Find("a").Click();
-
-		// Then
-		TheContent.ShouldBe("Command 'Foo' : 'bar'");
-
-	}
+    [Fact]
+    public void Command_ChangesContent()
+    {
+        theContent = "No Command yet!";
+        var cut = Render(@<LinkButton CommandName="Foo" CommandArgument="@("bar")" OnCommand="OnCommand">Click me!</LinkButton>);
+        theContent.ShouldBe("No Command yet!");
+        cut.Find("a").Click();
+        theContent.ShouldBe("Command 'Foo' : 'bar'");
+    }
 }
+

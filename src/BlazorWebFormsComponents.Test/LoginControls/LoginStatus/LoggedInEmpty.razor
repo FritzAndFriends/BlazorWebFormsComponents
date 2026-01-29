@@ -1,19 +1,11 @@
-﻿@inherits TestComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 
-<Fixture Setup="Setup" Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutText="" LogoutImageUrl="" />
-	</ComponentUnderTest>
-</Fixture>
-
 @code {
-
-	void Setup(Fixture fixture)
+	[Fact]
+	public void LoginStatus_LoggedInEmpty_RendersNoElements()
 	{
-
 		var principal = new ClaimsPrincipal();
 		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
 		principal.AddIdentity(identity);
@@ -21,19 +13,14 @@
 		var autheMock = new Mock<AuthenticationStateProvider>();
 		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-		fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
 		var navMock = new Mock<NavigationManager>();
-		fixture.Services.AddSingleton<NavigationManager>(navMock.Object);
+		Services.AddSingleton<NavigationManager>(navMock.Object);
 
-	}
-
-	void FirstTest(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.LoginStatus LogoutText="" LogoutImageUrl="" />);
 
 		cut.FindAll("input").Count().ShouldBe(0);
 		cut.FindAll("a").Count().ShouldBe(0);
 	}
-
 }

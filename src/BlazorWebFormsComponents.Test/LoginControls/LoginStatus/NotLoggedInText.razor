@@ -1,37 +1,26 @@
-﻿@inherits TestComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginStatus LoginText="Please Login"/>
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+	[Fact]
+	public void LoginStatus_NotLoggedInText_DisplaysCustomLoginText()
+	{
+		var principal = new ClaimsPrincipal();
 
-		void FirstTest(Fixture fixture)
-		{
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-			var principal = new ClaimsPrincipal();
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
-			var autheMock = new Mock<AuthenticationStateProvider>();
-			autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+		var navMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navMock.Object);
 
-			fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.LoginStatus LoginText="Please Login"/>);
 
-			var navMock = new Mock<NavigationManager>();
-			fixture.Services.AddSingleton<NavigationManager>(navMock.Object);
+		cut.FindAll("input").Count().ShouldBe(0);
+		cut.FindAll("a").Count().ShouldBe(1);
 
-			var cut = fixture.GetComponentUnderTest();
-
-			cut.FindAll("input").Count().ShouldBe(0);
-			cut.FindAll("a").Count().ShouldBe(1);
-
-			cut.Find("a").FirstChild.TextContent.ShouldBe("Please Login");
-
-		}
-
+		cut.Find("a").FirstChild.TextContent.ShouldBe("Please Login");
+	}
 }

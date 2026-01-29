@@ -1,0 +1,21 @@
+@using BlazorWebFormsComponents.DataBinding
+@using BlazorWebFormsComponents.Enums
+@typeparam TItem
+@inherits DataBoundComponent<TItem>
+
+@if (Visible)
+{
+	<select class="@CssClass" style="@Style"
+			size="@Rows"
+			multiple="@(SelectionMode == ListSelectionMode.Multiple ? true : (bool?)null)"
+			disabled="@(!Enabled)" @onchange="HandleChange">
+		@foreach (var item in GetItems())
+		{
+			<option value="@item.Value"
+					selected="@IsSelected(item.Value)"
+					disabled="@(!item.Enabled)">
+				@item.Text
+			</option>
+		}
+	</select>
+}

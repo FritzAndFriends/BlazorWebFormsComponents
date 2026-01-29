@@ -1,30 +1,17 @@
-﻿@inherits TestComponentBase
-@using BlazorWebFormsComponents
-
-<Fixture Test="Image_HasToolTip">
-	<ComponentUnderTest>
-		<Image ImageUrl="/img/VB.png" ToolTip="Visual Basic" />
-	</ComponentUnderTest>
-</Fixture>
-
-<Fixture Test="Image_HasNotToolTip">
-	<ComponentUnderTest>
-		<Image ImageUrl="/img/VB.png" />
-	</ComponentUnderTest>
-</Fixture>
 
 @code {
-	void Image_HasToolTip(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
+    [Fact]
+    public void Image_HasToolTip()
+    {
+        var cut = Render(@<Image ImageUrl="/img/VB.png" ToolTip="Visual Basic" />);
+        cut.Find("img").HasAttribute("title").ShouldBeTrue();
+    }
 
-		cut.Find("img").HasAttribute("title").ShouldBeTrue();
-	}
-
-	void Image_HasNotToolTip(Fixture fixture)
-	{
-		var cut = fixture.GetComponentUnderTest();
-
-		cut.Find("img").HasAttribute("title").ShouldBeFalse();
-	}
+    [Fact]
+    public void Image_HasNotToolTip()
+    {
+        var cut = Render(@<Image ImageUrl="/img/VB.png" />);
+        cut.Find("img").HasAttribute("title").ShouldBeFalse();
+    }
 }
+

@@ -67,9 +67,8 @@ We are always looking for help on this project.  There are many millions of appl
 
 1. [Visual Studio](https://visualstudio.microsoft.com/) (Windows)
 2. [Visual Studio Code](https://visualstudio.microsoft.com/) (Windows, Linux, Mac)
-3. [Visual Studio For Mac](https://visualstudio.microsoft.com/)
-4. Any text editor (Windows, Linux, Mac)
-5. Any Web browser.
+3. Any text editor (Windows, Linux, Mac)
+4. Any Web browser.
 
 ### Tell us your story
 
@@ -90,6 +89,10 @@ All code for a component should have an assigned issue that matches it.  This wa
 Any code that is written to support a component are required to be accompanied with unit tests at the time the pull request is submitted.  Pull requests without unit tests will be delayed and asked for unit tests to prove their functionality.  We use the [bUnit](https://www.nuget.org/packages/bunit/) to test our components.
 
 Code for components' features should also include some definition in the `/docs` folder so that our users can identify and understand which feature is supported.
+
+### Style Usage
+
+There is a rich component styling framework that is part of this library for you to use while building these components. When using these styles, create a component for the style type needed. In the OnInitialized method of the style component, set the style in the parent component appropriately.  See the `MenuItemStyle.razor.cs` file for an example of this behavior.
 
 ### Write documentation
 

@@ -1,22 +1,16 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<EditForm Model="@exampleModel">
-			<AspNetValidationSummary />
-		</EditForm>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 
 	private ExampleModel exampleModel = new ExampleModel();
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void ValidationSummary_NoErrors_HiddenByDefault()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<AspNetValidationSummary />
+			</EditForm>
+		);
 
 		cut.FindAll("div").Count.ShouldBe(1);
 

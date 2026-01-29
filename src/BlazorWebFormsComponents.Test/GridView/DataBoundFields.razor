@@ -1,8 +1,10 @@
-﻿@inherits TestComponentBase
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<GridView ItemType="Widget"
+@code {
+	[Fact]
+	public void GridView_DataBoundFields_RendersCorrectly()
+	{
+		const int expectedColumns = 4;
+		var cut = Render(@<GridView ItemType="Widget"
 							AutoGenerateColumns="false"
 							SelectMethod="GetWidgets">
 			<Columns>
@@ -13,16 +15,7 @@
 												DataTextField="Name" DataTextFormatString="Search for {0}"
 												DataNavigateUrlFields="ID,NAME" DataNavigateUrlFormatString="https://example.com/search?q={0} {1}" />
 			</Columns>
-		</GridView>
-	</ComponentUnderTest>
-</Fixture>
-
-
-@code {
-	void FirstTest(Fixture fixture)
-	{
-		const int expectedColumns = 4;
-		var cut = fixture.GetComponentUnderTest();
+		</GridView>);
 
 		// Check headers
 		var tableHeaders = cut.FindAll("th");

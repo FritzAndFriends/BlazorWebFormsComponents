@@ -1,0 +1,61 @@
+@page "/ControlSamples/TextBox"
+@using BlazorWebFormsComponents.Enums
+
+<h1>TextBox Samples</h1>
+
+<h2>Single Line TextBox</h2>
+<TextBox Text="@singleText" CssClass="form-control" />
+<p>Value: @singleText</p>
+
+<h2>Password TextBox</h2>
+<TextBox TextMode="TextBoxMode.Password" Placeholder="Enter password" />
+
+<h2>Email TextBox</h2>
+<TextBox TextMode="TextBoxMode.Email" Placeholder="Enter email" />
+
+<h2>Number TextBox</h2>
+<TextBox TextMode="TextBoxMode.Number" Placeholder="Enter number" />
+
+<h2>MultiLine TextBox</h2>
+<TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" Text="@multiLineText" />
+<p>Value: @multiLineText</p>
+
+<h2>ReadOnly TextBox</h2>
+<TextBox Text="Cannot edit this" ReadOnly="true" CssClass="form-control" />
+
+<h2>Disabled TextBox</h2>
+<TextBox Text="Disabled textbox" Enabled="false" CssClass="form-control" />
+
+<h2>With MaxLength (10 characters max)</h2>
+<TextBox MaxLength="10" Placeholder="Max 10 chars" CssClass="form-control" />
+
+<h2>With Styles</h2>
+<TextBox Text="Styled textbox" 
+         BackColor="WebColor.LightYellow" 
+         ForeColor="WebColor.Navy"
+         BorderColor="WebColor.Blue" 
+         BorderWidth="Unit.Pixel(2)" 
+         BorderStyle="BorderStyle.Solid"
+         Width="Unit.Pixel(200)" />
+
+<h2>Date Picker</h2>
+<TextBox TextMode="TextBoxMode.Date" />
+
+<h2>URL Input</h2>
+<TextBox TextMode="TextBoxMode.Url" Placeholder="Enter URL" />
+
+@code {
+    private string singleText = "Default Text";
+    private string multiLineText = "Line 1\nLine 2\nLine 3";
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;TextBox Text="@@singleText" CssClass="form-control" /&gt;<br />
+&lt;TextBox TextMode="TextBoxMode.Password" Placeholder="Enter password" /&gt;<br />
+&lt;TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" Text="@@multiLineText" /&gt;<br />
+&lt;TextBox Text="Cannot edit this" ReadOnly="true" CssClass="form-control" /&gt;<br />
+&lt;TextBox Text="Disabled textbox" Enabled="false" CssClass="form-control" /&gt;
+</code>

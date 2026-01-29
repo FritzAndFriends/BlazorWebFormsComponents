@@ -1,22 +1,3 @@
-﻿@inherits TestComponentBase
-
-<Fixture Test="FirstTest" Setup="Setup">
-	<ComponentUnderTest>
-
-		<TreeView @ref="BookTreeView"
-							DataSource="bookXml"
-							OnDataBinding="OnDataBinding"
-							OnDataBound="OnDataBound"
-							runat="server">
-
-			<DataBindings>
-				<TreeNodeBinding DataMember="Book" TextField="Title" />
-			</DataBindings>
-
-		</TreeView>
-
-	</ComponentUnderTest>
-</Fixture>
 
 @code {
 
@@ -27,17 +8,26 @@
 	long dataBindingTicks = 0;
 	long dataBoundTicks = 0;
 
-	void Setup(Fixture fixture)
+	[Fact]
+	public void TreeView_XmlDataSource_FiresDataBindingEvents()
 	{
 		bookXml.LoadXml(@"<Book Title=""Book Title"" />");
-
 		stopwatch = System.Diagnostics.Stopwatch.StartNew();
-	}
 
-	void FirstTest(Fixture fixture)
-	{
+		var cut = Render(
+			@<TreeView @ref="BookTreeView"
+								DataSource="bookXml"
+								OnDataBinding="OnDataBinding"
+								OnDataBound="OnDataBound"
+								runat="server">
 
-		var cut = fixture.GetComponentUnderTest<TreeView>();
+				<DataBindings>
+					<TreeNodeBinding DataMember="Book" TextField="Title" />
+				</DataBindings>
+
+			</TreeView>
+		);
+
 		var test = cut.Markup;
 
 		stopwatch.Stop();
@@ -45,7 +35,6 @@
 		dataBindingTicks.ShouldNotBe(0, "OnDataBinding event did not trigger");
 		dataBoundTicks.ShouldNotBe(0, "OnDataBound event did not trigger");
 		dataBoundTicks.ShouldBeGreaterThan(dataBindingTicks);
-
 	}
 
 	void OnDataBinding()

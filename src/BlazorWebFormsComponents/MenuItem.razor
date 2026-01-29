@@ -1,0 +1,19 @@
+@inherits BaseWebFormsComponent
+
+<li>
+    <a title="@Title" class="@($"level{Depth}")" href="@NavigateUrl" target="_blank">@Text</a>
+    @if (ChildContent != null && ParentMenu.StaticDisplayLevels <= Depth)
+    {
+        <ul class="level@(Depth+1)">
+            <CascadingValue Name="Depth" Value="@(Depth+1)">
+                @ChildContent
+            </CascadingValue>
+        </ul>
+    }
+</li>
+@if (ChildContent != null && ParentMenu.StaticDisplayLevels > Depth)
+{
+  <CascadingValue Name="Depth" Value="@(Depth+1)">
+      @ChildContent
+  </CascadingValue>
+}

@@ -1,26 +1,19 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.SimpleWidgetList"
-							ItemType="Widget"
-							RepeatLayout="Flow"
-							Context="Item">
-			<HeaderTemplate>My Widget List</HeaderTemplate>
-			<ItemTemplate>@Item.Name</ItemTemplate>
-			<SeparatorTemplate>====</SeparatorTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
-
 
 @code {
 
-	void FirstTest(Fixture fixture)
+	[Fact]
+	public void DataList_FlowLayout_SeparatorTemplate_RendersSeparators()
 	{
-
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.SimpleWidgetList"
+								ItemType="Widget"
+								RepeatLayout="Flow"
+								Context="Item">
+				<HeaderTemplate>My Widget List</HeaderTemplate>
+				<ItemTemplate>@Item.Name</ItemTemplate>
+				<SeparatorTemplate>====</SeparatorTemplate>
+			</DataList>
+		);
 
 		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length*2+1);
 
@@ -28,8 +21,6 @@
 
 		cut.FindAll("span")[3].TextContent.ShouldBe("====");
 		cut.FindAll("span")[7].TextContent.ShouldBe("====");
-
 	}
-
 
 }

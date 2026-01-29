@@ -1,0 +1,33 @@
+﻿@page "/ControlSamples/Login"
+
+<h3>Login</h3>
+@using BlazorWebFormsComponents.Validations;
+@using BlazorWebFormsComponents.LoginControls;
+
+
+<Login InstructionText="How to Login!!">
+	<ChildContent>
+		<InstructionTextStyle BackColor="@("#FF0000")"
+													CssClass="sdd" />
+		<ValidatorTextStyle ForeColor="@("#0000ff")" />
+	</ChildContent>
+</Login>
+
+
+
+@code
+{
+
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;Login InstructionText="How to Login!!"&gt;<br />
+&nbsp;&nbsp;&lt;ChildContent&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;InstructionTextStyle BackColor="@@("#FF0000")" CssClass="sdd" /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ValidatorTextStyle ForeColor="@@("#0000ff")" /&gt;<br />
+&nbsp;&nbsp;&lt;/ChildContent&gt;<br />
+&lt;/Login&gt;
+</code>

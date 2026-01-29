@@ -1,0 +1,89 @@
+
+@code {
+
+	[Fact]
+	public void RadioButtonList_WithStaticItems_RendersRadioButtons()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Small", "S"),
+			new ListItem("Medium", "M"),
+			new ListItem("Large", "L")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+
+		var labels = cut.FindAll("label");
+		labels.Count.ShouldBe(3);
+		labels[0].TextContent.ShouldBe("Small");
+		labels[1].TextContent.ShouldBe("Medium");
+		labels[2].TextContent.ShouldBe("Large");
+	}
+
+	[Fact]
+	public void RadioButtonList_AllRadioButtons_ShareSameName()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2"),
+			new ListItem("Option 3", "3")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		var name = radios[0].GetAttribute("name");
+		name.ShouldNotBeNullOrEmpty();
+		
+		// All radio buttons should have the same name for mutual exclusion
+		radios[1].GetAttribute("name").ShouldBe(name);
+		radios[2].GetAttribute("name").ShouldBe(name);
+	}
+
+	[Fact]
+	public void RadioButtonList_EmptyItems_RendersEmptyTable()
+	{
+		// Arrange
+		var items = new ListItemCollection();
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void RadioButtonList_WithValues_RendersCorrectValues()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("First", "1"),
+			new ListItem("Second", "2")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios[0].GetAttribute("value").ShouldBe("1");
+		radios[1].GetAttribute("value").ShouldBe("2");
+	}
+
+}

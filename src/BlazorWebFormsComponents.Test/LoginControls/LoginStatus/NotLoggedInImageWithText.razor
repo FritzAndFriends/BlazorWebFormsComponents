@@ -1,41 +1,30 @@
-﻿@inherits TestComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims;
 @using Moq;
 
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<BlazorWebFormsComponents.LoginControls.LoginStatus LoginText="Click to login" LoginImageUrl="login.png" />
-	</ComponentUnderTest>
-</Fixture>
-
-
 @code {
+	[Fact]
+	public void LoginStatus_NotLoggedInImageWithText_RendersImageInput()
+	{
+		var principal = new ClaimsPrincipal();
 
-		void FirstTest(Fixture fixture)
-		{
+		var autheMock = new Mock<AuthenticationStateProvider>();
+		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
 
-			var principal = new ClaimsPrincipal();
+		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
 
-			var autheMock = new Mock<AuthenticationStateProvider>();
-			autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+		var navMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navMock.Object);
 
-			fixture.Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		var cut = Render(@<BlazorWebFormsComponents.LoginControls.LoginStatus LoginText="Click to login" LoginImageUrl="login.png" />);
 
-			var navMock = new Mock<NavigationManager>();
-			fixture.Services.AddSingleton<NavigationManager>(navMock.Object);
+		cut.FindAll("a").Count().ShouldBe(0);
+		cut.FindAll("input").Count().ShouldBe(1);
 
-			var cut = fixture.GetComponentUnderTest();
+		var input = cut.Find("input");
 
-			cut.FindAll("a").Count().ShouldBe(0);
-			cut.FindAll("input").Count().ShouldBe(1);
-
-			var input = cut.Find("input");
-
-			input.Attributes["type"].Value.ShouldBe("image");
-			input.Attributes["alt"].Value.ShouldBe("Click to login");
-			input.Attributes["src"].Value.ShouldBe("login.png");
-
-		}
-
+		input.Attributes["type"].Value.ShouldBe("image");
+		input.Attributes["alt"].Value.ShouldBe("Click to login");
+		input.Attributes["src"].Value.ShouldBe("login.png");
+	}
 }

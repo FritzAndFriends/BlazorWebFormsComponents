@@ -1,92 +1,73 @@
-﻿@using static BlazorWebFormsComponents.Enums.ImageAlign
-@inherits TestComponentBase
+@using static BlazorWebFormsComponents.Enums.ImageAlign
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="NotSet" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" />
-	</ExpectedOutput>
-</SnapshotTest>
+@code {
+	[Fact]
+	public void ImageButton_ImageAlign_NotSet_NoAlignAttribute()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="NotSet" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="left" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_Left_RendersAlignLeft()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="left" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Right" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="right" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_Right_RendersAlignRight()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Right" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="right" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Baseline" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="baseline" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_Baseline_RendersAlignBaseline()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Baseline" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="baseline" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Top" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="top" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_Top_RendersAlignTop()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Top" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="top" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Middle" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="middle" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_Middle_RendersAlignMiddle()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Middle" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="middle" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Bottom" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="bottom" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_Bottom_RendersAlignBottom()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Bottom" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="bottom" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsBottom" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absbottom" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_AbsBottom_RendersAlignAbsBottom()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsBottom" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absbottom" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsMiddle" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absmiddle" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_AbsMiddle_RendersAlignAbsMiddle()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsMiddle" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absmiddle" />);
+	}
 
-<SnapshotTest>
-	<TestInput>
-		<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="TextTop" />
-	</TestInput>
-	<ExpectedOutput>
-		<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="texttop" />
-	</ExpectedOutput>
-</SnapshotTest>
+	[Fact]
+	public void ImageButton_ImageAlign_TextTop_RendersAlignTextTop()
+	{
+		var cut = Render(@<ImageButton ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="TextTop" />);
+		cut.MarkupMatches(@<input type="image" src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="texttop" />);
+	}
+}

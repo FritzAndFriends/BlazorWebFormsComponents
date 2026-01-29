@@ -1,0 +1,45 @@
+﻿@page "/ControlSamples/CustomValidator"
+
+<h3>Custom Validator</h3>
+@using BlazorWebFormsComponents.Validations;
+
+<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+
+	<label>Write something that starts with 'A'</label>
+	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
+	<CustomValidator ServerValidate="@DoesItStartWithA"
+									 ControlToValidate="@Name"
+									 Text="Does not start with 'A'."
+									 ErrorMessage="Does not start with 'A' but in summary!" />
+
+	<button type="submit">Submit</button>
+
+</EditForm>
+
+@code {
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	private void HandleValidSubmit()
+	{
+		Console.WriteLine("OnValidSubmit");
+	}
+
+	private bool DoesItStartWithA(string value)
+	{
+		return value.StartsWith("A", StringComparison.InvariantCultureIgnoreCase);
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;CustomValidator ServerValidate="@@DoesItStartWithA" ControlToValidate="@@Name" Text="Does not start with 'A'." /&gt;
+</code>

@@ -1,0 +1,72 @@
+@page "/ControlSamples/Menu"
+
+
+<h2>Menu Component homepage</h2>
+
+<Nav />
+
+<p>Here is a simple vertical menu showing two menu items.</p>
+
+<Menu id="NavigationMenu"
+			DisappearAfter="2000"
+			StaticDisplayLevels="2"
+			StaticSubmenuIndent="10"
+			orientation="Vertical"
+			font-names="Arial"
+			target="_blank"
+			runat="server">
+
+	<StaticMenuItemStyle BackColor="@("LightSteelBlue")"
+											 ForeColor="@("Black")" />
+	<StaticHoverStyle BackColor="WebColor.LightSkyBlue" />
+	<DynamicMenuItemStyle BackColor="WebColor.Black"
+												ForeColor="WebColor.Silver" />
+	<DynamicHoverStyle BackColor="WebColor.LightSkyBlue"
+										 ForeColor="WebColor.Black" />
+	<DynamicSelectedStyle BackColor="WebColor.PapayaWhip"
+												ForeColor="WebColor.SteelBlue" />
+
+	<Items>
+		<MenuItem navigateurl="Home.aspx"
+							text="Home"
+							tooltip="Home">
+			<MenuItem text="Music" tooltip="Music">
+				<MenuItem navigateurl="Classical.aspx"
+									text="Classical"
+									tooltip="Classical" />
+				<MenuItem navigateurl="Rock.aspx"
+									text="Rock"
+									tooltip="Rock" />
+				<MenuItem navigateurl="Jazz.aspx"
+									text="Jazz"
+									tooltip="Jazz" />
+			</MenuItem>
+			<MenuItem navigateurl="Movies.aspx" text="Movies" tooltip="Movies">
+				<MenuItem navigateurl="Action.aspx"
+									text="Action"
+									tooltip="Action" />
+				<MenuItem navigateurl="Drama.aspx"
+									text="Drama"
+									tooltip="Drama" />
+				<MenuItem navigateurl="Musical.aspx"
+									text="Musical"
+									tooltip="Musical" />
+			</MenuItem>
+		</MenuItem>
+	</Items>
+
+</Menu>
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;Menu id="NavigationMenu" orientation="Vertical"&gt;<br />
+&nbsp;&nbsp;&lt;StaticMenuItemStyle BackColor="LightSteelBlue" ForeColor="Black" /&gt;<br />
+&nbsp;&nbsp;&lt;Items&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;MenuItem navigateurl="Home.aspx" text="Home" tooltip="Home"&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;MenuItem text="Music" tooltip="Music"&gt;...&lt;/MenuItem&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/MenuItem&gt;<br />
+&nbsp;&nbsp;&lt;/Items&gt;<br />
+&lt;/Menu&gt;
+</code>

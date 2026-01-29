@@ -1,0 +1,51 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void ListBox_MultipleSelectionMode_RendersMultipleAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2"),
+			new ListItem("Item 3", "3")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" SelectionMode="ListSelectionMode.Multiple" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.HasAttribute("multiple").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ListBox_MultipleSelection_WithSelectedValues_MarksOptionsSelected()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Apple", "a"),
+			new ListItem("Banana", "b"),
+			new ListItem("Cherry", "c")
+		};
+		var selectedValues = new List<string> { "a", "c" };
+
+		// Act
+		var cut = Render(
+			@<ListBox TItem="object"
+					  StaticItems="items"
+					  SelectionMode="ListSelectionMode.Multiple"
+					  SelectedValues="selectedValues" />
+		);
+
+		// Assert
+		var options = cut.FindAll("option");
+		options[0].HasAttribute("selected").ShouldBeTrue();  // Apple
+		options[1].HasAttribute("selected").ShouldBeFalse(); // Banana
+		options[2].HasAttribute("selected").ShouldBeTrue();  // Cherry
+	}
+
+}

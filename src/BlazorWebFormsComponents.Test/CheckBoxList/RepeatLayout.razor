@@ -1,0 +1,130 @@
+@using BlazorWebFormsComponents.Enums
+@using RL = BlazorWebFormsComponents.Enums.RepeatLayout
+
+@code {
+
+	[Fact]
+	public void CheckBoxList_TableLayout_RendersTable()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.Table" />);
+
+		// Assert
+		cut.Find("table").ShouldNotBeNull();
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(2); // Vertical default, one row per item
+	}
+
+	[Fact]
+	public void CheckBoxList_FlowLayout_RendersSpan()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.Flow" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.ShouldNotBeNull();
+		
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void CheckBoxList_OrderedListLayout_RendersOl()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.OrderedList" />);
+
+		// Assert
+		cut.Find("ol").ShouldNotBeNull();
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void CheckBoxList_UnorderedListLayout_RendersUl()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.UnorderedList" />);
+
+		// Assert
+		cut.Find("ul").ShouldNotBeNull();
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void CheckBoxList_FlowLayoutVertical_RendersBrBetweenItems()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" 
+									   StaticItems="items" 
+									   RepeatLayout="RL.Flow" 
+									   RepeatDirection="DataListEnum.Vertical" />);
+
+		// Assert
+		var brs = cut.FindAll("br");
+		brs.Count.ShouldBe(1); // One br between two items
+	}
+
+	[Fact]
+	public void CheckBoxList_HorizontalDirection_RendersInSingleRow()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2"),
+			new ListItem("Option 3", "3")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" 
+									   StaticItems="items" 
+									   RepeatLayout="RL.Table"
+									   RepeatDirection="DataListEnum.Horizontal" />);
+
+		// Assert
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(1); // All items in single row
+		
+		var cells = cut.FindAll("td");
+		cells.Count.ShouldBe(3);
+	}
+
+}

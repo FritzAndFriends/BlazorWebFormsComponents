@@ -1,0 +1,89 @@
+﻿@page "/ControlSamples/ListView"
+@using static BlazorWebFormsComponents.DataBinder
+@using SharedSampleObjects.Models
+
+<h2>ListView Component homepage</h2>
+
+<Nav />
+
+<p>Here is a simple listview bound to a collection of widgets.</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<td>Id</td>
+			<td>Name</td>
+			<td>Price</td>
+			<td>Last Update</td>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView @ref="simpleListView"
+							runat="server"
+							EnableViewState="false"
+							Context="Item"
+							ItemType="SharedSampleObjects.Models.Widget">
+			<AlternatingItemTemplate>
+				<tr class="table-dark">
+					<td>@Item.Id</td>
+					<td>@Eval("Name")</td>
+					<td>@Eval("Price", "{0:C}")</td>
+					<td>@Eval("LastUpdate", "{0:d}")</td>
+				</tr>
+			</AlternatingItemTemplate>
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>@Item.LastUpdate.ToString("d")</td>
+				</tr>
+			</ItemTemplate>
+			<ItemSeparatorTemplate>
+				@*<tr>
+					<td colspan="4" style="border-bottom: 1px solid black;">&nbsp;</td>
+				</tr>*@
+			</ItemSeparatorTemplate>
+			<EmptyDataTemplate>
+				<tr>
+					<td colspan="4">No widgets available</td>
+				</tr>
+			</EmptyDataTemplate>
+		</ListView>
+	</tbody>
+</table>
+
+@code {
+
+	BlazorWebFormsComponents.ListView<Widget> simpleListView { get; set; }
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+
+		if (firstRender)
+		{
+			simpleListView.DataSource = Widget.SimpleWidgetList;
+			simpleListView.DataBind();
+		}
+
+		//base.OnParametersSet();
+		base.OnAfterRender(firstRender);
+
+	}
+
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;ListView Context="Item" ItemType="Widget"&gt;<br />
+&nbsp;&nbsp;&lt;ItemTemplate&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;tr&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&gt;@@Item.Id&lt;/td&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;td&gt;@@Item.Name&lt;/td&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/tr&gt;<br />
+&nbsp;&nbsp;&lt;/ItemTemplate&gt;<br />
+&nbsp;&nbsp;&lt;EmptyDataTemplate&gt;No widgets available&lt;/EmptyDataTemplate&gt;<br />
+&lt;/ListView&gt;
+</code>

@@ -1,27 +1,23 @@
-﻿@inherits TestComponentBase
-
-
-<Fixture Test="FirstTest">
-	<ComponentUnderTest>
-		<DataList Items="Widget.Widgets(12)"
-							ItemType="Widget"
-							Caption="DataListCaption"
-							RepeatDirection="Vertical"
-							RepeatLayout="Flow"
-							RepeatColumns="4"
-							GridLines="Vertical"
-							Context="Item">
-			<HeaderTemplate>HeaderTemplate</HeaderTemplate>
-			<ItemTemplate>@Item.Id</ItemTemplate>
-			<FooterTemplate>FooterTemplate</FooterTemplate>
-		</DataList>
-	</ComponentUnderTest>
-</Fixture>
 
 @code {
-	void FirstTest(Fixture fixture)
+
+	[Fact]
+	public void DataList_FlowLayout_VerticalColumns12in4_RendersCorrectly()
 	{
-		var cut = fixture.GetComponentUnderTest();
+		var cut = Render(
+			@<DataList Items="Widget.Widgets(12)"
+								ItemType="Widget"
+								Caption="DataListCaption"
+								RepeatDirection="Vertical"
+								RepeatLayout="Flow"
+								RepeatColumns="4"
+								GridLines="Vertical"
+								Context="Item">
+				<HeaderTemplate>HeaderTemplate</HeaderTemplate>
+				<ItemTemplate>@Item.Id</ItemTemplate>
+				<FooterTemplate>FooterTemplate</FooterTemplate>
+			</DataList>
+		);
 		System.Diagnostics.Debug.WriteLine(cut.Markup);
 
 		//DataListSpan
@@ -40,4 +36,5 @@
 		string.Join(' ', dataListChildren.Skip(2).Take(14).Select(x => x.InnerHtml)).ShouldBe("1 4 7 10  2 5 8 11  3 6 9 12");
 		cut.FindAll("br").Count().ShouldBe(4);
 	}
+
 }
