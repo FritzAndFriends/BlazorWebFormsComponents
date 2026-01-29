@@ -17,5 +17,10 @@ namespace BlazorWebFormsComponents
 		public string ImageUrl { get; set; }
 
 		public string NavigateUrl { get; set; }
+
+		/// <summary>
+		/// The component that raised this event
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

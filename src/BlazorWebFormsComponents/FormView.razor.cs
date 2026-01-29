@@ -93,35 +93,35 @@ namespace BlazorWebFormsComponents
 			switch (args.CommandName.ToLowerInvariant())
 			{
 				case "cancel":
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode }).GetAwaiter().GetResult();
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					break;
 				case "edit":
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit }).GetAwaiter().GetResult();
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit, Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
 					break;
 				case "delete":
 					Exception caughtException = null;
 					try {
-						OnItemDeleting.InvokeAsync(new FormViewDeleteEventArgs(Position)).GetAwaiter().GetResult();
+						OnItemDeleting.InvokeAsync(new FormViewDeleteEventArgs(Position) { Sender = this }).GetAwaiter().GetResult();
 					} catch (Exception ex) {
 						caughtException = ex;
 					}
 					// do we do the deletion?
-					OnItemDeleted.InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException)).GetAwaiter().GetResult();
+					OnItemDeleted.InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					Position = (Position == 0) ? 0 : Position - 1;
 					break;
 				case "insert":
-					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert }).GetAwaiter().GetResult();
-					OnItemInserted.InvokeAsync(new FormViewInsertEventArgs("insert") { }).GetAwaiter().GetResult();
+					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
+					OnItemInserted.InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Insert;
 					break;
 				case "update":
-					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update")).GetAwaiter().GetResult();
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode }).GetAwaiter().GetResult();
-					OnItemUpdated.InvokeAsync(new FormViewUpdatedEventArgs(0, null)).GetAwaiter().GetResult();
+					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update") { Sender = this }).GetAwaiter().GetResult();
+					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
+					OnItemUpdated.InvokeAsync(new FormViewUpdatedEventArgs(0, null) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					break;
 

@@ -17,6 +17,11 @@ namespace BlazorWebFormsComponents
 
 		public IOrderedDictionary Values { get; internal set; }
 
+		/// <summary>
+		/// The component that raised this event
+		/// </summary>
+		public object Sender { get; set; }
+
 	}
 
 }

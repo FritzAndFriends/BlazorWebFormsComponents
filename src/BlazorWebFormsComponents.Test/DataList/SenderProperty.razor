@@ -1,0 +1,61 @@
+@using SharedSampleObjects.Models
+@using Moq
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Routing
+@inherits BunitContext
+
+@code {
+
+	private object capturedSender = null;
+	private object capturedItem = null;
+
+	void OnItemDataBound(DataListItemEventArgs args)
+	{
+		capturedSender = args.Sender;
+		capturedItem = args.Item;
+	}
+
+	[Fact]
+	public void DataList_ItemDataBound_PopulatesSenderProperty()
+	{
+		// Arrange
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+		capturedSender = null;
+		capturedItem = null;
+		var widgets = Widget.SimpleWidgetList;
+
+		var cut = Render(@<DataList Items="widgets" OnItemDataBound="OnItemDataBound">
+			<ItemTemplate>
+				<span>@context.Name</span>
+			</ItemTemplate>
+		</DataList>);
+
+		// Assert - Sender should be set for each item
+		capturedSender.ShouldNotBeNull();
+		capturedSender.ShouldBeOfType<DataList<Widget>>();
+		capturedItem.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void DataList_ItemDataBound_SenderIsDataListInstance()
+	{
+		// Arrange
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+		capturedSender = null;
+		var widgets = new[] { new Widget { Name = "Test Widget" } };
+
+		var cut = Render(@<DataList Items="widgets" OnItemDataBound="OnItemDataBound">
+			<ItemTemplate>
+				<span>@context.Name</span>
+			</ItemTemplate>
+		</DataList>);
+
+		var dataListInstance = cut.FindComponent<DataList<Widget>>().Instance;
+
+		// Assert
+		capturedSender.ShouldBe(dataListInstance);
+	}
+
+}

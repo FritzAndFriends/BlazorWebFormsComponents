@@ -123,7 +123,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		private async Task ValidSubmit()
 		{
-			var loginCancelEventArgs = new LoginCancelEventArgs();
+			var loginCancelEventArgs = new LoginCancelEventArgs() { Sender = this };
 			await OnLoggingIn.InvokeAsync(loginCancelEventArgs);
 
 			if (loginCancelEventArgs.Cancel)
@@ -135,7 +135,7 @@ namespace BlazorWebFormsComponents.LoginControls
 			else
 			{
 
-				var authenticateEventArgs = new AuthenticateEventArgs();
+				var authenticateEventArgs = new AuthenticateEventArgs() { Sender = this };
 				await OnAuthenticate.InvokeAsync(authenticateEventArgs);
 
 				if (authenticateEventArgs.Authenticated)
