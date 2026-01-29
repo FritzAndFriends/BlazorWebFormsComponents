@@ -1,0 +1,44 @@
+@using System.Linq
+
+@code {
+
+	[Fact]
+	public void ListView_ItemDataBound_GroupedItemsReceiveListViewDataItem()
+	{
+		var receivedItems = new System.Collections.Generic.List<ListViewDataItem>();
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+					ItemType="Widget"
+					GroupItemCount="3"
+					OnItemDataBound="@((e) => CollectItems(e, receivedItems))"
+					Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			<GroupTemplate Context="ItemPlaceHolder">
+				<div>@ItemPlaceHolder</div>
+			</GroupTemplate>
+		</ListView>);
+
+		// Get unique items by DataItemIndex (in case of multiple renders)
+		var uniqueItems = receivedItems
+			.GroupBy(i => i.DataItemIndex)
+			.Select(g => g.First())
+			.OrderBy(i => i.DataItemIndex)
+			.ToList();
+
+		// Verify we received items for all data items
+		uniqueItems.Count.ShouldBe(Widget.SimpleWidgetList.Length);
+
+		// Verify all items are ListViewDataItem with correct properties
+		for (int i = 0; i < uniqueItems.Count; i++)
+		{
+			uniqueItems[i].DataItemIndex.ShouldBe(i);
+			uniqueItems[i].DisplayIndex.ShouldBe(i);
+			uniqueItems[i].ItemType.ShouldBe(BlazorWebFormsComponents.Enums.ListViewItemType.DataItem);
+			uniqueItems[i].DataItem.ShouldNotBeNull();
+			((Widget)uniqueItems[i].DataItem).Name.ShouldBe(Widget.SimpleWidgetList[i].Name);
+		}
+	}
+
+	void CollectItems(ListViewItemEventArgs args, System.Collections.Generic.List<ListViewDataItem> list) {
+		list.Add((ListViewDataItem)args.Item);
+	}
+}
