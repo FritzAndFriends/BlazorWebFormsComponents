@@ -6,11 +6,19 @@ on:
       - 'main'
       - 'dev'
       - 'v*'
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'mkdocs.yml'
   pull_request:
     branches:
       - 'main'
       - 'dev'
       - 'v*'
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'mkdocs.yml'
   workflow_dispatch:
 
 
