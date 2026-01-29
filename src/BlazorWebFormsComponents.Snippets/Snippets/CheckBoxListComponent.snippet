@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>BlazorWebForms CheckBoxList Component</Title>
+      <Shortcut>bwfcheckboxlist</Shortcut>
+      <Description>Creates a CheckBoxList component</Description>
+      <Author>Jeffrey T. Fritz</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>ItemType</ID>
+          <ToolTip>Type of items to display</ToolTip>
+          <Default>MyItemType</Default>
+        </Literal>
+        <Literal>
+          <ID>DataSource</ID>
+          <ToolTip>Data source for the list</ToolTip>
+          <Default>myDataSource</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="Razor">
+        <![CDATA[<CheckBoxList TItem="$ItemType$" 
+              DataSource="@$DataSource$"
+              DataTextField="Name"
+              DataValueField="Id"
+              RepeatLayout="Table"
+              RepeatColumns="2" />$end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

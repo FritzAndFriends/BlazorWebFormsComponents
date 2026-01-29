@@ -104,6 +104,7 @@ nav:
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - Snippets Package: UtilityFeatures/Snippets.md
     - ViewState: UtilityFeatures/ViewState.md
   - Migration:
       - Getting started: Migration/readme.md

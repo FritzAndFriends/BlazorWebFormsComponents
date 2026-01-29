@@ -89,6 +89,7 @@ There are a handful of features that augment the ASP<span></span>.NET developmen
 
   - [DataBinder](docs/UtilityFeatures/Databinder.md)
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
+  - [Snippets Package](docs/UtilityFeatures/Snippets.md) - Visual Studio code snippets for static imports and component patterns
   - [ViewState](docs/UtilityFeatures/ViewState.md)
 
 ## Compiling the project
