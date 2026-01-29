@@ -13,6 +13,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `CommandName` - the command name passed to `OnCommand` event
 - `CommandArgument` - the command argument passed to `OnCommand` event
 - `CausesValidation` - controls whether form validation is triggered on click (default: `true`)
+- `ValidationGroup` - specifies the validation group for which the button triggers validation
 - `Enabled` - enables or disables the button
 - `Visible` - controls button visibility
 - `ToolTip` - tooltip text displayed on hover
@@ -28,7 +29,6 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - **PostBackUrl** - Not supported; Blazor uses component events instead of postbacks to different pages
 - **UseSubmitBehavior** - Not supported; Blazor buttons trigger click events and you can inspect the form regardless
-- **ValidationGroup** - Not yet implemented; use EditForm validation instead
 - **AccessKey** - Use HTML `accesskey` attribute directly if needed
 
 ## Web Forms Declarative Syntax
@@ -152,6 +152,61 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     <Button Text="Cancel" CausesValidation="false" OnClick="HandleCancel" />
 </EditForm>
 ```
+
+### ValidationGroup - Selective Validation
+
+The `ValidationGroup` property allows you to create multiple validation groups on a single form. When a button with a `ValidationGroup` is clicked, only validators with the matching `ValidationGroup` will be triggered.
+
+**Important:** To use `ValidationGroup`, you must wrap your form in a `ValidationGroupProvider` component.
+
+```razor
+@using BlazorWebFormsComponents.Validations
+
+<ValidationGroupProvider>
+    <EditForm Model="@model" OnValidSubmit="HandlePersonalSubmit">
+        @* Personal Information Group *@
+        <InputText @ref="NameInput.Current" @bind-Value="model.Name" />
+        <RequiredFieldValidator ControlToValidate="@NameInput"
+                                Text="Name required"
+                                ValidationGroup="Personal" />
+        
+        <InputText @ref="EmailInput.Current" @bind-Value="model.Email" />
+        <RequiredFieldValidator ControlToValidate="@EmailInput"
+                                Text="Email required"
+                                ValidationGroup="Personal" />
+        
+        <Button Text="Validate Personal" ValidationGroup="Personal" />
+    </EditForm>
+    
+    <EditForm Model="@model" OnValidSubmit="HandleBusinessSubmit">
+        @* Business Information Group *@
+        <InputText @ref="CompanyInput.Current" @bind-Value="model.Company" />
+        <RequiredFieldValidator ControlToValidate="@CompanyInput"
+                                Text="Company required"
+                                ValidationGroup="Business" />
+        
+        <Button Text="Validate Business" ValidationGroup="Business" />
+    </EditForm>
+</ValidationGroupProvider>
+
+@code {
+    ForwardRef<InputBase<string>> NameInput = new ForwardRef<InputBase<string>>();
+    ForwardRef<InputBase<string>> EmailInput = new ForwardRef<InputBase<string>>();
+    ForwardRef<InputBase<string>> CompanyInput = new ForwardRef<InputBase<string>>();
+    
+    private FormModel model = new FormModel();
+    
+    void HandlePersonalSubmit() { /* Personal validation passed */ }
+    void HandleBusinessSubmit() { /* Business validation passed */ }
+}
+```
+
+**How ValidationGroup Works:**
+
+1. **Same Group** - Button with `ValidationGroup="Personal"` triggers only validators with `ValidationGroup="Personal"`
+2. **No Group (empty/null)** - Button without a `ValidationGroup` triggers only validators without a `ValidationGroup`
+3. **Multiple Groups** - You can have multiple groups on the same page that validate independently
+4. **CausesValidation** - Set `CausesValidation="false"` to disable validation entirely for a button
 
 ## HTML Output
 
