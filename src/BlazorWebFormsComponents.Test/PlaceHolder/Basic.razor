@@ -1,0 +1,32 @@
+
+@code {
+[Fact]
+public void PlaceHolder_RendersChildContentOnly()
+{
+    // Arrange & Act
+    var cut = Render(
+        @<PlaceHolder>
+            <p>Test content</p>
+        </PlaceHolder>
+    );
+
+    // Assert - no wrapper element, just the content
+    cut.MarkupMatches(@<p>Test content</p>);
+}
+
+[Fact]
+public void PlaceHolder_WithMultipleChildren_RendersAll()
+{
+    // Arrange & Act
+    var cut = Render(
+        @<PlaceHolder>
+            <p>First</p>
+            <p>Second</p>
+        </PlaceHolder>
+    );
+
+    // Assert
+    var paragraphs = cut.FindAll("p");
+    paragraphs.Count.ShouldBe(2);
+}
+}

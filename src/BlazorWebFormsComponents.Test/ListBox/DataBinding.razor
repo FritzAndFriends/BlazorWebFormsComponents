@@ -1,0 +1,54 @@
+
+@code {
+
+	public class Product
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+	}
+
+	[Fact]
+	public void ListBox_DataBound_RendersFromDataSource()
+	{
+		// Arrange
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Item 1" },
+			new Product { Id = "2", Name = "Item 2" },
+			new Product { Id = "3", Name = "Item 3" }
+		};
+
+		// Act
+		var cut = Render(
+			@<ListBox TItem="Product"
+					  Items="data"
+					  DataTextField="Name"
+					  DataValueField="Id" />
+		);
+
+		// Assert
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(3);
+		options[0].TextContent.ShouldBe("Item 1");
+		options[0].GetAttribute("value").ShouldBe("1");
+		options[1].TextContent.ShouldBe("Item 2");
+		options[1].GetAttribute("value").ShouldBe("2");
+	}
+
+	[Fact]
+	public void ListBox_DataBoundWithoutFields_UsesToString()
+	{
+		// Arrange
+		var data = new List<string> { "Apple", "Banana", "Cherry" };
+
+		// Act
+		var cut = Render(@<ListBox TItem="string" Items="data" />);
+
+		// Assert
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(3);
+		options[0].TextContent.ShouldBe("Apple");
+		options[0].GetAttribute("value").ShouldBe("Apple");
+	}
+
+}
