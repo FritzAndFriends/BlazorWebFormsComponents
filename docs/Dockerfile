@@ -1,14 +1,14 @@
-FROM squidfunk/mkdocs-material:5.5.0
+FROM squidfunk/mkdocs-material:9.7.1
 
-RUN apk add --no-cache \
-      git \
-      git-fast-import \
-      openssh \
-  && apk add --no-cache --virtual .build gcc musl-dev \
+RUN \
+  apk add --no-cache \
+    git \
+    git-fast-import \
+    openssh \
   && pip install --no-cache-dir \
-      'markdown-include==0.5.1' \
-      'mike==1.1.2' \
-      'mkdocs-exclude==1.0.2' \
-      'mkdocs-macros-plugin==0.5.12' \
-  && apk del .build gcc musl-dev \
+    'markdown-include' \
+    'mike' \
+    'mkdocs-exclude' \
+    'mkdocs-macros-plugin' \
+    'mkdocs-git-revision-date-localized-plugin' \
   && rm -rf /tmp/*
