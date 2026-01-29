@@ -2,18 +2,19 @@
 
 @code {
 	/// <summary>
-	/// Integration test to verify that Ads.xml is properly copied to output directory.
+	/// Integration test to verify that XML files are properly copied to output directory.
 	/// This test validates the fix for the Azure deployment issue where Ads.xml was missing.
+	/// Uses Ads1.xml as the test file to verify the deployment mechanism works correctly.
 	/// </summary>
 	[Fact]
 	public void AdRotator_DeploymentVerification_AdsXmlExistsInOutputDirectory()
 	{
-		// Arrange - Get the path where Ads.xml should be copied during build
+		// Arrange - Get the path where test XML files should be copied during build
 		var outputDirectory = AppContext.BaseDirectory;
 		var adsXmlPath = Path.Combine(outputDirectory, "Ads1.xml");
 
 		// Act & Assert - Verify the file exists (simulating deployment scenario)
-		File.Exists(adsXmlPath).ShouldBeTrue($"Ads.xml should be copied to output directory. Expected path: {adsXmlPath}");
+		File.Exists(adsXmlPath).ShouldBeTrue($"XML files should be copied to output directory. Expected path: {adsXmlPath}");
 		
 		// Verify the file can be read and contains valid XML
 		var fileContent = File.ReadAllText(adsXmlPath);
@@ -24,6 +25,7 @@
 	/// <summary>
 	/// Integration test to verify AdRotator can load and render ads from a file in the output directory.
 	/// This simulates the actual deployment scenario where the component loads from the file system.
+	/// Uses Ads1.xml to test the deployment mechanism works as expected.
 	/// </summary>
 	[Fact]
 	public void AdRotator_DeploymentVerification_LoadsFromOutputDirectory()
@@ -48,8 +50,8 @@
 	}
 
 	/// <summary>
-	/// Integration test to verify AdRotator handles missing Ads.xml gracefully.
-	/// This helps identify deployment issues early.
+	/// Integration test to verify AdRotator handles missing XML files gracefully.
+	/// This helps identify deployment issues early where files may not be properly deployed.
 	/// </summary>
 	[Fact]
 	public void AdRotator_DeploymentVerification_HandlesFileMissingScenario()

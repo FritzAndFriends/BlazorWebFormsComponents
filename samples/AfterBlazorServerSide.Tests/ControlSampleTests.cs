@@ -78,38 +78,50 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/AdRotator")]
     public async Task OtherControl_Loads_WithoutErrors(string path)
     {
+        await VerifyPageLoadsWithoutErrors(path);
+    }
+
+    /// <summary>
+    /// Validates that AdRotator displays an ad with the correct attributes.
+    /// This specifically tests that Ads.xml is properly deployed and accessible.
+    /// </summary>
+    [Fact]
+    public async Task AdRotator_DisplaysAd_WithCorrectAttributes()
+    {
         // Arrange
         var page = await _fixture.NewPageAsync();
-        var consoleErrors = new List<string>();
-        var pageErrors = new List<string>();
-
-        page.Console += (_, msg) =>
-        {
-            if (msg.Type == "error")
-            {
-                consoleErrors.Add($"{path}: {msg.Text}");
-            }
-        };
-
-        page.PageError += (_, error) =>
-        {
-            pageErrors.Add($"{path}: {error}");
-        };
 
         try
         {
             // Act
-            var response = await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            var response = await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/AdRotator", new PageGotoOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000
             });
 
-            // Assert - AdRotator may have issues with file loading, so we just verify page loads
+            // Assert - Page loads successfully
             Assert.NotNull(response);
-            // Note: AdRotator may return 500 if Ads.xml is not found in production, but that's a known limitation
-            Assert.True(response.Ok || response.Status == 500, 
-                $"Page {path} failed to load with status: {response.Status}");
+            Assert.True(response.Ok, $"Page failed to load with status: {response.Status}");
+
+            // Assert - AdRotator component rendered with an ad
+            var adImage = await page.QuerySelectorAsync("img[alt]");
+            Assert.NotNull(adImage);
+            Assert.True(await adImage.IsVisibleAsync(), "Ad image should be visible");
+
+            // Assert - Ad has valid attributes (proving Ads.xml was loaded)
+            var altText = await adImage.GetAttributeAsync("alt");
+            Assert.NotNull(altText);
+            Assert.NotEmpty(altText);
+
+            // Assert - Ad has a link
+            var adLink = await page.QuerySelectorAsync("a[href] img[alt]");
+            Assert.NotNull(adLink);
+
+            // Verify the link contains an href
+            var parentLink = await adLink.EvaluateAsync<string>("el => el.parentElement.getAttribute('href')");
+            Assert.NotNull(parentLink);
+            Assert.NotEmpty(parentLink);
         }
         finally
         {
