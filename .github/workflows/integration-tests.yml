@@ -44,8 +44,24 @@ jobs:
       - name: Build integration tests
         run: dotnet build samples/AfterBlazorServerSide.Tests/AfterBlazorServerSide.Tests.csproj --configuration Release --no-restore
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: |
+          PLAYWRIGHT_VERSION=$(grep -oP 'Microsoft\.Playwright.*Version="\K[^"]+' samples/AfterBlazorServerSide.Tests/AfterBlazorServerSide.Tests.csproj | head -1)
+          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+          echo "Playwright version: $PLAYWRIGHT_VERSION"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright browsers
-        run: pwsh samples/AfterBlazorServerSide.Tests/bin/Release/net10.0/playwright.ps1 install chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pwsh samples/AfterBlazorServerSide.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
       - name: Run integration tests
         run: dotnet test samples/AfterBlazorServerSide.Tests/AfterBlazorServerSide.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx"
