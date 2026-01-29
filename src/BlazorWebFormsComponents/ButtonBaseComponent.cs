@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using BlazorWebFormsComponents.Validations;
 
 namespace BlazorWebFormsComponents
 {
@@ -8,6 +9,12 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public bool CausesValidation { get; set; } = true;
+
+		[Parameter]
+		public string ValidationGroup { get; set; }
+
+		[CascadingParameter(Name = "ValidationGroupCoordinator")]
+		protected ValidationGroupCoordinator Coordinator { get; set; }
 
 		[Parameter]
 		public string CommandName { get; set; }
@@ -32,6 +39,12 @@ namespace BlazorWebFormsComponents
 
 		protected void Click()
 		{
+			// Trigger validation for the specific ValidationGroup if CausesValidation is true
+			if (CausesValidation && Coordinator != null)
+			{
+				Coordinator.ValidateGroup(ValidationGroup);
+			}
+
 			if (!string.IsNullOrEmpty(CommandName))
 			{
 				var args = new CommandEventArgs(CommandName, CommandArgument);

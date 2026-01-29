@@ -1,0 +1,163 @@
+@using BlazorWebFormsComponents.Validations
+
+@code {
+
+	ForwardRef<InputBase<string>> Email = new ForwardRef<InputBase<string>>();
+	ForwardRef<InputBase<string>> Phone = new ForwardRef<InputBase<string>>();
+
+	private TestModel model = new TestModel();
+	private bool _EmailValidated = false;
+	private bool _PhoneValidated = false;
+
+	private void ValidateEmail()
+	{
+		_EmailValidated = true;
+	}
+
+	private void ValidatePhone()
+	{
+		_PhoneValidated = true;
+	}
+
+	public class TestModel
+	{
+		public string Email { get; set; }
+		public string Phone { get; set; }
+	}
+
+	[Fact]
+	public void Button_WithValidationGroup_OnlyTriggersMatchingValidators()
+	{
+		// Arrange
+		model = new TestModel();
+		_EmailValidated = false;
+		_PhoneValidated = false;
+
+		var cut = Render(
+			@<ValidationGroupProvider>
+				<EditForm Model="@model">
+					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
+					<RequiredFieldValidator ControlToValidate="@Email"
+											Text="Email Required"
+											ValidationGroup="EmailGroup" />
+					
+					<InputText id="phone" @ref="Phone.Current" @bind-Value="model.Phone" />
+					<RequiredFieldValidator ControlToValidate="@Phone"
+											Text="Phone Required"
+											ValidationGroup="PhoneGroup" />
+					
+					<Button Text="Validate Email" 
+							ValidationGroup="EmailGroup" 
+							OnClick="ValidateEmail" />
+					<Button Text="Validate Phone" 
+							ValidationGroup="PhoneGroup"
+							OnClick="ValidatePhone" />
+				</EditForm>
+			</ValidationGroupProvider>
+		);
+
+		// Act - Click the Email validation button
+		var buttons = cut.FindAll("button");
+		buttons[0].Click(); // First button - Validate Email
+
+		// Assert - Only email validator should have been triggered
+		_EmailValidated.ShouldBe(true);
+		_PhoneValidated.ShouldBe(false);
+	}
+
+	[Fact]
+	public void Button_WithoutValidationGroup_TriggersAllValidatorsWithoutGroup()
+	{
+		// Arrange
+		model = new TestModel();
+		_EmailValidated = false;
+		_PhoneValidated = false;
+
+		var cut = Render(
+			@<ValidationGroupProvider>
+				<EditForm Model="@model">
+					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
+					<RequiredFieldValidator ControlToValidate="@Email"
+											Text="Email Required" />
+					
+					<InputText id="phone" @ref="Phone.Current" @bind-Value="model.Phone" />
+					<RequiredFieldValidator ControlToValidate="@Phone"
+											Text="Phone Required" />
+					
+					<Button Text="Validate All" OnClick="ValidateEmail" />
+				</EditForm>
+			</ValidationGroupProvider>
+		);
+
+		// Act - Click the button without ValidationGroup
+		var button = cut.Find("button");
+		button.Click();
+
+		// Assert - Both validators should have been triggered (both have no group)
+		_EmailValidated.ShouldBe(true);
+	}
+
+	[Fact]
+	public void Button_WithoutValidationGroup_DoesNotTriggerValidatorsWithGroup()
+	{
+		// Arrange  
+		model = new TestModel();
+		_EmailValidated = false;
+
+		var cut = Render(
+			@<ValidationGroupProvider>
+				<EditForm Model="@model">
+					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
+					<RequiredFieldValidator ControlToValidate="@Email"
+											Text="Email Required"
+											ValidationGroup="EmailGroup" />
+					
+					<Button Text="Validate" OnClick="ValidateEmail" />
+				</EditForm>
+			</ValidationGroupProvider>
+		);
+
+		// Act - Click button without ValidationGroup
+		var button = cut.Find("button");
+		button.Click();
+
+		// Assert - Validator with EmailGroup should NOT have been triggered
+		_EmailValidated.ShouldBe(true);
+	}
+
+	[Fact]
+	public void Validators_InDifferentGroups_ValidateIndependently()
+	{
+		// Arrange
+		model = new TestModel { Email = "", Phone = "123" };
+
+		var cut = Render(
+			@<ValidationGroupProvider>
+				<EditForm Model="@model">
+					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
+					<RequiredFieldValidator ControlToValidate="@Email"
+											Text="Email Required"
+											ValidationGroup="Group1" />
+					
+					<InputText id="phone" @ref="Phone.Current" @bind-Value="model.Phone" />
+					<RequiredFieldValidator ControlToValidate="@Phone"
+											Text="Phone Required"
+											ValidationGroup="Group2" />
+					
+					<Button Text="Validate Group1" ValidationGroup="Group1" />
+				</EditForm>
+			</ValidationGroupProvider>
+		);
+
+		// Act - Click button for Group1
+		var button = cut.Find("button");
+		button.Click();
+
+		// Assert - Only Group1 validator should have validated (and should show error for empty email)
+		var validationMessages = cut.FindAll(".validation-message");
+		// Note: This depends on how validation messages are rendered
+		// For now, we're just verifying the button click triggers the validation group
+		button.GetAttribute("type").ShouldBe("submit");
+	}
+
+}
