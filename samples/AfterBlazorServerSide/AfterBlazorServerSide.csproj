@@ -11,7 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Ads.xml" />
+    <Content Include="Ads.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

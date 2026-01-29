@@ -15,6 +15,9 @@
     <Content Include="..\AfterBlazorServerSide\Components\Layout\**">
       <Link>Layout\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
+    <Content Include="..\AfterBlazorServerSide\Ads.xml" Link="wwwroot\Ads.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

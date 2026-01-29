@@ -689,7 +689,6 @@ samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Label/Index.razor
 # 6. Update README.md
 - [Label](docs/EditorControls/Label.md)
 ```
-
 ## Quality Checklist
 
 Before submitting documentation:
@@ -704,6 +703,13 @@ Before submitting documentation:
 - [ ] Spell-checked
 
 Before submitting sample pages:
+- [ ] Includes both demo and source code sections
+- [ ] Code block exactly matches the demo
+- [ ] HTML entities properly encoded in code block
+- [ ] `@` symbols doubled in code block
+- [ ] Includes complete `@code` block with all handlers
+- [ ] Brief description explains what sample demonstrates
+- [ ] Sample is accessible from navigation or component list
 - [ ] Created in correct folder: `ControlSamples/[ComponentName]/`
 - [ ] Follows naming convention (Index.razor for main sample)
 - [ ] Includes `@page` directive with correct route
