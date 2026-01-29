@@ -39,7 +39,7 @@ app.MapRazorComponents<App>()
 
 await app.RunAsync();
 
-partial class Program
+public partial class Program
 {
     public static string ApplicationName => "Blazor Server-Side";
     public static string? ComponentVersion = typeof(BlazorWebFormsComponents.Button)
