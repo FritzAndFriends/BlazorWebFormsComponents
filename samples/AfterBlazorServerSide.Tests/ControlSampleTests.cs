@@ -16,10 +16,17 @@ public class ControlSampleTests
     [Theory]
     [InlineData("/ControlSamples/Button")]
     [InlineData("/ControlSamples/CheckBox")]
+    [InlineData("/ControlSamples/CheckBox/Events")]
+    [InlineData("/ControlSamples/CheckBox/Style")]
     [InlineData("/ControlSamples/HyperLink")]
     [InlineData("/ControlSamples/LinkButton")]
     [InlineData("/ControlSamples/Literal")]
     [InlineData("/ControlSamples/DropDownList")]
+    [InlineData("/ControlSamples/Panel")]
+    [InlineData("/ControlSamples/PlaceHolder")]
+    [InlineData("/ControlSamples/RadioButton")]
+    [InlineData("/ControlSamples/RadioButtonList")]
+    [InlineData("/ControlSamples/TextBox")]
     public async Task EditorControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -44,6 +51,8 @@ public class ControlSampleTests
     // Navigation Controls
     [Theory]
     [InlineData("/ControlSamples/TreeView")]
+    [InlineData("/ControlSamples/Menu")]
+    [InlineData("/ControlSamples/Menu/DatabindingSitemap")]
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);

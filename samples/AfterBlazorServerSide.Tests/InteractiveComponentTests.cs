@@ -530,4 +530,305 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task Panel_Renders_WithContent()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Panel", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Verify Panel renders as div elements
+            var divPanels = await page.Locator("div").AllAsync();
+            Assert.NotEmpty(divPanels);
+
+            // Verify fieldset for GroupingText panels
+            var fieldsets = await page.Locator("fieldset").AllAsync();
+            Assert.NotEmpty(fieldsets);
+
+            // Verify legend inside fieldset
+            var legends = await page.Locator("fieldset legend").AllAsync();
+            Assert.NotEmpty(legends);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task PlaceHolder_VisibilityToggle_Works()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PlaceHolder", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Find toggle button
+            var toggleButton = page.Locator("button:has-text('Hide Content'), button:has-text('Show Content')").First;
+            Assert.NotNull(toggleButton);
+
+            // Get initial visibility state by checking button text
+            var initialButtonText = await toggleButton.TextContentAsync();
+
+            // Click to toggle
+            await toggleButton.ClickAsync();
+            await page.WaitForTimeoutAsync(300);
+
+            // Verify button text changed (indicating toggle worked)
+            var newButtonText = await toggleButton.TextContentAsync();
+            Assert.NotEqual(initialButtonText, newButtonText);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task RadioButtonList_Selection_Works()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/RadioButtonList", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Find radio buttons
+            var radioButtons = await page.Locator("input[type='radio']").AllAsync();
+            Assert.NotEmpty(radioButtons);
+
+            // Click a radio button
+            var firstRadio = page.Locator("input[type='radio']").First;
+            await firstRadio.ClickAsync();
+            await page.WaitForTimeoutAsync(300);
+
+            // Verify it's checked
+            var isChecked = await firstRadio.IsCheckedAsync();
+            Assert.True(isChecked, "Radio button should be checked after clicking");
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task RadioButton_Toggle_Works()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/RadioButton", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Find radio buttons
+            var radioButtons = await page.Locator("input[type='radio']").AllAsync();
+            Assert.NotEmpty(radioButtons);
+
+            // Click a radio button
+            var firstRadio = page.Locator("input[type='radio']").First;
+            await firstRadio.ClickAsync();
+            await page.WaitForTimeoutAsync(300);
+
+            // Verify it's checked
+            var isChecked = await firstRadio.IsCheckedAsync();
+            Assert.True(isChecked, "Radio button should be checked after clicking");
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task TextBox_Input_Works()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/TextBox", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Find text inputs (not readonly)
+            var textInputs = await page.Locator("input[type='text']:not([readonly])").AllAsync();
+            Assert.NotEmpty(textInputs);
+
+            // Fill a text input
+            var firstInput = page.Locator("input[type='text']:not([readonly])").First;
+            await firstInput.FillAsync("Test Input");
+            
+            // Verify the value was set
+            var value = await firstInput.InputValueAsync();
+            Assert.Equal("Test Input", value);
+
+            // Verify readonly inputs exist
+            var readonlyInputs = await page.Locator("input[readonly]").AllAsync();
+            Assert.NotEmpty(readonlyInputs);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task TextBox_MultiLine_Works()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/TextBox", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Verify textarea elements exist (multiline textbox)
+            var textareas = await page.Locator("textarea").AllAsync();
+            Assert.NotEmpty(textareas);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Menu_Renders_WithItems()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Menu", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle
+            });
+
+            // Verify menu items exist
+            var menuItems = await page.Locator("a, li, td").AllAsync();
+            Assert.NotEmpty(menuItems);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }
