@@ -1,0 +1,184 @@
+@page "/ControlSamples/Panel"
+@using BlazorWebFormsComponents.Enums
+
+<h2>Panel Component Samples</h2>
+
+<h3>Basic Panel</h3>
+<Panel>
+	<p>This content is inside a basic Panel.</p>
+	<p>A Panel renders as a div element by default.</p>
+</Panel>
+<pre><code>&lt;Panel&gt;
+    &lt;p&gt;This content is inside a basic Panel.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with GroupingText (Fieldset)</h3>
+<Panel GroupingText="User Information">
+	<p>Name: John Doe</p>
+	<p>Email: john@example.com</p>
+</Panel>
+<pre><code>&lt;Panel GroupingText="User Information"&gt;
+    &lt;p&gt;Name: John Doe&lt;/p&gt;
+    &lt;p&gt;Email: john@example.com&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Styling</h3>
+<Panel BackColor="WebColor.LightYellow" 
+       ForeColor="WebColor.Navy"
+       BorderColor="WebColor.Blue"
+       BorderWidth="Unit.Pixel(2)"
+       BorderStyle="BorderStyle.Solid"
+       Width="Unit.Pixel(300)">
+	<p>This panel has custom colors and border.</p>
+</Panel>
+<pre><code>&lt;Panel BackColor="WebColor.LightYellow" 
+       ForeColor="WebColor.Navy"
+       BorderColor="WebColor.Blue"
+       BorderWidth="Unit.Pixel(2)"
+       BorderStyle="BorderStyle.Solid"
+       Width="Unit.Pixel(300)"&gt;
+    &lt;p&gt;This panel has custom colors and border.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Vertical ScrollBars</h3>
+<Panel ScrollBars="ScrollBars.Vertical" 
+       Height="Unit.Pixel(100)" 
+       Width="Unit.Pixel(300)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)">
+	<p>Line 1 - This panel has vertical scrollbars.</p>
+	<p>Line 2</p>
+	<p>Line 3</p>
+	<p>Line 4</p>
+	<p>Line 5</p>
+	<p>Line 6</p>
+	<p>Line 7</p>
+</Panel>
+<pre><code>&lt;Panel ScrollBars="ScrollBars.Vertical" 
+       Height="Unit.Pixel(100)" 
+       Width="Unit.Pixel(300)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)"&gt;
+    &lt;p&gt;Line 1&lt;/p&gt;
+    &lt;p&gt;Line 2&lt;/p&gt;
+    ...
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Horizontal ScrollBars</h3>
+<Panel ScrollBars="ScrollBars.Horizontal" 
+       Height="Unit.Pixel(60)" 
+       Width="Unit.Pixel(200)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)">
+	<p style="white-space: nowrap;">This is a very long line of text that will cause horizontal scrolling in the panel.</p>
+</Panel>
+<pre><code>&lt;Panel ScrollBars="ScrollBars.Horizontal" 
+       Height="Unit.Pixel(60)" 
+       Width="Unit.Pixel(200)"&gt;
+    &lt;p&gt;Long content here...&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Auto ScrollBars</h3>
+<Panel ScrollBars="ScrollBars.Auto" 
+       Height="Unit.Pixel(80)" 
+       Width="Unit.Pixel(250)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)">
+	<p>Auto scrollbars appear only when needed.</p>
+	<p>Add more content to see them.</p>
+	<p>Line 3</p>
+	<p>Line 4</p>
+</Panel>
+<pre><code>&lt;Panel ScrollBars="ScrollBars.Auto" 
+       Height="Unit.Pixel(80)" 
+       Width="Unit.Pixel(250)"&gt;
+    &lt;p&gt;Content...&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Horizontal Alignment</h3>
+<Panel HorizontalAlign="HorizontalAlign.Center"
+       BorderStyle="BorderStyle.Dashed"
+       BorderWidth="Unit.Pixel(1)"
+       Width="Unit.Pixel(400)">
+	<p>This text is centered within the panel.</p>
+</Panel>
+<pre><code>&lt;Panel HorizontalAlign="HorizontalAlign.Center"
+       BorderStyle="BorderStyle.Dashed"
+       Width="Unit.Pixel(400)"&gt;
+    &lt;p&gt;This text is centered within the panel.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Right Alignment</h3>
+<Panel HorizontalAlign="HorizontalAlign.Right"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)"
+       Width="Unit.Pixel(400)">
+	<p>This text is right-aligned.</p>
+</Panel>
+<pre><code>&lt;Panel HorizontalAlign="HorizontalAlign.Right" Width="Unit.Pixel(400)"&gt;
+    &lt;p&gt;This text is right-aligned.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Text Direction (RTL)</h3>
+<Panel Direction="ContentDirection.RightToLeft"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)"
+       Width="Unit.Pixel(300)">
+	<p>This text flows right-to-left.</p>
+</Panel>
+<pre><code>&lt;Panel Direction="ContentDirection.RightToLeft"&gt;
+    &lt;p&gt;This text flows right-to-left.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with No Wrap</h3>
+<Panel Wrap="false"
+       Width="Unit.Pixel(200)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)">
+	<span>This long text will not wrap to the next line because Wrap is false.</span>
+</Panel>
+<pre><code>&lt;Panel Wrap="false" Width="Unit.Pixel(200)"&gt;
+    &lt;span&gt;This long text will not wrap...&lt;/span&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Hidden Panel (Visible=false)</h3>
+<Panel Visible="false">
+	<p>This content should not be visible.</p>
+</Panel>
+<p><em>(The panel above is hidden - nothing rendered)</em></p>
+<pre><code>&lt;Panel Visible="false"&gt;
+    &lt;p&gt;This content should not be visible.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Visible Panel (Visible=true)</h3>
+<Panel Visible="true"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)"
+       BackColor="WebColor.LightGreen">
+	<p>This panel is visible (Visible=true is the default).</p>
+</Panel>
+<pre><code>&lt;Panel Visible="true" BackColor="WebColor.LightGreen"&gt;
+    &lt;p&gt;This panel is visible.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>

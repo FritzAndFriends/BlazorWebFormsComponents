@@ -1,6 +1,6 @@
+global using BlazorWebFormsComponents;
 using AfterBlazorServerSide;
 using AfterBlazorServerSide.Components;
-using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Reflection;
 

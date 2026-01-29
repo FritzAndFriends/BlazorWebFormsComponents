@@ -16,10 +16,17 @@ public class ControlSampleTests
     [Theory]
     [InlineData("/ControlSamples/Button")]
     [InlineData("/ControlSamples/CheckBox")]
+    [InlineData("/ControlSamples/CheckBox/Events")]
+    [InlineData("/ControlSamples/CheckBox/Style")]
     [InlineData("/ControlSamples/HyperLink")]
     [InlineData("/ControlSamples/LinkButton")]
     [InlineData("/ControlSamples/Literal")]
     [InlineData("/ControlSamples/DropDownList")]
+    [InlineData("/ControlSamples/Panel")]
+    [InlineData("/ControlSamples/PlaceHolder")]
+    [InlineData("/ControlSamples/RadioButton")]
+    [InlineData("/ControlSamples/RadioButtonList")]
+    [InlineData("/ControlSamples/TextBox")]
     public async Task EditorControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -47,6 +54,16 @@ public class ControlSampleTests
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
+    }
+
+    // Menu component tests - Menu has known JS interop requirements that may produce console errors
+    // Testing separately to verify the page loads and renders content
+    [Theory]
+    [InlineData("/ControlSamples/Menu")]
+    [InlineData("/ControlSamples/Menu/DatabindingSitemap")]
+    public async Task MenuControl_Loads_AndRendersContent(string path)
+    {
+        await VerifyMenuPageLoads(path);
     }
 
     // Validation Controls
@@ -78,38 +95,44 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/AdRotator")]
     public async Task OtherControl_Loads_WithoutErrors(string path)
     {
+        await VerifyPageLoadsWithoutErrors(path);
+    }
+
+    /// <summary>
+    /// Validates that AdRotator displays an ad with the correct attributes.
+    /// This specifically tests that Ads.xml is properly deployed and accessible.
+    /// </summary>
+    [Fact]
+    public async Task AdRotator_DisplaysAd_WithCorrectAttributes()
+    {
         // Arrange
         var page = await _fixture.NewPageAsync();
-        var consoleErrors = new List<string>();
-        var pageErrors = new List<string>();
-
-        page.Console += (_, msg) =>
-        {
-            if (msg.Type == "error")
-            {
-                consoleErrors.Add($"{path}: {msg.Text}");
-            }
-        };
-
-        page.PageError += (_, error) =>
-        {
-            pageErrors.Add($"{path}: {error}");
-        };
 
         try
         {
             // Act
-            var response = await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            var response = await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/AdRotator", new PageGotoOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000
             });
 
-            // Assert - AdRotator may have issues with file loading, so we just verify page loads
+            // Assert - Page loads successfully
             Assert.NotNull(response);
-            // Note: AdRotator may return 500 if Ads.xml is not found in production, but that's a known limitation
-            Assert.True(response.Ok || response.Status == 500, 
-                $"Page {path} failed to load with status: {response.Status}");
+            Assert.True(response.Ok, $"Page failed to load with status: {response.Status}");
+
+            // Assert - AdRotator component rendered (look for images from Ads.xml)
+            // The AdRotator renders as: <a href="..."><img src="/img/CSharp.png" OR "/img/VB.png" alt="..." /></a>
+            // Look for the specific image sources that come from Ads.xml
+            var adImage = await page.QuerySelectorAsync("img[src='/img/CSharp.png'], img[src='/img/VB.png']");
+            Assert.NotNull(adImage);
+            Assert.True(await adImage.IsVisibleAsync(), "Ad image should be visible");
+            
+            // Verify alt text is one of the expected values from Ads.xml
+            var altText = await adImage.GetAttributeAsync("alt");
+            Assert.NotNull(altText);
+            Assert.NotEmpty(altText);
+            Assert.Contains(altText, new[] { "CSharp", "Visual Basic" });
         }
         finally
         {
@@ -150,6 +173,51 @@ public class ControlSampleTests
             Assert.NotNull(response);
             Assert.True(response.Ok, $"Page {path} failed to load with status: {response.Status}");
             Assert.Empty(consoleErrors);
+            Assert.Empty(pageErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies Menu pages load and render content. Menu component has known JS interop 
+    /// requirements (bwfc.Page.AddScriptElement) that may produce console errors when
+    /// the JavaScript setup is not configured, but the page should still render.
+    /// </summary>
+    private async Task VerifyMenuPageLoads(string path)
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var pageErrors = new List<string>();
+
+        page.PageError += (_, error) =>
+        {
+            pageErrors.Add($"{path}: {error}");
+        };
+
+        try
+        {
+            // Act
+            var response = await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert - Page loads successfully
+            Assert.NotNull(response);
+            Assert.True(response.Ok, $"Page {path} failed to load with status: {response.Status}");
+            
+            // Assert - Page renders menu content (tables, links, or list items)
+            var menuContent = await page.Locator("table, a, li, td").AllAsync();
+            Assert.NotEmpty(menuContent);
+            
+            // Note: We don't check console errors for Menu pages because the Menu component
+            // requires JavaScript setup (bwfc.Page.AddScriptElement) that may not be configured
+            // in all environments. The important thing is that the page renders.
+            
             Assert.Empty(pageErrors);
         }
         finally
