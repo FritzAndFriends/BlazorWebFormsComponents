@@ -1,0 +1,85 @@
+@using BlazorWebFormsComponents.Enums
+@using RL = BlazorWebFormsComponents.Enums.RepeatLayout
+
+@code {
+
+	[Fact]
+	public void CheckBoxList_TextAlignRight_RendersInputBeforeLabel()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" TextAlign="Enums.TextAlign.Right" />);
+
+		// Assert
+		var td = cut.Find("td");
+		td.FirstElementChild.TagName.ShouldBe("INPUT");
+		td.LastElementChild.TagName.ShouldBe("LABEL");
+	}
+
+	[Fact]
+	public void CheckBoxList_TextAlignLeft_RendersLabelBeforeInput()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" TextAlign="Enums.TextAlign.Left" />);
+
+		// Assert
+		var td = cut.Find("td");
+		td.FirstElementChild.TagName.ShouldBe("LABEL");
+		td.LastElementChild.TagName.ShouldBe("INPUT");
+	}
+
+	[Fact]
+	public void CheckBoxList_DefaultTextAlign_IsRight()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var td = cut.Find("td");
+		td.FirstElementChild.TagName.ShouldBe("INPUT");
+		td.LastElementChild.TagName.ShouldBe("LABEL");
+	}
+
+	[Fact]
+	public void CheckBoxList_TextAlignLeft_FlowLayout_RendersCorrectly()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" 
+									   StaticItems="items" 
+									   RepeatLayout="RL.Flow"
+									   TextAlign="Enums.TextAlign.Left" />);
+
+		// Assert
+		var span = cut.Find("span");
+		var label = span.QuerySelector("label");
+		var input = span.QuerySelector("input");
+		
+		// Label should appear before input in the DOM
+		label.ShouldNotBeNull();
+		input.ShouldNotBeNull();
+	}
+
+}

@@ -1,0 +1,55 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Panel_WithGroupingText_RendersFieldset()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel GroupingText="Personal Info">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var fieldset = cut.Find("fieldset");
+		fieldset.ShouldNotBeNull();
+		
+		var legend = cut.Find("legend");
+		legend.TextContent.ShouldBe("Personal Info");
+		
+		fieldset.InnerHtml.ShouldContain("<p>Content</p>");
+	}
+
+	[Fact]
+	public void Panel_WithGroupingText_AppliesCssClass()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel GroupingText="Settings" CssClass="settings-panel">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var fieldset = cut.Find("fieldset");
+		fieldset.GetAttribute("class").ShouldBe("settings-panel");
+	}
+
+	[Fact]
+	public void Panel_WithoutGroupingText_RendersDiv()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel>
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		cut.FindAll("fieldset").Count.ShouldBe(0);
+		cut.Find("div").ShouldNotBeNull();
+	}
+
+}

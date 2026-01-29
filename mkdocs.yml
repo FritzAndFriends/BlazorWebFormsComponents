@@ -76,6 +76,8 @@ nav:
     - LinkButton: EditorControls/LinkButton.md
     - ListBox: EditorControls/ListBox.md
     - Literal: EditorControls/Literal.md
+    - Panel: EditorControls/Panel.md
+    - PlaceHolder: EditorControls/PlaceHolder.md
     - RadioButton: EditorControls/RadioButton.md
     - RadioButtonList: EditorControls/RadioButtonList.md
     - TextBox: EditorControls/TextBox.md

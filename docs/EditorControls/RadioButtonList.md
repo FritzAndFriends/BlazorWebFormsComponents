@@ -1,140 +1,115 @@
 # RadioButtonList
 
-The RadioButtonList component renders a group of radio buttons, allowing users to select a single item from a list of mutually exclusive options. It supports both static items and data-bound scenarios.
+The RadioButtonList component renders a group of radio buttons that allow users to select a single item from a list. This component supports both static items and data-bound scenarios with various layout options.
 
 Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.radiobuttonlist?view=netframework-4.8
 
-!!! warning "Not Yet Implemented"
-    This component is not yet available in BlazorWebFormsComponents. This documentation is a placeholder for the planned implementation.
-
-## Planned Features
+## Blazor Features Supported
 
 - Static items via `StaticItems` parameter with `ListItem` collection
 - Data binding via `Items` parameter with `DataTextField` and `DataValueField`
-- Single selection with `SelectedValue` and `SelectedIndex`
 - Two-way binding with `@bind-SelectedValue`
-- `RepeatColumns` for multi-column layout
-- `RepeatDirection` (Vertical or Horizontal)
-- `RepeatLayout` (Table, Flow, OrderedList, UnorderedList)
-- `TextAlign` for label positioning (Left or Right)
-- `OnSelectedIndexChanged` event handler
-- Style attributes and CssClass formatting
+- Selected item tracking via `SelectedValue` and `SelectedIndex`
+- OnSelectedIndexChanged event handler
+- RepeatLayout options: Table, Flow, OrderedList, UnorderedList
+- RepeatDirection options: Horizontal, Vertical
+- TextAlign for label positioning (Left or Right)
+- Disabled state via `Enabled` parameter
+- Per-item disabled state via `ListItem.Enabled`
+- Style attributes (BackColor, ForeColor, Font, etc.) and CssClass formatting
+- CellPadding and CellSpacing for table layout
+- Access to `SelectedItem` property
 
-## Web Forms Declarative Syntax
+## WebForms Features Not Supported
+
+- AutoPostBack is not supported in Blazor - use `OnSelectedIndexChanged` event instead
+- AppendDataBoundItems is not implemented
+- DataSourceID is not supported - bind directly to collections via `Items` parameter
+- RepeatColumns is not fully implemented
+
+## WebForms Syntax
 
 ```html
 <asp:RadioButtonList
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
+    ID="rbl1"
+    runat="server"
+    RepeatDirection="Vertical|Horizontal"
+    RepeatLayout="Table|Flow|OrderedList|UnorderedList"
+    TextAlign="Left|Right"
     CellPadding="integer"
     CellSpacing="integer"
     CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
     Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    OnUnload="Unload event handler"
-    RepeatColumns="integer"
-    RepeatDirection="Horizontal|Vertical"
-    RepeatLayout="Table|Flow|OrderedList|UnorderedList"
-    runat="server"
-    SelectedIndex="integer"
-    SelectedValue="string"
-    TabIndex="integer"
-    TextAlign="Left|Right"
-    ToolTip="string"
     Visible="True|False"
-    Width="size">
+    SelectedValue="string"
+    SelectedIndex="integer"
+    AutoPostBack="True|False"
+    OnSelectedIndexChanged="SelectedIndexChanged event handler"
+    DataTextField="string"
+    DataValueField="string">
     
-    <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Display Text 2" />
+    <asp:ListItem Value="S" Text="Small" />
+    <asp:ListItem Value="M" Text="Medium" Selected="True" />
+    <asp:ListItem Value="L" Text="Large" />
     
 </asp:RadioButtonList>
 ```
 
-## Proposed Blazor Syntax
+**Rendered HTML (Table layout, Vertical direction):**
+```html
+<table id="rbl1">
+    <tr>
+        <td><input id="rbl1_0" type="radio" name="rbl1" value="S" /><label for="rbl1_0">Small</label></td>
+    </tr>
+    <tr>
+        <td><input id="rbl1_1" type="radio" name="rbl1" value="M" checked="checked" /><label for="rbl1_1">Medium</label></td>
+    </tr>
+    <tr>
+        <td><input id="rbl1_2" type="radio" name="rbl1" value="L" /><label for="rbl1_2">Large</label></td>
+    </tr>
+</table>
+```
 
-### Basic Usage
+## Blazor Syntax
+
+### Static Items
 
 ```razor
-<RadioButtonList TItem="object" 
-                 StaticItems="items"
-                 @bind-SelectedValue="selectedValue" />
+<RadioButtonList TItem="object" StaticItems="items" @bind-SelectedValue="selectedSize" />
 
 @code {
-    private string selectedValue = "";
+    private string selectedSize = "M";
     
     private ListItemCollection items = new()
     {
         new ListItem("Small", "S"),
         new ListItem("Medium", "M"),
-        new ListItem("Large", "L"),
-        new ListItem("Extra Large", "XL")
+        new ListItem("Large", "L")
     };
 }
-```
-
-### Horizontal Layout
-
-```razor
-<RadioButtonList TItem="object" 
-                 StaticItems="items"
-                 RepeatDirection="RepeatDirection.Horizontal"
-                 @bind-SelectedValue="selectedValue" />
-```
-
-### Multi-Column Layout
-
-```razor
-<RadioButtonList TItem="object" 
-                 StaticItems="items"
-                 RepeatColumns="2"
-                 RepeatDirection="RepeatDirection.Vertical"
-                 @bind-SelectedValue="selectedValue" />
 ```
 
 ### Data Binding
 
 ```razor
-<RadioButtonList TItem="ShippingMethod"
-                 Items="shippingMethods"
+<RadioButtonList TItem="Size"
+                 Items="sizes"
                  DataTextField="Name"
                  DataValueField="Code"
-                 @bind-SelectedValue="selectedShippingCode" />
+                 @bind-SelectedValue="selectedSizeCode" />
 
 @code {
-    private string selectedShippingCode = "standard";
+    private string selectedSizeCode = "";
     
-    private List<ShippingMethod> shippingMethods = new()
+    private List<Size> sizes = new()
     {
-        new ShippingMethod { Code = "standard", Name = "Standard Shipping (5-7 days)" },
-        new ShippingMethod { Code = "express", Name = "Express Shipping (2-3 days)" },
-        new ShippingMethod { Code = "overnight", Name = "Overnight Shipping" }
+        new Size { Code = "S", Name = "Small" },
+        new Size { Code = "M", Name = "Medium" },
+        new Size { Code = "L", Name = "Large" },
+        new Size { Code = "XL", Name = "Extra Large" }
     };
     
-    public class ShippingMethod
+    public class Size
     {
         public string Code { get; set; }
         public string Name { get; set; }
@@ -151,37 +126,135 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
                  OnSelectedIndexChanged="HandleSelectionChanged" />
 
 @code {
-    private string selectedValue = "M";
+    private string selectedValue = "";
     
-    private void HandleSelectionChanged()
+    private void HandleSelectionChanged(ChangeEventArgs e)
     {
         Console.WriteLine($"Selection changed to: {selectedValue}");
     }
 }
 ```
 
-## Key Differences from Individual RadioButtons
+### Different Layouts
 
-The RadioButtonList is preferred when:
+```razor
+@* Flow layout - inline radio buttons *@
+<RadioButtonList TItem="object"
+                 StaticItems="items"
+                 RepeatLayout="RepeatLayout.Flow"
+                 RepeatDirection="RepeatDirection.Horizontal" />
 
-- You have a dynamic list of options
-- You want automatic grouping (no need for `GroupName`)
-- You need layout control (columns, direction)
-- You want data binding support
+@* Unordered list layout *@
+<RadioButtonList TItem="object"
+                 StaticItems="items"
+                 RepeatLayout="RepeatLayout.UnorderedList" />
 
-Use individual [RadioButton](RadioButton.md) components when:
+@* Ordered list layout *@
+<RadioButtonList TItem="object"
+                 StaticItems="items"
+                 RepeatLayout="RepeatLayout.OrderedList" />
+```
 
-- You have a fixed, small number of options
-- You need custom layout or styling per button
-- Options are spread across different parts of the UI
+### Label Position
 
-## Contributing
+```razor
+@* Label before radio button (left-aligned text) *@
+<RadioButtonList TItem="object"
+                 StaticItems="items"
+                 TextAlign="TextAlign.Left" />
 
-If you would like to help implement this component, please see our [contributing guide](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/CONTRIBUTING.md).
+@* Label after radio button (right-aligned text, default) *@
+<RadioButtonList TItem="object"
+                 StaticItems="items"
+                 TextAlign="TextAlign.Right" />
+```
+
+### With Styling
+
+```razor
+<RadioButtonList TItem="object"
+                 StaticItems="items"
+                 CssClass="custom-radio-list"
+                 BackColor="new WebColor(System.Drawing.Color.LightGray)"
+                 CellPadding="5"
+                 CellSpacing="2" />
+```
+
+## Key Differences from Web Forms
+
+1. **Type Parameter**: Blazor RadioButtonList requires a `TItem` type parameter for data binding
+2. **Property Names**: Use `StaticItems` for the item collection (not `Items`), as `Items` is reserved for data-bound scenarios
+3. **Two-way Binding**: Use `@bind-SelectedValue` for automatic two-way binding
+4. **Events**: Use `OnSelectedIndexChanged` with `ChangeEventArgs` instead of specialized event args
+5. **No AutoPostBack**: Blazor's event model doesn't require postback; events fire immediately
+6. **Mutual Exclusion**: All radio buttons automatically share the same `name` attribute for proper mutual exclusion
+
+## Key Difference from CheckBoxList
+
+RadioButtonList renders radio buttons with a **shared `name` attribute** for mutual exclusion (only one can be selected), while CheckBoxList uses checkboxes with unique names allowing multiple selections:
+
+```html
+<!-- RadioButtonList - all inputs have same name for mutual exclusion -->
+<input type="radio" name="rbl1" value="S" />
+<input type="radio" name="rbl1" value="M" checked />
+<input type="radio" name="rbl1" value="L" />
+
+<!-- CheckBoxList - each input has unique name -->
+<input type="checkbox" name="cbl1$0" value="1" />
+<input type="checkbox" name="cbl1$1" value="2" />
+<input type="checkbox" name="cbl1$2" value="3" />
+```
+
+## Common Patterns
+
+### Pre-select an Item
+
+```razor
+<RadioButtonList TItem="object" StaticItems="items" SelectedValue="M" />
+```
+
+### Disabled RadioButtonList
+
+```razor
+<RadioButtonList TItem="object" StaticItems="items" Enabled="false" />
+```
+
+### Disable Individual Items
+
+```razor
+@code {
+    private ListItemCollection items = new()
+    {
+        new ListItem("Available", "1") { Enabled = true },
+        new ListItem("Unavailable", "2") { Enabled = false },
+        new ListItem("Available", "3") { Enabled = true }
+    };
+}
+```
+
+### Get Selected Item Details
+
+```csharp
+var radioList = // reference to RadioButtonList component
+var selectedItem = radioList.SelectedItem;
+var text = selectedItem?.Text;
+var value = selectedItem?.Value;
+```
+
+## Migration Tips
+
+When migrating from Web Forms:
+
+1. Replace `<asp:RadioButtonList>` with `<RadioButtonList TItem="object">`
+2. Rename any `Items` parameter to `StaticItems`
+3. Replace `AutoPostBack="true"` with `OnSelectedIndexChanged` event handler
+4. Use `@bind-SelectedValue` instead of manually managing `SelectedValue`
+5. Remove `runat="server"` attribute
+6. Remove `<asp:ListItem>` tags and define items in code-behind as `ListItemCollection`
+7. Update `RepeatLayout` and `RepeatDirection` to use the enum syntax (e.g., `RepeatLayout.Table`)
 
 ## See Also
 
-- [RadioButton](RadioButton.md) - Single radio button control
-- [CheckBoxList](CheckBoxList.md) - Multiple selection checkbox list
+- [RadioButton](RadioButton.md) - Individual radio button control
 - [DropDownList](DropDownList.md) - Single selection dropdown
-- [ListBox](ListBox.md) - Multiple selection list control
+- [CheckBox](CheckBox.md) - Individual checkbox control

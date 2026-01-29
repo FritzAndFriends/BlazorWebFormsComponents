@@ -1,0 +1,99 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void RadioButtonList_TextAlignRight_RendersLabelAfterInput()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Test", "t")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" TextAlign="TextAlign.Right" />);
+
+		// Assert
+		var td = cut.Find("td");
+		var children = td.Children;
+		
+		// First child should be input, second should be label
+		children[0].TagName.ShouldBe("INPUT");
+		children[1].TagName.ShouldBe("LABEL");
+	}
+
+	[Fact]
+	public void RadioButtonList_TextAlignLeft_RendersLabelBeforeInput()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Test", "t")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" TextAlign="TextAlign.Left" />);
+
+		// Assert
+		var td = cut.Find("td");
+		var children = td.Children;
+		
+		// First child should be label, second should be input
+		children[0].TagName.ShouldBe("LABEL");
+		children[1].TagName.ShouldBe("INPUT");
+	}
+
+	[Fact]
+	public void RadioButtonList_LabelForAttribute_MatchesInputId()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Test", "t")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var input = cut.Find("input[type='radio']");
+		var label = cut.Find("label");
+		
+		var inputId = input.GetAttribute("id");
+		var labelFor = label.GetAttribute("for");
+		
+		inputId.ShouldNotBeNullOrEmpty();
+		labelFor.ShouldBe(inputId);
+	}
+
+	[Fact]
+	public void RadioButtonList_MultipleItems_HaveUniqueIds()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b"),
+			new ListItem("C", "c")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var inputs = cut.FindAll("input[type='radio']");
+		var ids = inputs.Select(i => i.GetAttribute("id")).ToList();
+		
+		// All IDs should be unique
+		ids.Distinct().Count().ShouldBe(3);
+		
+		// All labels should reference correct inputs
+		var labels = cut.FindAll("label");
+		for (int i = 0; i < labels.Count; i++)
+		{
+			labels[i].GetAttribute("for").ShouldBe(ids[i]);
+		}
+	}
+
+}
