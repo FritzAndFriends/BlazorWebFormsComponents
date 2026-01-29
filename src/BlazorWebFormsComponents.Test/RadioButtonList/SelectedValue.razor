@@ -1,0 +1,128 @@
+
+@code {
+
+	[Fact]
+	public void RadioButtonList_WithSelectedValue_MarksRadioChecked()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Apple", "a"),
+			new ListItem("Banana", "b"),
+			new ListItem("Cherry", "c")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" SelectedValue="b" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios[0].HasAttribute("checked").ShouldBeFalse();
+		radios[1].HasAttribute("checked").ShouldBeTrue();
+		radios[2].HasAttribute("checked").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void RadioButtonList_SelectionChange_UpdatesSelectedValue()
+	{
+		// Arrange
+		string selectedValue = "";
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2"),
+			new ListItem("Three", "3")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  @bind-SelectedValue="selectedValue" />
+		);
+
+		var radios = cut.FindAll("input[type='radio']");
+		radios[1].Change("2");
+
+		// Assert
+		selectedValue.ShouldBe("2");
+	}
+
+	[Fact]
+	public void RadioButtonList_SelectionChange_UpdatesSelectedIndex()
+	{
+		// Arrange
+		int selectedIndex = -1;
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2"),
+			new ListItem("Three", "3")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  @bind-SelectedIndex="selectedIndex" />
+		);
+
+		var radios = cut.FindAll("input[type='radio']");
+		radios[2].Change("3");
+
+		// Assert
+		selectedIndex.ShouldBe(2);
+	}
+
+	[Fact]
+	public void RadioButtonList_SelectionChange_FiresOnSelectedIndexChanged()
+	{
+		// Arrange
+		bool eventFired = false;
+		string newValue = "";
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2")
+		};
+
+		void HandleChange(ChangeEventArgs e)
+		{
+			eventFired = true;
+			newValue = e.Value?.ToString();
+		}
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  OnSelectedIndexChanged="HandleChange" />
+		);
+
+		var radios = cut.FindAll("input[type='radio']");
+		radios[1].Change("2");
+
+		// Assert
+		eventFired.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RadioButtonList_NoSelectedValue_NoRadioChecked()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios[0].HasAttribute("checked").ShouldBeFalse();
+		radios[1].HasAttribute("checked").ShouldBeFalse();
+	}
+
+}

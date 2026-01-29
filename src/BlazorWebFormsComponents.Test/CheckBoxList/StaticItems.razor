@@ -1,0 +1,75 @@
+
+@code {
+
+	[Fact]
+	public void CheckBoxList_WithStaticItems_RendersCheckboxes()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2"),
+			new ListItem("Option 3", "3")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(3);
+		checkboxes[0].GetAttribute("value").ShouldBe("1");
+		checkboxes[1].GetAttribute("value").ShouldBe("2");
+		checkboxes[2].GetAttribute("value").ShouldBe("3");
+		
+		var labels = cut.FindAll("label");
+		labels.Count.ShouldBe(3);
+		labels[0].TextContent.ShouldBe("Option 1");
+		labels[1].TextContent.ShouldBe("Option 2");
+		labels[2].TextContent.ShouldBe("Option 3");
+	}
+
+	[Fact]
+	public void CheckBoxList_EmptyItems_RendersEmptyTable()
+	{
+		// Arrange
+		var items = new ListItemCollection();
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void CheckBoxList_LabelForMatchesInputId()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Test Item", "test")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var checkbox = cut.Find("input[type='checkbox']");
+		var label = cut.Find("label");
+		
+		var inputId = checkbox.GetAttribute("id");
+		var labelFor = label.GetAttribute("for");
+		
+		inputId.ShouldNotBeNullOrEmpty();
+		labelFor.ShouldBe(inputId);
+	}
+
+}

@@ -391,6 +391,304 @@ When creating sample pages in `samples/AfterBlazorServerSide/Components/Pages/Co
 }
 ```
 
+## Creating Sample Pages for Components
+
+**CRITICAL**: Every documented component MUST have a corresponding sample page in the AfterBlazorServerSide project.
+
+### Sample Page Structure and Location
+
+Samples are located in `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/[ComponentName]/`
+
+The folder structure mirrors the documentation categories:
+- **Editor Controls**: `ControlSamples/[ComponentName]/`
+- **Data Controls**: `ControlSamples/[ComponentName]/`
+- **Validation Controls**: `ControlSamples/[ComponentName]/` (or `ControlSamples/Validations/`)
+- **Navigation Controls**: `ControlSamples/[ComponentName]/`
+- **Login Controls**: `ControlSamples/[ComponentName]/`
+
+### Sample File Naming Conventions
+
+1. **Basic Sample**: `Index.razor` - The main/default sample for the component
+   - Route: `@page "/ControlSamples/[ComponentName]"`
+
+2. **Additional Scenarios**: `[ScenarioName].razor` - Named after what they demonstrate
+   - Route: `@page "/ControlSamples/[ComponentName]/[ScenarioName]"`
+   - Examples: `Style.razor`, `Events.razor`, `JavaScript.razor`
+
+3. **Navigation Helper**: `Nav.razor` - Optional component listing all samples for this component
+   - Used to navigate between multiple samples for the same component
+
+### Sample Page Required Structure
+
+Every sample page MUST include:
+
+1. **Route**: `@page "/ControlSamples/[ComponentName]"` or `@page "/ControlSamples/[ComponentName]/[Scenario]"`
+2. **PageTitle**: `<PageTitle>[ComponentName] - [Scenario]</PageTitle>`
+3. **Heading**: `<h1>[ComponentName] Sample</h1>` or `<h2>[ComponentName] - [Scenario]</h2>`
+4. **Description**: Brief explanation of what the sample demonstrates
+5. **Demo Section**: Working component implementation
+6. **Code Display**: Showing the markup and code being used (optional but recommended)
+
+### Sample Page Template
+
+```razor
+@page "/ControlSamples/[ComponentName]"
+@page "/ControlSamples/[ComponentName]/[Scenario]"
+
+<PageTitle>[ComponentName] Sample</PageTitle>
+
+<h2>[ComponentName] - [Scenario Description]</h2>
+
+<p>[Brief description of what this sample demonstrates]</p>
+
+@* Optional: Navigation to other samples for this component *@
+<Nav />
+
+@* The working demo *@
+<div class="demo-section">
+    <[ComponentName]
+        Property1="value"
+        Property2="@someValue"
+        OnEvent="HandleEvent" />
+</div>
+
+@* Optional but recommended: Show the results or state *@
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="result">@Message</div>
+}
+
+@code {
+    private string Message = "";
+
+    private void HandleEvent()
+    {
+        Message = "Event handled!";
+    }
+}
+
+<hr />
+
+@* Optional: Display the code being used *@
+<p>Code:</p>
+<code>
+&lt;[ComponentName] Property1="value" OnEvent="HandleEvent" /&gt;
+</code>
+```
+
+### Creating Samples for Different Scenarios
+
+When a component has multiple features to demonstrate, create separate sample pages:
+
+```
+ControlSamples/
+  Button/
+    Index.razor           # Basic button usage
+    Style.razor           # Styling examples
+    JavaScript.razor      # JavaScript integration
+    Nav.razor            # Navigation between samples
+```
+
+Each scenario page should focus on ONE specific feature or use case.
+
+## Linking Samples in Navigation
+
+**CRITICAL**: After creating sample pages, they MUST be added to the navigation tree.
+
+### Update NavMenu.razor
+
+Location: `samples/AfterBlazorServerSide/Components/Layout/NavMenu.razor`
+
+Add `<TreeNode>` entries under the appropriate category section:
+
+```razor
+<TreeNode Text="[Category] Components">
+
+    @* For a component with a single sample *@
+    <TreeNode Text="[ComponentName]" NavigateUrl="/ControlSamples/[ComponentName]" />
+
+    @* For a component with multiple samples *@
+    <TreeNode Text="[ComponentName]" NavigateUrl="/ControlSamples/[ComponentName]" Expanded="false">
+        <TreeNode Text="Basic Usage" NavigateUrl="/ControlSamples/[ComponentName]" />
+        <TreeNode Text="[Scenario 1]" NavigateUrl="/ControlSamples/[ComponentName]/[Scenario1]" />
+        <TreeNode Text="[Scenario 2]" NavigateUrl="/ControlSamples/[ComponentName]/[Scenario2]" />
+    </TreeNode>
+
+</TreeNode>
+```
+
+**Navigation Categories**:
+- `<TreeNode Text="Editor Components">` - For editor controls
+- `<TreeNode Text="Data Components">` - For data-bound controls
+- `<TreeNode Text="Validation Components">` - For validators
+- `<TreeNode Text="Navigation Components">` - For navigation controls
+- `<TreeNode Text="Login Components">` - For login/authentication controls
+
+**Ordering**: Add new components alphabetically within their category.
+
+### Example NavMenu Updates
+
+```razor
+@* Adding a new editor control *@
+<TreeNode Text="Editor Components">
+    <TreeNode Text="Button" NavigateUrl="/ControlSamples/Button">
+        <TreeNode Text="JavaScript Click" NavigateUrl="/ControlSamples/Button/JavaScript" />
+        <TreeNode Text="Style" NavigateUrl="/ControlSamples/Button/Style" />
+    </TreeNode>
+    <TreeNode Text="Label" NavigateUrl="/ControlSamples/Label" />  @* New component *@
+    <TreeNode Text="TextBox" NavigateUrl="/ControlSamples/TextBox" />
+</TreeNode>
+
+@* Adding a new data control with multiple samples *@
+<TreeNode Text="Data Components">
+    <TreeNode Text="GridView" NavigateUrl="/ControlSamples/GridView" Expanded="false">
+        <TreeNode NavigateUrl="/ControlSamples/GridView" Text="Simple GridView" />
+        <TreeNode NavigateUrl="/ControlSamples/GridView/AutoGeneratedColumns" Text="Autogenerated Columns" />
+        <TreeNode NavigateUrl="/ControlSamples/GridView/TemplateFields" Text="Template Fields" />
+    </TreeNode>
+</TreeNode>
+```
+
+## Updating the Home Page Component List
+
+**CRITICAL**: After creating samples, update the component list on the home page.
+
+Location: `samples/AfterBlazorServerSide/Components/Pages/ComponentList.razor`
+
+Add links to the appropriate category column:
+
+```html
+<div class="col-md-3">
+    <h3>[Category] Controls</h3>
+    <ul>
+        <li><a href="/ControlSamples/ExistingComponent">ExistingComponent</a></li>
+        <li><a href="/ControlSamples/NewComponent">NewComponent</a></li>  @* Add alphabetically *@
+        <li><a href="/ControlSamples/OtherComponent">OtherComponent</a></li>
+    </ul>
+</div>
+```
+
+**Categories**:
+- **Editor Controls** - Simple UI components (Button, Label, TextBox, etc.)
+- **Data Controls** - Data-bound components (GridView, Repeater, DataList, etc.)
+- **Validation Controls** - Form validators
+- **Navigation Controls** - Menu, TreeView, SiteMapPath
+- **Login Controls** - Authentication/authorization components
+
+**Ordering**: Add links alphabetically within each category.
+
+## Updating the Repository README
+
+**CRITICAL**: After documenting a component, update the main README.md at the repository root.
+
+Location: `README.md` (repository root)
+
+### For New Components
+
+If adding a component that isn't already listed, add it to the appropriate category:
+
+```markdown
+## Blazor Components for Controls
+
+There are a significant number of controls in ASP.NET Web Forms, and we will focus on creating components in the following order:
+
+  - Editor Controls
+    - [AdRotator](docs/EditorControls/AdRotator.md)
+    - [Button](docs/EditorControls/Button.md)
+    - [NewComponent](docs/EditorControls/NewComponent.md)  <-- Add alphabetically with link
+    - [TextBox](docs/EditorControls/TextBox.md)
+```
+
+### For Existing Components (Adding Documentation)
+
+If a component exists in the list without a documentation link, add the link:
+
+```markdown
+Before:
+    - CheckBoxList
+
+After:
+    - [CheckBoxList](docs/EditorControls/CheckBoxList.md)
+```
+
+### README Categories
+
+Match the category in the README to where you placed the documentation:
+- `Editor Controls` → `docs/EditorControls/`
+- `Data Controls` → `docs/DataControls/`
+- `Validation Controls` → `docs/ValidationControls/`
+- `Navigation Controls` → `docs/NavigationControls/`
+- `Login Controls` → `docs/LoginControls/`
+
+**Ordering**: Keep components alphabetically sorted within each category.
+
+## Complete Documentation Workflow
+
+When documenting a new or existing component, follow this complete workflow:
+
+### 1. Create Component Documentation
+- Location: `docs/[Category]/[ComponentName].md`
+- Follow the component documentation template
+- Include Web Forms and Blazor syntax comparisons
+- Document supported and unsupported features
+- Provide working code examples
+
+### 2. Add to MkDocs Navigation
+- File: `mkdocs.yml`
+- Add entry under appropriate `nav:` section
+- Format: `- ComponentName: Category/ComponentName.md`
+- Maintain alphabetical order within category
+
+### 3. Create Sample Page(s)
+- Location: `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/[ComponentName]/`
+- Create `Index.razor` for basic usage
+- Create additional scenario pages as needed (Style.razor, Events.razor, etc.)
+- Follow sample page template and structure
+- Include `@page` directive with correct route
+- Add working component demonstration
+
+### 4. Update Navigation Menu
+- File: `samples/AfterBlazorServerSide/Components/Layout/NavMenu.razor`
+- Add `<TreeNode>` entries under appropriate category
+- Include all sample pages for the component
+- Maintain alphabetical order within category
+
+### 5. Update Home Page Component List
+- File: `samples/AfterBlazorServerSide/Components/Pages/ComponentList.razor`
+- Add link in appropriate category column
+- Link to the main sample page: `/ControlSamples/[ComponentName]`
+- Maintain alphabetical order within category
+
+### 6. Update Repository README
+- File: `README.md` (root)
+- Add component with documentation link if new
+- Update existing component entry to include link if adding documentation
+- Format: `- [ComponentName](docs/Category/ComponentName.md)`
+- Maintain alphabetical order within category
+
+### Example: Complete Workflow for "Label" Component
+
+```bash
+# 1. Create documentation
+docs/EditorControls/Label.md
+
+# 2. Update mkdocs.yml
+nav:
+  - Editor Controls:
+    - Label: EditorControls/Label.md
+
+# 3. Create sample page
+samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Label/Index.razor
+
+# 4. Update NavMenu.razor
+<TreeNode Text="Label" NavigateUrl="/ControlSamples/Label" />
+
+# 5. Update ComponentList.razor
+<li><a href="/ControlSamples/Label">Label</a></li>
+
+# 6. Update README.md
+- [Label](docs/EditorControls/Label.md)
+```
 ## Quality Checklist
 
 Before submitting documentation:
@@ -412,3 +710,20 @@ Before submitting sample pages:
 - [ ] Includes complete `@code` block with all handlers
 - [ ] Brief description explains what sample demonstrates
 - [ ] Sample is accessible from navigation or component list
+- [ ] Created in correct folder: `ControlSamples/[ComponentName]/`
+- [ ] Follows naming convention (Index.razor for main sample)
+- [ ] Includes `@page` directive with correct route
+- [ ] Includes `<PageTitle>` element
+- [ ] Has clear heading and description
+- [ ] Contains working component demonstration
+- [ ] Added to NavMenu.razor navigation tree
+- [ ] Added to ComponentList.razor home page
+- [ ] All samples for component are linked in navigation
+- [ ] Routes match navigation URLs exactly
+
+Before submitting README updates:
+- [ ] Component added to or updated in correct category
+- [ ] Documentation link format: `[ComponentName](docs/Category/ComponentName.md)`
+- [ ] Alphabetically ordered within category
+- [ ] Link verified to work (file exists at that path)
+- [ ] Category matches documentation location

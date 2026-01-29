@@ -1,0 +1,117 @@
+@page "/ControlSamples/PlaceHolder"
+
+<h2>PlaceHolder Component Samples</h2>
+
+<p>The PlaceHolder component is a container that renders its child content without adding any HTML markup of its own. It's useful for conditionally showing/hiding content.</p>
+
+<hr />
+
+<h3>Basic PlaceHolder</h3>
+<PlaceHolder>
+	<p>This content is inside a PlaceHolder.</p>
+	<p>Note: No extra wrapper element is rendered around this content.</p>
+</PlaceHolder>
+<pre><code>&lt;PlaceHolder&gt;
+    &lt;p&gt;This content is inside a PlaceHolder.&lt;/p&gt;
+    &lt;p&gt;No extra wrapper element is rendered.&lt;/p&gt;
+&lt;/PlaceHolder&gt;</code></pre>
+
+<hr />
+
+<h3>PlaceHolder with Visible=true (default)</h3>
+<PlaceHolder Visible="true">
+	<div style="background-color: lightgreen; padding: 10px; border: 1px solid green;">
+		<p>This PlaceHolder is visible (Visible=true).</p>
+	</div>
+</PlaceHolder>
+<pre><code>&lt;PlaceHolder Visible="true"&gt;
+    &lt;div&gt;This PlaceHolder is visible.&lt;/div&gt;
+&lt;/PlaceHolder&gt;</code></pre>
+
+<hr />
+
+<h3>PlaceHolder with Visible=false</h3>
+<PlaceHolder Visible="false">
+	<div style="background-color: lightcoral; padding: 10px;">
+		<p>This content should NOT be visible.</p>
+	</div>
+</PlaceHolder>
+<p><em>(The PlaceHolder above has Visible=false, so nothing is rendered)</em></p>
+<pre><code>&lt;PlaceHolder Visible="false"&gt;
+    &lt;div&gt;This content should NOT be visible.&lt;/div&gt;
+&lt;/PlaceHolder&gt;</code></pre>
+
+<hr />
+
+<h3>Dynamic Visibility Toggle</h3>
+<PlaceHolder Visible="@showContent">
+	<div style="background-color: lightyellow; padding: 10px; border: 1px solid orange;">
+		<p>Dynamic content is visible! Click button to hide.</p>
+	</div>
+</PlaceHolder>
+<button class="btn btn-primary" @onclick="ToggleContent">
+	@(showContent ? "Hide Content" : "Show Content")
+</button>
+<pre><code>&lt;PlaceHolder Visible="@@showContent"&gt;
+    &lt;div&gt;Dynamic content is visible!&lt;/div&gt;
+&lt;/PlaceHolder&gt;
+&lt;button @@onclick="ToggleContent"&gt;Toggle&lt;/button&gt;
+
+@@code {
+    private bool showContent = true;
+    private void ToggleContent() => showContent = !showContent;
+}</code></pre>
+
+<hr />
+
+<h3>Conditional Content (Login State Example)</h3>
+<PlaceHolder Visible="@isLoggedIn">
+	<div style="background-color: lightgreen; padding: 10px; border: 1px solid green;">
+		<p><strong>Welcome, logged in user!</strong></p>
+	</div>
+</PlaceHolder>
+<PlaceHolder Visible="@(!isLoggedIn)">
+	<div style="background-color: lightcoral; padding: 10px; border: 1px solid red;">
+		<p>Please log in to see content.</p>
+	</div>
+</PlaceHolder>
+<button class="btn btn-secondary" @onclick="ToggleLogin">
+	@(isLoggedIn ? "Log Out" : "Log In")
+</button>
+<p>Status: <strong>@(isLoggedIn ? "Logged In" : "Logged Out")</strong></p>
+<pre><code>&lt;PlaceHolder Visible="@@isLoggedIn"&gt;
+    &lt;div&gt;Welcome, logged in user!&lt;/div&gt;
+&lt;/PlaceHolder&gt;
+&lt;PlaceHolder Visible="@@(!isLoggedIn)"&gt;
+    &lt;div&gt;Please log in to see content.&lt;/div&gt;
+&lt;/PlaceHolder&gt;
+
+@@code {
+    private bool isLoggedIn = false;
+    private void ToggleLogin() => isLoggedIn = !isLoggedIn;
+}</code></pre>
+
+<hr />
+
+<h3>Empty PlaceHolder</h3>
+<p>Before empty PlaceHolder:</p>
+<PlaceHolder></PlaceHolder>
+<p>After empty PlaceHolder (nothing between these paragraphs).</p>
+<pre><code>&lt;p&gt;Before empty PlaceHolder:&lt;/p&gt;
+&lt;PlaceHolder&gt;&lt;/PlaceHolder&gt;
+&lt;p&gt;After empty PlaceHolder.&lt;/p&gt;</code></pre>
+
+@code {
+	private bool showContent = true;
+	private bool isLoggedIn = false;
+
+	private void ToggleContent()
+	{
+		showContent = !showContent;
+	}
+
+	private void ToggleLogin()
+	{
+		isLoggedIn = !isLoggedIn;
+	}
+}

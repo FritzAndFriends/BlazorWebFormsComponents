@@ -1,0 +1,34 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Panel_WhenNotVisible_RendersNothing()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel Visible="false">
+				<p>Should not appear</p>
+			</Panel>
+		);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Panel_WhenVisible_RendersContent()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel Visible="true">
+				<p>Should appear</p>
+			</Panel>
+		);
+
+		// Assert
+		cut.Find("div").ShouldNotBeNull();
+		cut.Find("p").TextContent.ShouldBe("Should appear");
+	}
+
+}

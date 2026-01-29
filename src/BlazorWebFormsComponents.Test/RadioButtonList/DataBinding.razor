@@ -1,0 +1,97 @@
+
+@code {
+
+	public class Size
+	{
+		public string Code { get; set; }
+		public string Name { get; set; }
+	}
+
+	[Fact]
+	public void RadioButtonList_DataBound_RendersFromDataSource()
+	{
+		// Arrange
+		var data = new List<Size>
+		{
+			new Size { Code = "S", Name = "Small" },
+			new Size { Code = "M", Name = "Medium" },
+			new Size { Code = "L", Name = "Large" }
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="Size"
+							  Items="data"
+							  DataTextField="Name"
+							  DataValueField="Code" />
+		);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+		radios[0].GetAttribute("value").ShouldBe("S");
+		radios[1].GetAttribute("value").ShouldBe("M");
+		radios[2].GetAttribute("value").ShouldBe("L");
+
+		var labels = cut.FindAll("label");
+		labels[0].TextContent.ShouldBe("Small");
+		labels[1].TextContent.ShouldBe("Medium");
+		labels[2].TextContent.ShouldBe("Large");
+	}
+
+	[Fact]
+	public void RadioButtonList_DataBoundWithoutFields_UsesToString()
+	{
+		// Arrange
+		var data = new List<string> { "Red", "Green", "Blue" };
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="string" Items="data" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+		radios[0].GetAttribute("value").ShouldBe("Red");
+		radios[1].GetAttribute("value").ShouldBe("Green");
+		radios[2].GetAttribute("value").ShouldBe("Blue");
+
+		var labels = cut.FindAll("label");
+		labels[0].TextContent.ShouldBe("Red");
+		labels[1].TextContent.ShouldBe("Green");
+		labels[2].TextContent.ShouldBe("Blue");
+	}
+
+	[Fact]
+	public void RadioButtonList_CombinedStaticAndDataBound_RendersAll()
+	{
+		// Arrange
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("None", "")
+		};
+		var data = new List<Size>
+		{
+			new Size { Code = "S", Name = "Small" },
+			new Size { Code = "M", Name = "Medium" }
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="Size"
+							  StaticItems="staticItems"
+							  Items="data"
+							  DataTextField="Name"
+							  DataValueField="Code" />
+		);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+		
+		var labels = cut.FindAll("label");
+		labels[0].TextContent.ShouldBe("None");
+		labels[1].TextContent.ShouldBe("Small");
+		labels[2].TextContent.ShouldBe("Medium");
+	}
+
+}

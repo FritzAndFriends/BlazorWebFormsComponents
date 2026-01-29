@@ -1,0 +1,151 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void RadioButtonList_TableLayout_RendersTable()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.Table" />);
+
+		// Assert
+		cut.Find("table").ShouldNotBeNull();
+		cut.FindAll("tr").Count.ShouldBeGreaterThan(0);
+		cut.FindAll("td").Count.ShouldBeGreaterThan(0);
+	}
+
+	[Fact]
+	public void RadioButtonList_FlowLayout_RendersSpan()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.Flow" />);
+
+		// Assert
+		cut.Find("span").ShouldNotBeNull();
+		Should.Throw<Bunit.ElementNotFoundException>(() => cut.Find("table"));
+	}
+
+	[Fact]
+	public void RadioButtonList_OrderedListLayout_RendersOl()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.OrderedList" />);
+
+		// Assert
+		cut.Find("ol").ShouldNotBeNull();
+		cut.FindAll("li").Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void RadioButtonList_UnorderedListLayout_RendersUl()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.UnorderedList" />);
+
+		// Assert
+		cut.Find("ul").ShouldNotBeNull();
+		cut.FindAll("li").Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void RadioButtonList_VerticalDirection_RendersInRows()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b"),
+			new ListItem("C", "c")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  RepeatLayout="RepeatLayout.Table"
+							  RepeatDirection="RepeatDirection.Vertical" />
+		);
+
+		// Assert
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(3); // Each item in its own row
+	}
+
+	[Fact]
+	public void RadioButtonList_HorizontalDirection_RendersInColumns()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b"),
+			new ListItem("C", "c")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  RepeatLayout="RepeatLayout.Table"
+							  RepeatDirection="RepeatDirection.Horizontal" />
+		);
+
+		// Assert
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(1); // All items in one row
+		
+		var cells = cut.FindAll("td");
+		cells.Count.ShouldBe(3); // Each item in its own cell
+	}
+
+	[Fact]
+	public void RadioButtonList_FlowVertical_RendersBrBetweenItems()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  RepeatLayout="RepeatLayout.Flow"
+							  RepeatDirection="RepeatDirection.Vertical" />
+		);
+
+		// Assert
+		cut.FindAll("br").Count.ShouldBe(2);
+	}
+
+}

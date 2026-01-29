@@ -12,6 +12,7 @@ The following is a set of guidelines for contributing to the project.  These are
     1. [Tell us your story](#tell-us-your-story)
     1. [Write code for a component](#write-code-for-a-component)
     1. [Write documentation](#write-documentation)
+        1. [Building the Documentation Locally](#building-the-documentation-locally)
 
 
 ## Code of Conduct
@@ -98,6 +99,25 @@ There is a rich component styling framework that is part of this library for you
 
 The documentation for the migration and consumption of these components will be significant in scope and need to cover many scenarios.  We are always looking for help to add content to the `/docs` section of the repository with proper links back through to the main `/README.md`.
 
-### Recources
+#### Building the Documentation Locally
+
+The documentation is built using [MkDocs](https://www.mkdocs.org/) with the [Material theme](https://squidfunk.github.io/mkdocs-material/). To build and preview the documentation locally:
+
+```bash
+# Build the mkdocs Docker image
+docker build -t mkdocs -f ./docs/Dockerfile ./
+
+# Build docs (from repository root)
+docker run --rm -v "$(pwd):/docs" mkdocs build --strict
+
+# Serve docs locally for preview
+docker run --rm -p 8000:8000 -v "$(pwd):/docs" mkdocs serve --dev-addr 0.0.0.0:8000
+```
+
+The documentation will be available at http://localhost:8000
+
+The docs are automatically built and deployed to GitHub Pages when changes are pushed to the `main` branch via the `.github/workflows/docs.yml` workflow.
+
+### Resources
 
 [cmjchrisjones Blog: Contributing To Someone else's git repository](https://cmjchrisjones.dev/posts/contributing-to-someone-elses-git-repository/)
