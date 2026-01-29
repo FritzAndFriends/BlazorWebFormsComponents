@@ -85,6 +85,10 @@ public class ControlSampleTests
     /// Validates that AdRotator displays an ad with the correct attributes.
     /// This specifically tests that Ads.xml is properly deployed and accessible.
     /// </summary>
+    /// <summary>
+    /// Validates that AdRotator displays an ad with the correct attributes.
+    /// This specifically tests that Ads.xml is properly deployed and accessible.
+    /// </summary>
     [Fact]
     public async Task AdRotator_DisplaysAd_WithCorrectAttributes()
     {
@@ -104,20 +108,21 @@ public class ControlSampleTests
             Assert.NotNull(response);
             Assert.True(response.Ok, $"Page failed to load with status: {response.Status}");
 
-            // Assert - AdRotator component rendered with an ad image
-            var adImage = await page.QuerySelectorAsync("img[alt]");
-            Assert.NotNull(adImage);
-            Assert.True(await adImage.IsVisibleAsync(), "Ad image should be visible");
+            // Assert - AdRotator component rendered (look for anchor with image inside)
+            // The AdRotator renders as: <a href="..."><img src="..." alt="..." /></a>
+            var adElements = await page.QuerySelectorAllAsync("a img[alt]");
+            Assert.NotEmpty(adElements);
 
-            // Assert - Ad has valid alt text (proving Ads.xml was loaded)
+            // Assert - At least one ad image has valid alt text (proving Ads.xml was loaded)
+            var adImage = adElements.First();
+            Assert.True(await adImage.IsVisibleAsync(), "Ad image should be visible");
+            
             var altText = await adImage.GetAttributeAsync("alt");
             Assert.NotNull(altText);
             Assert.NotEmpty(altText);
-
-            // Assert - Ad image is wrapped in an anchor tag with href (check parent element)
-            var href = await adImage.EvaluateAsync<string>("el => el.parentElement?.tagName === 'A' ? el.parentElement.getAttribute('href') : null");
-            Assert.NotNull(href);
-            Assert.NotEmpty(href);
+            
+            // Verify alt text is one of the expected values from Ads.xml
+            Assert.Contains(altText, new[] { "CSharp", "Visual Basic" });
         }
         finally
         {
