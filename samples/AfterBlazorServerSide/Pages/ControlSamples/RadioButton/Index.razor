@@ -1,4 +1,5 @@
 @page "/ControlSamples/RadioButton"
+@using BlazorWebFormsComponents
 
 <h1>RadioButton Samples</h1>
 
@@ -9,13 +10,13 @@
 <hr />
 
 <h2>Grouped RadioButtons (Size Selection)</h2>
-<RadioButton Text="Small" GroupName="Size" Checked="@(selectedSize == "Small")" 
+<RadioButton Text="Small" GroupName="Size" Checked="@(selectedSize == "Small")"
              OnCheckedChanged="@(() => OnSizeChange("Small"))" />
 <br />
-<RadioButton Text="Medium" GroupName="Size" Checked="@(selectedSize == "Medium")" 
+<RadioButton Text="Medium" GroupName="Size" Checked="@(selectedSize == "Medium")"
              OnCheckedChanged="@(() => OnSizeChange("Medium"))" />
 <br />
-<RadioButton Text="Large" GroupName="Size" Checked="@(selectedSize == "Large")" 
+<RadioButton Text="Large" GroupName="Size" Checked="@(selectedSize == "Large")"
              OnCheckedChanged="@(() => OnSizeChange("Large"))" />
 <p>Selected Size: @selectedSize</p>
 
@@ -24,7 +25,7 @@
 <h2>Text Alignment</h2>
 <RadioButton Text="Label on right (default)" GroupName="Align" />
 <br />
-<RadioButton Text="Label on left" GroupName="Align" TextAlign="Enums.TextAlign.Left" />
+<RadioButton Text="Label on left" GroupName="Align" TextAlign="@BlazorWebFormsComponents.Enums.TextAlign.Left" />
 
 <hr />
 
@@ -36,7 +37,7 @@
 <hr />
 
 <h2>Styled RadioButton</h2>
-<RadioButton Text="Custom styled" CssClass="custom-radio" BackColor="LightPink" GroupName="Styled" />
+<RadioButton Text="Custom styled" CssClass="custom-radio" BackColor="@BlazorWebFormsComponents.WebColor.LightPink" GroupName="Styled" />
 
 <hr />
 
@@ -50,18 +51,18 @@
 <h2>Interactive Example - Payment Method</h2>
 <div style="padding: 20px; background-color: #f5f5f5;">
     <h3>Select Payment Method:</h3>
-    <RadioButton Text="Credit Card" GroupName="Payment" Checked="@(paymentMethod == "Credit")" 
+    <RadioButton Text="Credit Card" GroupName="Payment" Checked="@(paymentMethod == "Credit")"
                  OnCheckedChanged="@(() => paymentMethod = "Credit")" />
     <br />
-    <RadioButton Text="Debit Card" GroupName="Payment" Checked="@(paymentMethod == "Debit")" 
+    <RadioButton Text="Debit Card" GroupName="Payment" Checked="@(paymentMethod == "Debit")"
                  OnCheckedChanged="@(() => paymentMethod = "Debit")" />
     <br />
-    <RadioButton Text="PayPal" GroupName="Payment" Checked="@(paymentMethod == "PayPal")" 
+    <RadioButton Text="PayPal" GroupName="Payment" Checked="@(paymentMethod == "PayPal")"
                  OnCheckedChanged="@(() => paymentMethod = "PayPal")" />
     <br />
-    <RadioButton Text="Bank Transfer" GroupName="Payment" Checked="@(paymentMethod == "Bank")" 
+    <RadioButton Text="Bank Transfer" GroupName="Payment" Checked="@(paymentMethod == "Bank")"
                  OnCheckedChanged="@(() => paymentMethod = "Bank")" />
-    
+
     @if (!string.IsNullOrEmpty(paymentMethod))
     {
         <p style="margin-top: 10px; color: green; font-weight: bold;">

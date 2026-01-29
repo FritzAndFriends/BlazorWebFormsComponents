@@ -1,0 +1,302 @@
+@page "/ControlSamples/RadioButtonList"
+@using BlazorWebFormsComponents.Enums
+
+<h2>RadioButtonList Component Samples</h2>
+
+<h3>Basic RadioButtonList with Static Items</h3>
+<RadioButtonList TItem="object" StaticItems="colorItems" @bind-SelectedValue="selectedColor" />
+<p>Selected: <strong>@selectedColor</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" StaticItems="colorItems" @@bind-SelectedValue="selectedColor" /&gt;
+
+@@code {
+    private string selectedColor = "";
+    private ListItemCollection colorItems = new() {
+        new ListItem("Red", "red"),
+        new ListItem("Green", "green"),
+        new ListItem("Blue", "blue")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>Horizontal Layout (RepeatDirection.Horizontal)</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="sizeItems" 
+                 RepeatDirection="RepeatDirection.Horizontal"
+                 @bind-SelectedValue="selectedSize" />
+<p>Selected: <strong>@selectedSize</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="sizeItems" 
+                 RepeatDirection="RepeatDirection.Horizontal"
+                 @@bind-SelectedValue="selectedSize" /&gt;</code></pre>
+
+<hr />
+
+<h3>Vertical Layout (RepeatDirection.Vertical - Default)</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="priorityItems" 
+                 RepeatDirection="RepeatDirection.Vertical"
+                 @bind-SelectedValue="selectedPriority" />
+<p>Selected: <strong>@selectedPriority</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="priorityItems" 
+                 RepeatDirection="RepeatDirection.Vertical"
+                 @@bind-SelectedValue="selectedPriority" /&gt;</code></pre>
+
+<hr />
+
+<h3>Flow Layout (No Table)</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="fruitItems" 
+                 RepeatLayout="RepeatLayout.Flow"
+                 @bind-SelectedValue="selectedFruit" />
+<p>Selected: <strong>@selectedFruit</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="fruitItems" 
+                 RepeatLayout="RepeatLayout.Flow"
+                 @@bind-SelectedValue="selectedFruit" /&gt;</code></pre>
+
+<hr />
+
+<h3>Unordered List Layout</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="animalItems" 
+                 RepeatLayout="RepeatLayout.UnorderedList"
+                 @bind-SelectedValue="selectedAnimal" />
+<p>Selected: <strong>@selectedAnimal</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="animalItems" 
+                 RepeatLayout="RepeatLayout.UnorderedList"
+                 @@bind-SelectedValue="selectedAnimal" /&gt;</code></pre>
+
+<hr />
+
+<h3>Ordered List Layout</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="rankItems" 
+                 RepeatLayout="RepeatLayout.OrderedList"
+                 @bind-SelectedValue="selectedRank" />
+<p>Selected: <strong>@selectedRank</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="rankItems" 
+                 RepeatLayout="RepeatLayout.OrderedList"
+                 @@bind-SelectedValue="selectedRank" /&gt;</code></pre>
+
+<hr />
+
+<h3>Text Align Left (Label before radio button)</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="yesNoItems" 
+                 TextAlign="TextAlign.Left"
+                 @bind-SelectedValue="yesNoValue" />
+<p>Selected: <strong>@yesNoValue</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="yesNoItems" 
+                 TextAlign="TextAlign.Left"
+                 @@bind-SelectedValue="yesNoValue" /&gt;</code></pre>
+
+<hr />
+
+<h3>Text Align Right (Label after radio button - Default)</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="yesNoItems" 
+                 TextAlign="TextAlign.Right"
+                 @bind-SelectedValue="yesNoValue2" />
+<p>Selected: <strong>@yesNoValue2</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="yesNoItems" 
+                 TextAlign="TextAlign.Right"
+                 @@bind-SelectedValue="yesNoValue2" /&gt;</code></pre>
+
+<hr />
+
+<h3>Data-Bound RadioButtonList</h3>
+<RadioButtonList TItem="Product"
+                 Items="products"
+                 DataTextField="Name"
+                 DataValueField="Id"
+                 @bind-SelectedValue="selectedProduct" />
+<p>Selected Product ID: <strong>@selectedProduct</strong></p>
+<pre><code>&lt;RadioButtonList TItem="Product"
+                 Items="products"
+                 DataTextField="Name"
+                 DataValueField="Id"
+                 @@bind-SelectedValue="selectedProduct" /&gt;
+
+@@code {
+    private List&lt;Product&gt; products = new() {
+        new Product { Id = "1", Name = "Widget" },
+        new Product { Id = "2", Name = "Gadget" }
+    };
+}</code></pre>
+
+<hr />
+
+<h3>With Styling</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="styledItems"
+                 BackColor="new WebColor(System.Drawing.Color.LightBlue)"
+                 ForeColor="new WebColor(System.Drawing.Color.DarkBlue)"
+                 BorderStyle="BorderStyle.Solid"
+                 BorderWidth="Unit.Pixel(1)"
+                 @bind-SelectedValue="styledValue" />
+<p>Selected: <strong>@styledValue</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="styledItems"
+                 BackColor="new WebColor(System.Drawing.Color.LightBlue)"
+                 ForeColor="new WebColor(System.Drawing.Color.DarkBlue)"
+                 BorderStyle="BorderStyle.Solid"
+                 BorderWidth="Unit.Pixel(1)"
+                 @@bind-SelectedValue="styledValue" /&gt;</code></pre>
+
+<hr />
+
+<h3>Disabled Item in List</h3>
+<RadioButtonList TItem="object" StaticItems="disabledItems" @bind-SelectedValue="disabledSelection" />
+<p>Selected: <strong>@disabledSelection</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" StaticItems="disabledItems" @@bind-SelectedValue="disabledSelection" /&gt;
+
+@@code {
+    private ListItemCollection disabledItems = new() {
+        new ListItem("Available", "available"),
+        new ListItem("Unavailable", "unavailable") { Enabled = false },
+        new ListItem("Also Available", "also-available")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>Enabled=false (Entire list disabled)</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="colorItems" 
+                 Enabled="false" 
+                 SelectedValue="green" />
+<p><em>(Entire RadioButtonList is disabled)</em></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="colorItems" 
+                 Enabled="false" 
+                 SelectedValue="green" /&gt;</code></pre>
+
+<hr />
+
+<h3>With Change Event</h3>
+<RadioButtonList TItem="object" 
+                 StaticItems="eventItems"
+                 @bind-SelectedValue="eventValue"
+                 OnSelectedIndexChanged="HandleSelectionChanged" />
+<p>Selection changed <strong>@changeCount</strong> times. Current: <strong>@eventValue</strong></p>
+<pre><code>&lt;RadioButtonList TItem="object" 
+                 StaticItems="eventItems"
+                 @@bind-SelectedValue="eventValue"
+                 OnSelectedIndexChanged="HandleSelectionChanged" /&gt;
+
+@@code {
+    private int changeCount = 0;
+    private void HandleSelectionChanged(ChangeEventArgs e) {
+        changeCount++;
+    }
+}</code></pre>
+
+@code {
+	private string selectedColor = "";
+	private string selectedSize = "";
+	private string selectedFruit = "";
+	private string selectedAnimal = "";
+	private string selectedPriority = "";
+	private string selectedRank = "";
+	private string yesNoValue = "";
+	private string yesNoValue2 = "";
+	private string selectedProduct = "";
+	private string styledValue = "";
+	private string disabledSelection = "";
+	private string eventValue = "";
+	private int changeCount = 0;
+
+	private ListItemCollection colorItems = new()
+	{
+		new ListItem("Red", "red"),
+		new ListItem("Green", "green"),
+		new ListItem("Blue", "blue")
+	};
+
+	private ListItemCollection sizeItems = new()
+	{
+		new ListItem("Small", "S"),
+		new ListItem("Medium", "M"),
+		new ListItem("Large", "L"),
+		new ListItem("X-Large", "XL")
+	};
+
+	private ListItemCollection fruitItems = new()
+	{
+		new ListItem("Apple", "apple"),
+		new ListItem("Banana", "banana"),
+		new ListItem("Cherry", "cherry")
+	};
+
+	private ListItemCollection animalItems = new()
+	{
+		new ListItem("Dog", "dog"),
+		new ListItem("Cat", "cat"),
+		new ListItem("Bird", "bird")
+	};
+
+	private ListItemCollection priorityItems = new()
+	{
+		new ListItem("High", "high"),
+		new ListItem("Medium", "medium"),
+		new ListItem("Low", "low")
+	};
+
+	private ListItemCollection rankItems = new()
+	{
+		new ListItem("First Place", "1"),
+		new ListItem("Second Place", "2"),
+		new ListItem("Third Place", "3")
+	};
+
+	private ListItemCollection yesNoItems = new()
+	{
+		new ListItem("Yes", "yes"),
+		new ListItem("No", "no")
+	};
+
+	private ListItemCollection styledItems = new()
+	{
+		new ListItem("Option A", "a"),
+		new ListItem("Option B", "b"),
+		new ListItem("Option C", "c")
+	};
+
+	private ListItemCollection disabledItems = new()
+	{
+		new ListItem("Available", "available"),
+		new ListItem("Unavailable (disabled)", "unavailable") { Enabled = false },
+		new ListItem("Also Available", "also-available")
+	};
+
+	private ListItemCollection eventItems = new()
+	{
+		new ListItem("First", "1"),
+		new ListItem("Second", "2"),
+		new ListItem("Third", "3")
+	};
+
+	private List<Product> products = new()
+	{
+		new Product { Id = "1", Name = "Widget" },
+		new Product { Id = "2", Name = "Gadget" },
+		new Product { Id = "3", Name = "Gizmo" }
+	};
+
+	private void HandleSelectionChanged(ChangeEventArgs e)
+	{
+		changeCount++;
+	}
+
+	public class Product
+	{
+		public string Id { get; set; } = "";
+		public string Name { get; set; } = "";
+	}
+}
