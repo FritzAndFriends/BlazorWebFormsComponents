@@ -1,0 +1,31 @@
+@page "/ControlSamples/DataGrid/ShowHideHeader"
+
+<h2>DataGrid ShowHeader Example</h2>
+
+<Nav />
+
+<h3>With Header (ShowHeader=true)</h3>
+<DataGrid ItemType="Customer"
+					AutoGenerateColumns="false"
+					ShowHeader="true"
+					SelectMethod="Customer.GetCustomers">
+	<Columns>
+		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+		<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company Name" />
+		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="First Name"/>
+	</Columns>
+</DataGrid>
+
+<hr />
+
+<h3>Without Header (ShowHeader=false)</h3>
+<DataGrid ItemType="Customer"
+					AutoGenerateColumns="false"
+					ShowHeader="false"
+					SelectMethod="Customer.GetCustomers">
+	<Columns>
+		<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+		<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company Name" />
+		<BoundField ItemType="Customer" DataField="FirstName" HeaderText="First Name"/>
+	</Columns>
+</DataGrid>
