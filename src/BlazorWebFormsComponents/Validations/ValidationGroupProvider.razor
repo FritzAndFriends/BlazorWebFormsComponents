@@ -6,6 +6,7 @@
 
 @code {
 	[Parameter]
+	[EditorRequired]
 	public RenderFragment ChildContent { get; set; }
 
 	private ValidationGroupCoordinator Coordinator { get; } = new ValidationGroupCoordinator();

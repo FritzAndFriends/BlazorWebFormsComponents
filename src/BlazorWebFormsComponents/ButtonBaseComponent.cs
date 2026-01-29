@@ -40,6 +40,9 @@ namespace BlazorWebFormsComponents
 		protected void Click()
 		{
 			// Trigger validation for the specific ValidationGroup if CausesValidation is true
+			// Note: In Blazor, validation state is managed by EditContext. The OnClick event
+			// will still fire regardless of validation state. The EditContext determines whether
+			// OnValidSubmit or OnInvalidSubmit fires based on validation results.
 			if (CausesValidation && Coordinator != null)
 			{
 				Coordinator.ValidateGroup(ValidationGroup);

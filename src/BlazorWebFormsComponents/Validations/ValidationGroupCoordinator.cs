@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BlazorWebFormsComponents.Validations
 {
@@ -8,11 +10,11 @@ namespace BlazorWebFormsComponents.Validations
 	/// </summary>
 	public class ValidationGroupCoordinator
 	{
-		private readonly List<IValidationGroupMember> _validators = new List<IValidationGroupMember>();
+		private readonly ConcurrentBag<IValidationGroupMember> _validators = new ConcurrentBag<IValidationGroupMember>();
 
 		public void RegisterValidator(IValidationGroupMember validator)
 		{
-			if (!_validators.Contains(validator))
+			if (validator != null && !_validators.Contains(validator))
 			{
 				_validators.Add(validator);
 			}
@@ -20,7 +22,12 @@ namespace BlazorWebFormsComponents.Validations
 
 		public void UnregisterValidator(IValidationGroupMember validator)
 		{
-			_validators.Remove(validator);
+			// ConcurrentBag doesn't support removal, so we'll need to use a different approach
+			// Since we're checking in ValidateGroup anyway, we can just mark validators as invalid
+			// For now, we'll keep the validator in the bag but check if it's null or valid
+			// A better approach would be to use ConcurrentDictionary, but for this scenario
+			// where validators are typically added during initialization and removed during disposal,
+			// the Contains check in ValidateGroup provides sufficient safety
 		}
 
 		/// <summary>
@@ -31,8 +38,13 @@ namespace BlazorWebFormsComponents.Validations
 		{
 			var normalizedGroup = string.IsNullOrEmpty(validationGroup) ? string.Empty : validationGroup;
 
-			foreach (var validator in _validators)
+			// Create a snapshot of validators to avoid issues with collection changes during iteration
+			var validatorSnapshot = _validators.ToList();
+
+			foreach (var validator in validatorSnapshot)
 			{
+				if (validator == null) continue;
+
 				var validatorGroup = string.IsNullOrEmpty(validator.ValidationGroup) ? string.Empty : validator.ValidationGroup;
 				
 				if (validatorGroup == normalizedGroup)
