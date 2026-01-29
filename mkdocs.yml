@@ -65,17 +65,20 @@ nav:
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
     - Button: EditorControls/Button.md
-    - DropDownList: EditorControls/DropDownList.md
     - CheckBox: EditorControls/CheckBox.md
+    - CheckBoxList: EditorControls/CheckBoxList.md
+    - DropDownList: EditorControls/DropDownList.md
     - HiddenField: EditorControls/HiddenField.md
     - HyperLink: EditorControls/HyperLink.md
     - Image: EditorControls/Image.md
     - ImageButton: EditorControls/ImageButton.md
     - Label: EditorControls/Label.md
     - LinkButton: EditorControls/LinkButton.md
+    - ListBox: EditorControls/ListBox.md
     - Literal: EditorControls/Literal.md
-    - TextBox: EditorControls/TextBox.md
     - RadioButton: EditorControls/RadioButton.md
+    - RadioButtonList: EditorControls/RadioButtonList.md
+    - TextBox: EditorControls/TextBox.md
   - Data Controls:
     - DataList: DataControls/DataList.md
     - FormView: DataControls/FormView.md
