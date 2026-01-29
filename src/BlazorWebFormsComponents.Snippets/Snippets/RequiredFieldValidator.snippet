@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>BlazorWebForms RequiredFieldValidator</Title>
+      <Shortcut>bwfrequired</Shortcut>
+      <Description>Creates a RequiredFieldValidator for a control</Description>
+      <Author>Jeffrey T. Fritz</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>ControlToValidate</ID>
+          <ToolTip>ID of the control to validate</ToolTip>
+          <Default>txtField</Default>
+        </Literal>
+        <Literal>
+          <ID>ErrorMessage</ID>
+          <ToolTip>Error message to display</ToolTip>
+          <Default>Field is required</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="Razor">
+        <![CDATA[<RequiredFieldValidator ControlToValidate="$ControlToValidate$" 
+                        ErrorMessage="$ErrorMessage$" 
+                        Display="Dynamic" />$end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

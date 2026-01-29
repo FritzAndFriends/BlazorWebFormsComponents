@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>BlazorWebForms Repeater Component</Title>
+      <Shortcut>bwfrepeater</Shortcut>
+      <Description>Creates a Repeater component with ItemTemplate</Description>
+      <Author>Jeffrey T. Fritz</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>ItemType</ID>
+          <ToolTip>Type of items to display</ToolTip>
+          <Default>MyItemType</Default>
+        </Literal>
+        <Literal>
+          <ID>DataSource</ID>
+          <ToolTip>Data source for the repeater</ToolTip>
+          <Default>myDataSource</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="Razor">
+        <![CDATA[<Repeater ItemType="$ItemType$" DataSource="@$DataSource$">
+    <ItemTemplate>
+        <div class="item">
+            @context.Name
+            $end$
+        </div>
+    </ItemTemplate>
+</Repeater>]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

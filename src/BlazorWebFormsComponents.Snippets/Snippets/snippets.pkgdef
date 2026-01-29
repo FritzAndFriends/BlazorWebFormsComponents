@@ -1,0 +1,11 @@
+// CSharp
+[$RootKey$\Languages\CodeExpansions\CSharp\Paths]
+"BlazorWebFormsComponents"="$PackageFolder$\Snippets"
+
+// Razor
+[$RootKey$\Languages\CodeExpansions\Razor\Paths]
+"BlazorWebFormsComponents"="$PackageFolder$\Snippets"
+
+// HTML
+[$RootKey$\Languages\CodeExpansions\HTML\Paths]
+"BlazorWebFormsComponents"="$PackageFolder$\Snippets"
