@@ -13,6 +13,7 @@ builder.Services.AddBlazorWebFormsComponents();
 
 var services = builder.Services;
 
+services.AddHttpContextAccessor(); // Required for TreeView and other components that use GetRouteUrlHelper
 services.AddRazorComponents()
     .AddInteractiveServerComponents();
 services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();

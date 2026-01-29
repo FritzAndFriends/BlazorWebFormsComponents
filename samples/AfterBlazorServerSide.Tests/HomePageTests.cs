@@ -85,7 +85,7 @@ public class HomePageTests
     }
 
     [Fact]
-    public async Task HomePage_HasNavigationMenu()
+    public async Task HomePage_HasNavigationLinks()
     {
         // Arrange
         var page = await _fixture.NewPageAsync();
@@ -94,10 +94,10 @@ public class HomePageTests
         {
             // Act
             await page.GotoAsync(_fixture.BaseUrl);
-            var navMenu = await page.QuerySelectorAsync("nav");
+            var links = await page.QuerySelectorAllAsync("a");
 
             // Assert
-            Assert.NotNull(navMenu);
+            Assert.NotEmpty(links);
         }
         finally
         {

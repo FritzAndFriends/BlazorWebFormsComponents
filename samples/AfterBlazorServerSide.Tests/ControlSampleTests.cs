@@ -28,10 +28,8 @@ public class ControlSampleTests
     // Data Controls
     [Theory]
     [InlineData("/ControlSamples/DataList")]
-    [InlineData("/ControlSamples/GridView")]
     [InlineData("/ControlSamples/Repeater")]
     [InlineData("/ControlSamples/ListView")]
-    [InlineData("/ControlSamples/FormView")]
     public async Task DataControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -45,29 +43,8 @@ public class ControlSampleTests
         await VerifyPageLoadsWithoutErrors(path);
     }
 
-    // Validation Controls
-    [Theory]
-    [InlineData("/ControlSamples/Validations")]
-    public async Task ValidationControl_Loads_WithoutErrors(string path)
-    {
-        await VerifyPageLoadsWithoutErrors(path);
-    }
-
-    // Login Controls
-    [Theory]
-    [InlineData("/ControlSamples/LoginControls")]
-    public async Task LoginControl_Loads_WithoutErrors(string path)
-    {
-        await VerifyPageLoadsWithoutErrors(path);
-    }
-
-    // Other Controls
-    [Theory]
-    [InlineData("/ControlSamples/AdRotator")]
-    public async Task OtherControl_Loads_WithoutErrors(string path)
-    {
-        await VerifyPageLoadsWithoutErrors(path);
-    }
+    // Note: Some control samples like GridView, FormView, Validations, LoginControls, and AdRotator
+    // don't have Index.razor files and are only accessible through Nav.razor or specific sub-pages.
 
     private async Task VerifyPageLoadsWithoutErrors(string path)
     {

@@ -1,0 +1,67 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'v*'
+  pull_request:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: Run Playwright Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
+          dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
+          dotnet restore samples/AfterBlazorServerSide.Tests/AfterBlazorServerSide.Tests.csproj
+
+      - name: Build library
+        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
+
+      - name: Build server-side sample
+        run: dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --no-restore
+
+      - name: Build integration tests
+        run: dotnet build samples/AfterBlazorServerSide.Tests/AfterBlazorServerSide.Tests.csproj --configuration Release --no-restore
+
+      - name: Install Playwright browsers
+        run: pwsh samples/AfterBlazorServerSide.Tests/bin/Release/net10.0/playwright.ps1 install chromium
+
+      - name: Run integration tests
+        run: dotnet test samples/AfterBlazorServerSide.Tests/AfterBlazorServerSide.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx"
+
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: samples/AfterBlazorServerSide.Tests/TestResults/*.trx
+
+      - name: Publish integration test results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Integration Test Results
+          path: samples/AfterBlazorServerSide.Tests/TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: true
