@@ -7,6 +7,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
+COPY ["Directory.Build.props", "./"]
 COPY ["samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj", "samples/AfterBlazorServerSide/"]
 COPY ["src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj", "src/BlazorWebFormsComponents/"]
 COPY ["samples/SharedSampleObjects/SharedSampleObjects.csproj", "samples/SharedSampleObjects/"]
