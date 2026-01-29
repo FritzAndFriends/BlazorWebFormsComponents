@@ -1,0 +1,12 @@
+
+@code {
+[Fact]
+public void PlaceHolder_Empty_RendersNothing()
+{
+    // Arrange & Act
+    var cut = Render(@<PlaceHolder></PlaceHolder>);
+
+    // Assert
+    cut.Markup.Trim().ShouldBeEmpty();
+}
+}

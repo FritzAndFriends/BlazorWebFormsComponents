@@ -1,0 +1,52 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Panel_RendersAsDiv()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel>
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("<p>Content</p>");
+	}
+
+	[Fact]
+	public void Panel_WithCssClass_AppliesClass()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel CssClass="my-panel">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		div.GetAttribute("class").ShouldBe("my-panel");
+	}
+
+	[Fact]
+	public void Panel_WithMultipleChildren_RendersAll()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel>
+				<p>First</p>
+				<p>Second</p>
+			</Panel>
+		);
+
+		// Assert
+		var paragraphs = cut.FindAll("p");
+		paragraphs.Count.ShouldBe(2);
+	}
+
+}

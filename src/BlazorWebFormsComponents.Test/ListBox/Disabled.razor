@@ -1,0 +1,38 @@
+
+@code {
+
+	[Fact]
+	public void ListBox_Disabled_RendersDisabledAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Cannot change", "1")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" Enabled="false" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.HasAttribute("disabled").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ListBox_Enabled_DoesNotRenderDisabledAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Can change", "1")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" Enabled="true" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.HasAttribute("disabled").ShouldBeFalse();
+	}
+
+}

@@ -1,0 +1,112 @@
+@using BlazorWebFormsComponents.Enums
+@using RL = BlazorWebFormsComponents.Enums.RepeatLayout
+
+@code {
+
+	[Fact]
+	public void CheckBoxList_CssClass_AppliedToContainer()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" CssClass="my-custom-class" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.ClassList.ShouldContain("my-custom-class");
+	}
+
+	[Fact]
+	public void CheckBoxList_CellPadding_AppliedToTable()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" CellPadding="5" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("cellpadding").ShouldBe("5");
+	}
+
+	[Fact]
+	public void CheckBoxList_CellSpacing_AppliedToTable()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" CellSpacing="3" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("cellspacing").ShouldBe("3");
+	}
+
+	[Fact]
+	public void CheckBoxList_FlowLayout_CssClassAppliedToSpan()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" 
+									   StaticItems="items" 
+									   RepeatLayout="RL.Flow" 
+									   CssClass="flow-class" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.ClassList.ShouldContain("flow-class");
+	}
+
+	[Fact]
+	public void CheckBoxList_Enabled_False_DisablesCheckboxes()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" Enabled="false" />);
+
+		// Assert
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes[0].HasAttribute("disabled").ShouldBeTrue();
+		checkboxes[1].HasAttribute("disabled").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CheckBoxList_Visible_False_RendersNothing()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" Visible="false" />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+}

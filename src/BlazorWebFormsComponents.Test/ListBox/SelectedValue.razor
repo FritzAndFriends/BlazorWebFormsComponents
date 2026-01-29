@@ -1,0 +1,107 @@
+
+@code {
+
+	[Fact]
+	public void ListBox_WithSelectedValue_MarksOptionSelected()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Apple", "a"),
+			new ListItem("Banana", "b"),
+			new ListItem("Cherry", "c")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" SelectedValue="b" />);
+
+		// Assert
+		var options = cut.FindAll("option");
+		options[0].HasAttribute("selected").ShouldBeFalse();
+		options[1].HasAttribute("selected").ShouldBeTrue();
+		options[2].HasAttribute("selected").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ListBox_SelectionChange_UpdatesSelectedValue()
+	{
+		// Arrange
+		string selectedValue = "";
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2"),
+			new ListItem("Three", "3")
+		};
+
+		// Act
+		var cut = Render(
+			@<ListBox TItem="object"
+					  StaticItems="items"
+					  @bind-SelectedValue="selectedValue" />
+		);
+
+		cut.Find("select").Change("2");
+
+		// Assert
+		selectedValue.ShouldBe("2");
+	}
+
+	[Fact]
+	public void ListBox_SelectionChange_FiresOnSelectedIndexChanged()
+	{
+		// Arrange
+		bool eventFired = false;
+		string newValue = "";
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2")
+		};
+
+		void HandleChange(ChangeEventArgs e)
+		{
+			eventFired = true;
+			newValue = e.Value?.ToString();
+		}
+
+		// Act
+		var cut = Render(
+			@<ListBox TItem="object"
+					  StaticItems="items"
+					  OnSelectedIndexChanged="HandleChange" />
+		);
+
+		cut.Find("select").Change("2");
+
+		// Assert
+		eventFired.ShouldBeTrue();
+		newValue.ShouldBe("2");
+	}
+
+	[Fact]
+	public void ListBox_SelectionChange_UpdatesSelectedIndex()
+	{
+		// Arrange
+		int selectedIndex = -1;
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2"),
+			new ListItem("Three", "3")
+		};
+
+		// Act
+		var cut = Render(
+			@<ListBox TItem="object"
+					  StaticItems="items"
+					  @bind-SelectedIndex="selectedIndex" />
+		);
+
+		cut.Find("select").Change("2");
+
+		// Assert
+		selectedIndex.ShouldBe(1);
+	}
+
+}

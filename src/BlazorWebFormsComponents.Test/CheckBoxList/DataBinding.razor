@@ -1,0 +1,95 @@
+
+@code {
+
+	public class Category
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+	}
+
+	[Fact]
+	public void CheckBoxList_DataBound_RendersFromDataSource()
+	{
+		// Arrange
+		var data = new List<Category>
+		{
+			new Category { Id = "1", Name = "Category 1" },
+			new Category { Id = "2", Name = "Category 2" },
+			new Category { Id = "3", Name = "Category 3" }
+		};
+
+		// Act
+		var cut = Render(
+			@<CheckBoxList TItem="Category"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id" />
+		);
+
+		// Assert
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(3);
+		checkboxes[0].GetAttribute("value").ShouldBe("1");
+		checkboxes[1].GetAttribute("value").ShouldBe("2");
+		checkboxes[2].GetAttribute("value").ShouldBe("3");
+		
+		var labels = cut.FindAll("label");
+		labels[0].TextContent.ShouldBe("Category 1");
+		labels[1].TextContent.ShouldBe("Category 2");
+		labels[2].TextContent.ShouldBe("Category 3");
+	}
+
+	[Fact]
+	public void CheckBoxList_DataBoundWithoutFields_UsesToString()
+	{
+		// Arrange
+		var data = new List<string> { "Apple", "Banana", "Cherry" };
+
+		// Act
+		var cut = Render(@<CheckBoxList TItem="string" Items="data" />);
+
+		// Assert
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(3);
+		checkboxes[0].GetAttribute("value").ShouldBe("Apple");
+		checkboxes[1].GetAttribute("value").ShouldBe("Banana");
+		checkboxes[2].GetAttribute("value").ShouldBe("Cherry");
+		
+		var labels = cut.FindAll("label");
+		labels[0].TextContent.ShouldBe("Apple");
+		labels[1].TextContent.ShouldBe("Banana");
+		labels[2].TextContent.ShouldBe("Cherry");
+	}
+
+	[Fact]
+	public void CheckBoxList_CombinesStaticAndDataBoundItems()
+	{
+		// Arrange
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("Select All", "all")
+		};
+		var data = new List<Category>
+		{
+			new Category { Id = "1", Name = "Category 1" },
+			new Category { Id = "2", Name = "Category 2" }
+		};
+
+		// Act
+		var cut = Render(
+			@<CheckBoxList TItem="Category"
+						  StaticItems="staticItems"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id" />
+		);
+
+		// Assert
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(3);
+		checkboxes[0].GetAttribute("value").ShouldBe("all");
+		checkboxes[1].GetAttribute("value").ShouldBe("1");
+		checkboxes[2].GetAttribute("value").ShouldBe("2");
+	}
+
+}

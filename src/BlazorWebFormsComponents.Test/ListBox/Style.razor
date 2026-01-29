@@ -1,0 +1,44 @@
+
+@code {
+
+	[Fact]
+	public void ListBox_WithCssClass_RendersCssClass()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Styled", "1")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" CssClass="form-select" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.GetAttribute("class").ShouldBe("form-select");
+	}
+
+	[Fact]
+	public void ListBox_WithInlineStyle_RendersStyleAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Colored listbox", "1")
+		};
+
+		// Act
+		var cut = Render(
+			@<ListBox TItem="object"
+					  StaticItems="items"
+					  BackColor="new WebColor(System.Drawing.Color.LightYellow)" />
+		);
+
+		// Assert
+		var select = cut.Find("select");
+		var style = select.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color");
+	}
+
+}

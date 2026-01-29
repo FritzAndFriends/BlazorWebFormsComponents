@@ -1,0 +1,101 @@
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Panel_WithBackColor_SetsStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel BackColor="Red">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void Panel_WithForeColor_SetsStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ForeColor="Blue">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("color");
+	}
+
+	[Fact]
+	public void Panel_WithHorizontalAlign_SetsTextAlign()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel HorizontalAlign="HorizontalAlign.Center">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("text-align:center");
+	}
+
+	[Fact]
+	public void Panel_WithWrapFalse_SetsWhiteSpace()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel Wrap="false">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("white-space:nowrap");
+	}
+
+	[Fact]
+	public void Panel_WithDirection_SetsDirAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel Direction="ContentDirection.RightToLeft">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		div.GetAttribute("dir").ShouldBe("rtl");
+	}
+
+	[Fact]
+	public void Panel_WithDirectionLtr_SetsDirAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel Direction="ContentDirection.LeftToRight">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		div.GetAttribute("dir").ShouldBe("ltr");
+	}
+
+}

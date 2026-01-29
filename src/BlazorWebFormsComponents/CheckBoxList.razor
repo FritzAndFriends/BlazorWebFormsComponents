@@ -1,0 +1,108 @@
+@using BlazorWebFormsComponents.DataBinding
+@using BlazorWebFormsComponents.Enums
+@typeparam TItem
+@inherits DataBoundComponent<TItem>
+
+@if (Visible)
+{
+	var allItems = GetItems().ToList();
+	
+	@switch (RepeatLayout)
+	{
+		case TableRepeatLayout:
+			<table class="@CssClass" style="@Style" 
+				   cellpadding="@(CellPadding >= 0 ? CellPadding : null)" 
+				   cellspacing="@(CellSpacing >= 0 ? CellSpacing : null)">
+				@RenderTableLayout(allItems)
+			</table>
+			break;
+		case FlowRepeatLayout:
+			<span class="@CssClass" style="@Style">
+				@RenderFlowLayout(allItems)
+			</span>
+			break;
+		case OrderedListRepeatLayout:
+			<ol class="@CssClass" style="@Style">
+				@RenderListLayout(allItems)
+			</ol>
+			break;
+		case UnorderedListRepeatLayout:
+			<ul class="@CssClass" style="@Style">
+				@RenderListLayout(allItems)
+			</ul>
+			break;
+	}
+}
+
+@code {
+	private RenderFragment RenderTableLayout(List<ListItem> items) => __builder =>
+	{
+		if (RepeatDirection is VerticalDataList)
+		{
+			// Vertical: each item in its own row
+			for (var i = 0; i < items.Count; i++)
+			{
+				var item = items[i];
+				var inputId = $"{_baseId}_{i}";
+				<tr>
+					<td>@RenderCheckBoxItem(item, inputId, i)</td>
+				</tr>
+			}
+		}
+		else
+		{
+			// Horizontal: items in a single row, or multiple rows if RepeatColumns is set
+			var cols = RepeatColumns > 0 ? RepeatColumns : items.Count;
+			for (var i = 0; i < items.Count; i += cols)
+			{
+				<tr>
+					@for (var j = 0; j < cols && i + j < items.Count; j++)
+					{
+						var idx = i + j;
+						var item = items[idx];
+						var inputId = $"{_baseId}_{idx}";
+						<td>@RenderCheckBoxItem(item, inputId, idx)</td>
+					}
+				</tr>
+			}
+		}
+	};
+
+	private RenderFragment RenderFlowLayout(List<ListItem> items) => __builder =>
+	{
+		for (var i = 0; i < items.Count; i++)
+		{
+			var item = items[i];
+			var inputId = $"{_baseId}_{i}";
+			@RenderCheckBoxItem(item, inputId, i)
+			if (RepeatDirection is VerticalDataList && i < items.Count - 1)
+			{
+				<br />
+			}
+		}
+	};
+
+	private RenderFragment RenderListLayout(List<ListItem> items) => __builder =>
+	{
+		for (var i = 0; i < items.Count; i++)
+		{
+			var item = items[i];
+			var inputId = $"{_baseId}_{i}";
+			<li>@RenderCheckBoxItem(item, inputId, i)</li>
+		}
+	};
+
+	private RenderFragment RenderCheckBoxItem(ListItem item, string inputId, int index) => __builder =>
+	{
+		var isChecked = SelectedValues.Contains(item.Value);
+		
+		if (TextAlign == Enums.TextAlign.Left)
+		{
+			<label for="@inputId">@item.Text</label><input id="@inputId" type="checkbox" name="@($"{_baseId}${index}")" value="@item.Value" checked="@isChecked" disabled="@(!Enabled || !item.Enabled)" @onchange="e => HandleChange(item, e)" />
+		}
+		else
+		{
+			<input id="@inputId" type="checkbox" name="@($"{_baseId}${index}")" value="@item.Value" checked="@isChecked" disabled="@(!Enabled || !item.Enabled)" @onchange="e => HandleChange(item, e)" /><label for="@inputId">@item.Text</label>
+		}
+	};
+}
