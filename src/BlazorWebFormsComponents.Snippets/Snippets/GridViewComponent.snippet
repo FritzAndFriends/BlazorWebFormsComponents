@@ -24,7 +24,7 @@
         </Literal>
       </Declarations>
       <Code Language="Razor">
-        <![CDATA[<GridView TItem="$ItemType$" DataSource="@$DataSource$">
+        <![CDATA[<GridView ItemType="$ItemType$" DataSource="@$DataSource$">
     <Columns>
         <BoundField DataField="@(nameof($ItemType$.Id))" HeaderText="ID" />
         <BoundField DataField="@(nameof($ItemType$.Name))" HeaderText="Name" />

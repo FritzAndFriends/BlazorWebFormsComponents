@@ -93,7 +93,7 @@ To use enumeration values without full qualification:
 Now you can use values like `Table`, `Flow`, `Horizontal`, `Vertical` directly:
 
 ```razor
-<DataList TItemType="Product" DataSource="@products" RepeatLayout="Table" RepeatDirection="Horizontal">
+<DataList ItemType="Product" DataSource="@products" RepeatLayout="Table" RepeatDirection="Horizontal">
     ...
 </DataList>
 ```
