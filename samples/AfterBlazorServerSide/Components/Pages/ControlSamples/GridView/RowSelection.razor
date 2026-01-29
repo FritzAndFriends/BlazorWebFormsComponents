@@ -12,6 +12,7 @@
           ItemType="Customer"
           AutoGenerateColumns="false"
           DataKeyNames="CustomerID"
+          SelectMethod="GetCustomers"
           OnRowCommand="HandleRowCommand"
           EmptyDataText="No data available">
     <Columns>
@@ -99,17 +100,6 @@
     private Customer SelectedCustomer;
     private List<Customer> _customers;
     
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _customers = GetCustomers();
-            CustomersGrid.DataSource = _customers;
-            CustomersGrid.DataBind();
-        }
-        base.OnAfterRender(firstRender);
-    }
-    
     private void HandleRowCommand(GridViewCommandEventArgs args)
     {
         if (args.CommandName == "Select")
@@ -118,7 +108,7 @@
             int rowIndex = Convert.ToInt32(args.CommandArgument);
             
             // Get the data item for the selected row using the cached data source
-            if (rowIndex < _customers.Count)
+            if (_customers != null && rowIndex < _customers.Count)
             {
                 SelectedCustomer = _customers[rowIndex];
                 
@@ -130,9 +120,9 @@
         }
     }
     
-    private List<Customer> GetCustomers()
+    public IQueryable<Customer> GetCustomers(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
     {
-        return new List<Customer>
+        var customers = new List<Customer>
         {
             new Customer
             {
@@ -163,5 +153,11 @@
                 CompanyName = "Innovation Labs"
             }
         };
+        
+        // Cache for use in HandleRowCommand
+        _customers = customers;
+        
+        totalRowCount = customers.Count;
+        return customers.AsQueryable();
     }
 }
