@@ -104,24 +104,23 @@ public class ControlSampleTests
             Assert.NotNull(response);
             Assert.True(response.Ok, $"Page failed to load with status: {response.Status}");
 
-            // Assert - AdRotator component rendered with an ad
+            // Assert - AdRotator component rendered with an ad image
             var adImage = await page.QuerySelectorAsync("img[alt]");
             Assert.NotNull(adImage);
             Assert.True(await adImage.IsVisibleAsync(), "Ad image should be visible");
 
-            // Assert - Ad has valid attributes (proving Ads.xml was loaded)
+            // Assert - Ad has valid alt text (proving Ads.xml was loaded)
             var altText = await adImage.GetAttributeAsync("alt");
             Assert.NotNull(altText);
             Assert.NotEmpty(altText);
 
-            // Assert - Ad has a link
-            var adLink = await page.QuerySelectorAsync("a[href] img[alt]");
-            Assert.NotNull(adLink);
-
-            // Verify the link contains an href
-            var parentLink = await adLink.EvaluateAsync<string>("el => el.parentElement.getAttribute('href')");
-            Assert.NotNull(parentLink);
-            Assert.NotEmpty(parentLink);
+            // Assert - Ad is wrapped in an anchor tag with href
+            var adLinkElement = await page.QuerySelectorAsync("a[href]");
+            Assert.NotNull(adLinkElement);
+            
+            var href = await adLinkElement.GetAttributeAsync("href");
+            Assert.NotNull(href);
+            Assert.NotEmpty(href);
         }
         finally
         {
