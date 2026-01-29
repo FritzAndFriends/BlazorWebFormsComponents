@@ -1,0 +1,26 @@
+
+@code {
+	[Fact]
+	public void DataGrid_AutoGenerateColumns_RendersCorrectly()
+	{
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="true"
+							SelectMethod="GetWidgets" />);
+
+		// Should auto-generate columns for bindable properties
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBeGreaterThan(0, "Should have auto-generated columns");
+		
+		// Check that we have headers for the Widget properties
+		var headerTexts = tableHeaders.Select(h => h.TextContent).ToList();
+		headerTexts.ShouldContain("Id");
+		headerTexts.ShouldContain("Name");
+		headerTexts.ShouldContain("Price");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

@@ -1,0 +1,15 @@
+@typeparam ItemType
+@inherits BaseRow<ItemType>
+@using Interfaces
+
+<tr @key="DataItem">
+	@foreach (IColumn<ItemType> column in Columns)
+	{
+		<td @key="column">
+
+			@if (DataItem is ButtonField<ItemType>) (DataItem as ButtonField<ItemType>).DataItemIndex = DataItemIndex;
+
+			@column.Render(DataItem)
+		</td>
+	}
+</tr>
