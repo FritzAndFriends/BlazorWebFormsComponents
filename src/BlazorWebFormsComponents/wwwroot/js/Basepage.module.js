@@ -14,6 +14,16 @@ export function onAfterRender() {
     formatClientClick();
 }
 
+export function addScriptElement(location, callback) {
+    var el = document.createElement("script");
+    el.setAttribute("src", location);
+    document.head.appendChild(el);
+
+    if (callback != null) {
+        el.addEventListener("load", function () { eval(callback); });
+    }
+}
+
 function formatClientClick() {
     var elementsToReplace = document.querySelectorAll("*[onclientclick]");
     for (var el of elementsToReplace) {
@@ -31,6 +41,7 @@ if (typeof window !== 'undefined') {
     window.bwfc.Page = {
         setTitle,
         getTitle,
-        OnAfterRender: onAfterRender
+        OnAfterRender: onAfterRender,
+        AddScriptElement: addScriptElement
     };
 }
