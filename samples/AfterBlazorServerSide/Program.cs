@@ -13,6 +13,7 @@ builder.Services.AddBlazorWebFormsComponents();
 
 var services = builder.Services;
 
+services.AddHttpContextAccessor(); // Required for TreeView and other components that use GetRouteUrlHelper
 services.AddRazorComponents()
     .AddInteractiveServerComponents();
 services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
@@ -39,7 +40,7 @@ app.MapRazorComponents<App>()
 
 await app.RunAsync();
 
-partial class Program
+public partial class Program
 {
     public static string ApplicationName => "Blazor Server-Side";
     public static string? ComponentVersion = typeof(BlazorWebFormsComponents.Button)

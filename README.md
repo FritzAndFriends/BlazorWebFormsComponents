@@ -2,7 +2,7 @@
 
 A collection of Blazor components that emulate the web forms components of the same name
 
-[![Build and Test](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  [![docs](https://github.com/FritzAndFriends/BlazorWebFormsComponents/workflows/docs/badge.svg)](https://fritzandfriends.github.io/BlazorWebFormsComponents/)
+[![Build and Test](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml)  [![Integration Tests](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  [![docs](https://github.com/FritzAndFriends/BlazorWebFormsComponents/workflows/docs/badge.svg)](https://fritzandfriends.github.io/BlazorWebFormsComponents/)
 
 [![Nuget](https://img.shields.io/nuget/v/Fritz.BlazorWebFormsComponents?color=violet)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Fritz.BlazorWebFormsComponents)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Live Sample](https://img.shields.io/badge/-Live%20Sample-purple)](https://blazorwebformscomponents.azurewebsites.net)
 
@@ -98,3 +98,30 @@ There are three different types of .NET projects in this repository:  .NET Frame
 `dotnet restore` to restore packages
 
 `dotnet run --project samples/AfterBlazorServerSide` to start the Blazor Server-Side samples
+
+## Testing
+
+The project includes two types of tests:
+
+### Unit Tests
+Unit tests for the component library are located in `src/BlazorWebFormsComponents.Test/` and use xUnit with bUnit for component testing.
+
+Run unit tests with:
+```bash
+dotnet test src/BlazorWebFormsComponents.Test
+```
+
+### Integration Tests
+Integration tests using Playwright validate the sample application pages. These tests are located in `samples/AfterBlazorServerSide.Tests/`.
+
+To run integration tests locally:
+1. Install Playwright browsers (first time only):
+   ```bash
+   pwsh samples/AfterBlazorServerSide.Tests/bin/Debug/net10.0/playwright.ps1 install
+   ```
+2. Run the tests:
+   ```bash
+   dotnet test samples/AfterBlazorServerSide.Tests
+   ```
+
+See [samples/AfterBlazorServerSide.Tests/README.md](samples/AfterBlazorServerSide.Tests/README.md) for more details.
