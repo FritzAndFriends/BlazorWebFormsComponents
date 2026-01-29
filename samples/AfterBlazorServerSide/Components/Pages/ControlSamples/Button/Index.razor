@@ -30,7 +30,8 @@
 	void OnCommand(CommandEventArgs args) {
 
 		Console.WriteLine("Command fired");
-		TheContent = $"Command '{args.CommandName}'";
+		var button = (Button)args.Sender;  // Access the sender!
+		TheContent = $"Command '{args.CommandName}' from button with text '{button.Text}'";
 
 	}
 
