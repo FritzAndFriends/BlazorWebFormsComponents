@@ -1,0 +1,132 @@
+
+@code {
+
+	[Fact]
+	public void RadioButtonList_WithCssClass_RendersCssClass()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Styled", "1")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" CssClass="my-radio-list" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("class").ShouldBe("my-radio-list");
+	}
+
+	[Fact]
+	public void RadioButtonList_WithBackColor_RendersStyleAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Colored", "1")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object"
+							  StaticItems="items"
+							  BackColor="new WebColor(System.Drawing.Color.LightBlue)" />
+		);
+
+		// Assert
+		var table = cut.Find("table");
+		var style = table.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void RadioButtonList_Disabled_RendersDisabledRadios()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" Enabled="false" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios[0].HasAttribute("disabled").ShouldBeTrue();
+		radios[1].HasAttribute("disabled").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RadioButtonList_DisabledItem_RendersDisabledRadio()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Enabled", "1") { Enabled = true },
+			new ListItem("Disabled", "2") { Enabled = false }
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios[0].HasAttribute("disabled").ShouldBeFalse();
+		radios[1].HasAttribute("disabled").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RadioButtonList_NotVisible_RendersNothing()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" Visible="false" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void RadioButtonList_TableWithCellPadding_RendersCellPadding()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" CellPadding="5" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("cellpadding").ShouldBe("5");
+	}
+
+	[Fact]
+	public void RadioButtonList_TableWithCellSpacing_RendersCellSpacing()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" CellSpacing="3" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("cellspacing").ShouldBe("3");
+	}
+
+}

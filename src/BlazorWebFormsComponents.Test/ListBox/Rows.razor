@@ -1,0 +1,63 @@
+
+@code {
+
+	[Fact]
+	public void ListBox_DefaultRows_HasSizeAttribute4()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2"),
+			new ListItem("Item 3", "3"),
+			new ListItem("Item 4", "4")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.GetAttribute("size").ShouldBe("4");
+	}
+
+	[Fact]
+	public void ListBox_CustomRows_HasCorrectSizeAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2"),
+			new ListItem("Item 3", "3"),
+			new ListItem("Item 4", "4"),
+			new ListItem("Item 5", "5"),
+			new ListItem("Item 6", "6")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" Rows="6" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.GetAttribute("size").ShouldBe("6");
+	}
+
+	[Fact]
+	public void ListBox_Rows1_HasSizeAttribute1()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" Rows="1" />);
+
+		// Assert
+		var select = cut.Find("select");
+		select.GetAttribute("size").ShouldBe("1");
+	}
+
+}

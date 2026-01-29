@@ -1,0 +1,30 @@
+
+@code {
+[Fact]
+public void PlaceHolder_WhenNotVisible_RendersNothing()
+{
+    // Arrange & Act
+    var cut = Render(
+        @<PlaceHolder Visible="false">
+            <p>Should not appear</p>
+        </PlaceHolder>
+    );
+
+    // Assert
+    cut.Markup.Trim().ShouldBeEmpty();
+}
+
+[Fact]
+public void PlaceHolder_WhenVisible_RendersContent()
+{
+    // Arrange & Act
+    var cut = Render(
+        @<PlaceHolder Visible="true">
+            <p>Should appear</p>
+        </PlaceHolder>
+    );
+
+    // Assert
+    cut.MarkupMatches(@<p>Should appear</p>);
+}
+}

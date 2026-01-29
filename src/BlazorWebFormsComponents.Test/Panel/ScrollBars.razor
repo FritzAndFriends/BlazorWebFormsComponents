@@ -1,0 +1,87 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Panel_WithScrollBarsHorizontal_SetsOverflowStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ScrollBars="Enums.ScrollBars.Horizontal">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("overflow-x:scroll");
+		style.ShouldContain("overflow-y:hidden");
+	}
+
+	[Fact]
+	public void Panel_WithScrollBarsVertical_SetsOverflowStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ScrollBars="Enums.ScrollBars.Vertical">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("overflow-x:hidden");
+		style.ShouldContain("overflow-y:scroll");
+	}
+
+	[Fact]
+	public void Panel_WithScrollBarsBoth_SetsOverflowStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ScrollBars="Enums.ScrollBars.Both">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("overflow:scroll");
+	}
+
+	[Fact]
+	public void Panel_WithScrollBarsAuto_SetsOverflowStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ScrollBars="Enums.ScrollBars.Auto">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("overflow:auto");
+	}
+
+	[Fact]
+	public void Panel_WithScrollBarsNone_NoOverflowStyle()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ScrollBars="Enums.ScrollBars.None">
+				<p>Content</p>
+			</Panel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		(style == null || !style.Contains("overflow")).ShouldBeTrue();
+	}
+
+}

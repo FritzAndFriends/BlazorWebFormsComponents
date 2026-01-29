@@ -1,0 +1,113 @@
+@using BlazorWebFormsComponents.DataBinding
+@using BlazorWebFormsComponents.Enums
+@typeparam TItem
+@inherits DataBoundComponent<TItem>
+
+@if (Visible)
+{
+	var items = GetItems().ToList();
+	var index = 0;
+
+	@if (RepeatLayout is TableRepeatLayout)
+	{
+		<table class="@CssClass" style="@Style"
+			   cellpadding="@(CellPadding >= 0 ? CellPadding : null)"
+			   cellspacing="@(CellSpacing >= 0 ? CellSpacing : null)">
+			@if (RepeatDirection == RepeatDirection.Vertical)
+			{
+				@foreach (var item in items)
+				{
+					var currentIndex = index++;
+					var inputId = GetInputId(currentIndex);
+					<tr>
+						<td>
+							@RenderRadioItem(item, inputId)
+						</td>
+					</tr>
+				}
+			}
+			else
+			{
+				<tr>
+					@foreach (var item in items)
+					{
+						var currentIndex = index++;
+						var inputId = GetInputId(currentIndex);
+						<td>
+							@RenderRadioItem(item, inputId)
+						</td>
+					}
+				</tr>
+			}
+		</table>
+	}
+	else if (RepeatLayout is FlowRepeatLayout)
+	{
+		<span class="@CssClass" style="@Style">
+			@foreach (var item in items)
+			{
+				var currentIndex = index++;
+				var inputId = GetInputId(currentIndex);
+				@RenderRadioItem(item, inputId)
+				@if (RepeatDirection == RepeatDirection.Vertical)
+				{
+					<br />
+				}
+			}
+		</span>
+	}
+	else if (RepeatLayout is OrderedListRepeatLayout)
+	{
+		<ol class="@CssClass" style="@Style">
+			@foreach (var item in items)
+			{
+				var currentIndex = index++;
+				var inputId = GetInputId(currentIndex);
+				<li>
+					@RenderRadioItem(item, inputId)
+				</li>
+			}
+		</ol>
+	}
+	else if (RepeatLayout is UnorderedListRepeatLayout)
+	{
+		<ul class="@CssClass" style="@Style">
+			@foreach (var item in items)
+			{
+				var currentIndex = index++;
+				var inputId = GetInputId(currentIndex);
+				<li>
+					@RenderRadioItem(item, inputId)
+				</li>
+			}
+		</ul>
+	}
+}
+
+@code {
+	private RenderFragment RenderRadioItem(ListItem item, string inputId) => __builder =>
+	{
+		if (TextAlign == TextAlign.Left)
+		{
+			<label for="@inputId">@item.Text</label>
+			<input id="@inputId"
+				   type="radio"
+				   name="@_groupName"
+				   value="@item.Value"
+				   checked="@(item.Value == SelectedValue)"
+				   disabled="@(!Enabled || !item.Enabled)"
+				   @onchange="(e) => HandleChange(item, e)" />
+		}
+		else
+		{
+			<input id="@inputId"
+				   type="radio"
+				   name="@_groupName"
+				   value="@item.Value"
+				   checked="@(item.Value == SelectedValue)"
+				   disabled="@(!Enabled || !item.Enabled)"
+				   @onchange="(e) => HandleChange(item, e)" />
+			<label for="@inputId">@item.Text</label>
+		}
+	};
+}
