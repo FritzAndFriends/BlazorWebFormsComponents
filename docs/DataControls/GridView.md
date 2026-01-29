@@ -8,6 +8,7 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 ### Blazor Notes
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
+- **Context attribute** - When using `<TemplateField>`, add `Context="Item"` to access the current row item as `@Item` instead of Blazor's default `@context`
 
 ## Web Forms Declarative Syntax
 

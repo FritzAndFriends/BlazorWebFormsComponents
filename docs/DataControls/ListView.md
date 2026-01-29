@@ -22,6 +22,8 @@ The ListView component is meant to emulate the asp:ListView control in markup an
 ## Usage Notes
 
  - LayoutTemplate requires a `Context` attribute that defines the placeholder for the items
+ - **Context attribute** - For Web Forms compatibility, use `Context="Item"` on the ListView to access the current item as `@Item` in ItemTemplate and AlternatingItemTemplate instead of Blazor's default `@context`
+ - **ItemType attribute** - Required to specify the type of items in the collection
 
 ##### [Back to top](#listview)
 

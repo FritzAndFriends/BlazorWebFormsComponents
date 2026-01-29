@@ -10,6 +10,10 @@ The FormView component is meant to emulate the asp:FormView control in markup an
 
 ## Usage Notes
 
+- **ItemType attribute** - Required to specify the type of items in the collection
+- **Context attribute** - For Web Forms compatibility, use `Context="Item"` to access the current item as `@Item` in templates (ItemTemplate, EditItemTemplate, InsertItemTemplate) instead of Blazor's default `@context`
+- **ID** - Use `@ref` instead of `ID` when referencing the component in code
+
 ## Web Forms Declarative Syntax
 
 ```html

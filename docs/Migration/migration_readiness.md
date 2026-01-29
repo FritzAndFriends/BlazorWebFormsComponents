@@ -19,6 +19,7 @@ Throughout this document, we will refer to several framework and technology term
 - Business logic needs to be convertible to .NET Core
 - Class libraries referenced need to be convertible to .NET Standard
 - No 3rd party control libraries that don't have a shim for conversion (none available at the time of this writing)
+- For data-bound controls (Repeater, DataList, GridView, ListView, FormView), use `Context="Item"` attribute to access items with `@Item` instead of Blazor's default `@context`
 
 ## Application architecture suggestions
 
