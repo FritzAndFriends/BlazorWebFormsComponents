@@ -111,13 +111,13 @@ docker build -t mkdocs -f ./docs/Dockerfile ./
 docker run --rm -v "$(pwd):/docs" mkdocs build --strict
 
 # Serve docs locally for preview
-docker run --rm -p 8000:8000 -v "$(pwd):/docs" mkdocs serve
+docker run --rm -p 8000:8000 -v "$(pwd):/docs" mkdocs serve --dev-addr 0.0.0.0:8000
 ```
 
 The documentation will be available at http://localhost:8000
 
 The docs are automatically built and deployed to GitHub Pages when changes are pushed to the `main` branch via the `.github/workflows/docs.yml` workflow.
 
-### Recources
+### Resources
 
 [cmjchrisjones Blog: Contributing To Someone else's git repository](https://cmjchrisjones.dev/posts/contributing-to-someone-elses-git-repository/)
