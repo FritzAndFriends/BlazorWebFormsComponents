@@ -80,7 +80,8 @@ namespace BlazorWebFormsComponents
 			{
 				AlternateText = advertisment.AlternateText,
 				ImageUrl = advertisment.ImageUrl,
-				NavigateUrl = advertisment.NavigateUrl
+				NavigateUrl = advertisment.NavigateUrl,
+				Sender = this
 			};
 
 			AdCreated(adArgs);

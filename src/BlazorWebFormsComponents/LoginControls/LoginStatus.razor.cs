@@ -56,7 +56,7 @@ namespace BlazorWebFormsComponents.LoginControls
 		private async Task LogoutHandle(MouseEventArgs args)
 		{
 
-			var logoutCancelEventArgs = new LoginCancelEventArgs();
+			var logoutCancelEventArgs = new LoginCancelEventArgs() { Sender = this };
 			await OnLoggingOut.InvokeAsync(logoutCancelEventArgs);
 
 			if (!logoutCancelEventArgs.Cancel)

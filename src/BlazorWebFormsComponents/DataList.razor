@@ -77,7 +77,7 @@
 											<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
 										</CascadingValue>
 
-										ItemDataBound(new DataListItemEventArgs(item));
+										ItemDataBound(new DataListItemEventArgs(item) { Sender = this });
 
 										idx++;
 										first = false;
@@ -123,7 +123,7 @@
 								}
 								<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
 							</CascadingValue>
-							ItemDataBound(new DataListItemEventArgs(item));
+							ItemDataBound(new DataListItemEventArgs(item) { Sender = this });
 							first = false;
 							idx++;
 						} while ((idx - 1) % RepeatColumns != 0 && idx <= IndexedItems.Count());

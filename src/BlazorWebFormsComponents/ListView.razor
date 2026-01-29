@@ -43,7 +43,7 @@ else
 							@ItemSeparatorTemplate
 						}
 
-						ItemDataBound(new ListViewItemEventArgs(item));
+						ItemDataBound(new ListViewItemEventArgs(item) { Sender = this });
 					}
 
 					DataBound(EventArgs.Empty);

@@ -34,7 +34,7 @@ namespace BlazorWebFormsComponents
 		{
 			if (!string.IsNullOrEmpty(CommandName))
 			{
-				var args = new CommandEventArgs(CommandName, CommandArgument);
+				var args = new CommandEventArgs(CommandName, CommandArgument) { Sender = this };
 				OnCommand.InvokeAsync(args);
 				OnBubbledEvent(this, args);
 			}
