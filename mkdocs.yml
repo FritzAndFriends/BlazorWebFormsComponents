@@ -69,7 +69,6 @@ nav:
     - CheckBoxList: EditorControls/CheckBoxList.md
     - DropDownList: EditorControls/DropDownList.md
     - HiddenField: EditorControls/HiddenField.md
-    - HyperLink: EditorControls/HyperLink.md
     - Image: EditorControls/Image.md
     - ImageButton: EditorControls/ImageButton.md
     - Label: EditorControls/Label.md
@@ -95,6 +94,8 @@ nav:
     - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md
     - ValidationSummary: ValidationControls/ValidationSummary.md
   - Navigation Controls:
+    - HyperLink: NavigationControls/HyperLink.md
+    - Menu: NavigationControls/Menu.md
     - TreeView: NavigationControls/TreeView.md
   - Login Controls:
     - Login: LoginControls/Login.md

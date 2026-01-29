@@ -32,7 +32,6 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [DropDownList](docs/EditorControls/DropDownList.md)
     - FileUpload
     - [HiddenField](docs/EditorControls/HiddenField.md)
-    - [HyperLink](docs/EditorControls/HyperLink.md)
     - [Image](docs/EditorControls/Image.md)
     - [ImageButton](docs/EditorControls/ImageButton.md)
     - ImageMap
@@ -69,7 +68,8 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [RequiredFieldValidator](docs/ValidationControls/RequiredFieldValidator.md)
     - [ValidationSummary](docs/ValidationControls/ValidationSummary.md)
   - Navigation Controls
-    - [Menu](docs/Menu.md)
+    - [HyperLink](docs/NavigationControls/HyperLink.md)
+    - [Menu](docs/NavigationControls/Menu.md)
     - SiteMapPath
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls

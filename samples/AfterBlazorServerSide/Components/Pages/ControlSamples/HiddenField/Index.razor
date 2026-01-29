@@ -1,0 +1,86 @@
+@page "/ControlSamples/HiddenField"
+
+<PageTitle>HiddenField Sample</PageTitle>
+
+<h2>HiddenField - Basic Usage</h2>
+
+<p>The HiddenField component stores a non-displayed value. While the field is not visible to users, the value is accessible to both server-side code and JavaScript.</p>
+
+<div class="demo-section">
+    <h3>Demo</h3>
+    
+    <HiddenField ID="myHiddenField" Value="@HiddenValue" OnValueChanged="HandleValueChanged" />
+    
+    <p><strong>Current hidden value:</strong> @HiddenValue</p>
+    
+    <div class="mb-3">
+        <label class="form-label">Update hidden field value:</label>
+        <input type="text" class="form-control" style="max-width: 300px;" @bind="NewValue" />
+    </div>
+    
+    <Button Text="Update Hidden Field" OnClick="UpdateHiddenValue" CssClass="btn btn-primary" />
+    
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-info mt-3">@Message</div>
+    }
+</div>
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">@@page "/ControlSamples/HiddenField"
+
+&lt;HiddenField ID="myHiddenField" Value="@@HiddenValue" OnValueChanged="HandleValueChanged" /&gt;
+
+&lt;p&gt;&lt;strong&gt;Current hidden value:&lt;/strong&gt; @@HiddenValue&lt;/p&gt;
+
+&lt;div class="mb-3"&gt;
+    &lt;label class="form-label"&gt;Update hidden field value:&lt;/label&gt;
+    &lt;input type="text" class="form-control" @@bind="NewValue" /&gt;
+&lt;/div&gt;
+
+&lt;Button Text="Update Hidden Field" OnClick="UpdateHiddenValue" /&gt;
+
+@@code {
+    private string HiddenValue = "initial-secret-value";
+    private string NewValue = "";
+    private string Message = "";
+
+    private void UpdateHiddenValue()
+    {
+        if (!string.IsNullOrEmpty(NewValue))
+        {
+            HiddenValue = NewValue;
+            Message = $"Hidden field updated to: {HiddenValue}";
+            NewValue = "";
+        }
+    }
+
+    private void HandleValueChanged(EventArgs e)
+    {
+        Message = "Value changed event triggered!";
+    }
+}</code></pre>
+
+@code {
+    private string HiddenValue = "initial-secret-value";
+    private string NewValue = "";
+    private string Message = "";
+
+    private void UpdateHiddenValue()
+    {
+        if (!string.IsNullOrEmpty(NewValue))
+        {
+            HiddenValue = NewValue;
+            Message = $"Hidden field updated to: {HiddenValue}";
+            NewValue = "";
+        }
+    }
+
+    private void HandleValueChanged(EventArgs e)
+    {
+        Message = "Value changed event triggered!";
+    }
+}

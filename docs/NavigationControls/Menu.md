@@ -341,5 +341,56 @@ The Menu component is meant to emulate the asp:Menu control in markup and is def
 
 ## Blazor Syntax
 
+```html
+<Menu id="NavigationMenu"
+      DisappearAfter="2000"
+      StaticDisplayLevels="2"
+      StaticSubmenuIndent="10"
+      orientation="Vertical"
+      font-names="Arial"
+      target="_blank">
+
+    <StaticMenuItemStyle BackColor="@("LightSteelBlue")"
+                         ForeColor="@("Black")" />
+    <StaticHoverStyle BackColor="WebColor.LightSkyBlue" />
+    <DynamicMenuItemStyle BackColor="WebColor.Black"
+                          ForeColor="WebColor.Silver" />
+    <DynamicHoverStyle BackColor="WebColor.LightSkyBlue"
+                       ForeColor="WebColor.Black" />
+    <DynamicSelectedStyle BackColor="WebColor.PapayaWhip"
+                          ForeColor="WebColor.SteelBlue" />
+
+    <Items>
+        <MenuItem navigateurl="Home.aspx"
+                  text="Home"
+                  tooltip="Home">
+            <MenuItem text="Music" tooltip="Music">
+                <MenuItem navigateurl="Classical.aspx"
+                          text="Classical"
+                          tooltip="Classical" />
+                <MenuItem navigateurl="Rock.aspx"
+                          text="Rock"
+                          tooltip="Rock" />
+                <MenuItem navigateurl="Jazz.aspx"
+                          text="Jazz"
+                          tooltip="Jazz" />
+            </MenuItem>
+            <MenuItem navigateurl="Movies.aspx" text="Movies" tooltip="Movies">
+                <MenuItem navigateurl="Action.aspx"
+                          text="Action"
+                          tooltip="Action" />
+                <MenuItem navigateurl="Drama.aspx"
+                          text="Drama"
+                          tooltip="Drama" />
+                <MenuItem navigateurl="Musical.aspx"
+                          text="Musical"
+                          tooltip="Musical" />
+            </MenuItem>
+        </MenuItem>
+    </Items>
+
+</Menu>
+```
+
 ##### [Back to top](#menu)
 
