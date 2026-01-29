@@ -17,10 +17,16 @@ on:
       - 'src/**'
       - 'samples/**'
       - '.github/workflows/demo.yml'
+  workflow_run:
+    workflows: ["Integration Tests"]
+    types:
+      - completed
 
 jobs:
   build-demos:
     runs-on: ubuntu-latest
+    # Only run if integration tests passed (or if triggered directly without workflow_run)
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     
     steps:
       - name: Checkout
