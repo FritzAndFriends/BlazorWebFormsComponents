@@ -119,7 +119,7 @@ When migrating data-bound controls like `<asp:Repeater>`, `<asp:DataList>`, `<as
 
 ### Web Forms vs. Blazor Context
 
-In ASP.NET Web Forms, templates implicitly use `Container.DataItem` to access the current item. In Blazor, templated components use a context variable.
+In ASP.NET Web Forms, when using strongly-typed data-binding with the `ItemType` attribute, templates access the current item using the `Item` property. In Blazor, templated components use a context variable.
 
 **Blazor's Default Behavior:**
 By default, Blazor uses `@context` as the variable name inside templates:
