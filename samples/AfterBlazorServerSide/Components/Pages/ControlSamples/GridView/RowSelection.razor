@@ -1,6 +1,7 @@
 @page "/ControlSamples/GridView/RowSelection"
 @using SharedSampleObjects.Models
 @using BlazorWebFormsComponents.DataBinding
+@rendermode InteractiveServer
 
 <h2>GridView Row Selection Example</h2>
 
@@ -8,18 +9,17 @@
 
 <p>This example demonstrates how to select a row in the GridView and retrieve the selected key value.</p>
 
-<GridView @ref="CustomersGrid"
-          ItemType="Customer"
+<GridView ItemType="Customer"
           AutoGenerateColumns="false"
           DataKeyNames="CustomerID"
-          SelectMethod="GetCustomers"
-          OnRowCommand="HandleRowCommand"
+          Items="@_customers"
           EmptyDataText="No data available">
     <Columns>
-        <ButtonField ItemType="Customer" 
-                     ButtonType="BlazorWebFormsComponents.Enums.ButtonType.Button" 
-                     Text="Select" 
-                     CommandName="Select" />
+        <TemplateField ItemType="Customer" HeaderText="">
+            <ItemTemplate Context="customer">
+                <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => SelectCustomer(customer))">Select</button>
+            </ItemTemplate>
+        </TemplateField>
         <BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
         <BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company" />
         <BoundField ItemType="Customer" DataField="FirstName" HeaderText="First Name"/>
@@ -43,14 +43,15 @@
 <h3>Code Example</h3>
 <p>This sample demonstrates the master-detail pattern using GridView row selection:</p>
 
-<pre><code>&lt;GridView @@ref="CustomersGrid"
-          ItemType="Customer"
+<pre><code>&lt;GridView ItemType="Customer"
           DataKeyNames="CustomerID"
-          OnRowCommand="HandleRowCommand"&gt;
+          Items="@@_customers"&gt;
     &lt;Columns&gt;
-        &lt;ButtonField ItemType="Customer" 
-                     Text="Select" 
-                     CommandName="Select" /&gt;
+        &lt;TemplateField ItemType="Customer" HeaderText=""&gt;
+            &lt;ItemTemplate Context="customer"&gt;
+                &lt;button type="button" class="btn btn-sm btn-primary" @@onclick="@@(() =&gt; SelectCustomer(customer))"&gt;Select&lt;/button&gt;
+            &lt;/ItemTemplate&gt;
+        &lt;/TemplateField&gt;
         &lt;BoundField DataField="CustomerID" HeaderText="ID" /&gt;
         &lt;BoundField DataField="CompanyName" HeaderText="Company" /&gt;
         &lt;BoundField DataField="FirstName" HeaderText="First Name"/&gt;
@@ -59,105 +60,57 @@
 &lt;/GridView&gt;
 
 @@code {
-    private GridView&lt;Customer&gt; CustomersGrid;
     private Customer SelectedCustomer;
-    private List&lt;Customer&gt; _customers;
-    
-    protected override void OnAfterRender(bool firstRender)
+    private List&lt;Customer&gt; _customers = new List&lt;Customer&gt;
     {
-        if (firstRender)
-        {
-            _customers = GetCustomers();
-            CustomersGrid.DataSource = _customers;
-            CustomersGrid.DataBind();
-        }
-    }
+        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
+        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
+        // ... more customers
+    };
     
-    private void HandleRowCommand(GridViewCommandEventArgs args)
+    private void SelectCustomer(Customer customer)
     {
-        if (args.CommandName == "Select")
-        {
-            // Get the row index from CommandArgument
-            int rowIndex = Convert.ToInt32(args.CommandArgument);
-            
-            // Get the data item for the selected row using the cached data source
-            if (rowIndex &lt; _customers.Count)
-            {
-                SelectedCustomer = _customers[rowIndex];
-                
-                // You can also retrieve the DataKey value directly
-                // if you need just the key value:
-                var customerID = SelectedCustomer.CustomerID;
-            }
-            
-            StateHasChanged();
-        }
+        SelectedCustomer = customer;
+        // CustomerID (the DataKey) is available via customer.CustomerID
     }
 }</code></pre>
 
 @code {
-    BlazorWebFormsComponents.GridView<Customer> CustomersGrid { get; set; }
     private Customer SelectedCustomer;
-    private List<Customer> _customers;
-    
-    private void HandleRowCommand(GridViewCommandEventArgs args)
+    private List<Customer> _customers = new List<Customer>
     {
-        if (args.CommandName == "Select")
+        new Customer
         {
-            // Get the row index from CommandArgument
-            int rowIndex = Convert.ToInt32(args.CommandArgument);
-            
-            // Get the data item for the selected row using the cached data source
-            if (_customers != null && rowIndex < _customers.Count)
-            {
-                SelectedCustomer = _customers[rowIndex];
-                
-                // Alternative: You can retrieve the DataKey value using DataBinder
-                // var dataKeyValue = DataBinder.GetPropertyValue(SelectedCustomer, "CustomerID");
-            }
-            
-            StateHasChanged();
+            CustomerID = 1,
+            FirstName = "John",
+            LastName = "Smith",
+            CompanyName = "Acme Corporation"
+        },
+        new Customer
+        {
+            CustomerID = 2,
+            FirstName = "Jane",
+            LastName = "Doe",
+            CompanyName = "TechStart Inc."
+        },
+        new Customer
+        {
+            CustomerID = 3,
+            FirstName = "Bob",
+            LastName = "Johnson",
+            CompanyName = "Global Solutions"
+        },
+        new Customer
+        {
+            CustomerID = 4,
+            FirstName = "Alice",
+            LastName = "Williams",
+            CompanyName = "Innovation Labs"
         }
-    }
+    };
     
-    public IQueryable<Customer> GetCustomers(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    private void SelectCustomer(Customer customer)
     {
-        var customers = new List<Customer>
-        {
-            new Customer
-            {
-                CustomerID = 1,
-                FirstName = "John",
-                LastName = "Smith",
-                CompanyName = "Acme Corporation"
-            },
-            new Customer
-            {
-                CustomerID = 2,
-                FirstName = "Jane",
-                LastName = "Doe",
-                CompanyName = "TechStart Inc."
-            },
-            new Customer
-            {
-                CustomerID = 3,
-                FirstName = "Bob",
-                LastName = "Johnson",
-                CompanyName = "Global Solutions"
-            },
-            new Customer
-            {
-                CustomerID = 4,
-                FirstName = "Alice",
-                LastName = "Williams",
-                CompanyName = "Innovation Labs"
-            }
-        };
-        
-        // Cache for use in HandleRowCommand
-        _customers = customers;
-        
-        totalRowCount = customers.Count;
-        return customers.AsQueryable();
+        SelectedCustomer = customer;
     }
 }
