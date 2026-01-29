@@ -1,0 +1,118 @@
+@page "/ControlSamples/Button/ValidationGroup"
+@using BlazorWebFormsComponents.Validations
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>ValidationGroup Demo</h2>
+
+<Nav></Nav>
+
+<p>This demo shows how ValidationGroup allows different buttons to trigger validation for specific sets of validators.</p>
+
+<ValidationGroupProvider>
+	<EditForm Model="@model" OnValidSubmit="@HandlePersonalSubmit">
+
+		<fieldset style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px;">
+			<legend>Personal Information (ValidationGroup="Personal")</legend>
+
+			<div style="margin-bottom: 10px;">
+				<Label Text="Name:" AssociatedControlID="name" />
+				<InputText id="name" @ref="NameInput.Current" @bind-Value="model.Name" style="margin-left: 10px;" />
+				<RequiredFieldValidator ControlToValidate="@NameInput"
+										Text="* Name is required"
+										ErrorMessage="Name is required"
+										ValidationGroup="Personal"
+										Display="Dynamic"
+										ForeColor="Red" />
+			</div>
+
+			<div style="margin-bottom: 10px;">
+				<Label Text="Email:" AssociatedControlID="email" />
+				<InputText id="email" @ref="EmailInput.Current" @bind-Value="model.Email" style="margin-left: 10px;" />
+				<RequiredFieldValidator ControlToValidate="@EmailInput"
+										Text="* Email is required"
+										ErrorMessage="Email is required"
+										ValidationGroup="Personal"
+										Display="Dynamic"
+										ForeColor="Red" />
+			</div>
+
+			<Button Text="Validate Personal Info"
+					CausesValidation="true"
+					ValidationGroup="Personal"
+					BackColor="Blue"
+					ForeColor="White" />
+		</fieldset>
+
+	</EditForm>
+
+	<EditForm Model="@model" OnValidSubmit="@HandleBusinessSubmit">
+		
+		<fieldset style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px;">
+			<legend>Business Information (ValidationGroup="Business")</legend>
+
+			<div style="margin-bottom: 10px;">
+				<Label Text="Company:" AssociatedControlID="company" />
+				<InputText id="company" @ref="CompanyInput.Current" @bind-Value="model.Company" style="margin-left: 10px;" />
+				<RequiredFieldValidator ControlToValidate="@CompanyInput"
+										Text="* Company is required"
+										ErrorMessage="Company is required"
+										ValidationGroup="Business"
+										Display="Dynamic"
+										ForeColor="Red" />
+			</div>
+
+			<div style="margin-bottom: 10px;">
+				<Label Text="Phone:" AssociatedControlID="phone" />
+				<InputText id="phone" @ref="PhoneInput.Current" @bind-Value="model.Phone" style="margin-left: 10px;" />
+				<RequiredFieldValidator ControlToValidate="@PhoneInput"
+										Text="* Phone is required"
+										ErrorMessage="Phone is required"
+										ValidationGroup="Business"
+										Display="Dynamic"
+										ForeColor="Red" />
+			</div>
+
+			<Button Text="Validate Business Info"
+					CausesValidation="true"
+					ValidationGroup="Business"
+					BackColor="Green"
+					ForeColor="White" />
+		</fieldset>
+
+	</EditForm>
+
+	<div style="margin-top: 20px;">
+		<p><strong>Status:</strong> @statusMessage</p>
+	</div>
+
+</ValidationGroupProvider>
+
+@code {
+
+	ForwardRef<InputBase<string>> NameInput = new ForwardRef<InputBase<string>>();
+	ForwardRef<InputBase<string>> EmailInput = new ForwardRef<InputBase<string>>();
+	ForwardRef<InputBase<string>> CompanyInput = new ForwardRef<InputBase<string>>();
+	ForwardRef<InputBase<string>> PhoneInput = new ForwardRef<InputBase<string>>();
+
+	private FormModel model = new FormModel();
+	private string statusMessage = "Ready";
+
+	public void HandlePersonalSubmit()
+	{
+		statusMessage = $"Personal Info Validated! Name: {model.Name}, Email: {model.Email}";
+	}
+
+	public void HandleBusinessSubmit()
+	{
+		statusMessage = $"Business Info Validated! Company: {model.Company}, Phone: {model.Phone}";
+	}
+
+	public class FormModel
+	{
+		public string Name { get; set; }
+		public string Email { get; set; }
+		public string Company { get; set; }
+		public string Phone { get; set; }
+	}
+
+}
