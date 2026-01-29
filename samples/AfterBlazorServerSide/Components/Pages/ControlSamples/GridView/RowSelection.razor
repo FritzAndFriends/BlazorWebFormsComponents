@@ -1,0 +1,167 @@
+@page "/ControlSamples/GridView/RowSelection"
+@using SharedSampleObjects.Models
+@using BlazorWebFormsComponents.DataBinding
+
+<h2>GridView Row Selection Example</h2>
+
+<Nav />
+
+<p>This example demonstrates how to select a row in the GridView and retrieve the selected key value.</p>
+
+<GridView @ref="CustomersGrid"
+          ItemType="Customer"
+          AutoGenerateColumns="false"
+          DataKeyNames="CustomerID"
+          OnRowCommand="HandleRowCommand"
+          EmptyDataText="No data available">
+    <Columns>
+        <ButtonField ItemType="Customer" 
+                     ButtonType="BlazorWebFormsComponents.Enums.ButtonType.Button" 
+                     Text="Select" 
+                     CommandName="Select" />
+        <BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+        <BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company" />
+        <BoundField ItemType="Customer" DataField="FirstName" HeaderText="First Name"/>
+        <BoundField ItemType="Customer" DataField="LastName" HeaderText="Last Name"/>
+    </Columns>
+</GridView>
+
+@if (SelectedCustomer != null)
+{
+    <div style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9;">
+        <h3>Selected Customer Details</h3>
+        <p><strong>Customer ID:</strong> @SelectedCustomer.CustomerID</p>
+        <p><strong>Company Name:</strong> @SelectedCustomer.CompanyName</p>
+        <p><strong>First Name:</strong> @SelectedCustomer.FirstName</p>
+        <p><strong>Last Name:</strong> @SelectedCustomer.LastName</p>
+    </div>
+}
+
+<hr />
+
+<h3>Code Example</h3>
+<p>This sample demonstrates the master-detail pattern using GridView row selection:</p>
+
+<pre><code>&lt;GridView @@ref="CustomersGrid"
+          ItemType="Customer"
+          DataKeyNames="CustomerID"
+          OnRowCommand="HandleRowCommand"&gt;
+    &lt;Columns&gt;
+        &lt;ButtonField ItemType="Customer" 
+                     Text="Select" 
+                     CommandName="Select" /&gt;
+        &lt;BoundField DataField="CustomerID" HeaderText="ID" /&gt;
+        &lt;BoundField DataField="CompanyName" HeaderText="Company" /&gt;
+        &lt;BoundField DataField="FirstName" HeaderText="First Name"/&gt;
+        &lt;BoundField DataField="LastName" HeaderText="Last Name"/&gt;
+    &lt;/Columns&gt;
+&lt;/GridView&gt;
+
+@@code {
+    private GridView&lt;Customer&gt; CustomersGrid;
+    private Customer SelectedCustomer;
+    private List&lt;Customer&gt; _customers;
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _customers = GetCustomers();
+            CustomersGrid.DataSource = _customers;
+            CustomersGrid.DataBind();
+        }
+    }
+    
+    private void HandleRowCommand(GridViewCommandEventArgs args)
+    {
+        if (args.CommandName == "Select")
+        {
+            // Get the row index from CommandArgument
+            int rowIndex = Convert.ToInt32(args.CommandArgument);
+            
+            // Get the data item for the selected row using the cached data source
+            if (rowIndex &lt; _customers.Count)
+            {
+                SelectedCustomer = _customers[rowIndex];
+                
+                // You can also retrieve the DataKey value directly
+                // if you need just the key value:
+                var customerID = SelectedCustomer.CustomerID;
+            }
+            
+            StateHasChanged();
+        }
+    }
+}</code></pre>
+
+@code {
+    BlazorWebFormsComponents.GridView<Customer> CustomersGrid { get; set; }
+    private Customer SelectedCustomer;
+    private List<Customer> _customers;
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _customers = GetCustomers();
+            CustomersGrid.DataSource = _customers;
+            CustomersGrid.DataBind();
+        }
+        base.OnAfterRender(firstRender);
+    }
+    
+    private void HandleRowCommand(GridViewCommandEventArgs args)
+    {
+        if (args.CommandName == "Select")
+        {
+            // Get the row index from CommandArgument
+            int rowIndex = Convert.ToInt32(args.CommandArgument);
+            
+            // Get the data item for the selected row using the cached data source
+            if (rowIndex < _customers.Count)
+            {
+                SelectedCustomer = _customers[rowIndex];
+                
+                // Alternative: You can retrieve the DataKey value using DataBinder
+                // var dataKeyValue = DataBinder.GetPropertyValue(SelectedCustomer, "CustomerID");
+            }
+            
+            StateHasChanged();
+        }
+    }
+    
+    private List<Customer> GetCustomers()
+    {
+        return new List<Customer>
+        {
+            new Customer
+            {
+                CustomerID = 1,
+                FirstName = "John",
+                LastName = "Smith",
+                CompanyName = "Acme Corporation"
+            },
+            new Customer
+            {
+                CustomerID = 2,
+                FirstName = "Jane",
+                LastName = "Doe",
+                CompanyName = "TechStart Inc."
+            },
+            new Customer
+            {
+                CustomerID = 3,
+                FirstName = "Bob",
+                LastName = "Johnson",
+                CompanyName = "Global Solutions"
+            },
+            new Customer
+            {
+                CustomerID = 4,
+                FirstName = "Alice",
+                LastName = "Williams",
+                CompanyName = "Innovation Labs"
+            }
+        };
+    }
+}
