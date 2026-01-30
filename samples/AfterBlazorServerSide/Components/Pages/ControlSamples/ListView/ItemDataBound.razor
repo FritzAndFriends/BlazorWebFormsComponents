@@ -1,0 +1,112 @@
+@page "/ControlSamples/ListView/ItemDataBound"
+@using SharedSampleObjects.Models
+@using BlazorWebFormsComponents.Enums
+
+<h2>ListView - ItemDataBound Event</h2>
+
+<Nav />
+
+<p>This example demonstrates using the <code>OnItemDataBound</code> event to access <code>ListViewItem</code> and <code>ListViewDataItem</code> properties.</p>
+
+<div class="alert alert-info">
+	<strong>ItemDataBound Event Counter:</strong> <span id="event-count">@itemDataBoundCount</span> events fired
+</div>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Name</th>
+			<th>Price</th>
+			<th>DataItemIndex</th>
+			<th>DisplayIndex</th>
+			<th>ItemType</th>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView Items="Widget.SimpleWidgetList"
+				  ItemType="Widget"
+				  OnItemDataBound="HandleItemDataBound"
+				  Context="Item">
+			<ItemTemplate>
+				<tr class="item-row">
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td class="data-item-index">-</td>
+					<td class="display-index">-</td>
+					<td class="item-type">DataItem</td>
+				</tr>
+			</ItemTemplate>
+			<AlternatingItemTemplate>
+				<tr class="table-dark alt-item-row">
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td class="data-item-index">-</td>
+					<td class="display-index">-</td>
+					<td class="item-type">DataItem</td>
+				</tr>
+			</AlternatingItemTemplate>
+		</ListView>
+	</tbody>
+</table>
+
+<h3>ItemDataBound Event Details</h3>
+<div id="event-details" class="border p-3">
+	<p>The <code>OnItemDataBound</code> event fires for each item as it's rendered. The event provides access to:</p>
+	<ul>
+		<li><strong>ItemType</strong>: The type of item (DataItem, InsertItem, or EmptyItem)</li>
+		<li><strong>DataItemIndex</strong>: The index of the data item in the underlying data source</li>
+		<li><strong>DisplayIndex</strong>: The position of the item as displayed in the ListView</li>
+		<li><strong>DataItem</strong>: The underlying data object bound to this item</li>
+	</ul>
+	<p>Total events fired: <strong>@itemDataBoundCount</strong></p>
+</div>
+
+@code {
+	private int itemDataBoundCount = 0;
+
+	private void HandleItemDataBound(ListViewItemEventArgs e)
+	{
+		itemDataBoundCount++;
+
+		// Access ListViewDataItem properties
+		if (e.Item is ListViewDataItem dataItem)
+		{
+			var widget = (Widget)dataItem.DataItem;
+			// You can access:
+			// - dataItem.DataItemIndex
+			// - dataItem.DisplayIndex
+			// - dataItem.ItemType
+			// - dataItem.DataItem (the bound object)
+		}
+	}
+}
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;ListView Items="Widget.SimpleWidgetList"
+          ItemType="Widget"
+          OnItemDataBound="HandleItemDataBound"
+          Context="Item"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@Item.Name&lt;/td&gt;
+            &lt;td&gt;@@currentItemInfo?.DataItemIndex&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/ListView&gt;
+
+@@code {
+    private void HandleItemDataBound(ListViewItemEventArgs e)
+    {
+        if (e.Item is ListViewDataItem dataItem)
+        {
+            var widget = (Widget)dataItem.DataItem;
+            // Access dataItem.DataItemIndex, dataItem.DisplayIndex
+            // Access dataItem.ItemType (DataItem, InsertItem, EmptyItem)
+        }
+    }
+}</code></pre>
