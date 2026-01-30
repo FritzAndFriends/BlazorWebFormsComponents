@@ -3,11 +3,11 @@
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
 | Editor Controls | 15 | 0 | 12 | 27 |
-| Data Controls | 5 | 0 | 3 | 8 |
+| Data Controls | 6 | 0 | 2 | 8 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 2 | 0 | 1 | 3 |
 | Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **33** | **0** | **19** | **52** |
+| **TOTAL** | **34** | **0** | **18** | **52** |
 
 ---
 
@@ -46,17 +46,17 @@
 | View | 🔴 Not Started | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
-### 🟡 Data Controls (5/8 - 62.5% Complete)
+### 🟡 Data Controls (6/8 - 75% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
+| DataGrid | ✅ Complete | Documented |
 | DataList | ✅ Complete | Documented in DataList.md |
 | FormView | ✅ Complete | Documented |
 | GridView | ✅ Complete | Documented |
 | ListView | ✅ Complete | Documented |
 | Repeater | ✅ Complete | Documented |
 | Chart | 🔴 Not Started | Consider deferring - very high complexity |
-| DataGrid | 🔴 Not Started | Legacy - superseded by GridView |
 | DataPager | 🔴 Not Started | Paging for ListView |
 | DetailsView | 🔴 Not Started | Single-record display/edit |
 
@@ -153,7 +153,7 @@
 | **Xml** | Medium | XML transform |
 | **Substitution** | N/A | Cache-related, may not apply |
 | **Chart** | Very High | Consider external library |
-| **DataGrid** | Medium | Legacy, use GridView |
+| ~~**DataGrid**~~ | ~~Medium~~ | ~~Legacy, use GridView~~ | ✅ Complete |
 
 ### Summary Estimates
 
@@ -164,7 +164,7 @@
 | **Nav & Data (3 remaining)** | ~32-46 hours | ~16-23 hours |
 | **Login (3)** | ~56-80 hours | ~28-40 hours |
 | **Lower Priority (10)** | Variable | Variable |
-| **Total Remaining** | 19 components | 19 components |
+| **Total Remaining** | 18 components | 18 components |
 
 ---
 

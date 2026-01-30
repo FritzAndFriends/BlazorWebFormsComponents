@@ -1,0 +1,30 @@
+
+@code {
+	[Fact]
+	public void DataGrid_ShowHeader_HidesHeaderWhenFalse()
+	{
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="false"
+							ShowHeader="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+			</Columns>
+		</DataGrid>);
+
+		// Should not have header row
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(0, "Should not have header row when ShowHeader is false");
+		
+		// But should still have data rows
+		var dataRows = cut.FindAll("tr");
+		dataRows.Count.ShouldBe(Widget.SimpleWidgetList.Length, "Should have data rows");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

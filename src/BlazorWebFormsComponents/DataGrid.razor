@@ -1,0 +1,46 @@
+@using BlazorWebFormsComponents.DataBinding
+@using Interfaces
+@typeparam ItemType
+@inherits DataBoundComponent<ItemType>
+@if (ColumnList.Any())
+{
+	<table class="@CssClass">
+		@if (ShowHeader)
+		{
+			<thead>
+				<tr>
+					@foreach (IColumn<ItemType> column in ColumnList)
+					{
+						<th>@column.HeaderText</th>
+					}
+				</tr>
+			</thead>
+		}
+		<tbody>
+			@if (Items != null && Items.Any())
+			{
+				var index = 0;
+				@foreach (ItemType item in Items)
+				{
+					<CascadingValue Value="this" Name="RowCollection">
+						<DataGridRow DataItem="item" Columns="ColumnList" DataItemIndex="index" />
+					</CascadingValue>
+
+					index++;
+				}
+			}
+			else
+			{
+				<tr>
+					<td colspan=@ColumnList.Count>
+						@EmptyDataText
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+<CascadingValue Value="this" Name="ColumnCollection">
+	@Columns
+</CascadingValue>

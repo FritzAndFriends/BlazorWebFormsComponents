@@ -81,6 +81,7 @@ nav:
     - RadioButtonList: EditorControls/RadioButtonList.md
     - TextBox: EditorControls/TextBox.md
   - Data Controls:
+    - DataGrid: DataControls/DataGrid.md
     - DataList: DataControls/DataList.md
     - FormView: DataControls/FormView.md
     - GridView: DataControls/GridView.md
