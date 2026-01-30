@@ -18,9 +18,6 @@
 			<th>Id</th>
 			<th>Name</th>
 			<th>Price</th>
-			<th>DataItemIndex</th>
-			<th>DisplayIndex</th>
-			<th>ItemType</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -33,9 +30,6 @@
 					<td>@Item.Id</td>
 					<td>@Item.Name</td>
 					<td>@Item.Price.ToString("c")</td>
-					<td class="data-item-index">-</td>
-					<td class="display-index">-</td>
-					<td class="item-type">DataItem</td>
 				</tr>
 			</ItemTemplate>
 			<AlternatingItemTemplate>
@@ -43,9 +37,6 @@
 					<td>@Item.Id</td>
 					<td>@Item.Name</td>
 					<td>@Item.Price.ToString("c")</td>
-					<td class="data-item-index">-</td>
-					<td class="display-index">-</td>
-					<td class="item-type">DataItem</td>
 				</tr>
 			</AlternatingItemTemplate>
 		</ListView>
@@ -83,6 +74,33 @@
 		}
 	}
 }
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;ListView Items="Widget.SimpleWidgetList"
+          ItemType="Widget"
+          OnItemDataBound="HandleItemDataBound"
+          Context="Item"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@Item.Name&lt;/td&gt;
+            &lt;td&gt;@@Item.Price.ToString("c")&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/ListView&gt;
+
+@@code {
+    private void HandleItemDataBound(ListViewItemEventArgs e)
+    {
+        if (e.Item is ListViewDataItem dataItem)
+        {
+            var widget = (Widget)dataItem.DataItem;
+            // Access dataItem.DataItemIndex, dataItem.DisplayIndex
+            // Access dataItem.ItemType (DataItem, InsertItem, EmptyItem)
+        }
+    }
+}</code></pre>
 
 <hr />
 
