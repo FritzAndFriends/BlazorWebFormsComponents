@@ -1,0 +1,59 @@
+@inherits BunitContext
+@using SharedSampleObjects.Models
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
+@using Moq
+
+@code {
+
+	[Fact]
+	public void GridView_RowSelection_SelectsCorrectCustomer()
+	{
+		// Register required services
+		var mockLinkGenerator = new Mock<LinkGenerator>();
+		Services.AddSingleton<LinkGenerator>(mockLinkGenerator.Object);
+		
+		var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+		Services.AddSingleton<IHttpContextAccessor>(mockHttpContextAccessor.Object);
+
+		var customers = new List<Customer>
+		{
+			new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme" },
+			new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart" },
+			new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global" }
+		};
+
+		Customer? selectedCustomer = null;
+
+		var cut = Render(@<GridView ItemType="Customer"
+			AutoGenerateColumns="false"
+			DataKeyNames="CustomerID"
+			Items="@customers">
+			<Columns>
+				<TemplateField ItemType="Customer">
+					<ItemTemplate Context="customer">
+						<button type="button" @onclick="@(() => selectedCustomer = customer)">Select</button>
+					</ItemTemplate>
+				</TemplateField>
+				<BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+				<BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company" />
+			</Columns>
+		</GridView>);
+
+		// Verify data is displayed
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBeGreaterThan(1, "Should have data rows");
+		
+		// Click the second row's select button
+		var buttons = cut.FindAll("button");
+		buttons.Count.ShouldBe(3, "Should have 3 select buttons");
+		
+		buttons[1].Click();
+
+		// Verify correct customer was selected
+		selectedCustomer.ShouldNotBeNull();
+		selectedCustomer.CustomerID.ShouldBe(2);
+		selectedCustomer.FirstName.ShouldBe("Jane");
+	}
+
+}
