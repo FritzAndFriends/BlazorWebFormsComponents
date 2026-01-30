@@ -101,30 +101,3 @@
         }
     }
 }</code></pre>
-
-<hr />
-
-<h3>Code Example</h3>
-<pre><code>&lt;ListView Items="Widget.SimpleWidgetList"
-          ItemType="Widget"
-          OnItemDataBound="HandleItemDataBound"
-          Context="Item"&gt;
-    &lt;ItemTemplate&gt;
-        &lt;tr&gt;
-            &lt;td&gt;@@Item.Name&lt;/td&gt;
-            &lt;td&gt;@@currentItemInfo?.DataItemIndex&lt;/td&gt;
-        &lt;/tr&gt;
-    &lt;/ItemTemplate&gt;
-&lt;/ListView&gt;
-
-@@code {
-    private void HandleItemDataBound(ListViewItemEventArgs e)
-    {
-        if (e.Item is ListViewDataItem dataItem)
-        {
-            var widget = (Widget)dataItem.DataItem;
-            // Access dataItem.DataItemIndex, dataItem.DisplayIndex
-            // Access dataItem.ItemType (DataItem, InsertItem, EmptyItem)
-        }
-    }
-}</code></pre>
