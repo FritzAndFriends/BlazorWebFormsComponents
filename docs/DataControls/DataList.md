@@ -28,7 +28,7 @@ The DataList component is meant to emulate the asp:DataList control in markup an
     - `EnableViewState`
 - `ID` should be converted to `@ref` if the component is referenced in code
 - `ItemType` MUST be defined as an attribute
-- `Context` should be used to define the object used in templates.  If not defined, the default `<INSERT>` will be available.
+- **For Web Forms compatibility, use `Context="Item"`** to access the current data item in templates with the name `@Item` instead of Blazor's default `@context`
 
 ## Web Forms Declarative Syntax
 

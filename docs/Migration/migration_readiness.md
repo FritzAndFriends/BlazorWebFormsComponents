@@ -20,6 +20,11 @@ Throughout this document, we will refer to several framework and technology term
 - Class libraries referenced need to be convertible to .NET Standard
 - No 3rd party control libraries that don't have a shim for conversion (none available at the time of this writing)
 
+### Data-Bound Controls
+
+- For data-bound controls (Repeater, DataList, GridView, ListView, FormView), use `Context="Item"` attribute to access items with `@Item` instead of Blazor's default `@context`
+- This provides compatibility with Web Forms' strongly-typed `Item` property when using `ItemType` attribute
+
 ## Application architecture suggestions
 
 - Prefer model-binding techniques over handling Form life-cycle events like `Init`, `Load`, `PreRender`, and `Unload`
