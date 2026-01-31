@@ -34,6 +34,9 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool ShowLines { get; set; } = false;
 
+		[Parameter]
+		public bool UseAccessibilityFeatures { get; set; } = false;
+
 		#region IHasStyle
 
 		[Parameter] public WebColor BackColor { get; set; }

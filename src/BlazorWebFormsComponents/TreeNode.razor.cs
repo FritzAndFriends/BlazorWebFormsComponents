@@ -222,6 +222,41 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		public async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+		{
+			if (!ParentTreeView.UseAccessibilityFeatures) return;
+
+			switch (e.Key)
+			{
+				case "ArrowRight":
+					// Expand node if it has children and is collapsed
+					if (ChildContent != null && !Expanded)
+					{
+						HandleNodeExpand();
+					}
+					break;
+
+				case "ArrowLeft":
+					// Collapse node if it has children and is expanded
+					if (ChildContent != null && Expanded)
+					{
+						HandleNodeExpand();
+					}
+					break;
+
+				case "Enter":
+				case " ": // Space key
+					// Activate the node's link or expand/collapse
+					if (string.IsNullOrEmpty(NavigateUrl) && ChildContent != null)
+					{
+						HandleNodeExpand();
+					}
+					break;
+			}
+
+			await Task.CompletedTask;
+		}
+
 		#endregion
 
 	}

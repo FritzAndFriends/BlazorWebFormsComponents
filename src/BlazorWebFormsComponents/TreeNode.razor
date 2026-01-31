@@ -1,10 +1,14 @@
 ﻿@inherits ComponentBase
 @{
 	string nodeText = Expanded ? $"Collapse {Text}" : $"Expand {Text}";
+	string ariaExpanded = ParentTreeView.UseAccessibilityFeatures && ChildContent != null ? (Expanded ? "true" : "false") : null;
+	string ariaLevel = ParentTreeView.UseAccessibilityFeatures ? ((Depth + 1).ToString()) : null;
+	string role = ParentTreeView.UseAccessibilityFeatures ? "treeitem" : null;
+	int tabIndex = ParentTreeView.UseAccessibilityFeatures ? 0 : -1;
 }
 @if ((Parent?.Expanded) ?? true)
 {
-<table cellpadding="0" cellspacing="0" style="border-width: 0;">
+<table cellpadding="0" cellspacing="0" style="border-width: 0;" role="@role" aria-expanded="@ariaExpanded" aria-level="@ariaLevel" tabindex="@(ParentTreeView.UseAccessibilityFeatures ? tabIndex : (int?)null)" @onkeydown="HandleKeyDown">
 	<tr>
 		@{
 			var currentParent = Parent;
@@ -36,7 +40,7 @@
 		@if ((IsRoot || IsParent) && ParentTreeView.ShowExpandCollapse && ChildContent != null)
 		{
 			<td>
-				<a href="" @onclick="HandleNodeExpand" @onclick:preventDefault @onclick:stopPropagation>
+				<a href="" @onclick="HandleNodeExpand" @onclick:preventDefault @onclick:stopPropagation aria-label="@(ParentTreeView.UseAccessibilityFeatures ? nodeText : null)">
 					<img src="@NodeImage" alt="@nodeText" title="@nodeText" style="border-width: 0;" />
 				</a>
 			</td>
