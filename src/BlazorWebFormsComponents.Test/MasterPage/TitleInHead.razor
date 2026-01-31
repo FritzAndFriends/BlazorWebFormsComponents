@@ -1,0 +1,57 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void MasterPage_WithTitleInHead_RendersCorrectly()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<Head>
+				<title>Test Page Title</title>
+				<link href="css/site.css" rel="stylesheet" />
+			</Head>
+			<ChildContent>
+				<div class="content">Body content</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert - Title is included in HeadContent
+		cut.Find(".content").TextContent.ShouldBe("Body content");
+	}
+
+	[Fact]
+	public void MasterPage_HeadWithMultipleElements_AllRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<Head>
+				<title>My Page</title>
+				<meta name="description" content="Test" />
+				<link href="css/style.css" rel="stylesheet" />
+			</Head>
+			<ChildContent>
+				<div class="page">Content</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".page").TextContent.ShouldBe("Content");
+	}
+
+	[Fact]
+	public void MasterPage_WithoutTitleInHead_StillWorks()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<Head>
+				<link href="css/site.css" rel="stylesheet" />
+			</Head>
+			<ChildContent>
+				<div class="content">Body only</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".content").TextContent.ShouldBe("Body only");
+	}
+}

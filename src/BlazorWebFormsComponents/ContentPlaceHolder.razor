@@ -1,0 +1,12 @@
+@inherits ContentPlaceHolderBase
+@if (Visible)
+{
+	@if (Content != null)
+	{
+		@Content
+	}
+	else
+	{
+		@ChildContent
+	}
+}
