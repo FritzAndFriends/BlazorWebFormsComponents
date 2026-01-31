@@ -1,6 +1,7 @@
 @using BlazorWebFormsComponents.DataBinding
 @using Interfaces
 @typeparam ItemType
+@attribute [CascadingTypeParameter(nameof(ItemType))]
 @inherits DataBoundComponent<ItemType>
 @if (ColumnList.Any())
 {

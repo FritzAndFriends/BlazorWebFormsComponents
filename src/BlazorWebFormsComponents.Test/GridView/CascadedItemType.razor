@@ -1,0 +1,86 @@
+@code {
+	[Fact]
+	public void GridView_CascadedItemType_ColumnsInferTypeFromParent()
+	{
+		// Test that columns can omit ItemType when parent GridView has it
+		// This uses the CascadingTypeParameter feature
+		var cut = Render(@<GridView ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField DataField="Id" HeaderText="ID" />
+				<BoundField DataField="Name" HeaderText="Widget Name" />
+				<BoundField DataField="LastUpdate.Year" HeaderText="Last Update Year" />
+			</Columns>
+		</GridView>);
+
+		// Check headers
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(3, "Wrong number of TH elements");
+		tableHeaders[0].TextContent.ShouldBe("ID");
+		tableHeaders[1].TextContent.ShouldBe("Widget Name");
+		tableHeaders[2].TextContent.ShouldBe("Last Update Year");
+
+		// Check first data row to see that it bound stuff correctly
+		var firstDataRow = cut.FindAll("tr")[1]; // Row #0 is the header, so row #1 is the first data row
+		var firstDataRowCells = firstDataRow.ChildNodes.OfType<AngleSharp.Dom.IElement>().ToList();
+		var idCellHtml = firstDataRowCells[0].InnerHtml.Trim();
+		idCellHtml.ShouldBe("1");
+		var nameCellHtml = firstDataRowCells[1].InnerHtml.Trim();
+		nameCellHtml.ShouldBe("First Widget");
+		var updateYearCellHtml = firstDataRowCells[2].InnerHtml.Trim();
+		updateYearCellHtml.ShouldBe(Widget.SimpleWidgetList.First().LastUpdate.Year.ToString());
+	}
+
+	[Fact]
+	public void GridView_CascadedItemType_MixedWithExplicitTypeStillWorks()
+	{
+		// Test backward compatibility - explicit ItemType on columns should still work
+		var cut = Render(@<GridView ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+				<BoundField DataField="Name" HeaderText="Widget Name" />
+			</Columns>
+		</GridView>);
+
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(2);
+		tableHeaders[0].TextContent.ShouldBe("ID");
+		tableHeaders[1].TextContent.ShouldBe("Widget Name");
+	}
+
+	[Fact]
+	public void GridView_CascadedItemType_TemplateFieldWorks()
+	{
+		// Test that TemplateField also benefits from cascaded type
+		var cut = Render(@<GridView ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField DataField="Id" HeaderText="ID" />
+				<TemplateField HeaderText="Custom">
+					<ItemTemplate Context="Item">
+						<span>@Item.Name</span>
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(2);
+		tableHeaders[1].TextContent.ShouldBe("Custom");
+
+		// Check that template rendered correctly
+		var firstDataRow = cut.FindAll("tr")[1];
+		var cells = firstDataRow.ChildNodes.OfType<AngleSharp.Dom.IElement>().ToList();
+		cells[1].InnerHtml.Trim().ShouldContain("First Widget");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

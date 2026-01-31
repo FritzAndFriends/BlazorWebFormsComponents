@@ -1,0 +1,55 @@
+@code {
+	[Fact]
+	public void DataGrid_CascadedItemType_ColumnsInferTypeFromParent()
+	{
+		// Test that columns can omit ItemType when parent DataGrid has it
+		// This uses the CascadingTypeParameter feature
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField DataField="Id" HeaderText="ID" />
+				<BoundField DataField="Name" HeaderText="Widget Name" />
+			</Columns>
+		</DataGrid>);
+
+		// Check headers
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(2, "Wrong number of TH elements");
+		tableHeaders[0].TextContent.ShouldBe("ID");
+		tableHeaders[1].TextContent.ShouldBe("Widget Name");
+
+		// Check first data row to see that it bound stuff correctly
+		var firstDataRow = cut.FindAll("tr")[1]; // Row #0 is the header, so row #1 is the first data row
+		var firstDataRowCells = firstDataRow.ChildNodes.OfType<AngleSharp.Dom.IElement>().ToList();
+		var idCellHtml = firstDataRowCells[0].InnerHtml.Trim();
+		idCellHtml.ShouldBe("1");
+		var nameCellHtml = firstDataRowCells[1].InnerHtml.Trim();
+		nameCellHtml.ShouldBe("First Widget");
+	}
+
+	[Fact]
+	public void DataGrid_CascadedItemType_BackwardCompatibility()
+	{
+		// Test backward compatibility - explicit ItemType on columns should still work
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+			</Columns>
+		</DataGrid>);
+
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(2);
+		tableHeaders[0].TextContent.ShouldBe("ID");
+		tableHeaders[1].TextContent.ShouldBe("Widget Name");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}
