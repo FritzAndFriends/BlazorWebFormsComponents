@@ -4,15 +4,13 @@
 {
     <PageTitle>@_currentTitle</PageTitle>
 }
+<HeadContent>
 @if (!string.IsNullOrEmpty(_currentMetaDescription))
 {
-<HeadContent>
     <meta name="description" content="@_currentMetaDescription" />
-</HeadContent>
 }
 @if (!string.IsNullOrEmpty(_currentMetaKeywords))
 {
-<HeadContent>
     <meta name="keywords" content="@_currentMetaKeywords" />
-</HeadContent>
 }
+</HeadContent>
