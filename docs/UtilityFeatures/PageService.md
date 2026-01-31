@@ -243,6 +243,10 @@ The `IPageService` interface can be extended in future versions to support addit
 | Synchronous | Synchronous | No change needed |
 | Scoped to request | Scoped to render cycle | Similar lifecycle |
 
+## Known Limitations
+
+- **HeadContent Rendering**: In some Blazor Server-Side scenarios, meta tags may not render consistently when using multiple conditional `HeadContent` blocks. The service properties and events work correctly, but rendering may vary. For guaranteed meta tag rendering, consider using static `<HeadContent>` with bound variables in addition to or instead of the `Page` component.
+
 ## Moving On
 
 While `PageService` provides familiar Web Forms compatibility, consider these Blazor-native approaches:
@@ -266,18 +270,22 @@ Use the built-in components directly:
 ### For Dynamic Metadata
 
 The `PageService` approach is appropriate when:
-- Title depends on data loaded asynchronously
-- Title changes based on user actions
-- Title is set in response to events
+- Metadata depends on data loaded asynchronously
+- Metadata changes based on user actions
+- Metadata is set in response to events
 - You want Web Forms-style programmatic control
 
-For simpler scenarios, you can use `<PageTitle>` with bound variables:
+For simpler scenarios, you can use built-in components with bound variables:
 
 ```razor
 <PageTitle>@currentTitle</PageTitle>
+<HeadContent>
+    <meta name="description" content="@currentDescription" />
+</HeadContent>
 
 @code {
     private string currentTitle = "Default Title";
+    private string currentDescription = "Default description";
     
     private void UpdateTitle(string newTitle)
     {
