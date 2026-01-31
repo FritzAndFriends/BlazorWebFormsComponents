@@ -125,3 +125,18 @@ To run integration tests locally:
    ```
 
 See [samples/AfterBlazorServerSide.Tests/README.md](samples/AfterBlazorServerSide.Tests/README.md) for more details.
+
+## Releasing
+
+This project uses automated scripts with Nerdbank.GitVersioning to help with version publishing and release management. See the [scripts/README.md](scripts/README.md) for detailed documentation on:
+
+- **prepare-release.sh** - Uses `nbgv` to update version.json and generates release notes
+- **generate-release-notes.sh** - Creates formatted release notes from git commits
+- **publish-release.sh** - Uses `nbgv tag` to create and publish release tags
+
+Quick workflow:
+1. On `dev` branch: `./scripts/prepare-release.sh 0.14`
+2. Merge `dev` to `main`
+3. On `main` branch: `./scripts/publish-release.sh`
+
+The NuGet package is automatically published via GitHub Actions when a version tag is pushed.
