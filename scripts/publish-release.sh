@@ -33,10 +33,16 @@ if ! git diff-index --quiet HEAD --; then
 fi
 
 # Get the version from nbgv
-VERSION=$(nbgv get-version -v Version 2>/dev/null)
+VERSION=$(nbgv get-version -v Version 2>&1)
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Could not read version using nbgv${NC}" >&2
+    echo "nbgv output: $VERSION" >&2
+    echo "Make sure you are in a git repository with version.json" >&2
+    exit 1
+fi
+
 if [ -z "$VERSION" ]; then
-    echo -e "${RED}Error: Could not read version using nbgv${NC}"
-    echo "Make sure you are in a git repository with version.json"
+    echo -e "${RED}Error: nbgv returned an empty version${NC}" >&2
     exit 1
 fi
 
