@@ -48,9 +48,9 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal RenderFragment GetContentForPlaceHolder(string placeHolderId)
 		{
-			if (ContentSections != null && ContentSections.ContainsKey(placeHolderId))
+			if (ContentSections != null && ContentSections.TryGetValue(placeHolderId, out var contentSection))
 			{
-				return ContentSections[placeHolderId];
+				return contentSection;
 			}
 			return null;
 		}
