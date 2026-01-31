@@ -9,6 +9,7 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
 - **Context attribute** - When using `<TemplateField>`, add `Context="Item"` to access the current row item as `@Item` instead of Blazor's default `@context`
+- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
 
 ## Web Forms Declarative Syntax
 
@@ -370,10 +371,14 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
     Visible=bool
 >
     <Columns>
+        <!-- Note: ItemType is optional on columns and will be automatically 
+             inferred from the parent GridView. You can still explicitly 
+             specify ItemType on individual columns for clarity if desired. -->
         <BoundField
                     DataField=string
                     DataFormatString=string
                     HeaderText=string
+                    ItemType=Type (optional, inferred from parent)
                     Visible=bool
         >
         </BoundField>
@@ -384,6 +389,7 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
             DataTextField="string"
             DataTextFormatString="string"
             HeaderText="string"
+            ItemType=Type (optional, inferred from parent)
             NavigateUrl="uri"
             Target="string|_blank|_parent|_search|_self|_top"
             Text="string"
@@ -391,6 +397,7 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
         </HyperLinkField>
         <TemplateField
                  HeaderText=string
+                 ItemType=Type (optional, inferred from parent)
                  Visible=bool
         >
             <ItemTemplate Context="Item">

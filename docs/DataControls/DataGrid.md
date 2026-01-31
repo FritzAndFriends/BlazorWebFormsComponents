@@ -15,6 +15,7 @@ The DataGrid component is meant to emulate the asp:DataGrid control in markup an
 - The `ItemCommand.CommandSource` object will be populated with the `ButtonField` object
 - DataGrid uses the same column types as GridView (BoundField, ButtonField, etc.)
 - DataGrid is a legacy control superseded by GridView in ASP.NET 2.0, but is provided for compatibility
+- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the DataGrid to child columns. You only need to specify it once on the DataGrid, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
 
 ## Web Forms Features NOT Supported
 
