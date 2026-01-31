@@ -1,0 +1,158 @@
+@using System.Collections.Generic
+
+@code {
+	[Fact]
+	public void AdRotator_DataSource_RendersFromList()
+	{
+		var ads = new List<Advertisment>
+		{
+			new Advertisment
+			{
+				ImageUrl = "test1.png",
+				NavigateUrl = "http://www.test1.com",
+				AlternateText = "Test Ad 1",
+				Width = "100",
+				Height = "50"
+			},
+			new Advertisment
+			{
+				ImageUrl = "test2.png",
+				NavigateUrl = "http://www.test2.com",
+				AlternateText = "Test Ad 2",
+				Width = "100",
+				Height = "50"
+			}
+		};
+
+		var cut = Render(@<AdRotator DataSource="@ads" Target="_blank" />);
+		
+		// Should render one of the ads
+		var link = cut.Find("a");
+		link.ShouldNotBeNull();
+		link.GetAttribute("target").ShouldBe("_blank");
+		
+		var img = cut.Find("img");
+		img.ShouldNotBeNull();
+		img.GetAttribute("width").ShouldBe("100");
+		img.GetAttribute("height").ShouldBe("50");
+		
+		// Verify it's one of our ads
+		var imgSrc = img.GetAttribute("src");
+		(imgSrc == "test1.png" || imgSrc == "test2.png").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void AdRotator_DataSource_WithKeywordFilter()
+	{
+		var ads = new List<Advertisment>
+		{
+			new Advertisment
+			{
+				ImageUrl = "tech.png",
+				NavigateUrl = "http://www.tech.com",
+				AlternateText = "Tech Ad",
+				Keyword = "technology",
+				Width = "100",
+				Height = "50"
+			},
+			new Advertisment
+			{
+				ImageUrl = "sport.png",
+				NavigateUrl = "http://www.sport.com",
+				AlternateText = "Sport Ad",
+				Keyword = "sports",
+				Width = "100",
+				Height = "50"
+			}
+		};
+
+		var cut = Render(@<AdRotator DataSource="@ads" KeywordFilter="technology" Target="_blank" />);
+		
+		var img = cut.Find("img");
+		img.GetAttribute("src").ShouldBe("tech.png");
+		img.GetAttribute("alt").ShouldBe("Tech Ad");
+	}
+
+	[Fact]
+	public void AdRotator_DataSource_EmptyList_RendersNothing()
+	{
+		var ads = new List<Advertisment>();
+
+		var cut = Render(@<AdRotator DataSource="@ads" Target="_blank" />);
+		
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void AdRotator_DataSource_OnDataBound_EventIsFired()
+	{
+		var ads = new List<Advertisment>
+		{
+			new Advertisment
+			{
+				ImageUrl = "test.png",
+				NavigateUrl = "http://www.test.com",
+				AlternateText = "Test Ad",
+				Width = "100",
+				Height = "50"
+			}
+		};
+
+		var dataBoundFired = false;
+
+		var cut = Render(@<AdRotator DataSource="@ads" OnDataBound="() => dataBoundFired = true" />);
+		
+		dataBoundFired.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void AdRotator_DataSource_WithCustomFields()
+	{
+		var ads = new List<Advertisment>
+		{
+			new Advertisment
+			{
+				ImageUrl = "custom.png",
+				NavigateUrl = "http://www.custom.com",
+				AlternateText = "Custom Ad",
+				Width = "200",
+				Height = "100"
+			}
+		};
+
+		var cut = Render(@<AdRotator DataSource="@ads" 
+			AlternateTextField="AlternateText"
+			ImageUrlField="ImageUrl"
+			NavigateUrlField="NavigateUrl"
+			Target="_self" />);
+		
+		var img = cut.Find("img");
+		img.GetAttribute("src").ShouldBe("custom.png");
+		img.GetAttribute("alt").ShouldBe("Custom Ad");
+		img.GetAttribute("width").ShouldBe("200");
+		img.GetAttribute("height").ShouldBe("100");
+	}
+
+	[Fact]
+	public void AdRotator_DataSource_TakesPriorityOverAdvertisementFile()
+	{
+		var ads = new List<Advertisment>
+		{
+			new Advertisment
+			{
+				ImageUrl = "datasource.png",
+				NavigateUrl = "http://www.datasource.com",
+				AlternateText = "DataSource Ad",
+				Width = "100",
+				Height = "50"
+			}
+		};
+
+		// Even with AdvertisementFile set, DataSource should take priority
+		var cut = Render(@<AdRotator DataSource="@ads" AdvertisementFile="Ads1.xml" Target="_blank" />);
+		
+		var img = cut.Find("img");
+		img.GetAttribute("src").ShouldBe("datasource.png");
+		img.GetAttribute("alt").ShouldBe("DataSource Ad");
+	}
+}

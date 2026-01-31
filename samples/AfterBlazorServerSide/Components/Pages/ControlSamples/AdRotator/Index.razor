@@ -2,6 +2,7 @@
 
 <h2>AdRotator Component</h2>
 
+<h3>Using XML Advertisement File</h3>
 <AdRotator AdvertisementFile="Ads.xml" Target="_top"></AdRotator>
 
 <hr />
@@ -10,3 +11,105 @@
 <code>
 &lt;AdRotator AdvertisementFile="Ads.xml" Target="_top"&gt;&lt;/AdRotator&gt;
 </code>
+
+<hr />
+
+<h3>Using DataSource with List of Advertisements</h3>
+<AdRotator DataSource="@_advertisements" Target="_blank" CssClass="data-source-ad" />
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;AdRotator DataSource="@_advertisements" Target="_blank" CssClass="data-source-ad" /&gt;
+
+@@code {
+    private List&lt;Advertisment&gt; _advertisements = new()
+    {
+        new Advertisment
+        {
+            ImageUrl = "https://via.placeholder.com/468x60/0000FF/FFFFFF?text=Ad+1",
+            NavigateUrl = "https://www.example1.com",
+            AlternateText = "Advertisement 1",
+            Width = "468",
+            Height = "60",
+            Keyword = "example"
+        },
+        new Advertisment
+        {
+            ImageUrl = "https://via.placeholder.com/468x60/FF0000/FFFFFF?text=Ad+2",
+            NavigateUrl = "https://www.example2.com",
+            AlternateText = "Advertisement 2",
+            Width = "468",
+            Height = "60",
+            Keyword = "example"
+        }
+    };
+}
+</code>
+
+<hr />
+
+<h3>Using OnAdCreated Event</h3>
+<AdRotator DataSource="@_advertisements" Target="_blank" OnAdCreated="HandleAdCreated" />
+<p>Last ad alternate text: <strong>@_lastAdText</strong></p>
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;AdRotator DataSource="@_advertisements" Target="_blank" OnAdCreated="HandleAdCreated" /&gt;
+&lt;p&gt;Last ad alternate text: &lt;strong&gt;@@_lastAdText&lt;/strong&gt;&lt;/p&gt;
+
+@@code {
+    private string _lastAdText = "";
+
+    private void HandleAdCreated(AdCreatedEventArgs e)
+    {
+        _lastAdText = e.AlternateText;
+        e.AlternateText = "Modified: " + e.AlternateText;
+    }
+}
+</code>
+
+@code {
+    private List<Advertisment> _advertisements = new()
+    {
+        new Advertisment
+        {
+            ImageUrl = "https://via.placeholder.com/468x60/0000FF/FFFFFF?text=Ad+1",
+            NavigateUrl = "https://www.example1.com",
+            AlternateText = "Advertisement 1",
+            Width = "468",
+            Height = "60",
+            Keyword = "example"
+        },
+        new Advertisment
+        {
+            ImageUrl = "https://via.placeholder.com/468x60/FF0000/FFFFFF?text=Ad+2",
+            NavigateUrl = "https://www.example2.com",
+            AlternateText = "Advertisement 2",
+            Width = "468",
+            Height = "60",
+            Keyword = "example"
+        },
+        new Advertisment
+        {
+            ImageUrl = "https://via.placeholder.com/468x60/00FF00/FFFFFF?text=Ad+3",
+            NavigateUrl = "https://www.example3.com",
+            AlternateText = "Advertisement 3",
+            Width = "468",
+            Height = "60",
+            Keyword = "example"
+        }
+    };
+
+    private string _lastAdText = "";
+
+    private void HandleAdCreated(AdCreatedEventArgs e)
+    {
+        _lastAdText = e.AlternateText;
+        e.AlternateText = "Modified: " + e.AlternateText;
+    }
+}
+
