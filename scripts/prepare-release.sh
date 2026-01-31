@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to prepare a release by updating version.json and generating release notes
+# Script to prepare a release using Nerdbank.GitVersioning
 # Usage: ./scripts/prepare-release.sh <new-version>
 # Example: ./scripts/prepare-release.sh 0.14
 
@@ -10,6 +10,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+# Check if nbgv is installed
+if ! command -v nbgv &> /dev/null; then
+    echo -e "${RED}Error: nbgv (Nerdbank.GitVersioning CLI) is not installed${NC}"
+    echo "Install it with: dotnet tool install -g nbgv"
+    exit 1
+fi
 
 # Check if version argument is provided
 if [ -z "$1" ]; then
@@ -46,10 +53,9 @@ fi
 
 echo -e "${GREEN}Preparing release v${NEW_VERSION}...${NC}"
 
-# Update version.json
-echo -e "${YELLOW}Updating version.json...${NC}"
-cat version.json | jq --arg version "$NEW_VERSION" '.version = $version' > version.json.tmp
-mv version.json.tmp version.json
+# Update version.json using nbgv
+echo -e "${YELLOW}Updating version.json using Nerdbank.GitVersioning...${NC}"
+nbgv set-version "$NEW_VERSION"
 
 # Generate release notes
 echo -e "${YELLOW}Generating release notes from dev branch...${NC}"
@@ -59,6 +65,6 @@ echo -e "${GREEN}Release preparation complete!${NC}"
 echo ""
 echo "Next steps:"
 echo "1. Review the changes in version.json and RELEASE_NOTES.md"
-echo "2. Commit the changes: git add version.json RELEASE_NOTES.md && git commit -m 'Prepare release v${NEW_VERSION}'"
+echo "2. Commit the changes: git add version.json RELEASE_NOTES.md && git commit -m 'Set version to ${NEW_VERSION}'"
 echo "3. Merge dev into main"
-echo "4. Run ./scripts/publish-release.sh ${NEW_VERSION} to create the tag and GitHub release"
+echo "4. Run ./scripts/publish-release.sh to create the tag and GitHub release"

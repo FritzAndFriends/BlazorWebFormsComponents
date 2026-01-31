@@ -1,12 +1,18 @@
 # Release Scripts
 
-This directory contains scripts to help with version publishing and release management for BlazorWebFormsComponents.
+This directory contains scripts to help with version publishing and release management for BlazorWebFormsComponents using Nerdbank.GitVersioning.
 
 ## Prerequisites
 
 - `git` - Git version control
-- `jq` - JSON processor for manipulating version.json
+- `nbgv` - Nerdbank.GitVersioning CLI tool
+- `jq` - JSON processor for reading version.json
 - `gh` (optional) - GitHub CLI for creating releases directly
+
+Install nbgv globally:
+```bash
+dotnet tool install -g nbgv
+```
 
 Install jq on Ubuntu/Debian:
 ```bash
@@ -22,7 +28,7 @@ Install GitHub CLI (optional):
 
 ### 1. prepare-release.sh
 
-Prepares a new release by updating the version number and generating release notes.
+Prepares a new release by updating the version number and generating release notes using Nerdbank.GitVersioning.
 
 **Usage:**
 ```bash
@@ -35,7 +41,7 @@ Prepares a new release by updating the version number and generating release not
 ```
 
 **What it does:**
-- Updates `version.json` with the new version number
+- Uses `nbgv set-version` to update `version.json` with the new version number
 - Generates release notes from commits in the dev branch since the last merge to main
 - Saves release notes to `RELEASE_NOTES.md`
 - Provides instructions for the next steps
@@ -64,32 +70,33 @@ This script is automatically called by `prepare-release.sh`, but can also be run
 
 ### 3. publish-release.sh
 
-Creates a git tag and publishes the release.
+Creates a git tag and publishes the release using Nerdbank.GitVersioning.
 
 **Usage:**
 ```bash
-./scripts/publish-release.sh <version>
+./scripts/publish-release.sh
 ```
 
 **Example:**
 ```bash
-./scripts/publish-release.sh 0.14
+./scripts/publish-release.sh
 ```
 
 **What it does:**
 - Validates that you're on the `main` branch
-- Checks that `version.json` matches the version you're releasing
-- Creates a git tag (e.g., `v0.14`)
+- Reads the version from `version.json`
+- Uses `nbgv tag` to create a git tag based on the current version
 - Pushes the tag to GitHub
 - Provides instructions for creating a GitHub release
 
 **Important:**
 - This script must be run on the `main` branch after merging dev
+- No version argument is needed - the version is determined from `version.json`
 - The tag push will automatically trigger the NuGet package build and publish via GitHub Actions
 
 ## Release Workflow
 
-Here's the complete workflow for releasing a new version:
+Here's the complete workflow for releasing a new version using Nerdbank.GitVersioning:
 
 ### Step 1: Prepare the Release on Dev Branch
 
@@ -115,7 +122,7 @@ Here's the complete workflow for releasing a new version:
 5. Commit the changes:
    ```bash
    git add version.json RELEASE_NOTES.md
-   git commit -m "Prepare release v0.14"
+   git commit -m "Set version to 0.14"
    git push origin dev
    ```
 
@@ -133,9 +140,9 @@ Here's the complete workflow for releasing a new version:
    git pull origin main
    ```
 
-2. Run the publish script:
+2. Run the publish script (no version argument needed):
    ```bash
-   ./scripts/publish-release.sh 0.14
+   ./scripts/publish-release.sh
    ```
 
 3. Create the GitHub release:
@@ -177,6 +184,13 @@ git commit -m "docs: Update GridView documentation with examples"
 
 ## Troubleshooting
 
+### "nbgv: command not found"
+
+Install Nerdbank.GitVersioning CLI:
+```bash
+dotnet tool install -g nbgv
+```
+
 ### "jq: command not found"
 
 Install jq:
@@ -196,6 +210,9 @@ git tag -d v0.14          # Delete locally
 git push origin :v0.14    # Delete remotely
 ```
 
-### Version mismatch error
+### "No git repo found" error from nbgv
 
-Make sure `version.json` has been updated to the version you're trying to release. Run `prepare-release.sh` first if you haven't already.
+This can happen in shallow clones. Try deepening the clone:
+```bash
+git fetch --unshallow
+```

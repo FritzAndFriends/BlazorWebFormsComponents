@@ -1,7 +1,7 @@
 #!/bin/bash
-# Script to publish a release by creating a git tag and GitHub release
-# Usage: ./scripts/publish-release.sh <version>
-# Example: ./scripts/publish-release.sh 0.14
+# Script to publish a release using Nerdbank.GitVersioning
+# Usage: ./scripts/publish-release.sh
+# Example: ./scripts/publish-release.sh
 
 set -e
 
@@ -11,20 +11,10 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Check if version argument is provided
-if [ -z "$1" ]; then
-    echo -e "${RED}Error: Version number is required${NC}"
-    echo "Usage: $0 <version>"
-    echo "Example: $0 0.14"
-    exit 1
-fi
-
-VERSION=$1
-TAG_NAME="v${VERSION}"
-
-# Validate version format
-if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
-    echo -e "${RED}Error: Invalid version format. Use format: X.Y (e.g., 0.14)${NC}"
+# Check if nbgv is installed
+if ! command -v nbgv &> /dev/null; then
+    echo -e "${RED}Error: nbgv (Nerdbank.GitVersioning CLI) is not installed${NC}"
+    echo "Install it with: dotnet tool install -g nbgv"
     exit 1
 fi
 
@@ -42,17 +32,13 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
+# Get the version from nbgv
+VERSION=$(jq -r .version version.json)
+TAG_NAME="v${VERSION}"
+
 # Check if tag already exists
 if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
     echo -e "${RED}Error: Tag $TAG_NAME already exists${NC}"
-    exit 1
-fi
-
-# Check if version.json matches the requested version
-CURRENT_VERSION=$(jq -r .version version.json)
-if [ "$CURRENT_VERSION" != "$VERSION" ]; then
-    echo -e "${RED}Error: version.json shows version $CURRENT_VERSION but you're trying to release $VERSION${NC}"
-    echo "Please update version.json first or use the correct version number."
     exit 1
 fi
 
@@ -64,19 +50,22 @@ fi
 
 echo -e "${GREEN}Publishing release v${VERSION}...${NC}"
 
-# Create and push the tag
-echo -e "${YELLOW}Creating git tag ${TAG_NAME}...${NC}"
-git tag -a "$TAG_NAME" -m "Release version ${VERSION}"
+# Create and push the tag using nbgv
+echo -e "${YELLOW}Creating git tag using Nerdbank.GitVersioning...${NC}"
+nbgv tag
+
+# Get the tag that was just created
+CREATED_TAG=$(git describe --tags --abbrev=0)
 
 echo -e "${YELLOW}Pushing tag to origin...${NC}"
-git push origin "$TAG_NAME"
+git push origin "$CREATED_TAG"
 
-echo -e "${GREEN}Tag ${TAG_NAME} created and pushed successfully!${NC}"
+echo -e "${GREEN}Tag ${CREATED_TAG} created and pushed successfully!${NC}"
 echo ""
 echo "Next steps:"
 echo "1. The GitHub Actions workflow will automatically build and publish the NuGet package"
-echo "2. Create a GitHub release at: https://github.com/FritzAndFriends/BlazorWebFormsComponents/releases/new?tag=${TAG_NAME}"
+echo "2. Create a GitHub release at: https://github.com/FritzAndFriends/BlazorWebFormsComponents/releases/new?tag=${CREATED_TAG}"
 echo "3. Use the contents of RELEASE_NOTES.md for the release description"
 echo ""
 echo "Or use the GitHub CLI to create the release automatically:"
-echo "gh release create ${TAG_NAME} --title \"Release v${VERSION}\" --notes-file RELEASE_NOTES.md"
+echo "gh release create ${CREATED_TAG} --title \"Release v${VERSION}\" --notes-file RELEASE_NOTES.md"
