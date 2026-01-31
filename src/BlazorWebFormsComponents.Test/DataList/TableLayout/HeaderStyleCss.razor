@@ -7,9 +7,9 @@
     public void DataList_TableLayout_HeaderStyleCss_RendersCorrectly()
     {
         var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+            <HeaderStyleContent>
                 <HeaderStyle CssClass="myClass"></HeaderStyle>
-            </ChildContent>
+            </HeaderStyleContent>
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);
@@ -24,9 +24,9 @@
     public void DataList_TableLayout_HeaderStyleCss_Null_RendersCorrectly()
     {
         var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+            <HeaderStyleContent>
                 <HeaderStyle></HeaderStyle>
-            </ChildContent>
+            </HeaderStyleContent>
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

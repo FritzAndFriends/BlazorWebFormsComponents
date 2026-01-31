@@ -7,16 +7,12 @@
 {
 	var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection);
 
-	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
-		<CascadingValue Name="FooterStyle" Value="FooterStyle">
-			<CascadingValue Name="ItemStyle" Value="ItemStyle">
-				<CascadingValue Name="AlternatingItemStyle" Value="AlternatingItemStyle">
-					<CascadingValue Name="SeparatorStyle" Value="SeparatorStyle">
-						@ChildContent
-					</CascadingValue>
-				</CascadingValue>
-			</CascadingValue>
-		</CascadingValue>
+	<CascadingValue Name="ParentDataList" Value="this" IsFixed="true">
+		@HeaderStyleContent
+		@FooterStyleContent
+		@ItemStyleContent
+		@AlternatingItemStyleContent
+		@SeparatorStyleContent
 	</CascadingValue>
 
 	@switch (RepeatLayout)

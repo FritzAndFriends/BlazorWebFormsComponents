@@ -1,15 +1,21 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Interfaces;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
 	public partial class ItemStyle : UiTableItemStyle
 	{
 
-		[CascadingParameter(Name = "ItemStyle")]
-		protected TableItemStyle theItemStyle
+		[CascadingParameter(Name = "ParentDataList")]
+		protected IDataListStyleContainer ParentDataList { get; set; }
+
+		protected override void OnInitialized()
 		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
+			if (ParentDataList != null)
+			{
+				theStyle = ParentDataList.ItemStyle;
+			}
+			base.OnInitialized();
 		}
 
 
