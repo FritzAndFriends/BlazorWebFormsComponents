@@ -6,7 +6,8 @@ namespace BlazorWebFormsComponents;
 
 /// <summary>
 /// Component that provides Web Forms-style Page object functionality.
-/// Use this component to set the page title programmatically, similar to Page.Title in Web Forms.
+/// Use this component to set the page title and meta tags programmatically,
+/// similar to Page.Title, Page.MetaDescription, and Page.MetaKeywords in Web Forms.
 /// </summary>
 public partial class Page : ComponentBase, IDisposable
 {
@@ -14,11 +15,18 @@ public partial class Page : ComponentBase, IDisposable
     private IPageService PageService { get; set; } = null!;
 
     private string? _currentTitle;
+    private string? _currentMetaDescription;
+    private string? _currentMetaKeywords;
 
     protected override void OnInitialized()
     {
         PageService.TitleChanged += OnTitleChanged;
+        PageService.MetaDescriptionChanged += OnMetaDescriptionChanged;
+        PageService.MetaKeywordsChanged += OnMetaKeywordsChanged;
+
         _currentTitle = PageService.Title;
+        _currentMetaDescription = PageService.MetaDescription;
+        _currentMetaKeywords = PageService.MetaKeywords;
     }
 
     private async void OnTitleChanged(object? sender, string newTitle)
@@ -36,8 +44,36 @@ public partial class Page : ComponentBase, IDisposable
         }
     }
 
+    private async void OnMetaDescriptionChanged(object? sender, string newMetaDescription)
+    {
+        try
+        {
+            _currentMetaDescription = newMetaDescription;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        {
+            // Silently handle exceptions from meta description updates.
+        }
+    }
+
+    private async void OnMetaKeywordsChanged(object? sender, string newMetaKeywords)
+    {
+        try
+        {
+            _currentMetaKeywords = newMetaKeywords;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        {
+            // Silently handle exceptions from meta keywords updates.
+        }
+    }
+
     public void Dispose()
     {
         PageService.TitleChanged -= OnTitleChanged;
+        PageService.MetaDescriptionChanged -= OnMetaDescriptionChanged;
+        PageService.MetaKeywordsChanged -= OnMetaKeywordsChanged;
     }
 }
