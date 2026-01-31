@@ -4,12 +4,12 @@ namespace BlazorWebFormsComponents
 {
 	public class ListViewItemEventArgs : EventArgs
 	{
-		public ListViewItemEventArgs(object item)
+		public ListViewItemEventArgs(ListViewItem item)
 		{
 			Item = item;
 		}
 
-		public object Item { get; }
+		public ListViewItem Item { get; }
 
 		/// <summary>
 		/// The component that raised this event

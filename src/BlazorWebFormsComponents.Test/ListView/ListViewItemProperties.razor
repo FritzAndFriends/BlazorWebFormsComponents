@@ -1,0 +1,66 @@
+@using System.Linq
+
+@code {
+
+	[Fact]
+	public void ListView_ItemDataBound_ReceivesListViewDataItem()
+	{
+		var receivedItems = new System.Collections.Generic.List<ListViewItem>();
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+					ItemType="Widget"
+					OnItemDataBound="@((e) => receivedItems.Add(e.Item))"
+					Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		// Verify we received at least one item (could be multiple due to Blazor rendering)
+		receivedItems.Count.ShouldBeGreaterThan(0);
+		
+		// Verify all received items are ListViewDataItem
+		receivedItems.ShouldAllBe(item => item is ListViewDataItem);
+	}
+
+	[Fact]
+	public void ListView_ItemDataBound_ListViewItemHasCorrectProperties()
+	{
+		var receivedItems = new System.Collections.Generic.List<ListViewDataItem>();
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+					ItemType="Widget"
+					OnItemDataBound="@((e) => CollectItems(e, receivedItems))"
+					Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		// Get unique items by DataItemIndex (in case of multiple renders)
+		var uniqueItems = receivedItems
+			.GroupBy(i => i.DataItemIndex)
+			.Select(g => g.First())
+			.OrderBy(i => i.DataItemIndex)
+			.ToList();
+
+		// Verify we received items for all data items
+		uniqueItems.Count.ShouldBe(Widget.SimpleWidgetList.Length);
+
+		// Verify first item properties
+		var firstItem = uniqueItems[0];
+		firstItem.ItemType.ShouldBe(BlazorWebFormsComponents.Enums.ListViewItemType.DataItem);
+		firstItem.DataItemIndex.ShouldBe(0);
+		firstItem.DisplayIndex.ShouldBe(0);
+		firstItem.DataItem.ShouldNotBeNull();
+		((Widget)firstItem.DataItem).Name.ShouldBe(Widget.SimpleWidgetList[0].Name);
+
+		// Verify properties are sequential
+		for (int i = 0; i < uniqueItems.Count; i++)
+		{
+			uniqueItems[i].DataItemIndex.ShouldBe(i);
+			uniqueItems[i].DisplayIndex.ShouldBe(i);
+			uniqueItems[i].ItemType.ShouldBe(BlazorWebFormsComponents.Enums.ListViewItemType.DataItem);
+			uniqueItems[i].DataItem.ShouldNotBeNull();
+			((Widget)uniqueItems[i].DataItem).Name.ShouldBe(Widget.SimpleWidgetList[i].Name);
+		}
+	}
+
+	void CollectItems(ListViewItemEventArgs args, System.Collections.Generic.List<ListViewDataItem> list) {
+		list.Add((ListViewDataItem)args.Item);
+	}
+}

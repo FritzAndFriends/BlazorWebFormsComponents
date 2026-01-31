@@ -16,6 +16,32 @@ The ListView component is meant to emulate the asp:ListView control in markup an
    - OnSelect Method
  - LayoutTemplate
  - DataBinder within the ItemTemplate and AlternatingItemTemplate
+ - **ListViewItem and ListViewDataItem** for event handling
+
+##### [Back to top](#listview)
+
+## ListViewItem and ListViewDataItem
+
+The `OnItemDataBound` event provides a `ListViewItemEventArgs` object that contains a `ListViewItem` instance. For data items, this will be a `ListViewDataItem` object with the following properties:
+
+- **ItemType** - The type of item (DataItem, InsertItem, or EmptyItem)
+- **DisplayIndex** - The position of the item as displayed in the ListView
+- **DataItemIndex** - The index of the data item in the underlying data source
+- **DataItem** - The underlying data object bound to this item
+
+**Example:**
+
+```csharp
+void ItemDataBound(ListViewItemEventArgs e)
+{
+    if (e.Item.ItemType == ListViewItemType.DataItem)
+    {
+        var dataItem = (ListViewDataItem)e.Item;
+        var widget = (Widget)dataItem.DataItem;
+        // Access widget.Name, widget.Price, etc.
+    }
+}
+```
 
 ##### [Back to top](#listview)
 

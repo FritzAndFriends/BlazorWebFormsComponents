@@ -32,18 +32,26 @@ else
 				{
 					DataBinding(EventArgs.Empty);
 
+					var dataItemIndex = 0;
+					var displayIndex = 0;
 					foreach(var item in Items)
 					{
-					  <CascadingValue Name="CurrentDataBoundItem" Value="item">
-						@oddOrEvenTemplate(even)(item)
-						@{ even = !even; }
+						var listViewDataItem = new ListViewDataItem(dataItemIndex, displayIndex)
+						{
+							DataItem = item
+						};
+						<CascadingValue Name="CurrentDataBoundItem" Value="item">
+							@oddOrEvenTemplate(even)(item)
+							@{ even = !even; }
 						</CascadingValue>
 						if (ItemSeparatorTemplate != null)
 						{
 							@ItemSeparatorTemplate
 						}
 
-						ItemDataBound(new ListViewItemEventArgs(item) { Sender = this });
+						ItemDataBound(new ListViewItemEventArgs(listViewDataItem) { Sender = this });
+						dataItemIndex++;
+						displayIndex++;
 					}
 
 					DataBound(EventArgs.Empty);
@@ -51,6 +59,10 @@ else
 				else
 				{
 					var buildCounter = 1;
+					var dataItemIndex = 0;
+					var displayIndex = 0;
+
+					DataBinding(EventArgs.Empty);
 
 					do
 					{
@@ -62,16 +74,24 @@ else
 							{
 								var builderTemplate = oddOrEvenTemplate(even);
 								var item = itemIterator.Current;
-										if (item != null)
-										{
-								<CascadingValue Name="CurrentDataBoundItem" Value="item">
-												@builderTemplate(item)
-								</CascadingValue>
-										}
+								if (item != null)
+								{
+									var listViewDataItem = new ListViewDataItem(dataItemIndex, displayIndex)
+									{
+										DataItem = item
+									};
+									<CascadingValue Name="CurrentDataBoundItem" Value="item">
+										@builderTemplate(item)
+									</CascadingValue>
+
+									ItemDataBound(new ListViewItemEventArgs(listViewDataItem) { Sender = this });
+									dataItemIndex++;
+									displayIndex++;
+								}
 								if (ItemSeparatorTemplate != null && i < GroupItemCount - 1)
 								{
 									builder.AddContent(buildCounter, @ItemSeparatorTemplate);
-								  buildCounter++;
+									buildCounter++;
 								}
 
 								isBusy = itemIterator.MoveNext();
@@ -89,6 +109,7 @@ else
 						
 					} while (isBusy);
 
+					DataBound(EventArgs.Empty);
 				}
 			}
 		)
