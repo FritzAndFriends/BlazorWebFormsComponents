@@ -68,5 +68,5 @@ git log "$MERGE_BASE"..HEAD --no-merges --pretty=format:"- %aN" | sort -u
 echo ""
 echo ""
 # Note: When using this in a GitHub release, replace {PREVIOUS_VERSION} with the actual previous version tag
-CURRENT_VERSION=$(jq -r .version version.json)
+CURRENT_VERSION=$(nbgv get-version -v Version 2>/dev/null || echo "0.0")
 echo "_Full Changelog_: https://github.com/FritzAndFriends/BlazorWebFormsComponents/compare/v{PREVIOUS_VERSION}...v${CURRENT_VERSION}"

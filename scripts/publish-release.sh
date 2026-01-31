@@ -32,15 +32,11 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-# Get the version from version.json
-if [ ! -f "version.json" ]; then
-    echo -e "${RED}Error: version.json not found${NC}"
-    exit 1
-fi
-
-VERSION=$(jq -r .version version.json)
-if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
-    echo -e "${RED}Error: Could not read version from version.json${NC}"
+# Get the version from nbgv
+VERSION=$(nbgv get-version -v Version 2>/dev/null)
+if [ -z "$VERSION" ]; then
+    echo -e "${RED}Error: Could not read version using nbgv${NC}"
+    echo "Make sure you are in a git repository with version.json"
     exit 1
 fi
 

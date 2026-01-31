@@ -6,17 +6,11 @@ This directory contains scripts to help with version publishing and release mana
 
 - `git` - Git version control
 - `nbgv` - Nerdbank.GitVersioning CLI tool
-- `jq` - JSON processor for reading version.json
 - `gh` (optional) - GitHub CLI for creating releases directly
 
 Install nbgv globally:
 ```bash
 dotnet tool install -g nbgv
-```
-
-Install jq on Ubuntu/Debian:
-```bash
-sudo apt-get install jq
 ```
 
 Install GitHub CLI (optional):
@@ -189,17 +183,6 @@ git commit -m "docs: Update GridView documentation with examples"
 Install Nerdbank.GitVersioning CLI:
 ```bash
 dotnet tool install -g nbgv
-```
-
-### "jq: command not found"
-
-Install jq:
-```bash
-# Ubuntu/Debian
-sudo apt-get install jq
-
-# macOS
-brew install jq
 ```
 
 ### Tag already exists
