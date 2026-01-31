@@ -32,8 +32,18 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-# Get the version from nbgv
+# Get the version from version.json
+if [ ! -f "version.json" ]; then
+    echo -e "${RED}Error: version.json not found${NC}"
+    exit 1
+fi
+
 VERSION=$(jq -r .version version.json)
+if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+    echo -e "${RED}Error: Could not read version from version.json${NC}"
+    exit 1
+fi
+
 TAG_NAME="v${VERSION}"
 
 # Check if tag already exists
@@ -52,10 +62,17 @@ echo -e "${GREEN}Publishing release v${VERSION}...${NC}"
 
 # Create and push the tag using nbgv
 echo -e "${YELLOW}Creating git tag using Nerdbank.GitVersioning...${NC}"
-nbgv tag
+if ! nbgv tag; then
+    echo -e "${RED}Error: Failed to create tag with nbgv${NC}"
+    exit 1
+fi
 
 # Get the tag that was just created
-CREATED_TAG=$(git describe --tags --abbrev=0)
+CREATED_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
+if [ -z "$CREATED_TAG" ]; then
+    echo -e "${RED}Error: Could not determine the created tag${NC}"
+    exit 1
+fi
 
 echo -e "${YELLOW}Pushing tag to origin...${NC}"
 git push origin "$CREATED_TAG"
