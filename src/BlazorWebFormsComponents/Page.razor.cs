@@ -23,8 +23,17 @@ public partial class Page : ComponentBase, IDisposable
 
     private async void OnTitleChanged(object? sender, string newTitle)
     {
-        _currentTitle = newTitle;
-        await InvokeAsync(StateHasChanged);
+        try
+        {
+            _currentTitle = newTitle;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        {
+            // Silently handle exceptions from title updates to prevent
+            // breaking the component lifecycle. Title updates are non-critical.
+            // In production, consider logging this exception.
+        }
     }
 
     public void Dispose()

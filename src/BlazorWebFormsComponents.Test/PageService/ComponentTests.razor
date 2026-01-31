@@ -39,8 +39,8 @@
 		// Act - Set title dynamically
 		pageService.Title = "Dynamic Title";
 
-		// Small delay to allow async update
-		System.Threading.Thread.Sleep(100);
+		// Wait for the component to update using bUnit's WaitForState
+		cut.WaitForState(() => pageService.Title == "Dynamic Title", TimeSpan.FromSeconds(2));
 
 		// Assert
 		pageService.Title.ShouldBe("Dynamic Title");
