@@ -1,0 +1,26 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void Button_WithID_RendersIDInHTML()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button ID="myButton" Text="Click me" />);
+
+		// Assert
+		var button = cut.Find("button");
+		button.GetAttribute("id").ShouldBe("myButton");
+	}
+
+	[Fact]
+	public void Button_WithoutID_DoesNotRenderIDInHTML()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click me" />);
+
+		// Assert
+		var button = cut.Find("button");
+		button.HasAttribute("id").ShouldBeFalse();
+	}
+}
