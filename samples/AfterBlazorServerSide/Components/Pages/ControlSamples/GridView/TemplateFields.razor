@@ -7,12 +7,12 @@
 					AutoGenerateColumns="false"
 					ItemType="SharedSampleObjects.Models.Widget">
 	<Columns>
-		<TemplateField HeaderText="Name" ItemType="SharedSampleObjects.Models.Widget">
+		<TemplateField HeaderText="Name">
 			<ItemTemplate Context="Item">
 				<Label ID="lblName" Text="@Item.Name"></Label>
 			</ItemTemplate>
 		</TemplateField>
-		<TemplateField HeaderText="Price" ItemType="SharedSampleObjects.Models.Widget">
+		<TemplateField HeaderText="Price">
 			<ItemTemplate Context="Item">
 				<Label ID="lblPrice" Text="@Item.Price.ToString()"></Label>
 			</ItemTemplate>
