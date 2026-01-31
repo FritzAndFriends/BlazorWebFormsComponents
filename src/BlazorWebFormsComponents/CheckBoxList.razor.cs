@@ -119,7 +119,7 @@ namespace BlazorWebFormsComponents
 			get
 			{
 				var items = GetItems().ToList();
-				for (int i = 0; i < items.Count; i++)
+				for (var i = 0; i < items.Count; i++)
 				{
 					if (SelectedValues.Contains(items[i].Value))
 						return i;
