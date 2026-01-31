@@ -1,0 +1,190 @@
+@page "/control-samples/masterpage"
+@layout MainLayout
+
+<PageTitle>MasterPage Migration Example</PageTitle>
+
+<h2>MasterPage to Blazor Layout Migration</h2>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> This page demonstrates how Web Forms MasterPages are replaced by Blazor Layouts.
+</div>
+
+<h3>Concept Overview</h3>
+
+<p>
+    In ASP.NET Web Forms, <code>MasterPages</code> provided a template for consistent page structure.
+    In Blazor, this is achieved through <strong>Layout Components</strong>.
+</p>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h4>Web Forms Approach</h4>
+            </div>
+            <div class="card-body">
+                <h5>Site.Master</h5>
+                <pre><code>&lt;%&#64; Master Language="C#" %&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;div class="header"&gt;Header&lt;/div&gt;
+    &lt;asp:ContentPlaceHolder ID="MainContent" 
+         runat="server"&gt;
+    &lt;/asp:ContentPlaceHolder&gt;
+    &lt;div class="footer"&gt;Footer&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <h5 class="mt-3">MyPage.aspx</h5>
+                <pre><code>&lt;%&#64; Page MasterPageFile="~/Site.Master" %&gt;
+&lt;asp:Content 
+    ContentPlaceHolderID="MainContent" 
+    runat="server"&gt;
+    &lt;h1&gt;Page Content&lt;/h1&gt;
+&lt;/asp:Content&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4>Blazor Approach</h4>
+            </div>
+            <div class="card-body">
+                <h5>MainLayout.razor</h5>
+                <pre><code>@@inherits LayoutComponentBase
+
+&lt;div class="header"&gt;Header&lt;/div&gt;
+@@Body
+&lt;div class="footer"&gt;Footer&lt;/div&gt;</code></pre>
+
+                <h5 class="mt-3">MyPage.razor</h5>
+                <pre><code>@@page "/mypage"
+@@layout MainLayout
+
+&lt;h1&gt;Page Content&lt;/h1&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5">Multiple Content Areas</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>Web Forms - Multiple ContentPlaceHolders</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;asp:ContentPlaceHolder 
+    ID="Header" runat="server"&gt;
+&lt;/asp:ContentPlaceHolder&gt;
+
+&lt;asp:ContentPlaceHolder 
+    ID="MainContent" runat="server"&gt;
+&lt;/asp:ContentPlaceHolder&gt;
+
+&lt;asp:ContentPlaceHolder 
+    ID="Sidebar" runat="server"&gt;
+&lt;/asp:ContentPlaceHolder&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Blazor - RenderSection</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>@@RenderSection("Header", required: false)
+
+@@Body
+
+@@RenderSection("Sidebar", required: false)</code></pre>
+
+                <h5 class="mt-3">In Page:</h5>
+                <pre><code>@@section Header {
+    &lt;h1&gt;Custom Header&lt;/h1&gt;
+}
+
+&lt;p&gt;Main content&lt;/p&gt;
+
+@@section Sidebar {
+    &lt;nav&gt;Sidebar&lt;/nav&gt;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5">Using MasterPage Components (Migration Helper)</h3>
+
+<p>
+    For gradual migration, BlazorWebFormsComponents provides <code>MasterPage</code> and 
+    <code>ContentPlaceHolder</code> components that emulate Web Forms syntax:
+</p>
+
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5>Bridge Components (Temporary Migration Aid)</h5>
+    </div>
+    <div class="card-body">
+        <pre><code>&lt;MasterPage&gt;
+    &lt;div class="header"&gt;
+        &lt;h1&gt;My Site&lt;/h1&gt;
+    &lt;/div&gt;
+    
+    &lt;ContentPlaceHolder ID="MainContent"&gt;
+        &lt;p&gt;Default content&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+    
+    &lt;div class="footer"&gt;
+        &lt;p&gt;Footer&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/MasterPage&gt;</code></pre>
+
+        <div class="alert alert-warning mt-3">
+            <strong>Recommendation:</strong> Use native Blazor layouts for new development. 
+            The MasterPage components are provided for easier migration but should be 
+            replaced with standard Blazor layouts as part of your modernization effort.
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5">Key Benefits of Blazor Layouts</h3>
+
+<ul>
+    <li><strong>Simpler Syntax:</strong> No need for ContentPlaceHolder/Content matching</li>
+    <li><strong>Type Safety:</strong> Layouts are strongly-typed Blazor components</li>
+    <li><strong>Better IntelliSense:</strong> Full IDE support in Razor files</li>
+    <li><strong>Cascading Values:</strong> Easy data sharing between layouts and pages</li>
+    <li><strong>Component Reusability:</strong> Extract shared UI into components</li>
+</ul>
+
+<h3 class="mt-4">This Page's Layout</h3>
+
+<p>
+    This page uses the <code>MainLayout</code> component specified by the 
+    <code>@@layout MainLayout</code> directive at the top of this file.
+</p>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Current Layout:</strong> MainLayout</p>
+        <p><strong>Layout Location:</strong> /Components/Layout/MainLayout.razor</p>
+        <p><strong>Contains:</strong> Navigation sidebar, top bar with links, and content area</p>
+    </div>
+</div>
+
+<hr class="my-5" />
+
+<div class="alert alert-primary">
+    <h4>Further Reading</h4>
+    <ul>
+        <li><a href="https://learn.microsoft.com/en-us/aspnet/core/blazor/components/layouts" target="_blank">Blazor Layouts Documentation</a></li>
+        <li><a href="https://fritzandfriends.github.io/BlazorWebFormsComponents/" target="_blank">BlazorWebFormsComponents Documentation</a></li>
+    </ul>
+</div>
