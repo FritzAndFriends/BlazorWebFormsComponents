@@ -1,0 +1,74 @@
+@code {
+
+	[Fact]
+	public void PageService_DefaultTitle_IsEmpty()
+	{
+		// Arrange
+		var pageService = new PageService();
+
+		// Assert
+		pageService.Title.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PageService_SetTitle_UpdatesValue()
+	{
+		// Arrange
+		var pageService = new PageService();
+
+		// Act
+		pageService.Title = "Test Page Title";
+
+		// Assert
+		pageService.Title.ShouldBe("Test Page Title");
+	}
+
+	[Fact]
+	public void PageService_SetTitle_RaisesTitleChangedEvent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		string? capturedTitle = null;
+		pageService.TitleChanged += (sender, title) => capturedTitle = title;
+
+		// Act
+		pageService.Title = "New Title";
+
+		// Assert
+		capturedTitle.ShouldBe("New Title");
+	}
+
+	[Fact]
+	public void PageService_SetSameTitle_DoesNotRaiseEvent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.Title = "Initial Title";
+		int eventCount = 0;
+		pageService.TitleChanged += (sender, title) => eventCount++;
+
+		// Act
+		pageService.Title = "Initial Title";
+
+		// Assert
+		eventCount.ShouldBe(0);
+	}
+
+	[Fact]
+	public void PageService_SetDifferentTitle_RaisesEventAgain()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.Title = "First Title";
+		int eventCount = 0;
+		pageService.TitleChanged += (sender, title) => eventCount++;
+
+		// Act
+		pageService.Title = "Second Title";
+		pageService.Title = "Third Title";
+
+		// Assert
+		eventCount.ShouldBe(2);
+	}
+
+}
