@@ -1,6 +1,11 @@
 @inherits MasterPageBase
 @layout EmptyLayout
 
+@if (!string.IsNullOrEmpty(PageTitle))
+{
+	<PageTitle>@PageTitle</PageTitle>
+}
+
 @if (Head != null)
 {
 	<HeadContent>

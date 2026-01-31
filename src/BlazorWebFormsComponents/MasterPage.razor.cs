@@ -21,6 +21,10 @@ namespace BlazorWebFormsComponents
 	/// wrapped in a HeadContent component, bridging the gap between Web Forms' 
 	/// &lt;head runat="server"&gt; and Blazor's HeadContent approach.
 	/// 
+	/// The PageTitle parameter allows you to define the page title that will be automatically
+	/// wrapped in a PageTitle component, bridging the gap between Web Forms' 
+	/// &lt;title&gt;Page.Title&lt;/title&gt; and Blazor's PageTitle approach.
+	/// 
 	/// Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.masterpage
 	/// </remarks>
 	public partial class MasterPage : MasterPageBase
@@ -30,6 +34,21 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
+
+		/// <summary>
+		/// Optional page title that will be automatically wrapped in a PageTitle component.
+		/// This provides a bridge between Web Forms' Page.Title property and Blazor's PageTitle component.
+		/// The title will be rendered in the document's &lt;title&gt; tag via HeadOutlet.
+		/// </summary>
+		/// <example>
+		/// &lt;MasterPage PageTitle="My Page - Site Name"&gt;
+		///     &lt;ChildContent&gt;
+		///         &lt;!-- Page layout here --&gt;
+		///     &lt;/ChildContent&gt;
+		/// &lt;/MasterPage&gt;
+		/// </example>
+		[Parameter]
+		public string PageTitle { get; set; }
 
 		/// <summary>
 		/// Optional head content that will be automatically wrapped in a HeadContent component.

@@ -116,15 +116,15 @@ The BlazorWebFormsComponents library provides components that allow you to use W
 </MasterPage>
 ```
 
-### MasterPage with Head Parameter (Migration Helper)
+### MasterPage with Head and PageTitle Parameters (Migration Helpers)
 
-The MasterPage component includes a `Head` parameter that automatically wraps content in a `<HeadContent>` component, providing a bridge between Web Forms' `<head runat="server">` and Blazor's HeadContent:
+The MasterPage component includes `Head` and `PageTitle` parameters that automatically wrap content in Blazor components, providing a bridge between Web Forms and Blazor approaches:
 
 ```razor
 <!-- SiteMasterPage.razor -->
 @using BlazorWebFormsComponents
 
-<MasterPage>
+<MasterPage PageTitle="My Website - Home">
     <Head>
         <!-- This content is automatically wrapped in HeadContent -->
         <link href="css/site.css" rel="stylesheet" />
@@ -147,12 +147,54 @@ The MasterPage component includes a `Head` parameter that automatically wraps co
 ```
 
 **How it works:**
+
+**PageTitle Parameter:**
+- The `PageTitle` parameter accepts a string that is automatically wrapped in a `<PageTitle>` component
+- This bridges the gap between Web Forms' `Page.Title` property and Blazor's PageTitle component
+- The title is rendered in the document's `<title>` tag via `<HeadOutlet>` in App.razor
+
+**Head Parameter:**
 - Content placed in the `<Head>` parameter is automatically rendered inside a `<HeadContent>` component
 - This allows you to maintain Web Forms-style head content definition in the MasterPage
 - The content will be injected into the document's `<head>` section via the `<HeadOutlet>` in App.razor
 - This bridges the gap between Web Forms' `<head runat="server">` and Blazor's approach
 
-**Important:** While this parameter provides a convenient migration path, for new Blazor development, it's recommended to use `<HeadContent>` directly in your pages and layouts rather than centralizing all head content in a master page.
+**Migration from Web Forms:**
+
+Before (Web Forms Site.Master):
+```html
+<%@ Master Language="C#" %>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title><%: Page.Title %> - My Site</title>
+    <link href="css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <asp:ContentPlaceHolder ID="MainContent" runat="server">
+    </asp:ContentPlaceHolder>
+</body>
+</html>
+```
+
+After (Blazor MasterPage):
+```razor
+<MasterPage PageTitle="@(pageTitle + " - My Site")">
+    <Head>
+        <link href="css/site.css" rel="stylesheet" />
+    </Head>
+    <ChildContent>
+        <ContentPlaceHolder ID="MainContent">
+        </ContentPlaceHolder>
+    </ChildContent>
+</MasterPage>
+
+@code {
+    [Parameter] public string pageTitle { get; set; } = "Home";
+}
+```
+
+**Important:** While these parameters provide a convenient migration path, for new Blazor development, it's recommended to use `<PageTitle>` and `<HeadContent>` directly in your pages and layouts rather than centralizing all head content in a master page.
 
 ### Multiple HeadContent Elements in the Hierarchy
 

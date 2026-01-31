@@ -146,9 +146,9 @@
     &lt;/div&gt;
 &lt;/MasterPage&gt;</code></pre>
 
-        <h5 class="mt-4">With Head Parameter (NEW!)</h5>
-        <p>The MasterPage component now includes a <code>Head</code> parameter that automatically wraps content in <code>&lt;HeadContent&gt;</code>:</p>
-        <pre><code>&lt;MasterPage&gt;
+        <h5 class="mt-4">With Head and PageTitle Parameters (NEW!)</h5>
+        <p>The MasterPage component now includes <code>Head</code> and <code>PageTitle</code> parameters:</p>
+        <pre><code>&lt;MasterPage PageTitle="My Page - Site Name"&gt;
     &lt;Head&gt;
         &lt;link href="css/site.css" rel="stylesheet" /&gt;
         &lt;meta name="description" content="My site" /&gt;
@@ -165,10 +165,12 @@
 &lt;/MasterPage&gt;</code></pre>
 
         <div class="alert alert-success mt-3">
-            <strong>New Feature:</strong> The <code>Head</code> parameter provides a convenient bridge 
-            between Web Forms' <code>&lt;head runat="server"&gt;</code> and Blazor's <code>&lt;HeadContent&gt;</code>. 
-            Content in the <code>Head</code> parameter is automatically wrapped in a <code>&lt;HeadContent&gt;</code> 
-            component and rendered in the document's <code>&lt;head&gt;</code> section.
+            <strong>New Features:</strong>
+            <ul class="mb-0">
+                <li>The <code>PageTitle</code> parameter accepts a string that is automatically wrapped in a <code>&lt;PageTitle&gt;</code> component, bridging Web Forms' <code>Page.Title</code> property to Blazor.</li>
+                <li>The <code>Head</code> parameter provides a convenient bridge between Web Forms' <code>&lt;head runat="server"&gt;</code> and Blazor's <code>&lt;HeadContent&gt;</code>.</li>
+                <li>Both are automatically rendered in the document's <code>&lt;head&gt;</code> section via <code>&lt;HeadOutlet&gt;</code>.</li>
+            </ul>
         </div>
 
         <div class="alert alert-warning mt-3">
