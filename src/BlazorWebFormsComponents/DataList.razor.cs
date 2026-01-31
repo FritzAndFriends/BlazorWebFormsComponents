@@ -1,13 +1,14 @@
 ﻿using BlazorComponentUtilities;
 using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IStyle
+	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IStyle, IDataListStyleContainer
 	{
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },
@@ -25,18 +26,18 @@ namespace BlazorWebFormsComponents
 		[Parameter] public DataListEnum GridLines { get; set; } = DataListEnum.None;
 		[Parameter] public RenderFragment HeaderTemplate { get; set; }
 		[Parameter] public RenderFragment FooterTemplate { get; set; }
-		internal TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
-		internal TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle HeaderStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle FooterStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RenderFragment HeaderStyleContent { get; set; }
 		[Parameter] public RenderFragment FooterStyleContent { get; set; }
-		internal TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle ItemStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
 		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
-		internal TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle AlternatingItemStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 		[Parameter] public DataListEnum RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.DataListEnum.Vertical;
 		[Parameter] public int RepeatColumns { get; set; } = 1;
-		internal TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle SeparatorStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RenderFragment SeparatorTemplate { get; set; }
 		[Parameter] public RenderFragment ItemStyleContent { get; set; }
 		[Parameter] public RenderFragment AlternatingItemStyleContent { get; set; }

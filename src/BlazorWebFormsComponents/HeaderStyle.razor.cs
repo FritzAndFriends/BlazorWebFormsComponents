@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Interfaces;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
@@ -7,18 +8,13 @@ namespace BlazorWebFormsComponents
 	{
 
 		[CascadingParameter(Name = "ParentDataList")]
-		protected object ParentDataList { get; set; }
+		protected IDataListStyleContainer ParentDataList { get; set; }
 
 		protected override void OnInitialized()
 		{
 			if (ParentDataList != null)
 			{
-				var parentType = ParentDataList.GetType();
-				var headerStyleProperty = parentType.GetProperty("HeaderStyle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
-				if (headerStyleProperty != null)
-				{
-					theStyle = headerStyleProperty.GetValue(ParentDataList) as TableItemStyle;
-				}
+				theStyle = ParentDataList.HeaderStyle;
 			}
 			base.OnInitialized();
 		}
