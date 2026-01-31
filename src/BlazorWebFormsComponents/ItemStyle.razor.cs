@@ -5,11 +5,21 @@ namespace BlazorWebFormsComponents
 	public partial class ItemStyle : UiTableItemStyle
 	{
 
-		[CascadingParameter(Name = "ItemStyle")]
-		protected TableItemStyle theItemStyle
+		[CascadingParameter(Name = "ParentDataList")]
+		protected object ParentDataList { get; set; }
+
+		protected override void OnInitialized()
 		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
+			if (ParentDataList != null)
+			{
+				var parentType = ParentDataList.GetType();
+				var itemStyleProperty = parentType.GetProperty("ItemStyle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+				if (itemStyleProperty != null)
+				{
+					theStyle = itemStyleProperty.GetValue(ParentDataList) as TableItemStyle;
+				}
+			}
+			base.OnInitialized();
 		}
 
 

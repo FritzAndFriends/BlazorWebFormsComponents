@@ -25,18 +25,22 @@ namespace BlazorWebFormsComponents
 		[Parameter] public DataListEnum GridLines { get; set; } = DataListEnum.None;
 		[Parameter] public RenderFragment HeaderTemplate { get; set; }
 		[Parameter] public RenderFragment FooterTemplate { get; set; }
-		[CascadingParameter(Name = "HeaderStyle")] private TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
-		[CascadingParameter(Name = "FooterStyle")] private TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
-		[Parameter] public RenderFragment ChildContent { get; set; }
-		[CascadingParameter(Name = "ItemStyle")] private TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
+		internal TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
+		internal TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
+		[Parameter] public RenderFragment HeaderStyleContent { get; set; }
+		[Parameter] public RenderFragment FooterStyleContent { get; set; }
+		internal TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
 		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
 		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
-		[CascadingParameter(Name = "AlternatingItemStyle")] private TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
+		internal TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
 		[Parameter] public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 		[Parameter] public DataListEnum RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.DataListEnum.Vertical;
 		[Parameter] public int RepeatColumns { get; set; } = 1;
-		[CascadingParameter(Name = "SeparatorStyle")] private TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
+		internal TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
 		[Parameter] public RenderFragment SeparatorTemplate { get; set; }
+		[Parameter] public RenderFragment ItemStyleContent { get; set; }
+		[Parameter] public RenderFragment AlternatingItemStyleContent { get; set; }
+		[Parameter] public RenderFragment SeparatorStyleContent { get; set; }
 		[Parameter] public bool ShowHeader { get; set; } = true;
 		[Parameter] public bool ShowFooter { get; set; } = true;
 		[Parameter] public string Style { get; set; }

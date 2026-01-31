@@ -7,9 +7,9 @@
     public void DataList_TableLayout_HeaderStyle_RendersCorrectly()
     {
         var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+            <HeaderStyleContent>
                 <HeaderStyle BackColor="@("#0000ff")" BorderStyle="Solid" BorderColor="Black" BorderWidth="2"></HeaderStyle>
-            </ChildContent>
+            </HeaderStyleContent>
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);
