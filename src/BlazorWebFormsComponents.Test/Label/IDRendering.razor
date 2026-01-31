@@ -1,0 +1,26 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+[Fact]
+public void Label_WithID_RendersIDInHTML()
+{
+// Arrange & Act
+var cut = Render(@<Label ID="myLabel" Text="Hello World" />);
+
+// Assert
+var span = cut.Find("span");
+span.GetAttribute("id").ShouldBe("myLabel");
+}
+
+[Fact]
+public void Label_WithoutID_DoesNotRenderIDInHTML()
+{
+// Arrange & Act
+var cut = Render(@<Label Text="Hello World" />);
+
+// Assert
+var span = cut.Find("span");
+span.HasAttribute("id").ShouldBeFalse();
+}
+}

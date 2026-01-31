@@ -67,6 +67,9 @@ namespace BlazorWebFormsComponents
 			{
 				var attributes = new Dictionary<string, object>();
 
+				if (!string.IsNullOrEmpty(ClientID))
+					attributes["id"] = ClientID;
+
 				if (!string.IsNullOrEmpty(CssClass))
 					attributes["class"] = CssClass;
 

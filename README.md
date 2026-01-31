@@ -88,6 +88,7 @@ We will NOT be converting any DataSource objects (SqlDataSource, ObjectDataSourc
 There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  Importantly, these features are NOT implemented the same way that they are in Web Forms, but rather have the same API and behave in a proper Blazor fashion.  These features include:
 
   - [DataBinder](docs/UtilityFeatures/Databinder.md)
+  - [ID Rendering](docs/UtilityFeatures/IDRendering.md) - Render HTML IDs for JavaScript integration
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
   - [ViewState](docs/UtilityFeatures/ViewState.md)
 

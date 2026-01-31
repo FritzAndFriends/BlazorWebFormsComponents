@@ -7,7 +7,8 @@ namespace BlazorWebFormsComponents
 {
 	public partial class RadioButton : BaseStyledComponent
 	{
-		private string _inputId = Guid.NewGuid().ToString("N");
+		private string _inputId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedInputId;
+		private readonly string _generatedInputId = Guid.NewGuid().ToString("N");
 
 		[Parameter]
 		public bool Checked { get; set; }
