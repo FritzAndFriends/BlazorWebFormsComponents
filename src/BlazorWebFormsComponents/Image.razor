@@ -2,6 +2,12 @@
 @inherits BaseWebFormsComponent
 @{
 		var element = new StringBuilder($"<img src=\"{ImageUrl}\"");
+		
+		if (!string.IsNullOrEmpty(ClientID))
+		{
+			element.AppendFormat(" id=\"{0}\"", ClientID);
+		}
+		
 		if(!string.IsNullOrEmpty(AlternateText))
 		{
 			element.AppendFormat(" alt=\"{0}\"", AlternateText);
