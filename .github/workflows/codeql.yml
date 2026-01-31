@@ -1,0 +1,63 @@
+name: "CodeQL Security Scanning"
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'v*'
+  pull_request:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'v*'
+  schedule:
+    # Run every Monday at 6:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
+          dotnet restore src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj
+
+      - name: Build
+        run: |
+          dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
+          dotnet build src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-restore
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
