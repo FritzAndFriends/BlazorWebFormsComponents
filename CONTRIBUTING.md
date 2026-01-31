@@ -11,6 +11,8 @@ The following is a set of guidelines for contributing to the project.  These are
 1. [How can I contribute?](#how-can-i-contribute?)
     1. [Tell us your story](#tell-us-your-story)
     1. [Write code for a component](#write-code-for-a-component)
+        1. [Writing Unit Tests](#writing-unit-tests)
+            1. [Using the xUnit Logger](#using-the-xunit-logger)
     1. [Write documentation](#write-documentation)
         1. [Building the Documentation Locally](#building-the-documentation-locally)
 
@@ -90,6 +92,49 @@ All code for a component should have an assigned issue that matches it.  This wa
 Any code that is written to support a component are required to be accompanied with unit tests at the time the pull request is submitted.  Pull requests without unit tests will be delayed and asked for unit tests to prove their functionality.  We use the [bUnit](https://www.nuget.org/packages/bunit/) to test our components.
 
 Code for components' features should also include some definition in the `/docs` folder so that our users can identify and understand which feature is supported.
+
+#### Writing Unit Tests
+
+All unit tests should be written as `.razor` files in the `src/BlazorWebFormsComponents.Test` directory, organized by component name.
+
+##### Using the xUnit Logger
+
+The test infrastructure supports the xUnit Logger for capturing diagnostic output during test execution. This is useful for debugging tests and understanding what's happening during test runs.
+
+To use the logger in your tests, inject `ITestOutputHelper` into your test class constructor:
+
+```razor
+@using Microsoft.Extensions.Logging
+
+@code {
+    private readonly ITestOutputHelper _output;
+    private ILogger<MyTest> _logger;
+
+    public MyTest(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
+    [Fact]
+    public void MyComponent_WithLogger_LogsExpectedMessages()
+    {
+        // The logger is automatically configured when you pass ITestOutputHelper to the base constructor
+        _logger = Services.GetService<ILogger<MyTest>>();
+        
+        _logger?.LogInformation("Setting up test");
+        
+        var cut = Render(@<MyComponent />);
+        
+        _logger?.LogDebug("Component rendered");
+        
+        // Your test assertions...
+    }
+}
+```
+
+The `BlazorWebFormsTestContext` base class (which all tests inherit from via `_Imports.razor`) automatically configures the xUnit logger when an `ITestOutputHelper` is provided. Log messages will appear in the test output when tests fail, helping you diagnose issues.
+
+**Note:** Using the logger is optional. Only add it to tests where diagnostic output would be helpful for debugging.
 
 ### Style Usage
 
