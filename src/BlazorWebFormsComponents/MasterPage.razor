@@ -1,0 +1,14 @@
+@inherits MasterPageBase
+@layout EmptyLayout
+
+@if (Head != null)
+{
+	<HeadContent>
+		@Head
+	</HeadContent>
+}
+
+@if (Visible)
+{
+	@ChildContent
+}

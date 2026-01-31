@@ -12,6 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="bunit" Version="2.5.3" />
+		<PackageReference Include="MartinCostello.Logging.XUnit" Version="0.5.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="$(AspNetCoreVersion)" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="$(AspNetCoreVersion)" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

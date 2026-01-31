@@ -1,0 +1,45 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void MasterPage_BasicRendering_DisplaysContent()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<div class="master-content">Master Page Content</div>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".master-content").TextContent.ShouldBe("Master Page Content");
+	}
+
+	[Fact]
+	public void MasterPage_WithContentPlaceHolder_RendersDefaultContent()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<div class="header">Header</div>
+			<ContentPlaceHolder ID="MainContent">
+				<p>Default content</p>
+			</ContentPlaceHolder>
+			<div class="footer">Footer</div>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".header").TextContent.ShouldBe("Header");
+		cut.Find(".footer").TextContent.ShouldBe("Footer");
+		cut.Find("p").TextContent.ShouldBe("Default content");
+	}
+
+	[Fact]
+	public void MasterPage_Visible_False_DoesNotRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage Visible="false">
+			<div class="should-not-appear">Hidden</div>
+		</MasterPage>);
+
+		// Assert
+		cut.Markup.ShouldNotContain("should-not-appear");
+	}
+}

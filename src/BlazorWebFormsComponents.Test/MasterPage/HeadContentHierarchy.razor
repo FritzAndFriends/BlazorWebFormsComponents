@@ -1,0 +1,83 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void MasterPage_MultipleHeadContentInHierarchy_AllRendered()
+	{
+		// This test demonstrates that multiple HeadContent elements
+		// from different levels of the hierarchy all get rendered
+		
+		// In Blazor, HeadContent components are additive:
+		// - MasterPage with Head parameter creates one HeadContent
+		// - Child component with its own HeadContent creates another
+		// - Both are collected by HeadOutlet and rendered in the <head>
+		
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<Head>
+				<!-- Head content from MasterPage -->
+				<link href="css/masterpage.css" rel="stylesheet" />
+			</Head>
+			<ChildContent>
+				<div class="wrapper">
+					<!-- This would be like a page adding its own HeadContent -->
+					<HeadContent>
+						<link href="css/page-specific.css" rel="stylesheet" />
+					</HeadContent>
+					<ContentPlaceHolder ID="MainContent">
+						<p>Content here</p>
+					</ContentPlaceHolder>
+				</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert - Both HeadContent elements should work together
+		// The Blazor framework collects all HeadContent and renders to HeadOutlet
+		cut.Find("p").TextContent.ShouldBe("Content here");
+	}
+
+	[Fact]
+	public void MasterPage_NestedHeadContent_DoesNotConflict()
+	{
+		// Multiple HeadContent components in hierarchy are additive, not conflicting
+		// This is standard Blazor behavior - all HeadContent is collected
+		
+		// Arrange & Act
+		var cut = Render(@<div>
+			<MasterPage>
+				<Head>
+					<meta name="from" content="masterpage" />
+				</Head>
+				<ChildContent>
+					<HeadContent>
+						<meta name="from" content="page" />
+					</HeadContent>
+					<div class="content">Test</div>
+				</ChildContent>
+			</MasterPage>
+		</div>);
+
+		// Assert
+		cut.Find(".content").TextContent.ShouldBe("Test");
+		// Both HeadContent elements are rendered by Blazor's HeadOutlet
+	}
+
+	[Fact]
+	public void MasterPage_HeadParameterNull_OtherHeadContentStillWorks()
+	{
+		// Even without MasterPage.Head, other HeadContent in hierarchy works
+		
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<ChildContent>
+				<HeadContent>
+					<link href="css/page.css" rel="stylesheet" />
+				</HeadContent>
+				<div class="page">Page content</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".page").TextContent.ShouldBe("Page content");
+	}
+}

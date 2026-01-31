@@ -1,0 +1,125 @@
+@page "/ControlSamples/IDRendering"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>ID Rendering Sample</PageTitle>
+
+<h1>ID Rendering and JavaScript Integration</h1>
+
+<p>
+    This page demonstrates how the BlazorWebFormsComponents library renders HTML IDs,
+    enabling JavaScript integration for components migrated from ASP.NET Web Forms.
+</p>
+
+<hr />
+
+<h2>Basic ID Rendering</h2>
+<p>Components with the <code>ID</code> parameter will render that ID in the HTML:</p>
+
+<div class="mb-3">
+    <Label ID="lblName" Text="Your Name:" />
+    <TextBox ID="txtName" Placeholder="Enter your name" CssClass="form-control" Width="Unit.Pixel(300)" />
+</div>
+
+<div class="mb-3">
+    <Button ID="btnShowName" Text="Show Name in Alert" OnClick="ShowNameAlert" CssClass="btn btn-primary" />
+</div>
+
+<pre><code>&lt;Label ID="lblName" Text="Your Name:" /&gt;
+&lt;TextBox ID="txtName" Placeholder="Enter your name" /&gt;
+&lt;Button ID="btnShowName" Text="Show Name" /&gt;</code></pre>
+
+<p class="text-muted">
+    <small>Rendered HTML includes: <code>id="lblName"</code>, <code>id="txtName"</code>, <code>id="btnShowName"</code></small>
+</p>
+
+<hr />
+
+<h2>Hierarchical ID Generation</h2>
+<p>
+    Nested components generate hierarchical IDs following the Web Forms pattern: <code>ParentID_ChildID</code>
+</p>
+
+<Panel ID="userPanel" GroupingText="User Information" CssClass="border p-3 mb-3">
+    <div class="mb-2">
+        <Label ID="lblEmail" Text="Email:" />
+        <TextBox ID="txtEmail" TextMode="TextBoxMode.Email" CssClass="form-control" Width="Unit.Pixel(300)" />
+    </div>
+    <div class="mb-2">
+        <Label ID="lblPhone" Text="Phone:" />
+        <TextBox ID="txtPhone" TextMode="TextBoxMode.Phone" CssClass="form-control" Width="Unit.Pixel(300)" />
+    </div>
+    <Button ID="btnSubmit" Text="Submit" CssClass="btn btn-success" />
+</Panel>
+
+<pre><code>&lt;Panel ID="userPanel"&gt;
+    &lt;Label ID="lblEmail" /&gt;
+    &lt;TextBox ID="txtEmail" /&gt;
+    &lt;Button ID="btnSubmit" /&gt;
+&lt;/Panel&gt;</code></pre>
+
+<p class="text-muted">
+    <small>
+        Rendered IDs: <code>id="userPanel"</code>, <code>id="userPanel_lblEmail"</code>, 
+        <code>id="userPanel_txtEmail"</code>, <code>id="userPanel_btnSubmit"</code>
+    </small>
+</p>
+
+<hr />
+
+<h2>Multiple Controls</h2>
+<p>Various controls with IDs for JavaScript targeting:</p>
+
+<div class="mb-3">
+    <CheckBox ID="chkAgree" Text="I agree to the terms" />
+</div>
+
+<div class="mb-3">
+    <RadioButton ID="rbOption1" GroupName="options" Text="Option 1" />
+    <RadioButton ID="rbOption2" GroupName="options" Text="Option 2" />
+</div>
+
+<div class="mb-3">
+    <HyperLink ID="lnkHelp" Text="Need Help?" NavigationUrl="/help" CssClass="text-primary" />
+</div>
+
+<div class="mb-3">
+    <Button ID="btnInspect" Text="Inspect IDs with Browser DevTools" CssClass="btn btn-info" />
+</div>
+
+<hr />
+
+<h2>JavaScript Compatibility</h2>
+
+<div class="alert alert-info">
+    <strong>Legacy JavaScript Support:</strong> Components with IDs can be accessed using standard DOM APIs:
+    <pre class="mt-2 mb-0"><code>// Access by ID (like Web Forms)
+var textBox = document.getElementById('txtName');
+var value = textBox.value;
+
+// Access hierarchical IDs
+var email = document.getElementById('userPanel_txtEmail');
+
+// Works with jQuery too
+var name = $('#txtName').val();</code></pre>
+</div>
+
+<hr />
+
+<h2>Usage Notes</h2>
+
+<ul>
+    <li><strong>Opt-in:</strong> ID rendering only occurs when the <code>ID</code> parameter is set.</li>
+    <li><strong>Web Forms Pattern:</strong> Follows ASP.NET Web Forms naming: <code>ParentID_ChildID</code></li>
+    <li><strong>ClientID Property:</strong> Components have a <code>ClientID</code> property that returns the generated ID including parent hierarchy.</li>
+    <li><strong>Backward Compatible:</strong> Components without IDs work exactly as before.</li>
+    <li><strong>JavaScript Ready:</strong> Enables migration of Web Forms apps that depend on client-side scripting.</li>
+</ul>
+
+@code {
+    private void ShowNameAlert()
+    {
+        // Note: In a real application, you would use JSInterop to interact with the DOM
+        // This is just to demonstrate the button click handler
+    }
+}

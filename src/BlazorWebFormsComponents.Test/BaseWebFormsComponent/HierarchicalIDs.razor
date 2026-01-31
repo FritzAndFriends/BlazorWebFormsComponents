@@ -1,0 +1,34 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void Panel_WithNestedComponents_GeneratesHierarchicalIDs()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel ID="mainPanel">
+				<Button ID="submitBtn" Text="Submit" />
+			</Panel>
+		);
+
+		// Assert - Button should have hierarchical ID
+		var button = cut.Find("button");
+		button.GetAttribute("id").ShouldBe("mainPanel_submitBtn");
+	}
+
+	[Fact]
+	public void Panel_WithoutID_ChildDoesNotIncludeParentInID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Panel>
+				<Button ID="submitBtn" Text="Submit" />
+			</Panel>
+		);
+
+		// Assert - Button should have only its own ID
+		var button = cut.Find("button");
+		button.GetAttribute("id").ShouldBe("submitBtn");
+	}
+}

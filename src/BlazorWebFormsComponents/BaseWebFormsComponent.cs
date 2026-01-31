@@ -55,10 +55,17 @@ namespace BlazorWebFormsComponents
 		public IHttpContextAccessor HttpContextAccessor { get; set; }
 
 		/// <summary>
-		/// 🚨🚨 Use @ref instead of ID 🚨🚨
+		/// The ID of the control. This is rendered in the HTML and can be used for JavaScript integration.
+		/// Follows ASP.NET Web Forms naming patterns for compatibility.
 		/// </summary>
-		[Parameter, Obsolete("Use @ref instead of ID")]
+		[Parameter]
 		public string ID { get; set; }
+
+		/// <summary>
+		/// Gets the client-side ID of the control, including parent naming containers.
+		/// Returns null if no ID is set.
+		/// </summary>
+		public string ClientID => ComponentIdGenerator.GetClientID(this);
 
 		/// <summary>
 		/// While ViewState is supported by this library, this parameter does nothing

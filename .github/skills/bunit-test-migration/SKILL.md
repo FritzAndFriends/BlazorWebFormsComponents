@@ -200,6 +200,37 @@ For tests that need isolated context (e.g., multiple renders):
 }
 ```
 
+### Tests with xUnit Logger (Optional)
+
+For debugging complex tests, you can optionally enable xUnit logging:
+
+```razor
+@using Microsoft.Extensions.Logging
+
+@code {
+    private ILogger<MyTest> _logger;
+
+    public MyTest(ITestOutputHelper output) : base(output)
+    {
+    }
+
+    [Fact]
+    public void Component_ComplexScenario_WorksAsExpected()
+    {
+        _logger = Services.GetService<ILogger<MyTest>>();
+        _logger?.LogInformation("Starting test");
+
+        var cut = Render(@<MyComponent />);
+
+        _logger?.LogDebug("Component rendered");
+
+        // Test assertions...
+    }
+}
+```
+
+**Note:** Only add logging when diagnostic output is helpful. Most tests should remain simple without logging.
+
 ## Quick Reference Table
 
 | Old Pattern | New Pattern |

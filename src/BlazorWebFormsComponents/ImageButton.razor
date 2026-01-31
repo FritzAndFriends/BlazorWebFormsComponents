@@ -10,21 +10,27 @@
 			builder.AddMultipleAttributes(1, new Dictionary<string, object> {
 				{ "type", "image" }, { "src", ImageUrl }, { "alt", AlternateText }, { "longdesc", DescriptionUrl }, { "style", Style }, { "class", CssClass }
 			});
-			builder.AddAttribute(2, "onclick", new Action(() => Click()));
+			
+			if (!string.IsNullOrEmpty(ClientID))
+			{
+				builder.AddAttribute(2, "id", ClientID);
+			}
+			
+			builder.AddAttribute(3, "onclick", new Action(() => Click()));
 
 			if(!Enabled)
 			{
-				builder.AddAttribute(3, "disabled", "disabled");
+				builder.AddAttribute(4, "disabled", "disabled");
 			}
 
 			if(!string.IsNullOrEmpty(ToolTip))
 			{
-				builder.AddAttribute(4, "title", ToolTip);
+				builder.AddAttribute(5, "title", ToolTip);
 			}
 
 			if(ImageAlign != Enums.ImageAlign.NotSet)
 			{
-				builder.AddAttribute(4, "align", ImageAlign.ToString().ToLower());
+				builder.AddAttribute(6, "align", ImageAlign.ToString().ToLower());
 			}
 
 			builder.CloseElement();
