@@ -5,7 +5,7 @@
 	private readonly ITestOutputHelper _output;
 	private ILogger<LoggerExample> _logger;
 
-	public LoggerExample(ITestOutputHelper output)
+	public LoggerExample(ITestOutputHelper output) : base(output)
 	{
 		_output = output;
 	}

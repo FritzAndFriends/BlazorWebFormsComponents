@@ -101,7 +101,7 @@ All unit tests should be written as `.razor` files in the `src/BlazorWebFormsCom
 
 The test infrastructure supports the xUnit Logger for capturing diagnostic output during test execution. This is useful for debugging tests and understanding what's happening during test runs.
 
-To use the logger in your tests, inject `ITestOutputHelper` into your test class constructor:
+To use the logger in your tests, inject `ITestOutputHelper` into your test class constructor and pass it to the base constructor:
 
 ```razor
 @using Microsoft.Extensions.Logging
@@ -110,7 +110,7 @@ To use the logger in your tests, inject `ITestOutputHelper` into your test class
     private readonly ITestOutputHelper _output;
     private ILogger<MyTest> _logger;
 
-    public MyTest(ITestOutputHelper output)
+    public MyTest(ITestOutputHelper output) : base(output)
     {
         _output = output;
     }

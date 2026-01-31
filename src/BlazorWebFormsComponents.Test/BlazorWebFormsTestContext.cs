@@ -14,6 +14,9 @@ namespace BlazorWebFormsComponents.Test;
 /// </summary>
 public abstract class BlazorWebFormsTestContext : BunitContext
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BlazorWebFormsTestContext"/> class without logging support.
+    /// </summary>
     protected BlazorWebFormsTestContext() : this(null)
     {
     }
