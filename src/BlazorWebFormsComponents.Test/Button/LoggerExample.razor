@@ -1,0 +1,42 @@
+@using Microsoft.Extensions.Logging
+
+@code {
+
+	private readonly ITestOutputHelper _output;
+	private ILogger<LoggerExample> _logger;
+
+	public LoggerExample(ITestOutputHelper output)
+	{
+		_output = output;
+	}
+
+	[Fact]
+	public void Button_WithLogger_LogsClickEvent()
+	{
+		// Arrange
+		_logger = Services.GetService<ILogger<LoggerExample>>();
+		
+		_logger?.LogInformation("Setting up button test");
+		
+		var clickCount = 0;
+		void OnClick()
+		{
+			clickCount++;
+			_logger?.LogDebug("Button clicked, count is now {ClickCount}", clickCount);
+		}
+
+		var cut = Render(@<Button OnClick="OnClick">Click me!</Button>);
+		
+		_logger?.LogInformation("Button rendered");
+
+		// Act
+		cut.Find("button").Click();
+		
+		_logger?.LogInformation("Button clicked in test");
+
+		// Assert
+		clickCount.ShouldBe(1);
+		_logger?.LogInformation("Test completed successfully");
+	}
+
+}
