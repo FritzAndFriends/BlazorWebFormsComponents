@@ -146,6 +146,31 @@
     &lt;/div&gt;
 &lt;/MasterPage&gt;</code></pre>
 
+        <h5 class="mt-4">With Head Parameter (NEW!)</h5>
+        <p>The MasterPage component now includes a <code>Head</code> parameter that automatically wraps content in <code>&lt;HeadContent&gt;</code>:</p>
+        <pre><code>&lt;MasterPage&gt;
+    &lt;Head&gt;
+        &lt;link href="css/site.css" rel="stylesheet" /&gt;
+        &lt;meta name="description" content="My site" /&gt;
+    &lt;/Head&gt;
+    &lt;ChildContent&gt;
+        &lt;div class="header"&gt;
+            &lt;h1&gt;My Site&lt;/h1&gt;
+        &lt;/div&gt;
+        
+        &lt;ContentPlaceHolder ID="MainContent"&gt;
+            &lt;p&gt;Default content&lt;/p&gt;
+        &lt;/ContentPlaceHolder&gt;
+    &lt;/ChildContent&gt;
+&lt;/MasterPage&gt;</code></pre>
+
+        <div class="alert alert-success mt-3">
+            <strong>New Feature:</strong> The <code>Head</code> parameter provides a convenient bridge 
+            between Web Forms' <code>&lt;head runat="server"&gt;</code> and Blazor's <code>&lt;HeadContent&gt;</code>. 
+            Content in the <code>Head</code> parameter is automatically wrapped in a <code>&lt;HeadContent&gt;</code> 
+            component and rendered in the document's <code>&lt;head&gt;</code> section.
+        </div>
+
         <div class="alert alert-warning mt-3">
             <strong>Recommendation:</strong> Use native Blazor layouts for new development. 
             The MasterPage components are provided for easier migration but should be 

@@ -17,6 +17,10 @@ namespace BlazorWebFormsComponents
 	/// This MasterPage component acts as a bridge, allowing Web Forms-style markup
 	/// to work in Blazor by internally using Blazor's layout system.
 	/// 
+	/// The Head parameter allows you to define head content that will be automatically
+	/// wrapped in a HeadContent component, bridging the gap between Web Forms' 
+	/// &lt;head runat="server"&gt; and Blazor's HeadContent approach.
+	/// 
 	/// Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.masterpage
 	/// </remarks>
 	public partial class MasterPage : MasterPageBase
@@ -26,6 +30,25 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
+
+		/// <summary>
+		/// Optional head content that will be automatically wrapped in a HeadContent component.
+		/// This provides a bridge between Web Forms' &lt;head runat="server"&gt; and Blazor's HeadContent.
+		/// Content defined here will be rendered in the document's &lt;head&gt; section via HeadOutlet.
+		/// </summary>
+		/// <example>
+		/// &lt;MasterPage&gt;
+		///     &lt;Head&gt;
+		///         &lt;link href="css/site.css" rel="stylesheet" /&gt;
+		///         &lt;meta name="description" content="My site" /&gt;
+		///     &lt;/Head&gt;
+		///     &lt;ChildContent&gt;
+		///         &lt;!-- Page layout here --&gt;
+		///     &lt;/ChildContent&gt;
+		/// &lt;/MasterPage&gt;
+		/// </example>
+		[Parameter]
+		public RenderFragment Head { get; set; }
 
 		/// <summary>
 		/// Collection of ContentPlaceHolder controls defined in this master page

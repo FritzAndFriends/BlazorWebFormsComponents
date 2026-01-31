@@ -116,6 +116,209 @@ The BlazorWebFormsComponents library provides components that allow you to use W
 </MasterPage>
 ```
 
+### MasterPage with Head Parameter (Migration Helper)
+
+The MasterPage component includes a `Head` parameter that automatically wraps content in a `<HeadContent>` component, providing a bridge between Web Forms' `<head runat="server">` and Blazor's HeadContent:
+
+```razor
+<!-- SiteMasterPage.razor -->
+@using BlazorWebFormsComponents
+
+<MasterPage>
+    <Head>
+        <!-- This content is automatically wrapped in HeadContent -->
+        <link href="css/site.css" rel="stylesheet" />
+        <meta name="description" content="My website" />
+    </Head>
+    <ChildContent>
+        <div class="header">
+            <h1>My Website</h1>
+        </div>
+        
+        <ContentPlaceHolder ID="MainContent">
+            <p>Default content</p>
+        </ContentPlaceHolder>
+        
+        <div class="footer">
+            <p>&copy; @DateTime.Now.Year My Company</p>
+        </div>
+    </ChildContent>
+</MasterPage>
+```
+
+**How it works:**
+- Content placed in the `<Head>` parameter is automatically rendered inside a `<HeadContent>` component
+- This allows you to maintain Web Forms-style head content definition in the MasterPage
+- The content will be injected into the document's `<head>` section via the `<HeadOutlet>` in App.razor
+- This bridges the gap between Web Forms' `<head runat="server">` and Blazor's approach
+
+**Important:** While this parameter provides a convenient migration path, for new Blazor development, it's recommended to use `<HeadContent>` directly in your pages and layouts rather than centralizing all head content in a master page.
+
+### Multiple HeadContent Elements in the Hierarchy
+
+**Blazor's HeadContent components are additive** - multiple `<HeadContent>` components throughout your component hierarchy all contribute to the final `<head>` section. This is important to understand when using the MasterPage's `Head` parameter.
+
+#### How Multiple HeadContent Works
+
+When you have HeadContent at multiple levels:
+
+```razor
+<!-- MasterPage -->
+<MasterPage>
+    <Head>
+        <!-- HeadContent #1: From MasterPage -->
+        <link href="css/site.css" rel="stylesheet" />
+    </Head>
+    <ChildContent>
+        <!-- Your layout here -->
+    </ChildContent>
+</MasterPage>
+
+<!-- Layout (if using one) -->
+@inherits LayoutComponentBase
+<HeadContent>
+    <!-- HeadContent #2: From Layout -->
+    <link href="css/layout.css" rel="stylesheet" />
+</HeadContent>
+@Body
+
+<!-- Page -->
+@page "/mypage"
+<HeadContent>
+    <!-- HeadContent #3: From Page -->
+    <link href="css/page.css" rel="stylesheet" />
+</HeadContent>
+
+<!-- Component within Page -->
+<HeadContent>
+    <!-- HeadContent #4: From Component -->
+    <link href="css/component.css" rel="stylesheet" />
+</HeadContent>
+```
+
+**Result:** All four HeadContent elements are collected by Blazor's `<HeadOutlet>` and rendered in the document's `<head>` section:
+
+```html
+<head>
+    <!-- Static content from App.razor -->
+    <meta charset="utf-8" />
+    
+    <!-- All HeadContent components combined -->
+    <link href="css/site.css" rel="stylesheet" />      <!-- From MasterPage.Head -->
+    <link href="css/layout.css" rel="stylesheet" />    <!-- From Layout -->
+    <link href="css/page.css" rel="stylesheet" />      <!-- From Page -->
+    <link href="css/component.css" rel="stylesheet" /> <!-- From Component -->
+</head>
+```
+
+#### Benefits of Additive HeadContent
+
+1. **Separation of Concerns** - Each level can manage its own head content:
+   - MasterPage/Layout: Site-wide styles and meta tags
+   - Page: Page-specific SEO and styles
+   - Components: Component-specific resources
+
+2. **No Conflicts** - Unlike Web Forms where the MasterPage owns the entire `<head>`, Blazor allows each level to contribute
+
+3. **Flexibility** - Pages and components can add head content without modifying parent components
+
+#### Migration Implications
+
+When migrating from Web Forms:
+
+**Before (Web Forms):**
+```html
+<!-- Site.Master - owns entire <head> -->
+<head runat="server">
+    <link href="css/site.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+
+<!-- MyPage.aspx - can only add via ContentPlaceHolder -->
+<asp:Content ContentPlaceHolderID="HeadContent" runat="server">
+    <link href="css/page.css" rel="stylesheet" />
+</asp:Content>
+```
+
+**After (Blazor with MasterPage.Head):**
+```razor
+<!-- MasterPage -->
+<MasterPage>
+    <Head>
+        <link href="css/site.css" rel="stylesheet" />
+    </Head>
+    <ChildContent>...</ChildContent>
+</MasterPage>
+
+<!-- MyPage.razor - adds its own HeadContent -->
+@page "/mypage"
+<HeadContent>
+    <link href="css/page.css" rel="stylesheet" />
+</HeadContent>
+```
+
+**Key Difference:** In Blazor, both the MasterPage's `Head` parameter and the page's `<HeadContent>` work together additively. You don't need a ContentPlaceHolder in the head - pages can directly add HeadContent.
+
+#### Best Practices
+
+1. **Use MasterPage.Head for site-wide content** - CSS frameworks, global meta tags, fonts
+2. **Use page-level HeadContent for specifics** - Page titles, descriptions, page-specific styles
+3. **Avoid duplication** - Since all HeadContent is combined, be mindful of adding the same resource multiple times
+4. **Consider order** - HeadContent from parent components renders before child components
+
+#### Example: Complete Hierarchy
+
+```razor
+<!-- App.razor -->
+<head>
+    <meta charset="utf-8" />
+    <HeadOutlet /> <!-- Collects all HeadContent -->
+</head>
+
+<!-- SiteMasterPage.razor -->
+<MasterPage>
+    <Head>
+        <!-- Site-wide resources -->
+        <link href="css/bootstrap.min.css" rel="stylesheet" />
+        <link href="css/site.css" rel="stylesheet" />
+    </Head>
+    <ChildContent>@ChildContent</ChildContent>
+</MasterPage>
+
+<!-- Products.razor -->
+@page "/products"
+<PageTitle>Products - My Store</PageTitle>
+<HeadContent>
+    <!-- Page-specific resources -->
+    <link href="css/products.css" rel="stylesheet" />
+    <meta name="description" content="Browse our products" />
+</HeadContent>
+
+<h1>Products</h1>
+<ProductCard /> <!-- Component with its own HeadContent -->
+
+<!-- ProductCard.razor (component) -->
+<HeadContent>
+    <!-- Component-specific resources (if needed) -->
+    <link href="css/product-card.css" rel="stylesheet" />
+</HeadContent>
+<div class="product-card">...</div>
+```
+
+**Final HTML head:**
+```html
+<head>
+    <meta charset="utf-8" />
+    <title>Products - My Store</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="css/products.css" rel="stylesheet" />
+    <meta name="description" content="Browse our products" />
+    <link href="css/product-card.css" rel="stylesheet" />
+</head>
+```
+
 ### Using the MasterPage in a Page
 
 While the components support Web Forms-style syntax, in practice you should use Blazor's native layout system for new development. These components are primarily useful for migration scenarios.
