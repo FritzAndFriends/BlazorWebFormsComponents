@@ -2,12 +2,10 @@
 
 @code {
 
-	private readonly ITestOutputHelper _output;
 	private ILogger<LoggerExample> _logger;
 
 	public LoggerExample(ITestOutputHelper output) : base(output)
 	{
-		_output = output;
 	}
 
 	[Fact]

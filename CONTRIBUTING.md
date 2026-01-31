@@ -107,12 +107,10 @@ To use the logger in your tests, inject `ITestOutputHelper` into your test class
 @using Microsoft.Extensions.Logging
 
 @code {
-    private readonly ITestOutputHelper _output;
     private ILogger<MyTest> _logger;
 
     public MyTest(ITestOutputHelper output) : base(output)
     {
-        _output = output;
     }
 
     [Fact]
