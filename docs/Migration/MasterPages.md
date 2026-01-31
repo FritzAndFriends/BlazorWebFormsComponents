@@ -116,17 +116,18 @@ The BlazorWebFormsComponents library provides components that allow you to use W
 </MasterPage>
 ```
 
-### MasterPage with Head and PageTitle Parameters (Migration Helpers)
+### MasterPage with Head Parameter (Migration Helper)
 
-The MasterPage component includes `Head` and `PageTitle` parameters that automatically wrap content in Blazor components, providing a bridge between Web Forms and Blazor approaches:
+The MasterPage component includes a `Head` parameter that automatically wraps content in a `<HeadContent>` component, providing a bridge between Web Forms' `<head runat="server">` and Blazor's HeadContent. You can include `<title>` elements directly in the Head content:
 
 ```razor
 <!-- SiteMasterPage.razor -->
 @using BlazorWebFormsComponents
 
-<MasterPage PageTitle="My Website - Home">
+<MasterPage>
     <Head>
         <!-- This content is automatically wrapped in HeadContent -->
+        <title>My Website - Home</title>
         <link href="css/site.css" rel="stylesheet" />
         <meta name="description" content="My website" />
     </Head>
@@ -148,13 +149,9 @@ The MasterPage component includes `Head` and `PageTitle` parameters that automat
 
 **How it works:**
 
-**PageTitle Parameter:**
-- The `PageTitle` parameter accepts a string that is automatically wrapped in a `<PageTitle>` component
-- This bridges the gap between Web Forms' `Page.Title` property and Blazor's PageTitle component
-- The title is rendered in the document's `<title>` tag via `<HeadOutlet>` in App.razor
-
 **Head Parameter:**
 - Content placed in the `<Head>` parameter is automatically rendered inside a `<HeadContent>` component
+- You can include `<title>` elements directly in the Head content and they will work correctly
 - This allows you to maintain Web Forms-style head content definition in the MasterPage
 - The content will be injected into the document's `<head>` section via the `<HeadOutlet>` in App.razor
 - This bridges the gap between Web Forms' `<head runat="server">` and Blazor's approach
@@ -179,8 +176,9 @@ Before (Web Forms Site.Master):
 
 After (Blazor MasterPage):
 ```razor
-<MasterPage PageTitle="@(pageTitle + " - My Site")">
+<MasterPage>
     <Head>
+        <title>@pageTitle - My Site</title>
         <link href="css/site.css" rel="stylesheet" />
     </Head>
     <ChildContent>
@@ -194,7 +192,7 @@ After (Blazor MasterPage):
 }
 ```
 
-**Important:** While these parameters provide a convenient migration path, for new Blazor development, it's recommended to use `<PageTitle>` and `<HeadContent>` directly in your pages and layouts rather than centralizing all head content in a master page.
+**Important:** While this parameter provides a convenient migration path, for new Blazor development, it's recommended to use `<PageTitle>` and `<HeadContent>` directly in your pages and layouts rather than centralizing all head content in a master page.
 
 ### Multiple HeadContent Elements in the Hierarchy
 
