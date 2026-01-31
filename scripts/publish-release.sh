@@ -62,15 +62,20 @@ echo -e "${GREEN}Publishing release v${VERSION}...${NC}"
 
 # Create and push the tag using nbgv
 echo -e "${YELLOW}Creating git tag using Nerdbank.GitVersioning...${NC}"
-if ! nbgv tag; then
+
+# Use nbgv tag to create the tag and capture output
+if ! nbgv tag > /tmp/nbgv_tag_output.txt 2>&1; then
     echo -e "${RED}Error: Failed to create tag with nbgv${NC}"
+    cat /tmp/nbgv_tag_output.txt
     exit 1
 fi
 
-# Get the tag that was just created
-CREATED_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
-if [ -z "$CREATED_TAG" ]; then
-    echo -e "${RED}Error: Could not determine the created tag${NC}"
+# nbgv doesn't output the tag name, so we construct it from the version
+CREATED_TAG="v${VERSION}"
+
+# Verify the tag was created
+if ! git rev-parse "$CREATED_TAG" >/dev/null 2>&1; then
+    echo -e "${RED}Error: Tag $CREATED_TAG was not created successfully${NC}"
     exit 1
 fi
 

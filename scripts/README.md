@@ -122,7 +122,7 @@ Here's the complete workflow for releasing a new version using Nerdbank.GitVersi
 5. Commit the changes:
    ```bash
    git add version.json RELEASE_NOTES.md
-   git commit -m "Set version to 0.14"
+   git commit -m "Prepare release v0.14"
    git push origin dev
    ```
 
