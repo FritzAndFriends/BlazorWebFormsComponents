@@ -1,0 +1,6 @@
+@inherits ComponentBase
+@implements IDisposable
+@if (!string.IsNullOrEmpty(_currentTitle))
+{
+    <PageTitle>@_currentTitle</PageTitle>
+}

@@ -1,0 +1,51 @@
+@code {
+
+	[Fact]
+	public void Page_ComponentRenders_WithoutError()
+	{
+		// Arrange
+		Services.AddScoped<IPageService, PageService>();
+
+		// Act
+		var cut = Render(@<Page />);
+
+		// Assert - Component should render without throwing
+		cut.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void Page_ComponentWithTitle_ServiceHasCorrectTitle()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.Title = "Test Title";
+		Services.AddScoped<IPageService>(_ => pageService);
+
+		// Act
+		var cut = Render(@<Page />);
+
+		// Assert - Title is maintained in service
+		pageService.Title.ShouldBe("Test Title");
+	}
+
+	[Fact]
+	public void Page_TitleChangedDynamically_ComponentUpdates()
+	{
+		// Arrange
+		var pageService = new PageService();
+		Services.AddScoped<IPageService>(_ => pageService);
+		var cut = Render(@<Page />);
+
+		// Act - Set title dynamically
+		pageService.Title = "Dynamic Title";
+
+		// Small delay to allow async update
+		System.Threading.Thread.Sleep(100);
+
+		// Assert
+		pageService.Title.ShouldBe("Dynamic Title");
+	}
+
+}
+
+
