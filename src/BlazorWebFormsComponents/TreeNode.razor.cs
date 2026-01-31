@@ -233,7 +233,6 @@ namespace BlazorWebFormsComponents
 					if (ChildContent != null && !Expanded)
 					{
 						HandleNodeExpand();
-						await Task.CompletedTask;
 					}
 					break;
 
@@ -242,24 +241,20 @@ namespace BlazorWebFormsComponents
 					if (ChildContent != null && Expanded)
 					{
 						HandleNodeExpand();
-						await Task.CompletedTask;
 					}
 					break;
 
 				case "Enter":
 				case " ": // Space key
 					// Activate the node's link or expand/collapse
-					if (!string.IsNullOrEmpty(NavigateUrl))
-					{
-						// Let the browser handle the navigation
-					}
-					else if (ChildContent != null)
+					if (string.IsNullOrEmpty(NavigateUrl) && ChildContent != null)
 					{
 						HandleNodeExpand();
-						await Task.CompletedTask;
 					}
 					break;
 			}
+
+			await Task.CompletedTask;
 		}
 
 		#endregion
