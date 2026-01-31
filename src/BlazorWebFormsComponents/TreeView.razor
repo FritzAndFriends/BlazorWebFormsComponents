@@ -1,7 +1,7 @@
 ﻿@using BlazorWebFormsComponents.DataBinding
 @inherits BaseDataBoundComponent
 
-<div class="@CssClass">
+<div class="@CssClass" role="@(UseAccessibilityFeatures ? "tree" : null)" aria-label="@(UseAccessibilityFeatures ? "Tree navigation" : null)">
 <CascadingValue Name="ParentTreeView" Value="this">
 @ChildContent
 @ChildNodesRenderFragment
