@@ -16,7 +16,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		/// <param name="component">The component to generate an ID for</param>
 		/// <param name="suffix">Optional suffix to append (e.g., for child elements)</param>
-		/// <returns>The generated client ID, or null if no ID is set</returns>
+		/// <returns>The generated client ID, or null if component is null or has no ID set</returns>
 		public static string GetClientID(BaseWebFormsComponent component, string suffix = null)
 		{
 			if (component == null)
@@ -55,7 +55,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		/// <param name="component">The parent component</param>
 		/// <param name="childSuffix">The suffix for the child element</param>
-		/// <returns>The generated client ID for the child element</returns>
+		/// <returns>The generated client ID for the child element, or null if component is null or has no ID set</returns>
 		public static string GetChildClientID(BaseWebFormsComponent component, string childSuffix)
 		{
 			return GetClientID(component, childSuffix);
@@ -67,7 +67,7 @@ namespace BlazorWebFormsComponents
 		/// <param name="component">The parent component</param>
 		/// <param name="itemIndex">The index of the item</param>
 		/// <param name="suffix">Optional additional suffix</param>
-		/// <returns>The generated client ID for the item</returns>
+		/// <returns>The generated client ID for the item, or null if component is null or has no ID set</returns>
 		public static string GetItemClientID(BaseWebFormsComponent component, int itemIndex, string suffix = null)
 		{
 			var baseSuffix = itemIndex.ToString();
