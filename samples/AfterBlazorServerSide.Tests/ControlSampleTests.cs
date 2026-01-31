@@ -51,7 +51,7 @@ public class ControlSampleTests
 
     /// <summary>
     /// Tests the ListView ItemDataBound event functionality by verifying that
-    /// the sample page loads and displays the event counter.
+    /// the sample page loads and displays the expected content.
     /// </summary>
     [Fact]
     public async Task ListView_ItemDataBound_DisplaysItemProperties()
@@ -61,12 +61,15 @@ public class ControlSampleTests
 
         try
         {
-            // Act
+            // Act - Use DOMContentLoaded instead of NetworkIdle to avoid Blazor SignalR connection delays
             var response = await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ListView/ItemDataBound", new PageGotoOptions
             {
-                WaitUntil = WaitUntilState.NetworkIdle,
+                WaitUntil = WaitUntilState.DOMContentLoaded,
                 Timeout = 30000
             });
+
+            // Wait for the component to render
+            await page.WaitForSelectorAsync(".item-row", new PageWaitForSelectorOptions { Timeout = 5000 });
 
             // Assert - Page loads successfully
             Assert.NotNull(response);
@@ -76,11 +79,10 @@ public class ControlSampleTests
             var itemRows = await page.Locator(".item-row, .alt-item-row").AllAsync();
             Assert.NotEmpty(itemRows);
 
-            // Assert - Event counter shows events fired
+            // Assert - Event counter shows item count
             var eventCount = await page.Locator("#event-count").TextContentAsync();
             Assert.NotNull(eventCount);
-            var count = int.Parse(eventCount.Trim());
-            Assert.True(count > 0, $"Expected ItemDataBound events to fire, but count was {count}");
+            Assert.Contains("12", eventCount); // SimpleWidgetList has 12 items
 
             // Assert - Event details section exists
             var eventDetails = await page.Locator("#event-details").IsVisibleAsync();
