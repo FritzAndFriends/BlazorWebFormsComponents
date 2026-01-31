@@ -45,7 +45,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the direction in which the radio buttons are displayed.
 		/// </summary>
 		[Parameter]
-		public RepeatDirection RepeatDirection { get; set; } = RepeatDirection.Vertical;
+		public DataListEnum RepeatDirection { get; set; } = DataListEnum.Vertical;
 
 		/// <summary>
 		/// Gets or sets the layout of the radio buttons.

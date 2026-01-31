@@ -13,7 +13,7 @@
 		<table class="@CssClass" style="@Style"
 			   cellpadding="@(CellPadding >= 0 ? CellPadding : null)"
 			   cellspacing="@(CellSpacing >= 0 ? CellSpacing : null)">
-			@if (RepeatDirection == RepeatDirection.Vertical)
+			@if (RepeatDirection == DataListEnum.Vertical)
 			{
 				@foreach (var item in items)
 				{
@@ -49,7 +49,7 @@
 				var currentIndex = index++;
 				var inputId = GetInputId(currentIndex);
 				@RenderRadioItem(item, inputId)
-				@if (RepeatDirection == RepeatDirection.Vertical)
+				@if (RepeatDirection == DataListEnum.Vertical)
 				{
 					<br />
 				}
