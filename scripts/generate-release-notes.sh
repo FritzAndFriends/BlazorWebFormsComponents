@@ -22,7 +22,7 @@ echo "## Changes in this release"
 echo ""
 
 # Get commits, filtering out merge commits and grouping by type
-git log $MERGE_BASE..HEAD --no-merges --pretty=format:"%s" | while read -r line; do
+git log "$MERGE_BASE"..HEAD --no-merges --pretty=format:"%s" | while read -r line; do
     # Try to categorize commits
     if [[ $line =~ ^(feat|feature|add|new): ]]; then
         echo "### ✨ New Features"
@@ -63,8 +63,10 @@ done | awk '
 echo ""
 echo "## Contributors"
 echo ""
-git log $MERGE_BASE..HEAD --no-merges --pretty=format:"- %aN" | sort -u
+git log "$MERGE_BASE"..HEAD --no-merges --pretty=format:"- %aN" | sort -u
 
 echo ""
 echo ""
-echo "_Full Changelog_: https://github.com/FritzAndFriends/BlazorWebFormsComponents/compare/v$(jq -r .version version.json)...\$\{TAG\}"
+# Note: When using this in a GitHub release, replace {PREVIOUS_VERSION} with the actual previous version tag
+CURRENT_VERSION=$(jq -r .version version.json)
+echo "_Full Changelog_: https://github.com/FritzAndFriends/BlazorWebFormsComponents/compare/v{PREVIOUS_VERSION}...v${CURRENT_VERSION}"
