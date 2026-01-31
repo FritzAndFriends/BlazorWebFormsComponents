@@ -9,10 +9,71 @@ The TreeView component is meant to emulate the asp:TreeView control in markup an
 - XmlDocument databinding
 - SiteMap databinding as an XmlDocument
 - Databinding events
+- **Accessibility features** (see below)
+
+## Accessibility Features
+
+The TreeView component includes an optional `UseAccessibilityFeatures` parameter that enhances the component for users with disabilities, particularly for keyboard navigation and screen reader support.
+
+### Enabling Accessibility Features
+
+To enable accessibility features, set the `UseAccessibilityFeatures` parameter to `true`:
+
+```html
+<TreeView UseAccessibilityFeatures="true">
+    <Nodes>
+        <TreeNode Text="Root Node" Expanded="true">
+            <TreeNode Text="Child Node" />
+        </TreeNode>
+    </Nodes>
+</TreeView>
+```
+
+### When Accessibility Features are Enabled
+
+The TreeView component provides the following enhancements:
+
+#### ARIA Attributes
+
+- **`role="tree"`**: Applied to the TreeView container to identify it as a tree widget
+- **`aria-label="Tree navigation"`**: Provides a descriptive label for screen readers
+- **`role="treeitem"`**: Applied to each TreeNode to identify it as a tree item
+- **`aria-level`**: Indicates the depth level of each node (1 for root nodes, 2 for children, etc.)
+- **`aria-expanded`**: For nodes with children, indicates whether the node is expanded (`"true"`) or collapsed (`"false"`)
+- **`aria-label`**: Added to expand/collapse links to provide descriptive text for screen readers
+
+#### Keyboard Navigation
+
+With accessibility features enabled, users can navigate the TreeView using keyboard shortcuts:
+
+- **Arrow Right (→)**: Expands a collapsed node that has children
+- **Arrow Left (←)**: Collapses an expanded node that has children
+- **Enter or Space**: Activates the node's link or expands/collapses the node
+- **Tab**: Moves focus into and out of the TreeView
+
+#### Focus Management
+
+- Each TreeNode receives a `tabindex="0"` attribute, making it keyboard accessible
+- Nodes can receive focus and respond to keyboard events
+- Visual focus indicators follow browser defaults
+
+### Benefits for Different Users
+
+The accessibility features address several user needs:
+
+1. **Keyboard Users**: Can navigate and interact with the TreeView without a mouse
+2. **Screen Reader Users**: Get proper semantic information about the tree structure and node states
+3. **Speech Recognition Users**: Benefit from larger interactive areas due to keyboard focus support
+4. **Touch Device Users**: While the core issue of small touch targets isn't fully addressed, keyboard equivalents provide an alternative interaction method
+
+### Backwards Compatibility
+
+By default, `UseAccessibilityFeatures` is `false`, ensuring existing implementations continue to work without changes. The HTML output remains identical to the original Web Forms TreeView when accessibility features are disabled.
 
 ## Usage Notes
 
 - ShowCheckBoxes attribute, when specifying multiple values, should be separated by a vertical pipe `|` instead of commas
+- For the best user experience with assistive technologies, set `UseAccessibilityFeatures="true"`
 
 ## Web Forms Declarative Syntax
 
