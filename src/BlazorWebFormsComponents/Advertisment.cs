@@ -1,6 +1,6 @@
 ﻿namespace BlazorWebFormsComponents
 {
-	internal class Advertisment
+	public class Advertisment
 	{
 		public string AlternateText { get; set; }
 

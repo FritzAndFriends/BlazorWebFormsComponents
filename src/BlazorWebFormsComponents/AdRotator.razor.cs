@@ -1,3 +1,7 @@
+using BlazorComponentUtilities;
+using BlazorWebFormsComponents.DataBinding;
+using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -7,7 +11,7 @@ using System.Xml.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class AdRotator : BaseStyledComponent
+	public partial class AdRotator : DataBoundComponent<Advertisment>, IStyle
 	{
 		private static readonly string DefaultAlternateTextField = "AlternateText";
 		private static readonly string DefaultImageUrlField = "ImageUrl";
@@ -43,27 +47,43 @@ namespace BlazorWebFormsComponents
 
 			if (string.IsNullOrEmpty(ImageUrlField))
 			{
-				throw new ArgumentException("AlternateTextField can't be null or empty.", nameof(ImageUrlField));
+				throw new ArgumentException("ImageUrlField can't be null or empty.", nameof(ImageUrlField));
 			}
 
 			if (string.IsNullOrEmpty(NavigateUrlField))
 			{
-				throw new ArgumentException("AlternateTextField can't be null or empty.", nameof(NavigateUrlField));
+				throw new ArgumentException("NavigateUrlField can't be null or empty.", nameof(NavigateUrlField));
 			}
 
-			var advertisments = GetAdvertismentsFileContent(AdvertisementFile);
+			IEnumerable<Advertisment> advertisments;
 
-			if (advertisments == null || advertisments.Count() == 0)
+			// Check if DataSource is provided (takes priority over AdvertisementFile)
+			if (ItemsList != null && ItemsList.Any())
+			{
+				advertisments = ItemsList;
+				DataBound(EventArgs.Empty);
+			}
+			else if (!string.IsNullOrEmpty(AdvertisementFile))
+			{
+				advertisments = GetAdvertismentsFileContent(AdvertisementFile);
+			}
+			else
 			{
 				return null;
 			}
 
-			if (KeywordFilter != string.Empty)
+			if (advertisments == null || !advertisments.Any())
 			{
-				advertisments = advertisments.Where(a => a.Keyword.Equals(KeywordFilter, StringComparison.OrdinalIgnoreCase));
+				return null;
 			}
 
-			if (advertisments.Count() == 0)
+			if (!string.IsNullOrEmpty(KeywordFilter))
+			{
+				advertisments = advertisments.Where(a => !string.IsNullOrEmpty(a.Keyword) && 
+					a.Keyword.Equals(KeywordFilter, StringComparison.OrdinalIgnoreCase));
+			}
+
+			if (!advertisments.Any())
 			{
 				return null;
 			}
@@ -73,7 +93,8 @@ namespace BlazorWebFormsComponents
 			var adProperties = new Dictionary<string, string>();
 			foreach (var property in typeof(Advertisment).GetProperties())
 			{
-				adProperties.Add(property.Name, property.GetValue(advertisment).ToString());
+				var value = property.GetValue(advertisment);
+				adProperties.Add(property.Name, value?.ToString() ?? string.Empty);
 			}
 
 			var adArgs = new AdCreatedEventArgs(adProperties)
@@ -115,5 +136,35 @@ namespace BlazorWebFormsComponents
 					Keyword = a.Descendants("Keyword").FirstOrDefault()?.Value
 				});
 		}
+
+		// IStyle properties
+		[Parameter]
+		public WebColor BackColor { get; set; }
+
+		[Parameter]
+		public WebColor BorderColor { get; set; }
+
+		[Parameter]
+		public BorderStyle BorderStyle { get; set; }
+
+		[Parameter]
+		public Unit BorderWidth { get; set; }
+
+		[Parameter]
+		public string CssClass { get; set; }
+
+		[Parameter]
+		public FontInfo Font { get; set; } = new FontInfo();
+
+		[Parameter]
+		public WebColor ForeColor { get; set; }
+
+		[Parameter]
+		public Unit Height { get; set; }
+
+		[Parameter]
+		public Unit Width { get; set; }
+
+		public string Style => this.ToStyle().Build().NullIfEmpty();
 	}
 }
