@@ -1,0 +1,131 @@
+@page "/UtilityFeatures/PageService"
+@inject IPageService PageService
+
+<Page />
+
+<h2>PageService - Web Forms Page Object Compatibility</h2>
+
+<p>The <code>PageService</code> provides page-level services that mimic ASP.NET Web Forms <code>Page</code> object functionality, enabling programmatic access to page properties like <code>Title</code>.</p>
+
+<div class="demo-section">
+    <h3>Current Page Title</h3>
+    <p><strong>Title:</strong> @PageService.Title</p>
+    
+    <div class="mb-3">
+        <label class="form-label">Set New Page Title:</label>
+        <input type="text" class="form-control" style="max-width: 400px;" @bind="NewTitle" placeholder="Enter page title..." />
+    </div>
+    
+    <Button Text="Update Title" OnClick="UpdateTitle" CssClass="btn btn-primary" />
+    
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-success mt-3">@Message</div>
+    }
+</div>
+
+<hr />
+
+<h3>Web Forms Comparison</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>ASP.NET Web Forms</h4>
+        <pre><code class="language-csharp">// In code-behind (.aspx.cs)
+protected void Page_Load(object sender, EventArgs e)
+{
+    Page.Title = "My Dynamic Title";
+}
+
+protected void UpdateTitle_Click(object sender, EventArgs e)
+{
+    Page.Title = txtNewTitle.Text;
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>Blazor with PageService</h4>
+        <pre><code class="language-razor">@@page "/MyPage"
+@@inject IPageService PageService
+
+&lt;Page /&gt;
+
+@@code {
+    protected override void OnInitialized()
+    {
+        PageService.Title = "My Dynamic Title";
+    }
+
+    private void UpdateTitle()
+    {
+        PageService.Title = NewTitle;
+    }
+}</code></pre>
+    </div>
+</div>
+
+<hr />
+
+<h3>Key Features</h3>
+<ul>
+    <li><strong>Programmatic Title Setting:</strong> Set page title dynamically via code, just like <code>Page.Title</code> in Web Forms</li>
+    <li><strong>Dependency Injection:</strong> Available through DI as <code>IPageService</code></li>
+    <li><strong>Event-Based Updates:</strong> The <code>Page</code> component automatically updates the browser title when <code>PageService.Title</code> changes</li>
+    <li><strong>Scoped Service:</strong> One instance per request/render cycle, just like Web Forms <code>Page</code> object</li>
+</ul>
+
+<h3>Usage Instructions</h3>
+
+<h4>1. Register the Service (Already done in this sample)</h4>
+<pre><code class="language-csharp">// In Program.cs
+builder.Services.AddBlazorWebFormsComponents();</code></pre>
+
+<h4>2. Add the Page Component to Your Layout or Page</h4>
+<pre><code class="language-razor">@@inject IPageService PageService
+
+&lt;Page /&gt;  @* This renders the dynamic PageTitle component *@</code></pre>
+
+<h4>3. Set the Title Programmatically</h4>
+<pre><code class="language-csharp">@@code {
+    protected override void OnInitialized()
+    {
+        PageService.Title = "My Page Title";
+    }
+
+    private void SomeEventHandler()
+    {
+        PageService.Title = "Updated Title";
+    }
+}</code></pre>
+
+<h3>Future Extensibility</h3>
+<p>The <code>IPageService</code> interface is designed to support additional <code>Page</code> object features in the future, such as:</p>
+<ul>
+    <li>Meta tags</li>
+    <li>Page-level client script registration</li>
+    <li>Other page metadata</li>
+</ul>
+
+@code {
+    private string NewTitle = "";
+    private string Message = "";
+
+    protected override void OnInitialized()
+    {
+        // Set initial title
+        PageService.Title = "PageService Sample - BlazorWebFormsComponents";
+    }
+
+    private void UpdateTitle()
+    {
+        if (!string.IsNullOrWhiteSpace(NewTitle))
+        {
+            PageService.Title = NewTitle;
+            Message = $"Page title updated to: {NewTitle}";
+            NewTitle = "";
+        }
+        else
+        {
+            Message = "Please enter a title";
+        }
+    }
+}
