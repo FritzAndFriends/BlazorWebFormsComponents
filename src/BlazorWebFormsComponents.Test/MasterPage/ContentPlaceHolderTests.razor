@@ -1,0 +1,69 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void ContentPlaceHolder_WithDefaultContent_RendersDefault()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<ContentPlaceHolder ID="MainContent">
+				<div class="default-content">This is default</div>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".default-content").TextContent.ShouldBe("This is default");
+	}
+
+	[Fact]
+	public void ContentPlaceHolder_WithoutID_StillRenders()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<ContentPlaceHolder>
+				<p>Content without ID</p>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		// Assert
+		cut.Find("p").TextContent.ShouldBe("Content without ID");
+	}
+
+	[Fact]
+	public void ContentPlaceHolder_Visible_False_DoesNotRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<ContentPlaceHolder ID="MainContent" Visible="false">
+				<div class="hidden">Should not appear</div>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		// Assert
+		cut.Markup.ShouldNotContain("hidden");
+	}
+
+	[Fact]
+	public void ContentPlaceHolder_MultipleInMasterPage_BothRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<div class="wrapper">
+				<ContentPlaceHolder ID="Header">
+					<h1>Default Header</h1>
+				</ContentPlaceHolder>
+				<ContentPlaceHolder ID="MainContent">
+					<p>Default Main Content</p>
+				</ContentPlaceHolder>
+				<ContentPlaceHolder ID="Footer">
+					<footer>Default Footer</footer>
+				</ContentPlaceHolder>
+			</div>
+		</MasterPage>);
+
+		// Assert
+		cut.Find("h1").TextContent.ShouldBe("Default Header");
+		cut.Find("p").TextContent.ShouldBe("Default Main Content");
+		cut.Find("footer").TextContent.ShouldBe("Default Footer");
+	}
+}
