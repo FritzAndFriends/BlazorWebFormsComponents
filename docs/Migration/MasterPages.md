@@ -215,6 +215,325 @@ Web Forms supports nested master pages. In Blazor, use nested layouts:
 | **Multiple Sections** | Multiple ContentPlaceHolders | `@RenderSection` for named sections |
 | **Default Content** | Inside ContentPlaceHolder tags | Not typically used; define in layout |
 | **Nesting** | `MasterPageFile` on master page | `@layout` directive in layout component |
+| **HTML Head Management** | `<head runat="server">` in MasterPage | `<HeadOutlet>` in App.razor with `<HeadContent>` components |
+| **Page Title** | `<%: Page.Title %>` or `Page.Title` property | `<PageTitle>` component |
+| **Scripts/Styles** | In `<head>` or ContentPlaceHolders | `<HeadContent>` component or `<script>`/`<link>` in App.razor |
+
+## Managing HTML Head and Scripts
+
+**This is a critical difference between Web Forms MasterPages and Blazor layouts.**
+
+### Web Forms MasterPage Head Management
+
+In Web Forms, the MasterPage controls the entire HTML document including the `<head>` section:
+
+```html
+<!-- Site.Master -->
+<%@ Master Language="C#" %>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <meta charset="utf-8" />
+    <title><%: Page.Title %> - My Site</title>
+    
+    <!-- Scripts can be added here -->
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+    
+    <!-- Stylesheets -->
+    <link href="~/Content/site.css" rel="stylesheet" />
+    
+    <!-- Child pages can add to head -->
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <!-- Body content -->
+</body>
+</html>
+```
+
+Child pages can add to the head:
+
+```html
+<%@ Page Title="My Page" MasterPageFile="~/Site.Master" %>
+
+<asp:Content ContentPlaceHolderID="HeadContent" runat="server">
+    <link href="/css/custom.css" rel="stylesheet" />
+    <script src="/js/custom.js"></script>
+</asp:Content>
+```
+
+### Blazor Head Management
+
+In Blazor, the HTML structure is defined in `App.razor` (or `_Host.cshtml` in older versions), **not in layouts**:
+
+**App.razor** (root component):
+```razor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    
+    <!-- Static stylesheets -->
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    
+    <!-- HeadOutlet renders PageTitle and HeadContent from pages/layouts -->
+    <HeadOutlet />
+</head>
+<body>
+    <!-- Routes component renders pages with their layouts -->
+    <Routes />
+    
+    <!-- Scripts at bottom of body -->
+    <script src="_framework/blazor.web.js"></script>
+    <script src="js/site.js"></script>
+</body>
+</html>
+```
+
+**Individual Pages** can add content to `<head>`:
+```razor
+@page "/mypage"
+
+<PageTitle>My Page Title</PageTitle>
+
+<HeadContent>
+    <link href="css/custom.css" rel="stylesheet" />
+    <script src="js/custom.js"></script>
+    <meta name="description" content="My page description" />
+</HeadContent>
+
+<h1>Page Content</h1>
+```
+
+**Layouts** can also add head content:
+```razor
+@inherits LayoutComponentBase
+
+<HeadContent>
+    <!-- Common head content for all pages using this layout -->
+    <link href="css/layout-specific.css" rel="stylesheet" />
+</HeadContent>
+
+<div class="page">
+    @Body
+</div>
+```
+
+### Migration Strategy for Head Content
+
+When migrating from Web Forms MasterPages to Blazor:
+
+#### 1. **Move Static Head Content to App.razor**
+
+Content that applies to **all pages** should move from MasterPage to `App.razor`:
+
+**Before (Site.Master):**
+```html
+<head runat="server">
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/site.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.js"></script>
+</head>
+```
+
+**After (App.razor):**
+```razor
+<head>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <HeadOutlet />
+</head>
+<body>
+    <Routes />
+    <script src="js/jquery.js"></script>
+</body>
+```
+
+#### 2. **Convert ContentPlaceHolder in Head to HeadContent**
+
+If your MasterPage has a ContentPlaceHolder in the `<head>`:
+
+**Before (Site.Master):**
+```html
+<head runat="server">
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+```
+
+**Before (MyPage.aspx):**
+```html
+<asp:Content ContentPlaceHolderID="HeadContent" runat="server">
+    <link href="/css/page-specific.css" rel="stylesheet" />
+</asp:Content>
+```
+
+**After (MyPage.razor):**
+```razor
+@page "/mypage"
+
+<HeadContent>
+    <link href="css/page-specific.css" rel="stylesheet" />
+</HeadContent>
+```
+
+#### 3. **Convert Page.Title to PageTitle Component**
+
+**Before (Site.Master):**
+```html
+<head runat="server">
+    <title><%: Page.Title %> - My Site</title>
+</head>
+```
+
+**Before (MyPage.aspx):**
+```html
+<%@ Page Title="Home" MasterPageFile="~/Site.Master" %>
+```
+
+**After (MyPage.razor):**
+```razor
+@page "/"
+
+<PageTitle>Home - My Site</PageTitle>
+```
+
+#### 4. **Script Management Strategies**
+
+**Option A: Global Scripts in App.razor** (Recommended)
+```razor
+<!-- App.razor -->
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/site.js"></script>
+</body>
+```
+
+**Option B: Page-Specific Scripts with HeadContent**
+```razor
+<!-- MyPage.razor -->
+<HeadContent>
+    <script src="js/page-specific.js"></script>
+</HeadContent>
+```
+
+**Option C: Dynamic Script Loading with IJSRuntime**
+```razor
+@inject IJSRuntime JS
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("loadScript", "js/dynamic.js");
+        }
+    }
+}
+```
+
+### Important Limitations
+
+1. **Layouts Don't Control HTML Structure** - In Blazor, layouts only control the body content. The `<html>`, `<head>`, and `<body>` tags are defined in `App.razor`, not layouts.
+
+2. **No `<head runat="server">`** - Blazor doesn't have server-side head manipulation like Web Forms. Use `<HeadContent>` components instead.
+
+3. **Script Placement** - Scripts are typically placed at the bottom of `App.razor` rather than in layouts or individual pages for better performance.
+
+4. **HeadOutlet is Required** - You must include `<HeadOutlet />` in your `App.razor` for `<PageTitle>` and `<HeadContent>` to work.
+
+### Example: Complete Head Migration
+
+**Before - Web Forms:**
+
+Site.Master:
+```html
+<%@ Master Language="C#" %>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title><%: Page.Title %> - Contoso</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/site.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <asp:ContentPlaceHolder ID="MainContent" runat="server">
+    </asp:ContentPlaceHolder>
+    <script src="~/Scripts/jquery.js"></script>
+    <script src="~/Scripts/site.js"></script>
+</body>
+</html>
+```
+
+Products.aspx:
+```html
+<%@ Page Title="Products" MasterPageFile="~/Site.Master" %>
+
+<asp:Content ContentPlaceHolderID="HeadContent" runat="server">
+    <link href="/Content/products.css" rel="stylesheet" />
+    <meta name="description" content="Our products" />
+</asp:Content>
+
+<asp:Content ContentPlaceHolderID="MainContent" runat="server">
+    <h1>Our Products</h1>
+</asp:Content>
+```
+
+**After - Blazor:**
+
+App.razor:
+```razor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <HeadOutlet />
+</head>
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/site.js"></script>
+</body>
+</html>
+```
+
+MainLayout.razor:
+```razor
+@inherits LayoutComponentBase
+
+<div class="page">
+    @Body
+</div>
+```
+
+Products.razor:
+```razor
+@page "/products"
+
+<PageTitle>Products - Contoso</PageTitle>
+
+<HeadContent>
+    <link href="css/products.css" rel="stylesheet" />
+    <meta name="description" content="Our products" />
+</HeadContent>
+
+<h1>Our Products</h1>
+```
 
 ## Named Sections in Blazor
 
@@ -311,11 +630,14 @@ Index.razor:
 
 The following MasterPage features don't have direct equivalents in Blazor:
 
+- **`<head runat="server">`** - Blazor layouts don't control the HTML head. Use `<HeadContent>` components in pages/layouts, and define static head content in `App.razor`
 - **Page.Title property** - Use `<PageTitle>` component instead
+- **ContentPlaceHolder in `<head>`** - Use `<HeadContent>` component in pages instead
 - **Master property** - Not needed; layouts are applied via directive
 - **MasterPageFile in web.config** - Use `@layout` directive or configure in `App.razor`
 - **MasterType directive** - Not applicable in Blazor
 - **FindControl across master/content** - Use component references and cascading parameters
+- **Server-side script registration** - Use `<HeadContent>` with `<script>` tags or IJSRuntime for dynamic loading
 
 ## Additional Resources
 

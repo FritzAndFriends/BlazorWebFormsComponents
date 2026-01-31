@@ -154,6 +154,99 @@
     </div>
 </div>
 
+<h3 class="mt-5">Critical Difference: HTML Head Management</h3>
+
+<div class="alert alert-danger">
+    <strong>Important:</strong> Web Forms MasterPages control the entire HTML document including the <code>&lt;head&gt;</code> section. 
+    Blazor layouts <strong>do NOT</strong> control the head - this is a fundamental architectural difference.
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>Web Forms - Head in MasterPage</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;%&#64; Master Language="C#" %&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head runat="server"&gt;
+    &lt;title&gt;&lt;%: Page.Title %&gt;&lt;/title&gt;
+    &lt;link href="~/css/site.css" rel="stylesheet" /&gt;
+    &lt;asp:ContentPlaceHolder ID="HeadContent" 
+         runat="server"&gt;
+    &lt;/asp:ContentPlaceHolder&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;asp:ContentPlaceHolder ID="MainContent" 
+         runat="server"&gt;
+    &lt;/asp:ContentPlaceHolder&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <h5 class="mt-3">Child Page</h5>
+                <pre><code>&lt;%&#64; Page Title="My Page" 
+         MasterPageFile="~/Site.Master" %&gt;
+
+&lt;asp:Content 
+    ContentPlaceHolderID="HeadContent" 
+    runat="server"&gt;
+    &lt;link href="/css/custom.css" rel="stylesheet" /&gt;
+&lt;/asp:Content&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Blazor - Head in App.razor</h5>
+            </div>
+            <div class="card-body">
+                <h5>App.razor (Root)</h5>
+                <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;link href="css/site.css" rel="stylesheet" /&gt;
+    &lt;HeadOutlet /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;Routes /&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <h5 class="mt-3">Page</h5>
+                <pre><code>@@page "/mypage"
+
+&lt;PageTitle&gt;My Page&lt;/PageTitle&gt;
+
+&lt;HeadContent&gt;
+    &lt;link href="css/custom.css" rel="stylesheet" /&gt;
+&lt;/HeadContent&gt;
+
+&lt;h1&gt;Content&lt;/h1&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h5>Key Points for Migration</h5>
+    </div>
+    <div class="card-body">
+        <ol>
+            <li><strong>Static head content</strong> (common CSS, meta tags) moves from MasterPage to <code>App.razor</code></li>
+            <li><strong>Page titles</strong> use <code>&lt;PageTitle&gt;</code> component instead of <code>Page.Title</code> property</li>
+            <li><strong>Page-specific head content</strong> uses <code>&lt;HeadContent&gt;</code> component instead of ContentPlaceHolder in head</li>
+            <li><strong>Layouts do NOT define HTML structure</strong> - they only wrap body content with <code>@@Body</code></li>
+            <li><strong>HeadOutlet is required</strong> in App.razor for PageTitle and HeadContent to work</li>
+        </ol>
+    </div>
+</div>
+
 <h3 class="mt-5">Key Benefits of Blazor Layouts</h3>
 
 <ul>
