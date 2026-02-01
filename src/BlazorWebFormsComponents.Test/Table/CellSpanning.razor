@@ -1,0 +1,68 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void TableCell_ColumnSpan_RendersColspanAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell ColumnSpan="3">Spanning Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		cell.GetAttribute("colspan").ShouldBe("3");
+	}
+
+	[Fact]
+	public void TableCell_RowSpan_RendersRowspanAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell RowSpan="2">Spanning Cell</TableCell>
+				<TableCell>Cell 2</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cells = cut.FindAll("td");
+		cells[0].GetAttribute("rowspan").ShouldBe("2");
+	}
+
+	[Fact]
+	public void TableCell_BothSpans_RendersBothAttributes()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell ColumnSpan="2" RowSpan="3">Spanning Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		cell.GetAttribute("colspan").ShouldBe("2");
+		cell.GetAttribute("rowspan").ShouldBe("3");
+	}
+
+	[Fact]
+	public void TableCell_ZeroSpan_DoesNotRenderAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell ColumnSpan="0" RowSpan="0">Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		cell.GetAttribute("colspan").ShouldBeNull();
+		cell.GetAttribute("rowspan").ShouldBeNull();
+	}
+
+}

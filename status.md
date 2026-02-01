@@ -2,12 +2,12 @@
 
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
-| Editor Controls | 15 | 0 | 12 | 27 |
+| Editor Controls | 17 | 0 | 10 | 27 |
 | Data Controls | 6 | 0 | 2 | 8 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 2 | 0 | 1 | 3 |
 | Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **34** | **0** | **18** | **52** |
+| **TOTAL** | **36** | **0** | **16** | **52** |
 
 ---
 
@@ -30,7 +30,7 @@
 | Literal | ✅ Complete | Documented |
 | RadioButton | ✅ Complete | Documented, tested, sample page exists |
 | TextBox | ✅ Complete | Documented, tested, sample page exists |
-| BulletedList | 🔴 Not Started | List control |
+| BulletedList | ✅ Complete | Documented, tested (41 tests), sample page exists |
 | Calendar | 🔴 Not Started | Complex date picker |
 | CheckBoxList | ✅ Complete | Documented, tested (26 tests) |
 | FileUpload | 🔴 Not Started | Consider Blazor InputFile |
@@ -42,7 +42,7 @@
 | PlaceHolder | ✅ Complete | Documented, tested - renders no wrapper element |
 | RadioButtonList | ✅ Complete | Documented, tested (30 tests) |
 | Substitution | 🔴 Not Started | Cache substitution - may not apply |
-| Table | 🔴 Not Started | HTML table wrapper |
+| Table | ✅ Complete | Includes TableRow, TableCell, TableHeaderCell, TableHeaderRow, TableFooterRow |
 | View | 🔴 Not Started | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 

@@ -4,7 +4,7 @@
     [Fact]
     public void DataList_TableLayout_GridLines_Both_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" GridLines="Both" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" GridLines="Both" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);
@@ -15,7 +15,7 @@
     [Fact]
     public void DataList_TableLayout_GridLines_Rows_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" GridLines="Horizontal" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" GridLines="Horizontal" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);
@@ -26,7 +26,7 @@
     [Fact]
     public void DataList_TableLayout_GridLines_Cols_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" GridLines="Vertical" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" GridLines="Vertical" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

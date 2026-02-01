@@ -1,0 +1,88 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void Table_BasicRendering_RendersTableElement()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell>Cell 1</TableCell>
+				<TableCell>Cell 2</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(1);
+		
+		var cells = cut.FindAll("td");
+		cells.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void Table_WithCaption_RendersCaptionElement()
+	{
+		// Act
+		var cut = Render(@<Table Caption="My Table">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var caption = cut.Find("caption");
+		caption.ShouldNotBeNull();
+		caption.TextContent.ShouldBe("My Table");
+	}
+
+	[Fact]
+	public void Table_NotVisible_RendersNothing()
+	{
+		// Act
+		var cut = Render(@<Table Visible="false">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Table_WithCssClass_AppliesClass()
+	{
+		// Act
+		var cut = Render(@<Table CssClass="my-table">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("class").ShouldBe("my-table");
+	}
+
+	[Fact]
+	public void Table_CellPaddingAndSpacing_RendersAttributes()
+	{
+		// Act
+		var cut = Render(@<Table CellPadding="5" CellSpacing="2">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("cellpadding").ShouldBe("5");
+		table.GetAttribute("cellspacing").ShouldBe("2");
+	}
+
+}

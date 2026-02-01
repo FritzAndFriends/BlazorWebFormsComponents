@@ -5,7 +5,7 @@
     [Fact]
     public void DataList_TableLayout_FooterStyleEmpty_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
             <FooterTemplate>FooterTemplate</FooterTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

@@ -1,0 +1,122 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	private int _clickedIndex = -1;
+
+	[Fact]
+	public async Task BulletedList_LinkButtonClick_InvokesOnClickEvent()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 0", "value0"),
+			new ListItem("Item 1", "value1"),
+			new ListItem("Item 2", "value2")
+		};
+		
+		int clickedIndex = -1;
+		var cut = Render(@<BulletedList TItem="object" 
+			StaticItems="items" 
+			DisplayMode="BulletedListDisplayMode.LinkButton" 
+			OnClick="e => clickedIndex = e.Index" />);
+
+		// Act
+		var links = cut.FindAll("a");
+		await links[1].ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
+
+		// Assert
+		clickedIndex.ShouldBe(1);
+	}
+
+	[Fact]
+	public async Task BulletedList_LinkButtonClick_FirstItem_ReturnsIndexZero()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("First", "first"),
+			new ListItem("Second", "second")
+		};
+		
+		int clickedIndex = -1;
+		var cut = Render(@<BulletedList TItem="object" 
+			StaticItems="items" 
+			DisplayMode="BulletedListDisplayMode.LinkButton" 
+			OnClick="e => clickedIndex = e.Index" />);
+
+		// Act
+		var links = cut.FindAll("a");
+		await links[0].ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
+
+		// Assert
+		clickedIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public async Task BulletedList_LinkButtonClick_LastItem_ReturnsCorrectIndex()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 0", "0"),
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2"),
+			new ListItem("Item 3", "3")
+		};
+		
+		int clickedIndex = -1;
+		var cut = Render(@<BulletedList TItem="object" 
+			StaticItems="items" 
+			DisplayMode="BulletedListDisplayMode.LinkButton" 
+			OnClick="e => clickedIndex = e.Index" />);
+
+		// Act
+		var links = cut.FindAll("a");
+		await links[3].ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
+
+		// Assert
+		clickedIndex.ShouldBe(3);
+	}
+
+	[Fact]
+	public void BulletedList_TextDisplayMode_NoClickHandler_NoLinks()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+		
+		int clickedIndex = -1;
+		var cut = Render(@<BulletedList TItem="object" 
+			StaticItems="items" 
+			DisplayMode="BulletedListDisplayMode.Text" 
+			OnClick="e => clickedIndex = e.Index" />);
+
+		// Assert - Text mode should not render links even with OnClick handler
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void BulletedList_HyperLinkDisplayMode_NoClickEvents()
+	{
+		// HyperLink mode uses actual href navigation, not click events
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Link", "http://example.com")
+		};
+
+		var cut = Render(@<BulletedList TItem="object" 
+			StaticItems="items" 
+			DisplayMode="BulletedListDisplayMode.HyperLink" />);
+
+		// Assert - Links should have actual href, not javascript:void(0)
+		var link = cut.Find("a");
+		link.GetAttribute("href").ShouldBe("http://example.com");
+	}
+
+}

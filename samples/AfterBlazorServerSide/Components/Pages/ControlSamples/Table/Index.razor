@@ -1,0 +1,162 @@
+@page "/ControlSamples/Table"
+@using BlazorWebFormsComponents.Enums
+@using TableComponent = BlazorWebFormsComponents.Table
+@using TableRowComponent = BlazorWebFormsComponents.TableRow
+@using TableCellComponent = BlazorWebFormsComponents.TableCell
+@using TableHeaderCellComponent = BlazorWebFormsComponents.TableHeaderCell
+
+<h2>Table Component Samples</h2>
+
+<h3>Basic Table</h3>
+<TableComponent>
+	<TableRowComponent>
+		<TableHeaderCellComponent>Header 1</TableHeaderCellComponent>
+		<TableHeaderCellComponent>Header 2</TableHeaderCellComponent>
+		<TableHeaderCellComponent>Header 3</TableHeaderCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Cell 1</TableCellComponent>
+		<TableCellComponent>Cell 2</TableCellComponent>
+		<TableCellComponent>Cell 3</TableCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Cell 4</TableCellComponent>
+		<TableCellComponent>Cell 5</TableCellComponent>
+		<TableCellComponent>Cell 6</TableCellComponent>
+	</TableRowComponent>
+</TableComponent>
+<pre><code>&lt;Table&gt;
+    &lt;TableRow&gt;
+        &lt;TableHeaderCell&gt;Header 1&lt;/TableHeaderCell&gt;
+        &lt;TableHeaderCell&gt;Header 2&lt;/TableHeaderCell&gt;
+    &lt;/TableRow&gt;
+    &lt;TableRow&gt;
+        &lt;TableCell&gt;Cell 1&lt;/TableCell&gt;
+        &lt;TableCell&gt;Cell 2&lt;/TableCell&gt;
+    &lt;/TableRow&gt;
+&lt;/Table&gt;</code></pre>
+
+<hr />
+
+<h3>Table with Caption</h3>
+<TableComponent Caption="Product List">
+	<TableRowComponent>
+		<TableHeaderCellComponent>Product</TableHeaderCellComponent>
+		<TableHeaderCellComponent>Price</TableHeaderCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Widget</TableCellComponent>
+		<TableCellComponent>$10.00</TableCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Gadget</TableCellComponent>
+		<TableCellComponent>$25.00</TableCellComponent>
+	</TableRowComponent>
+</TableComponent>
+<pre><code>&lt;Table Caption="Product List"&gt;
+    ...
+&lt;/Table&gt;</code></pre>
+
+<hr />
+
+<h3>Table with Grid Lines</h3>
+<TableComponent GridLines="BlazorWebFormsComponents.Enums.GridLines.Both" CellPadding="5">
+	<TableRowComponent>
+		<TableHeaderCellComponent>Name</TableHeaderCellComponent>
+		<TableHeaderCellComponent>Age</TableHeaderCellComponent>
+		<TableHeaderCellComponent>City</TableHeaderCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Alice</TableCellComponent>
+		<TableCellComponent>30</TableCellComponent>
+		<TableCellComponent>New York</TableCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Bob</TableCellComponent>
+		<TableCellComponent>25</TableCellComponent>
+		<TableCellComponent>Los Angeles</TableCellComponent>
+	</TableRowComponent>
+</TableComponent>
+<pre><code>&lt;Table GridLines="GridLines.Both" CellPadding="5"&gt;
+    ...
+&lt;/Table&gt;</code></pre>
+
+<hr />
+
+<h3>Cell Spanning</h3>
+<TableComponent GridLines="BlazorWebFormsComponents.Enums.GridLines.Both" CellPadding="5">
+	<TableRowComponent>
+		<TableHeaderCellComponent ColumnSpan="3">Full Width Header</TableHeaderCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent RowSpan="2">Spans 2 Rows</TableCellComponent>
+		<TableCellComponent>Cell 1</TableCellComponent>
+		<TableCellComponent>Cell 2</TableCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent>Cell 3</TableCellComponent>
+		<TableCellComponent>Cell 4</TableCellComponent>
+	</TableRowComponent>
+</TableComponent>
+<pre><code>&lt;TableHeaderCell ColumnSpan="3"&gt;Full Width Header&lt;/TableHeaderCell&gt;
+&lt;TableCell RowSpan="2"&gt;Spans 2 Rows&lt;/TableCell&gt;</code></pre>
+
+<hr />
+
+<h3>Table with Styling</h3>
+<TableComponent CssClass="styled-table" 
+       BackColor="new WebColor(System.Drawing.Color.WhiteSmoke)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(2)"
+       CellPadding="10"
+       CellSpacing="0">
+	<TableRowComponent BackColor="new WebColor(System.Drawing.Color.LightBlue)">
+		<TableHeaderCellComponent>Column A</TableHeaderCellComponent>
+		<TableHeaderCellComponent>Column B</TableHeaderCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableCellComponent HorizontalAlign="HorizontalAlign.Center">Centered</TableCellComponent>
+		<TableCellComponent VerticalAlign="VerticalAlign.Top">Top Aligned</TableCellComponent>
+	</TableRowComponent>
+	<TableRowComponent BackColor="new WebColor(System.Drawing.Color.LightGray)">
+		<TableCellComponent>Alternating</TableCellComponent>
+		<TableCellComponent>Row Color</TableCellComponent>
+	</TableRowComponent>
+</TableComponent>
+<pre><code>&lt;Table BackColor="new WebColor(System.Drawing.Color.WhiteSmoke)"
+       BorderStyle="BorderStyle.Solid"
+       CellPadding="10"&gt;
+    &lt;TableRow BackColor="new WebColor(System.Drawing.Color.LightBlue)"&gt;
+        &lt;TableHeaderCell&gt;Column A&lt;/TableHeaderCell&gt;
+    &lt;/TableRow&gt;
+    &lt;TableRow&gt;
+        &lt;TableCell HorizontalAlign="HorizontalAlign.Center"&gt;Centered&lt;/TableCell&gt;
+    &lt;/TableRow&gt;
+&lt;/Table&gt;</code></pre>
+
+<hr />
+
+<h3>Accessible Table with Header Scope</h3>
+<TableComponent GridLines="BlazorWebFormsComponents.Enums.GridLines.Both" CellPadding="5">
+	<TableRowComponent>
+		<TableHeaderCellComponent Scope="TableHeaderScope.Column">Product</TableHeaderCellComponent>
+		<TableHeaderCellComponent Scope="TableHeaderScope.Column">Q1</TableHeaderCellComponent>
+		<TableHeaderCellComponent Scope="TableHeaderScope.Column">Q2</TableHeaderCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableHeaderCellComponent Scope="TableHeaderScope.Row">Widgets</TableHeaderCellComponent>
+		<TableCellComponent>100</TableCellComponent>
+		<TableCellComponent>150</TableCellComponent>
+	</TableRowComponent>
+	<TableRowComponent>
+		<TableHeaderCellComponent Scope="TableHeaderScope.Row">Gadgets</TableHeaderCellComponent>
+		<TableCellComponent>200</TableCellComponent>
+		<TableCellComponent>175</TableCellComponent>
+	</TableRowComponent>
+</TableComponent>
+<pre><code>&lt;TableHeaderCell Scope="TableHeaderScope.Column"&gt;Product&lt;/TableHeaderCell&gt;
+&lt;TableHeaderCell Scope="TableHeaderScope.Row"&gt;Widgets&lt;/TableHeaderCell&gt;</code></pre>
+
+@code {
+}
+

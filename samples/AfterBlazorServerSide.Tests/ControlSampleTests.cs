@@ -14,6 +14,7 @@ public class ControlSampleTests
 
     // Editor Controls
     [Theory]
+    [InlineData("/ControlSamples/BulletedList")]
     [InlineData("/ControlSamples/Button")]
     [InlineData("/ControlSamples/CheckBox")]
     [InlineData("/ControlSamples/CheckBox/Events")]
@@ -26,6 +27,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/PlaceHolder")]
     [InlineData("/ControlSamples/RadioButton")]
     [InlineData("/ControlSamples/RadioButtonList")]
+    [InlineData("/ControlSamples/Table")]
     [InlineData("/ControlSamples/TextBox")]
     public async Task EditorControl_Loads_WithoutErrors(string path)
     {
