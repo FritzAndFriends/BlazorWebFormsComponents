@@ -2,6 +2,20 @@
 
 When migrating ASP.NET Web Forms applications to Blazor, you'll often encounter custom controls that inherit from `WebControl` or `CompositeControl`. The BlazorWebFormsComponents library provides shim classes that allow you to migrate these controls with minimal code changes.
 
+## Roslyn Analyzer Support
+
+**NEW**: The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes to help with migration:
+
+- **BWFC001**: Detects public properties missing `[Parameter]` attributes and provides a code fix to add them
+- **BWFC002**: Detects `Render` methods missing `AddBaseAttributes()` calls and provides a code fix to add them
+
+Install the analyzer:
+```bash
+dotnet add package BlazorWebFormsComponents.Analyzers
+```
+
+The analyzer automatically highlights migration issues in your IDE and offers quick fixes. See the [Analyzer README](../../src/BlazorWebFormsComponents.Analyzers/README.md) for details.
+
 ## Overview
 
 In Web Forms, custom controls are typically created by:

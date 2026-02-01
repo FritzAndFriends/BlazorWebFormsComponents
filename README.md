@@ -92,6 +92,17 @@ There are a handful of features that augment the ASP<span></span>.NET developmen
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
   - [ViewState](docs/UtilityFeatures/ViewState.md)
 
+### Custom Control Migration Support
+
+For applications with custom controls inheriting from `WebControl` or `CompositeControl`, the library provides:
+
+- **Shim Classes**: `WebControl`, `CompositeControl`, and `HtmlTextWriter` classes that enable minimal-change migration
+- **Roslyn Analyzers**: The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes:
+  - **BWFC001**: Detects public properties missing `[Parameter]` attributes
+  - **BWFC002**: Detects `Render` methods missing `AddBaseAttributes()` calls
+
+See the [Custom Controls Migration Guide](docs/Migration/Custom-Controls.md) for details.
+
 ## Compiling the project
 
 There are three different types of .NET projects in this repository:  .NET Framework, .NET Core, and .NET Standard.  The sample projects are in the `/samples` folder, while the unit test project is next to the component library in the `/src` folder.  From the root of the repository, you should be able to execute:
