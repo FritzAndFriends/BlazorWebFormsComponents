@@ -5,9 +5,9 @@
 | Editor Controls | 17 | 0 | 10 | 27 |
 | Data Controls | 6 | 0 | 2 | 8 |
 | Validation Controls | 7 | 0 | 0 | 7 |
-| Navigation Controls | 2 | 0 | 1 | 3 |
+| Navigation Controls | 3 | 0 | 0 | 3 |
 | Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **36** | **0** | **16** | **52** |
+| **TOTAL** | **37** | **0** | **15** | **52** |
 
 ---
 
@@ -73,13 +73,13 @@
 | RequiredFieldValidator | ✅ Complete | Documented |
 | ValidationSummary | ✅ Complete | Documented |
 
-### 🟡 Navigation Controls (2/3 - 67% Complete)
+### ✅ Navigation Controls (3/3 - 100% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Menu | ✅ Complete | Documented, tested, sample pages exist |
+| SiteMapPath | ✅ Complete | Documented, tested (23 tests), sample page exists |
 | TreeView | ✅ Complete | Documented in TreeView.md |
-| SiteMapPath | 🔴 Not Started | Listed in README |
 
 ### 🟡 Login Controls (4/7 - 57% Complete)
 

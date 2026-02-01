@@ -1,0 +1,75 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateDeepSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/");
+		var products = new SiteMapNode("Products", "/products");
+		var electronics = new SiteMapNode("Electronics", "/products/electronics");
+		var phones = new SiteMapNode("Phones", "/products/electronics/phones");
+		var iphone = new SiteMapNode("iPhone", "/products/electronics/phones/iphone");
+
+		root.AddChild(products);
+		products.AddChild(electronics);
+		electronics.AddChild(phones);
+		phones.AddChild(iphone);
+
+		return root;
+	}
+
+	[Fact]
+	public void ParentLevelsDisplayed_Minus1_Shows_All()
+	{
+		// Arrange
+		var siteMap = CreateDeepSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics/phones/iphone" 
+			ParentLevelsDisplayed="-1" />);
+
+		// Assert - Should show all 5 nodes
+		var allElements = cut.FindAll("a, span > span");
+		// 4 links + 1 current node span + separator spans
+		cut.FindAll("a").Count.ShouldBe(4);
+	}
+
+	[Fact]
+	public void ParentLevelsDisplayed_2_Shows_Limited_Path()
+	{
+		// Arrange
+		var siteMap = CreateDeepSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics/phones/iphone" 
+			ParentLevelsDisplayed="2" />);
+
+		// Assert - Should show Electronics, Phones, iPhone (2 parents + current)
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(2); // Electronics and Phones
+
+		// First link should be Electronics (not Home or Products)
+		links[0].TextContent.ShouldBe("Electronics");
+	}
+
+	[Fact]
+	public void ParentLevelsDisplayed_0_Shows_Only_Current()
+	{
+		// Arrange
+		var siteMap = CreateDeepSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics/phones/iphone" 
+			ParentLevelsDisplayed="0" />);
+
+		// Assert - Should show only current node
+		cut.FindAll("a").Count.ShouldBe(0);
+		var spans = cut.FindAll("span > span");
+		spans.Any(s => s.TextContent == "iPhone").ShouldBeTrue();
+	}
+}

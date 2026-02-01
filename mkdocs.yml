@@ -98,6 +98,7 @@ nav:
   - Navigation Controls:
     - HyperLink: NavigationControls/HyperLink.md
     - Menu: NavigationControls/Menu.md
+    - SiteMapPath: NavigationControls/SiteMapPath.md
     - TreeView: NavigationControls/TreeView.md
   - Login Controls:
     - Login: LoginControls/Login.md

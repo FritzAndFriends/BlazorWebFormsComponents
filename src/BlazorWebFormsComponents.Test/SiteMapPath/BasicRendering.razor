@@ -1,0 +1,100 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateTestSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/");
+		var products = new SiteMapNode("Products", "/products", "Our product catalog");
+		var electronics = new SiteMapNode("Electronics", "/products/electronics", "Electronic products");
+		var phones = new SiteMapNode("Phones", "/products/electronics/phones", "Mobile phones");
+
+		root.AddChild(products);
+		products.AddChild(electronics);
+		electronics.AddChild(phones);
+
+		return root;
+	}
+
+	[Fact]
+	public void Renders_Empty_When_No_SiteMapProvider()
+	{
+		// Arrange & Act
+		var cut = Render(@<SiteMapPath />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Renders_Empty_When_No_CurrentUrl()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Renders_Breadcrumb_Path_For_Current_Url()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/products/electronics" />);
+
+		// Assert
+		cut.MarkupMatches(@<span>
+			<a href="/" title="Home">Home</a>
+			<span> &gt; </span>
+			<a href="/products" title="Our product catalog">Products</a>
+			<span> &gt; </span>
+			<span title="Electronic products">Electronics</span>
+		</span>);
+	}
+
+	[Fact]
+	public void Renders_Root_Only_When_At_Root()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.InnerHtml.ShouldContain("Home");
+		cut.FindAll("a").Count.ShouldBe(0); // Current node is not a link by default
+	}
+
+	[Fact]
+	public void Uses_Default_PathSeparator()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/products" />);
+
+		// Assert
+		cut.Markup.ShouldContain(" &gt; ");
+	}
+
+	[Fact]
+	public void Renders_With_ID_Attribute()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/" ID="myBreadcrumb" />);
+
+		// Assert
+		cut.Find("span").Id.ShouldBe("myBreadcrumb");
+	}
+}

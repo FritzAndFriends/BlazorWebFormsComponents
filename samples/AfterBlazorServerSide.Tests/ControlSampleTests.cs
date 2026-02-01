@@ -101,6 +101,7 @@ public class ControlSampleTests
 
     // Navigation Controls
     [Theory]
+    [InlineData("/ControlSamples/SiteMapPath")]
     [InlineData("/ControlSamples/TreeView")]
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
