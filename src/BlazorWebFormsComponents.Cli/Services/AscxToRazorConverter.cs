@@ -167,6 +167,9 @@ public class AscxToRazorConverter
         result = Regex.Replace(result, @"<asp:(\w+)", "<$1", RegexOptions.IgnoreCase);
         result = Regex.Replace(result, @"</asp:(\w+)", "</$1", RegexOptions.IgnoreCase);
 
+        // Convert <%# data binding expressions (in templates) - convert to context
+        result = Regex.Replace(result, @"<%#\s*([^%]+?)\s*%>", "@($1)");
+
         // Convert <%: expressions to @() in Blazor
         // <%: is the HTML encoding syntax in ASP.NET
         result = Regex.Replace(result, @"<%:\s*([^%]+?)\s*%>", "@($1)");
