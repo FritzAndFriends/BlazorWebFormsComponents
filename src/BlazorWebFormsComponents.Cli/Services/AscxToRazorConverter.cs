@@ -168,6 +168,7 @@ public class AscxToRazorConverter
         result = Regex.Replace(result, @"</asp:(\w+)", "</$1", RegexOptions.IgnoreCase);
 
         // Convert <%# data binding expressions (in templates) - convert to context
+        // Process before other expressions to handle data binding first
         result = Regex.Replace(result, @"<%#\s*([^%]+?)\s*%>", "@($1)");
 
         // Convert <%: expressions to @() in Blazor
@@ -177,16 +178,15 @@ public class AscxToRazorConverter
         // Convert <%= expressions to @()
         result = Regex.Replace(result, @"<%=\s*([^%]+?)\s*%>", "@($1)");
 
-        // Convert <% code blocks to @{ } - requires careful handling
-        result = Regex.Replace(result, @"<%\s*([^%=:]+?)\s*%>", "@{ $1 }");
+        // Convert <% code blocks to @{ } 
+        // This is a simple conversion - complex code blocks may need manual adjustment
+        // Only match code blocks that don't start with # = or :
+        result = Regex.Replace(result, @"<%(?![#=:])\s*([^%]+?)\s*%>", "@{ $1 }");
 
-        // Fix common template issues: Item should be context in Blazor
-        // This is a known migration issue mentioned in the requirements
-        result = result.Replace("Item.", "context.");
-
-        // Convert ID attribute to id (lowercase, which is standard in HTML5/Blazor)
-        // But preserve the original casing in other attributes
-        // Note: Blazor components typically use @ref instead of ID
+        // Fix common template issues: Item.Property should be context.Property in Blazor
+        // Use word boundary to avoid replacing "Item" in the middle of other words
+        // Only replace within expression contexts (after @ symbol)
+        result = Regex.Replace(result, @"@\((\s*)Item\.", "@($1context.");
 
         return result.Trim();
     }
