@@ -1,0 +1,79 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void Previous_Disabled_On_First_Page()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="0"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPrevious" />);
+
+		// Assert
+		var prevLink = cut.FindAll("a").First(a => a.TextContent == "Previous");
+		prevLink.ClassList.ShouldContain("aspNetDisabled");
+	}
+
+	[Fact]
+	public void Next_Disabled_On_Last_Page()
+	{
+		// Arrange & Act - Page 5 (index 4) is last page
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="4"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPrevious" />);
+
+		// Assert
+		var nextLink = cut.FindAll("a").First(a => a.TextContent == "Next");
+		nextLink.ClassList.ShouldContain("aspNetDisabled");
+	}
+
+	[Fact]
+	public void First_Disabled_On_First_Page()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="0"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPreviousFirstLast" />);
+
+		// Assert
+		var firstLink = cut.FindAll("a").First(a => a.TextContent == "First");
+		firstLink.ClassList.ShouldContain("aspNetDisabled");
+	}
+
+	[Fact]
+	public void Last_Disabled_On_Last_Page()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="4"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPreviousFirstLast" />);
+
+		// Assert
+		var lastLink = cut.FindAll("a").First(a => a.TextContent == "Last");
+		lastLink.ClassList.ShouldContain("aspNetDisabled");
+	}
+
+	[Fact]
+	public void Current_Page_Is_Not_A_Link()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="2"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Assert - Page 3 (current) should be a span, not a link
+		var currentPage = cut.Find(".aspNetCurrentPage");
+		currentPage.TagName.ShouldBe("SPAN");
+		currentPage.TextContent.ShouldBe("3");
+	}
+}

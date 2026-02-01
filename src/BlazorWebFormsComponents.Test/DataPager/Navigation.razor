@@ -1,0 +1,110 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private int _currentPage = 0;
+
+	private void OnPageChanged(int newPage)
+	{
+		_currentPage = newPage;
+	}
+
+	[Fact]
+	public void Click_Next_Advances_Page()
+	{
+		// Arrange
+		_currentPage = 0;
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="@_currentPage"
+			PageIndexChanged="OnPageChanged"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPrevious" />);
+
+		// Act - Click Next
+		var nextLink = cut.FindAll("a").First(a => a.TextContent == "Next");
+		nextLink.Click();
+
+		// Assert
+		_currentPage.ShouldBe(1);
+	}
+
+	[Fact]
+	public void Click_Previous_Goes_Back()
+	{
+		// Arrange - Start on page 2
+		_currentPage = 1;
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="@_currentPage"
+			PageIndexChanged="OnPageChanged"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPrevious" />);
+
+		// Act - Click Previous
+		var prevLink = cut.FindAll("a").First(a => a.TextContent == "Previous");
+		prevLink.Click();
+
+		// Assert
+		_currentPage.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Click_Page_Number_Navigates_To_Page()
+	{
+		// Arrange
+		_currentPage = 0;
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="@_currentPage"
+			PageIndexChanged="OnPageChanged"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Act - Click page 3
+		var page3Link = cut.FindAll("a").First(a => a.TextContent == "3");
+		page3Link.Click();
+
+		// Assert
+		_currentPage.ShouldBe(2); // Zero-based index
+	}
+
+	[Fact]
+	public void Click_First_Goes_To_First_Page()
+	{
+		// Arrange - Start on page 3
+		_currentPage = 2;
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="@_currentPage"
+			PageIndexChanged="OnPageChanged"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPreviousFirstLast" />);
+
+		// Act - Click First
+		var firstLink = cut.FindAll("a").First(a => a.TextContent == "First");
+		firstLink.Click();
+
+		// Assert
+		_currentPage.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Click_Last_Goes_To_Last_Page()
+	{
+		// Arrange
+		_currentPage = 0;
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			PageIndex="@_currentPage"
+			PageIndexChanged="OnPageChanged"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.NextPreviousFirstLast" />);
+
+		// Act - Click Last
+		var lastLink = cut.FindAll("a").First(a => a.TextContent == "Last");
+		lastLink.Click();
+
+		// Assert
+		_currentPage.ShouldBe(4); // 5 pages (0-4)
+	}
+}

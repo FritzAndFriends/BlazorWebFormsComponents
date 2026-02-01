@@ -1,0 +1,100 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void Default_PageButtonCount_Is_5()
+	{
+		// Arrange & Act - 100 items = 10 pages, but only 5 buttons shown
+		var cut = Render(@<DataPager 
+			TotalRowCount="100" 
+			PageSize="10" 
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Assert - Should show exactly 5 page numbers
+		var pageElements = cut.FindAll(".aspNetCurrentPage, a")
+			.Where(e => int.TryParse(e.TextContent, out _))
+			.ToList();
+		pageElements.Count.ShouldBe(5);
+	}
+
+	[Fact]
+	public void PageButtonCount_Limits_Visible_Buttons()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager 
+			TotalRowCount="100" 
+			PageSize="10" 
+			PageButtonCount="3"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Assert
+		var pageElements = cut.FindAll(".aspNetCurrentPage, a")
+			.Where(e => int.TryParse(e.TextContent, out _))
+			.ToList();
+		pageElements.Count.ShouldBe(3);
+	}
+
+	[Fact]
+	public void Page_Range_Centers_On_Current_Page()
+	{
+		// Arrange & Act - Start on page 5 (index 4)
+		var cut = Render(@<DataPager 
+			TotalRowCount="100" 
+			PageSize="10" 
+			PageIndex="4"
+			PageButtonCount="5"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Assert - Should show pages 3, 4, 5, 6, 7 (centered on 5)
+		var pageElements = cut.FindAll(".aspNetCurrentPage, a")
+			.Where(e => int.TryParse(e.TextContent, out _))
+			.Select(e => int.Parse(e.TextContent))
+			.ToList();
+
+		pageElements.ShouldContain(5); // Current page
+		pageElements.Min().ShouldBeGreaterThanOrEqualTo(3);
+		pageElements.Max().ShouldBeLessThanOrEqualTo(7);
+	}
+
+	[Fact]
+	public void Page_Range_Adjusts_At_Beginning()
+	{
+		// Arrange & Act - Start on page 1 (index 0)
+		var cut = Render(@<DataPager 
+			TotalRowCount="100" 
+			PageSize="10" 
+			PageIndex="0"
+			PageButtonCount="5"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Assert - Should show pages 1, 2, 3, 4, 5
+		var pageElements = cut.FindAll(".aspNetCurrentPage, a")
+			.Where(e => int.TryParse(e.TextContent, out _))
+			.Select(e => int.Parse(e.TextContent))
+			.ToList();
+
+		pageElements.First().ShouldBe(1);
+		pageElements.Last().ShouldBe(5);
+	}
+
+	[Fact]
+	public void Page_Range_Adjusts_At_End()
+	{
+		// Arrange & Act - Start on last page (index 9)
+		var cut = Render(@<DataPager 
+			TotalRowCount="100" 
+			PageSize="10" 
+			PageIndex="9"
+			PageButtonCount="5"
+			Mode="BlazorWebFormsComponents.Enums.PagerButtons.Numeric" />);
+
+		// Assert - Should show pages 6, 7, 8, 9, 10
+		var pageElements = cut.FindAll(".aspNetCurrentPage, a")
+			.Where(e => int.TryParse(e.TextContent, out _))
+			.Select(e => int.Parse(e.TextContent))
+			.ToList();
+
+		pageElements.Last().ShouldBe(10);
+		pageElements.First().ShouldBe(6);
+	}
+}

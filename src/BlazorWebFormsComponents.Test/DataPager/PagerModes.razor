@@ -1,0 +1,74 @@
+@inherits BlazorWebFormsTestContext
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void Default_Mode_Shows_Numeric_Buttons()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="50" PageSize="10" Mode="PagerButtons.Numeric" />);
+
+		// Assert - Should show page numbers, not Previous/Next
+		cut.FindAll(".aspNetCurrentPage, a").Any(e => e.TextContent == "1").ShouldBeTrue();
+		cut.FindAll("a").Any(e => e.TextContent == "Previous").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void NextPrevious_Mode_Shows_Navigation_Buttons()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="50" PageSize="10" Mode="PagerButtons.NextPrevious" />);
+
+		// Assert
+		cut.FindAll("a").Any(e => e.TextContent == "Previous").ShouldBeTrue();
+		cut.FindAll("a").Any(e => e.TextContent == "Next").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void NextPreviousFirstLast_Mode_Shows_All_Navigation()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="50" PageSize="10" Mode="PagerButtons.NextPreviousFirstLast" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Any(e => e.TextContent == "First").ShouldBeTrue();
+		links.Any(e => e.TextContent == "Previous").ShouldBeTrue();
+		links.Any(e => e.TextContent == "Next").ShouldBeTrue();
+		links.Any(e => e.TextContent == "Last").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void NumericFirstLast_Mode_Shows_Numbers_And_FirstLast()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="50" PageSize="10" Mode="PagerButtons.NumericFirstLast" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Any(e => e.TextContent == "First").ShouldBeTrue();
+		links.Any(e => e.TextContent == "Last").ShouldBeTrue();
+		cut.FindAll(".aspNetCurrentPage, a").Any(e => e.TextContent == "1").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Custom_Button_Text()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager 
+			TotalRowCount="50" 
+			PageSize="10" 
+			Mode="PagerButtons.NextPreviousFirstLast"
+			FirstPageText="<<"
+			PreviousPageText="<"
+			NextPageText=">"
+			LastPageText=">>" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Any(e => e.TextContent == "<<").ShouldBeTrue();
+		links.Any(e => e.TextContent == "<").ShouldBeTrue();
+		links.Any(e => e.TextContent == ">").ShouldBeTrue();
+		links.Any(e => e.TextContent == ">>").ShouldBeTrue();
+	}
+}
