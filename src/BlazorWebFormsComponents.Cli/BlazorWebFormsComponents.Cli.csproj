@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>BlazorWebFormsComponents.Cli</RootNamespace>
+    <AssemblyName>webforms-to-blazor</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    
+    <!-- Global Tool Configuration -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>webforms-to-blazor</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    
+    <!-- Package Metadata -->
+    <PackageId>Fritz.WebFormsToBlazor.Cli</PackageId>
+    <Authors>Jeffrey T. Fritz</Authors>
+    <Description>A command-line tool to convert ASP.NET Web Forms user controls (.ascx) to Blazor Razor components, with assistance from GitHub Copilot SDK</Description>
+    <Copyright>Copyright Jeffrey T. Fritz 2019-2026</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</PackageProjectUrl>
+    <PackageTags>blazor;webforms;aspnet;migration;cli;tool</PackageTags>
+    <RepositoryUrl>https://github.com/FritzAndFriends/BlazorWebFormsComponents</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+  </ItemGroup>
+
+</Project>
