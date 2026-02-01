@@ -71,9 +71,8 @@ namespace BlazorWebFormsComponents.CustomControls
 				throw new ArgumentNullException(nameof(name));
 
 			// Special handling for class attribute - concatenate instead of replace
-			if (name.Equals("class", StringComparison.OrdinalIgnoreCase) && _pendingAttributes.ContainsKey("class"))
+			if (name.Equals("class", StringComparison.OrdinalIgnoreCase) && _pendingAttributes.TryGetValue("class", out var existingClass))
 			{
-				var existingClass = _pendingAttributes["class"];
 				if (!string.IsNullOrEmpty(existingClass) && !string.IsNullOrEmpty(value))
 				{
 					_pendingAttributes["class"] = $"{existingClass} {value}";
