@@ -116,4 +116,23 @@
 		html.ShouldContain("data-value=\"123\"");
 		html.ShouldContain("aria-label=\"Test Label\"");
 	}
+
+	[Fact]
+	public void HtmlTextWriter_MultipleStyleAttributes_ConcatenatesWithSemicolons()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
+		writer.AddStyleAttribute(HtmlTextWriterStyle.FontSize, "14px");
+		writer.AddStyleAttribute(HtmlTextWriterStyle.Margin, "10px");
+		writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		writer.RenderEndTag();
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("style=\"");
+		// Each style should be properly terminated with semicolons
+		html.ShouldContain("color: red;");
+		html.ShouldContain("font-size: 14px;");
+		html.ShouldContain("margin: 10px;");
+	}
 }

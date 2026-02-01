@@ -102,11 +102,18 @@ namespace BlazorWebFormsComponents.CustomControls
 
 			if (_pendingAttributes.TryGetValue("style", out var existingStyle))
 			{
-				_pendingAttributes["style"] = $"{existingStyle}; {name}: {value}";
+				// Ensure existing style ends with semicolon before concatenating
+				var trimmedStyle = existingStyle.TrimEnd();
+				if (!trimmedStyle.EndsWith(";"))
+				{
+					trimmedStyle += ";";
+				}
+				_pendingAttributes["style"] = $"{trimmedStyle} {name}: {value};";
 			}
 			else
 			{
-				_pendingAttributes["style"] = $"{name}: {value}";
+				// Ensure new style ends with semicolon for consistency
+				_pendingAttributes["style"] = $"{name}: {value};";
 			}
 		}
 

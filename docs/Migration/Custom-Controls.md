@@ -289,9 +289,17 @@ The `CompositeControl.RenderChildren()` method only works with child controls th
 Custom controls inherit from `BaseWebFormsComponent` which requires certain services. Make sure your Blazor app registers them:
 
 ```csharp
-// In Program.cs or Startup.cs
-builder.Services.AddSingleton<LinkGenerator>(/* mock or real implementation */);
-builder.Services.AddSingleton<IHttpContextAccessor>(/* mock or real implementation */);
+// In Program.cs
+builder.Services.AddRouting();  // Provides LinkGenerator
+builder.Services.AddHttpContextAccessor();  // Provides IHttpContextAccessor
+```
+
+For testing environments, you can use mocks:
+
+```csharp
+// In test setup
+Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
 ```
 
 ### Forgetting AddBaseAttributes
