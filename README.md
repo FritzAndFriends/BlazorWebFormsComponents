@@ -18,7 +18,7 @@ A command-line tool is available to help automate the conversion of ASP.NET Web 
 
 **Installation:**
 ```bash
-dotnet tool install --global Fritz.WebFormsToBlazor.Cli
+dotnet tool install --global WebformsToBlazor.Cli
 ```
 
 **Usage:**

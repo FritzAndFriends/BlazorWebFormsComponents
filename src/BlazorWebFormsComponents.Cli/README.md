@@ -9,7 +9,7 @@ A command-line tool to convert ASP.NET Web Forms user controls (.ascx) to Blazor
 Install the tool globally using the .NET CLI:
 
 ```bash
-dotnet tool install --global Fritz.WebFormsToBlazor.Cli
+dotnet tool install --global WebformsToBlazor.Cli
 ```
 
 Or install from source:
@@ -17,7 +17,7 @@ Or install from source:
 ```bash
 cd src/BlazorWebFormsComponents.Cli
 dotnet pack
-dotnet tool install --global --add-source ./nupkg Fritz.WebFormsToBlazor.Cli
+dotnet tool install --global --add-source ./nupkg WebformsToBlazor.Cli
 ```
 
 ### As a Local Tool
@@ -25,7 +25,7 @@ dotnet tool install --global --add-source ./nupkg Fritz.WebFormsToBlazor.Cli
 Add to your project's local tool manifest:
 
 ```bash
-dotnet tool install Fritz.WebFormsToBlazor.Cli
+dotnet tool install WebformsToBlazor.Cli
 ```
 
 ## Usage
