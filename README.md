@@ -8,6 +8,26 @@ A collection of Blazor components that emulate the web forms components of the s
 
 [Live Samples running on Azure](https://blazorwebformscomponents.azurewebsites.net)
 
+## WebForms to Blazor CLI Tool
+
+A command-line tool is available to help automate the conversion of ASP.NET Web Forms user controls (.ascx) to Blazor Razor components (.razor). The tool handles common conversions like:
+- Control directives to `@inherits`
+- ASP.NET server control syntax (`<asp:Button>` → `<Button>`)
+- Expression syntax (`<%:`, `<%=` → `@()`)
+- Common template issues (Item → context)
+
+**Installation:**
+```bash
+dotnet tool install --global WebformsToBlazor.Cli
+```
+
+**Usage:**
+```bash
+webforms-to-blazor --input path/to/controls/ --recursive
+```
+
+See the [CLI tool README](src/BlazorWebFormsComponents.Cli/README.md) for full documentation.
+
 ## Approach + Considerations
 
 We believe that Web Forms applications that have been well maintained and provide value should have a path forward to the new user-interface frameworks with minimal changes.  This is not an application converted nor is it a patch that can be applied to your project that magically makes it work with ASP<span></span>.NET Core.  This repository contains a library and series of strategies that will allow you to re-use much of your markup, much of your business code and help shorten your application re-write process.
