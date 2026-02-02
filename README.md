@@ -96,7 +96,7 @@ There are a handful of features that augment the ASP<span></span>.NET developmen
 
 For applications with custom controls inheriting from `WebControl` or `CompositeControl`, the library provides:
 
-- **Shim Classes**: `WebControl`, `CompositeControl`, and `HtmlTextWriter` classes that enable minimal-change migration
+- **Adapter Classes**: `WebControl`, `CompositeControl`, and `HtmlTextWriter` classes that enable minimal-change migration
 - **Roslyn Analyzers**: The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes:
   - **BWFC001**: Detects public properties missing `[Parameter]` attributes
   - **BWFC002**: Detects `Render` methods missing `AddBaseAttributes()` calls

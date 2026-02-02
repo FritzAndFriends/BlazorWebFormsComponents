@@ -1,6 +1,6 @@
 # Migrating Custom Controls to Blazor
 
-When migrating ASP.NET Web Forms applications to Blazor, you'll often encounter custom controls that inherit from `WebControl` or `CompositeControl`. The BlazorWebFormsComponents library provides shim classes that allow you to migrate these controls with minimal code changes.
+When migrating ASP.NET Web Forms applications to Blazor, you'll often encounter custom controls that inherit from `WebControl` or `CompositeControl`. The BlazorWebFormsComponents library provides adapter classes that allow you to migrate these controls with minimal code changes.
 
 ## Roslyn Analyzer Support
 
@@ -277,7 +277,7 @@ public string Text { get; set; }
 
 ### 4. Consider Pure Blazor for New Development
 
-While the custom control shims are useful for migration, consider using pure Blazor components for new development:
+While the custom control adapters are useful for migration, consider using pure Blazor components for new development:
 
 - Better performance (no HTML string generation)
 - Better tooling support
