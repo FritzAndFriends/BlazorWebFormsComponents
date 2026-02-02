@@ -80,10 +80,12 @@ nav:
     - PlaceHolder: EditorControls/PlaceHolder.md
     - RadioButton: EditorControls/RadioButton.md
     - RadioButtonList: EditorControls/RadioButtonList.md
+    - Table: EditorControls/Table.md
     - TextBox: EditorControls/TextBox.md
   - Data Controls:
     - DataGrid: DataControls/DataGrid.md
     - DataList: DataControls/DataList.md
+    - DataPager: DataControls/DataPager.md
     - FormView: DataControls/FormView.md
     - GridView: DataControls/GridView.md
     - ListView: DataControls/ListView.md

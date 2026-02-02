@@ -3,11 +3,11 @@
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
 | Editor Controls | 17 | 0 | 10 | 27 |
-| Data Controls | 6 | 0 | 2 | 8 |
+| Data Controls | 7 | 0 | 2 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 3 | 0 | 0 | 3 |
 | Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **37** | **0** | **15** | **52** |
+| **TOTAL** | **38** | **0** | **15** | **53** |
 
 ---
 
@@ -46,7 +46,7 @@
 | View | 🔴 Not Started | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
-### 🟡 Data Controls (6/8 - 75% Complete)
+### 🟡 Data Controls (7/9 - 78% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -57,7 +57,7 @@
 | ListView | ✅ Complete | Documented |
 | Repeater | ✅ Complete | Documented |
 | Chart | 🔴 Not Started | Consider deferring - very high complexity |
-| DataPager | 🔴 Not Started | Paging for ListView |
+| DataPager | ✅ Complete | Documented in DataPager.md |
 | DetailsView | 🔴 Not Started | Single-record display/edit |
 
 ### ✅ Validation Controls (7/7 - 100% Complete)
@@ -129,8 +129,8 @@
 | Component | Complexity | Est. Hours (Manual) | Est. Hours (with Copilot) |
 |-----------|------------|---------------------|---------------------------|
 | ~~**Menu**~~ | ~~Medium-High~~ | ~~12-16~~ | ~~6-8~~ | ✅ Complete |
-| **SiteMapPath** | Medium | 8-10 | 4-5 |
-| **DataPager** | Medium | 8-12 | 4-6 |
+| ~~**SiteMapPath**~~ | ~~Medium~~ | ~~8-10~~ | ~~4-5~~ | ✅ Complete |
+| ~~**DataPager**~~ | ~~Medium~~ | ~~8-12~~ | ~~4-6~~ | ✅ Complete |
 | **DetailsView** | High | 16-24 | 8-12 |
 
 #### Login Controls
@@ -205,8 +205,8 @@
 
 ### Phase 3: Navigation & Data
 10. ~~**Menu**~~ - ✅ Complete
-11. **SiteMapPath** - Breadcrumb navigation
-12. **DataPager** - Paging for ListView
+11. ~~**SiteMapPath**~~ - ✅ Complete (Breadcrumb navigation, 23 tests)
+12. ~~**DataPager**~~ - ✅ Complete (Paging for ListView)
 13. **DetailsView** - Single-record display
 
 ### Phase 4: Login Controls

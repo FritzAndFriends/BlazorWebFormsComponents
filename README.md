@@ -45,7 +45,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
     - [RadioButton](docs/EditorControls/RadioButton.md)
     - [RadioButtonList](docs/EditorControls/RadioButtonList.md)
-    - Table
+    - [Table](docs/EditorControls/Table.md)
     - [TextBox](docs/EditorControls/TextBox.md)
     - View
     - Xml
@@ -53,7 +53,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - Chart(?)
     - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
-    - DataPager
+    - [DataPager](docs/DataControls/DataPager.md)
     - DetailsView
     - [FormView](docs/DataControls/FormView.md)
     - [GridView](docs/DataControls/GridView.md)
