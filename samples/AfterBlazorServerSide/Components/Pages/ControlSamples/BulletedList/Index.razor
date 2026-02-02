@@ -1,0 +1,236 @@
+@page "/ControlSamples/BulletedList"
+@using BlazorWebFormsComponents.Enums
+
+<h2>BulletedList Component Samples</h2>
+
+<h3>Basic BulletedList with Static Items (Text Mode)</h3>
+<BulletedList TItem="object" StaticItems="basicItems" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="basicItems" /&gt;
+
+@@code {
+    private ListItemCollection basicItems = new() {
+        new ListItem("First item", "1"),
+        new ListItem("Second item", "2"),
+        new ListItem("Third item", "3")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Disc (Default for unordered)</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Disc" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Disc" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Circle</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Circle" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Circle" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Square</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Square" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Square" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Numbered</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Lower Alpha (a, b, c...)</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerAlpha" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerAlpha" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Upper Alpha (A, B, C...)</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperAlpha" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperAlpha" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Lower Roman (i, ii, iii...)</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerRoman" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerRoman" /&gt;</code></pre>
+
+<hr />
+
+<h3>Bullet Style: Upper Roman (I, II, III...)</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperRoman" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperRoman" /&gt;</code></pre>
+
+<hr />
+
+<h3>Numbered List Starting at 5</h3>
+<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" FirstBulletNumber="5" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" FirstBulletNumber="5" /&gt;</code></pre>
+
+<hr />
+
+<h3>Display Mode: HyperLink</h3>
+<BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;
+
+@@code {
+    private ListItemCollection linkItems = new() {
+        new ListItem("Microsoft", "https://microsoft.com"),
+        new ListItem("GitHub", "https://github.com"),
+        new ListItem("Azure", "https://azure.com")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>Display Mode: HyperLink with Target="_blank"</h3>
+<BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" />
+<pre><code>&lt;BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" /&gt;</code></pre>
+
+<hr />
+
+<h3>Display Mode: LinkButton (Clickable)</h3>
+<BulletedList TItem="object" StaticItems="clickItems" DisplayMode="BulletedListDisplayMode.LinkButton" OnClick="HandleItemClick" />
+<p>@clickMessage</p>
+<pre><code>&lt;BulletedList TItem="object" 
+              StaticItems="clickItems" 
+              DisplayMode="BulletedListDisplayMode.LinkButton" 
+              OnClick="HandleItemClick" /&gt;
+
+@@code {
+    private void HandleItemClick(BulletedListEventArgs e) {
+        clickMessage = $"You clicked item at index {e.Index}";
+    }
+}</code></pre>
+
+<hr />
+
+<h3>Data-Bound BulletedList</h3>
+<BulletedList TItem="Product" 
+              Items="products" 
+              DataTextField="Name" 
+              DataValueField="Url"
+              DisplayMode="BulletedListDisplayMode.HyperLink" />
+<pre><code>&lt;BulletedList TItem="Product" 
+              Items="products" 
+              DataTextField="Name" 
+              DataValueField="Url"
+              DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;
+
+@@code {
+    private List&lt;Product&gt; products = new() {
+        new Product { Name = "Laptop", Url = "/products/laptop" },
+        new Product { Name = "Phone", Url = "/products/phone" }
+    };
+}</code></pre>
+
+<hr />
+
+<h3>With Styling</h3>
+<BulletedList TItem="object" 
+              StaticItems="bulletItems" 
+              CssClass="styled-list"
+              BackColor="new WebColor(System.Drawing.Color.LightYellow)"
+              ForeColor="new WebColor(System.Drawing.Color.DarkGreen)"
+              BorderStyle="BorderStyle.Dashed"
+              BorderWidth="Unit.Pixel(2)"
+              Width="Unit.Pixel(300)" />
+<pre><code>&lt;BulletedList TItem="object" 
+              StaticItems="bulletItems" 
+              CssClass="styled-list"
+              BackColor="new WebColor(System.Drawing.Color.LightYellow)"
+              ForeColor="new WebColor(System.Drawing.Color.DarkGreen)"
+              BorderStyle="BorderStyle.Dashed"
+              BorderWidth="Unit.Pixel(2)"
+              Width="Unit.Pixel(300)" /&gt;</code></pre>
+
+<hr />
+
+<h3>Disabled Item in List</h3>
+<BulletedList TItem="object" 
+              StaticItems="disabledItems" 
+              DisplayMode="BulletedListDisplayMode.HyperLink" />
+<pre><code>&lt;BulletedList TItem="object" 
+              StaticItems="disabledItems" 
+              DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;
+
+@@code {
+    private ListItemCollection disabledItems = new() {
+        new ListItem("Enabled Link", "https://example.com"),
+        new ListItem("Disabled Link", "https://blocked.com") { Enabled = false },
+        new ListItem("Another Enabled", "https://another.com")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>Entire List Disabled</h3>
+<BulletedList TItem="object" 
+              StaticItems="linkItems" 
+              DisplayMode="BulletedListDisplayMode.LinkButton"
+              Enabled="false" />
+<p><em>(Entire BulletedList is disabled - items render as text)</em></p>
+<pre><code>&lt;BulletedList TItem="object" 
+              StaticItems="linkItems" 
+              DisplayMode="BulletedListDisplayMode.LinkButton"
+              Enabled="false" /&gt;</code></pre>
+
+@code {
+	private string clickMessage = "Click an item above to see the result.";
+
+	private ListItemCollection basicItems = new()
+	{
+		new ListItem("First item", "1"),
+		new ListItem("Second item", "2"),
+		new ListItem("Third item", "3")
+	};
+
+	private ListItemCollection bulletItems = new()
+	{
+		new ListItem("Item One", "1"),
+		new ListItem("Item Two", "2"),
+		new ListItem("Item Three", "3"),
+		new ListItem("Item Four", "4")
+	};
+
+	private ListItemCollection linkItems = new()
+	{
+		new ListItem("Microsoft", "https://microsoft.com"),
+		new ListItem("GitHub", "https://github.com"),
+		new ListItem("Azure", "https://azure.com")
+	};
+
+	private ListItemCollection clickItems = new()
+	{
+		new ListItem("Option A", "a"),
+		new ListItem("Option B", "b"),
+		new ListItem("Option C", "c")
+	};
+
+	private ListItemCollection disabledItems = new()
+	{
+		new ListItem("Enabled Link", "https://example.com"),
+		new ListItem("Disabled Link (renders as text)", "https://blocked.com") { Enabled = false },
+		new ListItem("Another Enabled Link", "https://another.com")
+	};
+
+	private List<Product> products = new()
+	{
+		new Product { Name = "Laptop", Url = "/products/laptop" },
+		new Product { Name = "Phone", Url = "/products/phone" },
+		new Product { Name = "Tablet", Url = "/products/tablet" }
+	};
+
+	private void HandleItemClick(BulletedListEventArgs e)
+	{
+		clickMessage = $"You clicked item at index {e.Index}: {clickItems[e.Index].Text}";
+	}
+
+	public class Product
+	{
+		public string Name { get; set; } = "";
+		public string Url { get; set; } = "";
+	}
+}

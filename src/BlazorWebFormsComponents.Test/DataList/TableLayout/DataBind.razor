@@ -13,7 +13,7 @@
     [Fact]
     public void DataList_TableLayout_DataBind_EventsTriggered()
     {
-        var cut = Render(@<DataList ID="simpleDataList" Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" OnDataBound="DataBound" OnDataBinding="DataBinding" OnItemDataBound="ItemDataBound" Context="Item">
+        var cut = Render(@<DataList ID="simpleDataList" Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" OnDataBound="DataBound" OnDataBinding="DataBinding" OnItemDataBound="ItemDataBound" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate><span>@Item.Name</span></ItemTemplate>
         </DataList>);

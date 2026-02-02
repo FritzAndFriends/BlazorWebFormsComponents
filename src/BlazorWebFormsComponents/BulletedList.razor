@@ -1,0 +1,65 @@
+@using BlazorWebFormsComponents.DataBinding
+@using BlazorWebFormsComponents.Enums
+@typeparam TItem
+@inherits DataBoundComponent<TItem>
+
+@if (Visible)
+{
+	var allItems = GetItems().ToList();
+	
+	@if (IsOrderedList)
+	{
+		<ol id="@ClientID" class="@CssClass" style="@CombinedStyle" type="@OrderedListType" start="@FirstBulletNumber">
+			@RenderListItems(allItems)
+		</ol>
+	}
+	else
+	{
+		<ul id="@ClientID" class="@CssClass" style="@CombinedStyle">
+			@RenderListItems(allItems)
+		</ul>
+	}
+}
+
+@code {
+	private RenderFragment RenderListItems(List<ListItem> items) => __builder =>
+	{
+		for (var i = 0; i < items.Count; i++)
+		{
+			var item = items[i];
+			var index = i;
+			var isEnabled = Enabled && item.Enabled;
+			
+			<li>
+				@switch (DisplayMode)
+				{
+					case BulletedListDisplayMode.Text:
+						<span>@item.Text</span>
+						break;
+						
+					case BulletedListDisplayMode.HyperLink:
+						@if (isEnabled && !string.IsNullOrEmpty(item.Value))
+						{
+							<a href="@item.Value" target="@Target">@item.Text</a>
+						}
+						else
+						{
+							<span>@item.Text</span>
+						}
+						break;
+						
+					case BulletedListDisplayMode.LinkButton:
+						@if (isEnabled)
+						{
+							<a href="javascript:void(0)" @onclick="() => HandleItemClick(index)" @onclick:preventDefault>@item.Text</a>
+						}
+						else
+						{
+							<span>@item.Text</span>
+						}
+						break;
+				}
+			</li>
+		}
+	};
+}

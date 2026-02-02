@@ -2,12 +2,12 @@
 
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
-| Editor Controls | 15 | 0 | 12 | 27 |
-| Data Controls | 6 | 0 | 2 | 8 |
+| Editor Controls | 17 | 0 | 10 | 27 |
+| Data Controls | 7 | 0 | 2 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
-| Navigation Controls | 2 | 0 | 1 | 3 |
+| Navigation Controls | 3 | 0 | 0 | 3 |
 | Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **34** | **0** | **18** | **52** |
+| **TOTAL** | **38** | **0** | **15** | **53** |
 
 ---
 
@@ -30,7 +30,7 @@
 | Literal | ✅ Complete | Documented |
 | RadioButton | ✅ Complete | Documented, tested, sample page exists |
 | TextBox | ✅ Complete | Documented, tested, sample page exists |
-| BulletedList | 🔴 Not Started | List control |
+| BulletedList | ✅ Complete | Documented, tested (41 tests), sample page exists |
 | Calendar | 🔴 Not Started | Complex date picker |
 | CheckBoxList | ✅ Complete | Documented, tested (26 tests) |
 | FileUpload | 🔴 Not Started | Consider Blazor InputFile |
@@ -42,11 +42,11 @@
 | PlaceHolder | ✅ Complete | Documented, tested - renders no wrapper element |
 | RadioButtonList | ✅ Complete | Documented, tested (30 tests) |
 | Substitution | 🔴 Not Started | Cache substitution - may not apply |
-| Table | 🔴 Not Started | HTML table wrapper |
+| Table | ✅ Complete | Includes TableRow, TableCell, TableHeaderCell, TableHeaderRow, TableFooterRow |
 | View | 🔴 Not Started | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
-### 🟡 Data Controls (6/8 - 75% Complete)
+### 🟡 Data Controls (7/9 - 78% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -57,7 +57,7 @@
 | ListView | ✅ Complete | Documented |
 | Repeater | ✅ Complete | Documented |
 | Chart | 🔴 Not Started | Consider deferring - very high complexity |
-| DataPager | 🔴 Not Started | Paging for ListView |
+| DataPager | ✅ Complete | Documented in DataPager.md |
 | DetailsView | 🔴 Not Started | Single-record display/edit |
 
 ### ✅ Validation Controls (7/7 - 100% Complete)
@@ -73,13 +73,13 @@
 | RequiredFieldValidator | ✅ Complete | Documented |
 | ValidationSummary | ✅ Complete | Documented |
 
-### 🟡 Navigation Controls (2/3 - 67% Complete)
+### ✅ Navigation Controls (3/3 - 100% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Menu | ✅ Complete | Documented, tested, sample pages exist |
+| SiteMapPath | ✅ Complete | Documented, tested (23 tests), sample page exists |
 | TreeView | ✅ Complete | Documented in TreeView.md |
-| SiteMapPath | 🔴 Not Started | Listed in README |
 
 ### 🟡 Login Controls (4/7 - 57% Complete)
 
@@ -129,8 +129,8 @@
 | Component | Complexity | Est. Hours (Manual) | Est. Hours (with Copilot) |
 |-----------|------------|---------------------|---------------------------|
 | ~~**Menu**~~ | ~~Medium-High~~ | ~~12-16~~ | ~~6-8~~ | ✅ Complete |
-| **SiteMapPath** | Medium | 8-10 | 4-5 |
-| **DataPager** | Medium | 8-12 | 4-6 |
+| ~~**SiteMapPath**~~ | ~~Medium~~ | ~~8-10~~ | ~~4-5~~ | ✅ Complete |
+| ~~**DataPager**~~ | ~~Medium~~ | ~~8-12~~ | ~~4-6~~ | ✅ Complete |
 | **DetailsView** | High | 16-24 | 8-12 |
 
 #### Login Controls
@@ -205,8 +205,8 @@
 
 ### Phase 3: Navigation & Data
 10. ~~**Menu**~~ - ✅ Complete
-11. **SiteMapPath** - Breadcrumb navigation
-12. **DataPager** - Paging for ListView
+11. ~~**SiteMapPath**~~ - ✅ Complete (Breadcrumb navigation, 23 tests)
+12. ~~**DataPager**~~ - ✅ Complete (Paging for ListView)
 13. **DetailsView** - Single-record display
 
 ### Phase 4: Login Controls

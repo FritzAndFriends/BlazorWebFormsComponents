@@ -24,7 +24,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
   - Editor Controls
     - [AdRotator](docs/EditorControls/AdRotator.md)
-    - BulletedList
+    - [BulletedList](docs/EditorControls/BulletedList.md)
     - [Button](docs/EditorControls/Button.md)
     - Calendar
     - [CheckBox](docs/EditorControls/CheckBox.md)
@@ -45,8 +45,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
     - [RadioButton](docs/EditorControls/RadioButton.md)
     - [RadioButtonList](docs/EditorControls/RadioButtonList.md)
-    - Substitution
-    - Table
+    - [Table](docs/EditorControls/Table.md)
     - [TextBox](docs/EditorControls/TextBox.md)
     - View
     - Xml
@@ -54,7 +53,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - Chart(?)
     - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
-    - DataPager
+    - [DataPager](docs/DataControls/DataPager.md)
     - DetailsView
     - [FormView](docs/DataControls/FormView.md)
     - [GridView](docs/DataControls/GridView.md)
@@ -70,7 +69,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
   - Navigation Controls
     - [HyperLink](docs/NavigationControls/HyperLink.md)
     - [Menu](docs/NavigationControls/Menu.md)
-    - SiteMapPath
+    - [SiteMapPath](docs/NavigationControls/SiteMapPath.md)
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
     - ChangePassword

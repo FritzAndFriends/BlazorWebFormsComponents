@@ -1,0 +1,55 @@
+@inherits BaseStyledComponent
+
+@if (NavigationPath.Count > 0)
+{
+	<span id="@ID" class="@CssClass" style="@Style">
+		@for (int i = 0; i < NavigationPath.Count; i++)
+		{
+			var node = NavigationPath[i];
+			var isFirst = i == 0;
+			var isCurrent = IsCurrentNode(node);
+			var isRoot = IsRootNode(node);
+
+			@* Render separator before all nodes except the first *@
+			@if (!isFirst)
+			{
+				<span style="@GetSeparatorStyle()">
+					@if (PathSeparatorTemplate != null)
+					{
+						@PathSeparatorTemplate
+					}
+					else
+					{
+						@PathSeparator
+					}
+				</span>
+			}
+
+			@* Render the node *@
+			@if (isCurrent && CurrentNodeTemplate != null)
+			{
+				@CurrentNodeTemplate(node)
+			}
+			else if (isRoot && RootNodeTemplate != null)
+			{
+				@RootNodeTemplate(node)
+			}
+			else if (!isCurrent && !isRoot && NodeTemplate != null)
+			{
+				@NodeTemplate(node)
+			}
+			else
+			{
+				@* Default rendering *@
+				@if (isCurrent && !RenderCurrentNodeAsLink)
+				{
+					<span style="@GetNodeStyle(node)" title="@GetTooltip(node)">@node.Title</span>
+				}
+				else
+				{
+					<a href="@node.Url" style="@GetNodeStyle(node)" title="@GetTooltip(node)">@node.Title</a>
+				}
+			}
+		}
+	</span>
+}

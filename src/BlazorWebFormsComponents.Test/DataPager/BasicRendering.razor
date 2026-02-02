@@ -1,0 +1,74 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void Renders_Nothing_When_Single_Page()
+	{
+		// Arrange & Act - 5 items with page size 10 = 1 page
+		var cut = Render(@<DataPager TotalRowCount="5" PageSize="10" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Renders_Nothing_When_No_Items()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="0" PageSize="10" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Renders_Pager_When_Multiple_Pages()
+	{
+		// Arrange & Act - 25 items with page size 10 = 3 pages
+		var cut = Render(@<DataPager TotalRowCount="25" PageSize="10" />);
+
+		// Assert
+		cut.Find("div").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void Renders_With_ID_Attribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" ID="myPager" />);
+
+		// Assert
+		cut.Find("div").Id.ShouldBe("myPager");
+	}
+
+	[Fact]
+	public void Default_PageIndex_Is_Zero()
+	{
+		// Arrange & Act
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" />);
+
+		// Assert - First page (1) should be current
+		cut.Find(".aspNetCurrentPage").TextContent.ShouldBe("1");
+	}
+
+	[Fact]
+	public void Calculates_TotalPages_Correctly()
+	{
+		// Arrange & Act - 25 items / 10 per page = 3 pages
+		var cut = Render(@<DataPager TotalRowCount="25" PageSize="10" />);
+
+		// Assert - Should show pages 1, 2, 3
+		var pageLinks = cut.FindAll("a, .aspNetCurrentPage");
+		pageLinks.Count.ShouldBeGreaterThanOrEqualTo(3);
+	}
+
+	[Fact]
+	public void Respects_PageIndex_Parameter()
+	{
+		// Arrange & Act - Start on page 2 (index 1)
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" PageIndex="1" />);
+
+		// Assert - Page 2 should be current
+		cut.Find(".aspNetCurrentPage").TextContent.ShouldBe("2");
+	}
+}

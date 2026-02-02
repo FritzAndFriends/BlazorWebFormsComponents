@@ -6,7 +6,7 @@
     [Fact]
     public void DataList_TableLayout_ComplexStyle_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" CellSpacing="2" CellPadding="3" RepeatLayout="Table" BackColor="@("#ff0000")" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" CellSpacing="2" CellPadding="3" RepeatLayout="Enums.RepeatLayout.Table" BackColor="@("#ff0000")" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

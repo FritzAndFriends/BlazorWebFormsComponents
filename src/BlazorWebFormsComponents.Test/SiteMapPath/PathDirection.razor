@@ -1,0 +1,72 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateTestSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/");
+		var products = new SiteMapNode("Products", "/products");
+		var electronics = new SiteMapNode("Electronics", "/products/electronics");
+		var phones = new SiteMapNode("Phones", "/products/electronics/phones");
+
+		root.AddChild(products);
+		products.AddChild(electronics);
+		electronics.AddChild(phones);
+
+		return root;
+	}
+
+	[Fact]
+	public void Default_PathDirection_Is_RootToCurrent()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/products/electronics" />);
+
+		// Assert - First link should be Home (root)
+		var links = cut.FindAll("a");
+		links[0].TextContent.ShouldBe("Home");
+		links[1].TextContent.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void CurrentToRoot_Reverses_Path_Order()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics" 
+			PathDirection="BlazorWebFormsComponents.Enums.PathDirection.CurrentToRoot" />);
+
+		// Assert - Current node should be first (as span), then links in reverse order
+		var spans = cut.FindAll("span > span");
+		var firstSpan = spans[0];
+		firstSpan.TextContent.ShouldBe("Electronics");
+
+		var links = cut.FindAll("a");
+		links[0].TextContent.ShouldBe("Products");
+		links[1].TextContent.ShouldBe("Home");
+	}
+
+	[Fact]
+	public void CurrentToRoot_With_Deep_Path()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics/phones" 
+			PathDirection="BlazorWebFormsComponents.Enums.PathDirection.CurrentToRoot" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(3); // Products, Electronics, Home are all links
+		links[2].TextContent.ShouldBe("Home"); // Last link should be Home
+	}
+}
