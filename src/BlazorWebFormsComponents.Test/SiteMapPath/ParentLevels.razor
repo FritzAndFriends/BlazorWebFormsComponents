@@ -29,9 +29,7 @@
 			CurrentUrl="/products/electronics/phones/iphone" 
 			ParentLevelsDisplayed="-1" />);
 
-		// Assert - Should show all 5 nodes
-		var allElements = cut.FindAll("a, span > span");
-		// 4 links + 1 current node span + separator spans
+		// Assert - Should show all 5 nodes (4 links + 1 current node span + separator spans)
 		cut.FindAll("a").Count.ShouldBe(4);
 	}
 

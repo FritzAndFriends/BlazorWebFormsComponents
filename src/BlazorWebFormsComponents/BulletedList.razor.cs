@@ -16,7 +16,7 @@ namespace BlazorWebFormsComponents
 	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
 	public partial class BulletedList<TItem> : DataBoundComponent<TItem>, IStyle
 	{
-		private string _baseId = Guid.NewGuid().ToString("N").Substring(0, 8);
+		private readonly string _baseId = Guid.NewGuid().ToString("N").Substring(0, 8);
 
 		/// <summary>
 		/// Gets or sets the bullet style of the list.
