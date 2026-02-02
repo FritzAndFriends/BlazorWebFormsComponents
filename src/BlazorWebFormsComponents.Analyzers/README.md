@@ -22,7 +22,9 @@ public class HelloLabel : WebControl
     
     protected override void Render(HtmlTextWriter writer)
     {
-        // ...
+        writer.RenderBeginTag(HtmlTextWriterTag.Span);
+        writer.Write(Text);
+        writer.RenderEndTag();
     }
 }
 ```
@@ -37,40 +39,14 @@ public class HelloLabel : WebControl
     
     protected override void Render(HtmlTextWriter writer)
     {
-        // ...
+        writer.RenderBeginTag(HtmlTextWriterTag.Span);
+        writer.Write(Text);
+        writer.RenderEndTag();
     }
 }
 ```
 
-### BWFC002: Missing AddBaseAttributes() Call
-
-**Severity**: Info
-
-Detects `Render` or `RenderContents` methods that call `RenderBeginTag()` but don't call `AddBaseAttributes(writer)` first. This ensures that base styling properties (ID, CssClass, Style) are properly applied.
-
-**Example:**
-
-```csharp
-protected override void Render(HtmlTextWriter writer)
-{
-    // ℹ️ BWFC002: Should call AddBaseAttributes(writer) before RenderBeginTag()
-    writer.RenderBeginTag(HtmlTextWriterTag.Div);
-    writer.Write("Content");
-    writer.RenderEndTag();
-}
-```
-
-**Code Fix**: Adds `AddBaseAttributes(writer);` at the beginning of the method.
-
-```csharp
-protected override void Render(HtmlTextWriter writer)
-{
-    AddBaseAttributes(writer);  // ✅ Fixed
-    writer.RenderBeginTag(HtmlTextWriterTag.Div);
-    writer.Write("Content");
-    writer.RenderEndTag();
-}
-```
+**Note**: Base attributes (ID, CssClass, Style) are automatically applied by the `WebControl` base class before your `Render` method is called, so you don't need to add them manually.
 
 ## Installation
 

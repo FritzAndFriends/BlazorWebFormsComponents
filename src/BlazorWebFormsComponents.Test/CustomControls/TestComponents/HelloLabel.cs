@@ -13,7 +13,6 @@ namespace BlazorWebFormsComponents.Test.CustomControls.TestComponents
 
 		protected override void Render(HtmlTextWriter writer)
 		{
-			AddBaseAttributes(writer);
 			writer.RenderBeginTag(HtmlTextWriterTag.Span);
 			writer.Write($"{Prefix} {Text}");
 			writer.RenderEndTag();

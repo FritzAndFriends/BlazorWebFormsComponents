@@ -4,10 +4,11 @@ When migrating ASP.NET Web Forms applications to Blazor, you'll often encounter 
 
 ## Roslyn Analyzer Support
 
-**NEW**: The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes to help with migration:
+The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes to help with migration:
 
 - **BWFC001**: Detects public properties missing `[Parameter]` attributes and provides a code fix to add them
-- **BWFC002**: Detects `Render` methods missing `AddBaseAttributes()` calls and provides a code fix to add them
+
+Base attributes (ID, CssClass, Style) are automatically applied by the `WebControl` base class, so no analyzer is needed for that.
 
 Install the analyzer:
 ```bash
@@ -86,7 +87,7 @@ public class HelloLabel : WebControl
 
     protected override void Render(HtmlTextWriter writer)
     {
-        AddBaseAttributes(writer);  // Includes ID, CssClass, Style from base
+        // Base attributes (ID, CssClass, Style) are automatically added
         writer.RenderBeginTag(HtmlTextWriterTag.Span);
         writer.Write($"{Prefix} {Text}");
         writer.RenderEndTag();
@@ -97,7 +98,7 @@ public class HelloLabel : WebControl
 ### Key Differences
 
 1. **Add `[Parameter]` attributes** to public properties that should accept values from markup
-2. **Call `AddBaseAttributes(writer)`** before `RenderBeginTag` to include base styling properties (ID, CssClass, Style)
+2. **Base attributes are automatic** - ID, CssClass, and Style are automatically added before your Render method is called
 3. **No `runat="server"`** needed in Blazor markup
 
 ### Usage in Blazor
@@ -198,7 +199,7 @@ public class SearchBox : CompositeControl
 
     protected override void Render(HtmlTextWriter writer)
     {
-        AddBaseAttributes(writer);
+        // Base attributes are automatically added
         writer.AddAttribute(HtmlTextWriterAttribute.Class, "search-box");
         writer.RenderBeginTag(HtmlTextWriterTag.Div);
         RenderChildren(writer);
@@ -241,16 +242,16 @@ For more complex scenarios, consider converting to a pure Blazor component:
 
 ## Best Practices
 
-### 1. Use AddBaseAttributes() Consistently
+### 1. Base Attributes Are Automatically Applied
 
-Always call `AddBaseAttributes(writer)` before your first `RenderBeginTag()` to ensure that base styling properties (ID, CssClass, Style) are applied:
+Base styling properties (ID, CssClass, Style) are automatically added to the HtmlTextWriter before your `Render` method is called. You don't need to call any method to include them:
 
 ```csharp
 protected override void Render(HtmlTextWriter writer)
 {
-    AddBaseAttributes(writer);  // Always first!
+    // Base attributes are already added automatically!
     writer.RenderBeginTag(HtmlTextWriterTag.Div);
-    // ... rest of rendering
+    writer.Write("Content");
     writer.RenderEndTag();
 }
 ```
@@ -260,7 +261,7 @@ protected override void Render(HtmlTextWriter writer)
 The `HtmlTextWriter` automatically concatenates multiple class attributes:
 
 ```csharp
-AddBaseAttributes(writer);  // Adds user's CssClass if present
+// Base CssClass is already added
 writer.AddAttribute(HtmlTextWriterAttribute.Class, "my-control");  // Concatenated
 writer.RenderBeginTag(HtmlTextWriterTag.Div);
 // Results in: <div class="user-class my-control">
@@ -315,10 +316,6 @@ For testing environments, you can use mocks:
 Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
 Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
 ```
-
-### Forgetting AddBaseAttributes
-
-If your migrated controls don't respect `CssClass`, `ID`, or `Style` properties, you likely forgot to call `AddBaseAttributes(writer)`.
 
 ### ViewState Dependencies
 

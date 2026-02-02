@@ -8,6 +8,8 @@ namespace BlazorWebFormsComponents.CustomControls
 	/// Provides a base class for custom controls that use HtmlTextWriter for rendering.
 	/// This class allows Web Forms custom controls to be migrated to Blazor by providing
 	/// a similar API surface to System.Web.UI.WebControls.WebControl.
+	/// Base attributes (ID, CssClass, Style) are automatically added to the HtmlTextWriter
+	/// before the Render method is called.
 	/// </summary>
 	/// <example>
 	/// <code>
@@ -63,10 +65,11 @@ namespace BlazorWebFormsComponents.CustomControls
 
 		/// <summary>
 		/// Adds the base component attributes (ID, CssClass, Style) to the HtmlTextWriter.
-		/// Call this method before calling RenderBeginTag if you want to include base attributes.
+		/// This method is called automatically before Render(). 
+		/// Derived classes should not need to call this method directly.
 		/// </summary>
 		/// <param name="writer">The HtmlTextWriter to add attributes to.</param>
-		protected void AddBaseAttributes(HtmlTextWriter writer)
+		private void AddBaseAttributes(HtmlTextWriter writer)
 		{
 			// Apply base styles if they exist
 			if (!string.IsNullOrEmpty(Style))
@@ -96,6 +99,9 @@ namespace BlazorWebFormsComponents.CustomControls
 
 			using (var writer = new HtmlTextWriter())
 			{
+				// Automatically add base attributes before calling user's Render method
+				AddBaseAttributes(writer);
+
 				// Call the custom render method
 				Render(writer);
 

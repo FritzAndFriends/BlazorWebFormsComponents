@@ -15,7 +15,6 @@ namespace BlazorWebFormsComponents.Test.CustomControls.TestComponents
 
 		protected override void Render(HtmlTextWriter writer)
 		{
-			AddBaseAttributes(writer);
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "search-box");
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 			RenderChildren(writer);
