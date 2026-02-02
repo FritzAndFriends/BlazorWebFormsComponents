@@ -71,13 +71,13 @@ namespace BlazorWebFormsComponents.CustomControls
 				throw new ArgumentNullException(nameof(name));
 
 			// Special handling for class attribute - concatenate instead of replace
-			if (name.Equals("class", StringComparison.OrdinalIgnoreCase) && _pendingAttributes.TryGetValue("class", out var existingClass))
+			if (name.Equals("class", StringComparison.OrdinalIgnoreCase)
+				&& _pendingAttributes.TryGetValue("class", out var existingClass)
+				&& !string.IsNullOrEmpty(existingClass)
+				&& !string.IsNullOrEmpty(value))
 			{
-				if (!string.IsNullOrEmpty(existingClass) && !string.IsNullOrEmpty(value))
-				{
-					_pendingAttributes["class"] = $"{existingClass} {value}";
-					return;
-				}
+				_pendingAttributes["class"] = $"{existingClass} {value}";
+				return;
 			}
 
 			_pendingAttributes[name] = value ?? string.Empty;
