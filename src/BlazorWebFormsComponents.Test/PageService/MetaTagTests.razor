@@ -1,0 +1,111 @@
+@code {
+
+	[Fact]
+	public void PageService_DefaultMetaDescription_IsEmpty()
+	{
+		// Arrange
+		var pageService = new PageService();
+
+		// Assert
+		pageService.MetaDescription.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PageService_DefaultMetaKeywords_IsEmpty()
+	{
+		// Arrange
+		var pageService = new PageService();
+
+		// Assert
+		pageService.MetaKeywords.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PageService_SetMetaDescription_UpdatesValue()
+	{
+		// Arrange
+		var pageService = new PageService();
+
+		// Act
+		pageService.MetaDescription = "This is a test page description";
+
+		// Assert
+		pageService.MetaDescription.ShouldBe("This is a test page description");
+	}
+
+	[Fact]
+	public void PageService_SetMetaKeywords_UpdatesValue()
+	{
+		// Arrange
+		var pageService = new PageService();
+
+		// Act
+		pageService.MetaKeywords = "test, keywords, blazor";
+
+		// Assert
+		pageService.MetaKeywords.ShouldBe("test, keywords, blazor");
+	}
+
+	[Fact]
+	public void PageService_SetMetaDescription_RaisesEvent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		string? capturedDescription = null;
+		pageService.MetaDescriptionChanged += (sender, description) => capturedDescription = description;
+
+		// Act
+		pageService.MetaDescription = "New Description";
+
+		// Assert
+		capturedDescription.ShouldBe("New Description");
+	}
+
+	[Fact]
+	public void PageService_SetMetaKeywords_RaisesEvent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		string? capturedKeywords = null;
+		pageService.MetaKeywordsChanged += (sender, keywords) => capturedKeywords = keywords;
+
+		// Act
+		pageService.MetaKeywords = "keyword1, keyword2";
+
+		// Assert
+		capturedKeywords.ShouldBe("keyword1, keyword2");
+	}
+
+	[Fact]
+	public void PageService_SetSameMetaDescription_DoesNotRaiseEvent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.MetaDescription = "Initial Description";
+		int eventCount = 0;
+		pageService.MetaDescriptionChanged += (sender, description) => eventCount++;
+
+		// Act
+		pageService.MetaDescription = "Initial Description";
+
+		// Assert
+		eventCount.ShouldBe(0);
+	}
+
+	[Fact]
+	public void PageService_SetSameMetaKeywords_DoesNotRaiseEvent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.MetaKeywords = "Initial Keywords";
+		int eventCount = 0;
+		pageService.MetaKeywordsChanged += (sender, keywords) => eventCount++;
+
+		// Act
+		pageService.MetaKeywords = "Initial Keywords";
+
+		// Assert
+		eventCount.ShouldBe(0);
+	}
+
+}

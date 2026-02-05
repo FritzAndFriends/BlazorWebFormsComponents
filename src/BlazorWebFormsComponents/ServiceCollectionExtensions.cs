@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlazorWebFormsComponents(this IServiceCollection services)
     {
         services.AddScoped<BlazorWebFormsJsInterop>();
+        services.AddScoped<IPageService, PageService>();
         return services;
     }
 }
