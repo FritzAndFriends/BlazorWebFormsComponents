@@ -252,11 +252,19 @@ namespace BlazorWebFormsComponents
 			return DayNameFormat switch
 			{
 				"Full" => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day),
-				"FirstLetter" => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day).Substring(0, 1),
-				"FirstTwoLetters" => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day).Substring(0, 2),
+				"FirstLetter" => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 1),
+				"FirstTwoLetters" => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 2),
 				"Shortest" => CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(day),
 				_ => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(day)
 			};
+		}
+
+		private static string SafeSubstring(string str, int start, int length)
+		{
+			if (string.IsNullOrEmpty(str) || start >= str.Length)
+				return str;
+			
+			return str.Substring(start, Math.Min(length, str.Length - start));
 		}
 
 		private List<List<DateTime>> GetCalendarWeeks()
@@ -390,6 +398,10 @@ namespace BlazorWebFormsComponents
 			return DayStyleCss;
 		}
 
+		/// <summary>
+		/// Creates day render arguments and invokes the OnDayRender event.
+		/// Note: OnDayRender is invoked synchronously during rendering. Handlers should not perform async operations or modify component state directly.
+		/// </summary>
 		private CalendarDayRenderArgs CreateDayRenderArgs(DateTime date)
 		{
 			var args = new CalendarDayRenderArgs
@@ -402,9 +414,10 @@ namespace BlazorWebFormsComponents
 				IsSelected = _selectedDays.Contains(date.Date)
 			};
 
+			// Invoke synchronously to allow handler to modify day properties before rendering
 			if (OnDayRender.HasDelegate)
 			{
-				_ = OnDayRender.InvokeAsync(args);
+				OnDayRender.InvokeAsync(args).GetAwaiter().GetResult();
 			}
 
 			return args;
