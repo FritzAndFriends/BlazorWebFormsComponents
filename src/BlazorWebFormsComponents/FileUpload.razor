@@ -4,11 +4,11 @@
 {
 	<input type="file"
 		   id="@ClientID"
-		   multiple="@(AllowMultiple ? true : null)"
+		   multiple="@AllowMultiple"
 		   accept="@Accept"
 		   style="@Style"
 		   class="@CssClass"
-		   disabled="@(Enabled ? null : true)"
+		   disabled="@(!Enabled)"
 		   title="@ToolTip"
 		   @onchange="OnFileChangeInternal" />
 }

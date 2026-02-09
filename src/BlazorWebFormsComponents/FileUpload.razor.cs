@@ -38,6 +38,22 @@ namespace BlazorWebFormsComponents
 		/// Gets the contents of the uploaded file as a byte array.
 		/// For multiple files, returns the first file's content.
 		/// </summary>
+		public async Task<byte[]> GetFileBytesAsync()
+		{
+			if (!HasFile) return Array.Empty<byte>();
+			
+			var file = _currentFile ?? _currentFiles.FirstOrDefault();
+			using var stream = file.OpenReadStream(MaxFileSize);
+			using var memoryStream = new MemoryStream();
+			await stream.CopyToAsync(memoryStream);
+			return memoryStream.ToArray();
+		}
+
+		/// <summary>
+		/// Gets the contents of the uploaded file as a byte array (synchronous).
+		/// For multiple files, returns the first file's content.
+		/// Note: Prefer GetFileBytesAsync() for better async/await patterns.
+		/// </summary>
 		public byte[] FileBytes
 		{
 			get
@@ -98,11 +114,11 @@ namespace BlazorWebFormsComponents
 		public string Accept { get; set; }
 
 		/// <summary>
-		/// Gets or sets the maximum file size in bytes. Default is 512000 (500KB) to match Blazor defaults.
+		/// Gets or sets the maximum file size in bytes. Default is 512000 bytes (~500 KiB).
 		/// Can be increased for larger files, but be mindful of memory usage.
 		/// </summary>
 		[Parameter]
-		public long MaxFileSize { get; set; } = 512000; // 500KB default
+		public long MaxFileSize { get; set; } = 512000; // ~500 KiB default
 
 		/// <summary>
 		/// Gets or sets the tooltip text displayed when hovering over the control.
@@ -145,6 +161,7 @@ namespace BlazorWebFormsComponents
 
 		/// <summary>
 		/// Saves all uploaded files to the specified directory.
+		/// File names are sanitized to prevent directory traversal attacks.
 		/// </summary>
 		/// <param name="directory">The directory path where files should be saved.</param>
 		/// <returns>A list of saved file paths.</returns>
@@ -160,7 +177,9 @@ namespace BlazorWebFormsComponents
 
 			foreach (var file in files)
 			{
-				var path = Path.Combine(directory, file.Name);
+				// Sanitize filename to prevent directory traversal attacks
+				var safeFileName = Path.GetFileName(file.Name);
+				var path = Path.Combine(directory, safeFileName);
 				using var stream = file.OpenReadStream(MaxFileSize);
 				using var fileStream = new FileStream(path, FileMode.Create);
 				await stream.CopyToAsync(fileStream);
@@ -210,6 +229,7 @@ namespace BlazorWebFormsComponents
 
 			/// <summary>
 			/// Gets a Stream object that points to the uploaded file.
+			/// Note: The caller is responsible for disposing the returned stream.
 			/// </summary>
 			public Stream InputStream => _file.OpenReadStream(_maxFileSize);
 
