@@ -66,6 +66,7 @@ nav:
     - AdRotator: EditorControls/AdRotator.md
     - BulletedList: EditorControls/BulletedList.md
     - Button: EditorControls/Button.md
+    - Calendar: EditorControls/Calendar.md
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
     - DropDownList: EditorControls/DropDownList.md

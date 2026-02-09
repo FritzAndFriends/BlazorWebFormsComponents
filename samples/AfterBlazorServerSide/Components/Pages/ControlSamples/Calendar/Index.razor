@@ -1,0 +1,134 @@
+@page "/ControlSamples/Calendar"
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>Calendar Component Samples</h2>
+
+<h3>Basic Calendar</h3>
+<Calendar @bind-SelectedDate="selectedDate" />
+<p>Selected Date: <strong>@selectedDate.ToShortDateString()</strong></p>
+
+<h3>Calendar with Custom Visible Month</h3>
+<Calendar VisibleDate="customMonth" @bind-SelectedDate="customSelectedDate" />
+<p>Selected: <strong>@customSelectedDate.ToShortDateString()</strong></p>
+
+<h3>Selection Modes</h3>
+<h4>None - No Selection</h4>
+<Calendar SelectionMode="None" />
+
+<h4>Day - Single Day Selection (Default)</h4>
+<Calendar SelectionMode="Day" @bind-SelectedDate="dayModeDate" />
+<p>Selected: <strong>@dayModeDate.ToShortDateString()</strong></p>
+
+<h4>DayWeek - Select Week</h4>
+<Calendar SelectionMode="DayWeek" @bind-SelectedDate="weekModeDate" />
+<p>Selected: <strong>@weekModeDate.ToShortDateString()</strong></p>
+
+<h4>DayWeekMonth - Select Month</h4>
+<Calendar SelectionMode="DayWeekMonth" @bind-SelectedDate="monthModeDate" />
+<p>Selected: <strong>@monthModeDate.ToShortDateString()</strong></p>
+
+<h3>Calendar with Grid Lines</h3>
+<Calendar ShowGridLines="true" @bind-SelectedDate="gridDate" />
+
+<h3>Calendar Without Title</h3>
+<Calendar ShowTitle="false" @bind-SelectedDate="noTitleDate" />
+
+<h3>Calendar Without Day Header</h3>
+<Calendar ShowDayHeader="false" @bind-SelectedDate="noDayHeaderDate" />
+
+<h3>Custom Day Name Format</h3>
+<h4>Full Day Names</h4>
+<Calendar DayNameFormat="Full" @bind-SelectedDate="fullNameDate" />
+
+<h4>First Letter Only</h4>
+<Calendar DayNameFormat="FirstLetter" @bind-SelectedDate="firstLetterDate" />
+
+<h4>Shortest (Default: Short)</h4>
+<Calendar DayNameFormat="Shortest" @bind-SelectedDate="shortestDate" />
+
+<h3>Custom Title Format</h3>
+<h4>Month Only</h4>
+<Calendar TitleFormat="Month" @bind-SelectedDate="monthOnlyDate" />
+
+<h3>Custom Navigation Text</h3>
+<Calendar NextMonthText="Next »" PrevMonthText="« Prev" @bind-SelectedDate="customNavDate" />
+
+<h3>Styled Calendar</h3>
+<Calendar CssClass="styled-calendar" 
+          TitleStyleCss="calendar-title"
+          SelectedDayStyleCss="selected-day"
+          TodayDayStyleCss="today-day"
+          @bind-SelectedDate="styledDate" />
+
+<style>
+.styled-calendar {
+    border: 2px solid #333;
+}
+.calendar-title {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+.selected-day {
+    background-color: #2196F3;
+    color: white;
+    font-weight: bold;
+}
+.today-day {
+    background-color: #FFC107;
+    font-weight: bold;
+}
+</style>
+
+<h3>Event Handling</h3>
+<Calendar @bind-SelectedDate="eventDate" 
+          OnSelectionChanged="HandleSelectionChanged"
+          OnVisibleMonthChanged="HandleMonthChanged" />
+<p>Selected: <strong>@eventDate.ToShortDateString()</strong></p>
+<p>Selection Changed: <strong>@selectionChangedCount</strong> times</p>
+<p>Month Changed: <strong>@monthChangedCount</strong> times</p>
+
+@code {
+	private DateTime selectedDate = DateTime.Today;
+	private DateTime customMonth = new DateTime(2024, 12, 25);
+	private DateTime customSelectedDate = DateTime.Today;
+	private DateTime dayModeDate = DateTime.Today;
+	private DateTime weekModeDate = DateTime.Today;
+	private DateTime monthModeDate = DateTime.Today;
+	private DateTime gridDate = DateTime.Today;
+	private DateTime noTitleDate = DateTime.Today;
+	private DateTime noDayHeaderDate = DateTime.Today;
+	private DateTime fullNameDate = DateTime.Today;
+	private DateTime firstLetterDate = DateTime.Today;
+	private DateTime shortestDate = DateTime.Today;
+	private DateTime monthOnlyDate = DateTime.Today;
+	private DateTime customNavDate = DateTime.Today;
+	private DateTime styledDate = DateTime.Today;
+	private DateTime eventDate = DateTime.Today;
+	private int selectionChangedCount = 0;
+	private int monthChangedCount = 0;
+
+	private void HandleSelectionChanged()
+	{
+		selectionChangedCount++;
+	}
+
+	private void HandleMonthChanged(CalendarMonthChangedArgs args)
+	{
+		monthChangedCount++;
+	}
+}
+
+<hr />
+
+<h3>Code Examples</h3>
+<code>
+&lt;Calendar @@bind-SelectedDate="selectedDate" /&gt;<br />
+&lt;Calendar ShowGridLines="true" /&gt;<br />
+&lt;Calendar SelectionMode="DayWeek" /&gt;<br />
+&lt;Calendar DayNameFormat="Full" /&gt;<br />
+&lt;Calendar TitleFormat="Month" /&gt;<br />
+&lt;Calendar NextMonthText="Next »" PrevMonthText="« Prev" /&gt;<br />
+&lt;Calendar OnSelectionChanged="HandleSelectionChanged" /&gt;
+</code>
