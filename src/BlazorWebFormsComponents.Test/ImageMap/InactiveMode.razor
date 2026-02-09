@@ -1,0 +1,58 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_InactiveMode_RendersNoHrefAttribute()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Inactive Area";
+		rect.HotSpotMode = HotSpotMode.Inactive;
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var area = cut.Find("area");
+		area.GetAttribute("shape").ShouldBe("rect");
+		area.GetAttribute("nohref").ShouldBe("nohref");
+		area.HasAttribute("href").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ImageMap_InactiveMode_MultipleHotSpots_AllInactive()
+	{
+		var hotSpots = new List<HotSpot>();
+		
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 50;
+		rect.Bottom = 50;
+		rect.AlternateText = "Area 1";
+		rect.HotSpotMode = HotSpotMode.Inactive;
+		hotSpots.Add(rect);
+		
+		var circle = new BlazorWebFormsComponents.CircleHotSpot();
+		circle.X = 100;
+		circle.Y = 100;
+		circle.Radius = 30;
+		circle.AlternateText = "Area 2";
+		circle.HotSpotMode = HotSpotMode.Inactive;
+		hotSpots.Add(circle);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var areas = cut.FindAll("area");
+		areas.Count.ShouldBe(2);
+		
+		foreach (var area in areas)
+		{
+			area.GetAttribute("nohref").ShouldBe("nohref");
+			area.HasAttribute("href").ShouldBeFalse();
+		}
+	}
+}

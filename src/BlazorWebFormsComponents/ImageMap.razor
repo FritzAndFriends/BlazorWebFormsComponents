@@ -1,16 +1,15 @@
+@using System.Text
 @inherits BaseWebFormsComponent
 
 @if (Visible)
 {
 	<img src="@ImageUrl" 
 		 usemap="#@_mapId"
-		 @attributes="@(new Dictionary<string, object> {
-			 { "alt", !string.IsNullOrEmpty(AlternateText) ? AlternateText : (GenerateEmptyAlternateText ? "" : null) },
-			 { "id", !string.IsNullOrEmpty(ClientID) ? ClientID : null },
-			 { "title", !string.IsNullOrEmpty(ToolTip) ? ToolTip : null },
-			 { "longdesc", !string.IsNullOrEmpty(DescriptionUrl) ? DescriptionUrl : null },
-			 { "align", ImageAlign != Enums.ImageAlign.NotSet ? ImageAlign.ToString().ToLower() : null }
-		 }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))" />
+		 alt="@GetAltText()"
+		 id="@GetId()"
+		 title="@GetTitle()"
+		 longdesc="@GetLongDesc()"
+		 align="@GetAlign()" />
 
 	<map name="@_mapId">
 		@foreach (var hotSpot in HotSpots)
@@ -32,11 +31,9 @@
 					  coords="@hotSpot.GetCoordinates()"
 					  href="@href"
 					  alt="@hotSpot.AlternateText"
-					  @attributes="@(new Dictionary<string, object> {
-						  { "target", !string.IsNullOrEmpty(target) ? target : null },
-						  { "tabindex", hotSpot.TabIndex > 0 ? hotSpot.TabIndex.ToString() : null },
-						  { "accesskey", !string.IsNullOrEmpty(hotSpot.AccessKey) ? hotSpot.AccessKey : null }
-					  }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))" />
+					  target="@GetTargetOrNull(target)"
+					  tabindex="@GetTabIndexOrNull(hotSpot.TabIndex)"
+					  accesskey="@GetAccessKeyOrNull(hotSpot.AccessKey)" />
 			}
 			else if (effectiveMode == Enums.HotSpotMode.PostBack)
 			{
@@ -46,15 +43,55 @@
 					  alt="@hotSpot.AlternateText"
 					  @onclick="@(() => HandleHotSpotClick(hotSpot))"
 					  @onclick:preventDefault="true"
-					  @attributes="@(new Dictionary<string, object> {
-						  { "tabindex", hotSpot.TabIndex > 0 ? hotSpot.TabIndex.ToString() : null },
-						  { "accesskey", !string.IsNullOrEmpty(hotSpot.AccessKey) ? hotSpot.AccessKey : null }
-					  }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))" />
+					  tabindex="@GetTabIndexOrNull(hotSpot.TabIndex)"
+					  accesskey="@GetAccessKeyOrNull(hotSpot.AccessKey)" />
 			}
 		}
 	</map>
 }
 
 @code {
+	private string GetAltText()
+	{
+		if (!string.IsNullOrEmpty(AlternateText))
+			return AlternateText;
+		if (GenerateEmptyAlternateText)
+			return "";
+		return null;
+	}
 	
+	private string GetId()
+	{
+		return !string.IsNullOrEmpty(ClientID) ? ClientID : null;
+	}
+	
+	private string GetTitle()
+	{
+		return !string.IsNullOrEmpty(ToolTip) ? ToolTip : null;
+	}
+	
+	private string GetLongDesc()
+	{
+		return !string.IsNullOrEmpty(DescriptionUrl) ? DescriptionUrl : null;
+	}
+	
+	private string GetAlign()
+	{
+		return ImageAlign != Enums.ImageAlign.NotSet ? ImageAlign.ToString().ToLower() : null;
+	}
+	
+	private string GetTargetOrNull(string target)
+	{
+		return !string.IsNullOrEmpty(target) ? target : null;
+	}
+	
+	private string GetTabIndexOrNull(short tabIndex)
+	{
+		return tabIndex > 0 ? tabIndex.ToString() : null;
+	}
+	
+	private string GetAccessKeyOrNull(string accessKey)
+	{
+		return !string.IsNullOrEmpty(accessKey) ? accessKey : null;
+	}
 }

@@ -1,0 +1,53 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_CircleHotSpot_RendersCorrectly()
+	{
+		var hotSpots = new List<HotSpot>();
+		var circle = new BlazorWebFormsComponents.CircleHotSpot();
+		circle.X = 100;
+		circle.Y = 100;
+		circle.Radius = 50;
+		circle.AlternateText = "Circle Area";
+		circle.NavigateUrl = "/page1.html";
+		hotSpots.Add(circle);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var area = cut.Find("area");
+		area.GetAttribute("shape").ShouldBe("circle");
+		area.GetAttribute("coords").ShouldBe("100,100,50");
+		area.GetAttribute("alt").ShouldBe("Circle Area");
+		area.GetAttribute("href").ShouldBe("/page1.html");
+	}
+
+	[Fact]
+	public void ImageMap_MultipleCircleHotSpots_RendersAll()
+	{
+		var hotSpots = new List<HotSpot>();
+		
+		var circle1 = new BlazorWebFormsComponents.CircleHotSpot();
+		circle1.X = 50;
+		circle1.Y = 50;
+		circle1.Radius = 25;
+		circle1.AlternateText = "Circle 1";
+		circle1.NavigateUrl = "/page1.html";
+		hotSpots.Add(circle1);
+		
+		var circle2 = new BlazorWebFormsComponents.CircleHotSpot();
+		circle2.X = 150;
+		circle2.Y = 150;
+		circle2.Radius = 35;
+		circle2.AlternateText = "Circle 2";
+		circle2.NavigateUrl = "/page2.html";
+		hotSpots.Add(circle2);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var areas = cut.FindAll("area");
+		areas.Count.ShouldBe(2);
+		areas[0].GetAttribute("coords").ShouldBe("50,50,25");
+		areas[1].GetAttribute("coords").ShouldBe("150,150,35");
+	}
+}
