@@ -1,0 +1,60 @@
+@inherits BaseWebFormsComponent
+
+@if (Visible)
+{
+	<img src="@ImageUrl" 
+		 usemap="#@_mapId"
+		 @attributes="@(new Dictionary<string, object> {
+			 { "alt", !string.IsNullOrEmpty(AlternateText) ? AlternateText : (GenerateEmptyAlternateText ? "" : null) },
+			 { "id", !string.IsNullOrEmpty(ClientID) ? ClientID : null },
+			 { "title", !string.IsNullOrEmpty(ToolTip) ? ToolTip : null },
+			 { "longdesc", !string.IsNullOrEmpty(DescriptionUrl) ? DescriptionUrl : null },
+			 { "align", ImageAlign != Enums.ImageAlign.NotSet ? ImageAlign.ToString().ToLower() : null }
+		 }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))" />
+
+	<map name="@_mapId">
+		@foreach (var hotSpot in HotSpots)
+		{
+			var effectiveMode = hotSpot.HotSpotMode != Enums.HotSpotMode.Navigate ? hotSpot.HotSpotMode : HotSpotMode;
+			var href = effectiveMode == Enums.HotSpotMode.Navigate ? hotSpot.NavigateUrl : "#";
+			var target = !string.IsNullOrEmpty(hotSpot.Target) ? hotSpot.Target : Target;
+
+			@if (effectiveMode == Enums.HotSpotMode.Inactive)
+			{
+				<area shape="@hotSpot.GetShapeType()"
+					  coords="@hotSpot.GetCoordinates()"
+					  alt="@hotSpot.AlternateText"
+					  nohref="nohref" />
+			}
+			else if (effectiveMode == Enums.HotSpotMode.Navigate)
+			{
+				<area shape="@hotSpot.GetShapeType()"
+					  coords="@hotSpot.GetCoordinates()"
+					  href="@href"
+					  alt="@hotSpot.AlternateText"
+					  @attributes="@(new Dictionary<string, object> {
+						  { "target", !string.IsNullOrEmpty(target) ? target : null },
+						  { "tabindex", hotSpot.TabIndex > 0 ? hotSpot.TabIndex.ToString() : null },
+						  { "accesskey", !string.IsNullOrEmpty(hotSpot.AccessKey) ? hotSpot.AccessKey : null }
+					  }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))" />
+			}
+			else if (effectiveMode == Enums.HotSpotMode.PostBack)
+			{
+				<area shape="@hotSpot.GetShapeType()"
+					  coords="@hotSpot.GetCoordinates()"
+					  href="#"
+					  alt="@hotSpot.AlternateText"
+					  @onclick="@(() => HandleHotSpotClick(hotSpot))"
+					  @onclick:preventDefault="true"
+					  @attributes="@(new Dictionary<string, object> {
+						  { "tabindex", hotSpot.TabIndex > 0 ? hotSpot.TabIndex.ToString() : null },
+						  { "accesskey", !string.IsNullOrEmpty(hotSpot.AccessKey) ? hotSpot.AccessKey : null }
+					  }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))" />
+			}
+		}
+	</map>
+}
+
+@code {
+	
+}
