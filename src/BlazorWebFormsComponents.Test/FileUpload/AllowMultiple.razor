@@ -1,0 +1,28 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_AllowMultiple_RendersMultipleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload AllowMultiple="true" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.HasAttribute("multiple").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void FileUpload_AllowMultipleFalse_DoesNotRenderMultipleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload AllowMultiple="false" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.HasAttribute("multiple").ShouldBeFalse();
+	}
+
+}

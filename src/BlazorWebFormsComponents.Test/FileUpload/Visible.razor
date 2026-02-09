@@ -1,0 +1,28 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_VisibleTrue_RendersInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Visible="true" />);
+
+		// Assert
+		var inputs = cut.FindAll("input[type='file']");
+		inputs.Count.ShouldBe(1);
+	}
+
+	[Fact]
+	public void FileUpload_VisibleFalse_DoesNotRenderInput()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Visible="false" />);
+
+		// Assert
+		var inputs = cut.FindAll("input[type='file']");
+		inputs.Count.ShouldBe(0);
+	}
+
+}

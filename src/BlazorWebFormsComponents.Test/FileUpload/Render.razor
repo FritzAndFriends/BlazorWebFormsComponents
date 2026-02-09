@@ -1,0 +1,17 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_Render_RendersInputFile()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.ShouldNotBeNull();
+	}
+
+}
