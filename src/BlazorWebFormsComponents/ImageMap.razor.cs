@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
@@ -70,23 +71,25 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool GenerateEmptyAlternateText { get; set; }
 
+		private static int _mapIdCounter = 0;
 		private string _mapId = string.Empty;
 
 		protected override void OnInitialized()
 		{
 			base.OnInitialized();
-			// Generate a unique map ID
-			_mapId = $"ImageMap_{GetHashCode()}";
+			// Generate a unique map ID using a counter
+			_mapId = $"ImageMap_{System.Threading.Interlocked.Increment(ref _mapIdCounter)}";
 		}
 
 		/// <summary>
 		/// Handles the click event for a hot spot.
 		/// </summary>
 		/// <param name="hotSpot">The hot spot that was clicked</param>
-		protected async void HandleHotSpotClick(HotSpot hotSpot)
+		protected async Task HandleHotSpotClick(HotSpot hotSpot)
 		{
-			if (hotSpot.HotSpotMode == HotSpotMode.PostBack || 
-			    (hotSpot.HotSpotMode == HotSpotMode.Navigate && HotSpotMode == HotSpotMode.PostBack))
+			var effectiveMode = hotSpot.HotSpotMode != HotSpotMode.NotSet ? hotSpot.HotSpotMode : HotSpotMode;
+			
+			if (effectiveMode == HotSpotMode.PostBack)
 			{
 				var eventArgs = new ImageMapEventArgs(hotSpot.PostBackValue);
 				await OnClick.InvokeAsync(eventArgs);

@@ -14,7 +14,7 @@
 	<map name="@_mapId">
 		@foreach (var hotSpot in HotSpots)
 		{
-			var effectiveMode = hotSpot.HotSpotMode != Enums.HotSpotMode.Navigate ? hotSpot.HotSpotMode : HotSpotMode;
+			var effectiveMode = hotSpot.HotSpotMode != Enums.HotSpotMode.NotSet ? hotSpot.HotSpotMode : HotSpotMode;
 			var href = effectiveMode == Enums.HotSpotMode.Navigate ? hotSpot.NavigateUrl : "#";
 			var target = !string.IsNullOrEmpty(hotSpot.Target) ? hotSpot.Target : Target;
 

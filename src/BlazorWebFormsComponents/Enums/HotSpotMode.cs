@@ -6,6 +6,11 @@ namespace BlazorWebFormsComponents.Enums
 	public enum HotSpotMode
 	{
 		/// <summary>
+		/// The HotSpot mode is not set and inherits from the parent ImageMap control.
+		/// </summary>
+		NotSet,
+
+		/// <summary>
 		/// The HotSpot does not have any behavior.
 		/// </summary>
 		Inactive,

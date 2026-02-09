@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets or sets the behavior of a HotSpot object in an ImageMap control when the HotSpot is clicked.
 		/// </summary>
-		public HotSpotMode HotSpotMode { get; set; } = HotSpotMode.Navigate;
+		public HotSpotMode HotSpotMode { get; set; } = HotSpotMode.NotSet;
 
 		/// <summary>
 		/// Gets or sets the URL to navigate to when a HotSpot object is clicked.
