@@ -1,0 +1,81 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<table id="@ClientID"
+				 class="@CssClass"
+				 style="@GetTableStyle()"
+				 cellpadding="@CellPadding"
+				 cellspacing="@CellSpacing"
+				 border="@GetBorder()"
+				 title="@ToolTip">
+		@if (ShowTitle)
+		{
+			<tr>
+				@if (ShowNextPrevMonth && SelectionMode == "DayWeekMonth")
+				{
+					<td class="@SelectorStyleCss" style="width:15%;">
+						<a @onclick="HandleMonthClick" @onclick:preventDefault="true" style="@NextPrevStyleCss">@SelectMonthText</a>
+					</td>
+				}
+				@if (ShowNextPrevMonth)
+				{
+					<td class="@NextPrevStyleCss">
+						<a @onclick="HandlePreviousMonth" @onclick:preventDefault="true">@((MarkupString)PrevMonthText)</a>
+					</td>
+				}
+				<td colspan="@(ShowNextPrevMonth ? 5 : 7)" class="@TitleStyleCss" align="center">
+					@GetTitleText()
+				</td>
+				@if (ShowNextPrevMonth)
+				{
+					<td class="@NextPrevStyleCss">
+						<a @onclick="HandleNextMonth" @onclick:preventDefault="true">@((MarkupString)NextMonthText)</a>
+					</td>
+				}
+			</tr>
+		}
+		@if (ShowDayHeader)
+		{
+			<tr>
+				@if (SelectionMode == "DayWeek" || SelectionMode == "DayWeekMonth")
+				{
+					<th class="@SelectorStyleCss"></th>
+				}
+				@foreach (var day in GetDayHeaders())
+				{
+					<th class="@DayHeaderStyleCss" abbr="@GetDayName(day)">
+						@GetDayName(day)
+					</th>
+				}
+			</tr>
+		}
+		@foreach (var week in GetCalendarWeeks())
+		{
+			<tr>
+				@if (SelectionMode == "DayWeek" || SelectionMode == "DayWeekMonth")
+				{
+					<td class="@SelectorStyleCss" align="center">
+						<a @onclick="() => HandleWeekClick(week)" @onclick:preventDefault="true">@((MarkupString)SelectWeekText)</a>
+					</td>
+				}
+				@foreach (var date in week)
+				{
+					var dayArgs = CreateDayRenderArgs(date);
+					<td class="@GetDayCellCss(date)" align="center">
+						@if (dayArgs.IsSelectable)
+						{
+							<a @onclick="() => HandleDayClick(date)" @onclick:preventDefault="true">
+								@date.Day
+							</a>
+						}
+						else
+						{
+							<span>@date.Day</span>
+						}
+					</td>
+				}
+			</tr>
+		}
+	</table>
+}
