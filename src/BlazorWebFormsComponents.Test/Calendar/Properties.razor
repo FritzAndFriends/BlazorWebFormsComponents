@@ -1,0 +1,91 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void Calendar_DayNameFormatShort_DisplaysAbbreviatedNames()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar DayNameFormat="Short" />);
+
+		// Assert
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBeGreaterThan(0);
+		// Short format should be less than full names (e.g., "Sun" vs "Sunday")
+		headers.Any(h => h.TextContent.Length <= 3).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_DayNameFormatFull_DisplaysFullNames()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar DayNameFormat="Full" />);
+
+		// Assert
+		var headers = cut.FindAll("th");
+		headers.Any(h => h.TextContent.Length > 5).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_TitleFormatMonth_DisplaysMonthOnly()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="Month" />);
+
+		// Assert
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldBe("June");
+		title.TextContent.ShouldNotContain("2024");
+	}
+
+	[Fact]
+	public void Calendar_TitleFormatMonthYear_DisplaysMonthAndYear()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="MonthYear" />);
+
+		// Assert
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldContain("June");
+		title.TextContent.ShouldContain("2024");
+	}
+
+	[Fact]
+	public void Calendar_CustomNavigationText_RendersCustomText()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar NextMonthText="Next &rarr;" PrevMonthText="&larr; Prev" />);
+
+		// Assert
+		var navLinks = cut.FindAll("td a");
+		navLinks.Count.ShouldBeGreaterThan(0);
+	}
+
+	[Fact]
+	public void Calendar_WithToolTip_RendersTitle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar ToolTip="Select a date" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("title").ShouldBe("Select a date");
+	}
+
+	[Fact]
+	public void Calendar_WithClientID_RendersId()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar ID="myCalendar" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.Id.ShouldContain("myCalendar");
+	}
+}
