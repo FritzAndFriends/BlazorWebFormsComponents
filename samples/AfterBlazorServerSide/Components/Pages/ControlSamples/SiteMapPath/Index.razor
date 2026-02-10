@@ -1,0 +1,128 @@
+@page "/ControlSamples/SiteMapPath"
+
+<PageTitle>SiteMapPath Sample</PageTitle>
+
+<h2>SiteMapPath - Breadcrumb Navigation</h2>
+
+<p>The SiteMapPath component displays a breadcrumb trail showing the current page's location in the site hierarchy.</p>
+
+<h3>Basic Breadcrumb</h3>
+<p>Select a page to see the breadcrumb path:</p>
+
+<div class="mb-3">
+    <label class="form-label">Current Page:</label>
+    <select class="form-select" style="max-width: 300px;" @onchange="OnPageChanged">
+        <option value="/">Home</option>
+        <option value="/products">Products</option>
+        <option value="/products/electronics">Electronics</option>
+        <option value="/products/electronics/phones" selected>Phones</option>
+        <option value="/products/clothing">Clothing</option>
+    </select>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <SiteMapPath SiteMapProvider="@SiteMap" CurrentUrl="@CurrentUrl" />
+    </div>
+</div>
+
+<hr />
+
+<h3>Custom Separator</h3>
+<p>Using a custom path separator:</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <SiteMapPath SiteMapProvider="@SiteMap" CurrentUrl="@CurrentUrl" PathSeparator=" / " />
+    </div>
+</div>
+
+<hr />
+
+<h3>Current Node as Link</h3>
+<p>Making the current page clickable:</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <SiteMapPath SiteMapProvider="@SiteMap" CurrentUrl="@CurrentUrl" RenderCurrentNodeAsLink="true" />
+    </div>
+</div>
+
+<hr />
+
+<h3>Reverse Path Direction</h3>
+<p>Showing current page first:</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <SiteMapPath SiteMapProvider="@SiteMap" CurrentUrl="@CurrentUrl" 
+                     PathDirection="BlazorWebFormsComponents.Enums.PathDirection.CurrentToRoot" />
+    </div>
+</div>
+
+<hr />
+
+<h3>Limited Parent Levels</h3>
+<p>Only showing 1 parent level:</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <SiteMapPath SiteMapProvider="@SiteMap" CurrentUrl="@CurrentUrl" ParentLevelsDisplayed="1" />
+    </div>
+</div>
+
+<hr />
+
+<h3>Custom Templates</h3>
+<p>Using custom templates for nodes and separators:</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <SiteMapPath SiteMapProvider="@SiteMap" CurrentUrl="@CurrentUrl">
+            <RootNodeTemplate Context="node">
+                <a href="@node.Url" class="badge bg-primary text-decoration-none">🏠 @node.Title</a>
+            </RootNodeTemplate>
+            <NodeTemplate Context="node">
+                <a href="@node.Url" class="text-secondary text-decoration-none">@node.Title</a>
+            </NodeTemplate>
+            <CurrentNodeTemplate Context="node">
+                <span class="badge bg-success">📍 @node.Title</span>
+            </CurrentNodeTemplate>
+            <PathSeparatorTemplate>
+                <span class="mx-2 text-muted">→</span>
+            </PathSeparatorTemplate>
+        </SiteMapPath>
+    </div>
+</div>
+
+@code {
+    private string CurrentUrl = "/products/electronics/phones";
+    private SiteMapNode SiteMap;
+
+    protected override void OnInitialized()
+    {
+        SiteMap = BuildSiteMap();
+    }
+
+    private void OnPageChanged(ChangeEventArgs e)
+    {
+        CurrentUrl = e.Value?.ToString() ?? "/";
+    }
+
+    private static SiteMapNode BuildSiteMap()
+    {
+        var root = new SiteMapNode("Home", "/", "Return to home page");
+        
+        var products = new SiteMapNode("Products", "/products", "Browse our product catalog");
+        var electronics = new SiteMapNode("Electronics", "/products/electronics", "Electronic devices");
+        var phones = new SiteMapNode("Phones", "/products/electronics/phones", "Mobile phones");
+        var clothing = new SiteMapNode("Clothing", "/products/clothing", "Apparel and accessories");
+        
+        root.AddChild(products);
+        products.AddChild(electronics);
+        products.AddChild(clothing);
+        electronics.AddChild(phones);
+        
+        return root;
+    }
+}

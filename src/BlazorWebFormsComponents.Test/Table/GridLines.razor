@@ -1,0 +1,67 @@
+@using GridLinesEnum = BlazorWebFormsComponents.Enums.GridLines
+
+@code {
+
+	[Fact]
+	public void Table_GridLinesHorizontal_RendersRulesRows()
+	{
+		// Act
+		var cut = Render(@<Table GridLines="GridLinesEnum.Horizontal">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("rules").ShouldBe("rows");
+		table.GetAttribute("border").ShouldBe("1");
+	}
+
+	[Fact]
+	public void Table_GridLinesVertical_RendersRulesCols()
+	{
+		// Act
+		var cut = Render(@<Table GridLines="GridLinesEnum.Vertical">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("rules").ShouldBe("cols");
+	}
+
+	[Fact]
+	public void Table_GridLinesBoth_RendersRulesAll()
+	{
+		// Act
+		var cut = Render(@<Table GridLines="GridLinesEnum.Both">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("rules").ShouldBe("all");
+	}
+
+	[Fact]
+	public void Table_GridLinesNone_NoRulesAttribute()
+	{
+		// Act
+		var cut = Render(@<Table GridLines="GridLinesEnum.None">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("rules").ShouldBeNull();
+		table.GetAttribute("border").ShouldBeNull();
+	}
+
+}

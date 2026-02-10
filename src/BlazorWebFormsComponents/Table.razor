@@ -1,0 +1,20 @@
+@using BlazorWebFormsComponents.Enums
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<table id="@(string.IsNullOrEmpty(ClientID) ? null : ClientID)"
+		   class="@CssClass"
+		   style="@CombinedStyle"
+		   cellpadding="@CellPaddingValue"
+		   cellspacing="@CellSpacingValue"
+		   border="@BorderAttribute"
+		   rules="@RulesAttribute"
+		   @attributes="AdditionalAttributes">
+		@if (!string.IsNullOrEmpty(Caption))
+		{
+			<caption style="@CaptionSideStyle">@Caption</caption>
+		}
+		@ChildContent
+	</table>
+}

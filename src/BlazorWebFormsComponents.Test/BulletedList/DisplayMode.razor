@@ -1,0 +1,155 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void BulletedList_TextDisplayMode_RendersSpans()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "http://example.com/1"),
+			new ListItem("Item 2", "http://example.com/2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.Text" />);
+
+		// Assert
+		var spans = cut.FindAll("li span");
+		spans.Count.ShouldBe(2);
+		spans[0].TextContent.ShouldBe("Item 1");
+		spans[1].TextContent.ShouldBe("Item 2");
+		
+		// Should not have any links
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void BulletedList_HyperLinkDisplayMode_RendersAnchors()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Link 1", "http://example.com/1"),
+			new ListItem("Link 2", "http://example.com/2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(2);
+		links[0].GetAttribute("href").ShouldBe("http://example.com/1");
+		links[0].TextContent.ShouldBe("Link 1");
+		links[1].GetAttribute("href").ShouldBe("http://example.com/2");
+		links[1].TextContent.ShouldBe("Link 2");
+	}
+
+	[Fact]
+	public void BulletedList_HyperLinkDisplayMode_WithTarget_SetsTargetAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Link 1", "http://example.com/1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" />);
+
+		// Assert
+		var link = cut.Find("a");
+		link.GetAttribute("target").ShouldBe("_blank");
+	}
+
+	[Fact]
+	public void BulletedList_LinkButtonDisplayMode_RendersClickableLinks()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Click Me", "value1"),
+			new ListItem("Click Me Too", "value2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.LinkButton" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(2);
+		links[0].GetAttribute("href").ShouldBe("javascript:void(0)");
+		links[0].TextContent.ShouldBe("Click Me");
+	}
+
+	[Fact]
+	public void BulletedList_HyperLinkDisplayMode_DisabledItem_RendersSpan()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Enabled", "http://example.com/1") { Enabled = true },
+			new ListItem("Disabled", "http://example.com/2") { Enabled = false }
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(1);
+		links[0].TextContent.ShouldBe("Enabled");
+		
+		var spans = cut.FindAll("li span");
+		spans.Count.ShouldBe(1);
+		spans[0].TextContent.ShouldBe("Disabled");
+	}
+
+	[Fact]
+	public void BulletedList_LinkButtonDisplayMode_DisabledItem_RendersSpan()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Enabled", "1") { Enabled = true },
+			new ListItem("Disabled", "2") { Enabled = false }
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.LinkButton" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(1);
+		
+		var spans = cut.FindAll("li span");
+		spans.Count.ShouldBe(1);
+		spans[0].TextContent.ShouldBe("Disabled");
+	}
+
+	[Fact]
+	public void BulletedList_DisabledControl_RendersAllAsSpans()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "http://example.com/1"),
+			new ListItem("Item 2", "http://example.com/2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" Enabled="false" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(0);
+		
+		var spans = cut.FindAll("li span");
+		spans.Count.ShouldBe(2);
+	}
+
+}

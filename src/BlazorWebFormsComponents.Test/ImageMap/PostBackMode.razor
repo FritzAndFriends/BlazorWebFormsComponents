@@ -1,0 +1,90 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_PostBackMode_InvokesClickEvent()
+	{
+		var clickedValue = string.Empty;
+		
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		rect.PostBackValue = "Area1Clicked";
+		rect.HotSpotMode = HotSpotMode.PostBack;
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" 
+								   HotSpots="@hotSpots" 
+								   OnClick="@((ImageMapEventArgs e) => clickedValue = e.PostBackValue)" />);
+
+		var area = cut.Find("area");
+		area.Click();
+
+		clickedValue.ShouldBe("Area1Clicked");
+	}
+
+	[Fact]
+	public void ImageMap_PostBackMode_MultipleHotSpots_InvokesCorrectEvent()
+	{
+		var clickedValue = string.Empty;
+		
+		var hotSpots = new List<HotSpot>();
+		
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 50;
+		rect.Bottom = 50;
+		rect.AlternateText = "Area 1";
+		rect.PostBackValue = "Area1";
+		rect.HotSpotMode = HotSpotMode.PostBack;
+		hotSpots.Add(rect);
+		
+		var circle = new BlazorWebFormsComponents.CircleHotSpot();
+		circle.X = 100;
+		circle.Y = 100;
+		circle.Radius = 30;
+		circle.AlternateText = "Area 2";
+		circle.PostBackValue = "Area2";
+		circle.HotSpotMode = HotSpotMode.PostBack;
+		hotSpots.Add(circle);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" 
+								   HotSpots="@hotSpots" 
+								   OnClick="@((ImageMapEventArgs e) => clickedValue = e.PostBackValue)" />);
+
+		// Click first area
+		var areas1 = cut.FindAll("area");
+		areas1[0].Click();
+		clickedValue.ShouldBe("Area1");
+		
+		// Re-find areas after render and click second area
+		var areas2 = cut.FindAll("area");
+		areas2[1].Click();
+		clickedValue.ShouldBe("Area2");
+	}
+
+	[Fact]
+	public void ImageMap_PostBackMode_RendersHrefHash()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		rect.PostBackValue = "Area1";
+		rect.HotSpotMode = HotSpotMode.PostBack;
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var area = cut.Find("area");
+		area.GetAttribute("href").ShouldBe("#");
+	}
+}

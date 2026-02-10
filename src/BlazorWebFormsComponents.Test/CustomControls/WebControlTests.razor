@@ -1,0 +1,78 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void WebControl_BasicRendering_OutputsCorrectHtml()
+	{
+		var cut = Render(@<HelloLabel Text="World" Prefix="Hello" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("<span>");
+		html.ShouldContain("Hello World");
+		html.ShouldContain("</span>");
+	}
+
+	[Fact]
+	public void WebControl_WithCssClass_IncludesClassAttribute()
+	{
+		var cut = Render(@<HelloLabel Text="World" Prefix="Hello" CssClass="test-class" />);
+
+		cut.Markup.ShouldContain("class=\"test-class\"");
+	}
+
+	[Fact]
+	public void WebControl_WithId_IncludesIdAttribute()
+	{
+		var cut = Render(@<HelloLabel Text="World" Prefix="Hello" ID="myControl" />);
+
+		cut.Markup.ShouldContain("id=\"myControl\"");
+	}
+
+	[Fact]
+	public void WebControl_NotVisible_RendersNothing()
+	{
+		var cut = Render(@<HelloLabel Text="World" Prefix="Hello" Visible="false" />);
+
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void WebControl_CustomButton_RendersButtonElement()
+	{
+		var cut = Render(@<CustomButton Text="Click Me" ButtonType="submit" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("<button");
+		html.ShouldContain("type=\"submit\"");
+		html.ShouldContain("Click Me");
+		html.ShouldContain("</button>");
+	}
+
+	[Fact]
+	public void WebControl_WithInlineStyles_RendersStyleAttribute()
+	{
+		var cut = Render(@<StyledDiv Content="Styled Content" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("style=\"");
+		html.ShouldContain("color: red");
+	}
+
+	[Fact]
+	public void WebControl_WithBaseStyles_MergesWithCustomStyles()
+	{
+		// Note: BackColor would need to be a proper WebColor object, not a string
+		// For this test, we're just verifying the custom styles are rendered
+		var cut = Render(@<StyledDiv Content="Test" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("style=\"");
+		// Should include the custom style from StyledDiv
+		html.ShouldContain("color: red");
+	}
+}

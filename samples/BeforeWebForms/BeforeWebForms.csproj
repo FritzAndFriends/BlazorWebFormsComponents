@@ -54,6 +54,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.DataVisualization" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
@@ -108,6 +109,10 @@
     <Content Include="Content\Images\C#.png" />
     <Content Include="Content\Site.css" />
     <Content Include="ControlSamples\Button\default.aspx" />
+    <Content Include="ControlSamples\Chart\Default.aspx" />
+    <Content Include="ControlSamples\Chart\PieChart.aspx" />
+    <Content Include="ControlSamples\Chart\LineChart.aspx" />
+    <Content Include="ControlSamples\Chart\DataBinding.aspx" />
     <Content Include="ControlSamples\DataList\RepeatColumns.aspx" />
     <Content Include="ControlSamples\DataList\StyleAttributes.aspx" />
     <Content Include="ControlSamples\DataList\FlowLayout.aspx" />
@@ -183,6 +188,34 @@
     </Compile>
     <Compile Include="ControlSamples\Button\default.aspx.designer.cs">
       <DependentUpon>default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\PieChart.aspx.cs">
+      <DependentUpon>PieChart.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\PieChart.aspx.designer.cs">
+      <DependentUpon>PieChart.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\LineChart.aspx.cs">
+      <DependentUpon>LineChart.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\LineChart.aspx.designer.cs">
+      <DependentUpon>LineChart.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\DataBinding.aspx.cs">
+      <DependentUpon>DataBinding.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ControlSamples\Chart\DataBinding.aspx.designer.cs">
+      <DependentUpon>DataBinding.aspx</DependentUpon>
     </Compile>
     <Compile Include="ControlSamples\DataList\RepeatColumns.aspx.cs">
       <DependentUpon>RepeatColumns.aspx</DependentUpon>

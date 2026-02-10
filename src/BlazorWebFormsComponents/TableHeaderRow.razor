@@ -1,0 +1,12 @@
+@using BlazorWebFormsComponents.Enums
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<tr id="@(string.IsNullOrEmpty(ClientID) ? null : ClientID)"
+		class="@CssClass"
+		style="@CombinedStyle"
+		@attributes="AdditionalAttributes">
+		@ChildContent
+	</tr>
+}

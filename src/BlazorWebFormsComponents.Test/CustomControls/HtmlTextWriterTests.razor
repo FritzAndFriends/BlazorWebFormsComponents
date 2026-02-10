@@ -1,0 +1,138 @@
+@using BlazorWebFormsComponents.CustomControls
+@using Shouldly
+@using Xunit
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void HtmlTextWriter_WriteString_OutputsText()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.Write("Hello World");
+		
+		writer.GetHtml().ShouldBe("Hello World");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_RenderSimpleTag_OutputsCorrectHtml()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		writer.Write("Content");
+		writer.RenderEndTag();
+		
+		writer.GetHtml().ShouldBe("<div>Content</div>");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_AddAttribute_IncludesAttributeInTag()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.AddAttribute(HtmlTextWriterAttribute.Id, "myId");
+		writer.AddAttribute(HtmlTextWriterAttribute.Class, "myClass");
+		writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		writer.Write("Content");
+		writer.RenderEndTag();
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("id=\"myId\"");
+		html.ShouldContain("class=\"myClass\"");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_AddStyleAttribute_IncludesStyleInTag()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
+		writer.AddStyleAttribute(HtmlTextWriterStyle.BackgroundColor, "blue");
+		writer.RenderBeginTag(HtmlTextWriterTag.Span);
+		writer.Write("Styled");
+		writer.RenderEndTag();
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("style=\"");
+		html.ShouldContain("color: red");
+		html.ShouldContain("background-color: blue");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_NestedTags_OutputsCorrectHierarchy()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		writer.RenderBeginTag(HtmlTextWriterTag.Span);
+		writer.Write("Nested");
+		writer.RenderEndTag();
+		writer.RenderEndTag();
+		
+		writer.GetHtml().ShouldBe("<div><span>Nested</span></div>");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_AttributeEncoding_EscapesSpecialCharacters()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.AddAttribute(HtmlTextWriterAttribute.Title, "<script>alert('xss')</script>");
+		writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		writer.RenderEndTag();
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("&lt;");
+		html.ShouldContain("&gt;");
+		html.ShouldNotContain("<script>");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_WriteLine_AddsLineBreak()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.WriteLine("Line 1");
+		writer.WriteLine("Line 2");
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("Line 1" + Environment.NewLine);
+		html.ShouldContain("Line 2" + Environment.NewLine);
+	}
+
+	[Fact]
+	public void HtmlTextWriter_StringAttributes_WorksWithCustomAttributeNames()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.AddAttribute("data-value", "123");
+		writer.AddAttribute("aria-label", "Test Label");
+		writer.RenderBeginTag(HtmlTextWriterTag.Button);
+		writer.Write("Click");
+		writer.RenderEndTag();
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("data-value=\"123\"");
+		html.ShouldContain("aria-label=\"Test Label\"");
+	}
+
+	[Fact]
+	public void HtmlTextWriter_MultipleStyleAttributes_ConcatenatesWithSemicolons()
+	{
+		using var writer = new HtmlTextWriter();
+		
+		writer.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
+		writer.AddStyleAttribute(HtmlTextWriterStyle.FontSize, "14px");
+		writer.AddStyleAttribute(HtmlTextWriterStyle.Margin, "10px");
+		writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		writer.RenderEndTag();
+		
+		var html = writer.GetHtml();
+		html.ShouldContain("style=\"");
+		// Each style should be properly terminated with semicolons
+		html.ShouldContain("color: red;");
+		html.ShouldContain("font-size: 14px;");
+		html.ShouldContain("margin: 10px;");
+	}
+}

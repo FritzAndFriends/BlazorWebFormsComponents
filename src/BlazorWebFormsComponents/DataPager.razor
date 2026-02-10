@@ -1,0 +1,75 @@
+@inherits BaseStyledComponent
+
+@if (TotalPages > 1)
+{
+	<div id="@ID" class="@CssClass" style="@Style">
+		@if (ChildContent != null)
+		{
+			@ChildContent
+		}
+		else
+		{
+			@* First Button *@
+			@if (ShouldShowFirstLast)
+			{
+				<a class="@(IsFirstPage ? "aspNetDisabled" : "")" 
+				   href="javascript:void(0)" 
+				   @onclick="GoToFirstPage" 
+				   @onclick:preventDefault="true"
+				   disabled="@IsFirstPage">@FirstPageText</a>
+				<span> </span>
+			}
+
+			@* Previous Button *@
+			@if (ShouldShowPreviousNext)
+			{
+				<a class="@(IsFirstPage ? "aspNetDisabled" : "")" 
+				   href="javascript:void(0)" 
+				   @onclick="GoToPreviousPage" 
+				   @onclick:preventDefault="true"
+				   disabled="@IsFirstPage">@PreviousPageText</a>
+				<span> </span>
+			}
+
+			@* Numeric Page Buttons *@
+			@if (ShouldShowNumeric)
+			{
+				@foreach (var page in GetPageRange())
+				{
+					@if (page == PageIndex)
+					{
+						<span class="aspNetCurrentPage">@(page + 1)</span>
+					}
+					else
+					{
+						<a href="javascript:void(0)" 
+						   @onclick="() => GoToPage(page)" 
+						   @onclick:preventDefault="true">@(page + 1)</a>
+					}
+					<span> </span>
+				}
+			}
+
+			@* Next Button *@
+			@if (ShouldShowPreviousNext)
+			{
+				<a class="@(IsLastPage ? "aspNetDisabled" : "")" 
+				   href="javascript:void(0)" 
+				   @onclick="GoToNextPage" 
+				   @onclick:preventDefault="true"
+				   disabled="@IsLastPage">@NextPageText</a>
+				<span> </span>
+			}
+
+			@* Last Button *@
+			@if (ShouldShowFirstLast)
+			{
+				<a class="@(IsLastPage ? "aspNetDisabled" : "")" 
+				   href="javascript:void(0)" 
+				   @onclick="GoToLastPage" 
+				   @onclick:preventDefault="true"
+				   disabled="@IsLastPage">@LastPageText</a>
+			}
+		}
+	</div>
+}

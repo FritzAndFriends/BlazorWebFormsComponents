@@ -24,17 +24,17 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
   - Editor Controls
     - [AdRotator](docs/EditorControls/AdRotator.md)
-    - BulletedList
+    - [BulletedList](docs/EditorControls/BulletedList.md)
     - [Button](docs/EditorControls/Button.md)
     - Calendar
     - [CheckBox](docs/EditorControls/CheckBox.md)
     - [CheckBoxList](docs/EditorControls/CheckBoxList.md)
     - [DropDownList](docs/EditorControls/DropDownList.md)
-    - FileUpload
+    - [FileUpload](docs/EditorControls/FileUpload.md)
     - [HiddenField](docs/EditorControls/HiddenField.md)
     - [Image](docs/EditorControls/Image.md)
     - [ImageButton](docs/EditorControls/ImageButton.md)
-    - ImageMap
+    - [ImageMap](docs/EditorControls/ImageMap.md)
     - [Label](docs/EditorControls/Label.md)
     - [LinkButton](docs/EditorControls/LinkButton.md)
     - [ListBox](docs/EditorControls/ListBox.md)
@@ -45,8 +45,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
     - [RadioButton](docs/EditorControls/RadioButton.md)
     - [RadioButtonList](docs/EditorControls/RadioButtonList.md)
-    - Substitution
-    - Table
+    - [Table](docs/EditorControls/Table.md)
     - [TextBox](docs/EditorControls/TextBox.md)
     - View
     - Xml
@@ -54,7 +53,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - Chart(?)
     - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
-    - DataPager
+    - [DataPager](docs/DataControls/DataPager.md)
     - DetailsView
     - [FormView](docs/DataControls/FormView.md)
     - [GridView](docs/DataControls/GridView.md)
@@ -70,7 +69,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
   - Navigation Controls
     - [HyperLink](docs/NavigationControls/HyperLink.md)
     - [Menu](docs/NavigationControls/Menu.md)
-    - SiteMapPath
+    - [SiteMapPath](docs/NavigationControls/SiteMapPath.md)
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
     - ChangePassword
@@ -92,6 +91,17 @@ There are a handful of features that augment the ASP<span></span>.NET developmen
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
   - [PageService](docs/UtilityFeatures/PageService.md) - Programmatic page title setting (Page.Title equivalent)
   - [ViewState](docs/UtilityFeatures/ViewState.md)
+
+### Custom Control Migration Support
+
+For applications with custom controls inheriting from `WebControl` or `CompositeControl`, the library provides:
+
+- **Adapter Classes**: `WebControl`, `CompositeControl`, and `HtmlTextWriter` classes that enable minimal-change migration
+  - Base attributes (ID, CssClass, Style) are automatically applied - no manual intervention needed
+- **Roslyn Analyzers**: The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes:
+  - **BWFC001**: Detects public properties missing `[Parameter]` attributes with automatic fix
+
+See the [Custom Controls Migration Guide](docs/Migration/Custom-Controls.md) for details.
 
 ## Compiling the project
 

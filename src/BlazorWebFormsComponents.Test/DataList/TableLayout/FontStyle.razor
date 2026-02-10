@@ -6,7 +6,7 @@
     [Fact]
     public void DataList_TableLayout_FontStyle_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Font-Bold="true" Font-Italic="true" Font-Strikeout="true" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Font-Bold="true" Font-Italic="true" Font-Strikeout="true" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

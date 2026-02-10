@@ -1,0 +1,101 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void Table_WithBackColor_RendersStyle()
+	{
+		// Act
+		var cut = Render(@<Table BackColor="WebColor.LightGray">
+			<TableRow>
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var table = cut.Find("table");
+		var style = table.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void TableRow_WithBackColor_RendersStyle()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow BackColor="WebColor.LightBlue">
+				<TableCell>Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var row = cut.Find("tr");
+		var style = row.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void TableCell_WithBackColor_RendersStyle()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell BackColor="WebColor.Yellow">Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		var style = cell.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void TableCell_NoWrap_RendersWhiteSpaceNowrap()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell Wrap="false">No Wrap Cell</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		var style = cell.GetAttribute("style");
+		style.ShouldContain("white-space: nowrap");
+	}
+
+	[Fact]
+	public void TableCell_HorizontalAlignCenter_RendersTextAlignCenter()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell HorizontalAlign="HorizontalAlign.Center">Centered</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		var style = cell.GetAttribute("style");
+		style.ShouldContain("text-align: center");
+	}
+
+	[Fact]
+	public void TableCell_VerticalAlignTop_RendersVerticalAlignTop()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableCell VerticalAlign="VerticalAlign.Top">Top Aligned</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var cell = cut.Find("td");
+		var style = cell.GetAttribute("style");
+		style.ShouldContain("vertical-align: top");
+	}
+
+}

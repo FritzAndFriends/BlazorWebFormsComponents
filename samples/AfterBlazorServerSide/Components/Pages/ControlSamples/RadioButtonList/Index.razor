@@ -19,28 +19,28 @@
 
 <hr />
 
-<h3>Horizontal Layout (RepeatDirection.Horizontal)</h3>
+<h3>Horizontal Layout (RepeatDirection="Horizontal")</h3>
 <RadioButtonList TItem="object" 
                  StaticItems="sizeItems" 
-                 RepeatDirection="RepeatDirection.Horizontal"
+                 RepeatDirection="Horizontal"
                  @bind-SelectedValue="selectedSize" />
 <p>Selected: <strong>@selectedSize</strong></p>
 <pre><code>&lt;RadioButtonList TItem="object" 
                  StaticItems="sizeItems" 
-                 RepeatDirection="RepeatDirection.Horizontal"
+                 RepeatDirection="Horizontal"
                  @@bind-SelectedValue="selectedSize" /&gt;</code></pre>
 
 <hr />
 
-<h3>Vertical Layout (RepeatDirection.Vertical - Default)</h3>
+<h3>Vertical Layout (RepeatDirection="Vertical" - Default)</h3>
 <RadioButtonList TItem="object" 
                  StaticItems="priorityItems" 
-                 RepeatDirection="RepeatDirection.Vertical"
+                 RepeatDirection="Vertical"
                  @bind-SelectedValue="selectedPriority" />
 <p>Selected: <strong>@selectedPriority</strong></p>
 <pre><code>&lt;RadioButtonList TItem="object" 
                  StaticItems="priorityItems" 
-                 RepeatDirection="RepeatDirection.Vertical"
+                 RepeatDirection="Vertical"
                  @@bind-SelectedValue="selectedPriority" /&gt;</code></pre>
 
 <hr />

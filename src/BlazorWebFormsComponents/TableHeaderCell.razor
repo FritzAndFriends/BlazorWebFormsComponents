@@ -1,0 +1,23 @@
+@using BlazorWebFormsComponents.Enums
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<th id="@(string.IsNullOrEmpty(ClientID) ? null : ClientID)"
+		class="@CssClass"
+		style="@CombinedStyle"
+		colspan="@ColSpanValue"
+		rowspan="@RowSpanValue"
+		scope="@ScopeValue"
+		abbr="@AbbreviatedText"
+		@attributes="AdditionalAttributes">
+		@if (ChildContent != null)
+		{
+			@ChildContent
+		}
+		else if (!string.IsNullOrEmpty(Text))
+		{
+			@Text
+		}
+	</th>
+}

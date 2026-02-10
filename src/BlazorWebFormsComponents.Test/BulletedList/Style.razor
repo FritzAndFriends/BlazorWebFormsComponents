@@ -1,0 +1,132 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void BulletedList_CssClass_AppliedToList()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" CssClass="my-custom-class" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.GetAttribute("class").ShouldBe("my-custom-class");
+	}
+
+	[Fact]
+	public void BulletedList_BackColor_AppliedToStyle()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BackColor="WebColor.Red" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		var style = ul.GetAttribute("style");
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void BulletedList_ForeColor_AppliedToStyle()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" ForeColor="WebColor.Blue" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		var style = ul.GetAttribute("style");
+		style.ShouldContain("color");
+	}
+
+	[Fact]
+	public void BulletedList_BorderStyle_AppliedToStyle()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BorderStyle="BorderStyle.Solid" BorderWidth="Unit.Pixel(1)" BorderColor="WebColor.Black" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		var style = ul.GetAttribute("style");
+		style.ShouldContain("border");
+	}
+
+	[Fact]
+	public void BulletedList_Width_AppliedToStyle()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" Width="Unit.Pixel(200)" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		var style = ul.GetAttribute("style");
+		style.ShouldContain("width");
+		style.ShouldContain("200px");
+	}
+
+	[Fact]
+	public void BulletedList_Height_AppliedToStyle()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" Height="Unit.Pixel(100)" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		var style = ul.GetAttribute("style");
+		style.ShouldContain("height");
+		style.ShouldContain("100px");
+	}
+
+	[Fact]
+	public void BulletedList_OrderedList_StyleApplied()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" CssClass="styled-list" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.GetAttribute("class").ShouldBe("styled-list");
+	}
+
+}

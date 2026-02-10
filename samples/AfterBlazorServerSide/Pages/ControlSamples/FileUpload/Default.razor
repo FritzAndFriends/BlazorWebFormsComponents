@@ -1,0 +1,47 @@
+@page "/ControlSamples/FileUpload"
+@using BlazorWebFormsComponents
+
+<h1>FileUpload Examples</h1>
+
+<h2>Basic Usage</h2>
+<FileUpload @ref="_basicFileControl" />
+<Button Text="Check Selection" OnClick="CheckBasicFile" />
+@if (_basicStatusText != null) { <div>@_basicStatusText</div> }
+<pre><code>&lt;FileUpload /&gt;</code></pre>
+
+<hr />
+
+<h2>Restrict to Images</h2>
+<FileUpload @ref="_imageFileControl" Accept="image/*" />
+<Button Text="Verify Image" OnClick="CheckImageFile" />
+@if (_imageStatusText != null) { <div>@_imageStatusText</div> }
+<pre><code>&lt;FileUpload Accept="image/*" /&gt;</code></pre>
+
+<hr />
+
+<h2>Allow Multiple Selection</h2>
+<FileUpload @ref="_multiFileControl" AllowMultiple="true" Width="Unit.Pixel(320)" />
+<Button Text="Count Files" OnClick="CheckMultiFiles" />
+@if (_multiStatusText != null) { <div>@_multiStatusText</div> }
+<pre><code>&lt;FileUpload AllowMultiple="true" /&gt;</code></pre>
+
+<hr />
+
+<h2>Inactive Control</h2>
+<FileUpload Enabled="false" />
+<pre><code>&lt;FileUpload Enabled="false" /&gt;</code></pre>
+
+<hr />
+
+<h2>Styled Control</h2>
+<FileUpload Width="Unit.Pixel(380)" BackColor="WebColor.Lavender" />
+<pre><code>&lt;FileUpload Width="Unit.Pixel(380)" BackColor="WebColor.Lavender" /&gt;</code></pre>
+
+@code {
+	FileUpload _basicFileControl, _imageFileControl, _multiFileControl;
+	string _basicStatusText, _imageStatusText, _multiStatusText;
+
+	void CheckBasicFile() => _basicStatusText = "Basic file control clicked";
+	void CheckImageFile() => _imageStatusText = "Image control clicked";
+	void CheckMultiFiles() => _multiStatusText = "Multi-file control clicked";
+}

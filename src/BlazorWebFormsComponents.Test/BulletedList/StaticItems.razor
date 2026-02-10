@@ -1,0 +1,100 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void BulletedList_WithStaticItems_RendersListItems()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Option 1", "1"),
+			new ListItem("Option 2", "2"),
+			new ListItem("Option 3", "3")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.ShouldNotBeNull();
+		
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(3);
+		
+		var spans = cut.FindAll("li span");
+		spans[0].TextContent.ShouldBe("Option 1");
+		spans[1].TextContent.ShouldBe("Option 2");
+		spans[2].TextContent.ShouldBe("Option 3");
+	}
+
+	[Fact]
+	public void BulletedList_EmptyItems_RendersEmptyList()
+	{
+		// Arrange
+		var items = new ListItemCollection();
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.ShouldNotBeNull();
+		
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void BulletedList_ClientID_RendersIdAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" ID="myList" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.GetAttribute("id").ShouldNotBeNullOrEmpty();
+	}
+
+	[Fact]
+	public void BulletedList_NotVisible_RendersNothing()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" Visible="false" />);
+
+		// Assert
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BulletedList_ItemWithTextOnly_UsesToStringForValue()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem { Text = "Text Only" }
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var span = cut.Find("li span");
+		span.TextContent.ShouldBe("Text Only");
+	}
+
+}

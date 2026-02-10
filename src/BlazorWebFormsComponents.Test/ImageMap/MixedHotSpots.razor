@@ -1,0 +1,41 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_MixedHotSpots_RendersAll()
+	{
+		var hotSpots = new List<HotSpot>();
+		
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Rectangle";
+		rect.NavigateUrl = "/rect.html";
+		hotSpots.Add(rect);
+		
+		var circle = new BlazorWebFormsComponents.CircleHotSpot();
+		circle.X = 200;
+		circle.Y = 50;
+		circle.Radius = 40;
+		circle.AlternateText = "Circle";
+		circle.NavigateUrl = "/circle.html";
+		hotSpots.Add(circle);
+		
+		var polygon = new BlazorWebFormsComponents.PolygonHotSpot();
+		polygon.Coordinates = "300,10,350,50,320,90";
+		polygon.AlternateText = "Triangle";
+		polygon.NavigateUrl = "/triangle.html";
+		hotSpots.Add(polygon);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var areas = cut.FindAll("area");
+		areas.Count.ShouldBe(3);
+		
+		areas[0].GetAttribute("shape").ShouldBe("rect");
+		areas[1].GetAttribute("shape").ShouldBe("circle");
+		areas[2].GetAttribute("shape").ShouldBe("poly");
+	}
+}
