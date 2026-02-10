@@ -21,3 +21,11 @@
 
 📌 Team update (2026-02-10): Docs and samples must ship in the same sprint as the component — decided by Jeffrey T. Fritz
 📌 Team update (2026-02-10): PRs #328 (ASCX CLI) and #309 (VS Snippets) shelved indefinitely — decided by Jeffrey T. Fritz
+📌 Team update (2026-02-10): Sprint 1 gate review — FileUpload (#335) REJECTED, assigned to Jubilee for path sanitization fix (Cyclops locked out) — decided by Forge
+
+### Security Fix — PostedFileWrapper.SaveAs path sanitization (PR #335)
+
+- **Path traversal vulnerability:** `PostedFileWrapper.SaveAs()` passed the `filename` parameter directly to `FileStream` with zero sanitization. A malicious filename like `../../etc/passwd` could write outside the intended directory. The outer `FileUpload.SaveAs()` already had `Path.GetFileName()` sanitization, but the inner `PostedFileWrapper.SaveAs()` did not — creating a security bypass.
+- **Fix applied:** Added the same `Path.GetFileName()` + `Path.GetDirectoryName()` + `Path.Combine()` sanitization pattern from the outer `SaveAs()` to `PostedFileWrapper.SaveAs()`.
+- **Lesson:** When a class exposes multiple code paths to the same operation (e.g., `FileUpload.SaveAs()` and `PostedFileWrapper.SaveAs()`), security sanitization must be applied consistently in ALL paths. Wrapper/inner classes are easy to overlook.
+- **Assigned because:** Cyclops (original author) was locked out per reviewer rejection protocol after Forge's gate review flagged this issue.
