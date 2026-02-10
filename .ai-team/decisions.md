@@ -1,0 +1,59 @@
+# Decisions
+
+> Shared team decisions. All agents read this. Only Scribe writes here (by merging from inbox).
+
+<!-- Decisions are appended below by the Scribe after merging from .ai-team/decisions/inbox/ -->
+
+### 2026-02-10: Sample pages use Components/Pages path
+
+**By:** Jubilee
+**What:** All new sample pages should be created in `Components/Pages/ControlSamples/{ComponentName}/Index.razor`. The older `Pages/ControlSamples/` path should not be used for new components.
+**Why:** The sample app has two page directories — the newer .NET 8+ `Components/Pages/` layout is the standard for new work.
+
+### 2026-02-10: PR merge readiness ratings
+
+**By:** Forge
+**What:** PR review ratings established: #333 Calendar (Needs Work — SelectionMode enum), #335 FileUpload (Needs Work — broken data flow), #337 ImageMap (Needs Work — wrong base class), #327 PageService (Ready with minor fixes), #328 ASCX CLI (Risky — conflicts, no tests), #309 VS Snippets (Risky — conflicts).
+**Why:** Systematic review of all open PRs to establish sprint priorities and identify blockers.
+
+### 2026-02-10: CalendarSelectionMode must be an enum, not a string (consolidated)
+
+**By:** Forge, Cyclops
+**What:** Created `CalendarSelectionMode` enum in `Enums/CalendarSelectionMode.cs` with values None (0), Day (1), DayWeek (2), DayWeekMonth (3). Refactored `Calendar.SelectionMode` from string to enum. Also added `Caption`, `CaptionAlign`, `UseAccessibleHeader` properties. Fixed blocking `.GetAwaiter().GetResult()` call.
+**Why:** Web Forms uses `CalendarSelectionMode` as an enum. Project convention requires every Web Forms enum to have a corresponding C# enum in `Enums/`. String-based modes are fragile. Blocking async calls risk deadlocks in Blazor's sync context.
+
+### 2026-02-10: FileUpload needs InputFile integration
+
+**By:** Forge
+**What:** The `@onchange` binding on `<input type="file">` uses `ChangeEventArgs` which does not provide file data in Blazor. Must use Blazor's `InputFile` component or JS interop. Without this fix, `HasFile` always returns false.
+**Why:** Ship-blocking bug — the component cannot function without actual file data access.
+
+### 2026-02-10: ImageMap base class must be BaseStyledComponent
+
+**By:** Forge
+**What:** ImageMap should inherit `BaseStyledComponent`, not `BaseWebFormsComponent`. Web Forms `ImageMap` inherits from `Image` → `WebControl` which has style properties.
+**Why:** `BaseWebFormsComponent` is insufficient for controls that need CssClass, Style, and other style properties.
+
+### 2026-02-10: ImageMap categorized under Navigation Controls
+
+**By:** Beast
+**What:** ImageMap is categorized under Navigation Controls in the documentation nav, alongside HyperLink, Menu, SiteMapPath, and TreeView.
+**Why:** ImageMap's primary purpose is clickable regions for navigation — it aligns with navigation-oriented controls rather than editor/display controls.
+
+### 2026-02-10: Shelve ASCX CLI and VS Snippets indefinitely
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** PR #328 (ASCX CLI, issue #18) and PR #309 (VS Snippets, issue #11) removed from sprint plan and shelved indefinitely.
+**Why:** Both PRs have merge conflicts and are considered risky. Not worth the effort right now.
+
+### 2026-02-10: Docs and samples must ship with components
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Documentation (Beast) and sample pages (Jubilee) must be delivered in the same sprint as the component they cover — never deferred to a later sprint.
+**Why:** Components aren't complete without docs and samples.
+
+### 2026-02-10: Sprint plan — 3-sprint roadmap
+
+**By:** Forge
+**What:** Sprint 1: Land & Stabilize current PRs (Calendar enum fix, FileUpload data flow, ImageMap base class, PageService merge). Sprint 2: Editor & Login Controls (MultiView, Localize, ChangePassword, CreateUserWizard). Sprint 3: Data Controls + Tooling + Polish (DetailsView, PasswordRecovery, migration guide, sample updates).
+**Why:** Prioritizes getting current PRs mergeable first, then fills biggest control gaps, then invests in tooling and documentation.
