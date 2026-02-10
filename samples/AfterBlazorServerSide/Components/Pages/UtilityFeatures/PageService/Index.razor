@@ -1,7 +1,7 @@
 @page "/UtilityFeatures/PageService"
-@inject IPageService PageService
+@inject IPageService Page
 
-<Page />
+<BlazorWebFormsComponents.Page />
 
 <h2>PageService - Web Forms Page Object Compatibility</h2>
 
@@ -9,9 +9,9 @@
 
 <div class="demo-section">
     <h3>Current Page Properties</h3>
-    <p><strong>Title:</strong> @PageService.Title</p>
-    <p><strong>Meta Description:</strong> @(string.IsNullOrEmpty(PageService.MetaDescription) ? "(not set)" : PageService.MetaDescription)</p>
-    <p><strong>Meta Keywords:</strong> @(string.IsNullOrEmpty(PageService.MetaKeywords) ? "(not set)" : PageService.MetaKeywords)</p>
+    <p><strong>Title:</strong> @Page.Title</p>
+    <p><strong>Meta Description:</strong> @(string.IsNullOrEmpty(Page.MetaDescription) ? "(not set)" : Page.MetaDescription)</p>
+    <p><strong>Meta Keywords:</strong> @(string.IsNullOrEmpty(Page.MetaKeywords) ? "(not set)" : Page.MetaKeywords)</p>
     
     <div class="mb-3">
         <label class="form-label">Set New Page Title:</label>
@@ -61,23 +61,23 @@ protected void UpdateButton_Click(object sender, EventArgs e)
     <div class="col-md-6">
         <h4>Blazor with PageService</h4>
         <pre><code class="language-razor">@@page "/MyPage"
-@@inject IPageService PageService
+@@inject IPageService Page
 
-&lt;Page /&gt;
+&lt;BlazorWebFormsComponents.Page /&gt;
 
 @@code {
     protected override void OnInitialized()
     {
-        PageService.Title = "My Dynamic Title";
-        PageService.MetaDescription = "Page description for SEO";
-        PageService.MetaKeywords = "blazor, webforms, migration";
+        Page.Title = "My Dynamic Title";
+        Page.MetaDescription = "Page description for SEO";
+        Page.MetaKeywords = "blazor, webforms, migration";
     }
 
     private void UpdatePageProperties()
     {
-        PageService.Title = NewTitle;
-        PageService.MetaDescription = NewMetaDescription;
-        PageService.MetaKeywords = NewMetaKeywords;
+        Page.Title = NewTitle;
+        Page.MetaDescription = NewMetaDescription;
+        Page.MetaKeywords = NewMetaKeywords;
     }
 }</code></pre>
     </div>
@@ -101,23 +101,23 @@ protected void UpdateButton_Click(object sender, EventArgs e)
 builder.Services.AddBlazorWebFormsComponents();</code></pre>
 
 <h4>2. Add the Page Component to Your Layout or Page</h4>
-<pre><code class="language-razor">@@inject IPageService PageService
+<pre><code class="language-razor">@@inject IPageService Page
 
-&lt;Page /&gt;  @* This renders the dynamic PageTitle and meta tags *@</code></pre>
+&lt;BlazorWebFormsComponents.Page /&gt;  @* This renders the dynamic PageTitle and meta tags *@</code></pre>
 
 <h4>3. Set Page Properties Programmatically</h4>
 <pre><code class="language-csharp">@@code {
     protected override void OnInitialized()
     {
-        PageService.Title = "My Page Title";
-        PageService.MetaDescription = "Description for search engines";
-        PageService.MetaKeywords = "keyword1, keyword2, keyword3";
+        Page.Title = "My Page Title";
+        Page.MetaDescription = "Description for search engines";
+        Page.MetaKeywords = "keyword1, keyword2, keyword3";
     }
 
     private void SomeEventHandler()
     {
-        PageService.Title = "Updated Title";
-        PageService.MetaDescription = "Updated description";
+        Page.Title = "Updated Title";
+        Page.MetaDescription = "Updated description";
     }
 }</code></pre>
 
@@ -138,18 +138,18 @@ builder.Services.AddBlazorWebFormsComponents();</code></pre>
     protected override void OnInitialized()
     {
         // Set initial page properties
-        PageService.Title = "PageService Sample - BlazorWebFormsComponents";
-        PageService.MetaDescription = "Demonstrates the PageService utility for setting page title and meta tags programmatically in Blazor, similar to ASP.NET Web Forms Page object.";
-        PageService.MetaKeywords = "blazor, webforms, page service, meta tags, seo, migration";
+        Page.Title = "PageService Sample - BlazorWebFormsComponents";
+        Page.MetaDescription = "Demonstrates the PageService utility for setting page title and meta tags programmatically in Blazor, similar to ASP.NET Web Forms Page object.";
+        Page.MetaKeywords = "blazor, webforms, page service, meta tags, seo, migration";
     }
 
     private void UpdatePageProperties()
     {
         if (!string.IsNullOrWhiteSpace(NewTitle))
         {
-            PageService.Title = NewTitle;
-            PageService.MetaDescription = NewMetaDescription;
-            PageService.MetaKeywords = NewMetaKeywords;
+            Page.Title = NewTitle;
+            Page.MetaDescription = NewMetaDescription;
+            Page.MetaKeywords = NewMetaKeywords;
             Message = $"Page properties updated!";
             NewTitle = "";
             NewMetaDescription = "";

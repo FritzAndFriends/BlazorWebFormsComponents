@@ -94,9 +94,9 @@ This registers `IPageService` as a scoped service that can be injected into comp
 **Step 1: Add the Page component to your page or layout**
 
 ```razor
-@inject IPageService PageService
+@inject IPageService Page
 
-<Page />  @* This renders the dynamic <PageTitle> and meta tags *@
+<BlazorWebFormsComponents.Page />  @* This renders the dynamic <PageTitle> and meta tags *@
 ```
 
 **Step 2: Set page properties programmatically**
@@ -105,15 +105,15 @@ This registers `IPageService` as a scoped service that can be injected into comp
 @code {
     protected override void OnInitialized()
     {
-        PageService.Title = "My Dynamic Page Title";
-        PageService.MetaDescription = "Description for search engines";
-        PageService.MetaKeywords = "blazor, webforms, migration";
+        Page.Title = "My Dynamic Page Title";
+        Page.MetaDescription = "Description for search engines";
+        Page.MetaKeywords = "blazor, webforms, migration";
     }
     
     private void UpdateMetadata()
     {
-        PageService.Title = "Updated Title - " + DateTime.Now.ToString();
-        PageService.MetaDescription = "Updated description based on user action";
+        Page.Title = "Updated Title - " + DateTime.Now.ToString();
+        Page.MetaDescription = "Updated description based on user action";
     }
 }
 ```
@@ -122,9 +122,9 @@ This registers `IPageService` as a scoped service that can be injected into comp
 
 ```razor
 @page "/MyPage"
-@inject IPageService PageService
+@inject IPageService Page
 
-<Page />
+<BlazorWebFormsComponents.Page />
 
 <h1>My Page</h1>
 
@@ -142,17 +142,17 @@ This registers `IPageService` as a scoped service that can be injected into comp
     
     protected override void OnInitialized()
     {
-        PageService.Title = "My Page - BlazorWebFormsComponents";
-        PageService.MetaDescription = "A sample page demonstrating PageService";
-        PageService.MetaKeywords = "blazor, sample, demo";
+        Page.Title = "My Page - BlazorWebFormsComponents";
+        Page.MetaDescription = "A sample page demonstrating PageService";
+        Page.MetaKeywords = "blazor, sample, demo";
     }
     
     private void UpdatePageMetadata()
     {
         if (!string.IsNullOrWhiteSpace(newTitle))
         {
-            PageService.Title = newTitle;
-            PageService.MetaDescription = newDescription;
+            Page.Title = newTitle;
+            Page.MetaDescription = newDescription;
         }
     }
 }
@@ -181,9 +181,9 @@ This registers `IPageService` as a scoped service that can be injected into comp
 
 ```razor
 @page "/customer/{id:int}"
-@inject IPageService PageService
+@inject IPageService Page
 
-<Page />
+<BlazorWebFormsComponents.Page />
 
 <h1>Customer Details</h1>
 
@@ -194,9 +194,9 @@ This registers `IPageService` as a scoped service that can be injected into comp
     protected override async Task OnInitializedAsync()
     {
         var customerName = await GetCustomerName(Id);
-        PageService.Title = $"Customer Details - {customerName}";
-        PageService.MetaDescription = $"View detailed information for {customerName}";
-        PageService.MetaKeywords = "customer, details, crm";
+        Page.Title = $"Customer Details - {customerName}";
+        Page.MetaDescription = $"View detailed information for {customerName}";
+        Page.MetaKeywords = "customer, details, crm";
     }
 }
 ```
@@ -236,10 +236,10 @@ The `IPageService` interface can be extended in future versions to support addit
 
 | Web Forms | Blazor with PageService | Notes |
 |-----------|------------------------|-------|
-| `Page.Title` property | `PageService.Title` property | Same concept, different access pattern |
-| `Page.MetaDescription` property | `PageService.MetaDescription` property | Available in Web Forms .NET 4.0+ |
-| `Page.MetaKeywords` property | `PageService.MetaKeywords` property | Available in Web Forms .NET 4.0+ |
-| Available automatically | Must inject `IPageService` | Standard Blazor DI pattern |
+| `Page.Title` property | `Page.Title` property | Same API! Just inject `IPageService` as `Page` |
+| `Page.MetaDescription` property | `Page.MetaDescription` property | Available in Web Forms .NET 4.0+ |
+| `Page.MetaKeywords` property | `Page.MetaKeywords` property | Available in Web Forms .NET 4.0+ |
+| Available automatically | Must inject `IPageService` as `Page` | Standard Blazor DI pattern |
 | Synchronous | Synchronous | No change needed |
 | Scoped to request | Scoped to render cycle | Similar lifecycle |
 
