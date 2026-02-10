@@ -70,6 +70,7 @@ nav:
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
     - DropDownList: EditorControls/DropDownList.md
+    - FileUpload: EditorControls/FileUpload.md
     - HiddenField: EditorControls/HiddenField.md
     - Image: EditorControls/Image.md
     - ImageButton: EditorControls/ImageButton.md
@@ -100,6 +101,7 @@ nav:
     - ValidationSummary: ValidationControls/ValidationSummary.md
   - Navigation Controls:
     - HyperLink: NavigationControls/HyperLink.md
+    - ImageMap: NavigationControls/ImageMap.md
     - Menu: NavigationControls/Menu.md
     - SiteMapPath: NavigationControls/SiteMapPath.md
     - TreeView: NavigationControls/TreeView.md
@@ -112,6 +114,7 @@ nav:
     - Databinder: UtilityFeatures/Databinder.md
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - PageService: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
   - Migration:
       - Getting started: Migration/readme.md
