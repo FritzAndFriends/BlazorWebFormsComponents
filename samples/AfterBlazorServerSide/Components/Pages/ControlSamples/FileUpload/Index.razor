@@ -1,0 +1,156 @@
+@page "/ControlSamples/FileUpload"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>FileUpload Sample</PageTitle>
+
+<h2>FileUpload Component Samples</h2>
+
+<p>The FileUpload control lets users select files for upload, emulating the ASP.NET Web Forms
+   <code>&lt;asp:FileUpload&gt;</code> control. It renders as an HTML <code>&lt;input type="file"&gt;</code>.</p>
+
+<hr />
+
+<!-- Basic single file upload — the most common migration scenario -->
+<h3>Basic File Upload</h3>
+<p>A simple file picker, just like the default Web Forms FileUpload:</p>
+
+<div class="demo-section">
+    <FileUpload @ref="basicUpload" />
+    <br />
+    <Button Text="Check File" OnClick="CheckBasicFile" />
+    @if (!string.IsNullOrEmpty(basicStatus))
+    {
+        <div class="alert alert-info mt-2">@basicStatus</div>
+    }
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload @@ref="basicUpload" /&gt;
+&lt;Button Text="Check File" OnClick="CheckBasicFile" /&gt;
+
+@@code {
+    FileUpload basicUpload;
+    void CheckBasicFile()
+    {
+        if (basicUpload.HasFile)
+            status = $"Selected: {basicUpload.FileName}";
+    }
+}</code></pre>
+
+<hr />
+
+<!-- File type filtering with Accept — mirrors common Web Forms validation pattern -->
+<h3>Restrict to Images Only</h3>
+<p>Use <code>Accept</code> to limit file types, similar to adding a RegularExpressionValidator
+   in Web Forms:</p>
+
+<div class="demo-section">
+    <FileUpload Accept="image/*" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload Accept="image/*" /&gt;</code></pre>
+
+<hr />
+
+<h3>Accept Specific File Types</h3>
+<p>Restrict to PDF and Word documents:</p>
+
+<div class="demo-section">
+    <FileUpload Accept=".pdf,.doc,.docx" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload Accept=".pdf,.doc,.docx" /&gt;</code></pre>
+
+<hr />
+
+<!-- Multiple file selection — Web Forms AllowMultiple property -->
+<h3>Multiple File Selection</h3>
+<p>Set <code>AllowMultiple="true"</code> to allow selecting more than one file at a time:</p>
+
+<div class="demo-section">
+    <FileUpload @ref="multiUpload" AllowMultiple="true" />
+    <br />
+    <Button Text="Count Files" OnClick="CheckMultiFiles" />
+    @if (!string.IsNullOrEmpty(multiStatus))
+    {
+        <div class="alert alert-info mt-2">@multiStatus</div>
+    }
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload AllowMultiple="true" /&gt;</code></pre>
+
+<hr />
+
+<!-- Disabled state — Enabled property from Web Forms -->
+<h3>Disabled FileUpload</h3>
+<p>Set <code>Enabled="false"</code> to prevent interaction, just like Web Forms:</p>
+
+<div class="demo-section">
+    <FileUpload Enabled="false" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload Enabled="false" /&gt;</code></pre>
+
+<hr />
+
+<!-- Styled control -->
+<h3>Styled FileUpload</h3>
+<p>Apply styling with <code>CssClass</code>, <code>BackColor</code>, and <code>Width</code>:</p>
+
+<div class="demo-section">
+    <FileUpload CssClass="form-control" BackColor="WebColor.LightCyan" Width="Unit.Pixel(400)" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload CssClass="form-control"
+            BackColor="WebColor.LightCyan"
+            Width="Unit.Pixel(400)" /&gt;</code></pre>
+
+<hr />
+
+<!-- Visibility toggle -->
+<h3>Visibility Toggle</h3>
+<p>Use the <code>Visible</code> property to show/hide, matching Web Forms behavior:</p>
+
+<div class="demo-section">
+    <button class="btn btn-secondary" @onclick="ToggleUploadVisibility">
+        @(uploadVisible ? "Hide" : "Show") FileUpload
+    </button>
+    <br />
+    <FileUpload Visible="@uploadVisible" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;FileUpload Visible="@@uploadVisible" /&gt;</code></pre>
+
+@code {
+    private FileUpload basicUpload;
+    private FileUpload multiUpload;
+    private string basicStatus;
+    private string multiStatus;
+    private bool uploadVisible = true;
+
+    private void CheckBasicFile()
+    {
+        basicStatus = basicUpload.HasFile
+            ? $"Selected: {basicUpload.FileName}"
+            : "No file selected.";
+    }
+
+    private void CheckMultiFiles()
+    {
+        multiStatus = multiUpload.HasFile
+            ? $"File(s) ready for upload."
+            : "No files selected.";
+    }
+
+    private void ToggleUploadVisibility()
+    {
+        uploadVisible = !uploadVisible;
+    }
+}
