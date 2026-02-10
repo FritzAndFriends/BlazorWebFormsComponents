@@ -89,6 +89,7 @@ There are a handful of features that augment the ASP<span></span>.NET developmen
   - [DataBinder](docs/UtilityFeatures/Databinder.md)
   - [ID Rendering](docs/UtilityFeatures/IDRendering.md) - Render HTML IDs for JavaScript integration
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
+  - [PageService](docs/UtilityFeatures/PageService.md) - Programmatic page title setting (Page.Title equivalent)
   - [ViewState](docs/UtilityFeatures/ViewState.md)
 
 ### Custom Control Migration Support
