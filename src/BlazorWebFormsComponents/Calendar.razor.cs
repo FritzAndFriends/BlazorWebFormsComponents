@@ -65,10 +65,28 @@ namespace BlazorWebFormsComponents
 		}
 
 		/// <summary>
-		/// Gets or sets the selection mode: None, Day, DayWeek, or DayWeekMonth.
+		/// Gets or sets the selection mode of the Calendar control.
 		/// </summary>
 		[Parameter]
-		public string SelectionMode { get; set; } = "Day";
+		public CalendarSelectionMode SelectionMode { get; set; } = CalendarSelectionMode.Day;
+
+		/// <summary>
+		/// Gets or sets the text displayed as the caption of the calendar table.
+		/// </summary>
+		[Parameter]
+		public string Caption { get; set; }
+
+		/// <summary>
+		/// Gets or sets the alignment of the caption relative to the calendar table.
+		/// </summary>
+		[Parameter]
+		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
+
+		/// <summary>
+		/// Gets or sets whether the calendar renders accessible table headers using scope attributes.
+		/// </summary>
+		[Parameter]
+		public bool UseAccessibleHeader { get; set; } = true;
 
 		/// <summary>
 		/// Event raised when a day is rendered, allowing customization.
@@ -308,7 +326,7 @@ namespace BlazorWebFormsComponents
 
 		private async Task HandleDayClick(DateTime date)
 		{
-			if (SelectionMode == "None") return;
+			if (SelectionMode == CalendarSelectionMode.None) return;
 
 			_selectedDays.Clear();
 			_selectedDays.Add(date.Date);
@@ -329,7 +347,7 @@ namespace BlazorWebFormsComponents
 
 		private async Task HandleWeekClick(List<DateTime> week)
 		{
-			if (SelectionMode != "DayWeek" && SelectionMode != "DayWeekMonth") return;
+			if (SelectionMode != CalendarSelectionMode.DayWeek && SelectionMode != CalendarSelectionMode.DayWeekMonth) return;
 
 			_selectedDays.Clear();
 			foreach (var day in week)
@@ -353,7 +371,7 @@ namespace BlazorWebFormsComponents
 
 		private async Task HandleMonthClick()
 		{
-			if (SelectionMode != "DayWeekMonth") return;
+			if (SelectionMode != CalendarSelectionMode.DayWeekMonth) return;
 
 			_selectedDays.Clear();
 			var firstOfMonth = new DateTime(_visibleMonth.Year, _visibleMonth.Month, 1);
@@ -407,17 +425,18 @@ namespace BlazorWebFormsComponents
 			var args = new CalendarDayRenderArgs
 			{
 				Date = date,
-				IsSelectable = SelectionMode != "None",
+				IsSelectable = SelectionMode != CalendarSelectionMode.None,
 				IsWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday,
 				IsToday = date.Date == DateTime.Today,
 				IsOtherMonth = date.Month != _visibleMonth.Month,
 				IsSelected = _selectedDays.Contains(date.Date)
 			};
 
-			// Invoke synchronously to allow handler to modify day properties before rendering
+			// Fire-and-forget: the handler can modify args properties synchronously
+			// before InvokeAsync yields. Avoid blocking with GetAwaiter().GetResult().
 			if (OnDayRender.HasDelegate)
 			{
-				OnDayRender.InvokeAsync(args).GetAwaiter().GetResult();
+				_ = OnDayRender.InvokeAsync(args);
 			}
 
 			return args;

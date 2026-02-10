@@ -1,4 +1,5 @@
 @inherits BaseStyledComponent
+@using BlazorWebFormsComponents.Enums
 
 @if (Visible)
 {
@@ -9,10 +10,14 @@
 				 cellspacing="@CellSpacing"
 				 border="@GetBorder()"
 				 title="@ToolTip">
+		@if (!string.IsNullOrEmpty(Caption))
+		{
+			<caption align="@(CaptionAlign != TableCaptionAlign.NotSet ? CaptionAlign.ToString().ToLowerInvariant() : null)">@Caption</caption>
+		}
 		@if (ShowTitle)
 		{
 			<tr>
-				@if (ShowNextPrevMonth && SelectionMode == "DayWeekMonth")
+				@if (ShowNextPrevMonth && SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
 					<td class="@SelectorStyleCss" style="width:15%;">
 						<a @onclick="HandleMonthClick" @onclick:preventDefault="true" style="@NextPrevStyleCss">@SelectMonthText</a>
@@ -38,13 +43,13 @@
 		@if (ShowDayHeader)
 		{
 			<tr>
-				@if (SelectionMode == "DayWeek" || SelectionMode == "DayWeekMonth")
+				@if (SelectionMode == CalendarSelectionMode.DayWeek || SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
 					<th class="@SelectorStyleCss"></th>
 				}
 				@foreach (var day in GetDayHeaders())
 				{
-					<th class="@DayHeaderStyleCss" abbr="@GetDayName(day)">
+					<th class="@DayHeaderStyleCss" abbr="@GetDayName(day)"@(UseAccessibleHeader ? $" scope=\"col\"" : "")>
 						@GetDayName(day)
 					</th>
 				}
@@ -53,7 +58,7 @@
 		@foreach (var week in GetCalendarWeeks())
 		{
 			<tr>
-				@if (SelectionMode == "DayWeek" || SelectionMode == "DayWeekMonth")
+				@if (SelectionMode == CalendarSelectionMode.DayWeek || SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
 					<td class="@SelectorStyleCss" align="center">
 						<a @onclick="() => HandleWeekClick(week)" @onclick:preventDefault="true">@((MarkupString)SelectWeekText)</a>

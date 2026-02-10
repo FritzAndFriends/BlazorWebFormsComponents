@@ -1,5 +1,6 @@
 @inherits BlazorWebFormsTestContext
 @using Shouldly
+@using BlazorWebFormsComponents.Enums
 
 @code {
 	[Fact]
@@ -23,7 +24,7 @@
 	{
 		// Arrange
 		var testDate = new DateTime(2024, 6, 15);
-		var cut = Render(@<Calendar VisibleDate="testDate" SelectionMode="None" />);
+		var cut = Render(@<Calendar VisibleDate="testDate" SelectionMode="CalendarSelectionMode.None" />);
 
 		// Act & Assert  
 		// Days rendered as non-clickable spans when selection is disabled

@@ -14,18 +14,18 @@
 
 <h3>Selection Modes</h3>
 <h4>None - No Selection</h4>
-<Calendar SelectionMode="None" />
+<Calendar SelectionMode="CalendarSelectionMode.None" />
 
 <h4>Day - Single Day Selection (Default)</h4>
-<Calendar SelectionMode="Day" @bind-SelectedDate="dayModeDate" />
+<Calendar SelectionMode="CalendarSelectionMode.Day" @bind-SelectedDate="dayModeDate" />
 <p>Selected: <strong>@dayModeDate.ToShortDateString()</strong></p>
 
 <h4>DayWeek - Select Week</h4>
-<Calendar SelectionMode="DayWeek" @bind-SelectedDate="weekModeDate" />
+<Calendar SelectionMode="CalendarSelectionMode.DayWeek" @bind-SelectedDate="weekModeDate" />
 <p>Selected: <strong>@weekModeDate.ToShortDateString()</strong></p>
 
 <h4>DayWeekMonth - Select Month</h4>
-<Calendar SelectionMode="DayWeekMonth" @bind-SelectedDate="monthModeDate" />
+<Calendar SelectionMode="CalendarSelectionMode.DayWeekMonth" @bind-SelectedDate="monthModeDate" />
 <p>Selected: <strong>@monthModeDate.ToShortDateString()</strong></p>
 
 <h3>Calendar with Grid Lines</h3>
