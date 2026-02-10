@@ -1,0 +1,50 @@
+
+@code {
+	[Fact]
+	public void MultiView_WithActiveViewIndex0_RendersFirstView()
+	{
+		var cut = Render(
+			@<MultiView ActiveViewIndex="0">
+				<View><p>View One</p></View>
+				<View><p>View Two</p></View>
+			</MultiView>
+		);
+
+		cut.MarkupMatches(@<p>View One</p>);
+	}
+
+	[Fact]
+	public void MultiView_WithActiveViewIndex1_RendersSecondView()
+	{
+		var cut = Render(
+			@<MultiView ActiveViewIndex="1">
+				<View><p>View One</p></View>
+				<View><p>View Two</p></View>
+			</MultiView>
+		);
+
+		cut.MarkupMatches(@<p>View Two</p>);
+	}
+
+	[Fact]
+	public void MultiView_WithActiveViewIndexMinus1_RendersNothing()
+	{
+		var cut = Render(
+			@<MultiView ActiveViewIndex="-1">
+				<View><p>View One</p></View>
+				<View><p>View Two</p></View>
+			</MultiView>
+		);
+
+		cut.MarkupMatches(string.Empty);
+	}
+
+	[Fact]
+	public void MultiView_HasCommandNameConstants()
+	{
+		Assert.Equal("NextView", MultiView.NextViewCommandName);
+		Assert.Equal("PrevView", MultiView.PreviousViewCommandName);
+		Assert.Equal("SwitchViewByID", MultiView.SwitchViewByIDCommandName);
+		Assert.Equal("SwitchViewByIndex", MultiView.SwitchViewByIndexCommandName);
+	}
+}

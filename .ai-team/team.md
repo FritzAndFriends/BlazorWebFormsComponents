@@ -17,6 +17,7 @@
 | Beast | Technical Writer | `.ai-team/agents/beast/charter.md` | ✅ Active |
 | Jubilee | Sample Writer | `.ai-team/agents/jubilee/charter.md` | ✅ Active |
 | Rogue | QA Analyst | `.ai-team/agents/rogue/charter.md` | ✅ Active |
+| Colossus | Integration Test Engineer | `.ai-team/agents/colossus/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
 
 ## Project Context

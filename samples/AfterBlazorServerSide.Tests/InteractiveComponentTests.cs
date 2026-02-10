@@ -826,4 +826,180 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task MultiView_NextButton_ChangesVisibleView()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/MultiView", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify initial state — View 1 is visible
+            var view1Content = page.Locator("h4:has-text('View 1 - Welcome')");
+            await view1Content.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await view1Content.IsVisibleAsync(), "View 1 should be visible initially");
+
+            // Click Next to go to View 2
+            var nextButton = page.Locator("button:has-text('Next')").First;
+            await nextButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify View 2 is now visible
+            var view2Content = page.Locator("h4:has-text('View 2 - Details')");
+            Assert.True(await view2Content.IsVisibleAsync(), "View 2 should be visible after clicking Next");
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ChangePassword_FormFields_Present()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ChangePassword", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify password form fields are present
+            var passwordInputs = await page.Locator("input[type='password']").AllAsync();
+            Assert.True(passwordInputs.Count >= 3, "ChangePassword should have at least 3 password fields (current, new, confirm)");
+
+            // Verify submit button exists
+            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            Assert.NotEmpty(submitButtons);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CreateUserWizard_FormFields_Present()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/CreateUserWizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify registration form fields are present — username (text), password, email
+            var textInputs = await page.Locator("input[type='text'], input[type='email']").AllAsync();
+            Assert.NotEmpty(textInputs);
+
+            var passwordInputs = await page.Locator("input[type='password']").AllAsync();
+            Assert.NotEmpty(passwordInputs);
+
+            // Verify submit/create button exists
+            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            Assert.NotEmpty(submitButtons);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Localize_RendersTextContent()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Localize", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify the Localize component renders its text content
+            var pageContent = await page.ContentAsync();
+            Assert.Contains("Hello, World!", pageContent);
+
+            // Verify PassThrough mode renders bold text as HTML
+            var boldText = await page.Locator("b:has-text('Bold text')").AllAsync();
+            Assert.NotEmpty(boldText);
+
+            // Verify the localized resource text renders
+            Assert.Contains("Welcome! (from a localized resource)", pageContent);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }

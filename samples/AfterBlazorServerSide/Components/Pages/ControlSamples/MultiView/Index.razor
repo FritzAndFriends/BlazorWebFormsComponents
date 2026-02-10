@@ -1,0 +1,53 @@
+@page "/ControlSamples/MultiView"
+
+<h2>MultiView / View Component</h2>
+
+<Nav></Nav>
+
+<p>
+	The <code>MultiView</code> component is a container for <code>View</code> controls.
+	Only one View is active at a time based on the <code>ActiveViewIndex</code> property.
+</p>
+
+<h3>Basic MultiView</h3>
+<p>Current View: @(activeIndex + 1) of 3</p>
+
+<MultiView ActiveViewIndex="@activeIndex">
+	<View>
+		<div style="padding: 10px; border: 1px solid #ccc;">
+			<h4>View 1 - Welcome</h4>
+			<p>Welcome to the MultiView demo. Click Next to continue.</p>
+			<button class="btn btn-primary" @onclick="() => activeIndex = 1">Next &raquo;</button>
+		</div>
+	</View>
+	<View>
+		<div style="padding: 10px; border: 1px solid #ccc;">
+			<h4>View 2 - Details</h4>
+			<p>This is the second view with more details.</p>
+			<button class="btn btn-secondary" @onclick="() => activeIndex = 0">&laquo; Previous</button>
+			<button class="btn btn-primary" @onclick="() => activeIndex = 2">Next &raquo;</button>
+		</div>
+	</View>
+	<View>
+		<div style="padding: 10px; border: 1px solid #ccc;">
+			<h4>View 3 - Complete</h4>
+			<p>You've reached the final view!</p>
+			<button class="btn btn-secondary" @onclick="() => activeIndex = 0">Start Over</button>
+		</div>
+	</View>
+</MultiView>
+
+@code {
+	private int activeIndex = 0;
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;MultiView ActiveViewIndex="@@activeIndex"&gt;<br />
+&nbsp;&nbsp;&lt;View&gt;View 1 content&lt;/View&gt;<br />
+&nbsp;&nbsp;&lt;View&gt;View 2 content&lt;/View&gt;<br />
+&nbsp;&nbsp;&lt;View&gt;View 3 content&lt;/View&gt;<br />
+&lt;/MultiView&gt;
+</code>

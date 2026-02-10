@@ -11,7 +11,8 @@ How to decide who handles what.
 | Architecture & scope | Forge | What to build next, trade-offs, decisions, Web Forms behavior research |
 | Documentation | Beast | MkDocs docs, migration guides, component API docs, utility feature docs |
 | Sample apps & demos | Jubilee | Sample pages, usage examples, demo scenarios, AfterBlazorServerSide samples |
-| Testing & QA | Rogue | bUnit tests, Playwright integration tests, edge cases, validation, quality |
+| Testing & QA | Rogue | bUnit tests, edge cases, validation, quality |
+| Integration testing | Colossus | Playwright integration tests, sample page verification, end-to-end testing |
 | Code review | Forge | Review PRs, check quality, verify Web Forms compatibility |
 | Session logging | Scribe | Automatic — never needs routing |
 

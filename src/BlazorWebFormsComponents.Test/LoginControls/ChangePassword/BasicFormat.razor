@@ -1,0 +1,101 @@
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+@code {
+	[Fact]
+	public void ChangePassword_RendersTitle()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "TestUser") }, "Test");
+		principal.AddIdentity(identity);
+
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<ChangePassword ID="cp1" />);
+
+		cut.Find("td[align='center']").TextContent.ShouldContain("Change Your Password");
+	}
+
+	[Fact]
+	public void ChangePassword_RendersPasswordFields()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "TestUser") }, "Test");
+		principal.AddIdentity(identity);
+
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<ChangePassword ID="cp1" />);
+
+		// Should have current password, new password, confirm new password
+		cut.Find("#cp1_CurrentPassword").ShouldNotBeNull();
+		cut.Find("#cp1_NewPassword").ShouldNotBeNull();
+		cut.Find("#cp1_ConfirmNewPassword").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ChangePassword_WithDisplayUserName_RendersUserNameField()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "TestUser") }, "Test");
+		principal.AddIdentity(identity);
+
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<ChangePassword ID="cp1" DisplayUserName="true" />);
+
+		cut.Find("#cp1_UserName").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ChangePassword_WithoutDisplayUserName_HidesUserNameField()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "TestUser") }, "Test");
+		principal.AddIdentity(identity);
+
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<ChangePassword ID="cp1" DisplayUserName="false" />);
+
+		Assert.Throws<Bunit.ElementNotFoundException>(() => cut.Find("#cp1_UserName"));
+	}
+
+	[Fact]
+	public void ChangePassword_RendersChangePasswordButton()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "TestUser") }, "Test");
+		principal.AddIdentity(identity);
+
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<ChangePassword ID="cp1" />);
+
+		var submitButton = cut.Find("#cp1_ChangePasswordButton");
+		submitButton.ShouldNotBeNull();
+		submitButton.GetAttribute("value").ShouldBe("Change Password");
+	}
+}

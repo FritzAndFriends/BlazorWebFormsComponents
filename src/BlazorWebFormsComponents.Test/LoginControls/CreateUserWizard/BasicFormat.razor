@@ -1,0 +1,80 @@
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+@code {
+	[Fact]
+	public void CreateUserWizard_RendersTitle()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false" />);
+
+		cut.Find("td[align='center']").TextContent.ShouldContain("Sign Up for Your New Account");
+	}
+
+	[Fact]
+	public void CreateUserWizard_RendersUserNameField()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false" />);
+
+		cut.Find("#cuw1_UserName").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CreateUserWizard_RendersPasswordFields()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false" />);
+
+		cut.Find("#cuw1_Password").ShouldNotBeNull();
+		cut.Find("#cuw1_ConfirmPassword").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CreateUserWizard_WithRequireEmail_RendersEmailField()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" RequireEmail="true" DisplaySideBar="false" />);
+
+		cut.Find("#cuw1_Email").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CreateUserWizard_WithAutoGeneratePassword_HidesPasswordFields()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" AutoGeneratePassword="true" DisplaySideBar="false" />);
+
+		Assert.Throws<Bunit.ElementNotFoundException>(() => cut.Find("#cuw1_Password"));
+		Assert.Throws<Bunit.ElementNotFoundException>(() => cut.Find("#cuw1_ConfirmPassword"));
+	}
+
+	[Fact]
+	public void CreateUserWizard_RendersCreateUserButton()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false" />);
+
+		var button = cut.Find("#cuw1_CreateUserButton");
+		button.ShouldNotBeNull();
+		button.GetAttribute("value").ShouldBe("Create User");
+	}
+
+	[Fact]
+	public void CreateUserWizard_WithDisplayCancelButton_RendersCancelButton()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplayCancelButton="true" DisplaySideBar="false" />);
+
+		cut.Find("#cuw1_CancelButton").ShouldNotBeNull();
+	}
+}
