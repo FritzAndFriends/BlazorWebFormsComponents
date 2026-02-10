@@ -2,18 +2,18 @@
 
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
-| Editor Controls | 17 | 0 | 10 | 27 |
+| Editor Controls | 18 | 0 | 9 | 27 |
 | Data Controls | 7 | 0 | 2 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 3 | 0 | 0 | 3 |
 | Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **38** | **0** | **15** | **53** |
+| **TOTAL** | **39** | **0** | **14** | **53** |
 
 ---
 
 ## Detailed Component Breakdown
 
-### 🟡 Editor Controls (15/27 - 56% Complete)
+### 🟡 Editor Controls (18/27 - 67% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -34,7 +34,7 @@
 | Calendar | 🔴 Not Started | Complex date picker |
 | CheckBoxList | ✅ Complete | Documented, tested (26 tests) |
 | FileUpload | 🔴 Not Started | Consider Blazor InputFile |
-| ImageMap | 🔴 Not Started | Clickable image regions |
+| ImageMap | ✅ Complete | Documented, tested (23 tests) |
 | ListBox | ✅ Complete | Documented, tested, supports single/multi-select |
 | Localize | 🔴 Not Started | Localization control |
 | MultiView | 🔴 Not Started | Tab container |
@@ -143,12 +143,12 @@
 #### Lower Priority / Consider Deferring
 | Component | Complexity | Notes |
 |-----------|------------|-------|
-| **BulletedList** | Low | Simple HTML list |
+| ~~**BulletedList**~~ | ~~Low~~ | ~~Simple HTML list~~ | ✅ Complete |
 | **Calendar** | High | Complex date picker |
 | **FileUpload** | Medium | Blazor has InputFile |
-| **ImageMap** | Medium | Clickable regions |
+| ~~**ImageMap**~~ | ~~Medium~~ | ~~Clickable regions~~ | ✅ Complete |
 | **MultiView/View** | Medium | Tab-like container |
-| **Table** | Low | HTML table wrapper |
+| ~~**Table**~~ | ~~Low~~ | ~~HTML table wrapper~~ | ✅ Complete |
 | **Localize** | Low | Localization |
 | **Xml** | Medium | XML transform |
 | **Substitution** | N/A | Cache-related, may not apply |
