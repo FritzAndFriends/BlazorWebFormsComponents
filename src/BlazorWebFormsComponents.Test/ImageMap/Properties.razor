@@ -1,0 +1,111 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_WithAlternateText_RendersAltAttribute()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" AlternateText="Site Map" HotSpots="@hotSpots" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("alt").ShouldBe("Site Map");
+	}
+
+	[Fact]
+	public void ImageMap_WithToolTip_RendersTitleAttribute()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" ToolTip="Click on the map" HotSpots="@hotSpots" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("title").ShouldBe("Click on the map");
+	}
+
+	[Fact]
+	public void ImageMap_WithDescriptionUrl_RendersLongDescAttribute()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" DescriptionUrl="/descriptions/map.html" HotSpots="@hotSpots" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("longdesc").ShouldBe("/descriptions/map.html");
+	}
+
+	[Fact]
+	public void ImageMap_GenerateEmptyAlternateText_RendersEmptyAlt()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" GenerateEmptyAlternateText="true" HotSpots="@hotSpots" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("alt").ShouldBe("");
+	}
+
+	[Fact]
+	public void ImageMap_WithClientID_RendersIdAttribute()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" ID="myMap" HotSpots="@hotSpots" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("id").ShouldBe("myMap");
+	}
+
+	[Fact]
+	public void ImageMap_WithImageAlign_RendersAlignAttribute()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" ImageAlign="ImageAlign.Left" HotSpots="@hotSpots" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("align").ShouldBe("left");
+	}
+}

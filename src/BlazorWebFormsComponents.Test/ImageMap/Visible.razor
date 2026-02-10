@@ -1,0 +1,42 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_Visible_True_RendersImageAndMap()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" Visible="true" HotSpots="@hotSpots" />);
+
+		// Should render an img element
+		cut.Find("img").GetAttribute("src").ShouldBe("/images/map.jpg");
+		
+		// Should render a map element
+		var map = cut.Find("map");
+		map.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ImageMap_Visible_False_RendersNothing()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = 100;
+		rect.Bottom = 100;
+		rect.AlternateText = "Area 1";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" Visible="false" HotSpots="@hotSpots" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+}

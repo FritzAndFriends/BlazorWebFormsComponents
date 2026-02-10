@@ -1,0 +1,39 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_PolygonHotSpot_RendersCorrectly()
+	{
+		var hotSpots = new List<HotSpot>();
+		var polygon = new BlazorWebFormsComponents.PolygonHotSpot();
+		polygon.Coordinates = "10,10,50,10,50,50,10,50";
+		polygon.AlternateText = "Polygon Area";
+		polygon.NavigateUrl = "/page1.html";
+		hotSpots.Add(polygon);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var area = cut.Find("area");
+		area.GetAttribute("shape").ShouldBe("poly");
+		area.GetAttribute("coords").ShouldBe("10,10,50,10,50,50,10,50");
+		area.GetAttribute("alt").ShouldBe("Polygon Area");
+		area.GetAttribute("href").ShouldBe("/page1.html");
+	}
+
+	[Fact]
+	public void ImageMap_ComplexPolygonHotSpot_RendersCorrectly()
+	{
+		var hotSpots = new List<HotSpot>();
+		var polygon = new BlazorWebFormsComponents.PolygonHotSpot();
+		polygon.Coordinates = "100,50,120,80,110,120,80,120,70,80,90,50";
+		polygon.AlternateText = "Star Shape";
+		polygon.NavigateUrl = "/star.html";
+		hotSpots.Add(polygon);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var area = cut.Find("area");
+		area.GetAttribute("shape").ShouldBe("poly");
+		area.GetAttribute("coords").ShouldBe("100,50,120,80,110,120,80,120,70,80,90,50");
+	}
+}
