@@ -1,0 +1,217 @@
+@inherits BaseWebFormsComponent
+
+@using BlazorWebFormsComponents.Validations;
+@using Microsoft.AspNetCore.Components.Forms;
+@using BlazorWebFormsComponents.Enums;
+
+<Microsoft.AspNetCore.Components.Forms.EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+
+	<CascadingValue Name="FailureTextStyle" Value="FailureTextStyle">
+		<CascadingValue Name="TitleTextStyle" Value="TitleTextStyle">
+			<CascadingValue Name="LabelStyle" Value="LabelStyle">
+				<CascadingValue Name="HyperLinkStyle" Value="HyperLinkStyle">
+					<CascadingValue Name="InstructionTextStyle" Value="InstructionTextStyle">
+						<CascadingValue Name="TextBoxStyle" Value="TextBoxStyle">
+							<CascadingValue Name="LoginButtonStyle" Value="LoginButtonStyle">
+								<CascadingValue Name="ValidatorTextStyle" Value="ValidatorTextStyle">
+									@ChildContent
+								</CascadingValue>
+							</CascadingValue>
+						</CascadingValue>
+					</CascadingValue>
+				</CascadingValue>
+			</CascadingValue>
+		</CascadingValue>
+	</CascadingValue>
+
+	@if (!ShowCompleteStep)
+	{
+		@if (CreateUserStep != null)
+		{
+			@CreateUserStep
+		}
+		else
+		{
+			<table cellspacing="0" cellpadding="@BorderPadding" id="@ID" style="border-collapse:collapse;">
+				<tbody>
+					<tr>
+						@if (DisplaySideBar)
+						{
+							<td>
+								@if (SideBarTemplate != null)
+								{
+									@SideBarTemplate
+								}
+								else
+								{
+									<a href="#" @onclick:preventDefault @onclick="() => { ShowCompleteStep = false; ActiveStepIndex = 0; }">Create User</a><br />
+									<a href="#" @onclick:preventDefault @onclick="() => { ShowCompleteStep = true; ActiveStepIndex = 1; }">Complete</a>
+								}
+							</td>
+						}
+						<td>
+							@if (HeaderTemplate != null)
+							{
+								@HeaderTemplate
+							}
+							<table cellpadding="0">
+								<tbody>
+									<tr>
+										<td align="center" colspan="2" style="@TitleTextStyle" class="@TitleTextStyle.CssClass">Sign Up for Your New Account</td>
+									</tr>
+									@if (!string.IsNullOrEmpty(InstructionText))
+									{
+										<tr>
+											<td align="center" colspan="2" style="@InstructionTextStyle" class="@InstructionTextStyle.CssClass">@InstructionText</td>
+										</tr>
+									}
+									<tr>
+										<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+											<label for="@(ID + "_UserName")">@UserNameLabelText</label>
+										</td>
+										<td>
+											<InputText @bind-Value="@Model.UserName" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
+										</td>
+									</tr>
+									@if (!AutoGeneratePassword)
+									{
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Password")">@PasswordLabelText</label>
+											</td>
+											<td>
+												<InputText type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
+											</td>
+										</tr>
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_ConfirmPassword")">@ConfirmPasswordLabelText</label>
+											</td>
+											<td>
+												<InputText type="password" @bind-Value="@Model.ConfirmPassword" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_ConfirmPassword")" />
+											</td>
+										</tr>
+									}
+									@if (RequireEmail)
+									{
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Email")">@EmailLabelText</label>
+											</td>
+											<td>
+												<InputText @bind-Value="@Model.Email" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Email")" />
+											</td>
+										</tr>
+									}
+									@if (ShowSecurityQuestion)
+									{
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Question")">@QuestionLabelText</label>
+											</td>
+											<td>
+												<InputText @bind-Value="@Model.Question" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Question")" />
+											</td>
+										</tr>
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Answer")">@AnswerLabelText</label>
+											</td>
+											<td>
+												<InputText @bind-Value="@Model.Answer" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Answer")" />
+											</td>
+										</tr>
+									}
+									@if (!string.IsNullOrEmpty(PasswordHintText))
+									{
+										<tr>
+											<td colspan="2">@PasswordHintText</td>
+										</tr>
+									}
+									@if (ShowFailureText)
+									{
+										<tr>
+											<td align="center" colspan="2" style="@FailureTextStyle" class="@FailureTextStyle.CssClass">
+												@FailureText
+											</td>
+										</tr>
+									}
+									<tr>
+										<td align="right" colspan="2">
+											<input type="submit" value="@CreateUserButtonText" name="@(ID + "$CreateUserButton")" id="@(ID + "_CreateUserButton")" style="@LoginButtonStyle" class="@LoginButtonStyle.CssClass" />
+											@if (DisplayCancelButton)
+											{
+												<input type="button" value="@CancelButtonText" @onclick="HandleCancelClick" name="@(ID + "$CancelButton")" id="@(ID + "_CancelButton")" />
+											}
+										</td>
+									</tr>
+									@if (HasHelp || HasEditProfile)
+									{
+										<tr>
+											<td colspan="2">
+												@if (!string.IsNullOrEmpty(HelpPageIconUrl))
+												{
+													<img src="@HelpPageIconUrl" alt="@HelpPageText" />
+												}
+												@if (!string.IsNullOrEmpty(HelpPageText))
+												{
+													<a id="@(ID + "_HelpLink")" href="@HelpPageUrl">@HelpPageText</a>
+												}
+												@if (HasHelp && HasEditProfile)
+												{
+													<br />
+												}
+												@if (!string.IsNullOrEmpty(EditProfileIconUrl))
+												{
+													<img src="@EditProfileIconUrl" alt="@EditProfileText" />
+												}
+												@if (!string.IsNullOrEmpty(EditProfileText))
+												{
+													<a id="@(ID + "_EditProfileLink")" href="@EditProfileUrl">@EditProfileText</a>
+												}
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		}
+	}
+	else
+	{
+		@if (CompleteStep != null)
+		{
+			@CompleteStep
+		}
+		else
+		{
+			<table cellspacing="0" cellpadding="@BorderPadding" id="@ID" style="border-collapse:collapse;">
+				<tbody>
+					<tr>
+						<td>
+							<table cellpadding="0">
+								<tbody>
+									<tr>
+										<td align="center" style="@TitleTextStyle" class="@TitleTextStyle.CssClass">Complete</td>
+									</tr>
+									<tr>
+										<td>@CompleteSuccessText</td>
+									</tr>
+									<tr>
+										<td align="right">
+											<input type="submit" value="@ContinueButtonText" @onclick="HandleContinueClick" name="@(ID + "$ContinueButton")" id="@(ID + "_ContinueButton")" style="@LoginButtonStyle" class="@LoginButtonStyle.CssClass" />
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		}
+	}
+
+</Microsoft.AspNetCore.Components.Forms.EditForm>

@@ -1,0 +1,9 @@
+
+@code {
+[Fact]
+public void Localize_WithEmptyText_RendersNothing()
+{
+	var cut = Render(@<Localize Text="" />);
+	cut.MarkupMatches(string.Empty);
+}
+}

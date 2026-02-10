@@ -1,0 +1,43 @@
+@page "/ControlSamples/CreateUserWizard"
+
+<h2>CreateUserWizard Component</h2>
+
+<Nav></Nav>
+
+<p>
+	The <code>CreateUserWizard</code> component provides a user registration wizard.
+	Handle the <code>OnCreatingUser</code> event to integrate with your authentication system.
+</p>
+
+<h3>Default CreateUserWizard</h3>
+<CreateUserWizard ID="CreateUserWizard1"
+	DisplaySideBar="false"
+	OnCreatingUser="HandleCreatingUser"
+	OnCreatedUser="HandleCreatedUser" />
+
+<p style="margin-top: 10px; font-weight: bold;">@statusMessage</p>
+
+@code {
+	private string statusMessage = "";
+
+	private void HandleCreatingUser(BlazorWebFormsComponents.LoginControls.LoginCancelEventArgs e)
+	{
+		// In a real app, use UserManager.CreateAsync here
+		statusMessage = "Creating user account...";
+	}
+
+	private void HandleCreatedUser(EventArgs e)
+	{
+		statusMessage = "User account created successfully!";
+	}
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;CreateUserWizard ID="CreateUserWizard1"<br />
+&nbsp;&nbsp;DisplaySideBar="false"<br />
+&nbsp;&nbsp;OnCreatingUser="HandleCreatingUser"<br />
+&nbsp;&nbsp;OnCreatedUser="HandleCreatedUser" /&gt;
+</code>

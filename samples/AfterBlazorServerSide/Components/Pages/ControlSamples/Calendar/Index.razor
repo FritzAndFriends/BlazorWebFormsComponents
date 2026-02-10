@@ -25,18 +25,18 @@
 <h3>Selection Modes</h3>
 
 <h4>None — Display Only</h4>
-<Calendar SelectionMode="None" />
+<Calendar SelectionMode="CalendarSelectionMode.None" />
 
 <h4>Day — Single Day (Default)</h4>
-<Calendar SelectionMode="Day" @bind-SelectedDate="dayModeDate" />
+<Calendar SelectionMode="CalendarSelectionMode.Day" @bind-SelectedDate="dayModeDate" />
 <p>Selected: <strong>@dayModeDate.ToShortDateString()</strong></p>
 
 <h4>DayWeek — Select Entire Weeks</h4>
-<Calendar SelectionMode="DayWeek" @bind-SelectedDate="weekModeDate" />
+<Calendar SelectionMode="CalendarSelectionMode.DayWeek" @bind-SelectedDate="weekModeDate" />
 <p>Selected: <strong>@weekModeDate.ToShortDateString()</strong></p>
 
 <h4>DayWeekMonth — Select Weeks or Month</h4>
-<Calendar SelectionMode="DayWeekMonth" @bind-SelectedDate="monthModeDate" />
+<Calendar SelectionMode="CalendarSelectionMode.DayWeekMonth" @bind-SelectedDate="monthModeDate" />
 <p>Selected: <strong>@monthModeDate.ToShortDateString()</strong></p>
 
 <p>Code:</p>

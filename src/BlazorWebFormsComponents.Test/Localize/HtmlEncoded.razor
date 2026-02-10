@@ -1,0 +1,9 @@
+
+@code {
+[Fact]
+public void Localize_EncodesHtmlByDefault()
+{
+	var cut = Render(@<Localize Text="<b>This is encoded text</b>" />);
+	cut.MarkupMatches(@<text>&lt;b&gt;This is encoded text&lt;/b&gt;</text>);
+}
+}

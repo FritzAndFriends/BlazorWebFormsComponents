@@ -1,0 +1,10 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+[Fact]
+public void Localize_WithModePassThrough_RendersRawHtml()
+{
+	var cut = Render(@<Localize Text="<b>This is bold text</b>" Mode="LiteralMode.PassThrough" />);
+	cut.MarkupMatches(@<b>This is bold text</b>);
+}
+}

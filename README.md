@@ -39,7 +39,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [LinkButton](docs/EditorControls/LinkButton.md)
     - [ListBox](docs/EditorControls/ListBox.md)
     - [Literal](docs/EditorControls/Literal.md)
-    - Localize
+    - [Localize](docs/EditorControls/Localize.md)
     - MultiView
     - [Panel](docs/EditorControls/Panel.md)
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
@@ -89,6 +89,7 @@ There are a handful of features that augment the ASP<span></span>.NET developmen
   - [DataBinder](docs/UtilityFeatures/Databinder.md)
   - [ID Rendering](docs/UtilityFeatures/IDRendering.md) - Render HTML IDs for JavaScript integration
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
+  - [PageService](docs/UtilityFeatures/PageService.md) - Programmatic page title setting (Page.Title equivalent)
   - [ViewState](docs/UtilityFeatures/ViewState.md)
 
 ### Custom Control Migration Support

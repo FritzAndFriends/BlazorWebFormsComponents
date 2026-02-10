@@ -1,0 +1,24 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+[Fact]
+public void Localize_IsSubclassOfLiteral()
+{
+	var localize = new Localize();
+	Assert.IsAssignableFrom<Literal>(localize);
+}
+
+[Fact]
+public void Localize_DefaultModeIsEncode()
+{
+	var localize = new Localize();
+	Assert.Equal(LiteralMode.Encode, localize.Mode);
+}
+
+[Fact]
+public void Localize_DefaultTextIsEmpty()
+{
+	var localize = new Localize();
+	Assert.Equal(string.Empty, localize.Text);
+}
+}
