@@ -2,12 +2,12 @@
 
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
-| Editor Controls | 18 | 0 | 9 | 27 |
+| Editor Controls | 20 | 0 | 7 | 27 |
 | Data Controls | 7 | 0 | 2 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 3 | 0 | 0 | 3 |
-| Login Controls | 4 | 0 | 3 | 7 |
-| **TOTAL** | **39** | **0** | **14** | **53** |
+| Login Controls | 6 | 0 | 1 | 7 |
+| **TOTAL** | **41** | **0** | **12** | **53** |
 
 ---
 
@@ -36,14 +36,14 @@
 | FileUpload | 🔴 Not Started | Consider Blazor InputFile |
 | ImageMap | ✅ Complete | Documented, tested (23 tests) |
 | ListBox | ✅ Complete | Documented, tested, supports single/multi-select |
-| Localize | 🔴 Not Started | Localization control |
-| MultiView | 🔴 Not Started | Tab container |
+| Localize | ✅ Complete | Documented, tested, inherits from Literal |
+| MultiView | ✅ Complete | Documented, tested, with View component |
 | Panel | ✅ Complete | Documented, tested |
 | PlaceHolder | ✅ Complete | Documented, tested - renders no wrapper element |
 | RadioButtonList | ✅ Complete | Documented, tested (30 tests) |
 | Substitution | 🔴 Not Started | Cache substitution - may not apply |
 | Table | ✅ Complete | Includes TableRow, TableCell, TableHeaderCell, TableHeaderRow, TableFooterRow |
-| View | 🔴 Not Started | Used with MultiView |
+| View | ✅ Complete | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
 ### 🟡 Data Controls (7/9 - 78% Complete)
@@ -89,8 +89,8 @@
 | LoginName | ✅ Complete | Documented, tested, sample page exists |
 | LoginStatus | ✅ Complete | Documented, tested, sample pages exist |
 | LoginView | ✅ Complete | Documented, tested |
-| ChangePassword | 🔴 Not Started | Complex ASP.NET Identity integration |
-| CreateUserWizard | 🔴 Not Started | Complex - user registration wizard |
+| ChangePassword | ✅ Complete | Documented, tested, table-based layout |
+| CreateUserWizard | ✅ Complete | Documented, tested, two-step wizard |
 | PasswordRecovery | 🔴 Not Started | Complex ASP.NET Identity integration |
 
 ---

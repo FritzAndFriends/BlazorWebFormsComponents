@@ -26,7 +26,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [AdRotator](docs/EditorControls/AdRotator.md)
     - [BulletedList](docs/EditorControls/BulletedList.md)
     - [Button](docs/EditorControls/Button.md)
-    - Calendar
+    - [Calendar](docs/EditorControls/Calendar.md)
     - [CheckBox](docs/EditorControls/CheckBox.md)
     - [CheckBoxList](docs/EditorControls/CheckBoxList.md)
     - [DropDownList](docs/EditorControls/DropDownList.md)
@@ -39,7 +39,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [LinkButton](docs/EditorControls/LinkButton.md)
     - [ListBox](docs/EditorControls/ListBox.md)
     - [Literal](docs/EditorControls/Literal.md)
-    - Localize
+    - [Localize](docs/EditorControls/Localize.md)
     - MultiView
     - [Panel](docs/EditorControls/Panel.md)
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)

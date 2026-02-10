@@ -1,0 +1,9 @@
+
+@code {
+[Fact]
+public void Localize_RendersPlainText()
+{
+	var cut = Render(@<Localize Text="This is normal text" />);
+	cut.MarkupMatches(@<text>This is normal text</text>);
+}
+}

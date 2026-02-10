@@ -1,27 +1,28 @@
 # FileUpload
 
-The **FileUpload** component allows users to select files from their local file system for upload to the server. It emulates the ASP.NET Web Forms FileUpload control with similar properties and behavior.
+The **FileUpload** component provides file upload functionality that emulates the ASP.NET Web Forms FileUpload control. It renders an HTML file input element and exposes properties and methods familiar to Web Forms developers, such as `HasFile`, `FileName`, `PostedFile`, and `SaveAs`.
 
 Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.fileupload?view=netframework-4.8
 
 ## Features Supported in Blazor
 
-- `HasFile` - indicates whether a file has been selected
-- `HasFiles` - indicates whether more than one file has been selected (for multi-file uploads)
-- `FileName` - gets the name of the selected file
-- `FileBytes` - gets the file contents as a byte array
-- `FileContent` - gets a Stream to read the file data
-- `PostedFile` - gets a wrapper object compatible with HttpPostedFile
-- `AllowMultiple` - allows selection of multiple files
-- `Accept` - specifies file type restrictions (e.g., "image/*", ".pdf,.doc")
-- `MaxFileSize` - sets maximum allowed file size in bytes (default: 500KB)
-- `SaveAs(path)` - saves the uploaded file to a specified server path
-- `GetMultipleFiles()` - retrieves all selected files when AllowMultiple is true
-- `SaveAllFiles(directory)` - saves all selected files to a directory
-- `Enabled` - enables or disables the control
-- `Visible` - controls visibility
-- `ToolTip` - tooltip text on hover
-- All style properties (`BackColor`, `ForeColor`, `BorderColor`, `BorderStyle`, `BorderWidth`, `CssClass`, `Width`, `Height`, `Font`)
+- `HasFile` — indicates whether a file has been selected
+- `FileName` — the name of the selected file
+- `FileBytes` — the file content as a byte array (synchronous)
+- `FileContent` — a `Stream` pointing to the uploaded file
+- `PostedFile` — a `PostedFileWrapper` providing `ContentLength`, `ContentType`, `FileName`, `InputStream`, and `SaveAs` (compatible with Web Forms `HttpPostedFile` patterns)
+- `AllowMultiple` — enables multi-file selection (default: `false`)
+- `Accept` — restricts file types via the HTML `accept` attribute (e.g., `".jpg,.png"` or `"image/*"`)
+- `MaxFileSize` — maximum file size in bytes (default: `512000` / ~500 KiB)
+- `ToolTip` — tooltip text displayed on hover
+- `OnFileSelected` — event raised when a file is selected
+- `SaveAs(filename)` — saves the uploaded file to a specified server path
+- `GetFileBytesAsync()` — async method to get file content as a byte array
+- `GetMultipleFiles()` — returns all selected files when `AllowMultiple` is enabled
+- `SaveAllFiles(directory)` — saves all uploaded files to a directory with sanitized filenames
+- `Enabled` — enables or disables the file input
+- `Visible` — controls visibility
+- All base style properties (`CssClass`, `Style`, `BackColor`, `ForeColor`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Width`, `Height`, `Font`)
 
 ### Blazor Notes
 
@@ -33,6 +34,10 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ## Web Forms Features NOT Supported
 
+- **PostedFile.SaveAs with HttpContext** — Blazor's `SaveAs` works directly with `IBrowserFile` streams; there is no `HttpContext`-based file handling
+- **Server.MapPath** — Use absolute paths or `IWebHostEnvironment.WebRootPath` in Blazor
+- **Request.Files collection** — Use the component's `GetMultipleFiles()` method instead
+- **Lifecycle events** (`OnDataBinding`, `OnInit`, etc.) — Use Blazor lifecycle methods instead
 - Direct postback behavior - use event handlers instead
 - Automatic form submission - implement form handling in Blazor
 - Server-side file system access in WebAssembly - must send to API endpoint
@@ -41,105 +46,161 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ```html
 <asp:FileUpload
-    ID="FileUpload1"
+<asp:FileUpload
+    AccessKey="string"
     AllowMultiple="True|False"
-    Enabled="True|False"
     BackColor="color name|#dddddd"
     BorderColor="color name|#dddddd"
     BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
     BorderWidth="size"
     CssClass="string"
+    Enabled="True|False"
     Height="size"
-    Width="size"
+    ID="string"
     ToolTip="string"
     Visible="True|False"
+    Width="size"
     runat="server" />
 ```
 
-## Blazor Syntax
+## Blazor Razor Syntax
+
+### Basic File Upload
 
 ```razor
-<FileUpload @ref="myFileUpload" 
-            Accept="image/*"
-            AllowMultiple="false"
-            MaxFileSize="1048576" 
-            Width="Unit.Pixel(300)" />
-
-<Button Text="Upload" OnClick="HandleUpload" />
+<FileUpload OnFileSelected="HandleFileSelected" />
 
 @code {
-    FileUpload myFileUpload;
-
-    async Task HandleUpload()
+    void HandleFileSelected(InputFileChangeEventArgs args)
     {
-        if (myFileUpload.HasFile)
-        {
-            string fileName = myFileUpload.FileName;
-            await myFileUpload.SaveAs($"uploads/{fileName}");
-        }
+        // File has been selected
     }
 }
 ```
 
-## Common Usage Patterns
-
-### Single File Upload
+### File Upload with Type Restriction
 
 ```razor
-<FileUpload @ref="fileControl" Accept=".pdf" />
-<Button Text="Upload PDF" OnClick="UploadPdf" />
-
-@code {
-    FileUpload fileControl;
-
-    async Task UploadPdf()
-    {
-        if (fileControl.HasFile)
-        {
-            await fileControl.SaveAs($"documents/{fileControl.FileName}");
-        }
-    }
-}
+<FileUpload Accept=".jpg,.png,.gif"
+            OnFileSelected="HandleImageSelected" />
 ```
 
 ### Multiple File Upload
 
 ```razor
-<FileUpload @ref="fileControl" AllowMultiple="true" />
-<Button Text="Upload All" OnClick="UploadAll" />
-
-@code {
-    FileUpload fileControl;
-
-    async Task UploadAll()
-    {
-        if (fileControl.HasFile)
-        {
-            var savedPaths = await fileControl.SaveAllFiles("uploads");
-            // Process savedPaths list
-        }
-    }
-}
+<FileUpload AllowMultiple="true"
+            OnFileSelected="HandleFilesSelected" />
 ```
 
-### Image Upload with Preview
+### File Upload with Increased Size Limit
 
 ```razor
-<FileUpload @ref="imageUpload" Accept="image/*" MaxFileSize="5242880" />
+<FileUpload MaxFileSize="10485760"
+            OnFileSelected="HandleLargeFile" />
 
 @code {
-    FileUpload imageUpload;
-
-    void HandleImageSelected()
+    async Task HandleLargeFile(InputFileChangeEventArgs args)
     {
-        if (imageUpload.HasFile)
+        // MaxFileSize is set to 10 MB
+    }
+}
+```
+
+### Saving an Uploaded File
+
+```razor
+@inject IWebHostEnvironment Environment
+
+<FileUpload @ref="uploader" OnFileSelected="HandleFile" />
+<Button Text="Upload" OnClick="SaveFile" />
+
+@code {
+    private FileUpload uploader;
+
+    void HandleFile(InputFileChangeEventArgs args)
+    {
+        // File selected, ready to save
+    }
+
+    async Task SaveFile()
+    {
+        if (uploader.HasFile)
         {
-            byte[] imageData = imageUpload.FileBytes;
-            // Process image data
+            var path = Path.Combine(Environment.WebRootPath, "uploads", uploader.FileName);
+            await uploader.SaveAs(path);
         }
     }
 }
 ```
+
+### Using PostedFile (Web Forms Pattern)
+
+```razor
+<FileUpload @ref="uploader" OnFileSelected="HandleFile" />
+
+@code {
+    private FileUpload uploader;
+
+    void HandleFile(InputFileChangeEventArgs args)
+    {
+        if (uploader.HasFile)
+        {
+            var postedFile = uploader.PostedFile;
+            var fileName = postedFile.FileName;
+            var contentType = postedFile.ContentType;
+            var size = postedFile.ContentLength;
+        }
+    }
+}
+```
+
+### Multiple File Save
+
+```razor
+<FileUpload @ref="uploader"
+            AllowMultiple="true"
+            OnFileSelected="HandleFiles" />
+<Button Text="Save All" OnClick="SaveAllFiles" />
+
+@code {
+    private FileUpload uploader;
+
+    void HandleFiles(InputFileChangeEventArgs args) { }
+
+    async Task SaveAllFiles()
+    {
+        if (uploader.HasFile)
+        {
+            var savedPaths = await uploader.SaveAllFiles("C:\\uploads");
+            // savedPaths contains the full path of each saved file
+        }
+    }
+}
+```
+
+## HTML Output
+
+**Blazor Input:**
+```razor
+<FileUpload CssClass="file-input" Accept=".pdf,.doc" AllowMultiple="true" />
+```
+
+**Rendered HTML:**
+```html
+<input type="file" multiple="true" accept=".pdf,.doc" class="file-input" />
+```
+
+## PostedFileWrapper Reference
+
+The `PostedFile` property returns a `PostedFileWrapper` object that mirrors the Web Forms `HttpPostedFile` API:
+
+| Property/Method | Type | Description |
+|-----------------|------|-------------|
+| `ContentLength` | `long` | Size of the uploaded file in bytes |
+| `ContentType` | `string` | MIME content type of the file |
+| `FileName` | `string` | Name of the uploaded file |
+| `InputStream` | `Stream` | Stream pointing to the file content |
+| `SaveAs(filename)` | `Task` | Saves the file to the specified path |
 
 ## Security Considerations
 
@@ -150,28 +211,34 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Store uploaded files outside of the web root when possible
 - Implement authentication and authorization for file upload endpoints
 
-## Migration from Web Forms
+## Migration Notes
 
-When migrating from Web Forms FileUpload:
+When migrating from Web Forms to Blazor:
 
-1. Replace `<asp:FileUpload>` with `<FileUpload>` (remove `asp:` prefix and `runat="server"`)
-2. Replace `FileUpload1.HasFile` with direct property access (no change needed)
-3. Replace `FileUpload1.SaveAs(Server.MapPath("~/path"))` with `await FileUpload1.SaveAs(path)`
-4. Handle file uploads asynchronously using `async/await` pattern
-5. Use `@ref` instead of `ID` to reference the component in code
+1. **Remove `asp:` prefix** — Change `<asp:FileUpload>` to `<FileUpload>`
+2. **Remove `runat="server"`** — Not needed in Blazor
+3. **Remove `ID` attribute** — Use `@ref` to get a component reference
+4. **Replace `PostBack` button pattern** — In Web Forms, a separate Button triggered the upload via PostBack. In Blazor, use the `OnFileSelected` event or a Button with `@ref` to call `SaveAs`
+5. **Replace `Server.MapPath`** — Use `IWebHostEnvironment.WebRootPath` or `ContentRootPath` for server paths
+6. **Use async methods** — Prefer `GetFileBytesAsync()` over `FileBytes` for better performance
 
 ### Before (Web Forms)
 
-```aspx
-<asp:FileUpload ID="FileUpload1" runat="server" />
-<asp:Button ID="UploadButton" Text="Upload" OnClick="UploadButton_Click" runat="server" />
+```html
+<asp:FileUpload ID="fileUpload1" runat="server" />
+<asp:Button ID="btnUpload" Text="Upload" OnClick="btnUpload_Click" runat="server" />
+<asp:Label ID="lblStatus" runat="server" />
+```
 
-// Code-behind
-protected void UploadButton_Click(object sender, EventArgs e)
+```csharp
+protected void btnUpload_Click(object sender, EventArgs e)
 {
-    if (FileUpload1.HasFile)
+    if (fileUpload1.HasFile)
     {
-        FileUpload1.SaveAs(Server.MapPath("~/uploads/" + FileUpload1.FileName));
+        string fileName = fileUpload1.FileName;
+        string savePath = Server.MapPath("~/uploads/") + fileName;
+        fileUpload1.SaveAs(savePath);
+        lblStatus.Text = "File uploaded: " + fileName;
     }
 }
 ```
@@ -179,18 +246,38 @@ protected void UploadButton_Click(object sender, EventArgs e)
 ### After (Blazor)
 
 ```razor
-<FileUpload @ref="FileUpload1" />
-<Button Text="Upload" OnClick="UploadButton_Click" />
+@inject IWebHostEnvironment Environment
+
+<FileUpload @ref="fileUpload" OnFileSelected="HandleFile" />
+<Button Text="Upload" OnClick="Upload" />
+<Label Text="@statusMessage" />
 
 @code {
-    FileUpload FileUpload1;
+    private FileUpload fileUpload;
+    private string statusMessage = "";
 
-    async Task UploadButton_Click()
+    void HandleFile(InputFileChangeEventArgs args) { }
+
+    async Task Upload()
     {
-        if (FileUpload1.HasFile)
+        if (fileUpload.HasFile)
         {
-            await FileUpload1.SaveAs($"uploads/{FileUpload1.FileName}");
+            var fileName = fileUpload.FileName;
+            var savePath = Path.Combine(Environment.WebRootPath, "uploads", fileName);
+            await fileUpload.SaveAs(savePath);
+            statusMessage = "File uploaded: " + fileName;
         }
     }
 }
 ```
+
+!!! warning "Security Consideration"
+    Always validate uploaded files on the server side. The `Accept` attribute only provides client-side filtering and can be bypassed. Validate file extensions, content types, and file sizes before saving. The `SaveAllFiles` method sanitizes filenames using `Path.GetFileName` to prevent directory traversal attacks, but additional validation is recommended.
+
+!!! note "File Size Limits"
+    The default `MaxFileSize` is 512,000 bytes (~500 KiB). For larger files, increase this value. Be mindful that large files consume memory, especially when using `FileBytes` or `GetFileBytesAsync()`. For very large files, work with the `FileContent` stream directly.
+
+## See Also
+
+- [Microsoft Docs: FileUpload Control](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.fileupload?view=netframework-4.8)
+- [Blazor File Uploads](https://docs.microsoft.com/en-us/aspnet/core/blazor/file-uploads)

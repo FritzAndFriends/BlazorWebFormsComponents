@@ -66,6 +66,7 @@ nav:
     - AdRotator: EditorControls/AdRotator.md
     - BulletedList: EditorControls/BulletedList.md
     - Button: EditorControls/Button.md
+    - Calendar: EditorControls/Calendar.md
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
     - DropDownList: EditorControls/DropDownList.md
@@ -78,6 +79,8 @@ nav:
     - LinkButton: EditorControls/LinkButton.md
     - ListBox: EditorControls/ListBox.md
     - Literal: EditorControls/Literal.md
+    - Localize: EditorControls/Localize.md
+    - MultiView: EditorControls/MultiView.md
     - Panel: EditorControls/Panel.md
     - PlaceHolder: EditorControls/PlaceHolder.md
     - RadioButton: EditorControls/RadioButton.md
@@ -101,10 +104,13 @@ nav:
     - ValidationSummary: ValidationControls/ValidationSummary.md
   - Navigation Controls:
     - HyperLink: NavigationControls/HyperLink.md
+    - ImageMap: NavigationControls/ImageMap.md
     - Menu: NavigationControls/Menu.md
     - SiteMapPath: NavigationControls/SiteMapPath.md
     - TreeView: NavigationControls/TreeView.md
   - Login Controls:
+    - ChangePassword: LoginControls/ChangePassword.md
+    - CreateUserWizard: LoginControls/CreateUserWizard.md
     - Login: LoginControls/Login.md
     - LoginName: LoginControls/LoginName.md
     - LoginStatus: LoginControls/LoginStatus.md

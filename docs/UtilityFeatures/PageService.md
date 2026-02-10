@@ -180,10 +180,10 @@ This registers `IPageService` as a scoped service that can be injected into comp
 ### After (Blazor)
 
 ```razor
-@page "/customer/{id:int}"
-@inject IPageService Page
+@page "/customer/{Id:int}"
+@inject IPageService PageService
 
-<BlazorWebFormsComponents.Page />
+<Page />
 
 <h1>Customer Details</h1>
 
