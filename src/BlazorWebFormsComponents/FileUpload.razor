@@ -1,0 +1,14 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<input type="file"
+		   id="@ClientID"
+		   multiple="@AllowMultiple"
+		   accept="@Accept"
+		   style="@Style"
+		   class="@CssClass"
+		   disabled="@(!Enabled)"
+		   title="@ToolTip"
+		   @onchange="OnFileChangeInternal" />
+}

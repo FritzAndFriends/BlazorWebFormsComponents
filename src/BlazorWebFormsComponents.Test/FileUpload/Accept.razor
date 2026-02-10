@@ -1,0 +1,28 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_WithAccept_RendersAcceptAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Accept=".jpg,.png" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.GetAttribute("accept").ShouldBe(".jpg,.png");
+	}
+
+	[Fact]
+	public void FileUpload_WithImageAccept_RendersCorrectly()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Accept="image/*" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.GetAttribute("accept").ShouldBe("image/*");
+	}
+
+}

@@ -69,6 +69,7 @@ nav:
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
     - DropDownList: EditorControls/DropDownList.md
+    - FileUpload: EditorControls/FileUpload.md
     - HiddenField: EditorControls/HiddenField.md
     - Image: EditorControls/Image.md
     - ImageButton: EditorControls/ImageButton.md
