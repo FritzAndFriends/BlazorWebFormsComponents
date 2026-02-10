@@ -22,7 +22,15 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `SaveAllFiles(directory)` — saves all uploaded files to a directory with sanitized filenames
 - `Enabled` — enables or disables the file input
 - `Visible` — controls visibility
-- All base style properties (`CssClass`, `Style`, etc.)
+- All base style properties (`CssClass`, `Style`, `BackColor`, `ForeColor`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Width`, `Height`, `Font`)
+
+### Blazor Notes
+
+- The control uses Blazor's `InputFile` component internally, which renders as a standard HTML `<input type="file">` element
+- File processing must be handled through component properties or methods
+- The `OnFileSelected` event fires when files are selected
+- Maximum file size should be configured based on your server's capabilities
+- For Blazor WebAssembly, file data is read in the browser before being sent to the server
 
 ## Web Forms Features NOT Supported
 
@@ -30,24 +38,29 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Server.MapPath** — Use absolute paths or `IWebHostEnvironment.WebRootPath` in Blazor
 - **Request.Files collection** — Use the component's `GetMultipleFiles()` method instead
 - **Lifecycle events** (`OnDataBinding`, `OnInit`, etc.) — Use Blazor lifecycle methods instead
+- Direct postback behavior - use event handlers instead
+- Automatic form submission - implement form handling in Blazor
+- Server-side file system access in WebAssembly - must send to API endpoint
 
 ## Web Forms Declarative Syntax
 
 ```html
 <asp:FileUpload
+<asp:FileUpload
     AccessKey="string"
     AllowMultiple="True|False"
     BackColor="color name|#dddddd"
     BorderColor="color name|#dddddd"
+    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
     BorderWidth="size"
     CssClass="string"
     Enabled="True|False"
+    Height="size"
     ID="string"
     ToolTip="string"
     Visible="True|False"
     Width="size"
-    runat="server"
-/>
+    runat="server" />
 ```
 
 ## Blazor Razor Syntax
@@ -188,6 +201,15 @@ The `PostedFile` property returns a `PostedFileWrapper` object that mirrors the 
 | `FileName` | `string` | Name of the uploaded file |
 | `InputStream` | `Stream` | Stream pointing to the file content |
 | `SaveAs(filename)` | `Task` | Saves the file to the specified path |
+
+## Security Considerations
+
+- Always validate file types on the server side, not just through the `Accept` attribute
+- Set appropriate `MaxFileSize` limits to prevent denial-of-service attacks
+- Sanitize file names before saving to prevent directory traversal attacks
+- Scan uploaded files for malware before processing
+- Store uploaded files outside of the web root when possible
+- Implement authentication and authorization for file upload endpoints
 
 ## Migration Notes
 

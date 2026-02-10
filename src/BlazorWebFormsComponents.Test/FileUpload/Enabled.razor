@@ -1,0 +1,28 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_Enabled_RendersWithoutDisabled()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Enabled="true" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.HasAttribute("disabled").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void FileUpload_Disabled_RendersWithDisabledAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Enabled="false" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.HasAttribute("disabled").ShouldBeTrue();
+	}
+
+}

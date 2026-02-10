@@ -1,0 +1,66 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void ImageMap_RectangleHotSpot_RendersCorrectly()
+	{
+		var hotSpots = new List<HotSpot>();
+		var rect = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect.Left = 10;
+		rect.Top = 20;
+		rect.Right = 110;
+		rect.Bottom = 120;
+		rect.AlternateText = "Rectangle Area";
+		rect.NavigateUrl = "/page1.html";
+		hotSpots.Add(rect);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var area = cut.Find("area");
+		area.GetAttribute("shape").ShouldBe("rect");
+		area.GetAttribute("coords").ShouldBe("10,20,110,120");
+		area.GetAttribute("alt").ShouldBe("Rectangle Area");
+		area.GetAttribute("href").ShouldBe("/page1.html");
+	}
+
+	[Fact]
+	public void ImageMap_MultipleRectangleHotSpots_RendersAll()
+	{
+		var hotSpots = new List<HotSpot>();
+		
+		var rect1 = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect1.Left = 0;
+		rect1.Top = 0;
+		rect1.Right = 50;
+		rect1.Bottom = 50;
+		rect1.AlternateText = "Area 1";
+		rect1.NavigateUrl = "/page1.html";
+		hotSpots.Add(rect1);
+		
+		var rect2 = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect2.Left = 60;
+		rect2.Top = 60;
+		rect2.Right = 110;
+		rect2.Bottom = 110;
+		rect2.AlternateText = "Area 2";
+		rect2.NavigateUrl = "/page2.html";
+		hotSpots.Add(rect2);
+		
+		var rect3 = new BlazorWebFormsComponents.RectangleHotSpot();
+		rect3.Left = 120;
+		rect3.Top = 120;
+		rect3.Right = 170;
+		rect3.Bottom = 170;
+		rect3.AlternateText = "Area 3";
+		rect3.NavigateUrl = "/page3.html";
+		hotSpots.Add(rect3);
+
+		var cut = Render(@<ImageMap ImageUrl="/images/map.jpg" HotSpots="@hotSpots" />);
+
+		var areas = cut.FindAll("area");
+		areas.Count.ShouldBe(3);
+		areas[0].GetAttribute("coords").ShouldBe("0,0,50,50");
+		areas[1].GetAttribute("coords").ShouldBe("60,60,110,110");
+		areas[2].GetAttribute("coords").ShouldBe("120,120,170,170");
+	}
+}

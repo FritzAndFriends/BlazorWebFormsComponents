@@ -1,0 +1,21 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+@using System
+@using Xunit.Abstractions
+
+@code {
+
+	[Fact]
+	public void FileUpload_Debug_ShowsRenderedHtml()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload />);
+
+		// Assert - just checking the HTML structure
+		var markup = cut.Markup;
+		
+		// The component should render something
+		markup.ShouldNotBeNullOrEmpty();
+	}
+
+}

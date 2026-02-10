@@ -30,11 +30,11 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [CheckBox](docs/EditorControls/CheckBox.md)
     - [CheckBoxList](docs/EditorControls/CheckBoxList.md)
     - [DropDownList](docs/EditorControls/DropDownList.md)
-    - FileUpload
+    - [FileUpload](docs/EditorControls/FileUpload.md)
     - [HiddenField](docs/EditorControls/HiddenField.md)
     - [Image](docs/EditorControls/Image.md)
     - [ImageButton](docs/EditorControls/ImageButton.md)
-    - ImageMap
+    - [ImageMap](docs/EditorControls/ImageMap.md)
     - [Label](docs/EditorControls/Label.md)
     - [LinkButton](docs/EditorControls/LinkButton.md)
     - [ListBox](docs/EditorControls/ListBox.md)
