@@ -15,3 +15,4 @@
 
 📌 Process learning: When fixes for a PR are committed directly to the target branch instead of the feature branch, the PR becomes stale and should be closed rather than merged. Always commit fixes to the feature branch to keep the PR diff clean.
 📌 Team update (2026-02-10): Sprint 1 gate review — Calendar (#333) REJECTED (assigned Rogue for triage) — decided by Forge
+📌 Team update (2026-02-10): Close PR #333 without merging — all Calendar work already on dev, PR branch has 0 unique commits — decided by Rogue
