@@ -263,8 +263,13 @@ namespace BlazorWebFormsComponents
 			/// <param name="filename">The full path to save the file.</param>
 			public async Task SaveAs(string filename)
 			{
+				// Sanitize: ensure the filename cannot escape the intended directory
+				var safeFileName = Path.GetFileName(filename);
+				var directory = Path.GetDirectoryName(filename);
+				var safePath = string.IsNullOrEmpty(directory) ? safeFileName : Path.Combine(directory, safeFileName);
+
 				using var stream = _file.OpenReadStream(_maxFileSize);
-				using var fileStream = new FileStream(filename, FileMode.Create);
+				using var fileStream = new FileStream(safePath, FileMode.Create);
 				await stream.CopyToAsync(fileStream);
 			}
 		}
