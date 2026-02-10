@@ -29,3 +29,5 @@
 - **Fix applied:** Added the same `Path.GetFileName()` + `Path.GetDirectoryName()` + `Path.Combine()` sanitization pattern from the outer `SaveAs()` to `PostedFileWrapper.SaveAs()`.
 - **Lesson:** When a class exposes multiple code paths to the same operation (e.g., `FileUpload.SaveAs()` and `PostedFileWrapper.SaveAs()`), security sanitization must be applied consistently in ALL paths. Wrapper/inner classes are easy to overlook.
 - **Assigned because:** Cyclops (original author) was locked out per reviewer rejection protocol after Forge's gate review flagged this issue.
+
+📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
