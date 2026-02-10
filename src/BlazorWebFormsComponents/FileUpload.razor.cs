@@ -1,38 +1,37 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// Blazor component that emulates the ASP.NET Web Forms FileUpload control.
-	/// Provides file upload functionality with compatibility for Web Forms properties and methods.
+	/// Uses Blazor's InputFile component internally for proper file data handling.
 	/// </summary>
 	public partial class FileUpload : BaseStyledComponent
 	{
-		[Inject]
-		private IJSRuntime JSRuntime { get; set; }
-
-		private ElementReference _inputElement;
 		private IBrowserFile _currentFile;
-		private List<IBrowserFile> _currentFiles = new List<IBrowserFile>();
+		private readonly List<IBrowserFile> _currentFiles = new List<IBrowserFile>();
 
 		/// <summary>
 		/// Gets a value indicating whether the FileUpload control contains a file.
 		/// </summary>
-		public bool HasFile => _currentFile != null || _currentFiles.Any();
+		public bool HasFile => _currentFile != null;
+
+		/// <summary>
+		/// Gets a value indicating whether more than one file has been selected.
+		/// </summary>
+		public bool HasFiles => _currentFiles.Count > 1;
 
 		/// <summary>
 		/// Gets the name of the file to upload using the FileUpload control.
 		/// Returns the first file name if multiple files are selected.
 		/// </summary>
-		public string FileName => _currentFile?.Name ?? _currentFiles.FirstOrDefault()?.Name ?? string.Empty;
+		public string FileName => _currentFile?.Name ?? string.Empty;
 
 		/// <summary>
 		/// Gets the contents of the uploaded file as a byte array.
@@ -41,9 +40,8 @@ namespace BlazorWebFormsComponents
 		public async Task<byte[]> GetFileBytesAsync()
 		{
 			if (!HasFile) return Array.Empty<byte>();
-			
-			var file = _currentFile ?? _currentFiles.FirstOrDefault();
-			using var stream = file.OpenReadStream(MaxFileSize);
+
+			using var stream = _currentFile.OpenReadStream(MaxFileSize);
 			using var memoryStream = new MemoryStream();
 			await stream.CopyToAsync(memoryStream);
 			return memoryStream.ToArray();
@@ -59,9 +57,8 @@ namespace BlazorWebFormsComponents
 			get
 			{
 				if (!HasFile) return Array.Empty<byte>();
-				
-				var file = _currentFile ?? _currentFiles.FirstOrDefault();
-				using var stream = file.OpenReadStream(MaxFileSize);
+
+				using var stream = _currentFile.OpenReadStream(MaxFileSize);
 				using var memoryStream = new MemoryStream();
 				stream.CopyTo(memoryStream);
 				return memoryStream.ToArray();
@@ -77,9 +74,8 @@ namespace BlazorWebFormsComponents
 			get
 			{
 				if (!HasFile) return Stream.Null;
-				
-				var file = _currentFile ?? _currentFiles.FirstOrDefault();
-				return file.OpenReadStream(MaxFileSize);
+
+				return _currentFile.OpenReadStream(MaxFileSize);
 			}
 		}
 
@@ -92,9 +88,8 @@ namespace BlazorWebFormsComponents
 			get
 			{
 				if (!HasFile) return null;
-				
-				var file = _currentFile ?? _currentFiles.FirstOrDefault();
-				return new PostedFileWrapper(file, MaxFileSize);
+
+				return new PostedFileWrapper(_currentFile, MaxFileSize);
 			}
 		}
 
@@ -144,9 +139,13 @@ namespace BlazorWebFormsComponents
 				throw new InvalidOperationException("No file has been selected for upload.");
 			}
 
-			var file = _currentFile ?? _currentFiles.FirstOrDefault();
-			using var stream = file.OpenReadStream(MaxFileSize);
-			using var fileStream = new FileStream(filename, FileMode.Create);
+			// Sanitize: ensure the filename cannot escape the intended directory
+			var safeFileName = Path.GetFileName(filename);
+			var directory = Path.GetDirectoryName(filename);
+			var safePath = string.IsNullOrEmpty(directory) ? safeFileName : Path.Combine(directory, safeFileName);
+
+			using var stream = _currentFile.OpenReadStream(MaxFileSize);
+			using var fileStream = new FileStream(safePath, FileMode.Create);
 			await stream.CopyToAsync(fileStream);
 		}
 
@@ -156,7 +155,7 @@ namespace BlazorWebFormsComponents
 		/// <returns>An enumerable collection of browser files.</returns>
 		public IEnumerable<IBrowserFile> GetMultipleFiles()
 		{
-			return _currentFiles ?? Enumerable.Empty<IBrowserFile>();
+			return _currentFiles.AsReadOnly();
 		}
 
 		/// <summary>
@@ -172,30 +171,55 @@ namespace BlazorWebFormsComponents
 				throw new InvalidOperationException("No files have been selected for upload.");
 			}
 
+			if (!Directory.Exists(directory))
+			{
+				throw new DirectoryNotFoundException($"The directory '{directory}' does not exist.");
+			}
+
 			var savedFiles = new List<string>();
-			var files = AllowMultiple ? _currentFiles : new List<IBrowserFile> { _currentFile ?? _currentFiles.FirstOrDefault() };
+			var files = _currentFiles;
 
 			foreach (var file in files)
 			{
 				// Sanitize filename to prevent directory traversal attacks
 				var safeFileName = Path.GetFileName(file.Name);
-				var path = Path.Combine(directory, safeFileName);
+				var fullPath = Path.GetFullPath(Path.Combine(directory, safeFileName));
+
+				// Verify the resolved path is still within the target directory
+				var resolvedDirectory = Path.GetFullPath(directory);
+				if (!fullPath.StartsWith(resolvedDirectory, StringComparison.OrdinalIgnoreCase))
+				{
+					throw new InvalidOperationException($"File name '{file.Name}' would escape the target directory.");
+				}
+
 				using var stream = file.OpenReadStream(MaxFileSize);
-				using var fileStream = new FileStream(path, FileMode.Create);
+				using var fileStream = new FileStream(fullPath, FileMode.Create);
 				await stream.CopyToAsync(fileStream);
-				savedFiles.Add(path);
+				savedFiles.Add(fullPath);
 			}
 
 			return savedFiles;
 		}
 
-		private async Task OnFileChangeInternal(ChangeEventArgs e)
+		private async Task OnFileChangeInternal(InputFileChangeEventArgs e)
 		{
-			// This method handles the change event from the HTML input element
-			// In a real Blazor app, you would need to use InputFile component
-			// or implement JavaScript interop to get file data
-			// For testing purposes, we'll just invoke the callback
-			await OnFileSelected.InvokeAsync(null);
+			_currentFiles.Clear();
+
+			if (AllowMultiple)
+			{
+				_currentFiles.AddRange(e.GetMultipleFiles());
+				_currentFile = _currentFiles.FirstOrDefault();
+			}
+			else
+			{
+				_currentFile = e.File;
+				_currentFiles.Add(_currentFile);
+			}
+
+			if (OnFileSelected.HasDelegate)
+			{
+				await OnFileSelected.InvokeAsync(e);
+			}
 		}
 
 		/// <summary>

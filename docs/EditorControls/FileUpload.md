@@ -7,6 +7,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 ## Features Supported in Blazor
 
 - `HasFile` - indicates whether a file has been selected
+- `HasFiles` - indicates whether more than one file has been selected (for multi-file uploads)
 - `FileName` - gets the name of the selected file
 - `FileBytes` - gets the file contents as a byte array
 - `FileContent` - gets a Stream to read the file data
@@ -24,7 +25,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ### Blazor Notes
 
-- The control renders as a standard HTML `<input type="file">` element
+- The control uses Blazor's `InputFile` component internally, which renders as a standard HTML `<input type="file">` element
 - File processing must be handled through component properties or methods
 - The `OnFileSelected` event fires when files are selected
 - Maximum file size should be configured based on your server's capabilities

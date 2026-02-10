@@ -1,14 +1,14 @@
 @inherits BaseStyledComponent
+@using Microsoft.AspNetCore.Components.Forms
 
 @if (Visible)
 {
-	<input type="file"
-		   id="@ClientID"
-		   multiple="@AllowMultiple"
-		   accept="@Accept"
-		   style="@Style"
-		   class="@CssClass"
-		   disabled="@(!Enabled)"
-		   title="@ToolTip"
-		   @onchange="OnFileChangeInternal" />
+	<InputFile id="@ClientID"
+			   multiple="@AllowMultiple"
+			   accept="@Accept"
+			   style="@Style"
+			   class="@CssClass"
+			   disabled="@(!Enabled)"
+			   title="@ToolTip"
+			   OnChange="OnFileChangeInternal" />
 }
