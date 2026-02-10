@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlazorWebFormsComponents.Enums;
@@ -9,7 +10,7 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Creates an image map control that displays an image with defined clickable hot spot regions.
 	/// </summary>
-	public partial class ImageMap : BaseWebFormsComponent, IImageComponent
+	public partial class ImageMap : BaseStyledComponent, IImageComponent
 	{
 		/// <summary>
 		/// Gets or sets the alternate text to display in the ImageMap control when the image is unavailable.
@@ -71,14 +72,11 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool GenerateEmptyAlternateText { get; set; }
 
-		private static int _mapIdCounter = 0;
-		private string _mapId = string.Empty;
+		private readonly string _mapId = $"ImageMap_{Guid.NewGuid():N}";
 
 		protected override void OnInitialized()
 		{
 			base.OnInitialized();
-			// Generate a unique map ID using a counter
-			_mapId = $"ImageMap_{System.Threading.Interlocked.Increment(ref _mapIdCounter)}";
 		}
 
 		/// <summary>

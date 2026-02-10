@@ -1,5 +1,5 @@
 @using System.Text
-@inherits BaseWebFormsComponent
+@inherits BaseStyledComponent
 
 @if (Visible)
 {
@@ -7,6 +7,8 @@
 		 usemap="#@_mapId"
 		 alt="@GetAltText()"
 		 id="@GetId()"
+		 class="@GetCssClassOrNull()"
+		 style="@Style"
 		 title="@GetTitle()"
 		 longdesc="@GetLongDesc()"
 		 align="@GetAlign()" />
@@ -17,8 +19,9 @@
 			var effectiveMode = hotSpot.HotSpotMode != Enums.HotSpotMode.NotSet ? hotSpot.HotSpotMode : HotSpotMode;
 			var href = effectiveMode == Enums.HotSpotMode.Navigate ? hotSpot.NavigateUrl : "#";
 			var target = !string.IsNullOrEmpty(hotSpot.Target) ? hotSpot.Target : Target;
+			var isDisabled = !Enabled;
 
-			@if (effectiveMode == Enums.HotSpotMode.Inactive)
+			@if (isDisabled || effectiveMode == Enums.HotSpotMode.Inactive)
 			{
 				<area shape="@hotSpot.GetShapeType()"
 					  coords="@hotSpot.GetCoordinates()"
@@ -63,6 +66,11 @@
 	private string GetId()
 	{
 		return !string.IsNullOrEmpty(ClientID) ? ClientID : null;
+	}
+	
+	private string GetCssClassOrNull()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
 	}
 	
 	private string GetTitle()
