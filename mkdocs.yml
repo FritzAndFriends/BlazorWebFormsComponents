@@ -113,6 +113,7 @@ nav:
     - Databinder: UtilityFeatures/Databinder.md
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - PageService: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
   - Migration:
       - Getting started: Migration/readme.md
