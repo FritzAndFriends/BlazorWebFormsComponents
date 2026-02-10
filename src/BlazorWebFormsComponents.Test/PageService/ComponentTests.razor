@@ -22,7 +22,7 @@
 		Services.AddScoped<IPageService>(_ => pageService);
 
 		// Act
-		var cut = Render(@<Page />);
+		Render(@<Page />);
 
 		// Assert - Title is maintained in service
 		pageService.Title.ShouldBe("Test Title");

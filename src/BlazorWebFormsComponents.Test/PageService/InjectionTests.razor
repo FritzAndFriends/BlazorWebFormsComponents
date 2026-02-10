@@ -22,7 +22,7 @@
 			protected override void OnInitialized()
 			{
 				// Verify we can access the service
-				var title = PageService.Title;
+				_ = PageService.Title;
 			}
 
 			protected override void BuildRenderTree(RenderTreeBuilder builder)

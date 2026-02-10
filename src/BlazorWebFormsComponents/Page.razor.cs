@@ -36,11 +36,10 @@ public partial class Page : ComponentBase, IDisposable
             _currentTitle = newTitle;
             await InvokeAsync(StateHasChanged);
         }
-        catch (Exception)
+        catch (ObjectDisposedException)
         {
-            // Silently handle exceptions from title updates to prevent
-            // breaking the component lifecycle. Title updates are non-critical.
-            // In production, consider logging this exception.
+            // Component was disposed before the state update completed.
+            // This is expected when navigating away while an event is in flight.
         }
     }
 
@@ -51,9 +50,9 @@ public partial class Page : ComponentBase, IDisposable
             _currentMetaDescription = newMetaDescription;
             await InvokeAsync(StateHasChanged);
         }
-        catch (Exception)
+        catch (ObjectDisposedException)
         {
-            // Silently handle exceptions from meta description updates.
+            // Component was disposed before the state update completed.
         }
     }
 
@@ -64,9 +63,9 @@ public partial class Page : ComponentBase, IDisposable
             _currentMetaKeywords = newMetaKeywords;
             await InvokeAsync(StateHasChanged);
         }
-        catch (Exception)
+        catch (ObjectDisposedException)
         {
-            // Silently handle exceptions from meta keywords updates.
+            // Component was disposed before the state update completed.
         }
     }
 
