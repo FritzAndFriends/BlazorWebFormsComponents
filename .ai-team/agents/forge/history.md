@@ -49,3 +49,35 @@
 📌 Team update (2026-02-10): Lockout protocol — Cyclops locked out of Calendar and FileUpload revisions — decided by Jeffrey T. Fritz
 📌 Team update (2026-02-10): Close PR #333 without merging — all Calendar work already on dev, PR branch has 0 unique commits — decided by Rogue
 📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
+
+### 2026-02-10 — Sprint 3 Planning & Status Reconciliation
+
+**Status.md was significantly stale:**
+- Calendar was merged to dev via commit d33e156 and PR #339 but still marked 🔴 Not Started
+- FileUpload was merged via PRs #335 and #338 but still marked 🔴 Not Started
+- Summary table said 41/53 (Editor: 20/27) but actual count of ✅ entries in the detailed section was already 23/27 for Editors (now 25/27 with Calendar + FileUpload fixed)
+- The 27-count for Editor Controls groups MultiView and View as one logical component despite separate table rows
+- Corrected total: 48/53 components complete (91%), 5 remaining
+
+**Sprint 3 scope decision:**
+- DetailsView and PasswordRecovery are the two buildable components
+- Chart deferred: requires SVG/Canvas rendering engine, no Blazor primitive equivalent
+- Substitution deferred: Web Forms output caching has no Blazor architectural equivalent
+- Xml deferred: XSLT transforms are a dead-end pattern with near-zero migration demand
+- Post-Sprint 3 state: 50/53 (94%), library effectively feature-complete for practical migration
+
+**DetailsView design notes:**
+- Must inherit BaseStyledComponent (Web Forms DetailsView → CompositeDataBoundControl → WebControl)
+- Renders as `<table>` with one `<tr>` per field (vertical layout vs GridView's horizontal)
+- Can reuse existing BoundField, TemplateField, CommandField, HyperLinkField, ButtonField from GridView
+- Needs DetailsViewMode enum (ReadOnly=0, Edit=1, Insert=2)
+- Needs 8 EventArgs classes for mode changes, CRUD operations
+
+**PasswordRecovery design notes:**
+- Must inherit BaseStyledComponent
+- 3-step wizard flow: UserName → Question → Success (same pattern as CreateUserWizard's 2-step)
+- Can reuse existing LoginControls style sub-components (TitleTextStyle, TextBoxStyle, LabelStyle, etc.)
+- Table-based HTML output matching ChangePassword's render pattern
+
+📌 Team update (2026-02-10): Sprint 3 plan ratified — DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred indefinitely with migration docs. 48/53 → target 50/53. — decided by Forge
+📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
