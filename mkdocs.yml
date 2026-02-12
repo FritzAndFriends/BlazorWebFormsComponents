@@ -74,7 +74,6 @@ nav:
     - HiddenField: EditorControls/HiddenField.md
     - Image: EditorControls/Image.md
     - ImageButton: EditorControls/ImageButton.md
-    - ImageMap: EditorControls/ImageMap.md
     - Label: EditorControls/Label.md
     - LinkButton: EditorControls/LinkButton.md
     - ListBox: EditorControls/ListBox.md

@@ -1449,6 +1449,106 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task DataBinder_Eval_RendersProductData()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                {
+                    consoleErrors.Add(msg.Text);
+                }
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/DataBinder", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert — Product data rendered by DataBinder.Eval in tables
+            var pageContent = await page.ContentAsync();
+            Assert.Contains("Laptop Stand", pageContent);
+            Assert.Contains("USB-C Hub", pageContent);
+            Assert.Contains("Mechanical Keyboard", pageContent);
+
+            // Assert — Table rows exist (Repeater renders <tr> items inside <tbody>)
+            var tableRows = await page.Locator("tbody tr").AllAsync();
+            Assert.True(tableRows.Count >= 3, "Expected at least 3 data rows from the Repeater");
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ViewState_Counter_IncrementsOnClick()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                {
+                    consoleErrors.Add(msg.Text);
+                }
+            }
+        };
+
+        try
+        {
+            // Act — Navigate to the ViewState page
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ViewState", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Find the ViewState increment button (not the property-based one)
+            var viewStateButton = page.GetByRole(AriaRole.Button, new() { Name = "Click Me (ViewState)" });
+            await viewStateButton.WaitForAsync(new() { Timeout = 5000 });
+
+            // Click once — counter should go to 1
+            await viewStateButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            var pageContent = await page.ContentAsync();
+            Assert.Contains("1", pageContent);
+
+            // Click again — counter should go to 2
+            await viewStateButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            pageContent = await page.ContentAsync();
+            Assert.Contains("2", pageContent);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
     public async Task Localize_RendersTextContent()
     {
         // Arrange

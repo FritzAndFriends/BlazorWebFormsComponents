@@ -175,6 +175,15 @@ public class ControlSampleTests
         await VerifyPageLoadsWithoutErrors(path);
     }
 
+    // Utility Features
+    [Theory]
+    [InlineData("/ControlSamples/DataBinder")]
+    [InlineData("/ControlSamples/ViewState")]
+    public async Task UtilityFeature_Loads_WithoutErrors(string path)
+    {
+        await VerifyPageLoadsWithoutErrors(path);
+    }
+
     // Other Controls
     [Theory]
     [InlineData("/ControlSamples/AdRotator")]

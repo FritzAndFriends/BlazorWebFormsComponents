@@ -88,3 +88,16 @@ Fixed all 7 failing integration tests. 111/111 passing after fixes.
   - Pages with multiple PasswordRecovery instances require ID-specific selectors (`#PasswordRecovery1_SubmitButton`) not suffix selectors (`input[id$='_SubmitButton']`) to avoid strict mode violations.
   - After a multi-step Blazor Server form flow, the final `_statusMessage` reflects the LAST handler that sets it. For PasswordRecovery step 2→3, `OnVerifyingAnswer` sets one message, then `OnSendingMail` overwrites it — test must assert on the final value.
   - `PressSequentiallyAsync` + Tab blur works reliably for Blazor Server `InputText` binding on dynamically re-rendered DOM elements.
+
+## 2026-02-12: DataBinder and ViewState utility feature integration tests
+
+- Added smoke tests in `ControlSampleTests.cs`:
+  - New "Utility Features" theory section with `[InlineData("/ControlSamples/DataBinder")]` and `[InlineData("/ControlSamples/ViewState")]`
+- Added 2 interaction tests in `InteractiveComponentTests.cs`:
+  - `DataBinder_Eval_RendersProductData` — verifies the DataBinder sample page renders product data ("Laptop Stand", "USB-C Hub", "Mechanical Keyboard") via Repeater with DataBinder.Eval(). Asserts at least 3 `<tbody tr>` rows present.
+  - `ViewState_Counter_IncrementsOnClick` — verifies the ViewState sample page's "Click Me (ViewState)" button increments a counter stored in ViewState. Clicks twice and verifies counter reaches 1 then 2.
+- Build: 0 errors. All 120 integration tests passing (116 existing + 4 new), 0 failures.
+- Key learnings:
+  - DataBinder sample uses `OnAfterRender(firstRender)` to call `DataBind()` on 4 Repeater instances — data only appears after first render, but NetworkIdle wait handles this.
+  - ViewState sample button text "Click Me (ViewState)" distinguishes it from the "Click Me (Property)" button in section 3. Used `GetByRole(AriaRole.Button, new() { Name = "Click Me (ViewState)" })` for precise targeting.
+  - Both pages include `<pre><code>` blocks with sample code — assertions use `page.ContentAsync()` for text presence rather than strict locators to avoid matching code samples vs rendered content where appropriate.
