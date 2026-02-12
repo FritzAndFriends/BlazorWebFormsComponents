@@ -1,0 +1,113 @@
+@code {
+
+	bool pageIndexChangingFired = false;
+	bool pageIndexChangedFired = false;
+	int? newPageIndexFromEvent = null;
+
+	[Fact]
+	public void DetailsView_AllowPaging_RendersPagerRow()
+	{
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AllowPaging="true" AutoGenerateRows="true" />);
+
+		// Should render pager links for each item (3 pages)
+		var pagerLinks = cut.FindAll("a").Where(a => int.TryParse(a.TextContent, out _)).ToList();
+		pagerLinks.Count.ShouldBeGreaterThan(0, "Expected pager links");
+	}
+
+	[Fact]
+	public void DetailsView_AllowPagingFalse_NoPagerRow()
+	{
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AllowPaging="false" AutoGenerateRows="true" />);
+
+		// No pager links should appear
+		var pagerLinks = cut.FindAll("a").Where(a => int.TryParse(a.TextContent, out _)).ToList();
+		pagerLinks.Count.ShouldBe(0, "Should not have pager links when AllowPaging is false");
+	}
+
+	[Fact]
+	public void DetailsView_SingleItem_NoPagerRow()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AllowPaging="true" AutoGenerateRows="true" />);
+
+		// Single item — no pager needed
+		var pagerLinks = cut.FindAll("a").Where(a => int.TryParse(a.TextContent, out _)).ToList();
+		pagerLinks.Count.ShouldBe(0, "Single item should not have pager links");
+	}
+
+	[Fact]
+	public void DetailsView_CurrentPage_RendersAsSpanNotLink()
+	{
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AllowPaging="true" AutoGenerateRows="true" />);
+
+		// Current page (page 1) should be a span, not an anchor
+		var pagerSpans = cut.FindAll("span").Where(s => s.TextContent.Trim() == "1").ToList();
+		pagerSpans.Count.ShouldBe(1, "Current page should render as span");
+	}
+
+	[Fact]
+	public void DetailsView_ClickPage2_ChangesDisplayedItem()
+	{
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AllowPaging="true" AutoGenerateRows="true" />);
+
+		// Initially showing first item
+		cut.Markup.ShouldContain("First Widget");
+
+		// Click page 2 link
+		var page2Link = cut.FindAll("a").First(a => a.TextContent.Trim() == "2");
+		page2Link.Click();
+
+		// Should now show second item
+		cut.Markup.ShouldContain("Second Widget");
+		cut.Markup.ShouldNotContain("First Widget");
+	}
+
+	[Fact]
+	public void DetailsView_ClickPage_FiresPageIndexChangingAndChanged()
+	{
+		pageIndexChangingFired = false;
+		pageIndexChangedFired = false;
+		newPageIndexFromEvent = null;
+
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AllowPaging="true" AutoGenerateRows="true"
+			PageIndexChanging="OnPageIndexChanging"
+			PageIndexChanged="OnPageIndexChanged" />);
+
+		var page2Link = cut.FindAll("a").First(a => a.TextContent.Trim() == "2");
+		page2Link.Click();
+
+		pageIndexChangingFired.ShouldBeTrue("PageIndexChanging event should fire");
+		pageIndexChangedFired.ShouldBeTrue("PageIndexChanged event should fire");
+		newPageIndexFromEvent.ShouldBe(1, "New page index should be 1 (zero-based)");
+	}
+
+	[Fact]
+	public void DetailsView_PagerTemplate_RendersCustomPager()
+	{
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AllowPaging="true" AutoGenerateRows="true">
+				<PagerTemplate>
+					<div id="customPager">Custom Paging Controls</div>
+				</PagerTemplate>
+			</DetailsView>);
+
+		cut.Find("#customPager").TextContent.ShouldBe("Custom Paging Controls");
+	}
+
+	void OnPageIndexChanging(PageChangedEventArgs args)
+	{
+		pageIndexChangingFired = true;
+		newPageIndexFromEvent = args.NewPageIndex;
+	}
+
+	void OnPageIndexChanged(PageChangedEventArgs args)
+	{
+		pageIndexChangedFired = true;
+	}
+}

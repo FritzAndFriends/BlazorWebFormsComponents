@@ -54,7 +54,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
     - [DataPager](docs/DataControls/DataPager.md)
-    - DetailsView
+    - [DetailsView](docs/DataControls/DetailsView.md)
     - [FormView](docs/DataControls/FormView.md)
     - [GridView](docs/DataControls/GridView.md)
     - [ListView](docs/DataControls/ListView.md)
@@ -78,7 +78,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [LoginName](docs/LoginControls/LoginName.md)
     - [LoginStatus](docs/LoginControls/LoginStatus.md)
     - [LoginView](docs/LoginControls/LoginView.md)
-    - PasswordRecovery
+    - [PasswordRecovery](docs/LoginControls/PasswordRecovery.md)
 
 We will NOT be converting any DataSource objects (SqlDataSource, ObjectDataSource, EntityDataSource, LinqDataSource, XmlDataSource, SiteMapDataSource, AccessDataSource), Wizard components, skins or themes.  Once this first collection of controls is written, we can consider additional features like modern tag formatting.
 

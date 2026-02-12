@@ -1,0 +1,142 @@
+@page "/ControlSamples/PasswordRecovery"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.LoginControls
+
+<PageTitle>PasswordRecovery Sample</PageTitle>
+
+<h2>PasswordRecovery Component Samples</h2>
+
+<p>The <code>PasswordRecovery</code> control provides a multi-step password recovery flow:
+   enter a username, answer a security question, and receive a success confirmation.
+   In Web Forms this was <code>&lt;asp:PasswordRecovery&gt;</code>.</p>
+
+<hr />
+
+<h3>Default PasswordRecovery</h3>
+<p>The default layout provides a username step, a security question step, and a success step.
+   Handle <code>OnVerifyingUser</code> to validate the username and set the security question
+   via the <code>SetQuestion</code> method. Handle <code>OnVerifyingAnswer</code> to verify the answer.</p>
+
+<PasswordRecovery ID="PasswordRecovery1"
+    OnVerifyingUser="HandleVerifyingUser"
+    OnVerifyingAnswer="HandleVerifyingAnswer"
+    OnSendingMail="HandleSendingMail" />
+
+<p style="margin-top: 10px; font-weight: bold;">@_statusMessage</p>
+
+<p>Code:</p>
+<pre><code>&lt;PasswordRecovery ID="PasswordRecovery1"
+    OnVerifyingUser="HandleVerifyingUser"
+    OnVerifyingAnswer="HandleVerifyingAnswer"
+    OnSendingMail="HandleSendingMail" /&gt;
+
+@@code {
+    void HandleVerifyingUser(LoginCancelEventArgs e)
+    {
+        // Look up the user. If valid, set the security question:
+        var recovery = (PasswordRecovery)e.Sender;
+        recovery.SetQuestion("What is your favorite color?");
+        // Set e.Cancel = true to reject the username.
+    }
+
+    void HandleVerifyingAnswer(LoginCancelEventArgs e)
+    {
+        // Validate the answer against your data store.
+        // Set e.Cancel = true to reject the answer.
+    }
+
+    void HandleSendingMail(MailMessageEventArgs e)
+    {
+        // Send the password reset email here.
+    }
+}</code></pre>
+
+<hr />
+
+<h3>Custom Text Properties</h3>
+<p>Customize labels, titles, and messages for each step using the text properties.</p>
+
+<PasswordRecovery ID="PasswordRecovery2"
+    UserNameTitleText="Password Reset"
+    UserNameInstructionText="Please enter your email address below."
+    UserNameLabelText="Email:"
+    SubmitButtonText="Next"
+    QuestionTitleText="Security Verification"
+    QuestionInstructionText="Please answer your security question."
+    SuccessText="A password reset link has been sent to your email."
+    OnVerifyingUser="HandleVerifyingUser2"
+    OnVerifyingAnswer="HandleVerifyingAnswer2" />
+
+<p>Code:</p>
+<pre><code>&lt;PasswordRecovery ID="PasswordRecovery2"
+    UserNameTitleText="Password Reset"
+    UserNameInstructionText="Please enter your email address below."
+    UserNameLabelText="Email:"
+    SubmitButtonText="Next"
+    QuestionTitleText="Security Verification"
+    QuestionInstructionText="Please answer your security question."
+    SuccessText="A password reset link has been sent to your email."
+    OnVerifyingUser="HandleVerifyingUser"
+    OnVerifyingAnswer="HandleVerifyingAnswer" /&gt;</code></pre>
+
+<hr />
+
+<h3>With Help Link</h3>
+<p>Use <code>HelpPageText</code> and <code>HelpPageUrl</code> to add a help link below the form.</p>
+
+<PasswordRecovery ID="PasswordRecovery3"
+    HelpPageText="Need more help?"
+    HelpPageUrl="/ControlSamples/PasswordRecovery"
+    OnVerifyingUser="HandleVerifyingUser3"
+    OnVerifyingAnswer="HandleVerifyingAnswer3" />
+
+<p>Code:</p>
+<pre><code>&lt;PasswordRecovery ID="PasswordRecovery3"
+    HelpPageText="Need more help?"
+    HelpPageUrl="/help/password-reset" /&gt;</code></pre>
+
+@code {
+    private string _statusMessage = "";
+
+    // Default PasswordRecovery handlers
+    private void HandleVerifyingUser(LoginCancelEventArgs e)
+    {
+        var recovery = (PasswordRecovery)e.Sender;
+        recovery.SetQuestion("What is your favorite color?");
+        _statusMessage = "User verified — showing security question.";
+    }
+
+    private void HandleVerifyingAnswer(LoginCancelEventArgs e)
+    {
+        _statusMessage = "Answer accepted — sending recovery email.";
+    }
+
+    private void HandleSendingMail(MailMessageEventArgs e)
+    {
+        _statusMessage = "Recovery email sent successfully!";
+    }
+
+    // Custom text handlers
+    private void HandleVerifyingUser2(LoginCancelEventArgs e)
+    {
+        var recovery = (PasswordRecovery)e.Sender;
+        recovery.SetQuestion("What city were you born in?");
+    }
+
+    private void HandleVerifyingAnswer2(LoginCancelEventArgs e)
+    {
+        // Accept any answer for demo purposes
+    }
+
+    // Help link handlers
+    private void HandleVerifyingUser3(LoginCancelEventArgs e)
+    {
+        var recovery = (PasswordRecovery)e.Sender;
+        recovery.SetQuestion("What is your pet's name?");
+    }
+
+    private void HandleVerifyingAnswer3(LoginCancelEventArgs e)
+    {
+        // Accept any answer for demo purposes
+    }
+}

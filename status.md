@@ -2,18 +2,18 @@
 
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
-| Editor Controls | 20 | 0 | 7 | 27 |
-| Data Controls | 7 | 0 | 2 | 9 |
+| Editor Controls | 25 | 0 | 2 | 27 |
+| Data Controls | 8 | 0 | 1 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 3 | 0 | 0 | 3 |
-| Login Controls | 6 | 0 | 1 | 7 |
-| **TOTAL** | **41** | **0** | **12** | **53** |
+| Login Controls | 7 | 0 | 0 | 7 |
+| **TOTAL** | **50** | **0** | **3** | **53** |
 
 ---
 
 ## Detailed Component Breakdown
 
-### 🟡 Editor Controls (18/27 - 67% Complete)
+### 🟢 Editor Controls (25/27 - 93% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -31,9 +31,9 @@
 | RadioButton | ✅ Complete | Documented, tested, sample page exists |
 | TextBox | ✅ Complete | Documented, tested, sample page exists |
 | BulletedList | ✅ Complete | Documented, tested (41 tests), sample page exists |
-| Calendar | 🔴 Not Started | Complex date picker |
+| Calendar | ✅ Complete | Documented, tested, table-based rendering, CalendarSelectionMode enum |
 | CheckBoxList | ✅ Complete | Documented, tested (26 tests) |
-| FileUpload | 🔴 Not Started | Consider Blazor InputFile |
+| FileUpload | ✅ Complete | Documented, tested, uses Blazor InputFile internally |
 | ImageMap | ✅ Complete | Documented, tested (23 tests) |
 | ListBox | ✅ Complete | Documented, tested, supports single/multi-select |
 | Localize | ✅ Complete | Documented, tested, inherits from Literal |
@@ -46,7 +46,7 @@
 | View | ✅ Complete | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
-### 🟡 Data Controls (7/9 - 78% Complete)
+### 🟡 Data Controls (8/9 - 89% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -58,7 +58,7 @@
 | Repeater | ✅ Complete | Documented |
 | Chart | 🔴 Not Started | Consider deferring - very high complexity |
 | DataPager | ✅ Complete | Documented in DataPager.md |
-| DetailsView | 🔴 Not Started | Single-record display/edit |
+| DetailsView | ✅ Complete | Single-record display/edit, documented, tested, sample page exists |
 
 ### ✅ Validation Controls (7/7 - 100% Complete)
 
@@ -81,7 +81,7 @@
 | SiteMapPath | ✅ Complete | Documented, tested (23 tests), sample page exists |
 | TreeView | ✅ Complete | Documented in TreeView.md |
 
-### 🟡 Login Controls (4/7 - 57% Complete)
+### ✅ Login Controls (7/7 - 100% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -91,7 +91,7 @@
 | LoginView | ✅ Complete | Documented, tested |
 | ChangePassword | ✅ Complete | Documented, tested, table-based layout |
 | CreateUserWizard | ✅ Complete | Documented, tested, two-step wizard |
-| PasswordRecovery | 🔴 Not Started | Complex ASP.NET Identity integration |
+| PasswordRecovery | ✅ Complete | Documented, tested, three-step wizard, table-based layout |
 
 ---
 
@@ -131,25 +131,24 @@
 | ~~**Menu**~~ | ~~Medium-High~~ | ~~12-16~~ | ~~6-8~~ | ✅ Complete |
 | ~~**SiteMapPath**~~ | ~~Medium~~ | ~~8-10~~ | ~~4-5~~ | ✅ Complete |
 | ~~**DataPager**~~ | ~~Medium~~ | ~~8-12~~ | ~~4-6~~ | ✅ Complete |
-| **DetailsView** | High | 16-24 | 8-12 |
+| ~~**DetailsView**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | ✅ Complete |
 
 #### Login Controls
 | Component | Complexity | Est. Hours (Manual) | Est. Hours (with Copilot) |
 |-----------|------------|---------------------|---------------------------|
-| **ChangePassword** | High | 16-24 | 8-12 |
-| **PasswordRecovery** | High | 16-24 | 8-12 |
-| **CreateUserWizard** | Very High | 24-32 | 12-16 |
+| ~~**ChangePassword**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | ✅ Complete |
+| ~~**PasswordRecovery**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | ✅ Complete |
+| ~~**CreateUserWizard**~~ | ~~Very High~~ | ~~24-32~~ | ~~12-16~~ | ✅ Complete |
 
 #### Lower Priority / Consider Deferring
 | Component | Complexity | Notes |
 |-----------|------------|-------|
-| ~~**BulletedList**~~ | ~~Low~~ | ~~Simple HTML list~~ | ✅ Complete |
-| **Calendar** | High | Complex date picker |
-| **FileUpload** | Medium | Blazor has InputFile |
+| ~~**Calendar**~~ | ~~High~~ | ~~Complex date picker~~ | ✅ Complete |
+| ~~**FileUpload**~~ | ~~Medium~~ | ~~Blazor has InputFile~~ | ✅ Complete |
 | ~~**ImageMap**~~ | ~~Medium~~ | ~~Clickable regions~~ | ✅ Complete |
-| **MultiView/View** | Medium | Tab-like container |
+| ~~**MultiView/View**~~ | ~~Medium~~ | ~~Tab-like container~~ | ✅ Complete |
 | ~~**Table**~~ | ~~Low~~ | ~~HTML table wrapper~~ | ✅ Complete |
-| **Localize** | Low | Localization |
+| ~~**Localize**~~ | ~~Low~~ | ~~Localization~~ | ✅ Complete |
 | **Xml** | Medium | XML transform |
 | **Substitution** | N/A | Cache-related, may not apply |
 | **Chart** | Very High | Consider external library |
@@ -161,10 +160,10 @@
 |--------|-------------------|------------------------|
 | ~~**High Priority (4)**~~ | ~~20-30 hours~~ | ~~10-15 hours~~ | ✅ Complete |
 | **Medium Priority (3 remaining)** | ~12-20 hours | ~6-10 hours |
-| **Nav & Data (3 remaining)** | ~32-46 hours | ~16-23 hours |
-| **Login (3)** | ~56-80 hours | ~28-40 hours |
-| **Lower Priority (10)** | Variable | Variable |
-| **Total Remaining** | 18 components | 18 components |
+| **Nav & Data (1 remaining)** | ~16-24 hours | ~8-12 hours |
+| **Login (1 remaining)** | ~16-24 hours | ~8-12 hours |
+| **Lower Priority (3 remaining)** | Variable | Variable |
+| **Total Remaining** | 5 components | 5 components |
 
 ---
 
@@ -196,27 +195,25 @@
 3. ~~**RadioButton**~~ - ✅ Complete
 4. ~~**DropDownList**~~ - ✅ Complete
 
-### Phase 2: List & Container Controls (Next Priority)
+### Phase 2: List & Container Controls ✅ COMPLETE
 5. ~~**Panel**~~ - ✅ Complete
 6. ~~**PlaceHolder**~~ - ✅ Complete
 7. ~~**CheckBoxList**~~ - ✅ Complete (Multi-select)
 8. ~~**RadioButtonList**~~ - ✅ Complete (Single-select group, 30 tests)
 9. ~~**ListBox**~~ - ✅ Complete
 
-### Phase 3: Navigation & Data
+### Phase 3: Navigation & Data ✅ MOSTLY COMPLETE
 10. ~~**Menu**~~ - ✅ Complete
 11. ~~**SiteMapPath**~~ - ✅ Complete (Breadcrumb navigation, 23 tests)
 12. ~~**DataPager**~~ - ✅ Complete (Paging for ListView)
-13. **DetailsView** - Single-record display
+13. ~~**DetailsView**~~ - ✅ Complete (Single-record display)
 
-### Phase 4: Login Controls
-14. **ChangePassword** - Password change UI
-15. **PasswordRecovery** - Password reset flow
-16. **CreateUserWizard** - User registration
+### Phase 4: Login Controls ✅ MOSTLY COMPLETE
+14. ~~**ChangePassword**~~ - ✅ Complete
+15. ~~**PasswordRecovery**~~ - ✅ Complete (Password reset flow)
+16. ~~**CreateUserWizard**~~ - ✅ Complete
 
 ### Consider Deferring
 - **Chart** - Very high complexity, consider Blazor charting libraries
-- **Calendar** - Complex, many alternatives exist
-- **DataGrid** - Legacy, use GridView instead
 - **Substitution** - Cache-related, may not apply to Blazor
-- **FileUpload** - Blazor has built-in InputFile component
+- **Xml** - Low migration demand, XSLT is rarely used in modern apps

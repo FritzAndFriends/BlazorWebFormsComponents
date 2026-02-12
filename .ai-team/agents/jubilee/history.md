@@ -31,3 +31,23 @@
 - **Assigned because:** Cyclops (original author) was locked out per reviewer rejection protocol after Forge's gate review flagged this issue.
 
 📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
+📌 Team update (2026-02-11): Sprint 3 scope: DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred. 48/53 → target 50/53. — decided by Forge
+📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
+
+### Sprint 3 — Sample Pages for DetailsView and PasswordRecovery (2026-02-11)
+
+- **DetailsView sample:** Uses `Items` parameter with inline `List<Customer>` data (same pattern as GridView RowSelection sample). Demonstrates auto-generated rows, paging between records with `AllowPaging`, Edit mode switching with `AutoGenerateEditButton`, and empty data text. Uses `Customer` model from `SharedSampleObjects.Models`.
+- **PasswordRecovery sample:** Shows the 3-step flow (username → security question → success). Uses `SetQuestion()` on the component reference via the `LoginCancelEventArgs.Sender` cast pattern. Demonstrates custom text properties and help link configuration.
+- **PasswordRecovery event pattern:** The `LoginCancelEventArgs` exposes a `Sender` property that must be cast back to `PasswordRecovery` to call `SetQuestion()` — this is the key integration point for the security question step.
+- **Nav ordering note:** Data Components section in NavMenu.razor is not strictly alphabetical (DataList before DataGrid). I placed DetailsView after DataGrid and before FormView to maintain the closest alphabetical order without rearranging existing entries.
+
+📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 50/53 components (94%). — decided by Forge
+📌 Team update (2026-02-12): LoginControls sample pages MUST include `@using BlazorWebFormsComponents.LoginControls` — root _Imports.razor doesn't cover sub-namespaces. Never use external image URLs in samples; use local SVGs. — decided by Colossus
+
+### Utility Feature Sample Pages — DataBinder and ViewState
+
+- **DataBinder sample** (`Components/Pages/ControlSamples/DataBinder/Index.razor`): Demonstrates all three `Eval()` signatures with a Repeater — `DataBinder.Eval(container, "Prop")`, shorthand `Eval("Prop")` via `@using static`, and `Eval("Prop", "{0:C}")` with format strings. Each section has live demo + code block. Section 4 ("Moving On") shows the modern `@context.Property` approach side by side.
+- **ViewState sample** (`Components/Pages/ControlSamples/ViewState/Index.razor`): Uses `@ref` to a Panel component to demo `ViewState.Add`/`ViewState["key"]` dictionary API. Shows a click counter and a multi-key settings form stored in ViewState, then contrasts with the modern C# field/property approach. `#pragma warning disable CS0618` suppresses the Obsolete warnings for the demo code.
+- **Navigation fixes applied:** NavMenu.razor Login Components reordered (Login before LoginName), DataBinder and ViewState added to Utility Features (alphabetical: DataBinder, ID Rendering, PageService, ViewState). ComponentList.razor fixed: HyperLink moved before Image in Editor Controls, ImageMap removed from Editor Controls and added to Navigation Controls (per team decision), Utility Features column added. mkdocs.yml: ImageMap removed from Editor Controls nav (already in Navigation Controls).
+- **Widget model reused:** DataBinder sample reuses `SharedSampleObjects.Models.Widget` with inline data (Laptop Stand, USB-C Hub, Mechanical Keyboard) for a product catalog demo.
+- **Build verified:** `dotnet build` passes with 0 compilation errors (Debug config). Release config has a known transient Nerdbank.GitVersioning file-copy issue unrelated to this work.

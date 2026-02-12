@@ -1,0 +1,215 @@
+@page "/ControlSamples/DataBinder"
+@using BlazorWebFormsComponents
+
+<PageTitle>DataBinder Sample</PageTitle>
+
+<h2>DataBinder Utility</h2>
+
+<p>The <code>DataBinder</code> class provides backward-compatible <code>Eval()</code> methods
+   that emulate the Web Forms data binding syntax. It is marked <code>[Obsolete]</code> and
+   should be migrated away from — see the <strong>Moving On</strong> section below.</p>
+
+<hr />
+
+<h3>1. DataBinder.Eval with a Repeater</h3>
+<p>Use <code>DataBinder.Eval(Container.DataItem, "PropertyName")</code> to bind data
+   inside a Repeater template, just like Web Forms.</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Repeater @ref="_repeater1"
+                  Context="Item"
+                  ItemType="SharedSampleObjects.Models.Widget">
+            <ItemTemplate>
+                <tr>
+                    <td>@DataBinder.Eval(Item, "Id")</td>
+                    <td>@DataBinder.Eval(Item, "Name")</td>
+                    <td>@DataBinder.Eval(Item, "Price")</td>
+                </tr>
+            </ItemTemplate>
+        </Repeater>
+    </tbody>
+</table>
+
+<p>Code:</p>
+<pre><code>@@using BlazorWebFormsComponents
+
+&lt;Repeater Context="Item" ItemType="Widget"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@DataBinder.Eval(Item, "Id")&lt;/td&gt;
+            &lt;td&gt;@@DataBinder.Eval(Item, "Name")&lt;/td&gt;
+            &lt;td&gt;@@DataBinder.Eval(Item, "Price")&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/Repeater&gt;</code></pre>
+
+<hr />
+
+<h3>2. Shorthand Eval with Static Import</h3>
+<p>Add <code>@@using static BlazorWebFormsComponents.DataBinder</code> to use
+   the shorter <code>Eval("PropertyName")</code> syntax — closer to the Web Forms
+   <code>&lt;%# Eval("PropertyName") %&gt;</code> pattern.</p>
+
+@using static BlazorWebFormsComponents.DataBinder
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Repeater @ref="_repeater2"
+                  Context="Item"
+                  ItemType="SharedSampleObjects.Models.Widget">
+            <ItemTemplate>
+                <tr>
+                    <td>@Eval("Id")</td>
+                    <td>@Eval("Name")</td>
+                    <td>@Eval("Price")</td>
+                </tr>
+            </ItemTemplate>
+        </Repeater>
+    </tbody>
+</table>
+
+<p>Code:</p>
+<pre><code>@@using static BlazorWebFormsComponents.DataBinder
+
+&lt;Repeater Context="Item" ItemType="Widget"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@Eval("Id")&lt;/td&gt;
+            &lt;td&gt;@@Eval("Name")&lt;/td&gt;
+            &lt;td&gt;@@Eval("Price")&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/Repeater&gt;</code></pre>
+
+<hr />
+
+<h3>3. Eval with Format Strings</h3>
+<p>Use <code>Eval("PropertyName", "{0:C}")</code> to apply .NET format strings,
+   just like <code>&lt;%# Eval("Price", "{0:C}") %&gt;</code> in Web Forms.</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price (formatted)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Repeater @ref="_repeater3"
+                  Context="Item"
+                  ItemType="SharedSampleObjects.Models.Widget">
+            <ItemTemplate>
+                <tr>
+                    <td>@Eval("Name")</td>
+                    <td>@Eval("Price", "{0:C}")</td>
+                </tr>
+            </ItemTemplate>
+        </Repeater>
+    </tbody>
+</table>
+
+<p>Code:</p>
+<pre><code>&lt;Repeater Context="Item" ItemType="Widget"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@Eval("Name")&lt;/td&gt;
+            &lt;td&gt;@@Eval("Price", "{0:C}")&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/Repeater&gt;</code></pre>
+
+<hr />
+
+<h3>4. Moving On — Use @@context Directly</h3>
+<p><code>DataBinder.Eval</code> is marked <code>[Obsolete]</code>. In Blazor, you have
+   direct access to the strongly-typed <code>@@context</code> (or your named <code>Context</code>
+   variable) inside templates. This is simpler, faster, and gives you compile-time checking.</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Repeater @ref="_repeater4"
+                  Context="Item"
+                  ItemType="SharedSampleObjects.Models.Widget">
+            <ItemTemplate>
+                <tr>
+                    <td>@Item.Id</td>
+                    <td>@Item.Name</td>
+                    <td>@Item.Price.ToString("C")</td>
+                </tr>
+            </ItemTemplate>
+        </Repeater>
+    </tbody>
+</table>
+
+<p>Code:</p>
+<pre><code>@@ No DataBinder needed — just use the context variable directly!
+
+&lt;Repeater Context="Item" ItemType="Widget"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@Item.Id&lt;/td&gt;
+            &lt;td&gt;@@Item.Name&lt;/td&gt;
+            &lt;td&gt;@@Item.Price.ToString("C")&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/Repeater&gt;</code></pre>
+
+<p><strong>Why migrate?</strong> The <code>@@context.Property</code> approach gives you
+   IntelliSense, compile-time type safety, and eliminates the reflection overhead of
+   <code>DataBinder.Eval</code>.</p>
+
+@code {
+    private Repeater<Widget> _repeater1 = default!;
+    private Repeater<Widget> _repeater2 = default!;
+    private Repeater<Widget> _repeater3 = default!;
+    private Repeater<Widget> _repeater4 = default!;
+
+    private static readonly Widget[] _products = new[]
+    {
+        new Widget { Id = 1, Name = "Laptop Stand", Price = 49.99M, LastUpdate = DateTime.Today },
+        new Widget { Id = 2, Name = "USB-C Hub", Price = 29.50M, LastUpdate = DateTime.Today },
+        new Widget { Id = 3, Name = "Mechanical Keyboard", Price = 124.00M, LastUpdate = DateTime.Today }
+    };
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _repeater1.DataSource = _products;
+            _repeater1.DataBind();
+
+            _repeater2.DataSource = _products;
+            _repeater2.DataBind();
+
+            _repeater3.DataSource = _products;
+            _repeater3.DataBind();
+
+            _repeater4.DataSource = _products;
+            _repeater4.DataBind();
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+}

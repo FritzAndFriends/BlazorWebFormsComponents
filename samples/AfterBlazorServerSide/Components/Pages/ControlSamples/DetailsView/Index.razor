@@ -1,0 +1,140 @@
+@page "/ControlSamples/DetailsView"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
+
+<PageTitle>DetailsView Sample</PageTitle>
+
+<h2>DetailsView Component Samples</h2>
+
+<p>The <code>DetailsView</code> control displays a single record from a data source in a table layout,
+   with one row per field. In Web Forms this was <code>&lt;asp:DetailsView&gt;</code>.</p>
+
+<hr />
+
+<h3>Auto-Generated Rows</h3>
+<p>When <code>AutoGenerateRows</code> is <code>true</code> (the default), the DetailsView
+   automatically creates a row for each public property on the data item.</p>
+
+<DetailsView ItemType="Customer"
+             Items="@_customers"
+             AutoGenerateRows="true"
+             HeaderText="Customer Details"
+             GridLines="GridLines.Both" />
+
+<p>Code:</p>
+<pre><code>&lt;DetailsView ItemType="Customer"
+             Items="@@_customers"
+             AutoGenerateRows="true"
+             HeaderText="Customer Details"
+             GridLines="GridLines.Both" /&gt;</code></pre>
+
+<hr />
+
+<h3>Paging Between Records</h3>
+<p>Set <code>AllowPaging="true"</code> to display a pager row that lets users navigate
+   between individual records in the data source — one record at a time.</p>
+
+<DetailsView ItemType="Customer"
+             Items="@_customers"
+             AllowPaging="true"
+             AutoGenerateRows="true"
+             HeaderText="Browse Customers"
+             GridLines="GridLines.Both"
+             PageIndexChanged="HandlePageChanged" />
+
+<p>Current page changed <strong>@_pageChangeCount</strong> time(s).</p>
+
+<p>Code:</p>
+<pre><code>&lt;DetailsView ItemType="Customer"
+             Items="@@_customers"
+             AllowPaging="true"
+             AutoGenerateRows="true"
+             HeaderText="Browse Customers"
+             PageIndexChanged="HandlePageChanged" /&gt;</code></pre>
+
+<hr />
+
+<h3>Edit Button &amp; Mode Switching</h3>
+<p>Set <code>AutoGenerateEditButton="true"</code> to add an Edit link in the command row.
+   Clicking Edit switches the DetailsView to Edit mode. Click Update or Cancel to return to ReadOnly mode.
+   Handle the <code>ModeChanging</code> and <code>ItemUpdating</code> events to integrate with your data store.</p>
+
+<DetailsView ItemType="Customer"
+             Items="@_customers"
+             AllowPaging="true"
+             AutoGenerateRows="true"
+             AutoGenerateEditButton="true"
+             HeaderText="Editable Customer"
+             GridLines="GridLines.Both"
+             ModeChanging="HandleModeChanging"
+             ItemUpdating="HandleUpdating" />
+
+<p style="margin-top: 10px; font-weight: bold;">@_statusMessage</p>
+
+<p>Code:</p>
+<pre><code>&lt;DetailsView ItemType="Customer"
+             Items="@@_customers"
+             AllowPaging="true"
+             AutoGenerateRows="true"
+             AutoGenerateEditButton="true"
+             HeaderText="Editable Customer"
+             ModeChanging="HandleModeChanging"
+             ItemUpdating="HandleUpdating" /&gt;
+
+@@code {
+    void HandleModeChanging(DetailsViewModeEventArgs e)
+    {
+        // e.NewMode indicates the requested mode (Edit, ReadOnly, Insert)
+    }
+
+    void HandleUpdating(DetailsViewUpdateEventArgs e)
+    {
+        // Persist changes to your data store here
+    }
+}</code></pre>
+
+<hr />
+
+<h3>Empty Data</h3>
+<p>When the data source has no items, the <code>EmptyDataText</code> is displayed.</p>
+
+<DetailsView ItemType="Customer"
+             Items="@_emptyList"
+             AutoGenerateRows="true"
+             EmptyDataText="No customers found."
+             GridLines="GridLines.Both" />
+
+<p>Code:</p>
+<pre><code>&lt;DetailsView ItemType="Customer"
+             Items="@@_emptyList"
+             EmptyDataText="No customers found." /&gt;</code></pre>
+
+@code {
+    private string _statusMessage = "";
+    private int _pageChangeCount = 0;
+
+    private List<Customer> _customers = new()
+    {
+        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
+        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
+        new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global Solutions" }
+    };
+
+    private List<Customer> _emptyList = new();
+
+    private void HandlePageChanged(PageChangedEventArgs e)
+    {
+        _pageChangeCount++;
+    }
+
+    private void HandleModeChanging(DetailsViewModeEventArgs e)
+    {
+        _statusMessage = $"Mode changing to {e.NewMode}";
+    }
+
+    private void HandleUpdating(DetailsViewUpdateEventArgs e)
+    {
+        _statusMessage = "Update requested — integrate with your data store here.";
+    }
+}

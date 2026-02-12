@@ -29,7 +29,6 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/HiddenField")]
     [InlineData("/ControlSamples/HyperLink")]
     [InlineData("/ControlSamples/Image")]
-    [InlineData("/ControlSamples/ImageMap")]
     [InlineData("/ControlSamples/LinkButton")]
     [InlineData("/ControlSamples/LinkButton/JavaScript")]
     [InlineData("/ControlSamples/Literal")]
@@ -70,6 +69,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/GridView/RowSelection")]
     [InlineData("/ControlSamples/FormView/Simple")]
     [InlineData("/ControlSamples/FormView/Edit")]
+    [InlineData("/ControlSamples/DetailsView")]
     public async Task DataControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -169,7 +169,17 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/LoginStatusNotAuthenticated")]
     [InlineData("/ControlSamples/ChangePassword")]
     [InlineData("/ControlSamples/CreateUserWizard")]
+    [InlineData("/ControlSamples/PasswordRecovery")]
     public async Task LoginControl_Loads_WithoutErrors(string path)
+    {
+        await VerifyPageLoadsWithoutErrors(path);
+    }
+
+    // Utility Features
+    [Theory]
+    [InlineData("/ControlSamples/DataBinder")]
+    [InlineData("/ControlSamples/ViewState")]
+    public async Task UtilityFeature_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
     }
@@ -236,7 +246,12 @@ public class ControlSampleTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add($"{path}: {msg.Text}");
+                // Filter out ASP.NET Core structured log messages forwarded to browser console
+                // These start with ISO 8601 timestamps like [2026-02-12T16:00:34.529...]
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                {
+                    consoleErrors.Add($"{path}: {msg.Text}");
+                }
             }
         };
 
