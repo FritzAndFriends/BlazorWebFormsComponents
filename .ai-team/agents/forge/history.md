@@ -116,3 +116,36 @@
 - Library is effectively feature-complete for practical Web Forms migration
 
 📌 Team update (2026-02-11): Sprint 3 gate review — DetailsView APPROVED, PasswordRecovery APPROVED. 50/53 complete (94%). — decided by Forge
+
+### 2026-02-12 — Chart Component JS Library Evaluation
+
+**Requested by Jeffrey T. Fritz.** Performed full architectural evaluation of using a JavaScript charting library to implement the Web Forms `System.Web.UI.DataVisualization.Charting.Chart` control (previously deferred as "very high complexity").
+
+**Key findings:**
+- Web Forms Chart renders an `<img>` tag pointing to a server-generated PNG via `ChartImg.axd` — this is architecturally impossible to replicate in Blazor (no GDI+, no server-side image handler pipeline). Any implementation must accept a HTML output deviation.
+- The `SeriesChartType` enum has 35 chart types (Point through Pyramid). Realistic Phase 1 subset: 8 types (Column, Bar, Line, Pie, Area, Doughnut, Scatter, StackedColumn) covering 90%+ of real-world usage.
+- Chart's key sub-objects: Series, DataPoint, ChartArea, Axis, Legend, Title — must be mirrored as Blazor sub-components.
+
+**Library evaluation results:**
+- **D3.js — REJECTED.** Low-level SVG manipulation toolkit, not a charting library. Zero built-in chart types. No Blazor wrapper. Would require building an entire charting engine from scratch (XL effort). Jeffrey's suggestion, but wrong abstraction level.
+- **Chart.js — RECOMMENDED.** MIT license, ~60KB gzipped, ~10 built-in chart types covering all Phase 1 needs, multiple Blazor wrappers exist (though we recommend bundling chart.min.js directly and writing thin interop, not depending on community wrapper NuGet packages).
+- **ApexCharts — STRONG ALTERNATIVE.** MIT, ~120KB gz, 20+ chart types, official Blazor wrapper (Blazor-ApexCharts). Better coverage but double the bundle size and the wrapper has its own opinionated API.
+- **Plotly.js — REJECTED.** 3-4MB gzipped bundle size is disqualifying. Scientific/3D features are overkill.
+
+**Architecture recommendation:**
+- Use Chart.js bundled as a static asset (~60KB)
+- Thin JS interop layer (`chart-interop.js`) translating C# config → Chart.js config
+- Blazor Chart component mirrors Web Forms property names (Series, ChartAreas, etc.)
+- `<canvas>` output instead of `<img>` — documented as justified exception
+- Inherit `DataBoundComponent<T>` (consistent with Web Forms Chart inheriting DataBoundControl)
+- Effort: L (Large) — first component requiring JS interop, new testing challenges (canvas can't be bUnit-tested)
+
+**Risks identified:**
+1. JS interop is unprecedented in this project — new build/packaging complexity
+2. Canvas content not testable via bUnit — Playwright becomes primary quality gate
+3. Chart.js version pinning required — major version upgrades could break interop
+4. SSR/prerendering needs special handling (canvas requires DOM)
+
+**Recommendation: Proceed, but as Sprint 4** — not tacked onto Sprint 3. The JS interop pattern warrants dedicated design review and planning.
+
+📌 Team update (2026-02-12): Chart component feasibility confirmed — Chart.js recommended via JS interop. HTML output deviation (`<canvas>` not `<img>`) justified and documented. Effort: L. Target Sprint 4. — decided by Forge

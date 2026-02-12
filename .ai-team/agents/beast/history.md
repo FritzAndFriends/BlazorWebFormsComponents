@@ -30,3 +30,6 @@
 - **Sprint 3 docs delivered:** DetailsView and PasswordRecovery documentation created with full structure (features, Web Forms syntax, Blazor syntax, HTML output, migration notes, examples, See Also). Added to mkdocs.yml nav (alphabetical) and linked in README.md.
 
 📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. Action item: fix DetailsView docs to replace `DataSource=` with `Items=` in Blazor code samples. — decided by Forge
+
+ Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
+

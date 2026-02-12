@@ -25,3 +25,6 @@
 📌 Test pattern: DetailsView is a generic DataBoundComponent<ItemType> — tests must use `ItemType="Widget"` and provide `Items` parameter as a list. PasswordRecovery requires NavigationManager service registration (`Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object)`). Both follow the .razor test file pattern inheriting BlazorWebFormsTestContext via _Imports.razor. — Rogue
 
 📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 71 new tests verified. 797 total. — decided by Forge
+
+ Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
+

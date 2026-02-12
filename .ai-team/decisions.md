@@ -153,3 +153,298 @@
 **By:** Rogue
 **What:** 71 new bUnit tests added for Sprint 3 components: 42 for DetailsView (5 test files: Rendering, HeaderFooter, CommandRow, Events, Paging) and 29 for PasswordRecovery (2 test files: Step1UserName, BasicFlow). Total test count now 797, all passing.
 **Why:** QA gate for Sprint 3 — both components needed comprehensive unit test coverage before merge. Tests verify rendering fidelity (table structure, property names/values, empty data, header/footer), interactive behavior (mode switching, paging, event firing), and edge cases (null items, single item paging, cancel flows, failure text display).
+
+### 2026-02-12: Chart component JS library evaluation
+
+**By:** Forge
+**What:** Recommend Chart.js via JS interop as the rendering engine for a Chart component, targeting 8 core chart types. Do NOT build from scratch with D3. Accept the HTML output deviation (SVG/Canvas instead of `<img>`) as a documented, justified exception to the project's HTML fidelity rule.
+**Why:** See full analysis below.
+
+---
+
+## 1. Web Forms Chart Control Analysis
+
+#### What It Is
+`System.Web.UI.DataVisualization.Charting.Chart` (namespace: `System.Web.UI.DataVisualization.Charting`, assembly: `System.Web.DataVisualization.dll`) is a server-side charting control that shipped with .NET Framework 3.5 SP1+. It inherits from `DataBoundControl` → `WebControl` → `Control`.
+
+#### Chart Types (35 total via `SeriesChartType` enum)
+| # | Type | # | Type | # | Type |
+|---|------|---|------|---|------|
+| 0 | Point | 12 | StackedColumn100 | 24 | RangeColumn |
+| 1 | FastPoint | 13 | Area | 25 | Radar |
+| 2 | Bubble | 14 | SplineArea | 26 | Polar |
+| 3 | Line | 15 | StackedArea | 27 | ErrorBar |
+| 4 | Spline | 16 | StackedArea100 | 28 | BoxPlot |
+| 5 | StepLine | 17 | Pie | 29 | Renko |
+| 6 | FastLine | 18 | Doughnut | 30 | ThreeLineBreak |
+| 7 | Bar | 19 | Stock | 31 | Kagi |
+| 8 | StackedBar | 20 | Candlestick | 32 | PointAndFigure |
+| 9 | StackedBar100 | 21 | Range | 33 | Funnel |
+| 10 | Column | 22 | SplineRange | 34 | Pyramid |
+| 11 | StackedColumn | 23 | RangeBar | | |
+
+#### Key Properties & Sub-Objects
+- **Chart:** `Series` (collection), `ChartAreas` (collection), `Legends` (collection), `Titles` (collection), `Annotations` (collection), `DataSource`, `Width`, `Height`, `ImageType`, `RenderType`, `Palette`
+- **Series:** `Name`, `ChartType`, `Points` (DataPointCollection), `XValueMember`, `YValueMembers`, `Color`, `BorderWidth`, `ChartArea`, `Legend`, `IsVisibleInLegend`, `MarkerStyle`, `ToolTip`
+- **DataPoint:** `XValue`, `YValues[]`, `Label`, `Color`, `ToolTip`, `IsValueShownAsLabel`
+- **ChartArea:** `Name`, `AxisX`, `AxisY`, `AxisX2`, `AxisY2`, `Area3DStyle`, `BackColor`
+- **Axis:** `Title`, `Minimum`, `Maximum`, `Interval`, `LabelStyle`, `MajorGrid`, `MinorGrid`, `IsLogarithmic`
+- **Legend:** `Name`, `Docking`, `Alignment`, `Title`
+- **Title:** `Text`, `Font`, `Alignment`, `Docking`
+
+#### HTML Output
+The Web Forms Chart control renders as an **`<img>` tag** pointing to a server-side image handler:
+```html
+<img src="/ChartImg.axd?i=chart_ABC123.png&g=..." alt="Chart" style="height:300px;width:400px;" />
+```
+The actual chart is a **server-generated PNG/JPEG/BMP image** produced by GDI+ (`System.Drawing`). The `ChartImg.axd` HTTP handler streams the image bytes on demand. There is no client-side rendering whatsoever — it's purely a raster image.
+
+---
+
+## 2. JS Library Evaluation
+
+#### Evaluation Criteria
+| Criterion | Weight | Rationale |
+|-----------|--------|-----------|
+| License | Must-have | Project is MIT; library must be MIT-compatible |
+| Bundle size | High | Library ships with the NuGet package |
+| Chart type coverage | High | Must cover the core Web Forms chart types |
+| Blazor wrapper exists | High | Reduces our JS interop surface area dramatically |
+| Ease of integration | Medium | Less JS code = less maintenance burden |
+| Rendering tech | Info | Canvas vs SVG affects testability |
+
+#### D3.js
+| Aspect | Assessment |
+|--------|------------|
+| License | BSD-3-Clause (MIT-compatible ✓) |
+| Bundle size | ~150-250 KB gzipped (full); modular |
+| Chart types built-in | **Zero.** D3 is a DOM manipulation toolkit, not a charting library. Every chart type must be built from scratch using SVG primitives. |
+| Blazor wrapper | **None.** No maintained C# wrapper. All integration is raw `IJSRuntime` interop. |
+| Effort to implement | **XL.** We'd be writing an entire charting library on top of D3. Each chart type is hundreds of lines of JS (axes, scales, transitions, tooltips, legends). |
+| Verdict | **❌ REJECT.** D3 is the wrong abstraction level. It's like suggesting we use System.Drawing to implement the Chart control — that's literally what Microsoft did, and it took a team years. |
+
+#### Chart.js
+| Aspect | Assessment |
+|--------|------------|
+| License | MIT ✓ |
+| Bundle size | ~60 KB gzipped |
+| Chart types | Line, Bar, Pie, Doughnut, Radar, Polar Area, Bubble, Scatter (~10 built-in) |
+| Blazor wrapper | **Yes.** Multiple: PSC.Blazor.Components.Chartjs (active, .NET 8), ChartJs.Blazor forks |
+| API style | Declarative JSON config → maps well to C# object model |
+| Rendering | Canvas (HTML5 `<canvas>`) |
+| Verdict | **✅ RECOMMENDED.** Best balance of size, coverage, and Blazor ecosystem support. |
+
+#### ApexCharts
+| Aspect | Assessment |
+|--------|------------|
+| License | MIT ✓ |
+| Bundle size | ~100-130 KB gzipped |
+| Chart types | 20+ types including candlestick, heatmap, treemap, boxplot, radar |
+| Blazor wrapper | **Yes.** Blazor-ApexCharts (official, actively maintained, .NET 8+, 6.1.0) |
+| API style | Declarative, strongly typed Blazor components with `<ApexChart>` / `<ApexPointSeries>` |
+| Rendering | SVG |
+| Verdict | **✅ STRONG ALTERNATIVE.** Better chart type coverage than Chart.js. Larger bundle but still reasonable. The official Blazor wrapper is the most mature in the ecosystem. |
+
+#### Plotly.js
+| Aspect | Assessment |
+|--------|------------|
+| License | MIT ✓ |
+| Bundle size | **3-4 MB gzipped** |
+| Chart types | 40+ including 3D, contour, Sankey, geo maps |
+| Blazor wrapper | Limited — Plotly.Blazor exists but less maintained |
+| Rendering | SVG + WebGL |
+| Verdict | **❌ REJECT.** Bundle size is disqualifying. A 3-4 MB JS dependency for a component library is unreasonable. The 3D/scientific features are overkill — Web Forms Chart was never used for that. |
+
+#### Summary Matrix
+
+| Library | License | Size (gz) | Chart Types | Blazor Wrapper | Effort | Verdict |
+|---------|---------|-----------|-------------|----------------|--------|---------|
+| D3.js | BSD-3 | ~150KB | 0 (DIY) | None | XL | ❌ |
+| **Chart.js** | **MIT** | **~60KB** | **~10** | **Yes (multiple)** | **M** | **✅** |
+| ApexCharts | MIT | ~120KB | ~20+ | Yes (official) | M | ✅ Alt |
+| Plotly.js | MIT | ~3.5MB | 40+ | Limited | L | ❌ |
+
+---
+
+## 3. Architecture Decision
+
+#### The HTML Output Problem
+
+This is the elephant in the room. Our project's #1 rule is **identical HTML output**. Web Forms Chart renders:
+```html
+<img src="/ChartImg.axd?..." style="height:300px;width:400px;" />
+```
+
+A JS library renders:
+```html
+<canvas width="400" height="300"></canvas>  <!-- Chart.js -->
+<!-- or -->
+<div class="apexcharts-canvas"><svg>...</svg></div>  <!-- ApexCharts -->
+```
+
+**These are fundamentally different.** There is no way to make a JS charting library produce an `<img>` tag. This is a **justified exception** to the HTML fidelity rule for these reasons:
+
+1. **The `<img>` output was an implementation detail, not a semantic contract.** Developers never targeted the `<img>` tag with CSS or JS — they styled the chart through the Chart control's own API (colors, fonts, borders). The surrounding `<div>` with `width`/`height` provides the same layout behavior.
+
+2. **Server-side image generation is architecturally impossible in Blazor.** Blazor has no equivalent to `ChartImg.axd` handlers, no `System.Drawing` (without SkiaSharp), and no server-side image streaming pipeline. Even if we wanted to replicate the `<img>` approach, we'd need a separate HTTP endpoint, image generation library, and caching layer — which is outside the scope of a component library.
+
+3. **The migration value is in the API, not the HTML.** Developers migrating Chart usage care about preserving their `Series`, `ChartAreas`, `DataPoints` configuration — not the output format. A Chart that accepts the same property names and renders a visually equivalent chart is a successful migration.
+
+4. **Precedent exists in the project.** The deferred controls documentation already acknowledges that Chart requires a fundamentally different approach. We're formalizing that acknowledgment.
+
+**Recommendation:** Document this as an explicit HTML output exception in the Chart component's docs. Add a "Migration Notes" section explaining that the output changes from `<img>` (raster) to `<canvas>`/`<svg>` (vector), and that this is actually an **upgrade** (better resolution, interactivity, accessibility).
+
+#### API Surface Design
+
+The Web Forms Chart has hundreds of properties across its object hierarchy. We should emulate the **structure** but not the **completeness**:
+
+```razor
+@* Proposed Blazor API — mirrors Web Forms declarative markup *@
+<Chart Width="400px" Height="300px" Palette="ChartPalette.Berry">
+    <ChartAreas>
+        <ChartArea Name="MainArea">
+            <AxisX Title="Month" />
+            <AxisY Title="Revenue ($)" />
+        </ChartArea>
+    </ChartAreas>
+    <Series>
+        <ChartSeries Name="Sales" ChartType="SeriesChartType.Column"
+                     XValueMember="Month" YValueMembers="Amount"
+                     Items="@salesData" />
+        <ChartSeries Name="Costs" ChartType="SeriesChartType.Line"
+                     XValueMember="Month" YValueMembers="Amount"
+                     Items="@costData" />
+    </Series>
+    <Legends>
+        <ChartLegend Name="Default" Docking="Docking.Bottom" />
+    </Legends>
+    <Titles>
+        <ChartTitle Text="Monthly Performance" />
+    </Titles>
+</Chart>
+```
+
+Compare to Web Forms:
+```aspx
+<asp:Chart ID="Chart1" runat="server" Width="400px" Height="300px" Palette="Berry">
+    <ChartAreas>
+        <asp:ChartArea Name="MainArea">
+            <AxisX Title="Month" />
+            <AxisY Title="Revenue ($)" />
+        </asp:ChartArea>
+    </ChartAreas>
+    <Series>
+        <asp:Series Name="Sales" ChartType="Column"
+                    XValueMember="Month" YValueMembers="Amount" />
+    </Series>
+    <Legends>
+        <asp:Legend Name="Default" Docking="Bottom" />
+    </Legends>
+    <Titles>
+        <asp:Title Text="Monthly Performance" />
+    </Titles>
+</asp:Chart>
+```
+
+The migration path: remove `asp:` prefix, remove `runat="server"`, change data binding from `DataSource`/`DataBind()` to `Items` parameter (consistent with GridView/DetailsView pattern).
+
+#### Scope: Initial Chart Type Subset
+
+Phase 1 — **8 chart types** covering 90%+ of real-world Web Forms Chart usage:
+
+| Priority | SeriesChartType | Chart.js Type | ApexCharts Type |
+|----------|----------------|---------------|-----------------|
+| P0 | Column | `bar` (vertical) | `bar` |
+| P0 | Bar | `bar` (horizontal) | `bar` (horizontal) |
+| P0 | Line | `line` | `line` |
+| P0 | Pie | `pie` | `pie` |
+| P0 | Area | `line` (fill) | `area` |
+| P1 | Doughnut | `doughnut` | `donut` |
+| P1 | Scatter/Point | `scatter` | `scatter` |
+| P1 | StackedColumn | `bar` (stacked) | `bar` (stacked) |
+
+Phase 2 (future, if demand exists): Radar, Polar, Bubble, Spline, Stock/Candlestick.
+
+Phase 3 (probably never): Renko, Kagi, ThreeLineBreak, PointAndFigure, Funnel, Pyramid — these are exotic financial/statistical types with near-zero migration demand.
+
+#### Which JS Library?
+
+**Primary recommendation: Chart.js**
+
+Rationale:
+1. **Smallest bundle** (~60KB gz) — critical for a library that NuGet consumers may not need
+2. **Covers all 8 Phase 1 chart types** out of the box
+3. **Multiple Blazor wrappers exist** — we can either use one or write a thin interop layer
+4. **Canvas rendering** — simpler DOM footprint, no SVG complexity in test assertions
+5. **Declarative JSON config** — maps cleanly to a C# object model that mirrors Web Forms' property hierarchy
+
+**Why not ApexCharts?**
+ApexCharts is technically superior (more chart types, SVG rendering, official Blazor wrapper), but:
+- Twice the bundle size for features we don't need in Phase 1
+- The official Blazor wrapper (`Blazor-ApexCharts`) has its own opinionated API that doesn't match Web Forms naming — we'd be wrapping a wrapper
+- If we ever expand to Phase 2 (Stock/Candlestick), ApexCharts becomes more compelling. We can pivot then.
+
+**Architecture approach:**
+- **Do NOT take a NuGet dependency on a Blazor Chart.js wrapper package.** These wrappers are community-maintained with uncertain longevity. Instead:
+- Bundle `chart.min.js` (~60KB) in the project's static assets
+- Write a thin JS interop module (`chart-interop.js`) that translates our C# config objects to Chart.js config
+- The Blazor `Chart` component converts its Web Forms-style properties to a JSON config, passes it to JS interop, and Chart.js renders into a `<canvas>` element
+- This gives us full control over the API surface and no external NuGet dependency risk
+
+---
+
+## 4. Final Recommendation
+
+| Item | Decision |
+|------|----------|
+| **JS Library** | Chart.js (MIT, ~60KB gz, bundled as static asset) |
+| **Approach** | Thin JS interop — no external Blazor wrapper dependency |
+| **Phase 1 chart types** | Column, Bar, Line, Pie, Area, Doughnut, Scatter, StackedColumn |
+| **API design** | Mirror Web Forms property names (`Series`, `ChartAreas`, `Legends`, `Titles`, `SeriesChartType` enum) |
+| **HTML output exception** | Documented deviation — `<canvas>` instead of `<img>`. Justified by architectural impossibility and migration value being in the API, not the HTML. |
+| **Effort estimate** | **L (Large)** — breakdown below |
+| **Base class** | `DataBoundComponent<T>` (Web Forms Chart inherits `DataBoundControl`) |
+| **Enums needed** | `SeriesChartType`, `ChartPalette`, `Docking`, `ChartDashStyle` |
+
+#### Effort Breakdown (Large)
+- **C# component hierarchy:** Chart, ChartArea, Series (ChartSeries), DataPoint, Legend, Title, Axis — ~8 component/class files. **M effort.**
+- **JS interop layer:** `chart-interop.js` bridging C# config → Chart.js config. **M effort.**
+- **SeriesChartType mapping:** Translating our enum values to Chart.js type strings + config. **S effort.**
+- **Testing:** bUnit tests for component API + manual visual testing (canvas content can't be asserted in bUnit). **M effort.**
+- **Docs, samples, migration guide:** Per team policy. **M effort.**
+- **Total: L** — comparable to DetailsView in component count, but the JS interop layer adds a new dimension we haven't tackled before.
+
+#### Risks & Gotchas
+
+1. **JS interop is a new pattern for this project.** Every other component is pure Blazor/C#. Chart will be the first (and likely only) component requiring JavaScript. This adds complexity to the build, test, and packaging pipeline.
+
+2. **Canvas can't be unit-tested with bUnit.** We can test the component renders a `<canvas>` element and passes correct config JSON, but we can't assert the visual output. Integration tests (Playwright screenshots) become the primary quality gate.
+
+3. **Chart.js version management.** We're bundling a specific version of `chart.min.js`. Major version upgrades could break our interop layer. Pin the version and document it.
+
+4. **Data binding model differs.** Web Forms Chart uses `DataSource` + `DataBind()` with `XValueMember`/`YValueMembers` string-based binding. Our Blazor version should use the project's established `Items` parameter pattern (typed collection), with `XValueMember`/`YValueMembers` as lambda expressions or property name strings for member access.
+
+5. **No image export.** Web Forms Chart could `SaveImage()` to a file. Chart.js can export to base64 PNG via `chart.toBase64Image()`, but this requires JS interop. Consider exposing as a future feature, not Phase 1.
+
+6. **SSR/prerendering.** Chart.js requires a DOM and `<canvas>` element. The component must suppress rendering during server-side prerendering (`OnAfterRenderAsync` pattern) or show a placeholder.
+
+#### Decision: Proceed or Defer?
+
+**Recommendation: Proceed with Chart.js, but as a separate sprint/milestone — not Sprint 3.**
+
+The library is at 50/53 (94%) and effectively feature-complete for practical migration. Chart is the highest-value remaining component, and JS interop makes it feasible. However, it introduces a new architectural pattern (JS dependencies, interop layer, canvas testing) that warrants dedicated planning, not tacking onto an existing sprint.
+
+Suggested timeline:
+- **Sprint 4 planning:** Design review for Chart component architecture, JS interop patterns, build/packaging changes
+- **Sprint 4 execution:** Implement Chart with Phase 1 types, docs, samples, integration tests
+- **Post-Sprint 4:** Evaluate demand for Phase 2 chart types
+
+### 2026-02-12: Milestone 4 — Chart component with Chart.js
+**By:** Forge (architecture), Squad (planning)
+**What:** Milestone 4 will implement the Chart component using Chart.js (~60KB, MIT) via Blazor JS interop. Phase 1: 8 chart types (Column, Bar, Line, Pie, Area, Doughnut, Scatter, StackedColumn). HTML output exception: `<canvas>` instead of `<img>` (justified — API fidelity is the migration value, not HTML fidelity). 8 work items across 5 waves. Target: 51/53 components (96%).
+**Why:** Chart is the highest-value remaining deferred component. Chart.js provides the best balance of bundle size, chart type coverage, and Blazor ecosystem support. D3 rejected (wrong abstraction), Plotly rejected (3-4MB bundle). Design review required before implementation (auto-triggered ceremony).
+
+### 2026-02-12: User directive — use "milestones" not "sprints" (consolidated)
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Going forward, use "milestones" instead of "sprints" for naming work batches. All future planning uses "milestone" terminology.
+**Why:** User preference — captured for team memory. Applies retroactively to planning references where practical.
