@@ -33,3 +33,12 @@
 📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
 📌 Team update (2026-02-11): Sprint 3 scope: DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred. 48/53 → target 50/53. — decided by Forge
 📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
+
+### Sprint 3 — Sample Pages for DetailsView and PasswordRecovery (2026-02-11)
+
+- **DetailsView sample:** Uses `Items` parameter with inline `List<Customer>` data (same pattern as GridView RowSelection sample). Demonstrates auto-generated rows, paging between records with `AllowPaging`, Edit mode switching with `AutoGenerateEditButton`, and empty data text. Uses `Customer` model from `SharedSampleObjects.Models`.
+- **PasswordRecovery sample:** Shows the 3-step flow (username → security question → success). Uses `SetQuestion()` on the component reference via the `LoginCancelEventArgs.Sender` cast pattern. Demonstrates custom text properties and help link configuration.
+- **PasswordRecovery event pattern:** The `LoginCancelEventArgs` exposes a `Sender` property that must be cast back to `PasswordRecovery` to call `SetQuestion()` — this is the key integration point for the security question step.
+- **Nav ordering note:** Data Components section in NavMenu.razor is not strictly alphabetical (DataList before DataGrid). I placed DetailsView after DataGrid and before FormView to maintain the closest alphabetical order without rearranging existing entries.
+
+📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 50/53 components (94%). — decided by Forge

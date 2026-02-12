@@ -111,3 +111,45 @@
 **By:** Jeffrey T. Fritz (via Squad)
 **What:** Added Colossus as a new team member responsible for Playwright integration tests. Colossus owns `samples/AfterBlazorServerSide.Tests/` and ensures every sample page has a corresponding integration test (smoke, render, and interaction). Rogue retains ownership of bUnit unit tests. Integration testing split from Rogue's QA role.
 **Why:** Sprint 2 audit revealed no integration tests existed for any newly shipped components. Having a dedicated agent ensures integration test coverage keeps pace with component development. Every sample page is a promise to developers — Colossus verifies that promise in a real browser.
+
+### 2026-02-11: Deferred controls documentation pattern established
+
+**By:** Beast
+**What:** Created `docs/Migration/DeferredControls.md` to document the three permanently deferred controls (Chart, Substitution, Xml). Each control gets its own section with: what it did in Web Forms, why it's not implemented, and the recommended Blazor alternative with before/after migration examples. Added to mkdocs.yml nav under Migration.
+**Why:** Components without documentation don't exist for the developer trying to migrate. Even controls we *don't* implement need a clear "here's what to do instead" — otherwise developers hit a dead end with no guidance. This pattern can be reused if additional controls are deferred in the future.
+
+### 2026-02-11: DetailsView and PasswordRecovery documentation shipped
+
+**By:** Beast
+**What:** Created `docs/DataControls/DetailsView.md` and `docs/LoginControls/PasswordRecovery.md`. Both added to `mkdocs.yml` nav in alphabetical order. README.md updated with documentation links for both components.
+**Why:** Sprint 3 requires docs to ship with components per team policy. Both docs follow the established convention: title → MS docs link → Features Supported → NOT Supported → Web Forms syntax → Blazor syntax → HTML output → Migration Notes (Before/After) → Examples → See Also. PasswordRecovery follows the ChangePassword.md pattern for login controls; DetailsView follows the data control patterns from FormView/GridView.
+
+### 2026-02-11: DetailsView inherits DataBoundComponent, not BaseStyledComponent
+
+**By:** Cyclops
+**What:** DetailsView inherits `DataBoundComponent<ItemType>` (same as GridView and FormView) rather than `BaseStyledComponent`. The `CssClass` property is declared directly on the component. Event args use separate DetailsView-specific types (`DetailsViewCommandEventArgs`, `DetailsViewModeEventArgs`, etc.) rather than reusing FormView's event args.
+**Why:** Web Forms DetailsView inherits from `CompositeDataBoundControl`, which is a data-bound control. GridView and FormView already follow this pattern in the codebase via `DataBoundComponent<T>`. Using separate event args (not FormView's) matches Web Forms where `DetailsViewInsertEventArgs` and `FormViewInsertEventArgs` are distinct types. The `DetailsViewMode` enum is also separate from `FormViewMode` even though they have identical values — Web Forms treats them as distinct types.
+
+### 2026-02-11: PasswordRecovery component — inherits BaseWebFormsComponent, 3-step flow
+
+**By:** Cyclops
+**What:** Built PasswordRecovery component in `LoginControls/` with 3-step password reset flow (UserName → Question → Success). Inherits `BaseWebFormsComponent` following existing login control patterns. Created `SuccessTextStyle` sub-component, `MailMessageEventArgs`, and `SendMailErrorEventArgs` event args. Each step has its own `EditForm`. Styles cascade via existing sub-components (`TitleTextStyle`, `LabelStyle`, `TextBoxStyle`, etc.) plus new `SuccessTextStyle`. The `SubmitButtonStyle` property maps to `LoginButtonStyle` cascading name to reuse existing sub-component. Templates (`UserNameTemplate`, `QuestionTemplate`, `SuccessTemplate`) allow full customization of each step.
+**Why:** Sprint 3 deliverable. Followed ChangePassword/CreateUserWizard patterns for consistency. Used `BaseWebFormsComponent` instead of spec-suggested `BaseStyledComponent` because all existing login controls use this base class and manage styles through CascadingParameters. Per-step `EditForm` prevents validation interference between steps.
+
+### 2026-02-11: Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED
+
+**By:** Forge
+**What:** Both Sprint 3 components passed gate review. DetailsView: correct `DataBoundComponent<ItemType>` inheritance, all 10 events with proper EventArgs, table-based HTML matching Web Forms, `DetailsViewMode` enum. 3 minor non-blocking issues (CellPadding/CellSpacing logic, docs DataSource→Items). PasswordRecovery: correct `BaseWebFormsComponent` inheritance, 3-step wizard flow, all 6 events, table-based nested HTML. 3 minor non-blocking issues (RenderOuterTable unused, SubmitButtonType unused, sample uses Sender casting vs @ref). Build: 0 errors, 797 tests. Status: 50/53 (94%).
+**Why:** Formal gate review — both components meet Web Forms fidelity standards. No blocking issues. Minor issues tracked but do not prevent shipping.
+
+### 2026-02-11: DetailsView sample uses Items parameter with inline data
+
+**By:** Jubilee
+**What:** DetailsView sample page uses the `Items` parameter with an inline `List<Customer>` rather than `SelectMethod` for data binding. This matches the GridView RowSelection sample pattern and is the clearest way to demonstrate paging and mode-switching without requiring a static query method.
+**Why:** The `SelectMethod` approach (used in GridView Default) requires a specific method signature with `out totalRowCount` that adds complexity. For a single-record-at-a-time control like DetailsView, the `Items` parameter is more natural and easier for migrating developers to understand. Both patterns work; `Items` is preferred for sample clarity.
+
+### 2026-02-12: Sprint 3 bUnit tests shipped — DetailsView + PasswordRecovery
+
+**By:** Rogue
+**What:** 71 new bUnit tests added for Sprint 3 components: 42 for DetailsView (5 test files: Rendering, HeaderFooter, CommandRow, Events, Paging) and 29 for PasswordRecovery (2 test files: Step1UserName, BasicFlow). Total test count now 797, all passing.
+**Why:** QA gate for Sprint 3 — both components needed comprehensive unit test coverage before merge. Tests verify rendering fidelity (table structure, property names/values, empty data, header/footer), interactive behavior (mode switching, paging, event firing), and edge cases (null items, single item paging, cancel flows, failure text display).

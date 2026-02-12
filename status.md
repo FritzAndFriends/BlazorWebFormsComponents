@@ -3,11 +3,11 @@
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
 | Editor Controls | 25 | 0 | 2 | 27 |
-| Data Controls | 7 | 0 | 2 | 9 |
+| Data Controls | 8 | 0 | 1 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 3 | 0 | 0 | 3 |
-| Login Controls | 6 | 0 | 1 | 7 |
-| **TOTAL** | **48** | **0** | **5** | **53** |
+| Login Controls | 7 | 0 | 0 | 7 |
+| **TOTAL** | **50** | **0** | **3** | **53** |
 
 ---
 
@@ -46,7 +46,7 @@
 | View | ✅ Complete | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
-### 🟡 Data Controls (7/9 - 78% Complete)
+### 🟡 Data Controls (8/9 - 89% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -58,7 +58,7 @@
 | Repeater | ✅ Complete | Documented |
 | Chart | 🔴 Not Started | Consider deferring - very high complexity |
 | DataPager | ✅ Complete | Documented in DataPager.md |
-| DetailsView | 🔴 Not Started | Single-record display/edit |
+| DetailsView | ✅ Complete | Single-record display/edit, documented, tested, sample page exists |
 
 ### ✅ Validation Controls (7/7 - 100% Complete)
 
@@ -81,7 +81,7 @@
 | SiteMapPath | ✅ Complete | Documented, tested (23 tests), sample page exists |
 | TreeView | ✅ Complete | Documented in TreeView.md |
 
-### 🟢 Login Controls (6/7 - 86% Complete)
+### ✅ Login Controls (7/7 - 100% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -91,7 +91,7 @@
 | LoginView | ✅ Complete | Documented, tested |
 | ChangePassword | ✅ Complete | Documented, tested, table-based layout |
 | CreateUserWizard | ✅ Complete | Documented, tested, two-step wizard |
-| PasswordRecovery | 🔴 Not Started | Complex ASP.NET Identity integration |
+| PasswordRecovery | ✅ Complete | Documented, tested, three-step wizard, table-based layout |
 
 ---
 
@@ -131,13 +131,13 @@
 | ~~**Menu**~~ | ~~Medium-High~~ | ~~12-16~~ | ~~6-8~~ | ✅ Complete |
 | ~~**SiteMapPath**~~ | ~~Medium~~ | ~~8-10~~ | ~~4-5~~ | ✅ Complete |
 | ~~**DataPager**~~ | ~~Medium~~ | ~~8-12~~ | ~~4-6~~ | ✅ Complete |
-| ~~**DetailsView**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | Sprint 3 |
+| ~~**DetailsView**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | ✅ Complete |
 
 #### Login Controls
 | Component | Complexity | Est. Hours (Manual) | Est. Hours (with Copilot) |
 |-----------|------------|---------------------|---------------------------|
 | ~~**ChangePassword**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | ✅ Complete |
-| **PasswordRecovery** | High | 16-24 | 8-12 | Sprint 3 |
+| ~~**PasswordRecovery**~~ | ~~High~~ | ~~16-24~~ | ~~8-12~~ | ✅ Complete |
 | ~~**CreateUserWizard**~~ | ~~Very High~~ | ~~24-32~~ | ~~12-16~~ | ✅ Complete |
 
 #### Lower Priority / Consider Deferring
@@ -206,11 +206,11 @@
 10. ~~**Menu**~~ - ✅ Complete
 11. ~~**SiteMapPath**~~ - ✅ Complete (Breadcrumb navigation, 23 tests)
 12. ~~**DataPager**~~ - ✅ Complete (Paging for ListView)
-13. **DetailsView** - Single-record display (Sprint 3)
+13. ~~**DetailsView**~~ - ✅ Complete (Single-record display)
 
 ### Phase 4: Login Controls ✅ MOSTLY COMPLETE
 14. ~~**ChangePassword**~~ - ✅ Complete
-15. **PasswordRecovery** - Password reset flow (Sprint 3)
+15. ~~**PasswordRecovery**~~ - ✅ Complete (Password reset flow)
 16. ~~**CreateUserWizard**~~ - ✅ Complete
 
 ### Consider Deferring
