@@ -70,6 +70,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/GridView/RowSelection")]
     [InlineData("/ControlSamples/FormView/Simple")]
     [InlineData("/ControlSamples/FormView/Edit")]
+    [InlineData("/ControlSamples/DetailsView")]
     public async Task DataControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -169,6 +170,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/LoginStatusNotAuthenticated")]
     [InlineData("/ControlSamples/ChangePassword")]
     [InlineData("/ControlSamples/CreateUserWizard")]
+    [InlineData("/ControlSamples/PasswordRecovery")]
     public async Task LoginControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);

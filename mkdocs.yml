@@ -91,6 +91,7 @@ nav:
     - DataGrid: DataControls/DataGrid.md
     - DataList: DataControls/DataList.md
     - DataPager: DataControls/DataPager.md
+    - DetailsView: DataControls/DetailsView.md
     - FormView: DataControls/FormView.md
     - GridView: DataControls/GridView.md
     - ListView: DataControls/ListView.md
@@ -115,6 +116,7 @@ nav:
     - LoginName: LoginControls/LoginName.md
     - LoginStatus: LoginControls/LoginStatus.md
     - LoginView: LoginControls/LoginView.md
+    - PasswordRecovery: LoginControls/PasswordRecovery.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - ID Rendering: UtilityFeatures/IDRendering.md
@@ -125,6 +127,7 @@ nav:
       - Getting started: Migration/readme.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
+      - Deferred Controls (Chart, Substitution, Xml): Migration/DeferredControls.md
       - Master Pages: Migration/MasterPages.md
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - User Controls: Migration/User-Controls.md

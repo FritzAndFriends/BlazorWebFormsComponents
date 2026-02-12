@@ -1,0 +1,168 @@
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+@code {
+
+	[Fact]
+	public void PasswordRecovery_Step1_RendersUserNameTitleText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		cut.Markup.ShouldContain("Forgot Your Password?");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_RendersUserNameLabel()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		var label = cut.Find("label[for='pr1_UserName']");
+		label.ShouldNotBeNull();
+		label.TextContent.ShouldContain("User Name:");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_RendersUserNameInput()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		cut.Find("#pr1_UserName").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_RendersSubmitButton()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		var submitButton = cut.Find("#pr1_SubmitButton");
+		submitButton.ShouldNotBeNull();
+		submitButton.GetAttribute("value").ShouldBe("Submit");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_RendersInstructionText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		cut.Markup.ShouldContain("Enter your User Name to receive your password.");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_CustomTitleText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" UserNameTitleText="Reset Password" />);
+
+		cut.Markup.ShouldContain("Reset Password");
+		cut.Markup.ShouldNotContain("Forgot Your Password?");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_CustomInstructionText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" UserNameInstructionText="Enter username below." />);
+
+		cut.Markup.ShouldContain("Enter username below.");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_CustomLabelText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" UserNameLabelText="Your Username:" />);
+
+		cut.Markup.ShouldContain("Your Username:");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_CustomSubmitButtonText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" SubmitButtonText="Go" />);
+
+		var submitButton = cut.Find("#pr1_SubmitButton");
+		submitButton.GetAttribute("value").ShouldBe("Go");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_RendersIdOnTable()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		var table = cut.Find("table#pr1");
+		table.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_TableHasBorderCollapse()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		var table = cut.Find("table#pr1");
+		table.GetAttribute("style").ShouldContain("border-collapse:collapse");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_NoFailureTextByDefault()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		cut.Markup.ShouldNotContain("Your attempt to retrieve your password was not successful");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_NoHelpLinkByDefault()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" />);
+
+		Assert.Throws<Bunit.ElementNotFoundException>(() => cut.Find("#pr1_HelpLink"));
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_WithHelpPage_RendersHelpLink()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" HelpPageText="Need help?" HelpPageUrl="/help" />);
+
+		var helpLink = cut.Find("#pr1_HelpLink");
+		helpLink.ShouldNotBeNull();
+		helpLink.TextContent.ShouldBe("Need help?");
+		helpLink.GetAttribute("href").ShouldBe("/help");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step1_WithHelpIcon_RendersImage()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1" HelpPageIconUrl="/images/help.png" HelpPageText="Help" HelpPageUrl="/help" />);
+
+		var img = cut.Find("img");
+		img.ShouldNotBeNull();
+		img.GetAttribute("src").ShouldBe("/images/help.png");
+	}
+}
