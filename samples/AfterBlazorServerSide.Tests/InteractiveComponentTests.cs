@@ -898,9 +898,16 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Verify password form fields are present
-            var passwordInputs = await page.Locator("input[type='password']").AllAsync();
-            Assert.True(passwordInputs.Count >= 3, "ChangePassword should have at least 3 password fields (current, new, confirm)");
+            // Verify password form fields are present using ID-based selectors
+            // ChangePassword component renders inputs with IDs: {ID}_CurrentPassword, {ID}_NewPassword, {ID}_ConfirmNewPassword
+            // Wait for Blazor interactive rendering to complete
+            await page.Locator("input[id$='_CurrentPassword']").WaitForAsync(new() { Timeout = 5000 });
+            var currentPassword = await page.Locator("input[id$='_CurrentPassword']").AllAsync();
+            var newPassword = await page.Locator("input[id$='_NewPassword']").AllAsync();
+            var confirmPassword = await page.Locator("input[id$='_ConfirmNewPassword']").AllAsync();
+            Assert.NotEmpty(currentPassword);
+            Assert.NotEmpty(newPassword);
+            Assert.NotEmpty(confirmPassword);
 
             // Verify submit button exists
             var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
@@ -939,11 +946,14 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Verify registration form fields are present — username (text), password, email
-            var textInputs = await page.Locator("input[type='text'], input[type='email']").AllAsync();
-            Assert.NotEmpty(textInputs);
+            // Verify registration form fields are present using ID-based selectors
+            // CreateUserWizard renders inputs with IDs: {ID}_UserName, {ID}_Email, {ID}_Password, etc.
+            // Wait for Blazor interactive rendering to complete
+            await page.Locator("input[id$='_UserName']").WaitForAsync(new() { Timeout = 5000 });
+            var userNameInput = await page.Locator("input[id$='_UserName']").AllAsync();
+            Assert.NotEmpty(userNameInput);
 
-            var passwordInputs = await page.Locator("input[type='password']").AllAsync();
+            var passwordInputs = await page.Locator("input[id$='_Password']").AllAsync();
             Assert.NotEmpty(passwordInputs);
 
             // Verify submit/create button exists
