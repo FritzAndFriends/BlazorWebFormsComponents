@@ -1072,15 +1072,14 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Find the Edit link/button in the editable DetailsView section
-            var editLink = page.Locator("a:has-text('Edit'), button:has-text('Edit')").First;
+            // Find the Edit link/button in the editable DetailsView section (exact match to avoid sidebar links)
+            var editLink = page.GetByRole(AriaRole.Link, new() { Name = "Edit", Exact = true }).First;
             await editLink.WaitForAsync(new() { Timeout = 5000 });
             await editLink.ClickAsync();
-            await page.WaitForTimeoutAsync(500);
 
-            // Verify mode changed — status message should update
-            var statusText = await page.ContentAsync();
-            Assert.Contains("Mode changing", statusText);
+            // Verify mode changed — wait for status message to appear in DOM
+            var statusLocator = page.Locator("text=Mode changing");
+            await statusLocator.WaitForAsync(new() { Timeout = 10000 });
 
             // In edit mode, Update and Cancel links should appear
             var updateLink = await page.Locator("a:has-text('Update'), button:has-text('Update')").AllAsync();
@@ -1121,8 +1120,8 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Assert — Step 1: Username input is present
-            var textInputs = await page.Locator("input[type='text']").AllAsync();
+            // Assert — Step 1: Username input is present (InputText renders without explicit type attribute)
+            var textInputs = await page.Locator("input[id$='_UserName']").AllAsync();
             Assert.NotEmpty(textInputs);
 
             // Assert — Submit button is present
@@ -1162,18 +1161,17 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Fill in a username on the first PasswordRecovery instance
-            var usernameInput = page.Locator("input[type='text']").First;
+            // Fill in a username on the first PasswordRecovery instance (InputText renders without explicit type attribute)
+            var usernameInput = page.Locator("input[id$='_UserName']").First;
             await usernameInput.FillAsync("testuser");
 
             // Click the submit button to advance to the question step
-            var submitButton = page.Locator("button, input[type='submit']").First;
+            var submitButton = page.Locator("input[id$='_SubmitButton']").First;
             await submitButton.ClickAsync();
-            await page.WaitForTimeoutAsync(500);
 
             // Assert — Status message updated (verifying user handler fired)
-            var pageContent = await page.ContentAsync();
-            Assert.Contains("User verified", pageContent);
+            var statusLocator = page.Locator("text=User verified");
+            await statusLocator.WaitForAsync(new() { Timeout = 5000 });
 
             // Assert no console errors
             Assert.Empty(consoleErrors);
