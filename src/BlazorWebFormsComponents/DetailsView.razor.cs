@@ -501,7 +501,25 @@ namespace BlazorWebFormsComponents
 		{
 			var value = _property.GetValue(dataItem);
 			var displayValue = value?.ToString() ?? string.Empty;
-			return builder => builder.AddContent(0, displayValue);
+
+			return mode switch
+			{
+				DetailsViewMode.Edit => builder =>
+				{
+					builder.OpenElement(0, "input");
+					builder.AddAttribute(1, "type", "text");
+					builder.AddAttribute(2, "value", displayValue);
+					builder.CloseElement();
+				},
+				DetailsViewMode.Insert => builder =>
+				{
+					builder.OpenElement(0, "input");
+					builder.AddAttribute(1, "type", "text");
+					builder.AddAttribute(2, "value", string.Empty);
+					builder.CloseElement();
+				},
+				_ => builder => builder.AddContent(0, displayValue),
+			};
 		}
 	}
 }

@@ -1107,6 +1107,66 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task DetailsView_EditMode_RendersInputTextboxes()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/DetailsView", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Click Edit in the editable DetailsView (exact match to avoid sidebar links)
+            var editLink = page.GetByRole(AriaRole.Link, new() { Name = "Edit", Exact = true }).First;
+            await editLink.WaitForAsync(new() { Timeout = 5000 });
+            await editLink.ClickAsync();
+
+            // Wait for mode change — status message appears in the DOM
+            await page.Locator("text=Mode changing").WaitForAsync(new() { Timeout = 10000 });
+
+            // Assert: input textboxes should appear for editable fields
+            var textInputs = await page.Locator("input[type='text']").AllAsync();
+            Assert.True(textInputs.Count >= 3,
+                $"Edit mode should show at least 3 text inputs for Customer fields (CustomerID, FirstName, LastName, CompanyName), but found {textInputs.Count}");
+
+            // Assert: Update and Cancel links present
+            var updateLink = page.GetByRole(AriaRole.Link, new() { Name = "Update", Exact = true });
+            await updateLink.WaitForAsync(new() { Timeout = 5000 });
+            var cancelLink = page.GetByRole(AriaRole.Link, new() { Name = "Cancel", Exact = true });
+            await cancelLink.WaitForAsync(new() { Timeout = 5000 });
+
+            // Verify Cancel returns to ReadOnly mode (inputs replaced by text)
+            await cancelLink.ClickAsync();
+            await page.Locator("text=Mode changing to ReadOnly").WaitForAsync(new() { Timeout = 10000 });
+
+            var textInputsAfterCancel = await page.Locator("input[type='text']").AllAsync();
+            Assert.True(textInputsAfterCancel.Count == 0,
+                $"After Cancel, no text inputs should remain in DetailsView, but found {textInputsAfterCancel.Count}");
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
     public async Task PasswordRecovery_Step1Form_RendersUsernameInput()
     {
         // Arrange
