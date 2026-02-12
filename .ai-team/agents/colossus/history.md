@@ -59,3 +59,18 @@ Fixed all 7 failing integration tests. 111/111 passing after fixes.
 - **SVG placeholders:** Simple inline SVG files are ideal test-safe replacements for external placeholder image services. They're just XML text, always available, and don't require network access.
 
 📌 Team update (2026-02-12): Boy scout fixes logged — 7 pre-existing integration test failures fixed, 111/111 integration tests + 797/797 bUnit tests all green. Commit a4d17f5 on sprint3/detailsview-passwordrecovery. — logged by Scribe
+
+## 2026-02-12: DetailsView edit mode input textbox verification test
+
+- Added `DetailsView_EditMode_RendersInputTextboxes` integration test in `InteractiveComponentTests.cs`
+- Test verifies the full edit mode lifecycle:
+  1. Navigates to `/ControlSamples/DetailsView` and clicks the Edit link
+  2. Waits for "Mode changing" status message (Blazor Server DOM update)
+  3. Asserts at least 3 `<input type="text">` elements appear (CustomerID, FirstName, LastName, CompanyName fields)
+  4. Asserts Update and Cancel links are present via `GetByRole(AriaRole.Link, ...)`
+  5. Clicks Cancel and verifies return to ReadOnly mode — no text inputs remain
+- This test catches the known bug where edit mode shows command row changes (Edit→Update/Cancel) but leaves field values as plain text instead of rendering `<input type="text">` textboxes
+- Cyclops is fixing the component in parallel — this test will pass once the fix lands
+- Key selector: `input[type='text']` works because the fix uses raw HTML `<input type="text">` not Blazor's `<InputText>` (which omits `type="text"` in .NET 10)
+
+📌 Team update (2026-02-12): DetailsView auto-generated fields must render <input type="text"> in Edit/Insert mode — decided by Cyclops
