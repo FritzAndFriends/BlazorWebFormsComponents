@@ -74,3 +74,17 @@ Fixed all 7 failing integration tests. 111/111 passing after fixes.
 - Key selector: `input[type='text']` works because the fix uses raw HTML `<input type="text">` not Blazor's `<InputText>` (which omits `type="text"` in .NET 10)
 
 📌 Team update (2026-02-12): DetailsView auto-generated fields must render <input type="text"> in Edit/Insert mode — decided by Cyclops
+
+## 2026-02-12: Sprint 3 missing integration tests — full interactive coverage
+
+- Added 4 new integration tests in `InteractiveComponentTests.cs` for Sprint 3 components:
+  - `DetailsView_EmptyData_ShowsMessage` — verifies `EmptyDataText="No customers found."` renders when data source is empty. Uses `GetByRole(AriaRole.Cell)` to avoid matching code sample `<pre>` blocks.
+  - `PasswordRecovery_AnswerSubmit_TransitionsToSuccessStep` — full 3-step flow test: username → question → success. Uses ID-specific selectors (`#PasswordRecovery1_UserName`, `#PasswordRecovery1_Answer`, `#PasswordRecovery1_SubmitButton`) to target the first PasswordRecovery instance. Uses `PressSequentiallyAsync` + Tab for Blazor Server `InputText` binding on re-rendered DOM. Verifies "Recovery email sent successfully" status (the final status after both `OnVerifyingAnswer` and `OnSendingMail` handlers fire).
+  - `PasswordRecovery_HelpLink_Renders` — verifies the 3rd PasswordRecovery renders a help link `<a id="PasswordRecovery3_HelpLink">` with text "Need more help?" and correct href.
+  - `PasswordRecovery_CustomText_Applies` — verifies the 2nd PasswordRecovery renders custom `UserNameTitleText="Password Reset"` in a table cell and custom `UserNameLabelText="Email:"` in the label element.
+- All 116 integration tests passing (112 existing + 4 new), 0 failures.
+- Key learnings:
+  - Pages with code sample `<pre><code>` blocks cause strict mode violations when using `text=` locators — the same text appears in both the rendered component and the code sample. Use role-based or ID-based selectors instead.
+  - Pages with multiple PasswordRecovery instances require ID-specific selectors (`#PasswordRecovery1_SubmitButton`) not suffix selectors (`input[id$='_SubmitButton']`) to avoid strict mode violations.
+  - After a multi-step Blazor Server form flow, the final `_statusMessage` reflects the LAST handler that sets it. For PasswordRecovery step 2→3, `OnVerifyingAnswer` sets one message, then `OnSendingMail` overwrites it — test must assert on the final value.
+  - `PressSequentiallyAsync` + Tab blur works reliably for Blazor Server `InputText` binding on dynamically re-rendered DOM elements.

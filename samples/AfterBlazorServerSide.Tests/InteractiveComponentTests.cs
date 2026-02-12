@@ -1167,6 +1167,45 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task DetailsView_EmptyData_ShowsMessage()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/DetailsView", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert — the empty data message appears in a table cell (not in code samples)
+            var emptyDataText = page.GetByRole(AriaRole.Cell, new() { Name = "No customers found." });
+            await emptyDataText.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await emptyDataText.CountAsync() > 0,
+                "EmptyDataText 'No customers found.' should appear for an empty data source");
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
     public async Task PasswordRecovery_Step1Form_RendersUsernameInput()
     {
         // Arrange
@@ -1242,6 +1281,163 @@ public class InteractiveComponentTests
             // Assert — Status message updated (verifying user handler fired)
             var statusLocator = page.Locator("text=User verified");
             await statusLocator.WaitForAsync(new() { Timeout = 5000 });
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task PasswordRecovery_AnswerSubmit_TransitionsToSuccessStep()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act — Navigate to the PasswordRecovery page
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PasswordRecovery", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Step 1: Fill in username on the first PasswordRecovery instance
+            var usernameInput = page.Locator("#PasswordRecovery1_UserName");
+            await usernameInput.WaitForAsync(new() { Timeout = 5000 });
+            await usernameInput.FillAsync("testuser");
+
+            // Click submit to advance to question step
+            var submitButton = page.Locator("#PasswordRecovery1_SubmitButton");
+            await submitButton.ClickAsync();
+
+            // Wait for Step 1→2 transition
+            var userVerified = page.Locator("text=User verified");
+            await userVerified.WaitForAsync(new() { Timeout = 10000 });
+
+            // Step 2: Wait for the answer input to appear after Blazor re-render
+            var answerInput = page.Locator("#PasswordRecovery1_Answer");
+            await answerInput.WaitForAsync(new() { Timeout = 10000 });
+
+            // Fill the answer and submit
+            await answerInput.ClickAsync();
+            await answerInput.PressSequentiallyAsync("blue");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Click the Step 2 submit button
+            var step2Submit = page.Locator("#PasswordRecovery1_SubmitButton");
+            await step2Submit.WaitForAsync(new() { Timeout = 5000 });
+            await step2Submit.ClickAsync();
+
+            // Assert — Step 2→3 transition: the OnSendingMail handler fires after answer accepted,
+            // so the final status message is the mail confirmation
+            var successText = page.Locator("text=Recovery email sent successfully");
+            await successText.WaitForAsync(new() { Timeout = 10000 });
+
+            // Assert — PasswordRecovery1 moved to Step 3 (Success): answer input and submit button are gone
+            Assert.Equal(0, await page.Locator("#PasswordRecovery1_Answer").CountAsync());
+            Assert.Equal(0, await page.Locator("#PasswordRecovery1_SubmitButton").CountAsync());
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task PasswordRecovery_HelpLink_Renders()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PasswordRecovery", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert — Help link with correct text exists
+            var helpLink = page.Locator("a#PasswordRecovery3_HelpLink");
+            await helpLink.WaitForAsync(new() { Timeout = 5000 });
+            var linkText = await helpLink.TextContentAsync();
+            Assert.Equal("Need more help?", linkText);
+
+            // Assert — Help link has the expected href
+            var href = await helpLink.GetAttributeAsync("href");
+            Assert.Contains("/ControlSamples/PasswordRecovery", href);
+
+            // Assert no console errors
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task PasswordRecovery_CustomText_Applies()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PasswordRecovery", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert — Custom title text "Password Reset" appears in a table cell (not in code samples)
+            var titleText = page.GetByRole(AriaRole.Cell, new() { Name = "Password Reset", Exact = true });
+            await titleText.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await titleText.CountAsync() > 0,
+                "Custom UserNameTitleText 'Password Reset' should appear on the page");
+
+            // Assert — Custom label text "Email:" appears (in PasswordRecovery2's label element)
+            var labelText = page.Locator("label[for='PasswordRecovery2_UserName']");
+            await labelText.WaitForAsync(new() { Timeout = 5000 });
+            var labelContent = await labelText.TextContentAsync();
+            Assert.Contains("Email:", labelContent);
 
             // Assert no console errors
             Assert.Empty(consoleErrors);

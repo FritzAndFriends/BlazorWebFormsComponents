@@ -169,6 +169,15 @@
 **What:** Added a regex filter in `VerifyPageLoadsWithoutErrors` to exclude browser console messages matching `^\[\d{4}-\d{2}-\d{2}T` (ISO 8601 timestamp prefix). These are ASP.NET Core ILogger messages forwarded to the browser console by Blazor Server, not actual page errors.
 **Why:** Without this filter, any page that triggers framework-level logging (e.g., Calendar with many interactive elements) produces false positive test failures.
 
+### 2026-02-12: Milestone exit criteria — samples and integration tests mandatory
+
+**By:** Jeffrey T. Fritz
+**What:** Every milestone/sprint must meet ALL of the following exit criteria before submission for review:
+1. **Samples for every feature** — Every feature of every component created or modified in the sprint must have a corresponding sample page demonstrating it
+2. **Integration tests for every sample** — Every sample page added must have at least one Playwright integration test verifying its interactive behavior
+3. **All integration tests pass** — 100% of integration tests (both new and pre-existing) must pass before the sprint is submitted
+**Why:** Sprint 3 exposed gaps where components shipped without full sample coverage and integration tests. This gate ensures no sprint is declared complete until the full chain — component → sample → integration test → green — is verified. This is a permanent policy for all future sprints.
+
 ### DetailsView auto-generated fields render inputs in Edit/Insert mode
 
 **By:** Cyclops
