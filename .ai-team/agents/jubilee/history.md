@@ -42,3 +42,4 @@
 - **Nav ordering note:** Data Components section in NavMenu.razor is not strictly alphabetical (DataList before DataGrid). I placed DetailsView after DataGrid and before FormView to maintain the closest alphabetical order without rearranging existing entries.
 
 📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 50/53 components (94%). — decided by Forge
+📌 Team update (2026-02-12): LoginControls sample pages MUST include `@using BlazorWebFormsComponents.LoginControls` — root _Imports.razor doesn't cover sub-namespaces. Never use external image URLs in samples; use local SVGs. — decided by Colossus

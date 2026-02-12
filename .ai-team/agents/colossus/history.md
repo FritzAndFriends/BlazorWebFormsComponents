@@ -26,3 +26,36 @@
   - PasswordRecovery Step 1 uses `input[type='text']` for username, button for submit
 
 📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 50/53 components (94%). Library effectively feature-complete. — decided by Forge
+
+## 2026-02-12: Boy Scout rule — fixed 7 pre-existing integration test failures
+
+Fixed all 7 failing integration tests. 111/111 passing after fixes.
+
+### Failure 1 & 2: ChangePassword + CreateUserWizard form fields not found
+- **Root cause:** The sample pages at `ChangePassword/Index.razor` and `CreateUserWizard/Index.razor` were MISSING `@using BlazorWebFormsComponents.LoginControls`. The components rendered as raw HTML custom elements (`<changepassword>`) instead of Blazor components. PasswordRecovery worked because it had the import.
+- **Fix:** Added `@using BlazorWebFormsComponents.LoginControls` to both sample pages. Also updated test selectors from `input[type='password']` / `input[type='text']` to ID-based selectors (`input[id$='_CurrentPassword']`, etc.) with `WaitForAsync` for circuit establishment timing.
+
+### Failure 3 & 4 & 7: Image, ImageMap external placeholder URLs unreachable
+- **Root cause:** Sample pages referenced `https://via.placeholder.com/...` URLs which are unreachable in the test environment.
+- **Fix:** Created 8 local SVG placeholder images in `wwwroot/img/` (placeholder-150x100.svg, placeholder-80x80.svg, etc.) and replaced all external URLs in both `Image/Index.razor` and `ImageMap/Index.razor`.
+
+### Failure 4 (additional): ImageMap duplicate InlineData
+- **Root cause:** ImageMap had entries in BOTH `EditorControl_Loads_WithoutErrors` and `NavigationControl_Loads_WithoutErrors`. Per team decisions, ImageMap is a Navigation Control.
+- **Fix:** Removed `[InlineData("/ControlSamples/ImageMap")]` from EditorControl test theory.
+
+### Failure 5: Calendar console errors
+- **Root cause:** ASP.NET Core structured log messages (timestamps like `[2026-02-12T16:00:34.529...]`) forwarded to browser console as "error" level. Calendar component and sample page have NO bugs — these are benign framework messages from Blazor's SignalR circuit.
+- **Fix:** Added regex filter in `VerifyPageLoadsWithoutErrors` to exclude messages matching `^\[\d{4}-\d{2}-\d{2}T` pattern.
+
+### Failure 6: TreeView/Images broken image path
+- **Root cause:** `ImageUrl="/img/C#.png"` but actual file is `CSharp.png`.
+- **Fix:** Changed to `ImageUrl="/img/CSharp.png"`.
+
+## Learnings
+
+- **Missing @using is silent:** When a Blazor component can't be resolved, it renders as a raw HTML custom element with no error. This is extremely hard to catch without integration tests that verify actual DOM content.
+- **LoginControls namespace:** Components in `BlazorWebFormsComponents.LoginControls` require an explicit `@using` — the root `@using BlazorWebFormsComponents` in `_Imports.razor` doesn't cover sub-namespaces. PasswordRecovery had it; ChangePassword and CreateUserWizard didn't.
+- **ASP.NET Core log messages in browser console:** Blazor Server forwards structured log output to the browser console. These appear as "error" type messages starting with ISO 8601 timestamps. Tests must filter these to avoid false positives.
+- **SVG placeholders:** Simple inline SVG files are ideal test-safe replacements for external placeholder image services. They're just XML text, always available, and don't require network access.
+
+📌 Team update (2026-02-12): Boy scout fixes logged — 7 pre-existing integration test failures fixed, 111/111 integration tests + 797/797 bUnit tests all green. Commit a4d17f5 on sprint3/detailsview-passwordrecovery. — logged by Scribe

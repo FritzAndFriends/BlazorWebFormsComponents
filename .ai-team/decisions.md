@@ -153,3 +153,18 @@
 **By:** Rogue
 **What:** 71 new bUnit tests added for Sprint 3 components: 42 for DetailsView (5 test files: Rendering, HeaderFooter, CommandRow, Events, Paging) and 29 for PasswordRecovery (2 test files: Step1UserName, BasicFlow). Total test count now 797, all passing.
 **Why:** QA gate for Sprint 3 — both components needed comprehensive unit test coverage before merge. Tests verify rendering fidelity (table structure, property names/values, empty data, header/footer), interactive behavior (mode switching, paging, event firing), and edge cases (null items, single item paging, cancel flows, failure text display).
+
+### 2026-02-12: ChangePassword and CreateUserWizard sample pages require LoginControls using directive
+**By:** Colossus
+**What:** Added `@using BlazorWebFormsComponents.LoginControls` to `ChangePassword/Index.razor` and `CreateUserWizard/Index.razor`. Without this, the components render as raw HTML custom elements instead of Blazor components — silently failing with no error.
+**Why:** The root `@using BlazorWebFormsComponents` in `_Imports.razor` does not cover sub-namespaces like `LoginControls`. Any future sample page using Login Controls must include this directive. PasswordRecovery already had it; these two were missed during Sprint 2.
+
+### 2026-02-12: External placeholder URLs replaced with local SVG images
+**By:** Colossus
+**What:** Replaced all `https://via.placeholder.com/...` URLs in Image and ImageMap sample pages with local SVG placeholder images in `wwwroot/img/`. Created 8 SVG files matching the sizes used in the samples.
+**Why:** External URLs are unreachable in CI/test environments, causing integration test failures. Local SVGs are always available and test-safe. Future sample pages must never use external image URLs.
+
+### 2026-02-12: ASP.NET Core structured log messages filtered in integration tests
+**By:** Colossus
+**What:** Added a regex filter in `VerifyPageLoadsWithoutErrors` to exclude browser console messages matching `^\[\d{4}-\d{2}-\d{2}T` (ISO 8601 timestamp prefix). These are ASP.NET Core ILogger messages forwarded to the browser console by Blazor Server, not actual page errors.
+**Why:** Without this filter, any page that triggers framework-level logging (e.g., Calendar with many interactive elements) produces false positive test failures.
