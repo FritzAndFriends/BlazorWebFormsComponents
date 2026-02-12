@@ -88,6 +88,7 @@ nav:
     - Table: EditorControls/Table.md
     - TextBox: EditorControls/TextBox.md
   - Data Controls:
+    - Chart: DataControls/Chart.md
     - DataGrid: DataControls/DataGrid.md
     - DataList: DataControls/DataList.md
     - DataPager: DataControls/DataPager.md
@@ -128,4 +129,5 @@ nav:
       - Master Pages: Migration/MasterPages.md
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - User Controls: Migration/User-Controls.md
+      - Deferred Controls: Migration/DeferredControls.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md

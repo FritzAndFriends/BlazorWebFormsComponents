@@ -1,0 +1,61 @@
+@page "/ControlSamples/Chart/Doughnut"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Doughnut</PageTitle>
+
+<h2>Chart - Doughnut</h2>
+
+<p>A <strong>Doughnut</strong> chart showing a department budget breakdown. Doughnut charts are similar to pie charts but with a hollow center, making them useful for displaying proportional data with a cleaner look.</p>
+
+<Chart ChartWidth="500px" ChartHeight="400px">
+	<ChartTitle Text="Annual Department Budget Allocation" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="DoughnutArea" />
+	<ChartSeries Name="Budget"
+		ChartType="SeriesChartType.Doughnut"
+		ChartArea="DoughnutArea"
+		Points="@BudgetPoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> BudgetPoints = new()
+	{
+		new() { XValue = "Engineering", YValues = new[] { 35.0 }, Label = "Engineering" },
+		new() { XValue = "Marketing", YValues = new[] { 20.0 }, Label = "Marketing" },
+		new() { XValue = "Sales", YValues = new[] { 18.0 }, Label = "Sales" },
+		new() { XValue = "Operations", YValues = new[] { 15.0 }, Label = "Operations" },
+		new() { XValue = "HR", YValues = new[] { 7.0 }, Label = "HR" },
+		new() { XValue = "Legal", YValues = new[] { 5.0 }, Label = "Legal" }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="500px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Annual Department Budget Allocation" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="DoughnutArea" /&gt;
+    &lt;ChartSeries Name="Budget"
+        ChartType="SeriesChartType.Doughnut"
+        ChartArea="DoughnutArea"
+        Points="@@BudgetPoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; BudgetPoints = new()
+    {
+        new() { XValue = "Engineering", YValues = new[] { 35.0 }, Label = "Engineering" },
+        new() { XValue = "Marketing", YValues = new[] { 20.0 }, Label = "Marketing" },
+        new() { XValue = "Sales", YValues = new[] { 18.0 }, Label = "Sales" },
+        new() { XValue = "Operations", YValues = new[] { 15.0 }, Label = "Operations" },
+        new() { XValue = "HR", YValues = new[] { 7.0 }, Label = "HR" },
+        new() { XValue = "Legal", YValues = new[] { 5.0 }, Label = "Legal" }
+    };
+
+}</code></pre>

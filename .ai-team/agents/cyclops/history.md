@@ -46,3 +46,16 @@
 
  Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
 
+- **Chart component architecture (WI-1/2/3):** Chart inherits `BaseStyledComponent`. Uses CascadingValue `"ParentChart"` for child registration (ChartSeries, ChartArea, ChartLegend, ChartTitle). JS interop via ES module `chart-interop.js` with lazy loading in `ChartJsInterop.cs`. `ChartConfigBuilder` is a pure static class converting component model → Chart.js JSON config, testable without browser.
+- **Chart file paths:**
+  - Enums: `Enums/SeriesChartType.cs` (35 values), `Enums/ChartPalette.cs`, `Enums/Docking.cs`, `Enums/ChartDashStyle.cs`
+  - POCOs: `Axis.cs`, `DataPoint.cs`
+  - JS: `wwwroot/js/chart.min.js` (PLACEHOLDER), `wwwroot/js/chart-interop.js`
+  - C# interop: `ChartJsInterop.cs`
+  - Config builder: `ChartConfigBuilder.cs` (+ config snapshot classes)
+  - Components: `Chart.razor`/`.cs`, `ChartSeries.razor`/`.cs`, `ChartArea.razor`/`.cs`, `ChartLegend.razor`/`.cs`, `ChartTitle.razor`/`.cs`
+- **Chart type mapping:** Web Forms `SeriesChartType.Point` maps to Chart.js `"scatter"`. Web Forms has no explicit "Scatter" enum value — `Point=0` is the equivalent. 8 types supported in Phase 1; unsupported throw `NotSupportedException`.
+- **JS interop pattern for Chart:** Uses `IJSRuntime` directly (not the shared `BlazorWebFormsJsInterop` service) because Chart.js interop is chart-specific, not page-level. `ChartJsInterop` lazily imports the ES module and exposes `CreateChartAsync`, `UpdateChartAsync`, `DestroyChartAsync`.
+- **BaseStyledComponent already has Width/Height as Unit type:** Chart adds `ChartWidth`/`ChartHeight` as string parameters for CSS dimension styling on the wrapper div, avoiding conflict with the base class Unit properties.
+- **Instance-based canvas IDs:** Uses `Guid.NewGuid()` (truncated to 8 chars) for canvas element IDs, consistent with the ImageMap pattern that avoids static counters.
+

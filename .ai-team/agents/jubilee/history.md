@@ -45,3 +45,13 @@
 
  Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
 
+### Milestone 4 — Chart Sample Pages (WI-6)
+
+- **Chart component API:** Uses child components (`ChartSeries`, `ChartArea`, `ChartTitle`, `ChartLegend`) inside a `<Chart>` parent via `CascadingValue`. Data is provided through `List<DataPoint>` on `ChartSeries.Points`, where each `DataPoint` has `XValue` (object) and `YValues` (double[]). Chart type is set via `SeriesChartType` enum on `ChartSeries.ChartType`.
+- **8 sample pages created:** Index (Column), Line, Bar, Pie, Area, Doughnut, Scatter, StackedColumn — each under `Components/Pages/ControlSamples/Chart/`.
+- **Multi-series demos:** Line (NY vs LA temps), StackedColumn (3 product lines) show how to add multiple `ChartSeries` children.
+- **Scatter uses `Point` type:** The `SeriesChartType` enum has `Point` (not `Scatter`), so the scatter sample uses `SeriesChartType.Point`.
+- **Axis config is a POCO:** `Axis` is a plain class (not a component), passed via parameter syntax `AxisX="@(new Axis { Title = "..." })"`.
+- **NavMenu Chart node:** Added under Data Components with `Expanded="false"` and 8 sub-nodes for each chart type, alphabetically ordered.
+- **ComponentList updated:** Replaced placeholder `Chart(?)` with a working link.
+

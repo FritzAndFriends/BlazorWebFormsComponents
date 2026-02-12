@@ -50,7 +50,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - View
     - Xml
   - Data Controls
-    - Chart(?)
+    - [Chart](docs/DataControls/Chart.md)
     - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
     - [DataPager](docs/DataControls/DataPager.md)

@@ -3,11 +3,11 @@
 | Category | Completed | In Progress | Not Started | Total |
 |----------|-----------|-------------|-------------|-------|
 | Editor Controls | 25 | 0 | 2 | 27 |
-| Data Controls | 8 | 0 | 1 | 9 |
+| Data Controls | 9 | 0 | 0 | 9 |
 | Validation Controls | 7 | 0 | 0 | 7 |
 | Navigation Controls | 3 | 0 | 0 | 3 |
 | Login Controls | 7 | 0 | 0 | 7 |
-| **TOTAL** | **50** | **0** | **3** | **53** |
+| **TOTAL** | **51** | **0** | **2** | **53** |
 
 ---
 
@@ -46,7 +46,7 @@
 | View | ✅ Complete | Used with MultiView |
 | Xml | 🔴 Not Started | XML display/transform |
 
-### 🟡 Data Controls (8/9 - 89% Complete)
+### ✅ Data Controls (9/9 - 100% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -56,7 +56,7 @@
 | GridView | ✅ Complete | Documented |
 | ListView | ✅ Complete | Documented |
 | Repeater | ✅ Complete | Documented |
-| Chart | 🔴 Not Started | Consider deferring - very high complexity |
+| Chart | ✅ Complete | Phase 1: 8 chart types via Chart.js, JS interop, documented |
 | DataPager | ✅ Complete | Documented in DataPager.md |
 | DetailsView | ✅ Complete | Single-record display/edit, documented, tested, sample page exists |
 
@@ -151,7 +151,7 @@
 | ~~**Localize**~~ | ~~Low~~ | ~~Localization~~ | ✅ Complete |
 | **Xml** | Medium | XML transform |
 | **Substitution** | N/A | Cache-related, may not apply |
-| **Chart** | Very High | Consider external library |
+| ~~**Chart**~~ | ~~Very High~~ | ~~Consider external library~~ | ✅ Complete |
 | ~~**DataGrid**~~ | ~~Medium~~ | ~~Legacy, use GridView~~ | ✅ Complete |
 
 ### Summary Estimates
@@ -214,6 +214,6 @@
 16. ~~**CreateUserWizard**~~ - ✅ Complete
 
 ### Consider Deferring
-- **Chart** - Very high complexity, consider Blazor charting libraries
+- ~~**Chart**~~ - ✅ Complete (Phase 1 — 8 chart types via Chart.js)
 - **Substitution** - Cache-related, may not apply to Blazor
 - **Xml** - Low migration demand, XSLT is rarely used in modern apps

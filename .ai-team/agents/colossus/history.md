@@ -29,3 +29,22 @@
 
  Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
 
+## Learnings
+
+### 2026-02-12: Milestone 4 — Chart integration tests (WI-7)
+
+- Added 8 Chart smoke tests as a dedicated `ChartControl_Loads_AndRendersContent` Theory in `ControlSampleTests.cs`
+  - Follows the Menu pattern: separate Theory with its own verify method (`VerifyChartPageLoads`) that tolerates JS interop console errors but checks for page errors
+  - Routes: `/ControlSamples/Chart`, `Chart/Line`, `Chart/Bar`, `Chart/Pie`, `Chart/Area`, `Chart/Doughnut`, `Chart/Scatter`, `Chart/StackedColumn`
+- Added 4 interactive tests in `InteractiveComponentTests.cs`:
+  - `Chart_DefaultPage_RendersCanvas` — verifies `<canvas>` on Column (default) page
+  - `Chart_LinePage_RendersCanvas` — verifies `<canvas>` on Line page
+  - `Chart_PiePage_RendersCanvas` — verifies `<canvas>` on Pie page
+  - `Chart_AllTypes_RenderCanvas` — Theory test covering all 8 routes for `<canvas>` element
+- All 19 Chart tests pass (8 smoke + 3 individual canvas + 8 theory canvas)
+- Used `WaitUntilState.DOMContentLoaded` instead of `NetworkIdle` for Chart tests — Chart.js JS interop can keep network busy
+- Key learnings:
+  - Chart component renders `<div>` wrapping a `<canvas>` element (in `Chart.razor`), so `<canvas>` is always in the DOM even before Chart.js initializes
+  - Chart pages use JS interop (`ChartJsInterop.cs`) — console errors are expected if Chart.js CDN/bundle isn't fully loaded; page errors are not
+  - Pre-existing test suite has 97 failures on non-Chart tests due to ASP.NET structured log console errors (`[timestamp] Error:`) being caught by `Assert.Empty(consoleErrors)` — these are unrelated to Chart work
+

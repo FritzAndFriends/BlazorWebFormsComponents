@@ -1,0 +1,77 @@
+@page "/ControlSamples/Chart"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Column</PageTitle>
+
+<h2>Chart - Column (Default)</h2>
+
+<p>The Chart component renders data visualizations using Chart.js. The default chart type is <strong>Column</strong>, which displays vertical bars for comparing values across categories.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px">
+	<ChartTitle Text="Monthly Sales — 2025" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="MainArea"
+		AxisX="@(new Axis { Title = "Month" })"
+		AxisY="@(new Axis { Title = "Sales ($)" })" />
+	<ChartSeries Name="Sales"
+		ChartType="SeriesChartType.Column"
+		ChartArea="MainArea"
+		Points="@SalesPoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> SalesPoints = new()
+	{
+		new() { XValue = "Jan", YValues = new[] { 12500.0 } },
+		new() { XValue = "Feb", YValues = new[] { 15200.0 } },
+		new() { XValue = "Mar", YValues = new[] { 18900.0 } },
+		new() { XValue = "Apr", YValues = new[] { 16400.0 } },
+		new() { XValue = "May", YValues = new[] { 21000.0 } },
+		new() { XValue = "Jun", YValues = new[] { 19800.0 } },
+		new() { XValue = "Jul", YValues = new[] { 22300.0 } },
+		new() { XValue = "Aug", YValues = new[] { 20100.0 } },
+		new() { XValue = "Sep", YValues = new[] { 17600.0 } },
+		new() { XValue = "Oct", YValues = new[] { 23400.0 } },
+		new() { XValue = "Nov", YValues = new[] { 25100.0 } },
+		new() { XValue = "Dec", YValues = new[] { 28700.0 } }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Monthly Sales — 2025" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="MainArea"
+        AxisX="@@(new Axis { Title = "Month" })"
+        AxisY="@@(new Axis { Title = "Sales ($)" })" /&gt;
+    &lt;ChartSeries Name="Sales"
+        ChartType="SeriesChartType.Column"
+        ChartArea="MainArea"
+        Points="@@SalesPoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; SalesPoints = new()
+    {
+        new() { XValue = "Jan", YValues = new[] { 12500.0 } },
+        new() { XValue = "Feb", YValues = new[] { 15200.0 } },
+        new() { XValue = "Mar", YValues = new[] { 18900.0 } },
+        new() { XValue = "Apr", YValues = new[] { 16400.0 } },
+        new() { XValue = "May", YValues = new[] { 21000.0 } },
+        new() { XValue = "Jun", YValues = new[] { 19800.0 } },
+        new() { XValue = "Jul", YValues = new[] { 22300.0 } },
+        new() { XValue = "Aug", YValues = new[] { 20100.0 } },
+        new() { XValue = "Sep", YValues = new[] { 17600.0 } },
+        new() { XValue = "Oct", YValues = new[] { 23400.0 } },
+        new() { XValue = "Nov", YValues = new[] { 25100.0 } },
+        new() { XValue = "Dec", YValues = new[] { 28700.0 } }
+    };
+
+}</code></pre>

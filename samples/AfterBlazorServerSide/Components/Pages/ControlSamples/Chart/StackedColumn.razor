@@ -1,0 +1,109 @@
+@page "/ControlSamples/Chart/StackedColumn"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Stacked Column</PageTitle>
+
+<h2>Chart - Stacked Column</h2>
+
+<p>A <strong>Stacked Column</strong> chart showing quarterly revenue by product line. Stacked columns display multiple series stacked on top of each other, making it easy to compare both individual contributions and totals across categories.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px">
+	<ChartTitle Text="Quarterly Revenue by Product Line" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="StackedArea"
+		AxisX="@(new Axis { Title = "Quarter" })"
+		AxisY="@(new Axis { Title = "Revenue ($K)" })" />
+	<ChartSeries Name="Desktop"
+		ChartType="SeriesChartType.StackedColumn"
+		ChartArea="StackedArea"
+		Points="@DesktopPoints" />
+	<ChartSeries Name="Mobile"
+		ChartType="SeriesChartType.StackedColumn"
+		ChartArea="StackedArea"
+		Points="@MobilePoints" />
+	<ChartSeries Name="Cloud"
+		ChartType="SeriesChartType.StackedColumn"
+		ChartArea="StackedArea"
+		Points="@CloudPoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> DesktopPoints = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 120.0 } },
+		new() { XValue = "Q2", YValues = new[] { 115.0 } },
+		new() { XValue = "Q3", YValues = new[] { 108.0 } },
+		new() { XValue = "Q4", YValues = new[] { 130.0 } }
+	};
+
+	private List<DataPoint> MobilePoints = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 80.0 } },
+		new() { XValue = "Q2", YValues = new[] { 95.0 } },
+		new() { XValue = "Q3", YValues = new[] { 110.0 } },
+		new() { XValue = "Q4", YValues = new[] { 125.0 } }
+	};
+
+	private List<DataPoint> CloudPoints = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 45.0 } },
+		new() { XValue = "Q2", YValues = new[] { 65.0 } },
+		new() { XValue = "Q3", YValues = new[] { 85.0 } },
+		new() { XValue = "Q4", YValues = new[] { 110.0 } }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Quarterly Revenue by Product Line" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="StackedArea"
+        AxisX="@@(new Axis { Title = "Quarter" })"
+        AxisY="@@(new Axis { Title = "Revenue ($K)" })" /&gt;
+    &lt;ChartSeries Name="Desktop"
+        ChartType="SeriesChartType.StackedColumn"
+        ChartArea="StackedArea"
+        Points="@@DesktopPoints" /&gt;
+    &lt;ChartSeries Name="Mobile"
+        ChartType="SeriesChartType.StackedColumn"
+        ChartArea="StackedArea"
+        Points="@@MobilePoints" /&gt;
+    &lt;ChartSeries Name="Cloud"
+        ChartType="SeriesChartType.StackedColumn"
+        ChartArea="StackedArea"
+        Points="@@CloudPoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; DesktopPoints = new()
+    {
+        new() { XValue = "Q1", YValues = new[] { 120.0 } },
+        new() { XValue = "Q2", YValues = new[] { 115.0 } },
+        new() { XValue = "Q3", YValues = new[] { 108.0 } },
+        new() { XValue = "Q4", YValues = new[] { 130.0 } }
+    };
+
+    private List&lt;DataPoint&gt; MobilePoints = new()
+    {
+        new() { XValue = "Q1", YValues = new[] { 80.0 } },
+        new() { XValue = "Q2", YValues = new[] { 95.0 } },
+        new() { XValue = "Q3", YValues = new[] { 110.0 } },
+        new() { XValue = "Q4", YValues = new[] { 125.0 } }
+    };
+
+    private List&lt;DataPoint&gt; CloudPoints = new()
+    {
+        new() { XValue = "Q1", YValues = new[] { 45.0 } },
+        new() { XValue = "Q2", YValues = new[] { 65.0 } },
+        new() { XValue = "Q3", YValues = new[] { 85.0 } },
+        new() { XValue = "Q4", YValues = new[] { 110.0 } }
+    };
+
+}</code></pre>

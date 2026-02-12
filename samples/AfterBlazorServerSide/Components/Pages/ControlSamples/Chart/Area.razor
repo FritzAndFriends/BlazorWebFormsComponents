@@ -1,0 +1,77 @@
+@page "/ControlSamples/Chart/Area"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Area</PageTitle>
+
+<h2>Chart - Area</h2>
+
+<p>An <strong>Area</strong> chart displaying cumulative website traffic over a year. Area charts emphasize the magnitude of change over time and are useful for showing volume.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px">
+	<ChartTitle Text="Monthly Website Visitors (thousands)" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="TrafficArea"
+		AxisX="@(new Axis { Title = "Month" })"
+		AxisY="@(new Axis { Title = "Visitors (K)" })" />
+	<ChartSeries Name="Visitors"
+		ChartType="SeriesChartType.Area"
+		ChartArea="TrafficArea"
+		Points="@TrafficPoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> TrafficPoints = new()
+	{
+		new() { XValue = "Jan", YValues = new[] { 45.0 } },
+		new() { XValue = "Feb", YValues = new[] { 52.0 } },
+		new() { XValue = "Mar", YValues = new[] { 61.0 } },
+		new() { XValue = "Apr", YValues = new[] { 58.0 } },
+		new() { XValue = "May", YValues = new[] { 73.0 } },
+		new() { XValue = "Jun", YValues = new[] { 85.0 } },
+		new() { XValue = "Jul", YValues = new[] { 92.0 } },
+		new() { XValue = "Aug", YValues = new[] { 88.0 } },
+		new() { XValue = "Sep", YValues = new[] { 79.0 } },
+		new() { XValue = "Oct", YValues = new[] { 96.0 } },
+		new() { XValue = "Nov", YValues = new[] { 110.0 } },
+		new() { XValue = "Dec", YValues = new[] { 125.0 } }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Monthly Website Visitors (thousands)" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="TrafficArea"
+        AxisX="@@(new Axis { Title = "Month" })"
+        AxisY="@@(new Axis { Title = "Visitors (K)" })" /&gt;
+    &lt;ChartSeries Name="Visitors"
+        ChartType="SeriesChartType.Area"
+        ChartArea="TrafficArea"
+        Points="@@TrafficPoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; TrafficPoints = new()
+    {
+        new() { XValue = "Jan", YValues = new[] { 45.0 } },
+        new() { XValue = "Feb", YValues = new[] { 52.0 } },
+        new() { XValue = "Mar", YValues = new[] { 61.0 } },
+        new() { XValue = "Apr", YValues = new[] { 58.0 } },
+        new() { XValue = "May", YValues = new[] { 73.0 } },
+        new() { XValue = "Jun", YValues = new[] { 85.0 } },
+        new() { XValue = "Jul", YValues = new[] { 92.0 } },
+        new() { XValue = "Aug", YValues = new[] { 88.0 } },
+        new() { XValue = "Sep", YValues = new[] { 79.0 } },
+        new() { XValue = "Oct", YValues = new[] { 96.0 } },
+        new() { XValue = "Nov", YValues = new[] { 110.0 } },
+        new() { XValue = "Dec", YValues = new[] { 125.0 } }
+    };
+
+}</code></pre>
