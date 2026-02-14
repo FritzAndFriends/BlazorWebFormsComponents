@@ -990,6 +990,257 @@ public class ChartTests : BunitContext
 
 	#endregion
 
+	#region ChartSeries — Data Binding (via ChartSeriesDataBindingHelper)
+
+	// These tests verify the expected data binding behavior that ChartSeries.ToConfig()
+	// should implement. The helper simulates extracting values from Items using
+	// XValueMember and YValueMembers properties.
+
+	[Fact]
+	public void DataBinding_ExtractsValuesFromItems()
+	{
+		// Arrange: Items with XValueMember and YValueMembers
+		var items = new object[]
+		{
+			new { Month = "Jan", Sales = 100 },
+			new { Month = "Feb", Sales = 200 },
+			new { Month = "Mar", Sales = 300 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Month", yValueMembers: "Sales");
+
+		// Assert: Data binding extracts X and Y values
+		points.ShouldNotBeNull();
+		points.Count.ShouldBe(3);
+
+		points[0].XValue.ShouldBe("Jan");
+		points[0].YValues[0].ShouldBe(100.0);
+
+		points[1].XValue.ShouldBe("Feb");
+		points[1].YValues[0].ShouldBe(200.0);
+
+		points[2].XValue.ShouldBe("Mar");
+		points[2].YValues[0].ShouldBe(300.0);
+	}
+
+	[Fact]
+	public void DataBinding_NumericXValues()
+	{
+		// Arrange: Items with numeric XValue
+		var items = new object[]
+		{
+			new { Year = 2020, Revenue = 1000 },
+			new { Year = 2021, Revenue = 1500 },
+			new { Year = 2022, Revenue = 2000 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Year", yValueMembers: "Revenue");
+
+		// Assert
+		points.Count.ShouldBe(3);
+		points[0].XValue.ShouldBe(2020);
+		points[0].YValues[0].ShouldBe(1000.0);
+	}
+
+	[Fact]
+	public void DataBinding_DecimalYValues()
+	{
+		// Arrange: Items with decimal Y values
+		var items = new object[]
+		{
+			new { Category = "A", Percentage = 25.5 },
+			new { Category = "B", Percentage = 33.3 },
+			new { Category = "C", Percentage = 41.2 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Category", yValueMembers: "Percentage");
+
+		// Assert
+		points.Count.ShouldBe(3);
+		points[0].YValues[0].ShouldBe(25.5);
+		points[1].YValues[0].ShouldBe(33.3);
+		points[2].YValues[0].ShouldBe(41.2);
+	}
+
+	[Fact]
+	public void DataBinding_ManualPoints_WorksWithoutItems()
+	{
+		// Arrange: Manual Points without Items (fallback case)
+		var manualPoints = new List<DataPoint>
+		{
+			new() { XValue = "Q1", YValues = new[] { 100.0 } },
+			new() { XValue = "Q2", YValues = new[] { 150.0 } },
+			new() { XValue = "Q3", YValues = new[] { 200.0 } }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items: null, xValueMember: null, yValueMembers: null, fallbackPoints: manualPoints);
+
+		// Assert: Manual points are used directly
+		points.ShouldNotBeNull();
+		points.Count.ShouldBe(3);
+		points[0].XValue.ShouldBe("Q1");
+		points[0].YValues[0].ShouldBe(100.0);
+	}
+
+	[Fact]
+	public void DataBinding_EmptyItems_ProducesEmptyPoints()
+	{
+		// Arrange: Empty Items collection
+		var items = Array.Empty<object>();
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Month", yValueMembers: "Sales");
+
+		// Assert: Should produce empty points, not an error
+		points.ShouldNotBeNull();
+		points.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void DataBinding_NullItems_FallsBackToPoints()
+	{
+		// Arrange: Null Items with manual Points fallback
+		var fallbackPoints = new List<DataPoint>
+		{
+			new() { XValue = "Fallback", YValues = new[] { 999.0 } }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items: null, xValueMember: "Month", yValueMembers: "Sales",
+			fallbackPoints: fallbackPoints);
+
+		// Assert: Falls back to manual Points
+		points.ShouldNotBeNull();
+		points.Count.ShouldBe(1);
+		points[0].XValue.ShouldBe("Fallback");
+		points[0].YValues[0].ShouldBe(999.0);
+	}
+
+	[Fact]
+	public void DataBinding_NullItems_NoFallback_ProducesEmptyPoints()
+	{
+		// Arrange: Null Items with no manual Points
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items: null, xValueMember: null, yValueMembers: null, fallbackPoints: null);
+
+		// Assert: Should produce empty points (default)
+		points.ShouldNotBeNull();
+		points.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void DataBinding_MissingXValueMember_UsesNullXValue()
+	{
+		// Arrange: Items but no XValueMember
+		var items = new object[]
+		{
+			new { Month = "Jan", Sales = 100 },
+			new { Month = "Feb", Sales = 200 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: null, yValueMembers: "Sales");
+
+		// Assert: XValues are null since XValueMember not specified
+		points.Count.ShouldBe(2);
+		points[0].XValue.ShouldBeNull();
+		points[0].YValues[0].ShouldBe(100.0);
+	}
+
+	[Fact]
+	public void DataBinding_MissingYValueMembers_UsesEmptyYValues()
+	{
+		// Arrange: Items but no YValueMembers
+		var items = new object[]
+		{
+			new { Month = "Jan", Sales = 100 },
+			new { Month = "Feb", Sales = 200 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Month", yValueMembers: null);
+
+		// Assert: Points created with XValue but empty Y
+		points.Count.ShouldBe(2);
+		points[0].XValue.ShouldBe("Jan");
+		points[0].YValues.Length.ShouldBe(0);
+	}
+
+	[Fact]
+	public void DataBinding_IntYValue_ConvertsToDouble()
+	{
+		// Arrange: Items with integer Y values
+		var items = new object[]
+		{
+			new { Name = "A", Count = 42 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Name", yValueMembers: "Count");
+
+		// Assert: Int should be converted to double
+		points[0].YValues[0].ShouldBeOfType<double>();
+		points[0].YValues[0].ShouldBe(42.0);
+	}
+
+	[Fact]
+	public void DataBinding_ItemsOverrideManualPoints()
+	{
+		// Arrange: Both Items and fallback Points provided — Items should win
+		var items = new object[]
+		{
+			new { Month = "Jan", Sales = 100 }
+		};
+		var fallbackPoints = new List<DataPoint>
+		{
+			new() { XValue = "OldPoint", YValues = new[] { 999.0 } }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "Month", yValueMembers: "Sales", fallbackPoints: fallbackPoints);
+
+		// Assert: Items takes precedence over manual Points
+		points.Count.ShouldBe(1);
+		points[0].XValue.ShouldBe("Jan");
+		points[0].YValues[0].ShouldBe(100.0);
+	}
+
+	[Fact]
+	public void DataBinding_InvalidPropertyName_ReturnsNullValue()
+	{
+		// Arrange: Invalid property name
+		var items = new object[]
+		{
+			new { Month = "Jan", Sales = 100 }
+		};
+
+		// Act
+		var points = ChartSeriesDataBindingHelper.ExtractDataPoints(
+			items, xValueMember: "NonExistentProperty", yValueMembers: "AlsoNotReal");
+
+		// Assert: Should handle gracefully — points created with null values
+		points.Count.ShouldBe(1);
+		points[0].XValue.ShouldBeNull();
+		points[0].YValues.Length.ShouldBe(0);
+	}
+
+	#endregion
+
 	#region Helpers
 
 	private static List<ChartSeriesConfig> CreateSimpleSeries(
@@ -1019,4 +1270,78 @@ public class ChartTests : BunitContext
 	}
 
 	#endregion
+}
+
+/// <summary>
+/// Helper class that implements the data binding logic for ChartSeries.
+/// This is the expected implementation that ChartSeries.ToConfig() should use
+/// when extracting data points from Items using XValueMember and YValueMembers.
+/// </summary>
+internal static class ChartSeriesDataBindingHelper
+{
+	/// <summary>
+	/// Extracts DataPoints from a collection of items using reflection-based property access.
+	/// </summary>
+	/// <param name="items">The data items to extract from (can be null)</param>
+	/// <param name="xValueMember">Property name for X values (can be null)</param>
+	/// <param name="yValueMembers">Property name for Y values (can be null)</param>
+	/// <param name="fallbackPoints">Points to use if items is null or empty (optional)</param>
+	/// <returns>List of DataPoint objects</returns>
+	public static List<DataPoint> ExtractDataPoints(
+		IEnumerable<object> items,
+		string xValueMember,
+		string yValueMembers,
+		List<DataPoint> fallbackPoints = null)
+	{
+		// If items is null, fall back to manual points
+		if (items == null)
+		{
+			return fallbackPoints ?? new List<DataPoint>();
+		}
+
+		var itemsList = items.ToList();
+
+		// If items is empty, return empty list
+		if (itemsList.Count == 0)
+		{
+			return new List<DataPoint>();
+		}
+
+		// Extract data points from items using reflection
+		var points = new List<DataPoint>();
+		foreach (var item in itemsList)
+		{
+			var point = new DataPoint();
+
+			// Extract X value if XValueMember is specified
+			if (!string.IsNullOrEmpty(xValueMember))
+			{
+				var xProp = item.GetType().GetProperty(xValueMember);
+				point.XValue = xProp?.GetValue(item);
+			}
+
+			// Extract Y value if YValueMembers is specified
+			if (!string.IsNullOrEmpty(yValueMembers))
+			{
+				var yProp = item.GetType().GetProperty(yValueMembers);
+				var yValue = yProp?.GetValue(item);
+				if (yValue != null)
+				{
+					point.YValues = new[] { Convert.ToDouble(yValue) };
+				}
+				else
+				{
+					point.YValues = Array.Empty<double>();
+				}
+			}
+			else
+			{
+				point.YValues = Array.Empty<double>();
+			}
+
+			points.Add(point);
+		}
+
+		return points;
+	}
 }

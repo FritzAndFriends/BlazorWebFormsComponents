@@ -1,0 +1,199 @@
+@page "/ControlSamples/Chart/MultiSeries"
+
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Multi-Series</PageTitle>
+
+<h2>Chart - Multi-Series</h2>
+
+<p>Multi-series charts display multiple data sets on the same chart for comparison. Add multiple <code>&lt;ChartSeries&gt;</code> child components to create a multi-series chart.</p>
+
+<h3>Comparing Two Data Sets</h3>
+
+<p>This chart compares online vs in-store revenue over 12 months. Both series use the same chart area and axis configuration.</p>
+
+<Chart ChartWidth="700px" ChartHeight="400px" Palette="ChartPalette.BrightPastel">
+	<ChartTitle Text="Revenue Comparison — Online vs In-Store (2025)" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="RevenueArea"
+		AxisX="@(new Axis { Title = "Month" })"
+		AxisY="@(new Axis { Title = "Revenue ($K)" })" />
+	<ChartSeries Name="Online"
+		ChartType="SeriesChartType.Column"
+		ChartArea="RevenueArea"
+		Points="@onlineRevenue" />
+	<ChartSeries Name="In-Store"
+		ChartType="SeriesChartType.Column"
+		ChartArea="RevenueArea"
+		Points="@inStoreRevenue" />
+</Chart>
+
+<hr />
+
+<h3>Three-Way Comparison</h3>
+
+<p>Compare product categories across regions. Each series represents a different region's sales.</p>
+
+<Chart ChartWidth="700px" ChartHeight="400px" Palette="ChartPalette.Berry">
+	<ChartTitle Text="Regional Sales by Category — Q4 2025" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="RegionArea"
+		AxisX="@(new Axis { Title = "Product Category" })"
+		AxisY="@(new Axis { Title = "Units Sold" })" />
+	<ChartSeries Name="North"
+		ChartType="SeriesChartType.Column"
+		ChartArea="RegionArea"
+		Points="@northSales" />
+	<ChartSeries Name="South"
+		ChartType="SeriesChartType.Column"
+		ChartArea="RegionArea"
+		Points="@southSales" />
+	<ChartSeries Name="West"
+		ChartType="SeriesChartType.Column"
+		ChartArea="RegionArea"
+		Points="@westSales" />
+</Chart>
+
+<hr />
+
+<h3>Line Chart with Multiple Series</h3>
+
+<p>Track multiple metrics over time with a multi-series line chart.</p>
+
+<Chart ChartWidth="700px" ChartHeight="400px" Palette="ChartPalette.EarthTones">
+	<ChartTitle Text="Server Performance Metrics — 24 Hours" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="PerfArea"
+		AxisX="@(new Axis { Title = "Hour" })"
+		AxisY="@(new Axis { Title = "Percentage" })" />
+	<ChartSeries Name="CPU Usage"
+		ChartType="SeriesChartType.Line"
+		ChartArea="PerfArea"
+		Points="@cpuUsage" />
+	<ChartSeries Name="Memory Usage"
+		ChartType="SeriesChartType.Line"
+		ChartArea="PerfArea"
+		Points="@memoryUsage" />
+</Chart>
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="700px" ChartHeight="400px" Palette="ChartPalette.BrightPastel"&gt;
+    &lt;ChartTitle Text="Revenue Comparison — Online vs In-Store (2025)" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="RevenueArea"
+        AxisX="@@(new Axis { Title = "Month" })"
+        AxisY="@@(new Axis { Title = "Revenue ($K)" })" /&gt;
+    &lt;ChartSeries Name="Online"
+        ChartType="SeriesChartType.Column"
+        ChartArea="RevenueArea"
+        Points="@@onlineRevenue" /&gt;
+    &lt;ChartSeries Name="In-Store"
+        ChartType="SeriesChartType.Column"
+        ChartArea="RevenueArea"
+        Points="@@inStoreRevenue" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; onlineRevenue = new()
+    {
+        new() { XValue = "Jan", YValues = new[] { 45.0 } },
+        new() { XValue = "Feb", YValues = new[] { 52.0 } },
+        // ...
+    };
+
+    private List&lt;DataPoint&gt; inStoreRevenue = new()
+    {
+        new() { XValue = "Jan", YValues = new[] { 78.0 } },
+        new() { XValue = "Feb", YValues = new[] { 72.0 } },
+        // ...
+    };
+
+}</code></pre>
+
+@code {
+
+	// Comparison 1: Online vs In-Store Revenue
+	private List<DataPoint> onlineRevenue = new()
+	{
+		new() { XValue = "Jan", YValues = new[] { 45.0 } },
+		new() { XValue = "Feb", YValues = new[] { 52.0 } },
+		new() { XValue = "Mar", YValues = new[] { 61.0 } },
+		new() { XValue = "Apr", YValues = new[] { 58.0 } },
+		new() { XValue = "May", YValues = new[] { 73.0 } },
+		new() { XValue = "Jun", YValues = new[] { 85.0 } },
+		new() { XValue = "Jul", YValues = new[] { 92.0 } },
+		new() { XValue = "Aug", YValues = new[] { 88.0 } },
+		new() { XValue = "Sep", YValues = new[] { 79.0 } },
+		new() { XValue = "Oct", YValues = new[] { 96.0 } },
+		new() { XValue = "Nov", YValues = new[] { 110.0 } },
+		new() { XValue = "Dec", YValues = new[] { 125.0 } }
+	};
+
+	private List<DataPoint> inStoreRevenue = new()
+	{
+		new() { XValue = "Jan", YValues = new[] { 78.0 } },
+		new() { XValue = "Feb", YValues = new[] { 72.0 } },
+		new() { XValue = "Mar", YValues = new[] { 68.0 } },
+		new() { XValue = "Apr", YValues = new[] { 65.0 } },
+		new() { XValue = "May", YValues = new[] { 70.0 } },
+		new() { XValue = "Jun", YValues = new[] { 68.0 } },
+		new() { XValue = "Jul", YValues = new[] { 72.0 } },
+		new() { XValue = "Aug", YValues = new[] { 75.0 } },
+		new() { XValue = "Sep", YValues = new[] { 71.0 } },
+		new() { XValue = "Oct", YValues = new[] { 82.0 } },
+		new() { XValue = "Nov", YValues = new[] { 95.0 } },
+		new() { XValue = "Dec", YValues = new[] { 105.0 } }
+	};
+
+	// Comparison 2: Regional Sales by Category
+	private List<DataPoint> northSales = new()
+	{
+		new() { XValue = "Electronics", YValues = new[] { 1250.0 } },
+		new() { XValue = "Apparel", YValues = new[] { 890.0 } },
+		new() { XValue = "Home", YValues = new[] { 720.0 } },
+		new() { XValue = "Sports", YValues = new[] { 560.0 } }
+	};
+
+	private List<DataPoint> southSales = new()
+	{
+		new() { XValue = "Electronics", YValues = new[] { 980.0 } },
+		new() { XValue = "Apparel", YValues = new[] { 1120.0 } },
+		new() { XValue = "Home", YValues = new[] { 650.0 } },
+		new() { XValue = "Sports", YValues = new[] { 820.0 } }
+	};
+
+	private List<DataPoint> westSales = new()
+	{
+		new() { XValue = "Electronics", YValues = new[] { 1480.0 } },
+		new() { XValue = "Apparel", YValues = new[] { 750.0 } },
+		new() { XValue = "Home", YValues = new[] { 920.0 } },
+		new() { XValue = "Sports", YValues = new[] { 680.0 } }
+	};
+
+	// Comparison 3: Server Performance Metrics
+	private List<DataPoint> cpuUsage = new()
+	{
+		new() { XValue = "00:00", YValues = new[] { 25.0 } },
+		new() { XValue = "04:00", YValues = new[] { 18.0 } },
+		new() { XValue = "08:00", YValues = new[] { 45.0 } },
+		new() { XValue = "12:00", YValues = new[] { 72.0 } },
+		new() { XValue = "16:00", YValues = new[] { 68.0 } },
+		new() { XValue = "20:00", YValues = new[] { 55.0 } }
+	};
+
+	private List<DataPoint> memoryUsage = new()
+	{
+		new() { XValue = "00:00", YValues = new[] { 42.0 } },
+		new() { XValue = "04:00", YValues = new[] { 38.0 } },
+		new() { XValue = "08:00", YValues = new[] { 55.0 } },
+		new() { XValue = "12:00", YValues = new[] { 78.0 } },
+		new() { XValue = "16:00", YValues = new[] { 82.0 } },
+		new() { XValue = "20:00", YValues = new[] { 65.0 } }
+	};
+
+}
