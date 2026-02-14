@@ -1,18 +1,81 @@
 @inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <div class="main">
-        <div class="top-row px-4">
-            <a target="_blank" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/">Docs</a>
-            <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents">About BlazorWebFormsComponents</a>
+<div class="layout-wrapper" data-bs-theme="light">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-brand-primary fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white d-lg-none me-2 sidebar-toggler" type="button" @onclick="ToggleSidebar" aria-label="Toggle sidebar">
+                <span class="oi oi-menu"></span>
+            </button>
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="img/logo.svg" alt="Logo" width="32" height="32" class="me-2">
+                <span class="brand-text">BlazorWebFormsComponents</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <form class="d-flex ms-auto me-3 my-2 my-lg-0" role="search">
+                    <input class="form-control search-input" type="search" placeholder="Search components..." aria-label="Search" disabled title="Search coming soon">
+                </form>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/" target="_blank">
+                            <span class="oi oi-book me-1"></span> Docs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" target="_blank">
+                            <span class="oi oi-external-link me-1"></span> GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
-        <div class="content px-4">
-            @Body
-        </div>
+    <div class="layout-body">
+        <!-- Sidebar -->
+        <aside class="sidebar @(sidebarCollapsed ? "collapsed" : "")">
+            <div class="sidebar-content">
+                <NavMenu />
+            </div>
+        </aside>
+
+        <!-- Sidebar overlay for mobile -->
+        @if (!sidebarCollapsed)
+        {
+            <div class="sidebar-overlay d-lg-none" @onclick="ToggleSidebar"></div>
+        }
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                @Body
+            </div>
+
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="container-fluid">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                        <span class="text-muted">
+                            <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" target="_blank" class="text-decoration-none">
+                                <span class="oi oi-external-link me-1"></span>GitHub
+                            </a>
+                        </span>
+                        <span class="text-muted">MIT License</span>
+                    </div>
+                </div>
+            </footer>
+        </main>
     </div>
 </div>
+
+@code {
+    private bool sidebarCollapsed = true;
+
+    private void ToggleSidebar()
+    {
+        sidebarCollapsed = !sidebarCollapsed;
+    }
+}

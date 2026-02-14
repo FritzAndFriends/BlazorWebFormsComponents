@@ -885,12 +885,12 @@ public class InteractiveComponentTests
                 WaitUntil = WaitUntilState.NetworkIdle
             });
 
-            // Verify menu content renders (the Menu component renders tables with menu items)
-            var menuTables = await page.Locator("table").AllAsync();
-            Assert.NotEmpty(menuTables);
+            // Verify menu content renders (the Menu component renders ul/li lists with menu items)
+            var menuLists = await page.Locator("ul").AllAsync();
+            Assert.NotEmpty(menuLists);
 
-            // Verify there are clickable elements (links or cells with menu text)
-            var menuItems = await page.Locator("td a, td").AllAsync();
+            // Verify there are clickable elements (links within list items)
+            var menuItems = await page.Locator("li a, li").AllAsync();
             Assert.NotEmpty(menuItems);
         }
         finally
