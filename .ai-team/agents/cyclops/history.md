@@ -58,4 +58,5 @@
 - **JS interop pattern for Chart:** Uses `IJSRuntime` directly (not the shared `BlazorWebFormsJsInterop` service) because Chart.js interop is chart-specific, not page-level. `ChartJsInterop` lazily imports the ES module and exposes `CreateChartAsync`, `UpdateChartAsync`, `DestroyChartAsync`.
 - **BaseStyledComponent already has Width/Height as Unit type:** Chart adds `ChartWidth`/`ChartHeight` as string parameters for CSS dimension styling on the wrapper div, avoiding conflict with the base class Unit properties.
 - **Instance-based canvas IDs:** Uses `Guid.NewGuid()` (truncated to 8 chars) for canvas element IDs, consistent with the ImageMap pattern that avoids static counters.
+- **ChartSeries data binding fix:** `ToConfig()` now checks for `Items` + `YValueMembers` and extracts `DataPoint` objects via reflection. Uses `XValueMember` for X axis values and comma-separated `YValueMembers` for Y values. Falls back to manual `Points` collection when `Items` is null or `YValueMembers` is empty. Handles type conversion via `TryConvertToDouble()` for common numeric types.
 

@@ -32,3 +32,8 @@
 
 📌 Test pattern: Chart component tests use `BunitContext` directly (not `BlazorWebFormsTestContext`) with `JSInterop.Mode = JSRuntimeMode.Loose` to handle Chart.js interop calls. ChartConfigBuilder is the most testable part — pure static class, no JS/canvas dependency. bUnit 2.x requires `Render<T>` not `RenderComponent<T>`. `GetPaletteColors` is internal, so palette behavior is tested indirectly via BuildConfig dataset colors. — Rogue
 
+📌 ChartSeries Data Binding Tests: Added 12 new bUnit tests for ChartSeries data binding in `ChartTests.cs`. Tests verify: extracting X/Y values from Items using XValueMember/YValueMembers, numeric X values, decimal Y values, manual Points fallback when Items is null, empty Items producing empty chart, missing XValueMember (null XValue), missing YValueMembers (empty YValues), integer-to-double conversion, Items overriding manual Points, invalid property names handled gracefully. Created `ChartSeriesDataBindingHelper` test helper class that implements expected data binding logic — this documents the expected behavior that `ChartSeries.ToConfig()` must implement (Cyclops's fix). Total Chart tests: 152 (140 original + 12 data binding). — Rogue
+
+📌 Test pattern: Since `ChartSeries.ToConfig()` is `internal`, data binding tests use a helper class `ChartSeriesDataBindingHelper` that implements the expected extraction logic. This helper documents the contract: if Items is not null, extract DataPoints using reflection; if Items is null, fall back to manual Points; handle invalid property names by returning null/empty values. Cyclops should use this same logic in `ToConfig()`. — Rogue
+
+

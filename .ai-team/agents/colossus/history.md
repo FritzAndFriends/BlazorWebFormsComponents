@@ -48,3 +48,20 @@
   - Chart pages use JS interop (`ChartJsInterop.cs`) — console errors are expected if Chart.js CDN/bundle isn't fully loaded; page errors are not
   - Pre-existing test suite has 97 failures on non-Chart tests due to ASP.NET structured log console errors (`[timestamp] Error:`) being caught by `Assert.Empty(consoleErrors)` — these are unrelated to Chart work
 
+### 2026-02-12: Enhanced Chart visual appearance tests
+
+- Added 5 stronger Chart tests in `InteractiveComponentTests.cs` to verify chart appearance:
+  - `Chart_RendersCanvas_WithDimensions` — verifies canvas has non-zero width/height via BoundingBox
+  - `Chart_AllTypes_HaveExpectedContainerDimensions` — Theory test verifying all 8 chart types have container dimensions matching ChartWidth/ChartHeight parameters (600x400 for most, 500x400 for Pie/Doughnut)
+  - `Chart_ChartJsLibrary_IsInitialized` — verifies Chart.js global is loaded and has at least one chart instance via `Chart.instances`
+  - `Chart_Line_MultipleSeries_RenderMultipleDatasets` — verifies Line chart's 2 series (NY/LA temps) produce 2 datasets via `Chart.instances[0].data.datasets.length`
+  - `Chart_AllTypes_CanvasHasRenderingContext` — Theory test verifying all 8 chart types have a 2D rendering context
+- Total Chart tests: 38 (8 smoke + 11 basic canvas + 19 enhanced visual)
+- Build: 0 errors, 0 warnings
+- Test patterns:
+  - Use `LocatorWaitForOptions { State = WaitForSelectorState.Visible }` instead of `Expect()` (class doesn't inherit from `PageTest`)
+  - Use `page.EvaluateAsync<T>` to query Chart.js internals (`Chart.instances`, dataset counts, etc.)
+  - Use `BoundingBoxAsync()` to verify element dimensions
+  - Allow ±10px tolerance on dimension checks for border/padding differences
+
+

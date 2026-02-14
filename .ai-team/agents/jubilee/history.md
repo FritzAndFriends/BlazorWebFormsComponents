@@ -55,3 +55,14 @@
 - **NavMenu Chart node:** Added under Data Components with `Expanded="false"` and 8 sub-nodes for each chart type, alphabetically ordered.
 - **ComponentList updated:** Replaced placeholder `Chart(?)` with a working link.
 
+### Chart Feature-Rich Sample Pages (2026-02-12)
+
+- **4 new sample pages added:** DataBinding, MultiSeries, Styling, ChartAreas — each demonstrating advanced Chart features.
+- **DataBinding.razor:** Shows Web Forms-style data binding with `Items`, `XValueMember`, and `YValueMembers` parameters. Uses business object records (`SalesData`, `TrafficData`) instead of manual `DataPoint` creation. Includes Web Forms vs Blazor comparison code snippets.
+- **MultiSeries.razor:** Demonstrates multiple series on one chart for comparisons — revenue channels (Online vs In-Store), regional sales (3 regions), and server performance metrics (CPU vs Memory). Shows the pattern of adding multiple `<ChartSeries>` children to one `<Chart>`.
+- **Styling.razor:** Showcases all 11 `ChartPalette` options with visual comparisons (BrightPastel, Berry, Chocolate, EarthTones, Excel, Fire, Grayscale, Light, Pastel, SeaGreen, SemiTransparent). Demonstrates custom colors via `WebColor` static fields (e.g., `WebColor.DodgerBlue`).
+- **ChartAreas.razor:** Explains the `Axis` configuration options (Title, Minimum, Maximum, Interval, IsLogarithmic). Shows logarithmic scale for exponential data and constrained Y-axis for focused ranges.
+- **Nav ordering pattern:** New samples added alphabetically within Chart node: Area, Bar, ChartAreas, Column, DataBinding, Doughnut, Line, MultiSeries, Pie, Scatter, StackedColumn, Styling.
+- **WebColor usage:** Use static fields like `WebColor.DodgerBlue` not `WebColor.FromName("...")` which doesn't exist.
+
+
