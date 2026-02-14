@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/brand-colors.css" />
     <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="css/search.css" />
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
@@ -29,6 +30,30 @@
 
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+    <script src="js/search.js"></script>
+    <script>
+        // Click outside handler for search dropdown
+        let clickOutsideHandlers = new Map();
+        
+        window.registerClickOutsideHandler = function(element, dotNetRef) {
+            const handler = function(event) {
+                if (element && !element.contains(event.target)) {
+                    dotNetRef.invokeMethodAsync('CloseDropdown');
+                }
+            };
+            clickOutsideHandlers.set(element, handler);
+            document.addEventListener('click', handler);
+        };
+        
+        window.unregisterClickOutsideHandler = function(element) {
+            const handler = clickOutsideHandlers.get(element);
+            if (handler) {
+                document.removeEventListener('click', handler);
+                clickOutsideHandlers.delete(element);
+            }
+        };
+    </script>
 </body>
 
 </html>

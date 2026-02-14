@@ -1,15 +1,9 @@
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
-<div class="top-row ps-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">BlazorWebFormsComponents<br/>@Program.ApplicationName</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="verticalNav @NavMenuCssClass">
+<div class="verticalNav">
     <nav class="nav flex-column p-2">
-        <a href="/" class="nav-link component-link @GetActiveClass("/")" title="Home">
+        <a href="/" class="nav-link component-link @GetActiveClass("/")" title="Home" @onclick="OnNavLinkClick">
             <span class="oi oi-home me-2"></span>Home
         </a>
 
@@ -36,7 +30,8 @@
                         {
                             <a href="@component.Route"
                                class="nav-link component-link py-1 @GetActiveClass(component.Route)"
-                               title="@component.Description">
+                               title="@component.Description"
+                               @onclick="OnNavLinkClick">
                                 @component.Name
                             </a>
                             @if (component.SubPages?.Any() == true)
@@ -47,7 +42,8 @@
                                         var subRoute = $"{component.Route}/{subPage}";
                                         <a href="@subRoute"
                                            class="nav-link component-link py-1 small @GetActiveClass(subRoute)"
-                                           title="@component.Name - @subPage">
+                                           title="@component.Name - @subPage"
+                                           @onclick="OnNavLinkClick">
                                             @subPage
                                         </a>
                                     }
@@ -65,16 +61,51 @@
     private bool collapseNavMenu = true;
     private HashSet<string> expandedCategories = new();
     private string currentUrl = "";
+    private bool isDesktop = true;
+
+    [Parameter]
+    public EventCallback OnMobileNavClick { get; set; }
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
 
-        // Expand the category containing the current page
-        ExpandCategoryForCurrentPage();
+        // Check if desktop and expand all categories
+        await CheckIfDesktopAndExpandCategories();
+    }
+
+    private async Task CheckIfDesktopAndExpandCategories()
+    {
+        try
+        {
+            var windowWidth = await JSRuntime.InvokeAsync<int>("eval", "window.innerWidth");
+            isDesktop = windowWidth >= 992;
+            
+            if (isDesktop)
+            {
+                // Expand all categories on desktop
+                foreach (var category in ComponentCatalog.Categories)
+                {
+                    expandedCategories.Add(category);
+                }
+            }
+            else
+            {
+                // On mobile, only expand the category containing current page
+                ExpandCategoryForCurrentPage();
+            }
+        }
+        catch
+        {
+            // Fallback: expand all categories
+            foreach (var category in ComponentCatalog.Categories)
+            {
+                expandedCategories.Add(category);
+            }
+        }
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -109,6 +140,15 @@
         else
         {
             expandedCategories.Add(category);
+        }
+    }
+
+    private async Task OnNavLinkClick()
+    {
+        // On mobile, collapse the sidebar when a link is clicked
+        if (!isDesktop)
+        {
+            await OnMobileNavClick.InvokeAsync();
         }
     }
 

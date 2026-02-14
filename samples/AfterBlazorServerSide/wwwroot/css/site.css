@@ -362,3 +362,110 @@ a.component-link.active {
     color: #333;
     font-size: 0.875rem;
 }
+
+/* ========================================
+   Homepage Hero Section
+   ======================================== */
+.hero-section {
+    background: linear-gradient(135deg, var(--blazor-purple) 0%, var(--webforms-blue) 100%);
+    color: #fff;
+    border-radius: 0.5rem;
+    margin: -1.5rem -2rem 2rem -2rem;
+    padding: 3rem 2rem;
+}
+
+.hero-title {
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hero-tagline {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.25rem;
+}
+
+.hero-section .btn-primary {
+    background-color: #fff;
+    color: var(--blazor-purple);
+    border-color: #fff;
+}
+
+.hero-section .btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--blazor-purple);
+}
+
+.hero-section .btn-outline-secondary {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
+.hero-section .btn-outline-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-color: #fff;
+}
+
+/* ========================================
+   Component Catalog Cards
+   ======================================== */
+.category-card {
+    border: 1px solid #e0e0e0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.category-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid var(--blazor-purple);
+    font-weight: 600;
+}
+
+.category-card .card-header h5 {
+    color: var(--blazor-purple);
+}
+
+.category-card .badge {
+    background-color: var(--blazor-purple) !important;
+}
+
+.component-list li {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.component-list li:last-child {
+    border-bottom: none;
+}
+
+.component-list .component-link {
+    color: var(--webforms-blue);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.component-list .component-link:hover {
+    color: var(--blazor-purple);
+    text-decoration: underline;
+}
+
+@media (max-width: 991.98px) {
+    .hero-section {
+        margin: -1rem -1rem 1.5rem -1rem;
+        padding: 2rem 1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-section .display-4 {
+        font-size: 1.75rem;
+    }
+
+    .hero-tagline {
+        font-size: 1rem;
+    }
+}

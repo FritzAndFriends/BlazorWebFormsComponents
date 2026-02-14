@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@using AfterBlazorServerSide.Components.Shared
 
 <div class="layout-wrapper" data-bs-theme="light">
     <!-- Top Navbar -->
@@ -15,9 +16,9 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
-                <form class="d-flex ms-auto me-3 my-2 my-lg-0" role="search">
-                    <input class="form-control search-input" type="search" placeholder="Search components..." aria-label="Search" disabled title="Search coming soon">
-                </form>
+                <div class="d-flex ms-auto me-3 my-2 my-lg-0">
+                    <SearchBox />
+                </div>
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/" target="_blank">
@@ -38,7 +39,7 @@
         <!-- Sidebar -->
         <aside class="sidebar @(sidebarCollapsed ? "collapsed" : "")">
             <div class="sidebar-content">
-                <NavMenu />
+                <NavMenu OnMobileNavClick="CollapseSidebar" />
             </div>
         </aside>
 
@@ -77,5 +78,10 @@
     private void ToggleSidebar()
     {
         sidebarCollapsed = !sidebarCollapsed;
+    }
+
+    private void CollapseSidebar()
+    {
+        sidebarCollapsed = true;
     }
 }

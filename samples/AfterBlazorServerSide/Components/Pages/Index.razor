@@ -1,13 +1,51 @@
 @page "/"
+@using AfterBlazorServerSide
 
-<PageTitle>After Blazor - Server Side</PageTitle>
+<PageTitle>BlazorWebFormsComponents</PageTitle>
 
-<h1>After Blazor - Server Side</h1>
+<!-- Hero Section -->
+<section class="hero-section text-center py-5 mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold hero-title">BlazorWebFormsComponents</h1>
+        <p class="lead hero-tagline mb-4">Migrate your Web Forms apps to Blazor with familiar syntax</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="https://fritzandfriends.github.io/BlazorWebFormsComponents/" class="btn btn-primary btn-lg" target="_blank">
+                <span class="oi oi-book me-2" aria-hidden="true"></span>Get Started
+            </a>
+            <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" class="btn btn-outline-secondary btn-lg" target="_blank">
+                <span class="oi oi-external-link me-2" aria-hidden="true"></span>View on GitHub
+            </a>
+        </div>
+    </div>
+</section>
 
-<p>
-    This is a project that contains individual pages for the BlazorWebFormsComponents developers to use
-    to test the new components they are building and see how they behave.  We will use this project to help verify
-    that our Blazor components render appropriately.
-</p>
-
-<ComponentList />
+<!-- Component Catalog Section -->
+<section class="component-catalog">
+    <div class="container">
+        <h2 class="text-center mb-4">Component Catalog</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var category in ComponentCatalog.Categories)
+            {
+                var components = ComponentCatalog.GetByCategory(category).ToList();
+                <div class="col">
+                    <div class="card h-100 category-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">@category</h5>
+                            <span class="badge bg-primary rounded-pill">@components.Count</span>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled component-list mb-0">
+                                @foreach (var component in components)
+                                {
+                                    <li>
+                                        <a href="@component.Route" class="component-link">@component.Name</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
