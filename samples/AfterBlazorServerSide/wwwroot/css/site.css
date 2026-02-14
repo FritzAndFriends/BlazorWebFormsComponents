@@ -204,6 +204,26 @@ a.component-link.active {
     color: var(--webforms-blue);
 }
 
+/* Global footer in App.razor - must respect sidebar */
+.global-footer {
+    background-color: #f0f0f5;
+    border-top: 1px solid #ddd;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+    color: #666;
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.global-footer a {
+    color: var(--blazor-purple);
+}
+
+.global-footer a:hover {
+    color: var(--webforms-blue);
+}
+
 /* ========================================
    Vertical Nav (component list)
    ======================================== */
@@ -262,6 +282,14 @@ a.component-link.active {
     }
 
     .main-content {
+        margin-left: 0;
+    }
+
+    body > footer {
+        margin-left: 0;
+    }
+
+    .global-footer {
         margin-left: 0;
     }
 

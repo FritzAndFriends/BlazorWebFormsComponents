@@ -10,6 +10,24 @@
     <link rel="stylesheet" href="css/brand-colors.css" />
     <link rel="stylesheet" href="css/site.css" />
     <link rel="stylesheet" href="css/search.css" />
+    <style>
+        /* Global footer - inline to avoid CSS caching issues */
+        .global-footer {
+            background-color: #f0f0f5;
+            border-top: 1px solid #ddd;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.8rem;
+            text-align: center;
+            color: #666;
+            margin-left: var(--sidebar-width, 280px);
+            transition: margin-left 0.3s ease-in-out;
+        }
+        .global-footer a { color: #512BD4; }
+        .global-footer a:hover { color: #0d6efd; }
+        @@media (max-width: 991.98px) {
+            .global-footer { margin-left: 0; }
+        }
+    </style>
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
@@ -22,7 +40,7 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <footer>
+    <footer class="global-footer">
         This site was built with ♥♥ and <a href="https://blazor.net">Blazor</a>, <a href="https://dot.net">Open Source C#</a>, <a href="https://www.asp.net">ASP.NET 10.0</a>, and the <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents/">BlazorWebFormsComponents</a>
         <br />
         <strong>BlazorWebFormsComponents @($"v{Program.ComponentVersion}")</strong>
