@@ -14,7 +14,7 @@
 <p>A simple image with alternate text:</p>
 
 <div class="demo-section">
-    <Image ImageUrl="https://via.placeholder.com/150x100" 
+    <Image ImageUrl="/img/placeholder-150x100.svg" 
            AlternateText="Sample placeholder image" />
 </div>
 
@@ -28,7 +28,7 @@
 <p>Hover over the image to see the tooltip:</p>
 
 <div class="demo-section">
-    <Image ImageUrl="https://via.placeholder.com/150x100/0066cc/ffffff?text=Hover+Me" 
+    <Image ImageUrl="/img/placeholder-150x100.svg" 
            AlternateText="Image with tooltip"
            ToolTip="This is a tooltip displayed on hover" />
 </div>
@@ -44,7 +44,7 @@
 <p>Images can be aligned using the ImageAlign property:</p>
 
 <div class="demo-section" style="overflow: auto;">
-    <Image ImageUrl="https://via.placeholder.com/80x80/28a745/ffffff?text=Left" 
+    <Image ImageUrl="/img/placeholder-80x80.svg" 
            AlternateText="Left aligned image"
            ImageAlign="ImageAlign.Left" />
     <p>This text flows around the left-aligned image. The ImageAlign property 
@@ -69,7 +69,7 @@
     </button>
     
     <div style="margin-top: 10px;">
-        <Image ImageUrl="https://via.placeholder.com/200x120/dc3545/ffffff?text=Toggle+Me" 
+        <Image ImageUrl="/img/placeholder-200x120.svg" 
                AlternateText="Toggleable image"
                Visible="@isVisible" />
     </div>
@@ -94,7 +94,7 @@
 <p>For decorative images that don't convey content, use GenerateEmptyAlternateText:</p>
 
 <div class="demo-section">
-    <Image ImageUrl="https://via.placeholder.com/300x20/6c757d/6c757d?text=+" 
+    <Image ImageUrl="/img/placeholder-300x20.svg" 
            GenerateEmptyAlternateText="true" />
     <p>The decorative separator above has an empty alt attribute for accessibility compliance.</p>
 </div>

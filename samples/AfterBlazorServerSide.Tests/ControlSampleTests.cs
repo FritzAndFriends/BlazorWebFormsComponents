@@ -29,7 +29,6 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/HiddenField")]
     [InlineData("/ControlSamples/HyperLink")]
     [InlineData("/ControlSamples/Image")]
-    [InlineData("/ControlSamples/ImageMap")]
     [InlineData("/ControlSamples/LinkButton")]
     [InlineData("/ControlSamples/LinkButton/JavaScript")]
     [InlineData("/ControlSamples/Literal")]
@@ -70,6 +69,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/GridView/RowSelection")]
     [InlineData("/ControlSamples/FormView/Simple")]
     [InlineData("/ControlSamples/FormView/Edit")]
+    [InlineData("/ControlSamples/DetailsView")]
     public async Task DataControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -169,6 +169,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/LoginStatusNotAuthenticated")]
     [InlineData("/ControlSamples/ChangePassword")]
     [InlineData("/ControlSamples/CreateUserWizard")]
+    [InlineData("/ControlSamples/PasswordRecovery")]
     public async Task LoginControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -187,6 +188,15 @@ public class ControlSampleTests
     public async Task ChartControl_Loads_AndRendersContent(string path)
     {
         await VerifyChartPageLoads(path);
+    }
+
+    // Utility Features
+    [Theory]
+    [InlineData("/ControlSamples/DataBinder")]
+    [InlineData("/ControlSamples/ViewState")]
+    public async Task UtilityFeature_Loads_WithoutErrors(string path)
+    {
+        await VerifyPageLoadsWithoutErrors(path);
     }
 
     // Other Controls

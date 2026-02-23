@@ -1,0 +1,169 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void DetailsView_WithData_RendersTable()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		cut.Find("table").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void DetailsView_AutoGenerateRows_RendersOneRowPerProperty()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		// Widget has 4 properties: Id, Name, Price, LastUpdate
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBeGreaterThanOrEqualTo(4);
+	}
+
+	[Fact]
+	public void DetailsView_AutoGenerateRows_RendersPropertyNamesAsHeaders()
+	{
+		var items = new List<Widget> { new Widget { Id = 1, Name = "Test", Price = 9.99M, LastUpdate = DateTime.Today } };
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		var markup = cut.Markup;
+		markup.ShouldContain("Id");
+		markup.ShouldContain("Name");
+		markup.ShouldContain("Price");
+		markup.ShouldContain("LastUpdate");
+	}
+
+	[Fact]
+	public void DetailsView_AutoGenerateRows_RendersPropertyValues()
+	{
+		var items = new List<Widget> { new Widget { Id = 42, Name = "TestWidget", Price = 9.99M, LastUpdate = DateTime.Today } };
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		var markup = cut.Markup;
+		markup.ShouldContain("42");
+		markup.ShouldContain("TestWidget");
+		markup.ShouldContain("9.99");
+	}
+
+	[Fact]
+	public void DetailsView_AutoGenerateRowsFalse_RendersNoDataRows()
+	{
+		var items = new List<Widget> { new Widget { Id = 1, Name = "Test", Price = 9.99M, LastUpdate = DateTime.Today } };
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="false" />);
+
+		// Should have a table but no data rows (only header/footer if configured)
+		cut.Find("table").ShouldNotBeNull();
+		// No td cells containing property names
+		var markup = cut.Markup;
+		markup.ShouldNotContain(">Id<");
+		markup.ShouldNotContain(">Name<");
+	}
+
+	[Fact]
+	public void DetailsView_EachRowHasTwoCells()
+	{
+		var items = new List<Widget> { new Widget { Id = 1, Name = "Test", Price = 5M, LastUpdate = DateTime.Today } };
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		var rows = cut.FindAll("tr");
+		foreach (var row in rows)
+		{
+			var cells = row.QuerySelectorAll("td");
+			cells.Length.ShouldBe(2, $"Expected 2 cells per row, got {cells.Length} in row: {row.InnerHtml}");
+		}
+	}
+
+	[Fact]
+	public void DetailsView_WithCssClass_AppliesClassToTable()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" CssClass="my-details" AutoGenerateRows="true" />);
+
+		var table = cut.Find("table");
+		table.ClassList.ShouldContain("my-details");
+	}
+
+	[Fact]
+	public void DetailsView_WithID_RendersIdOnTable()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" ID="dv1" AutoGenerateRows="true" />);
+
+		var table = cut.Find("table");
+		table.Id.ShouldContain("dv1");
+	}
+
+	[Fact]
+	public void DetailsView_NullItems_RendersEmptyDataText()
+	{
+		var cut = Render(@<DetailsView ItemType="Widget" EmptyDataText="No data available" AutoGenerateRows="true" />);
+
+		cut.Markup.ShouldContain("No data available");
+	}
+
+	[Fact]
+	public void DetailsView_EmptyItems_RendersEmptyDataText()
+	{
+		var items = new List<Widget>();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" EmptyDataText="Nothing to display" AutoGenerateRows="true" />);
+
+		cut.Markup.ShouldContain("Nothing to display");
+	}
+
+	[Fact]
+	public void DetailsView_EmptyDataTemplate_RendersTemplate()
+	{
+		var items = new List<Widget>();
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true">
+				<EmptyDataTemplate>
+					<span id="emptyMsg">Custom empty message</span>
+				</EmptyDataTemplate>
+			</DetailsView>);
+
+		cut.Find("#emptyMsg").TextContent.ShouldBe("Custom empty message");
+	}
+
+	[Fact]
+	public void DetailsView_VisibleFalse_DoesNotRender()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" Visible="false" AutoGenerateRows="true" />);
+
+		cut.FindAll("table").ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void DetailsView_DefaultGridLines_RendersBorderOne()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		var table = cut.Find("table");
+		table.GetAttribute("border").ShouldBe("1");
+		table.GetAttribute("rules").ShouldBe("all");
+	}
+
+	[Fact]
+	public void DetailsView_GridLinesNone_RendersBorderZero()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" GridLines="GridLines.None" />);
+
+		var table = cut.Find("table");
+		table.GetAttribute("border").ShouldBe("0");
+		table.GetAttribute("rules").ShouldBe("none");
+	}
+
+	[Fact]
+	public void DetailsView_StyleIncludesBorderCollapse()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("border-collapse:collapse");
+	}
+}

@@ -28,66 +28,203 @@ The following 27 chart types from the Web Forms `SeriesChartType` enum are **not
 
 ## Substitution
 
+Original Microsoft documentation: [https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.substitution?view=netframework-4.8](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.substitution?view=netframework-4.8)
+
 ### What It Did in Web Forms
 
-The [`Substitution`](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.substitution?view=netframework-4.8) control specified a section of an output-cached page that was exempt from caching. It allowed dynamic content to be injected into an otherwise cached response via a static callback method.
+The `<asp:Substitution>` control was a cache-control mechanism. When a Web Forms page was output-cached, `Substitution` marked a region of the page as **dynamic** — content that should be re-evaluated on every request even though the rest of the page was served from cache. It called a static method to generate fresh content for that region.
 
 ```html
-<asp:Substitution ID="Sub1" runat="server"
-    MethodName="GetCurrentTime" />
+<%@ OutputCache Duration="60" VaryByParam="none" %>
+
+<p>This content is cached for 60 seconds.</p>
+
+<asp:Substitution ID="TimeStamp" runat="server"
+                  MethodName="GetCurrentTime" />
+
+<p>This content is also cached.</p>
+```
+
+```csharp
+// Code-behind — must be a static method
+public static string GetCurrentTime(HttpContext context)
+{
+    return DateTime.Now.ToString("HH:mm:ss");
+}
 ```
 
 ### Why It's Not Implemented
 
-Blazor does not use the same output caching model as Web Forms. There is no equivalent of the `HttpCachePolicy`-based page output cache that `Substitution` was designed to work with. Blazor Server uses SignalR circuits (always dynamic), and Blazor WebAssembly runs entirely on the client.
+The `Substitution` control is **architecturally incompatible** with Blazor:
 
-### Recommended Alternative
+- Blazor does not use ASP.NET output caching. There is no page-level cache to punch holes in.
+- In Blazor Server, the UI is maintained as a live component tree over a SignalR connection — every render is already "dynamic."
+- In Blazor WebAssembly, the entire application runs in the browser — server-side output caching is not applicable.
+- The concept of "cache substitution" simply does not exist in Blazor's rendering model.
 
-For dynamic content in cached pages, use standard Blazor component lifecycle methods. If you need server-side output caching, use ASP.NET Core [Response Caching middleware](https://docs.microsoft.com/en-us/aspnet/core/performance/caching/response) with `<cache>` tag helpers in Razor Pages or MVC, not in Blazor components.
+### What to Do Instead
+
+**No migration is needed.** Blazor's component lifecycle already provides what `Substitution` was designed to achieve — dynamic content that updates on every render.
+
+If your Web Forms page used `Substitution` to show a timestamp, user-specific greeting, or other per-request content, that content will naturally be dynamic in Blazor:
+
+**Before (Web Forms):**
+
+```html
+<%@ OutputCache Duration="60" VaryByParam="none" %>
+
+<p>Welcome to our site!</p>
+<asp:Substitution ID="UserGreeting" runat="server"
+                  MethodName="GetUserGreeting" />
+```
+
+```csharp
+public static string GetUserGreeting(HttpContext context)
+{
+    return $"Hello, {context.User.Identity.Name}!";
+}
+```
+
+**After (Blazor):**
+
+```razor
+<p>Welcome to our site!</p>
+<p>Hello, @username!</p>
+
+@code {
+    private string username;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState;
+        username = state.User.Identity?.Name ?? "Guest";
+    }
+}
+```
+
+!!! note "If you need caching in Blazor"
+    If your Web Forms application relied heavily on output caching for performance, Blazor offers different caching strategies:
+
+    - **`IMemoryCache`** or **`IDistributedCache`** for data-level caching in your services
+    - **`@attribute [OutputCache]`** on Razor components in .NET 8+ static SSR mode
+    - **`@attribute [StreamRendering]`** for progressive rendering while data loads
+
+    These are applied at different levels than Web Forms output caching, but they solve the same performance problems.
 
 ---
 
 ## Xml
 
+Original Microsoft documentation: [https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.xml?view=netframework-4.8](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.xml?view=netframework-4.8)
+
 ### What It Did in Web Forms
 
-The [`Xml`](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.xml?view=netframework-4.8) control displayed the contents of an XML document or the results of an XSL Transformation (XSLT), rendered directly into the page.
+The `<asp:Xml>` control displayed the contents of an XML document or the results of an XSLT transformation. It could take an XML source (inline, from a file, or from a `System.Xml.XmlDocument`) and optionally transform it using an XSLT stylesheet before rendering the output.
 
 ```html
-<asp:Xml ID="Xml1" runat="server"
-    DocumentSource="~/data/catalog.xml"
-    TransformSource="~/transforms/catalog.xslt" />
+<asp:Xml ID="XmlDisplay" runat="server"
+         DocumentSource="~/App_Data/catalog.xml"
+         TransformSource="~/App_Data/catalog.xslt" />
+```
+
+Or with inline XML:
+
+```html
+<asp:Xml ID="XmlInline" runat="server"
+         TransformSource="~/App_Data/transform.xslt">
+    <book>
+        <title>Blazor in Action</title>
+        <author>Chris Sainty</author>
+    </book>
+</asp:Xml>
 ```
 
 ### Why It's Not Implemented
 
-XSLT transforms are a legacy technology with near-zero adoption in modern web applications. XML display can be handled with standard data binding. The migration demand for this control is extremely low.
+XSLT transforms via `<asp:Xml>` are a **legacy pattern with near-zero adoption** in modern projects:
 
-### Recommended Alternative
+- XSLT is rarely used in new development — it has been superseded by direct data binding, JSON APIs, and component-based rendering
+- The control existed for a very specific early-2000s pattern of XML-driven content rendering that has no meaningful migration demand
+- Building an XSLT transformation engine as a Blazor component would add complexity for a feature almost no one migrating to Blazor will need
 
-- **Displaying XML data**: Parse XML with `System.Xml.Linq` (`XDocument`) and bind the data to standard Blazor components like `Repeater` or `GridView`
-- **XSLT transforms**: If you must run XSLT, use `System.Xml.Xsl.XslCompiledTransform` in your service layer and render the HTML result with `MarkupString`
+### What to Do Instead
+
+**Replace with direct data binding or Razor markup.** If your Web Forms application used `<asp:Xml>` to display structured data, the Blazor equivalent is simply binding that data to components or HTML directly.
+
+**Before (Web Forms — XML + XSLT to render a list):**
+
+```html
+<asp:Xml ID="BookList" runat="server"
+         DocumentSource="~/App_Data/books.xml"
+         TransformSource="~/App_Data/books.xslt" />
+```
+
+```xml
+<!-- books.xml -->
+<books>
+    <book><title>Blazor in Action</title><author>Chris Sainty</author></book>
+    <book><title>ASP.NET Core in Action</title><author>Andrew Lock</author></book>
+</books>
+```
+
+```xslt
+<!-- books.xslt -->
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:template match="/books">
+        <ul>
+            <xsl:for-each select="book">
+                <li><xsl:value-of select="title"/> by <xsl:value-of select="author"/></li>
+            </xsl:for-each>
+        </ul>
+    </xsl:template>
+</xsl:stylesheet>
+```
+
+**After (Blazor — direct data binding):**
 
 ```razor
-@* Before: Web Forms *@
-@* <asp:Xml DocumentSource="~/data.xml" TransformSource="~/style.xslt" /> *@
-
-@* After: Blazor *@
-@((MarkupString)transformedHtml)
+<ul>
+    @foreach (var book in books)
+    {
+        <li>@book.Title by @book.Author</li>
+    }
+</ul>
 
 @code {
-    private string transformedHtml;
+    private List<Book> books;
 
     protected override void OnInitialized()
     {
-        var xslt = new System.Xml.Xsl.XslCompiledTransform();
-        xslt.Load("wwwroot/style.xslt");
-        using var writer = new StringWriter();
-        xslt.Transform("wwwroot/data.xml", null, writer);
-        transformedHtml = writer.ToString();
+        books = BookService.GetBooks();
     }
 }
 ```
+
+!!! tip "If you genuinely need XSLT in Blazor"
+    If your application logic truly depends on XSLT transformations (e.g., you receive XML from a third-party system and must apply an XSLT stylesheet), you can still use `System.Xml.Xsl.XslCompiledTransform` in your C# code and render the result as a `MarkupString`:
+
+    ```razor
+    @((MarkupString)transformedHtml)
+
+    @code {
+        private string transformedHtml;
+
+        protected override void OnInitialized()
+        {
+            var xslt = new XslCompiledTransform();
+            xslt.Load("transform.xslt");
+
+            using var writer = new StringWriter();
+            xslt.Transform("source.xml", null, writer);
+            transformedHtml = writer.ToString();
+        }
+    }
+    ```
+
+    This approach keeps the XSLT logic in C# where it belongs, rather than embedding it in a UI control.
 
 ---
 
@@ -96,5 +233,11 @@ XSLT transforms are a legacy technology with near-zero adoption in modern web ap
 | Control | Status | Recommendation |
 |---------|--------|----------------|
 | **Chart** | ✅ Partial (Phase 1) | [Implemented](../DataControls/Chart.md) with 8 chart types via Chart.js. Unsupported types need alternative libraries. |
-| **Substitution** | ❌ Deferred | Use Blazor component lifecycle; not applicable to Blazor's rendering model |
+| **Substitution** | ❌ Deferred | Not needed — Blazor renders dynamically by default |
 | **Xml** | ❌ Deferred | Use `XDocument` + data binding or `XslCompiledTransform` + `MarkupString` |
+
+## See Also
+
+- [Migration — Getting Started](readme.md)
+- [Migration Strategies](Strategies.md)
+- [Custom Controls](Custom-Controls.md)

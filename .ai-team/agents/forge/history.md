@@ -85,3 +85,72 @@ Completed full API surface audit of 12 controls (9 Data + 3 Navigation) comparin
  Team update (2026-02-23): GridView is highest-priority data control gap (no paging/sorting/editing)  decided by Forge
  Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
  Team update (2026-02-23): CascadingValue ThemeProvider recommended for Themes/Skins migration  decided by Forge
+📌 Team update (2026-02-10): Close PR #333 without merging — all Calendar work already on dev, PR branch has 0 unique commits — decided by Rogue
+📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
+
+### 2026-02-10 — Sprint 3 Planning & Status Reconciliation
+
+**Status.md was significantly stale:**
+- Calendar was merged to dev via commit d33e156 and PR #339 but still marked 🔴 Not Started
+- FileUpload was merged via PRs #335 and #338 but still marked 🔴 Not Started
+- Summary table said 41/53 (Editor: 20/27) but actual count of ✅ entries in the detailed section was already 23/27 for Editors (now 25/27 with Calendar + FileUpload fixed)
+- The 27-count for Editor Controls groups MultiView and View as one logical component despite separate table rows
+- Corrected total: 48/53 components complete (91%), 5 remaining
+
+**Sprint 3 scope decision:**
+- DetailsView and PasswordRecovery are the two buildable components
+- Chart deferred: requires SVG/Canvas rendering engine, no Blazor primitive equivalent
+- Substitution deferred: Web Forms output caching has no Blazor architectural equivalent
+- Xml deferred: XSLT transforms are a dead-end pattern with near-zero migration demand
+- Post-Sprint 3 state: 50/53 (94%), library effectively feature-complete for practical migration
+
+**DetailsView design notes:**
+- Must inherit BaseStyledComponent (Web Forms DetailsView → CompositeDataBoundControl → WebControl)
+- Renders as `<table>` with one `<tr>` per field (vertical layout vs GridView's horizontal)
+- Can reuse existing BoundField, TemplateField, CommandField, HyperLinkField, ButtonField from GridView
+- Needs DetailsViewMode enum (ReadOnly=0, Edit=1, Insert=2)
+- Needs 8 EventArgs classes for mode changes, CRUD operations
+
+**PasswordRecovery design notes:**
+- Must inherit BaseStyledComponent
+- 3-step wizard flow: UserName → Question → Success (same pattern as CreateUserWizard's 2-step)
+- Can reuse existing LoginControls style sub-components (TitleTextStyle, TextBoxStyle, LabelStyle, etc.)
+- Table-based HTML output matching ChangePassword's render pattern
+
+📌 Team update (2026-02-10): Sprint 3 plan ratified — DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred indefinitely with migration docs. 48/53 → target 50/53. — decided by Forge
+📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
+
+### 2026-02-11 — Sprint 3 Gate Review
+
+**DetailsView — APPROVED:**
+- Inherits `DataBoundComponent<ItemType>` — correct for data-bound controls. Uses same `Items` property as GridView/ListView.
+- All 10 Web Forms events implemented with correct `EventArgs` types. Pre-operation events support cancellation.
+- `DetailsViewMode` enum (ReadOnly=0, Edit=1, Insert=2) matches Web Forms exactly.
+- HTML output: `<table>` with one `<tr>` per field, command row with `<a>` links, nested-table numeric pager — all match Web Forms.
+- Auto-generation via reflection correctly generates fields from `ItemType` properties.
+- Minor issues (non-blocking): `CombinedStyle` has CellPadding/CellSpacing logic mismatch, `cellspacing` hardcoded to 0 in template, docs use `DataSource` but actual parameter is `Items`.
+- DetailsView docs `DataSource`→`Items` fix assigned to Beast.
+
+**PasswordRecovery — APPROVED:**
+- Inherits `BaseWebFormsComponent` — consistent with ChangePassword and CreateUserWizard pattern.
+- 3-step wizard flow (UserName → Question → Success) matches Web Forms exactly.
+- Reuses existing `LoginCancelEventArgs`, `TableItemStyle`, `Style` cascading parameter pattern from other Login Controls.
+- `SuccessTextStyle` sub-component added following existing `UiTableItemStyle` pattern.
+- All 6 events implemented: `OnVerifyingUser`, `OnUserLookupError`, `OnVerifyingAnswer`, `OnAnswerLookupError`, `OnSendingMail`, `OnSendMailError`.
+- `SetQuestion()` and `SkipToSuccess()` APIs provide developer control matching Web Forms extensibility.
+- Table-based nested HTML output matches Web Forms PasswordRecovery output.
+- Minor issues (non-blocking): `RenderOuterTable` declared but not used, `SubmitButtonType`/`SubmitButtonImageUrl` declared but not rendered, sample uses `e.Sender` casting instead of `@ref`.
+
+**Key Patterns Confirmed:**
+- Login Controls consistently inherit `BaseWebFormsComponent` (not `BaseStyledComponent`) and use cascading `TableItemStyle`/`Style` objects for styling — this is an established project convention.
+- Data-bound controls inherit `DataBoundComponent<T>` which provides `Items` (not `DataSource`) as the primary binding parameter.
+- Event naming in Login Controls uses `On` prefix (`OnVerifyingUser`, `OnChangingPassword`) — project convention, not Web Forms convention.
+- Both components ship with docs, samples, and tests per Sprint 2 policy.
+
+**Sprint 3 Status:**
+- 50/53 components complete (94%)
+- 797 tests passing, 0 build errors
+- 3 remaining (Chart, Substitution, Xml) deferred indefinitely
+- Library is effectively feature-complete for practical Web Forms migration
+
+📌 Team update (2026-02-11): Sprint 3 gate review — DetailsView APPROVED, PasswordRecovery APPROVED. 50/53 complete (94%). — decided by Forge

@@ -31,6 +31,7 @@
 - **DetailsView event args:** All event arg classes live in `src/BlazorWebFormsComponents/DetailsViewEventArgs.cs`. Includes `DetailsViewCommandEventArgs`, `DetailsViewDeleteEventArgs`, `DetailsViewDeletedEventArgs`, `DetailsViewInsertEventArgs`, `DetailsViewInsertedEventArgs`, `DetailsViewUpdateEventArgs`, `DetailsViewUpdatedEventArgs`, `DetailsViewModeEventArgs`. These parallel FormView's event args but are separate types, matching Web Forms.
 - **DetailsView field abstraction:** Uses `DetailsViewField` abstract base class and `DetailsViewAutoField` internal class for auto-generated fields. Field definitions can be added via `Fields` RenderFragment child content. External field components can register via `AddField`/`RemoveField` methods using a `DetailsViewFieldCollection` cascading value.
 - **Data control paging pattern:** DetailsView uses `PageIndex` (zero-based) to index into the `Items` collection. Each page shows one record. Pager row renders numeric page links. `PageChangedEventArgs` is reused from the existing shared class.
+- **DetailsView edit/insert mode rendering:** `DetailsViewAutoField.GetValue()` must respect the `DetailsViewMode` parameter. In `Edit` mode, render `<input type="text" value="{currentValue}" />` pre-filled with the property value. In `Insert` mode, render `<input type="text" value="" />` (empty). In `ReadOnly` mode, render plain text. Uses `RenderTreeBuilder.OpenElement/AddAttribute/CloseElement` pattern for input elements.
 
 📌 Team update(2026-02-10): FileUpload needs InputFile integration — @onchange won't populate file data. Ship-blocking bug. — decided by Forge
 📌 Team update (2026-02-10): ImageMap base class must be BaseStyledComponent, not BaseWebFormsComponent — decided by Forge
@@ -75,3 +76,4 @@
  Team update (2026-02-23): Validation Display property missing from all validators  migration-blocking  decided by Rogue
  Team update (2026-02-23): ValidationSummary comma-split bug is data corruption risk  decided by Rogue
  Team update (2026-02-23): Login controls missing outer WebControl style properties  decided by Rogue
+📌 Team update (2026-02-12): DetailsView auto-generated fields must render <input type="text"> in Edit/Insert mode — decided by Cyclops
