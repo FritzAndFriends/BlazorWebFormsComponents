@@ -1,5 +1,6 @@
 ﻿using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
@@ -10,7 +11,7 @@ using System.Xml;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class TreeView : BaseDataBoundComponent
+	public partial class TreeView : BaseDataBoundComponent, ITreeViewStyleContainer
 	{
 
 		[Parameter]
@@ -36,6 +37,233 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public bool UseAccessibilityFeatures { get; set; } = false;
+
+		#region WI-11: Node-level style sub-components
+
+		public TreeNodeStyle NodeStyle { get; internal set; } = new TreeNodeStyle();
+		public TreeNodeStyle HoverNodeStyle { get; internal set; } = new TreeNodeStyle();
+		public TreeNodeStyle LeafNodeStyle { get; internal set; } = new TreeNodeStyle();
+		public TreeNodeStyle ParentNodeStyle { get; internal set; } = new TreeNodeStyle();
+		public TreeNodeStyle RootNodeStyle { get; internal set; } = new TreeNodeStyle();
+		public TreeNodeStyle SelectedNodeStyle { get; internal set; } = new TreeNodeStyle();
+
+		[Parameter]
+		public RenderFragment NodeStyleContent { get; set; }
+
+		[Parameter]
+		public RenderFragment HoverNodeStyleContent { get; set; }
+
+		[Parameter]
+		public RenderFragment LeafNodeStyleContent { get; set; }
+
+		[Parameter]
+		public RenderFragment ParentNodeStyleContent { get; set; }
+
+		[Parameter]
+		public RenderFragment RootNodeStyleContent { get; set; }
+
+		[Parameter]
+		public RenderFragment SelectedNodeStyleContent { get; set; }
+
+		/// <summary>
+		/// Resolves the effective style for a node based on its type and selection state.
+		/// Priority: SelectedNodeStyle (if selected) > type-specific style > NodeStyle (fallback).
+		/// </summary>
+		internal string GetNodeStyle(TreeNode node)
+		{
+			TreeNodeStyle typeStyle = null;
+
+			if (node.IsRootNode)
+				typeStyle = RootNodeStyle;
+			else if (node.IsParentNode)
+				typeStyle = ParentNodeStyle;
+			else if (node.IsLeafNode)
+				typeStyle = LeafNodeStyle;
+
+			// Selected style takes highest priority
+			if (node.Selected)
+			{
+				var selectedStr = SelectedNodeStyle?.ToString();
+				if (!string.IsNullOrEmpty(selectedStr))
+					return selectedStr;
+			}
+
+			// Type-specific style
+			var typeStr = typeStyle?.ToString();
+			if (!string.IsNullOrEmpty(typeStr))
+				return typeStr;
+
+			// Default NodeStyle fallback
+			return NodeStyle?.ToString();
+		}
+
+		/// <summary>
+		/// Gets the CSS class for a node based on its type and selection state.
+		/// </summary>
+		internal string GetNodeCssClass(TreeNode node)
+		{
+			TreeNodeStyle typeStyle = null;
+
+			if (node.IsRootNode)
+				typeStyle = RootNodeStyle;
+			else if (node.IsParentNode)
+				typeStyle = ParentNodeStyle;
+			else if (node.IsLeafNode)
+				typeStyle = LeafNodeStyle;
+
+			if (node.Selected && !string.IsNullOrEmpty(SelectedNodeStyle?.CssClass))
+				return SelectedNodeStyle.CssClass;
+
+			if (!string.IsNullOrEmpty(typeStyle?.CssClass))
+				return typeStyle.CssClass;
+
+			return NodeStyle?.CssClass;
+		}
+
+		/// <summary>
+		/// Gets the style image URL for a node based on its type.
+		/// </summary>
+		internal string GetStyleImageUrl(TreeNode node)
+		{
+			if (node.IsRootNode && !string.IsNullOrEmpty(RootNodeStyle?.ImageUrl))
+				return RootNodeStyle.ImageUrl;
+			if (node.IsParentNode && !string.IsNullOrEmpty(ParentNodeStyle?.ImageUrl))
+				return ParentNodeStyle.ImageUrl;
+			if (node.IsLeafNode && !string.IsNullOrEmpty(LeafNodeStyle?.ImageUrl))
+				return LeafNodeStyle.ImageUrl;
+			if (!string.IsNullOrEmpty(NodeStyle?.ImageUrl))
+				return NodeStyle.ImageUrl;
+			return null;
+		}
+
+		#endregion
+
+		#region WI-13: Selection support
+
+		/// <summary>
+		/// Gets the currently selected TreeNode, or null if no node is selected.
+		/// </summary>
+		public TreeNode SelectedNode { get; private set; }
+
+		/// <summary>
+		/// Gets the Value property of the currently selected node, or null.
+		/// </summary>
+		public string SelectedValue => SelectedNode?.Value;
+
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> SelectedNodeChanged { get; set; }
+
+		/// <summary>
+		/// Called by TreeNode when it is clicked to become selected.
+		/// </summary>
+		internal async Task SelectNodeAsync(TreeNode node)
+		{
+			if (SelectedNode == node) return;
+
+			// Deselect previous
+			if (SelectedNode != null)
+				SelectedNode.Selected = false;
+
+			// Select new
+			node.Selected = true;
+			SelectedNode = node;
+
+			await SelectedNodeChanged.InvokeAsync(new TreeNodeEventArgs(node));
+			StateHasChanged();
+		}
+
+		#endregion
+
+		#region WI-15: Expand/collapse methods + properties
+
+		/// <summary>
+		/// Pixel indent per depth level. Default 20.
+		/// </summary>
+		[Parameter]
+		public int NodeIndent { get; set; } = 20;
+
+		/// <summary>
+		/// Limits initial expansion depth. -1 means fully expanded (default).
+		/// </summary>
+		[Parameter]
+		public int ExpandDepth { get; set; } = -1;
+
+		/// <summary>
+		/// Separator character used in value paths. Default '/'.
+		/// </summary>
+		[Parameter]
+		public char PathSeparator { get; set; } = '/';
+
+		/// <summary>
+		/// Expands all nodes in the tree.
+		/// </summary>
+		public void ExpandAll()
+		{
+			foreach (var node in Nodes)
+			{
+				ExpandNodeRecursive(node, true);
+			}
+			StateHasChanged();
+		}
+
+		/// <summary>
+		/// Collapses all nodes in the tree.
+		/// </summary>
+		public void CollapseAll()
+		{
+			foreach (var node in Nodes)
+			{
+				ExpandNodeRecursive(node, false);
+			}
+			StateHasChanged();
+		}
+
+		private void ExpandNodeRecursive(TreeNode node, bool expand)
+		{
+			node.SetExpanded(expand);
+			foreach (var child in node.ChildNodes)
+			{
+				ExpandNodeRecursive(child, expand);
+			}
+		}
+
+		/// <summary>
+		/// Finds a node by its PathSeparator-delimited value path.
+		/// </summary>
+		public TreeNode FindNode(string valuePath)
+		{
+			if (string.IsNullOrEmpty(valuePath)) return null;
+
+			var segments = valuePath.Split(PathSeparator);
+			var currentNodes = Nodes.AsEnumerable();
+
+			TreeNode found = null;
+			foreach (var segment in segments)
+			{
+				found = currentNodes.FirstOrDefault(n =>
+					string.Equals(n.Value ?? n.Text, segment, StringComparison.Ordinal));
+				if (found == null) return null;
+				currentNodes = found.ChildNodes;
+			}
+			return found;
+		}
+
+		/// <summary>
+		/// Gets the ValuePath for a node, using PathSeparator.
+		/// </summary>
+		internal string GetValuePath(TreeNode node)
+		{
+			var parts = new List<string>();
+			var current = node;
+			while (current != null)
+			{
+				parts.Insert(0, current.Value ?? current.Text);
+				current = current.Parent;
+			}
+			return string.Join(PathSeparator.ToString(), parts);
+		}
+
+		#endregion
 
 		#region Events
 
