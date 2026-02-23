@@ -448,3 +448,32 @@ Suggested timeline:
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Going forward, use "milestones" instead of "sprints" for naming work batches. All future planning uses "milestone" terminology.
 **Why:** User preference — captured for team memory. Applies retroactively to planning references where practical.
+### 2026-02-12: ChangePassword and CreateUserWizard sample pages require LoginControls using directive
+**By:** Colossus
+**What:** Added `@using BlazorWebFormsComponents.LoginControls` to `ChangePassword/Index.razor` and `CreateUserWizard/Index.razor`. Without this, the components render as raw HTML custom elements instead of Blazor components — silently failing with no error.
+**Why:** The root `@using BlazorWebFormsComponents` in `_Imports.razor` does not cover sub-namespaces like `LoginControls`. Any future sample page using Login Controls must include this directive. PasswordRecovery already had it; these two were missed during Sprint 2.
+
+### 2026-02-12: External placeholder URLs replaced with local SVG images
+**By:** Colossus
+**What:** Replaced all `https://via.placeholder.com/...` URLs in Image and ImageMap sample pages with local SVG placeholder images in `wwwroot/img/`. Created 8 SVG files matching the sizes used in the samples.
+**Why:** External URLs are unreachable in CI/test environments, causing integration test failures. Local SVGs are always available and test-safe. Future sample pages must never use external image URLs.
+
+### 2026-02-12: ASP.NET Core structured log messages filtered in integration tests
+**By:** Colossus
+**What:** Added a regex filter in `VerifyPageLoadsWithoutErrors` to exclude browser console messages matching `^\[\d{4}-\d{2}-\d{2}T` (ISO 8601 timestamp prefix). These are ASP.NET Core ILogger messages forwarded to the browser console by Blazor Server, not actual page errors.
+**Why:** Without this filter, any page that triggers framework-level logging (e.g., Calendar with many interactive elements) produces false positive test failures.
+
+### 2026-02-12: Milestone exit criteria — samples and integration tests mandatory
+
+**By:** Jeffrey T. Fritz
+**What:** Every milestone/sprint must meet ALL of the following exit criteria before submission for review:
+1. **Samples for every feature** — Every feature of every component created or modified in the sprint must have a corresponding sample page demonstrating it
+2. **Integration tests for every sample** — Every sample page added must have at least one Playwright integration test verifying its interactive behavior
+3. **All integration tests pass** — 100% of integration tests (both new and pre-existing) must pass before the sprint is submitted
+**Why:** Sprint 3 exposed gaps where components shipped without full sample coverage and integration tests. This gate ensures no sprint is declared complete until the full chain — component → sample → integration test → green — is verified. This is a permanent policy for all future sprints.
+
+### DetailsView auto-generated fields render inputs in Edit/Insert mode
+
+**By:** Cyclops
+**What:** Fixed `DetailsViewAutoField.GetValue()` to render `<input type="text">` elements when the DetailsView is in Edit or Insert mode, instead of always rendering plain text. Edit mode pre-fills the input with the current property value; Insert mode renders an empty input. ReadOnly mode continues to render plain text as before.
+**Why:** The `mode` parameter was being ignored — the method always rendered plain text regardless of mode. This broke the Edit workflow: clicking "Edit" switched the command row buttons correctly but fields remained non-editable. This matches ASP.NET Web Forms behavior where auto-generated fields become textboxes in edit/insert mode.

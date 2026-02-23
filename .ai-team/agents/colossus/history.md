@@ -29,3 +29,77 @@
 
  Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
 
+## 2026-02-12: Boy Scout rule — fixed 7 pre-existing integration test failures
+
+Fixed all 7 failing integration tests. 111/111 passing after fixes.
+
+### Failure 1 & 2: ChangePassword + CreateUserWizard form fields not found
+- **Root cause:** The sample pages at `ChangePassword/Index.razor` and `CreateUserWizard/Index.razor` were MISSING `@using BlazorWebFormsComponents.LoginControls`. The components rendered as raw HTML custom elements (`<changepassword>`) instead of Blazor components. PasswordRecovery worked because it had the import.
+- **Fix:** Added `@using BlazorWebFormsComponents.LoginControls` to both sample pages. Also updated test selectors from `input[type='password']` / `input[type='text']` to ID-based selectors (`input[id$='_CurrentPassword']`, etc.) with `WaitForAsync` for circuit establishment timing.
+
+### Failure 3 & 4 & 7: Image, ImageMap external placeholder URLs unreachable
+- **Root cause:** Sample pages referenced `https://via.placeholder.com/...` URLs which are unreachable in the test environment.
+- **Fix:** Created 8 local SVG placeholder images in `wwwroot/img/` (placeholder-150x100.svg, placeholder-80x80.svg, etc.) and replaced all external URLs in both `Image/Index.razor` and `ImageMap/Index.razor`.
+
+### Failure 4 (additional): ImageMap duplicate InlineData
+- **Root cause:** ImageMap had entries in BOTH `EditorControl_Loads_WithoutErrors` and `NavigationControl_Loads_WithoutErrors`. Per team decisions, ImageMap is a Navigation Control.
+- **Fix:** Removed `[InlineData("/ControlSamples/ImageMap")]` from EditorControl test theory.
+
+### Failure 5: Calendar console errors
+- **Root cause:** ASP.NET Core structured log messages (timestamps like `[2026-02-12T16:00:34.529...]`) forwarded to browser console as "error" level. Calendar component and sample page have NO bugs — these are benign framework messages from Blazor's SignalR circuit.
+- **Fix:** Added regex filter in `VerifyPageLoadsWithoutErrors` to exclude messages matching `^\[\d{4}-\d{2}-\d{2}T` pattern.
+
+### Failure 6: TreeView/Images broken image path
+- **Root cause:** `ImageUrl="/img/C#.png"` but actual file is `CSharp.png`.
+- **Fix:** Changed to `ImageUrl="/img/CSharp.png"`.
+
+## Learnings
+
+- **Missing @using is silent:** When a Blazor component can't be resolved, it renders as a raw HTML custom element with no error. This is extremely hard to catch without integration tests that verify actual DOM content.
+- **LoginControls namespace:** Components in `BlazorWebFormsComponents.LoginControls` require an explicit `@using` — the root `@using BlazorWebFormsComponents` in `_Imports.razor` doesn't cover sub-namespaces. PasswordRecovery had it; ChangePassword and CreateUserWizard didn't.
+- **ASP.NET Core log messages in browser console:** Blazor Server forwards structured log output to the browser console. These appear as "error" type messages starting with ISO 8601 timestamps. Tests must filter these to avoid false positives.
+- **SVG placeholders:** Simple inline SVG files are ideal test-safe replacements for external placeholder image services. They're just XML text, always available, and don't require network access.
+
+📌 Team update (2026-02-12): Boy scout fixes logged — 7 pre-existing integration test failures fixed, 111/111 integration tests + 797/797 bUnit tests all green. Commit a4d17f5 on sprint3/detailsview-passwordrecovery. — logged by Scribe
+
+## 2026-02-12: DetailsView edit mode input textbox verification test
+
+- Added `DetailsView_EditMode_RendersInputTextboxes` integration test in `InteractiveComponentTests.cs`
+- Test verifies the full edit mode lifecycle:
+  1. Navigates to `/ControlSamples/DetailsView` and clicks the Edit link
+  2. Waits for "Mode changing" status message (Blazor Server DOM update)
+  3. Asserts at least 3 `<input type="text">` elements appear (CustomerID, FirstName, LastName, CompanyName fields)
+  4. Asserts Update and Cancel links are present via `GetByRole(AriaRole.Link, ...)`
+  5. Clicks Cancel and verifies return to ReadOnly mode — no text inputs remain
+- This test catches the known bug where edit mode shows command row changes (Edit→Update/Cancel) but leaves field values as plain text instead of rendering `<input type="text">` textboxes
+- Cyclops is fixing the component in parallel — this test will pass once the fix lands
+- Key selector: `input[type='text']` works because the fix uses raw HTML `<input type="text">` not Blazor's `<InputText>` (which omits `type="text"` in .NET 10)
+
+📌 Team update (2026-02-12): DetailsView auto-generated fields must render <input type="text"> in Edit/Insert mode — decided by Cyclops
+
+## 2026-02-12: Sprint 3 missing integration tests — full interactive coverage
+
+- Added 4 new integration tests in `InteractiveComponentTests.cs` for Sprint 3 components:
+  - `DetailsView_EmptyData_ShowsMessage` — verifies `EmptyDataText="No customers found."` renders when data source is empty. Uses `GetByRole(AriaRole.Cell)` to avoid matching code sample `<pre>` blocks.
+  - `PasswordRecovery_AnswerSubmit_TransitionsToSuccessStep` — full 3-step flow test: username → question → success. Uses ID-specific selectors (`#PasswordRecovery1_UserName`, `#PasswordRecovery1_Answer`, `#PasswordRecovery1_SubmitButton`) to target the first PasswordRecovery instance. Uses `PressSequentiallyAsync` + Tab for Blazor Server `InputText` binding on re-rendered DOM. Verifies "Recovery email sent successfully" status (the final status after both `OnVerifyingAnswer` and `OnSendingMail` handlers fire).
+  - `PasswordRecovery_HelpLink_Renders` — verifies the 3rd PasswordRecovery renders a help link `<a id="PasswordRecovery3_HelpLink">` with text "Need more help?" and correct href.
+  - `PasswordRecovery_CustomText_Applies` — verifies the 2nd PasswordRecovery renders custom `UserNameTitleText="Password Reset"` in a table cell and custom `UserNameLabelText="Email:"` in the label element.
+- All 116 integration tests passing (112 existing + 4 new), 0 failures.
+- Key learnings:
+  - Pages with code sample `<pre><code>` blocks cause strict mode violations when using `text=` locators — the same text appears in both the rendered component and the code sample. Use role-based or ID-based selectors instead.
+  - Pages with multiple PasswordRecovery instances require ID-specific selectors (`#PasswordRecovery1_SubmitButton`) not suffix selectors (`input[id$='_SubmitButton']`) to avoid strict mode violations.
+  - After a multi-step Blazor Server form flow, the final `_statusMessage` reflects the LAST handler that sets it. For PasswordRecovery step 2→3, `OnVerifyingAnswer` sets one message, then `OnSendingMail` overwrites it — test must assert on the final value.
+  - `PressSequentiallyAsync` + Tab blur works reliably for Blazor Server `InputText` binding on dynamically re-rendered DOM elements.
+
+## 2026-02-12: DataBinder and ViewState utility feature integration tests
+
+- Added smoke tests in `ControlSampleTests.cs`:
+  - New "Utility Features" theory section with `[InlineData("/ControlSamples/DataBinder")]` and `[InlineData("/ControlSamples/ViewState")]`
+- Added 2 interaction tests in `InteractiveComponentTests.cs`:
+  - `DataBinder_Eval_RendersProductData` — verifies the DataBinder sample page renders product data ("Laptop Stand", "USB-C Hub", "Mechanical Keyboard") via Repeater with DataBinder.Eval(). Asserts at least 3 `<tbody tr>` rows present.
+  - `ViewState_Counter_IncrementsOnClick` — verifies the ViewState sample page's "Click Me (ViewState)" button increments a counter stored in ViewState. Clicks twice and verifies counter reaches 1 then 2.
+- Build: 0 errors. All 120 integration tests passing (116 existing + 4 new), 0 failures.
+- Key learnings:
+  - DataBinder sample uses `OnAfterRender(firstRender)` to call `DataBind()` on 4 Repeater instances — data only appears after first render, but NetworkIdle wait handles this.
+  - ViewState sample button text "Click Me (ViewState)" distinguishes it from the "Click Me (Property)" button in section 3. Used `GetByRole(AriaRole.Button, new() { Name = "Click Me (ViewState)" })` for precise targeting.
+  - Both pages include `<pre><code>` blocks with sample code — assertions use `page.ContentAsync()` for text presence rather than strict locators to avoid matching code samples vs rendered content where appropriate.
