@@ -29,6 +29,28 @@
 
  Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
 
+## Learnings
+
+### 2026-02-12: Milestone 4 — Chart integration tests (WI-7)
+
+- Added 8 Chart smoke tests as a dedicated `ChartControl_Loads_AndRendersContent` Theory in `ControlSampleTests.cs`
+  - Follows the Menu pattern: separate Theory with its own verify method (`VerifyChartPageLoads`) that tolerates JS interop console errors but checks for page errors
+  - Routes: `/ControlSamples/Chart`, `Chart/Line`, `Chart/Bar`, `Chart/Pie`, `Chart/Area`, `Chart/Doughnut`, `Chart/Scatter`, `Chart/StackedColumn`
+- Added 4 interactive tests in `InteractiveComponentTests.cs`:
+  - `Chart_DefaultPage_RendersCanvas` — verifies `<canvas>` on Column (default) page
+  - `Chart_LinePage_RendersCanvas` — verifies `<canvas>` on Line page
+  - `Chart_PiePage_RendersCanvas` — verifies `<canvas>` on Pie page
+  - `Chart_AllTypes_RenderCanvas` — Theory test covering all 8 routes for `<canvas>` element
+- All 19 Chart tests pass (8 smoke + 3 individual canvas + 8 theory canvas)
+- Used `WaitUntilState.DOMContentLoaded` instead of `NetworkIdle` for Chart tests — Chart.js JS interop can keep network busy
+- Key learnings:
+  - Chart component renders `<div>` wrapping a `<canvas>` element (in `Chart.razor`), so `<canvas>` is always in the DOM even before Chart.js initializes
+  - Chart pages use JS interop (`ChartJsInterop.cs`) — console errors are expected if Chart.js CDN/bundle isn't fully loaded; page errors are not
+  - Pre-existing test suite has 97 failures on non-Chart tests due to ASP.NET structured log console errors (`[timestamp] Error:`) being caught by `Assert.Empty(consoleErrors)` — these are unrelated to Chart work
+
+
+ Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
 ## 2026-02-12: Boy Scout rule — fixed 7 pre-existing integration test failures
 
 Fixed all 7 failing integration tests. 111/111 passing after fixes.
@@ -103,3 +125,20 @@ Fixed all 7 failing integration tests. 111/111 passing after fixes.
   - DataBinder sample uses `OnAfterRender(firstRender)` to call `DataBind()` on 4 Repeater instances — data only appears after first render, but NetworkIdle wait handles this.
   - ViewState sample button text "Click Me (ViewState)" distinguishes it from the "Click Me (Property)" button in section 3. Used `GetByRole(AriaRole.Button, new() { Name = "Click Me (ViewState)" })` for precise targeting.
   - Both pages include `<pre><code>` blocks with sample code — assertions use `page.ContentAsync()` for text presence rather than strict locators to avoid matching code samples vs rendered content where appropriate.
+### 2026-02-12: Enhanced Chart visual appearance tests
+
+- Added 5 stronger Chart tests in `InteractiveComponentTests.cs` to verify chart appearance:
+  - `Chart_RendersCanvas_WithDimensions` — verifies canvas has non-zero width/height via BoundingBox
+  - `Chart_AllTypes_HaveExpectedContainerDimensions` — Theory test verifying all 8 chart types have container dimensions matching ChartWidth/ChartHeight parameters (600x400 for most, 500x400 for Pie/Doughnut)
+  - `Chart_ChartJsLibrary_IsInitialized` — verifies Chart.js global is loaded and has at least one chart instance via `Chart.instances`
+  - `Chart_Line_MultipleSeries_RenderMultipleDatasets` — verifies Line chart's 2 series (NY/LA temps) produce 2 datasets via `Chart.instances[0].data.datasets.length`
+  - `Chart_AllTypes_CanvasHasRenderingContext` — Theory test verifying all 8 chart types have a 2D rendering context
+- Total Chart tests: 38 (8 smoke + 11 basic canvas + 19 enhanced visual)
+- Build: 0 errors, 0 warnings
+- Test patterns:
+  - Use `LocatorWaitForOptions { State = WaitForSelectorState.Visible }` instead of `Expect()` (class doesn't inherit from `PageTest`)
+  - Use `page.EvaluateAsync<T>` to query Chart.js internals (`Chart.instances`, dataset counts, etc.)
+  - Use `BoundingBoxAsync()` to verify element dimensions
+  - Allow ±10px tolerance on dimension checks for border/padding differences
+
+

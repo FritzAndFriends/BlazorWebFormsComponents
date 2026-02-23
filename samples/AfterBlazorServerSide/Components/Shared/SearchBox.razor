@@ -1,0 +1,262 @@
+@using Microsoft.AspNetCore.Components.Web
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<div class="search-box-container" @ref="containerRef">
+    <input class="form-control search-input"
+           type="search"
+           placeholder="Search components..."
+           aria-label="Search"
+           value="@searchQuery"
+           @oninput="OnSearchInput"
+           @onkeydown="HandleKeyDown"
+           @onfocus="OnFocus"
+           autocomplete="off" />
+    
+    @if (showDropdown && searchResults.Count > 0)
+    {
+        <div class="search-dropdown">
+            @for (int i = 0; i < searchResults.Count; i++)
+            {
+                var index = i;
+                var result = searchResults[i];
+                <div class="search-result-item @(selectedIndex == index ? "selected" : "")"
+                     @onclick="() => NavigateToResult(result)"
+                     @onmouseenter="() => selectedIndex = index">
+                    <div class="search-result-name">
+                        @((MarkupString)GetHighlightedName(result))
+                    </div>
+                    <div class="search-result-meta">
+                        <span class="badge bg-secondary">@result.Category</span>
+                        <span class="search-result-description">@TruncateDescription(result.Description)</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private string searchQuery = string.Empty;
+    private List<SearchResult> searchResults = new();
+    private bool showDropdown = false;
+    private int selectedIndex = 0;
+    private ElementReference containerRef;
+    private System.Timers.Timer? debounceTimer;
+    private bool isInitialized = false;
+    private DotNetObjectReference<SearchBox>? dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            
+            // Initialize Fuse.js with component data
+            var components = ComponentCatalog.Components.Select(c => new
+            {
+                name = c.Name,
+                category = c.Category,
+                route = c.Route,
+                description = c.Description,
+                keywords = c.Keywords ?? Array.Empty<string>()
+            }).ToArray();
+            
+            await JS.InvokeVoidAsync("initializeSearch", (object)components);
+            
+            // Register click outside handler
+            await JS.InvokeVoidAsync("registerClickOutsideHandler", containerRef, dotNetRef);
+            
+            isInitialized = true;
+        }
+    }
+
+    private void OnFocus()
+    {
+        if (searchResults.Count > 0)
+        {
+            showDropdown = true;
+        }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchQuery = e.Value?.ToString() ?? string.Empty;
+        DebouncedSearch();
+    }
+
+    [JSInvokable]
+    public void CloseDropdown()
+    {
+        showDropdown = false;
+        StateHasChanged();
+    }
+
+    private async Task SearchAsync()
+    {
+        if (!isInitialized || string.IsNullOrWhiteSpace(searchQuery))
+        {
+            searchResults.Clear();
+            showDropdown = false;
+            return;
+        }
+
+        try
+        {
+            var results = await JS.InvokeAsync<SearchResult[]>("searchComponents", searchQuery, 8);
+            searchResults = results?.ToList() ?? new List<SearchResult>();
+            showDropdown = searchResults.Count > 0;
+            selectedIndex = 0;
+        }
+        catch
+        {
+            searchResults.Clear();
+            showDropdown = false;
+        }
+    }
+
+    private void DebouncedSearch()
+    {
+        debounceTimer?.Stop();
+        debounceTimer?.Dispose();
+        
+        debounceTimer = new System.Timers.Timer(200);
+        debounceTimer.Elapsed += async (sender, args) =>
+        {
+            debounceTimer?.Stop();
+            await InvokeAsync(async () =>
+            {
+                await SearchAsync();
+                StateHasChanged();
+            });
+        };
+        debounceTimer.AutoReset = false;
+        debounceTimer.Start();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                if (showDropdown && searchResults.Count > 0)
+                {
+                    selectedIndex = (selectedIndex + 1) % searchResults.Count;
+                }
+                break;
+                
+            case "ArrowUp":
+                if (showDropdown && searchResults.Count > 0)
+                {
+                    selectedIndex = selectedIndex <= 0 ? searchResults.Count - 1 : selectedIndex - 1;
+                }
+                break;
+                
+            case "Enter":
+                if (showDropdown && selectedIndex >= 0 && selectedIndex < searchResults.Count)
+                {
+                    NavigateToResult(searchResults[selectedIndex]);
+                }
+                break;
+                
+            case "Escape":
+                showDropdown = false;
+                break;
+        }
+    }
+
+    private void NavigateToResult(SearchResult result)
+    {
+        showDropdown = false;
+        searchQuery = string.Empty;
+        searchResults.Clear();
+        Navigation.NavigateTo(result.Route);
+    }
+
+    private string GetHighlightedName(SearchResult result)
+    {
+        var nameMatch = result.Matches?.FirstOrDefault(m => m.Key == "name");
+        if (nameMatch?.Indices != null && nameMatch.Indices.Length > 0)
+        {
+            return HighlightText(result.Name, nameMatch.Indices);
+        }
+        return System.Net.WebUtility.HtmlEncode(result.Name);
+    }
+
+    private string HighlightText(string text, int[][] indices)
+    {
+        if (indices == null || indices.Length == 0)
+            return System.Net.WebUtility.HtmlEncode(text);
+            
+        var sortedIndices = indices.OrderBy(i => i[0]).ToArray();
+        var result = new System.Text.StringBuilder();
+        int lastIndex = 0;
+        
+        foreach (var idx in sortedIndices)
+        {
+            int start = idx[0];
+            int end = idx[1];
+            
+            if (start > lastIndex)
+                result.Append(System.Net.WebUtility.HtmlEncode(text.Substring(lastIndex, start - lastIndex)));
+            
+            result.Append("<mark>");
+            result.Append(System.Net.WebUtility.HtmlEncode(text.Substring(start, end - start + 1)));
+            result.Append("</mark>");
+            
+            lastIndex = end + 1;
+        }
+        
+        if (lastIndex < text.Length)
+            result.Append(System.Net.WebUtility.HtmlEncode(text.Substring(lastIndex)));
+            
+        return result.ToString();
+    }
+
+    private string TruncateDescription(string description)
+    {
+        const int maxLength = 50;
+        if (string.IsNullOrEmpty(description))
+            return string.Empty;
+        if (description.Length <= maxLength)
+            return description;
+        return description.Substring(0, maxLength) + "...";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        debounceTimer?.Stop();
+        debounceTimer?.Dispose();
+        
+        if (dotNetRef != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("unregisterClickOutsideHandler", containerRef);
+            }
+            catch
+            {
+                // Ignore errors during disposal (circuit may be closed)
+            }
+            dotNetRef.Dispose();
+        }
+    }
+
+    private class SearchResult
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Route { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public double Score { get; set; }
+        public MatchInfo[]? Matches { get; set; }
+    }
+
+    private class MatchInfo
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public int[][] Indices { get; set; } = Array.Empty<int[]>();
+    }
+}

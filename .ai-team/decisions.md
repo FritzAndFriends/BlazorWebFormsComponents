@@ -448,6 +448,112 @@ Suggested timeline:
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Going forward, use "milestones" instead of "sprints" for naming work batches. All future planning uses "milestone" terminology.
 **Why:** User preference — captured for team memory. Applies retroactively to planning references where practical.
+
+### 2026-02-23: AccessKey and ToolTip must be added to BaseStyledComponent (consolidated)
+
+**By:** Beast, Cyclops
+**What:** `AccessKey` (string) and `ToolTip` (string) are missing from all styled controls. Both are standard `WebControl` properties present on every control inheriting `WebControl` in Web Forms. Beast's audit of 15 editor controls (L–X) and Cyclops's audit of 13 editor controls (A–I) independently confirmed the gap. 7 of 13 A–I controls add ToolTip individually; the remaining 6 lack it entirely.
+**Recommendation:** Add `[Parameter] public string AccessKey { get; set; }` and `[Parameter] public string ToolTip { get; set; }` to `BaseStyledComponent`. This fixes the gap for all 20+ styled controls in one change.
+**Why:** Universal gap confirmed by two independent audits across 28 controls. Base-class fix is the highest-leverage single change available.
+
+### 2026-02-23: Label should inherit BaseStyledComponent
+
+**By:** Beast
+**What:** `Label` currently inherits `BaseWebFormsComponent` but Web Forms `Label` inherits from `WebControl`. This means Label is missing all 9 style properties (CssClass, BackColor, ForeColor, Font, etc.). Also consider `AssociatedControlID` to render `<label for="...">` instead of `<span>`.
+**Why:** Label is one of the most commonly used controls. Missing style properties break migration for any page that styles its Labels.
+
+### 2026-02-23: Substitution and Xml remain permanently deferred
+
+**By:** Beast
+**What:** Both controls are tightly coupled to server-side ASP.NET infrastructure: Substitution depends on the output caching pipeline (`HttpResponse.WriteSubstitution`); Xml depends on XSLT transformation. Neither maps to Blazor's component model.
+**Recommendation:** Document migration alternatives in `DeferredControls.md`. Substitution → Blazor component lifecycle. Xml → convert XML to C# objects and use Blazor templates.
+**Why:** Reinforces and formalizes the Sprint 3 deferral decision with specific migration guidance.
+
+### 2026-02-23: Chart Type Gallery documentation convention
+
+**By:** Beast
+**What:** Added a "Chart Type Gallery" section to `docs/DataControls/Chart.md` showing screenshots of all 8 Phase 1 chart types. Each entry includes an H3 heading, MkDocs image (`![alt](../images/chart/chart-{type}.png)`), `SeriesChartType` enum value, and usage description. Pie and Doughnut include `!!! warning "Palette Limitation"` admonitions for the Phase 1 single-color-per-series issue.
+**Why:** Visual documentation helps migrating developers choose the correct chart type. Image path convention: `docs/images/{component}/` with `chart-{type}.png` naming.
+
+### 2026-02-23: Feature audit findings — Editor Controls A–I
+
+**By:** Cyclops
+**What:** Completed feature comparison audit for 13 editor controls (AdRotator through ImageMap). Key findings beyond AccessKey/ToolTip (consolidated separately):
+1. **Image needs BaseStyledComponent.** Image inherits `BaseWebFormsComponent` but Web Forms `Image` inherits `WebControl`, leaving 10+ style properties missing. ImageMap was already fixed — Image should follow suit.
+2. **HyperLink.NavigateUrl vs NavigationUrl.** Blazor uses `NavigationUrl` but Web Forms uses `NavigateUrl`. Migration-breaking name difference.
+3. **List controls share common gaps.** BulletedList, CheckBoxList, and DropDownList all lack `DataTextFormatString`, `AppendDataBoundItems`, `CausesValidation`, and `ValidationGroup` from Web Forms `ListControl` base.
+**Why:** Prioritized work items for closing API gaps. Image base class fix is a single targeted change with high impact.
+
+### 2026-02-23: Chart component implementation architecture (consolidated)
+
+**By:** Cyclops, Forge
+**What:** Combined implementation decisions from Cyclops (WI-1/2/3 execution) and Forge (Milestone 4 design review):
+1. **Base class: DataBoundStyledComponent<T>.** New class inheriting `DataBoundComponent<T>` + implementing `IStyle`. Fills the structural gap where neither `DataBoundComponent<T>` (no styles) nor `BaseStyledComponent` (no data binding) alone satisfies the Web Forms Chart contract. Additive — does not affect existing components.
+2. **Child registration via CascadingParameter.** ChartSeries, ChartArea, ChartTitle, ChartLegend use `[CascadingParameter(Name="ParentChart")]` and register in `OnInitializedAsync`, following the MultiView/View pattern.
+3. **JS interop: Three-function ES module.** `chart-interop.js` exports `createChart`, `updateChart`, `destroyChart`. `ChartJsInterop` is separate from `BlazorWebFormsJsInterop` — chart-specific JS stays isolated. Lazy `IJSObjectReference` import pattern. Canvas referenced by `id`, not `ElementReference`.
+4. **Chart.js v4.4.8 bundled.** Pinned as static asset in `wwwroot/js/`. Originally a placeholder stub; now replaced with real Chart.js v4.4.8.
+5. **Phase 1 chart types.** 8 mappings: Column→bar, Bar→bar(indexAxis:'y'), Line→line, Pie→pie, Area→line(fill), Doughnut→doughnut, Point→scatter, StackedColumn→bar(stacked). `SeriesChartType.Point` maps to Chart.js `"scatter"` (Web Forms has no explicit Scatter value). Full 35-value enum created; unsupported types throw `NotSupportedException`.
+6. **ChartConfigBuilder uses snapshot classes.** Pure static class taking config snapshots (`ChartSeriesConfig`, `ChartAreaConfig`, etc.) via `.ToConfig()` methods. Decouples builder from component lifecycle, enables unit testing. Canvas content tested visually via Playwright.
+7. **ChartWidth/ChartHeight as string parameters.** Avoids hiding base `Width`/`Height` (Unit type) on `BaseStyledComponent`.
+8. **Docking parameter naming.** `ChartLegend.LegendDocking` and `ChartTitle.TitleDocking` use prefixed names to avoid conflicts. Nullable `Docking?` distinguishes "not set" from default.
+9. **Task.Yield() before first chart creation.** Gives child components time to register before JS interop fires.
+10. **Enums: 4 new files.** `SeriesChartType` (35), `ChartPalette` (13), `Docking` (4), `ChartDashStyle` (6) in `Enums/` per project convention.
+**Why:** Consolidates architecture decisions from design review and implementation to provide a single reference for chart component patterns.
+
+### 2026-02-23: DataBoundComponent style property gap (consolidated)
+
+**By:** Forge
+**What:** Controls inheriting `DataBoundComponent<T>` (DataGrid, GridView, FormView, DetailsView, ListView) lack all WebControl-level style properties because the chain `DataBoundComponent<T> → BaseDataBoundComponent → BaseWebFormsComponent` skips `BaseStyledComponent`. Only DataList works around this by implementing `IStyle` directly. GridView re-declares `CssClass` as a standalone `[Parameter]` — a pattern smell.
+**Recommendation:** Create `DataBoundStyledComponent<T>` inheriting `DataBoundComponent<T>` and implementing `IStyle`. Chart already uses this approach. This would immediately give BackColor, BorderColor, CssClass, Font, ForeColor, Height, Width, etc. to all 5 affected data controls.
+**Why:** Affects 5 of 9 data controls. Identified independently in both the data controls audit and chart design review. Single base-class fix with broad impact.
+
+### 2026-02-23: GridView is highest-priority data control gap
+
+**By:** Forge
+**What:** GridView is the most commonly used data control in Web Forms and has the weakest coverage: no paging, sorting, editing, selection, no style properties, 14 of 22 events missing. Currently read-only table rendering only.
+**Recommendation:** GridView enhancement should be a near-term priority, potentially as a Milestone 5 workstream.
+**Why:** Developers migrating from Web Forms will expect GridView to be functional.
+
+### 2026-02-23: DetailsView branch should be merged forward
+
+**By:** Forge
+**What:** DetailsView has strong implementation (27 props, 16 events with cancellation) but only exists on `sprint3/detailsview-passwordrecovery`. It is not on the current working branch.
+**Why:** APPROVED in Milestone 3 gate review. Should be available on the main development branches.
+
+### 2026-02-23: Themes and Skins — CascadingValue ThemeProvider recommended
+
+**By:** Forge
+**What:** Evaluated 5 approaches for Web Forms Themes/Skins migration. Recommended CascadingValue ThemeProvider — the only approach that faithfully models both `Theme` (override) and `StyleSheetTheme` (default) semantics. CSS-only approaches cannot set non-CSS properties. DI approach cannot scope to subtrees. SkinID must be corrected from `bool` to `string` on `BaseWebFormsComponent` first. Implementation is opt-in via `<ThemeProvider>` wrapper — zero breaking changes. Strategy is exploratory; README exclusion of themes/skins still stands.
+**Why:** Jeff requested exploration. CascadingValue aligns with existing library patterns (TableItemStyle already cascades) and is incrementally adoptable.
+
+### 2026-02-23: PasswordRecovery component missing from current branch
+
+**By:** Rogue
+**What:** `PasswordRecovery.razor` and `.razor.cs` do not exist in `src/BlazorWebFormsComponents/LoginControls/` despite history.md referencing Sprint 3 delivery with 29 bUnit tests. Component exists on `sprint3/detailsview-passwordrecovery` branch.
+**Recommendation:** Merge the sprint3 branch forward or cherry-pick the PasswordRecovery files.
+**Why:** Confirmed by audit. Related to DetailsView branch merge-forward decision.
+
+### 2026-02-23: Validation Display property gap — migration-blocking
+
+**By:** Rogue
+**What:** ALL six validation controls are missing the `Display` property (`ValidatorDisplay` enum: None, Static, Dynamic). Current Blazor implementation always uses Dynamic behavior (hidden when valid). `Static` reserves space even when valid — pages relying on this for layout stability will break.
+**Recommendation:** Add `Display` parameter to `BaseValidator<T>`.
+**Why:** Migration-blocking for pages using `Display="Static"`.
+
+### 2026-02-23: ValidationSummary functional gaps and comma-split bug
+
+**By:** Rogue
+**What:** `AspNetValidationSummary` is missing `HeaderText`, `ShowMessageBox`, `ShowSummary`, `ShowValidationErrors`, and `ValidationGroup`. Error message parsing uses `x.Split(',')[1]` which silently corrupts messages containing commas.
+**Recommendation:** Fix comma-split bug immediately (data corruption risk). Prioritize `HeaderText` and `ValidationGroup` (common in multi-form pages).
+**Why:** Comma-split is a latent data corruption bug. Missing properties affect multi-form page migration.
+
+### 2026-02-23: Login controls missing outer WebControl style properties
+
+**By:** Rogue
+**What:** Login, ChangePassword, CreateUserWizard, and LoginView inherit `BaseWebFormsComponent` instead of `BaseStyledComponent`, so they lack outer-level style properties (BackColor, CssClass, ForeColor, Width, Height). Only LoginName and LoginStatus have full style support. Web Forms applies outer styles to the wrapping `<table>`.
+**Recommendation:** Evaluate whether these composite controls should inherit `BaseStyledComponent` or if CascadingParameter sub-element styles are sufficient.
+**Why:** Migrating pages that set `CssClass` on Login controls will break.
+
 ### 2026-02-12: ChangePassword and CreateUserWizard sample pages require LoginControls using directive
 **By:** Colossus
 **What:** Added `@using BlazorWebFormsComponents.LoginControls` to `ChangePassword/Index.razor` and `CreateUserWizard/Index.razor`. Without this, the components render as raw HTML custom elements instead of Blazor components — silently failing with no error.
@@ -477,3 +583,277 @@ Suggested timeline:
 **By:** Cyclops
 **What:** Fixed `DetailsViewAutoField.GetValue()` to render `<input type="text">` elements when the DetailsView is in Edit or Insert mode, instead of always rendering plain text. Edit mode pre-fills the input with the current property value; Insert mode renders an empty input. ReadOnly mode continues to render plain text as before.
 **Why:** The `mode` parameter was being ignored — the method always rendered plain text regardless of mode. This broke the Edit workflow: clicking "Edit" switched the command row buttons correctly but fields remained non-editable. This matches ASP.NET Web Forms behavior where auto-generated fields become textboxes in edit/insert mode.
+# Chart Visual Appearance Testing Patterns
+
+**By:** Colossus
+**Date:** 2026-02-12
+
+## What
+
+Established patterns for testing Chart.js-based component visual appearance via Playwright:
+
+1. **Canvas dimension verification**: Use `BoundingBoxAsync()` to verify canvas has non-zero width/height, indicating successful render.
+
+2. **Container dimension verification**: Verify the chart container div has dimensions matching `ChartWidth`/`ChartHeight` parameters (with ±10px tolerance for border/padding).
+
+3. **Chart.js library verification**: Use `page.EvaluateAsync<bool>` to check:
+   - `typeof Chart !== 'undefined'` — library loaded
+   - `Chart.instances && Object.keys(Chart.instances).length > 0` — at least one chart instance exists
+
+4. **Multi-series verification**: Use `page.EvaluateAsync<int>` to query `Chart.instances[0].data?.datasets?.length` to verify correct number of datasets rendered.
+
+5. **Canvas context verification**: Check `canvas.getContext('2d') !== null` to verify canvas is properly initialized for 2D rendering.
+
+## Why
+
+Chart.js uses JS interop and renders to `<canvas>`, so traditional DOM assertions are insufficient. These patterns let us verify:
+- The canvas element exists and has dimensions (chart rendered something)
+- The Chart.js library loaded and created chart instances (JS interop succeeded)
+- Multiple data series produce multiple datasets (data binding works)
+- The canvas is properly initialized (rendering pipeline is functional)
+
+## Technical Notes
+
+- Use `LocatorWaitForOptions { State = WaitForSelectorState.Visible }` instead of `Expect()` since `InteractiveComponentTests` doesn't inherit from Playwright's `PageTest` class.
+- Use `WaitUntilState.NetworkIdle` for tests that need Chart.js fully initialized (library verification, dataset verification).
+- Use `WaitUntilState.DOMContentLoaded` for basic canvas presence tests.
+
+
+### 2026-02-12: ChartSeries data binding extracts points via reflection
+
+**By:** Cyclops
+**What:** Fixed `ChartSeries.ToConfig()` to support data binding via `Items`, `XValueMember`, and `YValueMembers` parameters. When `Items` is provided with a non-empty `YValueMembers`, the method extracts `DataPoint` objects using reflection. The `YValueMembers` property supports comma-separated field names for multi-value charts. Type conversion handles `double`, `float`, `int`, `long`, `decimal`, `short`, `byte`, and falls back to `Convert.ToDouble()`. The manual `Points` collection is used as a fallback when `Items` is null/empty or `YValueMembers` is not specified.
+**Why:** Data-bound charts were rendering empty because `ToConfig()` only used the manual `Points` collection. Web Forms Chart supports data binding via `XValueMember`/`YValueMembers` properties, and this fix restores that capability for Blazor migration scenarios.
+
+
+# Chart Component Implementation Decisions
+
+**By:** Cyclops
+**Date:** 2026-02-12
+**Scope:** WI-1, WI-2, WI-3 (Chart component, JS interop, chart type mapping)
+
+## Decisions Made
+
+### 1. SeriesChartType.Point maps to Chart.js "scatter"
+Web Forms does not have a `Scatter` enum value — `Point = 0` is the equivalent. The design spec listed "Scatter" as a Phase 1 type, but the actual enum uses `Point`. `ChartConfigBuilder` maps `Point` → `"scatter"` in Chart.js.
+
+### 2. ChartWidth/ChartHeight as string parameters (not overriding base Width/Height)
+`BaseStyledComponent` already defines `Width` and `Height` as `Unit` type parameters. Rather than hiding these, Chart adds separate `ChartWidth`/`ChartHeight` string parameters (e.g., "400px", "300px") that render as inline CSS on the wrapper `<div>`. The base `Width`/`Height` remain available for CSS style generation via `this.ToStyle()`.
+
+### 3. ChartJsInterop is separate from BlazorWebFormsJsInterop
+Chart.js interop uses its own `ChartJsInterop` class, not the shared `BlazorWebFormsJsInterop` service. This keeps chart-specific JS isolated and avoids polluting the page-level interop service.
+
+### 4. Chart.js placeholder file
+Since no internet access is available, `wwwroot/js/chart.min.js` is a placeholder stub that exports a `Chart` constructor. It logs a console warning. Must be replaced with real Chart.js v4.4.8 before production use.
+
+### 5. Child component registration via CascadingParameter
+All child components (ChartSeries, ChartArea, ChartLegend, ChartTitle) use `[CascadingParameter(Name = "ParentChart")]` and register in `OnInitializedAsync`, following the MultiView/View pattern.
+
+### 6. ChartConfigBuilder uses snapshot classes
+Instead of passing the `Chart` component directly to `ChartConfigBuilder.BuildConfig()`, we pass config snapshot classes (`ChartSeriesConfig`, `ChartAreaConfig`, etc.) extracted via `.ToConfig()` methods. This decouples the builder from component lifecycle and enables pure unit testing.
+
+### 7. Docking parameter naming avoids conflicts
+`ChartLegend.LegendDocking` and `ChartTitle.TitleDocking` use prefixed names to avoid potential parameter name conflicts with the base class or future properties. They're nullable `Docking?` to distinguish "not set" from a default value.
+
+### 8. Task.Yield() before first chart creation
+`OnAfterRenderAsync(firstRender)` calls `Task.Yield()` before creating the chart, giving child components time to register via their own `OnInitializedAsync`. Without this, the chart would render before series/areas/titles/legends are registered.
+
+## Files Created
+- `Enums/SeriesChartType.cs`, `Enums/ChartPalette.cs`, `Enums/Docking.cs`, `Enums/ChartDashStyle.cs`
+- `Axis.cs`, `DataPoint.cs`
+- `wwwroot/js/chart.min.js`, `wwwroot/js/chart-interop.js`
+- `ChartJsInterop.cs`, `ChartConfigBuilder.cs`
+- `Chart.razor`, `Chart.razor.cs`
+- `ChartSeries.razor`, `ChartSeries.razor.cs`
+- `ChartArea.razor`, `ChartArea.razor.cs`
+- `ChartLegend.razor`, `ChartLegend.razor.cs`
+- `ChartTitle.razor`, `ChartTitle.razor.cs`
+
+
+### 2026-02-13: Chart component Phase 1 gate review — CONDITIONAL APPROVAL
+
+**By:** Forge
+**What:** Chart component on `milestone4/chart-component` branch is **conditionally approved** pending one ship-blocking fix:
+
+1. **BLOCKING:** Data binding (`Items` + `XValueMember`/`YValueMembers`) is not implemented. The parameters exist and docs show examples, but `ChartSeries.ToConfig()` ignores `Items` entirely. Fix required before merge.
+
+**Non-blocking gaps (Phase 2/3):**
+- 27 unsupported chart types (documented, throws NotSupportedException)
+- Per-point coloring (`DataPoint.Color`) not wired
+- Tooltips not wired
+- `IsValueShownAsLabel` not implemented
+- `MarkerStyle` not mapped
+- Integration tests needed (Colossus to add)
+
+**Work items for ship:**
+1. **Cyclops:** Implement data binding in `ChartSeries.ToConfig()` — convert `Items` to `DataPoint` list using reflection on `XValueMember`/`YValueMembers`
+2. **Rogue:** Add tests for data binding scenario
+3. **Beast:** Verify doc examples work after fix
+4. **Colossus:** Add Chart sample routes to integration smoke tests
+
+**Why:** The component is architecturally sound and 90% complete. The data binding gap creates a docs-vs-reality mismatch that will frustrate migrating developers. Phase 2/3 features (more chart types, tooltips) are nice-to-have but not blocking for initial ship.
+
+
+# Decision: Chart Component Architecture (Design Review)
+
+**By:** Forge
+**Date:** 2026-02-12
+**Ceremony:** Design Review — Milestone 4
+
+---
+
+### Base class: DataBoundStyledComponent<T>
+
+**What:** Create new `DataBoundStyledComponent<T>` inheriting `DataBoundComponent<T>` and implementing `IStyle`. Chart inherits this new class. Web Forms `Chart` inherits `DataBoundControl` → `WebControl` — it needs both data binding AND style properties. Our `DataBoundComponent<T>` chain skips `BaseStyledComponent`, so styled data-bound controls have no proper base class. GridView worked around this by re-declaring `CssClass` as a standalone `[Parameter]` — a pattern smell.
+
+**Why:** Neither `DataBoundComponent<T>` (no styles) nor `BaseStyledComponent` (no data binding) alone satisfies the Web Forms Chart contract. The new base class fills a structural gap. It does not affect existing components (additive only).
+
+---
+
+### Child registration: CascadingValue + explicit Register on init
+
+**What:** ChartSeries, ChartArea, ChartTitle, ChartLegend register with parent Chart via `[CascadingParameter(Name="ParentChart")]` and call `ParentChart.RegisterXxx(this)` in `OnInitializedAsync`. Chart maintains `SeriesList`, `ChartAreaList`, `TitleList`, `LegendList` collections.
+
+**Why:** Follows the MultiView/View pattern already established in the project. Explicit registration gives Chart deterministic knowledge of its children before `OnAfterRenderAsync` fires the JS interop call.
+
+---
+
+### JS interop contract: Three-function ES module
+
+**What:** `chart-interop.js` exports `createChart(canvasId, config)`, `updateChart(canvasId, config)`, `destroyChart(canvasId)`. Config is a standard Chart.js configuration object (type + data + options). C# wrapper class `ChartJsInterop` uses lazy `IJSObjectReference` import pattern matching `BlazorWebFormsJsInterop`. Canvas referenced by `id` (from `ClientID`), not `ElementReference`.
+
+**Why:** Minimal JS surface area. Passing a standard Chart.js config object means C# owns the config shape and JS is a thin pass-through — no JS-side logic to maintain. Follows existing lazy-module-import pattern.
+
+---
+
+### Chart.js version: Pin to v4.4.8
+
+**What:** Bundle `chart.min.js` v4.4.8 as a static asset in `wwwroot/js/`. Imported by `chart-interop.js` via relative ES module import.
+
+**Why:** v4.4.8 is widely deployed and well-tested. v4.5.x is newer (Oct 2025) with less production mileage. Pinning to a stable version reduces risk for the project's first JS interop component. Upgrading is a single file replacement.
+
+---
+
+### Phase 1 chart types: 8 types mapped to Chart.js
+
+**What:** Column→bar, Bar→bar(indexAxis:'y'), Line→line, Pie→pie, Area→line(fill:true), Doughnut→doughnut, Scatter→scatter, StackedColumn→bar(stacked:true). Full `SeriesChartType` enum (all 35 Web Forms values) created for API fidelity; unsupported types throw `NotSupportedException`.
+
+**Why:** API fidelity requires the full enum. Chart.js maps cleanly to 8 common chart types. Unsupported types fail clearly rather than silently producing wrong output.
+
+---
+
+### Testing strategy: Extract ChartConfigBuilder as pure function
+
+**What:** `ChartConfigBuilder` is a static class that takes registered children/parameters and produces the Chart.js config dictionary. bUnit tests cover: markup structure (canvas attributes), child registration, config generation (via ChartConfigBuilder), JS interop mock verification, dispose cleanup, error handling. Visual rendering verified by Playwright.
+
+**Why:** Canvas content is opaque to bUnit. Extracting the config builder as a pure function maximizes testable surface area without JS interop. This is the same principle as testing a ViewModel separately from a View.
+
+---
+
+### Enums: 4 new enum files
+
+**What:** `SeriesChartType` (35 values), `ChartPalette` (13 values), `Docking` (4 values: Top/Bottom/Left/Right), `ChartDashStyle` (6 values). All placed in `Enums/` directory following project convention.
+
+**Why:** Web Forms Chart uses these enums. Project convention requires every Web Forms enum to have a corresponding C# enum in `Enums/`.
+
+
+# Chart Sample Pages — Feature-Rich Samples
+
+**By:** Jubilee
+**Date:** 2026-02-12
+
+## Decision
+
+Created 4 new Chart sample pages demonstrating advanced features:
+
+1. **DataBinding.razor** — Web Forms-style data binding with `Items`, `XValueMember`, `YValueMembers`
+2. **MultiSeries.razor** — Multiple series comparisons on single charts
+3. **Styling.razor** — All 11 color palettes plus custom `WebColor` usage
+4. **ChartAreas.razor** — Axis configuration (Title, Min/Max, Interval, IsLogarithmic)
+
+## Sample Patterns Established
+
+### Data Binding Pattern
+Use records for clean business object definitions:
+```csharp
+public record SalesData(string Month, decimal Amount);
+
+private List<SalesData> salesData = new() { new("Jan", 12500), ... };
+```
+
+Then bind with:
+```razor
+<ChartSeries Items="@salesData" XValueMember="Month" YValueMembers="Amount" ... />
+```
+
+### WebColor Usage
+Use static fields, NOT `FromName()`:
+```razor
+Color="WebColor.DodgerBlue"  // ✓ Correct
+Color="@(WebColor.FromName("DodgerBlue"))"  // ✗ Wrong - method doesn't exist
+```
+
+### Nav Ordering
+Chart sub-samples are alphabetically ordered in NavMenu.razor (Area, Bar, ChartAreas, Column, DataBinding, etc.).
+
+## Why
+
+Jeff requested rich samples covering all Chart features. These samples:
+- Show migrating developers how Web Forms data binding translates to Blazor
+- Demonstrate all available color palettes visually
+- Provide copy-paste ready code for common scenarios
+
+
+# ChartSeries Data Binding Test Coverage
+
+**By:** Rogue
+**Date:** 2026-02-12
+
+## What
+
+Added 12 new bUnit tests for `ChartSeries` data binding in `ChartTests.cs`. These tests verify the expected behavior when `Items` + `XValueMember` + `YValueMembers` are used for data binding vs. manual `Points`.
+
+## Test Cases
+
+1. **DataBinding_ExtractsValuesFromItems** — Items with XValueMember/YValueMembers extracts X and Y values correctly
+2. **DataBinding_NumericXValues** — Numeric X values (e.g., years) are preserved as numbers
+3. **DataBinding_DecimalYValues** — Decimal Y values are extracted with precision
+4. **DataBinding_ManualPoints_WorksWithoutItems** — When Items is null, manual Points are used
+5. **DataBinding_EmptyItems_ProducesEmptyPoints** — Empty Items collection produces empty points (not error)
+6. **DataBinding_NullItems_FallsBackToPoints** — Null Items falls back to manual Points
+7. **DataBinding_NullItems_NoFallback_ProducesEmptyPoints** — Null Items with no fallback produces empty list
+8. **DataBinding_MissingXValueMember_UsesNullXValue** — Missing XValueMember results in null XValue
+9. **DataBinding_MissingYValueMembers_UsesEmptyYValues** — Missing YValueMembers results in empty YValues array
+10. **DataBinding_IntYValue_ConvertsToDouble** — Integer Y values are converted to double
+11. **DataBinding_ItemsOverrideManualPoints** — When both Items and Points provided, Items wins
+12. **DataBinding_InvalidPropertyName_ReturnsNullValue** — Invalid property names handled gracefully
+
+## Implementation Pattern
+
+Since `ChartSeries.ToConfig()` is `internal`, tests use a helper class `ChartSeriesDataBindingHelper` that implements the expected extraction logic:
+
+```csharp
+public static List<DataPoint> ExtractDataPoints(
+    IEnumerable<object> items,
+    string xValueMember,
+    string yValueMembers,
+    List<DataPoint> fallbackPoints = null)
+```
+
+This helper documents the contract that Cyclops must implement in `ToConfig()`:
+- If `Items` is not null and not empty, extract `DataPoint` objects using reflection
+- If `Items` is null, fall back to manual `Points`
+- Handle missing properties by returning null/empty values
+- Convert numeric Y values to `double`
+
+## Why
+
+Cyclops is fixing the `ChartSeries.ToConfig()` bug where data binding is not implemented. These tests:
+1. Document the expected behavior before the fix
+2. Provide regression tests after the fix
+3. Cover edge cases that could cause silent failures
+
+## Total Test Count
+
+152 Chart tests (140 original + 12 new data binding tests). All passing.
+

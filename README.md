@@ -8,6 +8,22 @@ A collection of Blazor components that emulate the web forms components of the s
 
 [Live Samples running on Azure](https://blazorwebformscomponents.azurewebsites.net)
 
+## Sample Site
+
+The sample site showcases all components with interactive examples, code snippets, and a searchable catalog.
+
+### Homepage & Component Catalog
+![Sample Site Homepage](docs/images/sample-site-homepage.png)
+
+### GridView with Interactive Data
+![GridView Sample](docs/images/sample-site-gridview.png)
+
+### Chart Component with Chart.js
+![Chart Sample](docs/images/sample-site-chart.png)
+
+### Fuzzy Search
+![Search Feature](docs/images/sample-site-search.png)
+
 ## Approach + Considerations
 
 We believe that Web Forms applications that have been well maintained and provide value should have a path forward to the new user-interface frameworks with minimal changes.  This is not an application converted nor is it a patch that can be applied to your project that magically makes it work with ASP<span></span>.NET Core.  This repository contains a library and series of strategies that will allow you to re-use much of your markup, much of your business code and help shorten your application re-write process.
@@ -50,7 +66,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - View
     - Xml
   - Data Controls
-    - Chart(?)
+    - [Chart](docs/DataControls/Chart.md)
     - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
     - [DataPager](docs/DataControls/DataPager.md)

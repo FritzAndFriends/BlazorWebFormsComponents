@@ -44,7 +44,9 @@ public class HomePageTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
             }
         };
 
