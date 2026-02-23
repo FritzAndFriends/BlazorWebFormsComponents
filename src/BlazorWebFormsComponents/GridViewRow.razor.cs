@@ -35,6 +35,16 @@ namespace BlazorWebFormsComponents
 		[Parameter] public TableItemStyle EditRowStyle { get; set; }
 
 		/// <summary>
+		/// Style applied to this row (RowStyle or AlternatingRowStyle)
+		/// </summary>
+		[Parameter] public TableItemStyle RowStyle { get; set; }
+
+		/// <summary>
+		/// Whether this row is currently selected
+		/// </summary>
+		[Parameter] public bool IsSelected { get; set; }
+
+		/// <summary>
 		/// Reference to the parent GridView
 		/// </summary>
 		[Parameter] public GridView<ItemType> GridView { get; set; }
