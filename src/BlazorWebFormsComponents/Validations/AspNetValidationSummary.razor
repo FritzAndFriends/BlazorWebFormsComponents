@@ -1,11 +1,15 @@
 ﻿@using BlazorWebFormsComponents.Enums
 @inherits BaseStyledComponent
 
-@if (Enabled && Visible)
+@if (Enabled && Visible && ShowSummary)
 {
 	<div style="@(Style + (IsValid ? null : "display:none;"))">
 		@if (IsValid)
 		{
+			@if (!string.IsNullOrEmpty(HeaderText))
+			{
+				<b>@HeaderText</b>
+			}
 			@switch (DisplayMode)
 			{
 				case BulletListDisplayMode b:

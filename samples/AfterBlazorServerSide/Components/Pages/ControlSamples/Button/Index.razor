@@ -4,7 +4,10 @@
 
 <Nav></Nav>
 
-<Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" OnClick="OnClick" Text="Click me!" />
+<Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" OnClick="OnClick" Text="Click me!"
+				AccessKey="b" ToolTip="Click to submit" />
+
+<p><em>Tip:</em> This button has <code>AccessKey="b"</code> (press <kbd>Alt+B</kbd> to focus) and <code>ToolTip="Click to submit"</code> (hover to see).</p>
 
 <span style="font-weight: bold">@TheContent</span>
 
@@ -43,5 +46,6 @@
 
 <p>Code:</p>
 <code>
-&lt;Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" OnClick="OnClick" Text="Click me!" /&gt;
+&lt;Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" OnClick="OnClick" Text="Click me!"<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AccessKey="b" ToolTip="Click to submit" /&gt;
 </code>

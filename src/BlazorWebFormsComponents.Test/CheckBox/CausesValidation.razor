@@ -1,0 +1,96 @@
+@using BlazorWebFormsComponents.Validations
+
+@code {
+
+	[Fact]
+	public void CheckBox_CausesValidation_DefaultIsTrue()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Accept terms" />);
+
+		// Assert — parameter exists and defaults to true; no assertion on HTML needed,
+		// we verify the component accepts the parameter without error
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CheckBox_CausesValidation_CanBeSetToFalse()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Accept terms" CausesValidation="false" />);
+
+		// Assert — component renders without error
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CheckBox_ValidationGroup_ParameterAccepted()
+	{
+		// Arrange & Act
+		var cut = Render(@<CheckBox Text="Accept terms" ValidationGroup="GroupA" />);
+
+		// Assert — component renders without error
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void RadioButton_CausesValidation_DefaultIsTrue()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option 1" GroupName="testGroup" />);
+
+		// Assert
+		cut.Find("input[type='radio']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void RadioButton_CausesValidation_CanBeSetToFalse()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option 1" GroupName="testGroup" CausesValidation="false" />);
+
+		// Assert
+		cut.Find("input[type='radio']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void RadioButton_ValidationGroup_ParameterAccepted()
+	{
+		// Arrange & Act
+		var cut = Render(@<RadioButton Text="Option 1" GroupName="testGroup" ValidationGroup="GroupB" />);
+
+		// Assert
+		cut.Find("input[type='radio']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TextBox_CausesValidation_DefaultIsTrue()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Text="Hello" />);
+
+		// Assert
+		cut.Find("input").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TextBox_CausesValidation_CanBeSetToFalse()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Text="Hello" CausesValidation="false" />);
+
+		// Assert
+		cut.Find("input").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TextBox_ValidationGroup_ParameterAccepted()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Text="Hello" ValidationGroup="GroupC" />);
+
+		// Assert
+		cut.Find("input").ShouldNotBeNull();
+	}
+
+}

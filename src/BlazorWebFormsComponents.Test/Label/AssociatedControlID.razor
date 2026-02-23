@@ -1,0 +1,78 @@
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	[Fact]
+	public void Label_WithoutAssociatedControlID_RendersSpan()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Username" />);
+
+		// Assert
+		cut.Find("span").ShouldNotBeNull();
+		cut.FindAll("label").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Label_WithAssociatedControlID_RendersLabelWithForAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Username" AssociatedControlID="txtUser" />);
+
+		// Assert
+		var label = cut.Find("label");
+		label.ShouldNotBeNull();
+		label.GetAttribute("for").ShouldBe("txtUser");
+		label.TextContent.ShouldBe("Username");
+		cut.FindAll("span").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Label_WithAssociatedControlID_AndCssClass_AppliesClassToLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Email" AssociatedControlID="txtEmail" CssClass="form-label" />);
+
+		// Assert
+		var label = cut.Find("label");
+		label.GetAttribute("class").ShouldBe("form-label");
+		label.GetAttribute("for").ShouldBe("txtEmail");
+	}
+
+	[Fact]
+	public void Label_WithAssociatedControlID_AndStyle_AppliesStyleToLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Email" AssociatedControlID="txtEmail" ForeColor="Red" />);
+
+		// Assert
+		var label = cut.Find("label");
+		label.HasAttribute("style").ShouldBeTrue();
+		label.GetAttribute("style").ShouldContain("color:Red");
+	}
+
+	[Fact]
+	public void Label_WithoutAssociatedControlID_StyleAppliedToSpan()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Status" CssClass="status-text" ForeColor="Blue" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("status-text");
+		span.GetAttribute("style").ShouldContain("color:Blue");
+	}
+
+	[Fact]
+	public void Label_WithAssociatedControlID_AndID_RendersIdOnLabel()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Name" AssociatedControlID="txtName" ID="lblName" />);
+
+		// Assert
+		var label = cut.Find("label");
+		label.GetAttribute("id").ShouldBe("lblName");
+		label.GetAttribute("for").ShouldBe("txtName");
+	}
+
+}

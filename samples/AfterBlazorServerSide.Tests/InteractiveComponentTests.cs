@@ -1992,4 +1992,156 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task GridView_Paging_ClickNextPage()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/GridView/Paging", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify initial state - table has data rows (page size 10)
+            var rows = page.Locator("table tbody tr");
+            await Expect(rows).ToHaveCountAsync(10);
+
+            // Click page 2 link in the pager footer
+            var page2Link = page.Locator("table tfoot a").Filter(new() { HasTextString = "2" });
+            await page2Link.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify page indicator updated
+            var pageInfo = page.Locator("p", new() { HasTextRegex = new System.Text.RegularExpressions.Regex(@"Current Page:\s*2") });
+            await Expect(pageInfo).ToBeVisibleAsync();
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task GridView_Sorting_ClickColumnHeader()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/GridView/Sorting", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify initial sort state shows (none)
+            var sortInfo = page.Locator("p", new() { HasTextRegex = new System.Text.RegularExpressions.Regex(@"Sort Column:") });
+            await Expect(sortInfo).ToBeVisibleAsync();
+            var initialText = await sortInfo.TextContentAsync();
+            Assert.Contains("(none)", initialText);
+
+            // Click "Name" column header to sort
+            var nameHeader = page.Locator("thead th a").Filter(new() { HasTextString = "Name" });
+            await nameHeader.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify sort state updated to show Name column
+            var updatedText = await sortInfo.TextContentAsync();
+            Assert.Contains("Name", updatedText);
+            Assert.Contains("Ascending", updatedText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task GridView_InlineEditing_ClickEdit()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/GridView/InlineEditing", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify initial edit index is -1
+            var editInfo = page.Locator("p", new() { HasTextRegex = new System.Text.RegularExpressions.Regex(@"Edit Index:") });
+            var initialText = await editInfo.TextContentAsync();
+            Assert.Contains("-1", initialText);
+
+            // Click the Edit link on the first row
+            var editLink = page.Locator("tbody tr:first-child a").Filter(new() { HasTextString = "Edit" });
+            await editLink.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify edit mode activated - input fields should appear in the row
+            var inputs = page.Locator("tbody tr:first-child input[type='text']");
+            var inputCount = await inputs.CountAsync();
+            Assert.True(inputCount > 0, "Input fields should appear when editing a row");
+
+            // Verify Update and Cancel links appear
+            var updateLink = page.Locator("tbody tr:first-child a").Filter(new() { HasTextString = "Update" });
+            await Expect(updateLink).ToBeVisibleAsync();
+
+            var cancelLink = page.Locator("tbody tr:first-child a").Filter(new() { HasTextString = "Cancel" });
+            await Expect(cancelLink).ToBeVisibleAsync();
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    private ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
 }

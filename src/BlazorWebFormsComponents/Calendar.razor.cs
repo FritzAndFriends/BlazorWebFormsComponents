@@ -1,4 +1,5 @@
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class Calendar : BaseStyledComponent
+	public partial class Calendar : BaseStyledComponent, ICalendarStyleContainer
 	{
 		private DateTime _visibleMonth;
 		private readonly HashSet<DateTime> _selectedDays = new HashSet<DateTime>();
@@ -134,13 +135,13 @@ namespace BlazorWebFormsComponents
 		/// Format for displaying day names.
 		/// </summary>
 		[Parameter]
-		public string DayNameFormat { get; set; } = "Short";
+		public DayNameFormat DayNameFormat { get; set; } = DayNameFormat.Short;
 
 		/// <summary>
 		/// Format for the title.
 		/// </summary>
 		[Parameter]
-		public string TitleFormat { get; set; } = "MonthYear";
+		public TitleFormat TitleFormat { get; set; } = TitleFormat.MonthYear;
 
 		/// <summary>
 		/// Text for next month link.
@@ -190,33 +191,66 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string ToolTip { get; set; }
 
-		// Style properties for different day types
+		// Legacy CSS string style properties (backward compatible)
+#pragma warning disable CS0618
 		[Parameter]
+		[Obsolete("Use <CalendarTitleStyle> sub-component instead")]
 		public string TitleStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarDayHeaderStyle> sub-component instead")]
 		public string DayHeaderStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarDayStyle> sub-component instead")]
 		public string DayStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarTodayDayStyle> sub-component instead")]
 		public string TodayDayStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarSelectedDayStyle> sub-component instead")]
 		public string SelectedDayStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarOtherMonthDayStyle> sub-component instead")]
 		public string OtherMonthDayStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarWeekendDayStyle> sub-component instead")]
 		public string WeekendDayStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarNextPrevStyle> sub-component instead")]
 		public string NextPrevStyleCss { get; set; }
 
 		[Parameter]
+		[Obsolete("Use <CalendarSelectorStyle> sub-component instead")]
 		public string SelectorStyleCss { get; set; }
+#pragma warning restore CS0618
+
+		// TableItemStyle properties (ICalendarStyleContainer)
+		public TableItemStyle DayStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle TitleStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle DayHeaderStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle TodayDayStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle SelectedDayStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle OtherMonthDayStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle WeekendDayStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle NextPrevStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle SelectorStyle { get; internal set; } = new TableItemStyle();
+
+		// RenderFragment parameters for style sub-components
+		[Parameter] public RenderFragment DayStyleContent { get; set; }
+		[Parameter] public RenderFragment TitleStyleContent { get; set; }
+		[Parameter] public RenderFragment DayHeaderStyleContent { get; set; }
+		[Parameter] public RenderFragment TodayDayStyleContent { get; set; }
+		[Parameter] public RenderFragment SelectedDayStyleContent { get; set; }
+		[Parameter] public RenderFragment OtherMonthDayStyleContent { get; set; }
+		[Parameter] public RenderFragment WeekendDayStyleContent { get; set; }
+		[Parameter] public RenderFragment NextPrevStyleContent { get; set; }
+		[Parameter] public RenderFragment SelectorStyleContent { get; set; }
 
 		#endregion
 
@@ -249,7 +283,7 @@ namespace BlazorWebFormsComponents
 
 		private string GetTitleText()
 		{
-			var format = TitleFormat == "Month" ? "MMMM" : "MMMM yyyy";
+			var format = TitleFormat == TitleFormat.Month ? "MMMM" : "MMMM yyyy";
 			return _visibleMonth.ToString(format, CultureInfo.CurrentCulture);
 		}
 
@@ -269,10 +303,10 @@ namespace BlazorWebFormsComponents
 		{
 			return DayNameFormat switch
 			{
-				"Full" => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day),
-				"FirstLetter" => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 1),
-				"FirstTwoLetters" => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 2),
-				"Shortest" => CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(day),
+				Enums.DayNameFormat.Full => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day),
+				Enums.DayNameFormat.FirstLetter => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 1),
+				Enums.DayNameFormat.FirstTwoLetters => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 2),
+				Enums.DayNameFormat.Shortest => CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(day),
 				_ => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(day)
 			};
 		}
@@ -396,6 +430,7 @@ namespace BlazorWebFormsComponents
 			await InvokeAsync(StateHasChanged);
 		}
 
+		#pragma warning disable CS0612, CS0618
 		private string GetDayCellCss(DateTime date)
 		{
 			var isToday = date.Date == DateTime.Today;
@@ -403,17 +438,72 @@ namespace BlazorWebFormsComponents
 			var isOtherMonth = date.Month != _visibleMonth.Month;
 			var isWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
 
-			// Priority order for styling
-			if (isSelected && !string.IsNullOrEmpty(SelectedDayStyleCss))
-				return SelectedDayStyleCss;
-			if (isToday && !string.IsNullOrEmpty(TodayDayStyleCss))
-				return TodayDayStyleCss;
-			if (isOtherMonth && !string.IsNullOrEmpty(OtherMonthDayStyleCss))
-				return OtherMonthDayStyleCss;
-			if (isWeekend && !string.IsNullOrEmpty(WeekendDayStyleCss))
-				return WeekendDayStyleCss;
-			
-			return DayStyleCss;
+			if (isSelected)
+			{
+				var css = GetEffectiveCss(SelectedDayStyle, SelectedDayStyleCss);
+				if (!string.IsNullOrEmpty(css)) return css;
+			}
+			if (isToday)
+			{
+				var css = GetEffectiveCss(TodayDayStyle, TodayDayStyleCss);
+				if (!string.IsNullOrEmpty(css)) return css;
+			}
+			if (isOtherMonth)
+			{
+				var css = GetEffectiveCss(OtherMonthDayStyle, OtherMonthDayStyleCss);
+				if (!string.IsNullOrEmpty(css)) return css;
+			}
+			if (isWeekend)
+			{
+				var css = GetEffectiveCss(WeekendDayStyle, WeekendDayStyleCss);
+				if (!string.IsNullOrEmpty(css)) return css;
+			}
+
+			return GetEffectiveCss(DayStyle, DayStyleCss);
+		}
+		#pragma warning restore CS0612, CS0618
+
+		private string GetDayCellStyle(DateTime date)
+		{
+			var isToday = date.Date == DateTime.Today;
+			var isSelected = _selectedDays.Contains(date.Date);
+			var isOtherMonth = date.Month != _visibleMonth.Month;
+			var isWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
+
+			if (isSelected)
+			{
+				var style = SelectedDayStyle?.ToString();
+				if (!string.IsNullOrEmpty(style)) return style;
+			}
+			if (isToday)
+			{
+				var style = TodayDayStyle?.ToString();
+				if (!string.IsNullOrEmpty(style)) return style;
+			}
+			if (isOtherMonth)
+			{
+				var style = OtherMonthDayStyle?.ToString();
+				if (!string.IsNullOrEmpty(style)) return style;
+			}
+			if (isWeekend)
+			{
+				var style = WeekendDayStyle?.ToString();
+				if (!string.IsNullOrEmpty(style)) return style;
+			}
+
+			return DayStyle?.ToString();
+		}
+
+		private static string GetEffectiveCss(TableItemStyle tableItemStyle, string legacyCss)
+		{
+			if (!string.IsNullOrEmpty(tableItemStyle?.CssClass))
+				return tableItemStyle.CssClass;
+			return legacyCss;
+		}
+
+		private static string GetEffectiveStyle(TableItemStyle tableItemStyle)
+		{
+			return tableItemStyle?.ToString();
 		}
 
 		/// <summary>

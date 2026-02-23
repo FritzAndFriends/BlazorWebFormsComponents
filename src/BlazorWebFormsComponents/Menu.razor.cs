@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using BlazorComponentUtilities;
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.JSInterop;
@@ -29,6 +30,9 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public int DisappearAfter { get; set; }
+
+		[Parameter]
+		public Orientation Orientation { get; set; } = Orientation.Vertical;
 
 		[Parameter]
 		public int StaticDisplayLevels { get; set; }
@@ -110,7 +114,7 @@ namespace BlazorWebFormsComponents
 
 			if (firstRender)
 			{
-				await JS.InvokeVoidAsync("bwfc.Page.AddScriptElement", $"{StaticFilesLocation}Menu/Menu.js", $"new Sys.WebForms.Menu({{ element: '{ID}', disappearAfter: {DisappearAfter}, orientation: 'vertical', tabIndex: 0, disabled: false }});");
+				await JS.InvokeVoidAsync("bwfc.Page.AddScriptElement", $"{StaticFilesLocation}Menu/Menu.js", $"new Sys.WebForms.Menu({{ element: '{ID}', disappearAfter: {DisappearAfter}, orientation: '{Orientation.ToString().ToLower()}', tabIndex: 0, disabled: false }});");
 			}
 
 		}

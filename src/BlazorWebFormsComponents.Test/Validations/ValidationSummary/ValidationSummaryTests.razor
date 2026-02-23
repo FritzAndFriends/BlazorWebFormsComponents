@@ -1,0 +1,115 @@
+
+@code {
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	[Fact]
+	public void ValidationSummary_HeaderText_RendersInBoldTag()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel" OnInvalidSubmit="@HandleInvalidSubmit">
+				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
+				<RequiredFieldValidator Type="string"
+															ControlToValidate="@Name"
+															ErrorMessage="Name is required." />
+
+				<AspNetValidationSummary HeaderText="Errors Found" DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		_invalidSubmit.ShouldBeTrue();
+
+		cut.FindAll("b").Count().ShouldBe(1);
+		cut.Find("b").TextContent.ShouldBe("Errors Found");
+	}
+
+	[Fact]
+	public void ValidationSummary_NoHeaderText_NoBoldTag()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel2" OnInvalidSubmit="@HandleInvalidSubmit2">
+				<InputText @ref="Name2.Current" @bind-Value="exampleModel2.Name" />
+				<RequiredFieldValidator Type="string"
+															ControlToValidate="@Name2"
+															ErrorMessage="Name is required." />
+
+				<AspNetValidationSummary DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		cut.FindAll("b").Count().ShouldBe(0);
+	}
+
+	[Fact]
+	public void ValidationSummary_ShowSummaryFalse_DoesNotRender()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel3" OnInvalidSubmit="@HandleInvalidSubmit3">
+				<InputText @ref="Name3.Current" @bind-Value="exampleModel3.Name" />
+				<RequiredFieldValidator Type="string"
+															ControlToValidate="@Name3"
+															ErrorMessage="Name is required." />
+
+				<AspNetValidationSummary ShowSummary="false" DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		// When ShowSummary is false, no div should be rendered by the summary
+		cut.FindAll("ul").Count().ShouldBe(0);
+	}
+
+	[Fact]
+	public void ValidationSummary_ShowSummaryTrue_RendersSummary()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel4" OnInvalidSubmit="@HandleInvalidSubmit4">
+				<InputText @ref="Name4.Current" @bind-Value="exampleModel4.Name" />
+				<RequiredFieldValidator Type="string"
+															ControlToValidate="@Name4"
+															ErrorMessage="Name is required." />
+
+				<AspNetValidationSummary ShowSummary="true" DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		cut.FindAll("ul").Count().ShouldBe(1);
+		cut.FindAll("li").Count().ShouldBe(1);
+		cut.Find("li").TextContent.ShouldContain("Name is required.");
+	}
+
+	// Separate model/handler instances per test to avoid shared state
+	private ExampleModel exampleModel = new ExampleModel();
+	private void HandleInvalidSubmit() { _invalidSubmit = true; }
+
+	private bool _invalidSubmit2 = false;
+	ForwardRef<InputBase<string>> Name2 = new ForwardRef<InputBase<string>>();
+	private ExampleModel exampleModel2 = new ExampleModel();
+	private void HandleInvalidSubmit2() { _invalidSubmit2 = true; }
+
+	private bool _invalidSubmit3 = false;
+	ForwardRef<InputBase<string>> Name3 = new ForwardRef<InputBase<string>>();
+	private ExampleModel exampleModel3 = new ExampleModel();
+	private void HandleInvalidSubmit3() { _invalidSubmit3 = true; }
+
+	private bool _invalidSubmit4 = false;
+	ForwardRef<InputBase<string>> Name4 = new ForwardRef<InputBase<string>>();
+	private ExampleModel exampleModel4 = new ExampleModel();
+	private void HandleInvalidSubmit4() { _invalidSubmit4 = true; }
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}

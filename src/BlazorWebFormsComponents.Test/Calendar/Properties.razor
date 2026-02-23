@@ -1,12 +1,14 @@
 @inherits BlazorWebFormsTestContext
 @using Shouldly
+@using BlazorWebFormsComponents.Enums
 
 @code {
 	[Fact]
 	public void Calendar_DayNameFormatShort_DisplaysAbbreviatedNames()
 	{
 		// Arrange & Act
-		var cut = Render(@<Calendar DayNameFormat="Short" />);
+		var dnf = BlazorWebFormsComponents.Enums.DayNameFormat.Short;
+		var cut = Render(@<Calendar DayNameFormat="dnf" />);
 
 		// Assert
 		var headers = cut.FindAll("th");
@@ -19,7 +21,8 @@
 	public void Calendar_DayNameFormatFull_DisplaysFullNames()
 	{
 		// Arrange & Act
-		var cut = Render(@<Calendar DayNameFormat="Full" />);
+		var dnf = BlazorWebFormsComponents.Enums.DayNameFormat.Full;
+		var cut = Render(@<Calendar DayNameFormat="dnf" />);
 
 		// Assert
 		var headers = cut.FindAll("th");
@@ -31,9 +34,10 @@
 	{
 		// Arrange
 		var testDate = new DateTime(2024, 6, 15);
+		var tf = BlazorWebFormsComponents.Enums.TitleFormat.Month;
 
 		// Act
-		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="Month" />);
+		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="tf" />);
 
 		// Assert
 		var title = cut.Find("td[align='center']");
@@ -46,9 +50,10 @@
 	{
 		// Arrange
 		var testDate = new DateTime(2024, 6, 15);
+		var tf = BlazorWebFormsComponents.Enums.TitleFormat.MonthYear;
 
 		// Act
-		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="MonthYear" />);
+		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="tf" />);
 
 		// Assert
 		var title = cut.Find("td[align='center']");

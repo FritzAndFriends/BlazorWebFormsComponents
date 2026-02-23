@@ -10,5 +10,6 @@
 				class="@CalculatedCssClass"
 				disabled="@(Enabled ? null : "disabled")"
 				title="@ToolTip"
+				accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)"
 				>@Text</button>
 }

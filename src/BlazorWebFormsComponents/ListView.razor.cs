@@ -48,7 +48,7 @@ namespace BlazorWebFormsComponents
 		/// Style is not applied by this control
 		/// </summary>
 		[Parameter, Obsolete("Style is not applied by this control")]
-		public string Style { get; set; }
+		public new string Style { get; set; }
 
 
 		[Parameter] public RenderFragment ChildContent { get; set; }

@@ -1,8 +1,9 @@
 @inherits BaseWebFormsComponent
 @using BlazorComponentUtilities
+@using BlazorWebFormsComponents.Enums
 
 <div id="@ID">
-	<ul class="level1">
+	<ul class="level1@(Orientation == Orientation.Horizontal ? " horizontal" : "")">
 			<CascadingValue Name="ParentMenu" Value="this">
 				@ChildContent
 				@ChildNodesRenderFragment
@@ -27,6 +28,10 @@
 			margin: 0;
 			padding: 0;
 			width: auto;
+		}
+
+		@($"#{ID} ul.horizontal > li") {
+			display: inline-block;
 		}
 
 		@($"#{ID} ul.dynamic") {

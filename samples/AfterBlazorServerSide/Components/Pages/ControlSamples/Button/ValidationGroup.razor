@@ -1,4 +1,5 @@
 @page "/ControlSamples/Button/ValidationGroup"
+@using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.Validations
 @using static BlazorWebFormsComponents.WebColor
 
@@ -21,7 +22,7 @@
 										Text="* Name is required"
 										ErrorMessage="Name is required"
 										ValidationGroup="Personal"
-										Display="Dynamic"
+										Display="ValidatorDisplay.Dynamic"
 										ForeColor="Red" />
 			</div>
 
@@ -32,7 +33,7 @@
 										Text="* Email is required"
 										ErrorMessage="Email is required"
 										ValidationGroup="Personal"
-										Display="Dynamic"
+										Display="ValidatorDisplay.Dynamic"
 										ForeColor="Red" />
 			</div>
 
@@ -57,7 +58,7 @@
 										Text="* Company is required"
 										ErrorMessage="Company is required"
 										ValidationGroup="Business"
-										Display="Dynamic"
+										Display="ValidatorDisplay.Dynamic"
 										ForeColor="Red" />
 			</div>
 
@@ -68,7 +69,7 @@
 										Text="* Phone is required"
 										ErrorMessage="Phone is required"
 										ValidationGroup="Business"
-										Display="Dynamic"
+										Display="ValidatorDisplay.Dynamic"
 										ForeColor="Red" />
 			</div>
 

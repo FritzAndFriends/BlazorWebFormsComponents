@@ -10,7 +10,18 @@
 			<tr>
 				@foreach (IColumn<ItemType> column in ColumnList)
 				{
-					<th>@column.HeaderText</th>
+					@if (AllowSorting && !string.IsNullOrEmpty(column.SortExpression))
+					{
+						<th><a href="javascript:void(0);" @onclick="@(() => Sort(column.SortExpression))" @onclick:preventDefault>@column.HeaderText</a></th>
+					}
+					else
+					{
+						<th>@column.HeaderText</th>
+					}
+				}
+				@if (ShowCommandColumn)
+				{
+					<th></th>
 				}
 			</tr>
 		</thead>
@@ -18,10 +29,11 @@
 			@if (Items != null && Items.Any())
 			{
 				var index = 0;
-				@foreach (ItemType item in Items)
+				@foreach (ItemType item in PagedItems)
 				{
+					var rowIndex = index;
 					<CascadingValue Value="this" Name="RowCollection">
-						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="index" />
+						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="rowIndex" IsEditing="(rowIndex == EditIndex)" EditRowStyle="EditRowStyle" GridView="this" />
 					</CascadingValue>
 
 					index++;
@@ -30,12 +42,37 @@
 			else
 			{
 				<tr>
-					<td colspan=@ColumnList.Count>
+					<td colspan=@TotalColumnCount>
 						@EmptyDataText
 					</td>
 				</tr>
 			}
 		</tbody>
+		@if (AllowPaging && TotalPages > 1)
+		{
+			<tfoot>
+				<tr>
+					<td colspan="@TotalColumnCount">
+						<table>
+							<tr>
+								@for (int i = 0; i < TotalPages; i++)
+								{
+									var pageIndex = i;
+									@if (i == PageIndex)
+									{
+										<td><span>@(i + 1)</span></td>
+									}
+									else
+									{
+										<td><a href="javascript:void(0);" @onclick="@(() => GoToPage(pageIndex))" @onclick:preventDefault>@(pageIndex + 1)</a></td>
+									}
+								}
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</tfoot>
+		}
 	</table>
 }
 

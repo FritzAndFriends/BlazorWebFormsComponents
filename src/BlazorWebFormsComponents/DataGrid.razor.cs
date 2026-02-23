@@ -28,11 +28,6 @@ namespace BlazorWebFormsComponents
 		[Parameter] public string DataKeyField { get; set; }
 
 		/// <summary>
-		/// The css class of the DataGrid
-		/// </summary>
-		[Parameter] public string CssClass { get; set; }
-
-		/// <summary>
 		/// Show or hide the header row
 		/// </summary>
 		[Parameter] public bool ShowHeader { get; set; } = true;

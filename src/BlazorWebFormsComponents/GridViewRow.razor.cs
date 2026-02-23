@@ -23,5 +23,20 @@ namespace BlazorWebFormsComponents
 		/// The columns of the Row
 		/// </summary>
 		[Parameter] public List<IColumn<ItemType>> Columns { get; set; }
+
+		/// <summary>
+		/// Whether this row is in edit mode
+		/// </summary>
+		[Parameter] public bool IsEditing { get; set; }
+
+		/// <summary>
+		/// Style applied when the row is in edit mode
+		/// </summary>
+		[Parameter] public TableItemStyle EditRowStyle { get; set; }
+
+		/// <summary>
+		/// Reference to the parent GridView
+		/// </summary>
+		[Parameter] public GridView<ItemType> GridView { get; set; }
 	}
 }

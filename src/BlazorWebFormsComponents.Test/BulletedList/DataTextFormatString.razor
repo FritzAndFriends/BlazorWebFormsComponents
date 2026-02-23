@@ -1,0 +1,80 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	public class Product
+	{
+		public string Name { get; set; }
+		public string Url { get; set; }
+	}
+
+	[Fact]
+	public void BulletedList_DataTextFormatString_AppliesFormatToDataBoundItems()
+	{
+		// Arrange
+		var products = new List<Product>
+		{
+			new Product { Name = "Alpha", Url = "/a" },
+			new Product { Name = "Beta", Url = "/b" }
+		};
+
+		// Act
+		var cut = Render(
+			@<BulletedList TItem="Product"
+						  Items="products"
+						  DataTextField="Name"
+						  DataValueField="Url"
+						  DataTextFormatString=">> {0}" />
+		);
+
+		// Assert
+		var spans = cut.FindAll("li span");
+		spans[0].TextContent.ShouldBe(">> Alpha");
+		spans[1].TextContent.ShouldBe(">> Beta");
+	}
+
+	[Fact]
+	public void BulletedList_DataTextFormatString_AppliesFormatToStaticItems()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1"),
+			new ListItem("Two", "2")
+		};
+
+		// Act
+		var cut = Render(
+			@<BulletedList TItem="object"
+						  StaticItems="items"
+						  DataTextFormatString="#{0}" />
+		);
+
+		// Assert
+		var spans = cut.FindAll("li span");
+		spans[0].TextContent.ShouldBe("#One");
+		spans[1].TextContent.ShouldBe("#Two");
+	}
+
+	[Fact]
+	public void BulletedList_DataTextFormatString_Empty_NoFormatting()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Raw Text", "1")
+		};
+
+		// Act
+		var cut = Render(
+			@<BulletedList TItem="object"
+						  StaticItems="items"
+						  DataTextFormatString="" />
+		);
+
+		// Assert
+		var span = cut.Find("li span");
+		span.TextContent.ShouldBe("Raw Text");
+	}
+
+}

@@ -1,0 +1,91 @@
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+
+@code {
+
+	[Fact]
+	public void Label_WithCssClass_RendersClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Hello World" CssClass="my-label" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("class").ShouldBeTrue();
+		span.GetAttribute("class").ShouldBe("my-label");
+	}
+
+	[Fact]
+	public void Label_WithForeColor_RendersColorInStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Hello World" ForeColor="Red" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("color:Red");
+	}
+
+	[Fact]
+	public void Label_WithFontBold_RendersFontWeightInStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Hello World" Font="@(new FontInfo { Bold = true })" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("font-weight:bold");
+	}
+
+	[Fact]
+	public void Label_WithBackColor_RendersBackgroundColorInStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Hello World" BackColor="Yellow" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("background-color:Yellow");
+	}
+
+	[Fact]
+	public void Label_WithMultipleStyles_CombinesCorrectly()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Styled Label" ForeColor="Blue" BackColor="Yellow"
+			Font="@(new FontInfo { Bold = true, Italic = true })" />);
+
+		// Assert
+		var span = cut.Find("span");
+		var style = span.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("color:Blue");
+		style.ShouldContain("background-color:Yellow");
+		style.ShouldContain("font-weight:bold");
+		style.ShouldContain("font-style:italic");
+	}
+
+	[Fact]
+	public void Label_WithoutStyles_DoesNotRenderStyleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Plain Label" />);
+
+		// Assert
+		cut.Find("span").HasAttribute("style").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Label_WithoutCssClass_DoesNotRenderClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="No Class" />);
+
+		// Assert
+		cut.Find("span").HasAttribute("class").ShouldBeFalse();
+	}
+
+}

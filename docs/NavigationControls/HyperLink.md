@@ -3,7 +3,7 @@ It may seem strange that we have a HyperLink component when there already is an 
 ## Blazor Features Supported
 
 ### Core Properties
-- `NavigationUrl` - the URL to link when HyperLink component is clicked
+- `NavigateUrl` - the URL to link when HyperLink component is clicked
 - `Text` - the text content of the HyperLink component
 - `Target` - the target window or frame in which to display the Web page content linked to when the HyperLink component is clicked (e.g., "_blank", "_self", "_parent", "_top")
 - `ToolTip` - displays a tooltip on hover (rendered as the `title` attribute)
@@ -63,7 +63,7 @@ It may seem strange that we have a HyperLink component when there already is an 
 
 ### Blazor Syntax
 ```html
-<HyperLink NavigationUrl="https://example.com" 
+<HyperLink NavigateUrl="https://example.com" 
     Text="Visit Example" 
     Target="_blank"
     ToolTip="Click to visit example.com"
@@ -72,14 +72,14 @@ It may seem strange that we have a HyperLink component when there already is an 
 
 ### Blazor with Styling
 ```html
-<HyperLink NavigationUrl="/products" 
+<HyperLink NavigateUrl="/products" 
     Text="View Products" 
     ForeColor="#0066cc"
     Font-Bold="true"
     Font-Size="14px" />
 ```
 
-### Blazor without NavigationUrl (renders as plain anchor)
+### Blazor without NavigateUrl (renders as plain anchor)
 ```html
 <HyperLink Text="Inactive Link" 
     ToolTip="This link has no URL" />

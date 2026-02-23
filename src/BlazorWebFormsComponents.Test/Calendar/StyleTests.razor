@@ -1,0 +1,107 @@
+@inherits BlazorWebFormsComponents.Test.BlazorWebFormsTestContext
+@using Shouldly
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void Calendar_DayStyleSubComponent_AppliesCssClass()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Calendar>
+				<DayStyleContent>
+					<CalendarDayStyle CssClass="my-day-style" />
+				</DayStyleContent>
+			</Calendar>);
+
+		// Assert — day cells should carry the sub-component CSS class
+		var dayCells = cut.FindAll("td.my-day-style");
+		dayCells.Count.ShouldBeGreaterThan(0);
+	}
+
+	[Fact]
+	public void Calendar_TitleStyleSubComponent_AppliesCssClass()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Calendar>
+				<TitleStyleContent>
+					<CalendarTitleStyle CssClass="my-title-style" />
+				</TitleStyleContent>
+			</Calendar>);
+
+		// Assert — title cell should carry the sub-component CSS class
+		var titleCells = cut.FindAll("td.my-title-style");
+		titleCells.Count.ShouldBeGreaterThan(0);
+	}
+
+	[Fact]
+	public void Calendar_LegacyCssString_StillWorks()
+	{
+		// Arrange & Act — use the deprecated string-based CSS property
+#pragma warning disable CS0618
+		var cut = Render(@<Calendar TitleStyleCss="legacy-title" />);
+#pragma warning restore CS0618
+
+		// Assert — title cell should carry the legacy CSS class
+		var titleCells = cut.FindAll("td.legacy-title");
+		titleCells.Count.ShouldBeGreaterThan(0);
+	}
+
+	[Fact]
+	public void Calendar_SubComponentStyleOverridesLegacyCss()
+	{
+		// Arrange & Act — when both sub-component and legacy are set,
+		// sub-component CssClass takes precedence
+#pragma warning disable CS0618
+		var cut = Render(
+			@<Calendar TitleStyleCss="legacy-title">
+				<TitleStyleContent>
+					<CalendarTitleStyle CssClass="new-title" />
+				</TitleStyleContent>
+			</Calendar>);
+#pragma warning restore CS0618
+
+		// Assert — sub-component CssClass should win
+		var newTitleCells = cut.FindAll("td.new-title");
+		newTitleCells.Count.ShouldBeGreaterThan(0);
+		// Legacy class should not appear on the title cell
+		var legacyCells = cut.FindAll("td.legacy-title");
+		legacyCells.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Calendar_DayStyleSubComponent_AppliesBackColor()
+	{
+		// Arrange & Act — BackColor should produce an inline style
+		var testDate = new DateTime(2024, 6, 15);
+		WebColor yellow = "Yellow";
+		var cut = Render(
+			@<Calendar VisibleDate="testDate">
+				<DayStyleContent>
+					<CalendarDayStyle BackColor="yellow" />
+				</DayStyleContent>
+			</Calendar>);
+
+		// Assert — day cells should have an inline style containing the background color
+		var dayCells = cut.FindAll("td[align='center']");
+		dayCells.Any(td => td.GetAttribute("style") != null
+			&& td.GetAttribute("style").Contains("background-color")).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_DayHeaderStyleSubComponent_AppliesCssClass()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Calendar>
+				<DayHeaderStyleContent>
+					<CalendarDayHeaderStyle CssClass="my-header-style" />
+				</DayHeaderStyleContent>
+			</Calendar>);
+
+		// Assert — day header th elements should carry the CSS class
+		var headers = cut.FindAll("th.my-header-style");
+		headers.Count.ShouldBe(7);
+	}
+}

@@ -1,0 +1,125 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void GridView_CssClass_RendersOnTable()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+							CssClass="my-grid-class"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var table = cut.Find("table");
+		table.ClassList.ShouldContain("my-grid-class");
+	}
+
+	[Fact]
+	public void FormView_CssClass_ParameterAccepted()
+	{
+		var cut = Render(@<FormView CssClass="my-form-class"
+							Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							Context="Item">
+			<ItemTemplate>
+				<span>@Item.Name</span>
+			</ItemTemplate>
+		</FormView>);
+
+		// FormView renders without error — CssClass is accepted via BaseStyledComponent inheritance
+		cut.Find("table").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void DetailsView_CssClass_RendersOnTable()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget"
+							CssClass="my-details-class" AutoGenerateRows="true" />);
+
+		var table = cut.Find("table");
+		table.ClassList.ShouldContain("my-details-class");
+	}
+
+	[Fact]
+	public void DetailsView_BackColor_ParameterAccepted()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget"
+							BackColor="WebColor.Red" AutoGenerateRows="true" />);
+
+		// BackColor is accepted via BaseStyledComponent inheritance — component renders without error
+		cut.Find("table").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void DataList_CssClass_ParameterAccepted()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							CssClass="my-datalist-class"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		// CssClass is accepted via BaseStyledComponent inheritance — component renders without error
+		cut.Find("table").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void DataList_BackColor_RendersInStyle()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							BackColor="@("#ff0000")"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("background-color:");
+		table.GetAttribute("style").ShouldContain("#FF0000");
+	}
+
+	[Fact]
+	public void DataList_Width_RendersInStyle()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							Width="Unit.Pixel(400)"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("width:400px");
+	}
+
+	[Fact]
+	public void DataList_Height_RendersInStyle()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							Height="Unit.Pixel(300)"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("height:300px");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

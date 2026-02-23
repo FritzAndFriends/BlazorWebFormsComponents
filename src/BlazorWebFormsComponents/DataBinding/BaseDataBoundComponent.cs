@@ -3,7 +3,7 @@ using System;
 
 namespace BlazorWebFormsComponents.DataBinding
 {
-	public class BaseDataBoundComponent : BaseWebFormsComponent
+	public class BaseDataBoundComponent : BaseStyledComponent
 	{
 		[Parameter]
 		public virtual object DataSource { get; set; }

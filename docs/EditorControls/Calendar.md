@@ -25,14 +25,19 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Customizable navigation text (`NextMonthText`, `PrevMonthText`, `SelectWeekText`, `SelectMonthText`)
 - First day of week configuration (`FirstDayOfWeek`)
 - Cell padding and spacing options
-- Style attributes for different day types:
-  - `TitleStyleCss` - Title bar style
-  - `DayHeaderStyleCss` - Day header style  
-  - `DayStyleCss` - Regular day style
-  - `TodayDayStyleCss` - Today's date style
-  - `SelectedDayStyleCss` - Selected date style
-  - `OtherMonthDayStyleCss` - Days from other months style
-  - `WeekendDayStyleCss` - Weekend day style
+- **TableItemStyle sub-components** for rich styling (preferred):
+  - `<CalendarDayStyle>` - Regular day cells
+  - `<CalendarTitleStyle>` - Title bar
+  - `<CalendarDayHeaderStyle>` - Day name headers
+  - `<CalendarTodayDayStyle>` - Today's date cell
+  - `<CalendarSelectedDayStyle>` - Selected date cell
+  - `<CalendarOtherMonthDayStyle>` - Days from adjacent months
+  - `<CalendarWeekendDayStyle>` - Weekend day cells
+  - `<CalendarNextPrevStyle>` - Next/previous navigation links
+  - `<CalendarSelectorStyle>` - Week/month selector column
+- Each TableItemStyle sub-component supports: `CssClass`, `BackColor`, `ForeColor`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Height`, `Width`, `HorizontalAlign`, `VerticalAlign`, `Wrap`, `Font-Bold`, `Font-Italic`, `Font-Size`, `Font-Name`, etc.
+- Legacy CSS string properties (deprecated but still functional):
+  - `TitleStyleCss`, `DayHeaderStyleCss`, `DayStyleCss`, `TodayDayStyleCss`, `SelectedDayStyleCss`, `OtherMonthDayStyleCss`, `WeekendDayStyleCss`, `NextPrevStyleCss`, `SelectorStyleCss`
 - `Visible` property to show/hide the calendar
 - `CssClass` for custom CSS styling
 - `ToolTip` for accessibility
@@ -43,7 +48,9 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `Caption` and `CaptionAlign` properties not implemented
 - `TodaysDate` property not implemented (use `DateTime.Today`)
 - `UseAccessibleHeader` not implemented
-- Individual style objects (`DayStyle`, `TitleStyle`, etc.) not supported - use CSS class names instead
+
+!!! note "Style Properties Migration"
+    Individual style objects (`DayStyle`, `TitleStyle`, etc.) from Web Forms are now supported via **TableItemStyle sub-components** such as `<CalendarDayStyle>`, `<CalendarTitleStyle>`, etc. The older CSS string properties (`DayStyleCss`, `TitleStyleCss`, etc.) still work but are **deprecated**. See the [migration example](#migrating-from-css-string-properties-to-tableitemstyle) below.
 
 ## Web Forms Declarative Syntax
 
@@ -107,15 +114,25 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     ShowTitle="True|False"
     TitleFormat="Month|MonthYear"
     VisibleDate="DateTime"
-    TitleStyleCss="string"
-    DayStyleCss="string"
-    TodayDayStyleCss="string"
-    SelectedDayStyleCss="string"
-    OtherMonthDayStyleCss="string"
-    WeekendDayStyleCss="string"
-    DayHeaderStyleCss="string"
-    CssClass="string" />
+    CssClass="string">
+
+    @* TableItemStyle sub-components (preferred) *@
+    <CalendarDayStyle CssClass="string" BackColor="string" ForeColor="string" />
+    <CalendarTitleStyle CssClass="string" BackColor="string" ForeColor="string" Font-Bold="true" />
+    <CalendarDayHeaderStyle CssClass="string" BackColor="string" ForeColor="string" />
+    <CalendarTodayDayStyle CssClass="string" BackColor="string" ForeColor="string" />
+    <CalendarSelectedDayStyle CssClass="string" BackColor="string" ForeColor="string" />
+    <CalendarOtherMonthDayStyle CssClass="string" ForeColor="string" />
+    <CalendarWeekendDayStyle CssClass="string" BackColor="string" />
+    <CalendarNextPrevStyle CssClass="string" ForeColor="string" />
+    <CalendarSelectorStyle CssClass="string" BackColor="string" />
+
+</Calendar>
 ```
+
+!!! warning "Deprecated CSS String Properties"
+    The following properties still work but are deprecated. Use the TableItemStyle sub-components above instead:
+    `TitleStyleCss`, `DayStyleCss`, `TodayDayStyleCss`, `SelectedDayStyleCss`, `OtherMonthDayStyleCss`, `WeekendDayStyleCss`, `DayHeaderStyleCss`, `NextPrevStyleCss`, `SelectorStyleCss`
 
 ## Usage Examples
 
@@ -173,7 +190,21 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
           @bind-SelectedDate="selectedDate" />
 ```
 
-### Styled Calendar
+### Styled Calendar (using TableItemStyle sub-components)
+
+```razor
+<Calendar @bind-SelectedDate="selectedDate">
+    <CalendarTitleStyle BackColor="#007bff" ForeColor="White" Font-Bold="true" />
+    <CalendarSelectedDayStyle BackColor="#28a745" ForeColor="White" />
+    <CalendarTodayDayStyle BackColor="#ffc107" Font-Bold="true" />
+    <CalendarWeekendDayStyle BackColor="#f8f9fa" />
+    <CalendarOtherMonthDayStyle ForeColor="#ccc" />
+    <CalendarDayHeaderStyle BackColor="#e9ecef" Font-Bold="true" />
+    <CalendarNextPrevStyle ForeColor="White" />
+</Calendar>
+```
+
+### Styled Calendar (legacy CSS string properties — deprecated)
 
 ```razor
 <Calendar CssClass="my-calendar"
@@ -291,15 +322,9 @@ protected void Calendar1_SelectionChanged(object sender, EventArgs e)
 **Blazor:**
 ```razor
 <Calendar @bind-SelectedDate="selectedDate"
-          OnSelectionChanged="HandleSelectionChanged"
-          SelectedDayStyleCss="selected-day" />
-
-<style>
-.selected-day {
-    background-color: blue;
-    color: white;
-}
-</style>
+          OnSelectionChanged="HandleSelectionChanged">
+    <CalendarSelectedDayStyle BackColor="Blue" ForeColor="White" />
+</Calendar>
 ```
 
 ```csharp
@@ -313,12 +338,41 @@ protected void Calendar1_SelectionChanged(object sender, EventArgs e)
 }
 ```
 
+### Migrating from CSS String Properties to TableItemStyle
+
+If you previously used the CSS string properties, migrate to the new sub-components:
+
+**Before (deprecated):**
+```razor
+<Calendar TitleStyleCss="calendar-title"
+          SelectedDayStyleCss="selected-date"
+          TodayDayStyleCss="today-date"
+          WeekendDayStyleCss="weekend-date"
+          DayHeaderStyleCss="header-style"
+          @bind-SelectedDate="selectedDate" />
+```
+
+**After (preferred):**
+```razor
+<Calendar @bind-SelectedDate="selectedDate">
+    <CalendarTitleStyle CssClass="calendar-title" />
+    <CalendarSelectedDayStyle CssClass="selected-date" />
+    <CalendarTodayDayStyle CssClass="today-date" />
+    <CalendarWeekendDayStyle CssClass="weekend-date" />
+    <CalendarDayHeaderStyle CssClass="header-style" />
+</Calendar>
+```
+
+!!! tip "Best Practice"
+    The TableItemStyle sub-components also support inline style properties like `BackColor`, `ForeColor`, and `Font-Bold` — matching the Web Forms `<DayStyle>`, `<TitleStyle>`, etc. child elements. This makes migration from Web Forms markup even more direct.
+
 ### Key Differences
 
-1. **Style Properties**: Use CSS classes instead of inline style objects
-2. **Event Handlers**: Use EventCallback pattern instead of event delegates
-3. **Data Binding**: Use `@bind-SelectedDate` for two-way binding
-4. **Day Rendering**: The `OnDayRender` event provides day information but cannot inject custom HTML into cells
+1. **Style Properties**: Use TableItemStyle sub-components (`<CalendarDayStyle>`, `<CalendarTitleStyle>`, etc.) for a direct match to Web Forms style child elements, or use `CssClass` for CSS-based styling. Legacy CSS string properties (`DayStyleCss`, etc.) are deprecated.
+2. **DayNameFormat / TitleFormat**: Use enum values directly — `DayNameFormat="Full"`, `DayNameFormat="Short"`, `DayNameFormat="FirstLetter"`, `DayNameFormat="FirstTwoLetters"`, `DayNameFormat="Shortest"` for day names; `TitleFormat="Month"` or `TitleFormat="MonthYear"` for the title.
+3. **Event Handlers**: Use EventCallback pattern instead of event delegates
+4. **Data Binding**: Use `@bind-SelectedDate` for two-way binding
+5. **Day Rendering**: The `OnDayRender` event provides day information but cannot inject custom HTML into cells
 
 ## Common Scenarios
 

@@ -3,13 +3,13 @@
 @if (Visible)
 {
 
-	@if (NavigationUrl == null)
+	@if (NavigateUrl == null)
 	{
 		<a id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip">@Text</a>
 	}
 	else
 	{
-		<a id="@ClientID" href="@NavigationUrl" target="@Target" title="@ToolTip" class="@CssClass" style="@Style">@Text</a>
+		<a id="@ClientID" href="@NavigateUrl" target="@Target" title="@ToolTip" class="@CssClass" style="@Style">@Text</a>
 	}
 
 }

@@ -27,8 +27,8 @@
 
 	<button type="submit">Submit</button>
 
-	<h5>Bold Bullet List</h5>
-	<AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" />
+	<h5>Bold Bullet List with HeaderText</h5>
+	<AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" HeaderText="Please fix these errors:" />
 
 	<h5>Lime List</h5>
 	<AspNetValidationSummary ForeColor="Lime" DisplayMode="List" />
@@ -63,5 +63,5 @@
 <code>
 &lt;RequiredFieldValidator Type="string" ControlToValidate="@@Name" Text="Name is required." ErrorMessage="Name is required but in summary!" /&gt;<br />
 &lt;RegularExpressionValidator ValidationExpression="^[0-9]{5}$" ControlToValidate="@@Name" Text="Not a 5 digit number." /&gt;<br />
-&lt;AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" /&gt;
+&lt;AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" HeaderText="Please fix these errors:" /&gt;
 </code>

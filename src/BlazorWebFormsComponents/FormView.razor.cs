@@ -37,6 +37,42 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment<ItemType> ItemTemplate { get; set; }
 
+		/// <summary>
+		/// Gets or sets the text displayed in the header row.
+		/// </summary>
+		[Parameter]
+		public string HeaderText { get; set; }
+
+		/// <summary>
+		/// Gets or sets the custom header template. Takes precedence over HeaderText.
+		/// </summary>
+		[Parameter]
+		public RenderFragment HeaderTemplate { get; set; }
+
+		/// <summary>
+		/// Gets or sets the text displayed in the footer row.
+		/// </summary>
+		[Parameter]
+		public string FooterText { get; set; }
+
+		/// <summary>
+		/// Gets or sets the custom footer template. Takes precedence over FooterText.
+		/// </summary>
+		[Parameter]
+		public RenderFragment FooterTemplate { get; set; }
+
+		/// <summary>
+		/// Gets or sets the text shown when the DataSource is empty or null.
+		/// </summary>
+		[Parameter]
+		public string EmptyDataText { get; set; }
+
+		/// <summary>
+		/// Gets or sets the custom template for the empty state. Takes precedence over EmptyDataText.
+		/// </summary>
+		[Parameter]
+		public RenderFragment EmptyDataTemplate { get; set; }
+
 		public ItemType CurrentItem { get; set; }
 
 		public FormViewMode CurrentMode { get; private set; }

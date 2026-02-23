@@ -50,3 +50,9 @@
  Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
  Team update (2026-02-23): Chart implementation architecture consolidated (10 decisions)  decided by Cyclops, Forge
  Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+
+ Team update (2026-02-23): BaseListControl<TItem> introduced  docs should reflect shared base for list controls  decided by Cyclops
+ Team update (2026-02-23): Label AssociatedControlID switches rendered element  document accessibility benefit  decided by Cyclops
+ Team update (2026-02-23): Login controls now inherit BaseStyledComponent  update docs for outer style support  decided by Rogue, Cyclops
+ Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs, Beast assigned branding (UI-11) and docs (UI-12)  decided by Forge
+ Team update (2026-02-23): Menu Orientation requires Razor local variable workaround  document this pattern  decided by Jubilee

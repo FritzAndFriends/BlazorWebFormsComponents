@@ -1,6 +1,25 @@
-﻿@inherits BaseWebFormsComponent
+﻿@inherits BaseStyledComponent
 
 @if (Visible)
 {
-	<span id="@ClientID">@Text</span>
+	@if (!string.IsNullOrEmpty(AssociatedControlID))
+	{
+		<label for="@AssociatedControlID" id="@ClientID" class="@GetCssClassOrNull()" style="@Style" accesskey="@GetAccessKeyOrNull()">@Text</label>
+	}
+	else
+	{
+		<span id="@ClientID" class="@GetCssClassOrNull()" style="@Style" accesskey="@GetAccessKeyOrNull()">@Text</span>
+	}
+}
+
+@code {
+	private string GetCssClassOrNull()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
+
+	private string GetAccessKeyOrNull()
+	{
+		return !string.IsNullOrEmpty(AccessKey) ? AccessKey : null;
+	}
 }

@@ -547,12 +547,11 @@ Suggested timeline:
 **Recommendation:** Fix comma-split bug immediately (data corruption risk). Prioritize `HeaderText` and `ValidationGroup` (common in multi-form pages).
 **Why:** Comma-split is a latent data corruption bug. Missing properties affect multi-form page migration.
 
-### 2026-02-23: Login controls missing outer WebControl style properties
+### 2026-02-23: Login controls outer style properties (consolidated)
 
-**By:** Rogue
-**What:** Login, ChangePassword, CreateUserWizard, and LoginView inherit `BaseWebFormsComponent` instead of `BaseStyledComponent`, so they lack outer-level style properties (BackColor, CssClass, ForeColor, Width, Height). Only LoginName and LoginStatus have full style support. Web Forms applies outer styles to the wrapping `<table>`.
-**Recommendation:** Evaluate whether these composite controls should inherit `BaseStyledComponent` or if CascadingParameter sub-element styles are sufficient.
-**Why:** Migrating pages that set `CssClass` on Login controls will break.
+**By:** Rogue, Cyclops
+**What:** Login, ChangePassword, and CreateUserWizard were identified as missing outer-level WebControl style properties (BackColor, CssClass, ForeColor, Width, Height) because they inherited `BaseWebFormsComponent` instead of `BaseStyledComponent`. Resolution: all three changed to inherit `BaseStyledComponent` (Option A — base class change). Outer `<table>` elements now render CssClass and computed IStyle inline styles alongside `border-collapse:collapse;`. `[Parameter]` style properties do NOT conflict with `[CascadingParameter]` sub-styles (TitleTextStyle, LabelStyle, etc.) — completely independent mechanisms. LoginView still inherits `BaseWebFormsComponent`. LoginName and LoginStatus already had full style support. PasswordRecovery should follow the same pattern when ready.
+**Why:** Migrating pages that set CssClass on Login controls would break. `BaseStyledComponent` extends `BaseWebFormsComponent` — no functionality lost.
 
 ### 2026-02-12: ChangePassword and CreateUserWizard sample pages require LoginControls using directive
 **By:** Colossus
@@ -857,3 +856,495 @@ Cyclops is fixing the `ChartSeries.ToConfig()` bug where data binding is not imp
 
 152 Chart tests (140 original + 12 new data binding tests). All passing.
 
+### 2026-02-14: User directive — Sample website UI overhaul
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Improve the UI of the samples/AfterBlazorServerSide website with a modern layout that demos each sample, feature, and component cleanly. Add a search feature. Update integration tests with this overhaul.
+**Why:** User request — captured for team memory
+
+# Decision: BaseDataBoundComponent inherits BaseStyledComponent
+
+**By:** Cyclops
+**Date:** 2026-02-23
+**Work Item:** WI-07
+
+## What
+
+Changed the inheritance chain from:
+```
+DataBoundComponent<T> → BaseDataBoundComponent → BaseWebFormsComponent
+```
+To:
+```
+DataBoundComponent<T> → BaseDataBoundComponent → BaseStyledComponent → BaseWebFormsComponent
+```
+
+This gives all data-bound controls the full IStyle property set (BackColor, BorderColor, BorderStyle, BorderWidth, CssClass, ForeColor, Font, Height, Width) from the base class.
+
+## Controls affected
+
+Removed duplicate IStyle declarations and style properties from:
+- **GridView** — removed CssClass
+- **DetailsView** — removed CssClass
+- **DataGrid** — removed CssClass
+- **DataList** — removed IStyle + 9 style properties; kept `new string Style` parameter
+- **TreeView** — removed IStyle + 9 style properties
+- **AdRotator** — removed IStyle + 9 style properties + Style computed property
+- **BulletedList** — removed IStyle + 9 style properties + Style computed property
+- **CheckBoxList** — removed IStyle + 9 style properties + Style computed property
+- **DropDownList** — removed IStyle + 9 style properties + Style computed property
+- **ListBox** — removed IStyle + 9 style properties + Style computed property
+- **RadioButtonList** — removed IStyle + 9 style properties + Style computed property
+
+No changes needed:
+- **FormView** — no duplicate properties
+- **ListView** — only added `new` keyword to existing obsolete Style parameter
+- **Repeater** — no duplicate properties
+
+## Why
+
+Data controls in Web Forms inherit from `DataBoundControl → WebControl`, which provides style properties. Our `BaseDataBoundComponent` was missing this, forcing each control to implement IStyle independently with duplicate property declarations. This caused ~70 style property gaps and made maintenance harder.
+
+## Impact
+
+- 949/949 tests pass — zero regressions
+- All existing style rendering in templates (DataList, DetailsView, etc.) continues to work unchanged
+- Controls that don't yet render styles in their templates can add rendering later per-control
+
+### 2026-02-23: Label AssociatedControlID switches rendered element
+**By:** Cyclops
+**What:** Label renders `<label for="{AssociatedControlID}">` when AssociatedControlID is set, `<span>` when not. All style/id/accesskey attributes apply to whichever element renders.
+**Why:** Matches Web Forms behavior exactly. Important for accessibility — screen readers use `<label for>` to associate labels with inputs. No breaking change — default behavior (no AssociatedControlID) still renders `<span>`.
+
+### 2026-02-23: BaseListControl<TItem> introduced as shared base for all list controls
+
+**By:** Cyclops
+**What:** Created `DataBinding/BaseListControl.cs` inheriting `DataBoundComponent<TItem>`, consolidating `StaticItems`, `DataTextField`, `DataValueField`, `GetItems()`, and `GetPropertyValue()` from BulletedList, CheckBoxList, DropDownList, ListBox, and RadioButtonList. Added `DataTextFormatString` (WI-47) and `AppendDataBoundItems` (WI-48) parameters to this base class. All 5 list controls now inherit `BaseListControl<TItem>` instead of `DataBoundComponent<TItem>`.
+**Why:** Web Forms has `ListControl` as the shared base for these controls. The 5 Blazor list controls had identical duplicated code for item retrieval and property extraction. Consolidating into a base class eliminates ~150 lines of duplication and provides a single place to add shared ListControl features (DataTextFormatString, AppendDataBoundItems, and future properties like CausesValidation/ValidationGroup). The `AppendDataBoundItems=false` semantics mean static items are skipped when data-bound items exist — matching Web Forms behavior where `DataBind()` clears the Items collection by default.
+
+### 2026-02-23: CausesValidation on non-button controls follows ButtonBaseComponent pattern
+**By:** Cyclops
+**What:** CheckBox, RadioButton, and TextBox now have `CausesValidation`, `ValidationGroup`, and `ValidationGroupCoordinator` cascading parameter — same 3-property pattern used by ButtonBaseComponent. Validation fires in existing `HandleChange` methods for CheckBox/RadioButton. TextBox has the parameters but no trigger wiring because it lacks an `@onchange` binding.
+**Why:** Web Forms exposes CausesValidation/ValidationGroup on all postback-capable controls. Following the exact ButtonBaseComponent pattern (same property names, same cascading parameter name, same coordinator call) ensures consistency and lets the existing ValidationGroupProvider work with these controls without modification.
+
+### 2026-02-23: Menu Orientation uses CSS class approach, not inline styles
+**By:** Cyclops
+**What:** Menu horizontal layout is achieved by adding a `horizontal` CSS class to the top-level `<ul>` and a scoped CSS rule `ul.horizontal > li { display: inline-block; }`. The `Orientation` enum lives at `Enums/Orientation.cs` (Horizontal=0, Vertical=1). Default is Vertical.
+**Why:** CSS class approach is cleaner than inline styles and matches how Web Forms Menu generates different class-based layouts for orientation. The enum follows project convention (explicit integer values, file in Enums/). Default Vertical matches Web Forms default.
+
+# Decision: Milestone 6 Work Plan — Feature Gap Closure
+
+**By:** Forge
+**Date:** 2026-02-14
+**Status:** Proposed
+
+## What
+
+Milestone 6 work plan with 54 work items across 3 priority tiers, targeting ~345 feature gaps identified in the 53-control audit (SUMMARY.md). Full plan at `planning-docs/MILESTONE6-PLAN.md`.
+
+### P0 — Base Class Fixes (18 WIs, ~180 gaps)
+Seven base class changes that sweep across many controls:
+1. `AccessKey` on `BaseWebFormsComponent` (~40 gaps)
+2. `ToolTip` on `BaseWebFormsComponent` (~35 gaps)
+3. `DataBoundComponent<T>` → inherit `BaseStyledComponent` (~70 gaps)
+4. `Display` enum on `BaseValidator` (6 gaps)
+5. `SetFocusOnError` on `BaseValidator` (6 gaps)
+6. `Image` → `BaseStyledComponent` (11 gaps)
+7. `Label` → `BaseStyledComponent` (11 gaps)
+
+### P1 — Individual Control Improvements (28 WIs, ~120 gaps)
+- GridView overhaul: paging, sorting, inline row editing (most-used data control, currently 20.7% health)
+- Calendar: string styles → TableItemStyle sub-components + enum conversion
+- FormView: CssClass, header/footer, empty data templates
+- HyperLink: `NavigationUrl` → `NavigateUrl` rename (migration blocker)
+- ValidationSummary: HeaderText, ShowSummary, ValidationGroup
+- PasswordRecovery audit doc re-run (was 0% due to pre-merge timing)
+- Docs + integration tests for all changed controls
+
+### P2 — Nice-to-Have (8 WIs, ~45 gaps)
+ListControl format strings, Menu Orientation, Label AssociatedControlID, Login controls outer styles, CausesValidation on CheckBox/RadioButton/TextBox.
+
+## Key Scope Decisions
+- **Login controls outer styles → P2** (not P1): These controls use CascadingParameter sub-styles by convention. Outer wrapper styling is useful but lower priority than GridView/Calendar/FormView.
+- **Skip Substitution and Xml**: Per existing team decision, both remain permanently deferred.
+- **sprint3 merge is DONE**: DetailsView and PasswordRecovery are on the branch. Only the PasswordRecovery audit doc needs updating.
+
+## Why
+
+The audit shows 66.3% overall health with 597 missing features. P0 base class fixes are the highest-ROI work — 7 changes close ~180 gaps. GridView at 20.7% is the single biggest migration blocker and must be addressed. Expected outcome: overall health rises to ~85%.
+
+## Agents
+
+All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (samples), Beast (docs), Colossus (integration tests), Forge (PasswordRecovery re-audit + review).
+
+# Sample Website UI Overhaul — Scope & Work Breakdown
+
+**Author:** Forge  
+**Date:** 2026-02-13  
+**Requested by:** Jeffrey T. Fritz
+
+---
+
+## 1. Current State Analysis
+
+### Layout Structure
+- **MainLayout.razor:** Classic sidebar + main content layout
+  - Fixed 250px sidebar (purple gradient background, sticky)
+  - Top row with Docs/About links
+  - Main content area with `@Body`
+- **NavMenu.razor:** Uses `TreeView` component for navigation (176 lines of hardcoded TreeNode markup)
+  - Categories: Home → Utility Features → Editor → Data → Validation → Navigation → Login → Migration Guides
+  - No search functionality
+  - TreeView is nested 3-4 levels deep — complex to navigate
+
+### CSS Framework
+- **Bootstrap 4.3.1** (2019 vintage — two major versions behind)
+- Custom `site.css` (~200 lines) for layout, sidebar theming, validation states
+- Open Iconic icon font (Bootstrap 4 era icons)
+- No utility-first CSS — all custom classes
+
+### Sample Page Organization
+- **34 top-level component folders** in `Components/Pages/ControlSamples/`
+- Pattern: Each component folder contains `Index.razor` + variant pages + `Nav.razor` for sub-navigation
+- No consistent structure — some have 1 page, some have 6+
+- `ComponentList.razor` on homepage shows flat list by category — **manually maintained, out of sync** (missing DetailsView, PasswordRecovery links)
+
+### Static Assets
+- `wwwroot/css/` — Bootstrap + site.css
+- `wwwroot/img/` — Sample images for AdRotator, Chart
+- No favicon customization, no branding assets
+
+### Integration Tests
+- **4 test files:** `ControlSampleTests.cs`, `InteractiveComponentTests.cs`, `HomePageTests.cs`, `PlaywrightFixture.cs`
+- Tests use **semantic selectors** (element types, attributes) not CSS class selectors
+- Example: `page.Locator("span[style*='font-weight']")`, `page.QuerySelectorAsync("canvas")`
+- **Low risk from CSS changes** — tests don't depend on `.sidebar`, `.page`, etc.
+
+---
+
+## 2. Proposed Design Direction
+
+### 2.1 Layout Structure
+
+**Recommendation: Modern sidebar + card-based demo area**
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ [Logo] BlazorWebFormsComponents    [Search: ______] [Docs]│
+├─────────────┬──────────────────────────────────────────────┤
+│ NAVIGATION  │  BREADCRUMB: Home > Data Controls > GridView│
+│             ├──────────────────────────────────────────────┤
+│ [Search 🔍] │  ┌─────────────────────────────────────────┐ │
+│             │  │ GridView                                │ │
+│ ▼ Editor    │  │ ─────────────────────────────────────── │ │
+│   Button    │  │ Description text from component docs   │ │
+│   CheckBox  │  └─────────────────────────────────────────┘ │
+│   ...       │                                              │
+│ ▼ Data      │  ┌─────────────────────────────────────────┐ │
+│   GridView ←│  │ Live Demo                               │ │
+│   ListView  │  │ ┌─────────────────────────────────────┐ │ │
+│   ...       │  │ │  <actual component renders here>   │ │ │
+│ ▼ Validation│  │ └─────────────────────────────────────┘ │ │
+│ ▼ Navigation│  └─────────────────────────────────────────┘ │
+│ ▼ Login     │                                              │
+│             │  ┌─────────────────────────────────────────┐ │
+│             │  │ Code Example                   [Copy 📋]│ │
+│             │  │ <pre><code>...</code></pre>            │ │
+│             │  └─────────────────────────────────────────┘ │
+│             │                                              │
+│             │  ┌──────┐ ┌──────┐ ┌──────┐                 │
+│             │  │Style │ │Events│ │Paging│  ← sub-pages    │
+│             │  └──────┘ └──────┘ └──────┘                 │
+└─────────────┴──────────────────────────────────────────────┘
+```
+
+**Key changes:**
+1. **Persistent top bar** with search input + branding
+2. **Collapsible sidebar** with category grouping (current TreeView → simple `<details>` or Blazor Accordion)
+3. **Card-based demo pages** — description card, live demo card, code example card
+4. **Sub-page tabs** — replace current `Nav.razor` pattern with horizontal tabs
+
+### 2.2 CSS Approach
+
+**Recommendation: Bootstrap 5.3 (latest stable)**
+
+| Option | Pros | Cons | Verdict |
+|--------|------|------|---------|
+| **Bootstrap 5.3** | Familiar to team, minimal learning curve, great docs, no jQuery | Needs migration from 4.3 classes | ✅ **RECOMMENDED** |
+| Tailwind CSS | Modern, utility-first | Build tooling, different paradigm | ❌ Overkill for sample site |
+| FluentUI Blazor | Microsoft ecosystem | Heavy dependency, learning curve | ❌ Different library, confusing |
+| Custom CSS only | Full control | Maintenance burden, no responsive grid | ❌ Not worth it |
+
+**Bootstrap 4→5 breaking changes to address:**
+- `ml-*` → `ms-*`, `mr-*` → `me-*` (margin utilities)
+- `pl-*` → `ps-*`, `pr-*` → `pe-*` (padding utilities)
+- `data-toggle` → `data-bs-toggle` (JS attributes — not used)
+- `form-group` → `mb-3` (form layout)
+- `.close` → `.btn-close` (close buttons)
+- No jQuery dependency (already not using it)
+
+### 2.3 Component Organization
+
+**Current:** Flat navigation duplicated in TreeView (NavMenu) + ComponentList + manual sample pages
+
+**Proposed:**
+1. **Single source of truth:** `ComponentCatalog.json` or static class with component metadata:
+   ```json
+   {
+     "components": [
+       {
+         "name": "Button",
+         "category": "Editor",
+         "route": "/ControlSamples/Button",
+         "description": "Server-side button control",
+         "subPages": ["Style", "Events", "JavaScript"]
+       }
+     ]
+   }
+   ```
+2. **Auto-generate NavMenu** from catalog
+3. **Auto-generate ComponentList** from catalog
+4. **Template-driven sample pages** — reduce boilerplate
+
+### 2.4 Search Implementation
+
+**Recommendation: Client-side search with Fuse.js or similar**
+
+| Approach | Pros | Cons | Verdict |
+|----------|------|------|---------|
+| **Client-side JS (Fuse.js)** | Zero server load, instant results, works offline | 50KB+ bundle, client rendering | ✅ **RECOMMENDED** |
+| Blazor input + filter | No JS, type-safe | Re-renders on every keystroke | ⚠️ Viable fallback |
+| Server-side API | Scalable | Overkill for <100 pages | ❌ Unnecessary |
+
+**Implementation:**
+1. Generate `search-index.json` at build time from component catalog
+2. Include component name, category, description, keywords
+3. Fuse.js fuzzy search with highlighting
+4. Results show in dropdown below search input
+5. Keyboard navigation (arrow keys + Enter)
+
+---
+
+## 3. Work Breakdown
+
+| ID | Title | Owner | Size | Dependencies | Notes |
+|----|-------|-------|------|--------------|-------|
+| UI-1 | Upgrade Bootstrap 4.3→5.3 | Jubilee | M | — | Replace CSS files, update utility classes in site.css |
+| UI-2 | Create ComponentCatalog data source | Cyclops | S | — | JSON or static class with all 50+ components |
+| UI-3 | Redesign MainLayout.razor | Jubilee | M | UI-1 | New layout structure, top bar, breadcrumbs |
+| UI-4 | Redesign NavMenu from catalog | Jubilee | M | UI-2, UI-3 | Replace TreeView with Bootstrap 5 Accordion |
+| UI-5 | Create SamplePageTemplate | Jubilee | M | UI-3 | Card layout: description, demo, code, sub-tabs |
+| UI-6 | Migrate sample pages to template | Jubilee | L | UI-5 | 34 component folders, ~80 pages total |
+| UI-7 | Update ComponentList.razor | Jubilee | S | UI-2 | Generate from catalog, add missing components |
+| UI-8 | Implement search (Fuse.js) | Cyclops | M | UI-2 | Index generation, search component, dropdown |
+| UI-9 | Update integration tests | Colossus | M | UI-3, UI-4 | Verify all routes, update any broken selectors |
+| UI-10 | Add dark mode toggle | Jubilee | S | UI-1 | Bootstrap 5 color modes, localStorage persistence |
+| UI-11 | Update branding/favicon | Beast | S | — | BlazorWebFormsComponents logo, favicon.ico |
+| UI-12 | Documentation for new layout | Beast | S | UI-6 | Update any docs referencing sample site |
+
+### Dependency Graph
+
+```
+         ┌──────┐
+         │ UI-1 │ Bootstrap upgrade (Jubilee)
+         └──┬───┘
+            │
+    ┌───────┼────────┐
+    ▼       ▼        ▼
+┌──────┐ ┌──────┐ ┌──────┐
+│ UI-2 │ │ UI-3 │ │UI-10 │
+│Catalog│ │Layout│ │Dark  │
+│(Cyc)  │ │(Jub) │ │Mode  │
+└──┬───┘ └──┬───┘ └──────┘
+   │        │
+   ├────────┤
+   ▼        ▼
+┌──────┐ ┌──────┐
+│ UI-4 │ │ UI-5 │
+│NavMenu│ │Templat│
+│(Jub)  │ │(Jub)  │
+└──┬───┘ └──┬───┘
+   │        │
+   │        ▼
+   │     ┌──────┐
+   │     │ UI-6 │
+   │     │Migrate│
+   │     │(Jub)  │
+   │     └──┬───┘
+   │        │
+   ├────────┤
+   ▼        ▼
+┌──────┐ ┌──────┐
+│ UI-7 │ │ UI-8 │
+│CompLst│ │Search│
+│(Jub)  │ │(Cyc) │
+└──────┘ └──┬───┘
+            │
+            ▼
+         ┌──────┐
+         │ UI-9 │
+         │Tests │
+         │(Col) │
+         └──────┘
+```
+
+### Parallel Execution Plan
+
+**Phase 1 (parallel):**
+- UI-1: Bootstrap upgrade
+- UI-2: ComponentCatalog
+- UI-11: Branding
+
+**Phase 2 (after Phase 1):**
+- UI-3: MainLayout redesign
+- UI-10: Dark mode
+
+**Phase 3 (after Phase 2):**
+- UI-4: NavMenu
+- UI-5: SamplePageTemplate
+
+**Phase 4 (after Phase 3):**
+- UI-6: Migrate pages (largest item)
+- UI-7: ComponentList
+- UI-8: Search
+
+**Phase 5 (after Phase 4):**
+- UI-9: Integration tests
+- UI-12: Documentation
+
+---
+
+## 4. Risk Assessment
+
+### 4.1 Integration Test Breakage Risk: **LOW**
+
+Current tests use:
+- Element selectors: `button`, `input[type='submit']`, `canvas`, `table`, `a`, `li`
+- Attribute selectors: `span[style*='font-weight']`, `img[src='/img/CSharp.png']`
+- ID selectors: `#event-count`, `#event-details`
+- Class selectors: `.item-row`, `.alt-item-row` (component output, not layout)
+
+**No layout CSS class selectors found in tests.** Tests target component output, not page structure.
+
+**Mitigation:** UI-9 (Colossus) runs full test suite after each major phase. Fix any breakage immediately.
+
+### 4.2 Hardcoded Selectors: **MEDIUM**
+
+Found hardcoded patterns:
+- `NavMenu.razor` line 6: `navbar-brand` class (Bootstrap 4)
+- `ComponentList.razor` line 66: `col-md=3` (typo! should be `col-md-3`)
+- `site.css` references `.sidebar`, `.page`, `.main`, `.top-row`
+
+**Mitigation:** UI-3 (MainLayout) and UI-4 (NavMenu) will replace these classes. Grep for all Bootstrap 4 class usages before Phase 2.
+
+### 4.3 Search Implementation: **MEDIUM**
+
+Client-side search requires:
+1. JS interop for Fuse.js (first non-Chart JS in sample app)
+2. Build-time index generation (manual or automated)
+3. Keyboard navigation UX
+
+**Mitigation:** 
+- Use existing JS interop patterns from Chart component
+- Start with manual index; automate later if needed
+- Keep scope to basic dropdown; no fancy UX
+
+### 4.4 Large Migration Scope: **HIGH**
+
+UI-6 touches ~80 files across 34 component folders. Risk of:
+- Inconsistent migration
+- Broken links
+- Lost sample code
+
+**Mitigation:**
+- Create template first (UI-5)
+- Migrate 2-3 components as pilot (Button, GridView, Calendar)
+- Review pilot with Jeff before proceeding
+- Use checklist to track progress
+
+### 4.5 Bootstrap 4→5 Breaking Changes: **LOW**
+
+Most changes are utility class renames. No jQuery dependency to remove.
+
+**Mitigation:** 
+- Run `grep -r "ml-\|mr-\|pl-\|pr-"` to find all usages
+- Batch replace with `ms-`/`me-`/`ps-`/`pe-`
+- Verify responsive behavior after upgrade
+
+---
+
+## 5. Open Questions for Jeff
+
+1. **Dark mode priority?** UI-10 is nice-to-have. Include in Phase 2 or defer?
+2. **Search scope?** Component names only, or also search within docs/descriptions?
+3. **Branding assets?** Do you have a BlazorWebFormsComponents logo, or should Beast create one?
+4. **Migration guide updates?** Should we update the MasterPages migration guide to reference the new layout?
+
+---
+
+## 6. Recommendation
+
+**Proceed with UI-1, UI-2, UI-11 in parallel immediately.** These are foundational and have no dependencies.
+
+**Estimated total effort:** 3-4 sprints (assuming 2-day sprints)
+- Phase 1-2: 1 sprint
+- Phase 3: 1 sprint
+- Phase 4: 1-2 sprints (UI-6 is large)
+- Phase 5: 0.5 sprint
+
+**Owners:**
+- Jubilee: UI-1, UI-3, UI-4, UI-5, UI-6, UI-7, UI-10 (frontend lead)
+- Cyclops: UI-2, UI-8 (catalog + search logic)
+- Colossus: UI-9 (integration tests)
+- Beast: UI-11, UI-12 (branding + docs)
+
+# Decision: Menu Orientation requires local variable in Razor
+
+**By:** Jubilee
+**Date:** 2026-02-23
+**Context:** WI-54 P2 Sample Updates
+
+**What:** When using the `Orientation` parameter on the `Menu` component in Razor markup, you must use a local variable with the fully-qualified enum type because the parameter name `Orientation` collides with the enum type name `Orientation`. Direct usage like `Orientation="Orientation.Horizontal"` causes a Razor compilation error.
+
+**Pattern:**
+```csharp
+@code {
+    BlazorWebFormsComponents.Enums.Orientation horizontal = BlazorWebFormsComponents.Enums.Orientation.Horizontal;
+}
+```
+Then in markup: `Orientation="@horizontal"`
+
+**Why:** This is a Razor-specific disambiguation issue. Any sample or documentation showing Menu Orientation must use this pattern, or developers will hit a confusing compiler error.
+
+# Decision: P2 Test Coverage Strategy
+
+**Date:** 2026-02-23
+**Author:** Rogue (QA Analyst)
+**Context:** WI-53 — P2 Tests Batch
+
+## Decision
+
+All P2 features (WI-47 through WI-52) have been tested with 32 bUnit tests across 7 files. Tests focus on parameter acceptance and rendered output verification rather than deep integration testing, since these are P2 priority features.
+
+## Test Files Created
+
+| Feature | File | Tests |
+|---------|------|-------|
+| DataTextFormatString (WI-47) | `DropDownList/DataTextFormatString.razor` | 4 |
+| DataTextFormatString (WI-47) | `BulletedList/DataTextFormatString.razor` | 3 |
+| AppendDataBoundItems (WI-48) | `DropDownList/AppendDataBoundItems.razor` | 4 |
+| CausesValidation (WI-49) | `CheckBox/CausesValidation.razor` | 9 |
+| Menu Orientation (WI-50) | `Menu/OrientationTests.razor` | 3 |
+| Label AssociatedControlID (WI-51) | `Label/AssociatedControlID.razor` | 6 |
+| Login outer styles (WI-52) | `LoginControls/Login/OuterStyle.razor` | 3 |
+
+## Observations
+
+1. **Login already inherits BaseStyledComponent** — WI-52 described Login as inheriting BaseWebFormsComponent, but it already inherits BaseStyledComponent. The outer `<table>` renders `class="@GetCssClassOrNull()"` and `style="border-collapse:collapse;@Style"`, so CssClass and style properties already work on the outer element. ChangePassword and CreateUserWizard also already inherit BaseStyledComponent.
+
+2. **CausesValidation wiring is internal** — CheckBox, RadioButton, and TextBox all have CausesValidation and ValidationGroup parameters, and they wire to ValidationGroupCoordinator via CascadingParameter. Testing the full validation group triggering requires wrapping in `<ValidationGroupProvider>` + `<EditForm>`, which is already covered by Button tests. The P2 tests verify parameter existence and default values.
+
+3. **AppendDataBoundItems edge case** — When Items is null and AppendDataBoundItems is false, static items still render (by design — the replace behavior only kicks in when there ARE data-bound items to replace with).
+
+## Impact
+
+Team should be aware that Login/ChangePassword/CreateUserWizard BaseStyledComponent inheritance was already in place — WI-52's implementation may have been a no-op or only required template changes to wire `Style`/`CssClass` to the outer element.

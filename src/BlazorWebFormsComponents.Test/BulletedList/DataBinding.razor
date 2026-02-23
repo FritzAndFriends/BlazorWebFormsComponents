@@ -72,7 +72,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="Product" StaticItems="staticItems" Items="products" DataTextField="Name" DataValueField="Url" />);
+		var cut = Render(@<BulletedList TItem="Product" StaticItems="staticItems" Items="products" AppendDataBoundItems="true" DataTextField="Name" DataValueField="Url" />);
 
 		// Assert
 		var listItems = cut.FindAll("li");

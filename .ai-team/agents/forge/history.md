@@ -49,148 +49,17 @@ Evaluated 4 JS libraries for Chart component. D3 rejected (zero built-in charts,
 📌 Team update (2026-02-12): Chart component feasibility confirmed — Chart.js recommended via JS interop. Effort: L. Target Milestone 4. — decided by Forge
 📌 Team update (2026-02-12): Milestone 4 planned — Chart component with Chart.js via JS interop. 8 work items, design review required before implementation. — decided by Forge + Squad
 
-### Feature Comparison Audit: Data Controls + Navigation Controls (2026-02-12)
+### Summary: Feature Audit & Themes/Skins Exploration (2026-02-12)
 
-Completed full API surface audit of 12 controls (9 Data + 3 Navigation) comparing Web Forms API vs Blazor implementation. Created `planning-docs/{ControlName}.md` for each.
+Audited 12 data + navigation controls. Key findings: DataBoundComponent<T> chain lacks style properties (systematic gap across 5 controls). GridView weakest (no paging/sorting/editing). Recommended DataBoundStyledComponent<T> as fix. DetailsView strong on sprint3 branch but needs merge-forward. Evaluated 5 Themes/Skins approaches — recommended CascadingValue ThemeProvider. SkinID bug (bool→string). Implementation opt-in.
 
-**Key findings on control coverage:**
+### Summary: Sprint 3 Planning & Gate Review (2026-02-10 through 2026-02-11)
 
-1. **Best coverage:** Repeater (minimal Web Forms API, nearly 100% match), DataList (38 props, 8 events matching — excellent style/template support), SiteMapPath (27 props, 5 events — near-complete), DataPager (27 props, 7 events — solid paging).
+Status.md reconciliation found actual 48/53 (not 41/53). Sprint 3: DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred. DetailsView APPROVED (DataBoundComponent<T>, 10 events, auto-fields via reflection). PasswordRecovery APPROVED (BaseWebFormsComponent, 3-step wizard, 6 events). Key patterns: Login Controls → BaseWebFormsComponent, Data → DataBoundComponent<T> with Items, events use On prefix. 50/53 complete (94%), 797 tests.
 
-2. **Good but incomplete:** DetailsView (27 props, 16 events — strong CRUD events, missing style props; on sprint3 branch), TreeView (21 props, 11 events — good core + data binding + accessibility, missing node styles), Menu (16 props, 7 events — good rendering + JS interop, missing base styles and Orientation).
+### Summary: Chart Component Gate Review (2026-02-13)
 
-3. **Weakest coverage:** GridView (9 props, 8 events — only basic table rendering, no paging/sorting/editing/selection), FormView (10 props, 12 events — good mode switching but missing nearly all display properties), ListView (14 props, 9 events — great templates, no CRUD events), Chart (14 props, 6 events — architectural deviation to Chart.js/canvas).
+Chart on milestone4 branch substantially complete. Architecture sound: Components→ConfigBuilder→JSON→JS interop. 140 tests. Data binding gap was ship-blocking (Items/XValueMember/YValueMembers ignored by ToConfig()). Conditionally approved pending fix. 27 unsupported chart types documented. Phase 2/3: per-point coloring, tooltips, IsValueShownAsLabel, MarkerStyle.
 
-**Recurring pattern — style property gap:** Controls inheriting DataBoundComponent<T> (DataGrid, GridView, FormView, DetailsView, ListView) lack WebControl-level style properties (BackColor, ForeColor, Font, BorderColor, Width, Height, etc.) because DataBoundComponent inherits BaseWebFormsComponent, not BaseStyledComponent. DataList is the exception — it implements IStyle directly with all style parameters.
-
-**Recurring pattern — missing CRUD events:** GridView, ListView, and DataGrid are all missing row/item-level CRUD events (RowDeleting/RowDeleted, ItemEditing, etc.) that are essential for inline editing scenarios. Only DetailsView and FormView have these.
-
-**Recurring pattern — no PagerSettings:** All controls that support paging (GridView, DetailsView, FormView) are missing the PagerSettings configuration object that Web Forms uses to configure pager appearance.
-
-**DetailsView branch status:** DetailsView exists on `sprint3/detailsview-passwordrecovery` but is not on the current working branch (`milestone4/chart-component`).
-
-### Themes and Skins Migration Strategy (2026-02-12)
-
-- Evaluated 5 approaches for migrating Web Forms Themes/Skins to Blazor: CSS Custom Properties, CascadingValue ThemeProvider, Generated CSS Isolation, DI Service, and Hybrid.
-- **Recommended CascadingValue ThemeProvider** — only approach that faithfully models both `Theme` (override) and `StyleSheetTheme` (default) semantics, supports SkinID selection, and can set any property (not just CSS-expressible ones).
-- CSS-only approaches (1, 3, 5) cannot set non-CSS properties like `Width` (as HTML attribute), `ToolTip`, or `Visible` — which are valid skin properties in Web Forms.
-- DI-based approach (4) works functionally but cannot scope themes to a page or subtree, unlike `CascadingValue` which mirrors Web Forms' per-page `@Page Theme=` directive.
-- **Known bug:** `BaseWebFormsComponent.SkinID` is typed as `bool` instead of `string`. Must be fixed before any theme implementation.
-- The library already uses CascadingParameters extensively (TableItemStyle, LoginControl styles) — ThemeProvider follows the same pattern.
-- Implementation is opt-in and non-breaking: no `ThemeProvider` wrapper = no behavior change.
-- Strategy is exploratory per Jeff's request — the README exclusion of themes/skins still stands until a decision to implement.
-
- Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  fixes all 20+ styled controls in one change  decided by Beast, Cyclops
- Team update (2026-02-23): DataBoundComponent style gap confirmed systemic  DataBoundStyledComponent<T> recommended  decided by Forge
- Team update (2026-02-23): GridView is highest-priority data control gap (no paging/sorting/editing)  decided by Forge
- Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
- Team update (2026-02-23): CascadingValue ThemeProvider recommended for Themes/Skins migration  decided by Forge
-📌 Team update (2026-02-10): Close PR #333 without merging — all Calendar work already on dev, PR branch has 0 unique commits — decided by Rogue
-📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
-
-### 2026-02-10 — Sprint 3 Planning & Status Reconciliation
-
-**Status.md was significantly stale:**
-- Calendar was merged to dev via commit d33e156 and PR #339 but still marked 🔴 Not Started
-- FileUpload was merged via PRs #335 and #338 but still marked 🔴 Not Started
-- Summary table said 41/53 (Editor: 20/27) but actual count of ✅ entries in the detailed section was already 23/27 for Editors (now 25/27 with Calendar + FileUpload fixed)
-- The 27-count for Editor Controls groups MultiView and View as one logical component despite separate table rows
-- Corrected total: 48/53 components complete (91%), 5 remaining
-
-**Sprint 3 scope decision:**
-- DetailsView and PasswordRecovery are the two buildable components
-- Chart deferred: requires SVG/Canvas rendering engine, no Blazor primitive equivalent
-- Substitution deferred: Web Forms output caching has no Blazor architectural equivalent
-- Xml deferred: XSLT transforms are a dead-end pattern with near-zero migration demand
-- Post-Sprint 3 state: 50/53 (94%), library effectively feature-complete for practical migration
-
-**DetailsView design notes:**
-- Must inherit BaseStyledComponent (Web Forms DetailsView → CompositeDataBoundControl → WebControl)
-- Renders as `<table>` with one `<tr>` per field (vertical layout vs GridView's horizontal)
-- Can reuse existing BoundField, TemplateField, CommandField, HyperLinkField, ButtonField from GridView
-- Needs DetailsViewMode enum (ReadOnly=0, Edit=1, Insert=2)
-- Needs 8 EventArgs classes for mode changes, CRUD operations
-
-**PasswordRecovery design notes:**
-- Must inherit BaseStyledComponent
-- 3-step wizard flow: UserName → Question → Success (same pattern as CreateUserWizard's 2-step)
-- Can reuse existing LoginControls style sub-components (TitleTextStyle, TextBoxStyle, LabelStyle, etc.)
-- Table-based HTML output matching ChangePassword's render pattern
-
-📌 Team update (2026-02-10): Sprint 3 plan ratified — DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred indefinitely with migration docs. 48/53 → target 50/53. — decided by Forge
-📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
-
-### 2026-02-11 — Sprint 3 Gate Review
-
-**DetailsView — APPROVED:**
-- Inherits `DataBoundComponent<ItemType>` — correct for data-bound controls. Uses same `Items` property as GridView/ListView.
-- All 10 Web Forms events implemented with correct `EventArgs` types. Pre-operation events support cancellation.
-- `DetailsViewMode` enum (ReadOnly=0, Edit=1, Insert=2) matches Web Forms exactly.
-- HTML output: `<table>` with one `<tr>` per field, command row with `<a>` links, nested-table numeric pager — all match Web Forms.
-- Auto-generation via reflection correctly generates fields from `ItemType` properties.
-- Minor issues (non-blocking): `CombinedStyle` has CellPadding/CellSpacing logic mismatch, `cellspacing` hardcoded to 0 in template, docs use `DataSource` but actual parameter is `Items`.
-- DetailsView docs `DataSource`→`Items` fix assigned to Beast.
-
-**PasswordRecovery — APPROVED:**
-- Inherits `BaseWebFormsComponent` — consistent with ChangePassword and CreateUserWizard pattern.
-- 3-step wizard flow (UserName → Question → Success) matches Web Forms exactly.
-- Reuses existing `LoginCancelEventArgs`, `TableItemStyle`, `Style` cascading parameter pattern from other Login Controls.
-- `SuccessTextStyle` sub-component added following existing `UiTableItemStyle` pattern.
-- All 6 events implemented: `OnVerifyingUser`, `OnUserLookupError`, `OnVerifyingAnswer`, `OnAnswerLookupError`, `OnSendingMail`, `OnSendMailError`.
-- `SetQuestion()` and `SkipToSuccess()` APIs provide developer control matching Web Forms extensibility.
-- Table-based nested HTML output matches Web Forms PasswordRecovery output.
-- Minor issues (non-blocking): `RenderOuterTable` declared but not used, `SubmitButtonType`/`SubmitButtonImageUrl` declared but not rendered, sample uses `e.Sender` casting instead of `@ref`.
-
-**Key Patterns Confirmed:**
-- Login Controls consistently inherit `BaseWebFormsComponent` (not `BaseStyledComponent`) and use cascading `TableItemStyle`/`Style` objects for styling — this is an established project convention.
-- Data-bound controls inherit `DataBoundComponent<T>` which provides `Items` (not `DataSource`) as the primary binding parameter.
-- Event naming in Login Controls uses `On` prefix (`OnVerifyingUser`, `OnChangingPassword`) — project convention, not Web Forms convention.
-- Both components ship with docs, samples, and tests per Sprint 2 policy.
-
-**Sprint 3 Status:**
-- 50/53 components complete (94%)
-- 797 tests passing, 0 build errors
-- 3 remaining (Chart, Substitution, Xml) deferred indefinitely
-- Library is effectively feature-complete for practical Web Forms migration
-
-📌 Team update (2026-02-11): Sprint 3 gate review — DetailsView APPROVED, PasswordRecovery APPROVED. 50/53 complete (94%). — decided by Forge
-### Chart Component Analysis (2026-02-13)
-
-Thorough review of `milestone4/chart-component` branch. Implementation is **substantially complete** for Phase 1 scope:
-
-**What's done:**
-- `Chart.razor/.cs`: BaseStyledComponent inheritance, ChartWidth/ChartHeight/Palette/CssClass, canvas rendering, JS interop lifecycle (create/update/destroy)
-- `ChartSeries.razor/.cs`: 13 properties, cascading parent registration
-- `ChartArea.razor/.cs`: AxisX/AxisY (Axis POCO class)
-- `ChartTitle.razor/.cs` & `ChartLegend.razor/.cs`: Text, Docking
-- `ChartConfigBuilder.cs`: Pure static config builder (testable without canvas), 8 chart types mapped
-- `ChartJsInterop.cs`: ES module loader for chart-interop.js
-- Enums: `SeriesChartType` (35 values matching Web Forms), `ChartPalette` (12 palettes), `Docking` (4 positions), `ChartDashStyle`
-- Supporting classes: `DataPoint` (XValue, YValues[], Label, Color, ToolTip), `Axis` (Title, Min, Max, Interval, IsLogarithmic)
-- wwwroot: `chart.min.js` (Chart.js bundled), `chart-interop.js` (ES module wrapper)
-- 140 unit tests passing — enums, DataPoint, Axis, ChartConfigBuilder output
-- Docs: Comprehensive `Chart.md` with migration guide, code examples, feature tables
-- Samples: 8 Blazor pages (Index/Column, Bar, Line, Area, Pie, Doughnut, Scatter, StackedColumn)
-- BeforeWebForms: PieChart.aspx, LineChart.aspx reference samples
-
-**Gaps identified:**
-1. **Data binding not implemented** — `XValueMember`, `YValueMembers`, `Items` parameters exist but `ToConfig()` ignores them. Docs show data-bound examples that will silently fail.
-2. **27 chart types unsupported** — throw `NotSupportedException`. Clearly documented.
-3. **No integration tests** — Colossus hasn't added Chart sample routes to smoke tests yet.
-4. **No per-point coloring** — `DataPoint.Color` not wired to Chart.js output.
-5. **No tooltips** — `DataPoint.ToolTip` and `ChartSeries.ToolTip` not wired.
-6. **`IsValueShownAsLabel`** — not implemented.
-7. **MarkerStyle** — parameter exists but not mapped.
-
-**Architecture assessment:**
-- Clean separation: Components → Config objects → ChartConfigBuilder → JSON → JS interop
-- Config builder is purely testable without browser context (140 tests)
-- ES module pattern for JS loading is correct
-- SSR/prerender handled gracefully (JSException caught)
-- Dispose pattern handles circuit disconnection
-
-**Risk assessment:**
-- Approach is sound — Chart.js is a solid choice
-- First JS interop in project is well-executed
-- Data binding gap is ship-blocking — docs promise it works
-- Remaining gaps are Phase 2/3 features, not blockers
+ Team update (2026-02-23): P2 features complete  all 1,065 tests pass, 0 build errors  decided by Squad
+ Team update (2026-02-23): UI overhaul requested by Jeffrey T. Fritz  scope document created  decided by Jeffrey T. Fritz
