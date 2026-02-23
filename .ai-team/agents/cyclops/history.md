@@ -58,4 +58,20 @@
 - **JS interop pattern for Chart:** Uses `IJSRuntime` directly (not the shared `BlazorWebFormsJsInterop` service) because Chart.js interop is chart-specific, not page-level. `ChartJsInterop` lazily imports the ES module and exposes `CreateChartAsync`, `UpdateChartAsync`, `DestroyChartAsync`.
 - **BaseStyledComponent already has Width/Height as Unit type:** Chart adds `ChartWidth`/`ChartHeight` as string parameters for CSS dimension styling on the wrapper div, avoiding conflict with the base class Unit properties.
 - **Instance-based canvas IDs:** Uses `Guid.NewGuid()` (truncated to 8 chars) for canvas element IDs, consistent with the ImageMap pattern that avoids static counters.
+- **Feature audit — Editor Controls A–I (13 controls):** Created audit docs in `planning-docs/` comparing Web Forms API vs Blazor implementation for AdRotator, BulletedList, Button, Calendar, CheckBox, CheckBoxList, DropDownList, FileUpload, HiddenField, HyperLink, Image, ImageButton, ImageMap.
+- **Common missing property: AccessKey.** Every component that inherits WebControl in Web Forms has AccessKey. Neither `BaseStyledComponent` nor `BaseWebFormsComponent` provides it. This is the single most pervasive gap — affects all 13 audited controls.
+- **ToolTip inconsistently provided.** Some components (Button, FileUpload, Calendar, HyperLink, Image, ImageButton, ImageMap) add ToolTip directly. Others (AdRotator, BulletedList, CheckBox, CheckBoxList, DropDownList) do not. ToolTip should be on the base class.
+- **Image base class mismatch.** `Image` inherits `BaseWebFormsComponent` but Web Forms `Image` inherits `WebControl`. This means Image is missing ALL style properties (CssClass, BackColor, ForeColor, Font, Width, Height, BorderColor, BorderStyle, BorderWidth, Style). ImageMap correctly uses `BaseStyledComponent` per team decision. Image should follow the same pattern.
+- **HyperLink.NavigateUrl naming mismatch.** Web Forms uses `NavigateUrl`; Blazor uses `NavigationUrl`. This breaks migration — developers must rename the attribute.
+- **List controls missing common ListControl properties.** BulletedList, CheckBoxList, and DropDownList all lack DataTextFormatString, AppendDataBoundItems, CausesValidation, and ValidationGroup. These are inherited from ListControl in Web Forms.
+- **Calendar style sub-properties use CSS strings.** All 9 style sub-properties (DayStyle, TitleStyle, etc.) are implemented as CSS class strings instead of `TableItemStyle` objects. Functional but not API-compatible.
+- **HiddenField correctly uses BaseWebFormsComponent.** Matches Web Forms where HiddenField inherits Control (not WebControl), so no style properties needed.
 
+
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
+ Team update (2026-02-23): Label should inherit BaseStyledComponent instead of BaseWebFormsComponent  decided by Beast
+ Team update (2026-02-23): DataBoundComponent style gap  DataBoundStyledComponent<T> recommended  decided by Forge
+ Team update (2026-02-23): Chart implementation architecture consolidated (10 decisions)  decided by Cyclops, Forge
+ Team update (2026-02-23): Validation Display property missing from all validators  migration-blocking  decided by Rogue
+ Team update (2026-02-23): ValidationSummary comma-split bug is data corruption risk  decided by Rogue
+ Team update (2026-02-23): Login controls missing outer WebControl style properties  decided by Rogue

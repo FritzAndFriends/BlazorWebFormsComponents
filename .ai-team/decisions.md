@@ -448,3 +448,109 @@ Suggested timeline:
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Going forward, use "milestones" instead of "sprints" for naming work batches. All future planning uses "milestone" terminology.
 **Why:** User preference — captured for team memory. Applies retroactively to planning references where practical.
+
+### 2026-02-23: AccessKey and ToolTip must be added to BaseStyledComponent (consolidated)
+
+**By:** Beast, Cyclops
+**What:** `AccessKey` (string) and `ToolTip` (string) are missing from all styled controls. Both are standard `WebControl` properties present on every control inheriting `WebControl` in Web Forms. Beast's audit of 15 editor controls (L–X) and Cyclops's audit of 13 editor controls (A–I) independently confirmed the gap. 7 of 13 A–I controls add ToolTip individually; the remaining 6 lack it entirely.
+**Recommendation:** Add `[Parameter] public string AccessKey { get; set; }` and `[Parameter] public string ToolTip { get; set; }` to `BaseStyledComponent`. This fixes the gap for all 20+ styled controls in one change.
+**Why:** Universal gap confirmed by two independent audits across 28 controls. Base-class fix is the highest-leverage single change available.
+
+### 2026-02-23: Label should inherit BaseStyledComponent
+
+**By:** Beast
+**What:** `Label` currently inherits `BaseWebFormsComponent` but Web Forms `Label` inherits from `WebControl`. This means Label is missing all 9 style properties (CssClass, BackColor, ForeColor, Font, etc.). Also consider `AssociatedControlID` to render `<label for="...">` instead of `<span>`.
+**Why:** Label is one of the most commonly used controls. Missing style properties break migration for any page that styles its Labels.
+
+### 2026-02-23: Substitution and Xml remain permanently deferred
+
+**By:** Beast
+**What:** Both controls are tightly coupled to server-side ASP.NET infrastructure: Substitution depends on the output caching pipeline (`HttpResponse.WriteSubstitution`); Xml depends on XSLT transformation. Neither maps to Blazor's component model.
+**Recommendation:** Document migration alternatives in `DeferredControls.md`. Substitution → Blazor component lifecycle. Xml → convert XML to C# objects and use Blazor templates.
+**Why:** Reinforces and formalizes the Sprint 3 deferral decision with specific migration guidance.
+
+### 2026-02-23: Chart Type Gallery documentation convention
+
+**By:** Beast
+**What:** Added a "Chart Type Gallery" section to `docs/DataControls/Chart.md` showing screenshots of all 8 Phase 1 chart types. Each entry includes an H3 heading, MkDocs image (`![alt](../images/chart/chart-{type}.png)`), `SeriesChartType` enum value, and usage description. Pie and Doughnut include `!!! warning "Palette Limitation"` admonitions for the Phase 1 single-color-per-series issue.
+**Why:** Visual documentation helps migrating developers choose the correct chart type. Image path convention: `docs/images/{component}/` with `chart-{type}.png` naming.
+
+### 2026-02-23: Feature audit findings — Editor Controls A–I
+
+**By:** Cyclops
+**What:** Completed feature comparison audit for 13 editor controls (AdRotator through ImageMap). Key findings beyond AccessKey/ToolTip (consolidated separately):
+1. **Image needs BaseStyledComponent.** Image inherits `BaseWebFormsComponent` but Web Forms `Image` inherits `WebControl`, leaving 10+ style properties missing. ImageMap was already fixed — Image should follow suit.
+2. **HyperLink.NavigateUrl vs NavigationUrl.** Blazor uses `NavigationUrl` but Web Forms uses `NavigateUrl`. Migration-breaking name difference.
+3. **List controls share common gaps.** BulletedList, CheckBoxList, and DropDownList all lack `DataTextFormatString`, `AppendDataBoundItems`, `CausesValidation`, and `ValidationGroup` from Web Forms `ListControl` base.
+**Why:** Prioritized work items for closing API gaps. Image base class fix is a single targeted change with high impact.
+
+### 2026-02-23: Chart component implementation architecture (consolidated)
+
+**By:** Cyclops, Forge
+**What:** Combined implementation decisions from Cyclops (WI-1/2/3 execution) and Forge (Milestone 4 design review):
+1. **Base class: DataBoundStyledComponent<T>.** New class inheriting `DataBoundComponent<T>` + implementing `IStyle`. Fills the structural gap where neither `DataBoundComponent<T>` (no styles) nor `BaseStyledComponent` (no data binding) alone satisfies the Web Forms Chart contract. Additive — does not affect existing components.
+2. **Child registration via CascadingParameter.** ChartSeries, ChartArea, ChartTitle, ChartLegend use `[CascadingParameter(Name="ParentChart")]` and register in `OnInitializedAsync`, following the MultiView/View pattern.
+3. **JS interop: Three-function ES module.** `chart-interop.js` exports `createChart`, `updateChart`, `destroyChart`. `ChartJsInterop` is separate from `BlazorWebFormsJsInterop` — chart-specific JS stays isolated. Lazy `IJSObjectReference` import pattern. Canvas referenced by `id`, not `ElementReference`.
+4. **Chart.js v4.4.8 bundled.** Pinned as static asset in `wwwroot/js/`. Originally a placeholder stub; now replaced with real Chart.js v4.4.8.
+5. **Phase 1 chart types.** 8 mappings: Column→bar, Bar→bar(indexAxis:'y'), Line→line, Pie→pie, Area→line(fill), Doughnut→doughnut, Point→scatter, StackedColumn→bar(stacked). `SeriesChartType.Point` maps to Chart.js `"scatter"` (Web Forms has no explicit Scatter value). Full 35-value enum created; unsupported types throw `NotSupportedException`.
+6. **ChartConfigBuilder uses snapshot classes.** Pure static class taking config snapshots (`ChartSeriesConfig`, `ChartAreaConfig`, etc.) via `.ToConfig()` methods. Decouples builder from component lifecycle, enables unit testing. Canvas content tested visually via Playwright.
+7. **ChartWidth/ChartHeight as string parameters.** Avoids hiding base `Width`/`Height` (Unit type) on `BaseStyledComponent`.
+8. **Docking parameter naming.** `ChartLegend.LegendDocking` and `ChartTitle.TitleDocking` use prefixed names to avoid conflicts. Nullable `Docking?` distinguishes "not set" from default.
+9. **Task.Yield() before first chart creation.** Gives child components time to register before JS interop fires.
+10. **Enums: 4 new files.** `SeriesChartType` (35), `ChartPalette` (13), `Docking` (4), `ChartDashStyle` (6) in `Enums/` per project convention.
+**Why:** Consolidates architecture decisions from design review and implementation to provide a single reference for chart component patterns.
+
+### 2026-02-23: DataBoundComponent style property gap (consolidated)
+
+**By:** Forge
+**What:** Controls inheriting `DataBoundComponent<T>` (DataGrid, GridView, FormView, DetailsView, ListView) lack all WebControl-level style properties because the chain `DataBoundComponent<T> → BaseDataBoundComponent → BaseWebFormsComponent` skips `BaseStyledComponent`. Only DataList works around this by implementing `IStyle` directly. GridView re-declares `CssClass` as a standalone `[Parameter]` — a pattern smell.
+**Recommendation:** Create `DataBoundStyledComponent<T>` inheriting `DataBoundComponent<T>` and implementing `IStyle`. Chart already uses this approach. This would immediately give BackColor, BorderColor, CssClass, Font, ForeColor, Height, Width, etc. to all 5 affected data controls.
+**Why:** Affects 5 of 9 data controls. Identified independently in both the data controls audit and chart design review. Single base-class fix with broad impact.
+
+### 2026-02-23: GridView is highest-priority data control gap
+
+**By:** Forge
+**What:** GridView is the most commonly used data control in Web Forms and has the weakest coverage: no paging, sorting, editing, selection, no style properties, 14 of 22 events missing. Currently read-only table rendering only.
+**Recommendation:** GridView enhancement should be a near-term priority, potentially as a Milestone 5 workstream.
+**Why:** Developers migrating from Web Forms will expect GridView to be functional.
+
+### 2026-02-23: DetailsView branch should be merged forward
+
+**By:** Forge
+**What:** DetailsView has strong implementation (27 props, 16 events with cancellation) but only exists on `sprint3/detailsview-passwordrecovery`. It is not on the current working branch.
+**Why:** APPROVED in Milestone 3 gate review. Should be available on the main development branches.
+
+### 2026-02-23: Themes and Skins — CascadingValue ThemeProvider recommended
+
+**By:** Forge
+**What:** Evaluated 5 approaches for Web Forms Themes/Skins migration. Recommended CascadingValue ThemeProvider — the only approach that faithfully models both `Theme` (override) and `StyleSheetTheme` (default) semantics. CSS-only approaches cannot set non-CSS properties. DI approach cannot scope to subtrees. SkinID must be corrected from `bool` to `string` on `BaseWebFormsComponent` first. Implementation is opt-in via `<ThemeProvider>` wrapper — zero breaking changes. Strategy is exploratory; README exclusion of themes/skins still stands.
+**Why:** Jeff requested exploration. CascadingValue aligns with existing library patterns (TableItemStyle already cascades) and is incrementally adoptable.
+
+### 2026-02-23: PasswordRecovery component missing from current branch
+
+**By:** Rogue
+**What:** `PasswordRecovery.razor` and `.razor.cs` do not exist in `src/BlazorWebFormsComponents/LoginControls/` despite history.md referencing Sprint 3 delivery with 29 bUnit tests. Component exists on `sprint3/detailsview-passwordrecovery` branch.
+**Recommendation:** Merge the sprint3 branch forward or cherry-pick the PasswordRecovery files.
+**Why:** Confirmed by audit. Related to DetailsView branch merge-forward decision.
+
+### 2026-02-23: Validation Display property gap — migration-blocking
+
+**By:** Rogue
+**What:** ALL six validation controls are missing the `Display` property (`ValidatorDisplay` enum: None, Static, Dynamic). Current Blazor implementation always uses Dynamic behavior (hidden when valid). `Static` reserves space even when valid — pages relying on this for layout stability will break.
+**Recommendation:** Add `Display` parameter to `BaseValidator<T>`.
+**Why:** Migration-blocking for pages using `Display="Static"`.
+
+### 2026-02-23: ValidationSummary functional gaps and comma-split bug
+
+**By:** Rogue
+**What:** `AspNetValidationSummary` is missing `HeaderText`, `ShowMessageBox`, `ShowSummary`, `ShowValidationErrors`, and `ValidationGroup`. Error message parsing uses `x.Split(',')[1]` which silently corrupts messages containing commas.
+**Recommendation:** Fix comma-split bug immediately (data corruption risk). Prioritize `HeaderText` and `ValidationGroup` (common in multi-form pages).
+**Why:** Comma-split is a latent data corruption bug. Missing properties affect multi-form page migration.
+
+### 2026-02-23: Login controls missing outer WebControl style properties
+
+**By:** Rogue
+**What:** Login, ChangePassword, CreateUserWizard, and LoginView inherit `BaseWebFormsComponent` instead of `BaseStyledComponent`, so they lack outer-level style properties (BackColor, CssClass, ForeColor, Width, Height). Only LoginName and LoginStatus have full style support. Web Forms applies outer styles to the wrapping `<table>`.
+**Recommendation:** Evaluate whether these composite controls should inherit `BaseStyledComponent` or if CascadingParameter sub-element styles are sufficient.
+**Why:** Migrating pages that set `CssClass` on Login controls will break.
+

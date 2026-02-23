@@ -55,3 +55,6 @@
 - **NavMenu Chart node:** Added under Data Components with `Expanded="false"` and 8 sub-nodes for each chart type, alphabetically ordered.
 - **ComponentList updated:** Replaced placeholder `Chart(?)` with a working link.
 
+
+ Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops

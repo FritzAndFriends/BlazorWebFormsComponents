@@ -32,3 +32,17 @@
 
 📌 Test pattern: Chart component tests use `BunitContext` directly (not `BlazorWebFormsTestContext`) with `JSInterop.Mode = JSRuntimeMode.Loose` to handle Chart.js interop calls. ChartConfigBuilder is the most testable part — pure static class, no JS/canvas dependency. bUnit 2.x requires `Render<T>` not `RenderComponent<T>`. `GetPaletteColors` is internal, so palette behavior is tested indirectly via BuildConfig dataset colors. — Rogue
 
+📌 Feature Comparison Audit — Validation Controls + Login Controls (2026-02-12): Created 13 audit documents in `planning-docs/` comparing Web Forms API vs Blazor implementation for CompareValidator, CustomValidator, RangeValidator, RegularExpressionValidator, RequiredFieldValidator, ValidationSummary, ChangePassword, CreateUserWizard, Login, LoginName, LoginStatus, LoginView, PasswordRecovery. — Rogue
+
+📌 Validation controls common gaps: (1) `Display` property (None/Static/Dynamic) missing from all validators — affects layout behavior. (2) `SetFocusOnError` missing from all validators. (3) `ControlToValidate` uses `ForwardRef<InputBase<T>>` instead of string ID — different API shape from Web Forms. (4) `InitialValue` missing from RequiredFieldValidator. (5) `ControlToCompare` missing from CompareValidator. (6) `AccessKey` and `ToolTip` missing from all validators. (7) ValidationSummary is missing `HeaderText`, `ShowMessageBox`, `ShowSummary`, `ShowValidationErrors`, and `ValidationGroup` — significant functional gaps. (8) ValidationSummary error message parsing uses fragile comma-split (`x.Split(',')[1]`). — Rogue
+
+📌 Login control template support status: (1) ChangePassword: `ChangePasswordTemplate` and `SuccessTemplate` both supported as RenderFragment. (2) CreateUserWizard: `CreateUserStep`, `CompleteStep`, `SideBarTemplate`, `HeaderTemplate` all supported — but limited to 2 fixed wizard steps (no arbitrary WizardSteps). (3) Login: `LayoutTemplate` NOT supported (commented out in code). (4) LoginView: `AnonymousTemplate`, `LoggedInTemplate`, `RoleGroups` all supported — best template coverage of all login controls. (5) PasswordRecovery: component NOT FOUND in source tree despite Sprint 3 history references — needs investigation. — Rogue
+
+📌 Login controls inherit BaseWebFormsComponent (not BaseStyledComponent): Login, ChangePassword, CreateUserWizard, LoginView all lack outer-level WebControl style properties (BackColor, CssClass, ForeColor, Width, Height, etc.). Only LoginName and LoginStatus inherit BaseStyledComponent and have full style support. Sub-element styles are handled via CascadingParameters for the composite login controls. — Rogue
+
+
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
+ Team update (2026-02-23): DataBoundComponent style gap  DataBoundStyledComponent<T> recommended  decided by Forge
+ Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+ Team update (2026-02-23): Validation Display property gap confirmed migration-blocking  decided by Rogue
+ Team update (2026-02-23): ValidationSummary comma-split bug confirmed  immediate fix needed  decided by Rogue

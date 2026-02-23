@@ -49,6 +49,26 @@ Evaluated 4 JS libraries for Chart component. D3 rejected (zero built-in charts,
 📌 Team update (2026-02-12): Chart component feasibility confirmed — Chart.js recommended via JS interop. Effort: L. Target Milestone 4. — decided by Forge
 📌 Team update (2026-02-12): Milestone 4 planned — Chart component with Chart.js via JS interop. 8 work items, design review required before implementation. — decided by Forge + Squad
 
+### Feature Comparison Audit: Data Controls + Navigation Controls (2026-02-12)
+
+Completed full API surface audit of 12 controls (9 Data + 3 Navigation) comparing Web Forms API vs Blazor implementation. Created `planning-docs/{ControlName}.md` for each.
+
+**Key findings on control coverage:**
+
+1. **Best coverage:** Repeater (minimal Web Forms API, nearly 100% match), DataList (38 props, 8 events matching — excellent style/template support), SiteMapPath (27 props, 5 events — near-complete), DataPager (27 props, 7 events — solid paging).
+
+2. **Good but incomplete:** DetailsView (27 props, 16 events — strong CRUD events, missing style props; on sprint3 branch), TreeView (21 props, 11 events — good core + data binding + accessibility, missing node styles), Menu (16 props, 7 events — good rendering + JS interop, missing base styles and Orientation).
+
+3. **Weakest coverage:** GridView (9 props, 8 events — only basic table rendering, no paging/sorting/editing/selection), FormView (10 props, 12 events — good mode switching but missing nearly all display properties), ListView (14 props, 9 events — great templates, no CRUD events), Chart (14 props, 6 events — architectural deviation to Chart.js/canvas).
+
+**Recurring pattern — style property gap:** Controls inheriting DataBoundComponent<T> (DataGrid, GridView, FormView, DetailsView, ListView) lack WebControl-level style properties (BackColor, ForeColor, Font, BorderColor, Width, Height, etc.) because DataBoundComponent inherits BaseWebFormsComponent, not BaseStyledComponent. DataList is the exception — it implements IStyle directly with all style parameters.
+
+**Recurring pattern — missing CRUD events:** GridView, ListView, and DataGrid are all missing row/item-level CRUD events (RowDeleting/RowDeleted, ItemEditing, etc.) that are essential for inline editing scenarios. Only DetailsView and FormView have these.
+
+**Recurring pattern — no PagerSettings:** All controls that support paging (GridView, DetailsView, FormView) are missing the PagerSettings configuration object that Web Forms uses to configure pager appearance.
+
+**DetailsView branch status:** DetailsView exists on `sprint3/detailsview-passwordrecovery` but is not on the current working branch (`milestone4/chart-component`).
+
 ### Themes and Skins Migration Strategy (2026-02-12)
 
 - Evaluated 5 approaches for migrating Web Forms Themes/Skins to Blazor: CSS Custom Properties, CascadingValue ThemeProvider, Generated CSS Isolation, DI Service, and Hybrid.
@@ -59,3 +79,9 @@ Evaluated 4 JS libraries for Chart component. D3 rejected (zero built-in charts,
 - The library already uses CascadingParameters extensively (TableItemStyle, LoginControl styles) — ThemeProvider follows the same pattern.
 - Implementation is opt-in and non-breaking: no `ThemeProvider` wrapper = no behavior change.
 - Strategy is exploratory per Jeff's request — the README exclusion of themes/skins still stands until a decision to implement.
+
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  fixes all 20+ styled controls in one change  decided by Beast, Cyclops
+ Team update (2026-02-23): DataBoundComponent style gap confirmed systemic  DataBoundStyledComponent<T> recommended  decided by Forge
+ Team update (2026-02-23): GridView is highest-priority data control gap (no paging/sorting/editing)  decided by Forge
+ Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+ Team update (2026-02-23): CascadingValue ThemeProvider recommended for Themes/Skins migration  decided by Forge

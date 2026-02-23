@@ -48,3 +48,6 @@
   - Chart pages use JS interop (`ChartJsInterop.cs`) — console errors are expected if Chart.js CDN/bundle isn't fully loaded; page errors are not
   - Pre-existing test suite has 97 failures on non-Chart tests due to ASP.NET structured log console errors (`[timestamp] Error:`) being caught by `Assert.Empty(consoleErrors)` — these are unrelated to Chart work
 
+
+ Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
