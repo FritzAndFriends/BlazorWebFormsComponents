@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class CreateUserWizard : BaseWebFormsComponent
+	public partial class CreateUserWizard : BaseStyledComponent
 	{
 		#region Obsolete
 
@@ -241,6 +241,7 @@ namespace BlazorWebFormsComponents.LoginControls
 				HyperLinkStyle.FromUnknownAttributes(AdditionalAttributes, "HyperLinkStyle-");
 			}
 
+			this.SetFontsFromAttributes(AdditionalAttributes);
 			base.HandleUnknownAttributes();
 		}
 

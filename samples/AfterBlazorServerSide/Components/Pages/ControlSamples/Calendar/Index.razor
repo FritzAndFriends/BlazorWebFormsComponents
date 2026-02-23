@@ -68,13 +68,13 @@
 <h3>Day Name &amp; Title Formats</h3>
 
 <h4>Full Day Names</h4>
-<Calendar DayNameFormat="Full" @bind-SelectedDate="fullNameDate" />
+<Calendar DayNameFormat="BlazorWebFormsComponents.Enums.DayNameFormat.Full" @bind-SelectedDate="fullNameDate" />
 
 <h4>First Letter Only</h4>
-<Calendar DayNameFormat="FirstLetter" @bind-SelectedDate="firstLetterDate" />
+<Calendar DayNameFormat="BlazorWebFormsComponents.Enums.DayNameFormat.FirstLetter" @bind-SelectedDate="firstLetterDate" />
 
 <h4>Month-Only Title</h4>
-<Calendar TitleFormat="Month" @bind-SelectedDate="monthOnlyDate" />
+<Calendar TitleFormat="BlazorWebFormsComponents.Enums.TitleFormat.Month" @bind-SelectedDate="monthOnlyDate" />
 
 <p>Code:</p>
 <pre><code>&lt;Calendar DayNameFormat="Full" /&gt;
@@ -121,6 +121,55 @@
 
 <hr />
 
+<!-- Styled calendar with TableItemStyle sub-components (new approach) -->
+<h3>TableItemStyle Sub-Components</h3>
+<p>The recommended approach uses child sub-components instead of CSS-class strings.
+   Sub-components support BackColor, ForeColor, Font, and more:</p>
+
+<Calendar CssClass="subcmp-calendar"
+          ShowGridLines="true"
+          @bind-SelectedDate="subComponentDate">
+    <TitleStyleContent>
+        <CalendarTitleStyle CssClass="subcmp-title" />
+    </TitleStyleContent>
+    <DayHeaderStyleContent>
+        <CalendarDayHeaderStyle CssClass="subcmp-day-header" />
+    </DayHeaderStyleContent>
+    <SelectedDayStyleContent>
+        <CalendarSelectedDayStyle CssClass="subcmp-selected-day" />
+    </SelectedDayStyleContent>
+    <TodayDayStyleContent>
+        <CalendarTodayDayStyle CssClass="subcmp-today" />
+    </TodayDayStyleContent>
+    <WeekendDayStyleContent>
+        <CalendarWeekendDayStyle CssClass="subcmp-weekend" />
+    </WeekendDayStyleContent>
+</Calendar>
+
+<style>
+    .subcmp-calendar { border: 2px solid #333; }
+    .subcmp-title { background-color: navy; color: white; font-weight: bold; padding: 6px; }
+    .subcmp-day-header { background-color: lightgray; }
+    .subcmp-selected-day { background-color: dodgerblue; color: white; font-weight: bold; }
+    .subcmp-today { background-color: gold; }
+    .subcmp-weekend { background-color: lavenderblush; }
+</style>
+
+<p>Code:</p>
+<pre><code>&lt;Calendar ShowGridLines="true" @@bind-SelectedDate="date"&gt;
+    &lt;TitleStyleContent&gt;
+        &lt;CalendarTitleStyle CssClass="subcmp-title" /&gt;
+    &lt;/TitleStyleContent&gt;
+    &lt;DayHeaderStyleContent&gt;
+        &lt;CalendarDayHeaderStyle CssClass="subcmp-day-header" /&gt;
+    &lt;/DayHeaderStyleContent&gt;
+    &lt;SelectedDayStyleContent&gt;
+        &lt;CalendarSelectedDayStyle CssClass="subcmp-selected-day" /&gt;
+    &lt;/SelectedDayStyleContent&gt;
+&lt;/Calendar&gt;</code></pre>
+
+<hr />
+
 <!-- Event handling -->
 <h3>Event Handling</h3>
 <p>Track selection changes and month navigation, matching the Web Forms
@@ -156,6 +205,7 @@
     private DateTime monthOnlyDate = DateTime.Today;
     private DateTime customNavDate = DateTime.Today;
     private DateTime styledDate = DateTime.Today;
+    private DateTime subComponentDate = DateTime.Today;
     private DateTime eventDate = DateTime.Today;
     private int selectionChangedCount = 0;
     private int monthChangedCount = 0;

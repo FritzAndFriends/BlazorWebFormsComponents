@@ -1,3 +1,4 @@
+using BlazorWebFormsComponents.Validations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using System;
@@ -9,6 +10,15 @@ namespace BlazorWebFormsComponents
 	{
 		private string _inputId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedInputId;
 		private readonly string _generatedInputId = Guid.NewGuid().ToString("N");
+
+		[Parameter]
+		public bool CausesValidation { get; set; } = true;
+
+		[Parameter]
+		public string ValidationGroup { get; set; }
+
+		[CascadingParameter(Name = "ValidationGroupCoordinator")]
+		protected ValidationGroupCoordinator Coordinator { get; set; }
 
 		[Parameter]
 		public bool Checked { get; set; }
@@ -36,6 +46,12 @@ namespace BlazorWebFormsComponents
 		private async Task HandleChange(ChangeEventArgs e)
 		{
 			Checked = true;
+
+			if (CausesValidation && Coordinator != null)
+			{
+				Coordinator.ValidateGroup(ValidationGroup);
+			}
+
 			await CheckedChanged.InvokeAsync(Checked);
 			await OnCheckedChanged.InvokeAsync(e);
 		}

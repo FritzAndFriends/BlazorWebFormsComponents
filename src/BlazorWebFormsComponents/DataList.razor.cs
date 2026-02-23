@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IStyle, IDataListStyleContainer
+	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IDataListStyleContainer
 	{
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },
@@ -18,7 +18,6 @@ namespace BlazorWebFormsComponents
 		};
 		protected string CalculatedStyle { get; set; }
 		protected string? CalculatedGridLines { get => _GridLines[this.GridLines]; }
-		[Parameter] public string AccessKey { get; set; }
 		[Parameter] public string Caption { get; set; }
 		[Parameter] public VerticalAlign CaptionAlign { get; set; } = VerticalAlign.NotSet;
 		[Parameter] public int CellPadding { get; set; }
@@ -44,19 +43,9 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment SeparatorStyleContent { get; set; }
 		[Parameter] public bool ShowHeader { get; set; } = true;
 		[Parameter] public bool ShowFooter { get; set; } = true;
-		[Parameter] public string Style { get; set; }
+		[Parameter] public new string Style { get; set; }
 		[Parameter] public string ToolTip { get; set; }
 		[Parameter] public bool UseAccessibleHeader { get; set; } = false;
-		[Parameter] public WebColor BackColor { get; set; }
-		[Parameter] public WebColor BorderColor { get; set; }
-		[Parameter] public BorderStyle BorderStyle { get; set; }
-		[Parameter] public Unit BorderWidth { get; set; }
-		[Parameter] public string CssClass { get; set; }
-		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
-		[Parameter] public WebColor ForeColor { get; set; }
-		[Parameter] public Unit Height { get; set; }
-		[Parameter] public Unit Width { get; set; }
-
 		[Parameter]
 		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }
 

@@ -112,6 +112,12 @@ namespace BlazorWebFormsComponents
 		public short TabIndex { get; set; }
 
 		/// <summary>
+		/// Gets or sets the access key that allows you to quickly navigate to the Web server control.
+		/// </summary>
+		[Parameter]
+		public string AccessKey { get; set; }
+
+		/// <summary>
 		/// ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
 		/// </summary>
 		/// <value></value>

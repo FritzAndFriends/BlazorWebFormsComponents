@@ -1,0 +1,156 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> NameRef = new ForwardRef<InputBase<string>>();
+
+	[Fact]
+	public void Validator_Display_DefaultIsStatic()
+	{
+		var model = new DisplayTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		// Default Display is Static — span should be rendered with visibility:hidden when valid
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("visibility:hidden");
+	}
+
+	[Fact]
+	public void Validator_DisplayStatic_WhenValid_HasVisibilityHidden()
+	{
+		var model = new DisplayTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					Display="ValidatorDisplay.Static"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("visibility:hidden");
+	}
+
+	[Fact]
+	public void Validator_DisplayStatic_WhenInvalid_SpanIsVisible()
+	{
+		var model = new DisplayTestModel();
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					Display="ValidatorDisplay.Static"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("  ");
+		cut.Find("form").Submit();
+
+		var span = cut.Find("span");
+		var style = span.GetAttribute("style") ?? "";
+		style.ShouldNotContain("visibility:hidden");
+		style.ShouldNotContain("display:none");
+		span.TextContent.ShouldContain("Name is required.");
+	}
+
+	[Fact]
+	public void Validator_DisplayDynamic_WhenValid_HasDisplayNone()
+	{
+		var model = new DisplayTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					Display="ValidatorDisplay.Dynamic"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("display:none");
+	}
+
+	[Fact]
+	public void Validator_DisplayDynamic_WhenInvalid_SpanIsVisible()
+	{
+		var model = new DisplayTestModel();
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					Display="ValidatorDisplay.Dynamic"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("  ");
+		cut.Find("form").Submit();
+
+		var span = cut.Find("span");
+		var style = span.GetAttribute("style") ?? "";
+		style.ShouldNotContain("display:none");
+		style.ShouldNotContain("visibility:hidden");
+		span.TextContent.ShouldContain("Name is required.");
+	}
+
+	[Fact]
+	public void Validator_DisplayNone_AlwaysHasDisplayNone()
+	{
+		var model = new DisplayTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					Display="ValidatorDisplay.None"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("display:none");
+	}
+
+	[Fact]
+	public void Validator_DisplayNone_WhenInvalid_StillHasDisplayNone()
+	{
+		var model = new DisplayTestModel();
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="@NameRef"
+					Display="ValidatorDisplay.None"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("  ");
+		cut.Find("form").Submit();
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("display:none");
+	}
+
+	private void HandleValid() { _validSubmit = true; }
+	private void HandleInvalid() { _invalidSubmit = true; }
+
+	public class DisplayTestModel
+	{
+		public string Name { get; set; }
+	}
+}

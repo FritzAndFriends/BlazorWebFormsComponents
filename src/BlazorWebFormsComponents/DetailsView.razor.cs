@@ -61,12 +61,6 @@ namespace BlazorWebFormsComponents
 		public bool AutoGenerateInsertButton { get; set; }
 
 		/// <summary>
-		/// Gets or sets the CSS class for the control.
-		/// </summary>
-		[Parameter]
-		public string CssClass { get; set; }
-
-		/// <summary>
 		/// Gets or sets the gridlines style for the table.
 		/// </summary>
 		[Parameter]

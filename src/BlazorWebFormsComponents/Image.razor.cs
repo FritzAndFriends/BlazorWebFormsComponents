@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class Image : BaseWebFormsComponent, IImageComponent
+	public partial class Image : BaseStyledComponent, IImageComponent
 	{
 		[Parameter]
 		public string AlternateText { get; set; }

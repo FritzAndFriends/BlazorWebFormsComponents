@@ -1,0 +1,91 @@
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+
+@code {
+
+	[Fact]
+	public void Image_WithCssClass_RendersClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" CssClass="my-image" />);
+
+		// Assert
+		var img = cut.Find("img");
+		img.HasAttribute("class").ShouldBeTrue();
+		img.GetAttribute("class").ShouldBe("my-image");
+	}
+
+	[Fact]
+	public void Image_WithBackColor_RendersBackgroundColorInStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" BackColor="Yellow" />);
+
+		// Assert
+		var img = cut.Find("img");
+		img.HasAttribute("style").ShouldBeTrue();
+		img.GetAttribute("style").ShouldContain("background-color:Yellow");
+	}
+
+	[Fact]
+	public void Image_WithHeight_RendersHeightInStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" Height="Unit.Pixel(100)" />);
+
+		// Assert
+		var img = cut.Find("img");
+		img.HasAttribute("style").ShouldBeTrue();
+		img.GetAttribute("style").ShouldContain("height:100px");
+	}
+
+	[Fact]
+	public void Image_WithWidth_RendersWidthInStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" Width="Unit.Pixel(200)" />);
+
+		// Assert
+		var img = cut.Find("img");
+		img.HasAttribute("style").ShouldBeTrue();
+		img.GetAttribute("style").ShouldContain("width:200px");
+	}
+
+	[Fact]
+	public void Image_WithMultipleStyles_CombinesCorrectly()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test"
+			BackColor="Blue" ForeColor="White" Width="Unit.Pixel(150)" Height="Unit.Pixel(75)" />);
+
+		// Assert
+		var img = cut.Find("img");
+		var style = img.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color:Blue");
+		style.ShouldContain("color:White");
+		style.ShouldContain("width:150px");
+		style.ShouldContain("height:75px");
+	}
+
+	[Fact]
+	public void Image_WithoutStyles_DoesNotRenderStyleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" />);
+
+		// Assert
+		cut.Find("img").HasAttribute("style").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Image_WithoutCssClass_DoesNotRenderClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" />);
+
+		// Assert
+		cut.Find("img").HasAttribute("class").ShouldBeFalse();
+	}
+
+}

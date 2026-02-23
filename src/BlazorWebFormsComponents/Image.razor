@@ -1,41 +1,49 @@
-@using System.Text
-@inherits BaseWebFormsComponent
-@{
-		var element = new StringBuilder($"<img src=\"{ImageUrl}\"");
-		
-		if (!string.IsNullOrEmpty(ClientID))
-		{
-			element.AppendFormat(" id=\"{0}\"", ClientID);
-		}
-		
-		if(!string.IsNullOrEmpty(AlternateText))
-		{
-			element.AppendFormat(" alt=\"{0}\"", AlternateText);
-		}
-		else
-		{
-			if(GenerateEmptyAlternateText)
-			{
-				element.AppendFormat(" alt=\"{0}\"", AlternateText);
-			}
-		}
-
-		element.AppendFormat(" longdesc=\"{0}\"", DescriptionUrl);
-
-		if (!string.IsNullOrEmpty(ToolTip))
-		{
-			element.AppendFormat(" title=\"{0}\"", ToolTip);
-		}
-
-		if(ImageAlign != Enums.ImageAlign.NotSet)
-		{
-			element.AppendFormat(" align=\"{0}\"", ImageAlign.ToString().ToLower());
-		}
-
-		element.Append(" />");
-}
+@inherits BaseStyledComponent
 
 @if (Visible)
 {
-	@((MarkupString)element.ToString())
+	<img src="@ImageUrl"
+		 id="@GetId()"
+		 alt="@GetAltText()"
+		 class="@GetCssClassOrNull()"
+		 style="@Style"
+		 title="@GetTitle()"
+		 longdesc="@GetLongDesc()"
+		 align="@GetAlign()" />
+}
+
+@code {
+	private string GetAltText()
+	{
+		if (!string.IsNullOrEmpty(AlternateText))
+			return AlternateText;
+		if (GenerateEmptyAlternateText)
+			return "";
+		return null;
+	}
+
+	private string GetId()
+	{
+		return !string.IsNullOrEmpty(ClientID) ? ClientID : null;
+	}
+
+	private string GetCssClassOrNull()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
+
+	private string GetTitle()
+	{
+		return !string.IsNullOrEmpty(ToolTip) ? ToolTip : null;
+	}
+
+	private string GetLongDesc()
+	{
+		return DescriptionUrl;
+	}
+
+	private string GetAlign()
+	{
+		return ImageAlign != Enums.ImageAlign.NotSet ? ImageAlign.ToString().ToLower() : null;
+	}
 }

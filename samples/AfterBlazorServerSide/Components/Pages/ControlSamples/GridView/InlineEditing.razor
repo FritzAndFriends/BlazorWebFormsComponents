@@ -1,0 +1,77 @@
+@page "/ControlSamples/GridView/InlineEditing"
+
+<PageTitle>GridView - Inline Editing</PageTitle>
+
+<h2>GridView - Inline Editing</h2>
+
+<p>This sample demonstrates GridView with inline row editing. Click Edit to modify a row, Update to save changes, Cancel to discard, or Delete to remove a row.</p>
+
+<Nav />
+
+<GridView ItemType="Product" DataSource="@Products" AutoGenerateColumns="false" EditIndex="@EditIndex"
+          RowEditing="HandleRowEditing"
+          RowUpdating="HandleRowUpdating"
+          RowCancelingEdit="HandleRowCancelingEdit"
+          RowDeleting="HandleRowDeleting">
+    <Columns>
+        <BoundField ItemType="Product" DataField="Id" HeaderText="ID" ReadOnly="true" />
+        <BoundField ItemType="Product" DataField="Name" HeaderText="Name" />
+        <BoundField ItemType="Product" DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+    </Columns>
+</GridView>
+
+<p>Edit Index: <strong>@EditIndex</strong></p>
+
+@code {
+    private int EditIndex = -1;
+
+    private List<Product> Products = new List<Product>();
+
+    protected override void OnInitialized()
+    {
+        Products = new List<Product>
+        {
+            new Product { Id = 1, Name = "Laptop Stand", Price = 29.99m },
+            new Product { Id = 2, Name = "USB Cable", Price = 9.99m },
+            new Product { Id = 3, Name = "Wireless Mouse", Price = 24.99m },
+            new Product { Id = 4, Name = "Notebook", Price = 5.99m },
+            new Product { Id = 5, Name = "Pen Set", Price = 12.99m },
+            new Product { Id = 6, Name = "Monitor Arm", Price = 49.99m },
+            new Product { Id = 7, Name = "Headphones", Price = 39.99m },
+            new Product { Id = 8, Name = "Desk Lamp", Price = 19.99m }
+        };
+    }
+
+    private void HandleRowEditing(GridViewEditEventArgs e)
+    {
+        EditIndex = e.NewEditIndex;
+    }
+
+    private void HandleRowUpdating(GridViewUpdateEventArgs e)
+    {
+        // In a real app, you would read the new values from the edit fields
+        // and update the data source. Here we just exit edit mode.
+        EditIndex = -1;
+    }
+
+    private void HandleRowCancelingEdit(GridViewCancelEditEventArgs e)
+    {
+        EditIndex = -1;
+    }
+
+    private void HandleRowDeleting(GridViewDeleteEventArgs e)
+    {
+        if (e.RowIndex >= 0 && e.RowIndex < Products.Count)
+        {
+            Products.RemoveAt(e.RowIndex);
+        }
+        EditIndex = -1;
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+}

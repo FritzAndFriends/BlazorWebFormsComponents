@@ -1,4 +1,4 @@
-@inherits BaseWebFormsComponent
+@inherits BaseStyledComponent
 
 @using BlazorWebFormsComponents.Validations;
 @using Microsoft.AspNetCore.Components.Forms;
@@ -32,7 +32,7 @@
 		}
 		else
 		{
-			<table cellspacing="0" cellpadding="@BorderPadding" id="@ID" style="border-collapse:collapse;">
+			<table cellspacing="0" cellpadding="@BorderPadding" id="@ID" class="@GetCssClassOrNull()" style="border-collapse:collapse;@Style">
 				<tbody>
 					<tr>
 						@if (DisplaySideBar)
@@ -188,7 +188,7 @@
 		}
 		else
 		{
-			<table cellspacing="0" cellpadding="@BorderPadding" id="@ID" style="border-collapse:collapse;">
+			<table cellspacing="0" cellpadding="@BorderPadding" id="@ID" class="@GetCssClassOrNull()" style="border-collapse:collapse;@Style">
 				<tbody>
 					<tr>
 						<td>
@@ -215,3 +215,10 @@
 	}
 
 </Microsoft.AspNetCore.Components.Forms.EditForm>
+
+@code {
+	private string GetCssClassOrNull()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
+}

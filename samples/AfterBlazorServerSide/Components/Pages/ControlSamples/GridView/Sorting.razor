@@ -1,0 +1,102 @@
+@page "/ControlSamples/GridView/Sorting"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>GridView - Sorting</PageTitle>
+
+<h2>GridView - Sorting</h2>
+
+<p>This sample demonstrates GridView with sorting enabled. Click a column header to sort by that column. Click again to toggle the sort direction.</p>
+
+<Nav />
+
+<GridView ItemType="Product" DataSource="@Products" AllowSorting="true" AutoGenerateColumns="false"
+          Sorting="HandleSorting">
+    <Columns>
+        <BoundField ItemType="Product" DataField="Name" HeaderText="Name" />
+        <BoundField ItemType="Product" DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+        <BoundField ItemType="Product" DataField="Category" HeaderText="Category" />
+    </Columns>
+</GridView>
+
+<p>
+    Sort Column: <strong>@(string.IsNullOrEmpty(CurrentSortExpression) ? "(none)" : CurrentSortExpression)</strong> |
+    Sort Direction: <strong>@CurrentSortDirection</strong>
+</p>
+
+@code {
+    private string CurrentSortExpression = "";
+    private SortDirection CurrentSortDirection = SortDirection.Ascending;
+
+    private List<Product> Products = new List<Product>();
+
+    protected override void OnInitialized()
+    {
+        Products = Enumerable.Range(1, 25)
+            .Select(i => new Product
+            {
+                Id = i,
+                Name = GetProductName(i),
+                Price = Math.Round(4.99m + (i * 1.5m), 2),
+                Category = i % 3 == 0 ? "Electronics" : i % 3 == 1 ? "Books" : "Clothing"
+            })
+            .ToList();
+    }
+
+    private void HandleSorting(GridViewSortEventArgs e)
+    {
+        CurrentSortExpression = e.SortExpression;
+        CurrentSortDirection = e.SortDirection;
+
+        Products = e.SortExpression switch
+        {
+            "Name" => e.SortDirection == SortDirection.Ascending
+                ? Products.OrderBy(p => p.Name).ToList()
+                : Products.OrderByDescending(p => p.Name).ToList(),
+            "Price" => e.SortDirection == SortDirection.Ascending
+                ? Products.OrderBy(p => p.Price).ToList()
+                : Products.OrderByDescending(p => p.Price).ToList(),
+            "Category" => e.SortDirection == SortDirection.Ascending
+                ? Products.OrderBy(p => p.Category).ToList()
+                : Products.OrderByDescending(p => p.Category).ToList(),
+            _ => Products
+        };
+    }
+
+    private static string GetProductName(int index) => index switch
+    {
+        1 => "Laptop Stand",
+        2 => "USB Cable",
+        3 => "Wireless Mouse",
+        4 => "Notebook",
+        5 => "Pen Set",
+        6 => "Monitor Arm",
+        7 => "Headphones",
+        8 => "Desk Lamp",
+        9 => "Keyboard",
+        10 => "Webcam",
+        11 => "Phone Case",
+        12 => "Tablet Cover",
+        13 => "Charger",
+        14 => "Backpack",
+        15 => "Water Bottle",
+        16 => "Speaker",
+        17 => "Mouse Pad",
+        18 => "Screen Protector",
+        19 => "Power Bank",
+        20 => "Cable Organizer",
+        21 => "Stylus Pen",
+        22 => "Card Reader",
+        23 => "USB Hub",
+        24 => "Desk Mat",
+        25 => "Wrist Rest",
+        _ => $"Product {index}"
+    };
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public string Category { get; set; }
+    }
+}

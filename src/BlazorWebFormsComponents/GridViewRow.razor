@@ -2,14 +2,41 @@
 @inherits BaseRow<ItemType>
 @using Interfaces
 
-<tr @key="DataItem">
+<tr @key="DataItem" style="@(IsEditing && EditRowStyle != null ? EditRowStyle.ToString() : null)">
 	@foreach (IColumn<ItemType> column in Columns)
 	{
 		<td @key="column">
 
 			@if (DataItem is ButtonField<ItemType>) (DataItem as ButtonField<ItemType>).DataItemIndex = DataItemIndex;
 
-			@column.Render(DataItem)
+			@if (IsEditing)
+			{
+				@column.RenderEdit(DataItem)
+			}
+			else
+			{
+				@column.Render(DataItem)
+			}
+		</td>
+	}
+	@if (GridView != null && (GridView.RowEditing.HasDelegate || GridView.RowUpdating.HasDelegate || GridView.RowDeleting.HasDelegate || GridView.RowCancelingEdit.HasDelegate))
+	{
+		<td>
+			@if (IsEditing)
+			{
+				<a href="javascript:void(0);" @onclick="@(() => GridView.UpdateRow(DataItemIndex))" @onclick:preventDefault>Update</a>
+				@((MarkupString)"&nbsp;")
+				<a href="javascript:void(0);" @onclick="@(() => GridView.CancelEdit(DataItemIndex))" @onclick:preventDefault>Cancel</a>
+			}
+			else
+			{
+				<a href="javascript:void(0);" @onclick="@(() => GridView.EditRow(DataItemIndex))" @onclick:preventDefault>Edit</a>
+				@if (GridView.RowDeleting.HasDelegate)
+				{
+					@((MarkupString)"&nbsp;")
+					<a href="javascript:void(0);" @onclick="@(() => GridView.DeleteRow(DataItemIndex))" @onclick:preventDefault>Delete</a>
+				}
+			}
 		</td>
 	}
 </tr>

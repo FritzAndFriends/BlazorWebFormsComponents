@@ -1,4 +1,5 @@
 @page "/ControlSamples/Menu"
+@using BlazorWebFormsComponents.Enums
 
 
 <h2>Menu Component homepage</h2>
@@ -11,7 +12,6 @@
 			DisappearAfter="2000"
 			StaticDisplayLevels="2"
 			StaticSubmenuIndent="10"
-			orientation="Vertical"
 			font-names="Arial"
 			target="_blank"
 			runat="server">
@@ -59,6 +59,46 @@
 
 <hr />
 
+<h2>Horizontal Menu</h2>
+
+<p>Set <code>Orientation</code> to display menu items horizontally. This is useful for top navigation bars.</p>
+
+<Menu id="HorizontalMenu"
+			Orientation="@horizontal"
+			StaticDisplayLevels="2"
+			StaticSubmenuIndent="10"
+			target="_blank"
+			runat="server">
+
+	<StaticMenuItemStyle BackColor="@("LightSteelBlue")"
+											 ForeColor="@("Black")" />
+	<StaticHoverStyle BackColor="WebColor.LightSkyBlue" />
+
+	<Items>
+		<MenuItem navigateurl="Home.aspx"
+							text="Home"
+							tooltip="Home" />
+		<MenuItem text="Products"
+							tooltip="Products">
+			<MenuItem navigateurl="Software.aspx"
+								text="Software"
+								tooltip="Software" />
+			<MenuItem navigateurl="Hardware.aspx"
+								text="Hardware"
+								tooltip="Hardware" />
+		</MenuItem>
+		<MenuItem navigateurl="About.aspx"
+							text="About"
+							tooltip="About" />
+		<MenuItem navigateurl="Contact.aspx"
+							text="Contact"
+							tooltip="Contact" />
+	</Items>
+
+</Menu>
+
+<hr />
+
 <p>Code:</p>
 <code>
 &lt;Menu id="NavigationMenu" orientation="Vertical"&gt;<br />
@@ -68,5 +108,17 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;MenuItem text="Music" tooltip="Music"&gt;...&lt;/MenuItem&gt;<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;/MenuItem&gt;<br />
 &nbsp;&nbsp;&lt;/Items&gt;<br />
+&lt;/Menu&gt;<br /><br />
+&lt;!-- Horizontal orientation --&gt;<br />
+&lt;Menu id="HorizontalMenu" Orientation="horizontal"&gt;<br />
+&nbsp;&nbsp;&lt;Items&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;MenuItem text="Home" /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;MenuItem text="Products"&gt;...&lt;/MenuItem&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;MenuItem text="About" /&gt;<br />
+&nbsp;&nbsp;&lt;/Items&gt;<br />
 &lt;/Menu&gt;
 </code>
+
+@code {
+	BlazorWebFormsComponents.Enums.Orientation horizontal = BlazorWebFormsComponents.Enums.Orientation.Horizontal;
+}

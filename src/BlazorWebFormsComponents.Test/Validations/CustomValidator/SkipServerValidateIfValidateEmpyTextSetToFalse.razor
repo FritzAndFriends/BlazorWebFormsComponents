@@ -27,7 +27,7 @@
 		_invalidSubmit.ShouldBeFalse();
 		_serverValidate.ShouldBeFalse();
 
-		cut.FindAll("span").Count().ShouldBe(0);
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
 
 	}
 

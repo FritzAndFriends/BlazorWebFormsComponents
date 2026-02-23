@@ -1,0 +1,84 @@
+
+@code {
+
+	[Fact]
+	public void Button_WithToolTip_RendersTitleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me" ToolTip="Button tooltip" />);
+
+		// Assert
+		var button = cut.Find("button");
+		button.HasAttribute("title").ShouldBeTrue();
+		button.GetAttribute("title").ShouldBe("Button tooltip");
+	}
+
+	[Fact]
+	public void Image_WithToolTip_RendersTitleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Image ImageUrl="/img/test.png" ToolTip="Image tooltip" />);
+
+		// Assert
+		var img = cut.Find("img");
+		img.HasAttribute("title").ShouldBeTrue();
+		img.GetAttribute("title").ShouldBe("Image tooltip");
+	}
+
+	[Fact]
+	public void Calendar_WithToolTip_RendersTitleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar ToolTip="Calendar tooltip" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.HasAttribute("title").ShouldBeTrue();
+		table.GetAttribute("title").ShouldBe("Calendar tooltip");
+	}
+
+	[Fact]
+	public void Button_WithEmptyToolTip_RendersEmptyTitleAttribute()
+	{
+		// Button.razor renders title="@ToolTip" directly, so empty string renders as title=""
+		var cut = Render(@<Button Text="Click Me" ToolTip="" />);
+
+		// Assert — empty ToolTip still produces the title attribute on Button (known behavior)
+		cut.Find("button").GetAttribute("title").ShouldBe("");
+	}
+
+	[Fact]
+	public void Button_WithNullToolTip_DoesNotRenderTitleAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me" />);
+
+		// Assert
+		cut.Find("button").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Button_ToolTipStillRendersCorrectlyAfterBaseClassChange()
+	{
+		// Verify Button's ToolTip renders as title after moving to base class
+		var cut = Render(@<Button Text="Submit" ToolTip="Submit form" OnClientClick="return true;" />);
+		cut.Find("button").GetAttribute("title").ShouldBe("Submit form");
+	}
+
+	[Fact]
+	public void Image_ToolTipStillRendersCorrectlyAfterBaseClassChange()
+	{
+		// Verify Image's ToolTip renders as title after moving to base class
+		var cut = Render(@<Image ImageUrl="/img/logo.png" AlternateText="Logo" ToolTip="Company logo" />);
+		cut.Find("img").GetAttribute("title").ShouldBe("Company logo");
+	}
+
+	[Fact]
+	public void Calendar_ToolTipStillRendersCorrectlyAfterBaseClassChange()
+	{
+		// Verify Calendar's ToolTip renders as title after moving to base class
+		var cut = Render(@<Calendar ToolTip="Select a date" />);
+		cut.Find("table").GetAttribute("title").ShouldBe("Select a date");
+	}
+
+}

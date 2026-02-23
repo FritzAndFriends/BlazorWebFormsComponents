@@ -1,11 +1,19 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
 	public partial class HyperLink : BaseStyledComponent
 	{
 		[Parameter]
-		public string NavigationUrl { get; set; }
+		public string NavigateUrl { get; set; }
+
+		[Obsolete("Use NavigateUrl instead")]
+		public string NavigationUrl
+		{
+			get => NavigateUrl;
+			set => NavigateUrl = value;
+		}
 
 		[Parameter]
 		public string Target { get; set; } = string.Empty;

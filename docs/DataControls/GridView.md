@@ -4,12 +4,23 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 
 - Readonly grid
 - Bound, Button, Hyperlink, and Template columns
+- **Paging** - `AllowPaging`, `PageSize`, `PageIndex`, `PageIndexChanged` event
+- **Sorting** - `AllowSorting`, `SortExpression`, `SortDirection`, `Sorting`/`Sorted` events
+- **Row Editing** - `EditIndex`, `RowEditing`, `RowUpdating`, `RowDeleting`, `RowCancelingEdit` events
 
 ### Blazor Notes
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
 - **Context attribute** - When using `<TemplateField>`, add `Context="Item"` to access the current row item as `@Item` instead of Blazor's default `@context`
 - **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **Paging** - When `AllowPaging="true"`, the GridView automatically paginates the data source using `Skip()`/`Take()`. A numeric pager is rendered below the grid. The `PageIndexChanged` event fires with a `PageChangedEventArgs` containing `NewPageIndex`, `OldPageIndex`, `TotalPages`, `StartRowIndex`, and `Cancel`.
+- **Sorting** - When `AllowSorting="true"`, column headers become clickable. You must handle the `Sorting` event to apply the sort to your data source. The `Sorted` event fires after the sort completes. Both events use `GridViewSortEventArgs` with `SortExpression`, `SortDirection`, and `Cancel` properties.
+- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). An auto-generated command column appears when at least one editing event callback is registered.
+
+!!! warning "Differences from Web Forms"
+    - `PageIndexChanging` is not implemented; use `PageIndexChanged` with the `Cancel` property instead.
+    - `PagerTemplate` is not yet supported; only the built-in numeric pager is available.
+    - Sorting does not automatically re-sort the data source; you must handle the `Sorting` event and apply the sort yourself.
 
 ## Web Forms Declarative Syntax
 
@@ -349,10 +360,13 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
 ``` html
 <GridView
     runat="server"
+    AllowPaging=bool
+    AllowSorting=bool
     AutoGenerateColumns=bool
     CssClass=string
     DataKeyNames=string
     DataSource=IEnumerable
+    EditIndex=int
     EmptyDataText=string
     Enabled=bool
     ID=string
@@ -366,7 +380,18 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
     OnPreRender=EventCallBack
     OnUnload=EventCallBack
     OnDisposed=EventCallBack
+    PageIndex=int
+    PageIndexChanged=EventCallBack<PageChangedEventArgs>
+    PageSize=int
+    RowCancelingEdit=EventCallBack<GridViewCancelEditEventArgs>
+    RowDeleting=EventCallBack<GridViewDeleteEventArgs>
+    RowEditing=EventCallBack<GridViewEditEventArgs>
+    RowUpdating=EventCallBack<GridViewUpdateEventArgs>
     SelectMethod=SelectHandler
+    SortDirection=SortDirection
+    SortExpression=string
+    Sorted=EventCallBack<GridViewSortEventArgs>
+    Sorting=EventCallBack<GridViewSortEventArgs>
     TabIndex=int
     Visible=bool
 >
@@ -407,4 +432,164 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
     </Columns>
 </GridView>
 
+```
+
+## Examples
+
+### Basic Paging
+
+```razor
+@* GridView with paging enabled, 5 items per page *@
+<GridView DataSource="@Products"
+          ItemType="Product"
+          AllowPaging="true"
+          PageSize="5"
+          PageIndexChanged="HandlePageChanged"
+          AutoGenerateColumns="true" />
+
+<p>Page @(currentPageIndex + 1)</p>
+
+@code {
+    private List<Product> Products = new();
+    private int currentPageIndex = 0;
+
+    private void HandlePageChanged(PageChangedEventArgs e)
+    {
+        currentPageIndex = e.NewPageIndex;
+    }
+}
+```
+
+### Sorting
+
+```razor
+@* GridView with sortable columns *@
+<GridView DataSource="@SortedProducts"
+          ItemType="Product"
+          AllowSorting="true"
+          SortExpression="@sortExpression"
+          SortDirection="@sortDirection"
+          Sorting="HandleSorting">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Name" />
+        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+    </Columns>
+</GridView>
+
+@code {
+    private List<Product> Products = new();
+    private string sortExpression = "";
+    private SortDirection sortDirection = SortDirection.Ascending;
+
+    private IEnumerable<Product> SortedProducts => sortExpression switch
+    {
+        "Name" => sortDirection == SortDirection.Ascending
+            ? Products.OrderBy(p => p.Name)
+            : Products.OrderByDescending(p => p.Name),
+        "Price" => sortDirection == SortDirection.Ascending
+            ? Products.OrderBy(p => p.Price)
+            : Products.OrderByDescending(p => p.Price),
+        _ => Products
+    };
+
+    private void HandleSorting(GridViewSortEventArgs e)
+    {
+        sortExpression = e.SortExpression;
+        sortDirection = e.SortDirection;
+    }
+}
+```
+
+### Row Editing
+
+```razor
+@* GridView with inline edit, update, delete, and cancel *@
+<GridView DataSource="@Products"
+          ItemType="Product"
+          EditIndex="@editIndex"
+          RowEditing="HandleEdit"
+          RowUpdating="HandleUpdate"
+          RowDeleting="HandleDelete"
+          RowCancelingEdit="HandleCancelEdit">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Name" />
+        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+    </Columns>
+</GridView>
+
+@code {
+    private List<Product> Products = new();
+    private int editIndex = -1;
+
+    private void HandleEdit(GridViewEditEventArgs e)
+    {
+        editIndex = e.NewEditIndex;
+    }
+
+    private void HandleUpdate(GridViewUpdateEventArgs e)
+    {
+        // Apply changes to Products[e.RowIndex]
+        editIndex = -1;
+    }
+
+    private void HandleDelete(GridViewDeleteEventArgs e)
+    {
+        Products.RemoveAt(e.RowIndex);
+        editIndex = -1;
+    }
+
+    private void HandleCancelEdit(GridViewCancelEditEventArgs e)
+    {
+        editIndex = -1;
+    }
+}
+```
+
+### Paging with Sorting
+
+```razor
+@* Combining paging and sorting *@
+<GridView DataSource="@SortedProducts"
+          ItemType="Product"
+          AllowPaging="true"
+          PageSize="10"
+          PageIndexChanged="HandlePageChanged"
+          AllowSorting="true"
+          SortExpression="@sortExpression"
+          SortDirection="@sortDirection"
+          Sorting="HandleSorting">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Name" />
+        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+    </Columns>
+</GridView>
+
+@code {
+    private List<Product> Products = new();
+    private int currentPageIndex = 0;
+    private string sortExpression = "";
+    private SortDirection sortDirection = SortDirection.Ascending;
+
+    private IEnumerable<Product> SortedProducts => sortExpression switch
+    {
+        "Name" => sortDirection == SortDirection.Ascending
+            ? Products.OrderBy(p => p.Name)
+            : Products.OrderByDescending(p => p.Name),
+        "Price" => sortDirection == SortDirection.Ascending
+            ? Products.OrderBy(p => p.Price)
+            : Products.OrderByDescending(p => p.Price),
+        _ => Products
+    };
+
+    private void HandlePageChanged(PageChangedEventArgs e)
+    {
+        currentPageIndex = e.NewPageIndex;
+    }
+
+    private void HandleSorting(GridViewSortEventArgs e)
+    {
+        sortExpression = e.SortExpression;
+        sortDirection = e.SortDirection;
+    }
+}
 ```

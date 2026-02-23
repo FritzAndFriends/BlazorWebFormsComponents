@@ -6,6 +6,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.JSInterop;
 
 namespace BlazorWebFormsComponents.Validations
 {
@@ -25,8 +26,18 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public string ValidationGroup { get; set; }
 		[Parameter] public HorizontalAlign HorizontalAlign { get; set; }
 		[Parameter] public VerticalAlign VerticalAlign { get; set; }
+		[Parameter] public ValidatorDisplay Display { get; set; } = ValidatorDisplay.Static;
+		[Parameter] public bool SetFocusOnError { get; set; }
 
 		public abstract bool Validate(string value);
+
+		protected string DisplayStyle => Display switch
+		{
+			ValidatorDisplay.None => "display:none;",
+			ValidatorDisplay.Dynamic when IsValid => "display:none;",
+			ValidatorDisplay.Static when IsValid => "visibility:hidden;",
+			_ => ""
+		};
 
 		protected StyleBuilder CalculatedStyle => this.ToStyle();
 
@@ -100,7 +111,12 @@ namespace BlazorWebFormsComponents.Validations
 			{
 				IsValid = false;
 				// Text is for validator, ErrorMessage is for validation summary
-				_messageStore.Add(fieldIdentifier, Text + "," + ErrorMessage);
+				_messageStore.Add(fieldIdentifier, Text + "," + ErrorMessage + "\x1F" + (ValidationGroup ?? ""));
+
+				if (SetFocusOnError)
+				{
+					_ = JsRuntime.InvokeVoidAsync("bwfc.Validation.SetFocus", fieldIdentifier.FieldName);
+				}
 			}
 
 			CurrentEditContext.NotifyValidationStateChanged();

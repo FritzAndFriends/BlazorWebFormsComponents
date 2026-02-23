@@ -11,32 +11,31 @@
 
 | Metric | Properties | Events | **Total** |
 |--------|-----------|--------|-----------|
-| ✅ **Matching** | 931 | 341 | **1,272** |
-| ⚠️ **Needs Work** | 50 | 1 | **51** |
-| 🔴 **Missing** | 505 | 92 | **597** |
-| ➖ **N/A (server-only)** | — | — | **264** |
-| **Total Applicable** | **1,486** | **434** | **1,920** |
+| ✅ **Matching** | 967 | 347 | **1,314** |
+| ⚠️ **Needs Work** | 53 | 1 | **54** |
+| 🔴 **Missing** | 465 | 86 | **551** |
+| ➖ **N/A (server-only)** | — | — | **266** |
+| **Total Applicable** | **1,485** | **434** | **1,919** |
 
-### Overall Health: **66.3%**
+### Overall Health: **68.5%**
 
-Of 1,920 applicable features (properties + events), 1,272 fully match Web Forms behavior. An additional 51 exist but need API corrections. 597 features are missing entirely.
+Of 1,919 applicable features (properties + events), 1,314 fully match Web Forms behavior. An additional 54 exist but need API corrections. 551 features are missing entirely.
 
-**6 controls are 100% feature-complete.** 3 controls are not started (Substitution, Xml, PasswordRecovery on current branch). GridView is the weakest implemented control at 20.7% coverage.
+**6 controls are 100% feature-complete.** 2 controls are not started (Substitution, Xml). GridView is the weakest implemented control at 20.7% coverage.
 
 ---
 
 ## 2. Critical Findings
 
-### 🚨 UNMERGED COMPONENTS — DetailsView & PasswordRecovery
+### 🚨 UNMERGED COMPONENT — DetailsView
 
-**Branch `sprint3/detailsview-passwordrecovery` was NEVER merged to `dev`.**
+**PasswordRecovery has been merged to `dev`** and the re-audit shows **73.7% health** (42 matching features out of 57 applicable). DetailsView remains on the unmerged `sprint3/detailsview-passwordrecovery` branch.
 
-- `status.md` incorrectly lists both as ✅ Complete
+- `status.md` incorrectly lists DetailsView as ✅ Complete
 - **DetailsView** exists on the branch with 27 matching properties, 16 matching events, and strong CRUD support — but is inaccessible from the current working branch
-- **PasswordRecovery** exists on the branch (29 bUnit tests referenced in history) but the component files are NOT found on the current branch — the audit shows **0 matching features** from the current branch perspective
-- This means the actual shipped component count is **48/53 (91%)**, not 50/53 (94%)
+- This means the actual shipped component count is **49/53 (92%)**, not 50/53 (94%)
 
-**Action Required:** Merge `sprint3/detailsview-passwordrecovery` into `dev` immediately.
+**Action Required:** Merge DetailsView from `sprint3/detailsview-passwordrecovery` into `dev`.
 
 ### 🔴 Base Class Inheritance Gap — DataBoundComponent\<T\>
 
@@ -174,10 +173,10 @@ Calendar has 9 style sub-properties (DayStyle, TitleStyle, etc.) implemented as 
 | ChangePassword | 49 | 2 | 16 | 73.1% |
 | Login | 40 | 0 | 16 | 71.4% |
 | CreateUserWizard | 64 | 3 | 27 | 68.1% |
-| PasswordRecovery ⚠️ | 0 | 0 | 58 | 0% |
-| **TOTALS** | **176/38** | **5/0** | **110/13** | **62.6%** |
+| PasswordRecovery | 42 | 3 | 12 | 73.7% |
+| **TOTALS** | **212/44** | **8/0** | **70/7** | **75.1%** |
 
-⚠️ PasswordRecovery exists only on unmerged branch `sprint3/detailsview-passwordrecovery`
+⚠️ DetailsView exists only on unmerged branch `sprint3/detailsview-passwordrecovery`
 
 ### Not Started / Deferred (2 controls)
 
@@ -228,7 +227,7 @@ These 6 controls match 100% of applicable Web Forms features:
 
 | # | Fix | Impact | Notes |
 |---|-----|--------|-------|
-| 8 | **Merge `sprint3/detailsview-passwordrecovery` to dev** | 2 controls restored | Unblocks DetailsView + PasswordRecovery |
+| 8 | **Merge DetailsView from `sprint3/detailsview-passwordrecovery` to dev** | 1 control restored | Unblocks DetailsView (PasswordRecovery already merged) |
 | 9 | **GridView: Add paging** (AllowPaging, PageSize, PageIndex, PagerSettings) | Most-used data control feature | GridView is ~80% of data grid usage in Web Forms apps |
 | 10 | **GridView: Add sorting** (AllowSorting, SortDirection, SortExpression, Sorted/Sorting events) | Critical for data display | |
 | 11 | **GridView: Add row editing events** (RowEditing, RowUpdating, RowDeleting, RowCancelingEdit) | Inline editing support | |
@@ -272,22 +271,20 @@ These 6 controls match 100% of applicable Web Forms features:
 
 ## 6. Unmerged Branch Alert
 
-> ### ⚠️ CRITICAL: Branch `sprint3/detailsview-passwordrecovery` Must Be Merged
+> ### ⚠️ CRITICAL: DetailsView Must Be Merged from `sprint3/detailsview-passwordrecovery`
 >
-> **Two fully-reviewed, gate-approved components exist ONLY on this branch:**
+> **PasswordRecovery has been merged** and re-audited at **73.7% health**. One component remains on the unmerged branch:
 >
 > | Component | Properties | Events | Tests | Gate Status |
 > |-----------|-----------|--------|-------|-------------|
 > | DetailsView | 27 match, 23 missing | 16 match, 2 missing | Referenced in Sprint 3 | ✅ APPROVED by Forge |
-> | PasswordRecovery | 0 on current branch | 0 on current branch | 29 bUnit tests referenced | ✅ APPROVED by Forge |
 >
 > **Impact of NOT merging:**
-> - `status.md` claims 50/53 (94%) but actual shipped count is 48/53 (91%)
-> - PasswordRecovery audit shows 0% because the files don't exist on the current branch
+> - `status.md` claims 50/53 (94%) but actual shipped count is 49/53 (92%)
 > - DetailsView features (strong CRUD events, auto-generated rows, edit mode) are inaccessible
-> - Any work on `milestone4/chart-component` branch diverges further from these components
+> - Any work on `milestone4/chart-component` branch diverges further from this component
 >
-> **Recommended action:** Merge to `dev` immediately, then rebase current milestone branch.
+> **Recommended action:** Merge DetailsView to `dev`, then rebase current milestone branch.
 
 ---
 
@@ -329,22 +326,22 @@ These 6 controls match 100% of applicable Web Forms features:
 | 32 | RequiredFieldValidator | Validation | 75.9% | Adequate |
 | 33 | CompareValidator | Validation | 75.0% | Adequate |
 | 34 | Calendar | Data | 74.5% | Adequate |
-| 35 | ChangePassword | Login | 73.1% | Adequate |
-| 36 | DataList | Data | 73.0% | Adequate |
-| 37 | BulletedList | Data | 71.4% | Adequate |
-| 38 | Login | Login | 71.4% | Adequate |
-| 39 | ValidationSummary | Validation | 71.4% | Adequate |
-| 40 | CreateUserWizard | Login | 68.1% | Needs Work |
-| 41 | DetailsView | Data | 63.2% | ⚠️ Unmerged branch |
-| 42 | TreeView | Navigation | 57.1% | Needs Work |
-| 43 | Image | Editor | 56.0% | Needs Work |
-| 44 | Label | Editor | 54.2% | Needs Work |
-| 45 | DataGrid | Data | 44.6% | Needs Work |
-| 46 | Menu | Navigation | 37.7% | Significant gaps |
-| 47 | FormView | Data | 34.9% | Significant gaps |
-| 48 | ListView | Data | 34.3% | Significant gaps |
-| 49 | Chart | Data | 32.3% | Architectural deviation |
-| 50 | GridView | Data | 20.7% | 🔴 Critical gaps |
-| 51 | PasswordRecovery | Login | 0% | ⚠️ Unmerged branch |
+| 35 | PasswordRecovery | Login | 73.7% | Adequate |
+| 36 | ChangePassword | Login | 73.1% | Adequate |
+| 37 | DataList | Data | 73.0% | Adequate |
+| 38 | BulletedList | Data | 71.4% | Adequate |
+| 39 | Login | Login | 71.4% | Adequate |
+| 40 | ValidationSummary | Validation | 71.4% | Adequate |
+| 41 | CreateUserWizard | Login | 68.1% | Needs Work |
+| 42 | DetailsView | Data | 63.2% | ⚠️ Unmerged branch |
+| 43 | TreeView | Navigation | 57.1% | Needs Work |
+| 44 | Image | Editor | 56.0% | Needs Work |
+| 45 | Label | Editor | 54.2% | Needs Work |
+| 46 | DataGrid | Data | 44.6% | Needs Work |
+| 47 | Menu | Navigation | 37.7% | Significant gaps |
+| 48 | FormView | Data | 34.9% | Significant gaps |
+| 49 | ListView | Data | 34.3% | Significant gaps |
+| 50 | Chart | Data | 32.3% | Architectural deviation |
+| 51 | GridView | Data | 20.7% | 🔴 Critical gaps |
 | 52 | Substitution | Deferred | 0% | Intentionally deferred |
 | 53 | Xml | Deferred | 0% | Intentionally deferred |

@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class AdRotator : DataBoundComponent<Advertisment>, IStyle
+	public partial class AdRotator : DataBoundComponent<Advertisment>
 	{
 		private static readonly string DefaultAlternateTextField = "AlternateText";
 		private static readonly string DefaultImageUrlField = "ImageUrl";
@@ -137,34 +137,5 @@ namespace BlazorWebFormsComponents
 				});
 		}
 
-		// IStyle properties
-		[Parameter]
-		public WebColor BackColor { get; set; }
-
-		[Parameter]
-		public WebColor BorderColor { get; set; }
-
-		[Parameter]
-		public BorderStyle BorderStyle { get; set; }
-
-		[Parameter]
-		public Unit BorderWidth { get; set; }
-
-		[Parameter]
-		public string CssClass { get; set; }
-
-		[Parameter]
-		public FontInfo Font { get; set; } = new FontInfo();
-
-		[Parameter]
-		public WebColor ForeColor { get; set; }
-
-		[Parameter]
-		public Unit Height { get; set; }
-
-		[Parameter]
-		public Unit Width { get; set; }
-
-		public string Style => this.ToStyle().Build().NullIfEmpty();
 	}
 }

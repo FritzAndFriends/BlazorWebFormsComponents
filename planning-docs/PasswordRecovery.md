@@ -2,123 +2,119 @@
 
 **ASP.NET Docs:** https://learn.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.passwordrecovery?view=netframework-4.8
 **Blazor Component:** `BlazorWebFormsComponents.LoginControls.PasswordRecovery`
-**Implementation Status:** 🔴 Not Found in Source
-
-> **Note:** Despite history.md referencing PasswordRecovery tests in Sprint 3 (29 bUnit tests), no `PasswordRecovery.razor` or `PasswordRecovery.razor.cs` file exists in `src/BlazorWebFormsComponents/LoginControls/`. The component may exist on a different branch or may have been removed. This audit documents the expected Web Forms API for future implementation reference.
+**Implementation Status:** ✅ Implemented
 
 ## Properties
 
-### PasswordRecovery-Specific Properties (Web Forms API)
+### PasswordRecovery-Specific Properties
 
 | Property | Web Forms Type | Blazor Status | Notes |
 |----------|---------------|---------------|-------|
-| AnswerLabelText | `string` | 🔴 Missing | Default: "Answer:" |
-| AnswerRequiredErrorMessage | `string` | 🔴 Missing | |
-| BorderPadding | `int` | 🔴 Missing | Default: 1 |
-| GeneralFailureText | `string` | 🔴 Missing | Default: "Your attempt to retrieve your password was not successful." |
-| HelpPageIconUrl | `string` | 🔴 Missing | |
-| HelpPageText | `string` | 🔴 Missing | |
-| HelpPageUrl | `string` | 🔴 Missing | |
-| MailDefinition | `MailDefinition` | 🔴 Missing | Email config for sending recovered password |
-| MembershipProvider | `string` | 🔴 Missing | |
-| QuestionFailureText | `string` | 🔴 Missing | |
-| QuestionInstructionText | `string` | 🔴 Missing | |
-| QuestionLabelText | `string` | 🔴 Missing | |
-| QuestionTitleText | `string` | 🔴 Missing | |
-| RenderOuterTable | `bool` | 🔴 Missing | |
-| SuccessPageUrl | `string` | 🔴 Missing | |
-| SuccessText | `string` | 🔴 Missing | |
-| SubmitButtonImageUrl | `string` | 🔴 Missing | |
-| SubmitButtonText | `string` | 🔴 Missing | Default: "Submit" |
-| SubmitButtonType | `ButtonType` | 🔴 Missing | |
-| UserName | `string` | 🔴 Missing | |
-| UserNameFailureText | `string` | 🔴 Missing | |
-| UserNameInstructionText | `string` | 🔴 Missing | |
-| UserNameLabelText | `string` | 🔴 Missing | Default: "User Name:" |
-| UserNameRequiredErrorMessage | `string` | 🔴 Missing | |
-| UserNameTitleText | `string` | 🔴 Missing | Default: "Forgot Your Password?" |
+| AnswerLabelText | `string` | 🔴 Missing | Web Forms default: "Answer:" — not implemented; `QuestionLabelText` serves a similar role |
+| AnswerRequiredErrorMessage | `string` | ✅ Match | Default: "Answer is required." |
+| BorderPadding | `int` | ✅ Match | Default: 1 |
+| GeneralFailureText | `string` | ✅ Match | Default: "Your attempt to retrieve your password was not successful. Please try again." |
+| HelpPageIconUrl | `string` | ✅ Match | |
+| HelpPageText | `string` | ✅ Match | |
+| HelpPageUrl | `string` | ✅ Match | |
+| MailDefinition | `MailDefinition` | N/A | Email sending is a server concern; string placeholder parameter exists |
+| MembershipProvider | `string` | N/A | Marked `[Obsolete]` — server-side membership provider |
+| QuestionFailureText | `string` | ✅ Match | Default: "Your answer could not be verified. Please try again." |
+| QuestionInstructionText | `string` | ✅ Match | Default: "Answer the following question to receive your password." |
+| QuestionLabelText | `string` | ✅ Match | Default: "Answer:" |
+| QuestionTitleText | `string` | ✅ Match | Default: "Identity Confirmation" |
+| RenderOuterTable | `bool` | ⚠️ Needs Work | Parameter exists (default: true) but not wired to rendering logic |
+| SuccessPageUrl | `string` | ✅ Match | Navigates via NavigationManager |
+| SuccessText | `string` | ✅ Match | Default: "Your password has been sent to you." |
+| SubmitButtonImageUrl | `string` | ⚠️ Needs Work | Parameter exists but not used in default rendering |
+| SubmitButtonText | `string` | ✅ Match | Default: "Submit" |
+| SubmitButtonType | `ButtonType` | ⚠️ Needs Work | Parameter exists but default rendering always uses `<input type="submit">` |
+| UserName | `string` | ✅ Match | Public property backed by internal Model |
+| UserNameFailureText | `string` | ✅ Match | Default: "Your attempt to retrieve your password was not successful. Please try again." |
+| UserNameInstructionText | `string` | ✅ Match | Default: "Enter your User Name to receive your password." |
+| UserNameLabelText | `string` | ✅ Match | Default: "User Name:" |
+| UserNameRequiredErrorMessage | `string` | ✅ Match | Default: "User Name is required." |
+| UserNameTitleText | `string` | ✅ Match | Default: "Forgot Your Password?" |
 
-### Template Properties (Web Forms API)
-
-| Property | Web Forms Type | Blazor Status | Notes |
-|----------|---------------|---------------|-------|
-| QuestionTemplate | `ITemplate` | 🔴 Missing | Step 2: Security question template |
-| SuccessTemplate | `ITemplate` | 🔴 Missing | Step 3: Success message template |
-| UserNameTemplate | `ITemplate` | 🔴 Missing | Step 1: Username entry template |
-
-### Style Properties (Web Forms API)
+### Template Properties
 
 | Property | Web Forms Type | Blazor Status | Notes |
 |----------|---------------|---------------|-------|
-| FailureTextStyle | `TableItemStyle` | 🔴 Missing | |
-| HyperLinkStyle | `Style` | 🔴 Missing | |
-| InstructionTextStyle | `TableItemStyle` | 🔴 Missing | |
-| LabelStyle | `TableItemStyle` | 🔴 Missing | |
-| SubmitButtonStyle | `Style` | 🔴 Missing | |
-| SuccessTextStyle | `TableItemStyle` | 🔴 Missing | |
-| TextBoxStyle | `Style` | 🔴 Missing | |
-| TitleTextStyle | `TableItemStyle` | 🔴 Missing | |
-| ValidatorTextStyle | `Style` | 🔴 Missing | |
+| QuestionTemplate | `ITemplate` | ✅ Match | `RenderFragment` — Step 2: Security question template |
+| SuccessTemplate | `ITemplate` | ✅ Match | `RenderFragment` — Step 3: Success message template |
+| UserNameTemplate | `ITemplate` | ✅ Match | `RenderFragment` — Step 1: Username entry template |
+
+### Style Properties (via CascadingParameters)
+
+| Property | Web Forms Type | Blazor Status | Notes |
+|----------|---------------|---------------|-------|
+| FailureTextStyle | `TableItemStyle` | ✅ Match | Via CascadingParameter |
+| HyperLinkStyle | `Style` | ✅ Match | Via CascadingParameter (as TableItemStyle) |
+| InstructionTextStyle | `TableItemStyle` | ✅ Match | Via CascadingParameter |
+| LabelStyle | `TableItemStyle` | ✅ Match | Via CascadingParameter |
+| SubmitButtonStyle | `Style` | ✅ Match | Via CascadingParameter (mapped as "LoginButtonStyle") |
+| SuccessTextStyle | `TableItemStyle` | ✅ Match | Via CascadingParameter |
+| TextBoxStyle | `Style` | ✅ Match | Via CascadingParameter |
+| TitleTextStyle | `TableItemStyle` | ✅ Match | Via CascadingParameter |
+| ValidatorTextStyle | `Style` | ✅ Match | Via CascadingParameter |
 
 ### Inherited from WebControl
 
 | Property | Web Forms Type | Blazor Status | Notes |
 |----------|---------------|---------------|-------|
-| AccessKey | `string` | 🔴 Missing | |
-| BackColor | `Color` | 🔴 Missing | |
-| BorderColor | `Color` | 🔴 Missing | |
-| BorderStyle | `BorderStyle` | 🔴 Missing | |
-| BorderWidth | `Unit` | 🔴 Missing | |
-| CssClass | `string` | 🔴 Missing | |
-| Enabled | `bool` | 🔴 Missing | |
-| Font | `FontInfo` | 🔴 Missing | |
-| ForeColor | `Color` | 🔴 Missing | |
-| Height | `Unit` | 🔴 Missing | |
-| Style | `CssStyleCollection` | 🔴 Missing | |
-| TabIndex | `short` | 🔴 Missing | |
-| ToolTip | `string` | 🔴 Missing | |
-| Width | `Unit` | 🔴 Missing | |
+| AccessKey | `string` | ✅ Match | Via `BaseWebFormsComponent` |
+| BackColor | `Color` | 🔴 Missing | Inherits `BaseWebFormsComponent`, not `BaseStyledComponent` |
+| BorderColor | `Color` | 🔴 Missing | Same |
+| BorderStyle | `BorderStyle` | 🔴 Missing | Same |
+| BorderWidth | `Unit` | 🔴 Missing | Same |
+| CssClass | `string` | 🔴 Missing | Same |
+| Enabled | `bool` | ✅ Match | Via `BaseWebFormsComponent` |
+| Font | `FontInfo` | 🔴 Missing | Same |
+| ForeColor | `Color` | 🔴 Missing | Same |
+| Height | `Unit` | 🔴 Missing | Same |
+| Style | `CssStyleCollection` | 🔴 Missing | Same |
+| TabIndex | `short` | ✅ Match | Via `BaseWebFormsComponent` |
+| ToolTip | `string` | 🔴 Missing | Same |
+| Width | `Unit` | 🔴 Missing | Same |
 
 ### Inherited from Control
 
 | Property | Web Forms Type | Blazor Status | Notes |
 |----------|---------------|---------------|-------|
-| ID | `string` | 🔴 Missing | |
-| Visible | `bool` | 🔴 Missing | |
+| ID | `string` | ✅ Match | Via `BaseWebFormsComponent.ID` |
+| Visible | `bool` | ✅ Match | Via `BaseWebFormsComponent.Visible` |
 
 ## Events
 
 | Event | Web Forms Signature | Blazor Status | Notes |
 |-------|-------------------|---------------|-------|
-| AnswerLookupError | `EventHandler` | 🔴 Missing | Incorrect security answer |
-| SendingMail | `MailMessageEventHandler` | 🔴 Missing | Email sending |
-| SendMailError | `SendMailErrorEventHandler` | 🔴 Missing | Email error |
-| UserLookupError | `EventHandler` | 🔴 Missing | User not found |
-| VerifyingAnswer | `LoginCancelEventHandler` | 🔴 Missing | Before verifying answer |
-| VerifyingUser | `LoginCancelEventHandler` | 🔴 Missing | Before verifying user |
+| AnswerLookupError | `EventHandler` | ✅ Match | `EventCallback<EventArgs> OnAnswerLookupError` |
+| SendingMail | `MailMessageEventHandler` | ✅ Match | `EventCallback<MailMessageEventArgs> OnSendingMail` |
+| SendMailError | `SendMailErrorEventHandler` | ✅ Match | `EventCallback<SendMailErrorEventArgs> OnSendMailError` |
+| UserLookupError | `EventHandler` | ✅ Match | `EventCallback<EventArgs> OnUserLookupError` |
+| VerifyingAnswer | `LoginCancelEventHandler` | ✅ Match | `EventCallback<LoginCancelEventArgs> OnVerifyingAnswer` |
+| VerifyingUser | `LoginCancelEventHandler` | ✅ Match | `EventCallback<LoginCancelEventArgs> OnVerifyingUser` |
 
 ## Methods
 
 | Method | Web Forms Signature | Blazor Status | Notes |
 |--------|-------------------|---------------|-------|
-| DataBind() | `void DataBind()` | 🔴 Missing | |
-| Focus() | `void Focus()` | 🔴 Missing | |
-| FindControl() | `Control FindControl(string)` | 🔴 Missing | |
+| DataBind() | `void DataBind()` | N/A | No-op stub |
+| Focus() | `void Focus()` | 🔴 Missing | Server-initiated focus requires JS interop |
+| FindControl() | `Control FindControl(string)` | ✅ Match | Via `BaseWebFormsComponent` |
 
 ## HTML Output Comparison
 
 Web Forms `PasswordRecovery` renders a 3-step wizard:
-1. **Step 1 (UserName):** Username input with submit button
-2. **Step 2 (Question):** Security question with answer input
+1. **Step 1 (UserName):** Username input with submit button inside nested `<table>` layout
+2. **Step 2 (Question):** Security question display with answer input
 3. **Step 3 (Success):** Success message
 
-Each step renders in a `<table>` layout. The Blazor component does not exist in the source tree, so no output comparison is possible.
+The Blazor component produces matching table structures with `cellspacing="0"`, `cellpadding`, `border-collapse:collapse`. Field IDs follow the Web Forms pattern (`{ID}_UserName`, `{ID}_Answer`, `{ID}_SubmitButton`, `{ID}_HelpLink`). Steps 1 and 2 wrap content in an `EditForm` for Blazor validation. Help links and icons are conditionally rendered matching the Web Forms pattern. Style properties are applied via CascadingParameters and the `HandleUnknownAttributes` pattern used by other login controls.
 
 ## Summary
 
-- **Matching:** 0 properties, 0 events
-- **Needs Work:** 0
-- **Missing:** ALL — 52 properties, 6 events, 3 methods (component not found in source)
-- **N/A (server-only):** N/A
-
-> ⚠️ **Action Required:** Locate the PasswordRecovery component. History.md references Sprint 3 delivery with 29 tests. Check `dev` branch or other feature branches.
+- **Matching:** 36 properties, 6 events
+- **Needs Work:** 3 properties (RenderOuterTable, SubmitButtonImageUrl, SubmitButtonType)
+- **Missing:** 12 properties (AnswerLabelText + 11 WebControl style properties)
+- **N/A (server-only):** 2 properties (MailDefinition, MembershipProvider)

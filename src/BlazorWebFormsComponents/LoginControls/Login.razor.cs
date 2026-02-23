@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class Login : BaseWebFormsComponent
+	public partial class Login : BaseStyledComponent
 	{
 		#region Obsolete Attributes / Properties
 
@@ -184,6 +184,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 			}
 
+			this.SetFontsFromAttributes(AdditionalAttributes);
 			base.HandleUnknownAttributes();
 		}
 

@@ -1,6 +1,18 @@
 @inherits BaseStyledComponent
 @using BlazorWebFormsComponents.Enums
 
+<CascadingValue Name="ParentCalendar" Value="this" IsFixed="true">
+	@DayStyleContent
+	@TitleStyleContent
+	@DayHeaderStyleContent
+	@TodayDayStyleContent
+	@SelectedDayStyleContent
+	@OtherMonthDayStyleContent
+	@WeekendDayStyleContent
+	@NextPrevStyleContent
+	@SelectorStyleContent
+</CascadingValue>
+
 @if (Visible)
 {
 	<table id="@ClientID"
@@ -19,22 +31,22 @@
 			<tr>
 				@if (ShowNextPrevMonth && SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
-					<td class="@SelectorStyleCss" style="width:15%;">
-						<a @onclick="HandleMonthClick" @onclick:preventDefault="true" style="@NextPrevStyleCss">@SelectMonthText</a>
+					<td class="@GetEffectiveCss(SelectorStyle, SelectorStyleCss)" style="@GetEffectiveStyle(SelectorStyle);width:15%;">
+						<a @onclick="HandleMonthClick" @onclick:preventDefault="true" class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">@SelectMonthText</a>
 					</td>
 				}
 				@if (ShowNextPrevMonth)
 				{
-					<td class="@NextPrevStyleCss">
+					<td class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">
 						<a @onclick="HandlePreviousMonth" @onclick:preventDefault="true">@((MarkupString)PrevMonthText)</a>
 					</td>
 				}
-				<td colspan="@(ShowNextPrevMonth ? 5 : 7)" class="@TitleStyleCss" align="center">
+				<td colspan="@(ShowNextPrevMonth ? 5 : 7)" class="@GetEffectiveCss(TitleStyle, TitleStyleCss)" style="@GetEffectiveStyle(TitleStyle)" align="center">
 					@GetTitleText()
 				</td>
 				@if (ShowNextPrevMonth)
 				{
-					<td class="@NextPrevStyleCss">
+					<td class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">
 						<a @onclick="HandleNextMonth" @onclick:preventDefault="true">@((MarkupString)NextMonthText)</a>
 					</td>
 				}
@@ -45,11 +57,11 @@
 			<tr>
 				@if (SelectionMode == CalendarSelectionMode.DayWeek || SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
-					<th class="@SelectorStyleCss"></th>
+					<th class="@GetEffectiveCss(SelectorStyle, SelectorStyleCss)" style="@GetEffectiveStyle(SelectorStyle)"></th>
 				}
 				@foreach (var day in GetDayHeaders())
 				{
-					<th class="@DayHeaderStyleCss" abbr="@GetDayName(day)"@(UseAccessibleHeader ? $" scope=\"col\"" : "")>
+					<th class="@GetEffectiveCss(DayHeaderStyle, DayHeaderStyleCss)" style="@GetEffectiveStyle(DayHeaderStyle)" abbr="@GetDayName(day)"@(UseAccessibleHeader ? $" scope=\"col\"" : "")>
 						@GetDayName(day)
 					</th>
 				}
@@ -60,14 +72,14 @@
 			<tr>
 				@if (SelectionMode == CalendarSelectionMode.DayWeek || SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
-					<td class="@SelectorStyleCss" align="center">
+					<td class="@GetEffectiveCss(SelectorStyle, SelectorStyleCss)" style="@GetEffectiveStyle(SelectorStyle)" align="center">
 						<a @onclick="() => HandleWeekClick(week)" @onclick:preventDefault="true">@((MarkupString)SelectWeekText)</a>
 					</td>
 				}
 				@foreach (var date in week)
 				{
 					var dayArgs = CreateDayRenderArgs(date);
-					<td class="@GetDayCellCss(date)" align="center">
+					<td class="@GetDayCellCss(date)" style="@GetDayCellStyle(date)" align="center">
 						@if (dayArgs.IsSelectable)
 						{
 							<a @onclick="() => HandleDayClick(date)" @onclick:preventDefault="true">

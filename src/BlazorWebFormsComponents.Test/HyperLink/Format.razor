@@ -2,10 +2,10 @@
 @code {
 
 	[Fact]
-	public void HyperLink_WithTextAndNavigationUrl_RendersCorrectHtml()
+	public void HyperLink_WithTextAndNavigateUrl_RendersCorrectHtml()
 	{
 		// Arrange & Act
-		var cut = Render(@<HyperLink Text="Go to Bing!!" NavigationUrl="https://www.bing.com" />);
+		var cut = Render(@<HyperLink Text="Go to Bing!!" NavigateUrl="https://www.bing.com" />);
 
 		// Assert
 		cut.MarkupMatches(@<a href="https://www.bing.com" target="">Go to Bing!!</a>);

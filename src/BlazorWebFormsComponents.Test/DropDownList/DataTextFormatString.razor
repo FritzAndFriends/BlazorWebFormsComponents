@@ -1,0 +1,104 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	public class Product
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+	}
+
+	[Fact]
+	public void DropDownList_DataTextFormatString_AppliesFormatToDataBoundItems()
+	{
+		// Arrange
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Widget" },
+			new Product { Id = "2", Name = "Gadget" }
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id"
+						  DataTextFormatString="Item: {0}" />
+		);
+
+		// Assert
+		var options = cut.FindAll("option");
+		options[0].TextContent.Trim().ShouldBe("Item: Widget");
+		options[1].TextContent.Trim().ShouldBe("Item: Gadget");
+	}
+
+	[Fact]
+	public void DropDownList_DataTextFormatString_EmptyString_NoFormatting()
+	{
+		// Arrange
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Widget" }
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id"
+						  DataTextFormatString="" />
+		);
+
+		// Assert
+		var option = cut.Find("option");
+		option.TextContent.Trim().ShouldBe("Widget");
+	}
+
+	[Fact]
+	public void DropDownList_DataTextFormatString_NullString_NoFormatting()
+	{
+		// Arrange
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Widget" }
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id" />
+		);
+
+		// Assert — no DataTextFormatString set, so raw text
+		var option = cut.Find("option");
+		option.TextContent.Trim().ShouldBe("Widget");
+	}
+
+	[Fact]
+	public void DropDownList_DataTextFormatString_AppliesFormatToStaticItems()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Apple", "1"),
+			new ListItem("Banana", "2")
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="object"
+						  StaticItems="items"
+						  DataTextFormatString="Fruit: {0}" />
+		);
+
+		// Assert
+		var options = cut.FindAll("option");
+		options[0].TextContent.Trim().ShouldBe("Fruit: Apple");
+		options[1].TextContent.Trim().ShouldBe("Fruit: Banana");
+	}
+
+}

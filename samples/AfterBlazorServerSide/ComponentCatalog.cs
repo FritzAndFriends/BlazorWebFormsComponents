@@ -33,6 +33,8 @@ public static class ComponentCatalog
         new("Image", "Editor", "/ControlSamples/Image", "Displays an image with alt text support",
             Keywords: new[] { "img", "picture" }),
         new("ImageMap", "Editor", "/ControlSamples/ImageMap", "Image with clickable hotspot regions"),
+        new("Label", "Editor", "/ControlSamples/Label", "Renders text as span or accessible label element",
+            Keywords: new[] { "text", "label", "accessibility" }),
         new("LinkButton", "Editor", "/ControlSamples/LinkButton", "Button rendered as a hyperlink",
             new[] { "JavaScript" },
             new[] { "link", "postback" }),
