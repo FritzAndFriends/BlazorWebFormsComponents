@@ -149,6 +149,8 @@ public static class ChartConfigBuilder
 			}
 
 			// Color from series or palette
+			var isPieOrDoughnut = s.ChartType == SeriesChartType.Pie || s.ChartType == SeriesChartType.Doughnut;
+
 			if (s.Color != null && !s.Color.IsEmpty)
 			{
 				dataset["backgroundColor"] = ToRgbaString(s.Color);
@@ -156,9 +158,21 @@ public static class ChartConfigBuilder
 			}
 			else if (paletteColors.Length > 0)
 			{
-				var color = paletteColors[i % paletteColors.Length];
-				dataset["backgroundColor"] = color;
-				dataset["borderColor"] = color;
+				if (isPieOrDoughnut && s.Points != null)
+				{
+					// Pie/Doughnut need per-segment colors (one per data point)
+					var segmentColors = s.Points
+						.Select((_, idx) => paletteColors[idx % paletteColors.Length])
+						.ToList();
+					dataset["backgroundColor"] = segmentColors;
+					dataset["borderColor"] = segmentColors.Select(_ => "rgba(255,255,255,1)").ToList();
+				}
+				else
+				{
+					var color = paletteColors[i % paletteColors.Length];
+					dataset["backgroundColor"] = color;
+					dataset["borderColor"] = color;
+				}
 			}
 
 			if (s.BorderWidth > 0)

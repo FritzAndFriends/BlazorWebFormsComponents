@@ -123,6 +123,74 @@ Original Microsoft documentation: [System.Web.UI.DataVisualization.Charting.Char
 
 `None`, `BrightPastel` (default), `Berry`, `Chocolate`, `EarthTones`, `Excel`, `Fire`, `Grayscale`, `Light`, `Pastel`, `SeaGreen`, `SemiTransparent`
 
+## Chart Type Gallery
+
+Below is a visual reference for each of the 8 chart types supported in Phase 1. Use this gallery to choose the right chart type for your data and to see what the Blazor Chart component produces.
+
+### Column
+
+![Column Chart](../images/chart/chart-column.png)
+
+**Enum value:** `SeriesChartType.Column`
+
+The classic vertical bar chart — ideal for comparing discrete categories side by side. Use this when your X-axis represents categories (months, products, regions) and you want to emphasize differences in magnitude. This is the most commonly used chart type in Web Forms applications.
+
+### Line
+
+![Line Chart](../images/chart/chart-line.png)
+
+**Enum value:** `SeriesChartType.Line`
+
+Connects data points with straight line segments, perfect for showing trends over time. Use this when your X-axis represents a continuous or sequential dimension (dates, quarters, versions) and you want to highlight the direction and rate of change. Supports multiple series for comparison.
+
+### Bar
+
+![Bar Chart](../images/chart/chart-bar.png)
+
+**Enum value:** `SeriesChartType.Bar`
+
+A horizontal bar chart — the same concept as Column but rotated 90°. Use this when your category labels are long (e.g., product names, department titles) or when you have many categories that would crowd a vertical axis.
+
+### Pie
+
+![Pie Chart](../images/chart/chart-pie.png)
+
+**Enum value:** `SeriesChartType.Pie`
+
+Displays proportions of a whole as slices of a circle. Use this when you have a single data series and want to show each category's percentage of the total. Best with 3–7 slices — more than that becomes hard to read. Each slice is automatically assigned a distinct color from the active palette.
+
+### Doughnut
+
+![Doughnut Chart](../images/chart/chart-doughnut.png)
+
+**Enum value:** `SeriesChartType.Doughnut`
+
+A ring-shaped variant of the Pie chart with a hollow center. Use this when you want the same part-to-whole visualization as a Pie chart but prefer a cleaner look, or when you want to place a summary value or label in the center area. Each segment receives a distinct palette color automatically.
+
+### Area
+
+![Area Chart](../images/chart/chart-area.png)
+
+**Enum value:** `SeriesChartType.Area`
+
+A Line chart with the region below the line filled in. Use this when you want to emphasize the volume or cumulative total over time, rather than just the trend line. Works well for showing how a value accumulates or for comparing the magnitude of multiple series.
+
+### Scatter
+
+![Scatter Chart](../images/chart/chart-scatter.png)
+
+**Enum value:** `SeriesChartType.Point`
+
+Plots individual data points on an X/Y grid without connecting lines. Use this when both axes represent numeric values and you want to reveal correlations, clusters, or outliers in your data. Note that the Web Forms enum value is `Point`, not `Scatter`.
+
+### Stacked Column
+
+![Stacked Column Chart](../images/chart/chart-stacked-column.png)
+
+**Enum value:** `SeriesChartType.StackedColumn`
+
+Stacks multiple series vertically within each category column. Use this when you want to show both the total value per category and the breakdown of contributing series. Each color band represents one series, and the full column height shows the aggregate.
+
 ## Web Forms Features NOT Supported
 
 ### Chart Types Not Supported (Phase 1)
