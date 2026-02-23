@@ -1,0 +1,171 @@
+@using static BlazorWebFormsComponents.WebColor
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void DetailsView_RowStyle_AppliesToDataRows()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor red = "Red";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true">
+			<RowStyleContent>
+				<DetailsViewRowStyle BackColor="red" />
+			</RowStyleContent>
+		</DetailsView>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBeGreaterThan(0);
+		rows[0].GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_AlternatingRowStyle_AppliesToAlternateRows()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor red = "Red";
+		WebColor blue = "Blue";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true">
+			<RowStyleContent>
+				<DetailsViewRowStyle BackColor="red" />
+			</RowStyleContent>
+			<AlternatingRowStyleContent>
+				<DetailsViewAlternatingRowStyle BackColor="blue" />
+			</AlternatingRowStyleContent>
+		</DetailsView>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBeGreaterThanOrEqualTo(2);
+		rows[0].GetAttribute("style").ShouldContain("background-color");
+		rows[1].GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_HeaderStyle_AppliesToHeader()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor green = "Green";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					HeaderText="Test Header">
+			<HeaderStyleContent>
+				<DetailsViewHeaderStyle BackColor="green" />
+			</HeaderStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_FooterStyle_AppliesToFooter()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor navy = "Navy";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					FooterText="Test Footer">
+			<FooterStyleContent>
+				<DetailsViewFooterStyle BackColor="navy" />
+			</FooterStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_CommandRowStyle_AppliesToCommandRow()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor silver = "Silver";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					AutoGenerateEditButton="true">
+			<CommandRowStyleContent>
+				<DetailsViewCommandRowStyle BackColor="silver" />
+			</CommandRowStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_FieldHeaderStyle_AppliesToFieldHeaders()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor teal = "Teal";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true">
+			<FieldHeaderStyleContent>
+				<DetailsViewFieldHeaderStyle BackColor="teal" />
+			</FieldHeaderStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_EmptyDataRowStyle_AppliesWhenNoData()
+	{
+		var emptyList = new List<Widget>();
+		WebColor fuchsia = "Fuchsia";
+
+		var cut = Render(@<DetailsView Items="emptyList" ItemType="Widget" AutoGenerateRows="true"
+					EmptyDataText="No data">
+			<EmptyDataRowStyleContent>
+				<DetailsViewEmptyDataRowStyle BackColor="fuchsia" />
+			</EmptyDataRowStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_PagerStyle_AppliesToPager()
+	{
+		var items = Widget.SimpleWidgetList.ToList();
+		WebColor silver = "Silver";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					AllowPaging="true">
+			<PagerStyleContent>
+				<DetailsViewPagerStyle BackColor="silver" />
+			</PagerStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_EditRowStyle_AppliesToEditMode()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor orange = "Orange";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					AutoGenerateEditButton="true" DefaultMode="DetailsViewMode.Edit">
+			<EditRowStyleContent>
+				<DetailsViewEditRowStyle BackColor="orange" />
+			</EditRowStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DetailsView_InsertRowStyle_AppliesToInsertMode()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		WebColor lime = "Lime";
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					AutoGenerateInsertButton="true" DefaultMode="DetailsViewMode.Insert">
+			<InsertRowStyleContent>
+				<DetailsViewInsertRowStyle BackColor="lime" />
+			</InsertRowStyleContent>
+		</DetailsView>);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+}

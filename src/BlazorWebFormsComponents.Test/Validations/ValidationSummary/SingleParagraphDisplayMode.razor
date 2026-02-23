@@ -12,11 +12,11 @@
 				Write something
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<RequiredFieldValidator Type="string"
-															ControlToValidate="@Name"
+															ControlRef="@Name"
 															ErrorMessage="Name is required." />
 
 				<RegularExpressionValidator ValidationExpression="^[a-z]{6}$"
-																ControlToValidate="@Name"
+																ControlRef="@Name"
 																ErrorMessage="6 char only" />
 
 				<AspNetValidationSummary DisplayMode="SingleParagraph" />

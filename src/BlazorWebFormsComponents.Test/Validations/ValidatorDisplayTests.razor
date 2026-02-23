@@ -13,7 +13,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					ErrorMessage="Name is required." />
 			</EditForm>
 		);
@@ -31,7 +31,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					Display="ValidatorDisplay.Static"
 					ErrorMessage="Name is required." />
 			</EditForm>
@@ -49,7 +49,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					Display="ValidatorDisplay.Static"
 					ErrorMessage="Name is required." />
 			</EditForm>
@@ -73,7 +73,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					Display="ValidatorDisplay.Dynamic"
 					ErrorMessage="Name is required." />
 			</EditForm>
@@ -91,7 +91,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					Display="ValidatorDisplay.Dynamic"
 					ErrorMessage="Name is required." />
 			</EditForm>
@@ -115,7 +115,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					Display="ValidatorDisplay.None"
 					ErrorMessage="Name is required." />
 			</EditForm>
@@ -133,7 +133,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					Display="ValidatorDisplay.None"
 					ErrorMessage="Name is required." />
 			</EditForm>

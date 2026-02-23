@@ -1,0 +1,86 @@
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	[Fact]
+	public void Menu_BackColor_AppliesAsStyle()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		WebColor lightBlue = "LightBlue";
+
+		var cut = Render(
+			@<Menu BackColor="lightBlue">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void Menu_ForeColor_AppliesAsStyle()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		WebColor red = "Red";
+
+		var cut = Render(
+			@<Menu ForeColor="red">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.Markup.ShouldContain("color");
+	}
+
+	[Fact]
+	public void Menu_CssClass_AppliedToContainer()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu CssClass="my-menu-class">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.Markup.ShouldContain("my-menu-class");
+	}
+
+	[Fact]
+	public void Menu_Width_AppliesAsStyle()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu Width="200">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.Markup.ShouldContain("width");
+	}
+
+	[Fact]
+	public void Menu_Height_AppliesAsStyle()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu Height="100">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.Markup.ShouldContain("height");
+	}
+}

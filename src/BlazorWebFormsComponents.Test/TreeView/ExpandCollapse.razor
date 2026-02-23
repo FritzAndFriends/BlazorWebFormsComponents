@@ -1,0 +1,174 @@
+@code {
+
+	[Fact]
+	public async Task TreeView_ExpandAll_ShowsAllNodes()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="R" Expanded="false">
+						<TreeNode Text="Child" Value="C" Expanded="false">
+							<TreeNode Text="Grandchild" Value="G" />
+						</TreeNode>
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		var treeView = cut.FindComponent<TreeView>().Instance;
+		await cut.InvokeAsync(() => treeView.ExpandAll());
+
+		cut.FindAll("table").Count.ShouldBe(3);
+	}
+
+	[Fact]
+	public async Task TreeView_CollapseAll_HidesChildNodes()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="R" Expanded="true">
+						<TreeNode Text="Child" Value="C" Expanded="true">
+							<TreeNode Text="Grandchild" Value="G" />
+						</TreeNode>
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		var treeView = cut.FindComponent<TreeView>().Instance;
+		await cut.InvokeAsync(() => treeView.CollapseAll());
+
+		cut.FindAll("table").Count.ShouldBe(1);
+	}
+
+	[Fact]
+	public void TreeView_FindNode_ReturnsMatchingNode()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="R" Expanded="true">
+						<TreeNode Text="Child" Value="C" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		var treeView = cut.FindComponent<TreeView>().Instance;
+		var node = treeView.FindNode("R/C");
+		node.ShouldNotBeNull();
+		node.Text.ShouldBe("Child");
+	}
+
+	[Fact]
+	public void TreeView_FindNode_ReturnsNullForInvalidPath()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="R" />
+				</Nodes>
+			</TreeView>
+		);
+
+		var treeView = cut.FindComponent<TreeView>().Instance;
+		treeView.FindNode("R/X/Y").ShouldBeNull();
+	}
+
+	[Fact]
+	public void TreeView_NodeIndent_DefaultIs20()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="R" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.NodeIndent.ShouldBe(20);
+	}
+
+	[Fact]
+	public void TreeView_NodeIndent_CustomValue()
+	{
+		var cut = Render(
+			@<TreeView NodeIndent="40">
+				<Nodes>
+					<TreeNode Text="Root" Value="R" Expanded="true">
+						<TreeNode Text="Child" Value="C" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.NodeIndent.ShouldBe(40);
+	}
+
+	[Fact]
+	public void TreeView_PathSeparator_DefaultIsSlash()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="R" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.PathSeparator.ShouldBe('/');
+	}
+
+	[Fact]
+	public void TreeView_PathSeparator_CustomValueUsedByFindNode()
+	{
+		var cut = Render(
+			@<TreeView PathSeparator="@('-')">
+				<Nodes>
+					<TreeNode Text="Root" Value="R" Expanded="true">
+						<TreeNode Text="Child" Value="C" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		var treeView = cut.FindComponent<TreeView>().Instance;
+		var node = treeView.FindNode("R-C");
+		node.ShouldNotBeNull();
+		node.Text.ShouldBe("Child");
+	}
+
+	[Fact]
+	public void TreeView_ExpandDepth_PropertyIsSet()
+	{
+		var cut = Render(
+			@<TreeView ExpandDepth="2">
+				<Nodes>
+					<TreeNode Text="Root" Value="R" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.ExpandDepth.ShouldBe(2);
+	}
+
+	[Fact]
+	public void TreeView_ExpandDepth_LimitsVisibleNodes()
+	{
+		var cut = Render(
+			@<TreeView ExpandDepth="0">
+				<Nodes>
+					<TreeNode Text="Root" Value="R">
+						<TreeNode Text="Child" Value="C">
+							<TreeNode Text="Grandchild" Value="G" />
+						</TreeNode>
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// ExpandDepth=0 means no nodes expanded; only root visible
+		cut.FindAll("table").Count.ShouldBe(1);
+	}
+}

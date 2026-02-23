@@ -1,4 +1,4 @@
-﻿@inherits BaseStyledComponent
+@inherits BaseStyledComponent
 
 @using BlazorWebFormsComponents.Validations;
 @using Microsoft.AspNetCore.Components.Forms;
@@ -53,7 +53,7 @@
 									</td>
 									<td>
 										<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
-										<RequiredFieldValidator @ref="UsernameValidator" ControlToValidate="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
+										<RequiredFieldValidator @ref="UsernameValidator" ControlRef="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
 									</td>
 								</tr>
 								<tr>
@@ -62,7 +62,7 @@
 									</td>
 									<td>
 										<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
-										<RequiredFieldValidator @ref="PasswordValidator" ControlToValidate="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
+										<RequiredFieldValidator @ref="PasswordValidator" ControlRef="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
 									</td>
 								</tr>
 								@if (DisplayRememberMe)

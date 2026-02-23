@@ -1,11 +1,27 @@
 ﻿@using BlazorWebFormsComponents.DataBinding
 @inherits DataBoundComponent<ItemType>
 @typeparam ItemType
+
+<CascadingValue Name="ParentFormView" Value="this" IsFixed="true">
+	@RowStyleContent
+	@EditRowStyleContent
+	@InsertRowStyleContent
+	@HeaderStyleContent
+	@FooterStyleContent
+	@EmptyDataRowStyleContent
+	@PagerStyleContent
+</CascadingValue>
+
 <table cellspacing="0" style="border-collapse:collapse;">
+	@if (!string.IsNullOrEmpty(Caption))
+	{
+		<caption style="@GetCaptionStyle()">@Caption</caption>
+	}
+
 	@* Header Row *@
 	@if (HeaderTemplate != null || !string.IsNullOrEmpty(HeaderText))
 	{
-		<tr>
+		<tr style="@HeaderStyle?.ToString()">
 			<td colspan="2">
 				@if (HeaderTemplate != null)
 				{
@@ -24,7 +40,7 @@
 		@* Empty Data Row *@
 		@if (EmptyDataTemplate != null)
 		{
-			<tr>
+			<tr style="@EmptyDataRowStyle?.ToString()">
 				<td colspan="2">
 					@EmptyDataTemplate
 				</td>
@@ -32,14 +48,14 @@
 		}
 		else if (!string.IsNullOrEmpty(EmptyDataText))
 		{
-			<tr>
+			<tr style="@EmptyDataRowStyle?.ToString()">
 				<td colspan="2">@EmptyDataText</td>
 			</tr>
 		}
 	}
 	else
 	{
-		<tr>
+		<tr style="@GetCurrentRowStyle()?.ToString()">
 			<td colspan="2">
 				@if (CurrentItem == null)
 				{
@@ -67,25 +83,32 @@
 				}
 			</td>
 		</tr>
-		<tr>
+		<tr style="@PagerStyle?.ToString()">
 			<td>
-				<table>
-					@** BEGIN PAGER **@
-					<tr>
-						@for (int i = 1; i <= Items.Count(); i++)
-						{
-							if (i == Position)
+				@if (PagerTemplate != null)
+				{
+					@PagerTemplate
+				}
+				else
+				{
+					<table>
+						@** BEGIN PAGER **@
+						<tr>
+							@for (int i = 1; i <= Items.Count(); i++)
 							{
-								<td><span>@i</span></td>
+								if (i == Position)
+								{
+									<td><span>@i</span></td>
+								}
+								else
+								{
+									var thisPosition = i;
+									<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
+								}
 							}
-							else
-							{
-								var thisPosition = i;
-								<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
-							}
-						}
-					</tr>
-				</table>
+						</tr>
+					</table>
+				}
 			</td>
 		</tr>
 	}
@@ -93,7 +116,7 @@
 	@* Footer Row *@
 	@if (FooterTemplate != null || !string.IsNullOrEmpty(FooterText))
 	{
-		<tr>
+		<tr style="@FooterStyle?.ToString()">
 			<td colspan="2">
 				@if (FooterTemplate != null)
 				{

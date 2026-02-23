@@ -1,0 +1,108 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	bool _modeChangedFired;
+	FormViewCommandEventArgs _commandArgs;
+	bool _itemCreatedFired;
+	bool _pageIndexChangingFired;
+	bool _pageIndexChangedFired;
+
+	[Fact]
+	public void FormView_ModeChanged_FiresAfterModeChange()
+	{
+		_modeChangedFired = false;
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				ModeChanged="OnModeChanged">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Edit" Text="Edit" />
+				</ItemTemplate>
+				<EditItemTemplate>
+					<span>Editing @Item.Name</span>
+				</EditItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("button").Click();
+		_modeChangedFired.ShouldBeTrue("ModeChanged should fire when switching to edit mode");
+	}
+
+	[Fact]
+	public void FormView_ItemCommand_FiresOnButtonCommand()
+	{
+		_commandArgs = null;
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				ItemCommand="OnItemCommand">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Custom" Text="Do It" />
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("button").Click();
+		_commandArgs.ShouldNotBeNull("ItemCommand should fire on button click");
+		_commandArgs.CommandName.ShouldBe("Custom");
+	}
+
+	[Fact]
+	public void FormView_ItemCreated_FiresOnRender()
+	{
+		_itemCreatedFired = false;
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				ItemCreated="OnItemCreated">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		_itemCreatedFired.ShouldBeTrue("ItemCreated should fire when item row is created");
+	}
+
+	[Fact]
+	public void FormView_PageIndexChanging_FiresOnPageCommand()
+	{
+		_pageIndexChangingFired = false;
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				AllowPaging="true" DataKeyNames="Id" PageIndexChanging="OnPageIndexChanging">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Page" CommandArgument="2" Text="Go to 2" />
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("button").Click();
+		_pageIndexChangingFired.ShouldBeTrue("PageIndexChanging should fire on page command");
+	}
+
+	[Fact]
+	public void FormView_PageIndexChanged_FiresAfterPageCommand()
+	{
+		_pageIndexChangedFired = false;
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				AllowPaging="true" DataKeyNames="Id" PageIndexChanged="OnPageIndexChanged">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Page" CommandArgument="2" Text="Go to 2" />
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("button").Click();
+		_pageIndexChangedFired.ShouldBeTrue("PageIndexChanged should fire after page command");
+	}
+
+	void OnModeChanged(FormViewModeEventArgs args) { _modeChangedFired = true; }
+	void OnItemCommand(FormViewCommandEventArgs args) { _commandArgs = args; }
+	void OnItemCreated() { _itemCreatedFired = true; }
+	void OnPageIndexChanging() { _pageIndexChangingFired = true; }
+	void OnPageIndexChanged(PageChangedEventArgs args) { _pageIndexChangedFired = true; }
+}

@@ -1,4 +1,4 @@
-﻿@page "/ControlSamples/CustomValidator"
+@page "/ControlSamples/CustomValidator"
 
 <h3>Custom Validator</h3>
 @using BlazorWebFormsComponents.Validations;
@@ -8,7 +8,7 @@
 	<label>Write something that starts with 'A'</label>
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
 	<CustomValidator ServerValidate="@DoesItStartWithA"
-									 ControlToValidate="@Name"
+									 ControlRef="@Name"
 									 Text="Does not start with 'A'."
 									 ErrorMessage="Does not start with 'A' but in summary!" />
 
@@ -41,5 +41,5 @@
 
 <p>Code:</p>
 <code>
-&lt;CustomValidator ServerValidate="@@DoesItStartWithA" ControlToValidate="@@Name" Text="Does not start with 'A'." /&gt;
+&lt;CustomValidator ServerValidate="@@DoesItStartWithA" ControlRef="@@Name" Text="Does not start with 'A'." /&gt;
 </code>

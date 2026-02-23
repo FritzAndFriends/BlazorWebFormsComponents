@@ -10,7 +10,7 @@
 			@<EditForm Model="@exampleModel" OnInvalidSubmit="@HandleInvalidSubmit">
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<RequiredFieldValidator Type="string"
-															ControlToValidate="@Name"
+															ControlRef="@Name"
 															ErrorMessage="Name is required." />
 
 				<AspNetValidationSummary HeaderText="Errors Found" DisplayMode="BulletList" />
@@ -33,7 +33,7 @@
 			@<EditForm Model="@exampleModel2" OnInvalidSubmit="@HandleInvalidSubmit2">
 				<InputText @ref="Name2.Current" @bind-Value="exampleModel2.Name" />
 				<RequiredFieldValidator Type="string"
-															ControlToValidate="@Name2"
+															ControlRef="@Name2"
 															ErrorMessage="Name is required." />
 
 				<AspNetValidationSummary DisplayMode="BulletList" />
@@ -53,7 +53,7 @@
 			@<EditForm Model="@exampleModel3" OnInvalidSubmit="@HandleInvalidSubmit3">
 				<InputText @ref="Name3.Current" @bind-Value="exampleModel3.Name" />
 				<RequiredFieldValidator Type="string"
-															ControlToValidate="@Name3"
+															ControlRef="@Name3"
 															ErrorMessage="Name is required." />
 
 				<AspNetValidationSummary ShowSummary="false" DisplayMode="BulletList" />
@@ -74,7 +74,7 @@
 			@<EditForm Model="@exampleModel4" OnInvalidSubmit="@HandleInvalidSubmit4">
 				<InputText @ref="Name4.Current" @bind-Value="exampleModel4.Name" />
 				<RequiredFieldValidator Type="string"
-															ControlToValidate="@Name4"
+															ControlRef="@Name4"
 															ErrorMessage="Name is required." />
 
 				<AspNetValidationSummary ShowSummary="true" DisplayMode="BulletList" />

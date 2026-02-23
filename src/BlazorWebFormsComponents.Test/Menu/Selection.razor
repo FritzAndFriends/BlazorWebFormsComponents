@@ -1,0 +1,85 @@
+@code {
+
+	MenuEventArgs _menuClickArgs;
+
+	[Fact]
+	public void Menu_ClickItem_SetsSelectedItem()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+					<MenuItem Text="About" Value="about" />
+				</Items>
+			</Menu>
+		);
+
+		var menuLink = cut.FindAll("a").First(a => a.TextContent.Contains("About"));
+		menuLink.Click();
+
+		var menu = cut.FindComponent<Menu>().Instance;
+		menu.SelectedItem.ShouldNotBeNull();
+		menu.SelectedItem.Value.ShouldBe("about");
+	}
+
+	[Fact]
+	public void Menu_ClickItem_SetsSelectedValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+					<MenuItem Text="About" Value="about" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindAll("a").First(a => a.TextContent.Contains("Home")).Click();
+
+		cut.FindComponent<Menu>().Instance.SelectedValue.ShouldBe("home");
+	}
+
+	[Fact]
+	public void Menu_ClickItem_FiresMenuItemClick()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		_menuClickArgs = null;
+
+		var cut = Render(
+			@<Menu MenuItemClick="OnMenuItemClick">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindAll("a").First(a => a.TextContent.Contains("Home")).Click();
+
+		_menuClickArgs.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void Menu_NoClick_SelectedItemIsNull()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.SelectedItem.ShouldBeNull();
+	}
+
+	void OnMenuItemClick(MenuEventArgs args)
+	{
+		_menuClickArgs = args;
+	}
+}

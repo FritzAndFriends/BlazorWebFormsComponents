@@ -1,0 +1,97 @@
+@page "/ControlSamples/TreeView/ExpandCollapse"
+
+<PageTitle>TreeView Expand / Collapse</PageTitle>
+
+<h2>TreeView Expand &amp; Collapse</h2>
+
+<p>This sample demonstrates <code>ExpandAll</code>, <code>CollapseAll</code>,
+   <code>ExpandDepth</code>, and <code>NodeIndent</code>.</p>
+
+<hr />
+
+<h3>ExpandAll / CollapseAll</h3>
+<p>Use the buttons below to expand or collapse every node at once.</p>
+
+<p>
+    <button type="button" class="btn btn-sm btn-primary" @onclick="ExpandAll">Expand All</button>
+    <button type="button" class="btn btn-sm btn-secondary" @onclick="CollapseAll">Collapse All</button>
+</p>
+
+<TreeView @ref="_treeView" NodeIndent="@_nodeIndent">
+    <Nodes>
+        <TreeNode Text="Animals" Value="animals" Expanded="true">
+            <TreeNode Text="Mammals" Value="mammals">
+                <TreeNode Text="Dog" Value="dog" />
+                <TreeNode Text="Cat" Value="cat" />
+                <TreeNode Text="Elephant" Value="elephant" />
+            </TreeNode>
+            <TreeNode Text="Birds" Value="birds">
+                <TreeNode Text="Eagle" Value="eagle" />
+                <TreeNode Text="Parrot" Value="parrot" />
+            </TreeNode>
+            <TreeNode Text="Fish" Value="fish">
+                <TreeNode Text="Salmon" Value="salmon" />
+                <TreeNode Text="Tuna" Value="tuna" />
+            </TreeNode>
+        </TreeNode>
+    </Nodes>
+</TreeView>
+
+<hr />
+
+<h3>ExpandDepth</h3>
+<p><code>ExpandDepth</code> controls how many levels are expanded when the tree first renders.
+   A value of <code>-1</code> (default) expands all; <code>0</code> collapses everything;
+   <code>1</code> expands only the root level.</p>
+
+<TreeView ExpandDepth="1">
+    <Nodes>
+        <TreeNode Text="Root" Value="root" Expanded="true">
+            <TreeNode Text="Level 1 - A" Value="l1a">
+                <TreeNode Text="Level 2 - A1" Value="l2a1" />
+                <TreeNode Text="Level 2 - A2" Value="l2a2" />
+            </TreeNode>
+            <TreeNode Text="Level 1 - B" Value="l1b">
+                <TreeNode Text="Level 2 - B1" Value="l2b1" />
+            </TreeNode>
+        </TreeNode>
+    </Nodes>
+</TreeView>
+
+<hr />
+
+<h3>NodeIndent</h3>
+<p>The <code>NodeIndent</code> property controls pixel indentation per nesting level (default&nbsp;20).
+   Use the slider to see the effect.</p>
+
+<p>
+    <label>NodeIndent: <strong>@_nodeIndent px</strong></label><br />
+    <input type="range" min="0" max="60" @bind="_nodeIndent" @bind:event="oninput" />
+</p>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;TreeView @@ref="_treeView" ExpandDepth="1" NodeIndent="25"&gt;
+    &lt;Nodes&gt;
+        &lt;TreeNode Text="Root" Value="root" Expanded="true"&gt;
+            &lt;TreeNode Text="Child" Value="child" /&gt;
+        &lt;/TreeNode&gt;
+    &lt;/Nodes&gt;
+&lt;/TreeView&gt;
+
+@@code {
+    private TreeView _treeView;
+
+    void ExpandAll()  =&gt; _treeView.ExpandAll();
+    void CollapseAll() =&gt; _treeView.CollapseAll();
+}</code></pre>
+
+@code {
+
+    private TreeView _treeView;
+    private int _nodeIndent = 20;
+
+    private void ExpandAll() => _treeView.ExpandAll();
+    private void CollapseAll() => _treeView.CollapseAll();
+}

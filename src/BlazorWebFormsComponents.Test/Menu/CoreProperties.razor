@@ -1,0 +1,121 @@
+@code {
+
+	[Fact]
+	public void Menu_MaximumDynamicDisplayLevels_DefaultIs3()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.MaximumDynamicDisplayLevels.ShouldBe(3);
+	}
+
+	[Fact]
+	public void Menu_Target_AppliedToRenderedLinks()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu Target="_blank">
+				<Items>
+					<MenuItem Text="Home" NavigateUrl="home.aspx" />
+				</Items>
+			</Menu>
+		);
+
+		var link = cut.FindAll("a").First(a => a.TextContent.Contains("Home"));
+		link.GetAttribute("target").ShouldBe("_blank");
+	}
+
+	[Fact]
+	public void Menu_SkipLinkText_DefaultValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.SkipLinkText.ShouldBe("Skip Navigation Links");
+	}
+
+	[Fact]
+	public void Menu_SkipLinkText_CustomValue_RendersInMarkup()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu SkipLinkText="Skip Menu">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.Markup.ShouldContain("Skip Menu");
+	}
+
+	[Fact]
+	public void Menu_PathSeparator_DefaultIsSlash()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.PathSeparator.ShouldBe('/');
+	}
+
+	[Fact]
+	public void MenuItem_Value_StoresAssociatedValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home-value" />
+				</Items>
+			</Menu>
+		);
+
+		var menuItem = cut.FindComponent<MenuItem>().Instance;
+		menuItem.Value.ShouldBe("home-value");
+	}
+
+	[Fact]
+	public void MenuItem_ValuePath_ContainsItemValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu StaticDisplayLevels="2">
+				<Items>
+					<MenuItem Text="Home" Value="home">
+						<MenuItem Text="About" Value="about" />
+					</MenuItem>
+				</Items>
+			</Menu>
+		);
+
+		var menuItems = cut.FindComponents<MenuItem>();
+		var aboutItem = menuItems.First(m => m.Instance.Value == "about").Instance;
+		aboutItem.ValuePath.ShouldNotBeNullOrEmpty();
+		aboutItem.ValuePath.ShouldContain("about");
+	}
+}

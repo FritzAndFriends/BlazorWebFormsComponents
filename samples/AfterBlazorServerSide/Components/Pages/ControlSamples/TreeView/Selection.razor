@@ -1,0 +1,99 @@
+@page "/ControlSamples/TreeView/Selection"
+
+<PageTitle>TreeView Selection</PageTitle>
+
+<h2>TreeView Node Selection</h2>
+
+<p>This sample demonstrates node selection with the <code>SelectedNodeChanged</code> event
+   and <code>SelectedNodeStyle</code>.</p>
+
+<hr />
+
+<h3>Click a Node to Select It</h3>
+
+<TreeView @ref="_treeView"
+          SelectedNodeChanged="HandleNodeSelected">
+    <SelectedNodeStyleContent>
+        <TreeViewSelectedNodeStyle CssClass="selected-node" />
+    </SelectedNodeStyleContent>
+    <ChildContent>
+        <Nodes>
+            <TreeNode Text="Company" Value="company" Expanded="true">
+                <TreeNode Text="Engineering" Value="engineering" Expanded="true">
+                    <TreeNode Text="Frontend" Value="frontend" />
+                    <TreeNode Text="Backend" Value="backend" />
+                    <TreeNode Text="QA" Value="qa" />
+                </TreeNode>
+                <TreeNode Text="Marketing" Value="marketing">
+                    <TreeNode Text="Digital" Value="digital" />
+                    <TreeNode Text="Content" Value="content" />
+                </TreeNode>
+                <TreeNode Text="Sales" Value="sales">
+                    <TreeNode Text="Enterprise" Value="enterprise" />
+                    <TreeNode Text="SMB" Value="smb" />
+                </TreeNode>
+            </TreeNode>
+        </Nodes>
+    </ChildContent>
+</TreeView>
+
+<div style="margin-top:15px; padding:10px; border:1px solid #ccc; background:#f9f9f9;">
+    <strong>Selected node:</strong>
+    @if (!string.IsNullOrEmpty(_selectedText))
+    {
+        <span>@_selectedText (Value: <code>@_selectedValue</code>)</span>
+    }
+    else
+    {
+        <em>None — click a node above</em>
+    }
+    <br />
+    <strong>Selection count:</strong> @_selectionCount
+</div>
+
+<style>
+    .selected-node {
+        background-color: #E3F2FD;
+        font-weight: bold;
+        border-left: 3px solid #2196F3;
+        padding-left: 4px;
+    }
+</style>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;TreeView SelectedNodeChanged="HandleNodeSelected"&gt;
+    &lt;SelectedNodeStyleContent&gt;
+        &lt;TreeViewSelectedNodeStyle CssClass="selected-node" /&gt;
+    &lt;/SelectedNodeStyleContent&gt;
+    &lt;Nodes&gt;
+        &lt;TreeNode Text="Company" Value="company" Expanded="true"&gt;
+            &lt;TreeNode Text="Engineering" Value="engineering" /&gt;
+            &lt;TreeNode Text="Marketing" Value="marketing" /&gt;
+        &lt;/TreeNode&gt;
+    &lt;/Nodes&gt;
+&lt;/TreeView&gt;
+
+@@code {
+    void HandleNodeSelected(TreeNodeEventArgs e)
+    {
+        var node = e.Node;
+        // node.Text, node.Value
+    }
+}</code></pre>
+
+@code {
+
+    private TreeView _treeView;
+    private string _selectedText = "";
+    private string _selectedValue = "";
+    private int _selectionCount;
+
+    private void HandleNodeSelected(TreeNodeEventArgs e)
+    {
+        _selectedText = e.Node.Text;
+        _selectedValue = e.Node.Value;
+        _selectionCount++;
+    }
+}

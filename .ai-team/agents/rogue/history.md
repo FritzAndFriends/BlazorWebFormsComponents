@@ -37,3 +37,19 @@ Wrote 44 bUnit tests for P0 base class changes: AccessKey (4), ToolTip (8), Imag
  Team update (2026-02-23): CausesValidation/ValidationGroup added to CheckBox, RadioButton, TextBox  decided by Cyclops
  Team update (2026-02-23): Label AssociatedControlID switches rendered element (label vs span)  decided by Cyclops
  Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers  decided by Forge
+
+### Milestone 7: GridView Feature Tests — WI-03 + WI-06 + WI-08
+
+Wrote 24 bUnit tests across 3 new test files for GridView features:
+
+**Selection.razor (WI-03, 7 tests):** SelectedIndex with SelectedRowStyle CSS, SelectedIndexChanging event with correct index, cancellation prevents selection, AutoGenerateSelectButton renders Select links, SelectedValue returns DataKeyNames key, SelectedIndex=-1 clears selection, SelectedRow returns correct data item. Used `FindComponent<GridView<T>>().Instance` to verify SelectedRow/SelectedValue properties.
+
+**StyleSubComponents.razor (WI-06, 8 tests):** RowStyle applies to even-indexed data rows, AlternatingRowStyle applies to odd-indexed rows, HeaderStyle on thead tr, FooterStyle on tfoot tr, EmptyDataRowStyle on empty data, PagerStyle on pager row, EditRowStyle on row at EditIndex, style priority chain (Edit > Selected > Alternating > Row).
+
+**DisplayProperties.razor (WI-08, 9 tests):** ShowHeader=false hides thead, ShowFooter=true shows tfoot, Caption renders caption element, CaptionAlign renders correct caption-side/text-align style, EmptyDataTemplate overrides EmptyDataText, GridLines renders rules attribute, UseAccessibleHeader renders th scope="col", CellPadding/CellSpacing render table attributes, ShowHeaderWhenEmpty shows header with no data.
+
+📌 Test pattern: GridView style sub-components use named RenderFragments (`<RowStyleContent>`, etc.) containing `<GridViewRowStyle BackColor="color" />`. The sub-component configures the GridView's TableItemStyle via CascadingParameter "ParentGridView". Styles render as inline `style` attributes on `<tr>` elements. — Rogue
+
+📌 Test pattern: GridView AlternatingRowStyle is always initialized (non-null `new TableItemStyle()`), so `GetRowStyle()` returns it for odd rows even when not configured. RowStyle only applies to even-indexed rows; to style ALL rows, set both RowStyle and AlternatingRowStyle. — Rogue
+
+📌 Test pattern: GridView with `AutoGenerateColumns="false"` renders in two passes: first pass initializes style sub-components (empty table), second pass renders table after BoundField children register via `AddColumn`. bUnit waits for both renders. — Rogue

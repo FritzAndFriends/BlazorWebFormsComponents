@@ -13,7 +13,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					ErrorMessage="Name is required." />
 			</EditForm>
 		);
@@ -34,7 +34,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					SetFocusOnError="true"
 					ErrorMessage="Name is required." />
 			</EditForm>
@@ -55,7 +55,7 @@
 			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
 				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
 				<RequiredFieldValidator Type="string"
-					ControlToValidate="@NameRef"
+					ControlRef="@NameRef"
 					SetFocusOnError="true"
 					ErrorMessage="Name is required." />
 			</EditForm>

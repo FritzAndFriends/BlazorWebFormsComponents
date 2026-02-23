@@ -1,7 +1,7 @@
 @inherits BaseWebFormsComponent
 
 <li>
-    <a title="@Title" class="@($"level{Depth}")" href="@NavigateUrl" target="_blank">@Text</a>
+    <a title="@Title" class="@($"level{Depth}")" href="@NavigateUrl" target="@EffectiveTarget" @onclick="HandleClick" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))">@Text</a>
     @if (ChildContent != null && ParentMenu.StaticDisplayLevels <= Depth)
     {
         <ul class="level@(Depth+1)">
