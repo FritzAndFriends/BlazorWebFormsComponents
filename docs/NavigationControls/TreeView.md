@@ -10,6 +10,9 @@ The TreeView component is meant to emulate the asp:TreeView control in markup an
 - SiteMap databinding as an XmlDocument
 - Databinding events
 - **Accessibility features** (see below)
+- **Node-Level Styles** - `NodeStyle`, `HoverNodeStyle`, `LeafNodeStyle`, `ParentNodeStyle`, `RootNodeStyle`, `SelectedNodeStyle`
+- **Selection** - `SelectedNode`, `SelectedValue`, `SelectedNodeChanged` event
+- **Expand/Collapse** - `ExpandAll()`, `CollapseAll()`, `ExpandDepth`, `NodeIndent`, `PathSeparator`, `FindNode()`
 
 ## Accessibility Features
 
@@ -345,4 +348,231 @@ By default, `UseAccessibilityFeatures` is `false`, ensuring existing implementat
 ```
 
 ## Blazor Syntax
+
+```html
+<TreeView
+    CssClass=string
+    DataSource=XmlDocument
+    ExpandDepth=int
+    ID=string
+    NodeIndent=int
+    PathSeparator=char
+    SelectedNodeChanged=EventCallback<TreeNodeEventArgs>
+    ShowCheckBoxes="None|Root|Parent|Leaf|All"
+    ShowExpandCollapse=bool
+    ShowLines=bool
+    Target=string
+    UseAccessibilityFeatures=bool
+    Visible=bool
+>
+    <HoverNodeStyle CssClass="string" ... />
+    <LeafNodeStyle CssClass="string" ... />
+    <NodeStyle CssClass="string" ... />
+    <Nodes>
+        <TreeNode
+            Checked=bool
+            Expanded=bool
+            ImageUrl=string
+            NavigateUrl=string
+            Selected=bool
+            ShowCheckBox=bool
+            Target=string
+            Text=string
+            ToolTip=string
+            Value=string
+        >
+            <TreeNode Text="Child" Value="child" />
+        </TreeNode>
+    </Nodes>
+    <ParentNodeStyle CssClass="string" ... />
+    <RootNodeStyle CssClass="string" ... />
+    <SelectedNodeStyle CssClass="string" ... />
+</TreeView>
+```
+
+## Examples
+
+### Basic TreeView with Nodes
+
+```razor
+<TreeView ShowExpandCollapse="true">
+    <Nodes>
+        <TreeNode Text="Products" Value="products" Expanded="true">
+            <TreeNode Text="Electronics" Value="electronics">
+                <TreeNode Text="Laptops" Value="laptops" />
+                <TreeNode Text="Phones" Value="phones" />
+            </TreeNode>
+            <TreeNode Text="Clothing" Value="clothing">
+                <TreeNode Text="Shirts" Value="shirts" />
+                <TreeNode Text="Pants" Value="pants" />
+            </TreeNode>
+        </TreeNode>
+    </Nodes>
+</TreeView>
+```
+
+### Node Selection
+
+```razor
+<TreeView SelectedNodeChanged="HandleNodeSelected">
+    <Nodes>
+        <TreeNode Text="Home" Value="home" />
+        <TreeNode Text="About" Value="about" />
+        <TreeNode Text="Contact" Value="contact" />
+    </Nodes>
+    <SelectedNodeStyle CssClass="selected" BackColor="LightBlue" />
+</TreeView>
+
+<p>Selected: @selectedValue</p>
+
+@code {
+    private string selectedValue = "";
+
+    private void HandleNodeSelected(TreeNodeEventArgs e)
+    {
+        selectedValue = e.Node.Value;
+    }
+}
+```
+
+### Node-Level Styles
+
+```razor
+@* Apply different styles to root, parent, and leaf nodes *@
+<TreeView ShowExpandCollapse="true">
+    <Nodes>
+        <TreeNode Text="Documents" Value="docs" Expanded="true">
+            <TreeNode Text="Reports" Value="reports">
+                <TreeNode Text="Q1 Report" Value="q1" />
+                <TreeNode Text="Q2 Report" Value="q2" />
+            </TreeNode>
+        </TreeNode>
+    </Nodes>
+    <RootNodeStyle CssClass="root-node" ForeColor="DarkBlue" Font-Bold="true" />
+    <ParentNodeStyle CssClass="parent-node" ForeColor="Navy" />
+    <LeafNodeStyle CssClass="leaf-node" ForeColor="Black" />
+    <HoverNodeStyle CssClass="hover-node" BackColor="LightYellow" />
+    <SelectedNodeStyle CssClass="selected-node" BackColor="LightBlue" />
+</TreeView>
+```
+
+!!! note "Style Priority"
+    When multiple styles apply to a node, the priority order is:
+    **SelectedNodeStyle** > type-specific style (Root/Parent/Leaf) > **NodeStyle** (fallback).
+
+### Expand/Collapse Control
+
+```razor
+@* ExpandDepth controls initial expansion. -1 = fully expanded. *@
+<TreeView @ref="treeRef"
+          ExpandDepth="1"
+          NodeIndent="25"
+          PathSeparator="/">
+    <Nodes>
+        <TreeNode Text="Root" Value="root">
+            <TreeNode Text="Level 1" Value="level1">
+                <TreeNode Text="Level 2" Value="level2" />
+            </TreeNode>
+        </TreeNode>
+    </Nodes>
+</TreeView>
+
+<Button Text="Expand All" OnClick="ExpandAll" />
+<Button Text="Collapse All" OnClick="CollapseAll" />
+<Button Text="Find Node" OnClick="FindSpecific" />
+
+@code {
+    private TreeView treeRef;
+
+    private void ExpandAll() => treeRef.ExpandAll();
+    private void CollapseAll() => treeRef.CollapseAll();
+    private void FindSpecific()
+    {
+        // Find node by path: "root/level1/level2"
+        var node = treeRef.FindNode("root/level1/level2");
+    }
+}
+```
+
+### Data Binding with XmlDocument
+
+```razor
+@using System.Xml
+
+<TreeView DataSource="@sitemapXml"
+          ShowExpandCollapse="true">
+    <DataBindings>
+        <TreeNodeBinding DataMember="siteMapNode"
+                         TextField="title"
+                         NavigateUrlField="url" />
+    </DataBindings>
+</TreeView>
+
+@code {
+    private XmlDocument sitemapXml;
+
+    protected override void OnInitialized()
+    {
+        sitemapXml = new XmlDocument();
+        sitemapXml.LoadXml(@"
+            <siteMap>
+                <siteMapNode title='Home' url='/'>
+                    <siteMapNode title='Products' url='/products' />
+                    <siteMapNode title='About' url='/about' />
+                </siteMapNode>
+            </siteMap>");
+    }
+}
+```
+
+## Selection Properties Reference
+
+| Property/Event | Type | Default | Description |
+|----------------|------|---------|-------------|
+| `SelectedNode` | `TreeNode` | `null` | Read-only. The currently selected node. |
+| `SelectedValue` | `string` | `null` | Read-only. The `Value` of the selected node. |
+| `SelectedNodeChanged` | `EventCallback<TreeNodeEventArgs>` | — | Fires when the selected node changes. |
+
+## Node Style Sub-Components Reference
+
+All node style sub-components use `TreeNodeStyle` which supports:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `CssClass` | `string` | CSS class name |
+| `BackColor` | `WebColor` | Background color |
+| `ForeColor` | `WebColor` | Text color |
+| `Font` | `FontInfo` | Font settings |
+| `ImageUrl` | `string` | Custom node icon URL |
+| `HorizontalPadding` | `Unit` | Horizontal padding |
+| `VerticalPadding` | `Unit` | Vertical padding |
+| `ChildNodesPadding` | `Unit` | Padding around child nodes |
+| `NodeSpacing` | `Unit` | Spacing between nodes |
+
+**Available style sub-components:**
+
+| Component | Applied To |
+|-----------|-----------|
+| `<NodeStyle>` | All nodes (fallback) |
+| `<HoverNodeStyle>` | Nodes on mouse hover |
+| `<RootNodeStyle>` | Top-level nodes (no parent) |
+| `<ParentNodeStyle>` | Nodes that have children |
+| `<LeafNodeStyle>` | Nodes with no children |
+| `<SelectedNodeStyle>` | The currently selected node |
+
+## Expand/Collapse Reference
+
+| Property/Method | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `ExpandDepth` | `int` | `-1` | Initial expansion depth. `-1` = fully expanded, `0` = all collapsed. |
+| `NodeIndent` | `int` | `20` | Pixel indent per nesting level. |
+| `PathSeparator` | `char` | `'/'` | Separator character for `FindNode()` value paths. |
+| `ExpandAll()` | `void` | — | Expands all nodes recursively. |
+| `CollapseAll()` | `void` | — | Collapses all nodes recursively. |
+| `FindNode(string)` | `TreeNode` | — | Finds a node by its `PathSeparator`-delimited value path (e.g., `"root/child/leaf"`). |
+
+## See Also
+
+- [Menu](Menu.md)
+- [SiteMapPath](SiteMapPath.md)
 
