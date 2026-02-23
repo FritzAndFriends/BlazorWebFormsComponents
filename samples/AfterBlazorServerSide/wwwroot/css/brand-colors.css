@@ -1,0 +1,6 @@
+:root {
+  --blazor-purple: #512BD4;
+  --webforms-blue: #0078D4;
+  --brand-primary: var(--blazor-purple);
+  --brand-secondary: var(--webforms-blue);
+}

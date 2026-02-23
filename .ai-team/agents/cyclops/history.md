@@ -67,6 +67,7 @@
 - **List controls missing common ListControl properties.** BulletedList, CheckBoxList, and DropDownList all lack DataTextFormatString, AppendDataBoundItems, CausesValidation, and ValidationGroup. These are inherited from ListControl in Web Forms.
 - **Calendar style sub-properties use CSS strings.** All 9 style sub-properties (DayStyle, TitleStyle, etc.) are implemented as CSS class strings instead of `TableItemStyle` objects. Functional but not API-compatible.
 - **HiddenField correctly uses BaseWebFormsComponent.** Matches Web Forms where HiddenField inherits Control (not WebControl), so no style properties needed.
+- **ChartSeries data binding fix:** `ToConfig()` now checks for `Items` + `YValueMembers` and extracts `DataPoint` objects via reflection. Uses `XValueMember` for X axis values and comma-separated `YValueMembers` for Y values. Falls back to manual `Points` collection when `Items` is null or `YValueMembers` is empty. Handles type conversion via `TryConvertToDouble()` for common numeric types.
 
 
  Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops

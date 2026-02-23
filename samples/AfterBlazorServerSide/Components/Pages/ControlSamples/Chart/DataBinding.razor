@@ -1,0 +1,140 @@
+@page "/ControlSamples/Chart/DataBinding"
+
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Data Binding</PageTitle>
+
+<h2>Chart - Data Binding</h2>
+
+<p>This sample shows how to bind chart data using <code>Items</code>, <code>XValueMember</code>, and <code>YValueMembers</code> — the same approach used in ASP.NET Web Forms. Instead of manually creating <code>DataPoint</code> objects, you bind directly to your business objects.</p>
+
+<h3>Basic Data Binding</h3>
+
+<p>Bind a list of business objects to the chart using the <code>Items</code> property. Specify which properties to use for X and Y values.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.BrightPastel">
+	<ChartTitle Text="Monthly Sales — 2025" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="MainArea"
+		AxisX="@(new Axis { Title = "Month" })"
+		AxisY="@(new Axis { Title = "Sales ($)" })" />
+	<ChartSeries Name="Sales"
+		ChartType="SeriesChartType.Column"
+		ChartArea="MainArea"
+		Items="@salesData"
+		XValueMember="Month"
+		YValueMembers="Amount" />
+</Chart>
+
+<hr />
+
+<h3>Web Forms vs Blazor Comparison</h3>
+
+<h4>ASP.NET Web Forms (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:Chart ID="Chart1" runat="server" Width="600" Height="400" Palette="BrightPastel"&gt;
+    &lt;Titles&gt;
+        &lt;asp:Title Text="Monthly Sales — 2025" /&gt;
+    &lt;/Titles&gt;
+    &lt;ChartAreas&gt;
+        &lt;asp:ChartArea Name="MainArea"&gt;
+            &lt;AxisX Title="Month" /&gt;
+            &lt;AxisY Title="Sales ($)" /&gt;
+        &lt;/asp:ChartArea&gt;
+    &lt;/ChartAreas&gt;
+    &lt;Series&gt;
+        &lt;asp:Series Name="Sales"
+            ChartType="Column"
+            ChartArea="MainArea"
+            XValueMember="Month"
+            YValueMembers="Amount" /&gt;
+    &lt;/Series&gt;
+&lt;/asp:Chart&gt;
+
+// Code-behind:
+Chart1.DataSource = salesData;
+Chart1.DataBind();</code></pre>
+
+<h4>Blazor (After)</h4>
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.BrightPastel"&gt;
+    &lt;ChartTitle Text="Monthly Sales — 2025" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="MainArea"
+        AxisX="@@(new Axis { Title = "Month" })"
+        AxisY="@@(new Axis { Title = "Sales ($)" })" /&gt;
+    &lt;ChartSeries Name="Sales"
+        ChartType="SeriesChartType.Column"
+        ChartArea="MainArea"
+        Items="@@salesData"
+        XValueMember="Month"
+        YValueMembers="Amount" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+    private List&lt;SalesData&gt; salesData = new()
+    {
+        new("Jan", 12500),
+        new("Feb", 15200),
+        new("Mar", 18900),
+        // ...
+    };
+    
+    public record SalesData(string Month, decimal Amount);
+}</code></pre>
+
+<hr />
+
+<h3>Using with Different Data Types</h3>
+
+<p>The Chart component can bind to any object type. Here's an example with website traffic data using <code>int</code> values:</p>
+
+<Chart ChartWidth="600px" ChartHeight="350px" Palette="ChartPalette.SeaGreen">
+	<ChartTitle Text="Daily Website Visitors — Last Week" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="TrafficArea"
+		AxisX="@(new Axis { Title = "Day" })"
+		AxisY="@(new Axis { Title = "Visitors" })" />
+	<ChartSeries Name="Visitors"
+		ChartType="SeriesChartType.Line"
+		ChartArea="TrafficArea"
+		Items="@trafficData"
+		XValueMember="DayName"
+		YValueMembers="Visitors" />
+</Chart>
+
+@code {
+
+	// Example 1: Monthly sales data
+	private List<SalesData> salesData = new()
+	{
+		new("Jan", 12500),
+		new("Feb", 15200),
+		new("Mar", 18900),
+		new("Apr", 16400),
+		new("May", 21000),
+		new("Jun", 19800),
+		new("Jul", 22300),
+		new("Aug", 20100),
+		new("Sep", 17600),
+		new("Oct", 23400),
+		new("Nov", 25100),
+		new("Dec", 28700)
+	};
+
+	public record SalesData(string Month, decimal Amount);
+
+	// Example 2: Website traffic data
+	private List<TrafficData> trafficData = new()
+	{
+		new("Mon", 1250),
+		new("Tue", 1480),
+		new("Wed", 1320),
+		new("Thu", 1560),
+		new("Fri", 1890),
+		new("Sat", 2340),
+		new("Sun", 2100)
+	};
+
+	public record TrafficData(string DayName, int Visitors);
+
+}

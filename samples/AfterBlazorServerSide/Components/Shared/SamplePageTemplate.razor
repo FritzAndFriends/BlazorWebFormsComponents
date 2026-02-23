@@ -1,0 +1,68 @@
+@* Reusable template component for sample pages with consistent structure *@
+
+<div class="sample-page">
+    <header class="sample-header">
+        <h1>@Title</h1>
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <p class="lead">@Description</p>
+        }
+    </header>
+
+    @if (DemoContent != null)
+    {
+        <section class="sample-demo card mb-4">
+            <div class="card-header">Live Demo</div>
+            <div class="card-body">
+                @DemoContent
+            </div>
+        </section>
+    }
+
+    @if (CodeExample != null)
+    {
+        <section class="sample-code card mb-4">
+            <div class="card-header">Code Example</div>
+            <div class="card-body">
+                <pre><code>@CodeExample</code></pre>
+            </div>
+        </section>
+    }
+
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The title displayed in the page header (required).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional description displayed below the title.
+    /// </summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Content for the live demo section.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? DemoContent { get; set; }
+
+    /// <summary>
+    /// Content for the code example section.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? CodeExample { get; set; }
+
+    /// <summary>
+    /// Additional content rendered at the bottom of the page.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

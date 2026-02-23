@@ -185,6 +185,10 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/Chart/Doughnut")]
     [InlineData("/ControlSamples/Chart/Scatter")]
     [InlineData("/ControlSamples/Chart/StackedColumn")]
+    [InlineData("/ControlSamples/Chart/ChartAreas")]
+    [InlineData("/ControlSamples/Chart/DataBinding")]
+    [InlineData("/ControlSamples/Chart/MultiSeries")]
+    [InlineData("/ControlSamples/Chart/Styling")]
     public async Task ChartControl_Loads_AndRendersContent(string path)
     {
         await VerifyChartPageLoads(path);

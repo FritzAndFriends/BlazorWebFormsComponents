@@ -125,3 +125,20 @@ Fixed all 7 failing integration tests. 111/111 passing after fixes.
   - DataBinder sample uses `OnAfterRender(firstRender)` to call `DataBind()` on 4 Repeater instances — data only appears after first render, but NetworkIdle wait handles this.
   - ViewState sample button text "Click Me (ViewState)" distinguishes it from the "Click Me (Property)" button in section 3. Used `GetByRole(AriaRole.Button, new() { Name = "Click Me (ViewState)" })` for precise targeting.
   - Both pages include `<pre><code>` blocks with sample code — assertions use `page.ContentAsync()` for text presence rather than strict locators to avoid matching code samples vs rendered content where appropriate.
+### 2026-02-12: Enhanced Chart visual appearance tests
+
+- Added 5 stronger Chart tests in `InteractiveComponentTests.cs` to verify chart appearance:
+  - `Chart_RendersCanvas_WithDimensions` — verifies canvas has non-zero width/height via BoundingBox
+  - `Chart_AllTypes_HaveExpectedContainerDimensions` — Theory test verifying all 8 chart types have container dimensions matching ChartWidth/ChartHeight parameters (600x400 for most, 500x400 for Pie/Doughnut)
+  - `Chart_ChartJsLibrary_IsInitialized` — verifies Chart.js global is loaded and has at least one chart instance via `Chart.instances`
+  - `Chart_Line_MultipleSeries_RenderMultipleDatasets` — verifies Line chart's 2 series (NY/LA temps) produce 2 datasets via `Chart.instances[0].data.datasets.length`
+  - `Chart_AllTypes_CanvasHasRenderingContext` — Theory test verifying all 8 chart types have a 2D rendering context
+- Total Chart tests: 38 (8 smoke + 11 basic canvas + 19 enhanced visual)
+- Build: 0 errors, 0 warnings
+- Test patterns:
+  - Use `LocatorWaitForOptions { State = WaitForSelectorState.Visible }` instead of `Expect()` (class doesn't inherit from `PageTest`)
+  - Use `page.EvaluateAsync<T>` to query Chart.js internals (`Chart.instances`, dataset counts, etc.)
+  - Use `BoundingBoxAsync()` to verify element dimensions
+  - Allow ±10px tolerance on dimension checks for border/padding differences
+
+

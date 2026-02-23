@@ -67,3 +67,14 @@
 - **Navigation fixes applied:** NavMenu.razor Login Components reordered (Login before LoginName), DataBinder and ViewState added to Utility Features (alphabetical: DataBinder, ID Rendering, PageService, ViewState). ComponentList.razor fixed: HyperLink moved before Image in Editor Controls, ImageMap removed from Editor Controls and added to Navigation Controls (per team decision), Utility Features column added. mkdocs.yml: ImageMap removed from Editor Controls nav (already in Navigation Controls).
 - **Widget model reused:** DataBinder sample reuses `SharedSampleObjects.Models.Widget` with inline data (Laptop Stand, USB-C Hub, Mechanical Keyboard) for a product catalog demo.
 - **Build verified:** `dotnet build` passes with 0 compilation errors (Debug config). Release config has a known transient Nerdbank.GitVersioning file-copy issue unrelated to this work.
+### Chart Feature-Rich Sample Pages (2026-02-12)
+
+- **4 new sample pages added:** DataBinding, MultiSeries, Styling, ChartAreas — each demonstrating advanced Chart features.
+- **DataBinding.razor:** Shows Web Forms-style data binding with `Items`, `XValueMember`, and `YValueMembers` parameters. Uses business object records (`SalesData`, `TrafficData`) instead of manual `DataPoint` creation. Includes Web Forms vs Blazor comparison code snippets.
+- **MultiSeries.razor:** Demonstrates multiple series on one chart for comparisons — revenue channels (Online vs In-Store), regional sales (3 regions), and server performance metrics (CPU vs Memory). Shows the pattern of adding multiple `<ChartSeries>` children to one `<Chart>`.
+- **Styling.razor:** Showcases all 11 `ChartPalette` options with visual comparisons (BrightPastel, Berry, Chocolate, EarthTones, Excel, Fire, Grayscale, Light, Pastel, SeaGreen, SemiTransparent). Demonstrates custom colors via `WebColor` static fields (e.g., `WebColor.DodgerBlue`).
+- **ChartAreas.razor:** Explains the `Axis` configuration options (Title, Minimum, Maximum, Interval, IsLogarithmic). Shows logarithmic scale for exponential data and constrained Y-axis for focused ranges.
+- **Nav ordering pattern:** New samples added alphabetically within Chart node: Area, Bar, ChartAreas, Column, DataBinding, Doughnut, Line, MultiSeries, Pie, Scatter, StackedColumn, Styling.
+- **WebColor usage:** Use static fields like `WebColor.DodgerBlue` not `WebColor.FromName("...")` which doesn't exist.
+
+
