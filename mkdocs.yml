@@ -130,4 +130,5 @@ nav:
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - User Controls: Migration/User-Controls.md
       - Deferred Controls: Migration/DeferredControls.md
+      - Themes and Skins: Migration/ThemesAndSkins.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md

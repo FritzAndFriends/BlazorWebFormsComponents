@@ -48,3 +48,14 @@ Evaluated 4 JS libraries for Chart component. D3 rejected (zero built-in charts,
 📌 Team update (2026-02-11): Milestone 3 gate review — DetailsView APPROVED, PasswordRecovery APPROVED. 50/53 (94%). — decided by Forge
 📌 Team update (2026-02-12): Chart component feasibility confirmed — Chart.js recommended via JS interop. Effort: L. Target Milestone 4. — decided by Forge
 📌 Team update (2026-02-12): Milestone 4 planned — Chart component with Chart.js via JS interop. 8 work items, design review required before implementation. — decided by Forge + Squad
+
+### Themes and Skins Migration Strategy (2026-02-12)
+
+- Evaluated 5 approaches for migrating Web Forms Themes/Skins to Blazor: CSS Custom Properties, CascadingValue ThemeProvider, Generated CSS Isolation, DI Service, and Hybrid.
+- **Recommended CascadingValue ThemeProvider** — only approach that faithfully models both `Theme` (override) and `StyleSheetTheme` (default) semantics, supports SkinID selection, and can set any property (not just CSS-expressible ones).
+- CSS-only approaches (1, 3, 5) cannot set non-CSS properties like `Width` (as HTML attribute), `ToolTip`, or `Visible` — which are valid skin properties in Web Forms.
+- DI-based approach (4) works functionally but cannot scope themes to a page or subtree, unlike `CascadingValue` which mirrors Web Forms' per-page `@Page Theme=` directive.
+- **Known bug:** `BaseWebFormsComponent.SkinID` is typed as `bool` instead of `string`. Must be fixed before any theme implementation.
+- The library already uses CascadingParameters extensively (TableItemStyle, LoginControl styles) — ThemeProvider follows the same pattern.
+- Implementation is opt-in and non-breaking: no `ThemeProvider` wrapper = no behavior change.
+- Strategy is exploratory per Jeff's request — the README exclusion of themes/skins still stands until a decision to implement.
