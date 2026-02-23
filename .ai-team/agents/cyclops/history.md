@@ -44,4 +44,37 @@
 📌 Team update (2026-02-11): Sprint 3 scope: DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred. 48/53 → target 50/53. — decided by Forge
 📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
 📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 50/53 components (94%). — decided by Forge
+
+ Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
+
+- **Chart component architecture (WI-1/2/3):** Chart inherits `BaseStyledComponent`. Uses CascadingValue `"ParentChart"` for child registration (ChartSeries, ChartArea, ChartLegend, ChartTitle). JS interop via ES module `chart-interop.js` with lazy loading in `ChartJsInterop.cs`. `ChartConfigBuilder` is a pure static class converting component model → Chart.js JSON config, testable without browser.
+- **Chart file paths:**
+  - Enums: `Enums/SeriesChartType.cs` (35 values), `Enums/ChartPalette.cs`, `Enums/Docking.cs`, `Enums/ChartDashStyle.cs`
+  - POCOs: `Axis.cs`, `DataPoint.cs`
+  - JS: `wwwroot/js/chart.min.js` (PLACEHOLDER), `wwwroot/js/chart-interop.js`
+  - C# interop: `ChartJsInterop.cs`
+  - Config builder: `ChartConfigBuilder.cs` (+ config snapshot classes)
+  - Components: `Chart.razor`/`.cs`, `ChartSeries.razor`/`.cs`, `ChartArea.razor`/`.cs`, `ChartLegend.razor`/`.cs`, `ChartTitle.razor`/`.cs`
+- **Chart type mapping:** Web Forms `SeriesChartType.Point` maps to Chart.js `"scatter"`. Web Forms has no explicit "Scatter" enum value — `Point=0` is the equivalent. 8 types supported in Phase 1; unsupported throw `NotSupportedException`.
+- **JS interop pattern for Chart:** Uses `IJSRuntime` directly (not the shared `BlazorWebFormsJsInterop` service) because Chart.js interop is chart-specific, not page-level. `ChartJsInterop` lazily imports the ES module and exposes `CreateChartAsync`, `UpdateChartAsync`, `DestroyChartAsync`.
+- **BaseStyledComponent already has Width/Height as Unit type:** Chart adds `ChartWidth`/`ChartHeight` as string parameters for CSS dimension styling on the wrapper div, avoiding conflict with the base class Unit properties.
+- **Instance-based canvas IDs:** Uses `Guid.NewGuid()` (truncated to 8 chars) for canvas element IDs, consistent with the ImageMap pattern that avoids static counters.
+- **Feature audit — Editor Controls A–I (13 controls):** Created audit docs in `planning-docs/` comparing Web Forms API vs Blazor implementation for AdRotator, BulletedList, Button, Calendar, CheckBox, CheckBoxList, DropDownList, FileUpload, HiddenField, HyperLink, Image, ImageButton, ImageMap.
+- **Common missing property: AccessKey.** Every component that inherits WebControl in Web Forms has AccessKey. Neither `BaseStyledComponent` nor `BaseWebFormsComponent` provides it. This is the single most pervasive gap — affects all 13 audited controls.
+- **ToolTip inconsistently provided.** Some components (Button, FileUpload, Calendar, HyperLink, Image, ImageButton, ImageMap) add ToolTip directly. Others (AdRotator, BulletedList, CheckBox, CheckBoxList, DropDownList) do not. ToolTip should be on the base class.
+- **Image base class mismatch.** `Image` inherits `BaseWebFormsComponent` but Web Forms `Image` inherits `WebControl`. This means Image is missing ALL style properties (CssClass, BackColor, ForeColor, Font, Width, Height, BorderColor, BorderStyle, BorderWidth, Style). ImageMap correctly uses `BaseStyledComponent` per team decision. Image should follow the same pattern.
+- **HyperLink.NavigateUrl naming mismatch.** Web Forms uses `NavigateUrl`; Blazor uses `NavigationUrl`. This breaks migration — developers must rename the attribute.
+- **List controls missing common ListControl properties.** BulletedList, CheckBoxList, and DropDownList all lack DataTextFormatString, AppendDataBoundItems, CausesValidation, and ValidationGroup. These are inherited from ListControl in Web Forms.
+- **Calendar style sub-properties use CSS strings.** All 9 style sub-properties (DayStyle, TitleStyle, etc.) are implemented as CSS class strings instead of `TableItemStyle` objects. Functional but not API-compatible.
+- **HiddenField correctly uses BaseWebFormsComponent.** Matches Web Forms where HiddenField inherits Control (not WebControl), so no style properties needed.
+- **ChartSeries data binding fix:** `ToConfig()` now checks for `Items` + `YValueMembers` and extracts `DataPoint` objects via reflection. Uses `XValueMember` for X axis values and comma-separated `YValueMembers` for Y values. Falls back to manual `Points` collection when `Items` is null or `YValueMembers` is empty. Handles type conversion via `TryConvertToDouble()` for common numeric types.
+
+
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
+ Team update (2026-02-23): Label should inherit BaseStyledComponent instead of BaseWebFormsComponent  decided by Beast
+ Team update (2026-02-23): DataBoundComponent style gap  DataBoundStyledComponent<T> recommended  decided by Forge
+ Team update (2026-02-23): Chart implementation architecture consolidated (10 decisions)  decided by Cyclops, Forge
+ Team update (2026-02-23): Validation Display property missing from all validators  migration-blocking  decided by Rogue
+ Team update (2026-02-23): ValidationSummary comma-split bug is data corruption risk  decided by Rogue
+ Team update (2026-02-23): Login controls missing outer WebControl style properties  decided by Rogue
 📌 Team update (2026-02-12): DetailsView auto-generated fields must render <input type="text"> in Edit/Insert mode — decided by Cyclops

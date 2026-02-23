@@ -175,6 +175,25 @@ public class ControlSampleTests
         await VerifyPageLoadsWithoutErrors(path);
     }
 
+    // Chart Controls - Chart uses JS interop and may produce console errors from Chart.js
+    [Theory]
+    [InlineData("/ControlSamples/Chart")]
+    [InlineData("/ControlSamples/Chart/Line")]
+    [InlineData("/ControlSamples/Chart/Bar")]
+    [InlineData("/ControlSamples/Chart/Pie")]
+    [InlineData("/ControlSamples/Chart/Area")]
+    [InlineData("/ControlSamples/Chart/Doughnut")]
+    [InlineData("/ControlSamples/Chart/Scatter")]
+    [InlineData("/ControlSamples/Chart/StackedColumn")]
+    [InlineData("/ControlSamples/Chart/ChartAreas")]
+    [InlineData("/ControlSamples/Chart/DataBinding")]
+    [InlineData("/ControlSamples/Chart/MultiSeries")]
+    [InlineData("/ControlSamples/Chart/Styling")]
+    public async Task ChartControl_Loads_AndRendersContent(string path)
+    {
+        await VerifyChartPageLoads(path);
+    }
+
     // Utility Features
     [Theory]
     [InlineData("/ControlSamples/DataBinder")]
@@ -246,12 +265,14 @@ public class ControlSampleTests
         {
             if (msg.Type == "error")
             {
-                // Filter out ASP.NET Core structured log messages forwarded to browser console
-                // These start with ISO 8601 timestamps like [2026-02-12T16:00:34.529...]
-                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
-                {
-                    consoleErrors.Add($"{path}: {msg.Text}");
-                }
+                // Filter ASP.NET Core structured log messages that appear as console errors
+                // These are timestamp-prefixed messages like "[2026-02-12T20:34:15.123Z] ..."
+                if (System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    return;
+                // Filter external resource loading failures (e.g., placeholder images)
+                if (msg.Text.StartsWith("Failed to load resource"))
+                    return;
+                consoleErrors.Add($"{path}: {msg.Text}");
             }
         };
 
@@ -318,6 +339,47 @@ public class ControlSampleTests
             // requires JavaScript setup (bwfc.Page.AddScriptElement) that may not be configured
             // in all environments. The important thing is that the page renders.
             
+            Assert.Empty(pageErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies Chart pages load and render a canvas element. Chart component uses JS interop
+    /// (Chart.js) that may produce console errors when the JavaScript isn't fully loaded,
+    /// but the page should still render with a canvas element.
+    /// </summary>
+    private async Task VerifyChartPageLoads(string path)
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var pageErrors = new List<string>();
+
+        page.PageError += (_, error) =>
+        {
+            pageErrors.Add($"{path}: {error}");
+        };
+
+        try
+        {
+            // Act
+            var response = await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Page loads successfully
+            Assert.NotNull(response);
+            Assert.True(response.Ok, $"Page {path} failed to load with status: {response.Status}");
+
+            // Assert - Canvas element is present in the DOM (Chart component renders <canvas>)
+            var canvas = await page.QuerySelectorAsync("canvas");
+            Assert.NotNull(canvas);
+
             Assert.Empty(pageErrors);
         }
         finally

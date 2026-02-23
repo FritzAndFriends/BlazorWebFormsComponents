@@ -1,0 +1,174 @@
+@page "/ControlSamples/Chart/ChartAreas"
+
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Chart Areas</PageTitle>
+
+<h2>Chart - Chart Areas</h2>
+
+<p>A <code>ChartArea</code> defines a region within the chart where series data is plotted. You can configure axes, backgrounds, and other settings per chart area.</p>
+
+<h3>Single Chart Area</h3>
+
+<p>Most charts use a single chart area. The <code>ChartArea</code> component configures the X and Y axes using the <code>Axis</code> class.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.BrightPastel">
+	<ChartTitle Text="Quarterly Performance" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="MainArea"
+		AxisX="@(new Axis { Title = "Quarter" })"
+		AxisY="@(new Axis { Title = "Revenue ($K)", Minimum = 0, Maximum = 200, Interval = 50 })" />
+	<ChartSeries Name="Revenue"
+		ChartType="SeriesChartType.Column"
+		ChartArea="MainArea"
+		Points="@revenueData" />
+	<ChartSeries Name="Profit"
+		ChartType="SeriesChartType.Line"
+		ChartArea="MainArea"
+		Points="@profitData" />
+</Chart>
+
+<hr />
+
+<h3>Axis Configuration Options</h3>
+
+<p>The <code>Axis</code> class supports the following properties:</p>
+
+<table class="table" style="max-width: 600px;">
+	<thead>
+		<tr>
+			<th>Property</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td><code>Title</code></td><td>Axis title text</td></tr>
+		<tr><td><code>Minimum</code></td><td>Minimum value on the axis</td></tr>
+		<tr><td><code>Maximum</code></td><td>Maximum value on the axis</td></tr>
+		<tr><td><code>Interval</code></td><td>Step size between tick marks</td></tr>
+		<tr><td><code>IsLogarithmic</code></td><td>Use logarithmic scale</td></tr>
+	</tbody>
+</table>
+
+<hr />
+
+<h3>Logarithmic Axis</h3>
+
+<p>Use <code>IsLogarithmic = true</code> for data that spans multiple orders of magnitude.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.EarthTones">
+	<ChartTitle Text="Exponential Growth — Logarithmic Scale" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="LogArea"
+		AxisX="@(new Axis { Title = "Year" })"
+		AxisY="@(new Axis { Title = "Users (log scale)", IsLogarithmic = true })" />
+	<ChartSeries Name="Users"
+		ChartType="SeriesChartType.Line"
+		ChartArea="LogArea"
+		Points="@exponentialData" />
+</Chart>
+
+<hr />
+
+<h3>Chart Area with Constrained Y-Axis</h3>
+
+<p>Set <code>Minimum</code> and <code>Maximum</code> to focus on a specific data range.</p>
+
+<Chart ChartWidth="600px" ChartHeight="350px" Palette="ChartPalette.SeaGreen">
+	<ChartTitle Text="Stock Price — 52-Week Range" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="StockArea"
+		AxisX="@(new Axis { Title = "Week" })"
+		AxisY="@(new Axis { Title = "Price ($)", Minimum = 100, Maximum = 180 })" />
+	<ChartSeries Name="ACME Corp"
+		ChartType="SeriesChartType.Area"
+		ChartArea="StockArea"
+		Points="@stockData" />
+</Chart>
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.BrightPastel"&gt;
+    &lt;ChartTitle Text="Quarterly Performance" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="MainArea"
+        AxisX="@@(new Axis { Title = "Quarter" })"
+        AxisY="@@(new Axis { Title = "Revenue ($K)", Minimum = 0, Maximum = 200, Interval = 50 })" /&gt;
+    &lt;ChartSeries Name="Revenue"
+        ChartType="SeriesChartType.Column"
+        ChartArea="MainArea"
+        Points="@@revenueData" /&gt;
+    &lt;ChartSeries Name="Profit"
+        ChartType="SeriesChartType.Line"
+        ChartArea="MainArea"
+        Points="@@profitData" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; revenueData = new()
+    {
+        new() { XValue = "Q1", YValues = new[] { 120.0 } },
+        new() { XValue = "Q2", YValues = new[] { 145.0 } },
+        new() { XValue = "Q3", YValues = new[] { 138.0 } },
+        new() { XValue = "Q4", YValues = new[] { 175.0 } }
+    };
+
+    private List&lt;DataPoint&gt; profitData = new()
+    {
+        new() { XValue = "Q1", YValues = new[] { 35.0 } },
+        new() { XValue = "Q2", YValues = new[] { 42.0 } },
+        new() { XValue = "Q3", YValues = new[] { 38.0 } },
+        new() { XValue = "Q4", YValues = new[] { 52.0 } }
+    };
+
+}</code></pre>
+
+@code {
+
+	// Main chart data
+	private List<DataPoint> revenueData = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 120.0 } },
+		new() { XValue = "Q2", YValues = new[] { 145.0 } },
+		new() { XValue = "Q3", YValues = new[] { 138.0 } },
+		new() { XValue = "Q4", YValues = new[] { 175.0 } }
+	};
+
+	private List<DataPoint> profitData = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 35.0 } },
+		new() { XValue = "Q2", YValues = new[] { 42.0 } },
+		new() { XValue = "Q3", YValues = new[] { 38.0 } },
+		new() { XValue = "Q4", YValues = new[] { 52.0 } }
+	};
+
+	// Exponential growth data for logarithmic scale
+	private List<DataPoint> exponentialData = new()
+	{
+		new() { XValue = "2018", YValues = new[] { 100.0 } },
+		new() { XValue = "2019", YValues = new[] { 250.0 } },
+		new() { XValue = "2020", YValues = new[] { 800.0 } },
+		new() { XValue = "2021", YValues = new[] { 2500.0 } },
+		new() { XValue = "2022", YValues = new[] { 8000.0 } },
+		new() { XValue = "2023", YValues = new[] { 25000.0 } },
+		new() { XValue = "2024", YValues = new[] { 75000.0 } }
+	};
+
+	// Stock price data for constrained axis
+	private List<DataPoint> stockData = new()
+	{
+		new() { XValue = "W1", YValues = new[] { 125.0 } },
+		new() { XValue = "W8", YValues = new[] { 132.0 } },
+		new() { XValue = "W16", YValues = new[] { 118.0 } },
+		new() { XValue = "W24", YValues = new[] { 145.0 } },
+		new() { XValue = "W32", YValues = new[] { 158.0 } },
+		new() { XValue = "W40", YValues = new[] { 142.0 } },
+		new() { XValue = "W48", YValues = new[] { 168.0 } },
+		new() { XValue = "W52", YValues = new[] { 172.0 } }
+	};
+
+}

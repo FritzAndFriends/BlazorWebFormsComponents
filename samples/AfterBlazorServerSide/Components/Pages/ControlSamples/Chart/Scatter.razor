@@ -1,0 +1,75 @@
+@page "/ControlSamples/Chart/Scatter"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Scatter</PageTitle>
+
+<h2>Chart - Scatter (Point)</h2>
+
+<p>A <strong>Scatter</strong> plot displaying the relationship between hours studied and exam scores. Scatter plots use the <code>Point</code> chart type and are ideal for showing correlations between two numeric variables.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px">
+	<ChartTitle Text="Hours Studied vs. Exam Score" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="ScatterArea"
+		AxisX="@(new Axis { Title = "Hours Studied", Minimum = 0, Maximum = 12 })"
+		AxisY="@(new Axis { Title = "Exam Score", Minimum = 40, Maximum = 100 })" />
+	<ChartSeries Name="Students"
+		ChartType="SeriesChartType.Point"
+		ChartArea="ScatterArea"
+		Points="@ScatterPoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> ScatterPoints = new()
+	{
+		new() { XValue = 1.0, YValues = new[] { 52.0 } },
+		new() { XValue = 2.0, YValues = new[] { 58.0 } },
+		new() { XValue = 2.5, YValues = new[] { 61.0 } },
+		new() { XValue = 3.0, YValues = new[] { 65.0 } },
+		new() { XValue = 3.5, YValues = new[] { 63.0 } },
+		new() { XValue = 4.0, YValues = new[] { 70.0 } },
+		new() { XValue = 5.0, YValues = new[] { 74.0 } },
+		new() { XValue = 5.5, YValues = new[] { 72.0 } },
+		new() { XValue = 6.0, YValues = new[] { 78.0 } },
+		new() { XValue = 6.5, YValues = new[] { 80.0 } },
+		new() { XValue = 7.0, YValues = new[] { 82.0 } },
+		new() { XValue = 8.0, YValues = new[] { 85.0 } },
+		new() { XValue = 8.5, YValues = new[] { 88.0 } },
+		new() { XValue = 9.0, YValues = new[] { 90.0 } },
+		new() { XValue = 10.0, YValues = new[] { 95.0 } }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Hours Studied vs. Exam Score" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="ScatterArea"
+        AxisX="@@(new Axis { Title = "Hours Studied", Minimum = 0, Maximum = 12 })"
+        AxisY="@@(new Axis { Title = "Exam Score", Minimum = 40, Maximum = 100 })" /&gt;
+    &lt;ChartSeries Name="Students"
+        ChartType="SeriesChartType.Point"
+        ChartArea="ScatterArea"
+        Points="@@ScatterPoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; ScatterPoints = new()
+    {
+        new() { XValue = 1.0, YValues = new[] { 52.0 } },
+        new() { XValue = 2.0, YValues = new[] { 58.0 } },
+        new() { XValue = 3.0, YValues = new[] { 65.0 } },
+        new() { XValue = 5.0, YValues = new[] { 74.0 } },
+        new() { XValue = 7.0, YValues = new[] { 82.0 } },
+        new() { XValue = 9.0, YValues = new[] { 90.0 } },
+        new() { XValue = 10.0, YValues = new[] { 95.0 } }
+    };
+
+}</code></pre>

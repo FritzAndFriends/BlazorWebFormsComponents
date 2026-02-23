@@ -1,99 +1,28 @@
-# Deferred Controls — Chart, Substitution, and Xml
+# Deferred Controls
 
-Some ASP.NET Web Forms controls have no practical Blazor equivalent and are **permanently deferred** from the BlazorWebFormsComponents library. This page explains what each control did in Web Forms, why it is not implemented, and what you should use instead when migrating to Blazor.
+Some ASP.NET Web Forms controls have been **permanently deferred** from implementation in this library. This page documents each deferred control, explains why it's excluded, and provides recommended alternatives for your Blazor migration.
 
-!!! note "These controls are not coming"
-    Unlike other components in this library that are planned or in progress, these three controls have been permanently deferred. They will not be implemented. This page provides migration guidance so you can move forward without them.
+## Chart — Partially Implemented
 
----
+!!! note "Chart is NOW IMPLEMENTED (Phase 1)"
+    The [Chart component](../DataControls/Chart.md) has been implemented with Chart.js and supports 8 chart types: Column, Bar, Line, Pie, Area, Doughnut, Scatter (Point), and StackedColumn. See the [Chart documentation](../DataControls/Chart.md) for full details.
 
-## Chart
+### Unsupported Chart Types
 
-Original Microsoft documentation: [https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.datavisualization.charting.chart?view=netframework-4.8](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.datavisualization.charting.chart?view=netframework-4.8)
+The following 27 chart types from the Web Forms `SeriesChartType` enum are **not yet supported** and will throw `NotSupportedException`. If your application uses any of these, you will need an alternative approach:
 
-### What It Did in Web Forms
-
-The `<asp:Chart>` control rendered data as bar charts, line charts, pie charts, area charts, and dozens of other chart types. It was a server-side rendering control that generated chart images (PNG, JPEG, or SVG) and served them to the browser. Under the hood, it used GDI+ (`System.Drawing`) to rasterize charts — a technology that does not exist in Blazor's browser-based rendering model.
-
-```html
-<asp:Chart ID="SalesChart" runat="server" Width="600" Height="400">
-    <Series>
-        <asp:Series Name="Sales" ChartType="Column"
-                    XValueMember="Month" YValueMembers="Revenue" />
-    </Series>
-    <ChartAreas>
-        <asp:ChartArea Name="MainArea" />
-    </ChartAreas>
-</asp:Chart>
-```
-
-### Why It's Not Implemented
-
-The Web Forms Chart control is **Very High complexity** to replicate in Blazor:
-
-- It requires a full SVG or Canvas rendering engine — there is no equivalent Blazor primitive
-- The original control relied on server-side GDI+ image generation, which is fundamentally incompatible with Blazor's component model
-- Wrapping an external charting library would introduce a heavyweight dependency that doesn't align with this library's goal of lightweight Web Forms compatibility shims
-
-### Recommended Blazor Alternatives
-
-The Blazor ecosystem has mature charting libraries that are purpose-built for client-side rendering. Choose one based on your project needs:
-
-| Library | License | Notes |
-|---------|---------|-------|
-| [Radzen Blazor Charts](https://blazor.radzen.com/chart) | Free (MIT) | SVG-based, good variety of chart types |
-| [MudBlazor Charts](https://mudblazor.com/components/chart) | Free (MIT) | Simple API, integrates with MudBlazor component suite |
-| [Syncfusion Blazor Charts](https://www.syncfusion.com/blazor-components/blazor-charts) | Commercial (free community license available) | Feature-rich, closest to Web Forms Chart in capability |
-| [ApexCharts.Blazor](https://github.com/apexcharts/Blazor-ApexCharts) | Free (MIT) | Wrapper around ApexCharts.js, interactive charts |
-
-### Migration Example
-
-**Before (Web Forms):**
-
-```html
-<asp:Chart ID="SalesChart" runat="server" Width="600" Height="400">
-    <Series>
-        <asp:Series Name="Sales" ChartType="Column"
-                    XValueMember="Month" YValueMembers="Revenue" />
-    </Series>
-    <ChartAreas>
-        <asp:ChartArea Name="MainArea" />
-    </ChartAreas>
-</asp:Chart>
-```
-
-```csharp
-// Code-behind
-SalesChart.DataSource = GetSalesData();
-SalesChart.DataBind();
-```
-
-**After (Blazor with Radzen Charts):**
-
-```razor
-@using Radzen.Blazor
-
-<RadzenChart>
-    <RadzenColumnSeries Data="@salesData"
-                        CategoryProperty="Month"
-                        ValueProperty="Revenue"
-                        Title="Sales" />
-    <RadzenCategoryAxis />
-    <RadzenValueAxis />
-</RadzenChart>
-
-@code {
-    private List<SalesRecord> salesData;
-
-    protected override void OnInitialized()
-    {
-        salesData = GetSalesData();
-    }
-}
-```
-
-!!! tip "Migration Approach"
-    Don't try to replicate your `<asp:Chart>` markup one-to-one. Instead, identify what data your charts visualize and which chart types you use, then map those to the equivalent chart component in your chosen library. Most libraries support the same chart types — the markup syntax will simply be different.
+| Chart Type | Alternative |
+|------------|-------------|
+| Stock, Candlestick | Use a dedicated financial charting library (e.g., [Lightweight Charts](https://github.com/nicksenger/lightweight-charts-blazor)) |
+| Bubble | Can be approximated with a scatter chart and custom point sizes via Chart.js plugins |
+| Radar, Polar | Chart.js supports these natively — Phase 2/3 candidates |
+| Funnel, Pyramid | Use a dedicated visualization library or custom SVG |
+| Spline, SplineArea, SplineRange | Use `Line`/`Area` as an approximation; Chart.js tension options can create curved lines |
+| StackedBar, StackedArea, StackedColumn100, StackedBar100, StackedArea100 | Use `StackedColumn` or `Bar` as a starting point; full stacking support is a Phase 2/3 candidate |
+| Range, RangeBar, RangeColumn | Use a dedicated charting library for range-style visualizations |
+| BoxPlot, ErrorBar | Use a statistical charting library |
+| Renko, ThreeLineBreak, Kagi, PointAndFigure | Specialized financial chart types — use a dedicated financial charting library |
+| FastPoint, FastLine, StepLine | Use `Point` or `Line` respectively; Chart.js handles performance optimization automatically |
 
 ---
 
@@ -301,11 +230,11 @@ XSLT transforms via `<asp:Xml>` are a **legacy pattern with near-zero adoption**
 
 ## Summary
 
-| Control | Web Forms Purpose | Blazor Equivalent | Action Required |
-|---------|-------------------|-------------------|-----------------|
-| **Chart** | Server-side chart image rendering | Use a Blazor charting library (Radzen, MudBlazor, Syncfusion, ApexCharts) | Replace with a third-party library |
-| **Substitution** | Dynamic content in cached pages | Not needed — Blazor renders dynamically by default | Remove the control; content is already dynamic |
-| **Xml** | XML display and XSLT transforms | Direct data binding with Razor markup | Parse your XML data in C# and bind to components |
+| Control | Status | Recommendation |
+|---------|--------|----------------|
+| **Chart** | ✅ Partial (Phase 1) | [Implemented](../DataControls/Chart.md) with 8 chart types via Chart.js. Unsupported types need alternative libraries. |
+| **Substitution** | ❌ Deferred | Not needed — Blazor renders dynamically by default |
+| **Xml** | ❌ Deferred | Use `XDocument` + data binding or `XslCompiledTransform` + `MarkupString` |
 
 ## See Also
 

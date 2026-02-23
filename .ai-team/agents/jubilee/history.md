@@ -42,6 +42,22 @@
 - **Nav ordering note:** Data Components section in NavMenu.razor is not strictly alphabetical (DataList before DataGrid). I placed DetailsView after DataGrid and before FormView to maintain the closest alphabetical order without rearranging existing entries.
 
 📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. 50/53 components (94%). — decided by Forge
+
+ Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
+
+### Milestone 4 — Chart Sample Pages (WI-6)
+
+- **Chart component API:** Uses child components (`ChartSeries`, `ChartArea`, `ChartTitle`, `ChartLegend`) inside a `<Chart>` parent via `CascadingValue`. Data is provided through `List<DataPoint>` on `ChartSeries.Points`, where each `DataPoint` has `XValue` (object) and `YValues` (double[]). Chart type is set via `SeriesChartType` enum on `ChartSeries.ChartType`.
+- **8 sample pages created:** Index (Column), Line, Bar, Pie, Area, Doughnut, Scatter, StackedColumn — each under `Components/Pages/ControlSamples/Chart/`.
+- **Multi-series demos:** Line (NY vs LA temps), StackedColumn (3 product lines) show how to add multiple `ChartSeries` children.
+- **Scatter uses `Point` type:** The `SeriesChartType` enum has `Point` (not `Scatter`), so the scatter sample uses `SeriesChartType.Point`.
+- **Axis config is a POCO:** `Axis` is a plain class (not a component), passed via parameter syntax `AxisX="@(new Axis { Title = "..." })"`.
+- **NavMenu Chart node:** Added under Data Components with `Expanded="false"` and 8 sub-nodes for each chart type, alphabetically ordered.
+- **ComponentList updated:** Replaced placeholder `Chart(?)` with a working link.
+
+
+ Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
+ Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
 📌 Team update (2026-02-12): LoginControls sample pages MUST include `@using BlazorWebFormsComponents.LoginControls` — root _Imports.razor doesn't cover sub-namespaces. Never use external image URLs in samples; use local SVGs. — decided by Colossus
 
 ### Utility Feature Sample Pages — DataBinder and ViewState
@@ -51,3 +67,14 @@
 - **Navigation fixes applied:** NavMenu.razor Login Components reordered (Login before LoginName), DataBinder and ViewState added to Utility Features (alphabetical: DataBinder, ID Rendering, PageService, ViewState). ComponentList.razor fixed: HyperLink moved before Image in Editor Controls, ImageMap removed from Editor Controls and added to Navigation Controls (per team decision), Utility Features column added. mkdocs.yml: ImageMap removed from Editor Controls nav (already in Navigation Controls).
 - **Widget model reused:** DataBinder sample reuses `SharedSampleObjects.Models.Widget` with inline data (Laptop Stand, USB-C Hub, Mechanical Keyboard) for a product catalog demo.
 - **Build verified:** `dotnet build` passes with 0 compilation errors (Debug config). Release config has a known transient Nerdbank.GitVersioning file-copy issue unrelated to this work.
+### Chart Feature-Rich Sample Pages (2026-02-12)
+
+- **4 new sample pages added:** DataBinding, MultiSeries, Styling, ChartAreas — each demonstrating advanced Chart features.
+- **DataBinding.razor:** Shows Web Forms-style data binding with `Items`, `XValueMember`, and `YValueMembers` parameters. Uses business object records (`SalesData`, `TrafficData`) instead of manual `DataPoint` creation. Includes Web Forms vs Blazor comparison code snippets.
+- **MultiSeries.razor:** Demonstrates multiple series on one chart for comparisons — revenue channels (Online vs In-Store), regional sales (3 regions), and server performance metrics (CPU vs Memory). Shows the pattern of adding multiple `<ChartSeries>` children to one `<Chart>`.
+- **Styling.razor:** Showcases all 11 `ChartPalette` options with visual comparisons (BrightPastel, Berry, Chocolate, EarthTones, Excel, Fire, Grayscale, Light, Pastel, SeaGreen, SemiTransparent). Demonstrates custom colors via `WebColor` static fields (e.g., `WebColor.DodgerBlue`).
+- **ChartAreas.razor:** Explains the `Axis` configuration options (Title, Minimum, Maximum, Interval, IsLogarithmic). Shows logarithmic scale for exponential data and constrained Y-axis for focused ranges.
+- **Nav ordering pattern:** New samples added alphabetically within Chart node: Area, Bar, ChartAreas, Column, DataBinding, Doughnut, Line, MultiSeries, Pie, Scatter, StackedColumn, Styling.
+- **WebColor usage:** Use static fields like `WebColor.DodgerBlue` not `WebColor.FromName("...")` which doesn't exist.
+
+

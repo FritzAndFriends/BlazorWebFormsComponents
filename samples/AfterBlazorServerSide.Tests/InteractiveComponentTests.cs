@@ -23,7 +23,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -84,7 +88,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -130,7 +138,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -173,7 +185,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -213,7 +229,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -262,7 +282,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -310,7 +334,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -351,7 +379,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -387,7 +419,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -427,7 +463,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -467,7 +507,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -503,7 +547,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -542,7 +590,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -586,7 +638,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -633,7 +689,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -678,7 +738,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -723,7 +787,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -771,7 +839,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -813,12 +885,12 @@ public class InteractiveComponentTests
                 WaitUntil = WaitUntilState.NetworkIdle
             });
 
-            // Verify menu content renders (the Menu component renders tables with menu items)
-            var menuTables = await page.Locator("table").AllAsync();
-            Assert.NotEmpty(menuTables);
+            // Verify menu content renders (the Menu component renders ul/li lists with menu items)
+            var menuLists = await page.Locator("ul").AllAsync();
+            Assert.NotEmpty(menuLists);
 
-            // Verify there are clickable elements (links or cells with menu text)
-            var menuItems = await page.Locator("td a, td").AllAsync();
+            // Verify there are clickable elements (links within list items)
+            var menuItems = await page.Locator("li a, li").AllAsync();
             Assert.NotEmpty(menuItems);
         }
         finally
@@ -838,7 +910,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -885,7 +961,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -933,7 +1013,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -1559,7 +1643,11 @@ public class InteractiveComponentTests
         {
             if (msg.Type == "error")
             {
-                consoleErrors.Add(msg.Text);
+                // Filter ASP.NET Core structured log messages
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+
+                    consoleErrors.Add(msg.Text);
             }
         };
 
@@ -1585,6 +1673,319 @@ public class InteractiveComponentTests
 
             // Assert no console errors
             Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Chart_DefaultPage_RendersCanvas()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Canvas element is rendered by the Chart component
+            var canvas = await page.QuerySelectorAsync("canvas");
+            Assert.NotNull(canvas);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Chart_LinePage_RendersCanvas()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart/Line", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Canvas element is rendered by the Chart component
+            var canvas = await page.QuerySelectorAsync("canvas");
+            Assert.NotNull(canvas);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Chart_PiePage_RendersCanvas()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart/Pie", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Canvas element is rendered by the Chart component
+            var canvas = await page.QuerySelectorAsync("canvas");
+            Assert.NotNull(canvas);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Theory]
+    [InlineData("/ControlSamples/Chart")]
+    [InlineData("/ControlSamples/Chart/Line")]
+    [InlineData("/ControlSamples/Chart/Bar")]
+    [InlineData("/ControlSamples/Chart/Pie")]
+    [InlineData("/ControlSamples/Chart/Area")]
+    [InlineData("/ControlSamples/Chart/Doughnut")]
+    [InlineData("/ControlSamples/Chart/Scatter")]
+    [InlineData("/ControlSamples/Chart/StackedColumn")]
+    public async Task Chart_AllTypes_RenderCanvas(string path)
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Every chart type renders a <canvas> element
+            var canvas = await page.QuerySelectorAsync("canvas");
+            Assert.NotNull(canvas);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that the Chart component renders a canvas with proper dimensions.
+    /// Chart.js requires the canvas to have width/height for proper rendering.
+    /// </summary>
+    [Fact]
+    public async Task Chart_RendersCanvas_WithDimensions()
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Wait for canvas to be present
+            var canvas = page.Locator("canvas").First;
+            await canvas.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
+
+            // Give Chart.js time to render
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify canvas has non-zero dimensions (Chart.js sets these after initialization)
+            var boundingBox = await canvas.BoundingBoxAsync();
+            Assert.NotNull(boundingBox);
+            Assert.True(boundingBox.Width > 0, "Canvas width should be greater than 0");
+            Assert.True(boundingBox.Height > 0, "Canvas height should be greater than 0");
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that all Chart types render a canvas element successfully.
+    /// </summary>
+    [Theory]
+    [InlineData("/ControlSamples/Chart")]
+    [InlineData("/ControlSamples/Chart/Line")]
+    [InlineData("/ControlSamples/Chart/Bar")]
+    [InlineData("/ControlSamples/Chart/Pie")]
+    [InlineData("/ControlSamples/Chart/Area")]
+    [InlineData("/ControlSamples/Chart/Doughnut")]
+    [InlineData("/ControlSamples/Chart/Scatter")]
+    [InlineData("/ControlSamples/Chart/StackedColumn")]
+    public async Task Chart_AllTypes_RenderCanvasWithDimensions(string path)
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Wait for canvas to be present
+            var canvas = page.Locator("canvas").First;
+            await canvas.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
+
+            // Give Chart.js a moment to finish rendering
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify canvas has non-zero dimensions (confirms Chart.js initialized)
+            var boundingBox = await canvas.BoundingBoxAsync();
+            Assert.NotNull(boundingBox);
+            Assert.True(boundingBox.Width > 0, $"Canvas width at {path} should be greater than 0");
+            Assert.True(boundingBox.Height > 0, $"Canvas height at {path} should be greater than 0");
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that Chart.js is loaded and initializes the canvas by checking 
+    /// that the canvas has been drawn on.
+    /// </summary>
+    [Fact]
+    public async Task Chart_ChartJsLibrary_IsInitialized()
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Wait for Chart.js to initialize - canvas should be present
+            var canvas = page.Locator("canvas").First;
+            await canvas.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
+
+            // Give Chart.js time to render
+            await page.WaitForTimeoutAsync(1000);
+
+            // Check that Chart.js is available as a global
+            var chartJsLoaded = await page.EvaluateAsync<bool>(@"() => {
+                return typeof Chart !== 'undefined';
+            }");
+
+            Assert.True(chartJsLoaded, "Chart.js should be loaded");
+
+            // Verify canvas has been drawn on by checking it has a 2D context
+            var canvasHasContent = await page.EvaluateAsync<bool>(@"() => {
+                const canvas = document.querySelector('canvas');
+                if (!canvas) return false;
+                const ctx = canvas.getContext('2d');
+                return ctx !== null && canvas.width > 0 && canvas.height > 0;
+            }");
+
+            Assert.True(canvasHasContent, "Canvas should have content rendered by Chart.js");
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that the Line chart page renders canvas elements for the chart.
+    /// </summary>
+    [Fact]
+    public async Task Chart_Line_RendersCanvasElement()
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart/Line", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Wait for Chart.js to initialize
+            var canvas = page.Locator("canvas").First;
+            await canvas.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
+
+            // Give Chart.js time to render
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify canvas exists and has dimensions
+            var boundingBox = await canvas.BoundingBoxAsync();
+            Assert.NotNull(boundingBox);
+            Assert.True(boundingBox.Width > 0, "Line chart canvas should have width");
+            Assert.True(boundingBox.Height > 0, "Line chart canvas should have height");
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that all chart types have a canvas that responds to Chart.js rendering.
+    /// After Chart.js initializes, the canvas internal dimensions reflect device pixel ratio.
+    /// </summary>
+    [Theory]
+    [InlineData("/ControlSamples/Chart")]
+    [InlineData("/ControlSamples/Chart/Line")]
+    [InlineData("/ControlSamples/Chart/Bar")]
+    [InlineData("/ControlSamples/Chart/Pie")]
+    [InlineData("/ControlSamples/Chart/Area")]
+    [InlineData("/ControlSamples/Chart/Doughnut")]
+    [InlineData("/ControlSamples/Chart/Scatter")]
+    [InlineData("/ControlSamples/Chart/StackedColumn")]
+    public async Task Chart_AllTypes_CanvasHasRenderingContext(string path)
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var canvas = page.Locator("canvas").First;
+            await canvas.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+
+            // Verify the canvas has a 2D rendering context (Chart.js uses 2D context)
+            var hasContext = await page.EvaluateAsync<bool>(@"() => {
+                const canvas = document.querySelector('canvas');
+                if (!canvas) return false;
+                const ctx = canvas.getContext('2d');
+                return ctx !== null;
+            }");
+
+            Assert.True(hasContext, $"Canvas at {path} should have a 2D rendering context");
         }
         finally
         {
