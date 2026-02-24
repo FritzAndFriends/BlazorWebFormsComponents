@@ -1,0 +1,47 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void BackImageUrl_RendersAsBackgroundImageInStyle()
+	{
+		var cut = Render(
+			@<Panel BackImageUrl="/images/bg.png">
+				<p>Content</p>
+			</Panel>
+		);
+
+		var div = cut.Find("div");
+		div.GetAttribute("style").ShouldContain("background-image:url(/images/bg.png)");
+	}
+
+	[Fact]
+	public void BackImageUrl_NotSet_NoBackgroundImage()
+	{
+		var cut = Render(
+			@<Panel>
+				<p>Content</p>
+			</Panel>
+		);
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		if (style != null)
+		{
+			style.ShouldNotContain("background-image");
+		}
+	}
+
+	[Fact]
+	public void BackImageUrl_WithUrlEncodedCharacters()
+	{
+		var cut = Render(
+			@<Panel BackImageUrl="/images/my%20background.png">
+				<p>Content</p>
+			</Panel>
+		);
+
+		var div = cut.Find("div");
+		div.GetAttribute("style").ShouldContain("background-image:url(/images/my%20background.png)");
+	}
+}

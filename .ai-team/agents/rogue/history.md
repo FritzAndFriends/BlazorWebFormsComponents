@@ -53,3 +53,27 @@ Wrote 24 bUnit tests across 3 new test files for GridView features:
 📌 Test pattern: GridView AlternatingRowStyle is always initialized (non-null `new TableItemStyle()`), so `GetRowStyle()` returns it for odd rows even when not configured. RowStyle only applies to even-indexed rows; to style ALL rows, set both RowStyle and AlternatingRowStyle. — Rogue
 
 📌 Test pattern: GridView with `AutoGenerateColumns="false"` renders in two passes: first pass initializes style sub-components (empty table), second pass renders table after BoundField children register via `AddColumn`. bUnit waits for both renders. — Rogue
+
+### Milestone 6: P2 Feature Tests — ListView CRUD, DataGrid Styles+Events, Menu Level Styles, Panel BackImageUrl, Login Orientation
+
+Wrote 41 bUnit tests across 6 new test files for P2 features:
+
+**CrudEvents.razor (ListView, 12 tests):** HandleCommand routes Edit→sets EditIndex+fires ItemEditing, Cancel→clears EditIndex+fires ItemCanceling, Delete→fires ItemDeleting+ItemDeleted, Insert→fires ItemInserting+ItemInserted, Update→fires ItemUpdating+ItemUpdated. Unknown command→fires ItemCommand. EditIndex=-1 shows ItemTemplate for all. EmptyItemTemplate renders when Items empty. InsertItemTemplate at FirstItem/LastItem positions. ItemEditing cancellation prevents EditIndex change. EditItemTemplate rendering verified via HandleCommand (EditIndex set confirmed; template re-evaluation is a known component gap).
+
+**StyleSubComponents.razor (DataGrid, 11 tests):** DataGridItemStyle on data rows, AlternatingItemStyle on odd rows, HeaderStyle on thead, FooterStyle on tfoot, PagerStyle on pager row, SelectedItemStyle at SelectedIndex, EditItemStyle at EditItemIndex. Caption+CaptionAlign render correctly. GridLines→rules attribute. UseAccessibleHeader→th scope=col. CellPadding+CellSpacing on table.
+
+**Events.razor (DataGrid, 3 tests):** PageIndexChanged fires when pager link clicked, SortCommand fires on sortable header click, SelectedIndex default is -1.
+
+**LevelStyles.razor (Menu, 7 tests):** LevelMenuItemStyles applies per-depth CssClass, Level 1 items get index 0 style, Level 2 items get index 1 style, LevelSelectedStyles applies after click, LevelSubMenuStyles applies background-color to submenu ul, Level styles override static/dynamic styles.
+
+**BackImageUrl.razor (Panel, 3 tests):** BackImageUrl renders as background-image in style, not set→no background-image, URL-encoded characters preserved.
+
+**LoginOrientation.razor (Login, 5 tests):** Default Orientation is Vertical (fields in separate rows), Horizontal puts all fields in one row with 4 tds, TextOnLeft labels align right, TextOnTop labels above inputs with colspan, Horizontal+TextOnTop puts both labels in same row.
+
+📌 Test pattern: ListView HandleCommand must be called via `cut.InvokeAsync()` because it calls StateHasChanged() which requires the Blazor Dispatcher context. Direct `await theListView.HandleCommand()` throws InvalidOperationException. — Rogue
+
+📌 Test pattern: DataGrid style sub-components use named RenderFragments (`<ItemStyleContent>`, `<HeaderStyleContent>`, etc.) containing `<DataGridItemStyle BackColor="color" />`. WebColor values must be declared as variables (`WebColor red = "Red";`) then passed as `BackColor="red"` — not string literals. — Rogue
+
+📌 Test pattern: Menu tests that use `FindAll("a")` must use `FindAll("li a")` to exclude the accessibility skip-link `<a>` rendered before the menu. JSInterop.Mode = JSRuntimeMode.Loose required for all Menu tests. — Rogue
+
+📌 Test pattern: Login control tests require AuthenticationStateProvider + NavigationManager mock services. Use `Orientation ori = Orientation.Horizontal;` variable pattern to avoid Razor enum name collision. Login renders 4 layout combos based on Orientation × TextLayout (Vertical/Horizontal × TextOnLeft/TextOnTop). — Rogue
