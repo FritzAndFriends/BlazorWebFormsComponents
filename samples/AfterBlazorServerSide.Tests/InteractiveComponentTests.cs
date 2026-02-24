@@ -2175,7 +2175,7 @@ public class InteractiveComponentTests
             Assert.True(rows.Count > 1, "GridView should have header and data rows");
 
             // Initial selected index should be -1
-            var selectionInfo = page.Locator("text=Selected index:");
+            var selectionInfo = page.Locator("p").Filter(new() { HasTextString = "Selected index:" });
             var initialText = await selectionInfo.TextContentAsync();
             Assert.Contains("-1", initialText);
 
@@ -2189,7 +2189,7 @@ public class InteractiveComponentTests
             Assert.DoesNotContain("-1", updatedText);
 
             // Verify selection count incremented
-            var countInfo = page.Locator("text=Selection changes:");
+            var countInfo = page.Locator("p").Filter(new() { HasTextString = "Selection changes:" });
             var countText = await countInfo.TextContentAsync();
             Assert.Contains("1", countText);
 
@@ -2286,7 +2286,7 @@ public class InteractiveComponentTests
             Assert.True(await selectedNode.First.IsVisibleAsync(), "Selected node text should be displayed");
 
             // Verify selection count incremented
-            var countInfo = page.Locator("text=Selection count:");
+            var countInfo = page.Locator("div").Filter(new() { HasTextString = "Selection count:" }).Last;
             var countText = await countInfo.TextContentAsync();
             Assert.Contains("1", countText);
 
@@ -2378,7 +2378,7 @@ public class InteractiveComponentTests
             await page.WaitForTimeoutAsync(500);
 
             // Verify click count incremented
-            var countInfo = page.Locator("text=Click count:");
+            var countInfo = page.Locator("div").Filter(new() { HasTextString = "Click count:" }).Last;
             var countText = await countInfo.TextContentAsync();
             Assert.Contains("1", countText);
         }
@@ -2495,8 +2495,8 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Wait for the FormView to render item template
-            await page.WaitForSelectorAsync("button, input[type='submit']", new PageWaitForSelectorOptions { Timeout = 5000 });
+            // Wait for the FormView to render item template with Edit button
+            await page.WaitForSelectorAsync("button:has-text('Edit')", new PageWaitForSelectorOptions { Timeout = 10000 });
 
             // Verify initial state shows no events
             var noEvents = page.Locator("text=No events yet");
@@ -2505,7 +2505,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(tables);
 
             // Click the Edit button
-            var editButton = page.Locator("button:has-text('Edit'), input[value='Edit']").First;
+            var editButton = page.Locator("button:has-text('Edit')").First;
             await editButton.ClickAsync();
             await page.WaitForTimeoutAsync(500);
 
@@ -2553,8 +2553,8 @@ public class InteractiveComponentTests
             var tables = await page.Locator("table").AllAsync();
             Assert.NotEmpty(tables);
 
-            // Verify header text is present (HeaderText="Widget Catalog")
-            var headerText = page.Locator("text=Widget Catalog");
+            // Verify header text is present (HeaderText="Widget Catalog") — target <td> to avoid matching code example
+            var headerText = page.Locator("td").Filter(new() { HasTextString = "Widget Catalog" }).First;
             Assert.True(await headerText.IsVisibleAsync(), "Header text 'Widget Catalog' should be visible");
 
             Assert.Empty(consoleErrors);
