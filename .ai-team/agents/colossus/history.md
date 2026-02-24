@@ -16,3 +16,14 @@ Chart: 8 smoke tests + 11 canvas tests + 19 enhanced visual tests (dimensions, C
 
  Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers  decided by Forge
  Team update (2026-02-23): UI overhaul requested  Colossus assigned integration tests (UI-9)  decided by Jeffrey T. Fritz
+
+## Summary: Milestone 7 Integration Tests (2026-02-24)
+
+Added 9 smoke tests and 9 interaction tests for M7 sample pages: GridView Selection/DisplayProperties, TreeView Selection/ExpandCollapse, Menu Selection, DetailsView Styles/Caption, FormView Events/Styles. Menu Selection test skips console error checks (JS interop). FormView tests use DOMContentLoaded (items bound in OnAfterRenderAsync). Build verified green.
+
+## Learnings
+
+- FormView sample pages bind Items in `OnAfterRenderAsync`, so tests must use `WaitUntilState.DOMContentLoaded` + explicit `WaitForSelectorAsync` instead of `NetworkIdle`.
+- Menu interaction tests should always skip console error checks — the Menu component's JS interop (`bwfc.Page.AddScriptElement`) produces expected console errors in headless Playwright.
+- GridView Selection pages render Select links as `<a>` elements inside `<tbody>` rows — use `tbody tr:first-child a` with `HasTextString = "Select"` to target them.
+- DetailsView Caption renders actual `<caption>` HTML elements that can be directly queried.

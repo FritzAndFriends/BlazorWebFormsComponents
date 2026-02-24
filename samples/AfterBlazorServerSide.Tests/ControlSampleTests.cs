@@ -70,9 +70,15 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/GridView/Paging")]
     [InlineData("/ControlSamples/GridView/Sorting")]
     [InlineData("/ControlSamples/GridView/InlineEditing")]
+    [InlineData("/ControlSamples/GridView/Selection")]
+    [InlineData("/ControlSamples/GridView/DisplayProperties")]
     [InlineData("/ControlSamples/FormView/Simple")]
     [InlineData("/ControlSamples/FormView/Edit")]
+    [InlineData("/ControlSamples/FormView/Events")]
+    [InlineData("/ControlSamples/FormView/Styles")]
     [InlineData("/ControlSamples/DetailsView")]
+    [InlineData("/ControlSamples/DetailsView/Styles")]
+    [InlineData("/ControlSamples/DetailsView/Caption")]
     public async Task DataControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -136,6 +142,8 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/TreeView/ShowLines")]
     [InlineData("/ControlSamples/TreeView/SiteMapDataSource")]
     [InlineData("/ControlSamples/TreeView/XmlDataSource")]
+    [InlineData("/ControlSamples/TreeView/Selection")]
+    [InlineData("/ControlSamples/TreeView/ExpandCollapse")]
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -146,6 +154,7 @@ public class ControlSampleTests
     [Theory]
     [InlineData("/ControlSamples/Menu")]
     [InlineData("/ControlSamples/Menu/DatabindingSitemap")]
+    [InlineData("/ControlSamples/Menu/Selection")]
     public async Task MenuControl_Loads_AndRendersContent(string path)
     {
         await VerifyMenuPageLoads(path);

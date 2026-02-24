@@ -38,37 +38,115 @@
 								@if (!string.IsNullOrEmpty(TitleText))
 								{
 									<tr>
-										<td align="center" colspan="2" style="@TitleTextStyle" class="@TitleTextStyle.CssClass">@TitleText</td>
+										<td align="center" colspan="@TotalColspan" style="@TitleTextStyle" class="@TitleTextStyle.CssClass">@TitleText</td>
 									</tr>
 								}
 								@if (!string.IsNullOrEmpty(InstructionText))
 								{
 									<tr>
-										<td align="center" colspan="2" style="@InstructionTextStyle" class="@InstructionTextStyle.CssClass">@InstructionText</td>
+										<td align="center" colspan="@TotalColspan" style="@InstructionTextStyle" class="@InstructionTextStyle.CssClass">@InstructionText</td>
 									</tr>
 								}
-								<tr>
-									<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
-										<label for="@(ID + "_UserName")">@UserNameLabelText</label>
-									</td>
-									<td>
-										<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
-										<RequiredFieldValidator @ref="UsernameValidator" ControlRef="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
-									</td>
-								</tr>
-								<tr>
-									<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
-										<label for="@(ID + "_Password")">@PasswordLabelText</label>
-									</td>
-									<td>
-										<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
-										<RequiredFieldValidator @ref="PasswordValidator" ControlRef="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
-									</td>
-								</tr>
+								@if (IsVertical)
+								{
+									@* Vertical layout: each field in its own row *@
+									@if (IsTextOnLeft)
+									{
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_UserName")">@UserNameLabelText</label>
+											</td>
+											<td>
+												<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
+												<RequiredFieldValidator @ref="UsernameValidator" ControlRef="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
+											</td>
+										</tr>
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Password")">@PasswordLabelText</label>
+											</td>
+											<td>
+												<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
+												<RequiredFieldValidator @ref="PasswordValidator" ControlRef="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
+											</td>
+										</tr>
+									}
+									else
+									{
+										@* TextOnTop: label above input *@
+										<tr>
+											<td colspan="2" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_UserName")">@UserNameLabelText</label>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
+												<RequiredFieldValidator @ref="UsernameValidator" ControlRef="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Password")">@PasswordLabelText</label>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
+												<RequiredFieldValidator @ref="PasswordValidator" ControlRef="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
+											</td>
+										</tr>
+									}
+								}
+								else
+								{
+									@* Horizontal layout: fields side-by-side *@
+									@if (IsTextOnLeft)
+									{
+										<tr>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_UserName")">@UserNameLabelText</label>
+											</td>
+											<td>
+												<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
+												<RequiredFieldValidator @ref="UsernameValidator" ControlRef="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
+											</td>
+											<td align="right" style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Password")">@PasswordLabelText</label>
+											</td>
+											<td>
+												<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
+												<RequiredFieldValidator @ref="PasswordValidator" ControlRef="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
+											</td>
+										</tr>
+									}
+									else
+									{
+										@* Horizontal + TextOnTop: labels on top row, inputs on bottom *@
+										<tr>
+											<td style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_UserName")">@UserNameLabelText</label>
+											</td>
+											<td style="@LabelStyle" class="@LabelStyle.CssClass">
+												<label for="@(ID + "_Password")">@PasswordLabelText</label>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<InputText @ref="UsernameInput.Current" @bind-Value="@Model.Username" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_UserName")" />
+												<RequiredFieldValidator @ref="UsernameValidator" ControlRef="UsernameInput" Text="*" ErrorMessage="@UserNameRequiredErrorMessage" />
+											</td>
+											<td>
+												<InputText @ref="PasswordInput.Current" type="password" @bind-Value="@Model.Password" style="@TextBoxStyle" class="@TextBoxStyle.CssClass" id="@(ID + "_Password")" />
+												<RequiredFieldValidator @ref="PasswordValidator" ControlRef="PasswordInput" Text="*" ErrorMessage="@PasswordRequiredErrorMessage" />
+											</td>
+										</tr>
+									}
+								}
 								@if (DisplayRememberMe)
 								{
 									<tr>
-										<td colspan="2" style="@CheckBoxStyle" class="@CheckBoxStyle.CssClass">
+										<td colspan="@TotalColspan" style="@CheckBoxStyle" class="@CheckBoxStyle.CssClass">
 											<InputCheckbox @bind-Value="@Model.RememberMe" id="@(ID + "_RememberMe")" name="@(ID + "$RememberMe")" />
 											<label for="@(ID + "_RememberMe")">@RememberMeText</label>
 										</td>
@@ -77,13 +155,13 @@
 								@if (ShowFailureText)
 								{
 									<tr>
-										<td align="center" colspan="2" style="@FailureTextStyle" class="@FailureTextStyle.CssClass">
+										<td align="center" colspan="@TotalColspan" style="@FailureTextStyle" class="@FailureTextStyle.CssClass">
 											@FailureText
 										</td>
 									</tr>
 								}
 								<tr>
-									<td align="right" colspan="2" style="@HyperLinkStyle" class="@HyperLinkStyle.CssClass">
+									<td align="right" colspan="@TotalColspan" style="@HyperLinkStyle" class="@HyperLinkStyle.CssClass">
 										@switch (LoginButtonType)
 										{
 											case ButtonButtonType b:
@@ -157,6 +235,10 @@
 @code {
 	public ForwardRef<InputBase<string>> UsernameInput = new ForwardRef<InputBase<string>>();
 	public ForwardRef<InputBase<string>> PasswordInput = new ForwardRef<InputBase<string>>();
+
+	private bool IsVertical => Orientation == Enums.Orientation.Vertical;
+	private bool IsTextOnLeft => TextLayout == LoginTextLayout.TextOnLeft;
+	private int TotalColspan => IsVertical ? 2 : (IsTextOnLeft ? 4 : 2);
 
 	private string GetCssClassOrNull()
 	{

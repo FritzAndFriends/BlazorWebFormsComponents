@@ -71,6 +71,62 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
+		#region Level Styles
+
+		/// <summary>
+		/// A collection of MenuLevelStyle objects where index 0 = level 1 styles, index 1 = level 2 styles, etc.
+		/// Overrides StaticMenuItemStyle/DynamicMenuItemStyle for items at specific depth levels.
+		/// </summary>
+		[Parameter]
+		public List<MenuLevelStyle> LevelMenuItemStyles { get; set; }
+
+		/// <summary>
+		/// A collection of MenuLevelStyle objects for selected items at each depth level.
+		/// </summary>
+		[Parameter]
+		public List<MenuLevelStyle> LevelSelectedStyles { get; set; }
+
+		/// <summary>
+		/// A collection of MenuLevelStyle objects for submenu containers at each depth level.
+		/// </summary>
+		[Parameter]
+		public List<MenuLevelStyle> LevelSubMenuStyles { get; set; }
+
+		/// <summary>
+		/// Gets the level menu item style for a given depth, or null if none defined.
+		/// </summary>
+		internal MenuLevelStyle GetLevelMenuItemStyle(int depth)
+		{
+			var index = depth - 1;
+			if (LevelMenuItemStyles != null && index >= 0 && index < LevelMenuItemStyles.Count)
+				return LevelMenuItemStyles[index];
+			return null;
+		}
+
+		/// <summary>
+		/// Gets the level selected style for a given depth, or null if none defined.
+		/// </summary>
+		internal MenuLevelStyle GetLevelSelectedStyle(int depth)
+		{
+			var index = depth - 1;
+			if (LevelSelectedStyles != null && index >= 0 && index < LevelSelectedStyles.Count)
+				return LevelSelectedStyles[index];
+			return null;
+		}
+
+		/// <summary>
+		/// Gets the level submenu style for a given depth, or null if none defined.
+		/// </summary>
+		internal MenuLevelStyle GetLevelSubMenuStyle(int depth)
+		{
+			var index = depth - 1;
+			if (LevelSubMenuStyles != null && index >= 0 && index < LevelSubMenuStyles.Count)
+				return LevelSubMenuStyles[index];
+			return null;
+		}
+
+		#endregion
+
 		#region WI-21: Selection tracking and events
 
 		/// <summary>

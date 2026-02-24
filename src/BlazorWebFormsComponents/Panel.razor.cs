@@ -26,6 +26,9 @@ namespace BlazorWebFormsComponents
 		public ScrollBars ScrollBars { get; set; } = ScrollBars.None;
 
 		[Parameter]
+		public string BackImageUrl { get; set; }
+
+		[Parameter]
 		public bool Wrap { get; set; } = true;
 
 		private string DirectionAttr => Direction switch
@@ -63,6 +66,10 @@ namespace BlazorWebFormsComponents
 			};
 			if (overflowStyle != null)
 				styles.Add(overflowStyle);
+
+			// Add BackImageUrl
+			if (!string.IsNullOrEmpty(BackImageUrl))
+				styles.Add($"background-image:url({BackImageUrl})");
 
 			// Add Wrap
 			if (!Wrap)

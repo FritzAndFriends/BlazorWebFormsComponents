@@ -21,11 +21,16 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		#region Not implemented yet
 
-		//[Parameter] public Orientation Orientation { get; set; }
-		//[Parameter] public LoginTextLayout TextLayout { get; set; }
 		//[Parameter] public LoginFailureAction FailureAction { get; set; }
 		//[Parameter] public ITemplate LayoutTemplate { get; set; }
 		//[Parameter] public bool RenderOuterTable { get; set; } = true;
+
+		#endregion
+
+		#region Layout
+
+		[Parameter] public Orientation Orientation { get; set; } = Orientation.Vertical;
+		[Parameter] public LoginTextLayout TextLayout { get; set; } = LoginTextLayout.TextOnLeft;
 
 		#endregion
 

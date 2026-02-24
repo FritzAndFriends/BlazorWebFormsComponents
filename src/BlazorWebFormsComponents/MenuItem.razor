@@ -1,10 +1,10 @@
 @inherits BaseWebFormsComponent
 
 <li>
-    <a title="@Title" class="@($"level{Depth}")" href="@NavigateUrl" target="@EffectiveTarget" @onclick="HandleClick" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))">@Text</a>
+    <a title="@Title" class="@GetItemCssClass()" style="@GetItemStyle()" href="@NavigateUrl" target="@EffectiveTarget" @onclick="HandleClick" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))">@Text</a>
     @if (ChildContent != null && ParentMenu.StaticDisplayLevels <= Depth)
     {
-        <ul class="level@(Depth+1)">
+        <ul class="level@(Depth+1)" style="@GetSubMenuStyle()">
             <CascadingValue Name="Depth" Value="@(Depth+1)">
                 @ChildContent
             </CascadingValue>
@@ -16,4 +16,32 @@
   <CascadingValue Name="Depth" Value="@(Depth+1)">
       @ChildContent
   </CascadingValue>
+}
+
+@code {
+    private string GetItemCssClass()
+    {
+        var levelStyle = ParentMenu?.GetLevelMenuItemStyle(Depth);
+        var selectedStyle = IsSelected ? ParentMenu?.GetLevelSelectedStyle(Depth) : null;
+        var cssClass = selectedStyle?.CssClass ?? levelStyle?.CssClass;
+        return !string.IsNullOrEmpty(cssClass) ? $"level{Depth} {cssClass}" : $"level{Depth}";
+    }
+
+    private string GetItemStyle()
+    {
+        var selectedStyle = IsSelected ? ParentMenu?.GetLevelSelectedStyle(Depth) : null;
+        if (selectedStyle != null)
+            return selectedStyle.ToString();
+
+        var levelStyle = ParentMenu?.GetLevelMenuItemStyle(Depth);
+        return levelStyle?.ToString();
+    }
+
+    private string GetSubMenuStyle()
+    {
+        var subMenuStyle = ParentMenu?.GetLevelSubMenuStyle(Depth + 1);
+        return subMenuStyle?.ToString();
+    }
+
+    private bool IsSelected => ParentMenu?.SelectedItem == this;
 }

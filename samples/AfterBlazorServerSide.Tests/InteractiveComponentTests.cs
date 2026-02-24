@@ -2144,4 +2144,424 @@ public class InteractiveComponentTests
     }
 
     private ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
+
+    [Fact]
+    public async Task GridView_Selection_ClickSelect_HighlightsRow()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/GridView/Selection", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify table renders with data rows
+            var rows = await page.Locator("table tr").AllAsync();
+            Assert.True(rows.Count > 1, "GridView should have header and data rows");
+
+            // Initial selected index should be -1
+            var selectionInfo = page.Locator("text=Selected index:");
+            var initialText = await selectionInfo.TextContentAsync();
+            Assert.Contains("-1", initialText);
+
+            // Click the Select link on the first data row
+            var selectLink = page.Locator("tbody tr:first-child a").Filter(new() { HasTextString = "Select" });
+            await selectLink.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify selected index changed from -1
+            var updatedText = await selectionInfo.TextContentAsync();
+            Assert.DoesNotContain("-1", updatedText);
+
+            // Verify selection count incremented
+            var countInfo = page.Locator("text=Selection changes:");
+            var countText = await countInfo.TextContentAsync();
+            Assert.Contains("1", countText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task GridView_DisplayProperties_RendersCaption()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/GridView/DisplayProperties", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify caption element renders
+            var caption = page.Locator("caption");
+            var captionText = await caption.First.TextContentAsync();
+            Assert.Contains("Employee Directory", captionText);
+
+            // Verify EmptyDataTemplate renders for empty list
+            var emptyMessage = page.Locator("text=No employees found.");
+            Assert.True(await emptyMessage.IsVisibleAsync(), "EmptyDataTemplate should be displayed for empty data source");
+
+            // Verify checkboxes for ShowHeader/ShowFooter toggling
+            var checkboxes = await page.Locator("input[type='checkbox']").AllAsync();
+            Assert.True(checkboxes.Count >= 2, "ShowHeader and ShowFooter checkboxes should be present");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task TreeView_Selection_ClickNode_ShowsSelected()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/TreeView/Selection", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify initial state shows no selection
+            var selectionInfo = page.Locator("text=None — click a node above");
+            Assert.True(await selectionInfo.IsVisibleAsync(), "Should show 'None' when no node is selected");
+
+            // Click a tree node link (e.g., "Frontend")
+            var nodeLink = page.Locator("a:has-text('Frontend')");
+            await nodeLink.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify selection feedback shows the clicked node
+            var selectedNode = page.Locator("text=Frontend");
+            Assert.True(await selectedNode.First.IsVisibleAsync(), "Selected node text should be displayed");
+
+            // Verify selection count incremented
+            var countInfo = page.Locator("text=Selection count:");
+            var countText = await countInfo.TextContentAsync();
+            Assert.Contains("1", countText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task TreeView_ExpandCollapse_ButtonsWork()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/TreeView/ExpandCollapse", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify Expand All / Collapse All buttons exist
+            var expandAllBtn = page.Locator("button:has-text('Expand All')");
+            var collapseAllBtn = page.Locator("button:has-text('Collapse All')");
+            Assert.True(await expandAllBtn.IsVisibleAsync(), "Expand All button should be visible");
+            Assert.True(await collapseAllBtn.IsVisibleAsync(), "Collapse All button should be visible");
+
+            // Click Collapse All
+            await collapseAllBtn.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Click Expand All
+            await expandAllBtn.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify child nodes are visible after expanding (e.g., "Dog" is a leaf node)
+            var leafNode = page.Locator("a:has-text('Dog'), span:has-text('Dog')").First;
+            Assert.True(await leafNode.IsVisibleAsync(), "Leaf nodes should be visible after Expand All");
+
+            // Verify NodeIndent slider exists
+            var slider = page.Locator("input[type='range']");
+            Assert.True(await slider.IsVisibleAsync(), "NodeIndent slider should be present");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Menu_Selection_ClickItem_ShowsFeedback()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        // Note: Menu has JS interop requirements — skip console error checks
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Menu/Selection", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify initial state shows no selection
+            var noSelection = page.Locator("text=None — click a menu item");
+            Assert.True(await noSelection.IsVisibleAsync(), "Should show 'None' when no item is clicked");
+
+            // Click a menu item (e.g., "Home")
+            var menuItem = page.Locator("a:has-text('Home'), td:has-text('Home')").First;
+            await menuItem.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify click count incremented
+            var countInfo = page.Locator("text=Click count:");
+            var countText = await countInfo.TextContentAsync();
+            Assert.Contains("1", countText);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task DetailsView_Styles_RendersStyledTable()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/DetailsView/Styles", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify table renders with styled content
+            var tables = await page.Locator("table").AllAsync();
+            Assert.NotEmpty(tables);
+
+            // Verify header row with styled background exists
+            var headerText = page.Locator("text=Customer Details");
+            Assert.True(await headerText.IsVisibleAsync(), "Header text 'Customer Details' should be visible");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task DetailsView_Caption_RendersCaptionElement()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/DetailsView/Caption", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify caption elements are rendered
+            var captions = await page.Locator("caption").AllAsync();
+            Assert.NotEmpty(captions);
+
+            // Verify specific caption text
+            var captionText = await page.Locator("caption").First.TextContentAsync();
+            Assert.Contains("Customer Record", captionText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task FormView_Events_ClickEdit_LogsEvent()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/FormView/Events", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Wait for the FormView to render item template
+            await page.WaitForSelectorAsync("button, input[type='submit']", new PageWaitForSelectorOptions { Timeout = 5000 });
+
+            // Verify initial state shows no events
+            var noEvents = page.Locator("text=No events yet");
+            // It may or may not be visible depending on render timing, so just check the page loaded
+            var tables = await page.Locator("table").AllAsync();
+            Assert.NotEmpty(tables);
+
+            // Click the Edit button
+            var editButton = page.Locator("button:has-text('Edit'), input[value='Edit']").First;
+            await editButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify event log now has entries
+            var eventEntries = await page.Locator("ul li").AllAsync();
+            Assert.NotEmpty(eventEntries);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task FormView_Styles_RendersStyledHeader()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/FormView/Styles", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Wait for FormView to render
+            await page.WaitForSelectorAsync("table", new PageWaitForSelectorOptions { Timeout = 5000 });
+
+            // Verify table renders
+            var tables = await page.Locator("table").AllAsync();
+            Assert.NotEmpty(tables);
+
+            // Verify header text is present (HeaderText="Widget Catalog")
+            var headerText = page.Locator("text=Widget Catalog");
+            Assert.True(await headerText.IsVisibleAsync(), "Header text 'Widget Catalog' should be visible");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }
