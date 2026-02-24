@@ -1,4 +1,4 @@
-﻿@page "/ControlSamples/CompareValidator"
+@page "/ControlSamples/CompareValidator"
 
 <h3>Compare Validator</h3>
 @using BlazorWebFormsComponents.Validations;
@@ -7,7 +7,7 @@
 
 	<label>Write a number greater than 10</label>
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
-	<CompareValidator ControlToValidate="@Name"
+	<CompareValidator ControlRef="@Name"
 										Type="Integer"
 										Operator="GreaterThan"
 										ValueToCompare="10"
@@ -39,5 +39,5 @@
 
 <p>Code:</p>
 <code>
-&lt;CompareValidator ControlToValidate="@@Name" Type="Integer" Operator="GreaterThan" ValueToCompare="10" Text="Number must be greater than 10" /&gt;
+&lt;CompareValidator ControlRef="@@Name" Type="Integer" Operator="GreaterThan" ValueToCompare="10" Text="Number must be greater than 10" /&gt;
 </code>

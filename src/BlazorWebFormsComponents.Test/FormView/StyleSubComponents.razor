@@ -1,0 +1,145 @@
+@using static BlazorWebFormsComponents.WebColor
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void FormView_RowStyle_AppliedToItemRow()
+	{
+		WebColor red = "Red";
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<RowStyleContent>
+					<FormViewRowStyle BackColor="red" />
+				</RowStyleContent>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FormView_HeaderStyle_AppliedToHeader()
+	{
+		WebColor green = "Green";
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				HeaderText="Header">
+				<HeaderStyleContent>
+					<FormViewHeaderStyle BackColor="green" />
+				</HeaderStyleContent>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FormView_FooterStyle_AppliedToFooter()
+	{
+		WebColor navy = "Navy";
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				FooterText="Footer">
+				<FooterStyleContent>
+					<FormViewFooterStyle BackColor="navy" />
+				</FooterStyleContent>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FormView_EditRowStyle_AppliedInEditMode()
+	{
+		WebColor orange = "Orange";
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				DefaultMode="FormViewMode.Edit">
+				<EditRowStyleContent>
+					<FormViewEditRowStyle BackColor="orange" />
+				</EditRowStyleContent>
+				<EditItemTemplate>
+					<span>Editing @Item.Name</span>
+				</EditItemTemplate>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FormView_InsertRowStyle_AppliedInInsertMode()
+	{
+		WebColor lime = "Lime";
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				DefaultMode="FormViewMode.Insert">
+				<InsertRowStyleContent>
+					<FormViewInsertRowStyle BackColor="lime" />
+				</InsertRowStyleContent>
+				<InsertItemTemplate>
+					<span>Inserting</span>
+				</InsertItemTemplate>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FormView_EmptyDataRowStyle_AppliedWhenNoData()
+	{
+		WebColor fuchsia = "Fuchsia";
+		Widget[] emptyItems = Array.Empty<Widget>();
+
+		var cut = Render(
+			@<FormView Items="emptyItems" ItemType="Widget" Context="Item"
+				EmptyDataText="No data">
+				<EmptyDataRowStyleContent>
+					<FormViewEmptyDataRowStyle BackColor="fuchsia" />
+				</EmptyDataRowStyleContent>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FormView_PagerStyle_AppliedToPager()
+	{
+		WebColor silver = "Silver";
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				AllowPaging="true">
+				<PagerStyleContent>
+					<FormViewPagerStyle BackColor="silver" />
+				</PagerStyleContent>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("background-color");
+	}
+}

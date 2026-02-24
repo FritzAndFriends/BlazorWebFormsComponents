@@ -1,0 +1,65 @@
+@page "/ControlSamples/DetailsView/Caption"
+@using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
+
+<PageTitle>DetailsView Caption</PageTitle>
+
+<h2>DetailsView Caption &amp; CaptionAlign</h2>
+
+<p>This sample demonstrates the <code>Caption</code> and <code>CaptionAlign</code> properties
+   which render a <code>&lt;caption&gt;</code> element on the underlying table.</p>
+
+<hr />
+
+<h3>Caption (Default Alignment)</h3>
+
+<DetailsView ItemType="Customer"
+             Items="@_customers"
+             AutoGenerateRows="true"
+             Caption="Customer Record"
+             GridLines="GridLines.Both" />
+
+<hr />
+
+<h3>CaptionAlign Variations</h3>
+<p>The <code>CaptionAlign</code> property positions the caption relative to the table.
+   Values: <code>Top</code> (default), <code>Bottom</code>, <code>Left</code>, <code>Right</code>.</p>
+
+<div style="display:flex; flex-wrap:wrap; gap:30px;">
+    <div>
+        <h4>Top</h4>
+        <DetailsView ItemType="Customer"
+                     Items="@_customers"
+                     AutoGenerateRows="true"
+                     Caption="Top Caption"
+                     CaptionAlign="TableCaptionAlign.Top"
+                     GridLines="GridLines.Both" />
+    </div>
+    <div>
+        <h4>Bottom</h4>
+        <DetailsView ItemType="Customer"
+                     Items="@_customers"
+                     AutoGenerateRows="true"
+                     Caption="Bottom Caption"
+                     CaptionAlign="TableCaptionAlign.Bottom"
+                     GridLines="GridLines.Both" />
+    </div>
+</div>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;DetailsView ItemType="Customer"
+             Items="@@_customers"
+             AutoGenerateRows="true"
+             Caption="Customer Record"
+             CaptionAlign="TableCaptionAlign.Top"
+             GridLines="GridLines.Both" /&gt;</code></pre>
+
+@code {
+
+    private List<Customer> _customers = new()
+    {
+        new Customer { CustomerID = 1, FirstName = "Alice", LastName = "Williams", CompanyName = "Innovation Labs" }
+    };
+}

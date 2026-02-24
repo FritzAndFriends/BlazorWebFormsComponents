@@ -2,6 +2,19 @@
 @inherits DataBoundComponent<ItemType>
 @typeparam ItemType
 
+<CascadingValue Name="ParentDetailsView" Value="this" IsFixed="true">
+	@RowStyleContent
+	@AlternatingRowStyleContent
+	@HeaderStyleContent
+	@FooterStyleContent
+	@CommandRowStyleContent
+	@EditRowStyleContent
+	@InsertRowStyleContent
+	@FieldHeaderStyleContent
+	@EmptyDataRowStyleContent
+	@PagerStyleContent
+</CascadingValue>
+
 @if (Visible)
 {
 	<table @attributes="AdditionalAttributes"
@@ -12,10 +25,15 @@
 		   style="@CombinedStyle"
 		   class="@CssClass">
 
+		@if (!string.IsNullOrEmpty(Caption))
+		{
+			<caption style="@GetCaptionStyle()">@Caption</caption>
+		}
+
 		@* Header Row *@
 		@if (HeaderTemplate != null || !string.IsNullOrEmpty(HeaderText))
 		{
-			<tr>
+			<tr style="@HeaderStyle?.ToString()">
 				<td colspan="2">
 					@if (HeaderTemplate != null)
 					{
@@ -36,8 +54,9 @@
 			@foreach (var field in fieldList)
 			{
 				var isAlternating = rowIndex % 2 == 1;
-				<tr>
-					<td>@field.HeaderText</td>
+				var currentRowStyle = GetRowStyle(rowIndex);
+				<tr style="@currentRowStyle?.ToString()">
+					<td style="@FieldHeaderStyle?.ToString()">@field.HeaderText</td>
 					<td>@field.GetValue(CurrentItem, CurrentMode)</td>
 				</tr>
 				rowIndex++;
@@ -46,7 +65,7 @@
 			@* Command Row *@
 			@if (ShowCommandRow)
 			{
-				<tr>
+				<tr style="@CommandRowStyle?.ToString()">
 					<td colspan="2">
 						@switch (CurrentMode)
 						{
@@ -86,7 +105,7 @@
 			@* Pager Row *@
 			@if (AllowPaging && Items != null && Items.Count() > 1)
 			{
-				<tr>
+				<tr style="@PagerStyle?.ToString()">
 					<td colspan="2">
 						@if (PagerTemplate != null)
 						{
@@ -117,7 +136,7 @@
 		}
 		else if (EmptyDataTemplate != null || !string.IsNullOrEmpty(EmptyDataText))
 		{
-			<tr>
+			<tr style="@EmptyDataRowStyle?.ToString()">
 				<td>
 					@if (EmptyDataTemplate != null)
 					{
@@ -134,7 +153,7 @@
 		@* Footer Row *@
 		@if (FooterTemplate != null || !string.IsNullOrEmpty(FooterText))
 		{
-			<tr>
+			<tr style="@FooterStyle?.ToString()">
 				<td colspan="2">
 					@if (FooterTemplate != null)
 					{

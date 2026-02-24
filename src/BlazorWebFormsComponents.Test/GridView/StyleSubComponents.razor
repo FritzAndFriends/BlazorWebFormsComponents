@@ -1,0 +1,200 @@
+@code {
+
+	[Fact]
+	public void RowStyle_AppliesToDataRows()
+	{
+		var data = GetTestItems();
+		WebColor red = "Red";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="false">
+			<RowStyleContent>
+				<GridViewRowStyle BackColor="red" />
+			</RowStyleContent>
+			<Columns>
+				<BoundField ItemType="StyleTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBe(3);
+		// RowStyle applies to even-indexed rows; odd rows use AlternatingRowStyle (empty by default)
+		rows[0].GetAttribute("style").ShouldContain("background-color:Red");
+		rows[2].GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+	[Fact]
+	public void AlternatingRowStyle_AppliesToOddIndexedRows()
+	{
+		var data = GetTestItems();
+		WebColor red = "Red";
+		WebColor blue = "Blue";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="false">
+			<RowStyleContent>
+				<GridViewRowStyle BackColor="red" />
+			</RowStyleContent>
+			<AlternatingRowStyleContent>
+				<GridViewAlternatingRowStyle BackColor="blue" />
+			</AlternatingRowStyleContent>
+			<Columns>
+				<BoundField ItemType="StyleTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBe(3);
+		rows[0].GetAttribute("style").ShouldContain("background-color:Red");
+		rows[1].GetAttribute("style").ShouldContain("background-color:Blue");
+		rows[2].GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+	[Fact]
+	public void HeaderStyle_AppliesToTheadTr()
+	{
+		var data = GetTestItems();
+		WebColor green = "Green";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="false">
+			<HeaderStyleContent>
+				<GridViewHeaderStyle BackColor="green" />
+			</HeaderStyleContent>
+			<Columns>
+				<BoundField ItemType="StyleTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		cut.Find("thead tr").GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void FooterStyle_AppliesToTfootTr_WhenShowFooterTrue()
+	{
+		var data = GetTestItems();
+		WebColor navy = "Navy";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="false" ShowFooter="true">
+			<FooterStyleContent>
+				<GridViewFooterStyle BackColor="navy" />
+			</FooterStyleContent>
+			<Columns>
+				<BoundField ItemType="StyleTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		cut.Find("tfoot tr").GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void EmptyDataRowStyle_AppliesWhenNoItems()
+	{
+		var emptyList = new List<StyleTestItem>();
+		WebColor fuchsia = "Fuchsia";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" Items="emptyList" AutoGenerateColumns="true"
+						EmptyDataText="No data available">
+			<EmptyDataRowStyleContent>
+				<GridViewEmptyDataRowStyle BackColor="fuchsia" />
+			</EmptyDataRowStyleContent>
+		</GridView>);
+
+		var emptyRow = cut.Find("tbody tr");
+		emptyRow.GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void PagerStyle_AppliesToPagerRow_WhenAllowPagingTrue()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new StyleTestItem { Id = i, Name = $"Item {i}" }).ToList();
+		WebColor silver = "Silver";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="true"
+						AllowPaging="true" PageSize="10">
+			<PagerStyleContent>
+				<GridViewPagerStyle BackColor="silver" />
+			</PagerStyleContent>
+		</GridView>);
+
+		cut.Find("tfoot tr").GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void EditRowStyle_AppliesToRowAtEditIndex()
+	{
+		var data = GetTestItems();
+		WebColor orange = "Orange";
+
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="false"
+						EditIndex="0"
+						RowEditing="@((GridViewEditEventArgs e) => { })"
+						RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+			<EditRowStyleContent>
+				<GridViewEditRowStyle BackColor="orange" />
+			</EditRowStyleContent>
+			<Columns>
+				<BoundField ItemType="StyleTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows[0].GetAttribute("style").ShouldContain("background-color");
+		(rows[1].GetAttribute("style") == null || !rows[1].GetAttribute("style").Contains("background-color")).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void StylePriority_EditOverSelectedOverAlternatingOverRow()
+	{
+		var data = GetTestItems();
+		WebColor red = "Red";
+		WebColor blue = "Blue";
+		WebColor yellow = "Yellow";
+		WebColor orange = "Orange";
+
+		// EditIndex=0, SelectedIndex=1: tests Edit>Row (row 0) and Selected>Alternating (row 1)
+		var cut = Render(@<GridView ItemType="StyleTestItem" DataSource="data" AutoGenerateColumns="false"
+						SelectedIndex="1" EditIndex="0"
+						RowEditing="@((GridViewEditEventArgs e) => { })"
+						RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+			<RowStyleContent>
+				<GridViewRowStyle BackColor="red" />
+			</RowStyleContent>
+			<AlternatingRowStyleContent>
+				<GridViewAlternatingRowStyle BackColor="blue" />
+			</AlternatingRowStyleContent>
+			<SelectedRowStyleContent>
+				<GridViewSelectedRowStyle BackColor="yellow" />
+			</SelectedRowStyleContent>
+			<EditRowStyleContent>
+				<GridViewEditRowStyle BackColor="orange" />
+			</EditRowStyleContent>
+			<Columns>
+				<BoundField ItemType="StyleTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		// Row 0: even + EditIndex=0 → EditRowStyle wins (Orange)
+		rows[0].GetAttribute("style").ShouldContain("background-color:Orange");
+		// Row 1: odd + SelectedIndex=1 → SelectedRowStyle wins over AlternatingRowStyle (Yellow)
+		rows[1].GetAttribute("style").ShouldContain("background-color:Yellow");
+		// Row 2: even, no special → RowStyle (Red)
+		rows[2].GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+	private List<StyleTestItem> GetTestItems()
+	{
+		return new List<StyleTestItem>
+		{
+			new StyleTestItem { Id = 1, Name = "Alpha" },
+			new StyleTestItem { Id = 2, Name = "Beta" },
+			new StyleTestItem { Id = 3, Name = "Gamma" }
+		};
+	}
+
+	public class StyleTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

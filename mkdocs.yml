@@ -98,6 +98,7 @@ nav:
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
     - CompareValidator: ValidationControls/CompareValidator.md
+    - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md
     - RangeValidator: ValidationControls/RangeValidator.md
     - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md

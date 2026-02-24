@@ -63,3 +63,24 @@ Chart on milestone4 branch substantially complete. Architecture sound: Component
 
  Team update (2026-02-23): P2 features complete  all 1,065 tests pass, 0 build errors  decided by Squad
  Team update (2026-02-23): UI overhaul requested by Jeffrey T. Fritz  scope document created  decided by Jeffrey T. Fritz
+
+### Summary: Milestone 7 Planning (2026-02-23)
+
+Planned M7: "Control Depth & Navigation Overhaul" — 51 work items targeting ~138 gap closures. Key findings from post-M6 codebase audit:
+
+- **GridView (~55% post-M6):** Has paging, sorting, editing from M6. Still missing selection (SelectedIndex/SelectedRow/SelectedRowStyle), 6 style sub-components, display props (ShowHeader/ShowFooter/Caption/GridLines/EmptyDataTemplate). Selection is the last major functional gap.
+- **Menu (~42%):** Only got Orientation in M6. Still missing ~35 props — base style props (needs BaseStyledComponent upgrade), selection tracking, MenuItemClick/MenuItemDataBound events, level styles. JS interop complicates base class change.
+- **TreeView (~60%):** Untouched in M6. Has solid core (nodes, data binding, checkboxes, expand/collapse, image sets). Missing node-level styles (TreeNodeStyle objects), functional selection, ExpandAll/CollapseAll, ExpandDepth, FindNode.
+- **FormView (~50%):** M6 added header/footer/empty. Still missing style sub-components, paging events (PageIndexChanging/Changed), ModeChanged/ItemCommand events, PagerSettings.
+- **DetailsView (~70%):** Has strong event coverage (10 CRUD/mode/paging events). Missing all 10 style sub-components, PagerSettings, Caption.
+- **ListView (~42%):** Barely touched. Has excellent templates but missing all 16 CRUD events, editing templates, selection, sorting. Deferred to P2 due to L size.
+- **DataGrid (~55%):** Has command events from original impl + style inheritance from M6. Missing style sub-components, paging/sorting events. Also P2.
+
+**Key patterns confirmed:**
+- Style sub-components are the single biggest systematic remaining gap across all data controls
+- PagerSettings should be a shared type (GridView, FormView, DetailsView all need identical API)
+- Validator ControlToValidate string ID is a migration-blocking mismatch — ForwardRef doesn't match the "paste and it works" migration story
+- Diminishing returns are real: M6 closed ~345 gaps, M7 targets ~138 because remaining gaps require more work per gap (style sub-components, event pipelines vs. base class inheritance)
+- Re-audit must open the milestone — all planning-docs/ files are stale (pre-M6 numbers)
+
+📌 Team update (2026-02-23): Milestone 7 planned — 51 WIs, ~138 gaps, "Control Depth & Navigation Overhaul". P0: GridView completion + re-audit. P1: TreeView, Menu, DetailsView, FormView, Validators. P2: ListView CRUD, DataGrid, Menu levels. — decided by Forge

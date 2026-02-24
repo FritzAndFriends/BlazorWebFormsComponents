@@ -1,5 +1,6 @@
 using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace BlazorWebFormsComponents
 	/// Displays a single record from a data source in a table layout with one row per field.
 	/// </summary>
 	/// <typeparam name="ItemType">The type of the data items.</typeparam>
-	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>
+	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IDetailsViewStyleContainer
 	{
 		#region Properties
 
@@ -103,6 +104,23 @@ namespace BlazorWebFormsComponents
 		public int PageIndex { get; set; }
 
 		/// <summary>
+		/// Gets or sets the caption text rendered in a caption element at the top of the table.
+		/// </summary>
+		[Parameter]
+		public string Caption { get; set; }
+
+		/// <summary>
+		/// Gets or sets the horizontal or vertical position of the caption element.
+		/// </summary>
+		[Parameter]
+		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
+
+		/// <summary>
+		/// Gets the total number of pages (one item per page in DetailsView).
+		/// </summary>
+		public int PageCount => Items != null ? Items.Count() : 0;
+
+		/// <summary>
 		/// Gets the current display mode of the DetailsView control.
 		/// </summary>
 		public DetailsViewMode CurrentMode { get; private set; }
@@ -111,6 +129,75 @@ namespace BlazorWebFormsComponents
 		/// Gets the currently displayed item.
 		/// </summary>
 		public ItemType CurrentItem { get; private set; }
+
+		#endregion
+
+		#region TableItemStyle Properties (IDetailsViewStyleContainer)
+
+		/// <summary>
+		/// Gets or sets the style applied to data rows.
+		/// </summary>
+		public TableItemStyle RowStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to alternating data rows.
+		/// </summary>
+		public TableItemStyle AlternatingRowStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the header row.
+		/// </summary>
+		public TableItemStyle HeaderStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the footer row.
+		/// </summary>
+		public TableItemStyle FooterStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the command row.
+		/// </summary>
+		public TableItemStyle CommandRowStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the row being edited.
+		/// </summary>
+		public TableItemStyle EditRowStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the row in insert mode.
+		/// </summary>
+		public TableItemStyle InsertRowStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to field header cells.
+		/// </summary>
+		public TableItemStyle FieldHeaderStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the empty data row.
+		/// </summary>
+		public TableItemStyle EmptyDataRowStyle { get; internal set; } = new TableItemStyle();
+
+		/// <summary>
+		/// Gets or sets the style applied to the pager row.
+		/// </summary>
+		public TableItemStyle PagerStyle { get; internal set; } = new TableItemStyle();
+
+		#endregion
+
+		#region Style RenderFragment Parameters
+
+		[Parameter] public RenderFragment RowStyleContent { get; set; }
+		[Parameter] public RenderFragment AlternatingRowStyleContent { get; set; }
+		[Parameter] public RenderFragment HeaderStyleContent { get; set; }
+		[Parameter] public RenderFragment FooterStyleContent { get; set; }
+		[Parameter] public RenderFragment CommandRowStyleContent { get; set; }
+		[Parameter] public RenderFragment EditRowStyleContent { get; set; }
+		[Parameter] public RenderFragment InsertRowStyleContent { get; set; }
+		[Parameter] public RenderFragment FieldHeaderStyleContent { get; set; }
+		[Parameter] public RenderFragment EmptyDataRowStyleContent { get; set; }
+		[Parameter] public RenderFragment PagerStyleContent { get; set; }
 
 		#endregion
 
@@ -286,6 +373,36 @@ namespace BlazorWebFormsComponents
 				}
 				return string.Join(";", styles);
 			}
+		}
+
+		/// <summary>
+		/// Gets the CSS style for the caption element based on CaptionAlign.
+		/// </summary>
+		protected string GetCaptionStyle()
+		{
+			return CaptionAlign switch
+			{
+				TableCaptionAlign.Top => "caption-side:top",
+				TableCaptionAlign.Bottom => "caption-side:bottom",
+				TableCaptionAlign.Left => "text-align:left",
+				TableCaptionAlign.Right => "text-align:right",
+				_ => null
+			};
+		}
+
+		/// <summary>
+		/// Gets the effective style for a data row based on mode and row index.
+		/// Priority: EditRowStyle/InsertRowStyle > AlternatingRowStyle > RowStyle.
+		/// </summary>
+		protected TableItemStyle GetRowStyle(int rowIndex)
+		{
+			if (CurrentMode == DetailsViewMode.Edit && EditRowStyle != null)
+				return EditRowStyle;
+			if (CurrentMode == DetailsViewMode.Insert && InsertRowStyle != null)
+				return InsertRowStyle;
+			if (rowIndex % 2 == 1 && AlternatingRowStyle != null)
+				return AlternatingRowStyle;
+			return RowStyle;
 		}
 
 		#endregion

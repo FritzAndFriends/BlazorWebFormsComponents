@@ -37,12 +37,12 @@
 			@<ValidationGroupProvider>
 				<EditForm Model="@model">
 					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
-					<RequiredFieldValidator ControlToValidate="@Email"
+					<RequiredFieldValidator ControlRef="@Email"
 											Text="Email Required"
 											ValidationGroup="EmailGroup" />
 					
 					<InputText id="phone" @ref="Phone.Current" @bind-Value="model.Phone" />
-					<RequiredFieldValidator ControlToValidate="@Phone"
+					<RequiredFieldValidator ControlRef="@Phone"
 											Text="Phone Required"
 											ValidationGroup="PhoneGroup" />
 					
@@ -77,11 +77,11 @@
 			@<ValidationGroupProvider>
 				<EditForm Model="@model">
 					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
-					<RequiredFieldValidator ControlToValidate="@Email"
+					<RequiredFieldValidator ControlRef="@Email"
 											Text="Email Required" />
 					
 					<InputText id="phone" @ref="Phone.Current" @bind-Value="model.Phone" />
-					<RequiredFieldValidator ControlToValidate="@Phone"
+					<RequiredFieldValidator ControlRef="@Phone"
 											Text="Phone Required" />
 					
 					<Button Text="Validate All" OnClick="ValidateEmail" />
@@ -109,7 +109,7 @@
 			@<ValidationGroupProvider>
 				<EditForm Model="@model">
 					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
-					<RequiredFieldValidator ControlToValidate="@Email"
+					<RequiredFieldValidator ControlRef="@Email"
 											Text="Email Required"
 											ValidationGroup="EmailGroup" />
 					
@@ -137,12 +137,12 @@
 			@<ValidationGroupProvider>
 				<EditForm Model="@model">
 					<InputText id="email" @ref="Email.Current" @bind-Value="model.Email" />
-					<RequiredFieldValidator ControlToValidate="@Email"
+					<RequiredFieldValidator ControlRef="@Email"
 											Text="Email Required"
 											ValidationGroup="Group1" />
 					
 					<InputText id="phone" @ref="Phone.Current" @bind-Value="model.Phone" />
-					<RequiredFieldValidator ControlToValidate="@Phone"
+					<RequiredFieldValidator ControlRef="@Phone"
 											Text="Phone Required"
 											ValidationGroup="Group2" />
 					

@@ -23,5 +23,10 @@ namespace BlazorWebFormsComponents
 		/// The columns of the Row
 		/// </summary>
 		[Parameter] public List<IColumn<ItemType>> Columns { get; set; }
+
+		/// <summary>
+		/// The style applied to this row.
+		/// </summary>
+		[Parameter] public TableItemStyle RowStyle { get; set; }
 	}
 }

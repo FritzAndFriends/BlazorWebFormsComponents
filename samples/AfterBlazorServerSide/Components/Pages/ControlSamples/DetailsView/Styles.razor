@@ -1,0 +1,85 @@
+@page "/ControlSamples/DetailsView/Styles"
+@using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
+
+<PageTitle>DetailsView Styles</PageTitle>
+
+<h2>DetailsView Style Sub-Components</h2>
+
+<p>This sample demonstrates the style sub-components available on DetailsView:
+   <code>HeaderStyle</code>, <code>RowStyle</code>, and <code>AlternatingRowStyle</code>.</p>
+
+<hr />
+
+<h3>Styled DetailsView</h3>
+<p>Each style is applied using the <code>&lt;XxxStyleContent&gt;</code> pattern with a
+   corresponding style sub-component.</p>
+
+<DetailsView ItemType="Customer"
+             Items="@_customers"
+             AutoGenerateRows="true"
+             AllowPaging="true"
+             HeaderText="Customer Details"
+             GridLines="GridLines.Both">
+    <HeaderStyleContent>
+        <DetailsViewHeaderStyle BackColor="WebColor.Green" ForeColor="WebColor.White" Font_Bold="true" />
+    </HeaderStyleContent>
+    <RowStyleContent>
+        <DetailsViewRowStyle BackColor="WebColor.White" />
+    </RowStyleContent>
+    <AlternatingRowStyleContent>
+        <DetailsViewAlternatingRowStyle BackColor="WebColor.WhiteSmoke" />
+    </AlternatingRowStyleContent>
+</DetailsView>
+
+<hr />
+
+<h3>DetailsView with Field Header Styling</h3>
+
+<DetailsView ItemType="Customer"
+             Items="@_customers"
+             AutoGenerateRows="true"
+             HeaderText="Styled Field Headers"
+             GridLines="GridLines.Both">
+    <HeaderStyleContent>
+        <DetailsViewHeaderStyle BackColor="WebColor.Blue" ForeColor="WebColor.White" />
+    </HeaderStyleContent>
+    <FieldHeaderStyleContent>
+        <DetailsViewFieldHeaderStyle BackColor="WebColor.LightBlue" Font_Bold="true" />
+    </FieldHeaderStyleContent>
+    <RowStyleContent>
+        <DetailsViewRowStyle BackColor="WebColor.White" />
+    </RowStyleContent>
+    <AlternatingRowStyleContent>
+        <DetailsViewAlternatingRowStyle BackColor="WebColor.Snow" />
+    </AlternatingRowStyleContent>
+</DetailsView>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;DetailsView ItemType="Customer"
+             Items="@@_customers"
+             AutoGenerateRows="true"
+             HeaderText="Customer Details"
+             GridLines="GridLines.Both"&gt;
+    &lt;HeaderStyleContent&gt;
+        &lt;DetailsViewHeaderStyle BackColor="WebColor.Green" ForeColor="WebColor.White" Font_Bold="true" /&gt;
+    &lt;/HeaderStyleContent&gt;
+    &lt;RowStyleContent&gt;
+        &lt;DetailsViewRowStyle BackColor="WebColor.White" /&gt;
+    &lt;/RowStyleContent&gt;
+    &lt;AlternatingRowStyleContent&gt;
+        &lt;DetailsViewAlternatingRowStyle BackColor="WebColor.WhiteSmoke" /&gt;
+    &lt;/AlternatingRowStyleContent&gt;
+&lt;/DetailsView&gt;</code></pre>
+
+@code {
+
+    private List<Customer> _customers = new()
+    {
+        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
+        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
+        new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global Solutions" }
+    };
+}

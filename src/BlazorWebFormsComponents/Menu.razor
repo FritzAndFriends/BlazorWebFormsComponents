@@ -1,8 +1,12 @@
-@inherits BaseWebFormsComponent
+@inherits BaseStyledComponent
 @using BlazorComponentUtilities
 @using BlazorWebFormsComponents.Enums
 
-<div id="@ID">
+@if (!string.IsNullOrEmpty(SkipLinkText))
+{
+	<a class="skip-link" href="#@(ID)_SkipLink">@SkipLinkText</a>
+}
+<div id="@ID" class="@GetMenuCssClass()" style="@Style">
 	<ul class="level1@(Orientation == Orientation.Horizontal ? " horizontal" : "")">
 			<CascadingValue Name="ParentMenu" Value="this">
 				@ChildContent
@@ -10,6 +14,10 @@
 			</CascadingValue>
  	</ul>
 </div>
+@if (!string.IsNullOrEmpty(SkipLinkText))
+{
+	<a id="@(ID)_SkipLink"></a>
+}
 
 <!-- Menu component style -->
 <style type="text/css">
@@ -83,3 +91,10 @@
 
 
 </style>
+
+@code {
+	private string GetMenuCssClass()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
+}

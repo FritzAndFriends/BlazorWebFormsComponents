@@ -1,0 +1,52 @@
+@page "/ControlSamples/LoginControls/Orientation"
+@using BlazorWebFormsComponents.Enums
+@using BlazorWebFormsComponents.LoginControls
+
+<h2>Login Orientation &amp; TextLayout</h2>
+
+<h3>Vertical Orientation, TextOnLeft (Default)</h3>
+<Login TitleText="Vertical / TextOnLeft"
+	   Orientation="Orientation.Vertical"
+	   TextLayout="LoginTextLayout.TextOnLeft"
+	   InstructionText="Default layout — labels on the left, fields stacked vertically.">
+</Login>
+
+<hr />
+
+<h3>Vertical Orientation, TextOnTop</h3>
+<Login TitleText="Vertical / TextOnTop"
+	   Orientation="Orientation.Vertical"
+	   TextLayout="LoginTextLayout.TextOnTop"
+	   InstructionText="Labels appear above the input fields.">
+</Login>
+
+<hr />
+
+<h3>Horizontal Orientation, TextOnLeft</h3>
+<Login TitleText="Horizontal / TextOnLeft"
+	   Orientation="Orientation.Horizontal"
+	   TextLayout="LoginTextLayout.TextOnLeft"
+	   InstructionText="Fields arranged side by side with labels on the left.">
+</Login>
+
+<hr />
+
+<h3>Horizontal Orientation, TextOnTop</h3>
+<Login TitleText="Horizontal / TextOnTop"
+	   Orientation="Orientation.Horizontal"
+	   TextLayout="LoginTextLayout.TextOnTop"
+	   InstructionText="Fields side by side with labels on top.">
+</Login>
+
+<hr />
+
+<p>Code:</p>
+<pre><code>&lt;Login TitleText="Sign In"
+       Orientation="Orientation.Vertical"
+       TextLayout="LoginTextLayout.TextOnLeft"
+       InstructionText="Enter your credentials." /&gt;
+
+&lt;Login TitleText="Sign In"
+       Orientation="Orientation.Horizontal"
+       TextLayout="LoginTextLayout.TextOnTop"
+       InstructionText="Enter your credentials." /&gt;</code></pre>

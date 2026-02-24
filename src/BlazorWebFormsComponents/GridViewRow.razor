@@ -2,7 +2,7 @@
 @inherits BaseRow<ItemType>
 @using Interfaces
 
-<tr @key="DataItem" style="@(IsEditing && EditRowStyle != null ? EditRowStyle.ToString() : null)">
+<tr @key="DataItem" style="@(IsEditing && EditRowStyle != null ? EditRowStyle.ToString() : RowStyle?.ToString())">
 	@foreach (IColumn<ItemType> column in Columns)
 	{
 		<td @key="column">
@@ -19,9 +19,13 @@
 			}
 		</td>
 	}
-	@if (GridView != null && (GridView.RowEditing.HasDelegate || GridView.RowUpdating.HasDelegate || GridView.RowDeleting.HasDelegate || GridView.RowCancelingEdit.HasDelegate))
+	@if (GridView != null && (GridView.AutoGenerateSelectButton || GridView.RowEditing.HasDelegate || GridView.RowUpdating.HasDelegate || GridView.RowDeleting.HasDelegate || GridView.RowCancelingEdit.HasDelegate))
 	{
 		<td>
+			@if (GridView.AutoGenerateSelectButton)
+			{
+				<a href="javascript:void(0);" @onclick="@(() => GridView.SelectRow(DataItemIndex))" @onclick:preventDefault>Select</a>
+			}
 			@if (IsEditing)
 			{
 				<a href="javascript:void(0);" @onclick="@(() => GridView.UpdateRow(DataItemIndex))" @onclick:preventDefault>Update</a>

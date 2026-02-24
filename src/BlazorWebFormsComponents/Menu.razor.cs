@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// A menubar component capable of making hierarchical menus for navigating your application
 	/// </summary>
-	public partial class Menu : BaseWebFormsComponent
+	public partial class Menu : BaseStyledComponent
 	{
 
 		#region Injected Properties
@@ -42,6 +42,129 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public Items Items { get; set; }
+
+		#region WI-23: Core missing properties
+
+		/// <summary>
+		/// Gets or sets the maximum number of dynamic menu levels to display.
+		/// </summary>
+		[Parameter]
+		public int MaximumDynamicDisplayLevels { get; set; } = 3;
+
+		/// <summary>
+		/// Gets or sets the default target window or frame for menu item links.
+		/// </summary>
+		[Parameter]
+		public string Target { get; set; }
+
+		/// <summary>
+		/// Gets or sets the text for the accessibility skip link rendered before the menu.
+		/// </summary>
+		[Parameter]
+		public string SkipLinkText { get; set; } = "Skip Navigation Links";
+
+		/// <summary>
+		/// Gets or sets the character used to delimit the path of a menu item's value.
+		/// </summary>
+		[Parameter]
+		public char PathSeparator { get; set; } = '/';
+
+		#endregion
+
+		#region Level Styles
+
+		/// <summary>
+		/// A collection of MenuLevelStyle objects where index 0 = level 1 styles, index 1 = level 2 styles, etc.
+		/// Overrides StaticMenuItemStyle/DynamicMenuItemStyle for items at specific depth levels.
+		/// </summary>
+		[Parameter]
+		public List<MenuLevelStyle> LevelMenuItemStyles { get; set; }
+
+		/// <summary>
+		/// A collection of MenuLevelStyle objects for selected items at each depth level.
+		/// </summary>
+		[Parameter]
+		public List<MenuLevelStyle> LevelSelectedStyles { get; set; }
+
+		/// <summary>
+		/// A collection of MenuLevelStyle objects for submenu containers at each depth level.
+		/// </summary>
+		[Parameter]
+		public List<MenuLevelStyle> LevelSubMenuStyles { get; set; }
+
+		/// <summary>
+		/// Gets the level menu item style for a given depth, or null if none defined.
+		/// </summary>
+		internal MenuLevelStyle GetLevelMenuItemStyle(int depth)
+		{
+			var index = depth - 1;
+			if (LevelMenuItemStyles != null && index >= 0 && index < LevelMenuItemStyles.Count)
+				return LevelMenuItemStyles[index];
+			return null;
+		}
+
+		/// <summary>
+		/// Gets the level selected style for a given depth, or null if none defined.
+		/// </summary>
+		internal MenuLevelStyle GetLevelSelectedStyle(int depth)
+		{
+			var index = depth - 1;
+			if (LevelSelectedStyles != null && index >= 0 && index < LevelSelectedStyles.Count)
+				return LevelSelectedStyles[index];
+			return null;
+		}
+
+		/// <summary>
+		/// Gets the level submenu style for a given depth, or null if none defined.
+		/// </summary>
+		internal MenuLevelStyle GetLevelSubMenuStyle(int depth)
+		{
+			var index = depth - 1;
+			if (LevelSubMenuStyles != null && index >= 0 && index < LevelSubMenuStyles.Count)
+				return LevelSubMenuStyles[index];
+			return null;
+		}
+
+		#endregion
+
+		#region WI-21: Selection tracking and events
+
+		/// <summary>
+		/// Gets the currently selected menu item.
+		/// </summary>
+		public MenuItem SelectedItem { get; private set; }
+
+		/// <summary>
+		/// Gets the value of the currently selected menu item.
+		/// </summary>
+		public string SelectedValue => SelectedItem?.Value;
+
+		/// <summary>
+		/// Fires when a menu item is clicked.
+		/// </summary>
+		[Parameter]
+		public EventCallback<MenuEventArgs> MenuItemClick { get; set; }
+
+		/// <summary>
+		/// Fires after each MenuItem is data-bound.
+		/// </summary>
+		[Parameter]
+		public EventCallback<MenuEventArgs> MenuItemDataBound { get; set; }
+
+		/// <summary>
+		/// Called by MenuItem when it is clicked.
+		/// </summary>
+		internal async Task NotifyItemClicked(MenuItem item)
+		{
+			SelectedItem = item;
+			if (MenuItemClick.HasDelegate)
+			{
+				await MenuItemClick.InvokeAsync(new MenuEventArgs(item));
+			}
+			StateHasChanged();
+		}
+
+		#endregion
 
 		private DynamicHoverStyle _DynamicHoverStyle = new DynamicHoverStyle();
 		public DynamicHoverStyle DynamicHoverStyle {
@@ -206,8 +329,11 @@ namespace BlazorWebFormsComponents
 						}
 						builder.CloseComponent();
 
-						// TODO: What is the Menu equivalent of OnTreeNodeDataBound??
-						//OnTreeNodeDataBound.InvokeAsync(new TreeNodeEventArgs(null));
+						// Fire MenuItemDataBound after each data-bound item
+						if (MenuItemDataBound.HasDelegate)
+						{
+							_ = MenuItemDataBound.InvokeAsync(new MenuEventArgs(null));
+						}
 
 					}
 				}

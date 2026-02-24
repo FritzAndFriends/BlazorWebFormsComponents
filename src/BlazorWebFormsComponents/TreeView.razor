@@ -2,7 +2,13 @@
 @inherits BaseDataBoundComponent
 
 <div id="@ClientID" class="@CssClass" role="@(UseAccessibilityFeatures ? "tree" : null)" aria-label="@(UseAccessibilityFeatures ? "Tree navigation" : null)">
-<CascadingValue Name="ParentTreeView" Value="this">
+<CascadingValue Name="ParentTreeView" Value="this" IsFixed="true">
+@NodeStyleContent
+@HoverNodeStyleContent
+@LeafNodeStyleContent
+@ParentNodeStyleContent
+@RootNodeStyleContent
+@SelectedNodeStyleContent
 @ChildContent
 @ChildNodesRenderFragment
 </CascadingValue>

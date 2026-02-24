@@ -1,0 +1,115 @@
+@code {
+
+	TreeNodeEventArgs _receivedArgs;
+
+	[Fact]
+	public void TreeView_ClickNode_SetsSelectedNode()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Node A" Value="A" />
+					<TreeNode Text="Node B" Value="B" />
+				</Nodes>
+			</TreeView>
+		);
+
+		var nodeLink = cut.FindAll("a").First(a => a.TextContent.Contains("Node B"));
+		nodeLink.Click();
+
+		var treeView = cut.FindComponent<TreeView>().Instance;
+		treeView.SelectedNode.ShouldNotBeNull();
+		treeView.SelectedNode.Value.ShouldBe("B");
+	}
+
+	[Fact]
+	public void TreeView_ClickNode_SetsSelectedValue()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Node A" Value="A" />
+					<TreeNode Text="Node B" Value="B" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindAll("a").First(a => a.TextContent.Contains("Node A")).Click();
+
+		cut.FindComponent<TreeView>().Instance.SelectedValue.ShouldBe("A");
+	}
+
+	[Fact]
+	public void TreeView_ClickNode_FiresSelectedNodeChanged()
+	{
+		_receivedArgs = null;
+		var cut = Render(
+			@<TreeView SelectedNodeChanged="OnNodeChanged">
+				<Nodes>
+					<TreeNode Text="Node A" Value="A" />
+					<TreeNode Text="Node B" Value="B" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindAll("a").First(a => a.TextContent.Contains("Node B")).Click();
+
+		_receivedArgs.ShouldNotBeNull();
+		_receivedArgs.Node.Value.ShouldBe("B");
+	}
+
+	[Fact]
+	public void TreeView_SelectDifferentNode_UpdatesSelection()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Node A" Value="A" />
+					<TreeNode Text="Node B" Value="B" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindAll("a").First(a => a.TextContent.Contains("Node A")).Click();
+		cut.FindComponent<TreeView>().Instance.SelectedValue.ShouldBe("A");
+
+		cut.FindAll("a").First(a => a.TextContent.Contains("Node B")).Click();
+		cut.FindComponent<TreeView>().Instance.SelectedValue.ShouldBe("B");
+	}
+
+	[Fact]
+	public void TreeView_NoSelection_SelectedNodeIsNull()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Node A" Value="A" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.SelectedNode.ShouldBeNull();
+	}
+
+	[Fact]
+	public void TreeView_NodeWithSelectedTrue_SetsSelectedAttribute()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Node A" Value="A" Selected="true" />
+					<TreeNode Text="Node B" Value="B" />
+				</Nodes>
+			</TreeView>
+		);
+
+		// The Selected=true TreeNode should be rendered with selected styling
+		var nodeA = cut.FindComponents<TreeNode>().First(n => n.Instance.Value == "A").Instance;
+		nodeA.Selected.ShouldBeTrue();
+	}
+
+	void OnNodeChanged(TreeNodeEventArgs args)
+	{
+		_receivedArgs = args;
+	}
+}

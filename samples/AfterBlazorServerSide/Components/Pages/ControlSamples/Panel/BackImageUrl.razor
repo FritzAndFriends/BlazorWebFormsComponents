@@ -1,0 +1,47 @@
+@page "/ControlSamples/Panel/BackImageUrl"
+@using BlazorWebFormsComponents.Enums
+
+<h2>Panel with BackImageUrl</h2>
+
+<p>The <code>BackImageUrl</code> property sets a background image on the Panel using inline CSS <code>background-image:url(...)</code>.</p>
+
+<h3>Panel with Background Image</h3>
+<Panel BackImageUrl="https://via.placeholder.com/600x200/cccccc/666666?text=Background+Image"
+	   Width="Unit.Pixel(600)"
+	   Height="Unit.Pixel(200)"
+	   BorderStyle="BorderStyle.Solid"
+	   BorderWidth="Unit.Pixel(1)"
+	   BorderColor="WebColor.Gray">
+	<p style="padding: 20px; background-color: rgba(255,255,255,0.8); display: inline-block; margin: 10px;">
+		This Panel has a background image set via <strong>BackImageUrl</strong>.
+	</p>
+</Panel>
+<pre><code>&lt;Panel BackImageUrl="https://via.placeholder.com/600x200"
+       Width="Unit.Pixel(600)"
+       Height="Unit.Pixel(200)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)"&gt;
+    &lt;p&gt;Content over background image.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>Panel with Background Image and Styling</h3>
+<Panel BackImageUrl="https://via.placeholder.com/400x150/e8f4fd/1a73e8?text=Styled+Panel"
+	   Width="Unit.Pixel(400)"
+	   Height="Unit.Pixel(150)"
+	   HorizontalAlign="HorizontalAlign.Center"
+	   BorderStyle="BorderStyle.Solid"
+	   BorderWidth="Unit.Pixel(2)"
+	   BorderColor="WebColor.Navy">
+	<p style="padding: 15px; color: white; font-weight: bold; text-shadow: 1px 1px 2px black;">
+		Centered panel with background image and border.
+	</p>
+</Panel>
+<pre><code>&lt;Panel BackImageUrl="https://via.placeholder.com/400x150"
+       HorizontalAlign="HorizontalAlign.Center"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(2)"
+       BorderColor="WebColor.Navy"&gt;
+    &lt;p&gt;Centered content over image.&lt;/p&gt;
+&lt;/Panel&gt;</code></pre>

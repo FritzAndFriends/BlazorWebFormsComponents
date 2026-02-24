@@ -14,7 +14,7 @@
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<CustomValidator ServerValidate="@ServerValidate"
 												 ValidateEmptyText="true"
-												 ControlToValidate="@Name"
+												 ControlRef="@Name"
 												 Text="can't see me!" />
 			</EditForm>
 		);

@@ -1,0 +1,76 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	DataGridPageChangedEventArgs _pageChangedArgs;
+	DataGridSortCommandEventArgs _sortArgs;
+	bool _selectedIndexFired;
+
+	[Fact]
+	public void PageIndexChanged_FiresWhenPageChanges()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new DgEventItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<DataGrid ItemType="DgEventItem" Items="data" AutoGenerateColumns="false"
+						AllowPaging="true" PageSize="10"
+						PageIndexChanged="OnPageChanged">
+			<Columns>
+				<BoundField ItemType="DgEventItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		// Click page 2 link
+		var pagerLinks = cut.FindAll("tfoot a");
+		pagerLinks.Count.ShouldBeGreaterThan(0);
+		pagerLinks.First().Click();
+
+		_pageChangedArgs.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void SortCommand_FiresOnSortableHeaderClick()
+	{
+		var data = Enumerable.Range(1, 5).Select(i => new DgEventItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<DataGrid ItemType="DgEventItem" Items="data" AutoGenerateColumns="false"
+						AllowSorting="true"
+						SortCommand="OnSort">
+			<Columns>
+				<BoundField ItemType="DgEventItem" DataField="Name" HeaderText="Name" SortExpression="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var sortLink = cut.Find("th a");
+		sortLink.Click();
+
+		_sortArgs.ShouldNotBeNull();
+		_sortArgs.SortExpression.ShouldBe("Name");
+	}
+
+	[Fact]
+	public void SelectedIndexChanged_DefaultIsNegativeOne()
+	{
+		var data = Enumerable.Range(1, 3).Select(i => new DgEventItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<DataGrid ItemType="DgEventItem" Items="data" AutoGenerateColumns="false"
+						SelectedIndexChanged="OnSelectedIndexChanged">
+			<Columns>
+				<BoundField ItemType="DgEventItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var instance = cut.FindComponent<DataGrid<DgEventItem>>().Instance;
+		instance.SelectedIndex.ShouldBe(-1);
+		_selectedIndexFired.ShouldBeFalse();
+	}
+
+	void OnPageChanged(DataGridPageChangedEventArgs args) => _pageChangedArgs = args;
+	void OnSort(DataGridSortCommandEventArgs args) => _sortArgs = args;
+	void OnSelectedIndexChanged() => _selectedIndexFired = true;
+
+	public class DgEventItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

@@ -2,7 +2,7 @@
 @inherits BaseRow<ItemType>
 @using Interfaces
 
-<tr @key="DataItem">
+<tr @key="DataItem" style="@RowStyle?.ToString()">
 	@foreach (IColumn<ItemType> column in Columns)
 	{
 		<td @key="column">
