@@ -13,7 +13,7 @@ namespace BlazorWebFormsComponents
 	/// Blazor version of WebForms GridView control
 	/// </summary>
 	/// <typeparam name="ItemType"></typeparam>
-	public partial class GridView<ItemType> : DataBoundComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>, IGridViewStyleContainer
+	public partial class GridView<ItemType> : DataBoundComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>, IGridViewStyleContainer, IPagerSettingsContainer
 	{
 
 		/// <summary>
@@ -169,6 +169,20 @@ namespace BlazorWebFormsComponents
 		/// Content for the SelectedRowStyle sub-component.
 		/// </summary>
 		[Parameter] public RenderFragment SelectedRowStyleContent { get; set; }
+
+		#endregion
+
+		#region PagerSettings
+
+		/// <summary>
+		/// Gets the pager settings for the GridView.
+		/// </summary>
+		public PagerSettings PagerSettings { get; internal set; } = new PagerSettings();
+
+		/// <summary>
+		/// Content for the PagerSettings sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment PagerSettingsContent { get; set; }
 
 		#endregion
 
