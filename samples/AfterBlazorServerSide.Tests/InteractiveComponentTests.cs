@@ -2377,9 +2377,17 @@ public class InteractiveComponentTests
             await menuItem.ClickAsync();
             await page.WaitForTimeoutAsync(500);
 
-            // Verify click count incremented
-            var countInfo = page.Locator("div").Filter(new() { HasTextString = "Click count:" }).Last;
-            var countText = await countInfo.TextContentAsync();
+            // Verify click count incremented — use EvaluateAsync to bypass locator ambiguity
+            var countText = await page.EvaluateAsync<string>(@"
+                (() => {
+                    for (const s of document.querySelectorAll('strong')) {
+                        if (s.textContent.includes('Click count:')) {
+                            return s.parentElement.textContent;
+                        }
+                    }
+                    return null;
+                })()");
+            Assert.NotNull(countText);
             Assert.Contains("1", countText);
         }
         finally
