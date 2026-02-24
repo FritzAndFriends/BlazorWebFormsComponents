@@ -1,0 +1,150 @@
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	[Fact]
+	public void TreeView_NodeStyle_SetsPropertyOnTreeView()
+	{
+		WebColor orange = "Orange";
+		var cut = Render(
+			@<TreeView>
+				<NodeStyleContent>
+					<TreeViewNodeStyle BackColor="orange" />
+				</NodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Node A" Value="A" />
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.NodeStyle.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TreeView_HoverNodeStyle_SetsPropertyOnTreeView()
+	{
+		WebColor purple = "Purple";
+		var cut = Render(
+			@<TreeView>
+				<HoverNodeStyleContent>
+					<TreeViewHoverNodeStyle BackColor="purple" />
+				</HoverNodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Node A" Value="A" />
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.HoverNodeStyle.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TreeView_LeafNodeStyle_SetsPropertyOnTreeView()
+	{
+		WebColor green = "Green";
+		var cut = Render(
+			@<TreeView>
+				<LeafNodeStyleContent>
+					<TreeViewLeafNodeStyle BackColor="green" />
+				</LeafNodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Parent" Value="P" Expanded="true">
+							<TreeNode Text="Leaf" Value="L" />
+						</TreeNode>
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.LeafNodeStyle.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TreeView_ParentNodeStyle_SetsPropertyOnTreeView()
+	{
+		WebColor blue = "Blue";
+		var cut = Render(
+			@<TreeView>
+				<ParentNodeStyleContent>
+					<TreeViewParentNodeStyle BackColor="blue" />
+				</ParentNodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Parent" Value="P" Expanded="true">
+							<TreeNode Text="Child" Value="C" />
+						</TreeNode>
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.ParentNodeStyle.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TreeView_RootNodeStyle_SetsPropertyOnTreeView()
+	{
+		WebColor red = "Red";
+		var cut = Render(
+			@<TreeView>
+				<RootNodeStyleContent>
+					<TreeViewRootNodeStyle BackColor="red" />
+				</RootNodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Root" Value="R" />
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.RootNodeStyle.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TreeView_SelectedNodeStyle_SetsPropertyOnTreeView()
+	{
+		WebColor yellow = "Yellow";
+		var cut = Render(
+			@<TreeView>
+				<SelectedNodeStyleContent>
+					<TreeViewSelectedNodeStyle BackColor="yellow" />
+				</SelectedNodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Node A" Value="A" Selected="true" />
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.SelectedNodeStyle.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TreeView_SelectedNodeStyle_AppliesBackColorToMarkup()
+	{
+		WebColor yellow = "Yellow";
+		var cut = Render(
+			@<TreeView>
+				<SelectedNodeStyleContent>
+					<TreeViewSelectedNodeStyle BackColor="yellow" />
+				</SelectedNodeStyleContent>
+				<ChildContent>
+					<Nodes>
+						<TreeNode Text="Node A" Value="A" Selected="true" />
+						<TreeNode Text="Node B" Value="B" />
+					</Nodes>
+				</ChildContent>
+			</TreeView>
+		);
+
+		// Style may be applied to inner elements (td, a) rather than the table itself
+		cut.Markup.ShouldContain("background-color");
+	}
+}

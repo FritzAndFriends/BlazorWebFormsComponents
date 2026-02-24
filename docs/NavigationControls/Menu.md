@@ -8,6 +8,10 @@ The Menu component is meant to emulate the asp:Menu control in markup and is def
 
 - Simple static menu, as shown in the [ASP.NET example](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu?view=netframework-4.8#examples)
 - Simple databinding to a Sitemap as shown in the [ASP.NET example](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.menu?view=netframework-4.8#examples)
+- **Selection and Events** - `MenuItemClick` event, `SelectedItem`, `SelectedValue`
+- **Orientation** - `Horizontal` or `Vertical` layout
+- **Style Sub-Components** - `StaticMenuItemStyle`, `DynamicMenuItemStyle`, `StaticHoverStyle`, `DynamicHoverStyle`, `DynamicSelectedStyle`, `DynamicMenuStyle`
+- **Navigation Properties** - `Target`, `MaximumDynamicDisplayLevels`, `SkipLinkText`
 
 ##### [Back to top](#menu)
 
@@ -392,5 +396,154 @@ The Menu component is meant to emulate the asp:Menu control in markup and is def
 </Menu>
 ```
 
-##### [Back to top](#menu)
+## Examples
+
+### Basic Menu with Click Events
+
+```razor
+<Menu Orientation="Vertical"
+      MenuItemClick="HandleMenuClick">
+    <Items>
+        <MenuItem Text="Home" Value="home" NavigateUrl="/" />
+        <MenuItem Text="Products" Value="products">
+            <MenuItem Text="Electronics" Value="electronics" NavigateUrl="/electronics" />
+            <MenuItem Text="Clothing" Value="clothing" NavigateUrl="/clothing" />
+        </MenuItem>
+        <MenuItem Text="About" Value="about" NavigateUrl="/about" />
+    </Items>
+</Menu>
+
+<p>Clicked: @clickedItem</p>
+
+@code {
+    private string clickedItem = "";
+
+    private void HandleMenuClick(MenuEventArgs e)
+    {
+        clickedItem = e.Item.Text;
+    }
+}
+```
+
+### Horizontal Menu
+
+```razor
+<Menu Orientation="Horizontal"
+      SkipLinkText="Skip main navigation"
+      Target="_self">
+    <Items>
+        <MenuItem Text="Home" NavigateUrl="/" />
+        <MenuItem Text="Products" NavigateUrl="/products" />
+        <MenuItem Text="Services" NavigateUrl="/services" />
+        <MenuItem Text="Contact" NavigateUrl="/contact" />
+    </Items>
+    <StaticMenuItemStyle BackColor="@("SteelBlue")" ForeColor="@("White")" />
+    <StaticHoverStyle BackColor="@("LightSteelBlue")" ForeColor="@("Black")" />
+</Menu>
+```
+
+### Menu with Dynamic Submenus and Styles
+
+```razor
+<Menu Orientation="Vertical"
+      MaximumDynamicDisplayLevels="3"
+      StaticDisplayLevels="2">
+    <Items>
+        <MenuItem Text="File" Value="file">
+            <MenuItem Text="New" Value="new" />
+            <MenuItem Text="Open" Value="open" />
+            <MenuItem Text="Save" Value="save" />
+        </MenuItem>
+        <MenuItem Text="Edit" Value="edit">
+            <MenuItem Text="Cut" Value="cut" />
+            <MenuItem Text="Copy" Value="copy" />
+            <MenuItem Text="Paste" Value="paste" />
+        </MenuItem>
+    </Items>
+    <StaticMenuItemStyle BackColor="@("LightSteelBlue")" ForeColor="@("Black")" />
+    <DynamicMenuItemStyle BackColor="WebColor.Black" ForeColor="WebColor.Silver" />
+    <DynamicHoverStyle BackColor="WebColor.LightSkyBlue" ForeColor="WebColor.Black" />
+    <DynamicSelectedStyle BackColor="WebColor.PapayaWhip" ForeColor="WebColor.SteelBlue" />
+</Menu>
+```
+
+### Data Binding with SiteMap
+
+```razor
+@using System.Xml
+
+<Menu DataSource="@sitemapXml"
+      Orientation="Horizontal"
+      StaticDisplayLevels="2">
+    <DataBindings>
+        <MenuItemBinding DataMember="siteMapNode"
+                         TextField="title"
+                         NavigateUrlField="url" />
+    </DataBindings>
+</Menu>
+
+@code {
+    private XmlDocument sitemapXml;
+
+    protected override void OnInitialized()
+    {
+        sitemapXml = new XmlDocument();
+        sitemapXml.LoadXml(@"
+            <siteMap>
+                <siteMapNode title='Home' url='/'>
+                    <siteMapNode title='Products' url='/products' />
+                    <siteMapNode title='About' url='/about' />
+                </siteMapNode>
+            </siteMap>");
+    }
+}
+```
+
+## Selection and Events Reference
+
+| Property/Event | Type | Default | Description |
+|----------------|------|---------|-------------|
+| `MenuItemClick` | `EventCallback<MenuEventArgs>` | — | Fires when a menu item is clicked. |
+| `MenuItemDataBound` | `EventCallback<MenuEventArgs>` | — | Fires when a menu item is data-bound. |
+| `SelectedItem` | `MenuItem` | `null` | Read-only. The currently selected menu item. |
+| `SelectedValue` | `string` | `null` | Read-only. The `Value` of the selected menu item. |
+
+## Navigation Properties Reference
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `Orientation` | `Orientation` | `Vertical` | Menu layout direction (`Horizontal` or `Vertical`). |
+| `Target` | `string` | `null` | Default target frame for navigation links. |
+| `MaximumDynamicDisplayLevels` | `int` | `3` | Max depth of dynamically displayed submenus. |
+| `SkipLinkText` | `string` | `"Skip Navigation Links"` | Accessibility skip-link text for screen readers. |
+| `StaticDisplayLevels` | `int` | `1` | Number of menu levels displayed statically. |
+
+## MenuItem Properties Reference
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Text` | `string` | Display text for the menu item. |
+| `Value` | `string` | Value associated with the menu item. |
+| `NavigateUrl` | `string` | URL to navigate to when clicked. |
+| `ToolTip` | `string` | Tooltip text on hover. |
+| `Target` | `string` | Target frame (falls back to `Menu.Target`). |
+| `ChildContent` | `RenderFragment` | Nested child `MenuItem` components. |
+
+## Style Sub-Components Reference
+
+| Component | Applied To |
+|-----------|-----------|
+| `<StaticMenuItemStyle>` | Static (always-visible) menu items |
+| `<StaticHoverStyle>` | Static menu items on hover |
+| `<DynamicMenuItemStyle>` | Dynamically displayed submenu items |
+| `<DynamicMenuStyle>` | Dynamic submenu container |
+| `<DynamicHoverStyle>` | Dynamic menu items on hover |
+| `<DynamicSelectedStyle>` | Selected item in dynamic menus |
+
+All style components support `BackColor`, `ForeColor`, `CssClass`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Font`, `Height`, and `Width` properties.
+
+## See Also
+
+- [TreeView](TreeView.md)
+- [SiteMapPath](SiteMapPath.md)
 

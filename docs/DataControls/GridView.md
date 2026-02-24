@@ -7,6 +7,9 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 - **Paging** - `AllowPaging`, `PageSize`, `PageIndex`, `PageIndexChanged` event
 - **Sorting** - `AllowSorting`, `SortExpression`, `SortDirection`, `Sorting`/`Sorted` events
 - **Row Editing** - `EditIndex`, `RowEditing`, `RowUpdating`, `RowDeleting`, `RowCancelingEdit` events
+- **Selection** - `SelectedIndex`, `SelectedRow`, `SelectedValue`, `AutoGenerateSelectButton`, `SelectedIndexChanging`/`SelectedIndexChanged` events
+- **Style Sub-Components** - `RowStyle`, `AlternatingRowStyle`, `HeaderStyle`, `FooterStyle`, `SelectedRowStyle`, `EditRowStyle`, `EmptyDataRowStyle`, `PagerStyle`
+- **Display Properties** - `ShowHeader`, `ShowFooter`, `Caption`, `CaptionAlign`, `EmptyDataTemplate`, `GridLines`, `UseAccessibleHeader`, `CellPadding`, `CellSpacing`, `ShowHeaderWhenEmpty`
 
 ### Blazor Notes
 
@@ -16,11 +19,15 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 - **Paging** - When `AllowPaging="true"`, the GridView automatically paginates the data source using `Skip()`/`Take()`. A numeric pager is rendered below the grid. The `PageIndexChanged` event fires with a `PageChangedEventArgs` containing `NewPageIndex`, `OldPageIndex`, `TotalPages`, `StartRowIndex`, and `Cancel`.
 - **Sorting** - When `AllowSorting="true"`, column headers become clickable. You must handle the `Sorting` event to apply the sort to your data source. The `Sorted` event fires after the sort completes. Both events use `GridViewSortEventArgs` with `SortExpression`, `SortDirection`, and `Cancel` properties.
 - **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). An auto-generated command column appears when at least one editing event callback is registered.
+- **Selection** - Set `SelectedIndex` to highlight a row. `SelectedRow` returns the data item for the selected row, and `SelectedValue` returns the `DataKeyNames` value. When `AutoGenerateSelectButton="true"`, a "Select" link column is added automatically. The `SelectedIndexChanging` event fires before the selection changes (cancellable), and `SelectedIndexChanged` fires after.
+- **Style Sub-Components** - Use `<RowStyle>`, `<AlternatingRowStyle>`, `<HeaderStyle>`, `<FooterStyle>`, `<SelectedRowStyle>`, `<EditRowStyle>`, `<EmptyDataRowStyle>`, and `<PagerStyle>` child components to configure `TableItemStyle` properties (CssClass, BackColor, ForeColor, etc.) for each section of the grid.
+- **Display Properties** - `ShowHeader` and `ShowFooter` toggle header/footer rows. `Caption` and `CaptionAlign` add a `<caption>` element. `GridLines` controls table borders. `UseAccessibleHeader` renders `<th>` with `scope="col"`. `CellPadding` and `CellSpacing` set table spacing. `ShowHeaderWhenEmpty` shows column headers even when the data source is empty. `EmptyDataTemplate` renders custom content when there are no data rows.
 
 !!! warning "Differences from Web Forms"
     - `PageIndexChanging` is not implemented; use `PageIndexChanged` with the `Cancel` property instead.
     - `PagerTemplate` is not yet supported; only the built-in numeric pager is available.
     - Sorting does not automatically re-sort the data source; you must handle the `Sorting` event and apply the sort yourself.
+    - `SelectedIndexChanging` uses `GridViewSelectEventArgs` with a `Cancel` property to prevent selection.
 
 ## Web Forms Declarative Syntax
 
@@ -363,12 +370,18 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
     AllowPaging=bool
     AllowSorting=bool
     AutoGenerateColumns=bool
+    AutoGenerateSelectButton=bool
+    Caption=string
+    CaptionAlign=TableCaptionAlign
+    CellPadding=int
+    CellSpacing=int
     CssClass=string
     DataKeyNames=string
     DataSource=IEnumerable
     EditIndex=int
     EmptyDataText=string
     Enabled=bool
+    GridLines=GridLines
     ID=string
     Items=IEnumerable
     ItemType=Type
@@ -387,14 +400,22 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
     RowDeleting=EventCallBack<GridViewDeleteEventArgs>
     RowEditing=EventCallBack<GridViewEditEventArgs>
     RowUpdating=EventCallBack<GridViewUpdateEventArgs>
+    SelectedIndex=int
+    SelectedIndexChanged=EventCallBack<int>
+    SelectedIndexChanging=EventCallBack<GridViewSelectEventArgs>
     SelectMethod=SelectHandler
+    ShowFooter=bool
+    ShowHeader=bool
+    ShowHeaderWhenEmpty=bool
     SortDirection=SortDirection
     SortExpression=string
     Sorted=EventCallBack<GridViewSortEventArgs>
     Sorting=EventCallBack<GridViewSortEventArgs>
     TabIndex=int
+    UseAccessibleHeader=bool
     Visible=bool
 >
+    <AlternatingRowStyle CssClass="string" BackColor="WebColor" ... />
     <Columns>
         <!-- Note: ItemType is optional on columns and will be automatically 
              inferred from the parent GridView. You can still explicitly 
@@ -430,6 +451,16 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
             <ItemTemplate>
         </TemplateField>
     </Columns>
+    <EditRowStyle CssClass="string" BackColor="WebColor" ... />
+    <EmptyDataRowStyle CssClass="string" BackColor="WebColor" ... />
+    <EmptyDataTemplate>
+        <!-- Custom content when no data rows -->
+    </EmptyDataTemplate>
+    <FooterStyle CssClass="string" BackColor="WebColor" ... />
+    <HeaderStyle CssClass="string" BackColor="WebColor" ... />
+    <PagerStyle CssClass="string" BackColor="WebColor" ... />
+    <RowStyle CssClass="string" BackColor="WebColor" ... />
+    <SelectedRowStyle CssClass="string" BackColor="WebColor" ... />
 </GridView>
 
 ```
@@ -593,3 +624,185 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
     }
 }
 ```
+
+### Row Selection
+
+```razor
+@* GridView with row selection and auto-generated select button *@
+<GridView DataSource="@Products"
+          ItemType="Product"
+          AutoGenerateSelectButton="true"
+          SelectedIndex="@selectedIndex"
+          SelectedIndexChanged="HandleSelectionChanged">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Name" />
+        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+    </Columns>
+    <SelectedRowStyle CssClass="selected-row" BackColor="LightBlue" />
+</GridView>
+
+@if (SelectedProduct is not null)
+{
+    <p>Selected: @SelectedProduct.Name</p>
+}
+
+@code {
+    private List<Product> Products = new();
+    private int selectedIndex = -1;
+
+    private Product? SelectedProduct => selectedIndex >= 0 && selectedIndex < Products.Count
+        ? Products[selectedIndex]
+        : null;
+
+    private void HandleSelectionChanged(int newIndex)
+    {
+        selectedIndex = newIndex;
+    }
+}
+```
+
+### Selection with Cancellation
+
+```razor
+@* Prevent selection of inactive items *@
+<GridView DataSource="@Products"
+          ItemType="Product"
+          AutoGenerateSelectButton="true"
+          SelectedIndex="@selectedIndex"
+          SelectedIndexChanging="HandleSelecting"
+          SelectedIndexChanged="HandleSelected">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Name" />
+        <BoundField DataField="IsActive" HeaderText="Active" />
+    </Columns>
+</GridView>
+
+@code {
+    private List<Product> Products = new();
+    private int selectedIndex = -1;
+
+    private void HandleSelecting(GridViewSelectEventArgs e)
+    {
+        // Cancel selection of inactive products
+        if (!Products[e.NewSelectedIndex].IsActive)
+        {
+            e.Cancel = true;
+        }
+    }
+
+    private void HandleSelected(int newIndex)
+    {
+        selectedIndex = newIndex;
+    }
+}
+```
+
+### Style Sub-Components
+
+```razor
+@* GridView with comprehensive styling *@
+<GridView DataSource="@Products"
+          ItemType="Product"
+          AutoGenerateColumns="true"
+          ShowHeader="true"
+          ShowFooter="true"
+          GridLines="Both"
+          CellPadding="4"
+          UseAccessibleHeader="true"
+          Caption="Product Inventory"
+          CaptionAlign="Top">
+    <HeaderStyle CssClass="grid-header" BackColor="DarkBlue" ForeColor="White" />
+    <RowStyle CssClass="grid-row" BackColor="White" />
+    <AlternatingRowStyle CssClass="grid-alt-row" BackColor="LightGray" />
+    <SelectedRowStyle CssClass="grid-selected" BackColor="LightBlue" />
+    <FooterStyle CssClass="grid-footer" BackColor="DarkBlue" ForeColor="White" />
+    <EditRowStyle CssClass="grid-edit" BackColor="LightYellow" />
+    <PagerStyle CssClass="grid-pager" />
+</GridView>
+```
+
+### Empty Data Template
+
+```razor
+@* GridView with custom empty data display *@
+<GridView DataSource="@FilteredProducts"
+          ItemType="Product"
+          AutoGenerateColumns="true"
+          ShowHeaderWhenEmpty="true"
+          EmptyDataText="No products found.">
+    <EmptyDataTemplate>
+        <div class="empty-message">
+            <p>No products match your filter criteria.</p>
+            <Button Text="Clear Filters" OnClick="ClearFilters" />
+        </div>
+    </EmptyDataTemplate>
+    <EmptyDataRowStyle CssClass="empty-row" ForeColor="Gray" />
+</GridView>
+
+@code {
+    private List<Product> FilteredProducts = new();
+
+    private void ClearFilters()
+    {
+        // Reset filters and reload data
+    }
+}
+```
+
+## Selection Properties Reference
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SelectedIndex` | `int` | `-1` | Zero-based index of the selected row. `-1` = no selection. |
+| `SelectedRow` | `ItemType` | `default` | Read-only. Returns the data item for the selected row. |
+| `SelectedValue` | `object` | `null` | Read-only. Returns the `DataKeyNames` value of the selected row. |
+| `AutoGenerateSelectButton` | `bool` | `false` | When `true`, adds a "Select" link column. |
+| `SelectedIndexChanging` | `EventCallback<GridViewSelectEventArgs>` | — | Fires before selection changes. Set `Cancel = true` to prevent. |
+| `SelectedIndexChanged` | `EventCallback<int>` | — | Fires after the selected row changes. |
+
+## Style Sub-Components Reference
+
+All style sub-components use `TableItemStyle` which supports:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `CssClass` | `string` | CSS class name |
+| `BackColor` | `WebColor` | Background color |
+| `ForeColor` | `WebColor` | Text color |
+| `BorderColor` | `WebColor` | Border color |
+| `BorderStyle` | `BorderStyle` | Border style (Solid, Dashed, etc.) |
+| `BorderWidth` | `Unit` | Border width |
+| `Font` | `FontInfo` | Font settings |
+| `Height` | `Unit` | Row height |
+| `Width` | `Unit` | Row width |
+| `HorizontalAlign` | `HorizontalAlign` | Content alignment |
+| `Wrap` | `bool` | Whether content wraps |
+
+**Available style sub-components:**
+
+| Component | Applied To |
+|-----------|-----------|
+| `<RowStyle>` | All data rows |
+| `<AlternatingRowStyle>` | Even-numbered data rows |
+| `<HeaderStyle>` | Header row |
+| `<FooterStyle>` | Footer row |
+| `<SelectedRowStyle>` | Currently selected row |
+| `<EditRowStyle>` | Row being edited |
+| `<EmptyDataRowStyle>` | Empty data row |
+| `<PagerStyle>` | Pager row |
+
+## Display Properties Reference
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `ShowHeader` | `bool` | `true` | Show/hide the header row |
+| `ShowFooter` | `bool` | `false` | Show/hide the footer row |
+| `Caption` | `string` | `null` | Caption text above the table |
+| `CaptionAlign` | `TableCaptionAlign` | `NotSet` | Caption alignment (Top, Bottom, Left, Right) |
+| `GridLines` | `GridLines` | `None` | Table gridlines (None, Horizontal, Vertical, Both) |
+| `UseAccessibleHeader` | `bool` | `false` | Render `<th scope="col">` instead of `<td>` |
+| `CellPadding` | `int` | `-1` | Cell padding in pixels (-1 = not set) |
+| `CellSpacing` | `int` | `-1` | Cell spacing in pixels (-1 = not set) |
+| `ShowHeaderWhenEmpty` | `bool` | `false` | Show column headers when data source is empty |
+| `EmptyDataText` | `string` | `null` | Text shown when data source is empty |
+| `EmptyDataTemplate` | `RenderFragment` | `null` | Custom template shown when data source is empty |

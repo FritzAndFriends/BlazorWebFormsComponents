@@ -1,0 +1,182 @@
+@page "/ControlSamples/ListView/CrudOperations"
+@using BlazorWebFormsComponents.Enums
+
+<h2>ListView CRUD Operations</h2>
+
+<Nav />
+
+<p>This sample demonstrates edit, delete, and insert operations using the ListView component.</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Name</th>
+			<th>Price</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		<ListView @ref="listView"
+				  Context="Item"
+				  ItemType="SharedSampleObjects.Models.Widget"
+				  EditIndex="@editIndex"
+				  InsertItemPosition="InsertItemPosition.LastItem"
+				  ItemEditing="OnItemEditing"
+				  ItemUpdating="OnItemUpdating"
+				  ItemCanceling="OnItemCanceling"
+				  ItemDeleting="OnItemDeleting"
+				  ItemInserting="OnItemInserting">
+			<ItemTemplate>
+				<tr>
+					<td>@Item.Id</td>
+					<td>@Item.Name</td>
+					<td>@Item.Price.ToString("c")</td>
+					<td>
+						<button class="btn btn-sm btn-primary" @onclick="@(() => listView.HandleCommand("edit", null, items.IndexOf(Item)))">Edit</button>
+						<button class="btn btn-sm btn-danger" @onclick="@(() => listView.HandleCommand("delete", null, items.IndexOf(Item)))">Delete</button>
+					</td>
+				</tr>
+			</ItemTemplate>
+			<EditItemTemplate>
+				<tr class="table-warning">
+					<td>@Item.Id</td>
+					<td><input type="text" class="form-control" @bind="editName" /></td>
+					<td><input type="number" class="form-control" step="0.01" @bind="editPrice" /></td>
+					<td>
+						<button class="btn btn-sm btn-success" @onclick="@(() => listView.HandleCommand("update", null, editIndex))">Update</button>
+						<button class="btn btn-sm btn-secondary" @onclick="@(() => listView.HandleCommand("cancel", null, editIndex))">Cancel</button>
+					</td>
+				</tr>
+			</EditItemTemplate>
+			<InsertItemTemplate>
+				<tr class="table-info">
+					<td><em>New</em></td>
+					<td><input type="text" class="form-control" placeholder="Name" @bind="newName" /></td>
+					<td><input type="number" class="form-control" step="0.01" placeholder="Price" @bind="newPrice" /></td>
+					<td>
+						<button class="btn btn-sm btn-success" @onclick="@(() => listView.HandleCommand("insert", null, 0))">Insert</button>
+					</td>
+				</tr>
+			</InsertItemTemplate>
+			<EmptyDataTemplate>
+				<tr>
+					<td colspan="4">No items. Use the insert row below to add one.</td>
+				</tr>
+			</EmptyDataTemplate>
+		</ListView>
+	</tbody>
+</table>
+
+<p><strong>Status:</strong> @statusMessage</p>
+
+@code {
+
+	BlazorWebFormsComponents.ListView<Widget> listView;
+	List<Widget> items;
+	int editIndex = -1;
+	string editName;
+	decimal editPrice;
+	string newName;
+	decimal newPrice;
+	string statusMessage = "Ready";
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if (firstRender)
+		{
+			items = new List<Widget>
+			{
+				new Widget { Id = 1, Name = "Alpha Widget", Price = 9.99M, LastUpdate = DateTime.Today },
+				new Widget { Id = 2, Name = "Beta Widget", Price = 19.99M, LastUpdate = DateTime.Today },
+				new Widget { Id = 3, Name = "Gamma Widget", Price = 29.99M, LastUpdate = DateTime.Today }
+			};
+			listView.DataSource = items;
+			listView.DataBind();
+		}
+		base.OnAfterRender(firstRender);
+	}
+
+	void OnItemEditing(ListViewEditEventArgs args)
+	{
+		editIndex = args.NewEditIndex;
+		var item = items[editIndex];
+		editName = item.Name;
+		editPrice = item.Price;
+		statusMessage = $"Editing item {item.Id}";
+	}
+
+	void OnItemUpdating(ListViewUpdateEventArgs args)
+	{
+		var item = items[args.ItemIndex];
+		item.Name = editName;
+		item.Price = editPrice;
+		item.LastUpdate = DateTime.Now;
+		editIndex = -1;
+		statusMessage = $"Updated item {item.Id}";
+		RebindList();
+	}
+
+	void OnItemCanceling(ListViewCancelEventArgs args)
+	{
+		editIndex = -1;
+		statusMessage = "Edit cancelled";
+	}
+
+	void OnItemDeleting(ListViewDeleteEventArgs args)
+	{
+		var item = items[args.ItemIndex];
+		items.RemoveAt(args.ItemIndex);
+		statusMessage = $"Deleted item {item.Id} ({item.Name})";
+		RebindList();
+	}
+
+	void OnItemInserting(ListViewInsertEventArgs args)
+	{
+		var nextId = items.Any() ? items.Max(w => w.Id) + 1 : 1;
+		items.Add(new Widget
+		{
+			Id = nextId,
+			Name = newName ?? "New Widget",
+			Price = newPrice,
+			LastUpdate = DateTime.Now
+		});
+		newName = string.Empty;
+		newPrice = 0;
+		statusMessage = $"Inserted item {nextId}";
+		RebindList();
+	}
+
+	void RebindList()
+	{
+		listView.DataSource = items;
+		listView.DataBind();
+	}
+
+}
+
+<hr />
+
+<p>Code:</p>
+<pre><code>&lt;ListView Context="Item"
+          ItemType="Widget"
+          EditIndex="@@editIndex"
+          InsertItemPosition="InsertItemPosition.LastItem"
+          ItemEditing="OnItemEditing"
+          ItemUpdating="OnItemUpdating"
+          ItemCanceling="OnItemCanceling"
+          ItemDeleting="OnItemDeleting"
+          ItemInserting="OnItemInserting"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;tr&gt;
+            &lt;td&gt;@@Item.Name&lt;/td&gt;
+            &lt;td&gt;
+                &lt;button @@onclick="() =&gt; listView.HandleCommand("edit", null, index)"&gt;Edit&lt;/button&gt;
+                &lt;button @@onclick="() =&gt; listView.HandleCommand("delete", null, index)"&gt;Delete&lt;/button&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/ItemTemplate&gt;
+    &lt;EditItemTemplate&gt;...&lt;/EditItemTemplate&gt;
+    &lt;InsertItemTemplate&gt;...&lt;/InsertItemTemplate&gt;
+    &lt;EmptyDataTemplate&gt;No items available.&lt;/EmptyDataTemplate&gt;
+&lt;/ListView&gt;</code></pre>

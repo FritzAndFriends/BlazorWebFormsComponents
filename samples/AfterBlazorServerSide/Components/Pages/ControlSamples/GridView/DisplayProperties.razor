@@ -1,0 +1,116 @@
+@page "/ControlSamples/GridView/DisplayProperties"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>GridView Display Properties</PageTitle>
+
+<h2>GridView Display Properties</h2>
+
+<Nav />
+
+<p>This sample demonstrates visual and structural properties:
+   <code>Caption</code>, <code>GridLines</code>, <code>ShowHeader</code>,
+   <code>ShowFooter</code>, <code>EmptyDataTemplate</code>, and
+   <code>UseAccessibleHeader</code>.</p>
+
+<hr />
+
+<h3>Caption &amp; GridLines</h3>
+<p>The <code>Caption</code> property adds a caption above the table.
+   <code>GridLines</code> controls which cell borders are rendered.</p>
+
+<GridView ItemType="Employee"
+          Items="@_employees"
+          AutoGenerateColumns="false"
+          Caption="Employee Directory"
+          GridLines="GridLines.Both"
+          UseAccessibleHeader="true">
+    <Columns>
+        <BoundField ItemType="Employee" DataField="Id" HeaderText="ID" />
+        <BoundField ItemType="Employee" DataField="Name" HeaderText="Name" />
+        <BoundField ItemType="Employee" DataField="Department" HeaderText="Department" />
+    </Columns>
+</GridView>
+
+<hr />
+
+<h3>ShowHeader / ShowFooter</h3>
+<p>Toggle <code>ShowHeader</code> and <code>ShowFooter</code> to control row visibility.</p>
+
+<GridView ItemType="Employee"
+          Items="@_employees"
+          AutoGenerateColumns="false"
+          ShowHeader="@_showHeader"
+          ShowFooter="@_showFooter"
+          GridLines="GridLines.Horizontal">
+    <Columns>
+        <BoundField ItemType="Employee" DataField="Id" HeaderText="ID" />
+        <BoundField ItemType="Employee" DataField="Name" HeaderText="Name" />
+        <BoundField ItemType="Employee" DataField="Department" HeaderText="Department" />
+    </Columns>
+</GridView>
+
+<p style="margin-top:8px;">
+    <label><input type="checkbox" @bind="_showHeader" /> Show Header</label> &nbsp;
+    <label><input type="checkbox" @bind="_showFooter" /> Show Footer</label>
+</p>
+
+<hr />
+
+<h3>EmptyDataTemplate</h3>
+<p>When the data source is empty, the <code>EmptyDataTemplate</code> is displayed.</p>
+
+<GridView ItemType="Employee"
+          Items="@_emptyList"
+          AutoGenerateColumns="false"
+          GridLines="GridLines.Both">
+    <EmptyDataTemplate>
+        <div style="padding:20px; text-align:center; color:#666;">
+            <strong>No employees found.</strong>
+            <p>Try adjusting your search criteria.</p>
+        </div>
+    </EmptyDataTemplate>
+    <Columns>
+        <BoundField ItemType="Employee" DataField="Name" HeaderText="Name" />
+    </Columns>
+</GridView>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;GridView ItemType="Employee"
+          Items="@@_employees"
+          Caption="Employee Directory"
+          GridLines="GridLines.Both"
+          UseAccessibleHeader="true"
+          ShowHeader="true"
+          ShowFooter="false"&gt;
+    &lt;EmptyDataTemplate&gt;
+        &lt;p&gt;No data available.&lt;/p&gt;
+    &lt;/EmptyDataTemplate&gt;
+    &lt;Columns&gt;
+        &lt;BoundField DataField="Name" HeaderText="Name" /&gt;
+    &lt;/Columns&gt;
+&lt;/GridView&gt;</code></pre>
+
+@code {
+
+    private bool _showHeader = true;
+    private bool _showFooter = false;
+
+    private List<Employee> _employees = new()
+    {
+        new Employee { Id = 1, Name = "Alice Johnson", Department = "Engineering" },
+        new Employee { Id = 2, Name = "Bob Smith", Department = "Marketing" },
+        new Employee { Id = 3, Name = "Carol White", Department = "Engineering" },
+        new Employee { Id = 4, Name = "Dave Brown", Department = "Sales" }
+    };
+
+    private List<Employee> _emptyList = new();
+
+    private class Employee
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Department { get; set; }
+    }
+}

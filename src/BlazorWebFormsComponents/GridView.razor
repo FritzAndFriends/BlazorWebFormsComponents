@@ -3,37 +3,57 @@
 @typeparam ItemType
 @attribute [CascadingTypeParameter(nameof(ItemType))]
 @inherits DataBoundComponent<ItemType>
+
+<CascadingValue Name="ParentGridView" Value="this" IsFixed="true">
+	@RowStyleContent
+	@AlternatingRowStyleContent
+	@HeaderStyleContent
+	@FooterStyleContent
+	@EmptyDataRowStyleContent
+	@PagerStyleContent
+	@EditRowStyleContent
+	@SelectedRowStyleContent
+</CascadingValue>
+
 @if (ColumnList.Any())
 {
-	<table class="@CssClass">
+	<table class="@CssClass" rules="@GetGridLinesRules()" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)">
+		@if (!string.IsNullOrEmpty(Caption))
+		{
+			<caption style="@GetCaptionStyle()">@Caption</caption>
+		}
+		@if (ShouldRenderHeader)
+		{
 		<thead>
-			<tr>
+			<tr style="@HeaderStyle?.ToString()">
 				@foreach (IColumn<ItemType> column in ColumnList)
 				{
 					@if (AllowSorting && !string.IsNullOrEmpty(column.SortExpression))
 					{
-						<th><a href="javascript:void(0);" @onclick="@(() => Sort(column.SortExpression))" @onclick:preventDefault>@column.HeaderText</a></th>
+						<th scope="@(UseAccessibleHeader ? "col" : null)"><a href="javascript:void(0);" @onclick="@(() => Sort(column.SortExpression))" @onclick:preventDefault>@column.HeaderText</a></th>
 					}
 					else
 					{
-						<th>@column.HeaderText</th>
+						<th scope="@(UseAccessibleHeader ? "col" : null)">@column.HeaderText</th>
 					}
 				}
 				@if (ShowCommandColumn)
 				{
-					<th></th>
+					<th scope="@(UseAccessibleHeader ? "col" : null)"></th>
 				}
 			</tr>
 		</thead>
+		}
 		<tbody>
-			@if (Items != null && Items.Any())
+			@if (HasData)
 			{
 				var index = 0;
 				@foreach (ItemType item in PagedItems)
 				{
 					var rowIndex = index;
+					var rowStyle = GetRowStyle(rowIndex);
 					<CascadingValue Value="this" Name="RowCollection">
-						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="rowIndex" IsEditing="(rowIndex == EditIndex)" EditRowStyle="EditRowStyle" GridView="this" />
+						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="rowIndex" IsEditing="(rowIndex == EditIndex)" IsSelected="(rowIndex == SelectedIndex)" EditRowStyle="EditRowStyle" RowStyle="rowStyle" GridView="this" />
 					</CascadingValue>
 
 					index++;
@@ -41,17 +61,32 @@
 			}
 			else
 			{
-				<tr>
+				<tr style="@EmptyDataRowStyle?.ToString()">
 					<td colspan=@TotalColumnCount>
-						@EmptyDataText
+						@if (EmptyDataTemplate != null)
+						{
+							@EmptyDataTemplate
+						}
+						else
+						{
+							@EmptyDataText
+						}
 					</td>
 				</tr>
 			}
 		</tbody>
-		@if (AllowPaging && TotalPages > 1)
+		@if (ShowFooter || (AllowPaging && TotalPages > 1))
 		{
 			<tfoot>
-				<tr>
+				@if (ShowFooter)
+				{
+				<tr style="@FooterStyle?.ToString()">
+					<td colspan="@TotalColumnCount"></td>
+				</tr>
+				}
+				@if (AllowPaging && TotalPages > 1)
+				{
+				<tr style="@PagerStyle?.ToString()">
 					<td colspan="@TotalColumnCount">
 						<table>
 							<tr>
@@ -71,6 +106,7 @@
 						</table>
 					</td>
 				</tr>
+				}
 			</tfoot>
 		}
 	</table>

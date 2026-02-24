@@ -1,0 +1,112 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void RequiredFieldValidator_ControlToValidateString_FailsWhenEmpty()
+	{
+		var model = new ValidationStringModel { Name = "" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@(() => {})" OnInvalidSubmit="@(() => {})">
+				<InputText @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="Name"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		cut.Find("form").Submit();
+
+		var span = cut.Find("span");
+		span.TextContent.ShouldContain("Name is required.");
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_ControlToValidateString_PassesWhenFieldHasValue()
+	{
+		var model = new ValidationStringModel { Name = "Valid Name" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@(() => {})" OnInvalidSubmit="@(() => {})">
+				<InputText @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="Name"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var span = cut.Find("span");
+		var style = span.GetAttribute("style") ?? "";
+		(style.Contains("visibility:hidden") || style.Contains("display:none")).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_ControlToValidateString_WorksOnDifferentFields()
+	{
+		var model = new CompareValidationModel { Password = "", ConfirmPassword = "value" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@(() => {})" OnInvalidSubmit="@(() => {})">
+				<InputText @bind-Value="model.Password" />
+				<InputText @bind-Value="model.ConfirmPassword" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="Password"
+					ErrorMessage="Password is required." />
+			</EditForm>
+		);
+
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Password is required.");
+	}
+
+	[Fact]
+	public void RegularExpressionValidator_ControlToValidateString_FailsOnMismatch()
+	{
+		var model = new ValidationStringModel { Name = "invalid@chars" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@(() => {})" OnInvalidSubmit="@(() => {})">
+				<InputText @bind-Value="model.Name" />
+				<RegularExpressionValidator Type="string"
+					ControlToValidate="Name"
+					ValidationExpression="^[a-zA-Z]+$"
+					ErrorMessage="Letters only." />
+			</EditForm>
+		);
+
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Letters only.");
+	}
+
+	[Fact]
+	public void Validator_ControlToValidateString_MultipleValidatorsOnSameField()
+	{
+		var model = new ValidationStringModel { Name = "" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@(() => {})" OnInvalidSubmit="@(() => {})">
+				<InputText @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlToValidate="Name"
+					ErrorMessage="Name is required." />
+				<RegularExpressionValidator Type="string"
+					ControlToValidate="Name"
+					ValidationExpression="^[a-zA-Z]+$"
+					ErrorMessage="Letters only." />
+			</EditForm>
+		);
+
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Name is required.");
+	}
+
+	public class ValidationStringModel
+	{
+		public string Name { get; set; }
+	}
+
+	public class CompareValidationModel
+	{
+		public string Password { get; set; }
+		public string ConfirmPassword { get; set; }
+	}
+}

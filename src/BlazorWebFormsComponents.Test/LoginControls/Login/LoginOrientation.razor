@@ -1,0 +1,123 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls
+@using BlazorWebFormsComponents.Enums
+@using Moq
+
+@code {
+
+	private void SetupLoginServices()
+	{
+		var principal = new ClaimsPrincipal(new ClaimsIdentity());
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync())
+			.Returns(Task.FromResult(new AuthenticationState(principal)));
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+
+		var navMock = new Mock<NavigationManager>();
+		Services.AddSingleton<NavigationManager>(navMock.Object);
+	}
+
+	[Fact]
+	public void Login_DefaultOrientation_IsVertical()
+	{
+		SetupLoginServices();
+
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.Login ID="loginVert" />
+		);
+
+		// Vertical layout: username and password in separate rows
+		// Each label+input pair gets its own <tr>
+		var rows = cut.FindAll("table table tr");
+		// Should have title row + username row + password row + remember me + button row = multiple rows
+		// Username label and input are in separate <td> in the SAME row (TextOnLeft)
+		var usernameLabel = cut.Find("label[for='loginVert_UserName']");
+		var passwordLabel = cut.Find("label[for='loginVert_Password']");
+
+		// In vertical mode, the labels should be in different rows
+		var usernameTr = usernameLabel.ParentElement.ParentElement; // td -> tr
+		var passwordTr = passwordLabel.ParentElement.ParentElement; // td -> tr
+		usernameTr.ShouldNotBe(passwordTr);
+	}
+
+	[Fact]
+	public void Login_HorizontalOrientation_FieldsSideBySide()
+	{
+		SetupLoginServices();
+		Orientation ori = Orientation.Horizontal;
+
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.Login ID="loginHoriz" Orientation="ori" />
+		);
+
+		// Horizontal layout with TextOnLeft: username label, username input, password label, password input all in ONE row
+		var usernameLabel = cut.Find("label[for='loginHoriz_UserName']");
+		var passwordLabel = cut.Find("label[for='loginHoriz_Password']");
+
+		// Both labels should be in the same <tr>
+		var usernameTr = usernameLabel.ParentElement.ParentElement; // td -> tr
+		var passwordTr = passwordLabel.ParentElement.ParentElement; // td -> tr
+		usernameTr.ShouldBe(passwordTr);
+
+		// In horizontal + TextOnLeft, that row should have 4 <td> (label, input, label, input)
+		var tds = usernameTr.QuerySelectorAll("td");
+		tds.Length.ShouldBe(4);
+	}
+
+	[Fact]
+	public void Login_TextOnLeft_Default_LabelsAlignRight()
+	{
+		SetupLoginServices();
+
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.Login ID="loginTOL" />
+		);
+
+		// TextOnLeft (default): label in left td with align="right", input in right td
+		var labelTd = cut.Find("label[for='loginTOL_UserName']").ParentElement;
+		labelTd.GetAttribute("align").ShouldBe("right");
+	}
+
+	[Fact]
+	public void Login_TextOnTop_LabelsAboveInputs()
+	{
+		SetupLoginServices();
+		LoginTextLayout layout = LoginTextLayout.TextOnTop;
+
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.Login ID="loginTOT" TextLayout="layout" />
+		);
+
+		// TextOnTop: label in its own row with colspan, input in the next row with colspan
+		var usernameLabel = cut.Find("label[for='loginTOT_UserName']");
+		var usernameLabelTd = usernameLabel.ParentElement;
+		usernameLabelTd.GetAttribute("colspan").ShouldBe("2");
+
+		// The input should be in a different row than the label
+		var usernameInput = cut.Find("#loginTOT_UserName");
+		var labelRow = usernameLabel.ParentElement.ParentElement;
+		var inputRow = usernameInput.ParentElement.ParentElement;
+		labelRow.ShouldNotBe(inputRow);
+	}
+
+	[Fact]
+	public void Login_HorizontalTextOnTop_TwoRowLayout()
+	{
+		SetupLoginServices();
+		Orientation ori = Orientation.Horizontal;
+		LoginTextLayout layout = LoginTextLayout.TextOnTop;
+
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.Login ID="loginHTOT" Orientation="ori" TextLayout="layout" />
+		);
+
+		// Horizontal + TextOnTop: one row for both labels, next row for both inputs
+		var usernameLabel = cut.Find("label[for='loginHTOT_UserName']");
+		var passwordLabel = cut.Find("label[for='loginHTOT_Password']");
+
+		var usernameLabelRow = usernameLabel.ParentElement.ParentElement;
+		var passwordLabelRow = passwordLabel.ParentElement.ParentElement;
+		usernameLabelRow.ShouldBe(passwordLabelRow, "Both labels should be in the same row for horizontal TextOnTop");
+	}
+}

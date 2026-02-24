@@ -20,7 +20,16 @@ namespace BlazorWebFormsComponents.Validations
 		[CascadingParameter] EditContext CurrentEditContext { get; set; }
 		[CascadingParameter(Name = "ValidationGroupCoordinator")] 
 		ValidationGroupCoordinator Coordinator { get; set; }
-		[Parameter] public ForwardRef<InputBase<Type>> ControlToValidate { get; set; }
+		/// <summary>
+		/// String ID of the target control, matching the Web Forms ControlToValidate pattern.
+		/// Maps to a property name on the EditContext model. Use this for migration from Web Forms.
+		/// </summary>
+		[Parameter] public string ControlToValidate { get; set; }
+		/// <summary>
+		/// Blazor-native alternative: a ForwardRef to the InputBase control to validate.
+		/// When both ControlToValidate and ControlRef are set, ControlRef takes precedence.
+		/// </summary>
+		[Parameter] public ForwardRef<InputBase<Type>> ControlRef { get; set; }
 		[Parameter] public string Text { get; set; }
 		[Parameter] public string ErrorMessage { get; set; }
 		[Parameter] public string ValidationGroup { get; set; }
@@ -86,22 +95,11 @@ namespace BlazorWebFormsComponents.Validations
 
 			_validationRequested = false; // Reset for next validation
 
-			string name;
-			if (ControlToValidate.Current.ValueExpression.Body is MemberExpression memberExpression)
-			{
-				name = memberExpression.Member.Name;
-			}
-			else
-			{
-				throw new InvalidOperationException("You should not have seen this message, but now that you do" +
-					"I want you to open an issue here https://github.com/fritzAndFriends/BlazorWebFormsComponents/issues " +
-					"with a title 'ValueExpression.Body is not MemberExpression' and a sample code to reproduce this. Thanks!");
-			}
-
+			var name = GetFieldName();
 			var fieldIdentifier = CurrentEditContext.Field(name);
 
 			_messageStore.Clear(fieldIdentifier);
-			var value = GetCurrentValueAsString();
+			var value = GetCurrentValueAsString(name);
 
 			if (!Enabled || Validate(value))
 			{
@@ -122,12 +120,60 @@ namespace BlazorWebFormsComponents.Validations
 			CurrentEditContext.NotifyValidationStateChanged();
 		}
 
-		private string GetCurrentValueAsString()
+		/// <summary>
+		/// Resolves the field name from either ControlRef (ForwardRef) or ControlToValidate (string ID).
+		/// ControlRef takes precedence when both are set.
+		/// </summary>
+		private string GetFieldName()
 		{
-			// The getter variable could be stored in a static
-			// readonly variable to lessen the perf impact of reflection.
-			var getter = typeof(InputBase<Type>).GetProperty("CurrentValueAsString", BindingFlags.NonPublic | BindingFlags.Instance);
-			return getter.GetValue(ControlToValidate.Current) as string;
+			if (ControlRef?.Current != null)
+			{
+				if (ControlRef.Current.ValueExpression.Body is MemberExpression memberExpression)
+				{
+					return memberExpression.Member.Name;
+				}
+
+				throw new InvalidOperationException("You should not have seen this message, but now that you do" +
+					"I want you to open an issue here https://github.com/fritzAndFriends/BlazorWebFormsComponents/issues " +
+					"with a title 'ValueExpression.Body is not MemberExpression' and a sample code to reproduce this. Thanks!");
+			}
+
+			if (!string.IsNullOrEmpty(ControlToValidate))
+			{
+				return ControlToValidate;
+			}
+
+			throw new InvalidOperationException(
+				"Either ControlToValidate (string ID) or ControlRef (ForwardRef) must be set on the validator.");
+		}
+
+		private string GetCurrentValueAsString(string fieldName)
+		{
+			// When a ForwardRef is available, use the InputBase's internal value
+			if (ControlRef?.Current != null)
+			{
+				var getter = typeof(InputBase<Type>).GetProperty("CurrentValueAsString", BindingFlags.NonPublic | BindingFlags.Instance);
+				return getter.GetValue(ControlRef.Current) as string;
+			}
+
+			// When using string ControlToValidate, resolve via the EditContext model
+			var model = CurrentEditContext.Model;
+			var property = model.GetType().GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance);
+			if (property != null)
+			{
+				var value = property.GetValue(model);
+				return value?.ToString();
+			}
+
+			// Try fields as well (for model classes with public fields)
+			var field = model.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.Instance);
+			if (field != null)
+			{
+				var value = field.GetValue(model);
+				return value?.ToString();
+			}
+
+			return null;
 		}
 
 		/// <summary>

@@ -1,0 +1,163 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	private void SetupMenuServices()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Fact]
+	public void LevelMenuItemStyles_AppliesPerDepthStyles()
+	{
+		SetupMenuServices();
+		var levelStyles = new List<MenuLevelStyle>
+		{
+			new MenuLevelStyle { CssClass = "level1-style" },
+			new MenuLevelStyle { CssClass = "level2-style" }
+		};
+
+		var cut = Render(
+			@<Menu LevelMenuItemStyles="levelStyles">
+				<Items>
+					<MenuItem Text="Home">
+						<MenuItem Text="SubItem" />
+					</MenuItem>
+				</Items>
+			</Menu>
+		);
+
+		var links = cut.FindAll("li a");
+		// Level 1 item should get level1-style class
+		var homeLink = links.First(a => a.TextContent.Contains("Home"));
+		homeLink.GetAttribute("class").ShouldContain("level1-style");
+	}
+
+	[Fact]
+	public void Level1Items_GetStyleFromIndex0()
+	{
+		SetupMenuServices();
+		var levelStyles = new List<MenuLevelStyle>
+		{
+			new MenuLevelStyle { CssClass = "first-level-css" }
+		};
+
+		var cut = Render(
+			@<Menu LevelMenuItemStyles="levelStyles">
+				<Items>
+					<MenuItem Text="Home" />
+					<MenuItem Text="About" />
+				</Items>
+			</Menu>
+		);
+
+		var menuLinks = cut.FindAll("li a");
+		menuLinks.Count.ShouldBeGreaterThan(0);
+		foreach (var link in menuLinks)
+		{
+			link.GetAttribute("class").ShouldContain("first-level-css");
+		}
+	}
+
+	[Fact]
+	public void Level2Items_GetStyleFromIndex1()
+	{
+		SetupMenuServices();
+		var levelStyles = new List<MenuLevelStyle>
+		{
+			new MenuLevelStyle { CssClass = "level1-css" },
+			new MenuLevelStyle { CssClass = "level2-css" }
+		};
+
+		var cut = Render(
+			@<Menu StaticDisplayLevels="1" LevelMenuItemStyles="levelStyles">
+				<Items>
+					<MenuItem Text="Home">
+						<MenuItem Text="SubItem" />
+					</MenuItem>
+				</Items>
+			</Menu>
+		);
+
+		// SubItem is at depth 2, should get level2-css
+		var subItemLink = cut.FindAll("li a").First(a => a.TextContent.Contains("SubItem"));
+		subItemLink.GetAttribute("class").ShouldContain("level2-css");
+	}
+
+	[Fact]
+	public void LevelSelectedStyles_AppliesToSelectedItemPerLevel()
+	{
+		SetupMenuServices();
+		var selectedStyles = new List<MenuLevelStyle>
+		{
+			new MenuLevelStyle { CssClass = "selected-level1" }
+		};
+
+		var cut = Render(
+			@<Menu LevelSelectedStyles="selectedStyles">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+					<MenuItem Text="About" Value="about" />
+				</Items>
+			</Menu>
+		);
+
+		// Click Home to select it
+		cut.FindAll("li a").First(a => a.TextContent.Contains("Home")).Click();
+
+		// After click, selected item should have selected-level1 class
+		var homeLink = cut.FindAll("li a").First(a => a.TextContent.Contains("Home"));
+		homeLink.GetAttribute("class").ShouldContain("selected-level1");
+	}
+
+	[Fact]
+	public void LevelSubMenuStyles_AppliesToSubmenuContainersPerLevel()
+	{
+		SetupMenuServices();
+		WebColor bgColor = "LightBlue";
+		var subMenuStyles = new List<MenuLevelStyle>
+		{
+			new MenuLevelStyle(), // level 1 submenu (not applicable for outermost)
+			new MenuLevelStyle { BackColor = bgColor }
+		};
+
+		var cut = Render(
+			@<Menu StaticDisplayLevels="1" LevelSubMenuStyles="subMenuStyles">
+				<Items>
+					<MenuItem Text="Home">
+						<MenuItem Text="SubItem" />
+					</MenuItem>
+				</Items>
+			</Menu>
+		);
+
+		// The submenu ul should pick up the style from LevelSubMenuStyles
+		var subMenuUl = cut.FindAll("ul").FirstOrDefault(ul => ul.ClassList.Contains("level2"));
+		subMenuUl.ShouldNotBeNull();
+		var style = subMenuUl.GetAttribute("style");
+		// Style should contain background-color from the level sub menu style
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void LevelStyles_OverrideStaticDynamicStyles()
+	{
+		SetupMenuServices();
+		var levelStyles = new List<MenuLevelStyle>
+		{
+			new MenuLevelStyle { CssClass = "override-class" }
+		};
+
+		var cut = Render(
+			@<Menu LevelMenuItemStyles="levelStyles">
+				<Items>
+					<MenuItem Text="Home" />
+				</Items>
+			</Menu>
+		);
+
+		var homeLink = cut.FindAll("li a").First(a => a.TextContent.Contains("Home"));
+		homeLink.GetAttribute("class").ShouldContain("override-class");
+	}
+}

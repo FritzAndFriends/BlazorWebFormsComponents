@@ -3,16 +3,38 @@
 @typeparam ItemType
 @attribute [CascadingTypeParameter(nameof(ItemType))]
 @inherits DataBoundComponent<ItemType>
+
+<CascadingValue Name="ParentDataGrid" Value="this" IsFixed="true">
+	@AlternatingItemStyleContent
+	@ItemStyleContent
+	@HeaderStyleContent
+	@FooterStyleContent
+	@PagerStyleContent
+	@SelectedItemStyleContent
+	@EditItemStyleContent
+</CascadingValue>
+
 @if (ColumnList.Any())
 {
-	<table class="@CssClass">
+	<table class="@CssClass" rules="@GetGridLinesRules()" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)">
+		@if (!string.IsNullOrEmpty(Caption))
+		{
+			<caption style="@GetCaptionStyle()">@Caption</caption>
+		}
 		@if (ShowHeader)
 		{
 			<thead>
-				<tr>
+				<tr style="@HeaderStyle?.ToString()">
 					@foreach (IColumn<ItemType> column in ColumnList)
 					{
-						<th>@column.HeaderText</th>
+						@if (AllowSorting && !string.IsNullOrEmpty(column.SortExpression))
+						{
+							<th scope="@(UseAccessibleHeader ? "col" : null)"><a href="javascript:void(0);" @onclick="@(() => Sort(column.SortExpression))" @onclick:preventDefault>@column.HeaderText</a></th>
+						}
+						else
+						{
+							<th scope="@(UseAccessibleHeader ? "col" : null)">@column.HeaderText</th>
+						}
 					}
 				</tr>
 			</thead>
@@ -21,10 +43,12 @@
 			@if (Items != null && Items.Any())
 			{
 				var index = 0;
-				@foreach (ItemType item in Items)
+				@foreach (ItemType item in PagedItems)
 				{
+					var rowIndex = index;
+					var rowStyle = GetRowStyle(rowIndex);
 					<CascadingValue Value="this" Name="RowCollection">
-						<DataGridRow DataItem="item" Columns="ColumnList" DataItemIndex="index" />
+						<DataGridRow DataItem="item" Columns="ColumnList" DataItemIndex="rowIndex" RowStyle="rowStyle" />
 					</CascadingValue>
 
 					index++;
@@ -39,6 +63,40 @@
 				</tr>
 			}
 		</tbody>
+		@if (ShowFooter || (AllowPaging && PageCount > 1))
+		{
+			<tfoot>
+				@if (ShowFooter)
+				{
+				<tr style="@FooterStyle?.ToString()">
+					<td colspan="@ColumnList.Count"></td>
+				</tr>
+				}
+				@if (AllowPaging && PageCount > 1)
+				{
+				<tr style="@PagerStyle?.ToString()">
+					<td colspan="@ColumnList.Count">
+						<table>
+							<tr>
+								@for (int i = 0; i < PageCount; i++)
+								{
+									var pageIndex = i;
+									@if (i == CurrentPageIndex)
+									{
+										<td><span>@(i + 1)</span></td>
+									}
+									else
+									{
+										<td><a href="javascript:void(0);" @onclick="@(() => GoToPage(pageIndex))" @onclick:preventDefault>@(pageIndex + 1)</a></td>
+									}
+								}
+							</tr>
+						</table>
+					</td>
+				</tr>
+				}
+			</tfoot>
+		}
 	</table>
 }
 

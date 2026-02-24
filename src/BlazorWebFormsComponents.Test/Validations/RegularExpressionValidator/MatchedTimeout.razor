@@ -13,7 +13,7 @@
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<RegularExpressionValidator ValidationExpression="^(a)+$"
 																MatchTimeout="1"
-																ControlToValidate="@Name"
+																ControlRef="@Name"
 																Text="6 char only" />
 			</EditForm>
 		);

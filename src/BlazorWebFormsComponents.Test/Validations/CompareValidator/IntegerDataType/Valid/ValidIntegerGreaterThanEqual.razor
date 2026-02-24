@@ -12,7 +12,7 @@
 				Write something
 				<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
 				<CompareValidator InputType="int"
-													ControlToValidate="@Number"
+													ControlRef="@Number"
 													ValueToCompare="5"
 													Type="Integer"
 													Operator="GreaterThanEqual"

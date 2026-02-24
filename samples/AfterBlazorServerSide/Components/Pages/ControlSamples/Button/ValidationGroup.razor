@@ -18,7 +18,7 @@
 			<div style="margin-bottom: 10px;">
 				<Label Text="Name:" AssociatedControlID="name" />
 				<InputText id="name" @ref="NameInput.Current" @bind-Value="model.Name" style="margin-left: 10px;" />
-				<RequiredFieldValidator ControlToValidate="@NameInput"
+				<RequiredFieldValidator ControlRef="@NameInput"
 										Text="* Name is required"
 										ErrorMessage="Name is required"
 										ValidationGroup="Personal"
@@ -29,7 +29,7 @@
 			<div style="margin-bottom: 10px;">
 				<Label Text="Email:" AssociatedControlID="email" />
 				<InputText id="email" @ref="EmailInput.Current" @bind-Value="model.Email" style="margin-left: 10px;" />
-				<RequiredFieldValidator ControlToValidate="@EmailInput"
+				<RequiredFieldValidator ControlRef="@EmailInput"
 										Text="* Email is required"
 										ErrorMessage="Email is required"
 										ValidationGroup="Personal"
@@ -54,7 +54,7 @@
 			<div style="margin-bottom: 10px;">
 				<Label Text="Company:" AssociatedControlID="company" />
 				<InputText id="company" @ref="CompanyInput.Current" @bind-Value="model.Company" style="margin-left: 10px;" />
-				<RequiredFieldValidator ControlToValidate="@CompanyInput"
+				<RequiredFieldValidator ControlRef="@CompanyInput"
 										Text="* Company is required"
 										ErrorMessage="Company is required"
 										ValidationGroup="Business"
@@ -65,7 +65,7 @@
 			<div style="margin-bottom: 10px;">
 				<Label Text="Phone:" AssociatedControlID="phone" />
 				<InputText id="phone" @ref="PhoneInput.Current" @bind-Value="model.Phone" style="margin-left: 10px;" />
-				<RequiredFieldValidator ControlToValidate="@PhoneInput"
+				<RequiredFieldValidator ControlRef="@PhoneInput"
 										Text="* Phone is required"
 										ErrorMessage="Phone is required"
 										ValidationGroup="Business"

@@ -1,0 +1,59 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void DetailsView_Caption_RendersInMarkup()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					Caption="Test Caption" />);
+
+		cut.Markup.ShouldContain("Test Caption");
+	}
+
+	[Fact]
+	public void DetailsView_CaptionAlign_Bottom()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					Caption="My Caption" CaptionAlign="TableCaptionAlign.Bottom" />);
+
+		cut.Markup.ShouldContain("My Caption");
+	}
+
+	[Fact]
+	public void DetailsView_CaptionAlign_Top()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					Caption="Top Caption" CaptionAlign="TableCaptionAlign.Top" />);
+
+		cut.Markup.ShouldContain("Top Caption");
+	}
+
+	[Fact]
+	public void DetailsView_NoCaption_NoCaptionInMarkup()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		cut.Markup.ShouldNotContain("<caption");
+	}
+
+	[Fact]
+	public void DetailsView_PageCount_ReturnsItemCount()
+	{
+		var items = Widget.SimpleWidgetList.ToList();
+
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true"
+					AllowPaging="true" />);
+
+		var detailsView = cut.FindComponent<DetailsView<Widget>>().Instance;
+		detailsView.PageCount.ShouldBe(items.Count);
+	}
+}

@@ -1,0 +1,97 @@
+@page "/ControlSamples/FormView/Styles"
+
+<PageTitle>FormView Styles</PageTitle>
+
+<h2>FormView Style Sub-Components</h2>
+
+<Nav />
+
+<p>This sample demonstrates the style sub-components available on FormView:
+   <code>HeaderStyle</code>, <code>FooterStyle</code>, <code>RowStyle</code>,
+   and <code>EditRowStyle</code>.</p>
+
+<hr />
+
+<h3>Styled FormView</h3>
+<p>Each style is applied via the <code>&lt;XxxStyleContent&gt;</code> wrapper containing
+   the corresponding <code>FormViewXxxStyle</code> sub-component.</p>
+
+<FormView @ref="_formView"
+          AllowPaging="true"
+          DataKeyNames="Id"
+          OnPageIndexChanging="HandlePageChanging"
+          ItemType="Widget" Context="Item"
+          HeaderText="Widget Catalog"
+          FooterText="Browse widgets using the pager">
+
+    <HeaderStyleContent>
+        <FormViewHeaderStyle BackColor="WebColor.Blue" ForeColor="WebColor.White" Font_Bold="true" />
+    </HeaderStyleContent>
+    <FooterStyleContent>
+        <FormViewFooterStyle BackColor="WebColor.LightBlue" ForeColor="WebColor.Black" />
+    </FooterStyleContent>
+    <RowStyleContent>
+        <FormViewRowStyle BackColor="WebColor.White" />
+    </RowStyleContent>
+
+    <ItemTemplate>
+        <table style="width:100%;">
+            <tr><td><strong>Name:</strong></td><td>@Item.Name</td></tr>
+            <tr><td><strong>Price:</strong></td><td>@Item.Price.ToString("C")</td></tr>
+            <tr>
+                <td colspan="2">
+                    <Button CommandName="Edit" Text="Edit" />
+                </td>
+            </tr>
+        </table>
+    </ItemTemplate>
+
+    <EditItemTemplate>
+        <table style="width:100%;">
+            <tr><td>Name:</td><td><input @bind="Item.Name" /></td></tr>
+            <tr><td>Price:</td><td><input @bind="Item.Price" /></td></tr>
+            <tr>
+                <td colspan="2">
+                    <Button Text="Update" CommandName="Update" />&nbsp;
+                    <Button Text="Cancel" CommandName="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </EditItemTemplate>
+
+</FormView>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;FormView ItemType="Widget" Context="Item"
+          HeaderText="Widget Catalog"
+          FooterText="Browse widgets using the pager"&gt;
+    &lt;HeaderStyleContent&gt;
+        &lt;FormViewHeaderStyle BackColor="WebColor.Blue" ForeColor="WebColor.White" Font_Bold="true" /&gt;
+    &lt;/HeaderStyleContent&gt;
+    &lt;FooterStyleContent&gt;
+        &lt;FormViewFooterStyle BackColor="WebColor.LightBlue" /&gt;
+    &lt;/FooterStyleContent&gt;
+    &lt;RowStyleContent&gt;
+        &lt;FormViewRowStyle BackColor="WebColor.White" /&gt;
+    &lt;/RowStyleContent&gt;
+    &lt;ItemTemplate&gt;
+        ...
+    &lt;/ItemTemplate&gt;
+&lt;/FormView&gt;</code></pre>
+
+@code {
+
+    private FormView<Widget> _formView;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            _formView.Items = Widget.SimpleWidgetList;
+
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void HandlePageChanging(PageChangedEventArgs e) { }
+}

@@ -70,9 +70,15 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/GridView/Paging")]
     [InlineData("/ControlSamples/GridView/Sorting")]
     [InlineData("/ControlSamples/GridView/InlineEditing")]
+    [InlineData("/ControlSamples/GridView/Selection")]
+    [InlineData("/ControlSamples/GridView/DisplayProperties")]
     [InlineData("/ControlSamples/FormView/Simple")]
     [InlineData("/ControlSamples/FormView/Edit")]
+    [InlineData("/ControlSamples/FormView/Events")]
+    [InlineData("/ControlSamples/FormView/Styles")]
     [InlineData("/ControlSamples/DetailsView")]
+    [InlineData("/ControlSamples/DetailsView/Styles")]
+    [InlineData("/ControlSamples/DetailsView/Caption")]
     public async Task DataControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -136,6 +142,8 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/TreeView/ShowLines")]
     [InlineData("/ControlSamples/TreeView/SiteMapDataSource")]
     [InlineData("/ControlSamples/TreeView/XmlDataSource")]
+    [InlineData("/ControlSamples/TreeView/Selection")]
+    [InlineData("/ControlSamples/TreeView/ExpandCollapse")]
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -146,6 +154,7 @@ public class ControlSampleTests
     [Theory]
     [InlineData("/ControlSamples/Menu")]
     [InlineData("/ControlSamples/Menu/DatabindingSitemap")]
+    [InlineData("/ControlSamples/Menu/Selection")]
     public async Task MenuControl_Loads_AndRendersContent(string path)
     {
         await VerifyMenuPageLoads(path);
@@ -306,9 +315,8 @@ public class ControlSampleTests
     }
 
     /// <summary>
-    /// Verifies Menu pages load and render content. Menu component has known JS interop 
-    /// requirements (bwfc.Page.AddScriptElement) that may produce console errors when
-    /// the JavaScript setup is not configured, but the page should still render.
+    /// Verifies Menu pages load and render content without JavaScript errors.
+    /// Menu components require an ID attribute for JS interop to work correctly.
     /// </summary>
     private async Task VerifyMenuPageLoads(string path)
     {
@@ -337,11 +345,7 @@ public class ControlSampleTests
             // Assert - Page renders menu content (tables, links, or list items)
             var menuContent = await page.Locator("table, a, li, td").AllAsync();
             Assert.NotEmpty(menuContent);
-            
-            // Note: We don't check console errors for Menu pages because the Menu component
-            // requires JavaScript setup (bwfc.Page.AddScriptElement) that may not be configured
-            // in all environments. The important thing is that the page renders.
-            
+
             Assert.Empty(pageErrors);
         }
         finally

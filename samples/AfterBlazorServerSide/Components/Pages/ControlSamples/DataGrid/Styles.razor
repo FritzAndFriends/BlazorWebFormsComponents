@@ -1,0 +1,105 @@
+@page "/ControlSamples/DataGrid/Styles"
+@using BlazorWebFormsComponents.Enums
+
+<h2>DataGrid Styles Example</h2>
+
+<Nav />
+
+<h3>Style Sub-Components</h3>
+<p>This example shows ItemStyle, AlternatingItemStyle, HeaderStyle, and FooterStyle applied to a DataGrid.</p>
+
+<DataGrid ItemType="Customer"
+		  AutoGenerateColumns="false"
+		  DataKeyField="CustomerID"
+		  SelectMethod="Customer.GetCustomers"
+		  Caption="Customer Directory"
+		  GridLines="GridLines.Both"
+		  UseAccessibleHeader="true"
+		  ShowFooter="true"
+		  EmptyDataText="No customers found">
+	<HeaderStyleContent>
+		<DataGridHeaderStyle BackColor="WebColor.Navy" ForeColor="WebColor.White" Font-Bold="true" />
+	</HeaderStyleContent>
+	<ItemStyleContent>
+		<DataGridItemStyle BackColor="WebColor.White" ForeColor="WebColor.Black" />
+	</ItemStyleContent>
+	<AlternatingItemStyleContent>
+		<DataGridAlternatingItemStyle BackColor="WebColor.LightBlue" ForeColor="WebColor.Black" />
+	</AlternatingItemStyleContent>
+	<FooterStyleContent>
+		<DataGridFooterStyle BackColor="WebColor.Navy" ForeColor="WebColor.White" Font-Italic="true" />
+	</FooterStyleContent>
+	<Columns>
+		<BoundField DataField="CustomerID" HeaderText="ID" />
+		<BoundField DataField="CompanyName" HeaderText="Company" />
+		<BoundField DataField="FirstName" HeaderText="First Name" />
+		<BoundField DataField="LastName" HeaderText="Last Name" />
+	</Columns>
+</DataGrid>
+
+<hr />
+
+<h3>GridLines Variations</h3>
+
+<h4>GridLines.Horizontal</h4>
+<DataGrid ItemType="Customer"
+		  AutoGenerateColumns="false"
+		  SelectMethod="Customer.GetCustomers"
+		  GridLines="GridLines.Horizontal"
+		  Caption="Horizontal Lines Only">
+	<Columns>
+		<BoundField DataField="CustomerID" HeaderText="ID" />
+		<BoundField DataField="CompanyName" HeaderText="Company" />
+	</Columns>
+</DataGrid>
+
+<h4>GridLines.Vertical</h4>
+<DataGrid ItemType="Customer"
+		  AutoGenerateColumns="false"
+		  SelectMethod="Customer.GetCustomers"
+		  GridLines="GridLines.Vertical"
+		  Caption="Vertical Lines Only">
+	<Columns>
+		<BoundField DataField="CustomerID" HeaderText="ID" />
+		<BoundField DataField="CompanyName" HeaderText="Company" />
+	</Columns>
+</DataGrid>
+
+<h4>GridLines.None</h4>
+<DataGrid ItemType="Customer"
+		  AutoGenerateColumns="false"
+		  SelectMethod="Customer.GetCustomers"
+		  GridLines="GridLines.None"
+		  Caption="No Grid Lines">
+	<Columns>
+		<BoundField DataField="CustomerID" HeaderText="ID" />
+		<BoundField DataField="CompanyName" HeaderText="Company" />
+	</Columns>
+</DataGrid>
+
+<hr />
+
+<p>Code:</p>
+<pre><code>&lt;DataGrid ItemType="Customer"
+          AutoGenerateColumns="false"
+          Caption="Customer Directory"
+          GridLines="GridLines.Both"
+          UseAccessibleHeader="true"
+          ShowFooter="true"&gt;
+    &lt;HeaderStyleContent&gt;
+        &lt;DataGridHeaderStyle BackColor="WebColor.Navy" ForeColor="WebColor.White" Font-Bold="true" /&gt;
+    &lt;/HeaderStyleContent&gt;
+    &lt;ItemStyleContent&gt;
+        &lt;DataGridItemStyle BackColor="WebColor.White" ForeColor="WebColor.Black" /&gt;
+    &lt;/ItemStyleContent&gt;
+    &lt;AlternatingItemStyleContent&gt;
+        &lt;DataGridAlternatingItemStyle BackColor="WebColor.LightBlue" /&gt;
+    &lt;/AlternatingItemStyleContent&gt;
+    &lt;FooterStyleContent&gt;
+        &lt;DataGridFooterStyle BackColor="WebColor.Navy" ForeColor="WebColor.White" /&gt;
+    &lt;/FooterStyleContent&gt;
+    &lt;Columns&gt;
+        &lt;BoundField DataField="CustomerID" HeaderText="ID" /&gt;
+        &lt;BoundField DataField="CompanyName" HeaderText="Company" /&gt;
+    &lt;/Columns&gt;
+&lt;/DataGrid&gt;</code></pre>

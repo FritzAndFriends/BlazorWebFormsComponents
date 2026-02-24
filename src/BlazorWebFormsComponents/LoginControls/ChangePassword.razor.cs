@@ -85,6 +85,8 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		[Parameter] public int BorderPadding { get; set; } = 1;
 		[Parameter] public bool RenderOuterTable { get; set; } = true;
+		[Parameter] public Orientation Orientation { get; set; } = Orientation.Vertical;
+		[Parameter] public LoginTextLayout TextLayout { get; set; } = LoginTextLayout.TextOnLeft;
 
 		#endregion
 

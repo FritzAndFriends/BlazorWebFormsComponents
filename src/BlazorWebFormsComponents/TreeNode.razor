@@ -5,6 +5,8 @@
 	string ariaLevel = ParentTreeView.UseAccessibilityFeatures ? ((Depth + 1).ToString()) : null;
 	string role = ParentTreeView.UseAccessibilityFeatures ? "treeitem" : null;
 	int tabIndex = ParentTreeView.UseAccessibilityFeatures ? 0 : -1;
+	string nodeStyle = ComputedNodeStyle;
+	string nodeCssClass = ComputedNodeCssClass;
 }
 @if ((Parent?.Expanded) ?? true)
 {
@@ -20,14 +22,14 @@
 			indentBuilder.Append("<td>");
 			if (!ParentTreeView.ShowLines || currentParent.Parent == null)
 			{
-				indentBuilder.Append(@"<div style=""width:20px;height:1px;""></div>");
+				indentBuilder.Append($@"<div style=""width:{IndentWidth}px;height:1px;""></div>");
 			}
 			else if (!currentParent?.IsLast() ?? false)
 			{
 				indentBuilder.Append($"<img src=\"{ImageLocation}Default_I.gif\" />");
 			} else
 			{
-				indentBuilder.Append(@"<div style=""width:20px;height:1px;""></div>");
+				indentBuilder.Append($@"<div style=""width:{IndentWidth}px;height:1px;""></div>");
 			}
 			indentBuilder.Append("</td>");
 			indentItems.Add(indentBuilder.ToString());
@@ -69,7 +71,7 @@
 			}
 		}
 
-		<td style="white-space: nowrap;">
+		<td style="white-space: nowrap; @nodeStyle" class="@nodeCssClass">
 
 			@if (ParentTreeView.ShowCheckBoxes != Enums.TreeNodeTypes.None)
 			{
@@ -85,7 +87,7 @@
 
 			}
 
-			<a href="@NavigateUrl" target="@Target" title="@ToolTip" id="MainContent_SampleTreeViewt0">@Text</a>
+			<a href="@NavigateUrl" target="@Target" title="@ToolTip" id="MainContent_SampleTreeViewt0" @onclick="HandleNodeSelect" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))" style="@(Selected ? "font-weight:bold;" : null)">@Text</a>
 		</td>
 	</tr>
 </table>
