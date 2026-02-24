@@ -12,6 +12,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `HorizontalAlign` property for text alignment
 - `ScrollBars` property for overflow control
 - `Wrap` property for content wrapping
+- `BackImageUrl` property for background images
 - All style properties (BackColor, ForeColor, CssClass, etc.)
 - `Visible` property to show/hide the panel
 
@@ -151,6 +152,27 @@ When `GroupingText` is set, the Panel renders as a `<fieldset>` with a `<legend>
 @code {
     private bool showDetails = false;
 }
+```
+
+### Panel with BackImageUrl
+
+The `BackImageUrl` property sets a CSS background image on the panel. This renders as an inline `background-image:url(...)` style.
+
+```razor
+<Panel BackImageUrl="https://example.com/images/background.png"
+       Width="Unit.Pixel(500)"
+       Height="Unit.Pixel(200)"
+       BorderStyle="BorderStyle.Solid"
+       BorderWidth="Unit.Pixel(1)">
+    <p>Content displayed over the background image.</p>
+</Panel>
+```
+
+**Renders as:**
+```html
+<div style="background-image:url(https://example.com/images/background.png);width:500px;height:200px;border-style:Solid;border-width:1px;">
+    <p>Content displayed over the background image.</p>
+</div>
 ```
 
 ## HTML Output

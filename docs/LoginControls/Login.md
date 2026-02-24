@@ -15,12 +15,12 @@ The Login component provides a complete user interface for logging into a web ap
 - DestinationPageUrl for redirect after successful login
 - VisibleWhenLoggedIn to control visibility for authenticated users
 - Styling support through cascading style components
+- **Orientation** property (Vertical or Horizontal layout)
+- **TextLayout** property (TextOnLeft or TextOnTop)
 
 ## WebForms Features Not Supported
 
 - MembershipProvider - use OnAuthenticate event to implement authentication
-- Orientation property
-- TextLayout property
 - FailureAction property
 - LayoutTemplate
 - RenderOuterTable property
@@ -138,3 +138,55 @@ The Login component supports child style components for customization:
 | HyperLinkStyle | Styles the help and recovery links |
 | InstructionTextStyle | Styles the instruction text |
 | ValidatorTextStyle | Styles validation error messages |
+
+### Orientation and TextLayout
+
+The Login component supports two layout properties that control how the form is arranged:
+
+**Orientation** controls whether fields are stacked vertically or arranged side by side:
+
+| Value | Description |
+|-------|-------------|
+| `Orientation.Vertical` | Fields stacked vertically (default) |
+| `Orientation.Horizontal` | Fields arranged side by side |
+
+**TextLayout** controls label placement relative to input fields:
+
+| Value | Description |
+|-------|-------------|
+| `LoginTextLayout.TextOnLeft` | Labels appear to the left of inputs (default) |
+| `LoginTextLayout.TextOnTop` | Labels appear above inputs |
+
+```razor
+@using BlazorWebFormsComponents.Enums
+
+<Login TitleText="Sign In"
+       Orientation="Orientation.Horizontal"
+       TextLayout="LoginTextLayout.TextOnTop"
+       InstructionText="Enter your credentials." />
+```
+
+### Migration Example
+
+**Before (Web Forms):**
+```html
+<asp:Login ID="Login1" runat="server"
+    TitleText="Sign In"
+    Orientation="Horizontal"
+    TextLayout="TextOnTop"
+    OnAuthenticate="Login1_Authenticate">
+    <TitleTextStyle ForeColor="Navy" Font-Bold="True" />
+    <LoginButtonStyle BackColor="Blue" ForeColor="White" />
+</asp:Login>
+```
+
+**After (Blazor):**
+```razor
+<Login TitleText="Sign In"
+       Orientation="Orientation.Horizontal"
+       TextLayout="LoginTextLayout.TextOnTop"
+       OnAuthenticate="HandleAuthenticate">
+    <TitleTextStyle ForeColor="Navy" Font-Bold="true" />
+    <LoginButtonStyle BackColor="Blue" ForeColor="White" />
+</Login>
+```

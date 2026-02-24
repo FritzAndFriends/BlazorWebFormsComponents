@@ -9,6 +9,12 @@ The DataGrid component is meant to emulate the asp:DataGrid control in markup an
 - Auto-generate columns
 - Show/Hide header row
 - Empty data text
+- **Style sub-components** (ItemStyle, AlternatingItemStyle, HeaderStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle)
+- **Caption** property
+- **GridLines** property (None, Horizontal, Vertical, Both)
+- **UseAccessibleHeader** property (renders `<th scope="col">` for accessibility)
+- **CellPadding** and **CellSpacing** properties
+- **ShowFooter** property
 
 ### Blazor Notes
 
@@ -162,11 +168,15 @@ Currently, not every syntax element of Web Forms DataGrid is supported. In the m
 ```html
 <DataGrid
     AutoGenerateColumns=bool
+    Caption=string
+    CellPadding=int
+    CellSpacing=int
     CssClass=string
     DataKeyField=string
     DataSource=IEnumerable
     EmptyDataText=string
     Enabled=bool
+    GridLines=GridLines
     ID=string
     Items=IEnumerable
     ItemType=Type
@@ -184,9 +194,18 @@ Currently, not every syntax element of Web Forms DataGrid is supported. In the m
     OnDisposed=EventCallBack
     SelectMethod=SelectHandler
     ShowHeader=bool
+    ShowFooter=bool
     TabIndex=int
+    UseAccessibleHeader=bool
     Visible=bool
 >
+    <HeaderStyle BackColor=string ForeColor=string Font-Bold=bool ... />
+    <ItemStyle BackColor=string ForeColor=string ... />
+    <AlternatingItemStyle BackColor=string ForeColor=string ... />
+    <FooterStyle BackColor=string ForeColor=string Font-Italic=bool ... />
+    <PagerStyle BackColor=string ForeColor=string ... />
+    <SelectedItemStyle BackColor=string ForeColor=string ... />
+    <EditItemStyle BackColor=string ForeColor=string ... />
     <Columns>
         <BoundField
             DataField=string
@@ -223,6 +242,75 @@ Currently, not every syntax element of Web Forms DataGrid is supported. In the m
                 <!-- template content -->
             </ItemTemplate>
         </TemplateField>
+    </Columns>
+</DataGrid>
+```
+
+## Style Sub-Components
+
+The DataGrid supports 7 style sub-components that control the appearance of different row types. Each is specified as a child element:
+
+| Style Component | Description |
+|----------------|-------------|
+| `HeaderStyle` | Styles the header row |
+| `FooterStyle` | Styles the footer row |
+| `ItemStyle` | Styles normal data rows |
+| `AlternatingItemStyle` | Styles alternating data rows |
+| `PagerStyle` | Styles the pager row |
+| `SelectedItemStyle` | Styles the selected row |
+| `EditItemStyle` | Styles the row being edited |
+
+Each style component accepts standard style properties: `BackColor`, `ForeColor`, `CssClass`, `Font-Bold`, `Font-Italic`, `Font-Size`, `HorizontalAlign`, `VerticalAlign`, `Width`, `Height`, etc.
+
+### Caption Property
+
+The `Caption` property renders a `<caption>` element inside the `<table>`, providing an accessible description of the table's purpose.
+
+### GridLines Property
+
+Controls which table borders are displayed using the HTML `rules` attribute:
+
+| Value | Description |
+|-------|-------------|
+| `GridLines.None` | No grid lines |
+| `GridLines.Horizontal` | Horizontal lines only |
+| `GridLines.Vertical` | Vertical lines only |
+| `GridLines.Both` | Both horizontal and vertical lines |
+
+### UseAccessibleHeader Property
+
+When `true`, header cells render as `<th scope="col">` instead of `<td>`, improving accessibility for screen readers.
+
+### Migration Example
+
+**Before (Web Forms):**
+```html
+<asp:DataGrid ID="dgCustomers" runat="server"
+    AutoGenerateColumns="False"
+    GridLines="Both"
+    Caption="Customer List">
+    <HeaderStyle BackColor="#4472C4" ForeColor="White" Font-Bold="True" />
+    <AlternatingItemStyle BackColor="#D6E4F0" />
+    <Columns>
+        <asp:BoundColumn DataField="CustomerID" HeaderText="ID" />
+        <asp:BoundColumn DataField="CompanyName" HeaderText="Company" />
+    </Columns>
+</asp:DataGrid>
+```
+
+**After (Blazor):**
+```razor
+<DataGrid ItemType="Customer"
+          AutoGenerateColumns="false"
+          GridLines="GridLines.Both"
+          Caption="Customer List"
+          UseAccessibleHeader="true"
+          SelectMethod="Customer.GetCustomers">
+    <HeaderStyle BackColor="#4472C4" ForeColor="#FFFFFF" Font-Bold="true" />
+    <AlternatingItemStyle BackColor="#D6E4F0" />
+    <Columns>
+        <BoundField DataField="CustomerID" HeaderText="ID" />
+        <BoundField DataField="CompanyName" HeaderText="Company" />
     </Columns>
 </DataGrid>
 ```
