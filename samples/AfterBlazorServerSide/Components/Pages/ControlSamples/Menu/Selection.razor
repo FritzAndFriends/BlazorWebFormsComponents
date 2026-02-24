@@ -13,7 +13,7 @@
 <h3>Horizontal Menu with Selection</h3>
 <p>Click a menu item. The <code>MenuItemClick</code> event fires and reports the selected item.</p>
 
-<Menu @ref="_menu" Orientation="Orientation.Horizontal" MenuItemClick="HandleItemClick">
+<Menu @ref="_menu" ID="SelectionMenu" Orientation="Orientation.Horizontal" MenuItemClick="HandleItemClick">
     <Items>
         <MenuItem Text="Home" Value="home" />
         <MenuItem Text="Products" Value="products">
@@ -44,7 +44,7 @@
 
 <h3>Vertical Menu with Selection</h3>
 
-<Menu Orientation="Orientation.Vertical" MenuItemClick="HandleItemClick">
+<Menu ID="VerticalSelectionMenu" Orientation="Orientation.Vertical" MenuItemClick="HandleItemClick">
     <Items>
         <MenuItem Text="Dashboard" Value="dashboard" />
         <MenuItem Text="Reports" Value="reports">

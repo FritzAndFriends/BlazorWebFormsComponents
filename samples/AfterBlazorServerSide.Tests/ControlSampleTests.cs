@@ -315,9 +315,8 @@ public class ControlSampleTests
     }
 
     /// <summary>
-    /// Verifies Menu pages load and render content. Menu component has known JS interop 
-    /// requirements (bwfc.Page.AddScriptElement) that may produce console errors when
-    /// the JavaScript setup is not configured, but the page should still render.
+    /// Verifies Menu pages load and render content without JavaScript errors.
+    /// Menu components require an ID attribute for JS interop to work correctly.
     /// </summary>
     private async Task VerifyMenuPageLoads(string path)
     {
@@ -346,11 +345,7 @@ public class ControlSampleTests
             // Assert - Page renders menu content (tables, links, or list items)
             var menuContent = await page.Locator("table, a, li, td").AllAsync();
             Assert.NotEmpty(menuContent);
-            
-            // Note: We don't check console errors for Menu pages because the Menu component
-            // requires JavaScript setup (bwfc.Page.AddScriptElement) that may not be configured
-            // in all environments. The important thing is that the page renders.
-            
+
             Assert.Empty(pageErrors);
         }
         finally

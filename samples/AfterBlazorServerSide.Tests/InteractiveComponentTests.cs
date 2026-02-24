@@ -2418,7 +2418,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(tables);
 
             // Verify header row with styled background exists
-            var headerText = page.Locator("text=Customer Details");
+            var headerText = page.Locator("td").Filter(new() { HasTextString = "Customer Details" }).First;
             Assert.True(await headerText.IsVisibleAsync(), "Header text 'Customer Details' should be visible");
 
             Assert.Empty(consoleErrors);
