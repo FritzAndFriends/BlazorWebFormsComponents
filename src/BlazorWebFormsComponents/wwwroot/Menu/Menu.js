@@ -10,10 +10,15 @@ if (!Sys.WebForms) { Sys.WebForms = {}; }
 //    including allocation of the _MenuContainer object.
 
 Sys.WebForms.Menu = function(options) {
+    try {
     this.items = [];
     this.depth = options.depth || 1;
     this.parentMenuItem = options.parentMenuItem;
     this.element = Sys.WebForms.Menu._domHelper.getElement(options.element);
+
+    if (!this.element) {
+        return;
+    }
 
     if (this.element.tagName === 'DIV') {
         var containerElement = this.element;
@@ -103,6 +108,10 @@ Sys.WebForms.Menu = function(options) {
             previousMenuItem.nextSibling = menuItem;
         }
         this.items[this.items.length] = menuItem;
+    }
+    } catch (e) {
+        // Prevent unhandled JS exceptions from crashing the Blazor circuit
+        console.warn('Menu initialization error:', e.message);
     }
 };
 
