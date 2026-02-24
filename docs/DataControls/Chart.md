@@ -19,7 +19,7 @@ Original Microsoft documentation: [System.Web.UI.DataVisualization.Charting.Char
 
 ## Features Supported in Blazor
 
-### Chart Types (Phase 1 — 8 of 35)
+### Chart Types (8 of 35)
 
 | SeriesChartType | Chart.js Mapping | Description |
 |-----------------|------------------|-------------|
@@ -125,7 +125,7 @@ Original Microsoft documentation: [System.Web.UI.DataVisualization.Charting.Char
 
 ## Chart Type Gallery
 
-Below is a visual reference for each of the 8 chart types supported in Phase 1. Use this gallery to choose the right chart type for your data and to see what the Blazor Chart component produces.
+Below is a visual reference for each of the 8 supported chart types. Use this gallery to choose the right chart type for your data and to see what the Blazor Chart component produces.
 
 ### Column
 
@@ -193,7 +193,7 @@ Stacks multiple series vertically within each category column. Use this when you
 
 ## Web Forms Features NOT Supported
 
-### Chart Types Not Supported (Phase 1)
+### Chart Types Not Supported
 
 27 additional chart types from the `SeriesChartType` enum are defined but will throw `NotSupportedException` if used. The most commonly requested:
 

@@ -63,3 +63,9 @@ Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal
  Team update (2026-02-23): P2 test observation  Login/ChangePassword/CreateUserWizard already inherit BaseStyledComponent, so WI-52 may have been a no-op or template-only change  decided by Rogue
  Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers targeting ~345 feature gaps  decided by Forge
  Team update (2026-02-23): UI overhaul requested  ComponentCatalog (UI-2) and search (UI-8) assigned to Cyclops  decided by Jeffrey T. Fritz
+
+### Milestone 8 Release-Readiness Bug Fixes (2026-02-24)
+
+- **Menu JS interop crash (Bug 1):** `Menu.js` `Sys.WebForms.Menu` constructor crashes when `getElement()` returns null (e.g., headless Chrome timing). Fixed by adding null guard after `getElement()` (early return if element missing) and wrapping entire constructor body in try/catch to prevent unhandled exceptions from killing the Blazor circuit. File: `src/BlazorWebFormsComponents/wwwroot/Menu/Menu.js`.
+- **Calendar attribute rendering (Bug 2):** `Calendar.razor` line 64 used raw Razor expression injection to conditionally add `scope="col"` to `<th>` tags. This caused `@(UseAccessibleHeader` to appear literally in server logs due to Razor parsing issues. Fixed by replacing with proper conditional attribute: `scope="@(UseAccessibleHeader ? "col" : null)"` -- Blazor omits the attribute entirely when value is null. File: `src/BlazorWebFormsComponents/Calendar.razor`.
+- **Menu auto-ID generation (Bug 3):** Menu JS interop requires a DOM element ID, but when no `ID` parameter is provided, it passes an empty string causing null element lookup. Fixed by adding `OnParametersSet` override in `Menu.razor.cs` that auto-generates `menu_{GetHashCode():x}` when ID is null/empty. File: `src/BlazorWebFormsComponents/Menu.razor.cs`.

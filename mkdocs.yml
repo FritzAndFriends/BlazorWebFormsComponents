@@ -128,10 +128,9 @@ nav:
       - Getting started: Migration/readme.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
-      - Deferred Controls (Chart, Substitution, Xml): Migration/DeferredControls.md
+      - Deferred Controls: Migration/DeferredControls.md
       - Master Pages: Migration/MasterPages.md
       - .NET Standard to the Rescue: Migration/NET-Standard.md
-      - User Controls: Migration/User-Controls.md
-      - Deferred Controls: Migration/DeferredControls.md
       - Themes and Skins: Migration/ThemesAndSkins.md
+      - User Controls: Migration/User-Controls.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
