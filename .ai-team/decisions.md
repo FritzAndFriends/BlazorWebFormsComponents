@@ -582,6 +582,7 @@ Suggested timeline:
 **By:** Cyclops
 **What:** Fixed `DetailsViewAutoField.GetValue()` to render `<input type="text">` elements when the DetailsView is in Edit or Insert mode, instead of always rendering plain text. Edit mode pre-fills the input with the current property value; Insert mode renders an empty input. ReadOnly mode continues to render plain text as before.
 **Why:** The `mode` parameter was being ignored — the method always rendered plain text regardless of mode. This broke the Edit workflow: clicking "Edit" switched the command row buttons correctly but fields remained non-editable. This matches ASP.NET Web Forms behavior where auto-generated fields become textboxes in edit/insert mode.
+
 # Chart Visual Appearance Testing Patterns
 
 **By:** Colossus
@@ -617,13 +618,11 @@ Chart.js uses JS interop and renders to `<canvas>`, so traditional DOM assertion
 - Use `WaitUntilState.NetworkIdle` for tests that need Chart.js fully initialized (library verification, dataset verification).
 - Use `WaitUntilState.DOMContentLoaded` for basic canvas presence tests.
 
-
 ### 2026-02-12: ChartSeries data binding extracts points via reflection
 
 **By:** Cyclops
 **What:** Fixed `ChartSeries.ToConfig()` to support data binding via `Items`, `XValueMember`, and `YValueMembers` parameters. When `Items` is provided with a non-empty `YValueMembers`, the method extracts `DataPoint` objects using reflection. The `YValueMembers` property supports comma-separated field names for multi-value charts. Type conversion handles `double`, `float`, `int`, `long`, `decimal`, `short`, `byte`, and falls back to `Convert.ToDouble()`. The manual `Points` collection is used as a fallback when `Items` is null/empty or `YValueMembers` is not specified.
 **Why:** Data-bound charts were rendering empty because `ToConfig()` only used the manual `Points` collection. Web Forms Chart supports data binding via `XValueMember`/`YValueMembers` properties, and this fix restores that capability for Blazor migration scenarios.
-
 
 # Chart Component Implementation Decisions
 
@@ -668,7 +667,6 @@ Instead of passing the `Chart` component directly to `ChartConfigBuilder.BuildCo
 - `ChartLegend.razor`, `ChartLegend.razor.cs`
 - `ChartTitle.razor`, `ChartTitle.razor.cs`
 
-
 ### 2026-02-13: Chart component Phase 1 gate review — CONDITIONAL APPROVAL
 
 **By:** Forge
@@ -691,7 +689,6 @@ Instead of passing the `Chart` component directly to `ChartConfigBuilder.BuildCo
 4. **Colossus:** Add Chart sample routes to integration smoke tests
 
 **Why:** The component is architecturally sound and 90% complete. The data binding gap creates a docs-vs-reality mismatch that will frustrate migrating developers. Phase 2/3 features (more chart types, tooltips) are nice-to-have but not blocking for initial ship.
-
 
 # Decision: Chart Component Architecture (Design Review)
 
@@ -755,7 +752,6 @@ Instead of passing the `Chart` component directly to `ChartConfigBuilder.BuildCo
 
 **Why:** Web Forms Chart uses these enums. Project convention requires every Web Forms enum to have a corresponding C# enum in `Enums/`.
 
-
 # Chart Sample Pages — Feature-Rich Samples
 
 **By:** Jubilee
@@ -801,7 +797,6 @@ Jeff requested rich samples covering all Chart features. These samples:
 - Show migrating developers how Web Forms data binding translates to Blazor
 - Demonstrate all available color palettes visually
 - Provide copy-paste ready code for common scenarios
-
 
 # ChartSeries Data Binding Test Coverage
 
@@ -1348,3 +1343,584 @@ All P2 features (WI-47 through WI-52) have been tested with 32 bUnit tests acros
 ## Impact
 
 Team should be aware that Login/ChangePassword/CreateUserWizard BaseStyledComponent inheritance was already in place — WI-52's implementation may have been a no-op or only required template changes to wire `Style`/`CssClass` to the outer element.
+
+### Substitution and Xml formally deferred
+
+**By:** Beast
+**What:** Substitution and Xml controls are now formally marked as "ΓÅ╕∩╕Å Deferred" (not "Not Started") in status.md. DeferredControls.md already had migration guidance; status.md and README.md now reflect the permanent deferral. Chart is marked as fully complete with no "Phase 1" qualifier.
+**Why:** These two controls are architecturally incompatible with Blazor (Substitution relies on output caching; Xml relies on XSLT transforms). Marking them as deferred rather than "Not Started" accurately communicates that they will not be implemented, and clears the remaining work count to 0.
+
+# Decision: M7 Integration Tests Added (WI-39 + WI-40)
+
+**Author:** Colossus
+**Date:** 2026-02-24
+**Status:** Done
+
+## Context
+
+Milestone 7 added 9 new sample pages across GridView, TreeView, Menu, DetailsView, and FormView. Each page needed smoke tests (page loads without errors) and, where applicable, interaction tests (behaviors work).
+
+## What Was Added
+
+### Smoke Tests (ControlSampleTests.cs)
+
+Added `[InlineData]` entries to existing `[Theory]` methods:
+
+- **DataControl_Loads_WithoutErrors:**
+  - `/ControlSamples/GridView/Selection`
+  - `/ControlSamples/GridView/DisplayProperties`
+  - `/ControlSamples/FormView/Events`
+  - `/ControlSamples/FormView/Styles`
+  - `/ControlSamples/DetailsView/Styles`
+  - `/ControlSamples/DetailsView/Caption`
+
+- **NavigationControl_Loads_WithoutErrors:**
+  - `/ControlSamples/TreeView/Selection`
+  - `/ControlSamples/TreeView/ExpandCollapse`
+
+- **MenuControl_Loads_AndRendersContent:**
+  - `/ControlSamples/Menu/Selection`
+
+### Interaction Tests (InteractiveComponentTests.cs)
+
+Added 9 new `[Fact]` tests:
+
+| Test | What It Verifies |
+|------|-----------------|
+| `GridView_Selection_ClickSelect_HighlightsRow` | Click Select link ΓåÆ selected index updates, count increments |
+| `GridView_DisplayProperties_RendersCaption` | Caption element, EmptyDataTemplate, ShowHeader/ShowFooter checkboxes |
+| `TreeView_Selection_ClickNode_ShowsSelected` | Click node ΓåÆ selection text and count update |
+| `TreeView_ExpandCollapse_ButtonsWork` | Expand All / Collapse All buttons, leaf node visibility, NodeIndent slider |
+| `Menu_Selection_ClickItem_ShowsFeedback` | Click menu item ΓåÆ click count increments (no console error checks ΓÇö JS interop) |
+| `DetailsView_Styles_RendersStyledTable` | Table renders, "Customer Details" header visible |
+| `DetailsView_Caption_RendersCaptionElement` | `<caption>` elements present, "Customer Record" text |
+| `FormView_Events_ClickEdit_LogsEvent` | Click Edit ΓåÆ event log entries appear |
+| `FormView_Styles_RendersStyledHeader` | "Widget Catalog" header text visible |
+
+## Patterns Used
+
+- Menu Selection test skips console error checks (JS interop produces expected errors)
+- FormView tests use `WaitUntilState.DOMContentLoaded` (items bound in `OnAfterRenderAsync`)
+- All other tests use `WaitUntilState.NetworkIdle` with 30s timeout
+- Console error filtering: ISO 8601 timestamps + "Failed to load resource"
+
+## Build Verification
+
+`dotnet build samples/AfterBlazorServerSide.Tests/ -c Release` ΓÇö succeeded with no errors.
+
+# Decision: Avoid bare `text=` locators in Playwright integration tests
+
+**Author:** Colossus  
+**Date:** 2025-07-24  
+**Status:** Proposed  
+
+## Context
+
+Five integration tests failed in CI (PR #343) because `page.Locator("text=Label:")` matches the *innermost* element containing the text. When markup uses `<p><strong>Label:</strong> value</p>`, the locator returns the `<strong>`, excluding the sibling value text from `TextContentAsync()`. Additionally, bare `text=` locators cause strict-mode violations when the same text appears in both rendered output and code examples.
+
+## Decision
+
+All Playwright integration tests MUST use container-targeted locators instead of bare `text=` selectors when reading text content that includes a label and a value:
+
+```csharp
+// Γ¥î BAD ΓÇö matches <strong>, returns only label text
+var info = page.Locator("text=Selected index:");
+
+// Γ£à GOOD ΓÇö matches the parent <p>, returns label + value
+var info = page.Locator("p").Filter(new() { HasTextString = "Selected index:" });
+```
+
+For elements that might appear in multiple places (rendered output + code examples), target the specific rendered element type:
+
+```csharp
+// Γ¥î BAD ΓÇö strict mode violation if text appears twice
+var header = page.Locator("text=Widget Catalog");
+
+// Γ£à GOOD ΓÇö targets only the rendered <td>
+var header = page.Locator("td").Filter(new() { HasTextString = "Widget Catalog" }).First;
+```
+
+## Consequences
+
+- Existing tests using bare `text=` locators for value extraction should be migrated.
+- New tests must follow this pattern from the start.
+- WaitForSelectorAsync calls should use specific selectors (e.g., `button:has-text('Edit')`) not generic element type selectors.
+
+### 2026-02-24: User directive ΓÇö M8 scope excludes version bump and release
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Start on Forge's recommended Milestone 8 next steps EXCEPT the version bump to 1.0 and release. Focus on: Menu JS fix, Calendar fix, Menu auto-ID, formally defer Substitution/Xml, PagerSettings shared sub-component, doc polish.
+**Why:** User request ΓÇö captured for team memory
+
+# DataGrid Style Sub-Components + Paging/Sorting Events
+
+**By:** Cyclops  
+**Date:** 2026-02-24  
+**Work Items:** WI-44, WI-45
+
+## Decision
+
+DataGrid style sub-components follow the exact same `IXxxStyleContainer` + `UiTableItemStyle` + `CascadingParameter` pattern used by GridView, DetailsView, and FormView. Paging and sorting events follow Web Forms DataGrid naming conventions (not GridView conventions).
+
+## Details ΓÇö WI-44 (Style Sub-Components)
+
+- **Interface:** `IDataGridStyleContainer` with 7 TableItemStyle properties (AlternatingItemStyle, ItemStyle, HeaderStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle)
+- **CascadingValue name:** `"ParentDataGrid"` (matching GridView's `"ParentGridView"` convention)
+- **7 sub-component pairs:** DataGridAlternatingItemStyle, DataGridItemStyle, DataGridHeaderStyle, DataGridFooterStyle, DataGridPagerStyle, DataGridSelectedItemStyle, DataGridEditItemStyle
+- **Style priority in GetRowStyle:** EditItemStyle > SelectedItemStyle > AlternatingItemStyle > ItemStyle (matches Web Forms precedence)
+- **Display properties added:** Caption, CaptionAlign, CellPadding, CellSpacing, GridLines, UseAccessibleHeader
+- **Template enhanced:** Paging UI (page links in tfoot), footer row, caption element, grid lines rules attribute, sortable header links
+
+## Details ΓÇö WI-45 (Paging + Sorting Events)
+
+- **Events:** PageIndexChanged (DataGridPageChangedEventArgs), SortCommand (DataGridSortCommandEventArgs), ItemCreated (DataGridItemEventArgs), ItemDataBound (DataGridItemEventArgs), SelectedIndexChanged (EventCallback)
+- **Event args:** DataGridPageChangedEventArgs (NewPageIndex), DataGridSortCommandEventArgs (SortExpression, CommandSource), DataGridItemEventArgs (Item)
+- **Paging:** GoToPage(int) updates CurrentPageIndex and fires PageIndexChanged
+- **Sorting:** Sort(string) fires SortCommand when AllowSorting is enabled via header links
+
+## Key Naming Difference: DataGrid vs GridView
+
+DataGrid uses Web Forms DataGrid naming (ItemStyle, AlternatingItemStyle, EditItemIndex, CurrentPageIndex) rather than GridView naming (RowStyle, AlternatingRowStyle, EditIndex, PageIndex). This matches the original ASP.NET Web Forms distinction between the two controls.
+
+## Why
+
+Consistency with existing GridView style pattern ensures predictable API. DataGrid-specific naming preserves Web Forms migration fidelity ΓÇö developers migrating `<asp:DataGrid>` markup expect `ItemStyle` not `RowStyle`.
+
+# DetailsView + FormView Polish Decisions
+
+**By:** Cyclops
+**Date:** Milestone 7
+
+## WI-26: DetailsView Style Sub-Components
+
+**What:** Created `IDetailsViewStyleContainer` interface with 10 style properties and 10 sub-component pairs following the established GridView/Calendar pattern. DetailsView has two extra styles vs GridView: `CommandRowStyle` (for the Edit/Delete/New command row) and `FieldHeaderStyle` (for the left-side header cell in each data row). `InsertRowStyle` is separate from `EditRowStyle` to match Web Forms semantics where Insert and Edit modes can be styled independently.
+
+**Why:** Consistent with the GridView style sub-component architecture (WI-05). DetailsView has distinct row types (command row, field headers) that Web Forms styled separately. CascadingParameter name is "ParentDetailsView" to avoid collision with "ParentGridView".
+
+## WI-28: DetailsView Caption + PagerSettings
+
+**What:** Added `Caption` (string), `CaptionAlign` (TableCaptionAlign enum), and `PageCount` (computed int). Reuses existing `TableCaptionAlign` enum and `GetCaptionStyle()` pattern from GridView. `PageCount` is a read-only computed property (`Items.Count()`) since DetailsView shows one item per page. PagerSettings deferred to a future WI ΓÇö the current implementation uses the existing PagerTemplate approach and inline numeric pager.
+
+**Why:** Caption/CaptionAlign match GridView's implementation exactly. PageCount is trivially derived from the data source. Full PagerSettings (Mode, Position, PageButtonCount, navigation text) is better as a dedicated sub-component in a follow-up WI to keep this change focused.
+
+## WI-31: FormView Remaining Events
+
+**What:** Added `ModeChanged` (fires after mode transitions), `ItemCommand` (fires for all command bubbling via `FormViewCommandEventArgs`), `ItemCreated` (fires on first render), `PageIndexChanging`/`PageIndexChanged` (with cancellation via `PageChangedEventArgs.Cancel`). Added "page" command handler supporting "next"/"prev"/"first"/"last"/numeric arguments.
+
+**Why:** Web Forms FormView fires ModeChanged after every mode switch. ItemCommand is the catch-all command handler that fires before specific handlers. ItemCreated maps to the initial data-bound lifecycle. Page events reuse the existing `PageChangedEventArgs` class (shared with GridView/DetailsView).
+
+## WI-33: FormView Style Sub-Components + Pager + Caption
+
+**What:** Created `IFormViewStyleContainer` interface with 7 style properties and 7 sub-component pairs. Added `PagerTemplate` (RenderFragment) that replaces the default numeric pager when set. Added `Caption`/`CaptionAlign` using the same pattern as DetailsView/GridView. `GetCurrentRowStyle()` resolves style based on `CurrentMode` (EditΓåÆEditRowStyle, InsertΓåÆInsertRowStyle, defaultΓåÆRowStyle).
+
+**Why:** FormView doesn't have AlternatingRowStyle because it only displays one item at a time. The 7 styles (RowStyle, EditRowStyle, InsertRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle) cover all distinct visual regions. PagerTemplate enables custom pager markup, matching Web Forms' `<PagerTemplate>` element.
+
+# GridView Display Properties ΓÇö Decision Record
+
+**Author:** Cyclops  
+**Date:** WI-07 implementation  
+**Component:** GridView
+
+## Decisions
+
+### 1. ShowHeaderWhenEmpty defaults to false (breaking behavior change)
+
+Previously, GridView always rendered `<thead>` when columns existed, regardless of data. Now `ShouldRenderHeader = ShowHeader && (HasData || ShowHeaderWhenEmpty)`. With `ShowHeaderWhenEmpty=false` (default), the header is hidden when the data source is empty. This matches Web Forms behavior where `ShowHeaderWhenEmpty` was added in .NET 4.5 with default `false`.
+
+**Impact:** Existing GridViews with empty data will stop showing headers unless `ShowHeaderWhenEmpty="true"` is added. One test (`EmptyDataText.razor`) was updated accordingly.
+
+### 2. UseAccessibleHeader adds scope="col" to existing th elements
+
+The current GridView already renders `<th>` in the header (not `<td>`). Rather than changing the default to `<td>` (which would be a larger breaking change), `UseAccessibleHeader=true` adds `scope="col"` to the existing `<th>` elements for accessibility compliance. When false (default), `<th>` renders without scope ΓÇö preserving existing HTML output.
+
+### 3. GridLines.None suppresses the rules attribute entirely
+
+When `GridLines=None` (default), `GetGridLinesRules()` returns `null`, so Blazor omits the `rules` attribute from the `<table>` element. This matches Web Forms behavior where `GridLines.None` means no `rules` attribute is rendered.
+
+### 4. CellPadding/CellSpacing use -1 sentinel for "don't render"
+
+Following Web Forms convention, `-1` means the attribute is not rendered. Any value `>= 0` renders the corresponding `cellpadding`/`cellspacing` attribute on the `<table>`.
+
+### 5. ShowFooter and paging share a single tfoot
+
+When both `ShowFooter=true` and `AllowPaging` with multiple pages, both the footer row and pager row render inside the same `<tfoot>` element. The footer row renders first, followed by the pager row. Footer row gets `FooterStyle` applied.
+
+### 6. EmptyDataTemplate takes precedence over EmptyDataText
+
+When both `EmptyDataTemplate` (RenderFragment) and `EmptyDataText` (string) are set, the template wins. This matches Web Forms behavior.
+
+### GridView Selection Support ΓÇö Pattern Decisions
+
+**By:** Cyclops  
+**Date:** 2026-02-24  
+**WI:** WI-02
+
+**What:**
+- `SelectedIndex` (int, default -1) follows the same pattern as `EditIndex`
+- `SelectedRow` and `SelectedValue` are computed read-only properties (not parameters)
+- `SelectedValue` uses reflection on `DataKeyNames` first key field, matching Web Forms behavior
+- `AutoGenerateSelectButton` adds a "Select" link to the command column, rendered before Edit/Delete links
+- `ShowCommandColumn` now includes `AutoGenerateSelectButton` in its check
+- `GetRowStyle()` priority: EditRowStyle > SelectedRowStyle > AlternatingRowStyle > RowStyle (edit takes precedence over selection)
+- `GridViewSelectedRowStyle` follows the existing `IGridViewStyleContainer` + CascadingParameter pattern (same as `GridViewEditRowStyle`, etc.)
+- `GridViewSelectEventArgs` follows the same pattern as `GridViewEditEventArgs` (NewSelectedIndex + Cancel)
+
+**Why:**
+- Selection mirrors the existing edit-mode pattern for consistency
+- Edit takes priority over selection in styling because a row being edited is an active operation
+- The `SelectedRowStyle` child component reuses the established `IGridViewStyleContainer` interface rather than creating a new one
+
+# GridView Style Sub-Components Pattern
+
+**By:** Cyclops  
+**Date:** 2026-02-24  
+**Work Item:** WI-05
+
+## Decision
+
+GridView style sub-components follow the same `IXxxStyleContainer` + `UiTableItemStyle` + `CascadingParameter` pattern used by Calendar and DataList.
+
+## Details
+
+- **Interface:** `IGridViewStyleContainer` with 8 TableItemStyle properties (RowStyle, AlternatingRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle, EditRowStyle, SelectedRowStyle)
+- **CascadingValue name:** `"ParentGridView"` (matching Calendar's `"ParentCalendar"` and DataList's `"ParentDataList"` convention)
+- **Style priority in GetRowStyle:** EditRowStyle > SelectedRowStyle > AlternatingRowStyle > RowStyle (matches Web Forms precedence)
+- **Style application:** Inline `style` attribute via `TableItemStyle.ToString()` on `<tr>` elements, not CSS classes
+- **EditRowStyle migration:** Changed from `[Parameter]` to `IGridViewStyleContainer` property with `internal set`, to be consistent with all other style properties and enable sub-component setting
+
+## Why
+
+This maintains consistency with the existing Calendar and DataList style patterns. The `CascadingParameter` + interface approach allows style sub-components to be declared as child elements in markup, exactly matching Web Forms `<asp:GridView><RowStyle .../></asp:GridView>` syntax.
+
+# Decision: ListView CRUD Events Pattern (WI-41)
+
+**By:** Cyclops
+**Date:** 2026-02-24
+
+## What
+
+ListView CRUD events follow the same dual-event pattern as GridView and FormView:
+- Pre-events (ItemEditing, ItemDeleting, ItemUpdating, ItemInserting, ItemCanceling) support `Cancel` bool
+- Post-events (ItemDeleted, ItemInserted, ItemUpdated) carry `AffectedRows` + `Exception`
+- `ItemCommand` fires for unrecognized commands (catch-all)
+- `HandleCommand(string, object, int)` is the public routing method
+
+## Why
+
+Consistent with GridView's `EditRow`/`UpdateRow`/`DeleteRow`/`CancelEdit` and FormView's `HandleCommandArgs` patterns. ListView event args are intentionally simpler than FormView's (no OrderedDictionary) because the task spec said "don't over-engineer dictionaries if simpler patterns work."
+
+## Key Decisions
+
+1. **EmptyItemTemplate vs EmptyDataTemplate:** `EmptyItemTemplate` takes precedence when both are set. `EmptyDataTemplate` was the original, `EmptyItemTemplate` is the Web Forms ListView-specific name.
+2. **ListViewCancelMode enum:** Created in `Enums/ListViewCancelMode.cs` ΓÇö `CancelingEdit` (0) and `CancelingInsert` (1). Follows project enum convention with explicit int values.
+3. **GetItemTemplate helper:** Returns EditItemTemplate when itemIndex matches EditIndex, otherwise delegates to alternating template logic. Used in both grouped and non-grouped rendering paths.
+4. **InsertItemTemplate positioning:** Renders at top (before items) or bottom (after items) based on InsertItemPosition enum, only in the non-grouped (GroupItemCount == 0) path.
+
+# Decision: Menu auto-ID generation pattern
+
+**By:** Cyclops
+**Date:** 2026-02-24
+
+## What
+
+Menu component now auto-generates an ID (`menu_{GetHashCode():x}`) in `OnParametersSet` when no explicit `ID` parameter is provided. This ensures JS interop via `Sys.WebForms.Menu` always has a valid DOM element ID to target.
+
+Additionally, `Menu.js` now has null safety (early return if element not found) and a try/catch around the constructor to prevent unhandled JS exceptions from crashing the Blazor circuit.
+
+## Why
+
+The Menu component's JS interop depends on a DOM element ID to find and manipulate the menu element. Without an ID, `document.getElementById('')` returns null, causing `TypeError: Cannot read properties of null (reading 'tagName')`. This crashed the entire Blazor circuit in headless Chrome environments.
+
+## Impact
+
+Any component that uses JS interop via element IDs should consider auto-generating IDs when none are provided. This pattern (`$"componentname_{GetHashCode():x}"` in `OnParametersSet`) could be reused by other components with JS interop dependencies.
+
+# Decision: Menu Core Improvements (WI-19 + WI-21 + WI-23)
+
+**Author:** Cyclops  
+**Date:** 2026-02-24  
+**Status:** Implemented  
+**Branch:** milestone7/feature-implementation
+
+## Context
+
+Menu component needed three improvements: base class upgrade for styling, selection tracking with events, and missing core properties.
+
+## Decisions
+
+### WI-19: Menu inherits BaseStyledComponent
+
+- Changed `Menu : BaseWebFormsComponent` ΓåÆ `Menu : BaseStyledComponent`
+- Menu now gets BackColor, BorderColor, BorderStyle, BorderWidth, CssClass, Font, ForeColor, Height, Width from the base class
+- `Menu.razor` root `<div>` renders `style="@Style"` and `class="@GetMenuCssClass()"` using the inherited `Style` property
+- `GetMenuCssClass()` helper returns null when CssClass is empty (same pattern as Label)
+- Existing sub-component styles (DynamicHoverStyle, StaticMenuItemStyle, etc.) remain unchanged ΓÇö they are non-parameter properties set by child sub-components, completely independent from `[Parameter]` base class styles
+- MenuItem.razor still inherits BaseWebFormsComponent (no styling needed on individual items)
+
+### WI-21: Selection tracking and events
+
+- `SelectedItem` (MenuItem, read-only) ΓÇö set internally when a menu item is clicked
+- `SelectedValue` (string, read-only) ΓÇö computed from `SelectedItem?.Value`
+- `MenuItemClick` (EventCallback\<MenuEventArgs\>) ΓÇö fires when any menu item is clicked
+- `MenuItemDataBound` (EventCallback\<MenuEventArgs\>) ΓÇö fires after each data-bound MenuItem is created
+- Created `MenuEventArgs` class with `Item` property (follows TreeNodeEventArgs pattern)
+- MenuItem calls `ParentMenu.NotifyItemClicked(this)` via `@onclick` handler
+- `@onclick:preventDefault` only applies when `NavigateUrl` is empty (preserves navigation for link items)
+
+### WI-23: Core missing properties
+
+- `MaximumDynamicDisplayLevels` (int, default 3) ΓÇö limits depth of dynamic flyout menus
+- `Target` (string) ΓÇö default link target for menu items; MenuItem has its own `Target` that overrides via `EffectiveTarget`
+- `SkipLinkText` (string, default "Skip Navigation Links") ΓÇö rendered as `<a class="skip-link">` before the menu and an anchor `<a id="...SkipLink">` after; matches Web Forms pattern
+- `PathSeparator` (char, default '/') ΓÇö stored on Menu, used in MenuItem.ValuePath computation
+- MenuItem gets `Value` (string) and `ValuePath` (string, computed) properties
+- MenuItem `target` attribute changed from hardcoded `_blank` to `@EffectiveTarget` (item-level Target > Menu-level Target)
+
+## Files Changed
+
+- `src/BlazorWebFormsComponents/Menu.razor` ΓÇö BaseStyledComponent inherits, style/class on root, skip link
+- `src/BlazorWebFormsComponents/Menu.razor.cs` ΓÇö Base class change, new properties, events, NotifyItemClicked
+- `src/BlazorWebFormsComponents/MenuItem.razor` ΓÇö Click handler, EffectiveTarget
+- `src/BlazorWebFormsComponents/MenuItem.razor.cs` ΓÇö Value, Target, ValuePath, EffectiveTarget, HandleClick
+- `src/BlazorWebFormsComponents/MenuEventArgs.cs` ΓÇö New file
+
+## Risks
+
+- `MenuItemDataBound` fires with `null` Item during RenderTreeBuilder execution (component isn't materialized yet). Consumers should use this for counting/logging, not item manipulation.
+- `MaximumDynamicDisplayLevels` property is declared but not yet enforced in rendering logic ΓÇö the JS interop and CSS-based flyout system would need updates to actually limit depth.
+
+# Decision: Menu Level Styles, Panel BackImageUrl, Login/ChangePassword Orientation
+
+**Author:** Cyclops  
+**Date:** 2026-02-24  
+**Status:** Implemented  
+**WIs:** WI-47, WI-48, WI-49
+
+## WI-47 ΓÇö Menu Level Styles
+
+### Decision
+Created `MenuLevelStyle` as a standalone class (not a ComponentBase sub-component) with public constructor implementing `IStyle`. Level style collections are `List<MenuLevelStyle>` parameters on Menu, not `RenderFragment` sub-components.
+
+### Rationale
+- Level styles are positional (index-based), unlike named sub-components (StaticMenuItemStyle, DynamicMenuItemStyle)
+- A `List<T>` parameter is the natural API for ordered collections
+- `MenuLevelStyle` needed a public constructor (unlike `Style`/`TableItemStyle` which have `internal` constructors) so users can instantiate them in code
+- Follows the same `IStyle` contract so `ToStyle()` extension works for CSS generation
+
+### Style Resolution Order
+MenuItem applies styles in this priority:
+1. LevelSelectedStyles (if item is selected and entry exists at depth index)
+2. LevelMenuItemStyles (if entry exists at depth index)
+3. Falls back to static/dynamic CSS class styles from `<style>` block
+
+### Files Changed
+- `MenuLevelStyle.cs` (new)
+- `Menu.razor.cs` ΓÇö added 3 List parameters + 3 internal getter helpers
+- `MenuItem.razor` ΓÇö added `GetItemStyle()`, `GetItemCssClass()`, `GetSubMenuStyle()` methods
+
+## WI-48 ΓÇö Panel BackImageUrl
+
+### Decision
+Added `BackImageUrl` string parameter to Panel. Renders as `background-image:url({value})` in the existing `BuildStyle()` method.
+
+### Rationale
+- Minimal change ΓÇö one parameter, one style line in existing `BuildStyle()`
+- Follows same pattern as other computed styles (HorizontalAlign, ScrollBars, Wrap)
+- No new rendering elements needed
+
+### Files Changed
+- `Panel.razor.cs` ΓÇö added parameter + style entry in `BuildStyle()`
+
+## WI-49 ΓÇö Login/ChangePassword Orientation + TextLayout
+
+### Decision
+- Created `LoginTextLayout` enum (TextOnLeft, TextOnTop) in `Enums/`
+- Added `Orientation` and `TextLayout` parameters to both Login and ChangePassword
+- Used `Enums.Orientation.Vertical` fully-qualified comparison in Razor `@code` blocks to avoid parameter/type name collision
+
+### Razor Naming Collision
+The parameter `Orientation` has the same name as the enum type `Orientation`. In Razor, this causes ambiguity. Resolution: helper properties `IsVertical`/`IsCpVertical` use `Enums.Orientation.Vertical` (namespace-qualified) to disambiguate. This follows the known M6 pattern documented by Jubilee.
+
+### Layout Approach
+- Vertical (default): fields in separate `<tr>` rows (original behavior)
+- Horizontal: fields in `<td>` columns within same `<tr>`
+- TextOnLeft (default): label beside input (original behavior)
+- TextOnTop: label in separate row above input
+- Dynamic `colspan` adjusts full-width rows (title, instructions, failure text, buttons)
+
+### Files Changed
+- `Enums/LoginTextLayout.cs` (new)
+- `Login.razor.cs` ΓÇö added Orientation + TextLayout parameters
+- `Login.razor` ΓÇö 4 layout branches + helper properties
+- `ChangePassword.razor.cs` ΓÇö added Orientation + TextLayout parameters
+- `ChangePassword.razor` ΓÇö 4 layout branches + helper properties
+
+### PagerSettings follows settings-not-style pattern
+
+**By:** Cyclops
+**What:** PagerSettings is a plain C# class (not inheriting `Style`), unlike the existing `TableItemStyle` sub-components. The `UiPagerSettings` base component extends `ComponentBase` directly (not `UiStyle<T>`) because PagerSettings has no visual style properties ΓÇö it's pure configuration. The same CascadingParameter pattern is used (`IPagerSettingsContainer` interface, cascaded `"ParentXxx"` value), but the base class is simpler. The `PagerButtons` enum already existed; only `PagerPosition` was new.
+**Why:** Future sub-components that configure behavior (not style) should follow this `UiPagerSettings` pattern rather than `UiTableItemStyle`. The distinction is: style sub-components inherit `UiStyle<T>` and set visual properties; settings sub-components inherit `ComponentBase` and set configuration properties.
+
+# Decision: TreeView Enhancement (WI-11 + WI-13 + WI-15)
+
+**Author:** Cyclops  
+**Date:** 2026-02-24  
+**Status:** Implemented  
+**Branch:** milestone7/feature-implementation
+
+## Context
+
+TreeView needed three enhancements implemented together since they all touch the same component: node-level styling, selection support, and expand/collapse programmatic control.
+
+## Decisions
+
+### 1. TreeNodeStyle extends Style (not TableItemStyle)
+
+Web Forms `TreeNodeStyle` inherits from `Style`, not `TableItemStyle`. It adds tree-specific properties (`ChildNodesPadding`, `HorizontalPadding`, `ImageUrl`, `NodeSpacing`, `VerticalPadding`) but NOT `HorizontalAlign`/`VerticalAlign`/`Wrap` from `TableItemStyle`. Followed the same inheritance as Web Forms.
+
+### 2. Sub-component pattern mirrors GridView exactly
+
+Created `ITreeViewStyleContainer` + `UiTreeNodeStyle` + 6 sub-component pairs (`.razor` + `.razor.cs`), following the identical pattern used by `IGridViewStyleContainer` + `UiTableItemStyle` + GridView*Style sub-components. This keeps the codebase consistent.
+
+### 3. Style resolution priority
+
+`GetNodeStyle(node)` resolves: **SelectedNodeStyle** (if selected) > **type-specific style** (RootNodeStyle/ParentNodeStyle/LeafNodeStyle) > **NodeStyle** (fallback). This matches Web Forms behavior.
+
+### 4. Selection via @onclick on text anchor
+
+Rather than wrapping the entire row in a clickable element, selection is wired to the existing text `<a>` element via `@onclick="HandleNodeSelect"`. When `NavigateUrl` is empty, `@onclick:preventDefault` suppresses navigation. This preserves the existing HTML structure.
+
+### 5. ExpandDepth applied in OnInitializedAsync
+
+`ExpandDepth` controls initial expansion only. Applied during `TreeNode.OnInitializedAsync()` ΓÇö if `Depth >= ExpandDepth` and no user override exists, the node starts collapsed. User clicks override via `_UserExpanded`.
+
+### 6. FindNode uses Value with Text fallback
+
+`FindNode(valuePath)` splits on `PathSeparator` and matches each segment against `node.Value ?? node.Text`. This matches Web Forms behavior where Value defaults to Text if not explicitly set.
+
+### 7. NodeIndent replaces hardcoded 20px
+
+The previously hardcoded `width:20px` in indent `<div>` elements now uses `IndentWidth` (from `TreeView.NodeIndent` parameter, default 20). No visual change for existing usage.
+
+## Files Changed
+
+- **New:** `TreeNodeStyle.cs`, `UiTreeNodeStyle.cs`, `Interfaces/ITreeViewStyleContainer.cs`
+- **New:** 6 sub-component pairs: `TreeView{NodeStyle,HoverNodeStyle,LeafNodeStyle,ParentNodeStyle,RootNodeStyle,SelectedNodeStyle}.razor{,.cs}`
+- **Modified:** `TreeView.razor`, `TreeView.razor.cs`, `TreeNode.razor`, `TreeNode.razor.cs`
+
+## Risks
+
+- BL0005 warning on `Selected` parameter set outside component (same pattern as GridView selection ΓÇö acceptable).
+- HoverNodeStyle CSS is computed but hover interaction requires JS interop or CSS `:hover` pseudo-class ΓÇö the style data is available but hover event wiring is deferred to a future WI.
+
+# Decision: Validator ControlToValidate String ID Support (WI-36)
+
+**Date:** 2026-02-24
+**By:** Cyclops
+**Status:** Implemented
+
+## What
+
+Renamed the existing `ForwardRef<InputBase<Type>> ControlToValidate` parameter to `ControlRef` on `BaseValidator<Type>`, and added a new `[Parameter] public string ControlToValidate` parameter that accepts a string ID matching the Web Forms migration pattern `ControlToValidate="TextBox1"`.
+
+## Why
+
+In ASP.NET Web Forms, every validator uses `ControlToValidate="TextBoxID"` with a string control ID. The previous Blazor implementation required `ForwardRef<InputBase<Type>>` which doesn't match the "paste your markup and it works" migration story. This was identified as a migration-blocking API mismatch affecting all 5 input validators.
+
+## How It Works
+
+- **ControlToValidate (string):** Maps to a property/field name on the `EditContext.Model`. The validator uses `CurrentEditContext.Field(name)` for the field identifier and resolves the value via reflection on the model object. No JS interop needed.
+- **ControlRef (ForwardRef):** The Blazor-native alternative. Uses the existing `ValueExpression.Body` ΓåÆ `MemberExpression` path and reads `CurrentValueAsString` from `InputBase<Type>` via reflection.
+- **Precedence:** When both are set, `ControlRef` takes precedence.
+- **Error handling:** Throws `InvalidOperationException` if neither is set.
+
+## Impact
+
+- `BaseValidator.razor.cs`: Core dual-path logic added (`GetFieldName()`, `GetCurrentValueAsString(fieldName)`)
+- 38 test `.razor` files: `ControlToValidate=` ΓåÆ `ControlRef=`
+- 8 sample `.razor` files: `ControlToValidate=` ΓåÆ `ControlRef=`
+- `Login.razor`: `ControlToValidate=` ΓåÆ `ControlRef=`
+- All 5 validators (RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator) inherit dual-path support automatically through `BaseValidator<Type>`.
+
+## Breaking Change
+
+This is a parameter rename: existing code using `ControlToValidate="@someForwardRef"` must change to `ControlRef="@someForwardRef"`. This is intentional ΓÇö the string `ControlToValidate` parameter is the Web Forms-compatible API, while `ControlRef` is the Blazor-native alternative.
+
+# Decision: Milestone 7 Plan Ratified
+
+**Date:** 2026-02-23
+**Author:** Forge (Lead / Web Forms Reviewer)
+**Status:** Proposed
+**Scope:** Milestone 7 planning ΓÇö "Control Depth & Navigation Overhaul"
+
+## Context
+
+Milestone 6 closed ~345 gaps across 54 work items, primarily through sweeping base class fixes (AccessKey, ToolTip, DataBoundComponent style inheritance, Validator Display/SetFocusOnError, Image/Label base class upgrades) and targeted control improvements (GridView paging/sorting/editing, Calendar styles+enums, FormView header/footer/empty, HyperLink rename, ValidationSummary, ListControl improvements, Menu Orientation, Label AssociatedControlID, Login base class upgrade).
+
+The remaining gaps are in the "long tail" ΓÇö style sub-components, complex event pipelines, and navigation control completeness. The audit docs in `planning-docs/` are stale (reflect pre-M6 state).
+
+## Decision
+
+Milestone 7 targets ~138 gap closures across 51 work items, organized as:
+
+### P0 ΓÇö Re-Audit + GridView Completion (10 WIs, ~23 gaps)
+- **Re-audit all 53 controls** (mandatory, opens milestone)
+- **GridView selection**: SelectedIndex, SelectedRow, SelectedRowStyle, AutoGenerateSelectButton, events
+- **GridView style sub-components**: AlternatingRowStyle, RowStyle, HeaderStyle, FooterStyle, etc.
+- **GridView display properties**: ShowHeader/ShowFooter, Caption, EmptyDataTemplate, GridLines
+
+### P1 ΓÇö Navigation + Data Control Depth (30 WIs, ~67 gaps)
+- **TreeView**: Node-level styles (TreeNodeStyle), selection, ExpandAll/CollapseAll, ExpandDepth
+- **Menu**: Base class ΓåÆ BaseStyledComponent, selection+events, core missing props
+- **DetailsView**: Style sub-components (10 styles), PagerSettings, Caption
+- **FormView**: Remaining events (ModeChanged, ItemCommand, paging), style sub-components, PagerSettings
+- **Validators**: ControlToValidate string ID support (migration-critical)
+- **Integration tests** for all updated controls
+
+### P2 ΓÇö Nice-to-Have (11 WIs, ~48 gaps)
+- **ListView CRUD events** (large effort, ~22 gaps)
+- **DataGrid style sub-components + events** (~18 gaps)
+- **Menu level styles**, Panel BackImageUrl, Login/ChangePassword Orientation
+
+## Rationale
+
+1. GridView at ~55% is still the most-used data control ΓÇö completing selection and styles is highest-impact.
+2. Menu (42%) and TreeView (60%) are the weakest non-deferred controls.
+3. Style sub-components are the biggest systematic remaining gap across data controls.
+4. Validator ControlToValidate string ID is a migration-blocking API mismatch.
+5. PagerSettings should be a shared type across GridView/FormView/DetailsView.
+6. ListView CRUD is P2 due to size (L) and lower usage frequency vs. GridView.
+
+## Scoping Rules (unchanged)
+- Substitution, Xml: intentionally deferred
+- Chart advanced properties: intentionally deferred
+- DataSourceID/model binding: N/A in Blazor
+
+## Impact
+- Overall health: ~82% ΓåÆ ~87-90%
+- GridView: ~55% ΓåÆ ~75%
+- TreeView: ~60% ΓåÆ ~75%
+- Menu: ~42% ΓåÆ ~60-65%
+- FormView: ~50% ΓåÆ ~65%
+- DetailsView: ~70% ΓåÆ ~80%
+
+Full plan in `planning-docs/MILESTONE7-PLAN.md`.
+
+# Decision: Remove @rendermode InteractiveServer from CrudOperations.razor
+
+**Author:** Jubilee (Sample Writer)
+**Date:** 2025-07-15
+**Status:** Applied
+
+## Context
+
+PR #343 introduced `CrudOperations.razor` in `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/ListView/` with `@rendermode InteractiveServer` on line 2. The `AfterBlazorClientSide` project includes all server-side sample pages via wildcard in its csproj, so this directive caused a build failure ΓÇö `InteractiveServer` is not available in the WebAssembly SDK.
+
+## Decision
+
+Removed the `@rendermode InteractiveServer` directive. No other sample page in the `ControlSamples` directory uses this directive; they all work without it. This is the minimal change that restores consistency and fixes the CI build.
+
+## Verification
+
+- `dotnet build samples/AfterBlazorClientSide/ --configuration Release` ΓÇö Γ£à passes
+- `dotnet build samples/AfterBlazorServerSide/ --configuration Release` ΓÇö Γ£à passes
+- `dotnet test src/BlazorWebFormsComponents.Test/ --no-restore` ΓÇö Γ£à passes

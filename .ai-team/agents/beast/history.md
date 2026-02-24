@@ -58,3 +58,7 @@
  Team update (2026-02-23): Menu Orientation requires Razor local variable workaround  document this pattern  decided by Jubilee
 
 - **Milestone 8 release-readiness docs polish:** Formally deferred Substitution and Xml controls in `status.md` (changed from 🔴 Not Started to ⏸️ Deferred with rationale). Added Deferred column to summary table. Updated `docs/Migration/DeferredControls.md` to mark Chart as fully implemented (removed "Phase 1"/"Partial" hedging). Removed all "Phase 1"/"Phase 2/3" hedging from `docs/DataControls/Chart.md`. Fixed duplicate `DeferredControls.md` entry in `mkdocs.yml` and re-alphabetized Migration nav. Fixed broken `ImageMap` link in `README.md` (pointed to EditorControls, should be NavigationControls). Added missing doc links in README for MultiView, View, ChangePassword, CreateUserWizard. Marked Xml as deferred in README component list.
+
+ Team update (2026-02-24): Menu auto-ID pattern  components with JS interop should auto-generate IDs  decided by Cyclops
+ Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
+ Team update (2026-02-24): PagerSettings shared sub-component created  update docs when component stabilizes  decided by Cyclops

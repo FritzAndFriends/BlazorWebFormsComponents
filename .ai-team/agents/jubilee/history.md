@@ -38,3 +38,7 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
  Team update (2026-02-23): Label AssociatedControlID switches rendered element (label vs span)  decided by Cyclops
  Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers  decided by Forge
  Team update (2026-02-23): UI overhaul requested  Jubilee is frontend lead (UI-1,3,4,5,6,7,10)  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-24): Menu auto-ID pattern  Menu now auto-generates IDs for JS interop  decided by Cyclops
+ Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
+ Team update (2026-02-24): PagerSettings shared sub-component created  samples may need PagerSettings demos  decided by Cyclops
