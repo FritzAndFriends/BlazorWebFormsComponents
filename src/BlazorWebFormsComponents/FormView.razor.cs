@@ -92,6 +92,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
+
 		public ItemType CurrentItem { get; set; }
 
 		public FormViewMode CurrentMode { get; private set; }

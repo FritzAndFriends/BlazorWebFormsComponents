@@ -77,3 +77,11 @@ Wrote 41 bUnit tests across 6 new test files for P2 features:
 📌 Test pattern: Menu tests that use `FindAll("a")` must use `FindAll("li a")` to exclude the accessibility skip-link `<a>` rendered before the menu. JSInterop.Mode = JSRuntimeMode.Loose required for all Menu tests. — Rogue
 
 📌 Test pattern: Login control tests require AuthenticationStateProvider + NavigationManager mock services. Use `Orientation ori = Orientation.Horizontal;` variable pattern to avoid Razor enum name collision. Login renders 4 layout combos based on Orientation × TextLayout (Vertical/Horizontal × TextOnLeft/TextOnTop). — Rogue
+
+📌 Test pattern: Menu Orientation tests require JSInterop.Mode = JSRuntimeMode.Loose and @using BlazorWebFormsComponents.Enums. Login control tests require AuthenticationStateProvider and NavigationManager mock services. — Rogue
+
+ Team update (2026-02-23): BaseDataBoundComponent now inherits BaseStyledComponent  removed duplicate IStyle from 11 data controls  decided by Cyclops
+ Team update (2026-02-23): BaseListControl<TItem> introduced as shared base for 5 list controls (DataTextFormatString, AppendDataBoundItems)  decided by Cyclops
+ Team update (2026-02-23): CausesValidation/ValidationGroup added to CheckBox, RadioButton, TextBox  decided by Cyclops
+ Team update (2026-02-23): Label AssociatedControlID switches rendered element (label vs span)  decided by Cyclops
+ Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers  decided by Forge

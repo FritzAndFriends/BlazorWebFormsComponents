@@ -1,4 +1,4 @@
-@inherits BaseStyledComponent
+﻿@inherits BaseStyledComponent
 
 @using BlazorWebFormsComponents.Validations;
 @using Microsoft.AspNetCore.Components.Forms;
@@ -239,6 +239,7 @@
 	private bool IsVertical => Orientation == Enums.Orientation.Vertical;
 	private bool IsTextOnLeft => TextLayout == LoginTextLayout.TextOnLeft;
 	private int TotalColspan => IsVertical ? 2 : (IsTextOnLeft ? 4 : 2);
+
 
 	private string GetCssClassOrNull()
 	{

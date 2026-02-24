@@ -265,6 +265,7 @@ namespace BlazorWebFormsComponents
 
 		#endregion
 
+
 		#region Events
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)

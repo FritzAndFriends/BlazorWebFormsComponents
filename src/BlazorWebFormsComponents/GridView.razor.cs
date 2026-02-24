@@ -504,6 +504,7 @@ namespace BlazorWebFormsComponents
 			return RowStyle;
 		}
 
+
 		///<inheritdoc/>
 		public void AddColumn(IColumn<ItemType> column)
 		{
