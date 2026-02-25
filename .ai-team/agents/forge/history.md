@@ -121,3 +121,23 @@ Planned M9: "Migration Fidelity & Hardening" — 12 work items, ~30 gap closures
  Team update (2026-02-25): Doc audit found 10 gaps across FormView, DetailsView, DataGrid, ChangePassword, PagerSettings  decided by Beast
  Team update (2026-02-25): Nav audit found 4 missing components + 15 missing SubPages  decided by Jubilee
  Team update (2026-02-25): Test audit found 5 missing smoke tests  decided by Colossus
+
+### Summary: Milestone 12 Planning — Migration Analysis Tool PoC (2026-02-25)
+
+Planned M12: "Migration Analysis Tool (PoC)" — 13 work items. A CLI tool (`bwfc-migrate`) that analyzes existing Web Forms applications and produces migration reports showing control coverage, gaps, code-behind pattern detection, and complexity scoring.
+
+**Architecture decisions:**
+- Same repo, new project: `src/BlazorWebFormsComponents.MigrationAnalysis/` — mapping table must stay in sync with component library
+- CLI tool via `System.CommandLine`, packaged as `dotnet tool` for easy distribution
+- Regex-based parsing for PoC (not Roslyn) — hard scope boundary to prevent scope creep
+- Control mapping registry derived from `status.md`: 51 supported, 2 deferred, ~15 explicitly unsupported with migration guidance
+- Complexity scoring: Green/Yellow/Red based on control gaps + code-behind pattern density
+- Two output formats: Markdown (human-readable) + JSON (machine-readable)
+- Three-phase roadmap: Phase 1 (M12) = analysis engine + CLI, Phase 2 = Roslyn + scaffolding, Phase 3 = Copilot agent integration
+
+**Key insight:** At 51/53 components, the highest-value work is no longer building components — it's reducing the friction of using the ones we have. A migration analysis tool turns a week of manual evaluation into a 5-second CLI invocation.
+
+📌 Team update (2026-02-25): Milestone 12 planned — 13 WIs, "Migration Analysis Tool PoC". CLI tool for Web Forms app analysis with control mapping, gap identification, complexity scoring, and report generation. — decided by Forge
+
+ Team update (2026-02-25): Consolidated audit reports now use `planning-docs/AUDIT-REPORT-M{N}.md` pattern for all milestone audits  decided by Beast
+

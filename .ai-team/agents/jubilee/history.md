@@ -56,3 +56,9 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 � Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls)  decided by Cyclops
  Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
  Team update (2026-02-25): Nav audit merged  4 missing components + 15 missing SubPages in ComponentCatalog.cs  decided by Jubilee
+
+ Team update (2026-02-25): Consolidated audit reports now use `planning-docs/AUDIT-REPORT-M{N}.md` pattern for all milestone audits  decided by Beast
+
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

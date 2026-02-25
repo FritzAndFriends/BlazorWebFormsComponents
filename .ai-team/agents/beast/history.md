@@ -70,3 +70,12 @@
 
  Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
  Team update (2026-02-25): M9 plan ratified  12 WIs across P0/P1/P2, migration fidelity theme  decided by Forge
+
+- **M9 Consolidated Audit Report:** Created `planning-docs/AUDIT-REPORT-M9.md` combining findings from three M9 audits: Doc Gap Audit (5 findings → #359), Integration Test Coverage Audit (5 findings → #358), and Sample Navigation Audit (19 findings → #350). All 29 findings mapped to M10 GitHub Issues with 100% coverage. Report includes 6 additional post-M9 findings (component gaps and TreeView bug). Used the planning-docs historical snapshot header convention (`> ⚠️ Historical Snapshot (Milestone 9)`).
+- **Audit report convention established:** Consolidated audit reports should live at `planning-docs/AUDIT-REPORT-M{N}.md` with the standard historical snapshot header, summary table, per-audit sections with findings + resolution status, and an appendix issue tracker. This pattern can be reused for future milestone audits.
+
+ Team update (2026-02-25): TreeView NodeImage now checks ShowExpandCollapse independently of ShowLines; ExpandCollapseImage() helper added (#361)  decided by Cyclops
+
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

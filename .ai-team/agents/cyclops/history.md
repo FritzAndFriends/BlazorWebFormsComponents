@@ -85,3 +85,12 @@ Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal
  Team update (2026-02-25): Doc audit found DetailsView/DataGrid features needing implementation verification  decided by Beast
  Team update (2026-02-25): Test audit found 5 missing smoke tests (P0: ListView CrudOperations)  decided by Colossus
  Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
+
+### Bug Fix: TreeView caret not rotating on expand/collapse (#361)
+
+- **NodeImage fallback logic restructured (TreeNode.razor.cs lines 176–240):** The `NodeImage` property's three fallback paths (for root, parent, and leaf nodes when `ShowLines=false`) did not check `ShowExpandCollapse`. They relied on `ImageSet.Collapse` being non-empty to determine whether to show expand/collapse images vs `Default_NoExpand.gif`. For any ImageSet where `Collapse` returned empty, nodes would always show `Default_NoExpand.gif` regardless of expanded state. Fixed by adding explicit `if (ParentTreeView.ShowExpandCollapse)` checks in the non-ShowLines paths. Extracted `ExpandCollapseImage(bool expanded)` private helper to DRY the ImageSet→filename resolution with guaranteed fallbacks (`Default_Collapse.gif` / `Default_Expand.gif`). When `ShowExpandCollapse=false`, the method now explicitly returns `Default_NoExpand.gif`.
+- **Key files:** `src/BlazorWebFormsComponents/TreeNode.razor.cs` (NodeImage property + ExpandCollapseImage helper). Template in `TreeNode.razor` was already correct — it only renders `NodeImage` when `ShowExpandCollapse=true`.
+- **Pattern:** TreeView expand/collapse image resolution has three tiers: (1) ShowLines+ShowExpandCollapse → line-style images (Dash/T/L variants), (2) ShowExpandCollapse only → ImageSet images with Default fallback, (3) neither → NoExpand. The `TreeViewImageSet` base class's `Collapse`/`Expand` properties never return empty for built-in sets, but the code must not assume this.
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

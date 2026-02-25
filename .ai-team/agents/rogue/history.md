@@ -106,3 +106,9 @@ Wrote 24 bUnit tests across 2 files for migration fidelity work:
 
  Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
  Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
+
+ Team update (2026-02-25): TreeView NodeImage now checks ShowExpandCollapse independently of ShowLines; ExpandCollapseImage() helper added (#361)  decided by Cyclops
+
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

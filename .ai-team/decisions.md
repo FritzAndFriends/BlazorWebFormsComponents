@@ -1973,3 +1973,23 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 **Why:** Users cannot discover sample pages that aren't in the sidebar navigation.
 
 
+
+### 2026-02-25: Consolidated audit reports use `planning-docs/AUDIT-REPORT-M{N}.md`
+
+**By:** Beast
+**What:** When multiple audits are conducted in a milestone, their findings should be consolidated into a single report at `planning-docs/AUDIT-REPORT-M{N}.md`. The report follows the planning-docs historical snapshot header convention and includes: summary table, per-audit sections (findings + resolution status), additional findings section, and a complete issue tracker appendix. Each finding is mapped to its resolving GitHub Issue with assigned agent.
+**Why:** M9 produced three separate audits (doc gaps, test coverage, sample navigation) with findings scattered across agent history files. A consolidated report makes it easy for Jeff and the team to see all findings in one place, track resolution against M10 issues, and verify coverage. This pattern should be reused for future milestone audits.
+
+### 2026-02-25: TreeView NodeImage must check ShowExpandCollapse independently of ShowLines
+
+**By:** Cyclops
+**Date:** 2026-02-25
+**Issue:** #361
+**What:** The `NodeImage` property in `TreeNode.razor.cs` now explicitly checks `ShowExpandCollapse` in the non-`ShowLines` code paths, rather than relying on `ImageSet.Collapse` being non-empty. A new `ExpandCollapseImage(bool)` helper provides the ImageSet filename with a guaranteed fallback to `Default_Collapse.gif` / `Default_Expand.gif`.
+**Why:** The previous code had a fragile assumption: it used `string.IsNullOrEmpty(ImageSet.Collapse)` as a proxy for "should I show expand/collapse images." The fix makes the intent explicit  `ShowExpandCollapse` controls whether expand/collapse images are used, and the ImageSet only controls *which* images. All 51 TreeView tests pass.
+
+### 2026-02-25: Migration Analysis Tool PoC architecture
+**By:** Forge
+**What:** Milestone 12 introduces a Migration Analysis Tool as a CLI (`bwfc-migrate`) in the same repo at `src/BlazorWebFormsComponents.MigrationAnalysis/`. The PoC uses regex-based ASPX parsing (not Roslyn) to extract `<asp:*>` controls, maps them against a registry of all 53 planned BWFC components + ~15 known unsupported controls, analyzes code-behind patterns via regex, scores page complexity (Green/Yellow/Red), and produces Markdown + JSON reports. Packaged as a `dotnet tool`. Three-phase roadmap: M12 = analysis + CLI, Phase 2 = Roslyn + scaffolding, Phase 3 = Copilot agent. 13 work items total.
+**Why:** At 51/53 components complete, the component library is mature. The highest-leverage remaining work is helping developers evaluate and execute migrations using the components we already built. Same-repo placement keeps the control mapping table in sync with the actual component library. Regex over Roslyn prevents scope creep in the PoC — Roslyn is explicitly Phase 2. The tool transforms BlazorWebFormsComponents from a component library into a migration platform.
+
