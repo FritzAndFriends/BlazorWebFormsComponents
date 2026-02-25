@@ -59,3 +59,12 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
 - Panel/BackImageUrl sample page uses external placeholder URLs (`via.placeholder.com`). The existing `VerifyPageLoadsWithoutErrors` filter for "Failed to load resource" handles this, so the smoke test works despite the team convention against external image URLs.
 - LoginControls/Orientation is at `/ControlSamples/LoginControls/Orientation` (not under `/ControlSamples/Login` or `/ControlSamples/ChangePassword` as initially suggested in the issue).
 
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
+
+ Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee

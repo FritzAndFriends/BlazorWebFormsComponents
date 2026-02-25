@@ -1872,3 +1872,44 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 
 - PR #372 should now show only the 2 CI fix commits
 - No code was lost -- all previously merged work exists in upstream/dev
+
+### 2026-02-25: Strip NBGV from Docker build to fix version stamping
+
+**By:** Forge
+
+**What:** Added `sed` command in `samples/AfterBlazorServerSide/Dockerfile` (after `COPY . .`, before `dotnet build`) to remove the `Nerdbank.GitVersioning` PackageReference from `Directory.Build.props` inside the Docker build context. This allows the SDK's default assembly attribute generation to use the externally-passed `-p:Version=$VERSION -p:InformationalVersion=$VERSION` properties without NBGV interference.
+
+**Why:** NBGV's MSBuild targets unconditionally override version properties during build execution via task `<Output>` elements, which bypass MSBuild global property (`-p:`) precedence. Inside Docker (where `.git` is excluded by `.dockerignore`), NBGV falls back to `version.json` and stamps assemblies with a stale/inaccurate version instead of the precise version computed by `nbgv get-version` in the workflow. No combination of `-p:` properties can reliably prevent this because NBGV: (1) suppresses SDK attribute generation, (2) overwrites `AssemblyInformationalVersion` during execution, and (3) generates its own attribute source file. The only reliable fix is to remove NBGV entirely from the Docker build, which is safe because all projects only depend on NBGV transitively through `Directory.Build.props` — none reference NBGV properties directly.
+
+
+### 2026-02-25: Fix 19 unreachable sample pages in ComponentCatalog.cs (#350)
+
+**By:** Jubilee
+
+**What:** Updated `ComponentCatalog.cs` to link all 19 previously unreachable sample pages. Added 5 new component entries (DataBinder, ViewState, DetailsView, Menu, PasswordRecovery) and 15 new SubPage entries across GridView, TreeView, FormView, ListView, DataGrid, and Panel. Fixed DataList SubPage name from "Flow" to "SimpleFlow".
+
+**Why:** Sample pages existed on disk but were unreachable from the catalog navigation. DetailsView had zero catalog presence despite having 3 sample pages. SubPages are alphabetically sorted to match existing convention.
+
+### 2026-02-25: PagerSettings gets a dedicated doc page (#359)
+
+**By:** Beast
+
+**What:** Created `docs/DataControls/PagerSettings.md` as a standalone documentation page for the shared PagerSettings sub-component. Added to mkdocs.yml nav under Data Controls. PagerSettings is used by FormView, DetailsView, and GridView. Future shared sub-components of similar complexity should follow this pattern.
+
+**Why:** Rather than duplicating the PagerSettings property reference in each parent control's doc, a single dedicated page is linked from all three.
+
+### 2026-02-25: Stale "NOT Supported" doc entries corrected (#359)
+
+**By:** Beast
+
+**What:** Removed PagerSettings and row styles from DetailsView's "NOT Supported" list. Removed Paging, Sorting, Selection, and Editing from DataGrid's "NOT Supported" list. All were implemented in M6-M8 but docs were never updated.
+
+**Why:** Stale "NOT Supported" entries mislead migrators into thinking features are missing when they actually work. Future milestone work should include a doc review pass to catch similar drift.
+
+### 2026-02-25: LoginView and PasswordRecovery migrated to BaseStyledComponent (#352, #354)
+
+**By:** Cyclops
+
+**What:** LoginView and PasswordRecovery now inherit from `BaseStyledComponent` instead of `BaseWebFormsComponent`, matching Login, ChangePassword, and CreateUserWizard. PasswordRecovery renders CssClass/Style/ToolTip on all three step tables. LoginView has no wrapper element (template-switching component) so styled properties are available but not rendered.
+
+**Why:** All login controls should consistently inherit from BaseStyledComponent. No breaking changes — all 1200+ tests pass.

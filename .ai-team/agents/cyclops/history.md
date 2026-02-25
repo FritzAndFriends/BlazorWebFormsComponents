@@ -7,24 +7,13 @@
 
 ## Learnings
 
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
-<!-- ⚠ Summarized 2026-02-23 by Scribe — original entries covered 2026-02-10 through 2026-02-12 -->
+<!-- ⚠ Summarized 2026-02-25 by Scribe — older entries condensed into Core Context -->
 
-### Summary: Milestones 1–3 Implementation (2026-02-10 through 2026-02-12)
+### Core Context (2026-02-10 through 2026-02-25)
 
-Built Calendar (enum fix, async events), ImageMap (BaseStyledComponent, Guid IDs, Enabled propagation), FileUpload (InputFile integration, path sanitization), PasswordRecovery (3-step wizard, per-step EditForm, SubmitButtonStyle→LoginButtonStyle cascading), DetailsView (DataBoundComponent<T>, auto-field reflection, mode switching, 10 events, paging). Image and Label upgraded to BaseStyledComponent (WI-15/WI-17).
+Built Calendar (enum fix, async events), ImageMap (BaseStyledComponent, Guid IDs), FileUpload (InputFile integration, path sanitization), PasswordRecovery (3-step wizard), DetailsView (DataBoundComponent<T>, auto-field reflection, 10 events). Image and Label upgraded to BaseStyledComponent. Chart: BaseStyledComponent, CascadingValue "ParentChart", JS interop via ChartJsInterop, ChartConfigBuilder pure static. Feature audit: AccessKey/ToolTip gap, Image needs BaseStyledComponent, HyperLink.NavigateUrl mismatch, list controls missing shared features.
 
-**Key patterns:** Enum files in `Enums/` with explicit int values. Instance-based Guid IDs (not static). `_ = callback.InvokeAsync()` for render-time events. `Path.GetFileName()` for file save security. Login controls inherit BaseWebFormsComponent with CascadingParameter styles.
-
-### Summary: Milestone 4 Chart Component (2026-02-12)
-
-Chart uses BaseStyledComponent, CascadingValue `"ParentChart"` for child registration. JS interop via separate `ChartJsInterop` (not shared service). `ChartConfigBuilder` is pure static class for testability. ChartWidth/ChartHeight as strings (avoid base Width/Height conflict). SeriesChartType.Point → Chart.js "scatter". 8 Phase 1 types; unsupported throw NotSupportedException. ChartSeries data binding via reflection on Items/XValueMember/YValueMembers.
-
-### Summary: Feature Audit — Editor Controls A–I (2026-02-23)
-
-Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal gap), Image needs BaseStyledComponent, HyperLink.NavigateUrl naming mismatch, list controls missing DataTextFormatString/AppendDataBoundItems/CausesValidation/ValidationGroup, Calendar styles use CSS strings instead of TableItemStyle objects.
-
-📌 Team update (2026-02-12): DetailsView auto-generated fields must render <input type="text"> in Edit/Insert mode — decided by Cyclops
+**Key patterns:** `_ = callback.InvokeAsync()` for render-time events. `Path.GetFileName()` for file save security. Chart Width/Height as strings. Orientation enum collides with parameter name in Razor — use fully-qualified `Enums.Orientation.Vertical`.
 
 <!-- ⚠ Summarized 2026-02-25 by Scribe — original entries covered Milestone 6–7 implementation details -->
 
@@ -49,12 +38,9 @@ Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal
 📌 Team update (2026-02-23): Milestone 6 Work Plan ratified — 54 WIs across P0/P1/P2 tiers targeting ~345 feature gaps — decided by Forge
 📌 Team update (2026-02-23): UI overhaul requested — ComponentCatalog (UI-2) and search (UI-8) assigned to Cyclops — decided by Jeffrey T. Fritz
 
-### Milestone 8 Release-Readiness Bug Fixes (2026-02-24)
+### Summary: Milestone 8 Release-Readiness Bug Fixes (2026-02-24)
 
-- **Menu JS interop crash (Bug 1):** `Menu.js` `Sys.WebForms.Menu` constructor crashes when `getElement()` returns null (e.g., headless Chrome timing). Fixed by adding null guard after `getElement()` (early return if element missing) and wrapping entire constructor body in try/catch to prevent unhandled exceptions from killing the Blazor circuit. File: `src/BlazorWebFormsComponents/wwwroot/Menu/Menu.js`.
-- **Calendar attribute rendering (Bug 2):** `Calendar.razor` line 64 used raw Razor expression injection to conditionally add `scope="col"` to `<th>` tags. This caused `@(UseAccessibleHeader` to appear literally in server logs due to Razor parsing issues. Fixed by replacing with proper conditional attribute: `scope="@(UseAccessibleHeader ? "col" : null)"` -- Blazor omits the attribute entirely when value is null. File: `src/BlazorWebFormsComponents/Calendar.razor`.
-- **Menu auto-ID generation (Bug 3):** Menu JS interop requires a DOM element ID, but when no `ID` parameter is provided, it passes an empty string causing null element lookup. Fixed by adding `OnParametersSet` override in `Menu.razor.cs` that auto-generates `menu_{GetHashCode():x}` when ID is null/empty. File: `src/BlazorWebFormsComponents/Menu.razor.cs`.
-- **Shared PagerSettings sub-component:** Created `PagerSettings` class (plain C# POCO, not a Blazor component) with all 12 Web Forms PagerSettings properties (Mode, PageButtonCount, First/Last/Next/PreviousPageText, image URLs, Position, Visible). Created `PagerPosition` enum in `Enums/` (PagerButtons already existed). Created `IPagerSettingsContainer` interface in `Interfaces/`. Created `UiPagerSettings` abstract base component following the `UiTableItemStyle` CascadingParameter pattern but for settings instead of styles. Created 3 concrete sub-component pairs: `GridViewPagerSettings`, `FormViewPagerSettings`, `DetailsViewPagerSettings` — each inherits `UiPagerSettings` and uses `[CascadingParameter(Name = "ParentXxx")]` to set properties on the parent's `PagerSettings` instance. Wired into GridView, FormView, DetailsView: added `IPagerSettingsContainer` to each control's interface list, added `PagerSettings` property + `PagerSettingsContent` RenderFragment parameter, rendered `@PagerSettingsContent` inside existing `<CascadingValue>` block. Key files: `Enums/PagerPosition.cs`, `PagerSettings.cs`, `Interfaces/IPagerSettingsContainer.cs`, `UiPagerSettings.cs`, `GridViewPagerSettings.razor(.cs)`, `FormViewPagerSettings.razor(.cs)`, `DetailsViewPagerSettings.razor(.cs)`.
+Fixed 3 bugs: Menu JS null guard + try/catch for getElement(), Calendar conditional scope attribute (`scope="@(UseAccessibleHeader ? "col" : null)"`), Menu auto-ID generation (`menu_{GetHashCode():x}` when ID null). Created shared PagerSettings sub-component (POCO with 12 properties, PagerPosition enum, IPagerSettingsContainer interface, UiPagerSettings base following CascadingParameter pattern). Wired into GridView, FormView, DetailsView with concrete sub-component pairs (GridViewPagerSettings, FormViewPagerSettings, DetailsViewPagerSettings).
  Team update (2026-02-24): Substitution/Xml formally deferred  no implementation needed  decided by Beast
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
 
@@ -90,3 +76,10 @@ Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal
 - **PasswordRecovery → BaseStyledComponent (#354):** Changed `PasswordRecovery.razor` and `PasswordRecovery.razor.cs` to inherit `BaseStyledComponent`. Added `class="@CssClass"`, `style="border-collapse:collapse;@Style"`, and `title="@ToolTip"` to all three step `<table>` elements (UserName, Question, Success steps). Follows the same pattern as Login, ChangePassword, and CreateUserWizard. All existing tests pass.
 - **Pattern followed:** Login controls with `<table>` elements add `class="@CssClass" style="border-collapse:collapse;@Style" title="@ToolTip"` to the outer table, matching Login.razor and ChangePassword.razor.
 
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
