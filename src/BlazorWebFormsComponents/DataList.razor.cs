@@ -44,7 +44,6 @@ namespace BlazorWebFormsComponents
 		[Parameter] public bool ShowHeader { get; set; } = true;
 		[Parameter] public bool ShowFooter { get; set; } = true;
 		[Parameter] public new string Style { get; set; }
-		[Parameter] public string ToolTip { get; set; }
 		[Parameter] public bool UseAccessibleHeader { get; set; } = false;
 		[Parameter]
 		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }

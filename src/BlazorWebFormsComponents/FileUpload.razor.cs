@@ -116,12 +116,6 @@ namespace BlazorWebFormsComponents
 		public long MaxFileSize { get; set; } = 512000; // ~500 KiB default
 
 		/// <summary>
-		/// Gets or sets the tooltip text displayed when hovering over the control.
-		/// </summary>
-		[Parameter]
-		public string ToolTip { get; set; }
-
-		/// <summary>
 		/// Event raised when a file is selected.
 		/// </summary>
 		[Parameter]

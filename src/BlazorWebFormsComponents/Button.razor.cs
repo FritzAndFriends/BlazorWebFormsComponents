@@ -15,8 +15,5 @@ namespace BlazorWebFormsComponents
 		[Parameter, Obsolete("In Blazor this behaves the same whether activated or not")]
 		public bool UseSubmitBehavior { get; set; }
 
-		[Parameter]
-		public string ToolTip { get; set; }
-
 	}
 }

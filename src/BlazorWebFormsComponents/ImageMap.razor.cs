@@ -37,12 +37,6 @@ namespace BlazorWebFormsComponents
 		public string ImageUrl { get; set; } = string.Empty;
 
 		/// <summary>
-		/// Gets or sets the ToolTip text for the ImageMap control.
-		/// </summary>
-		[Parameter]
-		public string ToolTip { get; set; } = string.Empty;
-
-		/// <summary>
 		/// Gets or sets the default behavior for the HotSpot objects in the ImageMap control when the HotSpot objects are clicked.
 		/// </summary>
 		[Parameter]
