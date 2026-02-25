@@ -6,6 +6,7 @@
 	<tr id="@(string.IsNullOrEmpty(ClientID) ? null : ClientID)"
 		class="@CssClass"
 		style="@CombinedStyle"
+		title="@ToolTip"
 		@attributes="AdditionalAttributes">
 		@ChildContent
 	</tr>

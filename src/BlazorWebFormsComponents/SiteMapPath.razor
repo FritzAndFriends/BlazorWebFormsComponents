@@ -2,7 +2,7 @@
 
 @if (NavigationPath.Count > 0)
 {
-	<span id="@ID" class="@CssClass" style="@Style">
+	<span id="@ID" class="@CssClass" style="@Style" title="@ToolTip">
 		@for (int i = 0; i < NavigationPath.Count; i++)
 		{
 			var node = NavigationPath[i];

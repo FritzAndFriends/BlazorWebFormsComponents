@@ -98,6 +98,9 @@ namespace BlazorWebFormsComponents
 				if (TabIndex != 0)
 					attributes["tabindex"] = TabIndex;
 
+				if (!string.IsNullOrEmpty(ToolTip))
+					attributes["title"] = ToolTip;
+
 				if (TextMode == TextBoxMode.MultiLine)
 				{
 					if (Rows > 0)

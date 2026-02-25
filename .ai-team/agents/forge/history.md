@@ -109,3 +109,11 @@ Fixed three deployment pipeline issues on `fix/deployment-workflows` branch:
 - Version is computed once via nbgv and shared via GitHub Actions step outputs (`steps.nbgv.outputs.version`)
 
  Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge
+
+### Summary: Milestone 9 Planning (2026-02-25)
+
+Verified all 8 known priority gaps from prior audits against current `dev` branch. Found 7 of 8 already fixed (AccessKey, Image, Label, Validation Display, HyperLink NavigateUrl, DataBound chain, bUnit tests). Confirmed 1 still open (ToolTip not on BaseStyledComponent — 28+ controls missing) and identified 2 new gaps (ValidationSummary comma-split data corruption bug, SkinID bool→string type mismatch).
+
+Planned M9: "Migration Fidelity & Hardening" — 12 work items, ~30 gap closures. P0: ToolTip → BaseStyledComponent (4 WIs, ~28 gaps — highest-leverage remaining base class fix). P1: ValidationSummary comma-split fix + SkinID type fix (3 WIs). P2: Housekeeping — stale branch cleanup, doc gap audit, planning-docs refresh, integration test coverage review, sample navigation audit (5 WIs).
+
+📌 Team update (2026-02-25): Milestone 9 planned — 12 WIs, ~30 gaps, "Migration Fidelity & Hardening". P0: ToolTip base class fix. P1: ValidationSummary bug + SkinID type. P2: Housekeeping. — decided by Forge
