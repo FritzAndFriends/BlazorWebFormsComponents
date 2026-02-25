@@ -114,6 +114,10 @@ public static class ComponentCatalog
             Keywords: new[] { "status", "logout", "link" }),
         new("PasswordRecovery", "Login", "/ControlSamples/PasswordRecovery", "Multi-step password recovery form",
             Keywords: new[] { "password", "recovery", "reset", "security" }),
+
+        // Theming
+        new("Theming", "Theming", "/ControlSamples/Theming", "Skins and Themes PoC with ThemeProvider and ControlSkin",
+            Keywords: new[] { "skin", "theme", "provider", "skinid" }),
     }.AsReadOnly();
 
     public static IReadOnlyList<string> Categories { get; } = Components

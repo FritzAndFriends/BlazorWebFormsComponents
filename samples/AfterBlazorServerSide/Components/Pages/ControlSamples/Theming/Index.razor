@@ -1,0 +1,65 @@
+@page "/ControlSamples/Theming"
+@using BlazorWebFormsComponents.Theming
+
+<PageTitle>Theming - Skins &amp; Themes PoC</PageTitle>
+
+<h2>Skins &amp; Themes PoC</h2>
+
+<p>This sample demonstrates the Skins &amp; Themes system, which emulates ASP.NET Web Forms'
+<code>.skin</code> file behavior using Blazor's cascading values.</p>
+
+<h3>Themed Components</h3>
+<p>These components receive their visual properties from a <code>ThemeConfiguration</code>
+provided via <code>ThemeProvider</code>.</p>
+
+<ThemeProvider Theme="@SampleTheme">
+    <h4>Default Skin</h4>
+    <p>Button and Label with default theme skin applied:</p>
+    <Button Text="Themed Button" />
+    <br /><br />
+    <Label Text="Themed Label" />
+
+    <h4>Named Skin (SkinID)</h4>
+    <p>Button with <code>SkinID="Danger"</code> gets a different skin:</p>
+    <Button Text="Danger Button" SkinID="Danger" />
+
+    <h4>EnableTheming = false</h4>
+    <p>This button opts out of theming entirely:</p>
+    <Button Text="Unthemed Button" EnableTheming="false" />
+</ThemeProvider>
+
+<h3>Without ThemeProvider</h3>
+<p>Components outside the <code>ThemeProvider</code> keep their default appearance:</p>
+<Button Text="No Theme Button" />
+
+@code {
+    private ThemeConfiguration SampleTheme;
+
+    protected override void OnInitialized()
+    {
+        SampleTheme = new ThemeConfiguration();
+
+        // Default Button skin — blue background with white text
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue,
+            ForeColor = WebColor.White,
+            CssClass = "themed-button"
+        });
+
+        // Named "Danger" Button skin — red background
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Red,
+            ForeColor = WebColor.White,
+            CssClass = "themed-button-danger"
+        }, "Danger");
+
+        // Default Label skin — bold navy text
+        SampleTheme.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy,
+            Font = new FontInfo { Bold = true }
+        });
+    }
+}
