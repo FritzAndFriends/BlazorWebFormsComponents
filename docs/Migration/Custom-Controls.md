@@ -15,7 +15,7 @@ Install the analyzer:
 dotnet add package BlazorWebFormsComponents.Analyzers
 ```
 
-The analyzer automatically highlights migration issues in your IDE and offers quick fixes. See the [Analyzer README](../../src/BlazorWebFormsComponents.Analyzers/README.md) for details.
+The analyzer automatically highlights migration issues in your IDE and offers quick fixes. See the [Analyzer README](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/src/BlazorWebFormsComponents.Analyzers/README.md) for details.
 
 ## Overview
 
