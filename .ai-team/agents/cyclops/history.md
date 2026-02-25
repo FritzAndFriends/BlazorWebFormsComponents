@@ -74,3 +74,9 @@ Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
 
  Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge
+
+### Milestone 9 Migration-Fidelity Fixes (2026-02-25)
+
+- **ToolTip → BaseStyledComponent (WI-01):** Added `[Parameter] public string ToolTip { get; set; }` to `BaseStyledComponent.cs`. Removed duplicate ToolTip declarations from 8 components: Button, Calendar, DataList, FileUpload, HyperLink, Image, ImageButton, ImageMap. All controls inheriting BaseStyledComponent (28+) now get ToolTip automatically. Intentionally preserved ToolTip on sub-component types (ChartSeries, DataPoint, MenuItem, TreeNode) and binding fields (MenuItemBinding.ToolTipField, TreeNodeBinding.ToolTipField) since those are semantically different item-level tooltips.
+- **ValidationSummary comma-split bug fix (WI-05):** `AspNetValidationSummary.razor.cs` used `Split(',')[1]` to extract error messages, which truncated messages containing commas. Fixed to use `IndexOf(',')` + `Substring()` to take everything after the first comma. This is a data corruption bug — any validation message with a comma would silently lose content.
+- **SkinID type fix (WI-07):** Changed `SkinID` property in `BaseWebFormsComponent.cs` from `bool` to `string`. Web Forms SkinID is the name of a skin to apply (a string), not a boolean flag. The `[Obsolete]` attribute was preserved since theming is not available in Blazor.
