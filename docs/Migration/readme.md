@@ -148,6 +148,21 @@ This pattern applies to all templated data controls:
 
 **Note:** While it's one extra attribute per component, using `Context="Item"` eliminates the need to learn Blazor-specific `@context` syntax and makes your templates more readable for developers familiar with Web Forms.
 
+## Common Properties on All Styled Controls
+
+All BlazorWebFormsComponents controls that inherit from `BaseStyledComponent` support a set of common properties that match ASP.NET Web Forms' `WebControl` base class. This means properties like `CssClass`, `BackColor`, `ForeColor`, `Font`, `Width`, `Height`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Enabled`, `Visible`, and **`ToolTip`** are available on every styled control — just as they are in Web Forms.
+
+!!! tip "ToolTip renders as the HTML `title` attribute"
+    The `ToolTip` property renders as the standard HTML `title` attribute, matching Web Forms behavior. This means browser-native tooltip display works automatically.
+
+```razor
+<Button Text="Save" ToolTip="Click to save your changes" />
+<TextBox @bind-Text="name" ToolTip="Enter your full name" />
+<Label Text="Status" ToolTip="Current processing status" />
+```
+
+You do **not** need to add `ToolTip` support per-control — it is inherited from the shared base and works on all styled controls including Button, TextBox, Label, Panel, CheckBox, DropDownList, GridView, and more.
+
 ## Step 6 - Pages
 
 Page migration is a process very similar to UserControls, except working on files with the `.aspx` extension.

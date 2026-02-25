@@ -4,11 +4,11 @@
 {
 	@if (!string.IsNullOrEmpty(AssociatedControlID))
 	{
-		<label for="@AssociatedControlID" id="@ClientID" class="@GetCssClassOrNull()" style="@Style" accesskey="@GetAccessKeyOrNull()">@Text</label>
+		<label for="@AssociatedControlID" id="@ClientID" class="@GetCssClassOrNull()" style="@Style" accesskey="@GetAccessKeyOrNull()" title="@ToolTip">@Text</label>
 	}
 	else
 	{
-		<span id="@ClientID" class="@GetCssClassOrNull()" style="@Style" accesskey="@GetAccessKeyOrNull()">@Text</span>
+		<span id="@ClientID" class="@GetCssClassOrNull()" style="@Style" accesskey="@GetAccessKeyOrNull()" title="@ToolTip">@Text</span>
 	}
 }
 

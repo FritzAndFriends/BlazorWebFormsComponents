@@ -5,7 +5,7 @@
 
 @if (Visible)
 {
-	<select class="@CssClass" style="@Style"
+	<select class="@CssClass" style="@Style" title="@ToolTip"
 			size="@Rows"
 			multiple="@(SelectionMode == ListSelectionMode.Multiple ? true : (bool?)null)"
 			disabled="@(!Enabled)" @onchange="HandleChange">

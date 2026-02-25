@@ -7,5 +7,5 @@
 
 @if (activeAdvertisment != null)
 {
-	<a href="@activeAdvertisment.NavigateUrl" target="@Target" style="@Style" class="@CssClass"><img src="@activeAdvertisment.ImageUrl" width="@activeAdvertisment.Width" height="@activeAdvertisment.Height" alt="@activeAdvertisment.AlternateText" /></a>
+	<a href="@activeAdvertisment.NavigateUrl" target="@Target" style="@Style" class="@CssClass" title="@ToolTip"><img src="@activeAdvertisment.ImageUrl" width="@activeAdvertisment.Width" height="@activeAdvertisment.Height" alt="@activeAdvertisment.AlternateText" /></a>
 }

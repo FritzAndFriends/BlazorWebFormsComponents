@@ -98,7 +98,7 @@ namespace BlazorWebFormsComponents
 		/// 🚨🚨 Theming is not available in Blazor 🚨🚨
 		/// </summary>
 		[Parameter, Obsolete("Theming is not available in Blazor")]
-		public bool SkinID { get; set; }
+		public string SkinID { get; set; }
 
 		#endregion
 

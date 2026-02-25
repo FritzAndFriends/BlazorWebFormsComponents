@@ -1,7 +1,7 @@
 ﻿@using BlazorWebFormsComponents.DataBinding
 @inherits BaseDataBoundComponent
 
-<div id="@ClientID" class="@CssClass" role="@(UseAccessibilityFeatures ? "tree" : null)" aria-label="@(UseAccessibilityFeatures ? "Tree navigation" : null)">
+<div id="@ClientID" class="@CssClass" role="@(UseAccessibilityFeatures ? "tree" : null)" aria-label="@(UseAccessibilityFeatures ? "Tree navigation" : null)" title="@ToolTip">
 <CascadingValue Name="ParentTreeView" Value="this" IsFixed="true">
 @NodeStyleContent
 @HoverNodeStyleContent

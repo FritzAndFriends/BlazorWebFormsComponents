@@ -2,7 +2,7 @@
 
 @if (Visible)
 {
-	<div id="@ID" class="@CssClass" style="@Style @ChartDimensionStyle">
+	<div id="@ID" class="@CssClass" style="@Style @ChartDimensionStyle" title="@ToolTip">
 		<canvas @ref="_canvasRef" id="@CanvasId"></canvas>
 	</div>
 

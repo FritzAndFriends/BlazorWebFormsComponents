@@ -9,15 +9,13 @@
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
 
-- **Doc structure pattern:** Each component doc follows a consistent structure: title → intro paragraph with MS docs link → Features Supported → Features NOT Supported → Web Forms Declarative Syntax → Blazor Razor Syntax (with examples) → HTML Output → Migration Notes (Before/After) → Examples → See Also. Admonitions (`!!! note`, `!!! warning`, `!!! tip`) are used for gotchas and important notes.
-- **mkdocs.yml nav is alphabetical:** Components are listed alphabetically within their category sections (Editor Controls, Data Controls, Validation Controls, Navigation Controls, Login Controls, Utility Features).
-- **Calendar doc already existed:** The Calendar component doc was already present at `docs/EditorControls/Calendar.md` and in the mkdocs nav — likely created alongside the component PR. No changes needed.
-- **PageService doc existed on PR branch but not on dev:** The basepage services branch (`copilot/create-basepage-for-services`) already had a comprehensive `docs/UtilityFeatures/PageService.md`. I created a fresh version on dev that matches the project doc conventions.
-- **ImageMap is in Navigation Controls, not Editor Controls:** Despite being image-related, ImageMap is categorized under Navigation Controls in the mkdocs nav, alongside HyperLink, Menu, SiteMapPath, and TreeView.
-- **Style migration pattern:** Web Forms used `TableItemStyle` child elements (e.g., `<TitleStyle BackColor="Navy" />`). The Blazor components use CSS class name string parameters (e.g., `TitleStyleCss="my-class"`). This is a key migration note for Calendar, and should be documented for any future components with similar style patterns.
-- **Branch naming varies:** PR branches on upstream use `copilot/create-*` naming (not `copilot/fix-*` as referenced in some task descriptions). Always verify branch names via `git ls-remote` or GitHub API.
-- **Deferred controls doc pattern:** For controls permanently excluded from the library, use `docs/Migration/DeferredControls.md` with per-control sections: What It Did → Why It's Not Implemented → Recommended Alternatives → Migration Example (Before/After). Include a summary table at the end. This is distinct from the component doc pattern — deferred controls don't have Features Supported/Not Supported sections since they have zero Blazor implementation.
-- **Migration section nav is semi-alphabetical:** The Migration section in mkdocs.yml keeps "Getting started" and "Migration Strategies" at the top, then remaining entries in alphabetical order.
+<!-- ⚠ Summarized 2026-02-25 by Scribe — original entries covered 2026-02-10 through 2026-02-12 -->
+
+### Summary: Documentation Conventions (2026-02-10 through 2026-02-12)
+
+**Doc structure:** title → intro (MS docs link) → Features Supported → NOT Supported → Web Forms syntax → Blazor syntax → HTML Output → Migration Notes (Before/After) → Examples → See Also. Admonitions for gotchas. mkdocs.yml nav is alphabetical within category sections. Migration section keeps "Getting started" and "Migration Strategies" at top.
+
+**Key patterns:** Style migration: Web Forms `TableItemStyle` child elements → Blazor CSS class string parameters. Deferred controls use `docs/Migration/DeferredControls.md` with What/Why/Alternatives/Before-After (no Features sections). ImageMap is in Navigation Controls. Branch naming: `copilot/create-*` on upstream. Chart doc introduces JS interop "HTML Output Exception" pattern and multi-component (child) doc pattern. Chart Type Gallery at `docs/images/chart/chart-{type}.png`.
 
 📌 Team update (2026-02-10): Docs and samples must ship in the same sprint as the component — decided by Jeffrey T. Fritz
 📌 Team update (2026-02-10): PRs #328 (ASCX CLI) and #309 (VS Snippets) shelved indefinitely — decided by Jeffrey T. Fritz
@@ -38,13 +36,9 @@
 - **Child component docs pattern:** Chart introduces a multi-component documentation pattern (Chart, ChartSeries, ChartArea, ChartLegend, ChartTitle) with separate parameter tables for each. This nested-component doc approach should be used for any future components with required child components.
 - **Chart Type Gallery added:** Added a "Chart Type Gallery" section to `docs/DataControls/Chart.md` between "Chart Palettes" and "Web Forms Features NOT Supported". Contains 8 subsections (Column, Line, Bar, Pie, Doughnut, Area, Scatter, Stacked Column) each with a screenshot, `SeriesChartType` enum value, and 1-2 sentence usage guidance. Includes `!!! warning` admonitions on Pie and Doughnut for the Phase 1 palette limitation (single series color instead of per-segment colors).
 - **Chart image path convention:** Chart screenshots live at `docs/images/chart/chart-{type}.png` (lowercase, hyphenated). Referenced from Chart.md using relative paths: `../images/chart/chart-{type}.png`. This `docs/images/{component}/` pattern should be used for any future component screenshots.
-- **AccessKey and ToolTip missing across all WebControl-based components:** Neither `BaseWebFormsComponent` nor `BaseStyledComponent` defines `AccessKey` or `ToolTip` parameters. Every control inheriting from WebControl in Web Forms has these, so they are universally 🔴 Missing. Adding them to `BaseStyledComponent` would fix all styled controls in one shot.
-- **Label uses wrong base class for style support:** `Label` inherits `BaseWebFormsComponent` (no style) instead of `BaseStyledComponent`. Web Forms `Label` inherits from `WebControl` and supports all style properties (CssClass, BackColor, Font, etc.). This is the biggest gap for Label — 11 style properties are missing.
-- **ListControl-derived components share common gaps:** ListBox, RadioButtonList (and CheckBoxList, DropDownList) all have the same missing properties: `AppendDataBoundItems`, `DataTextFormatString`, `CausesValidation`, `ValidationGroup`, and `TextChanged` event. These could be fixed once in a shared base.
-- **Literal/Localize/PlaceHolder/View/MultiView are near-complete:** Controls inheriting from `Control` (not `WebControl`) have no style properties by design. The Blazor implementations are essentially feature-complete — matching all relevant properties and events.
-- **Substitution and Xml are permanently deferral candidates:** Both controls are tightly coupled to server-side ASP.NET infrastructure (output caching and XSLT transformation respectively). Neither concept maps to Blazor's component model. Recommend documenting migration alternatives rather than implementing.
-- **Style property computed but not directly settable:** Across all `BaseStyledComponent`-derived controls, the `Style` property is computed from BackColor/ForeColor/Font/etc. via `IStyle.ToStyle()`. Web Forms allowed direct `Style["property"] = "value"` assignment. This pattern difference is consistent but worth noting in migration guides.
-- **Panel is the most feature-complete styled control:** Panel implements 6 out of 7 specific Web Forms properties (only BackImageUrl missing). Combined with full BaseStyledComponent inheritance, it has the highest coverage of any editor control.
+### Summary: Feature Audit Findings (2026-02-23)
+
+AccessKey/ToolTip missing from base classes (universal gap). Label needs BaseStyledComponent. ListControl-derived components share common gaps (AppendDataBoundItems, DataTextFormatString, CausesValidation). Literal/Localize/PlaceHolder/View/MultiView near-complete. Substitution/Xml permanently deferred. Style property is computed (not directly settable). Panel is most feature-complete styled control.
 
 
  Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
@@ -62,3 +56,20 @@
  Team update (2026-02-24): Menu auto-ID pattern  components with JS interop should auto-generate IDs  decided by Cyclops
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
  Team update (2026-02-24): PagerSettings shared sub-component created  update docs when component stabilizes  decided by Cyclops
+
+- **M9 Doc Gap Audit (WI-09):** Audited all docs against M6-M8 features. GridView, TreeView, Menu, Validators (ControlToValidate), and Login are fully documented. Gaps found in: FormView (ItemCommand event, styles, PagerSettings not in Blazor sections), DetailsView (Caption missing, styles/PagerSettings listed as unsupported but may be stale), DataGrid (paging listed as unsupported, needs verification), ChangePassword (Orientation and TextLayout not documented despite Login having them), and PagerSettings (no dedicated doc page exists). Full report in `.ai-team/decisions/inbox/beast-m9-doc-audit.md`.
+- **M9 Planning-Docs Historical Headers (WI-10):** Added `> ⚠️ Historical Snapshot (Pre-Milestone 6)` header to all 54 per-control audit files and SUMMARY.md in `planning-docs/`. Excluded README.md and MILESTONE*-PLAN.md files (still current/active). This prevents future contributors from treating pre-M6 gap data as current.
+- **ChangePassword/Login parity gap:** Login.md documents Orientation and TextLayout with full reference tables and migration examples, but ChangePassword.md has neither. Both controls should have identical coverage for these shared layout properties.
+- **ToolTip universality documented (WI-04):** Added ToolTip to Features Supported in Label.md, TextBox.md, and GridView.md (Button.md already had it). Added "Common Properties on All Styled Controls" section to Migration/readme.md explaining that ToolTip (renders as `title` attribute) is universally available on all BaseStyledComponent-derived controls. Used `!!! tip` admonition and code examples. No dedicated Common Properties page created — kept it inline in the migration guide for minimal footprint.
+
+ Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
+ Team update (2026-02-25): M9 plan ratified  12 WIs across P0/P1/P2, migration fidelity theme  decided by Forge
+
+- **M9 Consolidated Audit Report:** Created `planning-docs/AUDIT-REPORT-M9.md` combining findings from three M9 audits: Doc Gap Audit (5 findings → #359), Integration Test Coverage Audit (5 findings → #358), and Sample Navigation Audit (19 findings → #350). All 29 findings mapped to M10 GitHub Issues with 100% coverage. Report includes 6 additional post-M9 findings (component gaps and TreeView bug). Used the planning-docs historical snapshot header convention (`> ⚠️ Historical Snapshot (Milestone 9)`).
+- **Audit report convention established:** Consolidated audit reports should live at `planning-docs/AUDIT-REPORT-M{N}.md` with the standard historical snapshot header, summary table, per-audit sections with findings + resolution status, and an appendix issue tracker. This pattern can be reused for future milestone audits.
+
+ Team update (2026-02-25): TreeView NodeImage now checks ShowExpandCollapse independently of ShowLines; ExpandCollapseImage() helper added (#361)  decided by Cyclops
+
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

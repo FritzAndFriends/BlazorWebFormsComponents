@@ -16,7 +16,7 @@
 
 @if (ColumnList.Any())
 {
-	<table class="@CssClass" rules="@GetGridLinesRules()" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)">
+	<table class="@CssClass" rules="@GetGridLinesRules()" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)" title="@ToolTip">
 		@if (!string.IsNullOrEmpty(Caption))
 		{
 			<caption style="@GetCaptionStyle()">@Caption</caption>
