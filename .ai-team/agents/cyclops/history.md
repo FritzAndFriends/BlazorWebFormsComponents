@@ -83,3 +83,21 @@ Fixed 3 bugs: Menu JS null guard + try/catch for getElement(), Calendar conditio
  Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
 
  Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
+
+### ListView CRUD Events Completion (#356)
+
+- **Sorting/Sorted events:** Added `ListViewSortEventArgs` (SortExpression, SortDirection, Cancel) and `Sorting`/`Sorted` EventCallback parameters. Sort command routed through `HandleCommand("Sort", expression, index)`. Toggles direction when sorting same expression (matches GridView pattern). `SortExpression` and `SortDirection` properties added to ListView.
+- **SelectedIndexChanging/SelectedIndexChanged events:** Added `ListViewSelectEventArgs` (NewSelectedIndex, Cancel) and `SelectedIndexChanging`/`SelectedIndexChanged` EventCallback parameters. Select command routed through `HandleCommand("Select", null, index)`. Follows GridView `SelectRow` pattern with cancellation support.
+- **PagePropertiesChanging/PagePropertiesChanged events:** Added `ListViewPagePropertiesChangingEventArgs` (StartRowIndex, MaximumRows) and `PagePropertiesChanging`/`PagePropertiesChanged` EventCallback parameters. Exposed via `SetPageProperties(startRowIndex, maximumRows)` public method. Added `StartRowIndex` and `MaximumRows` properties.
+- **LayoutCreated event:** Converted from `EventHandler OnLayoutCreated` to `EventCallback<EventArgs> OnLayoutCreated`. Wired invocation via `RaiseLayoutCreated()` internal method called in ListView.razor after LayoutTemplate is resolved.
+- **Key patterns followed:** EventArgs classes follow Web Forms signatures. Pre-operation events (`Sorting`, `SelectedIndexChanging`) support `Cancel` flag. Post-operation events (`Sorted`, `SelectedIndexChanged`, `PagePropertiesChanged`) fire after state updates. HandleCommand routes "sort" and "select" commands. `SortDirection` enum alias needed in test files to avoid `Shouldly.SortDirection` ambiguity.
+
+### Menu Level Styles — StaticMenuStyle, IMenuStyleContainer (#360)
+
+- **StaticMenuStyle sub-component:** Added `StaticMenuStyle` class to `MenuItemStyle.razor.cs` following the same pattern as `DynamicMenuStyle` — inherits `MenuItemStyle`, sets `ParentMenu.StaticMenuStyle = this` in `OnInitialized`. Renders CSS to `ul.level1` in `Menu.razor`.
+- **IMenuStyleContainer interface:** Created `Interfaces/IMenuStyleContainer.cs` exposing `DynamicMenuStyle`, `StaticMenuStyle`, `DynamicMenuItemStyle`, `StaticMenuItemStyle` as `MenuItemStyle` properties. Menu implements `IMenuStyleContainer` via explicit interface implementation since the concrete Menu properties use derived types (`DynamicMenuStyle`, `StaticMenuStyle`, etc.).
+- **RenderFragment parameters:** Added `DynamicMenuStyleContent`, `StaticMenuStyleContent`, `DynamicMenuItemStyleContent`, `StaticMenuItemStyleContent` RenderFragment parameters to Menu. Rendered inside `<CascadingValue Name="ParentMenu">` block before `@ChildContent`. Added `IsFixed="true"` to the CascadingValue.
+- **CSS rendering:** `StaticMenuStyle` CSS applied to `#{ID} ul.level1` in Menu.razor's `<style>` block, analogous to how `DynamicMenuStyle` applies to `ul.dynamic`.
+- **Key pattern:** Menu styles use `MenuItemStyle` (inherits `ComponentBase, IStyle`) NOT `UiTableItemStyle`. This is intentional — Menu styles produce CSS text via `ToStyle()` for inline `<style>` blocks, whereas GridView/Calendar styles use `TableItemStyle` objects for HTML attribute-level styling. When mixing named RenderFragment params with bare child content in tests, wrap bare content in `<ChildContent>` tags.
+- **Files created:** `ListViewSortEventArgs.cs`, `ListViewPagePropertiesChangingEventArgs.cs`, `ListViewSelectEventArgs.cs`, test files: `SortingEvents.razor`, `SelectionEvents.razor`, `PagingEvents.razor`, `LayoutCreatedEvent.razor`.
+- **All 1229 tests pass** including 12 new ListView event tests (27 total ListView tests).
