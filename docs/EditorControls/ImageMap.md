@@ -327,4 +327,4 @@ new RectangleHotSpot
 
 - [Image](Image.md) - Display static images
 - [ImageButton](ImageButton.md) - Clickable image that acts as a button
-- [HyperLink](HyperLink.md) - Text or image hyperlinks
+- HyperLink - Text or image hyperlinks (not yet implemented)
