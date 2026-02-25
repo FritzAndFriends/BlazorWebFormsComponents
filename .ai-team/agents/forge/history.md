@@ -84,3 +84,8 @@ Planned M7: "Control Depth & Navigation Overhaul" — 51 work items targeting ~1
 - Re-audit must open the milestone — all planning-docs/ files are stale (pre-M6 numbers)
 
 📌 Team update (2026-02-23): Milestone 7 planned — 51 WIs, ~138 gaps, "Control Depth & Navigation Overhaul". P0: GridView completion + re-audit. P1: TreeView, Menu, DetailsView, FormView, Validators. P2: ListView CRUD, DataGrid, Menu levels. — decided by Forge
+
+ Team update (2026-02-24): Menu auto-ID pattern established  components with JS interop should auto-generate IDs when none provided  decided by Cyclops
+ Team update (2026-02-24): Substitution/Xml formally deferred in status.md and README  decided by Beast
+ Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
+ Team update (2026-02-24): PagerSettings shared sub-component created for GridView/FormView/DetailsView  decided by Cyclops

@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 	/// Displays a single record from a data source in a table layout with one row per field.
 	/// </summary>
 	/// <typeparam name="ItemType">The type of the data items.</typeparam>
-	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IDetailsViewStyleContainer
+	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IDetailsViewStyleContainer, IPagerSettingsContainer
 	{
 		#region Properties
 
@@ -198,6 +198,20 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment FieldHeaderStyleContent { get; set; }
 		[Parameter] public RenderFragment EmptyDataRowStyleContent { get; set; }
 		[Parameter] public RenderFragment PagerStyleContent { get; set; }
+
+		#endregion
+
+		#region PagerSettings
+
+		/// <summary>
+		/// Gets the pager settings for the DetailsView.
+		/// </summary>
+		public PagerSettings PagerSettings { get; internal set; } = new PagerSettings();
+
+		/// <summary>
+		/// Content for the PagerSettings sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment PagerSettingsContent { get; set; }
 
 		#endregion
 

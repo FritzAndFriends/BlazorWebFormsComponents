@@ -229,6 +229,17 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+
+			// Auto-generate an ID if none was provided, ensuring JS interop has a valid element ID
+			if (string.IsNullOrEmpty(ID))
+			{
+				ID = $"menu_{GetHashCode():x}";
+			}
+		}
+
 		protected override async Task OnAfterRenderAsync(bool firstRender) {
 
 			await base.OnAfterRenderAsync(firstRender);

@@ -19,7 +19,7 @@ Original Microsoft documentation: [System.Web.UI.DataVisualization.Charting.Char
 
 ## Features Supported in Blazor
 
-### Chart Types (Phase 1 — 8 of 35)
+### Chart Types (8 of 35)
 
 | SeriesChartType | Chart.js Mapping | Description |
 |-----------------|------------------|-------------|
@@ -125,7 +125,7 @@ Original Microsoft documentation: [System.Web.UI.DataVisualization.Charting.Char
 
 ## Chart Type Gallery
 
-Below is a visual reference for each of the 8 chart types supported in Phase 1. Use this gallery to choose the right chart type for your data and to see what the Blazor Chart component produces.
+Below is a visual reference for each of the 8 supported chart types. Use this gallery to choose the right chart type for your data and to see what the Blazor Chart component produces.
 
 ### Column
 
@@ -193,24 +193,24 @@ Stacks multiple series vertically within each category column. Use this when you
 
 ## Web Forms Features NOT Supported
 
-### Chart Types Not Supported (Phase 1)
+### Chart Types Not Supported
 
 27 additional chart types from the `SeriesChartType` enum are defined but will throw `NotSupportedException` if used. The most commonly requested:
 
 | Chart Type | Status | Notes |
 |------------|--------|-------|
-| `Stock` | Phase 2/3 | OHLC financial charts |
-| `Candlestick` | Phase 2/3 | Financial candlestick charts |
-| `Bubble` | Phase 2/3 | Bubble charts (sized scatter) |
-| `Radar` | Phase 2/3 | Radar/spider charts |
-| `Polar` | Phase 2/3 | Polar area charts |
-| `Funnel` | Phase 2/3 | Funnel charts |
-| `Pyramid` | Phase 2/3 | Pyramid charts |
-| `Spline` | Phase 2/3 | Smooth line charts |
-| `StackedBar` | Phase 2/3 | Stacked horizontal bars |
-| `StackedArea` | Phase 2/3 | Stacked area charts |
-| `Range` / `RangeColumn` | Phase 2/3 | Range charts |
-| `BoxPlot` | Phase 2/3 | Statistical box plots |
+| `Stock` | Not supported | OHLC financial charts |
+| `Candlestick` | Not supported | Financial candlestick charts |
+| `Bubble` | Not supported | Bubble charts (sized scatter) |
+| `Radar` | Not supported | Radar/spider charts |
+| `Polar` | Not supported | Polar area charts |
+| `Funnel` | Not supported | Funnel charts |
+| `Pyramid` | Not supported | Pyramid charts |
+| `Spline` | Not supported | Smooth line charts |
+| `StackedBar` | Not supported | Stacked horizontal bars |
+| `StackedArea` | Not supported | Stacked area charts |
+| `Range` / `RangeColumn` | Not supported | Range charts |
+| `BoxPlot` | Not supported | Statistical box plots |
 
 ### Other Unsupported Features
 

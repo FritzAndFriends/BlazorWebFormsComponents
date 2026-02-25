@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace BlazorWebFormsComponents
 {
 
-	public partial class FormView<ItemType> : DataBoundComponent<ItemType>, IFormViewStyleContainer where ItemType : class, new()
+	public partial class FormView<ItemType> : DataBoundComponent<ItemType>, IFormViewStyleContainer, IPagerSettingsContainer where ItemType : class, new()
 	{
 
 		private static readonly Dictionary<string, FormViewMode> CommandNameModeLookup = new Dictionary<string, FormViewMode> {
@@ -173,6 +173,20 @@ namespace BlazorWebFormsComponents
 		[Parameter] public RenderFragment FooterStyleContent { get; set; }
 		[Parameter] public RenderFragment EmptyDataRowStyleContent { get; set; }
 		[Parameter] public RenderFragment PagerStyleContent { get; set; }
+
+		#endregion
+
+		#region PagerSettings
+
+		/// <summary>
+		/// Gets the pager settings for the FormView.
+		/// </summary>
+		public PagerSettings PagerSettings { get; internal set; } = new PagerSettings();
+
+		/// <summary>
+		/// Content for the PagerSettings sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment PagerSettingsContent { get; set; }
 
 		#endregion
 

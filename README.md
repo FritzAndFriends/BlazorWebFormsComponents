@@ -50,21 +50,21 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [HiddenField](docs/EditorControls/HiddenField.md)
     - [Image](docs/EditorControls/Image.md)
     - [ImageButton](docs/EditorControls/ImageButton.md)
-    - [ImageMap](docs/EditorControls/ImageMap.md)
+    - [ImageMap](docs/NavigationControls/ImageMap.md)
     - [Label](docs/EditorControls/Label.md)
     - [LinkButton](docs/EditorControls/LinkButton.md)
     - [ListBox](docs/EditorControls/ListBox.md)
     - [Literal](docs/EditorControls/Literal.md)
     - [Localize](docs/EditorControls/Localize.md)
-    - MultiView
+    - [MultiView](docs/EditorControls/MultiView.md)
     - [Panel](docs/EditorControls/Panel.md)
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
     - [RadioButton](docs/EditorControls/RadioButton.md)
     - [RadioButtonList](docs/EditorControls/RadioButtonList.md)
     - [Table](docs/EditorControls/Table.md)
     - [TextBox](docs/EditorControls/TextBox.md)
-    - View
-    - Xml
+    - [View](docs/EditorControls/MultiView.md)
+    - ~~Xml~~ — *Deferred ([details](docs/Migration/DeferredControls.md))*
   - Data Controls
     - [Chart](docs/DataControls/Chart.md)
     - [DataGrid](docs/DataControls/DataGrid.md)
@@ -88,8 +88,8 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [SiteMapPath](docs/NavigationControls/SiteMapPath.md)
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
-    - ChangePassword
-    - CreateUserWizard
+    - [ChangePassword](docs/LoginControls/ChangePassword.md)
+    - [CreateUserWizard](docs/LoginControls/CreateUserWizard.md)
     - [Login](docs/LoginControls/Login.md)
     - [LoginName](docs/LoginControls/LoginName.md)
     - [LoginStatus](docs/LoginControls/LoginStatus.md)

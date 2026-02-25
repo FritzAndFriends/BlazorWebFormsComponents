@@ -2,23 +2,23 @@
 
 Some ASP.NET Web Forms controls have been **permanently deferred** from implementation in this library. This page documents each deferred control, explains why it's excluded, and provides recommended alternatives for your Blazor migration.
 
-## Chart — Partially Implemented
+## Chart — Implemented
 
-!!! note "Chart is NOW IMPLEMENTED (Phase 1)"
+!!! success "Chart is FULLY IMPLEMENTED"
     The [Chart component](../DataControls/Chart.md) has been implemented with Chart.js and supports 8 chart types: Column, Bar, Line, Pie, Area, Doughnut, Scatter (Point), and StackedColumn. See the [Chart documentation](../DataControls/Chart.md) for full details.
 
 ### Unsupported Chart Types
 
-The following 27 chart types from the Web Forms `SeriesChartType` enum are **not yet supported** and will throw `NotSupportedException`. If your application uses any of these, you will need an alternative approach:
+The following 27 chart types from the Web Forms `SeriesChartType` enum are **not supported** and will throw `NotSupportedException`. If your application uses any of these, you will need an alternative approach:
 
 | Chart Type | Alternative |
 |------------|-------------|
 | Stock, Candlestick | Use a dedicated financial charting library (e.g., [Lightweight Charts](https://github.com/nicksenger/lightweight-charts-blazor)) |
 | Bubble | Can be approximated with a scatter chart and custom point sizes via Chart.js plugins |
-| Radar, Polar | Chart.js supports these natively — Phase 2/3 candidates |
+| Radar, Polar | Chart.js supports these natively — consider a Chart.js plugin or custom integration |
 | Funnel, Pyramid | Use a dedicated visualization library or custom SVG |
 | Spline, SplineArea, SplineRange | Use `Line`/`Area` as an approximation; Chart.js tension options can create curved lines |
-| StackedBar, StackedArea, StackedColumn100, StackedBar100, StackedArea100 | Use `StackedColumn` or `Bar` as a starting point; full stacking support is a Phase 2/3 candidate |
+| StackedBar, StackedArea, StackedColumn100, StackedBar100, StackedArea100 | Use `StackedColumn` or `Bar` as a starting point; full stacking support may be added in a future release |
 | Range, RangeBar, RangeColumn | Use a dedicated charting library for range-style visualizations |
 | BoxPlot, ErrorBar | Use a statistical charting library |
 | Renko, ThreeLineBreak, Kagi, PointAndFigure | Specialized financial chart types — use a dedicated financial charting library |
@@ -232,7 +232,7 @@ XSLT transforms via `<asp:Xml>` are a **legacy pattern with near-zero adoption**
 
 | Control | Status | Recommendation |
 |---------|--------|----------------|
-| **Chart** | ✅ Partial (Phase 1) | [Implemented](../DataControls/Chart.md) with 8 chart types via Chart.js. Unsupported types need alternative libraries. |
+| **Chart** | ✅ Complete | [Implemented](../DataControls/Chart.md) with 8 chart types via Chart.js. Unsupported types need alternative libraries. |
 | **Substitution** | ❌ Deferred | Not needed — Blazor renders dynamically by default |
 | **Xml** | ❌ Deferred | Use `XDocument` + data binding or `XslCompiledTransform` + `MarkupString` |
 

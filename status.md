@@ -1,13 +1,13 @@
 ## Component Status Summary
 
-| Category | Completed | In Progress | Not Started | Total |
-|----------|-----------|-------------|-------------|-------|
-| Editor Controls | 25 | 0 | 2 | 27 |
-| Data Controls | 9 | 0 | 0 | 9 |
-| Validation Controls | 7 | 0 | 0 | 7 |
-| Navigation Controls | 3 | 0 | 0 | 3 |
-| Login Controls | 7 | 0 | 0 | 7 |
-| **TOTAL** | **51** | **0** | **2** | **53** |
+| Category | Completed | In Progress | Not Started | Deferred | Total |
+|----------|-----------|-------------|-------------|----------|-------|
+| Editor Controls | 25 | 0 | 0 | 2 | 27 |
+| Data Controls | 9 | 0 | 0 | 0 | 9 |
+| Validation Controls | 7 | 0 | 0 | 0 | 7 |
+| Navigation Controls | 3 | 0 | 0 | 0 | 3 |
+| Login Controls | 7 | 0 | 0 | 0 | 7 |
+| **TOTAL** | **51** | **0** | **0** | **2** | **53** |
 
 ---
 
@@ -41,10 +41,10 @@
 | Panel | ✅ Complete | Documented, tested |
 | PlaceHolder | ✅ Complete | Documented, tested - renders no wrapper element |
 | RadioButtonList | ✅ Complete | Documented, tested (30 tests) |
-| Substitution | 🔴 Not Started | Cache substitution - may not apply |
+| Substitution | ⏸️ Deferred | Cache substitution pattern has no Blazor equivalent — deferred indefinitely |
 | Table | ✅ Complete | Includes TableRow, TableCell, TableHeaderCell, TableHeaderRow, TableFooterRow |
 | View | ✅ Complete | Used with MultiView |
-| Xml | 🔴 Not Started | XML display/transform |
+| Xml | ⏸️ Deferred | XSLT display/transform rarely used in modern apps — deferred indefinitely |
 
 ### ✅ Data Controls (9/9 - 100% Complete)
 
@@ -56,7 +56,7 @@
 | GridView | ✅ Complete | Documented |
 | ListView | ✅ Complete | Documented |
 | Repeater | ✅ Complete | Documented |
-| Chart | ✅ Complete | Phase 1: 8 chart types via Chart.js, JS interop, documented |
+| Chart | ✅ Complete | 8 chart types via Chart.js, JS interop, documented |
 | DataPager | ✅ Complete | Documented in DataPager.md |
 | DetailsView | ✅ Complete | Single-record display/edit, documented, tested, sample page exists |
 
@@ -149,8 +149,8 @@
 | ~~**MultiView/View**~~ | ~~Medium~~ | ~~Tab-like container~~ | ✅ Complete |
 | ~~**Table**~~ | ~~Low~~ | ~~HTML table wrapper~~ | ✅ Complete |
 | ~~**Localize**~~ | ~~Low~~ | ~~Localization~~ | ✅ Complete |
-| **Xml** | Medium | XML transform |
-| **Substitution** | N/A | Cache-related, may not apply |
+| **Xml** | Medium | ⏸️ Deferred — XSLT display/transform rarely used in modern apps |
+| **Substitution** | N/A | ⏸️ Deferred — Cache substitution pattern has no Blazor equivalent |
 | ~~**Chart**~~ | ~~Very High~~ | ~~Consider external library~~ | ✅ Complete |
 | ~~**DataGrid**~~ | ~~Medium~~ | ~~Legacy, use GridView~~ | ✅ Complete |
 
@@ -159,11 +159,11 @@
 | Metric | Manual Development | With Copilot Assistance |
 |--------|-------------------|------------------------|
 | ~~**High Priority (4)**~~ | ~~20-30 hours~~ | ~~10-15 hours~~ | ✅ Complete |
-| **Medium Priority (3 remaining)** | ~12-20 hours | ~6-10 hours |
-| **Nav & Data (1 remaining)** | ~16-24 hours | ~8-12 hours |
-| **Login (1 remaining)** | ~16-24 hours | ~8-12 hours |
-| **Lower Priority (3 remaining)** | Variable | Variable |
-| **Total Remaining** | 5 components | 5 components |
+| ~~**Medium Priority (3 remaining)**~~ | ~~12-20 hours~~ | ~~6-10 hours~~ | ✅ Complete |
+| ~~**Nav & Data (1 remaining)**~~ | ~~16-24 hours~~ | ~~8-12 hours~~ | ✅ Complete |
+| ~~**Login (1 remaining)**~~ | ~~16-24 hours~~ | ~~8-12 hours~~ | ✅ Complete |
+| ~~**Lower Priority (3 remaining)**~~ | ~~Variable~~ | ~~Variable~~ | ✅ Complete (2 deferred) |
+| **Total Remaining** | **0 components** | Substitution and Xml deferred indefinitely |
 
 ---
 
@@ -213,7 +213,7 @@
 15. ~~**PasswordRecovery**~~ - ✅ Complete (Password reset flow)
 16. ~~**CreateUserWizard**~~ - ✅ Complete
 
-### Consider Deferring
-- ~~**Chart**~~ - ✅ Complete (Phase 1 — 8 chart types via Chart.js)
-- **Substitution** - Cache-related, may not apply to Blazor
-- **Xml** - Low migration demand, XSLT is rarely used in modern apps
+### Deferred
+- ~~**Chart**~~ - ✅ Complete (8 chart types via Chart.js)
+- **Substitution** - ⏸️ Deferred indefinitely — cache substitution pattern has no Blazor equivalent
+- **Xml** - ⏸️ Deferred indefinitely — XSLT display/transform rarely used in modern apps

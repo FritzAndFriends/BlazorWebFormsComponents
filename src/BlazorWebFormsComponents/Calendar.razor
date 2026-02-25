@@ -61,7 +61,7 @@
 				}
 				@foreach (var day in GetDayHeaders())
 				{
-					<th class="@GetEffectiveCss(DayHeaderStyle, DayHeaderStyleCss)" style="@GetEffectiveStyle(DayHeaderStyle)" abbr="@GetDayName(day)"@(UseAccessibleHeader ? $" scope=\"col\"" : "")>
+					<th class="@GetEffectiveCss(DayHeaderStyle, DayHeaderStyleCss)" style="@GetEffectiveStyle(DayHeaderStyle)" abbr="@GetDayName(day)" scope="@(UseAccessibleHeader ? "col" : null)">
 						@GetDayName(day)
 					</th>
 				}

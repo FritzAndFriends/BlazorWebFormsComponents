@@ -31,3 +31,6 @@ Added 9 smoke tests and 9 interaction tests for M7 sample pages: GridView Select
 - For `<div>` containers with multiple `<strong>` labels (e.g., TreeView/Menu feedback panels), use `page.Locator("div").Filter(new() { HasTextString = "Target label:" }).Last` to match the specific container div.
 - When waiting for FormView to render its item template buttons, use a specific selector like `button:has-text('Edit')` instead of generic `button, input[type='submit']` — the latter matches sidebar/nav buttons that already exist, causing the wait to resolve prematurely before the FormView renders.
 - To avoid strict-mode violations when text appears in both rendered output AND code examples, target the specific rendered element (e.g., `page.Locator("td").Filter(new() { HasTextString = "Widget Catalog" }).First`) rather than using bare `text=` locators.
+
+ Team update (2026-02-24): Menu auto-ID pattern  Menu now auto-generates IDs, JS interop crash fixed  decided by Cyclops
+ Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
