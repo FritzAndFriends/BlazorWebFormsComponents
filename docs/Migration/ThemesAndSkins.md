@@ -2,8 +2,8 @@
 
 ASP.NET Web Forms **Themes** and **Skins** provided a centralized way to control the visual appearance of server controls across an entire application. Blazor has no built-in equivalent, but several Blazor-native approaches can achieve the same goals. This document explains the original Web Forms features, evaluates Blazor alternatives, and recommends a migration path.
 
-!!! note "Current Status"
-    The project README states: _"We will NOT be converting... skins or themes."_ The `EnableTheming` and `SkinID` properties exist on `BaseWebFormsComponent` but are marked `[Obsolete]` with no functional behavior. This document is an exploratory strategy for how these features **could** be addressed.
+!!! note "Current Status — PoC Implemented (M10)"
+    The theming/skinning system is now implemented as a proof-of-concept. `SkinID` (typed as `string`) and `EnableTheming` (typed as `bool`, defaults to `true`) are active `[Parameter]` properties on `BaseWebFormsComponent` — they are **not** `[Obsolete]`. The `ThemeProvider` component, `ThemeConfiguration`, and `ControlSkin` classes are live in the `BlazorWebFormsComponents.Theming` namespace. See the [PoC Decisions](#poc-decisions) section below for design choices.
 
 ---
 
@@ -75,8 +75,8 @@ Every Web Forms control inherits `SkinID` from `System.Web.UI.Control`:
 <asp:Button ID="btnSave" runat="server" Text="Save" SkinID="action" />
 ```
 
-!!! warning "Known Issue"
-    In the current codebase, `BaseWebFormsComponent.SkinID` is typed as `bool` instead of `string`. If any approach below is implemented, this must be corrected to `string` to match the Web Forms API.
+!!! tip "Implemented"
+    `SkinID` is correctly typed as `string` on `BaseWebFormsComponent` and defaults to `""` (empty string), which selects the default skin. Set `SkinID="action"` to select a named skin — just like Web Forms.
 
 ---
 
@@ -186,43 +186,43 @@ A wrapper component provides default property values via `CascadingParameter`.
 
 ### How It Works
 
-**Define a theme model:**
+**Define a theme model (actual implementation):**
 
 ```csharp
-public class WebFormsTheme
+// BlazorWebFormsComponents.Theming.ThemeConfiguration
+public class ThemeConfiguration
 {
-    public string Name { get; set; } = "Default";
-
-    // Per-control-type defaults (default skin)
-    public Dictionary<Type, ControlSkinDefaults> DefaultSkins { get; } = new();
-
-    // Named skins keyed by SkinID
-    public Dictionary<(Type, string), ControlSkinDefaults> NamedSkins { get; } = new();
+    public void AddSkin(string controlTypeName, ControlSkin skin, string skinId = null);
+    public ControlSkin GetSkin(string controlTypeName, string skinId = null);
+    public bool HasSkins(string controlTypeName);
 }
 
-public class ControlSkinDefaults
+// BlazorWebFormsComponents.Theming.ControlSkin
+public class ControlSkin
 {
-    public WebColor? BackColor { get; set; }
-    public WebColor? ForeColor { get; set; }
-    public WebColor? BorderColor { get; set; }
-    public string? FontFamily { get; set; }
-    public string? FontSize { get; set; }
-    public bool? FontBold { get; set; }
-    public string? CssClass { get; set; }
-    // ... other appearance properties
+    public WebColor BackColor { get; set; }
+    public WebColor ForeColor { get; set; }
+    public WebColor BorderColor { get; set; }
+    public BorderStyle? BorderStyle { get; set; }
+    public Unit? BorderWidth { get; set; }
+    public string CssClass { get; set; }
+    public Unit? Height { get; set; }
+    public Unit? Width { get; set; }
+    public FontInfo Font { get; set; }
+    public string ToolTip { get; set; }
 }
 ```
 
-**Create a ThemeProvider component:**
+**The `ThemeProvider` component (actual implementation):**
 
 ```razor
-<!-- ThemeProvider.razor -->
-<CascadingValue Value="Theme" Name="WebFormsTheme">
+<!-- ThemeProvider.razor (in BlazorWebFormsComponents.Theming) -->
+<CascadingValue Value="Theme">
     @ChildContent
 </CascadingValue>
 
 @code {
-    [Parameter] public WebFormsTheme Theme { get; set; } = new();
+    [Parameter] public ThemeConfiguration Theme { get; set; }
     [Parameter] public RenderFragment ChildContent { get; set; }
 }
 ```
@@ -237,47 +237,46 @@ public class ControlSkinDefaults
 </ThemeProvider>
 
 @code {
-    private WebFormsTheme professionalTheme = ThemeLoader.Load("Professional");
+    private ThemeConfiguration professionalTheme = new ThemeConfiguration();
+
+    protected override void OnInitialized()
+    {
+        professionalTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue,
+            ForeColor = WebColor.White
+        });
+    }
 }
 ```
 
-**Components read from the cascaded theme:**
+**Components read from the cascaded theme (actual implementation in `BaseStyledComponent`):**
 
 ```csharp
-// Inside BaseWebFormsComponent or BaseStyledComponent
-[CascadingParameter(Name = "WebFormsTheme")]
-protected WebFormsTheme? Theme { get; set; }
+// Inside BaseStyledComponent
+[CascadingParameter]
+public ThemeConfiguration Theme { get; set; }
 
 protected override void OnParametersSet()
 {
-    if (Theme != null)
-    {
-        ApplyThemeDefaults();
-    }
-}
+    base.OnParametersSet();
 
-private void ApplyThemeDefaults()
-{
-    var controlType = GetType();
-    ControlSkinDefaults? skin = null;
+    if (!EnableTheming || Theme == null) return;
 
-    // Check for named skin first
-    if (!string.IsNullOrEmpty(SkinID))
-    {
-        Theme.NamedSkins.TryGetValue((controlType, SkinID), out skin);
-    }
-
-    // Fall back to default skin
-    skin ??= Theme.DefaultSkins.GetValueOrDefault(controlType);
-
+    var skin = Theme.GetSkin(GetType().Name, SkinID);
     if (skin == null) return;
 
-    // StyleSheetTheme: apply only if property not explicitly set
-    if (BackColor == default && skin.BackColor.HasValue)
-        BackColor = skin.BackColor.Value;
+    ApplySkin(skin);
+}
 
-    if (ForeColor == default && skin.ForeColor.HasValue)
-        ForeColor = skin.ForeColor.Value;
+private void ApplySkin(ControlSkin skin)
+{
+    // StyleSheetTheme semantics: apply only if property not explicitly set
+    if (BackColor == default && skin.BackColor != default)
+        BackColor = skin.BackColor;
+
+    if (ForeColor == default && skin.ForeColor != default)
+        ForeColor = skin.ForeColor;
 
     // ... repeat for other appearance properties
 }
@@ -286,25 +285,17 @@ private void ApplyThemeDefaults()
 ### Theme vs StyleSheetTheme Semantics
 
 ```csharp
-public enum ThemeMode { StyleSheetTheme, Theme }
+// The current PoC implements StyleSheetTheme semantics only:
+// theme sets defaults, but explicit component values take precedence.
+// Theme (override) mode is deferred to M11.
 
-// In BaseWebFormsComponent:
-private void ApplySkin(ControlSkinDefaults skin, ThemeMode mode)
-{
-    if (mode == ThemeMode.StyleSheetTheme)
-    {
-        // Default mode: only apply if not explicitly set in markup
-        if (BackColor == default) BackColor = skin.BackColor ?? default;
-    }
-    else // ThemeMode.Theme
-    {
-        // Override mode: theme always wins
-        if (skin.BackColor.HasValue) BackColor = skin.BackColor.Value;
-    }
-}
+// In BaseStyledComponent.ApplySkin:
+// Only apply if the component property is at its default value
+if (BackColor == default && skin.BackColor != default)
+    BackColor = skin.BackColor;
 ```
 
-This approach can faithfully model **both** `Theme` and `StyleSheetTheme` semantics because it operates at the property level in C#, not in CSS.
+The current implementation uses **StyleSheetTheme** semantics exclusively — the theme sets defaults, and any value explicitly set on the component takes precedence. **Theme** (override) mode, where the theme always wins, is deferred to M11.
 
 ### SkinID Support
 
@@ -434,7 +425,7 @@ Generate separate CSS bundles per theme. Switch by loading a different bundle:
 
 ## Approach 4: Dictionary-Based Configuration via DI
 
-A `ThemeConfiguration` service registered in DI holds property defaults per control type, keyed by optional SkinID.
+A `ThemeConfiguration` service registered in DI holds property defaults per control type, keyed by optional SkinID. *(Note: This section shows a hypothetical DI-based variant — not the actual implementation. See [Approach 2](#approach-2-cascadingvalue-themeprovider) for the implemented API.)*
 
 ### How It Works
 
@@ -653,43 +644,44 @@ button.skin-action {
 
 ---
 
-## Recommended Approach: CascadingValue ThemeProvider (Approach 2)
+## Implemented Approach: CascadingValue ThemeProvider (Approach 2)
 
-**The CascadingValue ThemeProvider is the recommended approach** for the following reasons:
+**The CascadingValue ThemeProvider is the selected and implemented approach.** It was chosen for the following reasons:
 
 ### Rationale
 
-1. **Highest Web Forms fidelity.** It is the only approach that can faithfully model both `Theme` (override) and `StyleSheetTheme` (default) semantics, plus `SkinID` selection, using the same mental model as the original.
+1. **Highest Web Forms fidelity.** It is the only approach that can faithfully model both `Theme` (override) and `StyleSheetTheme` (default) semantics, plus `SkinID` selection, using the same mental model as the original. The PoC defaults to StyleSheetTheme semantics (theme sets defaults, explicit values override).
 
-2. **Works for all property types.** Unlike CSS-only approaches, it can set `BackColor`, `ForeColor`, `Width`, `ToolTip`, `CssClass`, and any other appearance property — matching what `.skin` files actually do.
+2. **Works for all property types.** Unlike CSS-only approaches, it sets `BackColor`, `ForeColor`, `Width`, `ToolTip`, `CssClass`, `Font`, and other appearance properties — matching what `.skin` files actually do. The `ControlSkin` class mirrors the properties on `BaseStyledComponent`.
 
-3. **Single point of change.** The theme resolution logic lives in `BaseWebFormsComponent.OnParametersSet`. Once implemented there, all 50+ components in the library inherit the behavior automatically. No per-component work required.
+3. **Single point of change.** The theme resolution logic lives in `BaseStyledComponent.OnParametersSet`. Once implemented there, all 50+ components in the library inherit the behavior automatically. No per-component work required.
 
 4. **Familiar Blazor pattern.** `CascadingValue`/`CascadingParameter` is a well-documented, first-class Blazor feature. Developers already encounter it with `EditContext`, `CascadingAuthenticationState`, and the library's own `TableItemStyle` cascading.
 
 5. **Scoped application.** Unlike DI (which is global), a `CascadingValue` can be scoped to a page or section — matching how Web Forms allows `StyleSheetTheme` on a per-page basis via the `@Page` directive.
 
-6. **Incrementally adoptable.** The `ThemeProvider` component and base class changes can ship without requiring any existing consumer to change their code. Themes are opt-in: if no `ThemeProvider` wraps the component tree, behavior is unchanged.
+6. **Incrementally adoptable.** The `ThemeProvider` component and base class changes ship without requiring any existing consumer to change their code. Themes are opt-in: if no `ThemeProvider` wraps the component tree, behavior is unchanged.
 
 ### Implementation Roadmap
 
-If this strategy is approved, implementation would proceed in phases:
+**Phase 1 — Foundation (✅ Complete — M10 PoC)**
 
-**Phase 1 — Foundation (Low effort)**
+- ~~Fix `SkinID` type from `bool` to `string` on `BaseWebFormsComponent`~~ ✅ Done
+- ~~Remove `[Obsolete]` from `SkinID` and `EnableTheming`~~ ✅ Done
+- ~~Define `ControlSkin` and `ThemeConfiguration`~~ ✅ Done (in `BlazorWebFormsComponents.Theming` namespace)
+- ~~Create `ThemeProvider` cascading wrapper component~~ ✅ Done
+- ~~Add theme resolution to `BaseStyledComponent.OnParametersSet`~~ ✅ Done
 
-- Fix `SkinID` type from `bool` to `string` on `BaseWebFormsComponent`
-- Remove `[Obsolete]` from `SkinID` and `EnableTheming`
-- Define `ControlSkinDefaults`, `WebFormsTheme`, `ThemeMode`
-- Create `ThemeProvider` cascading wrapper component
-- Add theme resolution to `BaseWebFormsComponent.OnParametersSet`
+**Phase 2 — Full Implementation (Deferred to M11)**
 
-**Phase 2 — Theme Loading (Medium effort)**
+- `.skin` file parser (reading actual `.skin` files)
+- StyleSheetTheme vs Theme priority distinction
+- Runtime theme switching
+- Sub-component style theming (HeaderStyle, RowStyle, etc.)
+- Container-level `EnableTheming` propagation to children
+- JSON theme format as alternative input
 
-- Build a JSON/YAML theme file loader (`ThemeLoader`)
-- Optionally support parsing legacy `.skin` files
-- Ship one sample theme matching a common Web Forms starter template
-
-**Phase 3 — Documentation & Samples (Low effort)**
+**Phase 3 — Documentation & Samples**
 
 - Sample page demonstrating theme switching
 - Migration guide addendum showing before/after for themed Web Forms apps
@@ -745,27 +737,29 @@ While the CascadingValue approach is primary, nothing prevents developers from *
 
 **`CorporateTheme.cs`:**
 ```csharp
+using BlazorWebFormsComponents.Theming;
+
 public static class CorporateTheme
 {
-    public static WebFormsTheme Create()
+    public static ThemeConfiguration Create()
     {
-        var theme = new WebFormsTheme { Name = "Corporate" };
+        var theme = new ThemeConfiguration();
 
-        theme.DefaultSkins[typeof(Button)] = new ControlSkinDefaults
+        // Default skin — applies to ALL Button instances
+        theme.AddSkin("Button", new ControlSkin
         {
             BackColor = WebColor.FromHtml("#336699"),
             ForeColor = WebColor.FromName("White"),
-            FontFamily = "Segoe UI",
-            FontSize = "9pt",
-            BorderStyle = BorderStyle.None
-        };
+            Font = new FontInfo { Name = "Segoe UI", Size = new FontUnit("9pt") },
+        });
 
-        theme.NamedSkins[(typeof(Button), "danger")] = new ControlSkinDefaults
+        // Named skin — applies only when SkinID="danger"
+        theme.AddSkin("Button", new ControlSkin
         {
             BackColor = WebColor.FromHtml("#CC3333"),
             ForeColor = WebColor.FromName("White"),
-            FontBold = true
-        };
+            Font = new FontInfo { Bold = true }
+        }, "danger");
 
         return theme;
     }
@@ -774,6 +768,8 @@ public static class CorporateTheme
 
 **`App.razor` (or layout):**
 ```razor
+@using BlazorWebFormsComponents.Theming
+
 <ThemeProvider Theme="@CorporateTheme.Create()">
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
@@ -792,6 +788,22 @@ public static class CorporateTheme
 ```
 
 The markup is nearly identical. The theme is applied automatically, just like Web Forms.
+
+---
+
+## PoC Decisions
+
+The following design decisions were made during the M10 PoC implementation:
+
+| Decision | Rationale |
+|----------|-----------|
+| **Default to StyleSheetTheme semantics** | The theme sets default values; any value explicitly set on a component takes precedence. This is the safer default for migration — existing markup is preserved. Theme (override) mode is deferred to M11. |
+| **Missing SkinID: log warning, don't throw** | When a component specifies `SkinID="foo"` but no skin named "foo" is registered, `GetSkin` returns `null` and the component renders without theme styling. This avoids breaking the app due to configuration mismatches. |
+| **Namespace: `BlazorWebFormsComponents.Theming`** | All theme-related types (`ThemeConfiguration`, `ControlSkin`, `ThemeProvider`) live in a dedicated `Theming` namespace to keep the root namespace clean. |
+| **`ThemeConfiguration` keyed by string, not Type** | Control type names are stored as strings (e.g., `"Button"`) with case-insensitive comparison. This avoids tight coupling to concrete types and simplifies the API. |
+| **`ControlSkin` mirrors `BaseStyledComponent` properties** | The skin model uses the same property types (`WebColor`, `Unit`, `FontInfo`, etc.) as the component base class, ensuring type-safe assignment. |
+| **Theme resolution in `BaseStyledComponent`, not `BaseWebFormsComponent`** | Only styled components can be themed — the `[CascadingParameter] ThemeConfiguration Theme` and `ApplySkin` logic live in `BaseStyledComponent`. |
+| **`.skin` file parsing deferred to M11** | Parsing legacy `.skin` files requires a dedicated parser for the pseudo-ASPX format. The PoC validates the C# configuration API first; `.skin` file support will layer on top in M11. |
 
 ---
 
