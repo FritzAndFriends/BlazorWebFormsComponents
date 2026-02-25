@@ -66,9 +66,11 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Trigger Azure App Service deployment
-        if: ${{ secrets.AZURE_WEBAPP_WEBHOOK_URL != '' }}
+        env:
+          AZURE_WEBAPP_WEBHOOK_URL: ${{ secrets.AZURE_WEBAPP_WEBHOOK_URL }}
+        if: env.AZURE_WEBAPP_WEBHOOK_URL != ''
         run: |
-          curl -sf -X POST "${{ secrets.AZURE_WEBAPP_WEBHOOK_URL }}" \
+          curl -sf -X POST "${{ env.AZURE_WEBAPP_WEBHOOK_URL }}" \
             -H "Content-Length: 0" \
             --max-time 60 \
             || echo "::warning::Azure webhook call failed — the App Service may need to be updated manually"
