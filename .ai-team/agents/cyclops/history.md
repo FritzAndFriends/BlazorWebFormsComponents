@@ -47,6 +47,14 @@
 - **Files created:** `ListViewSortEventArgs.cs`, `ListViewPagePropertiesChangingEventArgs.cs`, `ListViewSelectEventArgs.cs`, test files: `SortingEvents.razor`, `SelectionEvents.razor`, `PagingEvents.razor`, `LayoutCreatedEvent.razor`.
 - **All 1229 tests pass** including 12 new ListView event tests (27 total ListView tests).
 
+### ThemeConfiguration Core Types (#364)
+
+- **Namespace:** `BlazorWebFormsComponents.Theming` — clean separation from existing component code per team decision.
+- **ControlSkin:** Mirrors `BaseStyledComponent` parameters (BackColor, ForeColor, BorderColor, BorderStyle, BorderWidth, CssClass, Height, Width, Font, ToolTip). Uses nullable types (`BorderStyle?`, `Unit?`, null reference types) so "not set" is distinguishable from "set to default" — essential for StyleSheetTheme semantics where component explicit values override theme defaults.
+- **ThemeConfiguration:** Dictionary-of-dictionaries keyed by control type name (case-insensitive) → SkinID (empty string = default skin). `GetSkin` returns null for missing entries (no throw) per Jeff's decision; callers log warnings. `AddSkin` throws on null/empty controlTypeName for safety.
+- **ThemeProvider.razor:** Minimal `CascadingValue<ThemeConfiguration>` wrapper. Does not inherit `BaseWebFormsComponent` — it's infrastructure, not a Web Forms control emulation.
+- **Key files:** `src/BlazorWebFormsComponents/Theming/ControlSkin.cs`, `ThemeConfiguration.cs`, `ThemeProvider.razor`.
+
 ### SkinID + EnableTheming Activation (#365)
 
 - **Removed `[Obsolete]`** from `EnableTheming` and `SkinID` properties on `BaseWebFormsComponent`. These were previously marked obsolete with "Theming is not available in Blazor" messages.
@@ -55,3 +63,13 @@
 - **No other files reference these properties** — only `BaseWebFormsComponent.cs` needed changes.
 - **All 1246 tests pass**, 0 regressions. Build succeeds with 0 errors.
 - These properties are now ready for #366 (base class integration with the theming system being built in #364).
+
+### Theme Base Class Integration (#366)
+
+- **CascadingParameter:** Added `[CascadingParameter] public ThemeConfiguration Theme` to `BaseStyledComponent`. All styled components automatically receive the theme when wrapped in `<ThemeProvider>`.
+- **OnParametersSet override:** Early-returns when `EnableTheming` is false or `Theme` is null (protects all existing tests). Calls `Theme.GetSkin(GetType().Name, SkinID)` and applies via `ApplySkin`.
+- **StyleSheetTheme semantics:** `ApplySkin` only overwrites a property when the component value is still at its default and the skin provides a non-default value. Explicit component parameters always win.
+- **Font handling:** Checks individual FontInfo properties (Name, Size, Bold, Italic, Underline) since Font is always initialized to `new FontInfo()`. Uses `FontUnit.Empty` comparison for Size.
+- **Missing named skins:** If `SkinID` is set but no matching skin exists, silently continues (returns null from `GetSkin`). Logging deferred to M11 per project convention.
+- **Only file modified:** `src/BlazorWebFormsComponents/BaseStyledComponent.cs`.
+- **All 1246 tests pass**, 0 regressions. Build succeeds with 0 errors.
