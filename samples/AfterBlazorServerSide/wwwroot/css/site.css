@@ -27,12 +27,12 @@ a, .btn-link {
     color: var(--webforms-blue);
 }
 
-a.component-link {
+.main-content a.component-link {
     color: var(--webforms-blue);
     text-decoration: underline;
 }
 
-a.component-link.active {
+a.component-link.active, .main-content a.component-link.active {
     font-weight: bold;
     color: inherit;
     background-color: lightgrey;
