@@ -88,3 +88,5 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
 
 
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
+
+ Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive

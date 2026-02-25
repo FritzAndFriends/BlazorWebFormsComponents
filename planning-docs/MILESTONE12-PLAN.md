@@ -1,4 +1,6 @@
-# Milestone 12 — Migration Analysis Tool (PoC)
+> ⚠️ **Renumbered to M14 (2026-02-25):** Per Jeff's directive, the HTML fidelity audit (M11–M13) takes priority. This plan is now **Milestone 14**. See `planning-docs/HTML-AUDIT-MILESTONES.md` for M11–M13. All references to "Milestone 12" in this document should be read as "Milestone 14."
+
+# Milestone 14 — Migration Analysis Tool (PoC)
 
 **Created:** 2026-02-25
 **Author:** Forge (Lead / Web Forms Reviewer)
