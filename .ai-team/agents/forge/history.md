@@ -130,3 +130,19 @@ Planned M12: "Migration Analysis Tool (PoC)" — 13 work items. A CLI tool (`bwf
 
 📌 Team update (2026-02-25): CI secret-gating pattern corrected — secrets.* cannot be used in step-level if: conditions. Use env var indirection: declare secret in env:, check env.VAR_NAME in if:. Applied to nuget.yml and deploy-server-side.yml (PR #372). — decided by Forge
 
+### Summary: NBGV Docker Version Stamping Fix (2026-02-25)
+
+**Root cause:** NBGV (Nerdbank.GitVersioning 3.9.50) overrides externally-passed `-p:InformationalVersion` inside Docker, even when `.git` is excluded by `.dockerignore`. The mechanism:
+
+1. NBGV's targets (`Nerdbank.GitVersioning.targets` line 28) set `GenerateAssemblyInformationalVersionAttribute=false`, suppressing the SDK's attribute generation.
+2. NBGV's `GetBuildVersion` task (`Nerdbank.GitVersioning.Inner.targets` line 34) unconditionally overwrites `AssemblyInformationalVersion` via `<Output>` during build execution — this overrides even `-p:` global properties.
+3. NBGV's `GenerateAssemblyNBGVVersionInfo` target generates its own assembly version source file using NBGV's computed value (from `version.json` fallback when no `.git`).
+
+Result: The `BlazorWebFormsComponents` assembly gets stamped with NBGV's fallback version (e.g., `0.13.0` from old version.json) instead of the precise version computed by nbgv outside Docker.
+
+**Fix:** Added `sed` command in `samples/AfterBlazorServerSide/Dockerfile` after `COPY . .` to strip the NBGV PackageReference from `Directory.Build.props` inside the Docker build. This completely removes NBGV from the build, allowing the SDK's default attribute generation to use the `-p:InformationalVersion=$VERSION` property passed from the workflow. The `dotnet build` implicit restore handles the changed project metadata automatically.
+
+**Key insight:** You cannot override NBGV's version stamping via `-p:` properties alone. NBGV's MSBuild task outputs overwrite properties during execution (not evaluation), bypassing global property precedence. The only reliable fix is to remove NBGV from the build when git history is unavailable and version is injected externally.
+
+📌 Team update (2026-02-25): Docker NBGV fix — strip NBGV PackageReference inside Docker build via sed. NBGV cannot be overridden by -p: properties; must be removed entirely when .git is unavailable. — decided by Forge
+

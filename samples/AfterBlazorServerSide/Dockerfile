@@ -14,6 +14,8 @@ COPY ["src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj", "src/Blazo
 COPY ["samples/SharedSampleObjects/SharedSampleObjects.csproj", "samples/SharedSampleObjects/"]
 RUN dotnet restore "samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj"
 COPY . .
+# Remove NBGV - not functional in Docker without .git; version is injected via VERSION build arg
+RUN sed -i '/<PackageReference Include="Nerdbank.GitVersioning"/,/<\/PackageReference>/d' Directory.Build.props
 WORKDIR "/src/samples/AfterBlazorServerSide"
 RUN dotnet build "AfterBlazorServerSide.csproj" -c Release -o /app/build -p:Version=$VERSION -p:InformationalVersion=$VERSION
 
