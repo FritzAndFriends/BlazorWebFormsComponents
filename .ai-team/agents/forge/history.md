@@ -107,3 +107,5 @@ Fixed three deployment pipeline issues on `fix/deployment-workflows` branch:
 - Secret-gated workflow steps use `if: ${{ secrets.SECRET_NAME != '' }}` for graceful fallback when secrets aren't configured
 - Docker images are tagged with version number (from nbgv), `latest`, and commit SHA
 - Version is computed once via nbgv and shared via GitHub Actions step outputs (`steps.nbgv.outputs.version`)
+
+ Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge

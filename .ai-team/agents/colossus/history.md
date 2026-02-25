@@ -34,3 +34,5 @@ Added 9 smoke tests and 9 interaction tests for M7 sample pages: GridView Select
 
  Team update (2026-02-24): Menu auto-ID pattern  Menu now auto-generates IDs, JS interop crash fixed  decided by Cyclops
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge

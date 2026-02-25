@@ -462,12 +462,11 @@ Suggested timeline:
 **What:** `Label` currently inherits `BaseWebFormsComponent` but Web Forms `Label` inherits from `WebControl`. This means Label is missing all 9 style properties (CssClass, BackColor, ForeColor, Font, etc.). Also consider `AssociatedControlID` to render `<label for="...">` instead of `<span>`.
 **Why:** Label is one of the most commonly used controls. Missing style properties break migration for any page that styles its Labels.
 
-### 2026-02-23: Substitution and Xml remain permanently deferred
+### 2026-02-25: Substitution and Xml permanently deferred (consolidated)
 
 **By:** Beast
-**What:** Both controls are tightly coupled to server-side ASP.NET infrastructure: Substitution depends on the output caching pipeline (`HttpResponse.WriteSubstitution`); Xml depends on XSLT transformation. Neither maps to Blazor's component model.
-**Recommendation:** Document migration alternatives in `DeferredControls.md`. Substitution → Blazor component lifecycle. Xml → convert XML to C# objects and use Blazor templates.
-**Why:** Reinforces and formalizes the Sprint 3 deferral decision with specific migration guidance.
+**What:** Both controls are tightly coupled to server-side ASP.NET infrastructure: Substitution depends on the output caching pipeline; Xml depends on XSLT transformation. Neither maps to Blazor's component model. Both are formally marked as deferred in status.md and README.md. DeferredControls.md contains migration guidance: Substitution -> Blazor component lifecycle; Xml -> convert XML to C# objects and use Blazor templates.
+**Why:** Architecturally incompatible with Blazor. Marking as deferred (not "Not Started") accurately communicates they will not be implemented.
 
 ### 2026-02-23: Chart Type Gallery documentation convention
 
@@ -1344,12 +1343,6 @@ All P2 features (WI-47 through WI-52) have been tested with 32 bUnit tests acros
 
 Team should be aware that Login/ChangePassword/CreateUserWizard BaseStyledComponent inheritance was already in place — WI-52's implementation may have been a no-op or only required template changes to wire `Style`/`CssClass` to the outer element.
 
-### Substitution and Xml formally deferred
-
-**By:** Beast
-**What:** Substitution and Xml controls are now formally marked as "ΓÅ╕∩╕Å Deferred" (not "Not Started") in status.md. DeferredControls.md already had migration guidance; status.md and README.md now reflect the permanent deferral. Chart is marked as fully complete with no "Phase 1" qualifier.
-**Why:** These two controls are architecturally incompatible with Blazor (Substitution relies on output caching; Xml relies on XSLT transforms). Marking them as deferred rather than "Not Started" accurately communicates that they will not be implemented, and clears the remaining work count to 0.
-
 # Decision: M7 Integration Tests Added (WI-39 + WI-40)
 
 **Author:** Colossus
@@ -1924,3 +1917,8 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 - `dotnet build samples/AfterBlazorClientSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet build samples/AfterBlazorServerSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet test src/BlazorWebFormsComponents.Test/ --no-restore` ΓÇö Γ£à passes
+
+### 2026-02-25: Deployment pipeline patterns for Docker versioning, Azure webhook, and NuGet publishing
+**By:** Forge
+**What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets with `if: ${{ secrets.SECRET_NAME != '' }}` so workflows don't fail when secrets aren't configured. (3) Dual NuGet publishing  always push to GitHub Packages, conditionally push to nuget.org.
+**Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating ensures the workflows work in forks and PRs where secrets aren't available. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
