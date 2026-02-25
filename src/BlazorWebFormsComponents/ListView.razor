@@ -24,6 +24,7 @@ else
 	{
 		LayoutTemplate = context => builder => builder.AddContent(1, context);
 	}
+	RaiseLayoutCreated();
 
 	Func<bool, RenderFragment<ItemType>> oddOrEvenTemplate =
 	(isEven) => isEven ? ItemTemplate : AlternatingItemTemplate ?? ItemTemplate;
