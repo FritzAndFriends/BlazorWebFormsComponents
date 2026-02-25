@@ -46,3 +46,12 @@
 - **Key pattern:** Menu styles use `MenuItemStyle` (inherits `ComponentBase, IStyle`) NOT `UiTableItemStyle`. This is intentional — Menu styles produce CSS text via `ToStyle()` for inline `<style>` blocks, whereas GridView/Calendar styles use `TableItemStyle` objects for HTML attribute-level styling. When mixing named RenderFragment params with bare child content in tests, wrap bare content in `<ChildContent>` tags.
 - **Files created:** `ListViewSortEventArgs.cs`, `ListViewPagePropertiesChangingEventArgs.cs`, `ListViewSelectEventArgs.cs`, test files: `SortingEvents.razor`, `SelectionEvents.razor`, `PagingEvents.razor`, `LayoutCreatedEvent.razor`.
 - **All 1229 tests pass** including 12 new ListView event tests (27 total ListView tests).
+
+### SkinID + EnableTheming Activation (#365)
+
+- **Removed `[Obsolete]`** from `EnableTheming` and `SkinID` properties on `BaseWebFormsComponent`. These were previously marked obsolete with "Theming is not available in Blazor" messages.
+- **Set defaults:** `EnableTheming = true` (StyleSheetTheme semantics — theme sets defaults, explicit values override), `SkinID = ""` (empty string means "use default skin").
+- **Updated XML doc comments** to describe the properties' purpose instead of the old 🚨 warning messages.
+- **No other files reference these properties** — only `BaseWebFormsComponent.cs` needed changes.
+- **All 1246 tests pass**, 0 regressions. Build succeeds with 0 errors.
+- These properties are now ready for #366 (base class integration with the theming system being built in #364).
