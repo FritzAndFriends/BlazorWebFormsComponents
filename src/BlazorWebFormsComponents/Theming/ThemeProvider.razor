@@ -1,0 +1,21 @@
+@namespace BlazorWebFormsComponents.Theming
+
+<CascadingValue Value="Theme">
+	@ChildContent
+</CascadingValue>
+
+@code {
+
+	/// <summary>
+	/// The theme configuration to cascade to child components.
+	/// </summary>
+	[Parameter]
+	public ThemeConfiguration Theme { get; set; }
+
+	/// <summary>
+	/// The child content that will receive the cascading theme.
+	/// </summary>
+	[Parameter]
+	public RenderFragment ChildContent { get; set; }
+
+}
