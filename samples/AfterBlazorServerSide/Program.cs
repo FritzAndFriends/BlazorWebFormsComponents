@@ -47,5 +47,5 @@ public partial class Program
         .Assembly
         .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()
         ?.InformationalVersion
-        ?.Split('+')[0]; // Gets "0.13.0" without the commit hash
+        ?.Split('+')[0]; // Gets version without the commit hash
 }
