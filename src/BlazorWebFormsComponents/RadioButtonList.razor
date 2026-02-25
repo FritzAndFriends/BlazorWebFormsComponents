@@ -10,7 +10,7 @@
 
 	@if (RepeatLayout is TableRepeatLayout)
 	{
-		<table class="@CssClass" style="@Style"
+		<table class="@CssClass" style="@Style" title="@ToolTip"
 			   cellpadding="@(CellPadding >= 0 ? CellPadding : null)"
 			   cellspacing="@(CellSpacing >= 0 ? CellSpacing : null)">
 			@if (RepeatDirection == DataListEnum.Vertical)
@@ -43,7 +43,7 @@
 	}
 	else if (RepeatLayout is FlowRepeatLayout)
 	{
-		<span class="@CssClass" style="@Style">
+		<span class="@CssClass" style="@Style" title="@ToolTip">
 			@foreach (var item in items)
 			{
 				var currentIndex = index++;
@@ -58,7 +58,7 @@
 	}
 	else if (RepeatLayout is OrderedListRepeatLayout)
 	{
-		<ol class="@CssClass" style="@Style">
+		<ol class="@CssClass" style="@Style" title="@ToolTip">
 			@foreach (var item in items)
 			{
 				var currentIndex = index++;
@@ -71,7 +71,7 @@
 	}
 	else if (RepeatLayout is UnorderedListRepeatLayout)
 	{
-		<ul class="@CssClass" style="@Style">
+		<ul class="@CssClass" style="@Style" title="@ToolTip">
 			@foreach (var item in items)
 			{
 				var currentIndex = index++;

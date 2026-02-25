@@ -10,6 +10,7 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 - **Selection** - `SelectedIndex`, `SelectedRow`, `SelectedValue`, `AutoGenerateSelectButton`, `SelectedIndexChanging`/`SelectedIndexChanged` events
 - **Style Sub-Components** - `RowStyle`, `AlternatingRowStyle`, `HeaderStyle`, `FooterStyle`, `SelectedRowStyle`, `EditRowStyle`, `EmptyDataRowStyle`, `PagerStyle`
 - **Display Properties** - `ShowHeader`, `ShowFooter`, `Caption`, `CaptionAlign`, `EmptyDataTemplate`, `GridLines`, `UseAccessibleHeader`, `CellPadding`, `CellSpacing`, `ShowHeaderWhenEmpty`
+- `ToolTip` - tooltip text displayed on hover (renders as `title` attribute)
 
 ### Blazor Notes
 

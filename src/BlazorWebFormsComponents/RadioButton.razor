@@ -4,7 +4,7 @@
 {
 	@if (!string.IsNullOrEmpty(Text))
 	{
-		<span class="@CssClass" style="@Style">
+		<span class="@CssClass" style="@Style" title="@ToolTip">
 			@if (TextAlign == Enums.TextAlign.Left)
 			{
 				<label for="@_inputId">@Text</label>
@@ -19,6 +19,6 @@
 	}
 	else
 	{
-		<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" @onchange="HandleChange" />
+		<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" @onchange="HandleChange" />
 	}
 }

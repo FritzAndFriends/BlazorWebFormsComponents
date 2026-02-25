@@ -16,6 +16,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Rows and Columns for sizing
 - Placeholder text
 - All style properties (BackColor, ForeColor, BorderColor, CssClass, Width, Height, etc.)
+- `ToolTip` - tooltip text displayed on hover (renders as `title` attribute)
 - TabIndex support
 
 ## Web Forms Features NOT Supported

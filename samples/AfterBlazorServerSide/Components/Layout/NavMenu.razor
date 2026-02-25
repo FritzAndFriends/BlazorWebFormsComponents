@@ -15,10 +15,7 @@
             <div class="nav-category mt-2">
                 <button class="btn btn-link nav-link category-header d-flex align-items-center w-100 text-start @(isExpanded ? "" : "collapsed")"
                         type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#@categoryId"
                         aria-expanded="@isExpanded.ToString().ToLower()"
-                        aria-controls="@categoryId"
                         @onclick="() => ToggleCategory(category)">
                     <span class="oi oi-chevron-right category-chevron me-2"></span>
                     @category

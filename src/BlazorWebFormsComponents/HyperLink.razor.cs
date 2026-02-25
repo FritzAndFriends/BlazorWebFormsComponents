@@ -21,6 +21,5 @@ namespace BlazorWebFormsComponents
 		[Parameter] 
 		public string Text { get; set; }
 
-		[Parameter] public string ToolTip { get; set; }
 	}
 }

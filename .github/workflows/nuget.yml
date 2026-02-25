@@ -40,6 +40,10 @@ jobs:
       - name: Push to GitHub Packages
         run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
+      - name: Push to nuget.org
+        if: ${{ secrets.NUGET_API_KEY != '' }}
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+
       - name: Upload NuGet package artifact
         uses: actions/upload-artifact@v4
         with:

@@ -10,24 +10,24 @@
 	@switch (RepeatLayout)
 	{
 		case TableRepeatLayout:
-			<table class="@CssClass" style="@Style" 
+			<table class="@CssClass" style="@Style" title="@ToolTip"
 				   cellpadding="@(CellPadding >= 0 ? CellPadding : null)" 
 				   cellspacing="@(CellSpacing >= 0 ? CellSpacing : null)">
 				@RenderTableLayout(allItems)
 			</table>
 			break;
 		case FlowRepeatLayout:
-			<span class="@CssClass" style="@Style">
+			<span class="@CssClass" style="@Style" title="@ToolTip">
 				@RenderFlowLayout(allItems)
 			</span>
 			break;
 		case OrderedListRepeatLayout:
-			<ol class="@CssClass" style="@Style">
+			<ol class="@CssClass" style="@Style" title="@ToolTip">
 				@RenderListLayout(allItems)
 			</ol>
 			break;
 		case UnorderedListRepeatLayout:
-			<ul class="@CssClass" style="@Style">
+			<ul class="@CssClass" style="@Style" title="@ToolTip">
 				@RenderListLayout(allItems)
 			</ul>
 			break;

@@ -3,6 +3,7 @@ It may seem strange that we have a Label component when there already is an HTML
 ## Blazor Features Supported
 
 - `Text` the text content of the Label component
+- `ToolTip` - tooltip text displayed on hover (renders as `title` attribute)
 
 ## WebForms Syntax
 

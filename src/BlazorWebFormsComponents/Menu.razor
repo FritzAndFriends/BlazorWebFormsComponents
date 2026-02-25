@@ -6,7 +6,7 @@
 {
 	<a class="skip-link" href="#@(ID)_SkipLink">@SkipLinkText</a>
 }
-<div id="@ID" class="@GetMenuCssClass()" style="@Style">
+<div id="@ID" class="@GetMenuCssClass()" style="@Style" title="@ToolTip">
 	<ul class="level1@(Orientation == Orientation.Horizontal ? " horizontal" : "")">
 			<CascadingValue Name="ParentMenu" Value="this">
 				@ChildContent
