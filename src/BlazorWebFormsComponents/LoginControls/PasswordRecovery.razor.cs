@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class PasswordRecovery : BaseWebFormsComponent
+	public partial class PasswordRecovery : BaseStyledComponent
 	{
 		#region Obsolete
 

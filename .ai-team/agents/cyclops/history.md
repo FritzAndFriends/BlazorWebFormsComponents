@@ -83,3 +83,10 @@ Audited 13 controls. Found: AccessKey/ToolTip missing from base class (universal
 
 📌 Team update (2026-02-25): CI secret-gating pattern corrected — secrets.* cannot be used in step-level if: conditions. Use env var indirection: declare secret in env:, check env.VAR_NAME in if:. Applied to nuget.yml and deploy-server-side.yml (PR #372). — decided by Forge
 
+### Milestone 10 Component Fixes (#351, #352, #354) (2026-02-25)
+
+- **Panel BackImageUrl (#351):** Already fully implemented in prior milestone — `BackImageUrl` property in `Panel.razor.cs`, `background-image:url(...)` in `BuildStyle()`, bUnit tests in `Panel/BackImageUrl.razor`, and sample page at `Panel/BackImageUrl.razor`. No changes needed.
+- **LoginView → BaseStyledComponent (#352):** Changed `LoginView.razor` and `LoginView.razor.cs` to inherit `BaseStyledComponent` instead of `BaseWebFormsComponent`. LoginView is a template-switching component with no wrapper HTML element, so CssClass/Style/ToolTip properties are now available but the component doesn't render a wrapper div (consistent with Web Forms LoginView which also doesn't always render an outer element). All existing tests pass.
+- **PasswordRecovery → BaseStyledComponent (#354):** Changed `PasswordRecovery.razor` and `PasswordRecovery.razor.cs` to inherit `BaseStyledComponent`. Added `class="@CssClass"`, `style="border-collapse:collapse;@Style"`, and `title="@ToolTip"` to all three step `<table>` elements (UserName, Question, Success steps). Follows the same pattern as Login, ChangePassword, and CreateUserWizard. All existing tests pass.
+- **Pattern followed:** Login controls with `<table>` elements add `class="@CssClass" style="border-collapse:collapse;@Style" title="@ToolTip"` to the outer table, matching Login.razor and ChangePassword.razor.
+
