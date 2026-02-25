@@ -32,6 +32,56 @@ provided via <code>ThemeProvider</code>.</p>
 <p>Components outside the <code>ThemeProvider</code> keep their default appearance:</p>
 <Button Text="No Theme Button" />
 
+<hr />
+
+<h2>Migration Guide &mdash; Before &amp; After</h2>
+
+<p>The Skins &amp; Themes system maps directly from ASP.NET Web Forms concepts.
+Here is a concrete example showing how to migrate themed controls.</p>
+
+<h3>Before (Web Forms)</h3>
+
+<pre><code>App_Themes/Corporate/controls.skin:
+
+&lt;asp:Button runat="server"
+    BackColor="#336699"
+    ForeColor="White"
+    Font-Names="Segoe UI"
+    Font-Size="9pt"
+    BorderStyle="None" /&gt;
+
+&lt;asp:Button runat="server" SkinID="danger"
+    BackColor="#CC3333"
+    ForeColor="White"
+    Font-Bold="True" /&gt;
+
+web.config:
+&lt;pages theme="Corporate" /&gt;
+
+Products.aspx:
+&lt;asp:Button ID="btnSave" runat="server" Text="Save" /&gt;
+&lt;asp:Button ID="btnDelete" runat="server" Text="Delete" SkinID="danger" /&gt;</code></pre>
+
+<h3>Migration Steps</h3>
+
+<ol>
+    <li>Create a <code>ThemeConfiguration</code> in C# matching your <code>.skin</code> file</li>
+    <li>Wrap your app (or page) in a <code>ThemeProvider</code></li>
+    <li>Remove <code>asp:</code> prefix and <code>runat="server"</code> from markup</li>
+    <li>Keep <code>SkinID</code> attributes &mdash; they work the same way</li>
+</ol>
+
+<h3>After (Blazor)</h3>
+
+<pre><code class="language-razor">@@* Program.cs or App.razor *@@
+&lt;ThemeProvider Theme="@@corporateTheme"&gt;
+    &lt;Router ... /&gt;
+&lt;/ThemeProvider&gt;
+
+@@* Products.razor — markup barely changes *@@
+&lt;Button ID="btnSave" Text="Save" /&gt;
+&lt;Button ID="btnDelete" Text="Delete" SkinID="danger" /&gt;</code></pre>
+
 @code {
     private ThemeConfiguration SampleTheme;
 
