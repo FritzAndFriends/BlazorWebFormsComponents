@@ -1,0 +1,84 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void TableHeaderCell_RendersThElement()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableHeaderCell>Header</TableHeaderCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var th = cut.Find("th");
+		th.ShouldNotBeNull();
+		th.TextContent.ShouldBe("Header");
+	}
+
+	[Fact]
+	public void TableHeaderCell_ScopeColumn_RendersScopeAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableHeaderCell Scope="TableHeaderScope.Column">Header</TableHeaderCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var th = cut.Find("th");
+		th.GetAttribute("scope").ShouldBe("col");
+	}
+
+	[Fact]
+	public void TableHeaderCell_ScopeRow_RendersScopeAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableHeaderCell Scope="TableHeaderScope.Row">Header</TableHeaderCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var th = cut.Find("th");
+		th.GetAttribute("scope").ShouldBe("row");
+	}
+
+	[Fact]
+	public void TableHeaderCell_WithAbbr_RendersAbbrAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableHeaderCell AbbreviatedText="Qty">Quantity</TableHeaderCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var th = cut.Find("th");
+		th.GetAttribute("abbr").ShouldBe("Qty");
+	}
+
+	[Fact]
+	public void TableCell_AssociatedHeaderCellID_RendersHeadersAttribute()
+	{
+		// Act
+		var cut = Render(@<Table>
+			<TableRow>
+				<TableHeaderCell ID="header1">Header</TableHeaderCell>
+			</TableRow>
+			<TableRow>
+				<TableCell AssociatedHeaderCellID="header1">Data</TableCell>
+			</TableRow>
+		</Table>);
+
+		// Assert
+		var td = cut.Find("td");
+		td.GetAttribute("headers").ShouldBe("header1");
+	}
+
+}

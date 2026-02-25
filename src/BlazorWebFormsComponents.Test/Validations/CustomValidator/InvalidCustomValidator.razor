@@ -12,7 +12,7 @@
 				Write something
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<CustomValidator ServerValidate="@(x => false)"
-												 ControlToValidate="@Name"
+												 ControlRef="@Name"
 												 Text="there's no escape!" />
 			</EditForm>
 		);

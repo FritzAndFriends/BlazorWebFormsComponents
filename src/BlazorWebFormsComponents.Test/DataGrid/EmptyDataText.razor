@@ -1,0 +1,18 @@
+
+@code {
+	[Fact]
+	public void DataGrid_EmptyDataText_RendersCorrectly()
+	{
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="false"
+							EmptyDataText="There is no data">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+			</Columns>
+		</DataGrid>);
+
+		// Check empty data text
+		var emptyDataCell = cut.Find("td");
+		emptyDataCell.TextContent.Trim().ShouldBe("There is no data");
+	}
+}

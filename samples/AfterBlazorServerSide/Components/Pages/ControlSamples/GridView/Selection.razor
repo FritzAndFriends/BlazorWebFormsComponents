@@ -1,0 +1,110 @@
+@page "/ControlSamples/GridView/Selection"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>GridView Selection</PageTitle>
+
+<h2>GridView Selection Features</h2>
+
+<Nav />
+
+<p>This sample demonstrates the built-in selection support using
+   <code>AutoGenerateSelectButton</code>, <code>SelectedIndex</code>,
+   <code>SelectedRowStyle</code>, and the <code>SelectedIndexChanging</code> event.</p>
+
+<hr />
+
+<h3>Auto-Generated Select Button</h3>
+<p>Set <code>AutoGenerateSelectButton="true"</code> to render a Select link in each row.
+   The <code>SelectedRowStyle</code> highlights the chosen row.</p>
+
+<GridView ItemType="Product"
+          Items="@_products"
+          AutoGenerateColumns="false"
+          AutoGenerateSelectButton="true"
+          SelectedIndex="@_selectedIndex"
+          SelectedIndexChanging="HandleSelecting"
+          SelectedIndexChanged="HandleSelected">
+    <SelectedRowStyleContent>
+        <GridViewSelectedRowStyle BackColor="WebColor.Yellow" Font_Bold="true" />
+    </SelectedRowStyleContent>
+    <Columns>
+        <BoundField ItemType="Product" DataField="Id" HeaderText="ID" />
+        <BoundField ItemType="Product" DataField="Name" HeaderText="Product" />
+        <BoundField ItemType="Product" DataField="Category" HeaderText="Category" />
+        <BoundField ItemType="Product" DataField="Price" HeaderText="Price" DataFormatString="{0:C}" />
+    </Columns>
+</GridView>
+
+<p style="margin-top:10px;">
+    <strong>Selected index:</strong> @_selectedIndex &nbsp;
+    @if (_selectedIndex >= 0 && _selectedIndex < _products.Count)
+    {
+        <span>— <em>@_products[_selectedIndex].Name</em></span>
+    }
+</p>
+<p><strong>Selection changes:</strong> @_selectionCount</p>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;GridView ItemType="Product"
+          Items="@@_products"
+          AutoGenerateSelectButton="true"
+          SelectedIndex="@@_selectedIndex"
+          SelectedIndexChanging="HandleSelecting"
+          SelectedIndexChanged="HandleSelected"&gt;
+    &lt;SelectedRowStyleContent&gt;
+        &lt;GridViewSelectedRowStyle BackColor="WebColor.Yellow" Font_Bold="true" /&gt;
+    &lt;/SelectedRowStyleContent&gt;
+    &lt;Columns&gt;
+        &lt;BoundField DataField="Name" HeaderText="Product" /&gt;
+    &lt;/Columns&gt;
+&lt;/GridView&gt;
+
+@@code {
+    private int _selectedIndex = -1;
+
+    void HandleSelecting(GridViewSelectEventArgs e)
+    {
+        // e.NewSelectedIndex, e.Cancel
+        _selectedIndex = e.NewSelectedIndex;
+    }
+
+    void HandleSelected(int index)
+    {
+        // index contains the newly selected row
+    }
+}</code></pre>
+
+@code {
+
+    private int _selectedIndex = -1;
+    private int _selectionCount;
+
+    private void HandleSelecting(GridViewSelectEventArgs e)
+    {
+        _selectedIndex = e.NewSelectedIndex;
+    }
+
+    private void HandleSelected(int index)
+    {
+        _selectionCount++;
+    }
+
+    private List<Product> _products = new()
+    {
+        new Product { Id = 1, Name = "Widget A", Category = "Hardware", Price = 29.99m },
+        new Product { Id = 2, Name = "Gadget B", Category = "Electronics", Price = 49.99m },
+        new Product { Id = 3, Name = "Tool C", Category = "Hardware", Price = 19.99m },
+        new Product { Id = 4, Name = "Device D", Category = "Electronics", Price = 99.99m },
+        new Product { Id = 5, Name = "Part E", Category = "Accessories", Price = 9.99m }
+    };
+
+    private class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public decimal Price { get; set; }
+    }
+}

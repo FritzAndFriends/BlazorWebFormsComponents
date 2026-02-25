@@ -1,0 +1,69 @@
+@page "/ControlSamples/Chart/Bar"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Bar</PageTitle>
+
+<h2>Chart - Bar (Horizontal)</h2>
+
+<p>A horizontal <strong>Bar</strong> chart comparing programming language popularity. Bar charts are useful when category labels are long or when comparing ranked items.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px">
+	<ChartTitle Text="Programming Language Popularity — 2025" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="LangArea"
+		AxisX="@(new Axis { Title = "Language" })"
+		AxisY="@(new Axis { Title = "% of Developers" })" />
+	<ChartSeries Name="Usage"
+		ChartType="SeriesChartType.Bar"
+		ChartArea="LangArea"
+		Points="@LanguagePoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> LanguagePoints = new()
+	{
+		new() { XValue = "JavaScript", YValues = new[] { 65.6 } },
+		new() { XValue = "Python", YValues = new[] { 51.9 } },
+		new() { XValue = "TypeScript", YValues = new[] { 38.5 } },
+		new() { XValue = "Java", YValues = new[] { 35.3 } },
+		new() { XValue = "C#", YValues = new[] { 29.7 } },
+		new() { XValue = "C++", YValues = new[] { 22.4 } },
+		new() { XValue = "Go", YValues = new[] { 14.3 } },
+		new() { XValue = "Rust", YValues = new[] { 12.6 } }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Programming Language Popularity — 2025" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="LangArea"
+        AxisX="@@(new Axis { Title = "Language" })"
+        AxisY="@@(new Axis { Title = "% of Developers" })" /&gt;
+    &lt;ChartSeries Name="Usage"
+        ChartType="SeriesChartType.Bar"
+        ChartArea="LangArea"
+        Points="@@LanguagePoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; LanguagePoints = new()
+    {
+        new() { XValue = "JavaScript", YValues = new[] { 65.6 } },
+        new() { XValue = "Python", YValues = new[] { 51.9 } },
+        new() { XValue = "TypeScript", YValues = new[] { 38.5 } },
+        new() { XValue = "Java", YValues = new[] { 35.3 } },
+        new() { XValue = "C#", YValues = new[] { 29.7 } },
+        new() { XValue = "C++", YValues = new[] { 22.4 } },
+        new() { XValue = "Go", YValues = new[] { 14.3 } },
+        new() { XValue = "Rust", YValues = new[] { 12.6 } }
+    };
+
+}</code></pre>

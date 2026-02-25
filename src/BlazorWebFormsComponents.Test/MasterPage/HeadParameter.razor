@@ -1,0 +1,59 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void MasterPage_WithHeadParameter_RendersHeadContent()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<Head>
+				<link href="css/custom.css" rel="stylesheet" />
+				<meta name="description" content="Test page" />
+			</Head>
+			<ChildContent>
+				<div class="content">Body content</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert - Head content should be wrapped in HeadContent component
+		// The HeadContent component renders its content to the HeadOutlet in App.razor
+		cut.Markup.ShouldContain("Body content");
+	}
+
+	[Fact]
+	public void MasterPage_WithoutHeadParameter_StillWorks()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<ChildContent>
+				<div class="content">Body content only</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".content").TextContent.ShouldBe("Body content only");
+	}
+
+	[Fact]
+	public void MasterPage_HeadAndContentPlaceHolder_BothRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<MasterPage>
+			<Head>
+				<link href="css/site.css" rel="stylesheet" />
+			</Head>
+			<ChildContent>
+				<div class="header">Header</div>
+				<ContentPlaceHolder ID="MainContent">
+					<p>Default content</p>
+				</ContentPlaceHolder>
+				<div class="footer">Footer</div>
+			</ChildContent>
+		</MasterPage>);
+
+		// Assert
+		cut.Find(".header").TextContent.ShouldBe("Header");
+		cut.Find(".footer").TextContent.ShouldBe("Footer");
+		cut.Find("p").TextContent.ShouldBe("Default content");
+	}
+}

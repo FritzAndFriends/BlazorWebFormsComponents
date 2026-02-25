@@ -33,7 +33,7 @@
 			@<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
 
 				<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
-				<RangeValidator ControlToValidate="@Value"
+				<RangeValidator ControlRef="@Value"
 								Type="Integer"
 								MinimumValue="0"
 								MaximumValue="10"
@@ -54,6 +54,6 @@
 		_validSubmit.ShouldBeTrue();
 		_invalidSubmit.ShouldBeFalse();
 
-		cut.FindAll("span").Count().ShouldBe(0);
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
 	}
 }

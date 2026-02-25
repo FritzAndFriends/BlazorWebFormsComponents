@@ -1,0 +1,39 @@
+{
+  "agents": {
+    "forge": {
+      "persistent_name": "Forge",
+      "universe": "Marvel Cinematic Universe",
+      "created_at": "2026-02-10T15:30:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "cyclops": {
+      "persistent_name": "Cyclops",
+      "universe": "Marvel Cinematic Universe",
+      "created_at": "2026-02-10T15:30:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "beast": {
+      "persistent_name": "Beast",
+      "universe": "Marvel Cinematic Universe",
+      "created_at": "2026-02-10T15:30:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "jubilee": {
+      "persistent_name": "Jubilee",
+      "universe": "Marvel Cinematic Universe",
+      "created_at": "2026-02-10T15:30:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "rogue": {
+      "persistent_name": "Rogue",
+      "universe": "Marvel Cinematic Universe",
+      "created_at": "2026-02-10T15:30:00Z",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}

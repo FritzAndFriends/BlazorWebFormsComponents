@@ -16,9 +16,32 @@ namespace BlazorWebFormsComponents.Validations
 
 		[Parameter] public ValidationSummaryDisplayMode DisplayMode { get; set; } = ValidationSummaryDisplayMode.BulletList;
 
-		public bool IsValid => CurrentEditContext.GetValidationMessages().Any();
+		[Parameter] public string HeaderText { get; set; }
 
-		public IEnumerable<string> ValidationMessages => CurrentEditContext.GetValidationMessages().Select(x => x.Split(',')[1]);
+		[Parameter] public bool ShowSummary { get; set; } = true;
+
+		[Parameter] public string ValidationGroup { get; set; }
+
+		public bool IsValid => FilteredMessages.Any();
+
+		public IEnumerable<string> ValidationMessages => FilteredMessages.Select(x => x.Split('\x1F')[0].Split(',')[1]);
+
+		private IEnumerable<string> FilteredMessages
+		{
+			get
+			{
+				var messages = CurrentEditContext.GetValidationMessages();
+				if (!string.IsNullOrEmpty(ValidationGroup))
+				{
+					messages = messages.Where(x =>
+					{
+						var parts = x.Split('\x1F');
+						return parts.Length > 1 && parts[1] == ValidationGroup;
+					});
+				}
+				return messages;
+			}
+		}
 
 		public AspNetValidationSummary()
 		{

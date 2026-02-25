@@ -1,9 +1,9 @@
 ﻿@inherits BaseStyledComponent
 @typeparam Type
 
-@if (Enabled && Visible && !IsValid)
+@if (Enabled && Visible)
 {
-	<span style="@CalculatedStyle">
+	<span style="@($"{DisplayStyle}{CalculatedStyle}")">
 		@if (string.IsNullOrWhiteSpace(Text))
 		{
 			@ErrorMessage

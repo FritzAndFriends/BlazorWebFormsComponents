@@ -13,14 +13,8 @@ namespace BlazorWebFormsComponents
 	/// Represents a list box control that allows the user to select one or more items from a list.
 	/// </summary>
 	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-	public partial class ListBox<TItem> : DataBoundComponent<TItem>, IStyle
+	public partial class ListBox<TItem> : BaseListControl<TItem>
 	{
-		/// <summary>
-		/// Gets or sets the collection of list items in the ListBox.
-		/// </summary>
-		[Parameter]
-		public ListItemCollection StaticItems { get; set; } = new();
-
 		/// <summary>
 		/// Gets or sets the selected value.
 		/// </summary>
@@ -58,18 +52,6 @@ namespace BlazorWebFormsComponents
 		public EventCallback<int> SelectedIndexChanged { get; set; }
 
 		/// <summary>
-		/// Gets or sets the field of the data source that provides the text content of the list items.
-		/// </summary>
-		[Parameter]
-		public string DataTextField { get; set; }
-
-		/// <summary>
-		/// Gets or sets the field of the data source that provides the value of each list item.
-		/// </summary>
-		[Parameter]
-		public string DataValueField { get; set; }
-
-		/// <summary>
 		/// Gets or sets the number of rows displayed in the ListBox control.
 		/// </summary>
 		[Parameter]
@@ -105,36 +87,6 @@ namespace BlazorWebFormsComponents
 		public IEnumerable<ListItem> SelectedItems =>
 			GetItems().Where(i => SelectedValues.Contains(i.Value));
 
-		// IStyle implementation
-		[Parameter]
-		public WebColor BackColor { get; set; }
-
-		[Parameter]
-		public WebColor BorderColor { get; set; }
-
-		[Parameter]
-		public BorderStyle BorderStyle { get; set; }
-
-		[Parameter]
-		public Unit BorderWidth { get; set; }
-
-		[Parameter]
-		public string CssClass { get; set; }
-
-		[Parameter]
-		public FontInfo Font { get; set; } = new FontInfo();
-
-		[Parameter]
-		public WebColor ForeColor { get; set; }
-
-		[Parameter]
-		public Unit Height { get; set; }
-
-		[Parameter]
-		public Unit Width { get; set; }
-
-		protected string Style => this.ToStyle().NullIfEmpty();
-
 		private bool IsSelected(string value)
 		{
 			if (SelectionMode == ListSelectionMode.Multiple)
@@ -169,35 +121,5 @@ namespace BlazorWebFormsComponents
 			await OnSelectedIndexChanged.InvokeAsync(e);
 		}
 
-		private IEnumerable<ListItem> GetItems()
-		{
-			// Return static Items first
-			foreach (var item in StaticItems)
-			{
-				yield return item;
-			}
-
-			// Then data-bound items
-			if (Items != null)
-			{
-				foreach (var dataItem in Items)
-				{
-					yield return new ListItem
-					{
-						Text = GetPropertyValue(dataItem, DataTextField),
-						Value = GetPropertyValue(dataItem, DataValueField)
-					};
-				}
-			}
-		}
-
-		private string GetPropertyValue(TItem item, string propertyName)
-		{
-			if (string.IsNullOrEmpty(propertyName))
-				return item?.ToString() ?? string.Empty;
-
-			var prop = typeof(TItem).GetProperty(propertyName);
-			return prop?.GetValue(item)?.ToString() ?? string.Empty;
-		}
 	}
 }

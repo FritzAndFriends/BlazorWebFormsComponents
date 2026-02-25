@@ -4,10 +4,10 @@
     [Fact]
     public void DataList_TableLayout_FooterStyleClass_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+            <FooterStyleContent>
                 <FooterStyle CssClass="myClass"></FooterStyle>
-            </ChildContent>
+            </FooterStyleContent>
             <FooterTemplate>FooterTemplate</FooterTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

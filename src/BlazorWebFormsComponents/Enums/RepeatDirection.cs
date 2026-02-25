@@ -11,10 +11,4 @@
 	public class VerticalDataList : DataListEnum { }
 	public class NoneDataList : DataListEnum { }
 	public class BothDataList : DataListEnum { }
-
-	public enum RepeatDirection
-	{
-		Horizontal = 0,
-		Vertical = 1
-	}
 }

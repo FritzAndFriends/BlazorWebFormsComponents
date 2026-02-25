@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Interfaces;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
@@ -6,11 +7,16 @@ namespace BlazorWebFormsComponents
 	public partial class HeaderStyle : UiTableItemStyle
 	{
 
-		[CascadingParameter(Name = "HeaderStyle")]
-		protected TableItemStyle theHeaderStyle
+		[CascadingParameter(Name = "ParentDataList")]
+		protected IDataListStyleContainer ParentDataList { get; set; }
+
+		protected override void OnInitialized()
 		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
+			if (ParentDataList != null)
+			{
+				theStyle = ParentDataList.HeaderStyle;
+			}
+			base.OnInitialized();
 		}
 
 	}

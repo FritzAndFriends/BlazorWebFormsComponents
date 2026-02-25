@@ -1,0 +1,83 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void Calendar_DefaultState_RendersCurrentMonth()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar />);
+
+		// Assert
+		cut.Find("table").ShouldNotBeNull();
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldContain(DateTime.Today.ToString("MMMM"));
+	}
+
+	[Fact]
+	public void Calendar_WithVisibleDate_RendersSpecifiedMonth()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" />);
+
+		// Assert
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldContain("June 2024");
+	}
+
+	[Fact]
+	public void Calendar_ShowTitleFalse_HidesTitleRow()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar ShowTitle="false" />);
+
+		// Assert
+		// No title cell should be present
+		cut.FindAll("td[align='center']").Where(td => td.TextContent.Contains("2024") || td.TextContent.Contains("2026")).ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Calendar_ShowDayHeaderFalse_HidesDayNames()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar ShowDayHeader="false" />);
+
+		// Assert
+		cut.FindAll("th").ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Calendar_ShowGridLinesTrue_RendersTableBorder()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar ShowGridLines="true" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("border").ShouldBe("1");
+	}
+
+	[Fact]
+	public void Calendar_WithCssClass_AppliesClass()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar CssClass="custom-calendar" />);
+
+		// Assert
+		var table = cut.Find("table");
+		table.ClassList.ShouldContain("custom-calendar");
+	}
+
+	[Fact]
+	public void Calendar_VisibleFalse_DoesNotRender()
+	{
+		// Arrange & Act
+		var cut = Render(@<Calendar Visible="false" />);
+
+		// Assert
+		cut.FindAll("table").ShouldBeEmpty();
+	}
+}

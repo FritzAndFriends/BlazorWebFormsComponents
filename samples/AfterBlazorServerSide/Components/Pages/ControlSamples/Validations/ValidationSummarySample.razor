@@ -1,4 +1,4 @@
-﻿@page "/ControlSamples/ValidationSummary"
+@page "/ControlSamples/ValidationSummary"
 @using static BlazorWebFormsComponents.WebColor
 
 <h3>Required Field Validator</h3>
@@ -10,25 +10,25 @@
 	Write something
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
 	<RequiredFieldValidator Type="string"
-													ControlToValidate="@Name"
+													ControlRef="@Name"
 													ForeColor="Red"
 													Text="Name is required."
 													ErrorMessage="Name is required but in summary!" />
 
 	<RegularExpressionValidator ValidationExpression="^[0-9]{5}$"
-															ControlToValidate="@Name"
+															ControlRef="@Name"
 															Text="Not a 5 digit number."
 															ErrorMessage="Not a 5 digit number but in summary!" />
 
 	<RegularExpressionValidator ValidationExpression="^[0-3]{5}$"
-															ControlToValidate="@Name"
+															ControlRef="@Name"
 															Text="Not a 5 digit number with 0-3."
 															ErrorMessage="Not a 5 digit number with 0-3 but in summary!" />
 
 	<button type="submit">Submit</button>
 
-	<h5>Bold Bullet List</h5>
-	<AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" />
+	<h5>Bold Bullet List with HeaderText</h5>
+	<AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" HeaderText="Please fix these errors:" />
 
 	<h5>Lime List</h5>
 	<AspNetValidationSummary ForeColor="Lime" DisplayMode="List" />
@@ -61,7 +61,7 @@
 
 <p>Code:</p>
 <code>
-&lt;RequiredFieldValidator Type="string" ControlToValidate="@@Name" Text="Name is required." ErrorMessage="Name is required but in summary!" /&gt;<br />
-&lt;RegularExpressionValidator ValidationExpression="^[0-9]{5}$" ControlToValidate="@@Name" Text="Not a 5 digit number." /&gt;<br />
-&lt;AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" /&gt;
+&lt;RequiredFieldValidator Type="string" ControlRef="@@Name" Text="Name is required." ErrorMessage="Name is required but in summary!" /&gt;<br />
+&lt;RegularExpressionValidator ValidationExpression="^[0-9]{5}$" ControlRef="@@Name" Text="Not a 5 digit number." /&gt;<br />
+&lt;AspNetValidationSummary Font_Bold="true" DisplayMode="BulletList" HeaderText="Please fix these errors:" /&gt;
 </code>

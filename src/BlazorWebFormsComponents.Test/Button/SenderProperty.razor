@@ -1,0 +1,56 @@
+@using Moq
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Routing
+@inherits BunitContext
+
+@code {
+
+	private object capturedSender = null;
+	private string commandName = string.Empty;
+	private object commandArg = null;
+
+	void OnCommand(CommandEventArgs args)
+	{
+		capturedSender = args.Sender;
+		commandName = args.CommandName;
+		commandArg = args.CommandArgument;
+	}
+
+	[Fact]
+	public void Button_Command_PopulatesSenderProperty()
+	{
+		// Arrange
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+		capturedSender = null;
+		var cut = Render(@<Button CommandName="TestCommand" CommandArgument="@("TestArg")" OnCommand="OnCommand">Test Button</Button>);
+
+		// Act
+		cut.Find("button").Click();
+
+		// Assert
+		capturedSender.ShouldNotBeNull();
+		capturedSender.ShouldBeOfType<Button>();
+		commandName.ShouldBe("TestCommand");
+		commandArg.ShouldBe("TestArg");
+	}
+
+	[Fact]
+	public void Button_Command_SenderIsTheButtonInstance()
+	{
+		// Arrange
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
+		Button buttonRef = null;
+		capturedSender = null;
+		var cut = Render(@<Button @ref="buttonRef" CommandName="TestCmd" CommandArgument="@("Arg")" OnCommand="OnCommand" Text="Click" />);
+		var buttonInstance = cut.FindComponent<Button>().Instance;
+
+		// Act
+		cut.Find("button").Click();
+
+		// Assert
+		capturedSender.ShouldBe(buttonInstance);
+	}
+
+}

@@ -1,0 +1,22 @@
+{
+  "universe_usage_history": [
+    {
+      "assignment_id": "2026-02-10-blazor-webforms",
+      "universe": "Marvel Cinematic Universe",
+      "timestamp": "2026-02-10T15:30:00Z"
+    }
+  ],
+  "assignment_cast_snapshots": {
+    "2026-02-10-blazor-webforms": {
+      "universe": "Marvel Cinematic Universe",
+      "agent_map": {
+        "forge": "Forge",
+        "cyclops": "Cyclops",
+        "beast": "Beast",
+        "jubilee": "Jubilee",
+        "rogue": "Rogue"
+      },
+      "created_at": "2026-02-10T15:30:00Z"
+    }
+  }
+}

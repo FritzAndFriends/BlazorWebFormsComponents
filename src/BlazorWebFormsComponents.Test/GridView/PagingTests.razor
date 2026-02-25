@@ -1,0 +1,117 @@
+
+@code {
+
+	[Fact]
+	public void Paging_Shows_Correct_Number_Of_Rows()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" AutoGenerateColumns="true" />);
+
+		cut.Find("tbody").Children.Length.ShouldBe(10);
+	}
+
+	[Fact]
+	public void Paging_Disabled_Shows_All_Items()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="false" AutoGenerateColumns="true" />);
+
+		cut.Find("tbody").Children.Length.ShouldBe(25);
+	}
+
+	[Fact]
+	public void Paging_Page2_Renders_Correct_Items()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" PageIndex="1" AutoGenerateColumns="true" />);
+
+		var rows = cut.Find("tbody").Children;
+		rows.Length.ShouldBe(10);
+		// First row on page 2 should be item 11
+		rows[0].QuerySelector("td").TextContent.Trim().ShouldBe("11");
+	}
+
+	[Fact]
+	public void Paging_Last_Page_Handles_Partial_Data()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" PageIndex="2" AutoGenerateColumns="true" />);
+
+		cut.Find("tbody").Children.Length.ShouldBe(5);
+	}
+
+	[Fact]
+	public void Paging_Renders_Pager_Row()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" AutoGenerateColumns="true" />);
+
+		cut.FindAll("tfoot").Count.ShouldBe(1);
+	}
+
+	[Fact]
+	public void Paging_Current_Page_Renders_As_Span()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" PageIndex="0" AutoGenerateColumns="true" />);
+
+		var pagerCells = cut.FindAll("tfoot td td");
+		// First page (current) should be a span
+		pagerCells[0].QuerySelector("span").ShouldNotBeNull();
+		pagerCells[0].QuerySelector("span").TextContent.ShouldBe("1");
+	}
+
+	[Fact]
+	public void Paging_Other_Pages_Render_As_Links()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" PageIndex="0" AutoGenerateColumns="true" />);
+
+		var pagerCells = cut.FindAll("tfoot td td");
+		// Pages 2 and 3 should be links
+		pagerCells[1].QuerySelector("a").ShouldNotBeNull();
+		pagerCells[1].QuerySelector("a").TextContent.ShouldBe("2");
+		pagerCells[2].QuerySelector("a").ShouldNotBeNull();
+		pagerCells[2].QuerySelector("a").TextContent.ShouldBe("3");
+	}
+
+	[Fact]
+	public void Paging_No_Pager_When_Single_Page()
+	{
+		var data = Enumerable.Range(1, 5).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10" AutoGenerateColumns="true" />);
+
+		cut.FindAll("tfoot").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Paging_PageIndexChanged_Event_Fires()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PagingTestItem { Id = i, Name = $"Item {i}" }).ToList();
+		PageChangedEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="PagingTestItem" DataSource="data" AllowPaging="true" PageSize="10"
+						AutoGenerateColumns="true" PageIndexChanged="@((PageChangedEventArgs e) => receivedArgs = e)" />);
+
+		// Click page 2 link
+		var pageLinks = cut.FindAll("tfoot a");
+		pageLinks[0].Click();
+
+		receivedArgs.ShouldNotBeNull();
+		receivedArgs.NewPageIndex.ShouldBe(1);
+	}
+
+	public class PagingTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

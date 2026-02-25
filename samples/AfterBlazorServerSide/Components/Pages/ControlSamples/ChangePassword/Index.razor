@@ -1,0 +1,48 @@
+@page "/ControlSamples/ChangePassword"
+@using BlazorWebFormsComponents.LoginControls
+
+<h2>ChangePassword Component</h2>
+
+<Nav></Nav>
+
+<p>
+	The <code>ChangePassword</code> component provides a complete password change interface.
+	Handle the <code>OnChangingPassword</code> event to integrate with your authentication system.
+</p>
+
+<h3>Default ChangePassword</h3>
+<ChangePassword ID="ChangePassword1"
+	OnChangingPassword="HandleChangingPassword"
+	OnChangedPassword="HandleChangedPassword"
+	OnCancelButtonClick="HandleCancel" />
+
+<p style="margin-top: 10px; font-weight: bold;">@statusMessage</p>
+
+@code {
+	private string statusMessage = "";
+
+	private void HandleChangingPassword(BlazorWebFormsComponents.LoginControls.LoginCancelEventArgs e)
+	{
+		// In a real app, use UserManager.ChangePasswordAsync here
+		statusMessage = "Password change requested...";
+	}
+
+	private void HandleChangedPassword(EventArgs e)
+	{
+		statusMessage = "Password changed successfully!";
+	}
+
+	private void HandleCancel(EventArgs e)
+	{
+		statusMessage = "Password change cancelled.";
+	}
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;ChangePassword ID="ChangePassword1"<br />
+&nbsp;&nbsp;OnChangingPassword="HandleChangingPassword"<br />
+&nbsp;&nbsp;OnChangedPassword="HandleChangedPassword" /&gt;
+</code>

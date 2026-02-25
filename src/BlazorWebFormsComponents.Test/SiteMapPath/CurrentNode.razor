@@ -1,0 +1,82 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateTestSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/", "Return to home page");
+		var products = new SiteMapNode("Products", "/products", "Browse our products");
+		var electronics = new SiteMapNode("Electronics", "/products/electronics", "Electronic devices");
+
+		root.AddChild(products);
+		products.AddChild(electronics);
+
+		return root;
+	}
+
+	[Fact]
+	public void CurrentNode_Is_Not_A_Link_By_Default()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/products" />);
+
+		// Assert - Should have 1 link (Home) and 1 span (Products)
+		cut.FindAll("a").Count.ShouldBe(1);
+		var spans = cut.FindAll("span > span");
+		spans.Any(s => s.TextContent == "Products").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RenderCurrentNodeAsLink_Makes_Current_Node_A_Link()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products" 
+			RenderCurrentNodeAsLink="true" />);
+
+		// Assert - Both nodes should be links
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(2);
+		links[1].TextContent.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void ShowToolTips_Shows_Description_As_Title()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products" 
+			ShowToolTips="true" />);
+
+		// Assert
+		var link = cut.Find("a");
+		link.GetAttribute("title").ShouldBe("Return to home page");
+	}
+
+	[Fact]
+	public void ShowToolTips_False_Hides_Tooltips()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products" 
+			ShowToolTips="false" />);
+
+		// Assert
+		var link = cut.Find("a");
+		link.GetAttribute("title").ShouldBeNull();
+	}
+}

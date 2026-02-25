@@ -1,4 +1,4 @@
-﻿@page "/ControlSamples/RangeValidator"
+@page "/ControlSamples/RangeValidator"
 
 <h3>Range Validator</h3>
 @using BlazorWebFormsComponents.Validations;
@@ -7,7 +7,7 @@
 
 	<label>Write a year between 1900 - 2100</label>
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
-	<RangeValidator ControlToValidate="@Name"
+	<RangeValidator ControlRef="@Name"
 									Type="Integer"
 									MinimumValue="1900"
 									MaximumValue="2100"
@@ -38,5 +38,5 @@
 
 <p>Code:</p>
 <code>
-&lt;RangeValidator ControlToValidate="@@Name" Type="Integer" MinimumValue="1900" MaximumValue="2100" Text="Year must be between 1900 and 2100" /&gt;
+&lt;RangeValidator ControlRef="@@Name" Type="Integer" MinimumValue="1900" MaximumValue="2100" Text="Year must be between 1900 and 2100" /&gt;
 </code>

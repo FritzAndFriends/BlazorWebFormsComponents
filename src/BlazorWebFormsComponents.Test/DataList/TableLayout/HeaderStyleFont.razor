@@ -6,10 +6,10 @@
     [Fact]
     public void DataList_TableLayout_HeaderStyleFont_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+            <HeaderStyleContent>
                 <HeaderStyle Font-Bold="true" Font-Italic="true" Font-Names="arial black" Font-Overline="true" Font-Size="X-Large" Font-Strikeout="true" Font-Underline="true" />
-            </ChildContent>
+            </HeaderStyleContent>
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

@@ -1,0 +1,124 @@
+@code {
+
+	public class Product
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+	}
+
+	[Fact]
+	public void DropDownList_AppendDataBoundItems_False_ReplacesStaticItems()
+	{
+		// Arrange — default AppendDataBoundItems is false
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("-- Select --", "")
+		};
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Widget" },
+			new Product { Id = "2", Name = "Gadget" }
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  StaticItems="staticItems"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id"
+						  AppendDataBoundItems="false" />
+		);
+
+		// Assert — only data-bound items, static items replaced
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(2);
+		options[0].TextContent.Trim().ShouldBe("Widget");
+		options[1].TextContent.Trim().ShouldBe("Gadget");
+	}
+
+	[Fact]
+	public void DropDownList_AppendDataBoundItems_True_AppendsToStaticItems()
+	{
+		// Arrange
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("-- Select --", "")
+		};
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Widget" },
+			new Product { Id = "2", Name = "Gadget" }
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  StaticItems="staticItems"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id"
+						  AppendDataBoundItems="true" />
+		);
+
+		// Assert — static item first, then data-bound items
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(3);
+		options[0].TextContent.Trim().ShouldBe("-- Select --");
+		options[1].TextContent.Trim().ShouldBe("Widget");
+		options[2].TextContent.Trim().ShouldBe("Gadget");
+	}
+
+	[Fact]
+	public void DropDownList_AppendDataBoundItems_True_NoDataBoundItems_ShowsStaticOnly()
+	{
+		// Arrange
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("-- Select --", ""),
+			new ListItem("Option A", "a")
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  StaticItems="staticItems"
+						  AppendDataBoundItems="true" />
+		);
+
+		// Assert — just the static items
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(2);
+		options[0].TextContent.Trim().ShouldBe("-- Select --");
+		options[1].TextContent.Trim().ShouldBe("Option A");
+	}
+
+	[Fact]
+	public void DropDownList_AppendDataBoundItems_Default_IsFalse()
+	{
+		// Arrange — default behavior when AppendDataBoundItems not specified
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("Static", "s")
+		};
+		var data = new List<Product>
+		{
+			new Product { Id = "1", Name = "Dynamic" }
+		};
+
+		// Act
+		var cut = Render(
+			@<DropDownList TItem="Product"
+						  StaticItems="staticItems"
+						  Items="data"
+						  DataTextField="Name"
+						  DataValueField="Id" />
+		);
+
+		// Assert — static items replaced by data-bound items (default false)
+		var options = cut.FindAll("option");
+		options.Count.ShouldBe(1);
+		options[0].TextContent.Trim().ShouldBe("Dynamic");
+	}
+
+}

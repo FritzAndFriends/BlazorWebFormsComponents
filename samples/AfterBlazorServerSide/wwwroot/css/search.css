@@ -1,0 +1,92 @@
+/* Search Box Styles */
+.search-box-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-box-container .search-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.search-box-container .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-box-container .search-input:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+/* Search Dropdown */
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    margin-top: 0.25rem;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1050;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.15s ease;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover,
+.search-result-item.selected {
+    background-color: #f8f9fa;
+}
+
+.search-result-item.selected {
+    background-color: #e9ecef;
+}
+
+.search-result-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.search-result-name mark {
+    background-color: #fff3cd;
+    padding: 0 0.1em;
+    border-radius: 0.15em;
+}
+
+.search-result-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.search-result-description {
+    color: #6c757d;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-box-container {
+        width: 100%;
+    }
+}

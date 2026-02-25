@@ -35,7 +35,6 @@
 				DisappearAfter="2000"
 				StaticDisplayLevels="2"
 				StaticSubmenuIndent="10"
-				orientation="Vertical"
 				font-names="Arial"
 				target="_blank"
 				DataSource="menuSource"
@@ -52,7 +51,7 @@
 			</Menu>
 		);
 
-		var menuItems = cut.FindAll("a");
+		var menuItems = cut.FindAll("#NavigationMenu a");
 		menuItems.Count().ShouldBe(9);
 	}
 

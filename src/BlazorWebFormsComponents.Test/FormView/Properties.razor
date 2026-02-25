@@ -1,0 +1,81 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void FormView_Caption_RendersInMarkup()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				Caption="My Form Caption">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("My Form Caption");
+	}
+
+	[Fact]
+	public void FormView_CaptionAlign_Bottom()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				Caption="Bottom Caption" CaptionAlign="TableCaptionAlign.Bottom">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("Bottom Caption");
+	}
+
+	[Fact]
+	public void FormView_CaptionAlign_Top()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				Caption="Top Caption" CaptionAlign="TableCaptionAlign.Top">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("Top Caption");
+	}
+
+	[Fact]
+	public void FormView_NoCaption_NoCaptionInMarkup()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldNotContain("<caption");
+	}
+
+	[Fact]
+	public void FormView_PagerTemplate_RendersCustomPager()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				AllowPaging="true">
+				<PagerTemplate>
+					<div id="customPager">Custom Pager</div>
+				</PagerTemplate>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("#customPager").TextContent.ShouldBe("Custom Pager");
+	}
+}

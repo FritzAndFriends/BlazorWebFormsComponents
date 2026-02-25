@@ -1,14 +1,20 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Interfaces;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents
 {
 	public partial class AlternatingItemStyle : UiTableItemStyle
 	{
-		[CascadingParameter(Name = "AlternatingItemStyle")]
-		protected TableItemStyle theAlternatingItemStyle
+		[CascadingParameter(Name = "ParentDataList")]
+		protected IDataListStyleContainer ParentDataList { get; set; }
+
+		protected override void OnInitialized()
 		{
-			get { return base.theStyle; }
-			set { base.theStyle = value; }
+			if (ParentDataList != null)
+			{
+				theStyle = ParentDataList.AlternatingItemStyle;
+			}
+			base.OnInitialized();
 		}
 	}
 }

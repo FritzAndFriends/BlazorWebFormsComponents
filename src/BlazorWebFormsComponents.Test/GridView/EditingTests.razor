@@ -1,0 +1,137 @@
+
+@code {
+
+	[Fact]
+	public void Edit_Link_Appears_When_RowEditing_Has_Delegate()
+	{
+		var data = GetTestProducts();
+
+		var cut = Render(@<GridView ItemType="EditTestProduct" DataSource="data" AutoGenerateColumns="false"
+						RowEditing="@((GridViewEditEventArgs e) => { })">
+			<Columns>
+				<BoundField ItemType="EditTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="EditTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		// Each row should have an Edit link
+		var editLinks = cut.FindAll("tbody tr td a");
+		var editCount = editLinks.Count(a => a.TextContent == "Edit");
+		editCount.ShouldBe(data.Count);
+	}
+
+	[Fact]
+	public void EditIndex_Shows_Edit_Mode_For_That_Row()
+	{
+		var data = GetTestProducts();
+
+		var cut = Render(@<GridView ItemType="EditTestProduct" DataSource="data" AutoGenerateColumns="false" EditIndex="1"
+						RowEditing="@((GridViewEditEventArgs e) => { })"
+						RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+			<Columns>
+				<BoundField ItemType="EditTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="EditTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+
+		// Row at index 1 should have input fields (edit mode)
+		rows[1].QuerySelectorAll("input[type='text']").Length.ShouldBeGreaterThan(0);
+
+		// Row at index 1 should have Update and Cancel links
+		var row1Links = rows[1].QuerySelectorAll("a");
+		row1Links.Any(a => a.TextContent == "Update").ShouldBeTrue();
+		row1Links.Any(a => a.TextContent == "Cancel").ShouldBeTrue();
+
+		// Row at index 0 should NOT have input fields
+		rows[0].QuerySelectorAll("input[type='text']").Length.ShouldBe(0);
+	}
+
+	[Fact]
+	public void RowEditing_Event_Fires_On_Edit_Click()
+	{
+		var data = GetTestProducts();
+		GridViewEditEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="EditTestProduct" DataSource="data" AutoGenerateColumns="false"
+						RowEditing="@((GridViewEditEventArgs e) => receivedArgs = e)">
+			<Columns>
+				<BoundField ItemType="EditTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="EditTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		// Click the Edit link on the second row (index 1)
+		var rows = cut.FindAll("tbody tr");
+		var editLink = rows[1].QuerySelectorAll("a").First(a => a.TextContent == "Edit");
+		editLink.Click();
+
+		receivedArgs.ShouldNotBeNull();
+		receivedArgs.NewEditIndex.ShouldBe(1);
+	}
+
+	[Fact]
+	public void RowCancelingEdit_Event_Fires_On_Cancel_Click()
+	{
+		var data = GetTestProducts();
+		GridViewCancelEditEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="EditTestProduct" DataSource="data" AutoGenerateColumns="false" EditIndex="0"
+						RowEditing="@((GridViewEditEventArgs e) => { })"
+						RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => receivedArgs = e)">
+			<Columns>
+				<BoundField ItemType="EditTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="EditTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		// Row 0 is in edit mode, click Cancel
+		var rows = cut.FindAll("tbody tr");
+		var cancelLink = rows[0].QuerySelectorAll("a").First(a => a.TextContent == "Cancel");
+		cancelLink.Click();
+
+		receivedArgs.ShouldNotBeNull();
+		receivedArgs.RowIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public void EditIndex_Negative_One_Means_No_Editing()
+	{
+		var data = GetTestProducts();
+
+		var cut = Render(@<GridView ItemType="EditTestProduct" DataSource="data" AutoGenerateColumns="false" EditIndex="-1"
+						RowEditing="@((GridViewEditEventArgs e) => { })">
+			<Columns>
+				<BoundField ItemType="EditTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="EditTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		// No row should have input fields
+		cut.FindAll("tbody input[type='text']").Count.ShouldBe(0);
+
+		// No Update or Cancel links should exist
+		var allLinks = cut.FindAll("tbody a");
+		allLinks.Any(a => a.TextContent == "Update").ShouldBeFalse();
+		allLinks.Any(a => a.TextContent == "Cancel").ShouldBeFalse();
+	}
+
+	private List<EditTestProduct> GetTestProducts()
+	{
+		return new List<EditTestProduct>
+		{
+			new EditTestProduct { Name = "Widget", Price = 9.99m },
+			new EditTestProduct { Name = "Gadget", Price = 19.99m },
+			new EditTestProduct { Name = "Doohickey", Price = 4.99m }
+		};
+	}
+
+	public class EditTestProduct
+	{
+		public string Name { get; set; }
+		public decimal Price { get; set; }
+	}
+}

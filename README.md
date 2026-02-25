@@ -8,6 +8,22 @@ A collection of Blazor components that emulate the web forms components of the s
 
 [Live Samples running on Azure](https://blazorwebformscomponents.azurewebsites.net)
 
+## Sample Site
+
+The sample site showcases all components with interactive examples, code snippets, and a searchable catalog.
+
+### Homepage & Component Catalog
+![Sample Site Homepage](docs/images/sample-site-homepage.png)
+
+### GridView with Interactive Data
+![GridView Sample](docs/images/sample-site-gridview.png)
+
+### Chart Component with Chart.js
+![Chart Sample](docs/images/sample-site-chart.png)
+
+### Fuzzy Search
+![Search Feature](docs/images/sample-site-search.png)
+
 ## Approach + Considerations
 
 We believe that Web Forms applications that have been well maintained and provide value should have a path forward to the new user-interface frameworks with minimal changes.  This is not an application converted nor is it a patch that can be applied to your project that magically makes it work with ASP<span></span>.NET Core.  This repository contains a library and series of strategies that will allow you to re-use much of your markup, much of your business code and help shorten your application re-write process.
@@ -24,39 +40,37 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
 
   - Editor Controls
     - [AdRotator](docs/EditorControls/AdRotator.md)
-    - BulletedList
+    - [BulletedList](docs/EditorControls/BulletedList.md)
     - [Button](docs/EditorControls/Button.md)
-    - Calendar
+    - [Calendar](docs/EditorControls/Calendar.md)
     - [CheckBox](docs/EditorControls/CheckBox.md)
     - [CheckBoxList](docs/EditorControls/CheckBoxList.md)
     - [DropDownList](docs/EditorControls/DropDownList.md)
-    - FileUpload
+    - [FileUpload](docs/EditorControls/FileUpload.md)
     - [HiddenField](docs/EditorControls/HiddenField.md)
-    - [HyperLink](docs/EditorControls/HyperLink.md)
     - [Image](docs/EditorControls/Image.md)
     - [ImageButton](docs/EditorControls/ImageButton.md)
-    - ImageMap
+    - [ImageMap](docs/NavigationControls/ImageMap.md)
     - [Label](docs/EditorControls/Label.md)
     - [LinkButton](docs/EditorControls/LinkButton.md)
     - [ListBox](docs/EditorControls/ListBox.md)
     - [Literal](docs/EditorControls/Literal.md)
-    - Localize
-    - MultiView
+    - [Localize](docs/EditorControls/Localize.md)
+    - [MultiView](docs/EditorControls/MultiView.md)
     - [Panel](docs/EditorControls/Panel.md)
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
     - [RadioButton](docs/EditorControls/RadioButton.md)
     - [RadioButtonList](docs/EditorControls/RadioButtonList.md)
-    - Substitution
-    - Table
+    - [Table](docs/EditorControls/Table.md)
     - [TextBox](docs/EditorControls/TextBox.md)
-    - View
-    - Xml
+    - [View](docs/EditorControls/MultiView.md)
+    - ~~Xml~~ — *Deferred ([details](docs/Migration/DeferredControls.md))*
   - Data Controls
-    - Chart(?)
-    - DataGrid
+    - [Chart](docs/DataControls/Chart.md)
+    - [DataGrid](docs/DataControls/DataGrid.md)
     - [DataList](docs/DataControls/DataList.md)
-    - DataPager
-    - DetailsView
+    - [DataPager](docs/DataControls/DataPager.md)
+    - [DetailsView](docs/DataControls/DetailsView.md)
     - [FormView](docs/DataControls/FormView.md)
     - [GridView](docs/DataControls/GridView.md)
     - [ListView](docs/DataControls/ListView.md)
@@ -69,17 +83,18 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [RequiredFieldValidator](docs/ValidationControls/RequiredFieldValidator.md)
     - [ValidationSummary](docs/ValidationControls/ValidationSummary.md)
   - Navigation Controls
-    - [Menu](docs/Menu.md)
-    - SiteMapPath
+    - [HyperLink](docs/NavigationControls/HyperLink.md)
+    - [Menu](docs/NavigationControls/Menu.md)
+    - [SiteMapPath](docs/NavigationControls/SiteMapPath.md)
     - [TreeView](docs/NavigationControls/TreeView.md)
   - Login Controls
-    - ChangePassword
-    - CreateUserWizard
+    - [ChangePassword](docs/LoginControls/ChangePassword.md)
+    - [CreateUserWizard](docs/LoginControls/CreateUserWizard.md)
     - [Login](docs/LoginControls/Login.md)
     - [LoginName](docs/LoginControls/LoginName.md)
     - [LoginStatus](docs/LoginControls/LoginStatus.md)
     - [LoginView](docs/LoginControls/LoginView.md)
-    - PasswordRecovery
+    - [PasswordRecovery](docs/LoginControls/PasswordRecovery.md)
 
 We will NOT be converting any DataSource objects (SqlDataSource, ObjectDataSource, EntityDataSource, LinqDataSource, XmlDataSource, SiteMapDataSource, AccessDataSource), Wizard components, skins or themes.  Once this first collection of controls is written, we can consider additional features like modern tag formatting.
 
@@ -88,8 +103,21 @@ We will NOT be converting any DataSource objects (SqlDataSource, ObjectDataSourc
 There are a handful of features that augment the ASP<span></span>.NET development experience that are made available as part of this project in order to support migration efforts.  Importantly, these features are NOT implemented the same way that they are in Web Forms, but rather have the same API and behave in a proper Blazor fashion.  These features include:
 
   - [DataBinder](docs/UtilityFeatures/Databinder.md)
+  - [ID Rendering](docs/UtilityFeatures/IDRendering.md) - Render HTML IDs for JavaScript integration
   - [JavaScript Setup](docs/UtilityFeatures/JavaScriptSetup.md) - Options for auto-loading required JavaScript
+  - [PageService](docs/UtilityFeatures/PageService.md) - Programmatic page title setting (Page.Title equivalent)
   - [ViewState](docs/UtilityFeatures/ViewState.md)
+
+### Custom Control Migration Support
+
+For applications with custom controls inheriting from `WebControl` or `CompositeControl`, the library provides:
+
+- **Adapter Classes**: `WebControl`, `CompositeControl`, and `HtmlTextWriter` classes that enable minimal-change migration
+  - Base attributes (ID, CssClass, Style) are automatically applied - no manual intervention needed
+- **Roslyn Analyzers**: The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes:
+  - **BWFC001**: Detects public properties missing `[Parameter]` attributes with automatic fix
+
+See the [Custom Controls Migration Guide](docs/Migration/Custom-Controls.md) for details.
 
 ## Compiling the project
 
@@ -125,3 +153,18 @@ To run integration tests locally:
    ```
 
 See [samples/AfterBlazorServerSide.Tests/README.md](samples/AfterBlazorServerSide.Tests/README.md) for more details.
+
+## Releasing
+
+This project uses automated scripts with Nerdbank.GitVersioning to help with version publishing and release management. See the [scripts/README.md](scripts/README.md) for detailed documentation on:
+
+- **prepare-release.sh** - Uses `nbgv` to update version.json and generates release notes
+- **generate-release-notes.sh** - Creates formatted release notes from git commits
+- **publish-release.sh** - Uses `nbgv tag` to create and publish release tags
+
+Quick workflow:
+1. On `dev` branch: `./scripts/prepare-release.sh 0.14`
+2. Merge `dev` to `main`
+3. On `main` branch: `./scripts/publish-release.sh`
+
+The NuGet package is automatically published via GitHub Actions when a version tag is pushed.

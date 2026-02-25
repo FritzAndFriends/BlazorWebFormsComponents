@@ -18,6 +18,26 @@
 <p>Selected Product ID: <strong>@selectedProduct</strong></p>
 <p>Selected Product: <strong>@(products.FirstOrDefault(p => p.Id == selectedProduct)?.Name ?? "None")</strong></p>
 
+<h2>Data-bound with DataTextFormatString (Currency)</h2>
+<DropDownList TItem="PricedProduct"
+              Items="pricedProducts"
+              DataTextField="Price"
+              DataValueField="Id"
+              DataTextFormatString="{0:C}"
+              @bind-SelectedValue="selectedPricedProduct" />
+<p>Selected: <strong>@selectedPricedProduct</strong></p>
+<small>The <code>DataTextFormatString="{0:C}"</code> formats each item's text as currency.</small>
+
+<h2>Data-bound with DataTextFormatString (Prefix)</h2>
+<DropDownList TItem="Product"
+              Items="products"
+              DataTextField="Name"
+              DataValueField="Id"
+              DataTextFormatString="Item: {0}"
+              @bind-SelectedValue="selectedFormattedProduct" />
+<p>Selected: <strong>@selectedFormattedProduct</strong></p>
+<small>The <code>DataTextFormatString="Item: {0}"</code> adds a prefix to each item's display text.</small>
+
 <h2>Disabled DropDownList</h2>
 <DropDownList TItem="object" StaticItems="staticItems" Enabled="false" SelectedValue="2" />
 
@@ -43,6 +63,8 @@
 @code {
     private string selectedStatic = "";
     private string selectedProduct = "";
+    private string selectedPricedProduct = "";
+    private string selectedFormattedProduct = "";
     private string eventSelection = "";
     private string lastSelection = "None";
     private DateTime lastChangeTime = DateTime.Now;
@@ -90,6 +112,14 @@
         new Product { Id = "4", Name = "Doohickey" }
     };
 
+    private List<PricedProduct> pricedProducts = new()
+    {
+        new PricedProduct { Id = "1", Price = 9.99m },
+        new PricedProduct { Id = "2", Price = 24.50m },
+        new PricedProduct { Id = "3", Price = 149.95m },
+        new PricedProduct { Id = "4", Price = 3.00m }
+    };
+
     private void HandleSelectionChanged(ChangeEventArgs e)
     {
         lastSelection = e.Value?.ToString() ?? "None";
@@ -102,6 +132,12 @@
         public string Id { get; set; }
         public string Name { get; set; }
     }
+
+    public class PricedProduct
+    {
+        public string Id { get; set; }
+        public decimal Price { get; set; }
+    }
 }
 
 <hr />
@@ -110,5 +146,7 @@
 <code>
 &lt;DropDownList TItem="object" StaticItems="staticItems" @@bind-SelectedValue="selectedValue" /&gt;<br />
 &lt;DropDownList TItem="Product" Items="products" DataTextField="Name" DataValueField="Id" @@bind-SelectedValue="selectedProduct" /&gt;<br />
+&lt;DropDownList TItem="PricedProduct" Items="pricedProducts" DataTextField="Price" DataValueField="Id" DataTextFormatString="{0:C}" /&gt;<br />
+&lt;DropDownList TItem="Product" Items="products" DataTextField="Name" DataValueField="Id" DataTextFormatString="Item: {0}" /&gt;<br />
 &lt;DropDownList TItem="object" StaticItems="staticItems" Enabled="false" SelectedValue="2" /&gt;
 </code>

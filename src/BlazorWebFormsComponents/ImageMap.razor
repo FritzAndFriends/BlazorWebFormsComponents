@@ -1,0 +1,105 @@
+@using System.Text
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<img src="@ImageUrl" 
+		 usemap="#@_mapId"
+		 alt="@GetAltText()"
+		 id="@GetId()"
+		 class="@GetCssClassOrNull()"
+		 style="@Style"
+		 title="@GetTitle()"
+		 longdesc="@GetLongDesc()"
+		 align="@GetAlign()" />
+
+	<map name="@_mapId">
+		@foreach (var hotSpot in HotSpots)
+		{
+			var effectiveMode = hotSpot.HotSpotMode != Enums.HotSpotMode.NotSet ? hotSpot.HotSpotMode : HotSpotMode;
+			var href = effectiveMode == Enums.HotSpotMode.Navigate ? hotSpot.NavigateUrl : "#";
+			var target = !string.IsNullOrEmpty(hotSpot.Target) ? hotSpot.Target : Target;
+			var isDisabled = !Enabled;
+
+			@if (isDisabled || effectiveMode == Enums.HotSpotMode.Inactive)
+			{
+				<area shape="@hotSpot.GetShapeType()"
+					  coords="@hotSpot.GetCoordinates()"
+					  alt="@hotSpot.AlternateText"
+					  nohref="nohref" />
+			}
+			else if (effectiveMode == Enums.HotSpotMode.Navigate)
+			{
+				<area shape="@hotSpot.GetShapeType()"
+					  coords="@hotSpot.GetCoordinates()"
+					  href="@href"
+					  alt="@hotSpot.AlternateText"
+					  target="@GetTargetOrNull(target)"
+					  tabindex="@GetTabIndexOrNull(hotSpot.TabIndex)"
+					  accesskey="@GetAccessKeyOrNull(hotSpot.AccessKey)" />
+			}
+			else if (effectiveMode == Enums.HotSpotMode.PostBack)
+			{
+				<area shape="@hotSpot.GetShapeType()"
+					  coords="@hotSpot.GetCoordinates()"
+					  href="#"
+					  alt="@hotSpot.AlternateText"
+					  @onclick="@(() => HandleHotSpotClick(hotSpot))"
+					  @onclick:preventDefault="true"
+					  tabindex="@GetTabIndexOrNull(hotSpot.TabIndex)"
+					  accesskey="@GetAccessKeyOrNull(hotSpot.AccessKey)" />
+			}
+		}
+	</map>
+}
+
+@code {
+	private string GetAltText()
+	{
+		if (!string.IsNullOrEmpty(AlternateText))
+			return AlternateText;
+		if (GenerateEmptyAlternateText)
+			return "";
+		return null;
+	}
+	
+	private string GetId()
+	{
+		return !string.IsNullOrEmpty(ClientID) ? ClientID : null;
+	}
+	
+	private string GetCssClassOrNull()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
+	
+	private string GetTitle()
+	{
+		return !string.IsNullOrEmpty(ToolTip) ? ToolTip : null;
+	}
+	
+	private string GetLongDesc()
+	{
+		return !string.IsNullOrEmpty(DescriptionUrl) ? DescriptionUrl : null;
+	}
+	
+	private string GetAlign()
+	{
+		return ImageAlign != Enums.ImageAlign.NotSet ? ImageAlign.ToString().ToLower() : null;
+	}
+	
+	private string GetTargetOrNull(string target)
+	{
+		return !string.IsNullOrEmpty(target) ? target : null;
+	}
+	
+	private string GetTabIndexOrNull(short tabIndex)
+	{
+		return tabIndex > 0 ? tabIndex.ToString() : null;
+	}
+	
+	private string GetAccessKeyOrNull(string accessKey)
+	{
+		return !string.IsNullOrEmpty(accessKey) ? accessKey : null;
+	}
+}

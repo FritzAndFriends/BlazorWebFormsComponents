@@ -1,0 +1,212 @@
+
+@code {
+
+	[Fact]
+	public void TreeView_UseAccessibilityFeatures_AddsRoleAttribute()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" Expanded="true">
+						<TreeNode Text="Child Node" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var treeViewDiv = cut.Find("div");
+		treeViewDiv.GetAttribute("role").ShouldBe("tree");
+	}
+
+	[Fact]
+	public void TreeView_UseAccessibilityFeatures_AddsAriaLabel()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" />
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var treeViewDiv = cut.Find("div");
+		treeViewDiv.GetAttribute("aria-label").ShouldBe("Tree navigation");
+	}
+
+	[Fact]
+	public void TreeView_WithoutAccessibilityFeatures_NoRoleAttribute()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="false">
+				<Nodes>
+					<TreeNode Text="Root Node" />
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var treeViewDiv = cut.Find("div");
+		treeViewDiv.HasAttribute("role").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TreeNode_UseAccessibilityFeatures_AddsTreeItemRole()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" Expanded="true">
+						<TreeNode Text="Child Node" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var tables = cut.FindAll("table");
+		tables.Count().ShouldBeGreaterThan(0);
+		
+		foreach (var table in tables)
+		{
+			table.GetAttribute("role").ShouldBe("treeitem");
+		}
+	}
+
+	[Fact]
+	public void TreeNode_UseAccessibilityFeatures_AddsAriaLevel()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" Expanded="true">
+						<TreeNode Text="Child Node" Expanded="true">
+							<TreeNode Text="Grandchild Node" />
+						</TreeNode>
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var tables = cut.FindAll("table");
+		tables.Count().ShouldBe(3);
+		
+		// Root node should have aria-level="1"
+		tables[0].GetAttribute("aria-level").ShouldBe("1");
+		
+		// Child node should have aria-level="2"
+		tables[1].GetAttribute("aria-level").ShouldBe("2");
+		
+		// Grandchild node should have aria-level="3"
+		tables[2].GetAttribute("aria-level").ShouldBe("3");
+	}
+
+	[Fact]
+	public void TreeNode_UseAccessibilityFeatures_AddsAriaExpandedToParentNodes()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" Expanded="true">
+						<TreeNode Text="Child Node" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var tables = cut.FindAll("table");
+		
+		// Root node (has children, expanded)
+		tables[0].GetAttribute("aria-expanded").ShouldBe("true");
+		
+		// Child node (no children, should not have aria-expanded)
+		tables[1].HasAttribute("aria-expanded").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TreeNode_UseAccessibilityFeatures_AriaExpandedReflectsCollapsedState()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" Expanded="false">
+						<TreeNode Text="Child Node" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var tables = cut.FindAll("table");
+		
+		// Root node (has children, collapsed)
+		tables[0].GetAttribute("aria-expanded").ShouldBe("false");
+	}
+
+	[Fact]
+	public void TreeNode_UseAccessibilityFeatures_AddsTabindex()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true">
+				<Nodes>
+					<TreeNode Text="Root Node" />
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var table = cut.Find("table");
+		table.GetAttribute("tabindex").ShouldBe("0");
+	}
+
+	[Fact]
+	public void TreeNode_WithoutAccessibilityFeatures_NoTabindex()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="false">
+				<Nodes>
+					<TreeNode Text="Root Node" />
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var table = cut.Find("table");
+		table.HasAttribute("tabindex").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TreeNode_UseAccessibilityFeatures_AddsAriaLabelToExpandLink()
+	{
+		// Arrange/Act
+		var cut = Render(
+			@<TreeView UseAccessibilityFeatures="true" ShowExpandCollapse="true">
+				<Nodes>
+					<TreeNode Text="Root Node" Expanded="true">
+						<TreeNode Text="Child Node" />
+					</TreeNode>
+				</Nodes>
+			</TreeView>
+		);
+
+		// Assert
+		var expandLinks = cut.FindAll("a").Where(a => a.GetElementsByTagName("img").Any());
+		expandLinks.Count().ShouldBeGreaterThan(0);
+		
+		var firstExpandLink = expandLinks.First();
+		firstExpandLink.GetAttribute("aria-label").ShouldBe("Collapse Root Node");
+	}
+
+}

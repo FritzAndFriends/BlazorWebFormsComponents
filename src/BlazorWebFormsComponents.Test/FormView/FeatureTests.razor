@@ -1,0 +1,98 @@
+@inherits BlazorWebFormsComponents.Test.BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void FormView_HeaderText_RendersHeaderRow()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				HeaderText="My Header">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>);
+
+		// Assert — a header row should contain the text
+		cut.Markup.ShouldContain("My Header");
+	}
+
+	[Fact]
+	public void FormView_HeaderTemplate_RendersInsteadOfHeaderText()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				HeaderText="Plain Header">
+				<HeaderTemplate>
+					<h4 id="customHeader">Custom Header Content</h4>
+				</HeaderTemplate>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>);
+
+		// Assert — template takes precedence over HeaderText
+		cut.Find("#customHeader").TextContent.ShouldBe("Custom Header Content");
+		cut.Markup.ShouldNotContain("Plain Header");
+	}
+
+	[Fact]
+	public void FormView_FooterText_RendersFooterRow()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				FooterText="My Footer">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>);
+
+		// Assert — a footer row should contain the text
+		cut.Markup.ShouldContain("My Footer");
+	}
+
+	[Fact]
+	public void FormView_EmptyDataText_RendersWhenNoItems()
+	{
+		// Arrange — null Items means empty
+		Widget[] emptyItems = null;
+
+		// Act
+		var cut = Render(
+			@<FormView Items="emptyItems" ItemType="Widget" Context="Item"
+				EmptyDataText="No records found">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>);
+
+		// Assert
+		cut.Markup.ShouldContain("No records found");
+	}
+
+	[Fact]
+	public void FormView_EmptyDataTemplate_RendersWhenNoItems()
+	{
+		// Arrange — empty array means no data
+		Widget[] emptyItems = Array.Empty<Widget>();
+
+		// Act
+		var cut = Render(
+			@<FormView Items="emptyItems" ItemType="Widget" Context="Item"
+				EmptyDataText="Fallback Text">
+				<EmptyDataTemplate>
+					<div id="emptyTemplate">Custom empty state</div>
+				</EmptyDataTemplate>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>);
+
+		// Assert — template takes precedence over EmptyDataText
+		cut.Find("#emptyTemplate").TextContent.ShouldBe("Custom empty state");
+		cut.Markup.ShouldNotContain("Fallback Text");
+	}
+}

@@ -1,0 +1,241 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void DataGridItemStyle_AppliesToDataRows()
+	{
+		var data = GetTestItems();
+		WebColor red = "Red";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false">
+			<ItemStyleContent>
+				<DataGridItemStyle BackColor="red" />
+			</ItemStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBe(3);
+		rows[0].GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+	[Fact]
+	public void DataGridAlternatingItemStyle_AppliesToAlternatingRows()
+	{
+		var data = GetTestItems();
+		WebColor red = "Red";
+		WebColor blue = "Blue";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false">
+			<ItemStyleContent>
+				<DataGridItemStyle BackColor="red" />
+			</ItemStyleContent>
+			<AlternatingItemStyleContent>
+				<DataGridAlternatingItemStyle BackColor="blue" />
+			</AlternatingItemStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows[0].GetAttribute("style").ShouldContain("background-color:Red");
+		rows[1].GetAttribute("style").ShouldContain("background-color:Blue");
+		rows[2].GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+	[Fact]
+	public void DataGridHeaderStyle_AppliesToHeaderRow()
+	{
+		var data = GetTestItems();
+		WebColor green = "Green";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false">
+			<HeaderStyleContent>
+				<DataGridHeaderStyle BackColor="green" />
+			</HeaderStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		cut.Find("thead tr").GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DataGridFooterStyle_AppliesToFooterRow()
+	{
+		var data = GetTestItems();
+		WebColor navy = "Navy";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false" ShowFooter="true">
+			<FooterStyleContent>
+				<DataGridFooterStyle BackColor="navy" />
+			</FooterStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		cut.Find("tfoot tr").GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DataGridPagerStyle_AppliesToPagerRow()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new DgStyleItem { Id = i, Name = $"Item {i}" }).ToList();
+		WebColor silver = "Silver";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						AllowPaging="true" PageSize="10">
+			<PagerStyleContent>
+				<DataGridPagerStyle BackColor="silver" />
+			</PagerStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		cut.Find("tfoot tr").GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void DataGridSelectedItemStyle_AppliesToSelectedIndex()
+	{
+		var data = GetTestItems();
+		WebColor yellow = "Yellow";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						SelectedIndex="1">
+			<SelectedItemStyleContent>
+				<DataGridSelectedItemStyle BackColor="yellow" />
+			</SelectedItemStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows[1].GetAttribute("style").ShouldContain("background-color:Yellow");
+	}
+
+	[Fact]
+	public void DataGridEditItemStyle_AppliesToEditItemIndex()
+	{
+		var data = GetTestItems();
+		WebColor orange = "Orange";
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						EditItemIndex="0">
+			<EditItemStyleContent>
+				<DataGridEditItemStyle BackColor="orange" />
+			</EditItemStyleContent>
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows[0].GetAttribute("style").ShouldContain("background-color:Orange");
+	}
+
+	[Fact]
+	public void Caption_RendersCorrectly()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						Caption="My Caption">
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var caption = cut.Find("caption");
+		caption.TextContent.ShouldBe("My Caption");
+	}
+
+	[Fact]
+	public void CaptionAlign_RendersStyle()
+	{
+		var data = GetTestItems();
+		TableCaptionAlign captionAlign = TableCaptionAlign.Bottom;
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						Caption="Aligned" CaptionAlign="captionAlign">
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		cut.Find("caption").GetAttribute("style").ShouldContain("caption-side:bottom");
+	}
+
+	[Fact]
+	public void GridLines_RendersRulesAttribute()
+	{
+		var data = GetTestItems();
+		GridLines gridLines = GridLines.Both;
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						GridLines="gridLines">
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		cut.Find("table").GetAttribute("rules").ShouldBe("all");
+	}
+
+	[Fact]
+	public void UseAccessibleHeader_RendersTh_ScopeCol()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						UseAccessibleHeader="true">
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var th = cut.Find("th");
+		th.GetAttribute("scope").ShouldBe("col");
+	}
+
+	[Fact]
+	public void CellPaddingAndSpacing_RenderOnTable()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<DataGrid ItemType="DgStyleItem" Items="data" AutoGenerateColumns="false"
+						CellPadding="5" CellSpacing="3">
+			<Columns>
+				<BoundField ItemType="DgStyleItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</DataGrid>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("cellpadding").ShouldBe("5");
+		table.GetAttribute("cellspacing").ShouldBe("3");
+	}
+
+	private List<DgStyleItem> GetTestItems()
+	{
+		return new List<DgStyleItem>
+		{
+			new DgStyleItem { Id = 1, Name = "Alpha" },
+			new DgStyleItem { Id = 2, Name = "Beta" },
+			new DgStyleItem { Id = 3, Name = "Gamma" }
+		};
+	}
+
+	public class DgStyleItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

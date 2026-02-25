@@ -1,0 +1,99 @@
+@page "/ControlSamples/Chart/Line"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Line</PageTitle>
+
+<h2>Chart - Line</h2>
+
+<p>A multi-series <strong>Line</strong> chart showing average monthly temperatures for two cities. Line charts are ideal for visualizing trends over time.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px">
+	<ChartTitle Text="Average Monthly Temperature (°F)" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="TempArea"
+		AxisX="@(new Axis { Title = "Month" })"
+		AxisY="@(new Axis { Title = "Temperature (°F)" })" />
+	<ChartSeries Name="New York"
+		ChartType="SeriesChartType.Line"
+		ChartArea="TempArea"
+		Points="@NewYorkTemps" />
+	<ChartSeries Name="Los Angeles"
+		ChartType="SeriesChartType.Line"
+		ChartArea="TempArea"
+		Points="@LosAngelesTemps" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> NewYorkTemps = new()
+	{
+		new() { XValue = "Jan", YValues = new[] { 33.0 } },
+		new() { XValue = "Feb", YValues = new[] { 35.0 } },
+		new() { XValue = "Mar", YValues = new[] { 44.0 } },
+		new() { XValue = "Apr", YValues = new[] { 55.0 } },
+		new() { XValue = "May", YValues = new[] { 65.0 } },
+		new() { XValue = "Jun", YValues = new[] { 74.0 } },
+		new() { XValue = "Jul", YValues = new[] { 80.0 } },
+		new() { XValue = "Aug", YValues = new[] { 78.0 } },
+		new() { XValue = "Sep", YValues = new[] { 71.0 } },
+		new() { XValue = "Oct", YValues = new[] { 59.0 } },
+		new() { XValue = "Nov", YValues = new[] { 48.0 } },
+		new() { XValue = "Dec", YValues = new[] { 37.0 } }
+	};
+
+	private List<DataPoint> LosAngelesTemps = new()
+	{
+		new() { XValue = "Jan", YValues = new[] { 58.0 } },
+		new() { XValue = "Feb", YValues = new[] { 59.0 } },
+		new() { XValue = "Mar", YValues = new[] { 60.0 } },
+		new() { XValue = "Apr", YValues = new[] { 62.0 } },
+		new() { XValue = "May", YValues = new[] { 65.0 } },
+		new() { XValue = "Jun", YValues = new[] { 69.0 } },
+		new() { XValue = "Jul", YValues = new[] { 74.0 } },
+		new() { XValue = "Aug", YValues = new[] { 75.0 } },
+		new() { XValue = "Sep", YValues = new[] { 73.0 } },
+		new() { XValue = "Oct", YValues = new[] { 68.0 } },
+		new() { XValue = "Nov", YValues = new[] { 62.0 } },
+		new() { XValue = "Dec", YValues = new[] { 57.0 } }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="600px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Average Monthly Temperature (°F)" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="TempArea"
+        AxisX="@@(new Axis { Title = "Month" })"
+        AxisY="@@(new Axis { Title = "Temperature (°F)" })" /&gt;
+    &lt;ChartSeries Name="New York"
+        ChartType="SeriesChartType.Line"
+        ChartArea="TempArea"
+        Points="@@NewYorkTemps" /&gt;
+    &lt;ChartSeries Name="Los Angeles"
+        ChartType="SeriesChartType.Line"
+        ChartArea="TempArea"
+        Points="@@LosAngelesTemps" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; NewYorkTemps = new()
+    {
+        new() { XValue = "Jan", YValues = new[] { 33.0 } },
+        new() { XValue = "Feb", YValues = new[] { 35.0 } },
+        // ... more months
+    };
+
+    private List&lt;DataPoint&gt; LosAngelesTemps = new()
+    {
+        new() { XValue = "Jan", YValues = new[] { 58.0 } },
+        new() { XValue = "Feb", YValues = new[] { 59.0 } },
+        // ... more months
+    };
+
+}</code></pre>

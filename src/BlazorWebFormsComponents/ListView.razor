@@ -1,4 +1,5 @@
 ﻿@using BlazorWebFormsComponents.DataBinding
+@using BlazorWebFormsComponents.Enums
 @inherits DataBoundComponent<ItemType>
 @typeparam ItemType
 
@@ -8,7 +9,14 @@
 }
 else if (Items == null || !Items.Any())
 {
-	@EmptyDataTemplate
+	@if (EmptyItemTemplate != null)
+	{
+		@EmptyItemTemplate
+	}
+	else
+	{
+		@EmptyDataTemplate
+	}
 }
 else
 {
@@ -18,7 +26,7 @@ else
 	}
 
 	Func<bool, RenderFragment<ItemType>> oddOrEvenTemplate =
-		(isEven) => isEven ? ItemTemplate : AlternatingItemTemplate ?? ItemTemplate;
+	(isEven) => isEven ? ItemTemplate : AlternatingItemTemplate ?? ItemTemplate;
 
 	@LayoutTemplate(
 			@: @if (Items != null)
@@ -32,18 +40,40 @@ else
 				{
 					DataBinding(EventArgs.Empty);
 
+					@if (InsertItemPosition != InsertItemPosition.None && InsertItemPosition == InsertItemPosition.FirstItem && InsertItemTemplate != null)
+					{
+						@InsertItemTemplate(default(ItemType))
+					}
+
+					var dataItemIndex = 0;
+					var displayIndex = 0;
 					foreach(var item in Items)
 					{
-					  <CascadingValue Name="CurrentDataBoundItem" Value="item">
-						@oddOrEvenTemplate(even)(item)
-						@{ even = !even; }
+						var listViewDataItem = new ListViewDataItem(dataItemIndex, displayIndex)
+						{
+							DataItem = item
+						};
+						<CascadingValue Name="CurrentDataBoundItem" Value="item">
+							@{
+								var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
+									? EditItemTemplate : oddOrEvenTemplate(even);
+							}
+							@currentTemplate(item)
+							@{ even = !even; }
 						</CascadingValue>
 						if (ItemSeparatorTemplate != null)
 						{
 							@ItemSeparatorTemplate
 						}
 
-						ItemDataBound(new ListViewItemEventArgs(item));
+						ItemDataBound(new ListViewItemEventArgs(listViewDataItem) { Sender = this });
+						dataItemIndex++;
+						displayIndex++;
+					}
+
+					@if (InsertItemPosition != InsertItemPosition.None && InsertItemPosition == InsertItemPosition.LastItem && InsertItemTemplate != null)
+					{
+						@InsertItemTemplate(default(ItemType))
 					}
 
 					DataBound(EventArgs.Empty);
@@ -51,6 +81,10 @@ else
 				else
 				{
 					var buildCounter = 1;
+					var dataItemIndex = 0;
+					var displayIndex = 0;
+
+					DataBinding(EventArgs.Empty);
 
 					do
 					{
@@ -60,18 +94,27 @@ else
 							buildCounter++;
 							for (var i = 0; i < GroupItemCount ; i++)
 							{
-								var builderTemplate = oddOrEvenTemplate(even);
+								var builderTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
+									? EditItemTemplate : oddOrEvenTemplate(even);
 								var item = itemIterator.Current;
-										if (item != null)
-										{
-								<CascadingValue Name="CurrentDataBoundItem" Value="item">
-												@builderTemplate(item)
-								</CascadingValue>
-										}
+								if (item != null)
+								{
+									var listViewDataItem = new ListViewDataItem(dataItemIndex, displayIndex)
+									{
+										DataItem = item
+									};
+									<CascadingValue Name="CurrentDataBoundItem" Value="item">
+										@builderTemplate(item)
+									</CascadingValue>
+
+									ItemDataBound(new ListViewItemEventArgs(listViewDataItem) { Sender = this });
+									dataItemIndex++;
+									displayIndex++;
+								}
 								if (ItemSeparatorTemplate != null && i < GroupItemCount - 1)
 								{
 									builder.AddContent(buildCounter, @ItemSeparatorTemplate);
-								  buildCounter++;
+									buildCounter++;
 								}
 
 								isBusy = itemIterator.MoveNext();
@@ -89,6 +132,7 @@ else
 						
 					} while (isBusy);
 
+					DataBound(EventArgs.Empty);
 				}
 			}
 		)

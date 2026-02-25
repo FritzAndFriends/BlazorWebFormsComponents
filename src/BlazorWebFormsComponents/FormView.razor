@@ -1,63 +1,133 @@
 ﻿@using BlazorWebFormsComponents.DataBinding
 @inherits DataBoundComponent<ItemType>
 @typeparam ItemType
-<table cellspacing="0" style="border-collapse:collapse;">
-	<tr>
-		<td colspan="2">
-			@if (CurrentItem == null)
-			{
-				<span>Loading...</span>
-			}
-			else
-			{
-				DataBinding(EventArgs.Empty);
 
-				<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
-					@switch (CurrentMode) {
-						case Enums.FormViewMode.ReadOnly:
-							@ItemTemplate(CurrentItem);
-							break;
-						case Enums.FormViewMode.Edit:
-							@EditItemTemplate(CurrentItem);
-									break;
+<CascadingValue Name="ParentFormView" Value="this" IsFixed="true">
+	@RowStyleContent
+	@EditRowStyleContent
+	@InsertRowStyleContent
+	@HeaderStyleContent
+	@FooterStyleContent
+	@EmptyDataRowStyleContent
+	@PagerStyleContent
+	@PagerSettingsContent
+</CascadingValue>
+
+<table cellspacing="0" style="border-collapse:collapse;">
+	@if (!string.IsNullOrEmpty(Caption))
+	{
+		<caption style="@GetCaptionStyle()">@Caption</caption>
+	}
+
+	@* Header Row *@
+	@if (HeaderTemplate != null || !string.IsNullOrEmpty(HeaderText))
+	{
+		<tr style="@HeaderStyle?.ToString()">
+			<td colspan="2">
+				@if (HeaderTemplate != null)
+				{
+					@HeaderTemplate
+				}
+				else
+				{
+					@HeaderText
+				}
+			</td>
+		</tr>
+	}
+
+	@if (Items == null || !Items.Any())
+	{
+		@* Empty Data Row *@
+		@if (EmptyDataTemplate != null)
+		{
+			<tr style="@EmptyDataRowStyle?.ToString()">
+				<td colspan="2">
+					@EmptyDataTemplate
+				</td>
+			</tr>
+		}
+		else if (!string.IsNullOrEmpty(EmptyDataText))
+		{
+			<tr style="@EmptyDataRowStyle?.ToString()">
+				<td colspan="2">@EmptyDataText</td>
+			</tr>
+		}
+	}
+	else
+	{
+		<tr style="@GetCurrentRowStyle()?.ToString()">
+			<td colspan="2">
+				@if (CurrentItem == null)
+				{
+					<span>Loading...</span>
+				}
+				else
+				{
+					DataBinding(EventArgs.Empty);
+
+					<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
+						@switch (CurrentMode) {
+							case Enums.FormViewMode.ReadOnly:
+								@ItemTemplate(CurrentItem);
+								break;
+							case Enums.FormViewMode.Edit:
+								@EditItemTemplate(CurrentItem);
+								break;
 							case Enums.FormViewMode.Insert:
 								@InsertItemTemplate(CurrentItem);
-							break;
-					}
-						</CascadingValue>
-
-							DataBound(EventArgs.Empty);
+								break;
 						}
-					</td>
-	</tr>
-	<tr>
-		<td>
-			<table>
-				@** BEGIN PAGER **@
-				<tr>
-					@if (Items == null)
-					{
-						<td>Loading...</td>
-					}
-					else
-					{
-						@for (int i = 1; i <= Items.Count(); i++)
-					{
-							if (i == Position)
-							{
-							<td><span>@i</span></td>
-							}
-							else
-							{
-								var thisPosition = i;
-							<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
-							}
+					</CascadingValue>
 
-						}
-					}
-				</tr>
+					DataBound(EventArgs.Empty);
+				}
+			</td>
+		</tr>
+		<tr style="@PagerStyle?.ToString()">
+			<td>
+				@if (PagerTemplate != null)
+				{
+					@PagerTemplate
+				}
+				else
+				{
+					<table>
+						@** BEGIN PAGER **@
+						<tr>
+							@for (int i = 1; i <= Items.Count(); i++)
+							{
+								if (i == Position)
+								{
+									<td><span>@i</span></td>
+								}
+								else
+								{
+									var thisPosition = i;
+									<td><a href="javascript:void();" @onclick="@(() => { Position = thisPosition; })">@i</a></td>
+								}
+							}
+						</tr>
+					</table>
+				}
+			</td>
+		</tr>
+	}
 
-			</table>
-		</td>
-	</tr>
+	@* Footer Row *@
+	@if (FooterTemplate != null || !string.IsNullOrEmpty(FooterText))
+	{
+		<tr style="@FooterStyle?.ToString()">
+			<td colspan="2">
+				@if (FooterTemplate != null)
+				{
+					@FooterTemplate
+				}
+				else
+				{
+					@FooterText
+				}
+			</td>
+		</tr>
+	}
 </table>

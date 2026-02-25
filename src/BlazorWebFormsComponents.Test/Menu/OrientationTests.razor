@@ -1,0 +1,79 @@
+@using Moq
+@using Microsoft.AspNetCore.Routing
+@using Microsoft.AspNetCore.Http
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	private void SetupMenuServices()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Fact]
+	public void Menu_DefaultOrientation_IsVertical_NoHorizontalClass()
+	{
+		// Arrange
+		SetupMenuServices();
+
+		// Act
+		var cut = Render(
+			@<Menu id="vertMenu">
+				<Items>
+					<MenuItem text="Home" />
+					<MenuItem text="About" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert — default vertical: no "horizontal" CSS class on ul
+		var ul = cut.Find("ul.level1");
+		ul.ShouldNotBeNull();
+		ul.ClassList.ShouldNotContain("horizontal");
+	}
+
+	[Fact]
+	public void Menu_Orientation_Horizontal_AppliesHorizontalClass()
+	{
+		// Arrange
+		SetupMenuServices();
+		Orientation horizontal = Orientation.Horizontal;
+
+		// Act
+		var cut = Render(
+			@<Menu id="horizMenu" Orientation="horizontal">
+				<Items>
+					<MenuItem text="Home" />
+					<MenuItem text="About" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert
+		var ul = cut.Find("ul.level1");
+		ul.ShouldNotBeNull();
+		ul.ClassList.ShouldContain("horizontal");
+	}
+
+	[Fact]
+	public void Menu_Orientation_Vertical_ExplicitlySet_NoHorizontalClass()
+	{
+		// Arrange
+		SetupMenuServices();
+		Orientation vertical = Orientation.Vertical;
+
+		// Act
+		var cut = Render(
+			@<Menu id="vertExplicit" Orientation="vertical">
+				<Items>
+					<MenuItem text="Home" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert
+		var ul = cut.Find("ul.level1");
+		ul.ClassList.ShouldNotContain("horizontal");
+	}
+
+}

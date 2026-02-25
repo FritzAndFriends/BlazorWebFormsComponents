@@ -1,0 +1,124 @@
+@page "/ControlSamples/FormView/Events"
+
+<PageTitle>FormView Events</PageTitle>
+
+<h2>FormView Events</h2>
+
+<Nav />
+
+<p>This sample demonstrates the <code>ModeChanged</code> and <code>ItemCommand</code> events
+   on the FormView control.</p>
+
+<hr />
+
+<h3>ModeChanged &amp; ItemCommand</h3>
+<p>Click <strong>Edit</strong> to switch modes, then <strong>Update</strong> or <strong>Cancel</strong>.
+   Both events are logged below.</p>
+
+<FormView @ref="_formView"
+          AllowPaging="true"
+          DataKeyNames="Id"
+          OnPageIndexChanging="HandlePageChanging"
+          ModeChanged="HandleModeChanged"
+          ItemCommand="HandleItemCommand"
+          ItemType="Widget" Context="Item"
+          HeaderText="Widget Viewer">
+
+    <ItemTemplate>
+        <table>
+            <tr><td><strong>Name:</strong></td><td>@Item.Name</td></tr>
+            <tr><td><strong>Price:</strong></td><td>@Item.Price.ToString("C")</td></tr>
+            <tr>
+                <td colspan="2">
+                    <Button CommandName="Edit" Text="Edit" />
+                    <Button CommandName="CustomAction" Text="Custom Action" />
+                </td>
+            </tr>
+        </table>
+    </ItemTemplate>
+
+    <EditItemTemplate>
+        <table>
+            <tr><td>Name:</td><td><input @bind="Item.Name" /></td></tr>
+            <tr><td>Price:</td><td><input @bind="Item.Price" /></td></tr>
+            <tr>
+                <td colspan="2">
+                    <Button Text="Update" CommandName="Update" />
+                    <Button Text="Cancel" CommandName="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </EditItemTemplate>
+
+</FormView>
+
+<div style="margin-top:15px; padding:10px; border:1px solid #ccc; background:#f9f9f9;">
+    <strong>Event Log:</strong>
+    @if (_eventLog.Count == 0)
+    {
+        <p><em>No events yet — interact with the FormView above.</em></p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var entry in _eventLog)
+            {
+                <li>@entry</li>
+            }
+        </ul>
+    }
+</div>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;FormView ModeChanged="HandleModeChanged"
+          ItemCommand="HandleItemCommand"
+          ItemType="Widget" Context="Item"&gt;
+    &lt;ItemTemplate&gt;
+        &lt;Button CommandName="Edit" Text="Edit" /&gt;
+        &lt;Button CommandName="CustomAction" Text="Custom" /&gt;
+    &lt;/ItemTemplate&gt;
+    &lt;EditItemTemplate&gt;
+        &lt;Button Text="Update" CommandName="Update" /&gt;
+        &lt;Button Text="Cancel" CommandName="Cancel" /&gt;
+    &lt;/EditItemTemplate&gt;
+&lt;/FormView&gt;
+
+@@code {
+    void HandleModeChanged(FormViewModeEventArgs e)
+    {
+        // e.NewMode — ReadOnly, Edit, or Insert
+    }
+
+    void HandleItemCommand(FormViewCommandEventArgs e)
+    {
+        // e.CommandName — "Edit", "Update", "Cancel", or custom
+    }
+}</code></pre>
+
+@code {
+
+    private FormView<Widget> _formView;
+    private List<string> _eventLog = new();
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            _formView.Items = Widget.SimpleWidgetList;
+
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void HandlePageChanging(PageChangedEventArgs e) { }
+
+    private void HandleModeChanged(FormViewModeEventArgs e)
+    {
+        _eventLog.Insert(0, $"ModeChanged → {e.NewMode}");
+    }
+
+    private void HandleItemCommand(FormViewCommandEventArgs e)
+    {
+        _eventLog.Insert(0, $"ItemCommand → \"{e.CommandName}\"");
+    }
+}

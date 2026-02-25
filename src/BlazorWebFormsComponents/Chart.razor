@@ -1,0 +1,12 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<div id="@ID" class="@CssClass" style="@Style @ChartDimensionStyle">
+		<canvas @ref="_canvasRef" id="@CanvasId"></canvas>
+	</div>
+
+	<CascadingValue Name="ParentChart" Value="this">
+		@ChildContent
+	</CascadingValue>
+}

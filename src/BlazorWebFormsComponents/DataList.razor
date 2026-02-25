@@ -7,16 +7,12 @@
 {
 	var IndexedItems = ElementIndex(RepeatColumns, Items, RepeatDirection);
 
-	<CascadingValue Name="HeaderStyle" Value="HeaderStyle">
-		<CascadingValue Name="FooterStyle" Value="FooterStyle">
-			<CascadingValue Name="ItemStyle" Value="ItemStyle">
-				<CascadingValue Name="AlternatingItemStyle" Value="AlternatingItemStyle">
-					<CascadingValue Name="SeparatorStyle" Value="SeparatorStyle">
-						@ChildContent
-					</CascadingValue>
-				</CascadingValue>
-			</CascadingValue>
-		</CascadingValue>
+	<CascadingValue Name="ParentDataList" Value="this" IsFixed="true">
+		@HeaderStyleContent
+		@FooterStyleContent
+		@ItemStyleContent
+		@AlternatingItemStyleContent
+		@SeparatorStyleContent
 	</CascadingValue>
 
 	@switch (RepeatLayout)
@@ -77,7 +73,7 @@
 											<td style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</td>
 										</CascadingValue>
 
-										ItemDataBound(new DataListItemEventArgs(item));
+										ItemDataBound(new DataListItemEventArgs(item) { Sender = this });
 
 										idx++;
 										first = false;
@@ -123,7 +119,7 @@
 								}
 								<span style="@(even ? ItemStyle : AlternatingItemTemplate == null ? ItemStyle : AlternatingItemStyle)">@(even ? ItemTemplate(item) : AlternatingItemTemplate == null ? ItemTemplate(item) : AlternatingItemTemplate(item))</span>
 							</CascadingValue>
-							ItemDataBound(new DataListItemEventArgs(item));
+							ItemDataBound(new DataListItemEventArgs(item) { Sender = this });
 							first = false;
 							idx++;
 						} while ((idx - 1) % RepeatColumns != 0 && idx <= IndexedItems.Count());

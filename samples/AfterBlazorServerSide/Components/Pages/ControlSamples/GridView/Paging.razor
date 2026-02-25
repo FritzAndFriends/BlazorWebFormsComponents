@@ -1,0 +1,36 @@
+@page "/ControlSamples/GridView/Paging"
+
+<PageTitle>GridView - Paging</PageTitle>
+
+<h2>GridView - Paging</h2>
+
+<p>This sample demonstrates GridView with paging enabled, showing 10 items per page from a list of 50 products.</p>
+
+<Nav />
+
+<GridView ItemType="Product" DataSource="@Products" AllowPaging="true" PageSize="10" AutoGenerateColumns="true"
+          PageIndexChanged="HandlePageChanged" />
+
+<p>Current Page: @(CurrentPage + 1) of @TotalPages</p>
+
+@code {
+    private int CurrentPage = 0;
+    private int TotalPages => (int)Math.Ceiling((double)Products.Count / 10);
+
+    private List<Product> Products = Enumerable.Range(1, 50)
+        .Select(i => new Product { Id = i, Name = $"Product {i}", Price = 9.99m + i, Category = i % 3 == 0 ? "Electronics" : i % 3 == 1 ? "Books" : "Clothing" })
+        .ToList();
+
+    private void HandlePageChanged(PageChangedEventArgs e)
+    {
+        CurrentPage = e.NewPageIndex;
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public string Category { get; set; }
+    }
+}

@@ -1,0 +1,69 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateTestSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/");
+		var products = new SiteMapNode("Products", "/products");
+		var electronics = new SiteMapNode("Electronics", "/products/electronics");
+
+		root.AddChild(products);
+		products.AddChild(electronics);
+
+		return root;
+	}
+
+	[Fact]
+	public void Custom_PathSeparator_String()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products" 
+			PathSeparator=" / " />);
+
+		// Assert
+		cut.Markup.ShouldContain(" / ");
+		cut.Markup.ShouldNotContain(" &gt; ");
+	}
+
+	[Fact]
+	public void Custom_PathSeparator_Arrow()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products" 
+			PathSeparator=" → " />);
+
+		// Assert
+		cut.Markup.ShouldContain("→");
+	}
+
+	[Fact]
+	public void PathSeparatorTemplate_Overrides_String()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products"
+			PathSeparator=" > ">
+			<PathSeparatorTemplate>
+				<span class="separator-icon">|</span>
+			</PathSeparatorTemplate>
+		</SiteMapPath>);
+
+		// Assert
+		cut.Markup.ShouldContain("separator-icon");
+		cut.Markup.ShouldNotContain(" &gt; ");
+	}
+}

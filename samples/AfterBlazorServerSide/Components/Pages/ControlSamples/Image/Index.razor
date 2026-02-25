@@ -1,0 +1,112 @@
+@page "/ControlSamples/Image"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Image Sample</PageTitle>
+
+<h2>Image - Basic Usage</h2>
+
+<p>The Image component displays an image on a web page, emulating the ASP.NET Web Forms Image control.</p>
+
+<hr />
+
+<h3>Basic Image</h3>
+<p>A simple image with alternate text:</p>
+
+<div class="demo-section">
+    <Image ImageUrl="/img/placeholder-150x100.svg" 
+           AlternateText="Sample placeholder image" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;Image ImageUrl="https://via.placeholder.com/150x100" 
+       AlternateText="Sample placeholder image" /&gt;</code></pre>
+
+<hr />
+
+<h3>Image with Tooltip</h3>
+<p>Hover over the image to see the tooltip:</p>
+
+<div class="demo-section">
+    <Image ImageUrl="/img/placeholder-150x100.svg" 
+           AlternateText="Image with tooltip"
+           ToolTip="This is a tooltip displayed on hover" />
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;Image ImageUrl="https://via.placeholder.com/150x100/0066cc/ffffff?text=Hover+Me" 
+       AlternateText="Image with tooltip"
+       ToolTip="This is a tooltip displayed on hover" /&gt;</code></pre>
+
+<hr />
+
+<h3>Image Alignment</h3>
+<p>Images can be aligned using the ImageAlign property:</p>
+
+<div class="demo-section" style="overflow: auto;">
+    <Image ImageUrl="/img/placeholder-80x80.svg" 
+           AlternateText="Left aligned image"
+           ImageAlign="ImageAlign.Left" />
+    <p>This text flows around the left-aligned image. The ImageAlign property 
+       controls how content flows around the image, similar to the CSS float property. 
+       This is useful when migrating Web Forms applications that rely on this behavior.</p>
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;Image ImageUrl="https://via.placeholder.com/80x80" 
+       AlternateText="Left aligned image"
+       ImageAlign="ImageAlign.Left" /&gt;
+&lt;p&gt;This text flows around the left-aligned image...&lt;/p&gt;</code></pre>
+
+<hr />
+
+<h3>Dynamic Image with Visibility Toggle</h3>
+<p>Click the button to toggle image visibility:</p>
+
+<div class="demo-section">
+    <button class="btn btn-primary" @onclick="ToggleVisibility">
+        @(isVisible ? "Hide Image" : "Show Image")
+    </button>
+    
+    <div style="margin-top: 10px;">
+        <Image ImageUrl="/img/placeholder-200x120.svg" 
+               AlternateText="Toggleable image"
+               Visible="@isVisible" />
+    </div>
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;button @@onclick="ToggleVisibility"&gt;Toggle&lt;/button&gt;
+&lt;Image ImageUrl="..." AlternateText="Toggleable image" Visible="@@isVisible" /&gt;
+
+@@code {
+    private bool isVisible = true;
+    
+    void ToggleVisibility()
+    {
+        isVisible = !isVisible;
+    }
+}</code></pre>
+
+<hr />
+
+<h3>Decorative Image (Empty Alt Text)</h3>
+<p>For decorative images that don't convey content, use GenerateEmptyAlternateText:</p>
+
+<div class="demo-section">
+    <Image ImageUrl="/img/placeholder-300x20.svg" 
+           GenerateEmptyAlternateText="true" />
+    <p>The decorative separator above has an empty alt attribute for accessibility compliance.</p>
+</div>
+
+<p>Code:</p>
+<pre><code>&lt;Image ImageUrl="..." GenerateEmptyAlternateText="true" /&gt;</code></pre>
+
+@code {
+    private bool isVisible = true;
+
+    void ToggleVisibility()
+    {
+        isVisible = !isVisible;
+    }
+}

@@ -12,9 +12,9 @@
 					EnableViewState="false"
 					Context="Item"
 					ItemType="SharedSampleObjects.Models.Widget">
-	<ChildContent>
+	<FooterStyleContent>
 		<BlazorWebFormsComponents.FooterStyle BackColor="Blue" ForeColor="White"></BlazorWebFormsComponents.FooterStyle>
-	</ChildContent>
+	</FooterStyleContent>
 	<FooterTemplate>Simple Widgets</FooterTemplate>
 	<ItemTemplate>
 		@Item.Name - @Item.Price.ToString("c")
@@ -34,9 +34,9 @@
 					FooterStyle-BorderWidth="2"
 					SelectMethod="GetWidgets"
 					ItemType="SharedSampleObjects.Models.Widget">
-	<ChildContent>
+	<FooterStyleContent>
 		<BlazorWebFormsComponents.FooterStyle BackColor="Blue"></BlazorWebFormsComponents.FooterStyle>
-	</ChildContent>
+	</FooterStyleContent>
 	<FooterTemplate>Simple Widgets</FooterTemplate>
 	<ItemTemplate>
 		@Item.Name - @Item.Price.ToString("c")

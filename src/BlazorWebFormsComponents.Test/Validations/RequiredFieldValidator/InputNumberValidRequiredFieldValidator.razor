@@ -12,7 +12,7 @@
 				Write something
 				<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
 				<RequiredFieldValidator Type="int?"
-															ControlToValidate="@Number"
+															ControlRef="@Number"
 															Text="Name is required." />
 			</EditForm>
 		);
@@ -24,7 +24,7 @@
 		_validSubmit.ShouldBeTrue();
 		_invalidSubmit.ShouldBeFalse();
 
-		cut.FindAll("span").Count().ShouldBe(0);
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
 
 	}
 

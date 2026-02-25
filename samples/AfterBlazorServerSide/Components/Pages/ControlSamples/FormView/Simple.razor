@@ -10,6 +10,8 @@
 							AllowPaging="true"
 							DataKeyNames="Id"
 							OnPageIndexChanging="WidgetFormView_PageIndexChanging"
+							HeaderText="Widget Catalog"
+							FooterText="End of widgets"
 							ItemType="Widget" Context="Item"
 							runat="server">
 
@@ -45,11 +47,26 @@
 
 <hr />
 
+<h3>Empty FormView with EmptyDataText</h3>
+<p>When the data source is empty, the EmptyDataText is displayed:</p>
+
+<FormView ItemType="Widget" Context="Item"
+					EmptyDataText="No widgets available.">
+	<ItemTemplate>
+		<span>@Item.Name</span>
+	</ItemTemplate>
+</FormView>
+
+<hr />
+
 <p>Code:</p>
 <code>
-&lt;FormView AllowPaging="true" DataKeyNames="Id" ItemType="Widget" Context="Item"&gt;<br />
+&lt;FormView HeaderText="Widget Catalog" AllowPaging="true" DataKeyNames="Id" ItemType="Widget" Context="Item"&gt;<br />
 &nbsp;&nbsp;&lt;ItemTemplate&gt;<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;@@Item.Name&nbsp;@@Item.Price.ToString("C")&lt;/h3&gt;<br />
 &nbsp;&nbsp;&lt;/ItemTemplate&gt;<br />
+&lt;/FormView&gt;<br /><br />
+&lt;FormView ItemType="Widget" EmptyDataText="No widgets available."&gt;<br />
+&nbsp;&nbsp;&lt;ItemTemplate&gt;...&lt;/ItemTemplate&gt;<br />
 &lt;/FormView&gt;
 </code>

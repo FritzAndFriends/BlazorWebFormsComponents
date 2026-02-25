@@ -8,7 +8,7 @@
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="@HandleSubmit">
 
 	<InputText id="value" @ref="Value.Current" @bind-Value="exampleModel.Value" />
-	<RangeValidator ControlToValidate="@Value"
+	<RangeValidator ControlRef="@Value"
 									Type="Integer"
 									MinimumValue="0"
 									MaximumValue="10"

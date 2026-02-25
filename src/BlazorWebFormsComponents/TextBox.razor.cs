@@ -1,5 +1,6 @@
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Interfaces;
+using BlazorWebFormsComponents.Validations;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,15 @@ namespace BlazorWebFormsComponents
 {
 	public partial class TextBox : BaseStyledComponent, ITextComponent
 	{
+		[Parameter]
+		public bool CausesValidation { get; set; } = true;
+
+		[Parameter]
+		public string ValidationGroup { get; set; }
+
+		[CascadingParameter(Name = "ValidationGroupCoordinator")]
+		protected ValidationGroupCoordinator Coordinator { get; set; }
+
 		[Parameter]
 		public string Text { get; set; } = string.Empty;
 
@@ -66,6 +76,9 @@ namespace BlazorWebFormsComponents
 			get
 			{
 				var attributes = new Dictionary<string, object>();
+
+				if (!string.IsNullOrEmpty(ClientID))
+					attributes["id"] = ClientID;
 
 				if (!string.IsNullOrEmpty(CssClass))
 					attributes["class"] = CssClass;

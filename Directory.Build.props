@@ -12,4 +12,12 @@
 		<AspNetCoreVersion>10.0.0</AspNetCoreVersion>
 	</PropertyGroup>
 
+	<!-- Enable .NET Code Analyzers -->
+	<PropertyGroup>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+	</PropertyGroup>
+
 </Project>

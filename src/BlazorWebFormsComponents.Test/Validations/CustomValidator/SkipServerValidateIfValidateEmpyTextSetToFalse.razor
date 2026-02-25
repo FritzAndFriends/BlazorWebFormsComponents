@@ -14,7 +14,7 @@
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<CustomValidator ServerValidate="@ServerValidate"
 												 ValidateEmptyText="false"
-												 ControlToValidate="@Name"
+												 ControlRef="@Name"
 												 Text="can't see me!" />
 			</EditForm>
 		);
@@ -27,7 +27,7 @@
 		_invalidSubmit.ShouldBeFalse();
 		_serverValidate.ShouldBeFalse();
 
-		cut.FindAll("span").Count().ShouldBe(0);
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
 
 	}
 

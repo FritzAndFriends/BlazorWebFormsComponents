@@ -12,7 +12,7 @@
 				Write something
 				<InputNumber @ref="Number.Current" @bind-Value="exampleModel.Number" />
 				<CompareValidator InputType="int"
-													ControlToValidate="@Number"
+													ControlRef="@Number"
 													ValueToCompare="5"
 													Type="Integer"
 													Operator="LessThan"
@@ -27,7 +27,7 @@
 		_validSubmit.ShouldBeTrue();
 		_invalidSubmit.ShouldBeFalse();
 
-		cut.FindAll("span").Count().ShouldBe(0);
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
 	}
 
 	private ExampleModel exampleModel = new ExampleModel();

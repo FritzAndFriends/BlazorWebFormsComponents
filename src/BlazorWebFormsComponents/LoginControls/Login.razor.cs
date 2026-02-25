@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class Login : BaseWebFormsComponent
+	public partial class Login : BaseStyledComponent
 	{
 		#region Obsolete Attributes / Properties
 
@@ -21,11 +21,16 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		#region Not implemented yet
 
-		//[Parameter] public Orientation Orientation { get; set; }
-		//[Parameter] public LoginTextLayout TextLayout { get; set; }
 		//[Parameter] public LoginFailureAction FailureAction { get; set; }
 		//[Parameter] public ITemplate LayoutTemplate { get; set; }
 		//[Parameter] public bool RenderOuterTable { get; set; } = true;
+
+		#endregion
+
+		#region Layout
+
+		[Parameter] public Orientation Orientation { get; set; } = Orientation.Vertical;
+		[Parameter] public LoginTextLayout TextLayout { get; set; } = LoginTextLayout.TextOnLeft;
 
 		#endregion
 
@@ -123,7 +128,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		private async Task ValidSubmit()
 		{
-			var loginCancelEventArgs = new LoginCancelEventArgs();
+			var loginCancelEventArgs = new LoginCancelEventArgs() { Sender = this };
 			await OnLoggingIn.InvokeAsync(loginCancelEventArgs);
 
 			if (loginCancelEventArgs.Cancel)
@@ -135,7 +140,7 @@ namespace BlazorWebFormsComponents.LoginControls
 			else
 			{
 
-				var authenticateEventArgs = new AuthenticateEventArgs();
+				var authenticateEventArgs = new AuthenticateEventArgs() { Sender = this };
 				await OnAuthenticate.InvokeAsync(authenticateEventArgs);
 
 				if (authenticateEventArgs.Authenticated)
@@ -184,6 +189,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 			}
 
+			this.SetFontsFromAttributes(AdditionalAttributes);
 			base.HandleUnknownAttributes();
 		}
 

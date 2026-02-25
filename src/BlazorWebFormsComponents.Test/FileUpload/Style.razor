@@ -1,0 +1,28 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_WithCssClass_AppliesClass()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload CssClass="custom-file-input" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.ClassList.ShouldContain("custom-file-input");
+	}
+
+	[Fact]
+	public void FileUpload_WithStyle_AppliesStyle()
+	{
+		// Arrange & Act
+		var cut = Render(@<FileUpload Width="Unit.Pixel(300)" />);
+
+		// Assert
+		var input = cut.Find("input[type='file']");
+		input.GetAttribute("style").ShouldContain("width:300px");
+	}
+
+}

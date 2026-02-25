@@ -180,6 +180,45 @@ Tests inherit from `BunitContext` and use the `Render()` method with Razor synta
 }
 ```
 
+### Using the xUnit Logger (Optional)
+
+The test infrastructure supports optional logging via xUnit's `ITestOutputHelper` for debugging test execution. This is useful when you need to capture diagnostic output during test runs.
+
+To enable logging in a test, inject `ITestOutputHelper` into the test constructor and pass it to the base constructor:
+
+```razor
+@using Microsoft.Extensions.Logging
+
+@code {
+    private ILogger<MyTest> _logger;
+
+    public MyTest(ITestOutputHelper output) : base(output)
+    {
+    }
+
+    [Fact]
+    public void MyComponent_WithDiagnostics_LogsExpectedMessages()
+    {
+        _logger = Services.GetService<ILogger<MyTest>>();
+        _logger?.LogInformation("Setting up test");
+
+        var cut = Render(@<MyComponent />);
+
+        _logger?.LogDebug("Component rendered successfully");
+
+        // Your test assertions...
+    }
+}
+```
+
+**When to use logging:**
+- Only add logging to tests where diagnostic output is helpful for debugging
+- Use for complex tests that need visibility into execution flow
+- Leave most simple tests without logging to keep them clean and focused
+- Logging is completely optional and does not affect test execution
+
+**Note:** The `BlazorWebFormsTestContext` base class automatically configures the xUnit logger when `ITestOutputHelper` is provided. Log messages appear in test output when tests fail.
+
 ### Test Method Naming
 
 Use the pattern: `ComponentName_Scenario_ExpectedBehavior`

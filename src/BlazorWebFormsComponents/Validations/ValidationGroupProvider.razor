@@ -1,0 +1,13 @@
+@namespace BlazorWebFormsComponents.Validations
+
+<CascadingValue Name="ValidationGroupCoordinator" Value="@Coordinator">
+	@ChildContent
+</CascadingValue>
+
+@code {
+	[Parameter]
+	[EditorRequired]
+	public RenderFragment ChildContent { get; set; }
+
+	private ValidationGroupCoordinator Coordinator { get; } = new ValidationGroupCoordinator();
+}

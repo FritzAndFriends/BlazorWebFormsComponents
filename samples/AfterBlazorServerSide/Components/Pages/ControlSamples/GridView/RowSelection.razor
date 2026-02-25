@@ -1,0 +1,116 @@
+@page "/ControlSamples/GridView/RowSelection"
+@using SharedSampleObjects.Models
+@using BlazorWebFormsComponents.DataBinding
+
+<h2>GridView Row Selection Example</h2>
+
+<Nav />
+
+<p>This example demonstrates how to select a row in the GridView and retrieve the selected key value.</p>
+
+<GridView ItemType="Customer"
+          AutoGenerateColumns="false"
+          DataKeyNames="CustomerID"
+          Items="@_customers"
+          EmptyDataText="No data available">
+    <Columns>
+        <TemplateField ItemType="Customer" HeaderText="">
+            <ItemTemplate Context="customer">
+                <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => SelectCustomer(customer))">Select</button>
+            </ItemTemplate>
+        </TemplateField>
+        <BoundField ItemType="Customer" DataField="CustomerID" HeaderText="ID" />
+        <BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company" />
+        <BoundField ItemType="Customer" DataField="FirstName" HeaderText="First Name"/>
+        <BoundField ItemType="Customer" DataField="LastName" HeaderText="Last Name"/>
+    </Columns>
+</GridView>
+
+@if (SelectedCustomer != null)
+{
+    <div style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9;">
+        <h3>Selected Customer Details</h3>
+        <p><strong>Customer ID:</strong> @SelectedCustomer.CustomerID</p>
+        <p><strong>Company Name:</strong> @SelectedCustomer.CompanyName</p>
+        <p><strong>First Name:</strong> @SelectedCustomer.FirstName</p>
+        <p><strong>Last Name:</strong> @SelectedCustomer.LastName</p>
+    </div>
+}
+
+<hr />
+
+<h3>Code Example</h3>
+<p>This sample demonstrates the master-detail pattern using GridView row selection:</p>
+
+<pre><code>&lt;GridView ItemType="Customer"
+          DataKeyNames="CustomerID"
+          Items="@@_customers"&gt;
+    &lt;Columns&gt;
+        &lt;TemplateField ItemType="Customer" HeaderText=""&gt;
+            &lt;ItemTemplate Context="customer"&gt;
+                &lt;button type="button" class="btn btn-sm btn-primary" @@onclick="@@(() =&gt; SelectCustomer(customer))"&gt;Select&lt;/button&gt;
+            &lt;/ItemTemplate&gt;
+        &lt;/TemplateField&gt;
+        &lt;BoundField DataField="CustomerID" HeaderText="ID" /&gt;
+        &lt;BoundField DataField="CompanyName" HeaderText="Company" /&gt;
+        &lt;BoundField DataField="FirstName" HeaderText="First Name"/&gt;
+        &lt;BoundField DataField="LastName" HeaderText="Last Name"/&gt;
+    &lt;/Columns&gt;
+&lt;/GridView&gt;
+
+@@code {
+    private Customer? SelectedCustomer;
+    private List&lt;Customer&gt; _customers = new List&lt;Customer&gt;
+    {
+        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
+        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
+        new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global Solutions" },
+        new Customer { CustomerID = 4, FirstName = "Alice", LastName = "Williams", CompanyName = "Innovation Labs" }
+    };
+    
+    private void SelectCustomer(Customer customer)
+    {
+        SelectedCustomer = customer;
+        // CustomerID (the DataKey) is available via customer.CustomerID
+    }
+}</code></pre>
+
+@code {
+    private Customer? SelectedCustomer;
+    private List<Customer> _customers = new List<Customer>
+    {
+        new Customer
+        {
+            CustomerID = 1,
+            FirstName = "John",
+            LastName = "Smith",
+            CompanyName = "Acme Corporation"
+        },
+        new Customer
+        {
+            CustomerID = 2,
+            FirstName = "Jane",
+            LastName = "Doe",
+            CompanyName = "TechStart Inc."
+        },
+        new Customer
+        {
+            CustomerID = 3,
+            FirstName = "Bob",
+            LastName = "Johnson",
+            CompanyName = "Global Solutions"
+        },
+        new Customer
+        {
+            CustomerID = 4,
+            FirstName = "Alice",
+            LastName = "Williams",
+            CompanyName = "Innovation Labs"
+        }
+    };
+    
+    private void SelectCustomer(Customer customer)
+    {
+        SelectedCustomer = customer;
+    }
+}

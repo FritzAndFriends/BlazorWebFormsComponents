@@ -10,7 +10,7 @@
 	public void HyperLink_WithBackColorAndForeColor_AppliesStyleAttribute()
 	{
 		// Arrange
-		var cut = Render(@<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" BackColor="Blue" ForeColor="White" />);
+		var cut = Render(@<HyperLink Text="Blue Button" NavigateUrl="https://bing.com" BackColor="Blue" ForeColor="White" />);
 
 		// Act & Assert
 		cut.Find("a").HasAttribute("style").ShouldBeTrue();
@@ -25,7 +25,7 @@
 	public void HyperLink_WithToolTip_RendersTitleAttribute()
 	{
 		// Arrange
-		var cut = Render(@<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" ToolTip="@RandomTooltip" />);
+		var cut = Render(@<HyperLink Text="Blue Button" NavigateUrl="https://bing.com" ToolTip="@RandomTooltip" />);
 
 		// Act & Assert
 		cut.Find("a").HasAttribute("title").ShouldBeTrue();
@@ -39,7 +39,7 @@
 	public void HyperLink_VisibleFalse_RendersNothing()
 	{
 		// Arrange
-		var cut = Render(@<HyperLink Text="Blue Button" NavigationUrl="https://bing.com" Visible="false" />);
+		var cut = Render(@<HyperLink Text="Blue Button" NavigateUrl="https://bing.com" Visible="false" />);
 
 		// Assert
 		cut.FindAll("a").Count().ShouldBe(0, "Still rendered the anchor even though its not visible");

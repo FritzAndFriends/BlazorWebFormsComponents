@@ -12,7 +12,7 @@
 				Write something
 				<InputText @ref="Name.Current" @bind-Value="exampleModel.Name" />
 				<RegularExpressionValidator ValidationExpression="^[a-z]{6}$"
-																ControlToValidate="@Name"
+																ControlRef="@Name"
 																Text="6 char only" />
 			</EditForm>
 		);
@@ -24,7 +24,7 @@
 		_validSubmit.ShouldBeTrue();
 		_invalidSubmit.ShouldBeFalse();
 
-		cut.FindAll("span").Count().ShouldBe(0);
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
 
 	}
 

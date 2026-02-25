@@ -1,14 +1,23 @@
-@inherits BaseWebFormsComponent
+@inherits BaseStyledComponent
 @using BlazorComponentUtilities
+@using BlazorWebFormsComponents.Enums
 
-<div id="@ID">
-	<ul class="level1">
+@if (!string.IsNullOrEmpty(SkipLinkText))
+{
+	<a class="skip-link" href="#@(ID)_SkipLink">@SkipLinkText</a>
+}
+<div id="@ID" class="@GetMenuCssClass()" style="@Style">
+	<ul class="level1@(Orientation == Orientation.Horizontal ? " horizontal" : "")">
 			<CascadingValue Name="ParentMenu" Value="this">
 				@ChildContent
 				@ChildNodesRenderFragment
 			</CascadingValue>
  	</ul>
 </div>
+@if (!string.IsNullOrEmpty(SkipLinkText))
+{
+	<a id="@(ID)_SkipLink"></a>
+}
 
 <!-- Menu component style -->
 <style type="text/css">
@@ -27,6 +36,10 @@
 			margin: 0;
 			padding: 0;
 			width: auto;
+		}
+
+		@($"#{ID} ul.horizontal > li") {
+			display: inline-block;
 		}
 
 		@($"#{ID} ul.dynamic") {
@@ -78,3 +91,10 @@
 
 
 </style>
+
+@code {
+	private string GetMenuCssClass()
+	{
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
+}

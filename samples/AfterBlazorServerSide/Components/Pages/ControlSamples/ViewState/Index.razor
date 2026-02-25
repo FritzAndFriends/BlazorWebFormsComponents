@@ -1,0 +1,149 @@
+@page "/ControlSamples/ViewState"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>ViewState Sample</PageTitle>
+
+<h2>ViewState Utility</h2>
+
+<p>In Web Forms, <code>ViewState</code> was a dictionary on every control that persisted
+   values across postbacks. In this library, every component inheriting
+   <code>BaseWebFormsComponent</code> exposes a <code>ViewState</code> property of type
+   <code>Dictionary&lt;string, object&gt;</code> for migration compatibility.
+   It is marked <code>[Obsolete]</code> — see <strong>Moving On</strong> below.</p>
+
+<hr />
+
+<h3>1. ViewState API — Add and Retrieve Values</h3>
+<p>Access <code>ViewState</code> on any component via a <code>@@ref</code> reference.
+   Use <code>ViewState.Add("key", value)</code> or <code>ViewState["key"] = value</code>
+   to store values, and cast when retrieving.</p>
+
+<Panel @ref="_panel" BorderStyle="BorderStyle.Solid" BorderWidth="Unit.Pixel(1)">
+    <p>Click count (stored in ViewState): <strong>@_viewStateClickCount</strong></p>
+    <button class="btn btn-primary" @onclick="IncrementViewState">Click Me (ViewState)</button>
+</Panel>
+
+<p>Code:</p>
+<pre><code>&lt;Panel @@ref="_panel"&gt;
+    &lt;p&gt;Click count: @@_viewStateClickCount&lt;/p&gt;
+    &lt;button @@onclick="IncrementViewState"&gt;Click Me&lt;/button&gt;
+&lt;/Panel&gt;
+
+@@code {
+    Panel _panel;
+    int _viewStateClickCount = 0;
+
+    void IncrementViewState()
+    {
+        // Store value in ViewState
+#pragma warning disable CS0618
+        _panel.ViewState["ClickCount"] = _viewStateClickCount + 1;
+
+        // Retrieve value from ViewState
+        _viewStateClickCount = (int)_panel.ViewState["ClickCount"];
+#pragma warning restore CS0618
+    }
+}</code></pre>
+
+<hr />
+
+<h3>2. ViewState with Multiple Keys</h3>
+<p>ViewState can hold multiple named values, just like Web Forms. Here we store
+   a name and a color preference.</p>
+
+<Panel @ref="_settingsPanel" BorderStyle="BorderStyle.Solid" BorderWidth="Unit.Pixel(1)">
+    <p>
+        <label>Name: </label>
+        <input type="text" @bind="_nameInput" />
+    </p>
+    <p>
+        <label>Favorite Color: </label>
+        <input type="text" @bind="_colorInput" />
+    </p>
+    <button class="btn btn-secondary" @onclick="SaveToViewState">Save to ViewState</button>
+    <button class="btn btn-outline-secondary" @onclick="LoadFromViewState">Load from ViewState</button>
+    <p style="margin-top:10px;">
+        <em>Stored — Name: <strong>@_storedName</strong>, Color: <strong>@_storedColor</strong></em>
+    </p>
+</Panel>
+
+<p>Code:</p>
+<pre><code>#pragma warning disable CS0618
+// Save
+_settingsPanel.ViewState["UserName"] = _nameInput;
+_settingsPanel.ViewState["FavColor"] = _colorInput;
+
+// Load
+_storedName = _settingsPanel.ViewState["UserName"] as string;
+_storedColor = _settingsPanel.ViewState["FavColor"] as string;
+#pragma warning restore CS0618</code></pre>
+
+<hr />
+
+<h3>3. Moving On — Use C# Properties Instead</h3>
+<p><code>ViewState</code> is marked <code>[Obsolete]</code>. In Blazor, component state
+   is simply C# fields or properties — no dictionary indirection needed. This is type-safe,
+   faster, and idiomatic Blazor.</p>
+
+<Panel BorderStyle="BorderStyle.Dashed" BorderWidth="Unit.Pixel(1)">
+    <p>Click count (C# field): <strong>@_propertyClickCount</strong></p>
+    <button class="btn btn-success" @onclick="IncrementProperty">Click Me (Property)</button>
+</Panel>
+
+<p>Code (the modern way):</p>
+<pre><code>@@code {
+    // Just use a C# field — no ViewState needed!
+    private int _clickCount = 0;
+
+    void IncrementProperty()
+    {
+        _clickCount++;
+    }
+}</code></pre>
+
+<p><strong>Why migrate?</strong> C# fields and properties give you type safety at compile time,
+   avoid casting from <code>object</code>, and are the standard Blazor pattern for component state.</p>
+
+@code {
+    private Panel _panel = default!;
+    private Panel _settingsPanel = default!;
+
+    private int _viewStateClickCount = 0;
+    private int _propertyClickCount = 0;
+
+    private string _nameInput = "";
+    private string _colorInput = "";
+    private string _storedName = "(none)";
+    private string _storedColor = "(none)";
+
+#pragma warning disable CS0618
+    private void IncrementViewState()
+    {
+        _panel.ViewState["ClickCount"] = _viewStateClickCount + 1;
+        _viewStateClickCount = (int)_panel.ViewState["ClickCount"];
+    }
+
+    private void SaveToViewState()
+    {
+        _settingsPanel.ViewState["UserName"] = _nameInput;
+        _settingsPanel.ViewState["FavColor"] = _colorInput;
+        LoadFromViewState();
+    }
+
+    private void LoadFromViewState()
+    {
+        _storedName = _settingsPanel.ViewState.ContainsKey("UserName")
+            ? _settingsPanel.ViewState["UserName"] as string ?? "(none)"
+            : "(none)";
+        _storedColor = _settingsPanel.ViewState.ContainsKey("FavColor")
+            ? _settingsPanel.ViewState["FavColor"] as string ?? "(none)"
+            : "(none)";
+    }
+#pragma warning restore CS0618
+
+    private void IncrementProperty()
+    {
+        _propertyClickCount++;
+    }
+}

@@ -1,0 +1,50 @@
+
+@code {
+	[Fact]
+	public void DataGrid_DataBoundFields_RendersCorrectly()
+	{
+		const int expectedColumns = 4;
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+				<BoundField ItemType="Widget" DataField="LastUpdate.Year" HeaderText="Last Update Year" />
+				<HyperLinkField ItemType="Widget" HeaderText="Search"
+												DataTextField="Name" DataTextFormatString="Search for {0}"
+												DataNavigateUrlFields="ID,NAME" DataNavigateUrlFormatString="https://example.com/search?q={0} {1}" />
+			</Columns>
+		</DataGrid>);
+
+		// Check headers
+		var tableHeaders = cut.FindAll("th");
+		tableHeaders.Count.ShouldBe(expectedColumns, "Wrong number of TH elements");
+		tableHeaders[0].TextContent.ShouldBe("ID");
+		tableHeaders[1].TextContent.ShouldBe("Widget Name");
+		tableHeaders[2].TextContent.ShouldBe("Last Update Year");
+		tableHeaders[3].TextContent.ShouldBe("Search");
+
+		// Check general table structure
+		cut.FindAll("tr").Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Render wrong number of TR elements");
+		cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length * expectedColumns, $"Render wrong number of TD elements");
+
+		// Check first data row to see that it bound stuff correctly.
+		var firstDataRow = cut.FindAll("tr")[1]; // Row #0 is the header, so row #1 is the first data row
+		var firstDataRowCells = firstDataRow.ChildNodes.OfType<AngleSharp.Dom.IElement>().ToList();
+		var idCellHtml = firstDataRowCells[0].InnerHtml.Trim();
+		idCellHtml.ShouldBe("1");
+		var nameCellHtml = firstDataRowCells[1].InnerHtml.Trim();
+		nameCellHtml.ShouldBe("First Widget");
+		var updateYearCellHtml = firstDataRowCells[2].InnerHtml.Trim();
+		updateYearCellHtml.ShouldBe(Widget.SimpleWidgetList.First().LastUpdate.Year.ToString());
+		var searchUrlCellHtml = firstDataRowCells[3].InnerHtml.Trim();
+		searchUrlCellHtml.ShouldBe("<a href=\"https://example.com/search?q=1 First Widget\">Search for First Widget</a>");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

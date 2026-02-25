@@ -1,0 +1,125 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	public class Product
+	{
+		public string Name { get; set; }
+		public string Url { get; set; }
+	}
+
+	[Fact]
+	public void BulletedList_DataBinding_RendersItemsFromDataSource()
+	{
+		// Arrange
+		var products = new List<Product>
+		{
+			new Product { Name = "Product A", Url = "/products/a" },
+			new Product { Name = "Product B", Url = "/products/b" },
+			new Product { Name = "Product C", Url = "/products/c" }
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="Product" Items="products" DataTextField="Name" DataValueField="Url" />);
+
+		// Assert
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(3);
+		
+		var spans = cut.FindAll("li span");
+		spans[0].TextContent.ShouldBe("Product A");
+		spans[1].TextContent.ShouldBe("Product B");
+		spans[2].TextContent.ShouldBe("Product C");
+	}
+
+	[Fact]
+	public void BulletedList_DataBinding_WithHyperLinkMode_UsesValueFieldAsHref()
+	{
+		// Arrange
+		var products = new List<Product>
+		{
+			new Product { Name = "Product A", Url = "/products/a" },
+			new Product { Name = "Product B", Url = "/products/b" }
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="Product" Items="products" DataTextField="Name" DataValueField="Url" DisplayMode="BulletedListDisplayMode.HyperLink" />);
+
+		// Assert
+		var links = cut.FindAll("a");
+		links.Count.ShouldBe(2);
+		links[0].GetAttribute("href").ShouldBe("/products/a");
+		links[0].TextContent.ShouldBe("Product A");
+		links[1].GetAttribute("href").ShouldBe("/products/b");
+		links[1].TextContent.ShouldBe("Product B");
+	}
+
+	[Fact]
+	public void BulletedList_CombinedStaticAndDataBound_RendersAll()
+	{
+		// Arrange
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("Static Item 1", "static1"),
+			new ListItem("Static Item 2", "static2")
+		};
+		
+		var products = new List<Product>
+		{
+			new Product { Name = "Dynamic Item 1", Url = "dynamic1" },
+			new Product { Name = "Dynamic Item 2", Url = "dynamic2" }
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="Product" StaticItems="staticItems" Items="products" AppendDataBoundItems="true" DataTextField="Name" DataValueField="Url" />);
+
+		// Assert
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(4);
+		
+		var spans = cut.FindAll("li span");
+		spans[0].TextContent.ShouldBe("Static Item 1");
+		spans[1].TextContent.ShouldBe("Static Item 2");
+		spans[2].TextContent.ShouldBe("Dynamic Item 1");
+		spans[3].TextContent.ShouldBe("Dynamic Item 2");
+	}
+
+	[Fact]
+	public void BulletedList_EmptyDataSource_RendersEmptyList()
+	{
+		// Arrange
+		var products = new List<Product>();
+
+		// Act
+		var cut = Render(@<BulletedList TItem="Product" Items="products" DataTextField="Name" DataValueField="Url" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.ShouldNotBeNull();
+		
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void BulletedList_NullItems_RendersStaticItemsOnly()
+	{
+		// Arrange
+		var staticItems = new ListItemCollection
+		{
+			new ListItem("Static Only", "static")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="Product" StaticItems="staticItems" Items="null" DataTextField="Name" DataValueField="Url" />);
+
+		// Assert
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(1);
+		
+		var span = cut.Find("li span");
+		span.TextContent.ShouldBe("Static Only");
+	}
+
+}

@@ -1,0 +1,106 @@
+@page "/ControlSamples/TreeView/Accessibility"
+
+<h2>TreeView with Accessibility Features</h2>
+
+<p>This sample demonstrates the accessibility enhancements available in the TreeView component.</p>
+
+<h3>Standard TreeView (without accessibility features)</h3>
+<p>This is the default TreeView behavior, which matches the original Web Forms control.</p>
+
+<TreeView ID="StandardTreeView" runat="server">
+	<Nodes>
+		<TreeNode Value="Home"
+							NavigateUrl="/"
+							Text="Home"
+							Expanded="true">
+			<TreeNode Value="Products" Text="Products" Expanded="true">
+				<TreeNode Value="Electronics" Text="Electronics">
+					<TreeNode Value="Computers" Text="Computers" />
+					<TreeNode Value="Phones" Text="Phones" />
+				</TreeNode>
+				<TreeNode Value="Books" Text="Books" />
+			</TreeNode>
+			<TreeNode Value="About" Text="About Us" NavigateUrl="/about" />
+		</TreeNode>
+	</Nodes>
+</TreeView>
+
+<hr />
+
+<h3>TreeView with Accessibility Features Enabled</h3>
+<p>
+	Set <code>UseAccessibilityFeatures="true"</code> to enable:
+</p>
+<ul>
+	<li><strong>ARIA attributes</strong> for screen readers (role="tree", aria-expanded, aria-level, etc.)</li>
+	<li><strong>Keyboard navigation</strong>:
+		<ul>
+			<li><kbd>Arrow Right</kbd> - Expand a collapsed node</li>
+			<li><kbd>Arrow Left</kbd> - Collapse an expanded node</li>
+			<li><kbd>Enter</kbd> or <kbd>Space</kbd> - Activate node link or toggle expansion</li>
+			<li><kbd>Tab</kbd> - Move focus between nodes</li>
+		</ul>
+	</li>
+	<li><strong>Focus management</strong> with tabindex for keyboard users</li>
+</ul>
+
+<TreeView ID="AccessibleTreeView" runat="server" UseAccessibilityFeatures="true">
+	<Nodes>
+		<TreeNode Value="Home"
+							NavigateUrl="/"
+							Text="Home"
+							Expanded="true">
+			<TreeNode Value="Products" Text="Products" Expanded="true">
+				<TreeNode Value="Electronics" Text="Electronics">
+					<TreeNode Value="Computers" Text="Computers" />
+					<TreeNode Value="Phones" Text="Phones" />
+				</TreeNode>
+				<TreeNode Value="Books" Text="Books" />
+			</TreeNode>
+			<TreeNode Value="About" Text="About Us" NavigateUrl="/about" />
+		</TreeNode>
+	</Nodes>
+</TreeView>
+
+<hr />
+
+<h3>Accessibility Benefits</h3>
+<p>The <code>UseAccessibilityFeatures</code> parameter provides benefits for:</p>
+
+<div style="margin: 20px 0;">
+	<h4>🎹 Keyboard Users</h4>
+	<p>Navigate and interact with the TreeView entirely using keyboard shortcuts, without requiring a mouse.</p>
+</div>
+
+<div style="margin: 20px 0;">
+	<h4>🔊 Screen Reader Users</h4>
+	<p>Get proper semantic information about tree structure, node states (expanded/collapsed), and depth levels through ARIA attributes.</p>
+</div>
+
+<div style="margin: 20px 0;">
+	<h4>🎤 Speech Recognition Users</h4>
+	<p>Benefit from larger interactive areas and keyboard equivalents, making voice commands more reliable.</p>
+</div>
+
+<div style="margin: 20px 0;">
+	<h4>👆 Touch Device Users</h4>
+	<p>Use keyboard equivalents as an alternative to small touch targets for expand/collapse actions.</p>
+</div>
+
+<hr />
+
+<h3>Code Example</h3>
+<code>
+&lt;TreeView UseAccessibilityFeatures="true"&gt;<br />
+&nbsp;&nbsp;&lt;Nodes&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;TreeNode Text="Home" Expanded="true"&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;TreeNode Text="Products"&gt;...&lt;/TreeNode&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;TreeNode Text="About"&gt;...&lt;/TreeNode&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/TreeNode&gt;<br />
+&nbsp;&nbsp;&lt;/Nodes&gt;<br />
+&lt;/TreeView&gt;
+</code>
+
+@code {
+	// No code-behind needed for this demo
+}

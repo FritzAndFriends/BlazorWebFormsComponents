@@ -113,6 +113,41 @@ Alternatively, you can add the script manually to your layout:
 
 For more options and details, see the [JavaScript Setup documentation](../UtilityFeatures/JavaScriptSetup.md).
 
+## Step 5.6 - Data-Bound Controls and Template Context
+
+When migrating data-bound controls like `<asp:Repeater>`, `<asp:DataList>`, `<asp:GridView>`, `<asp:ListView>`, and `<asp:FormView>`, you'll encounter a key difference in how templates access the current data item.
+
+### Web Forms vs. Blazor Context
+
+In ASP.NET Web Forms, when using strongly-typed data-binding with the `ItemType` attribute, templates access the current item using the `Item` property. In Blazor, templated components use a context variable.
+
+**Blazor's Default Behavior:**
+By default, Blazor uses `@context` as the variable name inside templates:
+
+```razor
+<Repeater Items="widgets" ItemType="Widget">
+    <ItemTemplate>@context.Name</ItemTemplate>
+</Repeater>
+```
+
+**Web Forms Compatibility:**
+For better compatibility with Web Forms conventions and to reduce migration friction, **use the `Context="Item"` attribute** on data-bound components. This allows you to use `@Item` (similar to Web Forms' `Item` property):
+
+```razor
+<Repeater Items="widgets" ItemType="Widget" Context="Item">
+    <ItemTemplate>@Item.Name</ItemTemplate>
+</Repeater>
+```
+
+This pattern applies to all templated data controls:
+- `<Repeater>` - ItemTemplate, AlternatingItemTemplate, HeaderTemplate, FooterTemplate
+- `<DataList>` - ItemTemplate, AlternatingItemTemplate, HeaderTemplate, FooterTemplate
+- `<ListView>` - ItemTemplate, AlternatingItemTemplate, LayoutTemplate, GroupTemplate
+- `<FormView>` - ItemTemplate, EditItemTemplate, InsertItemTemplate
+- `<GridView>` with `<TemplateField>` - ItemTemplate
+
+**Note:** While it's one extra attribute per component, using `Context="Item"` eliminates the need to learn Blazor-specific `@context` syntax and makes your templates more readable for developers familiar with Web Forms.
+
 ## Step 6 - Pages
 
 Page migration is a process very similar to UserControls, except working on files with the `.aspx` extension.

@@ -1,0 +1,59 @@
+@page "/ControlSamples/Chart/Pie"
+
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Pie</PageTitle>
+
+<h2>Chart - Pie</h2>
+
+<p>A <strong>Pie</strong> chart showing market share distribution. Pie charts are best for displaying proportions of a whole with a small number of categories.</p>
+
+<Chart ChartWidth="500px" ChartHeight="400px">
+	<ChartTitle Text="Cloud Provider Market Share — 2025" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="PieArea" />
+	<ChartSeries Name="Market Share"
+		ChartType="SeriesChartType.Pie"
+		ChartArea="PieArea"
+		Points="@MarketSharePoints" />
+</Chart>
+
+@code {
+
+	private List<DataPoint> MarketSharePoints = new()
+	{
+		new() { XValue = "AWS", YValues = new[] { 31.0 }, Label = "AWS" },
+		new() { XValue = "Azure", YValues = new[] { 25.0 }, Label = "Azure" },
+		new() { XValue = "Google Cloud", YValues = new[] { 11.0 }, Label = "Google Cloud" },
+		new() { XValue = "Alibaba", YValues = new[] { 5.0 }, Label = "Alibaba" },
+		new() { XValue = "Others", YValues = new[] { 28.0 }, Label = "Others" }
+	};
+
+}
+
+<hr />
+
+<h3>Source Code</h3>
+
+<pre><code class="language-razor">&lt;Chart ChartWidth="500px" ChartHeight="400px"&gt;
+    &lt;ChartTitle Text="Cloud Provider Market Share — 2025" /&gt;
+    &lt;ChartLegend Name="Default" /&gt;
+    &lt;ChartArea Name="PieArea" /&gt;
+    &lt;ChartSeries Name="Market Share"
+        ChartType="SeriesChartType.Pie"
+        ChartArea="PieArea"
+        Points="@@MarketSharePoints" /&gt;
+&lt;/Chart&gt;
+
+@@code {
+
+    private List&lt;DataPoint&gt; MarketSharePoints = new()
+    {
+        new() { XValue = "AWS", YValues = new[] { 31.0 }, Label = "AWS" },
+        new() { XValue = "Azure", YValues = new[] { 25.0 }, Label = "Azure" },
+        new() { XValue = "Google Cloud", YValues = new[] { 11.0 }, Label = "Google Cloud" },
+        new() { XValue = "Alibaba", YValues = new[] { 5.0 }, Label = "Alibaba" },
+        new() { XValue = "Others", YValues = new[] { 28.0 }, Label = "Others" }
+    };
+
+}</code></pre>

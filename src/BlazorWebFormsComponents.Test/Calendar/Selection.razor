@@ -1,0 +1,85 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void Calendar_DayClick_SelectsDate()
+	{
+		// Arrange
+		DateTime selectedDate = DateTime.MinValue;
+		var testDate = new DateTime(2024, 6, 15);
+		var cut = Render(@<Calendar VisibleDate="testDate" @bind-SelectedDate="selectedDate" />);
+
+		// Act
+		var dayLink = cut.FindAll("td a").First(a => a.TextContent == "15");
+		dayLink.Click();
+
+		// Assert
+		selectedDate.ShouldBe(new DateTime(2024, 6, 15));
+	}
+
+	[Fact]
+	public void Calendar_SelectionModeNone_DaysNotSelectable()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var cut = Render(@<Calendar VisibleDate="testDate" SelectionMode="CalendarSelectionMode.None" />);
+
+		// Act & Assert  
+		// Days rendered as non-clickable spans when selection is disabled
+		var daySpans = cut.FindAll("td span");
+		daySpans.ShouldNotBeEmpty();
+	}
+
+	[Fact]
+	public void Calendar_OnSelectionChanged_InvokesCallback()
+	{
+		// Arrange
+		var callbackInvoked = false;
+		var testDate = new DateTime(2024, 6, 15);
+		var cut = Render(@<Calendar VisibleDate="testDate" 
+														   OnSelectionChanged="() => callbackInvoked = true" />);
+
+		// Act
+		var dayLink = cut.FindAll("td a").First(a => a.TextContent == "10");
+		dayLink.Click();
+
+		// Assert
+		callbackInvoked.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_PreviousMonthClick_ChangesMonth()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var cut = Render(@<Calendar VisibleDate="testDate" />);
+
+		// Act
+		// Find the previous month link - it's the first nav link in the title row
+		var prevLink = cut.FindAll("a").First(a => a.TextContent.Contains("<") || a.TextContent.Contains("&lt;"));
+		prevLink.Click();
+
+		// Assert
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldContain("May");
+	}
+
+	[Fact]
+	public void Calendar_NextMonthClick_ChangesMonth()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var cut = Render(@<Calendar VisibleDate="testDate" />);
+
+		// Act
+		// Find the next month link - it's the last nav link that contains ">" or "&gt;"
+		var nextLink = cut.FindAll("a").Last(a => a.TextContent.Contains(">") || a.TextContent.Contains("&gt;"));
+		nextLink.Click();
+
+		// Assert
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldContain("July");
+	}
+}

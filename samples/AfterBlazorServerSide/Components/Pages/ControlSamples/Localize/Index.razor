@@ -1,0 +1,53 @@
+@page "/ControlSamples/Localize"
+
+@using BlazorWebFormsComponents.Enums
+
+<h2>Localize Component</h2>
+
+<Nav></Nav>
+
+<p>
+	The <code>Localize</code> component inherits from <code>Literal</code> and is functionally identical.
+	In Web Forms, it marks text as localizable for design-time tooling.
+	In Blazor, use it for markup compatibility when migrating from Web Forms.
+</p>
+
+<h3>Basic Usage</h3>
+<Localize Text="Hello, World!" />
+
+<h3>LiteralMode: PassThrough (renders raw HTML)</h3>
+<Localize Mode="LiteralMode.PassThrough" Text="<b>Bold text</b> rendered as HTML" />
+
+<h3>LiteralMode: Encode (default — HTML-encodes the text)</h3>
+<Localize Mode="LiteralMode.Encode" Text="<b>Bold text</b> rendered as encoded text" />
+
+<h3>LiteralMode: Transform</h3>
+<Localize Mode="LiteralMode.Transform" Text="Text with transform mode" />
+
+<h3>Using with IStringLocalizer (conceptual)</h3>
+<p>
+	In Web Forms, <code>&lt;asp:Localize&gt;</code> works with resource expressions
+	(<code>&lt;%$ Resources:MyResource,Greeting %&gt;</code>). In Blazor, inject
+	<code>IStringLocalizer&lt;T&gt;</code> and pass the localized string to the <code>Text</code> property:
+</p>
+
+<Localize Text="@greeting" />
+
+@code {
+	// In a real app, inject IStringLocalizer<T>:
+	// @inject IStringLocalizer<Index> Localizer
+	// Then use: Localizer["Greeting"]
+	private string greeting = "Welcome! (from a localized resource)";
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+@@inject IStringLocalizer&lt;Index&gt; Localizer<br />
+<br />
+&lt;Localize Text="Hello, World!" /&gt;<br />
+&lt;Localize Mode="LiteralMode.PassThrough" Text="&lt;b&gt;Bold text&lt;/b&gt;" /&gt;<br />
+&lt;Localize Mode="LiteralMode.Encode" Text="&lt;b&gt;Bold text&lt;/b&gt;" /&gt;<br />
+&lt;Localize Text="@@Localizer[&quot;Greeting&quot;]" /&gt;
+</code>

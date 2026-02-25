@@ -1,0 +1,21 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<td id="@(string.IsNullOrEmpty(ClientID) ? null : ClientID)"
+		class="@CssClass"
+		style="@CombinedStyle"
+		colspan="@ColSpanValue"
+		rowspan="@RowSpanValue"
+		headers="@AssociatedHeaderCellID"
+		@attributes="AdditionalAttributes">
+		@if (ChildContent != null)
+		{
+			@ChildContent
+		}
+		else if (!string.IsNullOrEmpty(Text))
+		{
+			@Text
+		}
+	</td>
+}

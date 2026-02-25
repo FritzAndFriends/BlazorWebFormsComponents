@@ -1,0 +1,206 @@
+@page "/ControlSamples/Chart/Styling"
+
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Chart - Styling</PageTitle>
+
+<h2>Chart - Styling</h2>
+
+<p>The Chart component supports color palettes, axis configuration, and legend customization — the same styling options available in ASP.NET Web Forms.</p>
+
+<h3>Color Palettes</h3>
+
+<p>Use the <code>Palette</code> property to set a color scheme. Available palettes: <strong>BrightPastel</strong>, <strong>Berry</strong>, <strong>Chocolate</strong>, <strong>EarthTones</strong>, <strong>Excel</strong>, <strong>Fire</strong>, <strong>Grayscale</strong>, <strong>Light</strong>, <strong>Pastel</strong>, <strong>SeaGreen</strong>, <strong>SemiTransparent</strong>.</p>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+	<div>
+		<h4>BrightPastel (Default)</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.BrightPastel">
+			<ChartArea Name="Area1" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Pie" ChartArea="Area1" Points="@pieData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Berry</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.Berry">
+			<ChartArea Name="Area2" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Pie" ChartArea="Area2" Points="@pieData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Fire</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.Fire">
+			<ChartArea Name="Area3" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Pie" ChartArea="Area3" Points="@pieData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>SeaGreen</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.SeaGreen">
+			<ChartArea Name="Area4" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Pie" ChartArea="Area4" Points="@pieData" />
+		</Chart>
+	</div>
+
+</div>
+
+<hr />
+
+<h3>Axis Configuration</h3>
+
+<p>Configure axis titles, minimum/maximum values, and intervals using the <code>Axis</code> class.</p>
+
+<Chart ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.EarthTones">
+	<ChartTitle Text="Temperature Range — Custom Axis" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="TempArea"
+		AxisX="@(new Axis { Title = "Time of Day" })"
+		AxisY="@(new Axis { Title = "Temperature (°F)", Minimum = 50, Maximum = 100, Interval = 10 })" />
+	<ChartSeries Name="Temperature"
+		ChartType="SeriesChartType.Line"
+		ChartArea="TempArea"
+		Points="@tempData" />
+</Chart>
+
+<pre><code class="language-razor">&lt;ChartArea Name="TempArea"
+    AxisX="@@(new Axis { Title = "Time of Day" })"
+    AxisY="@@(new Axis { Title = "Temperature (°F)", Minimum = 50, Maximum = 100, Interval = 10 })" /&gt;</code></pre>
+
+<hr />
+
+<h3>More Palette Examples</h3>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+	<div>
+		<h4>Chocolate</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.Chocolate">
+			<ChartArea Name="AreaC" AxisX="@(new Axis { Title = "Category" })" AxisY="@(new Axis { Title = "Value" })" />
+			<ChartSeries Name="Q1" ChartType="SeriesChartType.Column" ChartArea="AreaC" Points="@barData1" />
+			<ChartSeries Name="Q2" ChartType="SeriesChartType.Column" ChartArea="AreaC" Points="@barData2" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Excel</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.Excel">
+			<ChartArea Name="AreaE" AxisX="@(new Axis { Title = "Category" })" AxisY="@(new Axis { Title = "Value" })" />
+			<ChartSeries Name="Q1" ChartType="SeriesChartType.Column" ChartArea="AreaE" Points="@barData1" />
+			<ChartSeries Name="Q2" ChartType="SeriesChartType.Column" ChartArea="AreaE" Points="@barData2" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Grayscale</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.Grayscale">
+			<ChartArea Name="AreaG" AxisX="@(new Axis { Title = "Category" })" AxisY="@(new Axis { Title = "Value" })" />
+			<ChartSeries Name="Q1" ChartType="SeriesChartType.Column" ChartArea="AreaG" Points="@barData1" />
+			<ChartSeries Name="Q2" ChartType="SeriesChartType.Column" ChartArea="AreaG" Points="@barData2" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Pastel</h4>
+		<Chart ChartWidth="320px" ChartHeight="250px" Palette="ChartPalette.Pastel">
+			<ChartArea Name="AreaP" AxisX="@(new Axis { Title = "Category" })" AxisY="@(new Axis { Title = "Value" })" />
+			<ChartSeries Name="Q1" ChartType="SeriesChartType.Column" ChartArea="AreaP" Points="@barData1" />
+			<ChartSeries Name="Q2" ChartType="SeriesChartType.Column" ChartArea="AreaP" Points="@barData2" />
+		</Chart>
+	</div>
+
+</div>
+
+<hr />
+
+<h3>Custom Series Colors</h3>
+
+<p>Override the palette for individual series using the <code>Color</code> property with a <code>WebColor</code>.</p>
+
+<Chart ChartWidth="600px" ChartHeight="350px">
+	<ChartTitle Text="Custom Series Colors" />
+	<ChartLegend Name="Default" />
+	<ChartArea Name="CustomArea"
+		AxisX="@(new Axis { Title = "Quarter" })"
+		AxisY="@(new Axis { Title = "Revenue ($K)" })" />
+	<ChartSeries Name="Actual"
+		ChartType="SeriesChartType.Column"
+		ChartArea="CustomArea"
+		Color="WebColor.DodgerBlue"
+		Points="@actualData" />
+	<ChartSeries Name="Target"
+		ChartType="SeriesChartType.Line"
+		ChartArea="CustomArea"
+		Color="WebColor.OrangeRed"
+		Points="@targetData" />
+</Chart>
+
+<pre><code class="language-razor">&lt;ChartSeries Name="Actual"
+    ChartType="SeriesChartType.Column"
+    Color="WebColor.DodgerBlue"
+    Points="@@actualData" /&gt;
+&lt;ChartSeries Name="Target"
+    ChartType="SeriesChartType.Line"
+    Color="WebColor.OrangeRed"
+    Points="@@targetData" /&gt;</code></pre>
+
+@code {
+
+	// Pie chart data for palette comparison
+	private List<DataPoint> pieData = new()
+	{
+		new() { XValue = "A", YValues = new[] { 35.0 }, Label = "A" },
+		new() { XValue = "B", YValues = new[] { 25.0 }, Label = "B" },
+		new() { XValue = "C", YValues = new[] { 20.0 }, Label = "C" },
+		new() { XValue = "D", YValues = new[] { 15.0 }, Label = "D" },
+		new() { XValue = "E", YValues = new[] { 5.0 }, Label = "E" }
+	};
+
+	// Temperature data for axis configuration
+	private List<DataPoint> tempData = new()
+	{
+		new() { XValue = "6 AM", YValues = new[] { 58.0 } },
+		new() { XValue = "9 AM", YValues = new[] { 65.0 } },
+		new() { XValue = "12 PM", YValues = new[] { 78.0 } },
+		new() { XValue = "3 PM", YValues = new[] { 85.0 } },
+		new() { XValue = "6 PM", YValues = new[] { 76.0 } },
+		new() { XValue = "9 PM", YValues = new[] { 68.0 } }
+	};
+
+	// Bar chart data for palette comparison
+	private List<DataPoint> barData1 = new()
+	{
+		new() { XValue = "A", YValues = new[] { 120.0 } },
+		new() { XValue = "B", YValues = new[] { 95.0 } },
+		new() { XValue = "C", YValues = new[] { 140.0 } }
+	};
+
+	private List<DataPoint> barData2 = new()
+	{
+		new() { XValue = "A", YValues = new[] { 100.0 } },
+		new() { XValue = "B", YValues = new[] { 115.0 } },
+		new() { XValue = "C", YValues = new[] { 125.0 } }
+	};
+
+	// Custom color data
+	private List<DataPoint> actualData = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 85.0 } },
+		new() { XValue = "Q2", YValues = new[] { 92.0 } },
+		new() { XValue = "Q3", YValues = new[] { 88.0 } },
+		new() { XValue = "Q4", YValues = new[] { 110.0 } }
+	};
+
+	private List<DataPoint> targetData = new()
+	{
+		new() { XValue = "Q1", YValues = new[] { 90.0 } },
+		new() { XValue = "Q2", YValues = new[] { 95.0 } },
+		new() { XValue = "Q3", YValues = new[] { 100.0 } },
+		new() { XValue = "Q4", YValues = new[] { 105.0 } }
+	};
+
+}

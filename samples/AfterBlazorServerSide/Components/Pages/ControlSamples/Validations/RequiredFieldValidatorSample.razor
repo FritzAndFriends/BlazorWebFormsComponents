@@ -1,5 +1,6 @@
-﻿@page "/ControlSamples/RequiredFieldValidator"
+@page "/ControlSamples/RequiredFieldValidator"
 @using static BlazorWebFormsComponents.WebColor
+@using BlazorWebFormsComponents.Enums
 
 <h3>Required Field Validator</h3>
 @using BlazorWebFormsComponents.Validations;
@@ -10,16 +11,18 @@
 	Write something
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
 	<RequiredFieldValidator Type="string"
-													ControlToValidate="@Name"
+													ControlRef="@Name"
 													ForeColor="Red"
 													Text="Name is required."
 													ErrorMessage="Name is required but in summary!" />
 
 	<InputNumber id="number" @ref="Number.Current" @bind-Value="exampleModel.Number" />
 	<RequiredFieldValidator Type="int?"
-													ControlToValidate="@Number"
+													ControlRef="@Number"
+													Display="ValidatorDisplay.Dynamic"
 													Text="Number is required."
 													ErrorMessage="Number is required but in summary!" />
+	<p><em>Note:</em> The Number validator uses <code>Display="Dynamic"</code> — it collapses and takes no space when the field is valid.</p>
 
 	<button type="submit">Submit</button>
 
@@ -51,7 +54,10 @@
 <code>
 &lt;EditForm Model="@@exampleModel" OnValidSubmit="@@HandleValidSubmit"&gt;<br />
 &nbsp;&nbsp;&lt;InputText id="name" @@ref="Name.Current" @@bind-Value="exampleModel.Name" /&gt;<br />
-&nbsp;&nbsp;&lt;RequiredFieldValidator Type="string" ControlToValidate="@@Name" ForeColor="Red" Text="Name is required." /&gt;<br />
+&nbsp;&nbsp;&lt;RequiredFieldValidator Type="string" ControlRef="@@Name" ForeColor="Red" Text="Name is required." /&gt;<br />
+<br />
+&nbsp;&nbsp;&lt;InputNumber id="number" @@ref="Number.Current" @@bind-Value="exampleModel.Number" /&gt;<br />
+&nbsp;&nbsp;&lt;RequiredFieldValidator Type="int?" ControlRef="@@Number" Display="ValidatorDisplay.Dynamic" Text="Number is required." /&gt;<br />
 &nbsp;&nbsp;&lt;button type="submit"&gt;Submit&lt;/button&gt;<br />
 &lt;/EditForm&gt;
 </code>

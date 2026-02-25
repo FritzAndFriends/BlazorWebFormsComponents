@@ -1,0 +1,94 @@
+@page "/ControlSamples/Menu/Selection"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Menu Selection</PageTitle>
+
+<h2>Menu Item Selection</h2>
+
+<p>This sample demonstrates the <code>MenuItemClick</code> event and
+   <code>SelectedItem</code> tracking on the Menu component.</p>
+
+<hr />
+
+<h3>Horizontal Menu with Selection</h3>
+<p>Click a menu item. The <code>MenuItemClick</code> event fires and reports the selected item.</p>
+
+<Menu @ref="_menu" ID="SelectionMenu" Orientation="Orientation.Horizontal" MenuItemClick="HandleItemClick">
+    <Items>
+        <MenuItem Text="Home" Value="home" />
+        <MenuItem Text="Products" Value="products">
+            <MenuItem Text="Software" Value="software" />
+            <MenuItem Text="Hardware" Value="hardware" />
+            <MenuItem Text="Services" Value="services" />
+        </MenuItem>
+        <MenuItem Text="About" Value="about" />
+        <MenuItem Text="Contact" Value="contact" />
+    </Items>
+</Menu>
+
+<div style="margin-top:15px; padding:10px; border:1px solid #ccc; background:#f9f9f9;">
+    <strong>Last clicked:</strong>
+    @if (!string.IsNullOrEmpty(_clickedText))
+    {
+        <span>@_clickedText (Value: <code>@_clickedValue</code>)</span>
+    }
+    else
+    {
+        <em>None — click a menu item</em>
+    }
+    <br />
+    <strong>Click count:</strong> @_clickCount
+</div>
+
+<hr />
+
+<h3>Vertical Menu with Selection</h3>
+
+<Menu ID="VerticalSelectionMenu" Orientation="Orientation.Vertical" MenuItemClick="HandleItemClick">
+    <Items>
+        <MenuItem Text="Dashboard" Value="dashboard" />
+        <MenuItem Text="Reports" Value="reports">
+            <MenuItem Text="Monthly" Value="monthly" />
+            <MenuItem Text="Annual" Value="annual" />
+        </MenuItem>
+        <MenuItem Text="Settings" Value="settings" />
+    </Items>
+</Menu>
+
+<hr />
+
+<h3>Code Example</h3>
+<pre><code>&lt;Menu Orientation="Orientation.Horizontal"
+      MenuItemClick="HandleItemClick"&gt;
+    &lt;Items&gt;
+        &lt;MenuItem Text="Home" Value="home" /&gt;
+        &lt;MenuItem Text="Products" Value="products"&gt;
+            &lt;MenuItem Text="Software" Value="software" /&gt;
+        &lt;/MenuItem&gt;
+    &lt;/Items&gt;
+&lt;/Menu&gt;
+
+@@code {
+    private string _clickedText;
+
+    void HandleItemClick(MenuEventArgs e)
+    {
+        _clickedText = e.Item.Text;
+        // e.Item.Value, e.Item.ValuePath also available
+    }
+}</code></pre>
+
+@code {
+
+    private Menu _menu;
+    private string _clickedText = "";
+    private string _clickedValue = "";
+    private int _clickCount;
+
+    private void HandleItemClick(MenuEventArgs e)
+    {
+        _clickedText = e.Item.Text;
+        _clickedValue = e.Item.Value;
+        _clickCount++;
+    }
+}

@@ -1,0 +1,48 @@
+
+@code {
+
+	[Fact]
+	public void Button_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me" AccessKey="B" />);
+
+		// Assert
+		var button = cut.Find("button");
+		button.HasAttribute("accesskey").ShouldBeTrue();
+		button.GetAttribute("accesskey").ShouldBe("B");
+	}
+
+	[Fact]
+	public void Label_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Hello" AccessKey="L" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("accesskey").ShouldBeTrue();
+		span.GetAttribute("accesskey").ShouldBe("L");
+	}
+
+	[Fact]
+	public void Button_WithEmptyAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me" AccessKey="" />);
+
+		// Assert
+		cut.Find("button").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Button_WithNullAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button Text="Click Me" />);
+
+		// Assert
+		cut.Find("button").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+}

@@ -1,0 +1,202 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+
+@code {
+
+	[Fact]
+	public void BulletedList_DefaultStyle_RendersUnorderedList()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.ShouldNotBeNull();
+		
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void BulletedList_DiscStyle_RendersWithDiscListStyleType()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Disc" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.ShouldNotBeNull();
+		ul.GetAttribute("style").ShouldContain("list-style-type: disc");
+	}
+
+	[Fact]
+	public void BulletedList_CircleStyle_RendersWithCircleListStyleType()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Circle" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.GetAttribute("style").ShouldContain("list-style-type: circle");
+	}
+
+	[Fact]
+	public void BulletedList_SquareStyle_RendersWithSquareListStyleType()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Square" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.GetAttribute("style").ShouldContain("list-style-type: square");
+	}
+
+	[Fact]
+	public void BulletedList_NumberedStyle_RendersOrderedList()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.ShouldNotBeNull();
+		ol.GetAttribute("type").ShouldBe("1");
+	}
+
+	[Fact]
+	public void BulletedList_LowerAlphaStyle_RendersOrderedListWithLowerAlpha()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.LowerAlpha" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.ShouldNotBeNull();
+		ol.GetAttribute("type").ShouldBe("a");
+	}
+
+	[Fact]
+	public void BulletedList_UpperAlphaStyle_RendersOrderedListWithUpperAlpha()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.UpperAlpha" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.GetAttribute("type").ShouldBe("A");
+	}
+
+	[Fact]
+	public void BulletedList_LowerRomanStyle_RendersOrderedListWithLowerRoman()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.LowerRoman" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.GetAttribute("type").ShouldBe("i");
+	}
+
+	[Fact]
+	public void BulletedList_UpperRomanStyle_RendersOrderedListWithUpperRoman()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.UpperRoman" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.GetAttribute("type").ShouldBe("I");
+	}
+
+	[Fact]
+	public void BulletedList_CustomImageStyle_RendersWithListStyleImage()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.CustomImage" BulletImageUrl="/images/bullet.png" />);
+
+		// Assert
+		var ul = cut.Find("ul");
+		ul.ShouldNotBeNull();
+		ul.GetAttribute("style").ShouldContain("list-style-image: url('/images/bullet.png')");
+	}
+
+	[Fact]
+	public void BulletedList_FirstBulletNumber_SetsStartAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" FirstBulletNumber="5" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.GetAttribute("start").ShouldBe("5");
+	}
+
+}

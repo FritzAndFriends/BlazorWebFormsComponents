@@ -4,12 +4,12 @@
     [Fact]
     public void DataList_TableLayout_ItemStyle_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
-            <ChildContent>
+            <ItemStyleContent>
                 <ItemStyle BackColor="Red" />
-            </ChildContent>
+            </ItemStyleContent>
         </DataList>);
 
         cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);

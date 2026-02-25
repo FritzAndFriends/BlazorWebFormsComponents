@@ -39,3 +39,29 @@ The Repeater component is meant to emulate the asp:Repeater control in markup an
         </SeparatorTemplate>
 </asp:Repeater>
 ```
+
+## Usage Notes
+
+- **ItemType attribute** - Required to specify the type of items in the collection
+- **Context attribute** - For Web Forms compatibility, use `Context="Item"` to access the current item as `@Item` in templates instead of Blazor's default `@context`
+- **ID** - Use `@ref` instead of `ID` when referencing the component in code
+- **runat** and **EnableViewState** - Not used in Blazor (these attributes are ignored)
+
+## Blazor Example
+
+```razor
+<Repeater Items="products" ItemType="Product" Context="Item">
+    <HeaderTemplate>
+        <h2>Product List</h2>
+    </HeaderTemplate>
+    <ItemTemplate>
+        <div class="product">@Item.Name - $@Item.Price</div>
+    </ItemTemplate>
+    <SeparatorTemplate>
+        <hr />
+    </SeparatorTemplate>
+    <FooterTemplate>
+        <p>End of list</p>
+    </FooterTemplate>
+</Repeater>
+```

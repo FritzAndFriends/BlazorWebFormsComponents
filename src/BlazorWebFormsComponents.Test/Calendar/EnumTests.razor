@@ -1,0 +1,115 @@
+@inherits BlazorWebFormsComponents.Test.BlazorWebFormsTestContext
+@using Shouldly
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	[Fact]
+	public void Calendar_DayNameFormatFull_RendersFullDayNames()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var dnf = DayNameFormat.Full;
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" DayNameFormat="dnf" />);
+
+		// Assert — headers should contain full day names like "Sunday", "Monday"
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBe(7);
+		headers.Any(h => h.TextContent == "Sunday").ShouldBeTrue();
+		headers.Any(h => h.TextContent == "Monday").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_DayNameFormatShort_RendersAbbreviatedNames()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var dnf = DayNameFormat.Short;
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" DayNameFormat="dnf" />);
+
+		// Assert — headers should contain abbreviated names like "Sun", "Mon"
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBe(7);
+		headers.Any(h => h.TextContent == "Sun").ShouldBeTrue();
+		headers.Any(h => h.TextContent == "Mon").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_DayNameFormatFirstLetter_RendersSingleLetter()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var dnf = DayNameFormat.FirstLetter;
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" DayNameFormat="dnf" />);
+
+		// Assert — each header should be exactly one character
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBe(7);
+		foreach (var header in headers)
+		{
+			header.TextContent.Trim().Length.ShouldBe(1);
+		}
+		// "S" for Sunday should appear
+		headers.Any(h => h.TextContent.Trim() == "S").ShouldBeTrue();
+		// "M" for Monday should appear
+		headers.Any(h => h.TextContent.Trim() == "M").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Calendar_TitleFormatMonth_RendersMonthOnly()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var tf = TitleFormat.Month;
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="tf" />);
+
+		// Assert — title should show "June" without the year
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldBe("June");
+		title.TextContent.ShouldNotContain("2024");
+	}
+
+	[Fact]
+	public void Calendar_TitleFormatMonthYear_RendersMonthAndYear()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var tf = TitleFormat.MonthYear;
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" TitleFormat="tf" />);
+
+		// Assert — title should show "June 2024"
+		var title = cut.Find("td[align='center']");
+		title.TextContent.ShouldContain("June");
+		title.TextContent.ShouldContain("2024");
+	}
+
+	[Fact]
+	public void Calendar_DayNameFormatFirstTwoLetters_RendersTwoLetters()
+	{
+		// Arrange
+		var testDate = new DateTime(2024, 6, 15);
+		var dnf = DayNameFormat.FirstTwoLetters;
+
+		// Act
+		var cut = Render(@<Calendar VisibleDate="testDate" DayNameFormat="dnf" />);
+
+		// Assert — each header should be exactly two characters
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBe(7);
+		foreach (var header in headers)
+		{
+			header.TextContent.Trim().Length.ShouldBe(2);
+		}
+		headers.Any(h => h.TextContent.Trim() == "Su").ShouldBeTrue();
+		headers.Any(h => h.TextContent.Trim() == "Mo").ShouldBeTrue();
+	}
+}

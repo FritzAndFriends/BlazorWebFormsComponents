@@ -1,0 +1,222 @@
+@page "/ControlSamples/Calendar"
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Calendar Sample</PageTitle>
+
+<h2>Calendar Component Samples</h2>
+
+<p>The Calendar control displays a one-month calendar and lets users select dates and navigate
+   between months. In Web Forms this was <code>&lt;asp:Calendar&gt;</code>.</p>
+
+<hr />
+
+<!-- Basic date selection — the most common migration scenario -->
+<h3>Basic Calendar</h3>
+<Calendar @bind-SelectedDate="selectedDate" />
+<p>Selected Date: <strong>@selectedDate.ToShortDateString()</strong></p>
+
+<p>Code:</p>
+<pre><code>&lt;Calendar @@bind-SelectedDate="selectedDate" /&gt;</code></pre>
+
+<hr />
+
+<!-- Selection modes mirror the Web Forms SelectionMode property -->
+<h3>Selection Modes</h3>
+
+<h4>None — Display Only</h4>
+<Calendar SelectionMode="CalendarSelectionMode.None" />
+
+<h4>Day — Single Day (Default)</h4>
+<Calendar SelectionMode="CalendarSelectionMode.Day" @bind-SelectedDate="dayModeDate" />
+<p>Selected: <strong>@dayModeDate.ToShortDateString()</strong></p>
+
+<h4>DayWeek — Select Entire Weeks</h4>
+<Calendar SelectionMode="CalendarSelectionMode.DayWeek" @bind-SelectedDate="weekModeDate" />
+<p>Selected: <strong>@weekModeDate.ToShortDateString()</strong></p>
+
+<h4>DayWeekMonth — Select Weeks or Month</h4>
+<Calendar SelectionMode="CalendarSelectionMode.DayWeekMonth" @bind-SelectedDate="monthModeDate" />
+<p>Selected: <strong>@monthModeDate.ToShortDateString()</strong></p>
+
+<p>Code:</p>
+<pre><code>&lt;Calendar SelectionMode="DayWeek" @@bind-SelectedDate="weekDate" /&gt;
+&lt;Calendar SelectionMode="DayWeekMonth" @@bind-SelectedDate="monthDate" /&gt;</code></pre>
+
+<hr />
+
+<!-- Display options -->
+<h3>Display Options</h3>
+
+<h4>Grid Lines</h4>
+<Calendar ShowGridLines="true" @bind-SelectedDate="gridDate" />
+
+<h4>Without Title</h4>
+<Calendar ShowTitle="false" @bind-SelectedDate="noTitleDate" />
+
+<h4>Without Day Header</h4>
+<Calendar ShowDayHeader="false" @bind-SelectedDate="noDayHeaderDate" />
+
+<p>Code:</p>
+<pre><code>&lt;Calendar ShowGridLines="true" /&gt;
+&lt;Calendar ShowTitle="false" /&gt;
+&lt;Calendar ShowDayHeader="false" /&gt;</code></pre>
+
+<hr />
+
+<!-- Day name and title formats -->
+<h3>Day Name &amp; Title Formats</h3>
+
+<h4>Full Day Names</h4>
+<Calendar DayNameFormat="BlazorWebFormsComponents.Enums.DayNameFormat.Full" @bind-SelectedDate="fullNameDate" />
+
+<h4>First Letter Only</h4>
+<Calendar DayNameFormat="BlazorWebFormsComponents.Enums.DayNameFormat.FirstLetter" @bind-SelectedDate="firstLetterDate" />
+
+<h4>Month-Only Title</h4>
+<Calendar TitleFormat="BlazorWebFormsComponents.Enums.TitleFormat.Month" @bind-SelectedDate="monthOnlyDate" />
+
+<p>Code:</p>
+<pre><code>&lt;Calendar DayNameFormat="Full" /&gt;
+&lt;Calendar DayNameFormat="FirstLetter" /&gt;
+&lt;Calendar TitleFormat="Month" /&gt;</code></pre>
+
+<hr />
+
+<!-- Custom navigation text -->
+<h3>Custom Navigation Text</h3>
+<Calendar NextMonthText="Next &raquo;" PrevMonthText="&laquo; Prev" @bind-SelectedDate="customNavDate" />
+
+<p>Code:</p>
+<pre><code>&lt;Calendar NextMonthText="Next &amp;raquo;" PrevMonthText="&amp;laquo; Prev" /&gt;</code></pre>
+
+<hr />
+
+<!-- Styled calendar with CSS classes -->
+<h3>Styled Calendar</h3>
+<p>Apply CSS classes to title, selected day, today, and weekend cells:</p>
+
+<Calendar CssClass="styled-calendar"
+          TitleStyleCss="calendar-title"
+          SelectedDayStyleCss="selected-day"
+          TodayDayStyleCss="today-day"
+          WeekendDayStyleCss="weekend-day"
+          ShowGridLines="true"
+          @bind-SelectedDate="styledDate" />
+
+<style>
+    .styled-calendar { border: 2px solid #333; }
+    .calendar-title { background-color: #4CAF50; color: white; font-weight: bold; padding: 6px; }
+    .selected-day { background-color: #2196F3; color: white; font-weight: bold; }
+    .today-day { background-color: #FFC107; font-weight: bold; }
+    .weekend-day { background-color: #f8d7da; }
+</style>
+
+<p>Code:</p>
+<pre><code>&lt;Calendar CssClass="styled-calendar"
+          TitleStyleCss="calendar-title"
+          SelectedDayStyleCss="selected-day"
+          TodayDayStyleCss="today-day"
+          ShowGridLines="true" /&gt;</code></pre>
+
+<hr />
+
+<!-- Styled calendar with TableItemStyle sub-components (new approach) -->
+<h3>TableItemStyle Sub-Components</h3>
+<p>The recommended approach uses child sub-components instead of CSS-class strings.
+   Sub-components support BackColor, ForeColor, Font, and more:</p>
+
+<Calendar CssClass="subcmp-calendar"
+          ShowGridLines="true"
+          @bind-SelectedDate="subComponentDate">
+    <TitleStyleContent>
+        <CalendarTitleStyle CssClass="subcmp-title" />
+    </TitleStyleContent>
+    <DayHeaderStyleContent>
+        <CalendarDayHeaderStyle CssClass="subcmp-day-header" />
+    </DayHeaderStyleContent>
+    <SelectedDayStyleContent>
+        <CalendarSelectedDayStyle CssClass="subcmp-selected-day" />
+    </SelectedDayStyleContent>
+    <TodayDayStyleContent>
+        <CalendarTodayDayStyle CssClass="subcmp-today" />
+    </TodayDayStyleContent>
+    <WeekendDayStyleContent>
+        <CalendarWeekendDayStyle CssClass="subcmp-weekend" />
+    </WeekendDayStyleContent>
+</Calendar>
+
+<style>
+    .subcmp-calendar { border: 2px solid #333; }
+    .subcmp-title { background-color: navy; color: white; font-weight: bold; padding: 6px; }
+    .subcmp-day-header { background-color: lightgray; }
+    .subcmp-selected-day { background-color: dodgerblue; color: white; font-weight: bold; }
+    .subcmp-today { background-color: gold; }
+    .subcmp-weekend { background-color: lavenderblush; }
+</style>
+
+<p>Code:</p>
+<pre><code>&lt;Calendar ShowGridLines="true" @@bind-SelectedDate="date"&gt;
+    &lt;TitleStyleContent&gt;
+        &lt;CalendarTitleStyle CssClass="subcmp-title" /&gt;
+    &lt;/TitleStyleContent&gt;
+    &lt;DayHeaderStyleContent&gt;
+        &lt;CalendarDayHeaderStyle CssClass="subcmp-day-header" /&gt;
+    &lt;/DayHeaderStyleContent&gt;
+    &lt;SelectedDayStyleContent&gt;
+        &lt;CalendarSelectedDayStyle CssClass="subcmp-selected-day" /&gt;
+    &lt;/SelectedDayStyleContent&gt;
+&lt;/Calendar&gt;</code></pre>
+
+<hr />
+
+<!-- Event handling -->
+<h3>Event Handling</h3>
+<p>Track selection changes and month navigation, matching the Web Forms
+   <code>SelectionChanged</code> and <code>VisibleMonthChanged</code> events:</p>
+
+<Calendar @bind-SelectedDate="eventDate"
+          OnSelectionChanged="HandleSelectionChanged"
+          OnVisibleMonthChanged="HandleMonthChanged" />
+<p>Selected: <strong>@eventDate.ToShortDateString()</strong></p>
+<p>Selection changed <strong>@selectionChangedCount</strong> time(s)</p>
+<p>Month navigated <strong>@monthChangedCount</strong> time(s)</p>
+
+<p>Code:</p>
+<pre><code>&lt;Calendar @@bind-SelectedDate="eventDate"
+          OnSelectionChanged="HandleSelectionChanged"
+          OnVisibleMonthChanged="HandleMonthChanged" /&gt;
+
+@@code {
+    void HandleSelectionChanged() =&gt; selectionChangedCount++;
+    void HandleMonthChanged(CalendarMonthChangedArgs args) =&gt; monthChangedCount++;
+}</code></pre>
+
+@code {
+    private DateTime selectedDate = DateTime.Today;
+    private DateTime dayModeDate = DateTime.Today;
+    private DateTime weekModeDate = DateTime.Today;
+    private DateTime monthModeDate = DateTime.Today;
+    private DateTime gridDate = DateTime.Today;
+    private DateTime noTitleDate = DateTime.Today;
+    private DateTime noDayHeaderDate = DateTime.Today;
+    private DateTime fullNameDate = DateTime.Today;
+    private DateTime firstLetterDate = DateTime.Today;
+    private DateTime monthOnlyDate = DateTime.Today;
+    private DateTime customNavDate = DateTime.Today;
+    private DateTime styledDate = DateTime.Today;
+    private DateTime subComponentDate = DateTime.Today;
+    private DateTime eventDate = DateTime.Today;
+    private int selectionChangedCount = 0;
+    private int monthChangedCount = 0;
+
+    private void HandleSelectionChanged()
+    {
+        selectionChangedCount++;
+    }
+
+    private void HandleMonthChanged(CalendarMonthChangedArgs args)
+    {
+        monthChangedCount++;
+    }
+}

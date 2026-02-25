@@ -40,8 +40,11 @@ namespace BlazorWebFormsComponents
 		{
 			get
 			{
-				return !String.IsNullOrEmpty(_ImageUrl) ? _ImageUrl :
-						string.IsNullOrEmpty(ParentTreeView.ImageSet.RootNode) ? "" :
+				// Check style-level ImageUrl first
+				var styleImageUrl = ParentTreeView?.GetStyleImageUrl(this);
+				if (!string.IsNullOrEmpty(_ImageUrl)) return _ImageUrl;
+				if (!string.IsNullOrEmpty(styleImageUrl)) return styleImageUrl;
+				return string.IsNullOrEmpty(ParentTreeView.ImageSet.RootNode) ? "" :
 							(IsRoot ? $"{ImageLocation}{ParentTreeView.ImageSet.RootNode}" :
 								IsParent ? $"{ImageLocation}{ParentTreeView.ImageSet.ParentNode}" :
 								$"{ImageLocation}{ParentTreeView.ImageSet.LeafNode}");
@@ -60,7 +63,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public TreeNodeSelectAction SelectAction { get; set; }
 
-		// TODO: Implement
 		[Parameter]
 		public bool Selected { get; set; }
 
@@ -82,6 +84,11 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
+		/// <summary>
+		/// Gets the ValuePath for this node using the TreeView's PathSeparator.
+		/// </summary>
+		public string ValuePath => ParentTreeView?.GetValuePath(this);
+
 		private TreeNode _Parent;
 		[CascadingParameter(Name = "ParentTreeNode")]
 		public TreeNode Parent
@@ -99,6 +106,11 @@ namespace BlazorWebFormsComponents
 
 		private HashSet<TreeNode> _ChildNodes = new HashSet<TreeNode>();
 
+		/// <summary>
+		/// Gets the child nodes of this node (used by ExpandAll/CollapseAll/FindNode).
+		/// </summary>
+		public IEnumerable<TreeNode> ChildNodes => _ChildNodes;
+
 		protected void AddChildNode(TreeNode node)
 		{
 
@@ -110,6 +122,10 @@ namespace BlazorWebFormsComponents
 			return (Parent?._ChildNodes?.Last() == this);
 		}
 
+		// Public node-type properties for style resolution
+		public bool IsRootNode => Parent is null;
+		public bool IsParentNode => !IsRootNode && (ChildContent != null);
+		public bool IsLeafNode => ChildContent is null && Parent != null;
 
 		protected bool IsRoot
 		{
@@ -119,6 +135,42 @@ namespace BlazorWebFormsComponents
 		protected bool IsParent
 		{
 			get { return !IsRoot && (ChildContent != null); }
+		}
+
+		/// <summary>
+		/// Sets the expanded state programmatically (used by ExpandAll/CollapseAll).
+		/// </summary>
+		internal void SetExpanded(bool expanded)
+		{
+			_UserExpanded = expanded;
+		}
+
+		/// <summary>
+		/// Gets the computed indent width in pixels using NodeIndent from TreeView.
+		/// </summary>
+		protected int IndentWidth => ParentTreeView?.NodeIndent ?? 20;
+
+		/// <summary>
+		/// Gets the computed node style from the parent TreeView.
+		/// </summary>
+		protected string ComputedNodeStyle => ParentTreeView?.GetNodeStyle(this);
+
+		/// <summary>
+		/// Gets the computed CSS class from the parent TreeView.
+		/// </summary>
+		protected string ComputedNodeCssClass => ParentTreeView?.GetNodeCssClass(this);
+
+		/// <summary>
+		/// Determines if this node should be initially expanded based on ExpandDepth.
+		/// </summary>
+		private bool ShouldExpandByDepth
+		{
+			get
+			{
+				if (ParentTreeView == null) return true;
+				if (ParentTreeView.ExpandDepth < 0) return true; // -1 means fully expanded
+				return Depth < ParentTreeView.ExpandDepth;
+			}
 		}
 
 		protected string NodeImage
@@ -188,6 +240,11 @@ namespace BlazorWebFormsComponents
 
 			Parent?.AddChildNode(this);
 
+			// Apply ExpandDepth on initialization
+			if (!_UserExpanded.HasValue && !ShouldExpandByDepth)
+			{
+				_Expanded = false;
+			}
 
 			return base.OnInitializedAsync();
 		}
@@ -213,6 +270,14 @@ namespace BlazorWebFormsComponents
 
 		}
 
+		/// <summary>
+		/// Handles click on the node text to select it.
+		/// </summary>
+		public async Task HandleNodeSelect()
+		{
+			await ParentTreeView.SelectNodeAsync(this);
+		}
+
 		public void HandleCheckbox(object sender, ChangeEventArgs args)
 		{
 
@@ -220,6 +285,45 @@ namespace BlazorWebFormsComponents
 
 			ParentTreeView.OnTreeNodeCheckChanged.InvokeAsync(new TreeNodeEventArgs(this));
 
+		}
+
+		public async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+		{
+			if (!ParentTreeView.UseAccessibilityFeatures) return;
+
+			switch (e.Key)
+			{
+				case "ArrowRight":
+					// Expand node if it has children and is collapsed
+					if (ChildContent != null && !Expanded)
+					{
+						HandleNodeExpand();
+					}
+					break;
+
+				case "ArrowLeft":
+					// Collapse node if it has children and is expanded
+					if (ChildContent != null && Expanded)
+					{
+						HandleNodeExpand();
+					}
+					break;
+
+				case "Enter":
+				case " ": // Space key
+					// Select the node, or expand/collapse if no navigate URL
+					if (string.IsNullOrEmpty(NavigateUrl))
+					{
+						await HandleNodeSelect();
+						if (ChildContent != null)
+						{
+							HandleNodeExpand();
+						}
+					}
+					break;
+			}
+
+			await Task.CompletedTask;
 		}
 
 		#endregion

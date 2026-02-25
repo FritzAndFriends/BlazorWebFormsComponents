@@ -1,0 +1,78 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> NameRef = new ForwardRef<InputBase<string>>();
+
+	[Fact]
+	public void Validator_SetFocusOnError_DefaultIsFalse()
+	{
+		var model = new FocusTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@NameRef"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		// Trigger validation failure
+		cut.Find("input").Change("  ");
+		cut.Find("form").Submit();
+
+		// SetFocusOnError defaults to false — no JS focus call should be made
+		JSInterop.VerifyNotInvoke("bwfc.Validation.SetFocus");
+	}
+
+	[Fact]
+	public void Validator_SetFocusOnError_True_ParameterAccepted()
+	{
+		var model = new FocusTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@NameRef"
+					SetFocusOnError="true"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		// Component renders without error with SetFocusOnError=true
+		cut.Find("span").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void Validator_SetFocusOnError_True_WhenInvalid_InvokesJS()
+	{
+		// Set up specific JS mock for the focus call
+		JSInterop.SetupVoid("bwfc.Validation.SetFocus", _ => true);
+
+		var model = new FocusTestModel();
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@NameRef"
+					SetFocusOnError="true"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("  ");
+		cut.Find("form").Submit();
+
+		// SetFocusOnError=true and validation failed — JS focus call should be invoked
+		JSInterop.VerifyInvoke("bwfc.Validation.SetFocus");
+	}
+
+	private void HandleValid() { _validSubmit = true; }
+	private void HandleInvalid() { _invalidSubmit = true; }
+
+	public class FocusTestModel
+	{
+		public string Name { get; set; }
+	}
+}

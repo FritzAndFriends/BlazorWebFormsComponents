@@ -1,0 +1,37 @@
+@using Microsoft.AspNetCore.Components.Rendering
+
+@code {
+
+	[Fact]
+	public void PageService_CanBeInjected_IntoComponent()
+	{
+		// Arrange & Act
+		Services.AddScoped<IPageService, PageService>();
+		var cut = Render(@<TestComponent />);
+
+		// Assert - Component renders without error when PageService is injected
+		cut.Markup.ShouldContain("Test");
+	}
+
+	@code {
+		public class TestComponent : ComponentBase
+		{
+			[Inject]
+			public IPageService PageService { get; set; } = null!;
+
+			protected override void OnInitialized()
+			{
+				// Verify we can access the service
+				_ = PageService.Title;
+			}
+
+			protected override void BuildRenderTree(RenderTreeBuilder builder)
+			{
+				builder.OpenElement(0, "div");
+				builder.AddContent(1, "Test");
+				builder.CloseElement();
+			}
+		}
+	}
+
+}

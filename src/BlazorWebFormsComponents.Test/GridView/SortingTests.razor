@@ -1,0 +1,131 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void Sort_Headers_Render_As_Links_When_AllowSorting_True()
+	{
+		var data = GetTestProducts();
+
+		var cut = Render(@<GridView ItemType="SortTestProduct" DataSource="data" AllowSorting="true" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="SortTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="SortTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBe(2);
+		headers[0].QuerySelector("a").ShouldNotBeNull();
+		headers[0].QuerySelector("a").TextContent.ShouldBe("Name");
+		headers[1].QuerySelector("a").ShouldNotBeNull();
+		headers[1].QuerySelector("a").TextContent.ShouldBe("Price");
+	}
+
+	[Fact]
+	public void Sort_Headers_Are_Plain_Text_When_AllowSorting_False()
+	{
+		var data = GetTestProducts();
+
+		var cut = Render(@<GridView ItemType="SortTestProduct" DataSource="data" AllowSorting="false" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="SortTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="SortTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBe(2);
+		headers[0].QuerySelector("a").ShouldBeNull();
+		headers[0].TextContent.ShouldBe("Name");
+		headers[1].QuerySelector("a").ShouldBeNull();
+		headers[1].TextContent.ShouldBe("Price");
+	}
+
+	[Fact]
+	public void Sorting_Event_Fires_On_Header_Click()
+	{
+		var data = GetTestProducts();
+		GridViewSortEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="SortTestProduct" DataSource="data" AllowSorting="true" AutoGenerateColumns="false"
+						Sorting="@((GridViewSortEventArgs e) => receivedArgs = e)">
+			<Columns>
+				<BoundField ItemType="SortTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="SortTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		// Click the "Name" header link
+		var headerLinks = cut.FindAll("th a");
+		headerLinks[0].Click();
+
+		receivedArgs.ShouldNotBeNull();
+		receivedArgs.SortExpression.ShouldBe("Name");
+		receivedArgs.SortDirection.ShouldBe(BlazorWebFormsComponents.Enums.SortDirection.Ascending);
+	}
+
+	[Fact]
+	public void Sort_Direction_Toggles_On_Second_Click()
+	{
+		var data = GetTestProducts();
+		GridViewSortEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="SortTestProduct" DataSource="data" AllowSorting="true" AutoGenerateColumns="false"
+						Sorting="@((GridViewSortEventArgs e) => receivedArgs = e)">
+			<Columns>
+				<BoundField ItemType="SortTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="SortTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		var headerLinks = cut.FindAll("th a");
+
+		// First click - Ascending
+		headerLinks[0].Click();
+		receivedArgs.SortDirection.ShouldBe(BlazorWebFormsComponents.Enums.SortDirection.Ascending);
+
+		// Second click on same column - Descending
+		headerLinks = cut.FindAll("th a");
+		headerLinks[0].Click();
+		receivedArgs.SortDirection.ShouldBe(BlazorWebFormsComponents.Enums.SortDirection.Descending);
+	}
+
+	[Fact]
+	public void BoundField_SortExpression_Defaults_To_DataField()
+	{
+		var data = GetTestProducts();
+		GridViewSortEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="SortTestProduct" DataSource="data" AllowSorting="true" AutoGenerateColumns="false"
+						Sorting="@((GridViewSortEventArgs e) => receivedArgs = e)">
+			<Columns>
+				<BoundField ItemType="SortTestProduct" DataField="Name" HeaderText="Product Name" />
+				<BoundField ItemType="SortTestProduct" DataField="Price" HeaderText="Product Price" />
+			</Columns>
+		</GridView>);
+
+		// Click the "Product Price" header - SortExpression should be "Price" (the DataField)
+		var headerLinks = cut.FindAll("th a");
+		headerLinks[1].Click();
+
+		receivedArgs.ShouldNotBeNull();
+		receivedArgs.SortExpression.ShouldBe("Price");
+	}
+
+	private List<SortTestProduct> GetTestProducts()
+	{
+		return new List<SortTestProduct>
+		{
+			new SortTestProduct { Name = "Widget", Price = 9.99m },
+			new SortTestProduct { Name = "Gadget", Price = 19.99m },
+			new SortTestProduct { Name = "Doohickey", Price = 4.99m }
+		};
+	}
+
+	public class SortTestProduct
+	{
+		public string Name { get; set; }
+		public decimal Price { get; set; }
+	}
+}

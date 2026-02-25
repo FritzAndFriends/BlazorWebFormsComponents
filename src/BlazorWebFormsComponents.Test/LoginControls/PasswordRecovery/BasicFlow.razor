@@ -1,0 +1,305 @@
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+@code {
+
+	bool verifyingUserFired = false;
+	bool verifyingAnswerFired = false;
+	bool userLookupErrorFired = false;
+	bool answerLookupErrorFired = false;
+	bool sendingMailFired = false;
+
+	[Fact]
+	public void PasswordRecovery_VerifyingUser_MoveToStep2WhenNotCancelled()
+	{
+		verifyingUserFired = false;
+
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		// Fill username and submit
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		verifyingUserFired.ShouldBeTrue("OnVerifyingUser should fire");
+
+		// Should now be on Step 2 (question step)
+		cut.Markup.ShouldContain("Identity Confirmation");
+	}
+
+	[Fact]
+	public void PasswordRecovery_VerifyingUser_Cancelled_ShowsFailureText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserCancel"
+			OnUserLookupError="OnUserLookupError" />);
+
+		cut.Find("#pr1_UserName").Change("baduser");
+		cut.Find("form").Submit();
+
+		userLookupErrorFired.ShouldBeTrue("OnUserLookupError should fire when cancelled");
+		cut.Markup.ShouldContain("Your attempt to retrieve your password was not successful");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_RendersQuestionTitleText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Identity Confirmation");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_RendersAnswerInput()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		cut.Find("#pr1_Answer").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_DisplaysUserName()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		cut.Find("#pr1_UserName").Change("myuser");
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("myuser");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_RendersAnswerLabel()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		var label = cut.Find("label[for='pr1_Answer']");
+		label.TextContent.ShouldContain("Answer:");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_VerifyingAnswer_MoveToStep3WhenNotCancelled()
+	{
+		verifyingAnswerFired = false;
+		sendingMailFired = false;
+
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk"
+			OnVerifyingAnswer="OnVerifyingAnswerOk"
+			OnSendingMail="OnSendingMail" />);
+
+		// Step 1
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		// Step 2
+		cut.Find("#pr1_Answer").Change("myanswer");
+		cut.Find("form").Submit();
+
+		verifyingAnswerFired.ShouldBeTrue("OnVerifyingAnswer should fire");
+		sendingMailFired.ShouldBeTrue("OnSendingMail should fire");
+
+		// Should now be on Step 3 (success)
+		cut.Markup.ShouldContain("Your password has been sent to you.");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_VerifyingAnswer_Cancelled_ShowsFailureText()
+	{
+		answerLookupErrorFired = false;
+
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk"
+			OnVerifyingAnswer="OnVerifyingAnswerCancel"
+			OnAnswerLookupError="OnAnswerLookupError" />);
+
+		// Step 1
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		// Step 2
+		cut.Find("#pr1_Answer").Change("wronganswer");
+		cut.Find("form").Submit();
+
+		answerLookupErrorFired.ShouldBeTrue("OnAnswerLookupError should fire when cancelled");
+		cut.Markup.ShouldContain("Your answer could not be verified");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step3_RendersSuccessText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk"
+			OnVerifyingAnswer="OnVerifyingAnswerOk" />);
+
+		// Step 1
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		// Step 2
+		cut.Find("#pr1_Answer").Change("correct");
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Your password has been sent to you.");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step3_CustomSuccessText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			SuccessText="Password reset email sent!"
+			OnVerifyingUser="OnVerifyingUserOk"
+			OnVerifyingAnswer="OnVerifyingAnswerOk" />);
+
+		// Step 1
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		// Step 2
+		cut.Find("#pr1_Answer").Change("correct");
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Password reset email sent!");
+	}
+
+	[Fact]
+	public void PasswordRecovery_UserNameTemplate_RendersCustomTemplate()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(
+			@<PasswordRecovery ID="pr1">
+				<UserNameTemplate>
+					<div id="customUserStep">Custom Username Step</div>
+				</UserNameTemplate>
+			</PasswordRecovery>);
+
+		cut.Find("#customUserStep").TextContent.ShouldBe("Custom Username Step");
+	}
+
+	[Fact]
+	public void PasswordRecovery_SuccessTemplate_RendersCustomTemplate()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			OnVerifyingUser="OnVerifyingUserOk"
+			OnVerifyingAnswer="OnVerifyingAnswerOk">
+			<SuccessTemplate>
+				<div id="customSuccess">Custom Success!</div>
+			</SuccessTemplate>
+		</PasswordRecovery>);
+
+		// Step 1
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		// Step 2
+		cut.Find("#pr1_Answer").Change("correct");
+		cut.Find("form").Submit();
+
+		cut.Find("#customSuccess").TextContent.ShouldBe("Custom Success!");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_CustomQuestionTitleText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			QuestionTitleText="Security Check"
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Security Check");
+	}
+
+	[Fact]
+	public void PasswordRecovery_Step2_CustomQuestionInstructionText()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<PasswordRecovery ID="pr1"
+			QuestionInstructionText="Please answer your security question."
+			OnVerifyingUser="OnVerifyingUserOk" />);
+
+		cut.Find("#pr1_UserName").Change("testuser");
+		cut.Find("form").Submit();
+
+		cut.Markup.ShouldContain("Please answer your security question.");
+	}
+
+	void OnVerifyingUserOk(LoginCancelEventArgs args)
+	{
+		verifyingUserFired = true;
+		// Don't cancel — user is valid
+	}
+
+	void OnVerifyingUserCancel(LoginCancelEventArgs args)
+	{
+		verifyingUserFired = true;
+		args.Cancel = true;
+	}
+
+	void OnUserLookupError(EventArgs args)
+	{
+		userLookupErrorFired = true;
+	}
+
+	void OnVerifyingAnswerOk(LoginCancelEventArgs args)
+	{
+		verifyingAnswerFired = true;
+		// Don't cancel — answer is valid
+	}
+
+	void OnVerifyingAnswerCancel(LoginCancelEventArgs args)
+	{
+		verifyingAnswerFired = true;
+		args.Cancel = true;
+	}
+
+	void OnAnswerLookupError(EventArgs args)
+	{
+		answerLookupErrorFired = true;
+	}
+
+	void OnSendingMail(MailMessageEventArgs args)
+	{
+		sendingMailFired = true;
+	}
+}

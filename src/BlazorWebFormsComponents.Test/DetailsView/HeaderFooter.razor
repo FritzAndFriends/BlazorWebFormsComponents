@@ -1,0 +1,77 @@
+@code {
+
+	[Fact]
+	public void DetailsView_WithHeaderText_RendersHeaderRow()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" HeaderText="Widget Details" AutoGenerateRows="true" />);
+
+		var firstRow = cut.Find("tr");
+		firstRow.InnerHtml.ShouldContain("Widget Details");
+		// Header row should have colspan=2
+		firstRow.QuerySelector("td[colspan='2']").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void DetailsView_WithHeaderTemplate_RendersTemplate()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true">
+				<HeaderTemplate>
+					<strong id="headerContent">Custom Header</strong>
+				</HeaderTemplate>
+			</DetailsView>);
+
+		cut.Find("#headerContent").TextContent.ShouldBe("Custom Header");
+	}
+
+	[Fact]
+	public void DetailsView_HeaderTemplate_TakesPriorityOverHeaderText()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" HeaderText="Plain Header" AutoGenerateRows="true">
+				<HeaderTemplate>
+					<span id="tmplHeader">Template Header</span>
+				</HeaderTemplate>
+			</DetailsView>);
+
+		cut.Find("#tmplHeader").ShouldNotBeNull();
+		cut.Markup.ShouldNotContain("Plain Header");
+	}
+
+	[Fact]
+	public void DetailsView_WithFooterText_RendersFooterRow()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" FooterText="End of record" AutoGenerateRows="true" />);
+
+		cut.Markup.ShouldContain("End of record");
+	}
+
+	[Fact]
+	public void DetailsView_WithFooterTemplate_RendersTemplate()
+	{
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true">
+				<FooterTemplate>
+					<em id="footerContent">Custom Footer</em>
+				</FooterTemplate>
+			</DetailsView>);
+
+		cut.Find("#footerContent").TextContent.ShouldBe("Custom Footer");
+	}
+
+	[Fact]
+	public void DetailsView_NoHeaderOrFooter_DoesNotRenderExtraRows()
+	{
+		var items = new List<Widget> { new Widget { Id = 1, Name = "Test", Price = 5M, LastUpdate = DateTime.Today } };
+		var cut = Render(@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="true" />);
+
+		// Widget has 4 properties, so should have exactly 4 rows (no header/footer)
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(4);
+	}
+}

@@ -6,10 +6,10 @@
     [Fact]
     public void DataList_TableLayout_HeaderStyleCss_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+            <HeaderStyleContent>
                 <HeaderStyle CssClass="myClass"></HeaderStyle>
-            </ChildContent>
+            </HeaderStyleContent>
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);
@@ -23,10 +23,10 @@
     [Fact]
     public void DataList_TableLayout_HeaderStyleCss_Null_RendersCorrectly()
     {
-        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Table" Context="Item">
-            <ChildContent>
+        var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+            <HeaderStyleContent>
                 <HeaderStyle></HeaderStyle>
-            </ChildContent>
+            </HeaderStyleContent>
             <HeaderTemplate>My Widget List</HeaderTemplate>
             <ItemTemplate>@Item.Name</ItemTemplate>
         </DataList>);

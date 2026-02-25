@@ -1,0 +1,79 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void CompositeControl_CreateChildControls_AddsControlsToCollection()
+	{
+		// Render the control which will trigger EnsureChildControls
+		var cut = Render(@<SearchBox />);
+
+		// Access the component instance
+		var searchBox = cut.FindComponent<SearchBox>().Instance;
+
+		// Child controls should have been created during rendering
+		searchBox.Controls.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void CompositeControl_Render_IncludesAllChildren()
+	{
+		var cut = Render(@<SearchBox />);
+
+		var html = cut.Markup;
+		html.ShouldContain("<label>Search:</label>");
+		html.ShouldContain("<button>Go</button>");
+	}
+
+	[Fact]
+	public void CompositeControl_WithWrapper_WrapsChildren()
+	{
+		var cut = Render(@<SearchBox />);
+
+		var html = cut.Markup;
+		html.ShouldContain("<div");
+		html.ShouldContain("class=\"search-box\"");
+		html.ShouldContain("</div>");
+	}
+
+	[Fact]
+	public void CompositeControl_WithParameters_CreatesConditionalChildren()
+	{
+		var cut = Render(@<FormGroup LabelText="Username:" ButtonText="Submit" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("<label>Username:</label>");
+		html.ShouldContain("<button>Submit</button>");
+	}
+
+	[Fact]
+	public void CompositeControl_EmptyParameters_SkipsChildren()
+	{
+		var cut = Render(@<FormGroup LabelText="" ButtonText="Submit" />);
+
+		var html = cut.Markup;
+		html.ShouldNotContain("<label>");
+		html.ShouldContain("<button>Submit</button>");
+	}
+
+	[Fact]
+	public void CompositeControl_WithCssClass_AppliesStyleToWrapper()
+	{
+		var cut = Render(@<SearchBox CssClass="custom-class" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("custom-class");
+	}
+
+	[Fact]
+	public void CompositeControl_NotVisible_RendersNothing()
+	{
+		var cut = Render(@<SearchBox Visible="false" />);
+
+		cut.Markup.ShouldBeEmpty();
+	}
+}

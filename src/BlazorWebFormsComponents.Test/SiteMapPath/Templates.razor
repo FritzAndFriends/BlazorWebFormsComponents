@@ -1,0 +1,105 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateTestSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/");
+		var products = new SiteMapNode("Products", "/products");
+		var electronics = new SiteMapNode("Electronics", "/products/electronics");
+
+		root.AddChild(products);
+		products.AddChild(electronics);
+
+		return root;
+	}
+
+	[Fact]
+	public void NodeTemplate_Customizes_Regular_Nodes()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics">
+			<NodeTemplate Context="node">
+				<a href="@node.Url" class="custom-node">[@node.Title]</a>
+			</NodeTemplate>
+		</SiteMapPath>);
+
+		// Assert
+		var customNodes = cut.FindAll("a.custom-node");
+		customNodes.Count.ShouldBe(1); // Only Products (not root, not current)
+		customNodes[0].TextContent.ShouldBe("[Products]");
+	}
+
+	[Fact]
+	public void RootNodeTemplate_Customizes_Root()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics">
+			<RootNodeTemplate Context="node">
+				<a href="@node.Url" class="root-node">🏠 @node.Title</a>
+			</RootNodeTemplate>
+		</SiteMapPath>);
+
+		// Assert
+		var rootNode = cut.Find("a.root-node");
+		rootNode.TextContent.ShouldContain("🏠");
+		rootNode.TextContent.ShouldContain("Home");
+	}
+
+	[Fact]
+	public void CurrentNodeTemplate_Customizes_Current()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics">
+			<CurrentNodeTemplate Context="node">
+				<strong class="current-node">📍 @node.Title</strong>
+			</CurrentNodeTemplate>
+		</SiteMapPath>);
+
+		// Assert
+		var currentNode = cut.Find("strong.current-node");
+		currentNode.TextContent.ShouldContain("📍");
+		currentNode.TextContent.ShouldContain("Electronics");
+	}
+
+	[Fact]
+	public void All_Templates_Work_Together()
+	{
+		// Arrange
+		var siteMap = CreateTestSiteMap();
+
+		// Act
+		var cut = Render(@<SiteMapPath 
+			SiteMapProvider="@siteMap" 
+			CurrentUrl="/products/electronics">
+			<RootNodeTemplate Context="node">
+				<a href="@node.Url" class="root">🏠</a>
+			</RootNodeTemplate>
+			<NodeTemplate Context="node">
+				<a href="@node.Url" class="node">📁 @node.Title</a>
+			</NodeTemplate>
+			<CurrentNodeTemplate Context="node">
+				<span class="current">📍 @node.Title</span>
+			</CurrentNodeTemplate>
+		</SiteMapPath>);
+
+		// Assert
+		cut.Find("a.root").TextContent.ShouldContain("🏠");
+		cut.Find("a.node").TextContent.ShouldContain("📁 Products");
+		cut.Find("span.current").TextContent.ShouldContain("📍 Electronics");
+	}
+}

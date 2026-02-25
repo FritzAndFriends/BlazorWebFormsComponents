@@ -1,0 +1,37 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void TextBox_WithID_RendersIDInHTML()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox ID="myTextBox" Text="Hello" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.GetAttribute("id").ShouldBe("myTextBox");
+	}
+
+	[Fact]
+	public void TextBox_WithoutID_DoesNotRenderIDInHTML()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox Text="Hello" />);
+
+		// Assert
+		var input = cut.Find("input");
+		input.HasAttribute("id").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TextBox_MultiLine_WithID_RendersIDInHTML()
+	{
+		// Arrange & Act
+		var cut = Render(@<TextBox ID="myTextArea" TextMode="BlazorWebFormsComponents.Enums.TextBoxMode.MultiLine" Text="Hello" />);
+
+		// Assert
+		var textarea = cut.Find("textarea");
+		textarea.GetAttribute("id").ShouldBe("myTextArea");
+	}
+}

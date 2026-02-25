@@ -64,52 +64,73 @@ nav:
   - Home: README.md
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
+    - BulletedList: EditorControls/BulletedList.md
     - Button: EditorControls/Button.md
+    - Calendar: EditorControls/Calendar.md
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
     - DropDownList: EditorControls/DropDownList.md
+    - FileUpload: EditorControls/FileUpload.md
     - HiddenField: EditorControls/HiddenField.md
-    - HyperLink: EditorControls/HyperLink.md
     - Image: EditorControls/Image.md
     - ImageButton: EditorControls/ImageButton.md
     - Label: EditorControls/Label.md
     - LinkButton: EditorControls/LinkButton.md
     - ListBox: EditorControls/ListBox.md
     - Literal: EditorControls/Literal.md
+    - Localize: EditorControls/Localize.md
+    - MultiView: EditorControls/MultiView.md
     - Panel: EditorControls/Panel.md
     - PlaceHolder: EditorControls/PlaceHolder.md
     - RadioButton: EditorControls/RadioButton.md
     - RadioButtonList: EditorControls/RadioButtonList.md
+    - Table: EditorControls/Table.md
     - TextBox: EditorControls/TextBox.md
   - Data Controls:
+    - Chart: DataControls/Chart.md
+    - DataGrid: DataControls/DataGrid.md
     - DataList: DataControls/DataList.md
+    - DataPager: DataControls/DataPager.md
+    - DetailsView: DataControls/DetailsView.md
     - FormView: DataControls/FormView.md
     - GridView: DataControls/GridView.md
     - ListView: DataControls/ListView.md
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
     - CompareValidator: ValidationControls/CompareValidator.md
+    - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md
     - RangeValidator: ValidationControls/RangeValidator.md
     - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md
     - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md
     - ValidationSummary: ValidationControls/ValidationSummary.md
   - Navigation Controls:
+    - HyperLink: NavigationControls/HyperLink.md
+    - ImageMap: NavigationControls/ImageMap.md
+    - Menu: NavigationControls/Menu.md
+    - SiteMapPath: NavigationControls/SiteMapPath.md
     - TreeView: NavigationControls/TreeView.md
   - Login Controls:
+    - ChangePassword: LoginControls/ChangePassword.md
+    - CreateUserWizard: LoginControls/CreateUserWizard.md
     - Login: LoginControls/Login.md
     - LoginName: LoginControls/LoginName.md
     - LoginStatus: LoginControls/LoginStatus.md
     - LoginView: LoginControls/LoginView.md
+    - PasswordRecovery: LoginControls/PasswordRecovery.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
+    - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - PageService: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
   - Migration:
       - Getting started: Migration/readme.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
+      - Deferred Controls: Migration/DeferredControls.md
       - Master Pages: Migration/MasterPages.md
       - .NET Standard to the Rescue: Migration/NET-Standard.md
+      - Themes and Skins: Migration/ThemesAndSkins.md
       - User Controls: Migration/User-Controls.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md

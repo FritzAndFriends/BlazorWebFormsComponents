@@ -1,0 +1,171 @@
+@code {
+
+	[Fact]
+	public void SelectedIndex_RendersHighlightedRow_WithSelectedRowStyle()
+	{
+		var data = GetTestItems();
+		WebColor yellow = "Yellow";
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false" SelectedIndex="1">
+			<SelectedRowStyleContent>
+				<GridViewSelectedRowStyle BackColor="yellow" />
+			</SelectedRowStyleContent>
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBe(3);
+		rows[1].GetAttribute("style").ShouldContain("background-color");
+		(rows[0].GetAttribute("style") == null || !rows[0].GetAttribute("style").Contains("background-color")).ShouldBeTrue();
+		(rows[2].GetAttribute("style") == null || !rows[2].GetAttribute("style").Contains("background-color")).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void SelectedIndexChanging_FiresWithCorrectIndex()
+	{
+		var data = GetTestItems();
+		GridViewSelectEventArgs receivedArgs = null;
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false"
+						AutoGenerateSelectButton="true"
+						SelectedIndexChanging="@((GridViewSelectEventArgs e) => receivedArgs = e)">
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var selectLinks = cut.FindAll("tbody a");
+		var selectCount = selectLinks.Count(a => a.TextContent == "Select");
+		selectCount.ShouldBe(3);
+
+		selectLinks.First(a => a.TextContent == "Select");
+		// Click Select on the third row (index 2)
+		selectLinks.Where(a => a.TextContent == "Select").ToList()[2].Click();
+
+		receivedArgs.ShouldNotBeNull();
+		receivedArgs.NewSelectedIndex.ShouldBe(2);
+	}
+
+	[Fact]
+	public void SelectedIndexChanging_CancelPreventsSelectionChange()
+	{
+		var data = GetTestItems();
+		WebColor yellow = "Yellow";
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false"
+						AutoGenerateSelectButton="true"
+						SelectedIndexChanging="@((GridViewSelectEventArgs e) => e.Cancel = true)">
+			<SelectedRowStyleContent>
+				<GridViewSelectedRowStyle BackColor="yellow" />
+			</SelectedRowStyleContent>
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		// Click Select on row 1
+		cut.FindAll("tbody a").Where(a => a.TextContent == "Select").ToList()[1].Click();
+
+		// No row should have the selected background-color since cancel was set
+		var rows = cut.FindAll("tbody tr");
+		foreach (var row in rows)
+		{
+			var style = row.GetAttribute("style");
+			(style == null || !style.Contains("background-color")).ShouldBeTrue();
+		}
+	}
+
+	[Fact]
+	public void AutoGenerateSelectButton_RendersSelectLinkInEachRow()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false"
+						AutoGenerateSelectButton="true">
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var selectLinks = cut.FindAll("tbody a");
+		selectLinks.Count(a => a.TextContent == "Select").ShouldBe(data.Count);
+	}
+
+	[Fact]
+	public void SelectedValue_ReturnsCorrectKeyValue()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false"
+						SelectedIndex="1" DataKeyNames="Id">
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<SelectionTestItem>>().Instance;
+		gridView.SelectedValue.ShouldBe(2);
+	}
+
+	[Fact]
+	public void SelectedIndex_NegativeOne_ClearsSelection()
+	{
+		var data = GetTestItems();
+		WebColor yellow = "Yellow";
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false"
+						SelectedIndex="-1">
+			<SelectedRowStyleContent>
+				<GridViewSelectedRowStyle BackColor="yellow" />
+			</SelectedRowStyleContent>
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		foreach (var row in rows)
+		{
+			var style = row.GetAttribute("style");
+			(style == null || !style.Contains("background-color")).ShouldBeTrue();
+		}
+	}
+
+	[Fact]
+	public void SelectedRow_ReturnsDataForSelectedRow()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="SelectionTestItem" DataSource="data" AutoGenerateColumns="false"
+						SelectedIndex="1">
+			<Columns>
+				<BoundField ItemType="SelectionTestItem" DataField="Id" HeaderText="ID" />
+				<BoundField ItemType="SelectionTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<SelectionTestItem>>().Instance;
+		gridView.SelectedRow.ShouldNotBeNull();
+		gridView.SelectedRow.Id.ShouldBe(2);
+		gridView.SelectedRow.Name.ShouldBe("Jane");
+	}
+
+	private List<SelectionTestItem> GetTestItems()
+	{
+		return new List<SelectionTestItem>
+		{
+			new SelectionTestItem { Id = 1, Name = "John" },
+			new SelectionTestItem { Id = 2, Name = "Jane" },
+			new SelectionTestItem { Id = 3, Name = "Bob" }
+		};
+	}
+
+	public class SelectionTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

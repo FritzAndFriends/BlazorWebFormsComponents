@@ -1,13 +1,14 @@
 ﻿using BlazorComponentUtilities;
 using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IStyle
+	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IDataListStyleContainer
 	{
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },
@@ -17,7 +18,6 @@ namespace BlazorWebFormsComponents
 		};
 		protected string CalculatedStyle { get; set; }
 		protected string? CalculatedGridLines { get => _GridLines[this.GridLines]; }
-		[Parameter] public string AccessKey { get; set; }
 		[Parameter] public string Caption { get; set; }
 		[Parameter] public VerticalAlign CaptionAlign { get; set; } = VerticalAlign.NotSet;
 		[Parameter] public int CellPadding { get; set; }
@@ -25,33 +25,27 @@ namespace BlazorWebFormsComponents
 		[Parameter] public DataListEnum GridLines { get; set; } = DataListEnum.None;
 		[Parameter] public RenderFragment HeaderTemplate { get; set; }
 		[Parameter] public RenderFragment FooterTemplate { get; set; }
-		[CascadingParameter(Name = "HeaderStyle")] private TableItemStyle HeaderStyle { get; set; } = new TableItemStyle();
-		[CascadingParameter(Name = "FooterStyle")] private TableItemStyle FooterStyle { get; set; } = new TableItemStyle();
-		[Parameter] public RenderFragment ChildContent { get; set; }
-		[CascadingParameter(Name = "ItemStyle")] private TableItemStyle ItemStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle HeaderStyle { get; internal set; } = new TableItemStyle();
+		public TableItemStyle FooterStyle { get; internal set; } = new TableItemStyle();
+		[Parameter] public RenderFragment HeaderStyleContent { get; set; }
+		[Parameter] public RenderFragment FooterStyleContent { get; set; }
+		public TableItemStyle ItemStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RenderFragment<ItemType> ItemTemplate { get; set; }
 		[Parameter] public RenderFragment<ItemType> AlternatingItemTemplate { get; set; }
-		[CascadingParameter(Name = "AlternatingItemStyle")] private TableItemStyle AlternatingItemStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle AlternatingItemStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RepeatLayout RepeatLayout { get; set; } = BlazorWebFormsComponents.Enums.RepeatLayout.Table;
 		[Parameter] public DataListEnum RepeatDirection { get; set; } = BlazorWebFormsComponents.Enums.DataListEnum.Vertical;
 		[Parameter] public int RepeatColumns { get; set; } = 1;
-		[CascadingParameter(Name = "SeparatorStyle")] private TableItemStyle SeparatorStyle { get; set; } = new TableItemStyle();
+		public TableItemStyle SeparatorStyle { get; internal set; } = new TableItemStyle();
 		[Parameter] public RenderFragment SeparatorTemplate { get; set; }
+		[Parameter] public RenderFragment ItemStyleContent { get; set; }
+		[Parameter] public RenderFragment AlternatingItemStyleContent { get; set; }
+		[Parameter] public RenderFragment SeparatorStyleContent { get; set; }
 		[Parameter] public bool ShowHeader { get; set; } = true;
 		[Parameter] public bool ShowFooter { get; set; } = true;
-		[Parameter] public string Style { get; set; }
+		[Parameter] public new string Style { get; set; }
 		[Parameter] public string ToolTip { get; set; }
 		[Parameter] public bool UseAccessibleHeader { get; set; } = false;
-		[Parameter] public WebColor BackColor { get; set; }
-		[Parameter] public WebColor BorderColor { get; set; }
-		[Parameter] public BorderStyle BorderStyle { get; set; }
-		[Parameter] public Unit BorderWidth { get; set; }
-		[Parameter] public string CssClass { get; set; }
-		[Parameter] public FontInfo Font { get; set; } = new FontInfo();
-		[Parameter] public WebColor ForeColor { get; set; }
-		[Parameter] public Unit Height { get; set; }
-		[Parameter] public Unit Width { get; set; }
-
 		[Parameter]
 		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }
 
