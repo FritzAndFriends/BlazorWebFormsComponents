@@ -91,3 +91,18 @@ Wrote 41 bUnit tests across 6 new test files for P2 features:
 
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
  Team update (2026-02-24): PagerSettings shared sub-component created  may need bUnit tests  decided by Cyclops
+
+### Milestone 9: Migration Fidelity QA — WI-02 + WI-06
+
+Wrote 24 bUnit tests across 2 files for migration fidelity work:
+
+**ToolTipTests.razor (WI-02, 20 tests):** Extended existing file with 20 new tests. 9 controls gained ToolTip from BaseStyledComponent: Label (span title), TextBox (input title via CalculatedAttributes), CheckBox (span title), RadioButton (span title), Panel (div title), Table (table title), DropDownList (select title), ListBox (select title), LinkButton (a title). Each tested with ToolTip present and absent. HyperLink regression test added. All 3 regression controls (Button, Image, HyperLink) confirmed working after base class move.
+
+**CommaSplitTests.razor (WI-06, 4 tests):** Validation message format is `Text,ErrorMessage\x1F ValidationGroup`. The comma-split fix uses `IndexOf(',')` + `Substring()` instead of `Split(',')` so commas in ErrorMessage are preserved. Tests: single comma in message, multiple commas, no commas, empty ErrorMessage. All pass.
+
+📌 Test pattern: Validation messages are stored as `Text + "," + ErrorMessage + "\x1F" + ValidationGroup` by BaseValidator. AspNetValidationSummary extracts ErrorMessage using first-comma split (IndexOf + Substring). ErrorMessage with commas is preserved correctly. — Rogue
+
+📌 Test pattern: ToolTip renders as `title` attribute on the outermost element. TextBox adds it via CalculatedAttributes dictionary (not direct markup). CheckBox/RadioButton render title on the wrapping `<span>` when Text is present, on `<input>` when no Text. Panel renders on `<div>` (no GroupingText) or `<fieldset>` (with GroupingText). — Rogue
+
+ Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
+ Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge

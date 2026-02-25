@@ -117,3 +117,7 @@ Verified all 8 known priority gaps from prior audits against current `dev` branc
 Planned M9: "Migration Fidelity & Hardening" — 12 work items, ~30 gap closures. P0: ToolTip → BaseStyledComponent (4 WIs, ~28 gaps — highest-leverage remaining base class fix). P1: ValidationSummary comma-split fix + SkinID type fix (3 WIs). P2: Housekeeping — stale branch cleanup, doc gap audit, planning-docs refresh, integration test coverage review, sample navigation audit (5 WIs).
 
 📌 Team update (2026-02-25): Milestone 9 planned — 12 WIs, ~30 gaps, "Migration Fidelity & Hardening". P0: ToolTip base class fix. P1: ValidationSummary bug + SkinID type. P2: Housekeeping. — decided by Forge
+
+ Team update (2026-02-25): Doc audit found 10 gaps across FormView, DetailsView, DataGrid, ChangePassword, PagerSettings  decided by Beast
+ Team update (2026-02-25): Nav audit found 4 missing components + 15 missing SubPages  decided by Jubilee
+ Team update (2026-02-25): Test audit found 5 missing smoke tests  decided by Colossus

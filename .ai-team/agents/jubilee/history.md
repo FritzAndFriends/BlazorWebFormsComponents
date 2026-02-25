@@ -52,3 +52,7 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 - Some pages are partially reachable via in-page `Nav.razor` components, but TreeView Selection/ExpandCollapse and DetailsView Styles/Caption have no nav links at all.
 - DataList has a SubPage name mismatch: catalog says "Flow" but file is `SimpleFlow.razor`.
 - Report written to `.ai-team/decisions/inbox/jubilee-m9-nav-audit.md`.
+
+� Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls)  decided by Cyclops
+ Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
+ Team update (2026-02-25): Nav audit merged  4 missing components + 15 missing SubPages in ComponentCatalog.cs  decided by Jubilee

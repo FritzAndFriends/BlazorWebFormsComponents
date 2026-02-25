@@ -67,3 +67,6 @@
 - **M9 Planning-Docs Historical Headers (WI-10):** Added `> ⚠️ Historical Snapshot (Pre-Milestone 6)` header to all 54 per-control audit files and SUMMARY.md in `planning-docs/`. Excluded README.md and MILESTONE*-PLAN.md files (still current/active). This prevents future contributors from treating pre-M6 gap data as current.
 - **ChangePassword/Login parity gap:** Login.md documents Orientation and TextLayout with full reference tables and migration examples, but ChangePassword.md has neither. Both controls should have identical coverage for these shared layout properties.
 - **ToolTip universality documented (WI-04):** Added ToolTip to Features Supported in Label.md, TextBox.md, and GridView.md (Button.md already had it). Added "Common Properties on All Styled Controls" section to Migration/readme.md explaining that ToolTip (renders as `title` attribute) is universally available on all BaseStyledComponent-derived controls. Used `!!! tip` admonition and code examples. No dedicated Common Properties page created — kept it inline in the migration guide for minimal footprint.
+
+ Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
+ Team update (2026-02-25): M9 plan ratified  12 WIs across P0/P1/P2, migration fidelity theme  decided by Forge
