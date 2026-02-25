@@ -6,6 +6,7 @@ EXPOSE 80
 ENV ASPNETCORE_HTTP_PORTS=80
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG VERSION=0.0.0
 WORKDIR /src
 COPY ["Directory.Build.props", "./"]
 COPY ["samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj", "samples/AfterBlazorServerSide/"]
@@ -14,10 +15,10 @@ COPY ["samples/SharedSampleObjects/SharedSampleObjects.csproj", "samples/SharedS
 RUN dotnet restore "samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj"
 COPY . .
 WORKDIR "/src/samples/AfterBlazorServerSide"
-RUN dotnet build "AfterBlazorServerSide.csproj" -c Release -o /app/build
+RUN dotnet build "AfterBlazorServerSide.csproj" -c Release -o /app/build -p:Version=$VERSION -p:InformationalVersion=$VERSION
 
 FROM build AS publish
-RUN dotnet publish "AfterBlazorServerSide.csproj" -c Release -o /app/publish
+RUN dotnet publish "AfterBlazorServerSide.csproj" -c Release -o /app/publish -p:Version=$VERSION -p:InformationalVersion=$VERSION
 
 FROM base AS final
 WORKDIR /app

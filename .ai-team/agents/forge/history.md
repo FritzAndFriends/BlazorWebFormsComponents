@@ -89,3 +89,23 @@ Planned M7: "Control Depth & Navigation Overhaul" — 51 work items targeting ~1
  Team update (2026-02-24): Substitution/Xml formally deferred in status.md and README  decided by Beast
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
  Team update (2026-02-24): PagerSettings shared sub-component created for GridView/FormView/DetailsView  decided by Cyclops
+
+### Summary: v0.14 Deployment Pipeline Fixes (2026-02-25)
+
+Fixed three deployment pipeline issues on `fix/deployment-workflows` branch:
+
+- **Docker version computation:** `.dockerignore` excludes `.git`, so nbgv can't run inside the Docker build. Solution: compute version with `nbgv get-version` in the workflow BEFORE Docker build, pass as `ARG VERSION` into the Dockerfile, use `-p:Version=$VERSION -p:InformationalVersion=$VERSION` in both `dotnet build` and `dotnet publish`. This pattern (compute outside, inject via build-arg) is the standard approach when `.git` isn't available inside the build context.
+- **Azure App Service webhook:** Added a `curl -sf -X POST` step gated on `AZURE_WEBAPP_WEBHOOK_URL` secret. Uses `|| echo "::warning::..."` fallback so the workflow doesn't fail if the webhook is unavailable. The webhook URL comes from Azure Portal → App Service → Deployment Center.
+- **nuget.org publishing:** Added a second push step after the existing GitHub Packages push, gated on `NUGET_API_KEY` secret. Both pushes use `--skip-duplicate` for idempotency.
+
+**Key file paths:**
+- `.github/workflows/deploy-server-side.yml` — Docker build + push + Azure webhook
+- `.github/workflows/nuget.yml` — NuGet pack + push (GitHub Packages + nuget.org)
+- `samples/AfterBlazorServerSide/Dockerfile` — server-side demo container
+
+**Patterns established:**
+- Secret-gated workflow steps use `if: ${{ secrets.SECRET_NAME != '' }}` for graceful fallback when secrets aren't configured
+- Docker images are tagged with version number (from nbgv), `latest`, and commit SHA
+- Version is computed once via nbgv and shared via GitHub Actions step outputs (`steps.nbgv.outputs.version`)
+
+ Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge

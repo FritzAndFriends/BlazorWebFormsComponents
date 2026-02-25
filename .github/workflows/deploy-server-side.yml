@@ -29,6 +29,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET for version computation
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compute version with nbgv
+        id: nbgv
+        run: |
+          dotnet tool install --global nbgv
+          VERSION=$(nbgv get-version -v NuGetPackageVersion)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Computed version: $VERSION"
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -45,6 +58,17 @@ jobs:
           context: .
           file: samples/AfterBlazorServerSide/Dockerfile
           push: true
+          build-args: |
+            VERSION=${{ steps.nbgv.outputs.version }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.nbgv.outputs.version }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Trigger Azure App Service deployment
+        if: ${{ secrets.AZURE_WEBAPP_WEBHOOK_URL != '' }}
+        run: |
+          curl -sf -X POST "${{ secrets.AZURE_WEBAPP_WEBHOOK_URL }}" \
+            -H "Content-Length: 0" \
+            --max-time 60 \
+            || echo "::warning::Azure webhook call failed — the App Service may need to be updated manually"
