@@ -500,13 +500,11 @@ Suggested timeline:
 10. **Enums: 4 new files.** `SeriesChartType` (35), `ChartPalette` (13), `Docking` (4), `ChartDashStyle` (6) in `Enums/` per project convention.
 **Why:** Consolidates architecture decisions from design review and implementation to provide a single reference for chart component patterns.
 
-### 2026-02-23: DataBoundComponent style property gap (consolidated)
+### 2026-02-23: BaseDataBoundComponent inherits BaseStyledComponent (consolidated)
 
-**By:** Forge
-**What:** Controls inheriting `DataBoundComponent<T>` (DataGrid, GridView, FormView, DetailsView, ListView) lack all WebControl-level style properties because the chain `DataBoundComponent<T> → BaseDataBoundComponent → BaseWebFormsComponent` skips `BaseStyledComponent`. Only DataList works around this by implementing `IStyle` directly. GridView re-declares `CssClass` as a standalone `[Parameter]` — a pattern smell.
-**Recommendation:** Create `DataBoundStyledComponent<T>` inheriting `DataBoundComponent<T>` and implementing `IStyle`. Chart already uses this approach. This would immediately give BackColor, BorderColor, CssClass, Font, ForeColor, Height, Width, etc. to all 5 affected data controls.
-**Why:** Affects 5 of 9 data controls. Identified independently in both the data controls audit and chart design review. Single base-class fix with broad impact.
-
+**By:** Forge (gap identification), Cyclops (implementation)
+**What:** Controls inheriting `DataBoundComponent<T>` lacked all WebControl-level style properties because the chain `DataBoundComponent<T>` → `BaseDataBoundComponent` → `BaseWebFormsComponent` skipped `BaseStyledComponent`. Changed inheritance to insert `BaseStyledComponent`: `DataBoundComponent<T>` → `BaseDataBoundComponent` → `BaseStyledComponent` → `BaseWebFormsComponent`. This gives all data-bound controls the full IStyle property set (BackColor, BorderColor, BorderStyle, BorderWidth, CssClass, ForeColor, Font, Height, Width). Removed duplicate IStyle declarations from 11 controls (GridView, DetailsView, DataGrid, DataList, TreeView, AdRotator, BulletedList, CheckBoxList, DropDownList, ListBox, RadioButtonList). 949/949 tests pass — zero regressions.
+**Why:** Affects 5+ of 9 data controls. Identified independently in data controls audit and chart design review. Single base-class fix closing ~70 style property gaps across the library.
 ### 2026-02-23: GridView is highest-priority data control gap
 
 **By:** Forge
@@ -624,49 +622,6 @@ Chart.js uses JS interop and renders to `<canvas>`, so traditional DOM assertion
 **What:** Fixed `ChartSeries.ToConfig()` to support data binding via `Items`, `XValueMember`, and `YValueMembers` parameters. When `Items` is provided with a non-empty `YValueMembers`, the method extracts `DataPoint` objects using reflection. The `YValueMembers` property supports comma-separated field names for multi-value charts. Type conversion handles `double`, `float`, `int`, `long`, `decimal`, `short`, `byte`, and falls back to `Convert.ToDouble()`. The manual `Points` collection is used as a fallback when `Items` is null/empty or `YValueMembers` is not specified.
 **Why:** Data-bound charts were rendering empty because `ToConfig()` only used the manual `Points` collection. Web Forms Chart supports data binding via `XValueMember`/`YValueMembers` properties, and this fix restores that capability for Blazor migration scenarios.
 
-# Chart Component Implementation Decisions
-
-**By:** Cyclops
-**Date:** 2026-02-12
-**Scope:** WI-1, WI-2, WI-3 (Chart component, JS interop, chart type mapping)
-
-## Decisions Made
-
-### 1. SeriesChartType.Point maps to Chart.js "scatter"
-Web Forms does not have a `Scatter` enum value — `Point = 0` is the equivalent. The design spec listed "Scatter" as a Phase 1 type, but the actual enum uses `Point`. `ChartConfigBuilder` maps `Point` → `"scatter"` in Chart.js.
-
-### 2. ChartWidth/ChartHeight as string parameters (not overriding base Width/Height)
-`BaseStyledComponent` already defines `Width` and `Height` as `Unit` type parameters. Rather than hiding these, Chart adds separate `ChartWidth`/`ChartHeight` string parameters (e.g., "400px", "300px") that render as inline CSS on the wrapper `<div>`. The base `Width`/`Height` remain available for CSS style generation via `this.ToStyle()`.
-
-### 3. ChartJsInterop is separate from BlazorWebFormsJsInterop
-Chart.js interop uses its own `ChartJsInterop` class, not the shared `BlazorWebFormsJsInterop` service. This keeps chart-specific JS isolated and avoids polluting the page-level interop service.
-
-### 4. Chart.js placeholder file
-Since no internet access is available, `wwwroot/js/chart.min.js` is a placeholder stub that exports a `Chart` constructor. It logs a console warning. Must be replaced with real Chart.js v4.4.8 before production use.
-
-### 5. Child component registration via CascadingParameter
-All child components (ChartSeries, ChartArea, ChartLegend, ChartTitle) use `[CascadingParameter(Name = "ParentChart")]` and register in `OnInitializedAsync`, following the MultiView/View pattern.
-
-### 6. ChartConfigBuilder uses snapshot classes
-Instead of passing the `Chart` component directly to `ChartConfigBuilder.BuildConfig()`, we pass config snapshot classes (`ChartSeriesConfig`, `ChartAreaConfig`, etc.) extracted via `.ToConfig()` methods. This decouples the builder from component lifecycle and enables pure unit testing.
-
-### 7. Docking parameter naming avoids conflicts
-`ChartLegend.LegendDocking` and `ChartTitle.TitleDocking` use prefixed names to avoid potential parameter name conflicts with the base class or future properties. They're nullable `Docking?` to distinguish "not set" from a default value.
-
-### 8. Task.Yield() before first chart creation
-`OnAfterRenderAsync(firstRender)` calls `Task.Yield()` before creating the chart, giving child components time to register via their own `OnInitializedAsync`. Without this, the chart would render before series/areas/titles/legends are registered.
-
-## Files Created
-- `Enums/SeriesChartType.cs`, `Enums/ChartPalette.cs`, `Enums/Docking.cs`, `Enums/ChartDashStyle.cs`
-- `Axis.cs`, `DataPoint.cs`
-- `wwwroot/js/chart.min.js`, `wwwroot/js/chart-interop.js`
-- `ChartJsInterop.cs`, `ChartConfigBuilder.cs`
-- `Chart.razor`, `Chart.razor.cs`
-- `ChartSeries.razor`, `ChartSeries.razor.cs`
-- `ChartArea.razor`, `ChartArea.razor.cs`
-- `ChartLegend.razor`, `ChartLegend.razor.cs`
-- `ChartTitle.razor`, `ChartTitle.razor.cs`
-
 ### 2026-02-13: Chart component Phase 1 gate review — CONDITIONAL APPROVAL
 
 **By:** Forge
@@ -689,68 +644,6 @@ Instead of passing the `Chart` component directly to `ChartConfigBuilder.BuildCo
 4. **Colossus:** Add Chart sample routes to integration smoke tests
 
 **Why:** The component is architecturally sound and 90% complete. The data binding gap creates a docs-vs-reality mismatch that will frustrate migrating developers. Phase 2/3 features (more chart types, tooltips) are nice-to-have but not blocking for initial ship.
-
-# Decision: Chart Component Architecture (Design Review)
-
-**By:** Forge
-**Date:** 2026-02-12
-**Ceremony:** Design Review — Milestone 4
-
----
-
-### Base class: DataBoundStyledComponent<T>
-
-**What:** Create new `DataBoundStyledComponent<T>` inheriting `DataBoundComponent<T>` and implementing `IStyle`. Chart inherits this new class. Web Forms `Chart` inherits `DataBoundControl` → `WebControl` — it needs both data binding AND style properties. Our `DataBoundComponent<T>` chain skips `BaseStyledComponent`, so styled data-bound controls have no proper base class. GridView worked around this by re-declaring `CssClass` as a standalone `[Parameter]` — a pattern smell.
-
-**Why:** Neither `DataBoundComponent<T>` (no styles) nor `BaseStyledComponent` (no data binding) alone satisfies the Web Forms Chart contract. The new base class fills a structural gap. It does not affect existing components (additive only).
-
----
-
-### Child registration: CascadingValue + explicit Register on init
-
-**What:** ChartSeries, ChartArea, ChartTitle, ChartLegend register with parent Chart via `[CascadingParameter(Name="ParentChart")]` and call `ParentChart.RegisterXxx(this)` in `OnInitializedAsync`. Chart maintains `SeriesList`, `ChartAreaList`, `TitleList`, `LegendList` collections.
-
-**Why:** Follows the MultiView/View pattern already established in the project. Explicit registration gives Chart deterministic knowledge of its children before `OnAfterRenderAsync` fires the JS interop call.
-
----
-
-### JS interop contract: Three-function ES module
-
-**What:** `chart-interop.js` exports `createChart(canvasId, config)`, `updateChart(canvasId, config)`, `destroyChart(canvasId)`. Config is a standard Chart.js configuration object (type + data + options). C# wrapper class `ChartJsInterop` uses lazy `IJSObjectReference` import pattern matching `BlazorWebFormsJsInterop`. Canvas referenced by `id` (from `ClientID`), not `ElementReference`.
-
-**Why:** Minimal JS surface area. Passing a standard Chart.js config object means C# owns the config shape and JS is a thin pass-through — no JS-side logic to maintain. Follows existing lazy-module-import pattern.
-
----
-
-### Chart.js version: Pin to v4.4.8
-
-**What:** Bundle `chart.min.js` v4.4.8 as a static asset in `wwwroot/js/`. Imported by `chart-interop.js` via relative ES module import.
-
-**Why:** v4.4.8 is widely deployed and well-tested. v4.5.x is newer (Oct 2025) with less production mileage. Pinning to a stable version reduces risk for the project's first JS interop component. Upgrading is a single file replacement.
-
----
-
-### Phase 1 chart types: 8 types mapped to Chart.js
-
-**What:** Column→bar, Bar→bar(indexAxis:'y'), Line→line, Pie→pie, Area→line(fill:true), Doughnut→doughnut, Scatter→scatter, StackedColumn→bar(stacked:true). Full `SeriesChartType` enum (all 35 Web Forms values) created for API fidelity; unsupported types throw `NotSupportedException`.
-
-**Why:** API fidelity requires the full enum. Chart.js maps cleanly to 8 common chart types. Unsupported types fail clearly rather than silently producing wrong output.
-
----
-
-### Testing strategy: Extract ChartConfigBuilder as pure function
-
-**What:** `ChartConfigBuilder` is a static class that takes registered children/parameters and produces the Chart.js config dictionary. bUnit tests cover: markup structure (canvas attributes), child registration, config generation (via ChartConfigBuilder), JS interop mock verification, dispose cleanup, error handling. Visual rendering verified by Playwright.
-
-**Why:** Canvas content is opaque to bUnit. Extracting the config builder as a pure function maximizes testable surface area without JS interop. This is the same principle as testing a ViewModel separately from a View.
-
----
-
-### Enums: 4 new enum files
-
-**What:** `SeriesChartType` (35 values), `ChartPalette` (13 values), `Docking` (4 values: Top/Bottom/Left/Right), `ChartDashStyle` (6 values). All placed in `Enums/` directory following project convention.
-
-**Why:** Web Forms Chart uses these enums. Project convention requires every Web Forms enum to have a corresponding C# enum in `Enums/`.
 
 # Chart Sample Pages — Feature-Rich Samples
 
@@ -855,55 +748,6 @@ Cyclops is fixing the `ChartSeries.ToConfig()` bug where data binding is not imp
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Improve the UI of the samples/AfterBlazorServerSide website with a modern layout that demos each sample, feature, and component cleanly. Add a search feature. Update integration tests with this overhaul.
 **Why:** User request — captured for team memory
-
-# Decision: BaseDataBoundComponent inherits BaseStyledComponent
-
-**By:** Cyclops
-**Date:** 2026-02-23
-**Work Item:** WI-07
-
-## What
-
-Changed the inheritance chain from:
-```
-DataBoundComponent<T> → BaseDataBoundComponent → BaseWebFormsComponent
-```
-To:
-```
-DataBoundComponent<T> → BaseDataBoundComponent → BaseStyledComponent → BaseWebFormsComponent
-```
-
-This gives all data-bound controls the full IStyle property set (BackColor, BorderColor, BorderStyle, BorderWidth, CssClass, ForeColor, Font, Height, Width) from the base class.
-
-## Controls affected
-
-Removed duplicate IStyle declarations and style properties from:
-- **GridView** — removed CssClass
-- **DetailsView** — removed CssClass
-- **DataGrid** — removed CssClass
-- **DataList** — removed IStyle + 9 style properties; kept `new string Style` parameter
-- **TreeView** — removed IStyle + 9 style properties
-- **AdRotator** — removed IStyle + 9 style properties + Style computed property
-- **BulletedList** — removed IStyle + 9 style properties + Style computed property
-- **CheckBoxList** — removed IStyle + 9 style properties + Style computed property
-- **DropDownList** — removed IStyle + 9 style properties + Style computed property
-- **ListBox** — removed IStyle + 9 style properties + Style computed property
-- **RadioButtonList** — removed IStyle + 9 style properties + Style computed property
-
-No changes needed:
-- **FormView** — no duplicate properties
-- **ListView** — only added `new` keyword to existing obsolete Style parameter
-- **Repeater** — no duplicate properties
-
-## Why
-
-Data controls in Web Forms inherit from `DataBoundControl → WebControl`, which provides style properties. Our `BaseDataBoundComponent` was missing this, forcing each control to implement IStyle independently with duplicate property declarations. This caused ~70 style property gaps and made maintenance harder.
-
-## Impact
-
-- 949/949 tests pass — zero regressions
-- All existing style rendering in templates (DataList, DetailsView, etc.) continues to work unchanged
-- Controls that don't yet render styles in their templates can add rendering later per-control
 
 ### 2026-02-23: Label AssociatedControlID switches rendered element
 **By:** Cyclops
@@ -1919,11 +1763,10 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 - `dotnet build samples/AfterBlazorServerSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet test src/BlazorWebFormsComponents.Test/ --no-restore` ΓÇö Γ£à passes
 
-### 2026-02-25: Deployment pipeline patterns for Docker versioning, Azure webhook, and NuGet publishing
+### 2026-02-25: Deployment pipeline patterns for Docker versioning, secret-gating, and NuGet publishing (consolidated)
 **By:** Forge
-**What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets with `if: ${{ secrets.SECRET_NAME != '' }}` so workflows don't fail when secrets aren't configured. (3) Dual NuGet publishing  always push to GitHub Packages, conditionally push to nuget.org.
-**Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating ensures the workflows work in forks and PRs where secrets aren't available. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
-
+**What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets using env var indirection — declare the secret in `env:`, check `env.VAR_NAME` in step-level `if:`, reference `env.VAR_NAME` in `run:`. Direct `secrets.*` references in step-level `if:` conditions are invalid and cause GitHub Actions validation failures. Applied to both `nuget.yml` and `deploy-server-side.yml` (PR #372). (3) Dual NuGet publishing — always push to GitHub Packages, conditionally push to nuget.org.
+**Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating via env var indirection ensures workflows work in forks and PRs where secrets aren't available. The original `if: ${{ secrets.SECRET_NAME != '' }}` pattern was incorrect — GitHub Actions rejects it at validation time for step-level conditions. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
 ### 2026-02-25: Milestone 9 Plan  Migration Fidelity & Hardening
 
 **By:** Forge
@@ -1993,3 +1836,39 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 **What:** Milestone 12 introduces a Migration Analysis Tool as a CLI (`bwfc-migrate`) in the same repo at `src/BlazorWebFormsComponents.MigrationAnalysis/`. The PoC uses regex-based ASPX parsing (not Roslyn) to extract `<asp:*>` controls, maps them against a registry of all 53 planned BWFC components + ~15 known unsupported controls, analyzes code-behind patterns via regex, scores page complexity (Green/Yellow/Red), and produces Markdown + JSON reports. Packaged as a `dotnet tool`. Three-phase roadmap: M12 = analysis + CLI, Phase 2 = Roslyn + scaffolding, Phase 3 = Copilot agent. 13 work items total.
 **Why:** At 51/53 components complete, the component library is mature. The highest-leverage remaining work is helping developers evaluate and execute migrations using the components we already built. Same-repo placement keeps the control mapping table in sync with the actual component library. Regex over Roslyn prevents scope creep in the PoC — Roslyn is explicitly Phase 2. The tool transforms BlazorWebFormsComponents from a component library into a migration platform.
 
+
+# Decision: Dev Branch Cleanup (Fork Alignment)
+
+**Date:** 2026-02-25
+**Author:** Forge (Lead / Web Forms Reviewer)
+**Requested by:** Jeffrey T. Fritz
+
+## Context
+
+PR #372 (csharpfritz:dev to FritzAndFriends:dev) was showing ~39 commits, but only 2 were actual new work. The remaining ~37 were old pre-squash commits and merge commits from previous milestones that had already been squash-merged upstream via earlier PRs.
+
+## Decision
+
+Reset origin/dev to upstream/dev and cherry-pick only the 2 relevant CI fix commits:
+
+1. b4f021c -> 24084d9 -- fix(ci): use env var pattern for secrets in nuget.yml if condition
+2. 0532c40 -> 97eedc5 -- fix(ci): use env var pattern for secrets in deploy-server-side.yml
+
+Used --force-with-lease for the force-push to origin (not --force), which ensures we don't overwrite concurrent changes.
+
+## Rationale
+
+- The 37 extra commits were noise -- they'd already been incorporated upstream via squash merges
+- PRs should show only the delta of new work, not re-introduce old history
+- Clean commit ranges make code review tractable and reduce merge conflicts
+
+## Verification
+
+- git log --oneline upstream/dev..origin/dev shows exactly 2 commits, no merge commits
+- upstream/main is clean: squash merge from PR #371 visible at d9a295b
+- Force-push succeeded with --force-with-lease (no rejected push)
+
+## Impact
+
+- PR #372 should now show only the 2 CI fix commits
+- No code was lost -- all previously merged work exists in upstream/dev
