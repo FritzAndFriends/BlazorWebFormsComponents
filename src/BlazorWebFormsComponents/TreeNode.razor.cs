@@ -191,8 +191,12 @@ namespace BlazorWebFormsComponents
 						return $"{ImageLocation}Default_Dash.gif";
 					}
 
-					return string.IsNullOrEmpty(ParentTreeView.ImageSet.Collapse) ? $"{ImageLocation}Default_NoExpand.gif" : (Expanded ? $"{ImageLocation}{ParentTreeView.ImageSet.Collapse}" : $"{ImageLocation}{ParentTreeView.ImageSet.Expand}");
-					//return $"{ImageLocation}Default_NoExpand.gif";
+					if (ParentTreeView.ShowExpandCollapse)
+					{
+						return Expanded ? $"{ImageLocation}{ExpandCollapseImage(true)}" : $"{ImageLocation}{ExpandCollapseImage(false)}";
+					}
+
+					return $"{ImageLocation}Default_NoExpand.gif";
 
 				}
 
@@ -209,11 +213,35 @@ namespace BlazorWebFormsComponents
 						return (Expanded ? $"{ImageLocation}Default_TCollapse.gif" : $"{ImageLocation}Default_TExpand.gif");
 					}
 
-					return string.IsNullOrEmpty(ParentTreeView.ImageSet.Collapse) ? $"{ImageLocation}Default_NoExpand.gif" : (Expanded ? $"{ImageLocation}{ParentTreeView.ImageSet.Collapse}" : $"{ImageLocation}{ParentTreeView.ImageSet.Expand}");
+					if (ParentTreeView.ShowExpandCollapse)
+					{
+						return Expanded ? $"{ImageLocation}{ExpandCollapseImage(true)}" : $"{ImageLocation}{ExpandCollapseImage(false)}";
+					}
+
+					return $"{ImageLocation}Default_NoExpand.gif";
 
 				}
 
-				return string.IsNullOrEmpty(ParentTreeView.ImageSet.Collapse) ? $"{ImageLocation}Default_NoExpand.gif" : (Expanded ? $"{ImageLocation}{ParentTreeView.ImageSet.Collapse}" : $"{ImageLocation}{ParentTreeView.ImageSet.Expand}");
+				return $"{ImageLocation}Default_NoExpand.gif";
+			}
+		}
+
+		/// <summary>
+		/// Returns the appropriate expand or collapse image filename from the ImageSet,
+		/// falling back to Default_Collapse.gif / Default_Expand.gif when the ImageSet
+		/// does not provide one.
+		/// </summary>
+		private string ExpandCollapseImage(bool expanded)
+		{
+			if (expanded)
+			{
+				var collapse = ParentTreeView.ImageSet.Collapse;
+				return !string.IsNullOrEmpty(collapse) ? collapse : "Default_Collapse.gif";
+			}
+			else
+			{
+				var expand = ParentTreeView.ImageSet.Expand;
+				return !string.IsNullOrEmpty(expand) ? expand : "Default_Expand.gif";
 			}
 		}
 
