@@ -9,12 +9,18 @@ The DataGrid component is meant to emulate the asp:DataGrid control in markup an
 - Auto-generate columns
 - Show/Hide header row
 - Empty data text
+- **Paging** (AllowPaging, PageSize, CurrentPageIndex, PageIndexChanged event)
+- **Sorting** (AllowSorting, SortCommand event — sortable column headers)
+- **Selection** (SelectedIndex, SelectedIndexChanged event)
+- **Editing** (EditItemIndex — inline row editing support)
 - **Style sub-components** (ItemStyle, AlternatingItemStyle, HeaderStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle)
 - **Caption** property
 - **GridLines** property (None, Horizontal, Vertical, Both)
 - **UseAccessibleHeader** property (renders `<th scope="col">` for accessibility)
 - **CellPadding** and **CellSpacing** properties
 - **ShowFooter** property
+- **ItemCreated** / **ItemDataBound** events
+- **OnItemCommand**, **OnEditCommand**, **OnCancelCommand**, **OnUpdateCommand**, **OnDeleteCommand** events
 
 ### Blazor Notes
 
@@ -27,11 +33,7 @@ The DataGrid component is meant to emulate the asp:DataGrid control in markup an
 
 The following DataGrid features from Web Forms are not currently supported:
 
-- Paging (AllowPaging, PageSize, CurrentPageIndex)
-- Sorting (AllowSorting)
-- Editing (EditItemIndex, OnEditCommand, OnUpdateCommand, OnCancelCommand)
-- Selection
-- Custom paging
+- Custom paging (AllowCustomPaging, VirtualItemCount)
 - Footer templates
 
 ## Web Forms Declarative Syntax
@@ -163,23 +165,29 @@ The following DataGrid features from Web Forms are not currently supported:
 
 ## Blazor Syntax
 
-Currently, not every syntax element of Web Forms DataGrid is supported. In the meantime, the following DataGrid in Blazor syntax will only include the implemented ones. **Non-implemented elements will be included later**.
+Currently, not every syntax element of Web Forms DataGrid is supported. In the meantime, the following DataGrid in Blazor syntax will only include the implemented ones. **Custom paging and footer templates will be included later**.
 
 ```html
 <DataGrid
+    AllowPaging=bool
+    AllowSorting=bool
     AutoGenerateColumns=bool
     Caption=string
     CellPadding=int
     CellSpacing=int
     CssClass=string
+    CurrentPageIndex=int
     DataKeyField=string
     DataSource=IEnumerable
+    EditItemIndex=int
     EmptyDataText=string
     Enabled=bool
     GridLines=GridLines
     ID=string
     Items=IEnumerable
     ItemType=Type
+    PageSize=int
+    SelectedIndex=int
     OnDataBinding=EventCallBack
     OnDataBound=EventCallBack
     OnItemCommand=EventCallBack<DataGridCommandEventArgs>
@@ -187,6 +195,11 @@ Currently, not every syntax element of Web Forms DataGrid is supported. In the m
     OnCancelCommand=EventCallBack<DataGridCommandEventArgs>
     OnUpdateCommand=EventCallBack<DataGridCommandEventArgs>
     OnDeleteCommand=EventCallBack<DataGridCommandEventArgs>
+    ItemCreated=EventCallback<DataGridItemEventArgs>
+    ItemDataBound=EventCallback<DataGridItemEventArgs>
+    PageIndexChanged=EventCallback<DataGridPageChangedEventArgs>
+    SortCommand=EventCallback<DataGridSortCommandEventArgs>
+    SelectedIndexChanged=EventCallback
     OnInit=EventCallBack
     OnLoad=EventCallBack
     OnPreRender=EventCallBack
@@ -356,6 +369,51 @@ When `true`, header cells render as `<th scope="col">` instead of `<td>`, improv
         <BoundField ItemType="Customer" DataField="CompanyName" HeaderText="Company" />
     </Columns>
 </DataGrid>
+```
+
+### DataGrid with Paging
+
+```razor
+<DataGrid ItemType="Customer"
+          AutoGenerateColumns="true"
+          AllowPaging="true"
+          PageSize="5"
+          DataKeyField="CustomerID"
+          SelectMethod="GetCustomers"
+          PageIndexChanged="HandlePageChanged">
+</DataGrid>
+
+@code {
+    private void HandlePageChanged(DataGridPageChangedEventArgs e)
+    {
+        // e.NewPageIndex contains the new page index
+    }
+}
+```
+
+When `AllowPaging="true"` and `PageSize` is set, the DataGrid automatically renders a numeric pager row. The pager displays page numbers and highlights the current page. Clicking a page number fires `PageIndexChanged` and navigates to that page.
+
+### DataGrid with Sorting
+
+```razor
+<DataGrid ItemType="Customer"
+          AutoGenerateColumns="false"
+          AllowSorting="true"
+          SelectMethod="GetCustomers"
+          SortCommand="HandleSort">
+    <Columns>
+        <BoundField DataField="CompanyName" HeaderText="Company" SortExpression="CompanyName" />
+        <BoundField DataField="ContactName" HeaderText="Contact" SortExpression="ContactName" />
+    </Columns>
+</DataGrid>
+
+@code {
+    private void HandleSort(DataGridSortCommandEventArgs e)
+    {
+        // e.SortExpression contains the column's SortExpression value
+        // Re-sort your data source and rebind
+    }
+}
 ```
 
 ## Comparison with GridView

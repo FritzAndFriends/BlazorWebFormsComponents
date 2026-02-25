@@ -95,6 +95,7 @@ nav:
     - FormView: DataControls/FormView.md
     - GridView: DataControls/GridView.md
     - ListView: DataControls/ListView.md
+    - PagerSettings: DataControls/PagerSettings.md
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
     - CompareValidator: ValidationControls/CompareValidator.md

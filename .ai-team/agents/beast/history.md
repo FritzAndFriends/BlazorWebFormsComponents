@@ -73,3 +73,11 @@ AccessKey/ToolTip missing from base classes (universal gap). Label needs BaseSty
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+- **Issue #359 doc updates (M6-M8 features):** Updated 4 existing doc pages and created 1 new page to close gaps identified in the M9 Doc Gap Audit:
+  1. **ChangePassword.md** — Added Orientation and TextLayout documentation with reference tables, enum usage examples, and migration Before/After, mirroring the Login.md pattern.
+  2. **PagerSettings.md** (NEW) — Created dedicated doc page in DataControls/ covering all properties, PagerButtons/PagerPosition enums, usage with FormView/DetailsView/GridView, and migration notes. Added to mkdocs.yml nav alphabetically.
+  3. **FormView.md** — Added ItemCommand, ItemCreated, PageIndexChanging/PageIndexChanged events to features and Blazor syntax. Added Caption/CaptionAlign, PagerSettings child element, PagerTemplate, and 7 style sub-components (RowStyle, EditRowStyle, InsertRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle) with reference table.
+  4. **DetailsView.md** — Added Caption/CaptionAlign with reference table. Moved styles and PagerSettings from "NOT Supported" to "Supported" (were stale). Added 10-row style sub-components table and PagerSettings child element to Blazor syntax. Updated migration notes to reflect style child elements.
+  5. **DataGrid.md** — Moved Paging, Sorting, Selection, and Editing from "NOT Supported" to "Supported" (all now implemented). Added AllowPaging/PageSize/CurrentPageIndex/PageIndexChanged, AllowSorting/SortCommand, SelectedIndex/EditItemIndex to Blazor syntax. Added paging and sorting examples with event handlers.
+- **Documentation pattern: PagerSettings as shared sub-component doc:** PagerSettings is the first shared (non-control) sub-component to get its own dedicated doc page. It's referenced via `[PagerSettings](PagerSettings.md)` links from FormView, DetailsView, and GridView docs. Future shared sub-components (e.g., TableItemStyle if ever documented separately) should follow this pattern.
+
