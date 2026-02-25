@@ -56,3 +56,6 @@ Established doc structure: title → intro (MS docs link) → Features Supported
  Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
 
  Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  docs may need updating  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle pattern with IMenuStyleContainer  docs may need updating  decided by Cyclops

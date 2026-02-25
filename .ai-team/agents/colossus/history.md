@@ -68,3 +68,6 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
  Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
 
  Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  interaction tests may be needed  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle with IMenuStyleContainer  interaction tests may be needed  decided by Cyclops

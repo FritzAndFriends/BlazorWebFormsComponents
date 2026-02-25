@@ -1913,3 +1913,27 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** LoginView and PasswordRecovery now inherit from `BaseStyledComponent` instead of `BaseWebFormsComponent`, matching Login, ChangePassword, and CreateUserWizard. PasswordRecovery renders CssClass/Style/ToolTip on all three step tables. LoginView has no wrapper element (template-switching component) so styled properties are available but not rendered.
 
 **Why:** All login controls should consistently inherit from BaseStyledComponent. No breaking changes — all 1200+ tests pass.
+
+### 2026-02-25: ListView CRUD events — full event parity (#356)
+
+**By:** Cyclops
+
+**What:** ListView now has full event parity for CRUD operations. 7 remaining events implemented: Sorting, Sorted, PagePropertiesChanging, PagePropertiesChanged, SelectedIndexChanging, SelectedIndexChanged, LayoutCreated. Sort/Select commands route through HandleCommand; paging uses dedicated SetPageProperties() method. LayoutCreated converted from EventHandler to EventCallback<EventArgs>. SortDirection toggle matches GridView behavior. 3 new EventArgs classes, 12 new tests.
+
+**Why:** ListView needs full event parity with Web Forms to support migration scenarios where applications rely on these events for sorting, paging, and selection behavior.
+
+### 2026-02-25: Menu styles use MenuItemStyle pattern, not UiTableItemStyle (#360)
+
+**By:** Cyclops
+
+**What:** Menu style sub-components (DynamicMenuStyle, StaticMenuStyle, DynamicMenuItemStyle, StaticMenuItemStyle) inherit `MenuItemStyle` (which inherits `ComponentBase, IStyle`), NOT `UiTableItemStyle`. The `IMenuStyleContainer` interface exposes these as `MenuItemStyle` properties. When adding RenderFragment parameters to a component that already has `ChildContent`, tests mixing named RenderFragments with bare content must wrap the bare content in `<ChildContent>` tags. CascadingValue for `ParentMenu` now has `IsFixed="true"` for performance.
+
+**Why:** Menu styles produce CSS text rendered into an inline `<style>` block via `ToStyle()`. This is fundamentally different from GridView/Calendar styles which use `TableItemStyle` objects applied as HTML element attributes. Forcing Menu styles into the `UiTableItemStyle` hierarchy would require restructuring the entire Menu CSS rendering approach with no benefit.
+
+### 2026-02-25: All 5 missing smoke tests added (#358)
+
+**By:** Colossus
+
+**What:** Added 5 InlineData entries to existing Theory smoke tests in `ControlSampleTests.cs`: ListView CrudOperations, Label, Panel BackImageUrl, LoginControls Orientation, DataGrid Styles. All fit cleanly as InlineData on existing Theory methods — no new Fact tests needed. Panel/BackImageUrl uses external placeholder URLs; smoke test works due to existing "Failed to load resource" filter, but the page should be updated to use local images per team convention.
+
+**Why:** M9 audit identified 5 sample pages without smoke tests. Every sample page is a promise to developers — all must have corresponding smoke tests.

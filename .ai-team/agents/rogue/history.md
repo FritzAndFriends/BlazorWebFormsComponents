@@ -89,3 +89,7 @@ Wrote 24 bUnit tests across 2 files for migration fidelity work:
  Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
 
  Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (Sorting/Sorted, SelectedIndexChanging/Changed, PagePropertiesChanging/Changed, LayoutCreated)  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle pattern (not UiTableItemStyle); IMenuStyleContainer interface added  decided by Cyclops
+ Team update (2026-02-25): 5 missing smoke tests added for ListView CrudOps, Label, Panel BackImageUrl, LoginControls Orientation, DataGrid Styles  decided by Colossus
