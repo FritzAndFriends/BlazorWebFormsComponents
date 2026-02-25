@@ -81,4 +81,167 @@
 		cut.Find("table").GetAttribute("title").ShouldBe("Select a date");
 	}
 
+	// --- Regression: HyperLink ToolTip still works after base class move ---
+
+	[Fact]
+	public void HyperLink_ToolTipStillRendersCorrectlyAfterBaseClassChange()
+	{
+		var cut = Render(@<HyperLink Text="Link" NavigateUrl="https://example.com" ToolTip="Go to example" />);
+		cut.Find("a").GetAttribute("title").ShouldBe("Go to example");
+	}
+
+	// --- Controls that gained ToolTip from BaseStyledComponent ---
+
+	[Fact]
+	public void Label_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<Label Text="Hello" ToolTip="Label tooltip" />);
+		var span = cut.Find("span");
+		span.HasAttribute("title").ShouldBeTrue();
+		span.GetAttribute("title").ShouldBe("Label tooltip");
+	}
+
+	[Fact]
+	public void Label_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<Label Text="Hello" />);
+		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TextBox_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<TextBox Text="value" ToolTip="TextBox tooltip" />);
+		var input = cut.Find("input");
+		input.HasAttribute("title").ShouldBeTrue();
+		input.GetAttribute("title").ShouldBe("TextBox tooltip");
+	}
+
+	[Fact]
+	public void TextBox_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<TextBox Text="value" />);
+		cut.Find("input").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CheckBox_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<CheckBox Text="Accept" ToolTip="CheckBox tooltip" />);
+		var span = cut.Find("span");
+		span.HasAttribute("title").ShouldBeTrue();
+		span.GetAttribute("title").ShouldBe("CheckBox tooltip");
+	}
+
+	[Fact]
+	public void CheckBox_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<CheckBox Text="Accept" />);
+		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void RadioButton_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<RadioButton Text="Option A" ToolTip="RadioButton tooltip" />);
+		var span = cut.Find("span");
+		span.HasAttribute("title").ShouldBeTrue();
+		span.GetAttribute("title").ShouldBe("RadioButton tooltip");
+	}
+
+	[Fact]
+	public void RadioButton_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<RadioButton Text="Option A" />);
+		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Panel_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<Panel ToolTip="Panel tooltip"><p>Content</p></Panel>);
+		var div = cut.Find("div");
+		div.HasAttribute("title").ShouldBeTrue();
+		div.GetAttribute("title").ShouldBe("Panel tooltip");
+	}
+
+	[Fact]
+	public void Panel_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<Panel><p>Content</p></Panel>);
+		cut.Find("div").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Table_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<Table ToolTip="Table tooltip">
+			<TableRow><TableCell>Cell</TableCell></TableRow>
+		</Table>);
+		var table = cut.Find("table");
+		table.HasAttribute("title").ShouldBeTrue();
+		table.GetAttribute("title").ShouldBe("Table tooltip");
+	}
+
+	[Fact]
+	public void Table_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<Table>
+			<TableRow><TableCell>Cell</TableCell></TableRow>
+		</Table>);
+		cut.Find("table").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void DropDownList_WithToolTip_RendersTitleAttribute()
+	{
+		var items = new ListItemCollection { new ListItem("One", "1") };
+		var cut = Render(@<DropDownList TItem="object" StaticItems="items" ToolTip="DropDownList tooltip" />);
+		var select = cut.Find("select");
+		select.HasAttribute("title").ShouldBeTrue();
+		select.GetAttribute("title").ShouldBe("DropDownList tooltip");
+	}
+
+	[Fact]
+	public void DropDownList_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var items = new ListItemCollection { new ListItem("One", "1") };
+		var cut = Render(@<DropDownList TItem="object" StaticItems="items" />);
+		cut.Find("select").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ListBox_WithToolTip_RendersTitleAttribute()
+	{
+		var items = new ListItemCollection { new ListItem("One", "1") };
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" ToolTip="ListBox tooltip" />);
+		var select = cut.Find("select");
+		select.HasAttribute("title").ShouldBeTrue();
+		select.GetAttribute("title").ShouldBe("ListBox tooltip");
+	}
+
+	[Fact]
+	public void ListBox_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var items = new ListItemCollection { new ListItem("One", "1") };
+		var cut = Render(@<ListBox TItem="object" StaticItems="items" />);
+		cut.Find("select").HasAttribute("title").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void LinkButton_WithToolTip_RendersTitleAttribute()
+	{
+		var cut = Render(@<LinkButton ToolTip="LinkButton tooltip">Click</LinkButton>);
+		var a = cut.Find("a");
+		a.HasAttribute("title").ShouldBeTrue();
+		a.GetAttribute("title").ShouldBe("LinkButton tooltip");
+	}
+
+	[Fact]
+	public void LinkButton_WithoutToolTip_DoesNotRenderTitleAttribute()
+	{
+		var cut = Render(@<LinkButton>Click</LinkButton>);
+		cut.Find("a").HasAttribute("title").ShouldBeFalse();
+	}
+
 }

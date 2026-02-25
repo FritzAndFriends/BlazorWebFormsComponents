@@ -80,6 +80,14 @@ public partial class ChartSeries : BaseWebFormsComponent
 	public string ToolTip { get; set; }
 
 	/// <summary>
+	/// Gets or sets the rendering order of this series in mixed charts.
+	/// Lower values are drawn last (on top). When null, an automatic order
+	/// is assigned based on chart type (line/area = 0, bar/column = 1).
+	/// </summary>
+	[Parameter]
+	public int? Order { get; set; }
+
+	/// <summary>
 	/// Gets or sets the data points for this series.
 	/// </summary>
 	[Parameter]
@@ -106,7 +114,8 @@ public partial class ChartSeries : BaseWebFormsComponent
 			Color = Color,
 			BorderWidth = BorderWidth,
 			IsVisibleInLegend = IsVisibleInLegend,
-			ChartArea = ChartArea
+			ChartArea = ChartArea,
+			Order = Order
 		};
 
 		// If Items is provided, extract data points from it

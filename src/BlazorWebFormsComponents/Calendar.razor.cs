@@ -185,12 +185,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public int CellSpacing { get; set; } = 0;
 
-		/// <summary>
-		/// Tooltip text.
-		/// </summary>
-		[Parameter]
-		public string ToolTip { get; set; }
-
 		// Legacy CSS string style properties (backward compatible)
 #pragma warning disable CS0618
 		[Parameter]

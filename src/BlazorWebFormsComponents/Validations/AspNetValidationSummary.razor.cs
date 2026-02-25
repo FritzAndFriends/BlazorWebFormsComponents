@@ -24,7 +24,12 @@ namespace BlazorWebFormsComponents.Validations
 
 		public bool IsValid => FilteredMessages.Any();
 
-		public IEnumerable<string> ValidationMessages => FilteredMessages.Select(x => x.Split('\x1F')[0].Split(',')[1]);
+		public IEnumerable<string> ValidationMessages => FilteredMessages.Select(x =>
+		{
+			var fieldMsg = x.Split('\x1F')[0];
+			var commaIndex = fieldMsg.IndexOf(',');
+			return commaIndex >= 0 ? fieldMsg.Substring(commaIndex + 1) : fieldMsg;
+		});
 
 		private IEnumerable<string> FilteredMessages
 		{

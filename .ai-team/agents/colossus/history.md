@@ -36,3 +36,17 @@ Added 9 smoke tests and 9 interaction tests for M7 sample pages: GridView Select
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
 
  Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge
+
+## Summary: M9 Integration Test Coverage Audit (WI-11)
+
+Audited all sample page `@page` routes against ControlSampleTests.cs and InteractiveComponentTests.cs. Found 105 sample routes total; 100 covered by smoke tests, 57 interaction tests exist. Identified **5 pages without any smoke test**: ListView/CrudOperations (M7 — highest priority), Label, Panel/BackImageUrl, LoginControls/Orientation, and DataGrid/Styles. All other M7 features (GridView Selection/DisplayProperties, TreeView Selection/ExpandCollapse, Menu Selection, FormView Events/Styles, DetailsView Styles/Caption) have full smoke + interaction test coverage. Report written to `.ai-team/decisions/inbox/colossus-m9-test-audit.md`.
+
+ Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
+ Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
+ Team update (2026-02-25): Test coverage audit merged  5 gaps identified, P0: ListView CrudOperations  decided by Colossus
+
+ Team update (2026-02-25): Consolidated audit reports now use `planning-docs/AUDIT-REPORT-M{N}.md` pattern for all milestone audits  decided by Beast
+
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

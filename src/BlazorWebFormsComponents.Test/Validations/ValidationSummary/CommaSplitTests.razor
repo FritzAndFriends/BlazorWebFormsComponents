@@ -1,0 +1,109 @@
+
+@code {
+
+	[Fact]
+	public void ValidationSummary_ErrorMessageWithOneComma_RendersFullMessage()
+	{
+		var cut = Render(
+			@<EditForm Model="@model1" OnInvalidSubmit="@(() => _invalid1 = true)">
+				<InputText @ref="ref1.Current" @bind-Value="model1.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@ref1"
+					ErrorMessage="Name, is required" />
+				<AspNetValidationSummary DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		_invalid1.ShouldBeTrue();
+		var li = cut.Find("li");
+		li.TextContent.ShouldContain("Name, is required");
+	}
+
+	[Fact]
+	public void ValidationSummary_ErrorMessageWithMultipleCommas_RendersFullMessage()
+	{
+		var cut = Render(
+			@<EditForm Model="@model2" OnInvalidSubmit="@(() => _invalid2 = true)">
+				<InputText @ref="ref2.Current" @bind-Value="model2.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@ref2"
+					ErrorMessage="Please enter first, middle, and last name" />
+				<AspNetValidationSummary DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		_invalid2.ShouldBeTrue();
+		var li = cut.Find("li");
+		li.TextContent.ShouldContain("Please enter first, middle, and last name");
+	}
+
+	[Fact]
+	public void ValidationSummary_ErrorMessageWithNoComma_RendersCorrectly()
+	{
+		var cut = Render(
+			@<EditForm Model="@model3" OnInvalidSubmit="@(() => _invalid3 = true)">
+				<InputText @ref="ref3.Current" @bind-Value="model3.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@ref3"
+					ErrorMessage="Name is required" />
+				<AspNetValidationSummary DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		_invalid3.ShouldBeTrue();
+		var li = cut.Find("li");
+		li.TextContent.ShouldContain("Name is required");
+	}
+
+	[Fact]
+	public void ValidationSummary_EmptyErrorMessage_RendersWithoutError()
+	{
+		var cut = Render(
+			@<EditForm Model="@model4" OnInvalidSubmit="@(() => _invalid4 = true)">
+				<InputText @ref="ref4.Current" @bind-Value="model4.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@ref4"
+					ErrorMessage="" />
+				<AspNetValidationSummary DisplayMode="BulletList" />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		// With empty ErrorMessage, the summary should still render without crashing
+		_invalid4.ShouldBeTrue();
+		cut.FindAll("li").Count.ShouldBeGreaterThanOrEqualTo(0);
+	}
+
+	// Separate model/handler instances per test to avoid shared state
+	private bool _invalid1 = false;
+	ForwardRef<InputBase<string>> ref1 = new ForwardRef<InputBase<string>>();
+	private ExModel model1 = new ExModel();
+
+	private bool _invalid2 = false;
+	ForwardRef<InputBase<string>> ref2 = new ForwardRef<InputBase<string>>();
+	private ExModel model2 = new ExModel();
+
+	private bool _invalid3 = false;
+	ForwardRef<InputBase<string>> ref3 = new ForwardRef<InputBase<string>>();
+	private ExModel model3 = new ExModel();
+
+	private bool _invalid4 = false;
+	ForwardRef<InputBase<string>> ref4 = new ForwardRef<InputBase<string>>();
+	private ExModel model4 = new ExModel();
+
+	public class ExModel
+	{
+		public string Name { get; set; }
+	}
+}

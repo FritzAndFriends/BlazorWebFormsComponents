@@ -190,6 +190,10 @@ public static class ChartConfigBuilder
 			if (s.ChartType == SeriesChartType.Bar)
 				dataset["indexAxis"] = "y";
 
+			// Z-order: lower order values are drawn last (on top) in Chart.js.
+			// Line/area types render on top of bar/column, matching Web Forms behavior.
+			dataset["order"] = s.Order ?? GetDefaultOrder(s.ChartType);
+
 			datasets.Add(dataset);
 		}
 
@@ -369,6 +373,21 @@ public static class ChartConfigBuilder
 		};
 	}
 
+	/// <summary>
+	/// Returns the default Chart.js dataset order based on series chart type.
+	/// Lower values are drawn last (on top). Bar/Column = 1 (behind), others = 0 (on top).
+	/// </summary>
+	private static int GetDefaultOrder(SeriesChartType chartType)
+	{
+		return chartType switch
+		{
+			SeriesChartType.Bar => 1,
+			SeriesChartType.Column => 1,
+			SeriesChartType.StackedColumn => 1,
+			_ => 0
+		};
+	}
+
 	private static string ToRgbaString(WebColor color)
 	{
 		if (color == null || color.IsEmpty) return "rgba(0,0,0,1)";
@@ -467,6 +486,7 @@ public class ChartSeriesConfig
 	public int BorderWidth { get; set; }
 	public bool IsVisibleInLegend { get; set; } = true;
 	public string ChartArea { get; set; }
+	public int? Order { get; set; }
 }
 
 /// <summary>

@@ -3,7 +3,7 @@
 
 @if (Enabled && Visible)
 {
-	<span style="@($"{DisplayStyle}{CalculatedStyle}")">
+	<span style="@($"{DisplayStyle}{CalculatedStyle}")" title="@ToolTip">
 		@if (string.IsNullOrWhiteSpace(Text))
 		{
 			@ErrorMessage

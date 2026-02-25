@@ -42,3 +42,23 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
  Team update (2026-02-24): Menu auto-ID pattern  Menu now auto-generates IDs for JS interop  decided by Cyclops
  Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
  Team update (2026-02-24): PagerSettings shared sub-component created  samples may need PagerSettings demos  decided by Cyclops
+
+### M9 Navigation Audit (WI-12)
+
+- Sidebar navigation is driven entirely by `ComponentCatalog.cs` — `NavMenu.razor` iterates over it with SubPages support.
+- Found **4 components** completely missing from ComponentCatalog (Menu, DataBinder, PasswordRecovery, ViewState) — invisible in sidebar.
+- Found **15 SubPage entries** missing across GridView (5), TreeView (2), FormView (3), DetailsView (2), ListView (1), DataGrid (1), Panel (1).
+- All 10 M7/M8 feature pages exist on disk with valid `@page` directives but none appear in sidebar navigation.
+- Some pages are partially reachable via in-page `Nav.razor` components, but TreeView Selection/ExpandCollapse and DetailsView Styles/Caption have no nav links at all.
+- DataList has a SubPage name mismatch: catalog says "Flow" but file is `SimpleFlow.razor`.
+- Report written to `.ai-team/decisions/inbox/jubilee-m9-nav-audit.md`.
+
+� Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls)  decided by Cyclops
+ Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
+ Team update (2026-02-25): Nav audit merged  4 missing components + 15 missing SubPages in ComponentCatalog.cs  decided by Jubilee
+
+ Team update (2026-02-25): Consolidated audit reports now use `planning-docs/AUDIT-REPORT-M{N}.md` pattern for all milestone audits  decided by Beast
+
+
+ Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
+

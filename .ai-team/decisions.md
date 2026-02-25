@@ -449,12 +449,13 @@ Suggested timeline:
 **What:** Going forward, use "milestones" instead of "sprints" for naming work batches. All future planning uses "milestone" terminology.
 **Why:** User preference — captured for team memory. Applies retroactively to planning references where practical.
 
-### 2026-02-23: AccessKey and ToolTip must be added to BaseStyledComponent (consolidated)
+### 2026-02-23: AccessKey must be added to BaseStyledComponent
 
 **By:** Beast, Cyclops
-**What:** `AccessKey` (string) and `ToolTip` (string) are missing from all styled controls. Both are standard `WebControl` properties present on every control inheriting `WebControl` in Web Forms. Beast's audit of 15 editor controls (L–X) and Cyclops's audit of 13 editor controls (A–I) independently confirmed the gap. 7 of 13 A–I controls add ToolTip individually; the remaining 6 lack it entirely.
-**Recommendation:** Add `[Parameter] public string AccessKey { get; set; }` and `[Parameter] public string ToolTip { get; set; }` to `BaseStyledComponent`. This fixes the gap for all 20+ styled controls in one change.
+**What:** `AccessKey` (string) is missing from all styled controls. Standard `WebControl` property. Beast's audit of 15 editor controls (L–X) and Cyclops's audit of 13 editor controls (A–I) independently confirmed the gap.
+**Recommendation:** Add `[Parameter] public string AccessKey { get; set; }` to `BaseStyledComponent`.
 **Why:** Universal gap confirmed by two independent audits across 28 controls. Base-class fix is the highest-leverage single change available.
+**Status:** AccessKey added in Milestone 6. ToolTip consolidated into 2026-02-25 entry below.
 
 ### 2026-02-23: Label should inherit BaseStyledComponent
 
@@ -539,12 +540,12 @@ Suggested timeline:
 **Recommendation:** Add `Display` parameter to `BaseValidator<T>`.
 **Why:** Migration-blocking for pages using `Display="Static"`.
 
-### 2026-02-23: ValidationSummary functional gaps and comma-split bug
+### 2026-02-23: ValidationSummary functional gaps
 
 **By:** Rogue
-**What:** `AspNetValidationSummary` is missing `HeaderText`, `ShowMessageBox`, `ShowSummary`, `ShowValidationErrors`, and `ValidationGroup`. Error message parsing uses `x.Split(',')[1]` which silently corrupts messages containing commas.
-**Recommendation:** Fix comma-split bug immediately (data corruption risk). Prioritize `HeaderText` and `ValidationGroup` (common in multi-form pages).
-**Why:** Comma-split is a latent data corruption bug. Missing properties affect multi-form page migration.
+**What:** `AspNetValidationSummary` is missing `HeaderText`, `ShowMessageBox`, `ShowSummary`, `ShowValidationErrors`, and `ValidationGroup`. Prioritize `HeaderText` and `ValidationGroup` (common in multi-form pages).
+**Why:** Missing properties affect multi-form page migration.
+**Status:** Comma-split bug fixed in M9 (2026-02-25) — see consolidated entry below.
 
 ### 2026-02-23: Login controls outer style properties (consolidated)
 
@@ -1922,3 +1923,73 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 **By:** Forge
 **What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets with `if: ${{ secrets.SECRET_NAME != '' }}` so workflows don't fail when secrets aren't configured. (3) Dual NuGet publishing  always push to GitHub Packages, conditionally push to nuget.org.
 **Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating ensures the workflows work in forks and PRs where secrets aren't available. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
+
+### 2026-02-25: Milestone 9 Plan  Migration Fidelity & Hardening
+
+**By:** Forge
+**What:** Milestone 9 ratified: 12 WIs, ~30 gap closures. P0: ToolTip  BaseStyledComponent (4 WIs, ~28 gaps). P1: ValidationSummary comma-split fix, SkinID boolstring fix (3 WIs). P2: Branch cleanup, doc audit, planning-docs headers, integration test review, nav audit (5 WIs). 7 of 8 prior audit gaps already fixed; 1 confirmed open + 2 newly identified.
+**Why:** ToolTip base class fix has highest blast radius (~28 controls). ValidationSummary is data corruption risk. SkinID type mismatch breaks compiled migration code. Full plan at `planning-docs/MILESTONE9-PLAN.md`.
+
+### 2026-02-25: ToolTip belongs on BaseStyledComponent (consolidated)
+
+**By:** Beast, Cyclops (original audit: 2026-02-23), Cyclops (implementation: 2026-02-25)
+**What:** `[Parameter] public string ToolTip { get; set; }` added to `BaseStyledComponent`. Removed 8 duplicate declarations (Button, Calendar, DataList, FileUpload, HyperLink, Image, ImageButton, ImageMap). 32 templates updated with `title="@ToolTip"`. Sub-component types (ChartSeries, DataPoint, MenuItem, TreeNode) keep their own ToolTip (item-level semantics). All 28+ styled controls now inherit ToolTip automatically.
+**Why:** Web Forms `WebControl.ToolTip` is defined at base class level. Two independent audits (Beast LX, Cyclops AI) confirmed universal gap. Base-class fix is highest-leverage single change.
+
+### 2026-02-25: ValidationSummary comma-split fixed (consolidated)
+
+**By:** Rogue (bug identification: 2026-02-23), Cyclops (fix: 2026-02-25)
+**What:** `AspNetValidationSummary.ValidationMessages` now uses `IndexOf(',')` + `Substring()` instead of `Split(',')[1]` to extract error messages. The field identifier is always before the first comma; everything after is the message.
+**Why:** Error messages containing commas were silently truncated  data corruption bug. Original audit by Rogue identified the issue; Cyclops implemented the fix.
+
+### 2026-02-25: SkinID is a string, not a bool
+
+**By:** Cyclops
+**What:** `BaseWebFormsComponent.SkinID` type changed from `bool` to `string`. `[Obsolete]` attribute preserved.
+**Why:** Web Forms `Control.SkinID` is a string containing the skin name. Boolean type breaks any migration code setting `SkinID="MySkin"`.
+
+### 2026-02-25: Documentation gap audit  M6-M8 features (WI-09)
+
+**By:** Beast
+**What:** Audited docs against M6-M8 features. Fully documented: GridView, TreeView, Menu, Validators, Login. Gaps found: FormView (ItemCommand, styles, PagerSettings not in Blazor sections), DetailsView (Caption missing, styles/PagerSettings possibly stale), DataGrid (paging status unclear), ChangePassword (Orientation/TextLayout undocumented), PagerSettings (no dedicated doc page).
+**Why:** Ensures documentation accuracy before 1.0. Gaps prioritized P1-P3.
+
+### 2026-02-25: Planning-docs marked as historical snapshots (WI-10)
+
+**By:** Beast
+**What:** Added historical snapshot headers to all 54 per-control audit files and SUMMARY.md in `planning-docs/`. Excluded README.md and MILESTONE*-PLAN.md (still current).
+**Why:** Prevents future contributors from treating pre-M6 gap data as current.
+
+### 2026-02-25: Integration test coverage audit (WI-11)
+
+**By:** Colossus
+**What:** 100 of 105 sample page routes covered by smoke tests. 5 gaps: ListView CrudOperations (M7, P0), Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles (all pre-M7, P1). 9 of 10 M7 features have full coverage (smoke + interaction). 57 interaction tests exist.
+**Why:** Read-only audit to identify test coverage gaps before 1.0.
+
+### 2026-02-25: Sample site navigation audit (WI-12)
+
+**By:** Jubilee
+**What:** 4 components missing entirely from ComponentCatalog.cs (Menu, DataBinder, PasswordRecovery, ViewState). 15 SubPages missing across GridView (5), TreeView (2), FormView (3), DetailsView (2), ListView (1), DataGrid (1), Panel (1). DataList "Flow" SubPage name mismatch. All 10 M7/M8 feature pages exist on disk but none linked in sidebar.
+**Why:** Users cannot discover sample pages that aren't in the sidebar navigation.
+
+
+
+### 2026-02-25: Consolidated audit reports use `planning-docs/AUDIT-REPORT-M{N}.md`
+
+**By:** Beast
+**What:** When multiple audits are conducted in a milestone, their findings should be consolidated into a single report at `planning-docs/AUDIT-REPORT-M{N}.md`. The report follows the planning-docs historical snapshot header convention and includes: summary table, per-audit sections (findings + resolution status), additional findings section, and a complete issue tracker appendix. Each finding is mapped to its resolving GitHub Issue with assigned agent.
+**Why:** M9 produced three separate audits (doc gaps, test coverage, sample navigation) with findings scattered across agent history files. A consolidated report makes it easy for Jeff and the team to see all findings in one place, track resolution against M10 issues, and verify coverage. This pattern should be reused for future milestone audits.
+
+### 2026-02-25: TreeView NodeImage must check ShowExpandCollapse independently of ShowLines
+
+**By:** Cyclops
+**Date:** 2026-02-25
+**Issue:** #361
+**What:** The `NodeImage` property in `TreeNode.razor.cs` now explicitly checks `ShowExpandCollapse` in the non-`ShowLines` code paths, rather than relying on `ImageSet.Collapse` being non-empty. A new `ExpandCollapseImage(bool)` helper provides the ImageSet filename with a guaranteed fallback to `Default_Collapse.gif` / `Default_Expand.gif`.
+**Why:** The previous code had a fragile assumption: it used `string.IsNullOrEmpty(ImageSet.Collapse)` as a proxy for "should I show expand/collapse images." The fix makes the intent explicit  `ShowExpandCollapse` controls whether expand/collapse images are used, and the ImageSet only controls *which* images. All 51 TreeView tests pass.
+
+### 2026-02-25: Migration Analysis Tool PoC architecture
+**By:** Forge
+**What:** Milestone 12 introduces a Migration Analysis Tool as a CLI (`bwfc-migrate`) in the same repo at `src/BlazorWebFormsComponents.MigrationAnalysis/`. The PoC uses regex-based ASPX parsing (not Roslyn) to extract `<asp:*>` controls, maps them against a registry of all 53 planned BWFC components + ~15 known unsupported controls, analyzes code-behind patterns via regex, scores page complexity (Green/Yellow/Red), and produces Markdown + JSON reports. Packaged as a `dotnet tool`. Three-phase roadmap: M12 = analysis + CLI, Phase 2 = Roslyn + scaffolding, Phase 3 = Copilot agent. 13 work items total.
+**Why:** At 51/53 components complete, the component library is mature. The highest-leverage remaining work is helping developers evaluate and execute migrations using the components we already built. Same-repo placement keeps the control mapping table in sync with the actual component library. Regex over Roslyn prevents scope creep in the PoC — Roslyn is explicitly Phase 2. The tool transforms BlazorWebFormsComponents from a component library into a migration platform.
+

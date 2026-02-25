@@ -3,7 +3,7 @@
 
 @if (Enabled && Visible && ShowSummary)
 {
-	<div style="@(Style + (IsValid ? null : "display:none;"))">
+	<div style="@(Style + (IsValid ? null : "display:none;"))" title="@ToolTip">
 		@if (IsValid)
 		{
 			@if (!string.IsNullOrEmpty(HeaderText))
