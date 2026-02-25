@@ -62,3 +62,12 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+### M10 — Fix 19 Unreachable Sample Pages in ComponentCatalog.cs (#350)
+
+- **4 missing components added:** Menu (Navigation, route to Selection since no Index), DataBinder (Utility), PasswordRecovery (Login), ViewState (Utility).
+- **DetailsView added as new component** (Data category) with SubPages: Caption, Styles — was completely absent from catalog despite having 3 pages on disk.
+- **15 missing SubPages added to existing components:** GridView (+5: DisplayProperties, InlineEditing, Paging, Selection, Sorting), TreeView (+2: ExpandCollapse, Selection), FormView (+3: Edit, Events, Styles), ListView (+1: CrudOperations), DataGrid (+1: Styles), Panel (+1: BackImageUrl).
+- **DataList SubPage name fix:** "Flow" → "SimpleFlow" to match actual file `SimpleFlow.razor`.
+- **Pattern confirmed:** SubPages are alphabetically ordered in catalog arrays; components without an Index.razor use their specific page route (e.g., Menu → `/ControlSamples/Menu/Selection`).
+- Build verified: `dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --no-restore --verbosity quiet` passes.
+
