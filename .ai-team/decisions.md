@@ -1937,3 +1937,89 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Added 5 InlineData entries to existing Theory smoke tests in `ControlSampleTests.cs`: ListView CrudOperations, Label, Panel BackImageUrl, LoginControls Orientation, DataGrid Styles. All fit cleanly as InlineData on existing Theory methods — no new Fact tests needed. Panel/BackImageUrl uses external placeholder URLs; smoke test works due to existing "Failed to load resource" filter, but the page should be updated to use local images per team convention.
 
 **Why:** M9 audit identified 5 sample pages without smoke tests. Every sample page is a promise to developers — all must have corresponding smoke tests.
+
+### 2026-02-25: Feature branch workflow required
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** All new work MUST be done on feature branches, pushed to origin, with a PR to upstream/dev. Never commit directly to the dev branch.
+**Why:** User directive  captured for team memory
+
+
+# Decision: SkinID and EnableTheming Property Defaults
+
+**Date:** 2026-02-26
+**Author:** Cyclops
+**Issue:** #365
+
+## Context
+
+The `SkinID` and `EnableTheming` properties on `BaseWebFormsComponent` were previously marked `[Obsolete]` with the message "Theming is not available in Blazor". As part of the Skins & Themes PoC, these properties need to become functional.
+
+## Decision
+
+Per Jeff's confirmed decisions:
+
+- **EnableTheming defaults to `true`** — follows StyleSheetTheme semantics where the theme sets defaults and explicit component values override.
+- **SkinID defaults to `""` (empty string)** — meaning "use default skin". This matches Web Forms behavior where an unset SkinID applies the default skin for the control type.
+- **`[Obsolete]` attributes removed** — these are now functional `[Parameter]` properties ready for #366 integration.
+
+## Impact
+
+- All components inheriting from `BaseWebFormsComponent` now have `EnableTheming = true` and `SkinID = ""` by default.
+- No breaking changes — existing code that doesn't use theming is unaffected since there's no theme provider yet (#364/#366 will add that).
+- #366 (Forge's base class integration) can now wire these properties into the theme resolution pipeline.
+
+
+# Decision: Theme Integration in BaseStyledComponent
+
+**Date:** 2026-02-26
+**Author:** Cyclops
+**Issue:** #366
+
+## Context
+
+With core theme types (#364) and SkinID/EnableTheming activation (#365) complete, the final wiring step connects the `ThemeConfiguration` cascading parameter to `BaseStyledComponent` so all styled components automatically participate in theming.
+
+## Decisions Made
+
+1. **CascadingParameter on BaseStyledComponent, not BaseWebFormsComponent** — Only styled components have visual properties (BackColor, ForeColor, etc.) to skin. Placing the `[CascadingParameter] ThemeConfiguration Theme` here keeps the concern scoped correctly.
+
+2. **OnParametersSet, not OnInitialized** — Theme values must be applied every time parameters change (e.g., if the theme is swapped at runtime). `OnParametersSet` is the correct lifecycle hook. Early-return when `EnableTheming == false` or `Theme == null` ensures zero impact on existing code.
+
+3. **StyleSheetTheme semantics (defaults, not overrides)** — Each property is only applied when the component's current value equals its type default (`default(WebColor)`, `default(Unit)`, `default(BorderStyle)`, `string.IsNullOrEmpty`, `FontUnit.Empty`, `false` for booleans). This matches ASP.NET Web Forms StyleSheetTheme behavior where themes provide defaults and explicit attribute values take precedence.
+
+4. **No logging for missing named skins** — Per project convention (Jeff's decision on #364), missing SkinID returns null and processing silently continues. ILogger injection deferred to M11 to avoid scope creep.
+
+5. **Font properties checked individually** — Since `Font` is always initialized to `new FontInfo()` in `BaseStyledComponent`, we cannot use a null check. Instead, each font sub-property (Name, Size, Bold, Italic, Underline) is checked against its own default.
+
+## Impact
+
+- All components inheriting `BaseStyledComponent` now automatically receive theme skins when wrapped in `<ThemeProvider>`.
+- Existing tests are unaffected — without a `ThemeProvider` ancestor, `Theme` is null and the early-return fires.
+- Future work: add Overline/Strikeout font properties, ILogger for missing skin warnings, Theme property override semantics.
+
+
+# Decision: Theme Core Types Design
+
+**Author:** Cyclops
+**Date:** 2026-02-26
+**Related:** #364
+
+## Context
+WI-1 required core data types for the Skins & Themes PoC.
+
+## Decisions Made
+
+1. **ControlSkin uses nullable property types** — `BorderStyle?`, `Unit?`, and null reference types for `WebColor`, `FontInfo`, `CssClass`, `ToolTip`. This enables StyleSheetTheme semantics: null = "not set by theme, use component default/explicit value." Non-null = "theme wants this value applied as a default."
+
+2. **ThemeConfiguration keys are case-insensitive** — Both the control type name and SkinID lookups use `StringComparer.OrdinalIgnoreCase`. This is forgiving for configuration and matches ASP.NET Web Forms behavior.
+
+3. **Default skin key is empty string** — `AddSkin("Button", skin)` registers a default skin (no SkinID). `AddSkin("Button", skin, "Professional")` registers a named skin. This avoids a separate dictionary for defaults.
+
+4. **ThemeProvider does NOT inherit BaseWebFormsComponent** — It's pure infrastructure (a CascadingValue wrapper), not a Web Forms control emulation. It uses `@namespace BlazorWebFormsComponents.Theming` and a simple `@code` block.
+
+5. **GetSkin returns null for missing entries** — Per Jeff's decision, missing SkinID should log a warning and continue, not throw. The null return lets the integration layer (#366) decide how/where to log.
+
+## Impact
+- Integration step (#366) will need to consume `CascadingParameter<ThemeConfiguration>` in `BaseStyledComponent` and apply skin values during initialization.
+- The nullable property design means the apply logic will check each property for null before overwriting the component's parameter value.
+

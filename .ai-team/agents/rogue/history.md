@@ -93,3 +93,15 @@ Wrote 24 bUnit tests across 2 files for migration fidelity work:
  Team update (2026-02-25): ListView now has full CRUD event parity (Sorting/Sorted, SelectedIndexChanging/Changed, PagePropertiesChanging/Changed, LayoutCreated)  decided by Cyclops
  Team update (2026-02-25): Menu styles use MenuItemStyle pattern (not UiTableItemStyle); IMenuStyleContainer interface added  decided by Cyclops
  Team update (2026-02-25): 5 missing smoke tests added for ListView CrudOps, Label, Panel BackImageUrl, LoginControls Orientation, DataGrid Styles  decided by Colossus
+
+ Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
+
+
+ Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
+
+
+ Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
+
