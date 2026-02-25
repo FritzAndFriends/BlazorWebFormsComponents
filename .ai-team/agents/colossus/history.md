@@ -50,3 +50,12 @@ Audited all sample page `@page` routes against ControlSampleTests.cs and Interac
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+## Summary: Issue #358 — 5 Missing Smoke Tests (2026-02-25)
+
+Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering all gaps identified in M9 audit: ListView/CrudOperations, Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles. All 5 sample pages verified to exist. Tests added as InlineData to existing Theory methods (EditorControl, DataControl, LoginControl). Build verified green (0 errors).
+
+## Learnings
+
+- Panel/BackImageUrl sample page uses external placeholder URLs (`via.placeholder.com`). The existing `VerifyPageLoadsWithoutErrors` filter for "Failed to load resource" handles this, so the smoke test works despite the team convention against external image URLs.
+- LoginControls/Orientation is at `/ControlSamples/LoginControls/Orientation` (not under `/ControlSamples/Login` or `/ControlSamples/ChangePassword` as initially suggested in the issue).
+
