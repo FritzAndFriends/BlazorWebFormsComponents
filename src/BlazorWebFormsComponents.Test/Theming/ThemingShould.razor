@@ -1,0 +1,134 @@
+@using BlazorWebFormsComponents.Theming
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	[Fact]
+	public void ApplyDefaultSkinToLabel()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" />
+			</ThemeProvider>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	[Fact]
+	public void ApplyNamedSkinViaSkinID()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Red }, "Danger");
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" SkinID="Danger" />
+			</ThemeProvider>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Red");
+		span.GetAttribute("style").ShouldNotContain("background-color:Blue");
+	}
+
+	[Fact]
+	public void NotApplyThemeWhenEnableThemingIsFalse()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" EnableTheming="false" />
+			</ThemeProvider>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void LetExplicitValueOverrideThemeSkin()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Red");
+		span.GetAttribute("style").ShouldNotContain("background-color:Blue");
+	}
+
+	[Fact]
+	public void NotApplyThemeWithoutThemeProvider()
+	{
+		// Act
+		var cut = Render(@<Label Text="test" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ApplyCssClassFromSkin()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { CssClass = "my-theme-class" });
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" />
+			</ThemeProvider>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("my-theme-class");
+	}
+
+	[Fact]
+	public void RenderGracefullyWithMissingSkinID()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" SkinID="NonExistent" />
+			</ThemeProvider>
+		);
+
+		// Assert — renders without error and without any theme applied
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeFalse();
+	}
+
+}
