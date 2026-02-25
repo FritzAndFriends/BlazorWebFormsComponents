@@ -83,3 +83,5 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
 
  Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
 
+
+ Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge

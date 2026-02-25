@@ -107,6 +107,12 @@ Result: The `BlazorWebFormsComponents` assembly gets stamped with NBGV's fallbac
 
  Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
 
+### Summary: Calendar Selection Behavior Review (2026-02-26)
+
+Deep review of Calendar component selection fidelity vs. Web Forms Calendar control, requested by Jeff. Found 7 issues: 1 P0 (external SelectedDate parameter not synced to _selectedDays — no OnParametersSet override), 4 P1 (SelectWeekText wrong default "&gt;&gt;" should be "&gt;"; SelectedDates not sorted ascending; SelectedDates read-only — Web Forms has Add/Remove/Clear/SelectRange; style layering exclusive not merged), 2 P2 (no tests for week/month selection; SelectedDates allocates new collection per access). Core click handlers work correctly — day/week/month selection, clearing, events all fire properly. Title row colspan math correct. Style precedence order matches Web Forms. Wrote findings to `.ai-team/decisions/inbox/forge-calendar-selection-review.md`.
+
+📌 Team update (2026-02-26): Calendar selection review — 7 issues found (1 P0, 4 P1, 2 P2). P0: external SelectedDate not synced. P1: SelectWeekText default wrong, SelectedDates unordered/read-only, style merging broken. — decided by Forge
+
  Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
 
 
@@ -118,3 +124,5 @@ Result: The `BlazorWebFormsComponents` assembly gets stamped with NBGV's fallbac
 
  Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
 
+
+ Team update (2026-02-25): ThemesAndSkins.md documentation updated to match PoC implementation  class names, API, roadmap status, PoC decisions table added  decided by Beast

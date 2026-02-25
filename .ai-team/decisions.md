@@ -2023,3 +2023,237 @@ WI-1 required core data types for the Skins & Themes PoC.
 - Integration step (#366) will need to consume `CascadingParameter<ThemeConfiguration>` in `BaseStyledComponent` and apply skin values during initialization.
 - The nullable property design means the apply logic will check each property for null before overwriting the component's parameter value.
 
+
+
+# Decision: ThemesAndSkins.md updated to reflect PoC implementation
+
+**Author:** Beast (Technical Writer)
+**Date:** 2026-02-25
+**Scope:** `docs/Migration/ThemesAndSkins.md`
+
+## Context
+
+The ThemesAndSkins.md document was originally written as an exploratory strategy document before implementation. With the M10 PoC now complete (ThemeConfiguration, ControlSkin, ThemeProvider, BaseStyledComponent integration), the doc needed surgical updates to reflect reality.
+
+## Decisions Made
+
+1. **Doc status upgraded from exploratory to implemented.** The "Current Status" admonition now states the PoC is implemented and references actual class names and namespace.
+
+2. **SkinID type warning removed.** The `SkinID` property is now correctly typed as `string` (not `bool` as the doc warned). The warning admonition was replaced with a "tip" confirming correct implementation.
+
+3. **Approach 2 code examples use real API.** All code samples in the CascadingValue ThemeProvider section now reference `ThemeConfiguration.AddSkin()`, `ThemeConfiguration.GetSkin()`, `ControlSkin`, and `ThemeProvider` — the actual class names and method signatures.
+
+4. **Implementation Roadmap Phase 1 marked complete.** All Phase 1 items show ✅ Done. Phase 2 deferred items explicitly listed for M11: `.skin` parser, Theme vs StyleSheetTheme priority, runtime switching, sub-component styles, container EnableTheming propagation, JSON format.
+
+5. **Alternative approaches preserved.** Approaches 1, 3, 4, and 5 remain in the doc as reference context — they document the evaluation process and may be useful for future enhancements.
+
+6. **PoC Decisions section added.** Seven key design decisions documented: StyleSheetTheme default, missing SkinID handling, namespace choice, string-keyed lookups, ControlSkin property mirroring, BaseStyledComponent placement, .skin parser deferral.
+
+## Impact
+
+- No code changes — documentation only.
+- Consumers reading the doc will see accurate API examples they can copy-paste.
+- The doc now serves as both a migration guide and an architecture decision record.
+
+# Calendar Selection Behavior Review
+
+**By:** Forge
+**Date:** 2026-02-26
+**Requested by:** Jeffrey T. Fritz
+**Scope:** Calendar component selection fidelity vs. ASP.NET Web Forms Calendar control
+**Reference:** [Calendar Class (MSDN)](https://learn.microsoft.com/dotnet/api/system.web.ui.webcontrols.calendar?view=netframework-4.8.1)
+
+---
+
+## Verdict
+
+Jeff is right to not be confident. I found **7 issues** — 1 P0 (broken behavior), 4 P1 (wrong behavior), and 2 P2 (polish/gaps). The core click-to-select flow works, but there are real fidelity gaps in the SelectedDates API surface, default property values, parameter sync, and test coverage that would bite migrating teams.
+
+---
+
+## Issues
+
+### 1. P0 — External `SelectedDate` parameter changes are not synced to visual selection
+
+**Web Forms does:** When `SelectedDate` is set programmatically, the `SelectedDates` collection is updated to contain that date, and the calendar re-renders showing that date as selected.
+
+**Our component does:** `_selectedDays` is only populated in `OnInitialized()` and in click handlers. There is NO `OnParametersSet` override. If a parent component programmatically changes the `SelectedDate` parameter (e.g., via data binding, async load, or external button), the `_selectedDays` HashSet is NOT updated. The calendar re-renders but the old date remains visually selected while `SelectedDate` property holds the new value.
+
+**Repro:** Parent component has a "Set to July 4" button that changes the bound `SelectedDate`. Click it — the calendar shows the old selection (or no selection if it's a different month), not July 4.
+
+**Fix:** Add `OnParametersSet` override that detects when `SelectedDate` changed externally and syncs `_selectedDays`:
+```csharp
+protected override void OnParametersSet()
+{
+    base.OnParametersSet();
+    // Sync _selectedDays when SelectedDate changes from outside
+    if (SelectedDate != DateTime.MinValue && !_selectedDays.Contains(SelectedDate.Date))
+    {
+        _selectedDays.Clear();
+        _selectedDays.Add(SelectedDate.Date);
+    }
+    else if (SelectedDate == DateTime.MinValue && _selectedDays.Count > 0)
+    {
+        // Parent cleared the selection
+        _selectedDays.Clear();
+    }
+}
+```
+Need care to avoid clearing multi-date selections (week/month) on re-render — track whether the last selection was internal (click) vs. external (parameter change).
+
+---
+
+### 2. P1 — `SelectWeekText` default value is wrong
+
+**Web Forms does:** `SelectWeekText` defaults to `"&gt;"` (single `>` character).
+
+**Our component does:** Defaults to `"&gt;&gt;"` (double `>>` characters).
+
+**Source:** [Calendar.SelectWeekText (MSDN)](https://learn.microsoft.com/dotnet/api/system.web.ui.webcontrols.calendar.selectweektext?view=netframework-4.8.1) — *"The default value is `&gt;`, which is rendered as a greater than sign (>)."*
+
+**Impact:** Any migrating page that relies on the default selector appearance will render `>>` instead of `>` for week selectors. `SelectMonthText` correctly defaults to `"&gt;&gt;"`, so the distinction between week and month selectors is lost — they both show `>>` when they should show `>` (week) and `>>` (month).
+
+**Fix:** Change line 162 in `Calendar.razor.cs`:
+```csharp
+public string SelectWeekText { get; set; } = "&gt;";
+```
+
+---
+
+### 3. P1 — `SelectedDates` collection is not sorted in ascending order
+
+**Web Forms does:** `SelectedDates` is a `SelectedDatesCollection` that stores dates *"sorted in ascending order by date"* ([MSDN](https://learn.microsoft.com/dotnet/api/system.web.ui.webcontrols.calendar.selecteddates?view=netframework-4.8.1)). Code iterating `SelectedDates` can rely on chronological order. `SelectedDates[0]` is always the earliest date.
+
+**Our component does:** `_selectedDays` is a `HashSet<DateTime>`. The `SelectedDates` property does `_selectedDays.ToList().AsReadOnly()`, which gives **arbitrary order**. A week selection spanning Sunday–Saturday could return dates in any order. Month selections (28–31 dates) are similarly unordered.
+
+**Impact:** Migrating code that does `foreach (var d in Calendar1.SelectedDates)` and expects ascending order, or `SelectedDates[0]` expecting the first chronological date, will produce wrong results.
+
+**Fix:** Sort before returning:
+```csharp
+public IReadOnlyCollection<DateTime> SelectedDates => 
+    _selectedDays.OrderBy(d => d).ToList().AsReadOnly();
+```
+Or switch `_selectedDays` to a `SortedSet<DateTime>` for O(log n) insert with maintained order.
+
+---
+
+### 4. P1 — `SelectedDates` is read-only; Web Forms allows programmatic manipulation
+
+**Web Forms does:** `SelectedDates` is a `SelectedDatesCollection` with `Add()`, `Remove()`, `Clear()`, `SelectRange(DateTime, DateTime)`, and indexer `[int]` methods. Developers programmatically add/remove dates: `Calendar1.SelectedDates.Add(someDate)`, `Calendar1.SelectedDates.SelectRange(start, end)`.
+
+**Our component does:** `SelectedDates` returns `IReadOnlyCollection<DateTime>`. No `Add`, `Remove`, `Clear`, or `SelectRange` methods. Code using any of these methods won't compile.
+
+**Impact:** Any migrating code that programmatically manipulates selections (blackout dates, preset ranges, holiday selectors) will break at compile time.
+
+**Fix:** Create a `SelectedDatesCollection` class that wraps `_selectedDays` and exposes `Add`, `Remove`, `Clear`, `SelectRange`, `Contains`, and indexer. The collection should sync back to `SelectedDate` (first item) when modified. This is a larger effort but critical for API fidelity.
+
+---
+
+### 5. P1 — Day cell styles are exclusive, not layered/merged
+
+**Web Forms does:** Day cell styles are **merged** — `DayStyle` is the base, then `WeekendDayStyle`, `OtherMonthDayStyle`, `TodayDayStyle`, and `SelectedDayStyle` are layered on top. Each layer overrides only the properties it defines; unset properties inherit from lower layers. A selected weekend day gets `DayStyle` font + `WeekendDayStyle` color + `SelectedDayStyle` background.
+
+**Our component does:** `GetDayCellCss()` and `GetDayCellStyle()` return the **first matching** style and exit. A selected day gets ONLY `SelectedDayStyle` — all base `DayStyle` and `WeekendDayStyle` properties are lost. If `DayStyle` sets `font-size: 14px` and `SelectedDayStyle` sets only `background-color: yellow`, selected days lose their font size.
+
+**Impact:** Calendars with layered styling (extremely common in production Web Forms apps) will look wrong after migration. Selected days may lose fonts, borders, padding set in base styles.
+
+**Fix:** Refactor `GetDayCellCss()` and `GetDayCellStyle()` to merge styles. For inline styles, concatenate non-conflicting properties. For CSS classes, combine all applicable classes (space-separated). This is a deeper architectural fix that may benefit from a `TableItemStyle.MergeWith()` helper.
+
+---
+
+### 6. P2 — No test coverage for week or month selection
+
+**Web Forms does:** N/A (test coverage concern).
+
+**Our tests cover:** Single day click, SelectionMode.None, OnSelectionChanged callback, prev/next navigation. That's it.
+
+**Missing test scenarios:**
+- Week selector click → verify all 7 dates in `SelectedDates`
+- Week selector click → verify `SelectedDate` equals first day of week
+- Month selector click → verify all month dates in `SelectedDates`
+- Month selector click → verify `SelectedDate` equals first of month
+- Cross-month week selection (e.g., week spanning Jan 29–Feb 4)
+- Re-selection: click week A, then click week B → verify week A dates are cleared
+- Re-selection: click week, then click individual day → verify week dates are cleared
+- Navigation after selection → verify selection visual state preserved
+- DayWeek mode → verify month selector is NOT rendered
+- DayWeekMonth mode → verify both selectors are rendered
+
+**Impact:** Jeff can't be confident because there's no proof these paths work. The code *looks* correct for most of these, but without tests, regressions are undetectable.
+
+**Fix:** Add comprehensive selection tests to `Selection.razor`. Priority: week selection and month selection end-to-end.
+
+---
+
+### 7. P2 — `SelectedDates` creates a new collection on every access
+
+**Web Forms does:** `SelectedDates` returns the same `SelectedDatesCollection` instance across accesses. `Calendar1.SelectedDates == Calendar1.SelectedDates` is `true`.
+
+**Our component does:**
+```csharp
+public IReadOnlyCollection<DateTime> SelectedDates => _selectedDays.ToList().AsReadOnly();
+```
+Every access creates a new `List<DateTime>` + `ReadOnlyCollection<DateTime>`. Reference equality fails. In a loop that accesses `SelectedDates` multiple times, this creates unnecessary allocations.
+
+**Impact:** Performance concern for code that accesses `SelectedDates` in tight loops (e.g., `OnDayRender` handlers checking `SelectedDates.Contains(date)` for every cell — 42 calls per render). Also breaks `ReferenceEquals` checks, though those are rare.
+
+**Fix:** Cache the read-only projection and invalidate when `_selectedDays` changes:
+```csharp
+private IReadOnlyList<DateTime> _cachedSelectedDates;
+private bool _selectionDirty = true;
+
+public IReadOnlyList<DateTime> SelectedDates 
+{
+    get 
+    {
+        if (_selectionDirty)
+        {
+            _cachedSelectedDates = _selectedDays.OrderBy(d => d).ToList().AsReadOnly();
+            _selectionDirty = false;
+        }
+        return _cachedSelectedDates;
+    }
+}
+```
+
+---
+
+## What's Working Correctly
+
+For the record, these aspects are correctly implemented:
+
+- ✅ `CalendarSelectionMode.None` — days render as `<span>`, not clickable
+- ✅ `CalendarSelectionMode.Day` — single day selection, clears previous
+- ✅ `CalendarSelectionMode.DayWeek` — week selector column appears, day click still selects single day
+- ✅ `CalendarSelectionMode.DayWeekMonth` — month selector appears in title row
+- ✅ `OnSelectionChanged` fires for day, week, and month selections
+- ✅ `SelectedDateChanged` fires with correct date (first day for week/month)
+- ✅ Week selection adds all 7 days to `_selectedDays` and sets `SelectedDate` to first day
+- ✅ Month selection adds all month days and sets `SelectedDate` to first of month
+- ✅ Re-selection clears previous selection (`_selectedDays.Clear()` in all handlers)
+- ✅ Selector column hidden when `SelectionMode` is `None` or `Day`
+- ✅ Month selector only shown in `DayWeekMonth` mode (empty cell in `DayWeek`)
+- ✅ Cross-month week selection works (grid includes prev/next month days)
+- ✅ Navigation doesn't clear selection (no `_selectedDays.Clear()` in nav handlers)
+- ✅ `SelectedDayStyle` CSS/class applied via `GetDayCellCss()` checking `_selectedDays.Contains()`
+- ✅ Style precedence order matches Web Forms (Selected > Today > OtherMonth > Weekend > Day)
+- ✅ `SelectMonthText` default (`"&gt;&gt;"`) matches Web Forms
+- ✅ Title row colspan arithmetic is correct with/without selector column
+- ✅ `OnDayRender` allows synchronous `IsSelectable` override per day
+
+---
+
+## Recommended Priority
+
+| # | Priority | Issue | Effort |
+|---|----------|-------|--------|
+| 1 | P0 | External SelectedDate parameter sync | Small — add `OnParametersSet` |
+| 2 | P1 | SelectWeekText wrong default | Trivial — one-line fix |
+| 3 | P1 | SelectedDates not sorted | Small — `OrderBy` or `SortedSet` |
+| 4 | P1 | SelectedDates not mutable | Medium — new collection class |
+| 5 | P1 | Style layering exclusive not merged | Medium-Large — architectural |
+| 6 | P2 | Missing selection tests | Medium — ~10 new test cases |
+| 7 | P2 | SelectedDates allocation per access | Small — caching |
+
+**Recommendation:** Fix #1 (P0) and #2 (P1, trivial) immediately. #3 and #6 in the next sprint. #4 and #5 are architectural and should be work items. #7 is nice-to-have.
+

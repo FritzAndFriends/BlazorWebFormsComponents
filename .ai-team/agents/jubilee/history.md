@@ -93,3 +93,12 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 
  Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
 
+### M10 — Theming Migration Guide & Calendar BeforeWebForms Sample
+
+- **Theming migration guide (#367):** Added "Migration Guide — Before & After" section to `Components/Pages/ControlSamples/Theming/Index.razor`. Shows three panels: Before (Web Forms `.skin` file + `web.config` + ASPX markup), Migration Steps (4-step numbered list), After (Blazor `ThemeProvider` + simplified markup). Uses `<pre><code>` blocks with proper HTML entity encoding (`&lt;`, `@@`). Placed after the existing live demo so the page flows from "see it work" to "how to migrate".
+- **Calendar BeforeWebForms sample:** Created `samples/BeforeWebForms/ControlSamples/Calendar/default.aspx`, `default.aspx.cs`, and `default.aspx.designer.cs`. Demonstrates basic Calendar, 3 SelectionMode variants (Day, DayWeek, DayWeekMonth), styled Calendar with TitleStyle/DayHeaderStyle/SelectedDayStyle/TodayDayStyle/OtherMonthDayStyle/WeekendDayStyle/NextPrevStyle/SelectorStyle, custom navigation text, and event handlers (SelectionChanged, VisibleMonthChanged). Follows established BeforeWebForms patterns (MasterPageFile, namespace convention, designer file with auto-generated control declarations).
+
+
+ Team update (2026-02-25): ThemesAndSkins.md documentation updated to match PoC implementation  class names, API, roadmap status, PoC decisions table added  decided by Beast
+
+ Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge
