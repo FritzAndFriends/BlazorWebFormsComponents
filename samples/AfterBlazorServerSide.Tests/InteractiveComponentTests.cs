@@ -1166,8 +1166,8 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Find the Edit link/button in the editable DetailsView section (exact match to avoid sidebar links)
-            var editLink = page.GetByRole(AriaRole.Link, new() { Name = "Edit", Exact = true }).First;
+            // Find the Edit link/button in the editable DetailsView section — scope to main content to avoid sidebar nav links
+            var editLink = page.Locator("main").GetByRole(AriaRole.Link, new() { Name = "Edit", Exact = true }).First;
             await editLink.WaitForAsync(new() { Timeout = 5000 });
             await editLink.ClickAsync();
 
@@ -1214,8 +1214,8 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Click Edit in the editable DetailsView (exact match to avoid sidebar links)
-            var editLink = page.GetByRole(AriaRole.Link, new() { Name = "Edit", Exact = true }).First;
+            // Click Edit in the editable DetailsView — scope to main content to avoid sidebar nav links
+            var editLink = page.Locator("main").GetByRole(AriaRole.Link, new() { Name = "Edit", Exact = true }).First;
             await editLink.WaitForAsync(new() { Timeout = 5000 });
             await editLink.ClickAsync();
 

@@ -8,7 +8,11 @@
 }
 <div id="@ID" class="@GetMenuCssClass()" style="@Style" title="@ToolTip">
 	<ul class="level1@(Orientation == Orientation.Horizontal ? " horizontal" : "")">
-			<CascadingValue Name="ParentMenu" Value="this">
+			<CascadingValue Name="ParentMenu" Value="this" IsFixed="true">
+				@DynamicMenuStyleContent
+				@StaticMenuStyleContent
+				@DynamicMenuItemStyleContent
+				@StaticMenuItemStyleContent
 				@ChildContent
 				@ChildNodesRenderFragment
 			</CascadingValue>
@@ -45,6 +49,10 @@
 		@($"#{ID} ul.dynamic") {
 			@DynamicMenuStyle?.ToStyle().ToString()
 			z-index: 1;
+		}
+
+		@($"#{ID} ul.level1") {
+			@StaticMenuStyle?.ToStyle().ToString()
 		}
 
 		@($"#{ID} a") {

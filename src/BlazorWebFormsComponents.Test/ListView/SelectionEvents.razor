@@ -1,0 +1,81 @@
+
+@code {
+
+	ListView<Widget> theListView;
+
+	// Event tracking fields
+	ListViewSelectEventArgs _selectingArgs;
+	bool _selectedChanged;
+
+	[Fact]
+	public void HandleCommand_Select_FiresSelectedIndexChangingAndChanged()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						SelectedIndexChanging="OnSelecting"
+						SelectedIndexChanged="OnSelected"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.HandleCommand("Select", null, 2));
+
+		_selectingArgs.ShouldNotBeNull();
+		_selectingArgs.NewSelectedIndex.ShouldBe(2);
+		_selectedChanged.ShouldBeTrue();
+		theListView.SelectedIndex.ShouldBe(2);
+	}
+
+	[Fact]
+	public void HandleCommand_Select_Cancellation_PreventsSelectionChange()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						SelectedIndexChanging="OnSelectingCancel"
+						SelectedIndexChanged="OnSelected"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.HandleCommand("Select", null, 2));
+
+		_selectingArgs.ShouldNotBeNull();
+		_selectedChanged.ShouldBeFalse();
+		theListView.SelectedIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public void HandleCommand_Select_ModifiedIndex_UsesModifiedValue()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						SelectedIndexChanging="OnSelectingModify"
+						SelectedIndexChanged="OnSelected"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.HandleCommand("Select", null, 2));
+
+		theListView.SelectedIndex.ShouldBe(5);
+	}
+
+	// Event handlers
+	void OnSelecting(ListViewSelectEventArgs args) => _selectingArgs = args;
+	void OnSelected(EventArgs args) => _selectedChanged = true;
+
+	void OnSelectingCancel(ListViewSelectEventArgs args)
+	{
+		_selectingArgs = args;
+		args.Cancel = true;
+	}
+
+	void OnSelectingModify(ListViewSelectEventArgs args)
+	{
+		_selectingArgs = args;
+		args.NewSelectedIndex = 5;
+	}
+}

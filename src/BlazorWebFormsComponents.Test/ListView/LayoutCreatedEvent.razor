@@ -1,0 +1,38 @@
+
+@code {
+
+	bool _layoutCreatedFired;
+
+	[Fact]
+	public void LayoutCreated_FiresWhenLayoutTemplateRendered()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						OnLayoutCreated="OnLayoutCreated"
+						Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			<LayoutTemplate Context="itemPlaceholder">
+				<div class="layout">@itemPlaceholder</div>
+			</LayoutTemplate>
+		</ListView>);
+
+		_layoutCreatedFired.ShouldBeTrue();
+		cut.FindAll("span").Count().ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void LayoutCreated_FiresWithDefaultLayout()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						OnLayoutCreated="OnLayoutCreated"
+						Context="Item">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		_layoutCreatedFired.ShouldBeTrue();
+	}
+
+	// Event handler
+	void OnLayoutCreated(EventArgs args) => _layoutCreatedFired = true;
+}

@@ -50,3 +50,43 @@ Audited all sample page `@page` routes against ControlSampleTests.cs and Interac
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+## Summary: Issue #358 — 5 Missing Smoke Tests (2026-02-25)
+
+Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering all gaps identified in M9 audit: ListView/CrudOperations, Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles. All 5 sample pages verified to exist. Tests added as InlineData to existing Theory methods (EditorControl, DataControl, LoginControl). Build verified green (0 errors).
+
+## Learnings
+
+- Panel/BackImageUrl sample page uses external placeholder URLs (`via.placeholder.com`). The existing `VerifyPageLoadsWithoutErrors` filter for "Failed to load resource" handles this, so the smoke test works despite the team convention against external image URLs.
+- LoginControls/Orientation is at `/ControlSamples/LoginControls/Orientation` (not under `/ControlSamples/Login` or `/ControlSamples/ChangePassword` as initially suggested in the issue).
+
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
+
+ Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  interaction tests may be needed  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle with IMenuStyleContainer  interaction tests may be needed  decided by Cyclops
+
+ Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
+
+
+ Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
+
+
+ Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
+
+
+ Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge
+
+
+ Team update (2026-02-25): HTML audit strategy approved  decided by Forge
+
+ Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive

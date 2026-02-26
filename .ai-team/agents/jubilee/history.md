@@ -1,6 +1,6 @@
 # Project Context
 
-- **Owner:** Jeffrey T. Fritz (csharpfritz@users.noreply.github.com)
+- **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents — Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
@@ -62,3 +62,48 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+### M10 — Fix 19 Unreachable Sample Pages in ComponentCatalog.cs (#350)
+
+- **4 missing components added:** Menu (Navigation, route to Selection since no Index), DataBinder (Utility), PasswordRecovery (Login), ViewState (Utility).
+- **DetailsView added as new component** (Data category) with SubPages: Caption, Styles — was completely absent from catalog despite having 3 pages on disk.
+- **15 missing SubPages added to existing components:** GridView (+5: DisplayProperties, InlineEditing, Paging, Selection, Sorting), TreeView (+2: ExpandCollapse, Selection), FormView (+3: Edit, Events, Styles), ListView (+1: CrudOperations), DataGrid (+1: Styles), Panel (+1: BackImageUrl).
+- **DataList SubPage name fix:** "Flow" → "SimpleFlow" to match actual file `SimpleFlow.razor`.
+- **Pattern confirmed:** SubPages are alphabetically ordered in catalog arrays; components without an Index.razor use their specific page route (e.g., Menu → `/ControlSamples/Menu/Selection`).
+- Build verified: `dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --no-restore --verbosity quiet` passes.
+
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  samples may need updating  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle with IMenuStyleContainer  samples may need updating  decided by Cyclops
+
+ Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
+
+
+ Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
+
+
+ Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
+
+### M10 — Theming Migration Guide & Calendar BeforeWebForms Sample
+
+- **Theming migration guide (#367):** Added "Migration Guide — Before & After" section to `Components/Pages/ControlSamples/Theming/Index.razor`. Shows three panels: Before (Web Forms `.skin` file + `web.config` + ASPX markup), Migration Steps (4-step numbered list), After (Blazor `ThemeProvider` + simplified markup). Uses `<pre><code>` blocks with proper HTML entity encoding (`&lt;`, `@@`). Placed after the existing live demo so the page flows from "see it work" to "how to migrate".
+- **Calendar BeforeWebForms sample:** Created `samples/BeforeWebForms/ControlSamples/Calendar/default.aspx`, `default.aspx.cs`, and `default.aspx.designer.cs`. Demonstrates basic Calendar, 3 SelectionMode variants (Day, DayWeek, DayWeekMonth), styled Calendar with TitleStyle/DayHeaderStyle/SelectedDayStyle/TodayDayStyle/OtherMonthDayStyle/WeekendDayStyle/NextPrevStyle/SelectorStyle, custom navigation text, and event handlers (SelectionChanged, VisibleMonthChanged). Follows established BeforeWebForms patterns (MasterPageFile, namespace convention, designer file with auto-generated control declarations).
+
+
+ Team update (2026-02-25): ThemesAndSkins.md documentation updated to match PoC implementation  class names, API, roadmap status, PoC decisions table added  decided by Beast
+
+ Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge
+
+
+ Team update (2026-02-25): HTML audit strategy approved  decided by Forge
+
+ Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive

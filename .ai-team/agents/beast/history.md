@@ -1,54 +1,20 @@
 # Project Context
 
-- **Owner:** Jeffrey T. Fritz (csharpfritz@users.noreply.github.com)
+- **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents — Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
 ## Learnings
 
-<!-- Append new learnings below. Each entry is something lasting about the project. -->
+<!-- ⚠ Summarized 2026-02-25 by Scribe — older entries condensed into Core Context -->
 
-<!-- ⚠ Summarized 2026-02-25 by Scribe — original entries covered 2026-02-10 through 2026-02-12 -->
+### Core Context (2026-02-10 through 2026-02-25)
 
-### Summary: Documentation Conventions (2026-02-10 through 2026-02-12)
+Established doc structure: title → intro (MS docs link) → Features Supported → NOT Supported → Web Forms syntax → Blazor syntax → HTML Output → Migration Notes → Examples → See Also. mkdocs.yml nav alphabetical within categories. Branch naming: `copilot/create-*`. Chart doc introduced JS interop "HTML Output Exception" pattern and multi-component (child) doc pattern. Chart Type Gallery at `docs/images/chart/chart-{type}.png`. Created PasswordRecovery doc (3-step wizard pattern), DetailsView doc (generic component pattern). Deferred controls use `docs/Migration/DeferredControls.md`. Feature audit: AccessKey/ToolTip base class gap, Substitution/Xml deferred, Style is computed.
 
-**Doc structure:** title → intro (MS docs link) → Features Supported → NOT Supported → Web Forms syntax → Blazor syntax → HTML Output → Migration Notes (Before/After) → Examples → See Also. Admonitions for gotchas. mkdocs.yml nav is alphabetical within category sections. Migration section keeps "Getting started" and "Migration Strategies" at top.
+**Key patterns:** Style migration: TableItemStyle → CSS class string parameters. DeferredControls.md has dual role (fully deferred + partially implemented). Chart screenshots at `docs/images/{component}/`. Shared sub-component docs linked from parent control docs.
 
-**Key patterns:** Style migration: Web Forms `TableItemStyle` child elements → Blazor CSS class string parameters. Deferred controls use `docs/Migration/DeferredControls.md` with What/Why/Alternatives/Before-After (no Features sections). ImageMap is in Navigation Controls. Branch naming: `copilot/create-*` on upstream. Chart doc introduces JS interop "HTML Output Exception" pattern and multi-component (child) doc pattern. Chart Type Gallery at `docs/images/chart/chart-{type}.png`.
-
-📌 Team update (2026-02-10): Docs and samples must ship in the same sprint as the component — decided by Jeffrey T. Fritz
-📌 Team update (2026-02-10): PRs #328 (ASCX CLI) and #309 (VS Snippets) shelved indefinitely — decided by Jeffrey T. Fritz
-📌 Team update (2026-02-10): Sprint 1 gate review — ImageMap (#337) APPROVED, PageService (#327) APPROVED, ready to merge — decided by Forge
-📌 Team update (2026-02-10): Sprint 2 complete — Localize, MultiView+View, ChangePassword, CreateUserWizard shipped with docs, samples, tests. 709 tests passing. 41/53 components done. — decided by Squad
-📌 Team update (2026-02-11): Sprint 3 scope: DetailsView + PasswordRecovery. Chart/Substitution/Xml deferred. 48/53 → target 50/53. — decided by Forge
-📌 Team update (2026-02-11): Colossus added as dedicated integration test engineer. Rogue retains bUnit unit tests. — decided by Jeffrey T. Fritz
-- **PasswordRecovery doc pattern follows ChangePassword:** The PasswordRecovery doc mirrors the ChangePassword.md structure — same "Authentication Integration" warning admonition, same style migration guidance (TableItemStyle → CSS classes via cascading parameters), same emphasis on event-driven architecture. This three-step wizard pattern (UserName → Question → Success) with `@ref` for calling component methods (SetQuestion, SkipToSuccess) is unique among login controls and should be noted for any future wizard-style components.
-- **DetailsView doc covers generic component:** DetailsView is generic (`DetailsView<ItemType>`), unlike most other data controls. The doc explicitly calls out the `ItemType` requirement and the reflection-based auto-field generation. The Fields child content pattern with CascadingValue registration is worth noting for any future components that use child component registration.
-- **Sprint 3 docs delivered:** DetailsView and PasswordRecovery documentation created with full structure (features, Web Forms syntax, Blazor syntax, HTML output, migration notes, examples, See Also). Added to mkdocs.yml nav (alphabetical) and linked in README.md.
-
-📌 Team update (2026-02-12): Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED. Action item: fix DetailsView docs to replace `DataSource=` with `Items=` in Blazor code samples. — decided by Forge
-
- Team update (2026-02-12): Milestone 4 planned  Chart component with Chart.js via JS interop. 8 work items, design review required before implementation.  decided by Forge + Squad
-
-- **Chart doc is first JS interop component:** The Chart component is unique in the library — it's the first to use JavaScript interop (Chart.js via ES module import). The doc template needed a new "HTML Output Exception" admonition pattern to explain why `<canvas>` replaces `<img>`. This pattern should be reused for any future components that deviate from identical HTML output.
-- **DeferredControls.md updated for partial implementation:** Chart moved from fully-deferred to partially-implemented. The DeferredControls page now has a dual role: documenting controls not implemented at all (Substitution, Xml) AND documenting unsupported sub-features of implemented controls (27 unsupported chart types). This "partially implemented" pattern may apply to future controls.
-- **Child component docs pattern:** Chart introduces a multi-component documentation pattern (Chart, ChartSeries, ChartArea, ChartLegend, ChartTitle) with separate parameter tables for each. This nested-component doc approach should be used for any future components with required child components.
-- **Chart Type Gallery added:** Added a "Chart Type Gallery" section to `docs/DataControls/Chart.md` between "Chart Palettes" and "Web Forms Features NOT Supported". Contains 8 subsections (Column, Line, Bar, Pie, Doughnut, Area, Scatter, Stacked Column) each with a screenshot, `SeriesChartType` enum value, and 1-2 sentence usage guidance. Includes `!!! warning` admonitions on Pie and Doughnut for the Phase 1 palette limitation (single series color instead of per-segment colors).
-- **Chart image path convention:** Chart screenshots live at `docs/images/chart/chart-{type}.png` (lowercase, hyphenated). Referenced from Chart.md using relative paths: `../images/chart/chart-{type}.png`. This `docs/images/{component}/` pattern should be used for any future component screenshots.
-### Summary: Feature Audit Findings (2026-02-23)
-
-AccessKey/ToolTip missing from base classes (universal gap). Label needs BaseStyledComponent. ListControl-derived components share common gaps (AppendDataBoundItems, DataTextFormatString, CausesValidation). Literal/Localize/PlaceHolder/View/MultiView near-complete. Substitution/Xml permanently deferred. Style property is computed (not directly settable). Panel is most feature-complete styled control.
-
-
- Team update (2026-02-23): AccessKey/ToolTip must be added to BaseStyledComponent  decided by Beast, Cyclops
- Team update (2026-02-23): Chart implementation architecture consolidated (10 decisions)  decided by Cyclops, Forge
- Team update (2026-02-23): DetailsView/PasswordRecovery branch (sprint3) must be merged forward  decided by Forge
-
- Team update (2026-02-23): BaseListControl<TItem> introduced  docs should reflect shared base for list controls  decided by Cyclops
- Team update (2026-02-23): Label AssociatedControlID switches rendered element  document accessibility benefit  decided by Cyclops
- Team update (2026-02-23): Login controls now inherit BaseStyledComponent  update docs for outer style support  decided by Rogue, Cyclops
- Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs, Beast assigned branding (UI-11) and docs (UI-12)  decided by Forge
  Team update (2026-02-23): Menu Orientation requires Razor local variable workaround  document this pattern  decided by Jubilee
 
 - **Milestone 8 release-readiness docs polish:** Formally deferred Substitution and Xml controls in `status.md` (changed from 🔴 Not Started to ⏸️ Deferred with rationale). Added Deferred column to summary table. Updated `docs/Migration/DeferredControls.md` to mark Chart as fully implemented (removed "Phase 1"/"Partial" hedging). Removed all "Phase 1"/"Phase 2/3" hedging from `docs/DataControls/Chart.md`. Fixed duplicate `DeferredControls.md` entry in `mkdocs.yml` and re-alphabetized Migration nav. Fixed broken `ImageMap` link in `README.md` (pointed to EditorControls, should be NavigationControls). Added missing doc links in README for MultiView, View, ChangePassword, CreateUserWizard. Marked Xml as deferred in README component list.
@@ -73,3 +39,42 @@ AccessKey/ToolTip missing from base classes (universal gap). Label needs BaseSty
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+- **Issue #359 doc updates (M6-M8 features):** Updated 4 existing doc pages and created 1 new page to close gaps identified in the M9 Doc Gap Audit:
+  1. **ChangePassword.md** — Added Orientation and TextLayout documentation with reference tables, enum usage examples, and migration Before/After, mirroring the Login.md pattern.
+  2. **PagerSettings.md** (NEW) — Created dedicated doc page in DataControls/ covering all properties, PagerButtons/PagerPosition enums, usage with FormView/DetailsView/GridView, and migration notes. Added to mkdocs.yml nav alphabetically.
+  3. **FormView.md** — Added ItemCommand, ItemCreated, PageIndexChanging/PageIndexChanged events to features and Blazor syntax. Added Caption/CaptionAlign, PagerSettings child element, PagerTemplate, and 7 style sub-components (RowStyle, EditRowStyle, InsertRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle) with reference table.
+  4. **DetailsView.md** — Added Caption/CaptionAlign with reference table. Moved styles and PagerSettings from "NOT Supported" to "Supported" (were stale). Added 10-row style sub-components table and PagerSettings child element to Blazor syntax. Updated migration notes to reflect style child elements.
+  5. **DataGrid.md** — Moved Paging, Sorting, Selection, and Editing from "NOT Supported" to "Supported" (all now implemented). Added AllowPaging/PageSize/CurrentPageIndex/PageIndexChanged, AllowSorting/SortCommand, SelectedIndex/EditItemIndex to Blazor syntax. Added paging and sorting examples with event handlers.
+- **Documentation pattern: PagerSettings as shared sub-component doc:** PagerSettings is the first shared (non-control) sub-component to get its own dedicated doc page. It's referenced via `[PagerSettings](PagerSettings.md)` links from FormView, DetailsView, and GridView docs. Future shared sub-components (e.g., TableItemStyle if ever documented separately) should follow this pattern.
+
+
+ Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
+
+ Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  docs may need updating  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle pattern with IMenuStyleContainer  docs may need updating  decided by Cyclops
+
+ Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
+
+
+ Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
+
+
+ Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
+
+- **ThemesAndSkins.md updated for M10 PoC:** Updated `docs/Migration/ThemesAndSkins.md` to reflect the actual PoC implementation. Key changes: (1) Replaced "Current Status" admonition — removed stale warnings about `[Obsolete]` and `bool` SkinID, replaced with "PoC Implemented (M10)" status. (2) Updated Approach 2 code examples to use real class names (`ThemeConfiguration`, `ControlSkin`, `ThemeProvider`) and actual API (`AddSkin`/`GetSkin` with string control type name). (3) Updated "Recommended Approach" → "Implemented Approach" with present tense. (4) Updated Implementation Roadmap — Phase 1 marked ✅ Complete, Phase 2 deferred items listed for M11. (5) Updated migration Before/After example to use real API with `using BlazorWebFormsComponents.Theming`. (6) Added "PoC Decisions" section documenting 7 design decisions (StyleSheetTheme default, missing SkinID handling, namespace, string keys, ControlSkin mirroring, BaseStyledComponent placement, .skin parser deferral). (7) Added disambiguation note to Approach 4 (DI) since its hypothetical class has the same name as the real implementation. All alternative approaches (1, 3, 4, 5) preserved as reference context.
+
+
+
+ Team update (2026-02-25): HTML audit strategy approved  decided by Forge
+
+ Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive

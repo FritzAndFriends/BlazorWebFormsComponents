@@ -29,16 +29,19 @@
 		@if (ShowTitle)
 		{
 			<tr>
-				@if (ShowNextPrevMonth && SelectionMode == CalendarSelectionMode.DayWeekMonth)
+				@if (SelectionMode == CalendarSelectionMode.DayWeek || SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
-					<td class="@GetEffectiveCss(SelectorStyle, SelectorStyleCss)" style="@GetEffectiveStyle(SelectorStyle);width:15%;">
-						<a @onclick="HandleMonthClick" @onclick:preventDefault="true" class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">@SelectMonthText</a>
+					<td class="@GetEffectiveCss(SelectorStyle, SelectorStyleCss)" style="@GetEffectiveStyle(SelectorStyle)">
+						@if (SelectionMode == CalendarSelectionMode.DayWeekMonth)
+						{
+							<a @onclick="HandleMonthClick" @onclick:preventDefault="true" style="cursor:pointer">@((MarkupString)SelectMonthText)</a>
+						}
 					</td>
 				}
 				@if (ShowNextPrevMonth)
 				{
 					<td class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">
-						<a @onclick="HandlePreviousMonth" @onclick:preventDefault="true">@((MarkupString)PrevMonthText)</a>
+						<a @onclick="HandlePreviousMonth" @onclick:preventDefault="true" style="cursor:pointer">@((MarkupString)PrevMonthText)</a>
 					</td>
 				}
 				<td colspan="@(ShowNextPrevMonth ? 5 : 7)" class="@GetEffectiveCss(TitleStyle, TitleStyleCss)" style="@GetEffectiveStyle(TitleStyle)" align="center">
@@ -47,7 +50,7 @@
 				@if (ShowNextPrevMonth)
 				{
 					<td class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">
-						<a @onclick="HandleNextMonth" @onclick:preventDefault="true">@((MarkupString)NextMonthText)</a>
+						<a @onclick="HandleNextMonth" @onclick:preventDefault="true" style="cursor:pointer">@((MarkupString)NextMonthText)</a>
 					</td>
 				}
 			</tr>
@@ -73,7 +76,7 @@
 				@if (SelectionMode == CalendarSelectionMode.DayWeek || SelectionMode == CalendarSelectionMode.DayWeekMonth)
 				{
 					<td class="@GetEffectiveCss(SelectorStyle, SelectorStyleCss)" style="@GetEffectiveStyle(SelectorStyle)" align="center">
-						<a @onclick="() => HandleWeekClick(week)" @onclick:preventDefault="true">@((MarkupString)SelectWeekText)</a>
+						<a @onclick="() => HandleWeekClick(week)" @onclick:preventDefault="true" style="cursor:pointer">@((MarkupString)SelectWeekText)</a>
 					</td>
 				}
 				@foreach (var date in week)
@@ -82,7 +85,7 @@
 					<td class="@GetDayCellCss(date)" style="@GetDayCellStyle(date)" align="center">
 						@if (dayArgs.IsSelectable)
 						{
-							<a @onclick="() => HandleDayClick(date)" @onclick:preventDefault="true">
+							<a @onclick="() => HandleDayClick(date)" @onclick:preventDefault="true" style="cursor:pointer">
 								@date.Day
 							</a>
 						}

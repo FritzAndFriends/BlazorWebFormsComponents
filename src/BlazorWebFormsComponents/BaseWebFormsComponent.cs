@@ -89,16 +89,18 @@ namespace BlazorWebFormsComponents
 		public string DataKeys { get; set; }
 
 		/// <summary>
-		/// 🚨🚨 Theming is not available in Blazor 🚨🚨
+		/// Gets or sets a value indicating whether theming is enabled for this control.
+		/// When true, the control participates in the theming/skinning system.
 		/// </summary>
-		[Parameter, Obsolete("Theming is not available in Blazor")]
-		public bool EnableTheming { get; set; }
+		[Parameter]
+		public bool EnableTheming { get; set; } = true;
 
 		/// <summary>
-		/// 🚨🚨 Theming is not available in Blazor 🚨🚨
+		/// Gets or sets the skin to apply to the control.
+		/// An empty string means "use default skin".
 		/// </summary>
-		[Parameter, Obsolete("Theming is not available in Blazor")]
-		public string SkinID { get; set; }
+		[Parameter]
+		public string SkinID { get; set; } = "";
 
 		#endregion
 

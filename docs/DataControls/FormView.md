@@ -7,9 +7,16 @@ The FormView component is meant to emulate the asp:FormView control in markup an
   - OnDataBinding and OnDataBound events trigger
   - ModeChanging and ModeChanged events
   - Insert, Edit, Update, Delete actions and supporting events
+  - **ItemCommand** event — fires when any command button within the FormView is clicked
+  - **ItemCreated** event — fires when the FormView is first created and data-bound
+  - **PageIndexChanging** / **PageIndexChanged** events — fires when paging occurs (cancellable)
   - **HeaderText** / **HeaderTemplate** - Renders a header row above the form content. `HeaderTemplate` takes precedence over `HeaderText` when both are specified.
   - **FooterText** / **FooterTemplate** - Renders a footer row below the form content. `FooterTemplate` takes precedence over `FooterText` when both are specified.
   - **EmptyDataText** / **EmptyDataTemplate** - Displays content when the data source is empty or null. `EmptyDataTemplate` takes precedence over `EmptyDataText` when both are specified.
+  - **PagerTemplate** — custom pager UI replacing the default numeric pager
+  - **Caption** / **CaptionAlign** — renders a `<caption>` element for table accessibility
+  - **Style sub-components** (RowStyle, EditRowStyle, InsertRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle)
+  - **[PagerSettings](PagerSettings.md)** — configurable pager button modes, text, images, and position
 
 ## Usage Notes
 
@@ -150,15 +157,20 @@ The FormView component is meant to emulate the asp:FormView control in markup an
 
 ## Blazor Syntax
 
-``` html
+``` razor
 <FormView
     DataSource=IEnumerable
     DefaultMode="ReadOnly|Edit|Insert"
+    Caption=string
+    CaptionAlign="NotSet|Top|Bottom|Left|Right"
     EmptyDataText=string
     HeaderText=string
     FooterText=string
     ItemType=Type
-    ModeChanging=EventCallBack<FormViewModeEventArgs>
+    ItemCommand=EventCallback<FormViewCommandEventArgs>
+    ItemCreated=EventCallback
+    ModeChanging=EventCallback<FormViewModeEventArgs>
+    ModeChanged=EventCallback<FormViewModeEventArgs>
     OnDataBinding=EventCallBack
     OnDataBound=EventCallBack
     OnItemDeleting=EventCallBack<FormViewDeleteEventArgs>
@@ -167,9 +179,22 @@ The FormView component is meant to emulate the asp:FormView control in markup an
     OnItemInserted=EventCallBack<FormViewInsertEventArgs>
     OnItemUpdating=EventCallBack<FormViewUpdateEventArgs>
     OnItemUpdated=EventCallBack<FormViewUpdatedEventArgs>
+    PageIndexChanging=EventCallback<PageChangedEventArgs>
+    PageIndexChanged=EventCallback<PageChangedEventArgs>
     SelectMethod=SelectHandler
     Visible=bool
 >
+    <PagerSettings Mode="PagerButtons.Numeric"
+                   NextPageText="string"
+                   PreviousPageText="string"
+                   Position="PagerPosition.Bottom" />
+    <RowStyle BackColor=string ForeColor=string CssClass=string ... />
+    <EditRowStyle BackColor=string ForeColor=string ... />
+    <InsertRowStyle BackColor=string ForeColor=string ... />
+    <HeaderStyle BackColor=string ForeColor=string ... />
+    <FooterStyle BackColor=string ForeColor=string ... />
+    <EmptyDataRowStyle BackColor=string ForeColor=string ... />
+    <PagerStyle BackColor=string ForeColor=string ... />
     <HeaderTemplate>
         <!-- custom header content -->
     </HeaderTemplate>
@@ -185,11 +210,30 @@ The FormView component is meant to emulate the asp:FormView control in markup an
     <EmptyDataTemplate>
         <!-- content shown when data source is empty -->
     </EmptyDataTemplate>
+    <PagerTemplate>
+        <!-- custom pager content -->
+    </PagerTemplate>
     <FooterTemplate>
         <!-- custom footer content -->
     </FooterTemplate>
 </FormView>
 ```
+
+## Style Sub-Components
+
+The FormView supports style sub-components that control the appearance of different sections. Each is specified as a child element:
+
+| Style Component | Description |
+|----------------|-------------|
+| `RowStyle` | Styles the data row in ReadOnly mode |
+| `EditRowStyle` | Styles the data row in Edit mode |
+| `InsertRowStyle` | Styles the data row in Insert mode |
+| `HeaderStyle` | Styles the header row |
+| `FooterStyle` | Styles the footer row |
+| `EmptyDataRowStyle` | Styles the empty data row |
+| `PagerStyle` | Styles the pager row |
+
+Each style component accepts standard style properties: `BackColor`, `ForeColor`, `CssClass`, `Font-Bold`, `Font-Italic`, `Font-Size`, `HorizontalAlign`, `VerticalAlign`, `Width`, `Height`, etc.
 
 ## Examples
 
@@ -351,3 +395,4 @@ The FormView component is meant to emulate the asp:FormView control in markup an
 - [GridView](GridView.md) - For tabular data display
 - [DetailsView](DetailsView.md) - Similar single-record display
 - [DataList](DataList.md) - For repeating data templates
+- [PagerSettings](PagerSettings.md) - Shared pager configuration
