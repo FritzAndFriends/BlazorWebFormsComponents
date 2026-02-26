@@ -20,7 +20,7 @@ const defaults = {
 
 const { url, output, pages } = parseArgs(process.argv, defaults);
 
-const samplesDir = path.join(repoRoot, 'samples', 'AfterBlazorServerSide', 'Pages', 'ControlSamples');
+const samplesDir = path.join(repoRoot, 'samples', 'AfterBlazorServerSide', 'Components', 'Pages', 'ControlSamples');
 
 await runCapture({
   baseUrl: url,
