@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+    <siteMapNode url="~/Default.aspx" title="Home" description="Home Page">
+        <siteMapNode url="~/ControlSamples/Button/default.aspx" title="Button" description="Button Control" />
+        <siteMapNode url="~/ControlSamples/GridView/Default.aspx" title="GridView" description="GridView Control" />
+        <siteMapNode url="~/ControlSamples/SiteMapPath/Default.aspx" title="SiteMapPath" description="SiteMapPath Control" />
+    </siteMapNode>
+</siteMap>
