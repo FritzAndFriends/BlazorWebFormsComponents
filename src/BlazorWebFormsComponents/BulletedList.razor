@@ -9,7 +9,7 @@
 	
 	@if (IsOrderedList)
 	{
-		<ol id="@ClientID" class="@CssClass" style="@CombinedStyle" type="@OrderedListType" start="@FirstBulletNumber" title="@ToolTip">
+		<ol id="@ClientID" class="@CssClass" style="@CombinedStyle" start="@GetStartAttribute()" title="@ToolTip">
 			@RenderListItems(allItems)
 		</ol>
 	}
