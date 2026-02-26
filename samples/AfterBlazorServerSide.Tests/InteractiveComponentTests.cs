@@ -1225,7 +1225,7 @@ public class InteractiveComponentTests
             // Assert: input textboxes should appear for editable fields
             var textInputs = await page.Locator("input[type='text']").AllAsync();
             Assert.True(textInputs.Count >= 3,
-                $"Edit mode should show at least 3 text inputs for Customer fields (CustomerID, FirstName, LastName, CompanyName), but found {textInputs.Count}");
+                $"Edit mode should show at least 3 text inputs for Product fields (Id, Name, Price, Category, InStock), but found {textInputs.Count}");
 
             // Assert: Update and Cancel links present
             var updateLink = page.GetByRole(AriaRole.Link, new() { Name = "Update", Exact = true });
@@ -1275,10 +1275,10 @@ public class InteractiveComponentTests
             });
 
             // Assert — the empty data message appears in a table cell (not in code samples)
-            var emptyDataText = page.GetByRole(AriaRole.Cell, new() { Name = "No customers found." });
+            var emptyDataText = page.GetByRole(AriaRole.Cell, new() { Name = "No products found." });
             await emptyDataText.WaitForAsync(new() { Timeout = 5000 });
             Assert.True(await emptyDataText.CountAsync() > 0,
-                "EmptyDataText 'No customers found.' should appear for an empty data source");
+                "EmptyDataText 'No products found.' should appear for an empty data source");
 
             // Assert no console errors
             Assert.Empty(consoleErrors);
@@ -2426,8 +2426,8 @@ public class InteractiveComponentTests
             Assert.NotEmpty(tables);
 
             // Verify header row with styled background exists
-            var headerText = page.Locator("td").Filter(new() { HasTextString = "Customer Details" }).First;
-            Assert.True(await headerText.IsVisibleAsync(), "Header text 'Customer Details' should be visible");
+            var headerText = page.Locator("td").Filter(new() { HasTextString = "Product Details" }).First;
+            Assert.True(await headerText.IsVisibleAsync(), "Header text 'Product Details' should be visible");
 
             Assert.Empty(consoleErrors);
         }
@@ -2468,7 +2468,7 @@ public class InteractiveComponentTests
 
             // Verify specific caption text
             var captionText = await page.Locator("caption").First.TextContentAsync();
-            Assert.Contains("Customer Record", captionText);
+            Assert.Contains("Product Record", captionText);
 
             Assert.Empty(consoleErrors);
         }
