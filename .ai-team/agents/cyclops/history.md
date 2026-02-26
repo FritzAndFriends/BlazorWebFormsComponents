@@ -124,3 +124,11 @@
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
  Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule implementation  decided by Jeffrey T. Fritz
+
+### M15 HTML Fidelity Bug Fixes (#380, #379, #378)
+
+- **BulletedList `<ol>` rendering (#380):** Removed HTML `type` attribute from `<ol>` element — WebForms uses CSS `list-style-type` only, not the HTML `type` attribute. Made `start` attribute conditional (only renders when `FirstBulletNumber != 1`). The `IsOrderedList` property and `ListStyleType` CSS mappings were already correct. Replaced `OrderedListType` property with `GetStartAttribute()` helper returning `int?` (null suppresses the attribute in Blazor).
+- **LinkButton `class` pass-through (#379):** Updated `GetCssClassOrNull()` in LinkButton.razor to add `aspNetDisabled` class when `Enabled=false`, matching the Button component's `CalculatedCssClass` pattern. Base CssClass pass-through was already working via the existing `GetCssClassOrNull()` method. Added 5 tests covering CssClass rendering, disabled state, and PostBackUrl+CssClass combo.
+- **Image `longdesc` conditional (#378):** The `GetLongDesc()` method in Image.razor already correctly returned null when `DescriptionUrl` was empty/unset, suppressing the `longdesc` attribute. Added 3 explicit tests verifying conditional rendering behavior. `DescriptionUrl` defaults to `string.Empty` in Image.razor.cs.
+- **Patterns followed:** Checked WebForms audit HTML to match exact attribute output. Followed Button's `CalculatedCssClass` pattern for disabled-state class handling. Used Blazor's null-attribute-suppression for conditional rendering (return null → attribute not rendered). All existing tests pass; added 10 new tests total.
+- **All 1277 tests pass**, 0 regressions.
