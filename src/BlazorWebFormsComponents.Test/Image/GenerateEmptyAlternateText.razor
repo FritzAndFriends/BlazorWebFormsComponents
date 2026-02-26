@@ -4,27 +4,27 @@
 public void Image_WithAlternateText_GenerateEmptyTrue_ShowsAlt()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" GenerateEmptyAlternateText="true" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" />);
 }
 
 [Fact]
 public void Image_WithAlternateText_GenerateEmptyFalse_ShowsAlt()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" GenerateEmptyAlternateText="false" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" />);
 }
 
 [Fact]
 public void Image_EmptyAlternateText_GenerateEmptyTrue_ShowsEmptyAlt()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="" GenerateEmptyAlternateText="true" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="" longdesc="" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="" />);
 }
 
 [Fact]
 public void Image_EmptyAlternateText_GenerateEmptyFalse_NoAltAttribute()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="" GenerateEmptyAlternateText="false" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" longdesc="" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" />);
 }
 }

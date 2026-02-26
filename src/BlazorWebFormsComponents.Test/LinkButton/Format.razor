@@ -4,6 +4,6 @@
 public void LinkButton_RendersAnchor_WithTextAndPostBackUrl()
 {
 var cut = Render(@<LinkButton Text="Go to Bing!!" PostBackUrl="https://www.bing.com" />);
-cut.MarkupMatches(@<a href="https://www.bing.com">Go to Bing!!</a>);
+cut.MarkupMatches(@<a href="https://www.bing.com" >Go to Bing!!</a>);
 }
 }
