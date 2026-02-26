@@ -1,6 +1,7 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using BlazorWebFormsComponents.LoginControls
+@using static BlazorWebFormsComponents.WebColor
 @using Moq
 
 @code {
@@ -136,7 +137,7 @@
 
 		// Act
 		var cut = Render(
-			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv7" Font-Bold="true">
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv7" Font="@(new FontInfo { Bold = true })">
 				<AnonymousTemplate>Anonymous</AnonymousTemplate>
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
