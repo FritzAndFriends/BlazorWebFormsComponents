@@ -1,0 +1,4311 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A collection of Blazor components that emulate the web forms components of the same name">
+      
+      
+        <meta name="author" content="Jeffrey T. Fritz">
+      
+      
+        <link rel="canonical" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/DataControls/Chart/">
+      
+      
+        <link rel="prev" href="../../EditorControls/TextBox/">
+      
+      
+        <link rel="next" href="../DataGrid/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Chart - BlazorWebFormsComponents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chart" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BlazorWebFormsComponents" class="md-header__button md-logo" aria-label="BlazorWebFormsComponents" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BlazorWebFormsComponents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chart
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FritzAndFriends/BlazorWebFormsComponents
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BlazorWebFormsComponents" class="md-nav__button md-logo" aria-label="BlazorWebFormsComponents" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    BlazorWebFormsComponents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FritzAndFriends/BlazorWebFormsComponents
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editor Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Editor Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/AdRotator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AdRotator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/BulletedList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BulletedList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Button/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Button
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Calendar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Calendar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/CheckBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CheckBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/CheckBoxList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CheckBoxList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/DropDownList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DropDownList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/FileUpload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FileUpload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/HiddenField/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HiddenField
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/ImageButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ImageButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Label/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Label
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/LinkButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LinkButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/ListBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ListBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Literal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Literal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Localize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Localize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/MultiView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MultiView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/PlaceHolder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PlaceHolder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/RadioButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RadioButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/RadioButtonList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RadioButtonList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Table/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Table
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/TextBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TextBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features-supported-in-blazor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features Supported in Blazor
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Features Supported in Blazor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chart-types-8-of-35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Types (8 of 35)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#child-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Child Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chartseries-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartSeries Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datapoint-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataPoint Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chartarea-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartArea Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axis-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Axis Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chartlegend-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartLegend Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charttitle-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartTitle Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chart-palettes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Palettes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chart-type-gallery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Type Gallery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chart Type Gallery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#column" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Column
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pie
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doughnut" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doughnut
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scatter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stacked-column" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stacked Column
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-forms-features-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Forms Features NOT Supported
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Web Forms Features NOT Supported">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chart-types-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Types Not Supported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-unsupported-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Unsupported Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-forms-declarative-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Forms Declarative Syntax
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blazor-razor-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Razor Syntax
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Blazor Razor Syntax">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-chart-with-data-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Chart with Data Points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-bound-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data-Bound Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-series-line-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Series Line Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pie-chart-with-legend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pie Chart with Legend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#html-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTML Output
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTML Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blazor-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendered-html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rendered HTML
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-web-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before (Web Forms)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-blazor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After (Blazor)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DataGrid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataGrid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DataList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DataPager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataPager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DetailsView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DetailsView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FormView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FormView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GridView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GridView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ListView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ListView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PagerSettings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PagerSettings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Repeater/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repeater
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/CompareValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CompareValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/ControlToValidate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ControlToValidate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/CustomValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CustomValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/RangeValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RangeValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/RegularExpressionValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RegularExpressionValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/RequiredFieldValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RequiredFieldValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/ValidationSummary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ValidationSummary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Navigation Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Navigation Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/HyperLink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HyperLink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/ImageMap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ImageMap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/Menu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Menu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/SiteMapPath/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SiteMapPath
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/TreeView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TreeView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Login Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/ChangePassword/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ChangePassword
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/CreateUserWizard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CreateUserWizard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/Login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/LoginName/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginName
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/LoginStatus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginStatus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/LoginView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/PasswordRecovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PasswordRecovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utility Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Utility Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/Databinder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Databinder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/IDRendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ID Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/JavaScriptSetup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JavaScript Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/NamingContainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NamingContainer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/PageService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PageService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/ViewState/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ViewState
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/WebFormsPage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebFormsPage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Migration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/Strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/Custom-Controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/DeferredControls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deferred Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/MasterPages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Master Pages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/NET-Standard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .NET Standard to the Rescue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/ThemesAndSkins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and Skins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/User-Controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/migration_readiness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Forms Application Migration Readiness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features-supported-in-blazor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features Supported in Blazor
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Features Supported in Blazor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chart-types-8-of-35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Types (8 of 35)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#child-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Child Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chartseries-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartSeries Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datapoint-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataPoint Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chartarea-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartArea Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axis-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Axis Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chartlegend-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartLegend Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charttitle-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ChartTitle Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chart-palettes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Palettes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chart-type-gallery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Type Gallery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chart Type Gallery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#column" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Column
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pie
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doughnut" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doughnut
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scatter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stacked-column" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stacked Column
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-forms-features-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Forms Features NOT Supported
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Web Forms Features NOT Supported">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chart-types-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chart Types Not Supported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-unsupported-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Unsupported Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-forms-declarative-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Forms Declarative Syntax
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blazor-razor-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Razor Syntax
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Blazor Razor Syntax">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-chart-with-data-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Chart with Data Points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-bound-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data-Bound Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-series-line-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Series Line Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pie-chart-with-legend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pie Chart with Legend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#html-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTML Output
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTML Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blazor-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendered-html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rendered HTML
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-web-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before (Web Forms)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-blazor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After (Blazor)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="chart">Chart<a class="headerlink" href="#chart" title="Permanent link">&para;</a></h1>
+<p><strong>The Chart component provides data visualization by rendering interactive charts in Blazor, emulating the ASP.NET Web Forms <code>Chart</code> control.</strong> This is the first component in the library to use JavaScript interop, powered by <a href="https://www.chartjs.org/">Chart.js</a> for client-side rendering.</p>
+<p>Original Microsoft documentation: <a href="https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.datavisualization.charting.chart?view=netframework-4.8">System.Web.UI.DataVisualization.Charting.Chart</a></p>
+<div class="admonition warning">
+<p class="admonition-title">HTML Output Exception</p>
+<p>The Web Forms Chart control renders an <code>&lt;img src="/ChartImg.axd?..."&gt;</code> tag — a server-generated raster image. The Blazor Chart component renders a <code>&lt;canvas&gt;</code> element powered by Chart.js. This is a <strong>justified deviation</strong> from the project's identical-HTML-output rule because:</p>
+<ul>
+<li><strong>Vector vs. raster</strong>: Canvas-based charts scale crisply at any resolution; the old <code>&lt;img&gt;</code> approach produced fixed-resolution PNGs/JPEGs</li>
+<li><strong>Interactive vs. static</strong>: Chart.js supports tooltips, hover effects, and animations out of the box — Web Forms charts were static images</li>
+<li><strong>Client-side rendering</strong>: No server round-trip to generate chart images, resulting in better performance</li>
+<li><strong>No server dependency</strong>: Web Forms required the <code>ChartImg.axd</code> HTTP handler and <code>System.Web.DataVisualization</code> assembly on the server</li>
+</ul>
+<p>Any CSS that targeted <code>img</code> inside your chart container will need to target <code>canvas</code> instead.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Chart.js Dependency</p>
+<p>The Chart component automatically loads Chart.js via JavaScript interop. The <code>chart.min.js</code> file is bundled in the library's static assets and loaded on demand — no manual script tags are required. See <a href="../../UtilityFeatures/JavaScriptSetup/">JavaScript Setup</a> for general JS configuration options.</p>
+</div>
+<h2 id="features-supported-in-blazor">Features Supported in Blazor<a class="headerlink" href="#features-supported-in-blazor" title="Permanent link">&para;</a></h2>
+<h3 id="chart-types-8-of-35">Chart Types (8 of 35)<a class="headerlink" href="#chart-types-8-of-35" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>SeriesChartType</th>
+<th>Chart.js Mapping</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td><code>bar</code> (vertical)</td>
+<td>Vertical bar chart</td>
+</tr>
+<tr>
+<td><code>Bar</code></td>
+<td><code>bar</code> (horizontal)</td>
+<td>Horizontal bar chart</td>
+</tr>
+<tr>
+<td><code>Line</code></td>
+<td><code>line</code></td>
+<td>Line chart</td>
+</tr>
+<tr>
+<td><code>Area</code></td>
+<td><code>line</code> (with fill)</td>
+<td>Filled area chart</td>
+</tr>
+<tr>
+<td><code>Pie</code></td>
+<td><code>pie</code></td>
+<td>Pie chart</td>
+</tr>
+<tr>
+<td><code>Doughnut</code></td>
+<td><code>doughnut</code></td>
+<td>Doughnut (ring) chart</td>
+</tr>
+<tr>
+<td><code>Point</code></td>
+<td><code>scatter</code></td>
+<td>Scatter plot</td>
+</tr>
+<tr>
+<td><code>StackedColumn</code></td>
+<td><code>bar</code> (stacked)</td>
+<td>Stacked vertical bar chart</td>
+</tr>
+</tbody>
+</table>
+<h3 id="component-parameters">Component Parameters<a class="headerlink" href="#component-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ChartWidth</code></td>
+<td><code>string</code></td>
+<td>Width in CSS units (e.g., <code>"400px"</code>, <code>"100%"</code>)</td>
+</tr>
+<tr>
+<td><code>ChartHeight</code></td>
+<td><code>string</code></td>
+<td>Height in CSS units (e.g., <code>"300px"</code>)</td>
+</tr>
+<tr>
+<td><code>Palette</code></td>
+<td><code>ChartPalette</code></td>
+<td>Color palette for auto-coloring series (default: <code>BrightPastel</code>)</td>
+</tr>
+<tr>
+<td><code>ImageType</code></td>
+<td><code>string</code></td>
+<td>API compatibility only; not functional in Blazor</td>
+</tr>
+<tr>
+<td><code>ID</code></td>
+<td><code>string</code></td>
+<td>HTML element ID</td>
+</tr>
+<tr>
+<td><code>CssClass</code></td>
+<td><code>string</code></td>
+<td>CSS class applied to the container <code>&lt;div&gt;</code></td>
+</tr>
+<tr>
+<td><code>Style</code></td>
+<td><code>string</code></td>
+<td>Inline CSS style</td>
+</tr>
+<tr>
+<td><code>Visible</code></td>
+<td><code>bool</code></td>
+<td>Whether the chart is rendered</td>
+</tr>
+</tbody>
+</table>
+<h3 id="child-components">Child Components<a class="headerlink" href="#child-components" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>ChartSeries</code></strong> — Defines a data series (chart type, data points, data binding fields)</li>
+<li><strong><code>ChartArea</code></strong> — Configures chart area with X/Y axis settings</li>
+<li><strong><code>ChartLegend</code></strong> — Adds and configures a chart legend</li>
+<li><strong><code>ChartTitle</code></strong> — Adds a chart title</li>
+</ul>
+<h3 id="chartseries-parameters">ChartSeries Parameters<a class="headerlink" href="#chartseries-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td>Series label shown in the legend</td>
+</tr>
+<tr>
+<td><code>ChartType</code></td>
+<td><code>SeriesChartType</code></td>
+<td>Chart type for this series</td>
+</tr>
+<tr>
+<td><code>ChartArea</code></td>
+<td><code>string</code></td>
+<td>Name of the chart area this series belongs to</td>
+</tr>
+<tr>
+<td><code>XValueMember</code></td>
+<td><code>string</code></td>
+<td>Field name for X values when data-binding</td>
+</tr>
+<tr>
+<td><code>YValueMembers</code></td>
+<td><code>string</code></td>
+<td>Field name(s) for Y values when data-binding</td>
+</tr>
+<tr>
+<td><code>Color</code></td>
+<td><code>WebColor</code></td>
+<td>Series color override</td>
+</tr>
+<tr>
+<td><code>BorderWidth</code></td>
+<td><code>int</code></td>
+<td>Border/line width</td>
+</tr>
+<tr>
+<td><code>IsVisibleInLegend</code></td>
+<td><code>bool</code></td>
+<td>Whether this series appears in the legend (default: <code>true</code>)</td>
+</tr>
+<tr>
+<td><code>Legend</code></td>
+<td><code>string</code></td>
+<td>Name of the legend this series is associated with</td>
+</tr>
+<tr>
+<td><code>MarkerStyle</code></td>
+<td><code>string</code></td>
+<td>Marker style for data points</td>
+</tr>
+<tr>
+<td><code>ToolTip</code></td>
+<td><code>string</code></td>
+<td>Tooltip text</td>
+</tr>
+<tr>
+<td><code>Points</code></td>
+<td><code>List&lt;DataPoint&gt;</code></td>
+<td>Manual data points</td>
+</tr>
+<tr>
+<td><code>Items</code></td>
+<td><code>IEnumerable&lt;object&gt;</code></td>
+<td>Data source items for data-binding</td>
+</tr>
+</tbody>
+</table>
+<h3 id="datapoint-properties">DataPoint Properties<a class="headerlink" href="#datapoint-properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>XValue</code></td>
+<td><code>object</code></td>
+<td>X-axis value</td>
+</tr>
+<tr>
+<td><code>YValues</code></td>
+<td><code>double[]</code></td>
+<td>Y-axis values</td>
+</tr>
+<tr>
+<td><code>Label</code></td>
+<td><code>string</code></td>
+<td>Display label</td>
+</tr>
+<tr>
+<td><code>Color</code></td>
+<td><code>WebColor</code></td>
+<td>Per-point color override</td>
+</tr>
+<tr>
+<td><code>ToolTip</code></td>
+<td><code>string</code></td>
+<td>Tooltip text</td>
+</tr>
+<tr>
+<td><code>IsValueShownAsLabel</code></td>
+<td><code>bool</code></td>
+<td>Show value as a label on the chart</td>
+</tr>
+</tbody>
+</table>
+<h3 id="chartarea-parameters">ChartArea Parameters<a class="headerlink" href="#chartarea-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td>Unique name of the chart area</td>
+</tr>
+<tr>
+<td><code>AreaBackColor</code></td>
+<td><code>WebColor</code></td>
+<td>Background color</td>
+</tr>
+<tr>
+<td><code>AxisX</code></td>
+<td><code>Axis</code></td>
+<td>X-axis configuration</td>
+</tr>
+<tr>
+<td><code>AxisY</code></td>
+<td><code>Axis</code></td>
+<td>Y-axis configuration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="axis-properties">Axis Properties<a class="headerlink" href="#axis-properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Title</code></td>
+<td><code>string</code></td>
+<td>Axis title text</td>
+</tr>
+<tr>
+<td><code>Minimum</code></td>
+<td><code>double?</code></td>
+<td>Minimum axis value</td>
+</tr>
+<tr>
+<td><code>Maximum</code></td>
+<td><code>double?</code></td>
+<td>Maximum axis value</td>
+</tr>
+<tr>
+<td><code>Interval</code></td>
+<td><code>double?</code></td>
+<td>Tick interval (step size)</td>
+</tr>
+<tr>
+<td><code>IsLogarithmic</code></td>
+<td><code>bool</code></td>
+<td>Use logarithmic scale</td>
+</tr>
+</tbody>
+</table>
+<h3 id="chartlegend-parameters">ChartLegend Parameters<a class="headerlink" href="#chartlegend-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td>Unique name</td>
+</tr>
+<tr>
+<td><code>LegendDocking</code></td>
+<td><code>Docking?</code></td>
+<td>Position: <code>Top</code>, <code>Bottom</code>, <code>Left</code>, <code>Right</code></td>
+</tr>
+<tr>
+<td><code>Alignment</code></td>
+<td><code>string</code></td>
+<td>Legend alignment</td>
+</tr>
+<tr>
+<td><code>Title</code></td>
+<td><code>string</code></td>
+<td>Legend title text</td>
+</tr>
+</tbody>
+</table>
+<h3 id="charttitle-parameters">ChartTitle Parameters<a class="headerlink" href="#charttitle-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Text</code></td>
+<td><code>string</code></td>
+<td>Title text</td>
+</tr>
+<tr>
+<td><code>Alignment</code></td>
+<td><code>string</code></td>
+<td>Title alignment</td>
+</tr>
+<tr>
+<td><code>TitleDocking</code></td>
+<td><code>Docking?</code></td>
+<td>Position: <code>Top</code>, <code>Bottom</code>, <code>Left</code>, <code>Right</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="chart-palettes">Chart Palettes<a class="headerlink" href="#chart-palettes" title="Permanent link">&para;</a></h3>
+<p>12 built-in color palettes matching the Web Forms <code>ChartColorPalette</code> enum:</p>
+<p><code>None</code>, <code>BrightPastel</code> (default), <code>Berry</code>, <code>Chocolate</code>, <code>EarthTones</code>, <code>Excel</code>, <code>Fire</code>, <code>Grayscale</code>, <code>Light</code>, <code>Pastel</code>, <code>SeaGreen</code>, <code>SemiTransparent</code></p>
+<h2 id="chart-type-gallery">Chart Type Gallery<a class="headerlink" href="#chart-type-gallery" title="Permanent link">&para;</a></h2>
+<p>Below is a visual reference for each of the 8 supported chart types. Use this gallery to choose the right chart type for your data and to see what the Blazor Chart component produces.</p>
+<h3 id="column">Column<a class="headerlink" href="#column" title="Permanent link">&para;</a></h3>
+<p><img alt="Column Chart" src="../../images/chart/chart-column.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Column</code></p>
+<p>The classic vertical bar chart — ideal for comparing discrete categories side by side. Use this when your X-axis represents categories (months, products, regions) and you want to emphasize differences in magnitude. This is the most commonly used chart type in Web Forms applications.</p>
+<h3 id="line">Line<a class="headerlink" href="#line" title="Permanent link">&para;</a></h3>
+<p><img alt="Line Chart" src="../../images/chart/chart-line.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Line</code></p>
+<p>Connects data points with straight line segments, perfect for showing trends over time. Use this when your X-axis represents a continuous or sequential dimension (dates, quarters, versions) and you want to highlight the direction and rate of change. Supports multiple series for comparison.</p>
+<h3 id="bar">Bar<a class="headerlink" href="#bar" title="Permanent link">&para;</a></h3>
+<p><img alt="Bar Chart" src="../../images/chart/chart-bar.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Bar</code></p>
+<p>A horizontal bar chart — the same concept as Column but rotated 90°. Use this when your category labels are long (e.g., product names, department titles) or when you have many categories that would crowd a vertical axis.</p>
+<h3 id="pie">Pie<a class="headerlink" href="#pie" title="Permanent link">&para;</a></h3>
+<p><img alt="Pie Chart" src="../../images/chart/chart-pie.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Pie</code></p>
+<p>Displays proportions of a whole as slices of a circle. Use this when you have a single data series and want to show each category's percentage of the total. Best with 3–7 slices — more than that becomes hard to read. Each slice is automatically assigned a distinct color from the active palette.</p>
+<h3 id="doughnut">Doughnut<a class="headerlink" href="#doughnut" title="Permanent link">&para;</a></h3>
+<p><img alt="Doughnut Chart" src="../../images/chart/chart-doughnut.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Doughnut</code></p>
+<p>A ring-shaped variant of the Pie chart with a hollow center. Use this when you want the same part-to-whole visualization as a Pie chart but prefer a cleaner look, or when you want to place a summary value or label in the center area. Each segment receives a distinct palette color automatically.</p>
+<h3 id="area">Area<a class="headerlink" href="#area" title="Permanent link">&para;</a></h3>
+<p><img alt="Area Chart" src="../../images/chart/chart-area.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Area</code></p>
+<p>A Line chart with the region below the line filled in. Use this when you want to emphasize the volume or cumulative total over time, rather than just the trend line. Works well for showing how a value accumulates or for comparing the magnitude of multiple series.</p>
+<h3 id="scatter">Scatter<a class="headerlink" href="#scatter" title="Permanent link">&para;</a></h3>
+<p><img alt="Scatter Chart" src="../../images/chart/chart-scatter.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.Point</code></p>
+<p>Plots individual data points on an X/Y grid without connecting lines. Use this when both axes represent numeric values and you want to reveal correlations, clusters, or outliers in your data. Note that the Web Forms enum value is <code>Point</code>, not <code>Scatter</code>.</p>
+<h3 id="stacked-column">Stacked Column<a class="headerlink" href="#stacked-column" title="Permanent link">&para;</a></h3>
+<p><img alt="Stacked Column Chart" src="../../images/chart/chart-stacked-column.png" /></p>
+<p><strong>Enum value:</strong> <code>SeriesChartType.StackedColumn</code></p>
+<p>Stacks multiple series vertically within each category column. Use this when you want to show both the total value per category and the breakdown of contributing series. Each color band represents one series, and the full column height shows the aggregate.</p>
+<h2 id="web-forms-features-not-supported">Web Forms Features NOT Supported<a class="headerlink" href="#web-forms-features-not-supported" title="Permanent link">&para;</a></h2>
+<h3 id="chart-types-not-supported">Chart Types Not Supported<a class="headerlink" href="#chart-types-not-supported" title="Permanent link">&para;</a></h3>
+<p>27 additional chart types from the <code>SeriesChartType</code> enum are defined but will throw <code>NotSupportedException</code> if used. The most commonly requested:</p>
+<table>
+<thead>
+<tr>
+<th>Chart Type</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Stock</code></td>
+<td>Not supported</td>
+<td>OHLC financial charts</td>
+</tr>
+<tr>
+<td><code>Candlestick</code></td>
+<td>Not supported</td>
+<td>Financial candlestick charts</td>
+</tr>
+<tr>
+<td><code>Bubble</code></td>
+<td>Not supported</td>
+<td>Bubble charts (sized scatter)</td>
+</tr>
+<tr>
+<td><code>Radar</code></td>
+<td>Not supported</td>
+<td>Radar/spider charts</td>
+</tr>
+<tr>
+<td><code>Polar</code></td>
+<td>Not supported</td>
+<td>Polar area charts</td>
+</tr>
+<tr>
+<td><code>Funnel</code></td>
+<td>Not supported</td>
+<td>Funnel charts</td>
+</tr>
+<tr>
+<td><code>Pyramid</code></td>
+<td>Not supported</td>
+<td>Pyramid charts</td>
+</tr>
+<tr>
+<td><code>Spline</code></td>
+<td>Not supported</td>
+<td>Smooth line charts</td>
+</tr>
+<tr>
+<td><code>StackedBar</code></td>
+<td>Not supported</td>
+<td>Stacked horizontal bars</td>
+</tr>
+<tr>
+<td><code>StackedArea</code></td>
+<td>Not supported</td>
+<td>Stacked area charts</td>
+</tr>
+<tr>
+<td><code>Range</code> / <code>RangeColumn</code></td>
+<td>Not supported</td>
+<td>Range charts</td>
+</tr>
+<tr>
+<td><code>BoxPlot</code></td>
+<td>Not supported</td>
+<td>Statistical box plots</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-unsupported-features">Other Unsupported Features<a class="headerlink" href="#other-unsupported-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Image export</strong> (<code>SaveImage</code>) — Not available. Use the Chart.js canvas API directly via JS: <code>canvas.toDataURL()</code> or <code>canvas.toBlob()</code></li>
+<li><strong>3D chart rendering</strong> — Chart.js is 2D only; Web Forms supported <code>ChartArea3DStyle</code></li>
+<li><strong>Annotations</strong> — Web Forms <code>Annotations</code> collection is not implemented</li>
+<li><strong>Map areas / hot spots</strong> — Clickable regions on the chart image (<code>MapAreas</code>) are not supported</li>
+<li><strong>Data binding via <code>DataSource</code> / <code>DataBind()</code></strong> — Use the <code>Items</code> parameter on <code>ChartSeries</code> or populate <code>Points</code> manually</li>
+<li><strong><code>ChartImg.axd</code> HTTP handler</strong> — Not needed; rendering is client-side</li>
+<li><strong>Skins and themes</strong> — Use CSS and <code>Palette</code> instead</li>
+<li><strong>Serialization</strong> (<code>ChartSerializer</code>) — Not applicable</li>
+</ul>
+<h2 id="web-forms-declarative-syntax">Web Forms Declarative Syntax<a class="headerlink" href="#web-forms-declarative-syntax" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">&lt;</span><span class="nt">asp:Chart</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="na">ID</span><span class="o">=</span><span class="s">&quot;Chart1&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="na">runat</span><span class="o">=</span><span class="s">&quot;server&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="na">Width</span><span class="o">=</span><span class="s">&quot;600px&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="na">Height</span><span class="o">=</span><span class="s">&quot;400px&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="na">Palette</span><span class="o">=</span><span class="s">&quot;BrightPastel&quot;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="na">ImageType</span><span class="o">=</span><span class="s">&quot;Png&quot;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="p">&lt;</span><span class="nt">Titles</span><span class="p">&gt;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="p">&lt;</span><span class="nt">asp:Title</span> <span class="na">Text</span><span class="o">=</span><span class="s">&quot;Monthly Sales&quot;</span> <span class="na">Docking</span><span class="o">=</span><span class="s">&quot;Top&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="p">&lt;/</span><span class="nt">Titles</span><span class="p">&gt;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="p">&lt;</span><span class="nt">Legends</span><span class="p">&gt;</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        <span class="p">&lt;</span><span class="nt">asp:Legend</span> <span class="na">Name</span><span class="o">=</span><span class="s">&quot;Legend1&quot;</span> <span class="na">Docking</span><span class="o">=</span><span class="s">&quot;Bottom&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="p">&lt;/</span><span class="nt">Legends</span><span class="p">&gt;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="p">&lt;</span><span class="nt">Series</span><span class="p">&gt;</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="p">&lt;</span><span class="nt">asp:Series</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            <span class="na">Name</span><span class="o">=</span><span class="s">&quot;Sales&quot;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>            <span class="na">ChartType</span><span class="o">=</span><span class="s">&quot;Column&quot;</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>            <span class="na">XValueMember</span><span class="o">=</span><span class="s">&quot;Month&quot;</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>            <span class="na">YValueMembers</span><span class="o">=</span><span class="s">&quot;Amount&quot;</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>        <span class="p">/&gt;</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="p">&lt;/</span><span class="nt">Series</span><span class="p">&gt;</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="p">&lt;</span><span class="nt">ChartAreas</span><span class="p">&gt;</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="p">&lt;</span><span class="nt">asp:ChartArea</span> <span class="na">Name</span><span class="o">=</span><span class="s">&quot;ChartArea1&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>            <span class="p">&lt;</span><span class="nt">AxisX</span> <span class="na">Title</span><span class="o">=</span><span class="s">&quot;Month&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>            <span class="p">&lt;</span><span class="nt">AxisY</span> <span class="na">Title</span><span class="o">=</span><span class="s">&quot;Revenue ($)&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>        <span class="p">&lt;/</span><span class="nt">asp:ChartArea</span><span class="p">&gt;</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="p">&lt;/</span><span class="nt">ChartAreas</span><span class="p">&gt;</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="p">&lt;/</span><span class="nt">asp:Chart</span><span class="p">&gt;</span>
+</code></pre></div>
+<p><strong>Code-behind (Web Forms):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">protected</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span><span class="w"> </span><span class="n">sender</span><span class="p">,</span><span class="w"> </span><span class="n">EventArgs</span><span class="w"> </span><span class="n">e</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">Chart1</span><span class="p">.</span><span class="n">DataSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetSalesData</span><span class="p">();</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">Chart1</span><span class="p">.</span><span class="n">DataBind</span><span class="p">();</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="blazor-razor-syntax">Blazor Razor Syntax<a class="headerlink" href="#blazor-razor-syntax" title="Permanent link">&para;</a></h2>
+<h3 id="basic-chart-with-data-points">Basic Chart with Data Points<a class="headerlink" href="#basic-chart-with-data-points" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&lt;Chart ID=&quot;Chart1&quot; ChartWidth=&quot;600px&quot; ChartHeight=&quot;400px&quot; Palette=&quot;ChartPalette.BrightPastel&quot;&gt;
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    &lt;ChartTitle Text=&quot;Monthly Sales&quot; /&gt;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    &lt;ChartLegend Name=&quot;Legend1&quot; LegendDocking=&quot;Docking.Bottom&quot; /&gt;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    &lt;ChartSeries Name=&quot;Sales&quot; ChartType=&quot;SeriesChartType.Column&quot;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>                 Points=&quot;@salesData&quot; /&gt;
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    &lt;ChartArea Name=&quot;ChartArea1&quot;
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>               AxisX=&quot;@(new Axis { Title = &quot;Month&quot; })&quot;
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>               AxisY=&quot;@(new Axis { Title = &quot;Revenue ($)&quot; })&quot; /&gt;
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>&lt;/Chart&gt;
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>@code {
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    private List&lt;DataPoint&gt; salesData = new()
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    {
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        new DataPoint { Label = &quot;Jan&quot;, YValues = new[] { 12000.0 } },
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        new DataPoint { Label = &quot;Feb&quot;, YValues = new[] { 15000.0 } },
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        new DataPoint { Label = &quot;Mar&quot;, YValues = new[] { 18000.0 } },
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        new DataPoint { Label = &quot;Apr&quot;, YValues = new[] { 14000.0 } },
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        new DataPoint { Label = &quot;May&quot;, YValues = new[] { 21000.0 } },
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>        new DataPoint { Label = &quot;Jun&quot;, YValues = new[] { 19000.0 } }
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    };
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>}
+</code></pre></div>
+<h3 id="data-bound-chart">Data-Bound Chart<a class="headerlink" href="#data-bound-chart" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&lt;Chart ID=&quot;SalesChart&quot; ChartWidth=&quot;100%&quot; ChartHeight=&quot;400px&quot;&gt;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    &lt;ChartTitle Text=&quot;Sales by Region&quot; /&gt;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    &lt;ChartSeries Name=&quot;Revenue&quot; ChartType=&quot;SeriesChartType.Column&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                 XValueMember=&quot;Region&quot; YValueMembers=&quot;Revenue&quot;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>                 Items=&quot;@regions&quot; /&gt;
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    &lt;ChartArea Name=&quot;MainArea&quot;
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>               AxisX=&quot;@(new Axis { Title = &quot;Region&quot; })&quot;
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>               AxisY=&quot;@(new Axis { Title = &quot;Revenue ($)&quot;, Minimum = 0 })&quot; /&gt;
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>&lt;/Chart&gt;
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>@code {
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    private List&lt;object&gt; regions = new()
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    {
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        new { Region = &quot;North&quot;, Revenue = 45000 },
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        new { Region = &quot;South&quot;, Revenue = 38000 },
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        new { Region = &quot;East&quot;, Revenue = 52000 },
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        new { Region = &quot;West&quot;, Revenue = 41000 }
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    };
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>}
+</code></pre></div>
+<h3 id="multi-series-line-chart">Multi-Series Line Chart<a class="headerlink" href="#multi-series-line-chart" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>&lt;Chart ID=&quot;TrendChart&quot; ChartWidth=&quot;700px&quot; ChartHeight=&quot;400px&quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>       Palette=&quot;ChartPalette.Excel&quot;&gt;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    &lt;ChartTitle Text=&quot;Quarterly Trends&quot; TitleDocking=&quot;Docking.Top&quot; /&gt;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    &lt;ChartLegend Name=&quot;Legend1&quot; LegendDocking=&quot;Docking.Bottom&quot; /&gt;
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    &lt;ChartSeries Name=&quot;2024&quot; ChartType=&quot;SeriesChartType.Line&quot;
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                 Points=&quot;@data2024&quot; BorderWidth=&quot;2&quot; /&gt;
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    &lt;ChartSeries Name=&quot;2025&quot; ChartType=&quot;SeriesChartType.Line&quot;
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>                 Points=&quot;@data2025&quot; BorderWidth=&quot;2&quot; /&gt;
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    &lt;ChartArea Name=&quot;ChartArea1&quot;
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>               AxisX=&quot;@(new Axis { Title = &quot;Quarter&quot; })&quot;
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>               AxisY=&quot;@(new Axis { Title = &quot;Units Sold&quot;, Minimum = 0 })&quot; /&gt;
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>&lt;/Chart&gt;
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>@code {
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    private List&lt;DataPoint&gt; data2024 = new()
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    {
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>        new DataPoint { Label = &quot;Q1&quot;, YValues = new[] { 120.0 } },
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        new DataPoint { Label = &quot;Q2&quot;, YValues = new[] { 150.0 } },
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        new DataPoint { Label = &quot;Q3&quot;, YValues = new[] { 180.0 } },
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>        new DataPoint { Label = &quot;Q4&quot;, YValues = new[] { 200.0 } }
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>    };
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    private List&lt;DataPoint&gt; data2025 = new()
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    {
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>        new DataPoint { Label = &quot;Q1&quot;, YValues = new[] { 140.0 } },
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        new DataPoint { Label = &quot;Q2&quot;, YValues = new[] { 175.0 } },
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        new DataPoint { Label = &quot;Q3&quot;, YValues = new[] { 210.0 } },
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        new DataPoint { Label = &quot;Q4&quot;, YValues = new[] { 245.0 } }
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    };
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>}
+</code></pre></div>
+<h3 id="pie-chart-with-legend">Pie Chart with Legend<a class="headerlink" href="#pie-chart-with-legend" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>&lt;Chart ID=&quot;PieChart&quot; ChartWidth=&quot;500px&quot; ChartHeight=&quot;400px&quot;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>       Palette=&quot;ChartPalette.Berry&quot;&gt;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    &lt;ChartTitle Text=&quot;Market Share&quot; /&gt;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    &lt;ChartLegend Name=&quot;Legend1&quot; LegendDocking=&quot;Docking.Right&quot;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>                 Title=&quot;Products&quot; /&gt;
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    &lt;ChartSeries Name=&quot;Share&quot; ChartType=&quot;SeriesChartType.Pie&quot;
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>                 Points=&quot;@marketData&quot; /&gt;
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>&lt;/Chart&gt;
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>@code {
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    private List&lt;DataPoint&gt; marketData = new()
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    {
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>        new DataPoint { Label = &quot;Product A&quot;, YValues = new[] { 35.0 } },
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        new DataPoint { Label = &quot;Product B&quot;, YValues = new[] { 28.0 } },
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>        new DataPoint { Label = &quot;Product C&quot;, YValues = new[] { 22.0 } },
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        new DataPoint { Label = &quot;Product D&quot;, YValues = new[] { 15.0 } }
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    };
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>}
+</code></pre></div>
+<h2 id="html-output">HTML Output<a class="headerlink" href="#html-output" title="Permanent link">&para;</a></h2>
+<h3 id="blazor-input">Blazor Input<a class="headerlink" href="#blazor-input" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>&lt;Chart ID=&quot;MyChart&quot; ChartWidth=&quot;400px&quot; ChartHeight=&quot;300px&quot;&gt;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    &lt;ChartSeries Name=&quot;Sales&quot; ChartType=&quot;SeriesChartType.Column&quot;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>                 Points=&quot;@data&quot; /&gt;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>&lt;/Chart&gt;
+</code></pre></div>
+<h3 id="rendered-html">Rendered HTML<a class="headerlink" href="#rendered-html" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;MyChart&quot;</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;width:400px;height:300px&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="p">&lt;</span><span class="nt">canvas</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;MyChart_canvas_a1b2c3d4&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">canvas</span><span class="p">&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Comparison with Web Forms Output</p>
+<p>Web Forms rendered: <code>&lt;img src="/ChartImg.axd?i=chart_abc123&amp;amp;g=..." /&gt;</code></p>
+<p>The Blazor component renders a <code>&lt;div&gt;</code> wrapper with a <code>&lt;canvas&gt;</code> child. Chart.js draws directly on the canvas — no server-generated images, no HTTP handler.</p>
+</div>
+<h2 id="migration-notes">Migration Notes<a class="headerlink" href="#migration-notes" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Remove the <code>asp:</code> prefix</strong> — <code>&lt;asp:Chart&gt;</code> becomes <code>&lt;Chart&gt;</code></li>
+<li><strong>Remove <code>runat="server"</code></strong> — Not needed in Blazor</li>
+<li><strong>Replace <code>DataSource</code> + <code>DataBind()</code> with <code>Items</code> parameter</strong> — Pass your data collection to <code>ChartSeries.Items</code> or populate <code>ChartSeries.Points</code> manually</li>
+<li><strong><code>ChartType</code> values remain the same</strong> — <code>Column</code>, <code>Bar</code>, <code>Line</code>, <code>Pie</code>, etc. are identical enum values (use <code>SeriesChartType.Column</code> syntax)</li>
+<li><strong><code>Palette</code> values remain the same</strong> — Use <code>ChartPalette.BrightPastel</code> syntax instead of the string <code>"BrightPastel"</code></li>
+<li><strong>Chart.js renders client-side</strong> — No <code>ChartImg.axd</code> handler registration needed; better performance and interactivity</li>
+<li><strong><code>Width</code>/<code>Height</code> become <code>ChartWidth</code>/<code>ChartHeight</code></strong> — These accept CSS unit strings (e.g., <code>"400px"</code>, <code>"100%"</code>)</li>
+<li><strong>Axis configuration uses POCO objects</strong> — Instead of nested XML elements, use <code>new Axis { Title = "...", Minimum = 0 }</code></li>
+<li><strong>Child element names changed</strong> — <code>&lt;Titles&gt;</code> → <code>&lt;ChartTitle&gt;</code>, <code>&lt;Legends&gt;</code> → <code>&lt;ChartLegend&gt;</code>, <code>&lt;Series&gt;</code> → <code>&lt;ChartSeries&gt;</code>, <code>&lt;ChartAreas&gt;</code> → <code>&lt;ChartArea&gt;</code> (singular, no wrapper element)</li>
+<li><strong><code>ImageType</code> is ignored</strong> — Chart.js renders to canvas, not an image file</li>
+</ol>
+<h3 id="before-web-forms">Before (Web Forms)<a class="headerlink" href="#before-web-forms" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">&lt;</span><span class="nt">asp:Chart</span> <span class="na">ID</span><span class="o">=</span><span class="s">&quot;Chart1&quot;</span> <span class="na">runat</span><span class="o">=</span><span class="s">&quot;server&quot;</span> <span class="na">Width</span><span class="o">=</span><span class="s">&quot;600&quot;</span> <span class="na">Height</span><span class="o">=</span><span class="s">&quot;400&quot;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>           <span class="na">Palette</span><span class="o">=</span><span class="s">&quot;BrightPastel&quot;</span> <span class="na">ImageType</span><span class="o">=</span><span class="s">&quot;Png&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="p">&lt;</span><span class="nt">Titles</span><span class="p">&gt;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="p">&lt;</span><span class="nt">asp:Title</span> <span class="na">Text</span><span class="o">=</span><span class="s">&quot;Sales Report&quot;</span> <span class="na">Docking</span><span class="o">=</span><span class="s">&quot;Top&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="p">&lt;/</span><span class="nt">Titles</span><span class="p">&gt;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="p">&lt;</span><span class="nt">Legends</span><span class="p">&gt;</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="p">&lt;</span><span class="nt">asp:Legend</span> <span class="na">Name</span><span class="o">=</span><span class="s">&quot;Legend1&quot;</span> <span class="na">Docking</span><span class="o">=</span><span class="s">&quot;Bottom&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="p">&lt;/</span><span class="nt">Legends</span><span class="p">&gt;</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="p">&lt;</span><span class="nt">Series</span><span class="p">&gt;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="p">&lt;</span><span class="nt">asp:Series</span> <span class="na">Name</span><span class="o">=</span><span class="s">&quot;Revenue&quot;</span> <span class="na">ChartType</span><span class="o">=</span><span class="s">&quot;Column&quot;</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>                    <span class="na">XValueMember</span><span class="o">=</span><span class="s">&quot;Month&quot;</span> <span class="na">YValueMembers</span><span class="o">=</span><span class="s">&quot;Amount&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="p">&lt;/</span><span class="nt">Series</span><span class="p">&gt;</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    <span class="p">&lt;</span><span class="nt">ChartAreas</span><span class="p">&gt;</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>        <span class="p">&lt;</span><span class="nt">asp:ChartArea</span> <span class="na">Name</span><span class="o">=</span><span class="s">&quot;ChartArea1&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>            <span class="p">&lt;</span><span class="nt">AxisX</span> <span class="na">Title</span><span class="o">=</span><span class="s">&quot;Month&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>            <span class="p">&lt;</span><span class="nt">AxisY</span> <span class="na">Title</span><span class="o">=</span><span class="s">&quot;Amount ($)&quot;</span> <span class="p">/&gt;</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>        <span class="p">&lt;/</span><span class="nt">asp:ChartArea</span><span class="p">&gt;</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="p">&lt;/</span><span class="nt">ChartAreas</span><span class="p">&gt;</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="p">&lt;/</span><span class="nt">asp:Chart</span><span class="p">&gt;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// Code-behind</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">Chart1</span><span class="p">.</span><span class="n">DataSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetMonthlyRevenue</span><span class="p">();</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">Chart1</span><span class="p">.</span><span class="n">DataBind</span><span class="p">();</span>
+</code></pre></div>
+<h3 id="after-blazor">After (Blazor)<a class="headerlink" href="#after-blazor" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>&lt;Chart ID=&quot;Chart1&quot; ChartWidth=&quot;600px&quot; ChartHeight=&quot;400px&quot;
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>       Palette=&quot;ChartPalette.BrightPastel&quot;&gt;
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    &lt;ChartTitle Text=&quot;Sales Report&quot; TitleDocking=&quot;Docking.Top&quot; /&gt;
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    &lt;ChartLegend Name=&quot;Legend1&quot; LegendDocking=&quot;Docking.Bottom&quot; /&gt;
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    &lt;ChartSeries Name=&quot;Revenue&quot; ChartType=&quot;SeriesChartType.Column&quot;
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>                 XValueMember=&quot;Month&quot; YValueMembers=&quot;Amount&quot;
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>                 Items=&quot;@monthlyRevenue&quot; /&gt;
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    &lt;ChartArea Name=&quot;ChartArea1&quot;
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>               AxisX=&quot;@(new Axis { Title = &quot;Month&quot; })&quot;
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>               AxisY=&quot;@(new Axis { Title = &quot;Amount ($)&quot; })&quot; /&gt;
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>&lt;/Chart&gt;
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>@code {
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>    private List&lt;object&gt; monthlyRevenue;
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>    protected override void OnInitialized()
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    {
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>        monthlyRevenue = GetMonthlyRevenue()
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>            .Cast&lt;object&gt;().ToList();
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>    }
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>}
+</code></pre></div>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../GridView/">GridView</a> — Data grid with row templates</li>
+<li><a href="../Repeater/">Repeater</a> — Flexible data repeater</li>
+<li><a href="../../UtilityFeatures/JavaScriptSetup/">JavaScript Setup</a> — JavaScript configuration for the library</li>
+<li><a href="https://www.chartjs.org/docs/">Chart.js Documentation</a> — The underlying charting library</li>
+<li><a href="https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.datavisualization.charting.chart?view=netframework-4.8">Microsoft Chart Class Reference</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_datetime" title="February 25, 2026 01:40:29 UTC">2026-02-25 01:40:29</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

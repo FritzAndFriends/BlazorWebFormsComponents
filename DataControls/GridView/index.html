@@ -1,0 +1,4059 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A collection of Blazor components that emulate the web forms components of the same name">
+      
+      
+        <meta name="author" content="Jeffrey T. Fritz">
+      
+      
+        <link rel="canonical" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/DataControls/GridView/">
+      
+      
+        <link rel="prev" href="../FormView/">
+      
+      
+        <link rel="next" href="../ListView/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>GridView - BlazorWebFormsComponents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#features-supported-in-blazor" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BlazorWebFormsComponents" class="md-header__button md-logo" aria-label="BlazorWebFormsComponents" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BlazorWebFormsComponents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              GridView
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FritzAndFriends/BlazorWebFormsComponents
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BlazorWebFormsComponents" class="md-nav__button md-logo" aria-label="BlazorWebFormsComponents" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    BlazorWebFormsComponents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FritzAndFriends/BlazorWebFormsComponents
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editor Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Editor Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/AdRotator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AdRotator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/BulletedList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BulletedList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Button/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Button
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Calendar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Calendar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/CheckBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CheckBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/CheckBoxList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CheckBoxList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/DropDownList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DropDownList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/FileUpload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FileUpload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/HiddenField/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HiddenField
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/ImageButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ImageButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Label/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Label
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/LinkButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LinkButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/ListBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ListBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Literal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Literal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Localize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Localize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/MultiView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MultiView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/PlaceHolder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PlaceHolder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/RadioButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RadioButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/RadioButtonList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RadioButtonList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/Table/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Table
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../EditorControls/TextBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TextBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DataGrid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataGrid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DataList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DataPager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataPager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DetailsView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DetailsView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FormView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FormView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GridView
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GridView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features-supported-in-blazor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features supported in Blazor
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Features supported in Blazor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blazor-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-forms-declarative-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Forms Declarative Syntax
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blazor-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Syntax
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-paging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Paging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sorting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#row-editing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Row Editing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paging-with-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paging with Sorting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#row-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Row Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selection-with-cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selection with Cancellation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#style-sub-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Style Sub-Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empty-data-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty Data Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#selection-properties-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selection Properties Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#style-sub-components-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Style Sub-Components Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#display-properties-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Display Properties Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ListView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ListView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PagerSettings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PagerSettings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Repeater/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repeater
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/CompareValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CompareValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/ControlToValidate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ControlToValidate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/CustomValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CustomValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/RangeValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RangeValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/RegularExpressionValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RegularExpressionValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/RequiredFieldValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RequiredFieldValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ValidationControls/ValidationSummary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ValidationSummary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Navigation Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Navigation Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/HyperLink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HyperLink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/ImageMap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ImageMap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/Menu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Menu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/SiteMapPath/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SiteMapPath
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../NavigationControls/TreeView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TreeView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Login Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/ChangePassword/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ChangePassword
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/CreateUserWizard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CreateUserWizard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/Login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/LoginName/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginName
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/LoginStatus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginStatus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/LoginView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LoginControls/PasswordRecovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PasswordRecovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utility Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Utility Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/Databinder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Databinder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/IDRendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ID Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/JavaScriptSetup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JavaScript Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/NamingContainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NamingContainer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/PageService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PageService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/ViewState/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ViewState
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../UtilityFeatures/WebFormsPage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebFormsPage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Migration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/Strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/Custom-Controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/DeferredControls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deferred Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/MasterPages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Master Pages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/NET-Standard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .NET Standard to the Rescue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/ThemesAndSkins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and Skins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/User-Controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Migration/migration_readiness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Forms Application Migration Readiness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features-supported-in-blazor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features supported in Blazor
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Features supported in Blazor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blazor-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-forms-declarative-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Forms Declarative Syntax
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blazor-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blazor Syntax
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-paging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Paging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sorting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#row-editing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Row Editing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paging-with-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paging with Sorting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#row-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Row Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selection-with-cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selection with Cancellation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#style-sub-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Style Sub-Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empty-data-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty Data Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#selection-properties-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selection Properties Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#style-sub-components-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Style Sub-Components Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#display-properties-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Display Properties Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>GridView</h1>
+
+<p>The GridView component is meant to emulate the asp:GridView control in markup and is defined in the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.gridview?view=netframework-4.8">System.Web.UI.WebControls.GridView class</a></p>
+<h2 id="features-supported-in-blazor">Features supported in Blazor<a class="headerlink" href="#features-supported-in-blazor" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Readonly grid</li>
+<li>Bound, Button, Hyperlink, and Template columns</li>
+<li><strong>Paging</strong> - <code>AllowPaging</code>, <code>PageSize</code>, <code>PageIndex</code>, <code>PageIndexChanged</code> event</li>
+<li><strong>Sorting</strong> - <code>AllowSorting</code>, <code>SortExpression</code>, <code>SortDirection</code>, <code>Sorting</code>/<code>Sorted</code> events</li>
+<li><strong>Row Editing</strong> - <code>EditIndex</code>, <code>RowEditing</code>, <code>RowUpdating</code>, <code>RowDeleting</code>, <code>RowCancelingEdit</code> events</li>
+<li><strong>Selection</strong> - <code>SelectedIndex</code>, <code>SelectedRow</code>, <code>SelectedValue</code>, <code>AutoGenerateSelectButton</code>, <code>SelectedIndexChanging</code>/<code>SelectedIndexChanged</code> events</li>
+<li><strong>Style Sub-Components</strong> - <code>RowStyle</code>, <code>AlternatingRowStyle</code>, <code>HeaderStyle</code>, <code>FooterStyle</code>, <code>SelectedRowStyle</code>, <code>EditRowStyle</code>, <code>EmptyDataRowStyle</code>, <code>PagerStyle</code></li>
+<li><strong>Display Properties</strong> - <code>ShowHeader</code>, <code>ShowFooter</code>, <code>Caption</code>, <code>CaptionAlign</code>, <code>EmptyDataTemplate</code>, <code>GridLines</code>, <code>UseAccessibleHeader</code>, <code>CellPadding</code>, <code>CellSpacing</code>, <code>ShowHeaderWhenEmpty</code></li>
+<li><code>ToolTip</code> - tooltip text displayed on hover (renders as <code>title</code> attribute)</li>
+</ul>
+<h3 id="blazor-notes">Blazor Notes<a class="headerlink" href="#blazor-notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The <code>RowCommand.CommandSource</code> object will be populated with the <code>ButtonField</code> object</li>
+<li><strong>Context attribute</strong> - When using <code>&lt;TemplateField&gt;</code>, add <code>Context="Item"</code> to access the current row item as <code>@Item</code> instead of Blazor's default <code>@context</code></li>
+<li><strong>ItemType cascading</strong> - The <code>ItemType</code> parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify <code>ItemType</code> on individual columns if desired.</li>
+<li><strong>Paging</strong> - When <code>AllowPaging="true"</code>, the GridView automatically paginates the data source using <code>Skip()</code>/<code>Take()</code>. A numeric pager is rendered below the grid. The <code>PageIndexChanged</code> event fires with a <code>PageChangedEventArgs</code> containing <code>NewPageIndex</code>, <code>OldPageIndex</code>, <code>TotalPages</code>, <code>StartRowIndex</code>, and <code>Cancel</code>.</li>
+<li><strong>Sorting</strong> - When <code>AllowSorting="true"</code>, column headers become clickable. You must handle the <code>Sorting</code> event to apply the sort to your data source. The <code>Sorted</code> event fires after the sort completes. Both events use <code>GridViewSortEventArgs</code> with <code>SortExpression</code>, <code>SortDirection</code>, and <code>Cancel</code> properties.</li>
+<li><strong>Row Editing</strong> - Set <code>EditIndex</code> to the zero-based row index to put a row in edit mode (<code>-1</code> means no row is being edited). An auto-generated command column appears when at least one editing event callback is registered.</li>
+<li><strong>Selection</strong> - Set <code>SelectedIndex</code> to highlight a row. <code>SelectedRow</code> returns the data item for the selected row, and <code>SelectedValue</code> returns the <code>DataKeyNames</code> value. When <code>AutoGenerateSelectButton="true"</code>, a "Select" link column is added automatically. The <code>SelectedIndexChanging</code> event fires before the selection changes (cancellable), and <code>SelectedIndexChanged</code> fires after.</li>
+<li><strong>Style Sub-Components</strong> - Use <code>&lt;RowStyle&gt;</code>, <code>&lt;AlternatingRowStyle&gt;</code>, <code>&lt;HeaderStyle&gt;</code>, <code>&lt;FooterStyle&gt;</code>, <code>&lt;SelectedRowStyle&gt;</code>, <code>&lt;EditRowStyle&gt;</code>, <code>&lt;EmptyDataRowStyle&gt;</code>, and <code>&lt;PagerStyle&gt;</code> child components to configure <code>TableItemStyle</code> properties (CssClass, BackColor, ForeColor, etc.) for each section of the grid.</li>
+<li><strong>Display Properties</strong> - <code>ShowHeader</code> and <code>ShowFooter</code> toggle header/footer rows. <code>Caption</code> and <code>CaptionAlign</code> add a <code>&lt;caption&gt;</code> element. <code>GridLines</code> controls table borders. <code>UseAccessibleHeader</code> renders <code>&lt;th&gt;</code> with <code>scope="col"</code>. <code>CellPadding</code> and <code>CellSpacing</code> set table spacing. <code>ShowHeaderWhenEmpty</code> shows column headers even when the data source is empty. <code>EmptyDataTemplate</code> renders custom content when there are no data rows.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Differences from Web Forms</p>
+<ul>
+<li><code>PageIndexChanging</code> is not implemented; use <code>PageIndexChanged</code> with the <code>Cancel</code> property instead.</li>
+<li><code>PagerTemplate</code> is not yet supported; only the built-in numeric pager is available.</li>
+<li>Sorting does not automatically re-sort the data source; you must handle the <code>Sorting</code> event and apply the sort yourself.</li>
+<li><code>SelectedIndexChanging</code> uses <code>GridViewSelectEventArgs</code> with a <code>Cancel</code> property to prevent selection.</li>
+</ul>
+</div>
+<h2 id="web-forms-declarative-syntax">Web Forms Declarative Syntax<a class="headerlink" href="#web-forms-declarative-syntax" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">&lt;</span><span class="nt">asp:GridView</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="na">AccessKey</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="na">AllowPaging</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="na">AllowSorting</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="na">AutoGenerateColumns</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="na">AutoGenerateDeleteButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="na">AutoGenerateEditButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="na">AutoGenerateSelectButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;color name|#dddddd&quot;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="na">BackImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="na">BorderColor</span><span class="o">=</span><span class="s">&quot;color name|#dddddd&quot;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="na">BorderStyle</span><span class="o">=</span><span class="s">&quot;NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="s">        Inset|Outset&quot;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="na">BorderWidth</span><span class="o">=</span><span class="s">&quot;size&quot;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="na">Caption</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="na">CaptionAlign</span><span class="o">=</span><span class="s">&quot;NotSet|Top|Bottom|Left|Right&quot;</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="na">CellPadding</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="na">CellSpacing</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="na">DataKeyNames</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="na">DataMember</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="na">DataSource</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="na">DataSourceID</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="na">EditIndex</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="na">EmptyDataText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>    <span class="na">Enabled</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="na">EnableSortingAndPagingCallbacks</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="na">EnableTheming</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>    <span class="na">EnableViewState</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>    <span class="na">Font-Bold</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>    <span class="na">Font-Italic</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>    <span class="na">Font-Names</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>    <span class="na">Font-Overline</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>    <span class="na">Font-Size</span><span class="o">=</span><span class="s">&quot;string|Smaller|Larger|XX-Small|X-Small|Small|Medium|</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="s">        Large|X-Large|XX-Large&quot;</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>    <span class="na">Font-Strikeout</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>    <span class="na">Font-Underline</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>    <span class="na">ForeColor</span><span class="o">=</span><span class="s">&quot;color name|#dddddd&quot;</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>    <span class="na">GridLines</span><span class="o">=</span><span class="s">&quot;None|Horizontal|Vertical|Both&quot;</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>    <span class="na">Height</span><span class="o">=</span><span class="s">&quot;size&quot;</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>    <span class="na">HorizontalAlign</span><span class="o">=</span><span class="s">&quot;NotSet|Left|Center|Right|Justify&quot;</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>    <span class="na">ID</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>    <span class="na">OnDataBinding</span><span class="o">=</span><span class="s">&quot;DataBinding event handler&quot;</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>    <span class="na">OnDataBound</span><span class="o">=</span><span class="s">&quot;DataBound event handler&quot;</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>    <span class="na">OnDisposed</span><span class="o">=</span><span class="s">&quot;Disposed event handler&quot;</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>    <span class="na">OnInit</span><span class="o">=</span><span class="s">&quot;Init event handler&quot;</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>    <span class="na">OnLoad</span><span class="o">=</span><span class="s">&quot;Load event handler&quot;</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>    <span class="na">OnPageIndexChanged</span><span class="o">=</span><span class="s">&quot;PageIndexChanged event handler&quot;</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>    <span class="na">OnPageIndexChanging</span><span class="o">=</span><span class="s">&quot;PageIndexChanging event handler&quot;</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>    <span class="na">OnPreRender</span><span class="o">=</span><span class="s">&quot;PreRender event handler&quot;</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>    <span class="na">OnRowCancelingEdit</span><span class="o">=</span><span class="s">&quot;RowCancelingEdit event handler&quot;</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>    <span class="na">OnRowCommand</span><span class="o">=</span><span class="s">&quot;RowCommand event handler&quot;</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>    <span class="na">OnRowCreated</span><span class="o">=</span><span class="s">&quot;RowCreated event handler&quot;</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>    <span class="na">OnRowDataBound</span><span class="o">=</span><span class="s">&quot;RowDataBound event handler&quot;</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>    <span class="na">OnRowDeleted</span><span class="o">=</span><span class="s">&quot;RowDeleted event handler&quot;</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>    <span class="na">OnRowDeleting</span><span class="o">=</span><span class="s">&quot;RowDeleting event handler&quot;</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>    <span class="na">OnRowEditing</span><span class="o">=</span><span class="s">&quot;RowEditing event handler&quot;</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>    <span class="na">OnRowUpdated</span><span class="o">=</span><span class="s">&quot;RowUpdated event handler&quot;</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>    <span class="na">OnRowUpdating</span><span class="o">=</span><span class="s">&quot;RowUpdating event handler&quot;</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>    <span class="na">OnSelectedIndexChanged</span><span class="o">=</span><span class="s">&quot;SelectedIndexChanged event handler&quot;</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>    <span class="na">OnSelectedIndexChanging</span><span class="o">=</span><span class="s">&quot;SelectedIndexChanging event handler&quot;</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>    <span class="na">OnSorted</span><span class="o">=</span><span class="s">&quot;Sorted event handler&quot;</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>    <span class="na">OnSorting</span><span class="o">=</span><span class="s">&quot;Sorting event handler&quot;</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>    <span class="na">OnUnload</span><span class="o">=</span><span class="s">&quot;Unload event handler&quot;</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>    <span class="na">PageIndex</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a>    <span class="na">PagerSettings-FirstPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>    <span class="na">PagerSettings-FirstPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>    <span class="na">PagerSettings-LastPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>    <span class="na">PagerSettings-LastPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a>    <span class="na">PagerSettings-Mode</span><span class="o">=</span><span class="s">&quot;NextPrevious|Numeric|NextPreviousFirstLast|</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a><span class="s">        NumericFirstLast&quot;</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a>    <span class="na">PagerSettings-NextPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>    <span class="na">PagerSettings-NextPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>    <span class="na">PagerSettings-PageButtonCount</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>    <span class="na">PagerSettings-Position</span><span class="o">=</span><span class="s">&quot;Bottom|Top|TopAndBottom&quot;</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>    <span class="na">PagerSettings-PreviousPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>    <span class="na">PagerSettings-PreviousPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>    <span class="na">PagerSettings-Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a>    <span class="na">PageSize</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80" href="#__codelineno-0-80"></a>    <span class="na">RowHeaderColumn</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81" href="#__codelineno-0-81"></a>    <span class="na">runat</span><span class="o">=</span><span class="s">&quot;server&quot;</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82" href="#__codelineno-0-82"></a>    <span class="na">SelectedIndex</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83" href="#__codelineno-0-83"></a>    <span class="na">ShowFooter</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84" href="#__codelineno-0-84"></a>    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85" href="#__codelineno-0-85"></a>    <span class="na">SkinID</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86" href="#__codelineno-0-86"></a>    <span class="na">Style</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87" href="#__codelineno-0-87"></a>    <span class="na">TabIndex</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88" href="#__codelineno-0-88"></a>    <span class="na">ToolTip</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89" href="#__codelineno-0-89"></a>    <span class="na">UseAccessibleHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90" href="#__codelineno-0-90"></a>    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91" href="#__codelineno-0-91"></a>    <span class="na">Width</span><span class="o">=</span><span class="s">&quot;size&quot;</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92" href="#__codelineno-0-92"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93" href="#__codelineno-0-93"></a>        <span class="p">&lt;</span><span class="nt">AlternatingRowStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94" href="#__codelineno-0-94"></a>        <span class="p">&lt;</span><span class="nt">Columns</span><span class="p">&gt;</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95" href="#__codelineno-0-95"></a>                <span class="p">&lt;</span><span class="nt">asp:BoundField</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96" href="#__codelineno-0-96"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97" href="#__codelineno-0-97"></a>                    <span class="na">ApplyFormatInEditMode</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98" href="#__codelineno-0-98"></a>                    <span class="na">ConvertEmptyStringToNull</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99" href="#__codelineno-0-99"></a>                    <span class="na">DataField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100" href="#__codelineno-0-100"></a>                    <span class="na">DataFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101" href="#__codelineno-0-101"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102" href="#__codelineno-0-102"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103" href="#__codelineno-0-103"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104" href="#__codelineno-0-104"></a>                    <span class="na">HtmlEncode</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105" href="#__codelineno-0-105"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106" href="#__codelineno-0-106"></a>                    <span class="na">NullDisplayText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107" href="#__codelineno-0-107"></a>                    <span class="na">ReadOnly</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108" href="#__codelineno-0-108"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109" href="#__codelineno-0-109"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110" href="#__codelineno-0-110"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111" href="#__codelineno-0-111"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112" href="#__codelineno-0-112"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113" href="#__codelineno-0-113"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114" href="#__codelineno-0-114"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115" href="#__codelineno-0-115"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116" href="#__codelineno-0-116"></a>                <span class="p">&lt;/</span><span class="nt">asp:BoundField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117" href="#__codelineno-0-117"></a>                <span class="p">&lt;</span><span class="nt">asp:ButtonField</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118" href="#__codelineno-0-118"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119" href="#__codelineno-0-119"></a>                    <span class="na">ButtonType</span><span class="o">=</span><span class="s">&quot;Button|Image|Link&quot;</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120" href="#__codelineno-0-120"></a>                    <span class="na">CausesValidation</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121" href="#__codelineno-0-121"></a>                    <span class="na">CommandName</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122" href="#__codelineno-0-122"></a>                    <span class="na">DataTextField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123" href="#__codelineno-0-123"></a>                    <span class="na">DataTextFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124" href="#__codelineno-0-124"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-125" name="__codelineno-0-125" href="#__codelineno-0-125"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-126" name="__codelineno-0-126" href="#__codelineno-0-126"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127" href="#__codelineno-0-127"></a>                    <span class="na">ImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128" href="#__codelineno-0-128"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129" href="#__codelineno-0-129"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-130" name="__codelineno-0-130" href="#__codelineno-0-130"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131" href="#__codelineno-0-131"></a>                    <span class="na">Text</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-132" name="__codelineno-0-132" href="#__codelineno-0-132"></a>                    <span class="na">ValidationGroup</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133" href="#__codelineno-0-133"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-134" name="__codelineno-0-134" href="#__codelineno-0-134"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-135" name="__codelineno-0-135" href="#__codelineno-0-135"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-136" name="__codelineno-0-136" href="#__codelineno-0-136"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-137" name="__codelineno-0-137" href="#__codelineno-0-137"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-138" name="__codelineno-0-138" href="#__codelineno-0-138"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-139" name="__codelineno-0-139" href="#__codelineno-0-139"></a>                <span class="p">&lt;/</span><span class="nt">asp:ButtonField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-140" name="__codelineno-0-140" href="#__codelineno-0-140"></a>                <span class="p">&lt;</span><span class="nt">asp:CheckBoxField</span>
+<a id="__codelineno-0-141" name="__codelineno-0-141" href="#__codelineno-0-141"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-142" name="__codelineno-0-142" href="#__codelineno-0-142"></a>                    <span class="na">DataField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-143" name="__codelineno-0-143" href="#__codelineno-0-143"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-144" name="__codelineno-0-144" href="#__codelineno-0-144"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-145" name="__codelineno-0-145" href="#__codelineno-0-145"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-146" name="__codelineno-0-146" href="#__codelineno-0-146"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-147" name="__codelineno-0-147" href="#__codelineno-0-147"></a>                    <span class="na">ReadOnly</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-148" name="__codelineno-0-148" href="#__codelineno-0-148"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-149" name="__codelineno-0-149" href="#__codelineno-0-149"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-150" name="__codelineno-0-150" href="#__codelineno-0-150"></a>                    <span class="na">Text</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-151" name="__codelineno-0-151" href="#__codelineno-0-151"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-152" name="__codelineno-0-152" href="#__codelineno-0-152"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-153" name="__codelineno-0-153" href="#__codelineno-0-153"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-154" name="__codelineno-0-154" href="#__codelineno-0-154"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-155" name="__codelineno-0-155" href="#__codelineno-0-155"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-156" name="__codelineno-0-156" href="#__codelineno-0-156"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-157" name="__codelineno-0-157" href="#__codelineno-0-157"></a>                <span class="p">&lt;/</span><span class="nt">asp:CheckBoxField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-158" name="__codelineno-0-158" href="#__codelineno-0-158"></a>                <span class="p">&lt;</span><span class="nt">asp:CommandField</span>
+<a id="__codelineno-0-159" name="__codelineno-0-159" href="#__codelineno-0-159"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-160" name="__codelineno-0-160" href="#__codelineno-0-160"></a>                    <span class="na">ButtonType</span><span class="o">=</span><span class="s">&quot;Button|Image|Link&quot;</span>
+<a id="__codelineno-0-161" name="__codelineno-0-161" href="#__codelineno-0-161"></a>                    <span class="na">CancelImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-162" name="__codelineno-0-162" href="#__codelineno-0-162"></a>                    <span class="na">CancelText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-163" name="__codelineno-0-163" href="#__codelineno-0-163"></a>                    <span class="na">CausesValidation</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-164" name="__codelineno-0-164" href="#__codelineno-0-164"></a>                    <span class="na">DeleteImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-165" name="__codelineno-0-165" href="#__codelineno-0-165"></a>                    <span class="na">DeleteText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-166" name="__codelineno-0-166" href="#__codelineno-0-166"></a>                    <span class="na">EditImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-167" name="__codelineno-0-167" href="#__codelineno-0-167"></a>                    <span class="na">EditText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-168" name="__codelineno-0-168" href="#__codelineno-0-168"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-169" name="__codelineno-0-169" href="#__codelineno-0-169"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-170" name="__codelineno-0-170" href="#__codelineno-0-170"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-171" name="__codelineno-0-171" href="#__codelineno-0-171"></a>                    <span class="na">InsertImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-172" name="__codelineno-0-172" href="#__codelineno-0-172"></a>                    <span class="na">InsertText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-173" name="__codelineno-0-173" href="#__codelineno-0-173"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-174" name="__codelineno-0-174" href="#__codelineno-0-174"></a>                    <span class="na">NewImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175" href="#__codelineno-0-175"></a>                    <span class="na">NewText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176" href="#__codelineno-0-176"></a>                    <span class="na">SelectImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177" href="#__codelineno-0-177"></a>                    <span class="na">SelectText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178" href="#__codelineno-0-178"></a>                    <span class="na">ShowCancelButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179" href="#__codelineno-0-179"></a>                    <span class="na">ShowDeleteButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180" href="#__codelineno-0-180"></a>                    <span class="na">ShowEditButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-181" name="__codelineno-0-181" href="#__codelineno-0-181"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182" href="#__codelineno-0-182"></a>                    <span class="na">ShowInsertButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183" href="#__codelineno-0-183"></a>                    <span class="na">ShowSelectButton</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-184" name="__codelineno-0-184" href="#__codelineno-0-184"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185" href="#__codelineno-0-185"></a>                    <span class="na">UpdateImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186" href="#__codelineno-0-186"></a>                    <span class="na">UpdateText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187" href="#__codelineno-0-187"></a>                    <span class="na">ValidationGroup</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188" href="#__codelineno-0-188"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189" href="#__codelineno-0-189"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190" href="#__codelineno-0-190"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191" href="#__codelineno-0-191"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192" href="#__codelineno-0-192"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193" href="#__codelineno-0-193"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194" href="#__codelineno-0-194"></a>                <span class="p">&lt;/</span><span class="nt">asp:CommandField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195" href="#__codelineno-0-195"></a>                <span class="p">&lt;</span><span class="nt">asp:DynamicField</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196" href="#__codelineno-0-196"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197" href="#__codelineno-0-197"></a>                    <span class="na">ApplyFormatInEditMode</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-198" name="__codelineno-0-198" href="#__codelineno-0-198"></a>                    <span class="na">ConvertEmptyStringToNull</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199" href="#__codelineno-0-199"></a>                    <span class="na">DataField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200" href="#__codelineno-0-200"></a>                    <span class="na">DataFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201" href="#__codelineno-0-201"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-202" name="__codelineno-0-202" href="#__codelineno-0-202"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203" href="#__codelineno-0-203"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-204" name="__codelineno-0-204" href="#__codelineno-0-204"></a>                    <span class="na">HtmlEncode</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205" href="#__codelineno-0-205"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-206" name="__codelineno-0-206" href="#__codelineno-0-206"></a>                    <span class="na">NullDisplayText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-207" name="__codelineno-0-207" href="#__codelineno-0-207"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-208" name="__codelineno-0-208" href="#__codelineno-0-208"></a>                    <span class="na">UIHint</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-209" name="__codelineno-0-209" href="#__codelineno-0-209"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210" href="#__codelineno-0-210"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-211" name="__codelineno-0-211" href="#__codelineno-0-211"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212" href="#__codelineno-0-212"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213" href="#__codelineno-0-213"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-214" name="__codelineno-0-214" href="#__codelineno-0-214"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-215" name="__codelineno-0-215" href="#__codelineno-0-215"></a>                <span class="p">&lt;/</span><span class="nt">asp:DynamicField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216" href="#__codelineno-0-216"></a>                <span class="p">&lt;</span><span class="nt">asp:HyperLinkField</span>
+<a id="__codelineno-0-217" name="__codelineno-0-217" href="#__codelineno-0-217"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-218" name="__codelineno-0-218" href="#__codelineno-0-218"></a>                    <span class="na">DataNavigateUrlFields</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219" href="#__codelineno-0-219"></a>                    <span class="na">DataNavigateUrlFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220" href="#__codelineno-0-220"></a>                    <span class="na">DataTextField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221" href="#__codelineno-0-221"></a>                    <span class="na">DataTextFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-222" name="__codelineno-0-222" href="#__codelineno-0-222"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223" href="#__codelineno-0-223"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224" href="#__codelineno-0-224"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-225" name="__codelineno-0-225" href="#__codelineno-0-225"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-226" name="__codelineno-0-226" href="#__codelineno-0-226"></a>                    <span class="na">NavigateUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227" href="#__codelineno-0-227"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228" href="#__codelineno-0-228"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229" href="#__codelineno-0-229"></a>                    <span class="na">Target</span><span class="o">=</span><span class="s">&quot;string|_blank|_parent|_search|_self|_top&quot;</span>
+<a id="__codelineno-0-230" name="__codelineno-0-230" href="#__codelineno-0-230"></a>                    <span class="na">Text</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231" href="#__codelineno-0-231"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-232" name="__codelineno-0-232" href="#__codelineno-0-232"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233" href="#__codelineno-0-233"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234" href="#__codelineno-0-234"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235" href="#__codelineno-0-235"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-236" name="__codelineno-0-236" href="#__codelineno-0-236"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237" href="#__codelineno-0-237"></a>                <span class="p">&lt;/</span><span class="nt">asp:HyperLinkField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-238" name="__codelineno-0-238" href="#__codelineno-0-238"></a>                <span class="p">&lt;</span><span class="nt">asp:ImageField</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239" href="#__codelineno-0-239"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240" href="#__codelineno-0-240"></a>                    <span class="na">AlternateText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241" href="#__codelineno-0-241"></a>                    <span class="na">ConvertEmptyStringToNull</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242" href="#__codelineno-0-242"></a>                    <span class="na">DataAlternateTextField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243" href="#__codelineno-0-243"></a>                    <span class="na">DataAlternateTextFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244" href="#__codelineno-0-244"></a>                    <span class="na">DataImageUrlField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245" href="#__codelineno-0-245"></a>                    <span class="na">DataImageUrlFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246" href="#__codelineno-0-246"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247" href="#__codelineno-0-247"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-248" name="__codelineno-0-248" href="#__codelineno-0-248"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249" href="#__codelineno-0-249"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250" href="#__codelineno-0-250"></a>                    <span class="na">NullDisplayText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251" href="#__codelineno-0-251"></a>                    <span class="na">NullImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252" href="#__codelineno-0-252"></a>                    <span class="na">ReadOnly</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-253" name="__codelineno-0-253" href="#__codelineno-0-253"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254" href="#__codelineno-0-254"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255" href="#__codelineno-0-255"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256" href="#__codelineno-0-256"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-257" name="__codelineno-0-257" href="#__codelineno-0-257"></a>                        <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258" href="#__codelineno-0-258"></a>                        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259" href="#__codelineno-0-259"></a>                        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260" href="#__codelineno-0-260"></a>                        <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261" href="#__codelineno-0-261"></a>                <span class="p">&lt;/</span><span class="nt">asp:ImageField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262" href="#__codelineno-0-262"></a>                <span class="p">&lt;</span><span class="nt">asp:TemplateField</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263" href="#__codelineno-0-263"></a>                    <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264" href="#__codelineno-0-264"></a>                    <span class="na">ConvertEmptyStringToNull</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265" href="#__codelineno-0-265"></a>                    <span class="na">FooterText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-266" name="__codelineno-0-266" href="#__codelineno-0-266"></a>                    <span class="na">HeaderImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267" href="#__codelineno-0-267"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268" href="#__codelineno-0-268"></a>                    <span class="na">InsertVisible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269" href="#__codelineno-0-269"></a>                    <span class="na">ShowHeader</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270" href="#__codelineno-0-270"></a>                    <span class="na">SortExpression</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271" href="#__codelineno-0-271"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272" href="#__codelineno-0-272"></a><span class="p">&gt;</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273" href="#__codelineno-0-273"></a>                            <span class="p">&lt;</span><span class="nt">ControlStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274" href="#__codelineno-0-274"></a>                            <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275" href="#__codelineno-0-275"></a>                            <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276" href="#__codelineno-0-276"></a>                            <span class="p">&lt;</span><span class="nt">ItemStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277" href="#__codelineno-0-277"></a>                        <span class="p">&lt;</span><span class="nt">AlternatingItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278" href="#__codelineno-0-278"></a>                            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279" href="#__codelineno-0-279"></a>                        <span class="p">&lt;/</span><span class="nt">AlternatingItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280" href="#__codelineno-0-280"></a>                        <span class="p">&lt;</span><span class="nt">EditItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281" href="#__codelineno-0-281"></a>                            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282" href="#__codelineno-0-282"></a>                        <span class="p">&lt;/</span><span class="nt">EditItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283" href="#__codelineno-0-283"></a>                        <span class="p">&lt;</span><span class="nt">FooterTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284" href="#__codelineno-0-284"></a>                            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285" href="#__codelineno-0-285"></a>                        <span class="p">&lt;/</span><span class="nt">FooterTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286" href="#__codelineno-0-286"></a>                        <span class="p">&lt;</span><span class="nt">HeaderTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287" href="#__codelineno-0-287"></a>                            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288" href="#__codelineno-0-288"></a>                        <span class="p">&lt;/</span><span class="nt">HeaderTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289" href="#__codelineno-0-289"></a>                        <span class="p">&lt;</span><span class="nt">InsertItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290" href="#__codelineno-0-290"></a>                            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291" href="#__codelineno-0-291"></a>                        <span class="p">&lt;/</span><span class="nt">InsertItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292" href="#__codelineno-0-292"></a>                        <span class="p">&lt;</span><span class="nt">ItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293" href="#__codelineno-0-293"></a>                            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294" href="#__codelineno-0-294"></a>                        <span class="p">&lt;/</span><span class="nt">ItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295" href="#__codelineno-0-295"></a>                <span class="p">&lt;/</span><span class="nt">asp:TemplateField</span><span class="p">&gt;</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296" href="#__codelineno-0-296"></a>        <span class="p">&lt;/</span><span class="nt">Columns</span><span class="p">&gt;</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297" href="#__codelineno-0-297"></a>        <span class="p">&lt;</span><span class="nt">EditRowStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298" href="#__codelineno-0-298"></a>        <span class="p">&lt;</span><span class="nt">EmptyDataRowStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299" href="#__codelineno-0-299"></a>        <span class="p">&lt;</span><span class="nt">EmptyDataTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300" href="#__codelineno-0-300"></a>            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301" href="#__codelineno-0-301"></a>        <span class="p">&lt;/</span><span class="nt">EmptyDataTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302" href="#__codelineno-0-302"></a>        <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303" href="#__codelineno-0-303"></a>        <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304" href="#__codelineno-0-304"></a>        <span class="p">&lt;</span><span class="nt">PagerSettings</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305" href="#__codelineno-0-305"></a>            <span class="na">FirstPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306" href="#__codelineno-0-306"></a>            <span class="na">FirstPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307" href="#__codelineno-0-307"></a>            <span class="na">LastPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308" href="#__codelineno-0-308"></a>            <span class="na">LastPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309" href="#__codelineno-0-309"></a>            <span class="na">Mode</span><span class="o">=</span><span class="s">&quot;NextPrevious|Numeric|NextPreviousFirstLast|</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310" href="#__codelineno-0-310"></a><span class="s">                NumericFirstLast&quot;</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311" href="#__codelineno-0-311"></a>            <span class="na">NextPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312" href="#__codelineno-0-312"></a>            <span class="na">NextPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313" href="#__codelineno-0-313"></a>            <span class="na">OnPropertyChanged</span><span class="o">=</span><span class="s">&quot;PropertyChanged event handler&quot;</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314" href="#__codelineno-0-314"></a>            <span class="na">PageButtonCount</span><span class="o">=</span><span class="s">&quot;integer&quot;</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315" href="#__codelineno-0-315"></a>            <span class="na">Position</span><span class="o">=</span><span class="s">&quot;Bottom|Top|TopAndBottom&quot;</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316" href="#__codelineno-0-316"></a>            <span class="na">PreviousPageImageUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317" href="#__codelineno-0-317"></a>            <span class="na">PreviousPageText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318" href="#__codelineno-0-318"></a>            <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319" href="#__codelineno-0-319"></a>        <span class="p">/&gt;</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320" href="#__codelineno-0-320"></a>        <span class="p">&lt;</span><span class="nt">PagerStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321" href="#__codelineno-0-321"></a>        <span class="p">&lt;</span><span class="nt">PagerTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322" href="#__codelineno-0-322"></a>            <span class="cm">&lt;!-- child controls --&gt;</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323" href="#__codelineno-0-323"></a>        <span class="p">&lt;/</span><span class="nt">PagerTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-0-324" name="__codelineno-0-324" href="#__codelineno-0-324"></a>        <span class="p">&lt;</span><span class="nt">RowStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325" href="#__codelineno-0-325"></a>        <span class="p">&lt;</span><span class="nt">SelectedRowStyle</span> <span class="p">/&gt;</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326" href="#__codelineno-0-326"></a><span class="p">&lt;/</span><span class="nt">asp:GridView</span><span class="p">&gt;</span>
+</code></pre></div>
+<h2 id="blazor-syntax">Blazor Syntax<a class="headerlink" href="#blazor-syntax" title="Permanent link">&para;</a></h2>
+<p>Currently, not every syntax element of Web Forms GridView is supported. In the meantime, the following GridView in Blazor syntax will only include the implemented ones. <strong>Non-implemented elements will be included later</strong>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">&lt;</span><span class="nt">GridView</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="na">runat</span><span class="o">=</span><span class="s">&quot;server&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="na">AllowPaging</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="na">AllowSorting</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="na">AutoGenerateColumns</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="na">AutoGenerateSelectButton</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="na">Caption</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="na">CaptionAlign</span><span class="o">=</span><span class="s">TableCaptionAlign</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="na">CellPadding</span><span class="o">=</span><span class="s">int</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="na">CellSpacing</span><span class="o">=</span><span class="s">int</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="na">CssClass</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="na">DataKeyNames</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="na">DataSource</span><span class="o">=</span><span class="s">IEnumerable</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="na">EditIndex</span><span class="o">=</span><span class="s">int</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="na">EmptyDataText</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="na">Enabled</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="na">GridLines</span><span class="o">=</span><span class="s">GridLines</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="na">ID</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="na">Items</span><span class="o">=</span><span class="s">IEnumerable</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="na">ItemType</span><span class="o">=</span><span class="s">Type</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="na">OnDataBinding</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="na">OnDataBound</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="na">OnItemDataBound</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="na">OnInit</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    <span class="na">OnLoad</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>    <span class="na">OnPreRender</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="na">OnUnload</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    <span class="na">OnDisposed</span><span class="o">=</span><span class="s">EventCallBack</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="na">PageIndex</span><span class="o">=</span><span class="s">int</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    <span class="na">PageIndexChanged</span><span class="o">=</span><span class="s">EventCallBack&lt;PageChangedEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    PageSize=int
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>    RowCancelingEdit=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewCancelEditEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>    RowDeleting=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewDeleteEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    RowEditing=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewEditEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    RowUpdating=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewUpdateEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    SelectedIndex=int
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    SelectedIndexChanged=EventCallBack<span class="p">&lt;</span><span class="nt">int</span><span class="p">&gt;</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    SelectedIndexChanging=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewSelectEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>    SelectMethod=SelectHandler
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    ShowFooter=bool
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>    ShowHeader=bool
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>    ShowHeaderWhenEmpty=bool
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>    SortDirection=SortDirection
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>    SortExpression=string
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    Sorted=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewSortEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>    Sorting=EventCallBack<span class="p">&lt;</span><span class="nt">GridViewSortEventArgs</span><span class="p">&gt;</span>
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    TabIndex=int
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    UseAccessibleHeader=bool
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    Visible=bool
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>&gt;
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>    <span class="p">&lt;</span><span class="nt">AlternatingRowStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    <span class="p">&lt;</span><span class="nt">Columns</span><span class="p">&gt;</span>
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>        <span class="cm">&lt;!-- Note: ItemType is optional on columns and will be automatically </span>
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a><span class="cm">             inferred from the parent GridView. You can still explicitly </span>
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a><span class="cm">             specify ItemType on individual columns for clarity if desired. --&gt;</span>
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>        <span class="p">&lt;</span><span class="nt">BoundField</span>
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>                    <span class="na">DataField</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>                    <span class="na">DataFormatString</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>                    <span class="na">HeaderText</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>                    <span class="na">ItemType</span><span class="o">=</span><span class="s">Type</span> <span class="err">(</span><span class="na">optional</span><span class="err">,</span> <span class="na">inferred</span> <span class="na">from</span> <span class="na">parent</span><span class="err">)</span>
+<a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>                    <span class="na">Visible</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>        <span class="p">&gt;</span>
+<a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>        <span class="p">&lt;/</span><span class="nt">BoundField</span><span class="p">&gt;</span>
+<a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>        <span class="p">&lt;</span><span class="nt">HyperLinkField</span>
+<a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>            <span class="na">AccessibleHeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>            <span class="na">DataNavigateUrlFields</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>            <span class="na">DataNavigateUrlFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>            <span class="na">DataTextField</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>            <span class="na">DataTextFormatString</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>            <span class="na">HeaderText</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a>            <span class="na">ItemType</span><span class="o">=</span><span class="s">Type</span> <span class="err">(</span><span class="na">optional</span><span class="err">,</span> <span class="na">inferred</span> <span class="na">from</span> <span class="na">parent</span><span class="err">)</span>
+<a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a>            <span class="na">NavigateUrl</span><span class="o">=</span><span class="s">&quot;uri&quot;</span>
+<a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a>            <span class="na">Target</span><span class="o">=</span><span class="s">&quot;string|_blank|_parent|_search|_self|_top&quot;</span>
+<a id="__codelineno-1-74" name="__codelineno-1-74" href="#__codelineno-1-74"></a>            <span class="na">Text</span><span class="o">=</span><span class="s">&quot;string&quot;</span>
+<a id="__codelineno-1-75" name="__codelineno-1-75" href="#__codelineno-1-75"></a>            <span class="na">Visible</span><span class="o">=</span><span class="s">&quot;True|False&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-1-76" name="__codelineno-1-76" href="#__codelineno-1-76"></a>        <span class="p">&lt;/</span><span class="nt">HyperLinkField</span><span class="p">&gt;</span>
+<a id="__codelineno-1-77" name="__codelineno-1-77" href="#__codelineno-1-77"></a>        <span class="p">&lt;</span><span class="nt">TemplateField</span>
+<a id="__codelineno-1-78" name="__codelineno-1-78" href="#__codelineno-1-78"></a>                 <span class="na">HeaderText</span><span class="o">=</span><span class="s">string</span>
+<a id="__codelineno-1-79" name="__codelineno-1-79" href="#__codelineno-1-79"></a>                 <span class="na">ItemType</span><span class="o">=</span><span class="s">Type</span> <span class="err">(</span><span class="na">optional</span><span class="err">,</span> <span class="na">inferred</span> <span class="na">from</span> <span class="na">parent</span><span class="err">)</span>
+<a id="__codelineno-1-80" name="__codelineno-1-80" href="#__codelineno-1-80"></a>                 <span class="na">Visible</span><span class="o">=</span><span class="s">bool</span>
+<a id="__codelineno-1-81" name="__codelineno-1-81" href="#__codelineno-1-81"></a>        <span class="p">&gt;</span>
+<a id="__codelineno-1-82" name="__codelineno-1-82" href="#__codelineno-1-82"></a>            <span class="p">&lt;</span><span class="nt">ItemTemplate</span> <span class="na">Context</span><span class="o">=</span><span class="s">&quot;Item&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a>                <span class="cm">&lt;!-- Child Content --&gt;</span>
+<a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a>            <span class="p">&lt;</span><span class="nt">ItemTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-1-85" name="__codelineno-1-85" href="#__codelineno-1-85"></a>        <span class="p">&lt;/</span><span class="nt">TemplateField</span><span class="p">&gt;</span>
+<a id="__codelineno-1-86" name="__codelineno-1-86" href="#__codelineno-1-86"></a>    <span class="p">&lt;/</span><span class="nt">Columns</span><span class="p">&gt;</span>
+<a id="__codelineno-1-87" name="__codelineno-1-87" href="#__codelineno-1-87"></a>    <span class="p">&lt;</span><span class="nt">EditRowStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-88" name="__codelineno-1-88" href="#__codelineno-1-88"></a>    <span class="p">&lt;</span><span class="nt">EmptyDataRowStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-89" name="__codelineno-1-89" href="#__codelineno-1-89"></a>    <span class="p">&lt;</span><span class="nt">EmptyDataTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-1-90" name="__codelineno-1-90" href="#__codelineno-1-90"></a>        <span class="cm">&lt;!-- Custom content when no data rows --&gt;</span>
+<a id="__codelineno-1-91" name="__codelineno-1-91" href="#__codelineno-1-91"></a>    <span class="p">&lt;/</span><span class="nt">EmptyDataTemplate</span><span class="p">&gt;</span>
+<a id="__codelineno-1-92" name="__codelineno-1-92" href="#__codelineno-1-92"></a>    <span class="p">&lt;</span><span class="nt">FooterStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-93" name="__codelineno-1-93" href="#__codelineno-1-93"></a>    <span class="p">&lt;</span><span class="nt">HeaderStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-94" name="__codelineno-1-94" href="#__codelineno-1-94"></a>    <span class="p">&lt;</span><span class="nt">PagerStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-95" name="__codelineno-1-95" href="#__codelineno-1-95"></a>    <span class="p">&lt;</span><span class="nt">RowStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-96" name="__codelineno-1-96" href="#__codelineno-1-96"></a>    <span class="p">&lt;</span><span class="nt">SelectedRowStyle</span> <span class="na">CssClass</span><span class="o">=</span><span class="s">&quot;string&quot;</span> <span class="na">BackColor</span><span class="o">=</span><span class="s">&quot;WebColor&quot;</span> <span class="err">...</span> <span class="p">/&gt;</span>
+<a id="__codelineno-1-97" name="__codelineno-1-97" href="#__codelineno-1-97"></a><span class="p">&lt;/</span><span class="nt">GridView</span><span class="p">&gt;</span>
+</code></pre></div>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-paging">Basic Paging<a class="headerlink" href="#basic-paging" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>@* GridView with paging enabled, 5 items per page *@
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&lt;GridView DataSource=&quot;@Products&quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>          AllowPaging=&quot;true&quot;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>          PageSize=&quot;5&quot;
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>          PageIndexChanged=&quot;HandlePageChanged&quot;
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>          AutoGenerateColumns=&quot;true&quot; /&gt;
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>&lt;p&gt;Page @(currentPageIndex + 1)&lt;/p&gt;
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>@code {
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    private List&lt;Product&gt; Products = new();
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    private int currentPageIndex = 0;
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    private void HandlePageChanged(PageChangedEventArgs e)
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    {
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        currentPageIndex = e.NewPageIndex;
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    }
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>}
+</code></pre></div>
+<h3 id="sorting">Sorting<a class="headerlink" href="#sorting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>@* GridView with sortable columns *@
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>&lt;GridView DataSource=&quot;@SortedProducts&quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>          AllowSorting=&quot;true&quot;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>          SortExpression=&quot;@sortExpression&quot;
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>          SortDirection=&quot;@sortDirection&quot;
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>          Sorting=&quot;HandleSorting&quot;&gt;
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    &lt;Columns&gt;
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        &lt;BoundField DataField=&quot;Name&quot; HeaderText=&quot;Name&quot; /&gt;
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        &lt;BoundField DataField=&quot;Price&quot; HeaderText=&quot;Price&quot; DataFormatString=&quot;{0:C}&quot; /&gt;
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    &lt;/Columns&gt;
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>&lt;/GridView&gt;
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>@code {
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    private List&lt;Product&gt; Products = new();
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    private string sortExpression = &quot;&quot;;
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    private SortDirection sortDirection = SortDirection.Ascending;
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    private IEnumerable&lt;Product&gt; SortedProducts =&gt; sortExpression switch
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    {
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        &quot;Name&quot; =&gt; sortDirection == SortDirection.Ascending
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>            ? Products.OrderBy(p =&gt; p.Name)
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>            : Products.OrderByDescending(p =&gt; p.Name),
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>        &quot;Price&quot; =&gt; sortDirection == SortDirection.Ascending
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>            ? Products.OrderBy(p =&gt; p.Price)
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>            : Products.OrderByDescending(p =&gt; p.Price),
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        _ =&gt; Products
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    };
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    private void HandleSorting(GridViewSortEventArgs e)
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>    {
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        sortExpression = e.SortExpression;
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        sortDirection = e.SortDirection;
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>    }
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>}
+</code></pre></div>
+<h3 id="row-editing">Row Editing<a class="headerlink" href="#row-editing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>@* GridView with inline edit, update, delete, and cancel *@
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&lt;GridView DataSource=&quot;@Products&quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>          EditIndex=&quot;@editIndex&quot;
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>          RowEditing=&quot;HandleEdit&quot;
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>          RowUpdating=&quot;HandleUpdate&quot;
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>          RowDeleting=&quot;HandleDelete&quot;
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>          RowCancelingEdit=&quot;HandleCancelEdit&quot;&gt;
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    &lt;Columns&gt;
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        &lt;BoundField DataField=&quot;Name&quot; HeaderText=&quot;Name&quot; /&gt;
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        &lt;BoundField DataField=&quot;Price&quot; HeaderText=&quot;Price&quot; DataFormatString=&quot;{0:C}&quot; /&gt;
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    &lt;/Columns&gt;
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>&lt;/GridView&gt;
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>@code {
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    private List&lt;Product&gt; Products = new();
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    private int editIndex = -1;
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    private void HandleEdit(GridViewEditEventArgs e)
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    {
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        editIndex = e.NewEditIndex;
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    }
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    private void HandleUpdate(GridViewUpdateEventArgs e)
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    {
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        // Apply changes to Products[e.RowIndex]
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        editIndex = -1;
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>    }
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>    private void HandleDelete(GridViewDeleteEventArgs e)
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>    {
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>        Products.RemoveAt(e.RowIndex);
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>        editIndex = -1;
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>    }
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>    private void HandleCancelEdit(GridViewCancelEditEventArgs e)
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>    {
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>        editIndex = -1;
+<a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>    }
+<a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>}
+</code></pre></div>
+<h3 id="paging-with-sorting">Paging with Sorting<a class="headerlink" href="#paging-with-sorting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>@* Combining paging and sorting *@
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>&lt;GridView DataSource=&quot;@SortedProducts&quot;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>          AllowPaging=&quot;true&quot;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>          PageSize=&quot;10&quot;
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>          PageIndexChanged=&quot;HandlePageChanged&quot;
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>          AllowSorting=&quot;true&quot;
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>          SortExpression=&quot;@sortExpression&quot;
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>          SortDirection=&quot;@sortDirection&quot;
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>          Sorting=&quot;HandleSorting&quot;&gt;
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    &lt;Columns&gt;
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        &lt;BoundField DataField=&quot;Name&quot; HeaderText=&quot;Name&quot; /&gt;
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>        &lt;BoundField DataField=&quot;Price&quot; HeaderText=&quot;Price&quot; DataFormatString=&quot;{0:C}&quot; /&gt;
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    &lt;/Columns&gt;
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>&lt;/GridView&gt;
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>@code {
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    private List&lt;Product&gt; Products = new();
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>    private int currentPageIndex = 0;
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    private string sortExpression = &quot;&quot;;
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    private SortDirection sortDirection = SortDirection.Ascending;
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    private IEnumerable&lt;Product&gt; SortedProducts =&gt; sortExpression switch
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>    {
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>        &quot;Name&quot; =&gt; sortDirection == SortDirection.Ascending
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>            ? Products.OrderBy(p =&gt; p.Name)
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>            : Products.OrderByDescending(p =&gt; p.Name),
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>        &quot;Price&quot; =&gt; sortDirection == SortDirection.Ascending
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>            ? Products.OrderBy(p =&gt; p.Price)
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>            : Products.OrderByDescending(p =&gt; p.Price),
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>        _ =&gt; Products
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>    };
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>
+<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>    private void HandlePageChanged(PageChangedEventArgs e)
+<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>    {
+<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>        currentPageIndex = e.NewPageIndex;
+<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a>    }
+<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a>
+<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>    private void HandleSorting(GridViewSortEventArgs e)
+<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a>    {
+<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a>        sortExpression = e.SortExpression;
+<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a>        sortDirection = e.SortDirection;
+<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a>    }
+<a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a>}
+</code></pre></div>
+<h3 id="row-selection">Row Selection<a class="headerlink" href="#row-selection" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>@* GridView with row selection and auto-generated select button *@
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>&lt;GridView DataSource=&quot;@Products&quot;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>          AutoGenerateSelectButton=&quot;true&quot;
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>          SelectedIndex=&quot;@selectedIndex&quot;
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>          SelectedIndexChanged=&quot;HandleSelectionChanged&quot;&gt;
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    &lt;Columns&gt;
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        &lt;BoundField DataField=&quot;Name&quot; HeaderText=&quot;Name&quot; /&gt;
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        &lt;BoundField DataField=&quot;Price&quot; HeaderText=&quot;Price&quot; DataFormatString=&quot;{0:C}&quot; /&gt;
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    &lt;/Columns&gt;
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    &lt;SelectedRowStyle CssClass=&quot;selected-row&quot; BackColor=&quot;LightBlue&quot; /&gt;
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>&lt;/GridView&gt;
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>@if (SelectedProduct is not null)
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>{
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>    &lt;p&gt;Selected: @SelectedProduct.Name&lt;/p&gt;
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>}
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>@code {
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>    private List&lt;Product&gt; Products = new();
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>    private int selectedIndex = -1;
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>    private Product? SelectedProduct =&gt; selectedIndex &gt;= 0 &amp;&amp; selectedIndex &lt; Products.Count
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>        ? Products[selectedIndex]
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>        : null;
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>    private void HandleSelectionChanged(int newIndex)
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>    {
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>        selectedIndex = newIndex;
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>    }
+<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>}
+</code></pre></div>
+<h3 id="selection-with-cancellation">Selection with Cancellation<a class="headerlink" href="#selection-with-cancellation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>@* Prevent selection of inactive items *@
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>&lt;GridView DataSource=&quot;@Products&quot;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>          AutoGenerateSelectButton=&quot;true&quot;
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>          SelectedIndex=&quot;@selectedIndex&quot;
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>          SelectedIndexChanging=&quot;HandleSelecting&quot;
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>          SelectedIndexChanged=&quot;HandleSelected&quot;&gt;
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    &lt;Columns&gt;
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        &lt;BoundField DataField=&quot;Name&quot; HeaderText=&quot;Name&quot; /&gt;
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        &lt;BoundField DataField=&quot;IsActive&quot; HeaderText=&quot;Active&quot; /&gt;
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    &lt;/Columns&gt;
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>&lt;/GridView&gt;
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>@code {
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    private List&lt;Product&gt; Products = new();
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    private int selectedIndex = -1;
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    private void HandleSelecting(GridViewSelectEventArgs e)
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>    {
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>        // Cancel selection of inactive products
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>        if (!Products[e.NewSelectedIndex].IsActive)
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>        {
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>            e.Cancel = true;
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>        }
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>    }
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>    private void HandleSelected(int newIndex)
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>    {
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>        selectedIndex = newIndex;
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>    }
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>}
+</code></pre></div>
+<h3 id="style-sub-components">Style Sub-Components<a class="headerlink" href="#style-sub-components" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>@* GridView with comprehensive styling *@
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>&lt;GridView DataSource=&quot;@Products&quot;
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>          AutoGenerateColumns=&quot;true&quot;
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>          ShowHeader=&quot;true&quot;
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>          ShowFooter=&quot;true&quot;
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>          GridLines=&quot;Both&quot;
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>          CellPadding=&quot;4&quot;
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>          UseAccessibleHeader=&quot;true&quot;
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>          Caption=&quot;Product Inventory&quot;
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>          CaptionAlign=&quot;Top&quot;&gt;
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    &lt;HeaderStyle CssClass=&quot;grid-header&quot; BackColor=&quot;DarkBlue&quot; ForeColor=&quot;White&quot; /&gt;
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    &lt;RowStyle CssClass=&quot;grid-row&quot; BackColor=&quot;White&quot; /&gt;
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>    &lt;AlternatingRowStyle CssClass=&quot;grid-alt-row&quot; BackColor=&quot;LightGray&quot; /&gt;
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>    &lt;SelectedRowStyle CssClass=&quot;grid-selected&quot; BackColor=&quot;LightBlue&quot; /&gt;
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>    &lt;FooterStyle CssClass=&quot;grid-footer&quot; BackColor=&quot;DarkBlue&quot; ForeColor=&quot;White&quot; /&gt;
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>    &lt;EditRowStyle CssClass=&quot;grid-edit&quot; BackColor=&quot;LightYellow&quot; /&gt;
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    &lt;PagerStyle CssClass=&quot;grid-pager&quot; /&gt;
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>&lt;/GridView&gt;
+</code></pre></div>
+<h3 id="empty-data-template">Empty Data Template<a class="headerlink" href="#empty-data-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>@* GridView with custom empty data display *@
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>&lt;GridView DataSource=&quot;@FilteredProducts&quot;
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>          ItemType=&quot;Product&quot;
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>          AutoGenerateColumns=&quot;true&quot;
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>          ShowHeaderWhenEmpty=&quot;true&quot;
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>          EmptyDataText=&quot;No products found.&quot;&gt;
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    &lt;EmptyDataTemplate&gt;
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        &lt;div class=&quot;empty-message&quot;&gt;
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>            &lt;p&gt;No products match your filter criteria.&lt;/p&gt;
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>            &lt;Button Text=&quot;Clear Filters&quot; OnClick=&quot;ClearFilters&quot; /&gt;
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>        &lt;/div&gt;
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    &lt;/EmptyDataTemplate&gt;
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    &lt;EmptyDataRowStyle CssClass=&quot;empty-row&quot; ForeColor=&quot;Gray&quot; /&gt;
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>&lt;/GridView&gt;
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>@code {
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    private List&lt;Product&gt; FilteredProducts = new();
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>    private void ClearFilters()
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>    {
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>        // Reset filters and reload data
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>    }
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>}
+</code></pre></div>
+<h2 id="selection-properties-reference">Selection Properties Reference<a class="headerlink" href="#selection-properties-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SelectedIndex</code></td>
+<td><code>int</code></td>
+<td><code>-1</code></td>
+<td>Zero-based index of the selected row. <code>-1</code> = no selection.</td>
+</tr>
+<tr>
+<td><code>SelectedRow</code></td>
+<td><code>ItemType</code></td>
+<td><code>default</code></td>
+<td>Read-only. Returns the data item for the selected row.</td>
+</tr>
+<tr>
+<td><code>SelectedValue</code></td>
+<td><code>object</code></td>
+<td><code>null</code></td>
+<td>Read-only. Returns the <code>DataKeyNames</code> value of the selected row.</td>
+</tr>
+<tr>
+<td><code>AutoGenerateSelectButton</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>When <code>true</code>, adds a "Select" link column.</td>
+</tr>
+<tr>
+<td><code>SelectedIndexChanging</code></td>
+<td><code>EventCallback&lt;GridViewSelectEventArgs&gt;</code></td>
+<td>—</td>
+<td>Fires before selection changes. Set <code>Cancel = true</code> to prevent.</td>
+</tr>
+<tr>
+<td><code>SelectedIndexChanged</code></td>
+<td><code>EventCallback&lt;int&gt;</code></td>
+<td>—</td>
+<td>Fires after the selected row changes.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="style-sub-components-reference">Style Sub-Components Reference<a class="headerlink" href="#style-sub-components-reference" title="Permanent link">&para;</a></h2>
+<p>All style sub-components use <code>TableItemStyle</code> which supports:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CssClass</code></td>
+<td><code>string</code></td>
+<td>CSS class name</td>
+</tr>
+<tr>
+<td><code>BackColor</code></td>
+<td><code>WebColor</code></td>
+<td>Background color</td>
+</tr>
+<tr>
+<td><code>ForeColor</code></td>
+<td><code>WebColor</code></td>
+<td>Text color</td>
+</tr>
+<tr>
+<td><code>BorderColor</code></td>
+<td><code>WebColor</code></td>
+<td>Border color</td>
+</tr>
+<tr>
+<td><code>BorderStyle</code></td>
+<td><code>BorderStyle</code></td>
+<td>Border style (Solid, Dashed, etc.)</td>
+</tr>
+<tr>
+<td><code>BorderWidth</code></td>
+<td><code>Unit</code></td>
+<td>Border width</td>
+</tr>
+<tr>
+<td><code>Font</code></td>
+<td><code>FontInfo</code></td>
+<td>Font settings</td>
+</tr>
+<tr>
+<td><code>Height</code></td>
+<td><code>Unit</code></td>
+<td>Row height</td>
+</tr>
+<tr>
+<td><code>Width</code></td>
+<td><code>Unit</code></td>
+<td>Row width</td>
+</tr>
+<tr>
+<td><code>HorizontalAlign</code></td>
+<td><code>HorizontalAlign</code></td>
+<td>Content alignment</td>
+</tr>
+<tr>
+<td><code>Wrap</code></td>
+<td><code>bool</code></td>
+<td>Whether content wraps</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Available style sub-components:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Applied To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;RowStyle&gt;</code></td>
+<td>All data rows</td>
+</tr>
+<tr>
+<td><code>&lt;AlternatingRowStyle&gt;</code></td>
+<td>Even-numbered data rows</td>
+</tr>
+<tr>
+<td><code>&lt;HeaderStyle&gt;</code></td>
+<td>Header row</td>
+</tr>
+<tr>
+<td><code>&lt;FooterStyle&gt;</code></td>
+<td>Footer row</td>
+</tr>
+<tr>
+<td><code>&lt;SelectedRowStyle&gt;</code></td>
+<td>Currently selected row</td>
+</tr>
+<tr>
+<td><code>&lt;EditRowStyle&gt;</code></td>
+<td>Row being edited</td>
+</tr>
+<tr>
+<td><code>&lt;EmptyDataRowStyle&gt;</code></td>
+<td>Empty data row</td>
+</tr>
+<tr>
+<td><code>&lt;PagerStyle&gt;</code></td>
+<td>Pager row</td>
+</tr>
+</tbody>
+</table>
+<h2 id="display-properties-reference">Display Properties Reference<a class="headerlink" href="#display-properties-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ShowHeader</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>Show/hide the header row</td>
+</tr>
+<tr>
+<td><code>ShowFooter</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>Show/hide the footer row</td>
+</tr>
+<tr>
+<td><code>Caption</code></td>
+<td><code>string</code></td>
+<td><code>null</code></td>
+<td>Caption text above the table</td>
+</tr>
+<tr>
+<td><code>CaptionAlign</code></td>
+<td><code>TableCaptionAlign</code></td>
+<td><code>NotSet</code></td>
+<td>Caption alignment (Top, Bottom, Left, Right)</td>
+</tr>
+<tr>
+<td><code>GridLines</code></td>
+<td><code>GridLines</code></td>
+<td><code>None</code></td>
+<td>Table gridlines (None, Horizontal, Vertical, Both)</td>
+</tr>
+<tr>
+<td><code>UseAccessibleHeader</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>Render <code>&lt;th scope="col"&gt;</code> instead of <code>&lt;td&gt;</code></td>
+</tr>
+<tr>
+<td><code>CellPadding</code></td>
+<td><code>int</code></td>
+<td><code>-1</code></td>
+<td>Cell padding in pixels (-1 = not set)</td>
+</tr>
+<tr>
+<td><code>CellSpacing</code></td>
+<td><code>int</code></td>
+<td><code>-1</code></td>
+<td>Cell spacing in pixels (-1 = not set)</td>
+</tr>
+<tr>
+<td><code>ShowHeaderWhenEmpty</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>Show column headers when data source is empty</td>
+</tr>
+<tr>
+<td><code>EmptyDataText</code></td>
+<td><code>string</code></td>
+<td><code>null</code></td>
+<td>Text shown when data source is empty</td>
+</tr>
+<tr>
+<td><code>EmptyDataTemplate</code></td>
+<td><code>RenderFragment</code></td>
+<td><code>null</code></td>
+<td>Custom template shown when data source is empty</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_datetime" title="February 25, 2026 17:05:31 UTC">2026-02-25 17:05:31</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
