@@ -143,3 +143,24 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
  Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule samples  decided by Jeffrey T. Fritz
+
+### M15-01 — Sample Data Alignment for HTML Audit Matching (#381)
+
+- **14 Blazor sample pages aligned** to use identical text, values, URLs, and attributes as their WebForms counterparts. All changes are data-only (no component source code changes).
+- **Label:** "Hello World" (no comma/exclamation), "Styled Label" with `text-primary`/Blue/Bold, HTML content `<em>Emphasized</em>` variant.
+- **Literal:** PassThrough mode text `"This is <b>literal</b> content."`, Encode mode text `"This is <b>encoded</b> content."`, simple text unchanged.
+- **HiddenField:** Value changed from `"initial-secret-value"` to `"secret-value-123"`.
+- **PlaceHolder:** Content paragraphs changed to `"This content was added programmatically."` / `"PlaceHolder renders no HTML of its own."`.
+- **Panel:** Restructured all 3 audited variants — Panel-1 is now GroupingText="User Info" with Label+TextBox, Panel-2 is ScrollBars.Auto Height=100px with 4 paragraphs, Panel-3 is DefaultButton with TextBox+Button.
+- **HyperLink:** All 4 variants aligned — styled (Blue/White), tooltip ("Navigate to Bing!"), Visible=false, basic — all using `https://bing.com` and text "Blue Button".
+- **Image:** Changed to `/Content/Images/banner.png` src, "Banner image" and "Sized image" alt text, added Width/Height on Image-2.
+- **Button:** Changed from "Click me!" to "Blue Button" with BackColor=Blue ForeColor=White.
+- **CheckBox:** Labels changed to "Accept Terms", "Subscribe", "Enable Feature" (with AutoPostBack).
+- **DropDownList:** DDL-3 changed to data-bound First/Second/Third Item, DDL-4 disabled "Cannot change", DDL-5 styled "Styled" with form-select, DDL-6 colored "Colored dropdown" with Navy/LightYellow/200px.
+- **BulletedList:** BL-1 Disc with Apple/Banana/Cherry/Date, BL-2 Numbered with First/Second/Third, BL-3 Square HyperLink with Example Site/Example Org.
+- **LinkButton:** LB-1 "Click Me" with btn-primary, LB-2 "Submit Form", LB-3 "Disabled Link" with Enabled=false.
+- **ImageMap:** Changed to banner.png, "Navigate" alt, two rect hotspots (0,0,100,50 Bing + 100,0,200,50 GitHub).
+- **AdRotator:** Updated Ads.xml from CSharp/VB images to banner.png with Visit Bing/Visit GitHub ads matching WebForms ads.xml.
+- **Infrastructure:** Created `wwwroot/Content/Images/banner.png` for image path parity with WebForms `~/Content/Images/banner.png`.
+- **Key pattern:** The `data-audit-control` markers were preserved on all audited sections. Non-audited demo sections below were kept but updated to reference valid types/data.
+- **Limitation found:** Label-3 HTML content (`<em>Emphasized</em>`) — Blazor Label uses `@Text` which HTML-encodes, so the rendered output will differ from WebForms which renders raw HTML. This is a component-level issue requiring a component fix, not a sample data fix.
