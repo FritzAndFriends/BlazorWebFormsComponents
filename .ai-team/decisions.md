@@ -1742,6 +1742,27 @@ Rather than wrapping the entire row in a clickable element, selection is wired t
 `FindNode(valuePath)` splits on `PathSeparator` and matches each segment against `node.Value ?? node.Text`. This matches Web Forms behavior where Value defaults to Text if not explicitly set.
 
 
+### 2026-02-26: WebFormsPage unified wrapper component (consolidated)
+
+**By:** Jeffrey T. Fritz (via Copilot), Forge
+**What:** Merge NamingContainer and the Skins/Themes wrapper into a single unified wrapper component named `WebFormsPage`. The name mirrors `System.Web.UI.Page` from ASP.NET Web Forms. Implementation: inherits `NamingContainer` (not `BaseWebFormsComponent`), adds `Theme` (ThemeConfiguration) parameter, wraps `ChildContent` in `CascadingValue<ThemeConfiguration>`. Parameters: `ID`, `UseCtl00Prefix`, `Theme`, `Visible`, `ChildContent` — no new parameters invented. Placement: `MainLayout.razor` wrapping `@Body`. ViewState already handled via inherited `BaseWebFormsComponent` dictionary. Rejected name alternatives: WebFormsSupport (too generic), WebFormsHost (implies hosting), LegacyPage (pejorative). One component instead of multiple separate wrappers.
+**Why:** User directive to simplify the migration story — developers add one wrapper and get NamingContainer + Skins/Themes support together. Forge's design ensures backward compatibility: existing `NamingContainer` and `ThemeProvider` standalone usage is unaffected.
+
+
+### 2026-02-26: SharedSampleObjects for sample data parity
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Use `samples/SharedSampleObjects/` to deliver identical data to both Blazor and WebForms samples. Product model and sample data centralized in SharedSampleObjects. Both sides must consume identical model data from this shared library.
+**Why:** The #1 blocker for HTML match rates is different sample data between WebForms and Blazor. SharedSampleObjects already exists and is shared by both projects.
+
+
+### 2026-02-26: Defer Login+Identity to future milestone
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Login controls + Blazor Identity integration (D-09) deferred to a future milestone. Do not schedule implementation work for Login, LoginName, LoginStatus, LoginView, ChangePassword, CreateUserWizard, or PasswordRecovery Identity integration now. Analysis preserved at `planning-docs/LOGIN-IDENTITY-ANALYSIS.md`.
+**Why:** User request — wants to delay this work and focus on other priorities first.
+
+
 ### 7. NodeIndent replaces hardcoded 20px
 
 The previously hardcoded `width:20px` in indent `<div>` elements now uses `IndentWidth` (from `TreeView.NodeIndent` parameter, default 20). No visual change for existing usage.

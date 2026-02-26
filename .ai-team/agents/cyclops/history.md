@@ -120,3 +120,7 @@
  Team update (2026-02-26): Data control divergence: 3 P1 bugs in DataList/GridView need fixes before M13 completion  decided by Forge
 
  Team update (2026-02-26): Post-fix capture: sample data alignment is P0, structural bugs are P3  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule implementation  decided by Jeffrey T. Fritz

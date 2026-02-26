@@ -61,3 +61,5 @@ Created three-milestone plan for HTML fidelity audit per Jeff's directive. Key d
  Team update (2026-02-26): NamingContainer inherits BaseWebFormsComponent (not BaseStyledComponent), UseCtl00Prefix in ComponentIdGenerator  decided by Cyclops
 
  Team update (2026-02-26): Menu RenderingMode=Table implemented with inline Razor for AngleSharp compatibility  decided by Cyclops
+
+ Team update (2026-02-26): WebFormsPage unified wrapper design accepted and consolidated into decisions.md  decided by Jeffrey T. Fritz, Forge

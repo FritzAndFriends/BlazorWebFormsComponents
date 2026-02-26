@@ -98,3 +98,6 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
  Team update (2026-02-26): Data control divergence: normalization pipeline needs <!--!--> stripping and Blazor data control normalization  decided by Forge
 
  Team update (2026-02-26): Post-fix capture: normalizer needs GUID ID stripping and empty style="" removal  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz

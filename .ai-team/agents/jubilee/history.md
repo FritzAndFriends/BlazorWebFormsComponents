@@ -123,3 +123,7 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
  Team update (2026-02-26): Data control divergence: 4 sample rewrites needed for data controls before re-capture  decided by Forge
 
  Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker  20+ divergences could become exact matches  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule samples  decided by Jeffrey T. Fritz

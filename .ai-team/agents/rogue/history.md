@@ -128,3 +128,6 @@ Re-ran full HTML capture pipeline after 14 bug fixes across 10 controls. Results
  Team update (2026-02-26): Data control divergence: 90%+ sample parity, 5 genuine bugs (3 P1, 2 P2), normalization pipeline gaps  decided by Forge
 
  Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker for match rates  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule tests  decided by Jeffrey T. Fritz
