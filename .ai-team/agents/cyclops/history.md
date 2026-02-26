@@ -190,3 +190,12 @@
 - **GridView UseAccessibleHeader default:** Changed `UseAccessibleHeader` default from `false` to `true` in `GridView.razor.cs`, matching WebForms behavior. WebForms defaults this to true, rendering `<th scope="col">` for header cells. The existing `UseAccessibleHeader_RendersThWithScope` test explicitly passed `UseAccessibleHeader="true"` and didn't catch the wrong default. Added 2 tests in `GridView/AccessibleHeaderDefault.razor` verifying default behavior and explicit false.
 - **Key learning:** When verifying WebForms fidelity, always test the default parameter values — passing `true` explicitly masks wrong defaults. CheckBoxList uses its own inline rendering, not the CheckBox component — changes to CheckBox don't affect CheckBoxList.
 - **All 1283 tests pass**, 0 regressions.
+
+### LoginView Wrapper Element for BaseStyledComponent (#351, #352, #354)
+
+- **Panel BackImageUrl (#351):** Already implemented — `BackImageUrl` parameter and `background-image:url(...)` rendering in `BuildStyle()` were present in `Panel.razor.cs`.
+- **PasswordRecovery base class (#354):** Already migrated — inherits `BaseStyledComponent`, outer `<table>` elements already render `class="@CssClass" style="border-collapse:collapse;@Style" title="@ToolTip"`.
+- **LoginView wrapper div (#352):** Added `<div class="@CssClass" style="@Style" title="@ToolTip">` wrapper around LoginView's content in `LoginView.razor`. The component already inherited `BaseStyledComponent` but had no outer HTML element rendering the style properties. Updated 8 LoginView test files to use `cut.Find("div").TextContent.Trim()` instead of `cut.Markup.Trim()` since the new wrapper `<div>` is now part of the rendered output.
+- **Key files changed:** `LoginControls/LoginView.razor`, 8 test files in `LoginControls/LoginView/`.
+- **Pattern:** For template-switching controls without a table layout (like LoginView), use a `<div>` wrapper with `class="@CssClass" style="@Style" title="@ToolTip"` — unlike Login/ChangePassword/CreateUserWizard which use `<table>` wrappers.
+- **All 1283 tests pass**, 0 regressions.
