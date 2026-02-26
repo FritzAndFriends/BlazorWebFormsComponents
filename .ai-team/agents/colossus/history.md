@@ -90,3 +90,11 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+ Team update (2026-02-26): Menu RenderingMode=Table  integration tests may need table-mode variants  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy defined  integration tests needed when handlers implemented  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: normalization pipeline needs <!--!--> stripping and Blazor data control normalization  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture: normalizer needs GUID ID stripping and empty style="" removal  decided by Rogue

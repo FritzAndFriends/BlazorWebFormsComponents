@@ -78,3 +78,7 @@ Established doc structure: title → intro (MS docs link) → Features Supported
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+ Team update (2026-02-26): Menu RenderingMode=Table added  docs may need updating for dual rendering modes  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy defined  handler delegates, separate Identity package  docs needed when implemented  decided by Forge

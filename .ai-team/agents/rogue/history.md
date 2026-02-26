@@ -118,3 +118,13 @@ Re-ran full HTML capture pipeline after 14 bug fixes across 10 controls. Results
 📌 Pipeline note: `normalize-html.mjs --compare` compares RAW files, not normalized. For accurate comparison, run `--input`/`--output` normalization on both sides first, then `--compare` the normalized directories. — Rogue
 
 📌 Pipeline note: The Blazor and WebForms samples use completely different data/text/IDs. Until sample data is aligned, the pipeline cannot distinguish component bugs from data differences. Calendar is the closest complex control at 73% word similarity. — Rogue
+
+ Team update (2026-02-26): NamingContainer inherits BaseWebFormsComponent, UseCtl00Prefix handled in ComponentIdGenerator  decided by Cyclops
+
+ Team update (2026-02-26): Menu RenderingMode=Table uses inline Razor to avoid whitespace; AngleSharp foster-parenting workaround  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy: handler delegates in core, separate Identity NuGet package, redirect-based cookie flows  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: 90%+ sample parity, 5 genuine bugs (3 P1, 2 P2), normalization pipeline gaps  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker for match rates  decided by Rogue

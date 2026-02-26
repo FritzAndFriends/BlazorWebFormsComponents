@@ -114,3 +114,9 @@
 - **Navigation sub-table:** Restructured the title/navigation row from flat `<td>` cells to a `<td colspan="7">` containing a nested `<table>` with prev/title/next cells (`width:15%/70%/15%`), matching WebForms sub-table pattern. Added `title="Go to the previous month"` and `title="Go to the next month"` on nav links.
 - **Files modified:** `Calendar.razor`, `Calendar.razor.cs`.
 - **All 1253 tests pass**, 0 regressions.
+
+ Team update (2026-02-26): Login+Identity strategy: handler delegates in core, separate Identity NuGet package, redirect-based cookie flows  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: 3 P1 bugs in DataList/GridView need fixes before M13 completion  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture: sample data alignment is P0, structural bugs are P3  decided by Rogue
