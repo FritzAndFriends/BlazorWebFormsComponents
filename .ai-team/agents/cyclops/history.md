@@ -94,3 +94,11 @@
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+### P1 Bug Fixes — Button and BulletedList
+
+- **Button `<input>` rendering:** Button.razor already rendered `<input type="submit" value="@Text" />` (fixed in prior commit `a5011ff`). `UseSubmitBehavior` (default true) controls `type="submit"` vs `type="button"`. `CausesValidation` no longer affects HTML type attribute — only validation behavior.
+- **BulletedList `<span>` removal:** Removed `<span>` wrapping in all three `DisplayMode` branches (Text, HyperLink disabled fallback, LinkButton disabled fallback). Items now render as `<li>Item</li>` for text and `<li><a>Item</a></li>` for links, matching WebForms output.
+- **BulletedList `<ol>` for ordered styles:** Already correct — `IsOrderedList` property correctly returns `true` for Numbered, LowerAlpha, UpperAlpha, LowerRoman, UpperRoman. `ListStyleType` correctly maps to CSS values.
+- **Test updates:** Changed 27 test files — all `Find("button")` / `FindAll("button")` selectors updated to `Find("input")` or `Find("input[type=submit]")` for Button component, and `li span` assertions changed to `li` text content for BulletedList.
+- **All 1253 tests pass**, 0 regressions.
