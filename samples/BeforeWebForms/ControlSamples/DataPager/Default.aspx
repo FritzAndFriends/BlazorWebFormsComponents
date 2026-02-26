@@ -12,7 +12,7 @@
     <div data-audit-control="DataPager">
     <asp:ListView ID="ProductListView"
         runat="server"
-        ItemType="BeforeWebForms.ControlSamples.DataPager.Product">
+        ItemType="SharedSampleObjects.Models.Product">
         <LayoutTemplate>
             <table cellpadding="4" border="1" style="border-collapse: collapse;">
                 <thead>

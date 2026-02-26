@@ -17,18 +17,18 @@
    automatically creates a row for each public property on the data item.</p>
 
 <div data-audit-control="DetailsView-1">
-<DetailsView ItemType="Customer"
-             Items="@_customers"
+<DetailsView ItemType="Product"
+             Items="@_products"
              AutoGenerateRows="true"
-             HeaderText="Customer Details"
+             HeaderText="Product Details"
              GridLines="GridLines.Both" />
 </div>
 
 <p>Code:</p>
-<pre><code>&lt;DetailsView ItemType="Customer"
-             Items="@@_customers"
+<pre><code>&lt;DetailsView ItemType="Product"
+             Items="@@_products"
              AutoGenerateRows="true"
-             HeaderText="Customer Details"
+             HeaderText="Product Details"
              GridLines="GridLines.Both" /&gt;</code></pre>
 
 <hr />
@@ -38,11 +38,11 @@
    between individual records in the data source — one record at a time.</p>
 
 <div data-audit-control="DetailsView-2">
-<DetailsView ItemType="Customer"
-             Items="@_customers"
+<DetailsView ItemType="Product"
+             Items="@_products"
              AllowPaging="true"
              AutoGenerateRows="true"
-             HeaderText="Browse Customers"
+             HeaderText="Browse Products"
              GridLines="GridLines.Both"
              PageIndexChanged="HandlePageChanged" />
 </div>
@@ -50,11 +50,11 @@
 <p>Current page changed <strong>@_pageChangeCount</strong> time(s).</p>
 
 <p>Code:</p>
-<pre><code>&lt;DetailsView ItemType="Customer"
-             Items="@@_customers"
+<pre><code>&lt;DetailsView ItemType="Product"
+             Items="@@_products"
              AllowPaging="true"
              AutoGenerateRows="true"
-             HeaderText="Browse Customers"
+             HeaderText="Browse Products"
              PageIndexChanged="HandlePageChanged" /&gt;</code></pre>
 
 <hr />
@@ -65,12 +65,12 @@
    Handle the <code>ModeChanging</code> and <code>ItemUpdating</code> events to integrate with your data store.</p>
 
 <div data-audit-control="DetailsView-3">
-<DetailsView ItemType="Customer"
-             Items="@_customers"
+<DetailsView ItemType="Product"
+             Items="@_products"
              AllowPaging="true"
              AutoGenerateRows="true"
              AutoGenerateEditButton="true"
-             HeaderText="Editable Customer"
+             HeaderText="Editable Product"
              GridLines="GridLines.Both"
              ModeChanging="HandleModeChanging"
              ItemUpdating="HandleUpdating" />
@@ -79,12 +79,12 @@
 <p style="margin-top: 10px; font-weight: bold;">@_statusMessage</p>
 
 <p>Code:</p>
-<pre><code>&lt;DetailsView ItemType="Customer"
-             Items="@@_customers"
+<pre><code>&lt;DetailsView ItemType="Product"
+             Items="@@_products"
              AllowPaging="true"
              AutoGenerateRows="true"
              AutoGenerateEditButton="true"
-             HeaderText="Editable Customer"
+             HeaderText="Editable Product"
              ModeChanging="HandleModeChanging"
              ItemUpdating="HandleUpdating" /&gt;
 
@@ -106,30 +106,25 @@
 <p>When the data source has no items, the <code>EmptyDataText</code> is displayed.</p>
 
 <div data-audit-control="DetailsView-4">
-<DetailsView ItemType="Customer"
+<DetailsView ItemType="Product"
              Items="@_emptyList"
              AutoGenerateRows="true"
-             EmptyDataText="No customers found."
+             EmptyDataText="No products found."
              GridLines="GridLines.Both" />
 </div>
 
 <p>Code:</p>
-<pre><code>&lt;DetailsView ItemType="Customer"
+<pre><code>&lt;DetailsView ItemType="Product"
              Items="@@_emptyList"
-             EmptyDataText="No customers found." /&gt;</code></pre>
+             EmptyDataText="No products found." /&gt;</code></pre>
 
 @code {
     private string _statusMessage = "";
     private int _pageChangeCount = 0;
 
-    private List<Customer> _customers = new()
-    {
-        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
-        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
-        new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global Solutions" }
-    };
+    private List<Product> _products = Product.GetProducts();
 
-    private List<Customer> _emptyList = new();
+    private List<Product> _emptyList = new();
 
     private void HandlePageChanged(PageChangedEventArgs e)
     {

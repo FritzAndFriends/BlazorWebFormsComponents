@@ -13,10 +13,10 @@
 
 <h3>Caption (Default Alignment)</h3>
 
-<DetailsView ItemType="Customer"
-             Items="@_customers"
+<DetailsView ItemType="Product"
+             Items="@_products"
              AutoGenerateRows="true"
-             Caption="Customer Record"
+             Caption="Product Record"
              GridLines="GridLines.Both" />
 
 <hr />
@@ -28,8 +28,8 @@
 <div style="display:flex; flex-wrap:wrap; gap:30px;">
     <div>
         <h4>Top</h4>
-        <DetailsView ItemType="Customer"
-                     Items="@_customers"
+        <DetailsView ItemType="Product"
+                     Items="@_products"
                      AutoGenerateRows="true"
                      Caption="Top Caption"
                      CaptionAlign="TableCaptionAlign.Top"
@@ -37,8 +37,8 @@
     </div>
     <div>
         <h4>Bottom</h4>
-        <DetailsView ItemType="Customer"
-                     Items="@_customers"
+        <DetailsView ItemType="Product"
+                     Items="@_products"
                      AutoGenerateRows="true"
                      Caption="Bottom Caption"
                      CaptionAlign="TableCaptionAlign.Bottom"
@@ -49,17 +49,17 @@
 <hr />
 
 <h3>Code Example</h3>
-<pre><code>&lt;DetailsView ItemType="Customer"
-             Items="@@_customers"
+<pre><code>&lt;DetailsView ItemType="Product"
+             Items="@@_products"
              AutoGenerateRows="true"
-             Caption="Customer Record"
+             Caption="Product Record"
              CaptionAlign="TableCaptionAlign.Top"
              GridLines="GridLines.Both" /&gt;</code></pre>
 
 @code {
 
-    private List<Customer> _customers = new()
+    private List<Product> _products = new()
     {
-        new Customer { CustomerID = 1, FirstName = "Alice", LastName = "Williams", CompanyName = "Innovation Labs" }
+        Product.GetProducts()[0]
     };
 }

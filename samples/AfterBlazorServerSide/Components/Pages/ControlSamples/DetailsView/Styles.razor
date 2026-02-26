@@ -15,11 +15,11 @@
 <p>Each style is applied using the <code>&lt;XxxStyleContent&gt;</code> pattern with a
    corresponding style sub-component.</p>
 
-<DetailsView ItemType="Customer"
-             Items="@_customers"
+<DetailsView ItemType="Product"
+             Items="@_products"
              AutoGenerateRows="true"
              AllowPaging="true"
-             HeaderText="Customer Details"
+             HeaderText="Product Details"
              GridLines="GridLines.Both">
     <HeaderStyleContent>
         <DetailsViewHeaderStyle BackColor="WebColor.Green" ForeColor="WebColor.White" Font_Bold="true" />
@@ -36,8 +36,8 @@
 
 <h3>DetailsView with Field Header Styling</h3>
 
-<DetailsView ItemType="Customer"
-             Items="@_customers"
+<DetailsView ItemType="Product"
+             Items="@_products"
              AutoGenerateRows="true"
              HeaderText="Styled Field Headers"
              GridLines="GridLines.Both">
@@ -58,10 +58,10 @@
 <hr />
 
 <h3>Code Example</h3>
-<pre><code>&lt;DetailsView ItemType="Customer"
-             Items="@@_customers"
+<pre><code>&lt;DetailsView ItemType="Product"
+             Items="@@_products"
              AutoGenerateRows="true"
-             HeaderText="Customer Details"
+             HeaderText="Product Details"
              GridLines="GridLines.Both"&gt;
     &lt;HeaderStyleContent&gt;
         &lt;DetailsViewHeaderStyle BackColor="WebColor.Green" ForeColor="WebColor.White" Font_Bold="true" /&gt;
@@ -76,10 +76,5 @@
 
 @code {
 
-    private List<Customer> _customers = new()
-    {
-        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
-        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
-        new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global Solutions" }
-    };
+    private List<Product> _products = Product.GetProducts();
 }

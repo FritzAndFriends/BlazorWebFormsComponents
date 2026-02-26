@@ -1081,7 +1081,7 @@ public class InteractiveComponentTests
             var tables = await page.Locator("table").AllAsync();
             Assert.NotEmpty(tables);
 
-            // Assert — Table has data rows (auto-generated from Customer properties)
+            // Assert — Table has data rows (auto-generated from Product properties)
             var rows = await page.Locator("table tr").AllAsync();
             Assert.True(rows.Count > 1, "DetailsView should render header and field rows");
 
