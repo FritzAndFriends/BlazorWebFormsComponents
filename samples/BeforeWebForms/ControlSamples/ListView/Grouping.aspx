@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Grouping.aspx.cs" Inherits="BeforeWebForms.ControlSamples.ListView.Grouping" MasterPageFile="~/Site.Master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Grouping.aspx.cs" Inherits="BeforeWebForms.ControlSamples.ListView.Grouping" MasterPageFile="~/Site.Master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="MainContent">
 
@@ -10,6 +10,7 @@
 
     <p>Here is a listview using Grouping to interact with widgets.</p>
 
+    <div data-audit-control="ListView">
     <asp:ListView ID="simpleListView"
         runat="server"
         GroupItemCount="5"
@@ -61,6 +62,7 @@
         </EmptyDataTemplate>
         <EmptyItemTemplate></EmptyItemTemplate>
     </asp:ListView>
+    </div>
 
 
 </asp:Content>

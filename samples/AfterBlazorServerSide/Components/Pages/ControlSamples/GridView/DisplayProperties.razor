@@ -1,5 +1,6 @@
 @page "/ControlSamples/GridView/DisplayProperties"
 @using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
 
 <PageTitle>GridView Display Properties</PageTitle>
 
@@ -97,20 +98,7 @@
     private bool _showHeader = true;
     private bool _showFooter = false;
 
-    private List<Employee> _employees = new()
-    {
-        new Employee { Id = 1, Name = "Alice Johnson", Department = "Engineering" },
-        new Employee { Id = 2, Name = "Bob Smith", Department = "Marketing" },
-        new Employee { Id = 3, Name = "Carol White", Department = "Engineering" },
-        new Employee { Id = 4, Name = "Dave Brown", Department = "Sales" }
-    };
+    private List<Employee> _employees = Employee.GetEmployees();
 
     private List<Employee> _emptyList = new();
-
-    private class Employee
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Department { get; set; }
-    }
 }

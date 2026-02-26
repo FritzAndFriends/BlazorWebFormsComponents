@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeBehind="default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.TreeView._default" %>
+<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeFile="default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.TreeView._default" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="MainContent">
 
@@ -12,6 +12,7 @@
     <a href="https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8#examples">https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8#examples</a></a>
     </p>
 
+      <div data-audit-control="TreeView">
       <asp:TreeView id="SampleTreeView"
         ShowExpandCollapse="false"
         ShowCheckBoxes="All"
@@ -57,6 +58,7 @@
         </Nodes>
         
       </asp:TreeView>
+      </div>
 
       <h3>Generates the following HTML:</h3>
 

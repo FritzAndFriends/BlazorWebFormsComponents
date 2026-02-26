@@ -1,5 +1,6 @@
 @page "/ControlSamples/ListView/CrudOperations"
 @using BlazorWebFormsComponents.Enums
+@using System.Linq
 
 <h2>ListView CRUD Operations</h2>
 
@@ -85,12 +86,13 @@
 	{
 		if (firstRender)
 		{
-			items = new List<Widget>
+			items = Widget.SimpleWidgetList.Take(3).Select(w => new Widget
 			{
-				new Widget { Id = 1, Name = "Alpha Widget", Price = 9.99M, LastUpdate = DateTime.Today },
-				new Widget { Id = 2, Name = "Beta Widget", Price = 19.99M, LastUpdate = DateTime.Today },
-				new Widget { Id = 3, Name = "Gamma Widget", Price = 29.99M, LastUpdate = DateTime.Today }
-			};
+				Id = w.Id,
+				Name = w.Name,
+				Price = w.Price,
+				LastUpdate = w.LastUpdate
+			}).ToList();
 			listView.DataSource = items;
 			listView.DataBind();
 		}

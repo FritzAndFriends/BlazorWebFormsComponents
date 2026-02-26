@@ -4,7 +4,9 @@
 <h2>RadioButtonList Component Samples</h2>
 
 <h3>Basic RadioButtonList with Static Items</h3>
-<RadioButtonList TItem="object" StaticItems="colorItems" @bind-SelectedValue="selectedColor" />
+<div data-audit-control="RadioButtonList-1">
+    <RadioButtonList TItem="object" StaticItems="colorItems" @bind-SelectedValue="selectedColor" />
+</div>
 <p>Selected: <strong>@selectedColor</strong></p>
 <pre><code>&lt;RadioButtonList TItem="object" StaticItems="colorItems" @@bind-SelectedValue="selectedColor" /&gt;
 
@@ -20,10 +22,12 @@
 <hr />
 
 <h3>Horizontal Layout (RepeatDirection="Horizontal")</h3>
-<RadioButtonList TItem="object" 
+<div data-audit-control="RadioButtonList-2">
+    <RadioButtonList TItem="object" 
                  StaticItems="sizeItems" 
                  RepeatDirection="Horizontal"
                  @bind-SelectedValue="selectedSize" />
+</div>
 <p>Selected: <strong>@selectedSize</strong></p>
 <pre><code>&lt;RadioButtonList TItem="object" 
                  StaticItems="sizeItems" 

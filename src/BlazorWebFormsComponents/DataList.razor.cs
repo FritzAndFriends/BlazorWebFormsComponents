@@ -102,6 +102,20 @@ namespace BlazorWebFormsComponents
 			base.OnInitialized();
 		}
 
+		protected string GetItemTypeAttribute()
+		{
+			if (AdditionalAttributes != null && AdditionalAttributes.TryGetValue("itemtype", out var value))
+				return value?.ToString();
+			return null;
+		}
+
+		protected string GetTableStyle()
+		{
+			var borderCollapse = GridLines != DataListEnum.None ? "border-collapse:collapse;" : null;
+			var combined = borderCollapse + CalculatedStyle;
+			return string.IsNullOrEmpty(combined) ? null : combined;
+		}
+
 		protected virtual void ItemDataBound(DataListItemEventArgs e)
 		{
 			OnItemDataBound.InvokeAsync(e);

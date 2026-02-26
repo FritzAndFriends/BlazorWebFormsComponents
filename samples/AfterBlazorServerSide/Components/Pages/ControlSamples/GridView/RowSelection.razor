@@ -60,54 +60,23 @@
 
 @@code {
     private Customer? SelectedCustomer;
-    private List&lt;Customer&gt; _customers = new List&lt;Customer&gt;
-    {
-        new Customer { CustomerID = 1, FirstName = "John", LastName = "Smith", CompanyName = "Acme Corporation" },
-        new Customer { CustomerID = 2, FirstName = "Jane", LastName = "Doe", CompanyName = "TechStart Inc." },
-        new Customer { CustomerID = 3, FirstName = "Bob", LastName = "Johnson", CompanyName = "Global Solutions" },
-        new Customer { CustomerID = 4, FirstName = "Alice", LastName = "Williams", CompanyName = "Innovation Labs" }
-    };
+    private List&lt;Customer&gt; _customers = Customer.GetCustomers(...).ToList();
     
     private void SelectCustomer(Customer customer)
     {
         SelectedCustomer = customer;
-        // CustomerID (the DataKey) is available via customer.CustomerID
     }
 }</code></pre>
 
 @code {
     private Customer? SelectedCustomer;
-    private List<Customer> _customers = new List<Customer>
+    private List<Customer> _customers;
+
+    protected override void OnInitialized()
     {
-        new Customer
-        {
-            CustomerID = 1,
-            FirstName = "John",
-            LastName = "Smith",
-            CompanyName = "Acme Corporation"
-        },
-        new Customer
-        {
-            CustomerID = 2,
-            FirstName = "Jane",
-            LastName = "Doe",
-            CompanyName = "TechStart Inc."
-        },
-        new Customer
-        {
-            CustomerID = 3,
-            FirstName = "Bob",
-            LastName = "Johnson",
-            CompanyName = "Global Solutions"
-        },
-        new Customer
-        {
-            CustomerID = 4,
-            FirstName = "Alice",
-            LastName = "Williams",
-            CompanyName = "Innovation Labs"
-        }
-    };
+        int totalRowCount;
+        _customers = Customer.GetCustomers(int.MaxValue, 0, null, out totalRowCount).ToList();
+    }
     
     private void SelectCustomer(Customer customer)
     {

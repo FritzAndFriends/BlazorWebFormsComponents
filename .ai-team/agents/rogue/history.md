@@ -110,3 +110,24 @@ Wrote 24 bUnit tests across 2 files for migration fidelity work:
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+### Post-Bug-Fix Capture Pipeline (2026-02-26)
+
+Re-ran full HTML capture pipeline after 14 bug fixes across 10 controls. Results: 132→131 divergences, 0→1 exact match (Literal-3). All 11 targeted controls show verified structural improvements: Button (`<button>`→`<input>`), BulletedList (span removal), LinkButton (href addition), Calendar (border styling + tbody), CheckBox (span removal), Image (longdesc removal), DataList (spurious style removal), GridView (rules/border addition), TreeView (compacted output). 11 new Blazor captures gained (75→64 missing). Primary blocker identified: sample data parity, not component bugs.
+
+📌 Pipeline note: `normalize-html.mjs --compare` compares RAW files, not normalized. For accurate comparison, run `--input`/`--output` normalization on both sides first, then `--compare` the normalized directories. — Rogue
+
+📌 Pipeline note: The Blazor and WebForms samples use completely different data/text/IDs. Until sample data is aligned, the pipeline cannot distinguish component bugs from data differences. Calendar is the closest complex control at 73% word similarity. — Rogue
+
+ Team update (2026-02-26): NamingContainer inherits BaseWebFormsComponent, UseCtl00Prefix handled in ComponentIdGenerator  decided by Cyclops
+
+ Team update (2026-02-26): Menu RenderingMode=Table uses inline Razor to avoid whitespace; AngleSharp foster-parenting workaround  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy: handler delegates in core, separate Identity NuGet package, redirect-based cookie flows  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: 90%+ sample parity, 5 genuine bugs (3 P1, 2 P2), normalization pipeline gaps  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker for match rates  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule tests  decided by Jeffrey T. Fritz

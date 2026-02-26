@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="WithGridLines.aspx.cs" Inherits="BeforeWebForms.ControlSamples.TreeView.WithGridLines" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="WithGridLines.aspx.cs" Inherits="BeforeWebForms.ControlSamples.TreeView.WithGridLines" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <h2>Treeview With GridLines</h2>
@@ -10,6 +10,7 @@
     <p>Here is a treeview with inline nodes and the ShowLines turned on
     </p>
 
+      <div data-audit-control="TreeView">
       <asp:TreeView id="SampleTreeView"
         ShowExpandCollapse="true"
         ShowCheckBoxes="All"
@@ -153,5 +154,6 @@
         </Nodes>
         
       </asp:TreeView>
+      </div>
 
 </asp:Content>

@@ -78,3 +78,13 @@ Established doc structure: title → intro (MS docs link) → Features Supported
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+ Team update (2026-02-26): Menu RenderingMode=Table added  docs may need updating for dual rendering modes  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy defined  handler delegates, separate Identity package  docs needed when implemented  decided by Forge
+
+- **NamingContainer.md created:** New doc page at `docs/UtilityFeatures/NamingContainer.md` covering the NamingContainer component — a structural (no-HTML) component that establishes naming scopes for child component ID generation, equivalent to Web Forms `INamingContainer`. Documented UseCtl00Prefix parameter, nesting behavior, migration before/after, and relationship to WebFormsPage (which inherits NamingContainer). Added to mkdocs.yml nav alphabetically. Updated IDRendering.md with cross-references to NamingContainer and WebFormsPage in both the Naming Containers section and Related Documentation.
+- **Structural component doc pattern:** Components that render no HTML of their own (purely structural) should lead with that fact prominently, since developers expect Blazor components to produce markup. The "renders no HTML" callout and the relationship comparison table (NamingContainer vs WebFormsPage) are reusable patterns for future structural/infrastructure component docs.
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule docs  decided by Jeffrey T. Fritz

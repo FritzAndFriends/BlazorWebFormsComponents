@@ -6,6 +6,7 @@
 
 
 
+<div data-audit-control="ValidationSummary-1">
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
 	Write something
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
@@ -37,6 +38,7 @@
 	<AspNetValidationSummary Font_Italic="true" DisplayMode="SingleParagraph" />
 
 </EditForm>
+</div>
 
 
 

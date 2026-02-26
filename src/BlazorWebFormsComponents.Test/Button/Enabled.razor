@@ -8,7 +8,7 @@
 		var cut = Render(@<Button Enabled="false">This is not an enabled button</Button>);
 
 		// Act
-		var theButton = cut.Find("button");
+		var theButton = cut.Find("input");
 
 		// Assert
 		theButton.ClassList.Contains("aspNetDisabled").ShouldBeTrue("Did not assign the aspNetDisabled CSS class to a disabled button");

@@ -4,11 +4,17 @@
 
 <Nav></Nav>
 
-<LinkButton CommandName="Foo" CommandArgument="bar1" OnCommand="OnCommand" Text="LinkButton1 with Command" />
+<div data-audit-control="LinkButton-1">
+    <LinkButton CommandName="Foo" CommandArgument="bar1" OnCommand="OnCommand" Text="LinkButton1 with Command" />
+</div>
 <br />
-<LinkButton CommandName="Foo" CommandArgument="bar2" OnCommand="OnCommand" Text="LinkButton2 with Command" />
+<div data-audit-control="LinkButton-2">
+    <LinkButton CommandName="Foo" CommandArgument="bar2" OnCommand="OnCommand" Text="LinkButton2 with Command" />
+</div>
 <br />
-<LinkButton OnClick="OnClick" Text="Click me!!" PostBackUrl="ControlSamples/LinkButton/#" />
+<div data-audit-control="LinkButton-3">
+    <LinkButton OnClick="OnClick" Text="Click me!!" PostBackUrl="ControlSamples/LinkButton/#" />
+</div>
 <br />
 <LinkButton CommandName="Foo" CommandArgument="bar3" OnCommand="OnCommand" OnClick="OnClick" Text="BlazorWebFormsComponents" PostBackUrl="https://github.com/FritzAndFriends/BlazorWebFormsComponents" />
 <br />

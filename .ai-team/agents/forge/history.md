@@ -57,3 +57,9 @@ Created three-milestone plan for HTML fidelity audit per Jeff's directive. Key d
 - `.ai-team/decisions/inbox/forge-html-audit-milestones.md` — decision record
 
 📌 Team update (2026-02-25): HTML audit planned as M11–M13. M11: infrastructure + Tier 1 capture. M12: Tier 2 data controls + normalization. M13: Tier 3 JS-coupled + remaining + master report. Existing M12 renumbered to M14. M11 (Skins & Themes) deferred to M15+. — decided by Forge
+
+ Team update (2026-02-26): NamingContainer inherits BaseWebFormsComponent (not BaseStyledComponent), UseCtl00Prefix in ComponentIdGenerator  decided by Cyclops
+
+ Team update (2026-02-26): Menu RenderingMode=Table implemented with inline Razor for AngleSharp compatibility  decided by Cyclops
+
+ Team update (2026-02-26): WebFormsPage unified wrapper design accepted and consolidated into decisions.md  decided by Jeffrey T. Fritz, Forge

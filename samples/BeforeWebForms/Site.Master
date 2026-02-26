@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="BeforeWebForms.SiteMaster" %>
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.master.cs" Inherits="BeforeWebForms.SiteMaster" %>
 
 <!DOCTYPE html>
 
@@ -8,11 +8,13 @@
     <%--    <meta name="viewport" content="width=device-width, initial-scale=1.0" />--%>
     <title><%: Page.Title %> - BeforeWebForms Sample</title>
 
+    <%-- Removed for audit: bundling not available without MSBuild
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/bundles/modernizr") %>
     </asp:PlaceHolder>
+    --%>
 
-    <webopt:BundleReference runat="server" Path="~/Content/css" />
+    <%-- <webopt:BundleReference runat="server" Path="~/Content/css" /> --%>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 </head>
 <body>
@@ -151,7 +153,7 @@
         <hr />
         <footer>
             <p>&copy; <%: DateTime.Now.Year %> - BeforeWebForms Sample</p>
-            This site was built with ♥♥ and <a href="https://dot.net">Open Source C#</a>, <a href="https://www.asp.net">ASP.NET 3.1</a>, and the <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents/">BlazorWebFormsComponents</a>
+            This site was built with ?? and <a href="https://dot.net">Open Source C#</a>, <a href="https://www.asp.net">ASP.NET 3.1</a>, and the <a target="_blank" href="https://github.com/FritzAndFriends/BlazorWebFormsComponents/">BlazorWebFormsComponents</a>
         </footer>
     </form>
 </body>

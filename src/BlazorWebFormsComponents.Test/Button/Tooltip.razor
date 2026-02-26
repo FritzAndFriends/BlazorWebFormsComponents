@@ -8,7 +8,7 @@
 		var cut = Render(@<Button Text="Click Me!" ToolTip="Go To Bing!" OnClientClick="window.navigate('bing.com')" />);
 
 		// Assert
-		cut.MarkupMatches(@<button type="submit" title="Go To Bing!" onclientclick="window.navigate('bing.com')">Click Me!</button>);
+		cut.MarkupMatches(@<input type="submit" title="Go To Bing!" onclientclick="window.navigate('bing.com')" value="Click Me!" />);
 	}
 
 	[Fact]
@@ -18,7 +18,7 @@
 		var cut = Render(@<Button Text="Click Me!" OnClientClick="window.navigate('bing.com')" />);
 
 		// Assert
-		cut.MarkupMatches(@<button type="submit" onclientclick="window.navigate('bing.com')">Click Me!</button>);
+		cut.MarkupMatches(@<input type="submit" onclientclick="window.navigate('bing.com')" value="Click Me!" />);
 	}
 
 }

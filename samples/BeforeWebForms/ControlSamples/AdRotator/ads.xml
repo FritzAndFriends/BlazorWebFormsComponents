@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Advertisements>
+    <Ad>
+        <ImageUrl>~/Content/Images/banner.png</ImageUrl>
+        <NavigateUrl>https://github.com</NavigateUrl>
+        <AlternateText>Visit GitHub</AlternateText>
+        <Impressions>50</Impressions>
+        <Keyword>technology</Keyword>
+    </Ad>
+    <Ad>
+        <ImageUrl>~/Content/Images/banner.png</ImageUrl>
+        <NavigateUrl>https://bing.com</NavigateUrl>
+        <AlternateText>Visit Bing</AlternateText>
+        <Impressions>50</Impressions>
+        <Keyword>search</Keyword>
+    </Ad>
+</Advertisements>

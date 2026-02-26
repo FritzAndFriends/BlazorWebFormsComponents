@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TemplateFields.aspx.cs" Inherits="BeforeWebForms.ControlSamples.GridView.TemplateFields" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="TemplateFields.aspx.cs" Inherits="BeforeWebForms.ControlSamples.GridView.TemplateFields" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
   <h2>GridView Control</h2>
@@ -9,6 +9,7 @@
 
   <p>This is just a simple example of a GridView that uses template fields</p>
 
+  <div data-audit-control="GridView">
   <asp:gridview id="TemplateFieldGridView" 
     autogeneratecolumns="False"
     ItemType="SharedSampleObjects.Models.Widget"
@@ -26,6 +27,7 @@
 		    </asp:TemplateField>
       </Columns>
   </asp:gridview>
+  </div>
 
   <asp:Button runat="server" Text="Click Me" OnClick="Unnamed_Click"/>
 </asp:Content>

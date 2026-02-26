@@ -107,3 +107,39 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+### M12-01 — Tier 2 BeforeWebForms Data Control Samples
+
+- **DetailsView sample created:** `samples/BeforeWebForms/ControlSamples/DetailsView/Default.aspx` + `.aspx.cs` + `.aspx.designer.cs`. Two DetailsView instances: one with AutoGenerateRows=true and NumericFirstLast paging, one with explicit BoundFields (Name, Price formatted as {0:C}, Category, InStock) and NextPreviousFirstLast paging. Both use inline `List<Product>` with 10 items. Includes PageIndexChanging handlers for paging support. Styled with HeaderStyle, AlternatingRowStyle, PagerStyle, FieldHeaderStyle. Wrapped with `data-audit-control="DetailsView"`.
+- **DataPager sample created:** `samples/BeforeWebForms/ControlSamples/DataPager/Default.aspx` + `.aspx.cs` + `.aspx.designer.cs`. ListView+DataPager combination showing paged product data. DataPager uses PageSize=3, combines two NextPreviousPagerField instances (first/prev on left, next/last on right) with a NumericPagerField (ButtonCount=5) in the middle. Uses inline `List<Product>` with 10 items. PreRender rebinding for postback paging. Wrapped with `data-audit-control="DataPager"`.
+- **Existing samples verified:** GridView (3 pages), DataList (4 pages), Repeater (1 page), FormView (1 page), ListView (3 pages) — all already have `data-audit-control` markers and use inline data via `SharedSampleObjects.Models.Widget`. No database dependencies found; no fixes needed.
+
+ Team update (2026-02-26): NamingContainer inherits BaseWebFormsComponent, UseCtl00Prefix handled in ComponentIdGenerator  decided by Cyclops
+
+ Team update (2026-02-26): Menu RenderingMode=Table uses inline Razor to avoid whitespace; AngleSharp foster-parenting workaround  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy: handler delegates in core, separate Identity NuGet package, redirect-based cookie flows  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: 4 sample rewrites needed for data controls before re-capture  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker  20+ divergences could become exact matches  decided by Rogue
+
+### SharedSampleObjects Data Alignment Sweep
+
+- **Audited all Blazor sample pages** in `Components/Pages/ControlSamples/` for inline data that should use SharedSampleObjects.
+- **Priority directories already aligned:** FormView (4 pages), DataList (6 pages), Repeater (1 page) — all already use `Widget.SimpleWidgetList` or `Widget.Widgets(n)`. DetailsView (2 pages) already uses `Product.GetProducts()`.
+- **New shared model created:** `SharedSampleObjects/Models/Employee.cs` with `Id`, `Name`, `Department` properties and static `GetEmployees()` method (4 employees).
+- **New Product overload added:** `Product.GetProducts(int count)` generates n products with deterministic data for paging/sorting demos (consistent categories: Tools/Electronics/Hardware).
+- **Files aligned to SharedSampleObjects:**
+  - `GridView/InlineEditing.razor` — removed local `Product` class, now uses `Product.GetProducts()`
+  - `GridView/Paging.razor` — removed local `Product` class + inline Enumerable.Range, now uses `Product.GetProducts(50)`
+  - `GridView/Sorting.razor` — removed local `Product` class + 25-item GetProductName() helper, now uses `Product.GetProducts(25)`
+  - `GridView/Selection.razor` — removed local `Product` class + 5 inline items, now uses `Product.GetProducts().Take(5).ToList()`
+  - `GridView/DisplayProperties.razor` — removed local `Employee` class + 4 inline items, now uses `Employee.GetEmployees()`
+  - `ListView/CrudOperations.razor` — replaced 3 inline Widget objects with `Widget.SimpleWidgetList.Take(3)` copy
+- **Files intentionally NOT changed:** BulletedList (has `Product` with `Name`/`Url` — different shape), DropDownList/RadioButtonList (have `Product` with `string Id` — list control binding pattern), Chart pages (chart-specific records like `SalesData`/`TrafficData`), Validation pages (form-specific `ExampleModel` classes).
+- Build verified: `dotnet build samples\AfterBlazorServerSide\ -c Release` succeeds with 0 errors.
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule samples  decided by Jeffrey T. Fritz

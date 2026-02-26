@@ -18,7 +18,7 @@
 
 @if (ColumnList.Any())
 {
-	<table class="@CssClass" rules="@GetGridLinesRules()" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)" title="@ToolTip">
+	<table class="@CssClass" rules="@GetGridLinesRules()" border="@GetGridLinesBorder()" style="border-collapse:collapse;" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)" title="@ToolTip">
 		@if (!string.IsNullOrEmpty(Caption))
 		{
 			<caption style="@GetCaptionStyle()">@Caption</caption>
@@ -35,12 +35,12 @@
 					}
 					else
 					{
-						<th scope="@(UseAccessibleHeader ? "col" : null)">@column.HeaderText</th>
+						<th scope="@(UseAccessibleHeader ? "col" : null)">@(string.IsNullOrEmpty(column.HeaderText) ? (MarkupString)"&nbsp;" : column.HeaderText)</th>
 					}
 				}
 				@if (ShowCommandColumn)
 				{
-					<th scope="@(UseAccessibleHeader ? "col" : null)"></th>
+					<th scope="@(UseAccessibleHeader ? "col" : null)">@((MarkupString)"&nbsp;")</th>
 				}
 			</tr>
 		</thead>

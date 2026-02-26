@@ -1,0 +1,62 @@
+@page "/ControlSamples/ListBox"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>ListBox Sample</PageTitle>
+
+<h2>ListBox Component Samples</h2>
+
+<h3>Single Selection ListBox</h3>
+<div data-audit-control="ListBox-1">
+    <ListBox TItem="object" StaticItems="colorItems" @bind-SelectedValue="selectedColor" Rows="4" />
+</div>
+<p>Selected: <strong>@selectedColor</strong></p>
+<pre><code>&lt;ListBox TItem="object" StaticItems="colorItems" @@bind-SelectedValue="selectedColor" Rows="4" /&gt;
+
+@@code {
+    private string selectedColor = "";
+    private ListItemCollection colorItems = new() {
+        new ListItem("Red", "red"),
+        new ListItem("Green", "green"),
+        new ListItem("Blue", "blue")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>Multiple Selection ListBox</h3>
+<div data-audit-control="ListBox-2">
+    <ListBox TItem="object"
+             StaticItems="sizeItems"
+             SelectionMode="ListSelectionMode.Multiple"
+             Rows="4"
+             @bind-SelectedValues="selectedSizes" />
+</div>
+<p>Selected: <strong>@string.Join(", ", selectedSizes)</strong></p>
+<pre><code>&lt;ListBox TItem="object"
+         StaticItems="sizeItems"
+         SelectionMode="ListSelectionMode.Multiple"
+         Rows="4"
+         @@bind-SelectedValues="selectedSizes" /&gt;</code></pre>
+
+@code {
+    private string selectedColor = "";
+    private List<string> selectedSizes = new();
+
+    private ListItemCollection colorItems = new()
+    {
+        new ListItem("Red", "red"),
+        new ListItem("Green", "green"),
+        new ListItem("Blue", "blue"),
+        new ListItem("Yellow", "yellow"),
+        new ListItem("Purple", "purple")
+    };
+
+    private ListItemCollection sizeItems = new()
+    {
+        new ListItem("Small", "S"),
+        new ListItem("Medium", "M"),
+        new ListItem("Large", "L"),
+        new ListItem("X-Large", "XL"),
+        new ListItem("XX-Large", "XXL")
+    };
+}

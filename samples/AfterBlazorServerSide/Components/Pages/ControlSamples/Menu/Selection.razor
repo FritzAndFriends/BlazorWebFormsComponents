@@ -13,6 +13,7 @@
 <h3>Horizontal Menu with Selection</h3>
 <p>Click a menu item. The <code>MenuItemClick</code> event fires and reports the selected item.</p>
 
+<div data-audit-control="Menu-1">
 <Menu @ref="_menu" ID="SelectionMenu" Orientation="Orientation.Horizontal" MenuItemClick="HandleItemClick">
     <Items>
         <MenuItem Text="Home" Value="home" />
@@ -25,6 +26,7 @@
         <MenuItem Text="Contact" Value="contact" />
     </Items>
 </Menu>
+</div>
 
 <div style="margin-top:15px; padding:10px; border:1px solid #ccc; background:#f9f9f9;">
     <strong>Last clicked:</strong>
@@ -44,6 +46,7 @@
 
 <h3>Vertical Menu with Selection</h3>
 
+<div data-audit-control="Menu-2">
 <Menu ID="VerticalSelectionMenu" Orientation="Orientation.Vertical" MenuItemClick="HandleItemClick">
     <Items>
         <MenuItem Text="Dashboard" Value="dashboard" />
@@ -54,6 +57,7 @@
         <MenuItem Text="Settings" Value="settings" />
     </Items>
 </Menu>
+</div>
 
 <hr />
 

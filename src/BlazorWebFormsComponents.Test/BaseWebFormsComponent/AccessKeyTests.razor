@@ -8,7 +8,7 @@
 		var cut = Render(@<Button Text="Click Me" AccessKey="B" />);
 
 		// Assert
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.HasAttribute("accesskey").ShouldBeTrue();
 		button.GetAttribute("accesskey").ShouldBe("B");
 	}
@@ -32,7 +32,7 @@
 		var cut = Render(@<Button Text="Click Me" AccessKey="" />);
 
 		// Assert
-		cut.Find("button").HasAttribute("accesskey").ShouldBeFalse();
+		cut.Find("input[type=submit]").HasAttribute("accesskey").ShouldBeFalse();
 	}
 
 	[Fact]
@@ -42,7 +42,7 @@
 		var cut = Render(@<Button Text="Click Me" />);
 
 		// Assert
-		cut.Find("button").HasAttribute("accesskey").ShouldBeFalse();
+		cut.Find("input[type=submit]").HasAttribute("accesskey").ShouldBeFalse();
 	}
 
 }

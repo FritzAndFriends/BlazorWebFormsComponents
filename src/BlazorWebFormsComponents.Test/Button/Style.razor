@@ -11,7 +11,7 @@
 		var cut = Render(@<Button Text="Blue Button" BackColor="Blue" ForeColor="White" />);
 
 		// Act
-		var button = cut.Find("button");
+		var button = cut.Find("input");
 
 		// Assert
 		button.HasAttribute("style").ShouldBeTrue();

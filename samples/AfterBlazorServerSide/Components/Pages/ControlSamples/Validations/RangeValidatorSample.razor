@@ -3,6 +3,7 @@
 <h3>Range Validator</h3>
 @using BlazorWebFormsComponents.Validations;
 
+<div data-audit-control="RangeValidator-1">
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
 
 	<label>Write a year between 1900 - 2100</label>
@@ -17,6 +18,7 @@
 	<button type="submit">Submit</button>
 
 </EditForm>
+</div>
 
 @code {
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();

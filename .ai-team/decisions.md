@@ -1742,6 +1742,27 @@ Rather than wrapping the entire row in a clickable element, selection is wired t
 `FindNode(valuePath)` splits on `PathSeparator` and matches each segment against `node.Value ?? node.Text`. This matches Web Forms behavior where Value defaults to Text if not explicitly set.
 
 
+### 2026-02-26: WebFormsPage unified wrapper component (consolidated)
+
+**By:** Jeffrey T. Fritz (via Copilot), Forge
+**What:** Merge NamingContainer and the Skins/Themes wrapper into a single unified wrapper component named `WebFormsPage`. The name mirrors `System.Web.UI.Page` from ASP.NET Web Forms. Implementation: inherits `NamingContainer` (not `BaseWebFormsComponent`), adds `Theme` (ThemeConfiguration) parameter, wraps `ChildContent` in `CascadingValue<ThemeConfiguration>`. Parameters: `ID`, `UseCtl00Prefix`, `Theme`, `Visible`, `ChildContent` — no new parameters invented. Placement: `MainLayout.razor` wrapping `@Body`. ViewState already handled via inherited `BaseWebFormsComponent` dictionary. Rejected name alternatives: WebFormsSupport (too generic), WebFormsHost (implies hosting), LegacyPage (pejorative). One component instead of multiple separate wrappers.
+**Why:** User directive to simplify the migration story — developers add one wrapper and get NamingContainer + Skins/Themes support together. Forge's design ensures backward compatibility: existing `NamingContainer` and `ThemeProvider` standalone usage is unaffected.
+
+
+### 2026-02-26: SharedSampleObjects for sample data parity
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Use `samples/SharedSampleObjects/` to deliver identical data to both Blazor and WebForms samples. Product model and sample data centralized in SharedSampleObjects. Both sides must consume identical model data from this shared library.
+**Why:** The #1 blocker for HTML match rates is different sample data between WebForms and Blazor. SharedSampleObjects already exists and is shared by both projects.
+
+
+### 2026-02-26: Defer Login+Identity to future milestone
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Login controls + Blazor Identity integration (D-09) deferred to a future milestone. Do not schedule implementation work for Login, LoginName, LoginStatus, LoginView, ChangePassword, CreateUserWizard, or PasswordRecovery Identity integration now. Analysis preserved at `planning-docs/LOGIN-IDENTITY-ANALYSIS.md`.
+**Why:** User request — wants to delay this work and focus on other priorities first.
+
+
 ### 7. NodeIndent replaces hardcoded 20px
 
 The previously hardcoded `width:20px` in indent `<div>` elements now uses `IndentWidth` (from `TreeView.NodeIndent` parameter, default 20). No visual change for existing usage.
@@ -2434,3 +2455,207 @@ For the record, these aspects are correctly implemented:
 **By:** Forge
 **What:** Created a three-milestone plan (M11–M13) for comprehensive HTML fidelity audit comparing Web Forms gold-standard output against Blazor component output. M11: audit infrastructure + Tier 1 (simple controls) capture. M12: Tier 2 (data controls) with normalization pipeline. M13: Tier 3 (JS-coupled) + remaining controls + master audit report. The existing M12 (Migration Analysis Tool PoC) has been renumbered to M14. The previously planned M11 (Skins & Themes Implementation) is deferred to M15+.
 **Why:** Jeff directed that HTML output fidelity verification is the foundation the rest of the project depends on. At 51/53 components, we've never systematically verified that Blazor output matches Web Forms output. The audit must complete before building migration tooling (M14) so that tool can reference verified HTML fidelity data. The three-tier phasing (simple → data → JS-coupled) minimizes risk by proving infrastructure on easy controls first.
+
+### 2026-02-26: IIS Express setup script for BeforeWebForms HTML audit
+**By:** Cyclops
+**What:** Created `scripts/Setup-IISExpress.ps1`  automates BeforeWebForms sample app setup for IIS Express with dynamic compilation. Key design: CodeBehind-to-CodeFile conversion is temporary (reverted via `-Revert` switch using git checkout), NuGet packages restored to `src/packages/`, Roslyn compilers copied to `bin/roslyn/`, nuget.exe downloaded on demand, fully idempotent.
+**Why:** The HTML audit requires running the BeforeWebForms sample app under IIS Express to capture gold-standard Web Forms HTML output. Manual setup was error-prone and undocumented.
+
+### 2026-02-26: Intentional divergence registry (D-01 through D-10)
+**By:** Forge
+**What:** Created `planning-docs/DIVERGENCE-REGISTRY.md` with 10 documented intentional divergences covering ID mangling, PostBack mechanisms, ViewState, WebResource.axd, Chart rendering, Menu table mode, TreeView JS, Calendar selection, Login infrastructure, and Validator scripts. Each entry documents affected controls, divergence description, category, reason, CSS/JS impact, and normalization rules.
+**Why:** Without a pre-defined registry, auditors would repeatedly investigate platform-level differences that can never be replicated in Blazor. The registry provides normalization rules for the audit pipeline and classification guidance for audit reports.
+
+### 2026-02-26: Decision: NamingContainer inherits BaseWebFormsComponent, not BaseStyledComponent
+
+**By:** Cyclops
+**Date:** 2026-02-26
+**Task:** D-01
+
+## What
+
+`NamingContainer` inherits from `BaseWebFormsComponent` and renders no HTML of its own — only `@ChildContent`. It relies on the existing `BaseWebFormsComponent` constructor to cascade itself as `ParentComponent`, which `ComponentIdGenerator` already walks. `UseCtl00Prefix` is handled in `ComponentIdGenerator.GetClientID` by inserting "ctl00" before the NamingContainer's ID in the parts list when the flag is true.
+
+## Why
+
+- **No HTML output:** NamingContainer is a structural/scoping component like `PlaceHolder`, not a visual control. `BaseStyledComponent` would add unused style properties (`CssClass`, `Style`, `BackColor`, etc.) that have no rendering target.
+- **Parent cascading already works:** `BaseWebFormsComponent`'s constructor wraps every component's render tree in a `CascadingValue<BaseWebFormsComponent>` named `"ParentComponent"`. This means NamingContainer automatically participates in the parent hierarchy with zero additional wiring — no need for a separate `CascadingValue Name="NamingContainer"` as initially suggested.
+- **UseCtl00Prefix in ComponentIdGenerator:** Rather than creating a virtual parent component or overriding ID properties, the cleanest approach was a 5-line addition to `ComponentIdGenerator.GetClientID` that checks `current is NamingContainer nc && nc.UseCtl00Prefix` during the hierarchy walk. This keeps the NamingContainer component simple and the ID generation logic centralized.
+
+## Alternatives Considered
+
+1. **Separate CascadingValue in razor template** — Unnecessary since BaseWebFormsComponent already cascades.
+2. **Internal parent component for ctl00** — Over-engineered; modifying ComponentIdGenerator is simpler.
+3. **Override ID property getter** — Would break the component's own ID, causing confusion.
+
+
+### 2026-02-26: D-06: Menu RenderingMode=Table — Whitespace in Table Elements
+
+**Decision by:** Cyclops  
+**Date:** 2026-02-26  
+**Status:** Implemented
+
+## Context
+
+Adding `RenderingMode=Table` to the Menu component required rendering `<table>/<tr>/<td>` structures instead of `<ul>/<li>`. The straightforward Razor template approach produced whitespace (newlines, tabs) between `<tr>` and `<td>` elements from null RenderFragment expressions and Razor formatting.
+
+## Problem
+
+AngleSharp (used by bUnit for DOM assertions) foster-parents `<td>` elements out of `<tr>` when whitespace text nodes appear between them in table parsing context. This caused all table-mode DOM-query-based tests to fail even though the raw Blazor markup was structurally correct.
+
+## Decision
+
+- Table-mode rendering in `Menu.razor` and `MenuItem.razor` uses inline/compact Razor to eliminate whitespace between table structure elements (`<tr>`, `<td>`).
+- Style RenderFragment parameters (`DynamicMenuStyleContent`, etc.) are rendered in a separate `<CascadingValue>` block outside the `<table>` for table mode, keeping the table interior clean.
+- This is a rendering-layer concern only; the component API (`RenderingMode` parameter, `MenuRenderingMode` enum) is clean and straightforward.
+
+## Alternatives Considered
+
+1. **RenderTreeBuilder in code-behind** — Would avoid whitespace entirely but adds complexity and diverges from the Razor template pattern used by all other components.
+2. **Markup string assertions in tests** — Would work around AngleSharp but makes tests fragile and less readable.
+
+## Impact
+
+- No impact on existing List mode rendering (zero changes to that path).
+- 4 new tests validate both rendering modes and both orientations.
+- All 1257+ tests pass with 0 regressions.
+
+
+### 2026-02-26: Decision: Login Controls + Blazor Identity Integration Strategy (D-09)
+
+**Date:** 2026-02-27
+**By:** Forge
+**Task:** D-09
+
+## Context
+
+The project has 7 login-related Web Forms controls implemented as Blazor components (Login, LoginName, LoginStatus, LoginView, ChangePassword, CreateUserWizard, PasswordRecovery). All are "visual shells" — they render correct Web Forms HTML structure but don't connect to ASP.NET Core Identity. This analysis determines how to bridge that gap.
+
+## Key Findings
+
+1. **LoginName and LoginView already work** — they correctly read `AuthenticationStateProvider` for display purposes. Both need a fix to re-render on auth state changes (currently read once in `OnInitializedAsync`).
+
+2. **The HttpContext problem is the critical constraint.** `SignInManager` operations (sign-in, sign-out) require `HttpContext` for cookie manipulation, which is unavailable in Blazor Server interactive mode and Blazor WebAssembly. Direct `SignInManager` calls from components will fail. Redirect-based flows (navigate to a server endpoint) are the standard solution.
+
+3. **UserManager operations work directly.** `ChangePasswordAsync()`, `CreateAsync()`, `GeneratePasswordResetTokenAsync()` do NOT require `HttpContext` and can be called from Blazor components in any hosting model.
+
+4. **All 7 controls use an event-only pattern** where the developer handles all logic in callbacks. This works but provides no built-in functionality.
+
+## Decisions
+
+### 1. Create a separate `BlazorWebFormsComponents.Identity` NuGet package
+
+The core package must NOT depend on `Microsoft.AspNetCore.Identity`. The Identity package provides pre-built handler implementations and server endpoints.
+
+### 2. Use handler delegate pattern in core package
+
+Each control gets optional `Func<>` handler delegate parameters (e.g., `AuthenticateHandler`, `ChangePasswordHandler`). When set, the component calls the handler instead of relying on event-only patterns. When not set, existing behavior is preserved. **Zero breaking changes.**
+
+### 3. Priority order: LoginName → LoginView → LoginStatus → Login → ChangePassword → CreateUserWizard → PasswordRecovery
+
+The first three are Small complexity (1-2 days each). Login and ChangePassword are Medium (3-5 days). CreateUserWizard and PasswordRecovery are Large (5-10 days).
+
+### 4. Auth state re-render fix is cross-cutting
+
+LoginName, LoginView, LoginStatus, and Login all need to subscribe to `AuthenticationStateChanged` or accept `[CascadingParameter] Task<AuthenticationState>`. This should be done as a single foundational change before individual control work.
+
+### 5. Redirect-based flows for cookie operations
+
+Login and LoginStatus should get `LoginActionUrl` and `LogoutActionUrl` parameters for redirect-based sign-in/sign-out. The Identity package provides the corresponding server endpoints.
+
+## Impact
+
+- **Core package:** Additive API surface only. No breaking changes. ~4-6 weeks.
+- **Identity package:** New package. ~3-4 weeks after core changes.
+- **Full analysis:** `planning-docs/LOGIN-IDENTITY-ANALYSIS.md`
+
+
+### 2026-02-26: Decision: Data Control Divergence Analysis Results
+
+**Date:** 2026-02-27
+**By:** Forge (Lead / Web Forms Reviewer)
+**Status:** Pending Review
+**Relates to:** M13 HTML Fidelity Audit — Data Controls (DataList, GridView, ListView, Repeater)
+
+## Context
+
+The M13 audit captured WebForms and Blazor HTML for 4 data controls showing 389 total line differences (DataList 110, GridView 33, ListView 182, Repeater 64). A line-by-line analysis was performed to classify each divergence.
+
+## Decision
+
+### 1. Sample Parity is the dominant cause of divergences
+
+The majority of differences (estimated 90%+) are caused by the Blazor sample pages using different templates, styles, columns, and data formats than the corresponding Web Forms samples. The Blazor samples must be rewritten to match the Web Forms samples before meaningful fidelity comparison is possible.
+
+**Implication:** Items 6–10 in the action plan (Jubilee tasks) are prerequisites for accurate audit results.
+
+### 2. Five genuine component bugs identified
+
+| Bug | Control | Description | Priority |
+|-----|---------|-------------|----------|
+| BUG-DL-2 | DataList | Missing `itemtype` attribute | P2 |
+| BUG-DL-3 | DataList | `border-collapse:collapse` unconditionally rendered | P1 |
+| BUG-GV-1 | GridView | Default GridLines may not match WF default (Both) | P1 |
+| BUG-GV-2 | GridView | Missing default `border-collapse:collapse` | P1 |
+| BUG-GV-3 | GridView | Empty `<th>` instead of `&nbsp;` for blank headers | P2 |
+
+### 3. ListView and Repeater have zero component bugs
+
+All differences in these two controls are entirely sample parity issues. The components render templates correctly.
+
+### 4. Normalization pipeline gaps
+
+- Blazor output for data controls has not been normalized (directories missing under `audit-output/normalized/blazor/`)
+- `<!--!-->` Blazor rendering markers need to be stripped by the normalization pipeline (new rule needed)
+
+## Full Analysis
+
+See `planning-docs/DATA-CONTROL-ANALYSIS.md` for the complete line-by-line breakdown.
+
+## Impact
+
+- 3 P1 bugs need Cyclops fixes before M13 completion
+- 4 sample rewrites needed (Jubilee) before re-capture
+- Normalization pipeline update needed (Colossus)
+
+
+### 2026-02-26: Decision: Post-Bug-Fix Capture Results — Sample Parity is the Primary Blocker
+
+**Date:** 2026-02-26
+**Author:** Rogue (QA)
+**Status:** proposed
+**Scope:** HTML fidelity audit pipeline
+
+## Context
+
+Re-ran the full HTML capture pipeline after 14 bug fixes across 10 controls (Button, BulletedList, LinkButton, Calendar, TreeView, CheckBox, RadioButtonList, FileUpload, Image, DataList, GridView). Previous run (M13) showed 132 divergences with 0 exact matches.
+
+## Results
+
+- **All 11 targeted controls show verified structural improvements** in Blazor output
+- Exact matches: 0 → 1 (Literal-3)
+- Missing Blazor captures: 75 → 64 (11 new captures gained)
+- Calendar variants now at 55–73% word similarity (was much lower)
+- Bug fixes confirmed working: Button `<button>`→`<input>`, BulletedList span removal, LinkButton href addition, Calendar border styling, CheckBox span removal, Image longdesc removal, GridView rules/border addition
+
+## Decision
+
+**The #1 blocker for achieving meaningful match rates is sample data parity, not component bugs.**
+
+Nearly every remaining divergence is caused by the WebForms and Blazor samples using completely different text, data, IDs, styling, and configuration. Examples: Label shows "Hello World" vs "Hello, World!", Button shows "Blue Button" vs "Click me!", HyperLink links to bing.com vs github.com.
+
+### Recommended priority order:
+1. **P0:** Align Blazor sample data to match WebForms samples (could convert 20+ divergences to exact matches)
+2. **P1:** Add audit markers to 64 missing Blazor sample pages
+3. **P2:** Enhance normalizer (GUID ID stripping, empty style="" removal)
+4. **P3:** Fix remaining structural bugs (BulletedList `<ol>` for numbered, missing `list-style-type`)
+
+## Impact
+
+Without sample alignment, the pipeline cannot distinguish between "component renders wrong HTML" and "samples show different content." Any future bug-fix measurement will be equally blocked.
+
+## Evidence
+
+Full analysis: `planning-docs/POST-FIX-CAPTURE-RESULTS.md`
+Diff report: `audit-output/diff-report-post-fix.md`
+

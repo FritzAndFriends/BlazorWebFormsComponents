@@ -18,7 +18,7 @@
 		TheContent.ShouldBe("Not clicked yet!");
 
 		// Act
-		cut.Find("button").Click();
+		cut.Find("input").Click();
 
 		// Assert
 		TheContent.ShouldBe("I've been clicked");

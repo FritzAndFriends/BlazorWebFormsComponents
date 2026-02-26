@@ -22,8 +22,9 @@
 			<table accesskey="@AccessKey"
 						 cellpadding="@(CellPadding == default ? null : (int?)CellPadding)"
 						 cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)"
+						 itemtype="@GetItemTypeAttribute()"
 						 rules="@CalculatedGridLines"
-						 style="border-collapse:collapse;@CalculatedStyle"
+						 style="@GetTableStyle()"
 						 tabindex="@(TabIndex == default ? null : (short?)TabIndex)"
 						 title="@ToolTip">
 				<tbody>
@@ -94,7 +95,7 @@
 			</table>
 			break;
 		case FlowRepeatLayout f:
-			<span accesskey="@AccessKey" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
+			<span accesskey="@AccessKey" itemtype="@GetItemTypeAttribute()" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
 				@if (HeaderTemplate != null && ShowHeader)
 				{
 					<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />

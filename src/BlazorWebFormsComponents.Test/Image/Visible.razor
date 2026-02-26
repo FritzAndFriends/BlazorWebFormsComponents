@@ -4,7 +4,7 @@
 public void Image_Visible_True_RendersImage()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" Visible="true" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" />);
 }
 
 [Fact]

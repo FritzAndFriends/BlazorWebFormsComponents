@@ -7,6 +7,7 @@
 
 <p>Here is a simple datalist bound to a collection of widgets.</p>
 
+<div data-audit-control="DataList">
 		<DataList @ref="simpleDataList"
 							runat="server"
 							EnableViewState="false"
@@ -21,6 +22,7 @@
                     @Item.Name - @Item.Price.ToString("c")
 			</ItemTemplate>
 		</DataList>
+</div>
 
 @code {
 

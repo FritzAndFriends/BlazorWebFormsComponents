@@ -19,7 +19,7 @@
 		TheContent.ShouldBe("No Command yet!");
 
 		// Act
-		cut.Find("button").Click();
+		cut.Find("input").Click();
 
 		// Assert
 		TheContent.ShouldBe("Command 'Foo' : 'bar'");

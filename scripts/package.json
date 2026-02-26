@@ -1,0 +1,14 @@
+{
+  "name": "blazor-webforms-audit-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright scripts for capturing rendered HTML from WebForms and Blazor sample pages",
+  "scripts": {
+    "capture:webforms": "node capture-html.mjs",
+    "capture:blazor": "node capture-blazor.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}

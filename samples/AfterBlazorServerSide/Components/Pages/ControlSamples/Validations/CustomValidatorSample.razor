@@ -3,6 +3,7 @@
 <h3>Custom Validator</h3>
 @using BlazorWebFormsComponents.Validations;
 
+<div data-audit-control="CustomValidator-1">
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
 
 	<label>Write something that starts with 'A'</label>
@@ -15,6 +16,7 @@
 	<button type="submit">Submit</button>
 
 </EditForm>
+</div>
 
 @code {
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();

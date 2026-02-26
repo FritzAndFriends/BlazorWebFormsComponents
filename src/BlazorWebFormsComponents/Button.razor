@@ -2,7 +2,7 @@
 
 @if (Visible)
 {
-<button type="@CalculatedButtonType"
+<input type="@CalculatedButtonType"
 				id="@ClientID"
 				@onclick="Click"
 				OnClientClick="@OnClientClick"
@@ -11,5 +11,5 @@
 				disabled="@(Enabled ? null : "disabled")"
 				title="@ToolTip"
 				accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)"
-				>@Text</button>
+				value="@Text" />
 }

@@ -262,12 +262,12 @@ namespace BlazorWebFormsComponents
 
 		private string GetTableStyle()
 		{
-			var baseStyle = Style ?? "";
-			if (ShowGridLines)
+			var style = "border-width:1px;border-style:solid;border-collapse:collapse;";
+			if (!string.IsNullOrWhiteSpace(Style))
 			{
-				baseStyle += "border-collapse:collapse;";
+				style += Style;
 			}
-			return string.IsNullOrWhiteSpace(baseStyle) ? null : baseStyle;
+			return style;
 		}
 
 		private string GetBorder()
@@ -303,6 +303,16 @@ namespace BlazorWebFormsComponents
 				Enums.DayNameFormat.Shortest => CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(day),
 				_ => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(day)
 			};
+		}
+
+		private string GetFullDayName(DayOfWeek day)
+		{
+			return CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day);
+		}
+
+		private string GetDayTitle(DateTime date)
+		{
+			return date.ToString("MMMM d", CultureInfo.CurrentCulture);
 		}
 
 		private static string SafeSubstring(string str, int start, int length)
@@ -459,6 +469,7 @@ namespace BlazorWebFormsComponents
 
 		private string GetDayCellStyle(DateTime date)
 		{
+			const string widthStyle = "width:14%;";
 			var isToday = date.Date == DateTime.Today;
 			var isSelected = _selectedDays.Contains(date.Date);
 			var isOtherMonth = date.Month != _visibleMonth.Month;
@@ -467,25 +478,26 @@ namespace BlazorWebFormsComponents
 			if (isSelected)
 			{
 				var style = SelectedDayStyle?.ToString();
-				if (!string.IsNullOrEmpty(style)) return style;
+				if (!string.IsNullOrEmpty(style)) return widthStyle + style;
 			}
 			if (isToday)
 			{
 				var style = TodayDayStyle?.ToString();
-				if (!string.IsNullOrEmpty(style)) return style;
+				if (!string.IsNullOrEmpty(style)) return widthStyle + style;
 			}
 			if (isOtherMonth)
 			{
 				var style = OtherMonthDayStyle?.ToString();
-				if (!string.IsNullOrEmpty(style)) return style;
+				if (!string.IsNullOrEmpty(style)) return widthStyle + style;
 			}
 			if (isWeekend)
 			{
 				var style = WeekendDayStyle?.ToString();
-				if (!string.IsNullOrEmpty(style)) return style;
+				if (!string.IsNullOrEmpty(style)) return widthStyle + style;
 			}
 
-			return DayStyle?.ToString();
+			var dayStyle = DayStyle?.ToString();
+			return string.IsNullOrEmpty(dayStyle) ? widthStyle : widthStyle + dayStyle;
 		}
 
 		private static string GetEffectiveCss(TableItemStyle tableItemStyle, string legacyCss)

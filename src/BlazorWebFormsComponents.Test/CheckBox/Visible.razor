@@ -7,7 +7,7 @@
 		var cut = Render(@<CheckBox Text="Visible" Visible="true" />);
 
 		// Assert
-		cut.Find("span").ShouldNotBeNull();
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
 	}
 
 	[Fact]

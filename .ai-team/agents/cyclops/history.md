@@ -94,3 +94,33 @@
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+### P1 Bug Fixes — Button and BulletedList
+
+- **Button `<input>` rendering:** Button.razor already rendered `<input type="submit" value="@Text" />` (fixed in prior commit `a5011ff`). `UseSubmitBehavior` (default true) controls `type="submit"` vs `type="button"`. `CausesValidation` no longer affects HTML type attribute — only validation behavior.
+- **BulletedList `<span>` removal:** Removed `<span>` wrapping in all three `DisplayMode` branches (Text, HyperLink disabled fallback, LinkButton disabled fallback). Items now render as `<li>Item</li>` for text and `<li><a>Item</a></li>` for links, matching WebForms output.
+- **BulletedList `<ol>` for ordered styles:** Already correct — `IsOrderedList` property correctly returns `true` for Numbered, LowerAlpha, UpperAlpha, LowerRoman, UpperRoman. `ListStyleType` correctly maps to CSS values.
+- **Test updates:** Changed 27 test files — all `Find("button")` / `FindAll("button")` selectors updated to `Find("input")` or `Find("input[type=submit]")` for Button component, and `li span` assertions changed to `li` text content for BulletedList.
+- **All 1253 tests pass**, 0 regressions.
+
+### Calendar Structural Bug Fixes (HTML Audit)
+
+- **`<tbody>` wrapper:** Added `<tbody>` around all `<tr>` elements inside the calendar `<table>`, matching WebForms structural output.
+- **`width:14%` on day cells:** `GetDayCellStyle()` now prepends `width:14%;` to all day cell styles, ensuring equal-width day columns.
+- **Day `title` attributes:** Added `GetDayTitle(DateTime)` method returning "MonthName Day" format (e.g., "January 25"). Applied as `title` on day `<a>` links for accessibility.
+- **Full `abbr` day names:** Added `GetFullDayName(DayOfWeek)` method that always returns the full day name (e.g., "Sunday") for the `abbr` attribute on `<th>` headers, regardless of `DayNameFormat`. Display text still uses the configured format.
+- **Day header `align="center"`:** Added `align="center"` to `<th>` day header elements matching WebForms output.
+- **Root table default styles:** `GetTableStyle()` now always includes `border-width:1px;border-style:solid;border-collapse:collapse;` as default styles, matching WebForms default rendering.
+- **Navigation sub-table:** Restructured the title/navigation row from flat `<td>` cells to a `<td colspan="7">` containing a nested `<table>` with prev/title/next cells (`width:15%/70%/15%`), matching WebForms sub-table pattern. Added `title="Go to the previous month"` and `title="Go to the next month"` on nav links.
+- **Files modified:** `Calendar.razor`, `Calendar.razor.cs`.
+- **All 1253 tests pass**, 0 regressions.
+
+ Team update (2026-02-26): Login+Identity strategy: handler delegates in core, separate Identity NuGet package, redirect-based cookie flows  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: 3 P1 bugs in DataList/GridView need fixes before M13 completion  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture: sample data alignment is P0, structural bugs are P3  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule implementation  decided by Jeffrey T. Fritz

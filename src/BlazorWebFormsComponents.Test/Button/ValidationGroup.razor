@@ -57,7 +57,7 @@
 		);
 
 		// Act - Click the Email validation button
-		var buttons = cut.FindAll("button");
+		var buttons = cut.FindAll("input[type=submit]");
 		buttons[0].Click(); // First button - Validate Email
 
 		// Assert - Only email validator should have been triggered
@@ -90,7 +90,7 @@
 		);
 
 		// Act - Click the button without ValidationGroup
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.Click();
 
 		// Assert - The button click handler should have been invoked
@@ -119,7 +119,7 @@
 		);
 
 		// Act - Click button without ValidationGroup
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.Click();
 
 		// Assert - Button click handler is still called, but validator with EmailGroup should NOT validate
@@ -152,7 +152,7 @@
 		);
 
 		// Act - Click button for Group1
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.Click();
 
 		// Assert - Verify button type is correct (CausesValidation=true makes it submit type)

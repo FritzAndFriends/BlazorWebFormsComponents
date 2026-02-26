@@ -91,7 +91,12 @@
 		</td>
 	</tr>
 </table>
+@if (ChildContent != null)
+{
+<div>
 <CascadingValue Name="ParentTreeNode" Value="this">
 	@ChildContent
 </CascadingValue>
+</div>
+}
 }

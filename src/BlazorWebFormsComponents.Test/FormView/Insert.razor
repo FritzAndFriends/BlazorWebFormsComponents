@@ -22,11 +22,11 @@ public void FormView_InsertButton_EntersInsertMode()
 			<label>@Item.Name</label>
 		</InsertItemTemplate>
 	</FormView>);
-	var insertButton = cut.Find("button");
+	var insertButton = cut.Find("input[type=submit]");
 	insertButton.ShouldNotBeNull();
 	insertButton.Click();
 	cut.Find("label").ShouldNotBeNull();
-	cut.FindAll("button").Count().ShouldBe(0);
+	cut.FindAll("input[type=submit]").Count().ShouldBe(0);
 }
 
 		void WidgetFormView_PageIndexChanging()

@@ -1,5 +1,6 @@
 @page "/ControlSamples/GridView/Sorting"
 @using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
 
 <PageTitle>GridView - Sorting</PageTitle>
 
@@ -31,15 +32,7 @@
 
     protected override void OnInitialized()
     {
-        Products = Enumerable.Range(1, 25)
-            .Select(i => new Product
-            {
-                Id = i,
-                Name = GetProductName(i),
-                Price = Math.Round(4.99m + (i * 1.5m), 2),
-                Category = i % 3 == 0 ? "Electronics" : i % 3 == 1 ? "Books" : "Clothing"
-            })
-            .ToList();
+        Products = Product.GetProducts(25);
     }
 
     private void HandleSorting(GridViewSortEventArgs e)
@@ -60,43 +53,5 @@
                 : Products.OrderByDescending(p => p.Category).ToList(),
             _ => Products
         };
-    }
-
-    private static string GetProductName(int index) => index switch
-    {
-        1 => "Laptop Stand",
-        2 => "USB Cable",
-        3 => "Wireless Mouse",
-        4 => "Notebook",
-        5 => "Pen Set",
-        6 => "Monitor Arm",
-        7 => "Headphones",
-        8 => "Desk Lamp",
-        9 => "Keyboard",
-        10 => "Webcam",
-        11 => "Phone Case",
-        12 => "Tablet Cover",
-        13 => "Charger",
-        14 => "Backpack",
-        15 => "Water Bottle",
-        16 => "Speaker",
-        17 => "Mouse Pad",
-        18 => "Screen Protector",
-        19 => "Power Bank",
-        20 => "Cable Organizer",
-        21 => "Stylus Pen",
-        22 => "Card Reader",
-        23 => "USB Hub",
-        24 => "Desk Mat",
-        25 => "Wrist Rest",
-        _ => $"Product {index}"
-    };
-
-    public class Product
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public string Category { get; set; }
     }
 }

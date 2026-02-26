@@ -10,7 +10,9 @@ matching the behavior of the ASP.NET Web Forms Label control.</p>
 
 <h3>Basic Label</h3>
 
-<Label Text="Hello, World!" />
+<div data-audit-control="Label-1">
+    <Label Text="Hello, World!" />
+</div>
 
 <pre><code>&lt;Label Text="Hello, World!" /&gt;</code></pre>
 
@@ -18,9 +20,11 @@ matching the behavior of the ASP.NET Web Forms Label control.</p>
 
 <h3>Styled Label</h3>
 
-<Label Text="Important notice"
+<div data-audit-control="Label-2">
+    <Label Text="Important notice"
        CssClass="text-danger fw-bold"
        ForeColor="WebColor.Red" />
+</div>
 
 <pre><code>&lt;Label Text="Important notice"
        CssClass="text-danger fw-bold"
@@ -35,7 +39,9 @@ element instead of a <code>&lt;span&gt;</code>. This associates the label with a
 clicking the label focuses the input, and screen readers announce the relationship.</p>
 
 <div class="mb-3">
-    <Label Text="Email Address:" AssociatedControlID="emailInput" CssClass="form-label" />
+    <div data-audit-control="Label-3">
+        <Label Text="Email Address:" AssociatedControlID="emailInput" CssClass="form-label" />
+    </div>
     <TextBox id="emailInput"
              TextMode="TextBoxMode.Email"
              Placeholder="you@example.com"
