@@ -30,14 +30,14 @@
       "description": "Replace javascript:__doPostBack(...) hrefs with [postback] placeholder (D-02, D-08)",
       "enabled": true,
       "pattern": "href=[\"']javascript:__doPostBack\\([^)]*\\)[\"']",
-      "replacement": "href=\"[postback]\"",
+      "replacement": "",
       "flags": "gi"
     },
     {
       "id": "strip-webforms-ids",
-      "description": "Normalize ctl00_..._Name id attributes to just Name — keeps last segment only (D-01)",
+      "description": "Normalize ctl00_..._Name id attributes to just Name — keeps last segment only. Handles optional prefix segments before ctl (e.g., MainContent_ctl00_GridView1_ctl01_lnkSort → lnkSort) (D-01)",
       "enabled": true,
-      "pattern": "id=[\"']ctl\\d+(?:_[A-Za-z0-9]+)*_([A-Za-z0-9]+)[\"']",
+      "pattern": "id=[\"'](?:[A-Za-z0-9]+_)*ctl\\d+(?:_[A-Za-z0-9]+)*_([A-Za-z0-9]+)[\"']",
       "replacement": "id=\"$1\"",
       "flags": "gi"
     },
@@ -50,19 +50,19 @@
       "flags": "gi"
     },
     {
+      "id": "strip-content-prefix-ids",
+      "description": "Strip ContentPlaceHolder prefixes (MainContent_, ContentPlaceHolder1_) from id attributes (D-01)",
+      "enabled": true,
+      "pattern": "id=[\"'](?:MainContent|ContentPlaceHolder\\d*)_([^\"']+)[\"']",
+      "replacement": "id=\"$1\"",
+      "flags": "gi"
+    },
+    {
       "id": "strip-validator-attributes",
       "description": "Remove Web Forms validator-specific attributes: evaluationfunction, controltovalidate, initialvalue, etc. (D-10)",
       "enabled": true,
       "pattern": "\\b(evaluationfunction|controltovalidate|initialvalue|validationexpression|maximumvalue|minimumvalue|valuetocompare|operator|display|errormessage|validationgroup|validateemptytext|setfocusonerror|enabled)=[\"'][^\"']*[\"']",
       "replacement": "",
-      "flags": "gi"
-    },
-    {
-      "id": "strip-treeview-onclick",
-      "description": "Normalize TreeView onclick=TreeView_ToggleNode(...) attributes to placeholder (D-07)",
-      "enabled": true,
-      "pattern": "onclick=[\"']TreeView_ToggleNode\\([^)]*\\)[\"']",
-      "replacement": "onclick=\"[treeview-toggle]\"",
       "flags": "gi"
     },
     {
@@ -80,6 +80,46 @@
       "pattern": "<!--!-->",
       "replacement": "",
       "flags": "g"
+    },
+    {
+      "id": "strip-blazor-enhanced-nav",
+      "description": "Strip Blazor enhanced navigation attributes (data-enhance-nav, data-enhance-id) and @-prefixed Razor artifacts",
+      "enabled": true,
+      "pattern": "\\b(data-enhance[-a-z]*)(=[\"'][^\"']*[\"'])?",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-treeview-onclick",
+      "description": "Normalize TreeView onclick=TreeView_ToggleNode(...) attributes to placeholder (D-07)",
+      "enabled": true,
+      "pattern": "onclick=[\"']TreeView_ToggleNode\\([^)]*\\)[\"']",
+      "replacement": "onclick=\"[treeview-toggle]\"",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-event-handlers",
+      "description": "Strip all on* event handler attributes (onclick, onchange, onblur, etc.) from both Web Forms and Blazor output",
+      "enabled": true,
+      "pattern": "\\bon[a-z]+=(?:\"[^\"]*\"|'[^']*')",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-form-action",
+      "description": "Strip form action attributes (Web Forms emits action='Default.aspx', Blazor differs)",
+      "enabled": true,
+      "pattern": "\\baction=[\"'][^\"']*[\"']",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-table-legacy-attrs",
+      "description": "Strip table-specific legacy attributes: cellpadding, cellspacing, rules, border (Web Forms defaults not always in Blazor)",
+      "enabled": true,
+      "pattern": "\\b(cellpadding|cellspacing|rules|border)=[\"'][^\"']*[\"']",
+      "replacement": "",
+      "flags": "gi"
     },
     {
       "id": "normalize-self-closing",

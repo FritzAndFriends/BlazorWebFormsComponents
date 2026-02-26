@@ -6,6 +6,14 @@
  * Normalizes captured HTML files so that known, intentional divergences
  * (see planning-docs/DIVERGENCE-REGISTRY.md) are stripped before comparison.
  *
+ * M12-02 Enhancement (Tier 2 Data Controls):
+ *   - Pager/sort link normalization: postback hrefs fully stripped (not replaced)
+ *   - Auto-generated ID normalization: handles MainContent_ prefixes and _ctl01_ middle segments
+ *   - Event handler stripping: all on* attributes removed
+ *   - Blazor enhanced navigation attribute stripping (data-enhance-*)
+ *   - Form action attribute stripping
+ *   - Table legacy attribute stripping (cellpadding, cellspacing, rules, border)
+ *
  * Usage:
  *   node scripts/normalize-html.mjs --input <file-or-dir> --output <file-or-dir>
  *   node scripts/normalize-html.mjs --compare <dir1> <dir2> --report <report.md>
