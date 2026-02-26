@@ -1,0 +1,26 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void FileUpload_WithID_RendersExactId()
+	{
+		// WebForms renders the developer-set ID with no GUID suffix
+		var cut = Render(@<FileUpload ID="myUpload" />);
+
+		var input = cut.Find("input[type='file']");
+		input.GetAttribute("id").ShouldBe("myUpload");
+	}
+
+	[Fact]
+	public void FileUpload_WithoutID_NoIdAttribute()
+	{
+		// WebForms does not render an id when none is set
+		var cut = Render(@<FileUpload />);
+
+		var input = cut.Find("input[type='file']");
+		input.HasAttribute("id").ShouldBeFalse();
+	}
+
+}

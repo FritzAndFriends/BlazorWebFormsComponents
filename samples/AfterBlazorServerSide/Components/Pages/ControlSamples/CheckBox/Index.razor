@@ -8,18 +8,18 @@
 
 <h3>Basic CheckBox</h3>
 <div data-audit-control="CheckBox-1">
-    <CheckBox Text="I agree to terms" @bind-Checked="agreed" />
+    <CheckBox Text="Accept Terms" @bind-Checked="agreed" />
 </div>
 <p>Agreed: <strong>@agreed</strong></p>
 
 <h3>Pre-checked CheckBox</h3>
 <div data-audit-control="CheckBox-2">
-    <CheckBox Text="Already checked" Checked="true" />
+    <CheckBox Text="Subscribe" Checked="true" />
 </div>
 
-<h3>Text Alignment</h3>
+<h3>With AutoPostBack</h3>
 <div data-audit-control="CheckBox-3">
-    <CheckBox Text="Label on right (default)" />
+    <CheckBox Text="Enable Feature" AutoPostBack="true" />
 </div>
 <br />
 <CheckBox Text="Label on left" TextAlign="TextAlign.Left" />

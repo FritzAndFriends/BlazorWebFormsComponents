@@ -63,3 +63,37 @@ Created three-milestone plan for HTML fidelity audit per Jeff's directive. Key d
  Team update (2026-02-26): Menu RenderingMode=Table implemented with inline Razor for AngleSharp compatibility  decided by Cyclops
 
  Team update (2026-02-26): WebFormsPage unified wrapper design accepted and consolidated into decisions.md  decided by Jeffrey T. Fritz, Forge
+
+### Summary: M15 HTML Fidelity Strategy (2026-02-28)
+
+Post-PR #377 strategic assessment. PR #377 (M11–M14) merged to upstream/dev with full HTML audit (132 comparisons), 14 bug fixes, post-fix re-run (131 divergences, 1 exact match — Literal-3), WebFormsPage, NamingContainer.
+
+**Key findings:**
+1. The "1 exact match" number is misleading — vast majority of divergences are sample data differences, not component bugs. Estimated 15–20 controls would achieve exact match with sample alignment alone.
+2. 5 remaining fixable structural bugs: BulletedList (`<ol>` + `list-style-type`), LinkButton (`class` pass-through), Image (`longdesc`), FileUpload (GUID leak), CheckBox (`<span>` wrapper verification).
+3. 64 variants still missing Blazor captures — 25 of these just need `data-audit-control` markers on existing pages.
+4. 4 data controls (DataList, GridView, ListView, Repeater) need line-by-line investigation — mixed structural + sample parity issues.
+5. Calendar is closest complex control at 73% — needs style pass-through, day padding, title attribute work.
+
+**M15 scope recommended:** 12 work items covering: (1) P0 sample data alignment (~22 false positives eliminated), (2) P1 remaining bug fixes (BulletedList, LinkButton), (3) P2 fixes (Image, FileUpload, CheckBox, stable IDs), (4) P2 new Blazor markers (~25 new comparisons), (5) P3 normalizer enhancements, data control investigation, and full pipeline re-run. Target: ≥15 exact matches (up from 1).
+
+**Pixel-perfect realism:** ~13–15 controls can achieve exact normalized match. ~10 more can hit >90%. TreeView, Chart, Menu Table-mode, and event infrastructure are permanently divergent. Recommended definition: structural match after normalization of intentional divergences D-01 through D-10+.
+
+**New divergence candidates:** D-11 (GUID IDs — recommend fix, not register), D-12 (boolean attribute format — register as intentional), D-13 (Calendar day padding — recommend fix), D-14 (Calendar style pass-through — fix progressively).
+
+📌 Decision filed: `.ai-team/decisions/inbox/forge-m15-html-fidelity-strategy.md` — M15 scope proposal with 12 work items, 2–3 week estimate, target ≥15 exact matches.
+
+### Summary: M15-10 Data Control Deep Investigation (2026-02-28)
+
+Line-by-line classification of HTML divergences in DataList (106 lines), GridView (20 lines), ListView (106 lines), and Repeater (62 lines) using post-fix normalized captures.
+
+**Key findings:**
+1. 3 of 5 bugs from M13 analysis are now FIXED (PR #377): DataList border-collapse, GridView GridLines defaults, GridView border-collapse.
+2. 4 remaining genuine bugs: GridView `UseAccessibleHeader` default (false→should be true), GridView `&amp;nbsp;` encoding (ternary expression type issue), GridView `<thead>` vs WF's `<tbody>` for header rows, DataList missing `itemtype` from generic parameter.
+3. Sample parity is 22 of 26 findings — the Blazor samples use completely different templates, styles, and data formats. ListView and Repeater have ZERO component bugs; all divergences are sample authoring differences.
+4. After sample alignment alone: ListView and Repeater would achieve exact match. DataList would drop from 106 to ~5 diff lines. GridView from 20 to ~8.
+5. 2 normalizer gaps identified: inconsistent `<div>` wrapper stripping, empty `style=""` attributes not stripped.
+
+**New divergence candidate:** D-11 (Blazor uses `<thead>` for headers, WF uses `<tbody>` by default). Needs team decision — register as intentional or fix.
+
+📌 Decision filed: `.ai-team/decisions/inbox/forge-m15-data-control-analysis.md` — Data control investigation complete; 4 remaining bugs, sample alignment is critical path.

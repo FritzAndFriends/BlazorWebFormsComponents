@@ -1,0 +1,46 @@
+@page "/ControlSamples/LoginView"
+@using BlazorWebFormsComponents.LoginControls
+
+<h2>LoginView Component</h2>
+
+<Nav />
+
+<p>
+	The <code>LoginView</code> component displays different content depending on whether
+	the user is authenticated. Use <code>AnonymousTemplate</code> and <code>LoggedInTemplate</code>
+	to define the content for each state.
+</p>
+
+<h3>LoginView with Templates</h3>
+<div data-audit-control="LoginView-1">
+<LoginView>
+	<AnonymousTemplate>
+		<p>You are not logged in. Please <a href="#">sign in</a> to access member content.</p>
+	</AnonymousTemplate>
+	<LoggedInTemplate>
+		<p>Welcome back! You are logged in.</p>
+	</LoggedInTemplate>
+</LoginView>
+</div>
+
+@code {
+	protected override void OnInitialized()
+	{
+		StaticAuthStateProvider.Logout();
+		base.OnInitialized();
+	}
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;LoginView&gt;<br />
+&nbsp;&nbsp;&lt;AnonymousTemplate&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;You are not logged in.&lt;/p&gt;<br />
+&nbsp;&nbsp;&lt;/AnonymousTemplate&gt;<br />
+&nbsp;&nbsp;&lt;LoggedInTemplate&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;Welcome back!&lt;/p&gt;<br />
+&nbsp;&nbsp;&lt;/LoggedInTemplate&gt;<br />
+&lt;/LoginView&gt;
+</code>

@@ -101,3 +101,11 @@ Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering 
 
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+
+## Summary: PR #377 DetailsView Integration Test Fix (2026-02-26)
+
+Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs after DetailsView sample pages migrated from Customer to Product model (SharedSampleObjects.Models.Product). Changes: "Customer Details"→"Product Details" (Styles), "Customer Record"→"Product Record" (Caption), "No customers found."→"No products found." (EmptyData), Customer field names→Product field names in EditMode assertion message. All 7 DetailsView integration tests passing.
+
+## Learnings
+
+- When sample data models change (e.g., Customer→Product), integration test assertions referencing model-specific text (header text, empty data messages, caption text, field name lists in assertion messages) must be updated in lockstep. Smoke tests won't catch these because they only verify page loads without errors — interactive tests with text-matching assertions are the ones that break.

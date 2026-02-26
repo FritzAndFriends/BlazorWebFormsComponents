@@ -1,0 +1,27 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void CheckBox_WithText_NoSpanWrapper()
+	{
+		// WebForms CheckBox renders <input> and <label> directly, no <span> wrapper
+		var cut = Render(@<CheckBox Text="Accept terms" />);
+
+		Should.Throw<Bunit.ElementNotFoundException>(() => cut.Find("span"));
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+		cut.Find("label").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CheckBox_WithoutText_NoSpanWrapper()
+	{
+		// WebForms CheckBox without text renders just <input>, no <span> wrapper
+		var cut = Render(@<CheckBox />);
+
+		Should.Throw<Bunit.ElementNotFoundException>(() => cut.Find("span"));
+		cut.Find("input[type='checkbox']").ShouldNotBeNull();
+	}
+
+}

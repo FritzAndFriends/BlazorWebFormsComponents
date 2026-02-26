@@ -86,17 +86,11 @@ _ => null
 };
 
 /// <summary>
-/// Gets the HTML type attribute value for ordered lists.
+/// Gets the start attribute value for ordered lists, or null when the default (1) is used.
+/// WebForms only renders the start attribute when FirstBulletNumber differs from 1.
 /// </summary>
-protected string OrderedListType => BulletStyle switch
-{
-BulletStyle.Numbered => "1",
-BulletStyle.LowerAlpha => "a",
-BulletStyle.UpperAlpha => "A",
-BulletStyle.LowerRoman => "i",
-BulletStyle.UpperRoman => "I",
-_ => null
-};
+protected int? GetStartAttribute() =>
+	IsOrderedList && FirstBulletNumber != 1 ? FirstBulletNumber : null;
 
 /// <summary>
 /// Gets the combined style string including list-style customization.

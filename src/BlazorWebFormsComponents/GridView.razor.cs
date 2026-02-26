@@ -226,8 +226,9 @@ namespace BlazorWebFormsComponents
 
 		/// <summary>
 		/// Gets or sets whether header cells render with th scope="col" for accessibility.
+		/// WebForms defaults this to true.
 		/// </summary>
-		[Parameter] public bool UseAccessibleHeader { get; set; }
+		[Parameter] public bool UseAccessibleHeader { get; set; } = true;
 
 		/// <summary>
 		/// Gets or sets the cell padding for the table. -1 means the attribute is not rendered.

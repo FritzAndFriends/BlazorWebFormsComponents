@@ -12,6 +12,8 @@ else
 @code {
 	private string GetCssClassOrNull()
 	{
+		if (!Enabled)
+			return string.Concat(CssClass, " aspNetDisabled").Trim();
 		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
 	}
 }

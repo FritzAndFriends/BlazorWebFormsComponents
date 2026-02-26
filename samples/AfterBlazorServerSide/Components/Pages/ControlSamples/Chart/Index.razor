@@ -8,6 +8,7 @@
 
 <p>The Chart component renders data visualizations using Chart.js. The default chart type is <strong>Column</strong>, which displays vertical bars for comparing values across categories.</p>
 
+<div data-audit-control="Chart">
 <Chart ChartWidth="600px" ChartHeight="400px">
 	<ChartTitle Text="Monthly Sales — 2025" />
 	<ChartLegend Name="Default" />
@@ -19,6 +20,7 @@
 		ChartArea="MainArea"
 		Points="@SalesPoints" />
 </Chart>
+</div>
 
 @code {
 

@@ -5,11 +5,11 @@
 <h2>Literal Component</h2>
 
 <div data-audit-control="Literal-1">
-    <Literal Mode="LiteralMode.PassThrough" Text="<b>Literal</b>"></Literal>
+    <Literal Mode="LiteralMode.PassThrough" Text="This is <b>literal</b> content."></Literal>
 </div>
 <br/>
 <div data-audit-control="Literal-2">
-    <Literal Text="<b>Literal</b>"></Literal>
+    <Literal Mode="LiteralMode.Encode" Text="This is <b>encoded</b> content."></Literal>
 </div>
 <br/>
 <div data-audit-control="Literal-3">
@@ -22,7 +22,7 @@
 Code:
 </p>
 <code>
-&lt;Literal Mode="LiteralMode.PassThrough" Text="&lt;b&gt;Literal&lt;/b&gt;"&gt;&lt;/Literal&gt;
+&lt;Literal Mode="LiteralMode.PassThrough" Text="This is &lt;b&gt;literal&lt;/b&gt; content."&gt;&lt;/Literal&gt;
 <br/>
-&lt;Literal Text="&lt;b&gt;Literal&lt;/b&gt;"&gt;&lt;/Literal&gt;
+&lt;Literal Mode="LiteralMode.Encode" Text="This is &lt;b&gt;encoded&lt;/b&gt; content."&gt;&lt;/Literal&gt;
 </code>

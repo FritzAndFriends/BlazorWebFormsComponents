@@ -11,24 +11,36 @@ matching the behavior of the ASP.NET Web Forms Label control.</p>
 <h3>Basic Label</h3>
 
 <div data-audit-control="Label-1">
-    <Label Text="Hello, World!" />
+    <Label Text="Hello World" />
 </div>
 
-<pre><code>&lt;Label Text="Hello, World!" /&gt;</code></pre>
+<pre><code>&lt;Label Text="Hello World" /&gt;</code></pre>
 
 <hr />
 
 <h3>Styled Label</h3>
 
 <div data-audit-control="Label-2">
-    <Label Text="Important notice"
-       CssClass="text-danger fw-bold"
-       ForeColor="WebColor.Red" />
+    <Label Text="Styled Label"
+       CssClass="text-primary"
+       ForeColor="WebColor.Blue"
+       Font-Bold="true" />
 </div>
 
-<pre><code>&lt;Label Text="Important notice"
-       CssClass="text-danger fw-bold"
-       ForeColor="WebColor.Red" /&gt;</code></pre>
+<pre><code>&lt;Label Text="Styled Label"
+       CssClass="text-primary"
+       ForeColor="WebColor.Blue"
+       Font-Bold="true" /&gt;</code></pre>
+
+<hr />
+
+<h3>Label with HTML</h3>
+
+<div data-audit-control="Label-3">
+    <Label Text="&lt;em&gt;Emphasized&lt;/em&gt;" />
+</div>
+
+<pre><code>&lt;Label Text="&amp;lt;em&amp;gt;Emphasized&amp;lt;/em&amp;gt;" /&gt;</code></pre>
 
 <hr />
 
@@ -39,9 +51,7 @@ element instead of a <code>&lt;span&gt;</code>. This associates the label with a
 clicking the label focuses the input, and screen readers announce the relationship.</p>
 
 <div class="mb-3">
-    <div data-audit-control="Label-3">
-        <Label Text="Email Address:" AssociatedControlID="emailInput" CssClass="form-label" />
-    </div>
+    <Label Text="Email Address:" AssociatedControlID="emailInput" CssClass="form-label" />
     <TextBox id="emailInput"
              TextMode="TextBoxMode.Email"
              Placeholder="you@example.com"
@@ -63,19 +73,6 @@ clicking the label focuses the input, and screen readers announce the relationsh
 
 &lt;Label Text="Full Name:" AssociatedControlID="nameInput" CssClass="form-label" /&gt;
 &lt;TextBox id="nameInput" Placeholder="Enter your full name" CssClass="form-control" /&gt;</code></pre>
-
-<hr />
-
-<h4>Without AssociatedControlID (default)</h4>
-<p>Without <code>AssociatedControlID</code>, the Label renders as a <code>&lt;span&gt;</code>:</p>
-
-<Label Text="This renders as a span" />
-
-<pre><code>&lt;!-- Renders: &lt;span&gt;This renders as a span&lt;/span&gt; --&gt;
-&lt;Label Text="This renders as a span" /&gt;
-
-&lt;!-- Renders: &lt;label for="emailInput"&gt;Email Address:&lt;/label&gt; --&gt;
-&lt;Label Text="Email Address:" AssociatedControlID="emailInput" /&gt;</code></pre>
 
 @code {
 }
