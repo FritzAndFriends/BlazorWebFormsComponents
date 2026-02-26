@@ -199,3 +199,12 @@
 - **Key files changed:** `LoginControls/LoginView.razor`, 8 test files in `LoginControls/LoginView/`.
 - **Pattern:** For template-switching controls without a table layout (like LoginView), use a `<div>` wrapper with `class="@CssClass" style="@Style" title="@ToolTip"` — unlike Login/ChangePassword/CreateUserWizard which use `<table>` wrappers.
 - **All 1283 tests pass**, 0 regressions.
+
+### ClientIDMode Implementation
+
+- **Created `Enums/ClientIDMode.cs`:** New enum with 4 values matching `System.Web.UI.ClientIDMode`: `Inherit` (0), `AutoID` (1), `Static` (2), `Predictable` (3).
+- **Added `ClientIDMode` parameter to `BaseWebFormsComponent.cs`:** `[Parameter] public ClientIDMode ClientIDMode { get; set; } = ClientIDMode.Inherit;` — all components inherit this property. Added `using BlazorWebFormsComponents.Enums;` import.
+- **Updated `ComponentIdGenerator.cs`:** Added `GetEffectiveClientIDMode()` helper that walks parent hierarchy to resolve `Inherit` mode (defaults to `Predictable` if no ancestor specifies a mode). Refactored `GetClientID()` to switch on effective mode: `Static` returns raw ID, `AutoID` uses `BuildAutoID()` (walks parents with ctl00 prefixes), `Predictable` uses `BuildPredictableID()` (walks parents, joins with underscore, no ctl00). Extracted `BuildAutoID` and `BuildPredictableID` private helpers.
+- **Backward compatibility:** Existing components default to `Inherit` → resolves to `Predictable`. The `Predictable` path walks parents and joins IDs with underscores, matching prior behavior. `UseCtl00Prefix` on `NamingContainer` now only takes effect in `AutoID` mode, which is correct per Web Forms semantics.
+- **Key files:** `src/BlazorWebFormsComponents/Enums/ClientIDMode.cs` (new), `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` (modified), `src/BlazorWebFormsComponents/ComponentIdGenerator.cs` (modified).
+- **Build succeeds with 0 errors.**

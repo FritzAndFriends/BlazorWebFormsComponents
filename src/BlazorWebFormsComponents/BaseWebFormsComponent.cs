@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorWebFormsComponents.Enums;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -101,6 +102,14 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		[Parameter]
 		public string SkinID { get; set; } = "";
+
+		/// <summary>
+		/// Gets or sets the algorithm used to generate the ClientID property value.
+		/// Matches System.Web.UI.Control.ClientIDMode from Web Forms.
+		/// Default is Inherit, which resolves to Predictable if no parent specifies a mode.
+		/// </summary>
+		[Parameter]
+		public ClientIDMode ClientIDMode { get; set; } = ClientIDMode.Inherit;
 
 		#endregion
 
