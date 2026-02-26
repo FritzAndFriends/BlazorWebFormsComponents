@@ -1,16 +1,16 @@
 ﻿<Advertisements>  
   <Ad>  
-    <ImageUrl>/Content/Images/banner.png</ImageUrl>  
-    <NavigateUrl>https://bing.com</NavigateUrl>  
-    <AlternateText>Visit Bing</AlternateText>  
+    <ImageUrl>/img/CSharp.png</ImageUrl>  
+    <NavigateUrl>https://learn.microsoft.com/dotnet/csharp/</NavigateUrl>  
+    <AlternateText>CSharp</AlternateText>  
     <Impressions>50</Impressions>  
-    <Keyword>search</Keyword>  
+    <Keyword>language</Keyword>  
   </Ad>  
   <Ad>  
-    <ImageUrl>/Content/Images/banner.png</ImageUrl>
-    <NavigateUrl>https://github.com</NavigateUrl>  
-    <AlternateText>Visit GitHub</AlternateText>  
+    <ImageUrl>/img/VB.png</ImageUrl>
+    <NavigateUrl>https://learn.microsoft.com/dotnet/visual-basic/</NavigateUrl>  
+    <AlternateText>Visual Basic</AlternateText>  
     <Impressions>50</Impressions>  
-    <Keyword>technology</Keyword>  
+    <Keyword>language</Keyword>  
   </Ad>  
-</Advertisements>  
+</Advertisements>
