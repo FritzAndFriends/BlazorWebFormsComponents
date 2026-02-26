@@ -192,7 +192,7 @@ else {
 }
 
 # Patch web.config: remove System.Web.Optimization namespace and control registrations
-$webConfigFile = Join-Path $webFormsDir 'web.config'
+$webConfigFile = Join-Path $sampleDir 'web.config'
 if (Test-Path $webConfigFile) {
     $wcContent = Get-Content $webConfigFile -Raw
     $wcContent = $wcContent -replace '(?s)<add\s+namespace="System\.Web\.Optimization"\s*/>', '<!-- Removed for audit: System.Web.Optimization -->'
