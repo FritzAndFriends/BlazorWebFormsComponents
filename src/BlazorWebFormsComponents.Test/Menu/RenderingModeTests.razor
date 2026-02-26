@@ -1,0 +1,119 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	private void SetupMenuServices()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Fact]
+	public void Menu_DefaultRenderingMode_IsList_RendersUlLi()
+	{
+		// Arrange
+		SetupMenuServices();
+
+		// Act
+		var cut = Render(
+			@<Menu id="listMenu">
+				<Items>
+					<MenuItem Text="Home" NavigateUrl="/home" />
+					<MenuItem Text="About" NavigateUrl="/about" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert — default List mode renders ul/li
+		var ul = cut.Find("ul.level1");
+		ul.ShouldNotBeNull();
+		cut.FindAll("li").Count.ShouldBeGreaterThanOrEqualTo(2);
+		// Should NOT contain table structure
+		cut.FindAll("table").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Menu_RenderingModeTable_RendersTableStructure()
+	{
+		// Arrange
+		SetupMenuServices();
+
+		// Act
+		var cut = Render(
+			@<Menu id="tableMenu" RenderingMode="MenuRenderingMode.Table">
+				<Items>
+					<MenuItem Text="Home" NavigateUrl="/home" />
+					<MenuItem Text="About" NavigateUrl="/about" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert — Table mode renders table/tr/td
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		table.GetAttribute("cellpadding").ShouldBe("0");
+		table.GetAttribute("cellspacing").ShouldBe("0");
+		table.GetAttribute("border").ShouldBe("0");
+		cut.FindAll("td").Count.ShouldBeGreaterThanOrEqualTo(2);
+		// Should NOT contain ul/li structure
+		cut.FindAll("ul").Count.ShouldBe(0);
+		cut.FindAll("li").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Menu_RenderingModeTable_Horizontal_ItemsInSameRow()
+	{
+		// Arrange
+		SetupMenuServices();
+
+		// Act
+		var cut = Render(
+			@<Menu id="horizTableMenu" RenderingMode="MenuRenderingMode.Table" Orientation="Orientation.Horizontal">
+				<Items>
+					<MenuItem Text="Home" NavigateUrl="/home" />
+					<MenuItem Text="About" NavigateUrl="/about" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert — horizontal table: all items in a single <tr>
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		var rows = table.QuerySelectorAll("tr");
+		rows.Length.ShouldBe(1);
+		// Both items should be <td> elements within that single row
+		var cells = rows[0].QuerySelectorAll("td");
+		cells.Length.ShouldBeGreaterThanOrEqualTo(2);
+	}
+
+	[Fact]
+	public void Menu_RenderingModeTable_Vertical_ItemsInSeparateRows()
+	{
+		// Arrange
+		SetupMenuServices();
+
+		// Act
+		var cut = Render(
+			@<Menu id="vertTableMenu" RenderingMode="MenuRenderingMode.Table" Orientation="Orientation.Vertical">
+				<Items>
+					<MenuItem Text="Home" NavigateUrl="/home" />
+					<MenuItem Text="About" NavigateUrl="/about" />
+				</Items>
+			</Menu>
+		);
+
+		// Assert — vertical table: each item in its own <tr>
+		var table = cut.Find("table");
+		table.ShouldNotBeNull();
+		var rows = table.QuerySelectorAll("tr");
+		rows.Length.ShouldBe(2);
+		// Each row should have a <td> with an <a> link
+		foreach (var row in rows)
+		{
+			var cells = row.QuerySelectorAll("td");
+			cells.Length.ShouldBe(1);
+			var link = cells[0].QuerySelector("a");
+			link.ShouldNotBeNull();
+		}
+	}
+
+}

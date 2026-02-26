@@ -7,6 +7,23 @@
 	<a class="skip-link" href="#@(ID)_SkipLink">@SkipLinkText</a>
 }
 <div id="@ID" class="@GetMenuCssClass()" style="@Style" title="@ToolTip">
+@if (RenderingMode == MenuRenderingMode.Table)
+{
+	<CascadingValue Name="ParentMenu" Value="this" IsFixed="true">
+		@DynamicMenuStyleContent
+		@StaticMenuStyleContent
+		@DynamicMenuItemStyleContent
+		@StaticMenuItemStyleContent
+	</CascadingValue>
+	<table cellpadding="0" cellspacing="0" border="0">
+	@if (Orientation == Orientation.Horizontal)
+	{<tr><CascadingValue Name="ParentMenu" Value="this" IsFixed="true">@ChildContent@ChildNodesRenderFragment</CascadingValue></tr>}
+	else
+	{<CascadingValue Name="ParentMenu" Value="this" IsFixed="true">@ChildContent@ChildNodesRenderFragment</CascadingValue>}
+	</table>
+}
+else
+{
 	<ul class="level1@(Orientation == Orientation.Horizontal ? " horizontal" : "")">
 			<CascadingValue Name="ParentMenu" Value="this" IsFixed="true">
 				@DynamicMenuStyleContent
@@ -17,6 +34,7 @@
 				@ChildNodesRenderFragment
 			</CascadingValue>
  	</ul>
+}
 </div>
 @if (!string.IsNullOrEmpty(SkipLinkText))
 {

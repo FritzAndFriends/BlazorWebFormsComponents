@@ -35,6 +35,12 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Orientation Orientation { get; set; } = Orientation.Vertical;
 
+		/// <summary>
+		/// Gets or sets how the menu renders HTML. List uses ul/li (default), Table uses table/tr/td (legacy).
+		/// </summary>
+		[Parameter]
+		public MenuRenderingMode RenderingMode { get; set; } = MenuRenderingMode.List;
+
 		[Parameter]
 		public int StaticDisplayLevels { get; set; }
 
