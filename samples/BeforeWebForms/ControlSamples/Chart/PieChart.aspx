@@ -11,25 +11,27 @@
 
     <p>This is an example of a Pie Chart showing market share distribution.</p>
 
-    <asp:Chart ID="Chart1" runat="server" Width="600px" Height="400px" 
-        BackColor="WhiteSmoke" BorderColor="#999999" BorderWidth="1" 
-        BorderDashStyle="Solid">
-        <Series>
-            <asp:Series Name="MarketShare" ChartType="Pie" 
-                BorderColor="Black" BorderWidth="1">
-                <SmartLabelStyle Enabled="True" />
-            </asp:Series>
-        </Series>
-        <ChartAreas>
-            <asp:ChartArea Name="ChartArea1" BackColor="White">
-            </asp:ChartArea>
-        </ChartAreas>
-        <Titles>
-            <asp:Title Text="Product Market Share" Font="Arial, 14pt, style=Bold" />
-        </Titles>
-        <Legends>
-            <asp:Legend Name="Legend1" Docking="Right" Alignment="Center" />
-        </Legends>
-    </asp:Chart>
+    <div data-audit-control="Chart">
+        <asp:Chart ID="Chart1" runat="server" Width="600px" Height="400px" 
+            BackColor="WhiteSmoke" BorderColor="#999999" BorderWidth="1" 
+            BorderDashStyle="Solid">
+            <Series>
+                <asp:Series Name="MarketShare" ChartType="Pie" 
+                    BorderColor="Black" BorderWidth="1">
+                    <SmartLabelStyle Enabled="True" />
+                </asp:Series>
+            </Series>
+            <ChartAreas>
+                <asp:ChartArea Name="ChartArea1" BackColor="White">
+                </asp:ChartArea>
+            </ChartAreas>
+            <Titles>
+                <asp:Title Text="Product Market Share" Font="Arial, 14pt, style=Bold" />
+            </Titles>
+            <Legends>
+                <asp:Legend Name="Legend1" Docking="Right" Alignment="Center" />
+            </Legends>
+        </asp:Chart>
+    </div>
 
 </asp:Content>

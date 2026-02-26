@@ -13,28 +13,30 @@
 		style attributes that can be set on the DataList
     </p>
 
-    <asp:DataList ID="simpleDataList"
-        runat="server"
-        RepeatColumns="2"
-        ToolTip="This is my tooltip"
-        AccessKey="S"
-        BackColor="Gray"
-        BorderStyle="Solid"
-        BorderWidth="2px"
-        BorderColor="Firebrick"
-        Font-Bold="true"
-        GridLines="Vertical"
-        UseAccessibleHeader="true"
-        ItemType="SharedSampleObjects.Models.Widget">
-        <HeaderTemplate>
-            My Widget List
-        </HeaderTemplate>
-        <FooterTemplate>End of Line</FooterTemplate>
-        <ItemTemplate>
-            <%# Item.Name %>
-            <br />
-            <%# Item.Price.ToString("c") %>
-        </ItemTemplate>
-    </asp:DataList>
+    <div data-audit-control="DataList">
+        <asp:DataList ID="simpleDataList"
+            runat="server"
+            RepeatColumns="2"
+            ToolTip="This is my tooltip"
+            AccessKey="S"
+            BackColor="Gray"
+            BorderStyle="Solid"
+            BorderWidth="2px"
+            BorderColor="Firebrick"
+            Font-Bold="true"
+            GridLines="Vertical"
+            UseAccessibleHeader="true"
+            ItemType="SharedSampleObjects.Models.Widget">
+            <HeaderTemplate>
+                My Widget List
+            </HeaderTemplate>
+            <FooterTemplate>End of Line</FooterTemplate>
+            <ItemTemplate>
+                <%# Item.Name %>
+                <br />
+                <%# Item.Price.ToString("c") %>
+            </ItemTemplate>
+        </asp:DataList>
+    </div>
 
 </asp:Content>

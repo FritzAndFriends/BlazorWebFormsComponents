@@ -11,33 +11,35 @@
 
     <p>This example demonstrates binding a Chart control to a collection of objects (similar to GridView data binding).</p>
 
-    <asp:Chart ID="Chart1" runat="server" Width="700px" Height="400px" 
-        BackColor="WhiteSmoke" BorderColor="#999999" BorderWidth="1" 
-        BorderDashStyle="Solid" DataSourceID="ObjectDataSource1">
-        <Series>
-            <asp:Series Name="CustomerSales" ChartType="Bar" 
-                Color="MediumSeaGreen" BorderColor="Black" BorderWidth="1"
-                XValueMember="CompanyName" YValueMembers="TotalSales">
-            </asp:Series>
-        </Series>
-        <ChartAreas>
-            <asp:ChartArea Name="ChartArea1" 
-                BackColor="White" 
-                BorderColor="Black" 
-                BorderWidth="1" 
-                BorderDashStyle="Solid">
-                <AxisX Title="Company" IsLabelAutoFit="true">
-                    <MajorGrid LineColor="LightGray" />
-                </AxisX>
-                <AxisY Title="Total Sales ($)">
-                    <MajorGrid LineColor="LightGray" />
-                </AxisY>
-            </asp:ChartArea>
-        </ChartAreas>
-        <Titles>
-            <asp:Title Text="Customer Sales Report" Font="Arial, 14pt, style=Bold" />
-        </Titles>
-    </asp:Chart>
+    <div data-audit-control="Chart">
+        <asp:Chart ID="Chart1" runat="server" Width="700px" Height="400px" 
+            BackColor="WhiteSmoke" BorderColor="#999999" BorderWidth="1" 
+            BorderDashStyle="Solid" DataSourceID="ObjectDataSource1">
+            <Series>
+                <asp:Series Name="CustomerSales" ChartType="Bar" 
+                    Color="MediumSeaGreen" BorderColor="Black" BorderWidth="1"
+                    XValueMember="CompanyName" YValueMembers="TotalSales">
+                </asp:Series>
+            </Series>
+            <ChartAreas>
+                <asp:ChartArea Name="ChartArea1" 
+                    BackColor="White" 
+                    BorderColor="Black" 
+                    BorderWidth="1" 
+                    BorderDashStyle="Solid">
+                    <AxisX Title="Company" IsLabelAutoFit="true">
+                        <MajorGrid LineColor="LightGray" />
+                    </AxisX>
+                    <AxisY Title="Total Sales ($)">
+                        <MajorGrid LineColor="LightGray" />
+                    </AxisY>
+                </asp:ChartArea>
+            </ChartAreas>
+            <Titles>
+                <asp:Title Text="Customer Sales Report" Font="Arial, 14pt, style=Bold" />
+            </Titles>
+        </asp:Chart>
+    </div>
 
     <asp:ObjectDataSource ID="ObjectDataSource1" runat="server" 
         TypeName="BeforeWebForms.ControlSamples.Chart.DataBinding" 

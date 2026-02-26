@@ -7,6 +7,7 @@
 				<h2>Declarative</h2>
 				<div class="row">
 					<h4>Horizontal Menu Using a Table Layout</h4>
+					<div data-audit-control="Menu-1">
 					<asp:Menu ID="HorizontalMenuTable"
 						DisappearAfter="2000"
 						StaticDisplayLevels="2"
@@ -37,9 +38,11 @@
 							</asp:MenuItem>
 						</Items>
 					</asp:Menu>
+					</div>
 				</div>
 				<div class="row">
 					<h4>Horizontal Menu Using a List Layout</h4>
+					<div data-audit-control="Menu-2">
 					<asp:Menu ID="HorizontalMenuList"
 						DisappearAfter="2000"
 						StaticDisplayLevels="2"
@@ -70,9 +73,11 @@
 							</asp:MenuItem>
 						</Items>
 					</asp:Menu>
+					</div>
 				</div>
 				<div class="row">
 					<h4>Vertical Menu Using a Table Layout</h4>
+					<div data-audit-control="Menu-3">
 					<asp:Menu ID="VerticalMenuTable"
 						DisappearAfter="2000"
 						StaticDisplayLevels="2"
@@ -103,9 +108,11 @@
 							</asp:MenuItem>
 						</Items>
 					</asp:Menu>
+					</div>
 				</div>
 				<div class="row">
 					<h4>Vertical Menu Using a List Layout</h4>
+					<div data-audit-control="Menu-4">
 					<asp:Menu ID="VerticalMenuList"
 						DisappearAfter="2000"
 						StaticDisplayLevels="2"
@@ -136,6 +143,7 @@
 							</asp:MenuItem>
 						</Items>
 					</asp:Menu>
+					</div>
 				</div>
 			</div>
 			<div class="col-md-6">
@@ -144,6 +152,7 @@
 					<h4>Horizontal Menu Using a Table Layout</h4>
 
 					<!-- Bind the Menu control to a XmlDataSource control.  -->
+					<div data-audit-control="Menu-5">
 					<asp:Menu ID="NavigationMenuTableDataSource"
 						DisappearAfter="2000"
 						StaticDisplayLevels="2"
@@ -165,11 +174,13 @@
 							<asp:MenuItemBinding DataMember="MapNode" Depth="2" TextField="title" NavigateUrlField="url" />
 						</DataBindings>
 					</asp:Menu>
+					</div>
 				</div>
 				<div class="row">
 					<h4>Horizontal Menu Using a List Layout</h4>
 
 					<!-- Bind the Menu control to a XmlDataSource control.  -->
+					<div data-audit-control="Menu-6">
 					<asp:Menu ID="NavigationMenuListDataSource"
 						DisappearAfter="2000"
 						StaticDisplayLevels="2"
@@ -191,9 +202,11 @@
 							<asp:MenuItemBinding DataMember="MapNode" Depth="2" TextField="title" NavigateUrlField="url" />
 						</DataBindings>
 					</asp:Menu>
+					</div>
 				</div>
 				<div class="row">
 					<h4>Vertical Menu Using a Table Layout</h4>
+					<div data-audit-control="Menu-7">
 					<asp:Menu ID="VerticalMenuTableDataSource"
 						StaticDisplayLevels="2"
 						StaticSubMenuIndent="10"
@@ -214,9 +227,11 @@
 							<asp:MenuItemBinding DataMember="MapNode" Depth="2" TextField="title" NavigateUrlField="url" />
 						</DataBindings>
 					</asp:Menu>
+					</div>
 				</div>
 				<div class="row">
 					<h4>Vertical Menu Using a List Layout</h4>
+					<div data-audit-control="Menu-8">
 					<asp:Menu ID="VerticalMenuListDataSource"
 						StaticDisplayLevels="2"
 						StaticSubMenuIndent="10"
@@ -237,6 +252,7 @@
 							<asp:MenuItemBinding DataMember="MapNode" Depth="2" TextField="title" NavigateUrlField="url" />
 						</DataBindings>
 					</asp:Menu>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -255,6 +271,7 @@
 					<!-- Everything you want hidden at 940px or less, place within here -->
 					<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
+						<div data-audit-control="Menu-9">
 						<asp:Menu ID="Menu1"
 							Orientation="Horizontal"
 							RenderingMode="list"
@@ -277,6 +294,7 @@
 								</asp:MenuItem>
 							</Items>
 						</asp:Menu>
+						</div>
 					</div>
 				</div>
 			</div>

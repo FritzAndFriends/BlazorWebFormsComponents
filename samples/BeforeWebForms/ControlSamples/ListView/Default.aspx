@@ -10,6 +10,7 @@
 
     <p>Here is a simple listview bound to a collection of widgets.</p>
 
+    <div data-audit-control="ListView">
     <asp:ListView ID="simpleListView" 
                   runat="server" 
                   Enabled="true"
@@ -57,6 +58,7 @@
         </EmptyDataTemplate>
         <EmptyItemTemplate></EmptyItemTemplate>
     </asp:ListView>
+    </div>
 
     <code>&lt;table&gt;<br />
                 &lt;thead&gt;<br />

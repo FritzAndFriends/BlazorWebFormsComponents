@@ -10,6 +10,7 @@
 
     <p>Here is a listview using Grouping to interact with widgets.</p>
 
+    <div data-audit-control="ListView">
     <asp:ListView ID="simpleListView"
         runat="server"
         GroupItemCount="5"
@@ -61,6 +62,7 @@
         </EmptyDataTemplate>
         <EmptyItemTemplate></EmptyItemTemplate>
     </asp:ListView>
+    </div>
 
 
 </asp:Content>

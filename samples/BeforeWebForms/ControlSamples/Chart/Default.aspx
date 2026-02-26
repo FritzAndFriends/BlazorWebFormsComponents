@@ -11,31 +11,33 @@
 
     <p>This is a basic example of a Column Chart displaying monthly sales data.</p>
 
-    <asp:Chart ID="Chart1" runat="server" Width="600px" Height="400px" 
-        BackColor="WhiteSmoke" BorderColor="#999999" BorderWidth="1" 
-        BorderDashStyle="Solid">
-        <Series>
-            <asp:Series Name="Sales" ChartType="Column" 
-                Color="SteelBlue" BorderColor="Black" BorderWidth="1">
-            </asp:Series>
-        </Series>
-        <ChartAreas>
-            <asp:ChartArea Name="ChartArea1" 
-                BackColor="White" 
-                BorderColor="Black" 
-                BorderWidth="1" 
-                BorderDashStyle="Solid">
-                <AxisX Title="Month">
-                    <MajorGrid LineColor="LightGray" />
-                </AxisX>
-                <AxisY Title="Sales ($)">
-                    <MajorGrid LineColor="LightGray" />
-                </AxisY>
-            </asp:ChartArea>
-        </ChartAreas>
-        <Titles>
-            <asp:Title Text="Monthly Sales Report" Font="Arial, 14pt, style=Bold" />
-        </Titles>
-    </asp:Chart>
+    <div data-audit-control="Chart">
+        <asp:Chart ID="Chart1" runat="server" Width="600px" Height="400px" 
+            BackColor="WhiteSmoke" BorderColor="#999999" BorderWidth="1" 
+            BorderDashStyle="Solid">
+            <Series>
+                <asp:Series Name="Sales" ChartType="Column" 
+                    Color="SteelBlue" BorderColor="Black" BorderWidth="1">
+                </asp:Series>
+            </Series>
+            <ChartAreas>
+                <asp:ChartArea Name="ChartArea1" 
+                    BackColor="White" 
+                    BorderColor="Black" 
+                    BorderWidth="1" 
+                    BorderDashStyle="Solid">
+                    <AxisX Title="Month">
+                        <MajorGrid LineColor="LightGray" />
+                    </AxisX>
+                    <AxisY Title="Sales ($)">
+                        <MajorGrid LineColor="LightGray" />
+                    </AxisY>
+                </asp:ChartArea>
+            </ChartAreas>
+            <Titles>
+                <asp:Title Text="Monthly Sales Report" Font="Arial, 14pt, style=Bold" />
+            </Titles>
+        </asp:Chart>
+    </div>
 
 </asp:Content>

@@ -9,6 +9,7 @@
 
   <p>This is just a simple example of a GridView that uses template fields</p>
 
+  <div data-audit-control="GridView">
   <asp:gridview id="TemplateFieldGridView" 
     autogeneratecolumns="False"
     ItemType="SharedSampleObjects.Models.Widget"
@@ -26,6 +27,7 @@
 		    </asp:TemplateField>
       </Columns>
   </asp:gridview>
+  </div>
 
   <asp:Button runat="server" Text="Click Me" OnClick="Unnamed_Click"/>
 </asp:Content>

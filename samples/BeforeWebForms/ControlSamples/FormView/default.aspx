@@ -12,6 +12,7 @@
 
 	<p>Here is a simple formview for a Widget from the SharedSampleObjects project</p>
 
+	<div data-audit-control="FormView">
 	<asp:FormView ID="WidgetFormView"
 		AllowPaging="true"
 		DataKeyNames="Id"
@@ -52,6 +53,7 @@
 		</ItemTemplate>
 
 	</asp:FormView>
+	</div>
 
 	Generates this source code:
 	<pre>

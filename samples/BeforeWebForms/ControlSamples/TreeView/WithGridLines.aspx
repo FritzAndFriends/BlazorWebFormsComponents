@@ -10,6 +10,7 @@
     <p>Here is a treeview with inline nodes and the ShowLines turned on
     </p>
 
+      <div data-audit-control="TreeView">
       <asp:TreeView id="SampleTreeView"
         ShowExpandCollapse="true"
         ShowCheckBoxes="All"
@@ -153,5 +154,6 @@
         </Nodes>
         
       </asp:TreeView>
+      </div>
 
 </asp:Content>

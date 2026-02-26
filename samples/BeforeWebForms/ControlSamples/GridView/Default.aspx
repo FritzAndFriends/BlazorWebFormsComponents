@@ -9,6 +9,7 @@
 
   <p>This is just a simple example of a GridView with a selectMethod</p>
 
+  <div data-audit-control="GridView">
   <asp:gridview id="CustomersGridView" 
     autogeneratecolumns="False"
     emptydatatext="No data available."
@@ -34,4 +35,5 @@
           DataNavigateUrlFields="CompanyName, FirstName, LastName" DataNavigateUrlFormatString="https://www.bing.com/search?q={0} {1} {2}" />
       </Columns>
   </asp:gridview>
+  </div>
 </asp:Content>

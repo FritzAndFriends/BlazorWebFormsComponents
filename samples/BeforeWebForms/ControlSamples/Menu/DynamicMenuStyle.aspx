@@ -11,6 +11,7 @@
     
       <h3>Menu DynamicMenuStyle Example</h3>
     
+      <div data-audit-control="Menu">
       <asp:menu id="NavigationMenu"
         staticdisplaylevels="2"
         staticsubmenuindent="10" 
@@ -58,6 +59,7 @@
         </items>
       
       </asp:menu>
+      </div>
 
     </form>
   </body>

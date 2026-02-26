@@ -10,18 +10,20 @@
 
     <p>Here is a simple repeater bound to a collection of widgets.</p>
 
-    <asp:Repeater ID="repeaterControl" runat="server" 
-      ItemType="SharedSampleObjects.Models.Widget"> 
-      <HeaderTemplate>
-        This is a list of widgets
-      </HeaderTemplate>
-      <ItemTemplate>
-        <li><%# Item.Name %></li>
-      </ItemTemplate>
-      <FooterTemplate>
-        This is the footer of the control
-      </FooterTemplate>
-      <SeparatorTemplate><hr /></SeparatorTemplate>
-    </asp:Repeater>
+    <div data-audit-control="Repeater">
+        <asp:Repeater ID="repeaterControl" runat="server" 
+          ItemType="SharedSampleObjects.Models.Widget"> 
+          <HeaderTemplate>
+            This is a list of widgets
+          </HeaderTemplate>
+          <ItemTemplate>
+            <li><%# Item.Name %></li>
+          </ItemTemplate>
+          <FooterTemplate>
+            This is the footer of the control
+          </FooterTemplate>
+          <SeparatorTemplate><hr /></SeparatorTemplate>
+        </asp:Repeater>
+    </div>
 
 </asp:Content>

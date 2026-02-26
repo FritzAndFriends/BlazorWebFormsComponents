@@ -12,6 +12,7 @@
     <a href="https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8#examples">https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.treeview?view=netframework-4.8#examples</a></a>
     </p>
 
+      <div data-audit-control="TreeView">
       <asp:TreeView id="SampleTreeView"
         ShowExpandCollapse="false"
         ShowCheckBoxes="All"
@@ -57,6 +58,7 @@
         </Nodes>
         
       </asp:TreeView>
+      </div>
 
       <h3>Generates the following HTML:</h3>
 

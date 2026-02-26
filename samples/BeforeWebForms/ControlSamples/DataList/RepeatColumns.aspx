@@ -5,6 +5,7 @@
         usage samples <a href="Default.aspx">Default Sample</a>|<a href="FlowLayout.aspx">FlowLayout Sample</a>|<a href="StyleAttributes.aspx">Styles</a>|<a href="RepeatColumns.aspx">Repeat Columns Sample</a>
     </div>
     <p>Here is a simple datalist bound to a collection of widgets with RepeatLayout set to Flow</p>
+    <div data-audit-control="DataList">
     <asp:DataList ID="simpleDataList"
         runat="server"
         Enabled="true"
@@ -24,4 +25,5 @@
         <FooterTemplate>DataList Footer </FooterTemplate>
         <ItemTemplate><%# Item.Id %> </ItemTemplate>
     </asp:DataList>
+    </div>
  </asp:Content> 
