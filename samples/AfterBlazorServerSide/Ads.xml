@@ -1,20 +1,16 @@
 ﻿<Advertisements>  
   <Ad>  
-    <ImageUrl>/img/CSharp.png</ImageUrl>  
-    <Height>343</Height>  
-    <Width>397</Width>  
-    <NavigateUrl>http://www.microsoft.com</NavigateUrl>  
-    <AlternateText>CSharp</AlternateText>  
-    <Impressions>90</Impressions>  
-    <Keyword>c#</Keyword>  
+    <ImageUrl>/Content/Images/banner.png</ImageUrl>  
+    <NavigateUrl>https://bing.com</NavigateUrl>  
+    <AlternateText>Visit Bing</AlternateText>  
+    <Impressions>50</Impressions>  
+    <Keyword>search</Keyword>  
   </Ad>  
   <Ad>  
-    <ImageUrl>/img/VB.png</ImageUrl>
-		<Height>343</Height>
-		<Width>397</Width>
-		<NavigateUrl>http://www.microsoft.com</NavigateUrl>  
-    <AlternateText>Visual Basic</AlternateText>  
-    <Impressions>80</Impressions>  
-    <Keyword>vb</Keyword>  
+    <ImageUrl>/Content/Images/banner.png</ImageUrl>
+    <NavigateUrl>https://github.com</NavigateUrl>  
+    <AlternateText>Visit GitHub</AlternateText>  
+    <Impressions>50</Impressions>  
+    <Keyword>technology</Keyword>  
   </Ad>  
 </Advertisements>  

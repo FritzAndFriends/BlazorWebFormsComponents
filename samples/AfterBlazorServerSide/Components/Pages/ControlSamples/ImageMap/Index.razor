@@ -18,18 +18,17 @@
 
 <div class="demo-section">
     <div data-audit-control="ImageMap">
-        <ImageMap ImageUrl="/img/placeholder-400x200.svg"
-              AlternateText="Navigation demo image"
+        <ImageMap ImageUrl="/Content/Images/banner.png"
+              AlternateText="Navigate"
               HotSpotMode="HotSpotMode.Navigate"
               HotSpots="@navigationHotSpots" />
     </div>
 </div>
 
-<p>The image above has three hot spots defined:</p>
+<p>The image above has two hot spots defined:</p>
 <ul>
-    <li><strong>Left rectangle</strong> (0,0 → 130,200) — navigates to the Button sample</li>
-    <li><strong>Center circle</strong> (200,100 radius 60) — navigates to the CheckBox sample</li>
-    <li><strong>Right rectangle</strong> (270,0 → 400,200) — navigates to the Image sample</li>
+    <li><strong>Left rectangle</strong> (0,0 → 100,50) — navigates to Bing</li>
+    <li><strong>Right rectangle</strong> (100,0 → 200,50) — navigates to GitHub</li>
 </ul>
 
 <p>Code:</p>
@@ -182,26 +181,20 @@ new RectangleHotSpot {
     private string mixedClickResult;
     private string polygonClickResult;
 
-    // Navigation mode hot spots
+    // Navigation mode hot spots — matching WebForms audit
     private List<HotSpot> navigationHotSpots = new()
     {
         new RectangleHotSpot
         {
-            Left = 0, Top = 0, Right = 130, Bottom = 200,
-            NavigateUrl = "/ControlSamples/Button",
-            AlternateText = "Go to Button samples"
-        },
-        new CircleHotSpot
-        {
-            X = 200, Y = 100, Radius = 60,
-            NavigateUrl = "/ControlSamples/CheckBox",
-            AlternateText = "Go to CheckBox samples"
+            Left = 0, Top = 0, Right = 100, Bottom = 50,
+            NavigateUrl = "https://bing.com",
+            AlternateText = "Go to Bing"
         },
         new RectangleHotSpot
         {
-            Left = 270, Top = 0, Right = 400, Bottom = 200,
-            NavigateUrl = "/ControlSamples/Image",
-            AlternateText = "Go to Image samples"
+            Left = 100, Top = 0, Right = 200, Bottom = 50,
+            NavigateUrl = "https://github.com",
+            AlternateText = "Go to GitHub"
         }
     };
 

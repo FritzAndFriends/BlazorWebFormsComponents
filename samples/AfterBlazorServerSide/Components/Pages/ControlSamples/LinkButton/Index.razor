@@ -5,41 +5,28 @@
 <Nav></Nav>
 
 <div data-audit-control="LinkButton-1">
-    <LinkButton CommandName="Foo" CommandArgument="bar1" OnCommand="OnCommand" Text="LinkButton1 with Command" />
+    <LinkButton OnClick="OnClick" Text="Click Me" CssClass="btn btn-primary" />
 </div>
 <br />
 <div data-audit-control="LinkButton-2">
-    <LinkButton CommandName="Foo" CommandArgument="bar2" OnCommand="OnCommand" Text="LinkButton2 with Command" />
+    <LinkButton OnClick="OnClick" Text="Submit Form" />
 </div>
 <br />
 <div data-audit-control="LinkButton-3">
-    <LinkButton OnClick="OnClick" Text="Click me!!" PostBackUrl="ControlSamples/LinkButton/#" />
+    <LinkButton Text="Disabled Link" Enabled="false" />
 </div>
 <br />
-<LinkButton CommandName="Foo" CommandArgument="bar3" OnCommand="OnCommand" OnClick="OnClick" Text="BlazorWebFormsComponents" PostBackUrl="https://github.com/FritzAndFriends/BlazorWebFormsComponents" />
+<LinkButton OnClick="OnClick" Text="BlazorWebFormsComponents" PostBackUrl="https://github.com/FritzAndFriends/BlazorWebFormsComponents" />
 <br />
-<p style="font-weight: bold">@ContentMessage<br />@CommandMessage</p>
+<p style="font-weight: bold">@ContentMessage</p>
 
 @code {
 	[Parameter]
 	public string ContentMessage { get; set; } = "Not clicked yet!";
 
-	[Parameter]
-	public string CommandMessage { get; set; } = "No command fired!";
-
-	public string bar1 = "Bar 1";
-	public string bar2 = "Bar 2";
-	public string bar3 = "Bar 3";
-
 	void OnClick()
 	{
 		ContentMessage = "I've been clicked";
-	}
-
-	void OnCommand(CommandEventArgs args)
-	{
-		Console.WriteLine("Command fired");
-		CommandMessage = $"Command '{args.CommandName}', Argument '{args.CommandArgument}'";
 	}
 }
 

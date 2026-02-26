@@ -15,55 +15,32 @@
 
 <h2>Data-bound DropDownList</h2>
 <div data-audit-control="DropDownList-3">
-    <DropDownList TItem="Product"
-              Items="products"
+    <DropDownList TItem="DataItem"
+              Items="dataBoundItems"
               DataTextField="Name"
               DataValueField="Id"
-              @bind-SelectedValue="selectedProduct" />
+              @bind-SelectedValue="selectedDataBound" />
 </div>
-<p>Selected Product ID: <strong>@selectedProduct</strong></p>
-<p>Selected Product: <strong>@(products.FirstOrDefault(p => p.Id == selectedProduct)?.Name ?? "None")</strong></p>
-
-<h2>Data-bound with DataTextFormatString (Currency)</h2>
-<div data-audit-control="DropDownList-4">
-    <DropDownList TItem="PricedProduct"
-              Items="pricedProducts"
-              DataTextField="Price"
-              DataValueField="Id"
-              DataTextFormatString="{0:C}"
-              @bind-SelectedValue="selectedPricedProduct" />
-</div>
-<p>Selected: <strong>@selectedPricedProduct</strong></p>
-<small>The <code>DataTextFormatString="{0:C}"</code> formats each item's text as currency.</small>
-
-<h2>Data-bound with DataTextFormatString (Prefix)</h2>
-<div data-audit-control="DropDownList-5">
-    <DropDownList TItem="Product"
-              Items="products"
-              DataTextField="Name"
-              DataValueField="Id"
-              DataTextFormatString="Item: {0}"
-              @bind-SelectedValue="selectedFormattedProduct" />
-</div>
-<p>Selected: <strong>@selectedFormattedProduct</strong></p>
-<small>The <code>DataTextFormatString="Item: {0}"</code> adds a prefix to each item's display text.</small>
+<p>Selected Value: <strong>@selectedDataBound</strong></p>
 
 <h2>Disabled DropDownList</h2>
-<div data-audit-control="DropDownList-6">
-    <DropDownList TItem="object" StaticItems="staticItems" Enabled="false" SelectedValue="2" />
+<div data-audit-control="DropDownList-4">
+    <DropDownList TItem="object" StaticItems="disabledItems" Enabled="false" SelectedValue="1" />
 </div>
 
 <h2>With CSS Class</h2>
-<DropDownList TItem="object" StaticItems="styledItems" CssClass="form-select" />
-<br />
-<small>Note: The form-select class is from Bootstrap and provides styling.</small>
+<div data-audit-control="DropDownList-5">
+    <DropDownList TItem="object" StaticItems="styledItems" CssClass="form-select" />
+</div>
 
 <h2>With Inline Styles</h2>
-<DropDownList TItem="object"
+<div data-audit-control="DropDownList-6">
+    <DropDownList TItem="object"
               StaticItems="colorItems"
               BackColor="new WebColor(System.Drawing.Color.LightYellow)"
               ForeColor="new WebColor(System.Drawing.Color.Navy)"
-              Font="new FontInfo { Bold = true }" />
+              Width="Unit.Pixel(200)" />
+</div>
 
 <h2>With Change Event</h2>
 <DropDownList TItem="object"
@@ -74,9 +51,7 @@
 
 @code {
     private string selectedStatic = "";
-    private string selectedProduct = "";
-    private string selectedPricedProduct = "";
-    private string selectedFormattedProduct = "";
+    private string selectedDataBound = "";
     private string eventSelection = "";
     private string lastSelection = "None";
     private DateTime lastChangeTime = DateTime.Now;
@@ -96,16 +71,19 @@
         new ListItem("Cherry", "cherry")
     };
 
+    private ListItemCollection disabledItems = new()
+    {
+        new ListItem("Cannot change", "1")
+    };
+
     private ListItemCollection styledItems = new()
     {
-        new ListItem("Styled Option", "1"),
-        new ListItem("Another Option", "2")
+        new ListItem("Styled", "1")
     };
 
     private ListItemCollection colorItems = new()
     {
-        new ListItem("Colored dropdown item", "1"),
-        new ListItem("Another colored item", "2")
+        new ListItem("Colored dropdown", "1")
     };
 
     private ListItemCollection eventItems = new()
@@ -116,20 +94,11 @@
         new ListItem("Third", "3")
     };
 
-    private List<Product> products = new()
+    private List<DataItem> dataBoundItems = new()
     {
-        new Product { Id = "1", Name = "Widget" },
-        new Product { Id = "2", Name = "Gadget" },
-        new Product { Id = "3", Name = "Gizmo" },
-        new Product { Id = "4", Name = "Doohickey" }
-    };
-
-    private List<PricedProduct> pricedProducts = new()
-    {
-        new PricedProduct { Id = "1", Price = 9.99m },
-        new PricedProduct { Id = "2", Price = 24.50m },
-        new PricedProduct { Id = "3", Price = 149.95m },
-        new PricedProduct { Id = "4", Price = 3.00m }
+        new DataItem { Id = "1", Name = "First Item" },
+        new DataItem { Id = "2", Name = "Second Item" },
+        new DataItem { Id = "3", Name = "Third Item" }
     };
 
     private void HandleSelectionChanged(ChangeEventArgs e)
@@ -139,16 +108,10 @@
         StateHasChanged();
     }
 
-    public class Product
+    public class DataItem
     {
         public string Id { get; set; }
         public string Name { get; set; }
-    }
-
-    public class PricedProduct
-    {
-        public string Id { get; set; }
-        public decimal Price { get; set; }
     }
 }
 
@@ -157,8 +120,7 @@
 <p>Code:</p>
 <code>
 &lt;DropDownList TItem="object" StaticItems="staticItems" @@bind-SelectedValue="selectedValue" /&gt;<br />
-&lt;DropDownList TItem="Product" Items="products" DataTextField="Name" DataValueField="Id" @@bind-SelectedValue="selectedProduct" /&gt;<br />
-&lt;DropDownList TItem="PricedProduct" Items="pricedProducts" DataTextField="Price" DataValueField="Id" DataTextFormatString="{0:C}" /&gt;<br />
-&lt;DropDownList TItem="Product" Items="products" DataTextField="Name" DataValueField="Id" DataTextFormatString="Item: {0}" /&gt;<br />
-&lt;DropDownList TItem="object" StaticItems="staticItems" Enabled="false" SelectedValue="2" /&gt;
+&lt;DropDownList TItem="DataItem" Items="dataBoundItems" DataTextField="Name" DataValueField="Id" @@bind-SelectedValue="selectedDataBound" /&gt;<br />
+&lt;DropDownList TItem="object" StaticItems="disabledItems" Enabled="false" SelectedValue="1" /&gt;<br />
+&lt;DropDownList TItem="object" StaticItems="styledItems" CssClass="form-select" /&gt;
 </code>
