@@ -13,7 +13,9 @@
 
 <!-- Basic date selection — the most common migration scenario -->
 <h3>Basic Calendar</h3>
-<Calendar @bind-SelectedDate="selectedDate" />
+<div data-audit-control="Calendar-1">
+    <Calendar @bind-SelectedDate="selectedDate" />
+</div>
 <p>Selected Date: <strong>@selectedDate.ToShortDateString()</strong></p>
 
 <p>Code:</p>
@@ -25,18 +27,26 @@
 <h3>Selection Modes</h3>
 
 <h4>None — Display Only</h4>
-<Calendar SelectionMode="CalendarSelectionMode.None" />
+<div data-audit-control="Calendar-2">
+    <Calendar SelectionMode="CalendarSelectionMode.None" />
+</div>
 
 <h4>Day — Single Day (Default)</h4>
-<Calendar SelectionMode="CalendarSelectionMode.Day" @bind-SelectedDate="dayModeDate" />
+<div data-audit-control="Calendar-3">
+    <Calendar SelectionMode="CalendarSelectionMode.Day" @bind-SelectedDate="dayModeDate" />
+</div>
 <p>Selected: <strong>@dayModeDate.ToShortDateString()</strong></p>
 
 <h4>DayWeek — Select Entire Weeks</h4>
-<Calendar SelectionMode="CalendarSelectionMode.DayWeek" @bind-SelectedDate="weekModeDate" />
+<div data-audit-control="Calendar-4">
+    <Calendar SelectionMode="CalendarSelectionMode.DayWeek" @bind-SelectedDate="weekModeDate" />
+</div>
 <p>Selected: <strong>@weekModeDate.ToShortDateString()</strong></p>
 
 <h4>DayWeekMonth — Select Weeks or Month</h4>
-<Calendar SelectionMode="CalendarSelectionMode.DayWeekMonth" @bind-SelectedDate="monthModeDate" />
+<div data-audit-control="Calendar-5">
+    <Calendar SelectionMode="CalendarSelectionMode.DayWeekMonth" @bind-SelectedDate="monthModeDate" />
+</div>
 <p>Selected: <strong>@monthModeDate.ToShortDateString()</strong></p>
 
 <p>Code:</p>
@@ -49,10 +59,14 @@
 <h3>Display Options</h3>
 
 <h4>Grid Lines</h4>
-<Calendar ShowGridLines="true" @bind-SelectedDate="gridDate" />
+<div data-audit-control="Calendar-6">
+    <Calendar ShowGridLines="true" @bind-SelectedDate="gridDate" />
+</div>
 
 <h4>Without Title</h4>
-<Calendar ShowTitle="false" @bind-SelectedDate="noTitleDate" />
+<div data-audit-control="Calendar-7">
+    <Calendar ShowTitle="false" @bind-SelectedDate="noTitleDate" />
+</div>
 
 <h4>Without Day Header</h4>
 <Calendar ShowDayHeader="false" @bind-SelectedDate="noDayHeaderDate" />

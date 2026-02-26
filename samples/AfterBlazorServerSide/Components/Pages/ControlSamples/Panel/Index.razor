@@ -4,10 +4,12 @@
 <h2>Panel Component Samples</h2>
 
 <h3>Basic Panel</h3>
-<Panel>
+<div data-audit-control="Panel-1">
+    <Panel>
 	<p>This content is inside a basic Panel.</p>
 	<p>A Panel renders as a div element by default.</p>
-</Panel>
+    </Panel>
+</div>
 <pre><code>&lt;Panel&gt;
     &lt;p&gt;This content is inside a basic Panel.&lt;/p&gt;
 &lt;/Panel&gt;</code></pre>
@@ -15,10 +17,12 @@
 <hr />
 
 <h3>Panel with GroupingText (Fieldset)</h3>
-<Panel GroupingText="User Information">
+<div data-audit-control="Panel-2">
+    <Panel GroupingText="User Information">
 	<p>Name: John Doe</p>
 	<p>Email: john@example.com</p>
-</Panel>
+    </Panel>
+</div>
 <pre><code>&lt;Panel GroupingText="User Information"&gt;
     &lt;p&gt;Name: John Doe&lt;/p&gt;
     &lt;p&gt;Email: john@example.com&lt;/p&gt;
@@ -27,14 +31,16 @@
 <hr />
 
 <h3>Panel with Styling</h3>
-<Panel BackColor="WebColor.LightYellow" 
+<div data-audit-control="Panel-3">
+    <Panel BackColor="WebColor.LightYellow" 
        ForeColor="WebColor.Navy"
        BorderColor="WebColor.Blue"
        BorderWidth="Unit.Pixel(2)"
        BorderStyle="BorderStyle.Solid"
        Width="Unit.Pixel(300)">
 	<p>This panel has custom colors and border.</p>
-</Panel>
+    </Panel>
+</div>
 <pre><code>&lt;Panel BackColor="WebColor.LightYellow" 
        ForeColor="WebColor.Navy"
        BorderColor="WebColor.Blue"

@@ -9,7 +9,9 @@
 <div class="demo-section">
     <h3>Demo</h3>
     
-    <HiddenField ID="myHiddenField" Value="@HiddenValue" OnValueChanged="HandleValueChanged" />
+    <div data-audit-control="HiddenField">
+        <HiddenField ID="myHiddenField" Value="@HiddenValue" OnValueChanged="HandleValueChanged" />
+    </div>
     
     <p><strong>Current hidden value:</strong> @HiddenValue</p>
     

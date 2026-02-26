@@ -17,10 +17,12 @@
 <p>Click a region to navigate. This mirrors the Web Forms <code>HotSpotMode.Navigate</code> behavior:</p>
 
 <div class="demo-section">
-    <ImageMap ImageUrl="/img/placeholder-400x200.svg"
+    <div data-audit-control="ImageMap">
+        <ImageMap ImageUrl="/img/placeholder-400x200.svg"
               AlternateText="Navigation demo image"
               HotSpotMode="HotSpotMode.Navigate"
               HotSpots="@navigationHotSpots" />
+    </div>
 </div>
 
 <p>The image above has three hot spots defined:</p>

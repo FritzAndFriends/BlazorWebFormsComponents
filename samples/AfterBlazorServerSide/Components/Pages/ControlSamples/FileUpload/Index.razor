@@ -16,7 +16,9 @@
 <p>A simple file picker, just like the default Web Forms FileUpload:</p>
 
 <div class="demo-section">
-    <FileUpload @ref="basicUpload" />
+    <div data-audit-control="FileUpload">
+        <FileUpload @ref="basicUpload" />
+    </div>
     <br />
     <Button Text="Check File" OnClick="CheckBasicFile" />
     @if (!string.IsNullOrEmpty(basicStatus))
