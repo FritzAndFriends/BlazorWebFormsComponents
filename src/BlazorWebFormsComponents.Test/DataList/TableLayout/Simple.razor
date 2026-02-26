@@ -11,8 +11,7 @@
         cut.FindAll("td").Count().ShouldBe(Widget.SimpleWidgetList.Length+1);
         cut.Find("td").TextContent.ShouldBe("My Widget List");
 
-        cut.Find("table").HasAttribute("style").ShouldBeTrue();
-        cut.Find("table").GetAttribute("style").ShouldContain("border-collapse:collapse;");
+        cut.Find("table").HasAttribute("style").ShouldBeFalse();
 
         cut.Find("table").HasAttribute("title").ShouldBeFalse();
         cut.Find("table").HasAttribute("cellspacing").ShouldBeFalse();
