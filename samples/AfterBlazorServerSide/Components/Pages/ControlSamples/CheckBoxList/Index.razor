@@ -1,0 +1,60 @@
+@page "/ControlSamples/CheckBoxList"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>CheckBoxList Sample</PageTitle>
+
+<h2>CheckBoxList Component Samples</h2>
+
+<h3>Basic CheckBoxList with Static Items</h3>
+<div data-audit-control="CheckBoxList-1">
+    <CheckBoxList TItem="object" StaticItems="colorItems" @bind-SelectedValues="selectedColors" />
+</div>
+<p>Selected: <strong>@string.Join(", ", selectedColors)</strong></p>
+<pre><code>&lt;CheckBoxList TItem="object" StaticItems="colorItems" @@bind-SelectedValues="selectedColors" /&gt;
+
+@@code {
+    private List&lt;string&gt; selectedColors = new();
+    private ListItemCollection colorItems = new() {
+        new ListItem("Red", "red"),
+        new ListItem("Green", "green"),
+        new ListItem("Blue", "blue")
+    };
+}</code></pre>
+
+<hr />
+
+<h3>With RepeatDirection and RepeatLayout Settings</h3>
+<div data-audit-control="CheckBoxList-2">
+    <CheckBoxList TItem="object"
+                  StaticItems="sizeItems"
+                  RepeatDirection="Horizontal"
+                  RepeatLayout="RepeatLayout.Flow"
+                  @bind-SelectedValues="selectedSizes" />
+</div>
+<p>Selected: <strong>@string.Join(", ", selectedSizes)</strong></p>
+<pre><code>&lt;CheckBoxList TItem="object"
+              StaticItems="sizeItems"
+              RepeatDirection="Horizontal"
+              RepeatLayout="RepeatLayout.Flow"
+              @@bind-SelectedValues="selectedSizes" /&gt;</code></pre>
+
+@code {
+    private List<string> selectedColors = new();
+    private List<string> selectedSizes = new();
+
+    private ListItemCollection colorItems = new()
+    {
+        new ListItem("Red", "red"),
+        new ListItem("Green", "green"),
+        new ListItem("Blue", "blue"),
+        new ListItem("Yellow", "yellow")
+    };
+
+    private ListItemCollection sizeItems = new()
+    {
+        new ListItem("Small", "S"),
+        new ListItem("Medium", "M"),
+        new ListItem("Large", "L"),
+        new ListItem("X-Large", "XL")
+    };
+}

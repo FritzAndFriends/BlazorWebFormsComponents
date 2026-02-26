@@ -1,0 +1,49 @@
+@page "/ControlSamples/ImageButton"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>ImageButton Sample</PageTitle>
+
+<h2>ImageButton Component Samples</h2>
+
+<h3>Basic ImageButton</h3>
+<div data-audit-control="ImageButton-1">
+    <ImageButton ImageUrl="/img/placeholder-150x100.svg"
+                 AlternateText="Submit"
+                 OnClick="HandleClick1" />
+</div>
+<p>Click count: <strong>@clickCount1</strong></p>
+<pre><code>&lt;ImageButton ImageUrl="/img/placeholder-150x100.svg"
+             AlternateText="Submit"
+             OnClick="HandleClick" /&gt;</code></pre>
+
+<hr />
+
+<h3>ImageButton with AlternateText and Styling</h3>
+<div data-audit-control="ImageButton-2">
+    <ImageButton ImageUrl="/img/placeholder-80x80.svg"
+                 AlternateText="Styled submit button"
+                 ToolTip="Click this image button to submit"
+                 CssClass="img-button-styled"
+                 OnClick="HandleClick2" />
+</div>
+<p>Click count: <strong>@clickCount2</strong></p>
+<pre><code>&lt;ImageButton ImageUrl="/img/placeholder-80x80.svg"
+             AlternateText="Styled submit button"
+             ToolTip="Click this image button to submit"
+             CssClass="img-button-styled"
+             OnClick="HandleClick" /&gt;</code></pre>
+
+@code {
+    private int clickCount1 = 0;
+    private int clickCount2 = 0;
+
+    private void HandleClick1(MouseEventArgs e)
+    {
+        clickCount1++;
+    }
+
+    private void HandleClick2(MouseEventArgs e)
+    {
+        clickCount2++;
+    }
+}

@@ -3,6 +3,7 @@
 <h3>Compare Validator</h3>
 @using BlazorWebFormsComponents.Validations;
 
+<div data-audit-control="CompareValidator-1">
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
 
 	<label>Write a number greater than 10</label>
@@ -18,6 +19,7 @@
 
 
 </EditForm>
+</div>
 
 @code {
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
