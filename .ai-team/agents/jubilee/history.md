@@ -190,3 +190,6 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 - **2 structural edge cases noted but not added:** `LoginControls/Orientation` (route `/ControlSamples/LoginControls/Orientation`) and `LoginStatusNotAuthenticated` (route `/ControlSamples/LoginStatusNotAuthenticated`) don't fit the SubPage URL pattern of any existing catalog entry. These pages are reachable via in-page links but not from sidebar navigation.
 - **ComponentCatalog.cs pattern for future reference:** Each entry is a `ComponentInfo` record with (Name, Category, Route, Description, SubPages?, Keywords?). SubPages are string arrays where each name is appended to the base Route to form nav links (`{Route}/{SubPage}`). Entries are grouped by category comments and alphabetically ordered within each category. Components without an Index.razor use their specific sub-page route (e.g., Menu → `/ControlSamples/Menu/Selection`).
 - **Build verified:** `dotnet build samples\AfterBlazorServerSide\AfterBlazorServerSide.csproj -c Release --verbosity quiet` — exit code 0.
+
+ Team update (2026-02-26): M15 HTML fidelity strategy  sample data alignment (M15-01) is P0 priority, assigned to Jubilee  decided by Forge
+ Team update (2026-02-26): Data-audit-control markers (M15-08) assigned to Jubilee  ~25 new comparisons needed  decided by Forge

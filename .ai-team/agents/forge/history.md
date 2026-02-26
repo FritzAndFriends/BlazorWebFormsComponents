@@ -154,3 +154,6 @@ Line-by-line classification of HTML divergences in DataList (106 lines), GridVie
 **New divergence candidate:** D-11 (Blazor uses `<thead>` for headers, WF uses `<tbody>` by default). Needs team decision — register as intentional or fix.
 
 📌 Decision filed: `.ai-team/decisions/inbox/forge-m15-data-control-analysis.md` — Data control investigation complete; 4 remaining bugs, sample alignment is critical path.
+
+ Team update (2026-02-26): Data control divergence analysis consolidated with post-bug-fix capture results  sample alignment confirmed as #1 blocker  decided by Forge, Rogue
+ Team update (2026-02-26): M15 HTML Fidelity Strategy document merged into decisions.md  12 work items, 6 agent assignments  decided by Forge

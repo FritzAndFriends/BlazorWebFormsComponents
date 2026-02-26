@@ -115,3 +115,6 @@ AccessKey/ToolTip missing from base classes (universal gap). Label needs BaseSty
 
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule docs  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-26): M15 HTML fidelity strategy  doc updates post-M15 if new exact matches warrant verification badges  decided by Forge
+ Team update (2026-02-26): ClientIDMode implementation landed (M16)  may need documentation for ClientIDMode property on components  decided by Cyclops, Rogue
