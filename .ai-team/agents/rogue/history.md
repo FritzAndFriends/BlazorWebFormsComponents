@@ -154,3 +154,17 @@ Re-ran full HTML capture pipeline after 14 bug fixes across 10 controls. Results
 
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule tests  decided by Jeffrey T. Fritz
+
+### Milestone 16: LoginView/PasswordRecovery OuterStyle Tests (#352, #354)
+
+Wrote 18 bUnit tests across 2 new test files for BaseStyledComponent style property rendering on login controls:
+
+**OuterStyle.razor (LoginView, 9 tests):** CssClass renders on outer element, no class when unset, ToolTip as title attribute, no title when unset, BackColor renders background-color in style, ForeColor renders color in style, Font-Bold renders font-weight:bold, combined CssClass+BackColor+ToolTip, template content still renders inside styled wrapper. Tests find outer element by `#ID` selector — will pass after Cyclops adds styled wrapper in #352.
+
+**OuterStyle.razor (PasswordRecovery, 9 tests):** CssClass renders on outer `<table>`, no class when unset, ToolTip as title attribute, no title when unset, BackColor renders background-color, ForeColor renders color, Font-Bold renders font-weight:bold, combined CssClass+BackColor+ToolTip, border-collapse:collapse always present in style. Tests use `table#ID` selector matching existing PasswordRecovery markup.
+
+**Panel BackImageUrl:** Tests already existed from Milestone 6 P2 (3 tests in `Panel/BackImageUrl.razor`). No new tests needed.
+
+📌 Test pattern: LoginView tests require AuthenticationStateProvider mock (anonymous user). PasswordRecovery tests require NavigationManager mock. Both use fully-qualified `BlazorWebFormsComponents.LoginControls.LoginView` in Razor markup to avoid ambiguity. Find outer element by `#ID` for LoginView (wrapper element unknown until Cyclops implements), `table#ID` for PasswordRecovery (outer table already renders ID/CssClass/Style/ToolTip). — Rogue
+
+📌 Test pattern: PasswordRecovery outer table always includes `border-collapse:collapse` in style — assertions for BackColor/ForeColor should check `ShouldContain` not exact match. LoginView currently has no styled wrapper; #352 will add one. — Rogue
