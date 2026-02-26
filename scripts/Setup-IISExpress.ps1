@@ -181,11 +181,24 @@ if (Test-Path $globalFile) {
     # and are not needed for the HTML structure audit
     $globalContent = $globalContent -replace '(?m)^(\s*)(RouteConfig\.)', '$1// $2'
     $globalContent = $globalContent -replace '(?m)^(\s*)(BundleConfig\.)', '$1// $2'
+    # Comment out using directives for unavailable assemblies
+    $globalContent = $globalContent -replace '(?m)^(\s*)(using System\.Web\.Optimization;)', '$1// $2'
+    $globalContent = $globalContent -replace '(?m)^(\s*)(using System\.Web\.Routing;)', '$1// $2'
     Set-Content -Path $globalFile -Value $globalContent -NoNewline
-    Write-OK 'Commented out RouteConfig/BundleConfig calls (not needed for audit).'
+    Write-OK 'Commented out RouteConfig/BundleConfig calls and unused using directives.'
 }
 else {
     Write-Warn 'Global.asax.cs not found — skipping.'
+}
+
+# Patch web.config: remove System.Web.Optimization namespace and control registrations
+$webConfigFile = Join-Path $webFormsDir 'web.config'
+if (Test-Path $webConfigFile) {
+    $wcContent = Get-Content $webConfigFile -Raw
+    $wcContent = $wcContent -replace '(?s)<add\s+namespace="System\.Web\.Optimization"\s*/>', '<!-- Removed for audit: System.Web.Optimization -->'
+    $wcContent = $wcContent -replace '(?s)<add\s+assembly="Microsoft\.AspNet\.Web\.Optimization\.WebForms"[^/]*/>', '<!-- Removed for audit: Optimization.WebForms -->'
+    Set-Content -Path $webConfigFile -Value $wcContent -NoNewline
+    Write-OK 'Patched web.config: removed Optimization references.'
 }
 
 # ============================================================

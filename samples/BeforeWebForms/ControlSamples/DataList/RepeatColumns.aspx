@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="RepeatColumns.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.RepeatColumns" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="RepeatColumns.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.RepeatColumns" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <h2>DataList Repeat Columns Sample</h2>
     <div>

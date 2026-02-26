@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.Calendar._default" %>
+<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeFile="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.Calendar._default" %>
 
 <asp:Content ContentPlaceHolderID="MainContent" runat="server">
 

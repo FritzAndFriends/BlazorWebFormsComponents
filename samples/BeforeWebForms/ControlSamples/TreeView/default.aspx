@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeBehind="default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.TreeView._default" %>
+<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeFile="default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.TreeView._default" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="MainContent">
 

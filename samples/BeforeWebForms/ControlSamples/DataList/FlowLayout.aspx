@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="FlowLayout.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.FlowLayout" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="FlowLayout.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.FlowLayout" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 

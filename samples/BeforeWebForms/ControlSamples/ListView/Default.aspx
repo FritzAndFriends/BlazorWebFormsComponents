@@ -1,4 +1,4 @@
-﻿<%@ Page Title="ListView Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.ListView.Default" %>
+<%@ Page Title="ListView Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.ListView.Default" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="MainContent">
 

@@ -107,3 +107,9 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
  Team update (2026-02-25): HTML audit strategy approved  decided by Forge
 
  Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+### M12-01 — Tier 2 BeforeWebForms Data Control Samples
+
+- **DetailsView sample created:** `samples/BeforeWebForms/ControlSamples/DetailsView/Default.aspx` + `.aspx.cs` + `.aspx.designer.cs`. Two DetailsView instances: one with AutoGenerateRows=true and NumericFirstLast paging, one with explicit BoundFields (Name, Price formatted as {0:C}, Category, InStock) and NextPreviousFirstLast paging. Both use inline `List<Product>` with 10 items. Includes PageIndexChanging handlers for paging support. Styled with HeaderStyle, AlternatingRowStyle, PagerStyle, FieldHeaderStyle. Wrapped with `data-audit-control="DetailsView"`.
+- **DataPager sample created:** `samples/BeforeWebForms/ControlSamples/DataPager/Default.aspx` + `.aspx.cs` + `.aspx.designer.cs`. ListView+DataPager combination showing paged product data. DataPager uses PageSize=3, combines two NextPreviousPagerField instances (first/prev on left, next/last on right) with a NumericPagerField (ButtonCount=5) in the middle. Uses inline `List<Product>` with 10 items. PreRender rebinding for postback paging. Wrapped with `data-audit-control="DataPager"`.
+- **Existing samples verified:** GridView (3 pages), DataList (4 pages), Repeater (1 page), FormView (1 page), ListView (3 pages) — all already have `data-audit-control` markers and use inline data via `SharedSampleObjects.Models.Widget`. No database dependencies found; no fixes needed.

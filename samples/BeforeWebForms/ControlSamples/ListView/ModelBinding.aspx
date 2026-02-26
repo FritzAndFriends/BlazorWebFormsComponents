@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ModelBinding.aspx.cs" Inherits="BeforeWebForms.ControlSamples.ListView.ModelBinding" MasterPageFile="~/Site.Master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ModelBinding.aspx.cs" Inherits="BeforeWebForms.ControlSamples.ListView.ModelBinding" MasterPageFile="~/Site.Master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="MainContent">
 

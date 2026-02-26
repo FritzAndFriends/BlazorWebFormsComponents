@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="StyleAttributes.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.StyleAttributes" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="StyleAttributes.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.StyleAttributes" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 

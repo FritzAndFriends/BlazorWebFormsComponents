@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.FormView._default" MasterPageFile="~/Site.Master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeFile="default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.FormView._default" MasterPageFile="~/Site.Master" %>
 
 <asp:Content ContentPlaceHolderID="MainContent" runat="server">
 
