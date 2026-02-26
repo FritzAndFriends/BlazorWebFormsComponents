@@ -124,6 +124,22 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 
  Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker  20+ divergences could become exact matches  decided by Rogue
 
+### SharedSampleObjects Data Alignment Sweep
+
+- **Audited all Blazor sample pages** in `Components/Pages/ControlSamples/` for inline data that should use SharedSampleObjects.
+- **Priority directories already aligned:** FormView (4 pages), DataList (6 pages), Repeater (1 page) — all already use `Widget.SimpleWidgetList` or `Widget.Widgets(n)`. DetailsView (2 pages) already uses `Product.GetProducts()`.
+- **New shared model created:** `SharedSampleObjects/Models/Employee.cs` with `Id`, `Name`, `Department` properties and static `GetEmployees()` method (4 employees).
+- **New Product overload added:** `Product.GetProducts(int count)` generates n products with deterministic data for paging/sorting demos (consistent categories: Tools/Electronics/Hardware).
+- **Files aligned to SharedSampleObjects:**
+  - `GridView/InlineEditing.razor` — removed local `Product` class, now uses `Product.GetProducts()`
+  - `GridView/Paging.razor` — removed local `Product` class + inline Enumerable.Range, now uses `Product.GetProducts(50)`
+  - `GridView/Sorting.razor` — removed local `Product` class + 25-item GetProductName() helper, now uses `Product.GetProducts(25)`
+  - `GridView/Selection.razor` — removed local `Product` class + 5 inline items, now uses `Product.GetProducts().Take(5).ToList()`
+  - `GridView/DisplayProperties.razor` — removed local `Employee` class + 4 inline items, now uses `Employee.GetEmployees()`
+  - `ListView/CrudOperations.razor` — replaced 3 inline Widget objects with `Widget.SimpleWidgetList.Take(3)` copy
+- **Files intentionally NOT changed:** BulletedList (has `Product` with `Name`/`Url` — different shape), DropDownList/RadioButtonList (have `Product` with `string Id` — list control binding pattern), Chart pages (chart-specific records like `SalesData`/`TrafficData`), Validation pages (form-specific `ExampleModel` classes).
+- Build verified: `dotnet build samples\AfterBlazorServerSide\ -c Release` succeeds with 0 errors.
+
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
  Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule samples  decided by Jeffrey T. Fritz
