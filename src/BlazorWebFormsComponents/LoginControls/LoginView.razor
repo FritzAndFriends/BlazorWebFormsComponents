@@ -1,7 +1,9 @@
 ﻿@inherits BaseStyledComponent
 
-<CascadingValue Name="LoginView" Value="this">
-	@ChildContent
-</CascadingValue>
+<div class="@CssClass" style="@Style" title="@ToolTip">
+	<CascadingValue Name="LoginView" Value="this">
+		@ChildContent
+	</CascadingValue>
 
-@GetView()
+	@GetView()
+</div>
