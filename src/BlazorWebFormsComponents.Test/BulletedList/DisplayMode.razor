@@ -4,7 +4,7 @@
 @code {
 
 	[Fact]
-	public void BulletedList_TextDisplayMode_RendersSpans()
+	public void BulletedList_TextDisplayMode_RendersTextDirectly()
 	{
 		// Arrange
 		var items = new ListItemCollection
@@ -17,14 +17,18 @@
 		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.Text" />);
 
 		// Assert
-		var spans = cut.FindAll("li span");
-		spans.Count.ShouldBe(2);
-		spans[0].TextContent.ShouldBe("Item 1");
-		spans[1].TextContent.ShouldBe("Item 2");
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(2);
+		listItems[0].TextContent.ShouldBe("Item 1");
+		listItems[1].TextContent.ShouldBe("Item 2");
 		
 		// Should not have any links
 		var links = cut.FindAll("a");
 		links.Count.ShouldBe(0);
+		
+		// Should not have spans
+		var spans = cut.FindAll("li span");
+		spans.Count.ShouldBe(0);
 	}
 
 	[Fact]
@@ -87,7 +91,7 @@
 	}
 
 	[Fact]
-	public void BulletedList_HyperLinkDisplayMode_DisabledItem_RendersSpan()
+	public void BulletedList_HyperLinkDisplayMode_DisabledItem_RendersText()
 	{
 		// Arrange
 		var items = new ListItemCollection
@@ -104,13 +108,16 @@
 		links.Count.ShouldBe(1);
 		links[0].TextContent.ShouldBe("Enabled");
 		
+		var listItems = cut.FindAll("li");
+		listItems[1].TextContent.ShouldBe("Disabled");
+		
+		// Should not have spans
 		var spans = cut.FindAll("li span");
-		spans.Count.ShouldBe(1);
-		spans[0].TextContent.ShouldBe("Disabled");
+		spans.Count.ShouldBe(0);
 	}
 
 	[Fact]
-	public void BulletedList_LinkButtonDisplayMode_DisabledItem_RendersSpan()
+	public void BulletedList_LinkButtonDisplayMode_DisabledItem_RendersText()
 	{
 		// Arrange
 		var items = new ListItemCollection
@@ -126,13 +133,16 @@
 		var links = cut.FindAll("a");
 		links.Count.ShouldBe(1);
 		
+		var listItems = cut.FindAll("li");
+		listItems[1].TextContent.ShouldBe("Disabled");
+		
+		// Should not have spans
 		var spans = cut.FindAll("li span");
-		spans.Count.ShouldBe(1);
-		spans[0].TextContent.ShouldBe("Disabled");
+		spans.Count.ShouldBe(0);
 	}
 
 	[Fact]
-	public void BulletedList_DisabledControl_RendersAllAsSpans()
+	public void BulletedList_DisabledControl_RendersAllAsText()
 	{
 		// Arrange
 		var items = new ListItemCollection
@@ -148,8 +158,14 @@
 		var links = cut.FindAll("a");
 		links.Count.ShouldBe(0);
 		
+		var listItems = cut.FindAll("li");
+		listItems.Count.ShouldBe(2);
+		listItems[0].TextContent.ShouldBe("Item 1");
+		listItems[1].TextContent.ShouldBe("Item 2");
+		
+		// Should not have spans
 		var spans = cut.FindAll("li span");
-		spans.Count.ShouldBe(2);
+		spans.Count.ShouldBe(0);
 	}
 
 }

@@ -28,9 +28,9 @@
 		);
 
 		// Assert
-		var spans = cut.FindAll("li span");
-		spans[0].TextContent.ShouldBe(">> Alpha");
-		spans[1].TextContent.ShouldBe(">> Beta");
+		var listItems = cut.FindAll("li");
+		listItems[0].TextContent.ShouldBe(">> Alpha");
+		listItems[1].TextContent.ShouldBe(">> Beta");
 	}
 
 	[Fact]
@@ -51,9 +51,9 @@
 		);
 
 		// Assert
-		var spans = cut.FindAll("li span");
-		spans[0].TextContent.ShouldBe("#One");
-		spans[1].TextContent.ShouldBe("#Two");
+		var listItems = cut.FindAll("li");
+		listItems[0].TextContent.ShouldBe("#One");
+		listItems[1].TextContent.ShouldBe("#Two");
 	}
 
 	[Fact]
@@ -73,8 +73,8 @@
 		);
 
 		// Assert
-		var span = cut.Find("li span");
-		span.TextContent.ShouldBe("Raw Text");
+		var li = cut.Find("li");
+		li.TextContent.ShouldBe("Raw Text");
 	}
 
 }

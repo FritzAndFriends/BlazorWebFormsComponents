@@ -24,10 +24,9 @@
 		var listItems = cut.FindAll("li");
 		listItems.Count.ShouldBe(3);
 		
-		var spans = cut.FindAll("li span");
-		spans[0].TextContent.ShouldBe("Option 1");
-		spans[1].TextContent.ShouldBe("Option 2");
-		spans[2].TextContent.ShouldBe("Option 3");
+		listItems[0].TextContent.ShouldBe("Option 1");
+		listItems[1].TextContent.ShouldBe("Option 2");
+		listItems[2].TextContent.ShouldBe("Option 3");
 	}
 
 	[Fact]
@@ -93,8 +92,8 @@
 		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
 
 		// Assert
-		var span = cut.Find("li span");
-		span.TextContent.ShouldBe("Text Only");
+		var li = cut.Find("li");
+		li.TextContent.ShouldBe("Text Only");
 	}
 
 }

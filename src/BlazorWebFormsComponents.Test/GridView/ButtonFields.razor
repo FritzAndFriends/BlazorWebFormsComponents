@@ -28,7 +28,7 @@
 		var rows = cut.FindAll("tr");
 		rows.Count(e => e.InnerHtml.Contains("td")).ShouldBe(Widget.SimpleWidgetList.Length, $"Did not render {Widget.SimpleWidgetList.Length} TR elements");
 
-		cut.FindAll("button").Count().ShouldBe(Widget.SimpleWidgetList.Length, $"Rendered wrong number of price anchors");
+		cut.FindAll("input[type=submit]").Count().ShouldBe(Widget.SimpleWidgetList.Length, $"Rendered wrong number of price anchors");
 
 		// inspect the button tags
 		foreach (var r in rows.Where(r => r.InnerHtml.Contains("td")))
@@ -61,7 +61,7 @@
 		</GridView>);
 
 		System.Diagnostics.Debug.Write(cut.Markup);
-		var firstButton = cut.Find("button");
+		var firstButton = cut.Find("input[type=submit]");
 		firstButton.Click();
 
 		argsSet.ShouldNotBeNull();

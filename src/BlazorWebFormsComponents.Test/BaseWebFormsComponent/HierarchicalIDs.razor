@@ -13,7 +13,7 @@
 		);
 
 		// Assert - Button should have hierarchical ID
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.GetAttribute("id").ShouldBe("mainPanel_submitBtn");
 	}
 
@@ -28,7 +28,7 @@
 		);
 
 		// Assert - Button should have only its own ID
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.GetAttribute("id").ShouldBe("submitBtn");
 	}
 }

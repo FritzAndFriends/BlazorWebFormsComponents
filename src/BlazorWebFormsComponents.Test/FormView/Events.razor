@@ -25,7 +25,7 @@
 			</FormView>
 		);
 
-		cut.Find("button").Click();
+		cut.Find("input[type=submit]").Click();
 		_modeChangedFired.ShouldBeTrue("ModeChanged should fire when switching to edit mode");
 	}
 
@@ -43,7 +43,7 @@
 			</FormView>
 		);
 
-		cut.Find("button").Click();
+		cut.Find("input[type=submit]").Click();
 		_commandArgs.ShouldNotBeNull("ItemCommand should fire on button click");
 		_commandArgs.CommandName.ShouldBe("Custom");
 	}
@@ -78,7 +78,7 @@
 			</FormView>
 		);
 
-		cut.Find("button").Click();
+		cut.Find("input[type=submit]").Click();
 		_pageIndexChangingFired.ShouldBeTrue("PageIndexChanging should fire on page command");
 	}
 
@@ -96,7 +96,7 @@
 			</FormView>
 		);
 
-		cut.Find("button").Click();
+		cut.Find("input[type=submit]").Click();
 		_pageIndexChangedFired.ShouldBeTrue("PageIndexChanged should fire after page command");
 	}
 
