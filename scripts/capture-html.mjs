@@ -27,6 +27,6 @@ await runCapture({
   outputDir: output,
   pageNames: pages,
   samplesDir,
-  buildUrl: (controlName) => `${url}/ControlSamples/${controlName}/Default`,
+  buildUrl: (controlName) => `${url}/ControlSamples/${controlName}/Default.aspx`,
   ignoreHttpsErrors: false,
 });

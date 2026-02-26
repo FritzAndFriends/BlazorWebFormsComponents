@@ -83,6 +83,7 @@ if ($Revert) {
     try {
         git checkout -- "samples/BeforeWebForms/*.aspx" `
                         "samples/BeforeWebForms/*.ascx" `
+                        "samples/BeforeWebForms/*.asax" `
                         "samples/BeforeWebForms/*.master" `
                         "samples/BeforeWebForms/*.Master" `
                         "samples/BeforeWebForms/ControlSamples/**/*.aspx" `
@@ -141,41 +142,47 @@ Write-OK "IIS Express found: $iisExe"
 # ============================================================
 # STEP 1: CodeBehind → CodeFile conversion
 # ============================================================
-Write-Step 'Converting CodeBehind= to CodeFile= in .aspx, .ascx, .master files...'
+Write-Step 'Converting CodeBehind= to CodeFile= in .aspx, .ascx, .asax, .master files...'
 
-$extensions = @('*.aspx', '*.ascx', '*.master', '*.Master')
+$extensions = @('*.aspx', '*.ascx', '*.asax', '*.master', '*.Master')
 $converted = 0
 
 foreach ($ext in $extensions) {
     $files = Get-ChildItem -Path $sampleDir -Filter $ext -Recurse -File
     foreach ($file in $files) {
         $content = Get-Content $file.FullName -Raw
-        if ($content -match 'CodeBehind=') {
-            $newContent = $content -replace 'CodeBehind=', 'CodeFile='
+        if ($content -match 'Code[Bb]ehind=') {
+            $newContent = $content -replace 'Code[Bb]ehind=', 'CodeFile='
             Set-Content -Path $file.FullName -Value $newContent -NoNewline
             $converted++
         }
     }
 }
 
-Write-OK "$converted file(s) converted (CodeBehind → CodeFile)."
+Write-OK "$converted file(s) converted (CodeBehind/Codebehind → CodeFile)."
 
 # ============================================================
 # STEP 2: Add 'partial' to Global.asax.cs
 # ============================================================
-Write-Step 'Checking Global.asax.cs for partial keyword...'
+Write-Step 'Patching Global.asax.cs for dynamic compilation...'
 
 $globalFile = Join-Path $sampleDir 'Global.asax.cs'
 if (Test-Path $globalFile) {
     $globalContent = Get-Content $globalFile -Raw
+    # Add partial keyword if missing
     if ($globalContent -match 'public\s+class\s+Global\s*:' -and $globalContent -notmatch 'public\s+partial\s+class\s+Global\s*:') {
         $globalContent = $globalContent -replace 'public\s+class\s+Global\s*:', 'public partial class Global :'
-        Set-Content -Path $globalFile -Value $globalContent -NoNewline
         Write-OK 'Added partial keyword to Global class.'
     }
     else {
         Write-OK 'Global.asax.cs already has partial keyword (or pattern not found).'
     }
+    # Comment out RouteConfig/BundleConfig calls — App_Start classes can't be dynamically compiled
+    # and are not needed for the HTML structure audit
+    $globalContent = $globalContent -replace '(?m)^(\s*)(RouteConfig\.)', '$1// $2'
+    $globalContent = $globalContent -replace '(?m)^(\s*)(BundleConfig\.)', '$1// $2'
+    Set-Content -Path $globalFile -Value $globalContent -NoNewline
+    Write-OK 'Commented out RouteConfig/BundleConfig calls (not needed for audit).'
 }
 else {
     Write-Warn 'Global.asax.cs not found — skipping.'
