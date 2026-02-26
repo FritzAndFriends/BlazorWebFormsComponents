@@ -1,0 +1,60 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void GridView_DefaultUseAccessibleHeader_RendersThWithScope()
+	{
+		// WebForms defaults UseAccessibleHeader to true, rendering <th scope="col">
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="AccessibleHeaderTestItem" DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="AccessibleHeaderTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBeGreaterThan(0);
+		foreach (var header in headers)
+		{
+			header.GetAttribute("scope").ShouldBe("col");
+		}
+	}
+
+	[Fact]
+	public void GridView_UseAccessibleHeaderFalse_NoScope()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="AccessibleHeaderTestItem" DataSource="data" AutoGenerateColumns="false"
+						UseAccessibleHeader="false">
+			<Columns>
+				<BoundField ItemType="AccessibleHeaderTestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var headers = cut.FindAll("th");
+		headers.Count.ShouldBeGreaterThan(0);
+		foreach (var header in headers)
+		{
+			header.HasAttribute("scope").ShouldBeFalse();
+		}
+	}
+
+	private List<AccessibleHeaderTestItem> GetTestItems()
+	{
+		return new List<AccessibleHeaderTestItem>
+		{
+			new AccessibleHeaderTestItem { Id = 1, Name = "Alpha" },
+			new AccessibleHeaderTestItem { Id = 2, Name = "Beta" }
+		};
+	}
+
+	public class AccessibleHeaderTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}
