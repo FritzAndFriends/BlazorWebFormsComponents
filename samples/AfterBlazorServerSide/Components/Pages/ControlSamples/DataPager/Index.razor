@@ -1,0 +1,87 @@
+@page "/ControlSamples/DataPager"
+@using BlazorWebFormsComponents.Enums
+
+<h2>DataPager Component</h2>
+
+<Nav />
+
+<p>
+	The <code>DataPager</code> component provides paging functionality for data-bound controls.
+	It supports numeric page buttons and next/previous navigation.
+</p>
+
+<h3>DataPager with Numeric Buttons</h3>
+<div data-audit-control="DataPager">
+<table cellpadding="4" border="1" style="border-collapse: collapse;">
+	<thead>
+		<tr style="background-color: #507CD1; color: white;">
+			<th>ID</th>
+			<th>Name</th>
+			<th>Price</th>
+			<th>Category</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in GetPagedItems())
+		{
+			<tr>
+				<td>@item.Id</td>
+				<td>@item.Name</td>
+				<td>@item.Price.ToString("C")</td>
+				<td>@item.Category</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<br />
+
+<DataPager TotalRowCount="@_allProducts.Count"
+	PageSize="3"
+	PageIndex="@_pageIndex"
+	PageIndexChanged="HandlePageChanged"
+	Mode="PagerButtons.NumericFirstLast"
+	FirstPageText="« First"
+	LastPageText="Last »" />
+</div>
+
+@code {
+	private int _pageIndex = 0;
+
+	private List<ProductItem> _allProducts = Enumerable.Range(1, 12).Select(i => new ProductItem
+	{
+		Id = i,
+		Name = $"Product {i}",
+		Price = 9.99m + i,
+		Category = i % 2 == 0 ? "Hardware" : "Software"
+	}).ToList();
+
+	private List<ProductItem> GetPagedItems()
+	{
+		return _allProducts.Skip(_pageIndex * 3).Take(3).ToList();
+	}
+
+	private void HandlePageChanged(int newPage)
+	{
+		_pageIndex = newPage;
+	}
+
+	private class ProductItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+		public decimal Price { get; set; }
+		public string Category { get; set; }
+	}
+}
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;DataPager TotalRowCount="@@totalRows"<br />
+&nbsp;&nbsp;PageSize="3"<br />
+&nbsp;&nbsp;PageIndex="@@pageIndex"<br />
+&nbsp;&nbsp;PageIndexChanged="HandlePageChanged"<br />
+&nbsp;&nbsp;Mode="PagerButtons.NumericFirstLast" /&gt;
+</code>
