@@ -1,0 +1,8 @@
+@inherits NamingContainer
+
+@if (Visible)
+{
+	<CascadingValue Value="Theme">
+		@ChildContent
+	</CascadingValue>
+}

@@ -50,3 +50,62 @@ Audited all sample page `@page` routes against ControlSampleTests.cs and Interac
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+## Summary: Issue #358 — 5 Missing Smoke Tests (2026-02-25)
+
+Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering all gaps identified in M9 audit: ListView/CrudOperations, Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles. All 5 sample pages verified to exist. Tests added as InlineData to existing Theory methods (EditorControl, DataControl, LoginControl). Build verified green (0 errors).
+
+## Learnings
+
+- Panel/BackImageUrl sample page uses external placeholder URLs (`via.placeholder.com`). The existing `VerifyPageLoadsWithoutErrors` filter for "Failed to load resource" handles this, so the smoke test works despite the team convention against external image URLs.
+- LoginControls/Orientation is at `/ControlSamples/LoginControls/Orientation` (not under `/ControlSamples/Login` or `/ControlSamples/ChangePassword` as initially suggested in the issue).
+
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
+
+ Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  interaction tests may be needed  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle with IMenuStyleContainer  interaction tests may be needed  decided by Cyclops
+
+ Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
+
+
+ Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
+
+
+ Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
+
+
+ Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge
+
+
+ Team update (2026-02-25): HTML audit strategy approved  decided by Forge
+
+ Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+ Team update (2026-02-26): Menu RenderingMode=Table  integration tests may need table-mode variants  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy defined  integration tests needed when handlers implemented  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: normalization pipeline needs <!--!--> stripping and Blazor data control normalization  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture: normalizer needs GUID ID stripping and empty style="" removal  decided by Rogue
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+
+## Summary: PR #377 DetailsView Integration Test Fix (2026-02-26)
+
+Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs after DetailsView sample pages migrated from Customer to Product model (SharedSampleObjects.Models.Product). Changes: "Customer Details"→"Product Details" (Styles), "Customer Record"→"Product Record" (Caption), "No customers found."→"No products found." (EmptyData), Customer field names→Product field names in EditMode assertion message. All 7 DetailsView integration tests passing.
+
+## Learnings
+
+- When sample data models change (e.g., Customer→Product), integration test assertions referencing model-specific text (header text, empty data messages, caption text, field name lists in assertion messages) must be updated in lockstep. Smoke tests won't catch these because they only verify page loads without errors — interactive tests with text-matching assertions are the ones that break.

@@ -216,6 +216,28 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		private Dictionary<string, object> GetInputAttributes()
+		{
+			var attrs = new Dictionary<string, object>();
+
+			if (!string.IsNullOrEmpty(ClientID))
+				attrs["id"] = ClientID;
+			if (AllowMultiple)
+				attrs["multiple"] = true;
+			if (!string.IsNullOrEmpty(Accept))
+				attrs["accept"] = Accept;
+			if (!string.IsNullOrEmpty(Style))
+				attrs["style"] = Style;
+			if (!string.IsNullOrEmpty(CssClass))
+				attrs["class"] = CssClass;
+			if (!Enabled)
+				attrs["disabled"] = true;
+			if (!string.IsNullOrEmpty(ToolTip))
+				attrs["title"] = ToolTip;
+
+			return attrs;
+		}
+
 		/// <summary>
 		/// Wrapper class to provide compatibility with Web Forms HttpPostedFile.
 		/// </summary>

@@ -28,9 +28,9 @@ public void FormView_UpdateButton_UpdatesItemAndRaisesEvents()
 			<Button CommandName="Update" Text="Update" />
 		</EditItemTemplate>
 	</FormView>);
-	var editButton = cut.Find("button");
+	var editButton = cut.Find("input[type=submit]");
 	editButton.Click();
-	var updateButton = cut.Find("button");
+	var updateButton = cut.Find("input[type=submit]");
 	updateButton.Click();
 	raisedModeChangeEvent.ShouldBeTrue("Did not raise ModeChange event");
 	raisedItemUpdatingEvent.ShouldBeTrue("Did not raise the ItemUpdating event");

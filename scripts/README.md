@@ -1,6 +1,46 @@
-# Release Scripts
+# Scripts
 
-This directory contains scripts to help with version publishing and release management for BlazorWebFormsComponents using Nerdbank.GitVersioning.
+This directory contains scripts for release management and development tooling for BlazorWebFormsComponents.
+
+---
+
+## BeforeWebForms IIS Express Setup
+
+### Setup-IISExpress.ps1
+
+Automates setup and launch of the BeforeWebForms (.NET Framework 4.8) sample app under IIS Express for the HTML audit. The project uses dynamic compilation (CodeFile= directives) instead of MSBuild.
+
+**Prerequisites:**
+- .NET Framework 4.8
+- IIS Express (comes with Visual Studio or standalone install)
+- `git` in PATH
+
+**Usage:**
+```powershell
+# Full setup + launch on default port 55501
+.\scripts\Setup-IISExpress.ps1
+
+# Custom port, no browser launch
+.\scripts\Setup-IISExpress.ps1 -Port 8080 -NoBrowser
+
+# Revert temporary file changes (restores git state)
+.\scripts\Setup-IISExpress.ps1 -Revert
+```
+
+**What it does:**
+1. Converts `CodeBehind=` to `CodeFile=` in all .aspx/.ascx/.master files (enables dynamic compilation without MSBuild)
+2. Adds `partial` keyword to `Global.asax.cs` if missing
+3. Restores NuGet packages via `nuget.exe` (downloads nuget.exe if not found)
+4. Copies required DLLs from NuGet packages to `samples/BeforeWebForms/bin/`
+5. Launches IIS Express serving the sample app
+
+**Important:** The CodeBehind→CodeFile changes are temporary and should **not** be committed. Use `-Revert` to undo them.
+
+---
+
+## Release Scripts
+
+Scripts for version publishing and release management using Nerdbank.GitVersioning.
 
 ## Prerequisites
 

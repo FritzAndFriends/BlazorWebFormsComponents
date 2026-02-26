@@ -17,10 +17,12 @@
    Handle <code>OnVerifyingUser</code> to validate the username and set the security question
    via the <code>SetQuestion</code> method. Handle <code>OnVerifyingAnswer</code> to verify the answer.</p>
 
+<div data-audit-control="PasswordRecovery-1">
 <PasswordRecovery ID="PasswordRecovery1"
     OnVerifyingUser="HandleVerifyingUser"
     OnVerifyingAnswer="HandleVerifyingAnswer"
     OnSendingMail="HandleSendingMail" />
+</div>
 
 <p style="margin-top: 10px; font-weight: bold;">@_statusMessage</p>
 
@@ -56,6 +58,7 @@
 <h3>Custom Text Properties</h3>
 <p>Customize labels, titles, and messages for each step using the text properties.</p>
 
+<div data-audit-control="PasswordRecovery-2">
 <PasswordRecovery ID="PasswordRecovery2"
     UserNameTitleText="Password Reset"
     UserNameInstructionText="Please enter your email address below."
@@ -66,6 +69,7 @@
     SuccessText="A password reset link has been sent to your email."
     OnVerifyingUser="HandleVerifyingUser2"
     OnVerifyingAnswer="HandleVerifyingAnswer2" />
+</div>
 
 <p>Code:</p>
 <pre><code>&lt;PasswordRecovery ID="PasswordRecovery2"

@@ -4,8 +4,10 @@
 
 <Nav></Nav>
 
-<Button CommandName="Foo" CommandArgument="bar" OnCommand="OnCommand" OnClick="OnClick" Text="Click me!"
-				AccessKey="b" ToolTip="Click to submit" />
+<div data-audit-control="Button-1">
+    <Button OnClick="OnClick" Text="Blue Button"
+				BackColor="WebColor.Blue" ForeColor="WebColor.White" />
+</div>
 
 <p><em>Tip:</em> This button has <code>AccessKey="b"</code> (press <kbd>Alt+B</kbd> to focus) and <code>ToolTip="Click to submit"</code> (hover to see).</p>
 

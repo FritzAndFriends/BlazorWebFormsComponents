@@ -1,5 +1,14 @@
 @inherits BaseWebFormsComponent
 
+@if (ParentMenu?.RenderingMode == MenuRenderingMode.Table)
+{
+	@if (ParentMenu?.Orientation == Orientation.Vertical)
+	{<tr><td><a title="@Title" class="@GetItemCssClass()" style="@GetItemStyle()" href="@NavigateUrl" target="@EffectiveTarget" @onclick="HandleClick" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))">@Text</a></td></tr>}
+	else
+	{<td><a title="@Title" class="@GetItemCssClass()" style="@GetItemStyle()" href="@NavigateUrl" target="@EffectiveTarget" @onclick="HandleClick" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))">@Text</a></td>}
+}
+else
+{
 <li>
     <a title="@Title" class="@GetItemCssClass()" style="@GetItemStyle()" href="@NavigateUrl" target="@EffectiveTarget" @onclick="HandleClick" @onclick:preventDefault="@(string.IsNullOrEmpty(NavigateUrl))">@Text</a>
     @if (ChildContent != null && ParentMenu.StaticDisplayLevels <= Depth)
@@ -16,6 +25,7 @@
   <CascadingValue Name="Depth" Value="@(Depth+1)">
       @ChildContent
   </CascadingValue>
+}
 }
 
 @code {

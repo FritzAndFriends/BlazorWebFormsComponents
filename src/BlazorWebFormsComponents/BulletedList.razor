@@ -9,7 +9,7 @@
 	
 	@if (IsOrderedList)
 	{
-		<ol id="@ClientID" class="@CssClass" style="@CombinedStyle" type="@OrderedListType" start="@FirstBulletNumber" title="@ToolTip">
+		<ol id="@ClientID" class="@CssClass" style="@CombinedStyle" start="@GetStartAttribute()" title="@ToolTip">
 			@RenderListItems(allItems)
 		</ol>
 	}
@@ -34,7 +34,7 @@
 				@switch (DisplayMode)
 				{
 					case BulletedListDisplayMode.Text:
-						<span>@item.Text</span>
+						@item.Text
 						break;
 						
 					case BulletedListDisplayMode.HyperLink:
@@ -44,7 +44,7 @@
 						}
 						else
 						{
-							<span>@item.Text</span>
+							@item.Text
 						}
 						break;
 						
@@ -55,7 +55,7 @@
 						}
 						else
 						{
-							<span>@item.Text</span>
+							@item.Text
 						}
 						break;
 				}

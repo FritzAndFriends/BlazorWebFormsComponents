@@ -5,69 +5,69 @@
 public void Image_ImageAlign_NotSet_NoAlignAttribute()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="NotSet" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" />);
 }
 
 [Fact]
 public void Image_ImageAlign_Left()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Left" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="left" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="left" />);
 }
 
 [Fact]
 public void Image_ImageAlign_Right()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Right" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="right" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="right" />);
 }
 
 [Fact]
 public void Image_ImageAlign_Baseline()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Baseline" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="baseline" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="baseline" />);
 }
 
 [Fact]
 public void Image_ImageAlign_Top()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Top" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="top" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="top" />);
 }
 
 [Fact]
 public void Image_ImageAlign_Middle()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Middle" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="middle" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="middle" />);
 }
 
 [Fact]
 public void Image_ImageAlign_Bottom()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="Bottom" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="bottom" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="bottom" />);
 }
 
 [Fact]
 public void Image_ImageAlign_AbsBottom()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsBottom" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absbottom" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="absbottom" />);
 }
 
 [Fact]
 public void Image_ImageAlign_AbsMiddle()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="AbsMiddle" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="absmiddle" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="absmiddle" />);
 }
 
 [Fact]
 public void Image_ImageAlign_TextTop()
 {
 var cut = Render(@<Image ImageUrl="/img/vb.jpg" AlternateText="Visual Basic" ImageAlign="TextTop" />);
-cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" longdesc="" align="texttop" />);
+cut.MarkupMatches(@<img src="/img/vb.jpg" alt="Visual Basic" align="texttop" />);
 }
 }

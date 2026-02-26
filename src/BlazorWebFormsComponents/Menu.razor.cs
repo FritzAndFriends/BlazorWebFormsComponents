@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.JSInterop;
@@ -15,7 +16,7 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// A menubar component capable of making hierarchical menus for navigating your application
 	/// </summary>
-	public partial class Menu : BaseStyledComponent
+	public partial class Menu : BaseStyledComponent, IMenuStyleContainer
 	{
 
 		#region Injected Properties
@@ -33,6 +34,12 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public Orientation Orientation { get; set; } = Orientation.Vertical;
+
+		/// <summary>
+		/// Gets or sets how the menu renders HTML. List uses ul/li (default), Table uses table/tr/td (legacy).
+		/// </summary>
+		[Parameter]
+		public MenuRenderingMode RenderingMode { get; set; } = MenuRenderingMode.List;
 
 		[Parameter]
 		public int StaticDisplayLevels { get; set; }
@@ -224,6 +231,69 @@ namespace BlazorWebFormsComponents
 				StateHasChanged();
 			}
 		}
+
+		private StaticMenuStyle _StaticMenuStyle = new StaticMenuStyle();
+		public StaticMenuStyle StaticMenuStyle
+		{
+			get { return _StaticMenuStyle; }
+			set
+			{
+				_StaticMenuStyle = value;
+				this.StateHasChanged();
+			}
+		}
+
+		#region IMenuStyleContainer explicit implementation
+
+		MenuItemStyle IMenuStyleContainer.DynamicMenuStyle
+		{
+			get => _DynamicMenuStyle;
+			set => DynamicMenuStyle = (DynamicMenuStyle)value;
+		}
+
+		MenuItemStyle IMenuStyleContainer.StaticMenuStyle
+		{
+			get => _StaticMenuStyle;
+			set => StaticMenuStyle = (StaticMenuStyle)value;
+		}
+
+		MenuItemStyle IMenuStyleContainer.DynamicMenuItemStyle
+		{
+			get => _DynamicMenuItemStyle;
+			set => DynamicMenuItemStyle = (DynamicMenuItemStyle)value;
+		}
+
+		MenuItemStyle IMenuStyleContainer.StaticMenuItemStyle
+		{
+			get => _StaticMenuItemStyle;
+			set => StaticMenuItemStyle = (StaticMenuItemStyle)value;
+		}
+
+		#endregion
+
+		#region Style RenderFragment Parameters
+
+		/// <summary>
+		/// Content for the DynamicMenuStyle sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment DynamicMenuStyleContent { get; set; }
+
+		/// <summary>
+		/// Content for the StaticMenuStyle sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment StaticMenuStyleContent { get; set; }
+
+		/// <summary>
+		/// Content for the DynamicMenuItemStyle sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment DynamicMenuItemStyleContent { get; set; }
+
+		/// <summary>
+		/// Content for the StaticMenuItemStyle sub-component.
+		/// </summary>
+		[Parameter] public RenderFragment StaticMenuItemStyleContent { get; set; }
+
+		#endregion
 
 
 		[Parameter]

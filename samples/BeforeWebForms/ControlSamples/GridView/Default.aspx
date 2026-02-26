@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.GridView.Default" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Default.aspx.cs" Inherits="BeforeWebForms.ControlSamples.GridView.Default" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
   <h2>GridView control homepage</h2>
@@ -9,6 +9,7 @@
 
   <p>This is just a simple example of a GridView with a selectMethod</p>
 
+  <div data-audit-control="GridView">
   <asp:gridview id="CustomersGridView" 
     autogeneratecolumns="False"
     emptydatatext="No data available."
@@ -34,4 +35,5 @@
           DataNavigateUrlFields="CompanyName, FirstName, LastName" DataNavigateUrlFormatString="https://www.bing.com/search?q={0} {1} {2}" />
       </Columns>
   </asp:gridview>
+  </div>
 </asp:Content>

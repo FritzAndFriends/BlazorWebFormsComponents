@@ -3,12 +3,6 @@
 
 @if (Visible)
 {
-	<InputFile id="@ClientID"
-			   multiple="@AllowMultiple"
-			   accept="@Accept"
-			   style="@Style"
-			   class="@CssClass"
-			   disabled="@(!Enabled)"
-			   title="@ToolTip"
-			   OnChange="OnFileChangeInternal" />
+	<InputFile OnChange="OnFileChangeInternal"
+			   AdditionalAttributes="@GetInputAttributes()" />
 }

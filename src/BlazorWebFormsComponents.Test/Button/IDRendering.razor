@@ -9,7 +9,7 @@
 		var cut = Render(@<Button ID="myButton" Text="Click me" />);
 
 		// Assert
-		var button = cut.Find("button");
+		var button = cut.Find("input");
 		button.GetAttribute("id").ShouldBe("myButton");
 	}
 
@@ -20,7 +20,7 @@
 		var cut = Render(@<Button Text="Click me" />);
 
 		// Assert
-		var button = cut.Find("button");
+		var button = cut.Find("input");
 		button.HasAttribute("id").ShouldBeFalse();
 	}
 }

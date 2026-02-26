@@ -23,7 +23,7 @@ public void FormView_DeleteButton_DeletesItemAndRaisesEvents()
 			</table>
 		</ItemTemplate>
 	</FormView>);
-	var deleteButton = cut.Find("button");
+	var deleteButton = cut.Find("input[type=submit]");
 	deleteButton.Click();
 	raisedItemDeletingEvent.ShouldBeTrue("Did not raise the ItemDeleting event");
 	raisedItemDeletedEvent.ShouldBeTrue("Did not raise the ItemDeleted event");

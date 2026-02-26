@@ -8,7 +8,7 @@
 		var cut = Render(@<Button Text="Click Me" ToolTip="Button tooltip" />);
 
 		// Assert
-		var button = cut.Find("button");
+		var button = cut.Find("input[type=submit]");
 		button.HasAttribute("title").ShouldBeTrue();
 		button.GetAttribute("title").ShouldBe("Button tooltip");
 	}
@@ -44,7 +44,7 @@
 		var cut = Render(@<Button Text="Click Me" ToolTip="" />);
 
 		// Assert — empty ToolTip still produces the title attribute on Button (known behavior)
-		cut.Find("button").GetAttribute("title").ShouldBe("");
+		cut.Find("input[type=submit]").GetAttribute("title").ShouldBe("");
 	}
 
 	[Fact]
@@ -54,7 +54,7 @@
 		var cut = Render(@<Button Text="Click Me" />);
 
 		// Assert
-		cut.Find("button").HasAttribute("title").ShouldBeFalse();
+		cut.Find("input[type=submit]").HasAttribute("title").ShouldBeFalse();
 	}
 
 	[Fact]
@@ -62,7 +62,7 @@
 	{
 		// Verify Button's ToolTip renders as title after moving to base class
 		var cut = Render(@<Button Text="Submit" ToolTip="Submit form" OnClientClick="return true;" />);
-		cut.Find("button").GetAttribute("title").ShouldBe("Submit form");
+		cut.Find("input[type=submit]").GetAttribute("title").ShouldBe("Submit form");
 	}
 
 	[Fact]
@@ -128,16 +128,16 @@
 	public void CheckBox_WithToolTip_RendersTitleAttribute()
 	{
 		var cut = Render(@<CheckBox Text="Accept" ToolTip="CheckBox tooltip" />);
-		var span = cut.Find("span");
-		span.HasAttribute("title").ShouldBeTrue();
-		span.GetAttribute("title").ShouldBe("CheckBox tooltip");
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("title").ShouldBeTrue();
+		input.GetAttribute("title").ShouldBe("CheckBox tooltip");
 	}
 
 	[Fact]
 	public void CheckBox_WithoutToolTip_DoesNotRenderTitleAttribute()
 	{
 		var cut = Render(@<CheckBox Text="Accept" />);
-		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+		cut.Find("input[type='checkbox']").HasAttribute("title").ShouldBeFalse();
 	}
 
 	[Fact]

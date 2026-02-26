@@ -7,6 +7,7 @@
 
 
 
+<div data-audit-control="RequiredFieldValidator-1">
 <EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
 	Write something
 	<InputText id="name" @ref="Name.Current" @bind-Value="exampleModel.Name" />
@@ -27,9 +28,7 @@
 	<button type="submit">Submit</button>
 
 </EditForm>
-
-
-
+</div>
 @code {
 	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
 	ForwardRef<InputBase<int?>> Number = new ForwardRef<InputBase<int?>>();

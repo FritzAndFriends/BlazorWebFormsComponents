@@ -8,10 +8,10 @@
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Label on right" TextAlign="Enums.TextAlign.Right" />);
 
-		// Assert
-		var span = cut.Find("span");
-		span.FirstElementChild.TagName.ShouldBe("INPUT");
-		span.LastElementChild.TagName.ShouldBe("LABEL");
+		// Assert - input comes before label in markup
+		var elements = cut.FindAll("input, label");
+		elements[0].TagName.ShouldBe("INPUT");
+		elements[1].TagName.ShouldBe("LABEL");
 	}
 
 	[Fact]
@@ -20,10 +20,10 @@
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Label on left" TextAlign="Enums.TextAlign.Left" />);
 
-		// Assert
-		var span = cut.Find("span");
-		span.FirstElementChild.TagName.ShouldBe("LABEL");
-		span.LastElementChild.TagName.ShouldBe("INPUT");
+		// Assert - label comes before input in markup
+		var elements = cut.FindAll("label, input");
+		elements[0].TagName.ShouldBe("LABEL");
+		elements[1].TagName.ShouldBe("INPUT");
 	}
 
 	[Fact]
@@ -32,10 +32,10 @@
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Default alignment" />);
 
-		// Assert
-		var span = cut.Find("span");
-		span.FirstElementChild.TagName.ShouldBe("INPUT");
-		span.LastElementChild.TagName.ShouldBe("LABEL");
+		// Assert - default is Right, so input before label
+		var elements = cut.FindAll("input, label");
+		elements[0].TagName.ShouldBe("INPUT");
+		elements[1].TagName.ShouldBe("LABEL");
 	}
 
 }

@@ -45,10 +45,10 @@ namespace BlazorWebFormsComponents
 		public RenderFragment<RenderFragment> LayoutTemplate { get; set; }
 
 		/// <summary>
-		/// Triggers when the layout template is completed construction 
+		/// Occurs after the layout template has been created.
 		/// </summary>
 		[Parameter]
-		public EventHandler OnLayoutCreated { get; set; }
+		public EventCallback<EventArgs> OnLayoutCreated { get; set; }
 
 		#endregion
 
@@ -69,6 +69,30 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public int SelectedIndex { get; set; }
+
+		/// <summary>
+		/// Gets or sets the current sort expression.
+		/// </summary>
+		[Parameter]
+		public string SortExpression { get; set; }
+
+		/// <summary>
+		/// Gets or sets the current sort direction.
+		/// </summary>
+		[Parameter]
+		public SortDirection SortDirection { get; set; } = SortDirection.Ascending;
+
+		/// <summary>
+		/// Gets or sets the index of the first record to display on a page.
+		/// </summary>
+		[Parameter]
+		public int StartRowIndex { get; set; }
+
+		/// <summary>
+		/// Gets or sets the maximum number of items to display on a single page.
+		/// </summary>
+		[Parameter]
+		public int MaximumRows { get; set; } = int.MaxValue;
 
 		/// <summary>
 		/// Style is not applied by this control
@@ -145,6 +169,42 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public EventCallback ItemCreated { get; set; }
 
+		/// <summary>
+		/// Occurs before a sort operation. Can be cancelled.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewSortEventArgs> Sorting { get; set; }
+
+		/// <summary>
+		/// Occurs after a sort operation completes.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewSortEventArgs> Sorted { get; set; }
+
+		/// <summary>
+		/// Occurs when the page properties are changing.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewPagePropertiesChangingEventArgs> PagePropertiesChanging { get; set; }
+
+		/// <summary>
+		/// Occurs after the page properties have changed.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> PagePropertiesChanged { get; set; }
+
+		/// <summary>
+		/// Occurs before the selected index changes. Can be cancelled.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewSelectEventArgs> SelectedIndexChanging { get; set; }
+
+		/// <summary>
+		/// Occurs after the selected index has changed.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> SelectedIndexChanged { get; set; }
+
 		#endregion
 
 		[CascadingParameter(Name = "Host")] public BaseWebFormsComponent HostComponent { get; set; }
@@ -167,6 +227,17 @@ namespace BlazorWebFormsComponents
 		protected virtual void ItemDataBound(ListViewItemEventArgs e)
 		{
 			OnItemDataBound.InvokeAsync(e);
+		}
+
+		/// <summary>
+		/// Invokes the LayoutCreated event. Called after the layout template has been rendered.
+		/// </summary>
+		internal void RaiseLayoutCreated()
+		{
+			if (OnLayoutCreated.HasDelegate)
+			{
+				_ = OnLayoutCreated.InvokeAsync(EventArgs.Empty);
+			}
 		}
 
 		#region Command Handling
@@ -192,6 +263,12 @@ namespace BlazorWebFormsComponents
 					break;
 				case "update":
 					await HandleUpdateCommand(itemIndex);
+					break;
+				case "sort":
+					await HandleSortCommand(commandArgument as string ?? string.Empty);
+					break;
+				case "select":
+					await HandleSelectCommand(itemIndex);
 					break;
 				default:
 					var cmdArgs = new ListViewCommandEventArgs(commandName, commandArgument);
@@ -291,7 +368,47 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		private async Task HandleSortCommand(string sortExpression)
+		{
+			var newDirection = (sortExpression == SortExpression && SortDirection == SortDirection.Ascending)
+				? SortDirection.Descending
+				: SortDirection.Ascending;
+
+			var args = new ListViewSortEventArgs(sortExpression, newDirection);
+			await Sorting.InvokeAsync(args);
+			if (args.Cancel) return;
+
+			SortExpression = args.SortExpression;
+			SortDirection = args.SortDirection;
+			await Sorted.InvokeAsync(args);
+		}
+
+		private async Task HandleSelectCommand(int itemIndex)
+		{
+			var args = new ListViewSelectEventArgs(itemIndex);
+			await SelectedIndexChanging.InvokeAsync(args);
+			if (args.Cancel) return;
+
+			SelectedIndex = args.NewSelectedIndex;
+			await SelectedIndexChanged.InvokeAsync(EventArgs.Empty);
+		}
+
 		#endregion
+
+		/// <summary>
+		/// Sets the page properties and fires the PagePropertiesChanging/Changed events.
+		/// </summary>
+		public async Task SetPageProperties(int startRowIndex, int maximumRows)
+		{
+			var args = new ListViewPagePropertiesChangingEventArgs(startRowIndex, maximumRows);
+			await PagePropertiesChanging.InvokeAsync(args);
+
+			StartRowIndex = args.StartRowIndex;
+			MaximumRows = args.MaximumRows;
+
+			await PagePropertiesChanged.InvokeAsync(EventArgs.Empty);
+			StateHasChanged();
+		}
 
 		/// <summary>
 		/// Gets the appropriate template for the item at the specified index.

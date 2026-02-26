@@ -1,0 +1,157 @@
+{
+  "description": "Normalization rules for HTML fidelity audit comparison between Web Forms and Blazor output. Reference: planning-docs/DIVERGENCE-REGISTRY.md",
+  "rules": [
+    {
+      "id": "strip-viewstate",
+      "description": "Remove __VIEWSTATE, __VIEWSTATEGENERATOR, __EVENTVALIDATION, __EVENTTARGET, __EVENTARGUMENT hidden fields (D-03)",
+      "enabled": true,
+      "pattern": "<input[^>]*\\bname=[\"'](__VIEWSTATE|__VIEWSTATEGENERATOR|__EVENTVALIDATION|__EVENTTARGET|__EVENTARGUMENT)[\"'][^>]*/?>",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-webresource-axd",
+      "description": "Remove <script> and <link> tags referencing WebResource.axd (D-04, D-10)",
+      "enabled": true,
+      "pattern": "<(script|link)[^>]*WebResource\\.axd[^>]*(/>|>[\\s\\S]*?</\\1>)",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-webresource-scripts",
+      "description": "Remove inline <script> blocks containing WebResource/WebUIValidation references (D-04, D-10)",
+      "enabled": true,
+      "pattern": "<script[^>]*>[\\s\\S]*?(WebResource|WebUIValidation|TreeView_ToggleNode|TreeView\\w*_Data)[\\s\\S]*?</script>",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-dopostback",
+      "description": "Replace javascript:__doPostBack(...) hrefs with [postback] placeholder (D-02, D-08)",
+      "enabled": true,
+      "pattern": "href=[\"']javascript:__doPostBack\\([^)]*\\)[\"']",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-webforms-ids",
+      "description": "Normalize ctl00_..._Name id attributes to just Name — keeps last segment only. Handles optional prefix segments before ctl (e.g., MainContent_ctl00_GridView1_ctl01_lnkSort → lnkSort) (D-01)",
+      "enabled": true,
+      "pattern": "id=[\"'](?:[A-Za-z0-9]+_)*ctl\\d+(?:_[A-Za-z0-9]+)*_([A-Za-z0-9]+)[\"']",
+      "replacement": "id=\"$1\"",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-webforms-names",
+      "description": "Strip name attributes using Web Forms naming container syntax ctl00$...$ (D-01)",
+      "enabled": true,
+      "pattern": "\\bname=[\"'][^\"']*ctl\\d+\\$[^\"']*[\"']",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-content-prefix-ids",
+      "description": "Strip ContentPlaceHolder prefixes (MainContent_, ContentPlaceHolder1_) from id attributes (D-01)",
+      "enabled": true,
+      "pattern": "id=[\"'](?:MainContent|ContentPlaceHolder\\d*)_([^\"']+)[\"']",
+      "replacement": "id=\"$1\"",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-validator-attributes",
+      "description": "Remove Web Forms validator-specific attributes: evaluationfunction, controltovalidate, initialvalue, etc. (D-10)",
+      "enabled": true,
+      "pattern": "\\b(evaluationfunction|controltovalidate|initialvalue|validationexpression|maximumvalue|minimumvalue|valuetocompare|operator|display|errormessage|validationgroup|validateemptytext|setfocusonerror|enabled)=[\"'][^\"']*[\"']",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-blazor-attributes",
+      "description": "Remove Blazor-specific attributes: blazor:*, _bl_*, b-* scope identifiers",
+      "enabled": true,
+      "pattern": "\\b(blazor:[a-z0-9_-]+|_bl_[a-z0-9_]+|b-[a-z0-9]+)(=[\"'][^\"']*[\"'])?",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-blazor-comments",
+      "description": "Remove Blazor comment markers <!--!-->",
+      "enabled": true,
+      "pattern": "<!--!-->",
+      "replacement": "",
+      "flags": "g"
+    },
+    {
+      "id": "strip-blazor-enhanced-nav",
+      "description": "Strip Blazor enhanced navigation attributes (data-enhance-nav, data-enhance-id) and @-prefixed Razor artifacts",
+      "enabled": true,
+      "pattern": "\\b(data-enhance[-a-z]*)(=[\"'][^\"']*[\"'])?",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-treeview-onclick",
+      "description": "Normalize TreeView onclick=TreeView_ToggleNode(...) attributes to placeholder (D-07)",
+      "enabled": true,
+      "pattern": "onclick=[\"']TreeView_ToggleNode\\([^)]*\\)[\"']",
+      "replacement": "onclick=\"[treeview-toggle]\"",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-event-handlers",
+      "description": "Strip all on* event handler attributes (onclick, onchange, onblur, etc.) from both Web Forms and Blazor output",
+      "enabled": true,
+      "pattern": "\\bon[a-z]+=(?:\"[^\"]*\"|'[^']*')",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-form-action",
+      "description": "Strip form action attributes (Web Forms emits action='Default.aspx', Blazor differs)",
+      "enabled": true,
+      "pattern": "\\baction=[\"'][^\"']*[\"']",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "strip-table-legacy-attrs",
+      "description": "Strip table-specific legacy attributes: cellpadding, cellspacing, rules, border (Web Forms defaults not always in Blazor)",
+      "enabled": true,
+      "pattern": "\\b(cellpadding|cellspacing|rules|border)=[\"'][^\"']*[\"']",
+      "replacement": "",
+      "flags": "gi"
+    },
+    {
+      "id": "normalize-self-closing",
+      "description": "Normalize self-closing tags: <input/> and <input /> to <input />",
+      "enabled": true,
+      "pattern": "<(input|br|hr|img|meta|link|col|area|base|embed|source|track|wbr)\\b([^>]*?)\\s*/?>",
+      "replacement": "<$1$2 />",
+      "flags": "gi"
+    },
+    {
+      "id": "normalize-style-colors",
+      "description": "Normalize CSS color values in style attributes to lowercase",
+      "enabled": true,
+      "pattern": "CUSTOM_FUNCTION",
+      "replacement": "Handled by normalizeStyleAttributes() in code",
+      "flags": ""
+    },
+    {
+      "id": "normalize-attribute-order",
+      "description": "Sort HTML attributes alphabetically within each element",
+      "enabled": true,
+      "pattern": "CUSTOM_FUNCTION",
+      "replacement": "Handled by sortAttributes() in code",
+      "flags": ""
+    },
+    {
+      "id": "normalize-whitespace",
+      "description": "Collapse whitespace, trim lines, normalize indentation",
+      "enabled": true,
+      "pattern": "CUSTOM_FUNCTION",
+      "replacement": "Handled by normalizeWhitespace() in code",
+      "flags": ""
+    }
+  ]
+}

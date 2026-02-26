@@ -1,5 +1,6 @@
 @page "/ControlSamples/GridView/Selection"
 @using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
 
 <PageTitle>GridView Selection</PageTitle>
 
@@ -91,20 +92,5 @@
         _selectionCount++;
     }
 
-    private List<Product> _products = new()
-    {
-        new Product { Id = 1, Name = "Widget A", Category = "Hardware", Price = 29.99m },
-        new Product { Id = 2, Name = "Gadget B", Category = "Electronics", Price = 49.99m },
-        new Product { Id = 3, Name = "Tool C", Category = "Hardware", Price = 19.99m },
-        new Product { Id = 4, Name = "Device D", Category = "Electronics", Price = 99.99m },
-        new Product { Id = 5, Name = "Part E", Category = "Accessories", Price = 9.99m }
-    };
-
-    private class Product
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Category { get; set; }
-        public decimal Price { get; set; }
-    }
+    private List<Product> _products = Product.GetProducts().Take(5).ToList();
 }

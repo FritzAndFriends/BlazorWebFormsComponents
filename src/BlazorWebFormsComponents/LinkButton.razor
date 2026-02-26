@@ -2,9 +2,18 @@
 
 @if (PostBackUrl == null)
 {
-	<a id="@ClientID" @onclick="@Click" OnClientClick="@OnClientClick" title="@ToolTip">@Text</a>
+	<a id="@ClientID" @onclick="@Click" OnClientClick="@OnClientClick" href="javascript:void(0)" class="@GetCssClassOrNull()" title="@ToolTip">@Text</a>
 }
 else
 {
-	<a id="@ClientID" @onclick="@Click" OnClientClick="@OnClientClick" href="@PostBackUrl" title="@ToolTip">@Text</a>
+	<a id="@ClientID" @onclick="@Click" OnClientClick="@OnClientClick" href="@PostBackUrl" class="@GetCssClassOrNull()" title="@ToolTip">@Text</a>
+}
+
+@code {
+	private string GetCssClassOrNull()
+	{
+		if (!Enabled)
+			return string.Concat(CssClass, " aspNetDisabled").Trim();
+		return !string.IsNullOrEmpty(CssClass) ? CssClass : null;
+	}
 }

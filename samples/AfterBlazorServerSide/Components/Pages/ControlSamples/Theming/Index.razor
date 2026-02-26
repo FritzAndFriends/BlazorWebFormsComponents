@@ -1,0 +1,115 @@
+@page "/ControlSamples/Theming"
+@using BlazorWebFormsComponents.Theming
+
+<PageTitle>Theming - Skins &amp; Themes PoC</PageTitle>
+
+<h2>Skins &amp; Themes PoC</h2>
+
+<p>This sample demonstrates the Skins &amp; Themes system, which emulates ASP.NET Web Forms'
+<code>.skin</code> file behavior using Blazor's cascading values.</p>
+
+<h3>Themed Components</h3>
+<p>These components receive their visual properties from a <code>ThemeConfiguration</code>
+provided via <code>ThemeProvider</code>.</p>
+
+<ThemeProvider Theme="@SampleTheme">
+    <h4>Default Skin</h4>
+    <p>Button and Label with default theme skin applied:</p>
+    <Button Text="Themed Button" />
+    <br /><br />
+    <Label Text="Themed Label" />
+
+    <h4>Named Skin (SkinID)</h4>
+    <p>Button with <code>SkinID="Danger"</code> gets a different skin:</p>
+    <Button Text="Danger Button" SkinID="Danger" />
+
+    <h4>EnableTheming = false</h4>
+    <p>This button opts out of theming entirely:</p>
+    <Button Text="Unthemed Button" EnableTheming="false" />
+</ThemeProvider>
+
+<h3>Without ThemeProvider</h3>
+<p>Components outside the <code>ThemeProvider</code> keep their default appearance:</p>
+<Button Text="No Theme Button" />
+
+<hr />
+
+<h2>Migration Guide &mdash; Before &amp; After</h2>
+
+<p>The Skins &amp; Themes system maps directly from ASP.NET Web Forms concepts.
+Here is a concrete example showing how to migrate themed controls.</p>
+
+<h3>Before (Web Forms)</h3>
+
+<pre><code>App_Themes/Corporate/controls.skin:
+
+&lt;asp:Button runat="server"
+    BackColor="#336699"
+    ForeColor="White"
+    Font-Names="Segoe UI"
+    Font-Size="9pt"
+    BorderStyle="None" /&gt;
+
+&lt;asp:Button runat="server" SkinID="danger"
+    BackColor="#CC3333"
+    ForeColor="White"
+    Font-Bold="True" /&gt;
+
+web.config:
+&lt;pages theme="Corporate" /&gt;
+
+Products.aspx:
+&lt;asp:Button ID="btnSave" runat="server" Text="Save" /&gt;
+&lt;asp:Button ID="btnDelete" runat="server" Text="Delete" SkinID="danger" /&gt;</code></pre>
+
+<h3>Migration Steps</h3>
+
+<ol>
+    <li>Create a <code>ThemeConfiguration</code> in C# matching your <code>.skin</code> file</li>
+    <li>Wrap your app (or page) in a <code>ThemeProvider</code></li>
+    <li>Remove <code>asp:</code> prefix and <code>runat="server"</code> from markup</li>
+    <li>Keep <code>SkinID</code> attributes &mdash; they work the same way</li>
+</ol>
+
+<h3>After (Blazor)</h3>
+
+<pre><code class="language-razor">@@* Program.cs or App.razor *@@
+&lt;ThemeProvider Theme="@@corporateTheme"&gt;
+    &lt;Router ... /&gt;
+&lt;/ThemeProvider&gt;
+
+@@* Products.razor — markup barely changes *@@
+&lt;Button ID="btnSave" Text="Save" /&gt;
+&lt;Button ID="btnDelete" Text="Delete" SkinID="danger" /&gt;</code></pre>
+
+@code {
+    private ThemeConfiguration SampleTheme;
+
+    protected override void OnInitialized()
+    {
+        SampleTheme = new ThemeConfiguration();
+
+        // Default Button skin — blue background with white text
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue,
+            ForeColor = WebColor.White,
+            CssClass = "themed-button"
+        });
+
+        // Named "Danger" Button skin — red background
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Red,
+            ForeColor = WebColor.White,
+            CssClass = "themed-button-danger"
+        }, "Danger");
+
+        // Default Label skin — bold navy text
+        SampleTheme.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy,
+            Font = new FontInfo { Bold = true }
+        });
+    }
+}

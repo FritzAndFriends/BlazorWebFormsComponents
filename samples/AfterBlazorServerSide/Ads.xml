@@ -1,20 +1,16 @@
 ﻿<Advertisements>  
   <Ad>  
     <ImageUrl>/img/CSharp.png</ImageUrl>  
-    <Height>343</Height>  
-    <Width>397</Width>  
-    <NavigateUrl>http://www.microsoft.com</NavigateUrl>  
+    <NavigateUrl>https://learn.microsoft.com/dotnet/csharp/</NavigateUrl>  
     <AlternateText>CSharp</AlternateText>  
-    <Impressions>90</Impressions>  
-    <Keyword>c#</Keyword>  
+    <Impressions>50</Impressions>  
+    <Keyword>language</Keyword>  
   </Ad>  
   <Ad>  
     <ImageUrl>/img/VB.png</ImageUrl>
-		<Height>343</Height>
-		<Width>397</Width>
-		<NavigateUrl>http://www.microsoft.com</NavigateUrl>  
+    <NavigateUrl>https://learn.microsoft.com/dotnet/visual-basic/</NavigateUrl>  
     <AlternateText>Visual Basic</AlternateText>  
-    <Impressions>80</Impressions>  
-    <Keyword>vb</Keyword>  
+    <Impressions>50</Impressions>  
+    <Keyword>language</Keyword>  
   </Ad>  
-</Advertisements>  
+</Advertisements>

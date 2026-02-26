@@ -19,10 +19,11 @@
 | Rogue | QA Analyst | `.ai-team/agents/rogue/charter.md` | ✅ Active |
 | Colossus | Integration Test Engineer | `.ai-team/agents/colossus/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
+| Ralph | Work Monitor | — | 🔄 Monitor |
 
 ## Project Context
 
-- **Owner:** Jeffrey T. Fritz (csharpfritz@users.noreply.github.com)
+- **Owner:** Jeffrey T. Fritz
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Description:** A library of Blazor components that emulate ASP.NET Web Forms controls, enabling migration from Web Forms to Blazor with minimal markup changes.
 - **Created:** 2026-02-10

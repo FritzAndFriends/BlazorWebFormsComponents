@@ -95,6 +95,7 @@ nav:
     - FormView: DataControls/FormView.md
     - GridView: DataControls/GridView.md
     - ListView: DataControls/ListView.md
+    - PagerSettings: DataControls/PagerSettings.md
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
     - CompareValidator: ValidationControls/CompareValidator.md
@@ -122,8 +123,10 @@ nav:
     - Databinder: UtilityFeatures/Databinder.md
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - NamingContainer: UtilityFeatures/NamingContainer.md
     - PageService: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
+    - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
       - Migration Strategies: Migration/Strategies.md

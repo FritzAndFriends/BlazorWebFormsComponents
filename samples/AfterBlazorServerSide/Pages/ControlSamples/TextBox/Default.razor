@@ -5,7 +5,9 @@
 <h1>TextBox Samples</h1>
 
 <h2>Single Line TextBox (Default)</h2>
+<div data-audit-control="TextBox-1">
 <TextBox Text="Hello World" CssClass="form-control" Width="Unit.Pixel(300)" />
+</div>
 <pre><code>&lt;TextBox Text="Hello World" CssClass="form-control" Width="Unit.Pixel(300)" /&gt;</code></pre>
 
 <hr />
@@ -17,13 +19,17 @@
 <hr />
 
 <h2>ReadOnly TextBox (ReadOnly=true)</h2>
+<div data-audit-control="TextBox-4">
 <TextBox Text="Cannot edit this text" ReadOnly="true" CssClass="form-control" Width="Unit.Pixel(300)" />
+</div>
 <pre><code>&lt;TextBox Text="Cannot edit this text" ReadOnly="true" CssClass="form-control" /&gt;</code></pre>
 
 <hr />
 
 <h2>Password TextBox</h2>
+<div data-audit-control="TextBox-2">
 <TextBox TextMode="TextBoxMode.Password" Placeholder="Enter password" CssClass="form-control" Width="Unit.Pixel(300)" />
+</div>
 <pre><code>&lt;TextBox TextMode="TextBoxMode.Password" Placeholder="Enter password" /&gt;</code></pre>
 
 <hr />
@@ -41,7 +47,9 @@
 <hr />
 
 <h2>MultiLine TextBox</h2>
+<div data-audit-control="TextBox-3">
 <TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" Text="@multiLineText" />
+</div>
 <pre><code>&lt;TextBox TextMode="TextBoxMode.MultiLine" Rows="5" Columns="40" Text="Line 1..." /&gt;</code></pre>
 
 <hr />
@@ -53,18 +61,23 @@
 <hr />
 
 <h2>Disabled TextBox (Enabled=false)</h2>
+<div data-audit-control="TextBox-5">
 <TextBox Text="Disabled textbox" Enabled="false" CssClass="form-control" Width="Unit.Pixel(300)" />
+</div>
 <pre><code>&lt;TextBox Text="Disabled textbox" Enabled="false" /&gt;</code></pre>
 
 <hr />
 
 <h2>MaxLength (10 characters max)</h2>
+<div data-audit-control="TextBox-6">
 <TextBox MaxLength="10" Placeholder="Max 10 chars" CssClass="form-control" Width="Unit.Pixel(200)" />
+</div>
 <pre><code>&lt;TextBox MaxLength="10" Placeholder="Max 10 chars" /&gt;</code></pre>
 
 <hr />
 
 <h2>Styled TextBox</h2>
+<div data-audit-control="TextBox-7">
 <TextBox Text="Styled textbox"
          BackColor="WebColor.LightYellow"
          ForeColor="WebColor.Navy"
@@ -72,6 +85,7 @@
          BorderWidth="Unit.Pixel(2)"
          BorderStyle="BorderStyle.Solid"
          Width="Unit.Pixel(250)" />
+</div>
 <pre><code>&lt;TextBox Text="Styled textbox"
          BackColor="WebColor.LightYellow"
          ForeColor="WebColor.Navy"

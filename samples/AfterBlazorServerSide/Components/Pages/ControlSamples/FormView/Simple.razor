@@ -6,6 +6,7 @@
 
 <p>Here is a simple form view</p>
 
+<div data-audit-control="FormView-1">
 <FormView @ref="WidgetFormView"
 							AllowPaging="true"
 							DataKeyNames="Id"
@@ -29,6 +30,7 @@
 	</ItemTemplate>
 
 </FormView>
+</div>
 @code {
 
 	protected FormView<Widget> WidgetFormView;
@@ -50,12 +52,14 @@
 <h3>Empty FormView with EmptyDataText</h3>
 <p>When the data source is empty, the EmptyDataText is displayed:</p>
 
+<div data-audit-control="FormView-2">
 <FormView ItemType="Widget" Context="Item"
 					EmptyDataText="No widgets available.">
 	<ItemTemplate>
 		<span>@Item.Name</span>
 	</ItemTemplate>
 </FormView>
+</div>
 
 <hr />
 

@@ -1,6 +1,6 @@
 # Project Context
 
-- **Owner:** Jeffrey T. Fritz (csharpfritz@users.noreply.github.com)
+- **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents — Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
@@ -62,3 +62,118 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 
  Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
 
+### M10 — Fix 19 Unreachable Sample Pages in ComponentCatalog.cs (#350)
+
+- **4 missing components added:** Menu (Navigation, route to Selection since no Index), DataBinder (Utility), PasswordRecovery (Login), ViewState (Utility).
+- **DetailsView added as new component** (Data category) with SubPages: Caption, Styles — was completely absent from catalog despite having 3 pages on disk.
+- **15 missing SubPages added to existing components:** GridView (+5: DisplayProperties, InlineEditing, Paging, Selection, Sorting), TreeView (+2: ExpandCollapse, Selection), FormView (+3: Edit, Events, Styles), ListView (+1: CrudOperations), DataGrid (+1: Styles), Panel (+1: BackImageUrl).
+- **DataList SubPage name fix:** "Flow" → "SimpleFlow" to match actual file `SimpleFlow.razor`.
+- **Pattern confirmed:** SubPages are alphabetically ordered in catalog arrays; components without an Index.razor use their specific page route (e.g., Menu → `/ControlSamples/Menu/Selection`).
+- Build verified: `dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --no-restore --verbosity quiet` passes.
+
+
+
+ Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
+
+ Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
+
+ Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
+
+ Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  samples may need updating  decided by Cyclops
+ Team update (2026-02-25): Menu styles use MenuItemStyle with IMenuStyleContainer  samples may need updating  decided by Cyclops
+
+ Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
+
+
+ Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
+
+
+ Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
+
+### M10 — Theming Migration Guide & Calendar BeforeWebForms Sample
+
+- **Theming migration guide (#367):** Added "Migration Guide — Before & After" section to `Components/Pages/ControlSamples/Theming/Index.razor`. Shows three panels: Before (Web Forms `.skin` file + `web.config` + ASPX markup), Migration Steps (4-step numbered list), After (Blazor `ThemeProvider` + simplified markup). Uses `<pre><code>` blocks with proper HTML entity encoding (`&lt;`, `@@`). Placed after the existing live demo so the page flows from "see it work" to "how to migrate".
+- **Calendar BeforeWebForms sample:** Created `samples/BeforeWebForms/ControlSamples/Calendar/default.aspx`, `default.aspx.cs`, and `default.aspx.designer.cs`. Demonstrates basic Calendar, 3 SelectionMode variants (Day, DayWeek, DayWeekMonth), styled Calendar with TitleStyle/DayHeaderStyle/SelectedDayStyle/TodayDayStyle/OtherMonthDayStyle/WeekendDayStyle/NextPrevStyle/SelectorStyle, custom navigation text, and event handlers (SelectionChanged, VisibleMonthChanged). Follows established BeforeWebForms patterns (MasterPageFile, namespace convention, designer file with auto-generated control declarations).
+
+
+ Team update (2026-02-25): ThemesAndSkins.md documentation updated to match PoC implementation  class names, API, roadmap status, PoC decisions table added  decided by Beast
+
+ Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge
+
+
+ Team update (2026-02-25): HTML audit strategy approved  decided by Forge
+
+ Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
+
+### M12-01 — Tier 2 BeforeWebForms Data Control Samples
+
+- **DetailsView sample created:** `samples/BeforeWebForms/ControlSamples/DetailsView/Default.aspx` + `.aspx.cs` + `.aspx.designer.cs`. Two DetailsView instances: one with AutoGenerateRows=true and NumericFirstLast paging, one with explicit BoundFields (Name, Price formatted as {0:C}, Category, InStock) and NextPreviousFirstLast paging. Both use inline `List<Product>` with 10 items. Includes PageIndexChanging handlers for paging support. Styled with HeaderStyle, AlternatingRowStyle, PagerStyle, FieldHeaderStyle. Wrapped with `data-audit-control="DetailsView"`.
+- **DataPager sample created:** `samples/BeforeWebForms/ControlSamples/DataPager/Default.aspx` + `.aspx.cs` + `.aspx.designer.cs`. ListView+DataPager combination showing paged product data. DataPager uses PageSize=3, combines two NextPreviousPagerField instances (first/prev on left, next/last on right) with a NumericPagerField (ButtonCount=5) in the middle. Uses inline `List<Product>` with 10 items. PreRender rebinding for postback paging. Wrapped with `data-audit-control="DataPager"`.
+- **Existing samples verified:** GridView (3 pages), DataList (4 pages), Repeater (1 page), FormView (1 page), ListView (3 pages) — all already have `data-audit-control` markers and use inline data via `SharedSampleObjects.Models.Widget`. No database dependencies found; no fixes needed.
+
+ Team update (2026-02-26): NamingContainer inherits BaseWebFormsComponent, UseCtl00Prefix handled in ComponentIdGenerator  decided by Cyclops
+
+ Team update (2026-02-26): Menu RenderingMode=Table uses inline Razor to avoid whitespace; AngleSharp foster-parenting workaround  decided by Cyclops
+
+ Team update (2026-02-26): Login+Identity strategy: handler delegates in core, separate Identity NuGet package, redirect-based cookie flows  decided by Forge
+
+ Team update (2026-02-26): Data control divergence: 4 sample rewrites needed for data controls before re-capture  decided by Forge
+
+ Team update (2026-02-26): Post-fix capture confirms sample data alignment is P0 blocker  20+ divergences could become exact matches  decided by Rogue
+
+### SharedSampleObjects Data Alignment Sweep
+
+- **Audited all Blazor sample pages** in `Components/Pages/ControlSamples/` for inline data that should use SharedSampleObjects.
+- **Priority directories already aligned:** FormView (4 pages), DataList (6 pages), Repeater (1 page) — all already use `Widget.SimpleWidgetList` or `Widget.Widgets(n)`. DetailsView (2 pages) already uses `Product.GetProducts()`.
+- **New shared model created:** `SharedSampleObjects/Models/Employee.cs` with `Id`, `Name`, `Department` properties and static `GetEmployees()` method (4 employees).
+- **New Product overload added:** `Product.GetProducts(int count)` generates n products with deterministic data for paging/sorting demos (consistent categories: Tools/Electronics/Hardware).
+- **Files aligned to SharedSampleObjects:**
+  - `GridView/InlineEditing.razor` — removed local `Product` class, now uses `Product.GetProducts()`
+  - `GridView/Paging.razor` — removed local `Product` class + inline Enumerable.Range, now uses `Product.GetProducts(50)`
+  - `GridView/Sorting.razor` — removed local `Product` class + 25-item GetProductName() helper, now uses `Product.GetProducts(25)`
+  - `GridView/Selection.razor` — removed local `Product` class + 5 inline items, now uses `Product.GetProducts().Take(5).ToList()`
+  - `GridView/DisplayProperties.razor` — removed local `Employee` class + 4 inline items, now uses `Employee.GetEmployees()`
+  - `ListView/CrudOperations.razor` — replaced 3 inline Widget objects with `Widget.SimpleWidgetList.Take(3)` copy
+- **Files intentionally NOT changed:** BulletedList (has `Product` with `Name`/`Url` — different shape), DropDownList/RadioButtonList (have `Product` with `string Id` — list control binding pattern), Chart pages (chart-specific records like `SalesData`/`TrafficData`), Validation pages (form-specific `ExampleModel` classes).
+- Build verified: `dotnet build samples\AfterBlazorServerSide\ -c Release` succeeds with 0 errors.
+
+ Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+ Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule samples  decided by Jeffrey T. Fritz
+
+### M15-01 — Sample Data Alignment for HTML Audit Matching (#381)
+
+- **14 Blazor sample pages aligned** to use identical text, values, URLs, and attributes as their WebForms counterparts. All changes are data-only (no component source code changes).
+- **Label:** "Hello World" (no comma/exclamation), "Styled Label" with `text-primary`/Blue/Bold, HTML content `<em>Emphasized</em>` variant.
+- **Literal:** PassThrough mode text `"This is <b>literal</b> content."`, Encode mode text `"This is <b>encoded</b> content."`, simple text unchanged.
+- **HiddenField:** Value changed from `"initial-secret-value"` to `"secret-value-123"`.
+- **PlaceHolder:** Content paragraphs changed to `"This content was added programmatically."` / `"PlaceHolder renders no HTML of its own."`.
+- **Panel:** Restructured all 3 audited variants — Panel-1 is now GroupingText="User Info" with Label+TextBox, Panel-2 is ScrollBars.Auto Height=100px with 4 paragraphs, Panel-3 is DefaultButton with TextBox+Button.
+- **HyperLink:** All 4 variants aligned — styled (Blue/White), tooltip ("Navigate to Bing!"), Visible=false, basic — all using `https://bing.com` and text "Blue Button".
+- **Image:** Changed to `/Content/Images/banner.png` src, "Banner image" and "Sized image" alt text, added Width/Height on Image-2.
+- **Button:** Changed from "Click me!" to "Blue Button" with BackColor=Blue ForeColor=White.
+- **CheckBox:** Labels changed to "Accept Terms", "Subscribe", "Enable Feature" (with AutoPostBack).
+- **DropDownList:** DDL-3 changed to data-bound First/Second/Third Item, DDL-4 disabled "Cannot change", DDL-5 styled "Styled" with form-select, DDL-6 colored "Colored dropdown" with Navy/LightYellow/200px.
+- **BulletedList:** BL-1 Disc with Apple/Banana/Cherry/Date, BL-2 Numbered with First/Second/Third, BL-3 Square HyperLink with Example Site/Example Org.
+- **LinkButton:** LB-1 "Click Me" with btn-primary, LB-2 "Submit Form", LB-3 "Disabled Link" with Enabled=false.
+- **ImageMap:** Changed to banner.png, "Navigate" alt, two rect hotspots (0,0,100,50 Bing + 100,0,200,50 GitHub).
+- **AdRotator:** Updated Ads.xml from CSharp/VB images to banner.png with Visit Bing/Visit GitHub ads matching WebForms ads.xml.
+- **Infrastructure:** Created `wwwroot/Content/Images/banner.png` for image path parity with WebForms `~/Content/Images/banner.png`.
+- **Key pattern:** The `data-audit-control` markers were preserved on all audited sections. Non-audited demo sections below were kept but updated to reference valid types/data.
+- **Limitation found:** Label-3 HTML content (`<em>Emphasized</em>`) — Blazor Label uses `@Text` which HTML-encodes, so the rendered output will differ from WebForms which renders raw HTML. This is a component-level issue requiring a component fix, not a sample data fix.
+
+### M15-08 — Add Audit Markers to Blazor Samples (#384)
+
+- **10 existing Blazor sample pages updated** with `data-audit-control` wrapper divs matching WebForms counterparts:
+  - ChangePassword (`ChangePassword-1`), Chart (`Chart`), CreateUserWizard (`CreateUserWizard-1`)
+  - Login (`Login-1`), LoginName (`LoginName-1`), LoginStatus (`LoginStatus-1`, `LoginStatus-2`)
+  - MultiView (`MultiView-1`), PasswordRecovery (`PasswordRecovery-1`, `PasswordRecovery-2`), Table (`Table-3`)
+- **2 new Blazor sample pages created** for controls that had WebForms samples but no Blazor equivalents:
+  - `DataPager/Index.razor` with `data-audit-control="DataPager"` — uses inline product data with paging demo
+  - `LoginView/Index.razor` with `data-audit-control="LoginView-1"` — shows AnonymousTemplate and LoggedInTemplate
+- **Audit coverage:** All WebForms controls with `data-audit-control` markers now have corresponding Blazor markers. Validator samples only have their first variant marked (matching the single-demo pattern already established).
+- **Key learning:** Blazor samples split across two paths — `Components/Pages/ControlSamples/` (current .NET 8 pattern) and legacy `Pages/ControlSamples/` (RadioButton, TextBox). New pages always go in `Components/Pages/`.
+- **Build verified:** `dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj -c Release` — 0 errors, 0 warnings.

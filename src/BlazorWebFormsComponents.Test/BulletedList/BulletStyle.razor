@@ -91,7 +91,7 @@
 		// Assert
 		var ol = cut.Find("ol");
 		ol.ShouldNotBeNull();
-		ol.GetAttribute("type").ShouldBe("1");
+		ol.GetAttribute("style").ShouldContain("list-style-type: decimal");
 	}
 
 	[Fact]
@@ -109,7 +109,7 @@
 		// Assert
 		var ol = cut.Find("ol");
 		ol.ShouldNotBeNull();
-		ol.GetAttribute("type").ShouldBe("a");
+		ol.GetAttribute("style").ShouldContain("list-style-type: lower-alpha");
 	}
 
 	[Fact]
@@ -126,7 +126,8 @@
 
 		// Assert
 		var ol = cut.Find("ol");
-		ol.GetAttribute("type").ShouldBe("A");
+		ol.ShouldNotBeNull();
+		ol.GetAttribute("style").ShouldContain("list-style-type: upper-alpha");
 	}
 
 	[Fact]
@@ -143,7 +144,8 @@
 
 		// Assert
 		var ol = cut.Find("ol");
-		ol.GetAttribute("type").ShouldBe("i");
+		ol.ShouldNotBeNull();
+		ol.GetAttribute("style").ShouldContain("list-style-type: lower-roman");
 	}
 
 	[Fact]
@@ -160,7 +162,8 @@
 
 		// Assert
 		var ol = cut.Find("ol");
-		ol.GetAttribute("type").ShouldBe("I");
+		ol.ShouldNotBeNull();
+		ol.GetAttribute("style").ShouldContain("list-style-type: upper-roman");
 	}
 
 	[Fact]
@@ -197,6 +200,40 @@
 		// Assert
 		var ol = cut.Find("ol");
 		ol.GetAttribute("start").ShouldBe("5");
+	}
+
+	[Fact]
+	public void BulletedList_DefaultFirstBulletNumber_NoStartAttribute()
+	{
+		// Arrange
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.HasAttribute("start").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void BulletedList_NumberedStyle_NoTypeAttribute()
+	{
+		// Arrange — WebForms uses CSS list-style-type, not the HTML type attribute
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		// Act
+		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" />);
+
+		// Assert
+		var ol = cut.Find("ol");
+		ol.HasAttribute("type").ShouldBeFalse();
 	}
 
 }

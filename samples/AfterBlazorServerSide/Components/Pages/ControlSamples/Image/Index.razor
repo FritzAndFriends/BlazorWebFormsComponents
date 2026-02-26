@@ -14,29 +14,35 @@
 <p>A simple image with alternate text:</p>
 
 <div class="demo-section">
-    <Image ImageUrl="/img/placeholder-150x100.svg" 
-           AlternateText="Sample placeholder image" />
+    <div data-audit-control="Image-1">
+        <Image ImageUrl="/Content/Images/banner.png" 
+           AlternateText="Banner image" />
+    </div>
 </div>
 
 <p>Code:</p>
-<pre><code>&lt;Image ImageUrl="https://via.placeholder.com/150x100" 
-       AlternateText="Sample placeholder image" /&gt;</code></pre>
+<pre><code>&lt;Image ImageUrl="/Content/Images/banner.png" 
+       AlternateText="Banner image" /&gt;</code></pre>
 
 <hr />
 
-<h3>Image with Tooltip</h3>
-<p>Hover over the image to see the tooltip:</p>
+<h3>Sized Image</h3>
+<p>An image with explicit width and height:</p>
 
 <div class="demo-section">
-    <Image ImageUrl="/img/placeholder-150x100.svg" 
-           AlternateText="Image with tooltip"
-           ToolTip="This is a tooltip displayed on hover" />
+    <div data-audit-control="Image-2">
+        <Image ImageUrl="/Content/Images/banner.png" 
+           AlternateText="Sized image"
+           Width="Unit.Pixel(200)"
+           Height="Unit.Pixel(100)" />
+    </div>
 </div>
 
 <p>Code:</p>
-<pre><code>&lt;Image ImageUrl="https://via.placeholder.com/150x100/0066cc/ffffff?text=Hover+Me" 
-       AlternateText="Image with tooltip"
-       ToolTip="This is a tooltip displayed on hover" /&gt;</code></pre>
+<pre><code>&lt;Image ImageUrl="/Content/Images/banner.png" 
+       AlternateText="Sized image"
+       Width="Unit.Pixel(200)"
+       Height="Unit.Pixel(100)" /&gt;</code></pre>
 
 <hr />
 

@@ -2,20 +2,28 @@
 
 <h2>HyperLink Component</h2>
 
-<HyperLink NavigateUrl="https://www.github.com" Text="GitHub" />
+<div data-audit-control="HyperLink-1">
+    <HyperLink NavigateUrl="https://bing.com" Text="Blue Button" BackColor="WebColor.Blue" ForeColor="WebColor.White" />
+</div>
 <br />
-<HyperLink NavigateUrl="https://www.github.com" Text="GitHub" Target="_blank" />
+<div data-audit-control="HyperLink-2">
+    <HyperLink NavigateUrl="https://bing.com" Text="Blue Button" ToolTip="Navigate to Bing!" />
+</div>
 <br />
-<HyperLink NavigateUrl="https://www.github.com" Text="GitHub" Target="_blank" ToolTip="GitHub (Social Coding)" />
+<div data-audit-control="HyperLink-3">
+    <HyperLink NavigateUrl="https://bing.com" Text="Blue Button" Visible="false" />
+</div>
 <br />
-<HyperLink NavigateUrl="https://www.github.com" Text="GitHub" Target="_blank" ToolTip="GitHub (Social Coding)" BackColor="WebColor.DimGray" ForeColor="WebColor.White" />
+<div data-audit-control="HyperLink-4">
+    <HyperLink NavigateUrl="https://bing.com" Text="Blue Button" />
+</div>
 
 <hr />
 
 <p>Code:</p>
 <code>
-&lt;HyperLink NavigateUrl="https://www.github.com" Text="GitHub" /&gt;<br />
-&lt;HyperLink NavigateUrl="https://www.github.com" Text="GitHub" Target="_blank" /&gt;<br />
-&lt;HyperLink NavigateUrl="https://www.github.com" Text="GitHub" Target="_blank" ToolTip="GitHub (Social Coding)" /&gt;<br />
-&lt;HyperLink NavigateUrl="https://www.github.com" Text="GitHub" Target="_blank" ToolTip="GitHub (Social Coding)" BackColor="WebColor.DimGray" ForeColor="WebColor.White" /&gt;
+&lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" BackColor="WebColor.Blue" ForeColor="WebColor.White" /&gt;<br />
+&lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" ToolTip="Navigate to Bing!" /&gt;<br />
+&lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" Visible="false" /&gt;<br />
+&lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" /&gt;
 </code>

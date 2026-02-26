@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="FlowLayout.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.FlowLayout" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="FlowLayout.aspx.cs" Inherits="BeforeWebForms.ControlSamples.DataList.FlowLayout" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -10,26 +10,28 @@
 
     <p>Here is a simple datalist bound to a collection of widgets with RepeatLayout set to Flow</p>
 
-    <asp:DataList ID="simpleDataList"
-        runat="server"
-        Enabled="true"
-        Caption="This is my caption"
-        CaptionAlign="Top"
-        CellPadding="2"
-        CellSpacing="3"
-        ToolTip="This is my tooltip"
-        UseAccessibleHeader="true"
-        RepeatLayout="Flow"
-        ItemType="SharedSampleObjects.Models.Widget">
-        <HeaderStyle />
-        <HeaderTemplate>
-            My Widget List
-        </HeaderTemplate>
-        <ItemTemplate>
-            <%# Item.Name %>
-            <br />
-            <%# Item.Price.ToString("c") %>
-        </ItemTemplate>
-    </asp:DataList>
+    <div data-audit-control="DataList">
+        <asp:DataList ID="simpleDataList"
+            runat="server"
+            Enabled="true"
+            Caption="This is my caption"
+            CaptionAlign="Top"
+            CellPadding="2"
+            CellSpacing="3"
+            ToolTip="This is my tooltip"
+            UseAccessibleHeader="true"
+            RepeatLayout="Flow"
+            ItemType="SharedSampleObjects.Models.Widget">
+            <HeaderStyle />
+            <HeaderTemplate>
+                My Widget List
+            </HeaderTemplate>
+            <ItemTemplate>
+                <%# Item.Name %>
+                <br />
+                <%# Item.Price.ToString("c") %>
+            </ItemTemplate>
+        </asp:DataList>
+    </div>
 
 </asp:Content>

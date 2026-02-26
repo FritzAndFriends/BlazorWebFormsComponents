@@ -3,45 +3,48 @@
 
 <h2>Panel Component Samples</h2>
 
-<h3>Basic Panel</h3>
-<Panel>
-	<p>This content is inside a basic Panel.</p>
-	<p>A Panel renders as a div element by default.</p>
-</Panel>
-<pre><code>&lt;Panel&gt;
-    &lt;p&gt;This content is inside a basic Panel.&lt;/p&gt;
+<h3>Basic Panel with GroupingText</h3>
+<div data-audit-control="Panel-1">
+    <Panel GroupingText="User Info">
+	<Label Text="Name:" />
+	<TextBox />
+    </Panel>
+</div>
+<pre><code>&lt;Panel GroupingText="User Info"&gt;
+    &lt;Label Text="Name:" /&gt;
+    &lt;TextBox /&gt;
 &lt;/Panel&gt;</code></pre>
 
 <hr />
 
-<h3>Panel with GroupingText (Fieldset)</h3>
-<Panel GroupingText="User Information">
-	<p>Name: John Doe</p>
-	<p>Email: john@example.com</p>
-</Panel>
-<pre><code>&lt;Panel GroupingText="User Information"&gt;
-    &lt;p&gt;Name: John Doe&lt;/p&gt;
-    &lt;p&gt;Email: john@example.com&lt;/p&gt;
+<h3>Panel with ScrollBars</h3>
+<div data-audit-control="Panel-2">
+    <Panel ScrollBars="ScrollBars.Auto" Height="Unit.Pixel(100)">
+	<p>First paragraph of content inside the scrollable panel.</p>
+	<p>Second paragraph of content inside the scrollable panel.</p>
+	<p>Third paragraph of content inside the scrollable panel.</p>
+	<p>Fourth paragraph of content inside the scrollable panel.</p>
+    </Panel>
+</div>
+<pre><code>&lt;Panel ScrollBars="ScrollBars.Auto" Height="Unit.Pixel(100)"&gt;
+    &lt;p&gt;First paragraph of content inside the scrollable panel.&lt;/p&gt;
+    &lt;p&gt;Second paragraph of content inside the scrollable panel.&lt;/p&gt;
+    &lt;p&gt;Third paragraph of content inside the scrollable panel.&lt;/p&gt;
+    &lt;p&gt;Fourth paragraph of content inside the scrollable panel.&lt;/p&gt;
 &lt;/Panel&gt;</code></pre>
 
 <hr />
 
-<h3>Panel with Styling</h3>
-<Panel BackColor="WebColor.LightYellow" 
-       ForeColor="WebColor.Navy"
-       BorderColor="WebColor.Blue"
-       BorderWidth="Unit.Pixel(2)"
-       BorderStyle="BorderStyle.Solid"
-       Width="Unit.Pixel(300)">
-	<p>This panel has custom colors and border.</p>
-</Panel>
-<pre><code>&lt;Panel BackColor="WebColor.LightYellow" 
-       ForeColor="WebColor.Navy"
-       BorderColor="WebColor.Blue"
-       BorderWidth="Unit.Pixel(2)"
-       BorderStyle="BorderStyle.Solid"
-       Width="Unit.Pixel(300)"&gt;
-    &lt;p&gt;This panel has custom colors and border.&lt;/p&gt;
+<h3>Panel with DefaultButton</h3>
+<div data-audit-control="Panel-3">
+    <Panel DefaultButton="btnSubmit">
+	<TextBox />
+	<Button ID="btnSubmit" Text="Submit" />
+    </Panel>
+</div>
+<pre><code>&lt;Panel DefaultButton="btnSubmit"&gt;
+    &lt;TextBox /&gt;
+    &lt;Button ID="btnSubmit" Text="Submit" /&gt;
 &lt;/Panel&gt;</code></pre>
 
 <hr />

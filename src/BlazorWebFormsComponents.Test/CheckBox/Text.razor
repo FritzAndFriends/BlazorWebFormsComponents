@@ -1,13 +1,12 @@
 @code {
 
 	[Fact]
-	public void CheckBox_WithText_RendersSpanWithInputAndLabel()
+	public void CheckBox_WithText_RendersInputAndLabel()
 	{
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Accept terms" />);
 
 		// Assert
-		cut.Find("span").ShouldNotBeNull();
 		cut.Find("input[type='checkbox']").ShouldNotBeNull();
 		cut.Find("label").TextContent.ShouldBe("Accept terms");
 	}

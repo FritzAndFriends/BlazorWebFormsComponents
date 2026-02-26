@@ -222,12 +222,13 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets or sets the grid line style for the table (renders the rules attribute).
 		/// </summary>
-		[Parameter] public GridLines GridLines { get; set; } = GridLines.None;
+		[Parameter] public GridLines GridLines { get; set; } = GridLines.Both;
 
 		/// <summary>
 		/// Gets or sets whether header cells render with th scope="col" for accessibility.
+		/// WebForms defaults this to true.
 		/// </summary>
-		[Parameter] public bool UseAccessibleHeader { get; set; }
+		[Parameter] public bool UseAccessibleHeader { get; set; } = true;
 
 		/// <summary>
 		/// Gets or sets the cell padding for the table. -1 means the attribute is not rendered.
@@ -487,6 +488,14 @@ namespace BlazorWebFormsComponents
 				GridLines.Both => "all",
 				_ => null
 			};
+		}
+
+		/// <summary>
+		/// Gets the border attribute value. WebForms renders border="1" when GridLines is not None.
+		/// </summary>
+		internal string GetGridLinesBorder()
+		{
+			return GridLines != GridLines.None ? "1" : null;
 		}
 
 		/// <summary>

@@ -1,0 +1,83 @@
+@using BlazorWebFormsComponents.Enums
+@using SortDirection = BlazorWebFormsComponents.Enums.SortDirection
+
+@code {
+
+	ListView<Widget> theListView;
+
+	// Event tracking fields
+	ListViewSortEventArgs _sortingArgs;
+	ListViewSortEventArgs _sortedArgs;
+
+	[Fact]
+	public void HandleCommand_Sort_FiresSortingAndSorted()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						Sorting="OnSorting"
+						Sorted="OnSorted"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.HandleCommand("Sort", "Name", 0));
+
+		_sortingArgs.ShouldNotBeNull();
+		_sortingArgs.SortExpression.ShouldBe("Name");
+		_sortingArgs.SortDirection.ShouldBe(SortDirection.Ascending);
+		_sortedArgs.ShouldNotBeNull();
+		theListView.SortExpression.ShouldBe("Name");
+		theListView.SortDirection.ShouldBe(SortDirection.Ascending);
+	}
+
+	[Fact]
+	public void HandleCommand_Sort_TogglesSortDirection()
+	{
+		SortDirection initialDirection = SortDirection.Ascending;
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						SortExpression="Name"
+						SortDirection="initialDirection"
+						Sorting="OnSorting"
+						Sorted="OnSorted"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.HandleCommand("Sort", "Name", 0));
+
+		_sortingArgs.ShouldNotBeNull();
+		_sortingArgs.SortDirection.ShouldBe(SortDirection.Descending);
+		theListView.SortDirection.ShouldBe(SortDirection.Descending);
+	}
+
+	[Fact]
+	public void HandleCommand_Sort_Cancellation_PreventsSortUpdate()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						Sorting="OnSortingCancel"
+						Sorted="OnSorted"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.HandleCommand("Sort", "Name", 0));
+
+		theListView.SortExpression.ShouldBeNull();
+		_sortedArgs.ShouldBeNull();
+	}
+
+	// Event handlers
+	void OnSorting(ListViewSortEventArgs args) => _sortingArgs = args;
+	void OnSorted(ListViewSortEventArgs args) => _sortedArgs = args;
+
+	void OnSortingCancel(ListViewSortEventArgs args)
+	{
+		_sortingArgs = args;
+		args.Cancel = true;
+	}
+}

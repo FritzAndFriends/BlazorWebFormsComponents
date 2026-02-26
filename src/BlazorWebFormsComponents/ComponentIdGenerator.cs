@@ -36,6 +36,11 @@ namespace BlazorWebFormsComponents
 				{
 					parts.Insert(0, current.ID);
 				}
+				// If this is a NamingContainer with UseCtl00Prefix, prepend "ctl00"
+				if (current is NamingContainer nc && nc.UseCtl00Prefix)
+				{
+					parts.Insert(0, "ctl00");
+				}
 				current = current.Parent;
 			}
 

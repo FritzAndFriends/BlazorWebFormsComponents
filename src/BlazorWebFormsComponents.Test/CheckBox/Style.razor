@@ -4,26 +4,26 @@
 @code {
 
 	[Fact]
-	public void CheckBox_WithCssClass_AppliesClassToSpan()
+	public void CheckBox_WithCssClass_AppliesClassToInput()
 	{
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Styled checkbox" CssClass="custom-check" />);
 
 		// Assert
-		var span = cut.Find("span");
-		span.ClassList.ShouldContain("custom-check");
+		var input = cut.Find("input[type='checkbox']");
+		input.ClassList.ShouldContain("custom-check");
 	}
 
 	[Fact]
-	public void CheckBox_WithBackColorAndForeColor_AppliesStyleToSpan()
+	public void CheckBox_WithBackColorAndForeColor_AppliesStyleToInput()
 	{
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Colored" BackColor="LightBlue" ForeColor="Navy" />);
 
 		// Assert
-		var span = cut.Find("span");
-		span.HasAttribute("style").ShouldBeTrue();
-		var style = span.GetAttribute("style");
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("style").ShouldBeTrue();
+		var style = input.GetAttribute("style");
 
 		style.ShouldNotBeNull();
 		style.ShouldContain("background-color:LightBlue");

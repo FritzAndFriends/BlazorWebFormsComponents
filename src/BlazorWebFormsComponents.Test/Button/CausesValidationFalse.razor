@@ -37,10 +37,10 @@
 
 		// Act
 		cut.Find("input").Change("100");
-		var typeAttribute = cut.Find("button").GetAttribute("type");
+		var typeAttribute = cut.Find("input[type=submit]").GetAttribute("type");
 
 		// Assert
-		typeAttribute.ShouldBe("button");
+		typeAttribute.ShouldBe("submit");
 	}
 
 }

@@ -12,6 +12,7 @@
 <h3>Basic MultiView</h3>
 <p>Current View: @(activeIndex + 1) of 3</p>
 
+<div data-audit-control="MultiView-1">
 <MultiView ActiveViewIndex="@activeIndex">
 	<View>
 		<div style="padding: 10px; border: 1px solid #ccc;">
@@ -36,6 +37,7 @@
 		</div>
 	</View>
 </MultiView>
+</div>
 
 @code {
 	private int activeIndex = 0;

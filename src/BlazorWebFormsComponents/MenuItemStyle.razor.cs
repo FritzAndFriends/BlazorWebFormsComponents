@@ -125,4 +125,14 @@ namespace BlazorWebFormsComponents
 
 	}
 
+	public class StaticMenuStyle : MenuItemStyle {
+
+		protected override void OnInitialized()
+		{
+			base.OnInitialized();
+			ParentMenu.StaticMenuStyle = this;
+		}
+
+	}
+
 }

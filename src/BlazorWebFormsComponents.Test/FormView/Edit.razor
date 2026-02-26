@@ -22,11 +22,11 @@ public void FormView_EditButton_EntersEditMode()
 			<label>@Item.Name</label>
 		</EditItemTemplate>
 	</FormView>);
-	var editButton = cut.Find("button");
+	var editButton = cut.Find("input[type=submit]");
 	editButton.ShouldNotBeNull();
 	editButton.Click();
 	cut.Find("label").ShouldNotBeNull();
-	cut.FindAll("button").Count().ShouldBe(0);
+	cut.FindAll("input[type=submit]").Count().ShouldBe(0);
 }
 
 	void WidgetFormView_PageIndexChanging()

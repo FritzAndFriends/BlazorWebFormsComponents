@@ -39,7 +39,7 @@
 
 	private string GetLongDesc()
 	{
-		return DescriptionUrl;
+		return !string.IsNullOrEmpty(DescriptionUrl) ? DescriptionUrl : null;
 	}
 
 	private string GetAlign()

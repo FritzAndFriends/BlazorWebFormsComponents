@@ -16,7 +16,7 @@ public void ListView_WithLayoutTemplate_ParentComponentIsSet()
 			</div>
 		</LayoutTemplate>
 	</ListView>);
-	cut.FindAll("button").Count().ShouldNotBe(0);
+	cut.FindAll("input[type=submit]").Count().ShouldNotBe(0);
 	MyButton.ShouldNotBeNull();
 	MyButton.Parent.ShouldNotBeNull("Cannot find the Parent component");
 }

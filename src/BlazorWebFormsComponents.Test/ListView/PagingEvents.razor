@@ -1,0 +1,52 @@
+
+@code {
+
+	ListView<Widget> theListView;
+
+	// Event tracking fields
+	ListViewPagePropertiesChangingEventArgs _changingArgs;
+	bool _changedFired;
+
+	[Fact]
+	public void SetPageProperties_FiresPagePropertiesChangingAndChanged()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						PagePropertiesChanging="OnChanging"
+						PagePropertiesChanged="OnChanged"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.SetPageProperties(10, 5));
+
+		_changingArgs.ShouldNotBeNull();
+		_changingArgs.StartRowIndex.ShouldBe(10);
+		_changingArgs.MaximumRows.ShouldBe(5);
+		_changedFired.ShouldBeTrue();
+		theListView.StartRowIndex.ShouldBe(10);
+		theListView.MaximumRows.ShouldBe(5);
+	}
+
+	[Fact]
+	public void SetPageProperties_UpdatesProperties()
+	{
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						PagePropertiesChanging="OnChanging"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		cut.InvokeAsync(() => theListView.SetPageProperties(0, 3));
+
+		theListView.StartRowIndex.ShouldBe(0);
+		theListView.MaximumRows.ShouldBe(3);
+	}
+
+	// Event handlers
+	void OnChanging(ListViewPagePropertiesChangingEventArgs args) => _changingArgs = args;
+	void OnChanged(EventArgs args) => _changedFired = true;
+}

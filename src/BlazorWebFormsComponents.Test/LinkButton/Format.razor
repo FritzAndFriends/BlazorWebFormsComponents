@@ -4,6 +4,47 @@
 public void LinkButton_RendersAnchor_WithTextAndPostBackUrl()
 {
 var cut = Render(@<LinkButton Text="Go to Bing!!" PostBackUrl="https://www.bing.com" />);
-cut.MarkupMatches(@<a href="https://www.bing.com">Go to Bing!!</a>);
+cut.MarkupMatches(@<a href="https://www.bing.com" >Go to Bing!!</a>);
+}
+
+[Fact]
+public void LinkButton_CssClass_RendersClassAttribute()
+{
+	var cut = Render(@<LinkButton Text="Click Me" CssClass="btn btn-primary" />);
+	var a = cut.Find("a");
+	a.GetAttribute("class").ShouldBe("btn btn-primary");
+}
+
+[Fact]
+public void LinkButton_NoCssClass_NoClassAttribute()
+{
+	var cut = Render(@<LinkButton Text="Click Me" />);
+	var a = cut.Find("a");
+	a.HasAttribute("class").ShouldBeFalse();
+}
+
+[Fact]
+public void LinkButton_Disabled_RendersAspNetDisabledClass()
+{
+	var cut = Render(@<LinkButton Text="Click Me" Enabled="false" />);
+	var a = cut.Find("a");
+	a.GetAttribute("class").ShouldContain("aspNetDisabled");
+}
+
+[Fact]
+public void LinkButton_DisabledWithCssClass_RendersBothClasses()
+{
+	var cut = Render(@<LinkButton Text="Click Me" CssClass="btn" Enabled="false" />);
+	var a = cut.Find("a");
+	a.GetAttribute("class").ShouldContain("btn");
+	a.GetAttribute("class").ShouldContain("aspNetDisabled");
+}
+
+[Fact]
+public void LinkButton_CssClass_WithPostBackUrl_RendersClassAttribute()
+{
+	var cut = Render(@<LinkButton Text="Go" PostBackUrl="https://example.com" CssClass="my-link" />);
+	var a = cut.Find("a");
+	a.GetAttribute("class").ShouldBe("my-link");
 }
 }

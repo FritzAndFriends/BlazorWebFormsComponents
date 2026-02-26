@@ -4,28 +4,35 @@
 <h2>BulletedList Component Samples</h2>
 
 <h3>Basic BulletedList with Static Items (Text Mode)</h3>
-<BulletedList TItem="object" StaticItems="basicItems" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="basicItems" /&gt;
+<div data-audit-control="BulletedList-1">
+    <BulletedList TItem="object" StaticItems="discItems" BulletStyle="BulletStyle.Disc" />
+</div>
+<pre><code>&lt;BulletedList TItem="object" StaticItems="discItems" BulletStyle="BulletStyle.Disc" /&gt;
 
 @@code {
-    private ListItemCollection basicItems = new() {
-        new ListItem("First item", "1"),
-        new ListItem("Second item", "2"),
-        new ListItem("Third item", "3")
+    private ListItemCollection discItems = new() {
+        new ListItem("Apple", "1"),
+        new ListItem("Banana", "2"),
+        new ListItem("Cherry", "3"),
+        new ListItem("Date", "4")
     };
 }</code></pre>
 
 <hr />
 
-<h3>Bullet Style: Disc (Default for unordered)</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Disc" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Disc" /&gt;</code></pre>
+<h3>Bullet Style: Numbered</h3>
+<div data-audit-control="BulletedList-2">
+    <BulletedList TItem="object" StaticItems="numberedItems" BulletStyle="BulletStyle.Numbered" />
+</div>
+<pre><code>&lt;BulletedList TItem="object" StaticItems="numberedItems" BulletStyle="BulletStyle.Numbered" /&gt;</code></pre>
 
 <hr />
 
-<h3>Bullet Style: Circle</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Circle" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Circle" /&gt;</code></pre>
+<h3>Bullet Style: Square with HyperLinks</h3>
+<div data-audit-control="BulletedList-3">
+    <BulletedList TItem="object" StaticItems="squareLinkItems" BulletStyle="BulletStyle.Square" DisplayMode="BulletedListDisplayMode.HyperLink" />
+</div>
+<pre><code>&lt;BulletedList TItem="object" StaticItems="squareLinkItems" BulletStyle="BulletStyle.Square" DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;</code></pre>
 
 <hr />
 
@@ -180,11 +187,25 @@
 @code {
 	private string clickMessage = "Click an item above to see the result.";
 
-	private ListItemCollection basicItems = new()
+	private ListItemCollection discItems = new()
 	{
-		new ListItem("First item", "1"),
-		new ListItem("Second item", "2"),
-		new ListItem("Third item", "3")
+		new ListItem("Apple", "1"),
+		new ListItem("Banana", "2"),
+		new ListItem("Cherry", "3"),
+		new ListItem("Date", "4")
+	};
+
+	private ListItemCollection numberedItems = new()
+	{
+		new ListItem("First", "1"),
+		new ListItem("Second", "2"),
+		new ListItem("Third", "3")
+	};
+
+	private ListItemCollection squareLinkItems = new()
+	{
+		new ListItem("Example Site", "https://example.com"),
+		new ListItem("Example Org", "https://example.org")
 	};
 
 	private ListItemCollection bulletItems = new()

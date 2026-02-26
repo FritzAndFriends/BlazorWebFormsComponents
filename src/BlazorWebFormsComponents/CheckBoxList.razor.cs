@@ -15,7 +15,8 @@ namespace BlazorWebFormsComponents
 	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
 	public partial class CheckBoxList<TItem> : BaseListControl<TItem>
 	{
-		private string _baseId = Guid.NewGuid().ToString("N").Substring(0, 8);
+		private readonly string _generatedBaseId = Guid.NewGuid().ToString("N").Substring(0, 8);
+		private string _baseId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedBaseId;
 
 		/// <summary>
 		/// Gets or sets the number of columns to display in the CheckBoxList.

@@ -5,7 +5,8 @@
 
 <p>Here is a simple static tree view</p>
 
-<TreeView ID="SampleTreeView" runat="server"
+<div data-audit-control="TreeView">
+    <TreeView ID="SampleTreeView" runat="server"
 	OnTreeNodeCheckChanged="CheckChanged"
 	ShowCheckBoxes="Root|Parent">
 	<Nodes>
@@ -24,7 +25,8 @@
 			</TreeNode>
 		</TreeNode>
 	</Nodes>
-</TreeView>
+    </TreeView>
+</div>
 
 Checkboxes clicked:  @clickCount
 

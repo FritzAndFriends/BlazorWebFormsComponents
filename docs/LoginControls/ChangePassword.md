@@ -22,6 +22,8 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Custom templates via `ChangePasswordTemplate` and `SuccessTemplate`
 - Styling through cascading style components (follows Login control pattern)
 - Table-based layout matching Web Forms HTML output
+- **Orientation** property (Vertical or Horizontal layout)
+- **TextLayout** property (TextOnLeft or TextOnTop)
 
 ## Web Forms Features NOT Supported
 
@@ -144,7 +146,65 @@ The component renders a table-based layout matching the Web Forms ChangePassword
 }
 ```
 
+## Orientation and TextLayout
+
+The ChangePassword component supports two layout properties that control how the form is arranged, identical to the [Login](Login.md) control:
+
+**Orientation** controls whether fields are stacked vertically or arranged side by side:
+
+| Value | Description |
+|-------|-------------|
+| `Orientation.Vertical` | Fields stacked vertically (default) |
+| `Orientation.Horizontal` | Fields arranged side by side |
+
+**TextLayout** controls label placement relative to input fields:
+
+| Value | Description |
+|-------|-------------|
+| `LoginTextLayout.TextOnLeft` | Labels appear to the left of inputs (default) |
+| `LoginTextLayout.TextOnTop` | Labels appear above inputs |
+
+```razor
+@using BlazorWebFormsComponents.Enums
+
+<ChangePassword
+    ChangePasswordTitleText="Update Password"
+    Orientation="Orientation.Horizontal"
+    TextLayout="LoginTextLayout.TextOnTop"
+    OnChangingPassword="HandleChanging" />
+```
+
+### Migration Example: Layout Properties
+
+**Before (Web Forms):**
+```html
+<asp:ChangePassword ID="cp1" runat="server"
+    Orientation="Horizontal"
+    TextLayout="TextOnTop"
+    OnChangingPassword="cp1_ChangingPassword" />
+```
+
+**After (Blazor):**
+```razor
+@using BlazorWebFormsComponents.Enums
+
+<ChangePassword
+    Orientation="Orientation.Horizontal"
+    TextLayout="LoginTextLayout.TextOnTop"
+    OnChangingPassword="HandleChanging" />
+
+@code {
+    private async Task HandleChanging(LoginCancelEventArgs e)
+    {
+        // Perform password change via your identity service
+    }
+}
+```
+
+!!! note "Migration Tip"
+    In Web Forms, `Orientation` and `TextLayout` are simple strings (`"Horizontal"`, `"TextOnTop"`). In Blazor, they require the fully qualified enum values: `Orientation.Horizontal` and `LoginTextLayout.TextOnTop`. Add `@using BlazorWebFormsComponents.Enums` to your page.
+
 ## See Also
 
-- [Login](Login.md) — Related login control with similar table layout
+- [Login](Login.md) — Related login control with identical Orientation and TextLayout support
 - [CreateUserWizard](CreateUserWizard.md) — User registration wizard

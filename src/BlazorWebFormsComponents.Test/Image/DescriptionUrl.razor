@@ -1,0 +1,27 @@
+
+@code {
+	[Fact]
+	public void Image_WithDescriptionUrl_RendersLongDescAttribute()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" DescriptionUrl="http://example.com/desc" />);
+		var img = cut.Find("img");
+		img.HasAttribute("longdesc").ShouldBeTrue();
+		img.GetAttribute("longdesc").ShouldBe("http://example.com/desc");
+	}
+
+	[Fact]
+	public void Image_WithoutDescriptionUrl_NoLongDescAttribute()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" />);
+		var img = cut.Find("img");
+		img.HasAttribute("longdesc").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Image_EmptyDescriptionUrl_NoLongDescAttribute()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" DescriptionUrl="" />);
+		var img = cut.Find("img");
+		img.HasAttribute("longdesc").ShouldBeFalse();
+	}
+}

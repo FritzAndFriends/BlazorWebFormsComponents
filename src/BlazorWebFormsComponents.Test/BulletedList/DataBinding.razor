@@ -27,10 +27,9 @@
 		var listItems = cut.FindAll("li");
 		listItems.Count.ShouldBe(3);
 		
-		var spans = cut.FindAll("li span");
-		spans[0].TextContent.ShouldBe("Product A");
-		spans[1].TextContent.ShouldBe("Product B");
-		spans[2].TextContent.ShouldBe("Product C");
+		listItems[0].TextContent.ShouldBe("Product A");
+		listItems[1].TextContent.ShouldBe("Product B");
+		listItems[2].TextContent.ShouldBe("Product C");
 	}
 
 	[Fact]
@@ -78,11 +77,10 @@
 		var listItems = cut.FindAll("li");
 		listItems.Count.ShouldBe(4);
 		
-		var spans = cut.FindAll("li span");
-		spans[0].TextContent.ShouldBe("Static Item 1");
-		spans[1].TextContent.ShouldBe("Static Item 2");
-		spans[2].TextContent.ShouldBe("Dynamic Item 1");
-		spans[3].TextContent.ShouldBe("Dynamic Item 2");
+		listItems[0].TextContent.ShouldBe("Static Item 1");
+		listItems[1].TextContent.ShouldBe("Static Item 2");
+		listItems[2].TextContent.ShouldBe("Dynamic Item 1");
+		listItems[3].TextContent.ShouldBe("Dynamic Item 2");
 	}
 
 	[Fact]
@@ -118,8 +116,8 @@
 		var listItems = cut.FindAll("li");
 		listItems.Count.ShouldBe(1);
 		
-		var span = cut.Find("li span");
-		span.TextContent.ShouldBe("Static Only");
+		var li = cut.Find("li");
+		li.TextContent.ShouldBe("Static Only");
 	}
 
 }
