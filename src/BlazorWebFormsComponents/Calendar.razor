@@ -26,6 +26,7 @@
 		{
 			<caption align="@(CaptionAlign != TableCaptionAlign.NotSet ? CaptionAlign.ToString().ToLowerInvariant() : null)">@Caption</caption>
 		}
+		<tbody>
 		@if (ShowTitle)
 		{
 			<tr>
@@ -38,21 +39,25 @@
 						}
 					</td>
 				}
-				@if (ShowNextPrevMonth)
-				{
-					<td class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">
-						<a @onclick="HandlePreviousMonth" @onclick:preventDefault="true" style="cursor:pointer">@((MarkupString)PrevMonthText)</a>
-					</td>
-				}
-				<td colspan="@(ShowNextPrevMonth ? 5 : 7)" class="@GetEffectiveCss(TitleStyle, TitleStyleCss)" style="@GetEffectiveStyle(TitleStyle)" align="center">
-					@GetTitleText()
+				<td colspan="7" class="@GetEffectiveCss(TitleStyle, TitleStyleCss)" style="@GetEffectiveStyle(TitleStyle)">
+					<table style="width:100%;border-collapse:collapse;">
+						<tbody><tr>
+							@if (ShowNextPrevMonth)
+							{
+								<td style="width:15%;@GetEffectiveStyle(NextPrevStyle)" class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)">
+									<a @onclick="HandlePreviousMonth" @onclick:preventDefault="true" style="cursor:pointer;" title="Go to the previous month">@((MarkupString)PrevMonthText)</a>
+								</td>
+							}
+							<td align="center" style="@(ShowNextPrevMonth ? "width:70%;" : null)">@GetTitleText()</td>
+							@if (ShowNextPrevMonth)
+							{
+								<td style="width:15%;@GetEffectiveStyle(NextPrevStyle)" class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" align="right">
+									<a @onclick="HandleNextMonth" @onclick:preventDefault="true" style="cursor:pointer;" title="Go to the next month">@((MarkupString)NextMonthText)</a>
+								</td>
+							}
+						</tr></tbody>
+					</table>
 				</td>
-				@if (ShowNextPrevMonth)
-				{
-					<td class="@GetEffectiveCss(NextPrevStyle, NextPrevStyleCss)" style="@GetEffectiveStyle(NextPrevStyle)">
-						<a @onclick="HandleNextMonth" @onclick:preventDefault="true" style="cursor:pointer">@((MarkupString)NextMonthText)</a>
-					</td>
-				}
 			</tr>
 		}
 		@if (ShowDayHeader)
@@ -64,7 +69,7 @@
 				}
 				@foreach (var day in GetDayHeaders())
 				{
-					<th class="@GetEffectiveCss(DayHeaderStyle, DayHeaderStyleCss)" style="@GetEffectiveStyle(DayHeaderStyle)" abbr="@GetDayName(day)" scope="@(UseAccessibleHeader ? "col" : null)">
+					<th class="@GetEffectiveCss(DayHeaderStyle, DayHeaderStyleCss)" style="@GetEffectiveStyle(DayHeaderStyle)" abbr="@GetFullDayName(day)" align="center" scope="@(UseAccessibleHeader ? "col" : null)">
 						@GetDayName(day)
 					</th>
 				}
@@ -85,7 +90,7 @@
 					<td class="@GetDayCellCss(date)" style="@GetDayCellStyle(date)" align="center">
 						@if (dayArgs.IsSelectable)
 						{
-							<a @onclick="() => HandleDayClick(date)" @onclick:preventDefault="true" style="cursor:pointer">
+							<a @onclick="() => HandleDayClick(date)" @onclick:preventDefault="true" style="cursor:pointer;" title="@GetDayTitle(date)">
 								@date.Day
 							</a>
 						}
@@ -97,5 +102,6 @@
 				}
 			</tr>
 		}
+		</tbody>
 	</table>
 }
