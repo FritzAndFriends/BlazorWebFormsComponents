@@ -1,0 +1,62 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void Button_InsideNamingContainer_GetsPrefixedClientID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="MainContent">
+				<Button ID="MyButton" Text="Click" />
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MainContent_MyButton");
+	}
+
+	[Fact]
+	public void NestedNamingContainers_ProduceFullyQualifiedClientID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Outer">
+				<NamingContainer ID="Inner">
+					<Button ID="ButtonId" Text="Click" />
+				</NamingContainer>
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("Outer_Inner_ButtonId");
+	}
+
+	[Fact]
+	public void UseCtl00Prefix_PrependsCtl00ToClientID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="MainContent" UseCtl00Prefix="true">
+				<Button ID="MyButton" Text="Click" />
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("ctl00_MainContent_MyButton");
+	}
+
+	[Fact]
+	public void Button_WithoutNamingContainer_HasUnchangedID()
+	{
+		// Arrange & Act
+		var cut = Render(@<Button ID="MyButton" Text="Click" />);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MyButton");
+	}
+}
