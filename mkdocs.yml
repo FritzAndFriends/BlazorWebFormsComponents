@@ -123,6 +123,7 @@ nav:
     - Databinder: UtilityFeatures/Databinder.md
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - NamingContainer: UtilityFeatures/NamingContainer.md
     - PageService: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md

@@ -150,6 +150,7 @@ All components inheriting from `BaseWebFormsComponent` support the ID parameter.
 - Child component IDs are prefixed with the parent's ID
 - Format: `ParentID_ChildID` (using underscore separator)
 - Follows the ASP.NET Web Forms `ClientIDMode.AutoID` pattern
+- For explicit naming scope control, see [NamingContainer](NamingContainer.md) and [WebFormsPage](WebFormsPage.md)
 
 ### Differences from Web Forms
 
@@ -247,5 +248,7 @@ See the [ID Rendering Sample](/ControlSamples/IDRendering) for a complete workin
 
 ## Related Documentation
 
+- [NamingContainer](NamingContainer.md) - Explicit naming scope component for ID hierarchy control
+- [WebFormsPage](WebFormsPage.md) - Combined naming container and theme wrapper
 - [ViewState](ViewState.md) - Understanding state management in migrated applications
 - [JavaScript Setup](JavaScriptSetup.md) - Configuring JavaScript for Blazor
