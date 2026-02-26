@@ -30,5 +30,23 @@ namespace SharedSampleObjects.Models
 				new Product { Id = 10, Name = "Mechanism", Price = 18.50m, Category = "Electronics", InStock = true }
 			};
 		}
+
+		public static List<Product> GetProducts(int count)
+		{
+			var categories = new[] { "Tools", "Electronics", "Hardware" };
+			var products = new List<Product>();
+			for (var i = 1; i <= count; i++)
+			{
+				products.Add(new Product
+				{
+					Id = i,
+					Name = $"Product {i}",
+					Price = System.Math.Round(4.99m + (i * 1.5m), 2),
+					Category = categories[(i - 1) % 3],
+					InStock = i % 3 != 0
+				});
+			}
+			return products;
+		}
 	}
 }
