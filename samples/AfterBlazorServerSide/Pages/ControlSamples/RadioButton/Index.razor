@@ -4,14 +4,18 @@
 <h1>RadioButton Samples</h1>
 
 <h2>Standalone RadioButton</h2>
+<div data-audit-control="RadioButton-1">
 <RadioButton Text="Single option" Checked="@singleChecked" CheckedChanged="@HandleSingleCheckedChanged" />
+</div>
 <p>Checked: @singleChecked</p>
 
 <hr />
 
 <h2>Grouped RadioButtons (Size Selection)</h2>
+<div data-audit-control="RadioButton-2">
 <RadioButton Text="Small" GroupName="Size" Checked="@(selectedSize == "Small")"
              OnCheckedChanged="@(() => OnSizeChange("Small"))" />
+</div>
 <br />
 <RadioButton Text="Medium" GroupName="Size" Checked="@(selectedSize == "Medium")"
              OnCheckedChanged="@(() => OnSizeChange("Medium"))" />
@@ -23,7 +27,9 @@
 <hr />
 
 <h2>Text Alignment</h2>
+<div data-audit-control="RadioButton-3">
 <RadioButton Text="Label on right (default)" GroupName="Align" />
+</div>
 <br />
 <RadioButton Text="Label on left" GroupName="Align" TextAlign="@BlazorWebFormsComponents.Enums.TextAlign.Left" />
 
