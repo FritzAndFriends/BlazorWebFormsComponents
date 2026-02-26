@@ -315,9 +315,10 @@ if ($roslynPkgDir) {
         if (-not (Test-Path $roslynBinDir)) {
             New-Item -ItemType Directory -Path $roslynBinDir -Force | Out-Null
         }
-        $roslynFiles = Get-ChildItem -Path $roslynToolsDir -Filter '*.dll' -File -ErrorAction SilentlyContinue
-        $roslynExes  = Get-ChildItem -Path $roslynToolsDir -Filter '*.exe' -File -ErrorAction SilentlyContinue
-        ($roslynFiles + $roslynExes) | ForEach-Object {
+        $roslynItems = @()
+        $roslynItems += @(Get-ChildItem -Path $roslynToolsDir -Filter '*.dll' -File -ErrorAction SilentlyContinue)
+        $roslynItems += @(Get-ChildItem -Path $roslynToolsDir -Filter '*.exe' -File -ErrorAction SilentlyContinue)
+        $roslynItems | ForEach-Object {
             Copy-Item -Path $_.FullName -Destination $roslynBinDir -Force
         }
 
