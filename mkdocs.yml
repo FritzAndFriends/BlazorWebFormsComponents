@@ -125,6 +125,7 @@ nav:
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
     - PageService: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
+    - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
       - Migration Strategies: Migration/Strategies.md

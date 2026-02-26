@@ -1,0 +1,101 @@
+@using BlazorWebFormsComponents.Theming
+
+@code {
+	[Fact]
+	public void NamingScope_CascadesThroughWebFormsPage()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent">
+				<Button ID="MyButton" Text="Click" />
+			</WebFormsPage>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MainContent_MyButton");
+	}
+
+	[Fact]
+	public void ThemeCascade_AppliesToChildComponents()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage Theme="theme">
+				<Label Text="test" />
+			</WebFormsPage>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	[Fact]
+	public void NamingAndTheming_WorkTogether()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Button", new ControlSkin { BackColor = WebColor.Red });
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent" Theme="theme">
+				<Button ID="Submit" Text="Go" />
+			</WebFormsPage>
+		);
+
+		// Assert — both naming and theming applied
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MainContent_Submit");
+		button.GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+	[Fact]
+	public void UseCtl00Prefix_WorksThroughWebFormsPage()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent" UseCtl00Prefix="true">
+				<Button ID="MyButton" Text="Click" />
+			</WebFormsPage>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("ctl00_MainContent_MyButton");
+	}
+
+	[Fact]
+	public void NullTheme_RendersWithoutError()
+	{
+		// Arrange & Act — no Theme parameter
+		var cut = Render(
+			@<WebFormsPage ID="Page">
+				<Label Text="hello" />
+			</WebFormsPage>
+		);
+
+		// Assert — Label renders, no style applied
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Visible_False_HidesContent()
+	{
+		// Act
+		var cut = Render(
+			@<WebFormsPage Visible="false">
+				<Label Text="hidden" />
+			</WebFormsPage>
+		);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+}
