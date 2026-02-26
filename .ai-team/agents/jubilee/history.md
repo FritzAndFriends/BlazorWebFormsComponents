@@ -164,3 +164,16 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 - **Infrastructure:** Created `wwwroot/Content/Images/banner.png` for image path parity with WebForms `~/Content/Images/banner.png`.
 - **Key pattern:** The `data-audit-control` markers were preserved on all audited sections. Non-audited demo sections below were kept but updated to reference valid types/data.
 - **Limitation found:** Label-3 HTML content (`<em>Emphasized</em>`) — Blazor Label uses `@Text` which HTML-encodes, so the rendered output will differ from WebForms which renders raw HTML. This is a component-level issue requiring a component fix, not a sample data fix.
+
+### M15-08 — Add Audit Markers to Blazor Samples (#384)
+
+- **10 existing Blazor sample pages updated** with `data-audit-control` wrapper divs matching WebForms counterparts:
+  - ChangePassword (`ChangePassword-1`), Chart (`Chart`), CreateUserWizard (`CreateUserWizard-1`)
+  - Login (`Login-1`), LoginName (`LoginName-1`), LoginStatus (`LoginStatus-1`, `LoginStatus-2`)
+  - MultiView (`MultiView-1`), PasswordRecovery (`PasswordRecovery-1`, `PasswordRecovery-2`), Table (`Table-3`)
+- **2 new Blazor sample pages created** for controls that had WebForms samples but no Blazor equivalents:
+  - `DataPager/Index.razor` with `data-audit-control="DataPager"` — uses inline product data with paging demo
+  - `LoginView/Index.razor` with `data-audit-control="LoginView-1"` — shows AnonymousTemplate and LoggedInTemplate
+- **Audit coverage:** All WebForms controls with `data-audit-control` markers now have corresponding Blazor markers. Validator samples only have their first variant marked (matching the single-demo pattern already established).
+- **Key learning:** Blazor samples split across two paths — `Components/Pages/ControlSamples/` (current .NET 8 pattern) and legacy `Pages/ControlSamples/` (RadioButton, TextBox). New pages always go in `Components/Pages/`.
+- **Build verified:** `dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj -c Release` — 0 errors, 0 warnings.
