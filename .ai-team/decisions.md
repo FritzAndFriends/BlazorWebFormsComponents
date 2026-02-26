@@ -2434,3 +2434,13 @@ For the record, these aspects are correctly implemented:
 **By:** Forge
 **What:** Created a three-milestone plan (M11–M13) for comprehensive HTML fidelity audit comparing Web Forms gold-standard output against Blazor component output. M11: audit infrastructure + Tier 1 (simple controls) capture. M12: Tier 2 (data controls) with normalization pipeline. M13: Tier 3 (JS-coupled) + remaining controls + master audit report. The existing M12 (Migration Analysis Tool PoC) has been renumbered to M14. The previously planned M11 (Skins & Themes Implementation) is deferred to M15+.
 **Why:** Jeff directed that HTML output fidelity verification is the foundation the rest of the project depends on. At 51/53 components, we've never systematically verified that Blazor output matches Web Forms output. The audit must complete before building migration tooling (M14) so that tool can reference verified HTML fidelity data. The three-tier phasing (simple → data → JS-coupled) minimizes risk by proving infrastructure on easy controls first.
+
+### 2026-02-26: IIS Express setup script for BeforeWebForms HTML audit
+**By:** Cyclops
+**What:** Created `scripts/Setup-IISExpress.ps1`  automates BeforeWebForms sample app setup for IIS Express with dynamic compilation. Key design: CodeBehind-to-CodeFile conversion is temporary (reverted via `-Revert` switch using git checkout), NuGet packages restored to `src/packages/`, Roslyn compilers copied to `bin/roslyn/`, nuget.exe downloaded on demand, fully idempotent.
+**Why:** The HTML audit requires running the BeforeWebForms sample app under IIS Express to capture gold-standard Web Forms HTML output. Manual setup was error-prone and undocumented.
+
+### 2026-02-26: Intentional divergence registry (D-01 through D-10)
+**By:** Forge
+**What:** Created `planning-docs/DIVERGENCE-REGISTRY.md` with 10 documented intentional divergences covering ID mangling, PostBack mechanisms, ViewState, WebResource.axd, Chart rendering, Menu table mode, TreeView JS, Calendar selection, Login infrastructure, and Validator scripts. Each entry documents affected controls, divergence description, category, reason, CSS/JS impact, and normalization rules.
+**Why:** Without a pre-defined registry, auditors would repeatedly investigate platform-level differences that can never be replicated in Blazor. The registry provides normalization rules for the audit pipeline and classification guidance for audit reports.
