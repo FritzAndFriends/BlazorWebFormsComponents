@@ -1,0 +1,188 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls
+@using Moq
+
+@code {
+
+	private void SetupLoginViewServices()
+	{
+		var principal = new ClaimsPrincipal();
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync())
+			.Returns(Task.FromResult(new AuthenticationState(principal)));
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+	}
+
+	[Fact]
+	public void LoginView_CssClass_RendersOnOuterElement()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv1" CssClass="login-view-panel">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv1");
+		outer.ShouldNotBeNull();
+		outer.GetAttribute("class").ShouldBe("login-view-panel");
+	}
+
+	[Fact]
+	public void LoginView_WithoutCssClass_NoClassOnOuterElement()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv2">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv2");
+		outer.HasAttribute("class").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void LoginView_ToolTip_RendersAsTitleAttribute()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv3" ToolTip="Login view tooltip">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv3");
+		outer.GetAttribute("title").ShouldBe("Login view tooltip");
+	}
+
+	[Fact]
+	public void LoginView_WithoutToolTip_NoTitleAttribute()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv4">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv4");
+		var title = outer.GetAttribute("title");
+		(string.IsNullOrEmpty(title)).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void LoginView_BackColor_RendersInlineStyle()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv5" BackColor="Yellow">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv5");
+		var style = outer.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void LoginView_ForeColor_RendersInlineStyle()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv6" ForeColor="Navy">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv6");
+		var style = outer.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("color");
+	}
+
+	[Fact]
+	public void LoginView_FontBold_RendersInlineStyle()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv7" Font-Bold="true">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv7");
+		var style = outer.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("font-weight:bold");
+	}
+
+	[Fact]
+	public void LoginView_CssClassAndStyle_BothRender()
+	{
+		// Arrange
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv8" CssClass="themed" BackColor="Silver" ToolTip="Styled view">
+				<AnonymousTemplate>Anonymous</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		var outer = cut.Find("#lv8");
+		outer.GetAttribute("class").ShouldBe("themed");
+		outer.GetAttribute("title").ShouldBe("Styled view");
+		outer.GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void LoginView_StillRendersTemplateContent()
+	{
+		// Arrange — verify style wrapper doesn't break template rendering
+		SetupLoginViewServices();
+
+		// Act
+		var cut = Render(
+			@<BlazorWebFormsComponents.LoginControls.LoginView ID="lv9" CssClass="styled">
+				<AnonymousTemplate>Anonymous Content</AnonymousTemplate>
+			</BlazorWebFormsComponents.LoginControls.LoginView>
+		);
+
+		// Assert
+		cut.Markup.ShouldContain("Anonymous Content");
+	}
+
+}
