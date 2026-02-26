@@ -10,6 +10,7 @@
 
 							@*runat="server"
 							EnableViewState="false"*@
+<div data-audit-control="Repeater">
 <table>
 		<Repeater @ref="simpleRepeater"
 							Context="Item"
@@ -35,6 +36,7 @@
 			</SeparatorTemplate>
 		</Repeater>
 </table>
+</div>
 
 
 @code {

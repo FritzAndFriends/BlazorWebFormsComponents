@@ -16,11 +16,13 @@
 <p>When <code>AutoGenerateRows</code> is <code>true</code> (the default), the DetailsView
    automatically creates a row for each public property on the data item.</p>
 
+<div data-audit-control="DetailsView-1">
 <DetailsView ItemType="Customer"
              Items="@_customers"
              AutoGenerateRows="true"
              HeaderText="Customer Details"
              GridLines="GridLines.Both" />
+</div>
 
 <p>Code:</p>
 <pre><code>&lt;DetailsView ItemType="Customer"
@@ -35,6 +37,7 @@
 <p>Set <code>AllowPaging="true"</code> to display a pager row that lets users navigate
    between individual records in the data source — one record at a time.</p>
 
+<div data-audit-control="DetailsView-2">
 <DetailsView ItemType="Customer"
              Items="@_customers"
              AllowPaging="true"
@@ -42,6 +45,7 @@
              HeaderText="Browse Customers"
              GridLines="GridLines.Both"
              PageIndexChanged="HandlePageChanged" />
+</div>
 
 <p>Current page changed <strong>@_pageChangeCount</strong> time(s).</p>
 
@@ -60,6 +64,7 @@
    Clicking Edit switches the DetailsView to Edit mode. Click Update or Cancel to return to ReadOnly mode.
    Handle the <code>ModeChanging</code> and <code>ItemUpdating</code> events to integrate with your data store.</p>
 
+<div data-audit-control="DetailsView-3">
 <DetailsView ItemType="Customer"
              Items="@_customers"
              AllowPaging="true"
@@ -69,6 +74,7 @@
              GridLines="GridLines.Both"
              ModeChanging="HandleModeChanging"
              ItemUpdating="HandleUpdating" />
+</div>
 
 <p style="margin-top: 10px; font-weight: bold;">@_statusMessage</p>
 
@@ -99,11 +105,13 @@
 <h3>Empty Data</h3>
 <p>When the data source has no items, the <code>EmptyDataText</code> is displayed.</p>
 
+<div data-audit-control="DetailsView-4">
 <DetailsView ItemType="Customer"
              Items="@_emptyList"
              AutoGenerateRows="true"
              EmptyDataText="No customers found."
              GridLines="GridLines.Both" />
+</div>
 
 <p>Code:</p>
 <pre><code>&lt;DetailsView ItemType="Customer"
