@@ -132,3 +132,11 @@
 - **Image `longdesc` conditional (#378):** The `GetLongDesc()` method in Image.razor already correctly returned null when `DescriptionUrl` was empty/unset, suppressing the `longdesc` attribute. Added 3 explicit tests verifying conditional rendering behavior. `DescriptionUrl` defaults to `string.Empty` in Image.razor.cs.
 - **Patterns followed:** Checked WebForms audit HTML to match exact attribute output. Followed Button's `CalculatedCssClass` pattern for disabled-state class handling. Used Blazor's null-attribute-suppression for conditional rendering (return null → attribute not rendered). All existing tests pass; added 10 new tests total.
 - **All 1277 tests pass**, 0 regressions.
+
+### M15 HTML Fidelity Closure Fixes (#383, #382, GridView default)
+
+- **FileUpload ID rendering (#383):** Verified that FileUpload renders the developer-set ID exactly (e.g., `id="myUpload"`) with no GUID suffix. In .NET 10, `InputFile` does not generate its own internal id — the `id` from `GetInputAttributes()` via `ClientID` is rendered as-is. When no ID is set, no `id` attribute is rendered. Added 2 regression tests in `FileUpload/IdRendering.razor`.
+- **CheckBox span wrapper removal (#382):** Verified that CheckBox renders `<input>` and `<label>` directly without a `<span>` wrapper (fixed in prior commit `3d84b4a`). CheckBoxList renders its own inline `<input>`/`<label>` pairs and does not use the CheckBox component, so no span dependency exists. Added 2 regression tests in `CheckBox/NoSpanWrapper.razor`.
+- **GridView UseAccessibleHeader default:** Changed `UseAccessibleHeader` default from `false` to `true` in `GridView.razor.cs`, matching WebForms behavior. WebForms defaults this to true, rendering `<th scope="col">` for header cells. The existing `UseAccessibleHeader_RendersThWithScope` test explicitly passed `UseAccessibleHeader="true"` and didn't catch the wrong default. Added 2 tests in `GridView/AccessibleHeaderDefault.razor` verifying default behavior and explicit false.
+- **Key learning:** When verifying WebForms fidelity, always test the default parameter values — passing `true` explicitly masks wrong defaults. CheckBoxList uses its own inline rendering, not the CheckBox component — changes to CheckBox don't affect CheckBoxList.
+- **All 1283 tests pass**, 0 regressions.
