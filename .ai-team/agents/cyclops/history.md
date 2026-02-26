@@ -102,3 +102,15 @@
 - **BulletedList `<ol>` for ordered styles:** Already correct — `IsOrderedList` property correctly returns `true` for Numbered, LowerAlpha, UpperAlpha, LowerRoman, UpperRoman. `ListStyleType` correctly maps to CSS values.
 - **Test updates:** Changed 27 test files — all `Find("button")` / `FindAll("button")` selectors updated to `Find("input")` or `Find("input[type=submit]")` for Button component, and `li span` assertions changed to `li` text content for BulletedList.
 - **All 1253 tests pass**, 0 regressions.
+
+### Calendar Structural Bug Fixes (HTML Audit)
+
+- **`<tbody>` wrapper:** Added `<tbody>` around all `<tr>` elements inside the calendar `<table>`, matching WebForms structural output.
+- **`width:14%` on day cells:** `GetDayCellStyle()` now prepends `width:14%;` to all day cell styles, ensuring equal-width day columns.
+- **Day `title` attributes:** Added `GetDayTitle(DateTime)` method returning "MonthName Day" format (e.g., "January 25"). Applied as `title` on day `<a>` links for accessibility.
+- **Full `abbr` day names:** Added `GetFullDayName(DayOfWeek)` method that always returns the full day name (e.g., "Sunday") for the `abbr` attribute on `<th>` headers, regardless of `DayNameFormat`. Display text still uses the configured format.
+- **Day header `align="center"`:** Added `align="center"` to `<th>` day header elements matching WebForms output.
+- **Root table default styles:** `GetTableStyle()` now always includes `border-width:1px;border-style:solid;border-collapse:collapse;` as default styles, matching WebForms default rendering.
+- **Navigation sub-table:** Restructured the title/navigation row from flat `<td>` cells to a `<td colspan="7">` containing a nested `<table>` with prev/title/next cells (`width:15%/70%/15%`), matching WebForms sub-table pattern. Added `title="Go to the previous month"` and `title="Go to the next month"` on nav links.
+- **Files modified:** `Calendar.razor`, `Calendar.razor.cs`.
+- **All 1253 tests pass**, 0 regressions.

@@ -15,7 +15,8 @@ namespace BlazorWebFormsComponents
 	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
 	public partial class RadioButtonList<TItem> : BaseListControl<TItem>
 	{
-		private string _groupName = Guid.NewGuid().ToString("N");
+		private readonly string _generatedGroupName = Guid.NewGuid().ToString("N");
+		private string _groupName => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedGroupName;
 
 		/// <summary>
 		/// Gets or sets the number of columns to display in the list control.

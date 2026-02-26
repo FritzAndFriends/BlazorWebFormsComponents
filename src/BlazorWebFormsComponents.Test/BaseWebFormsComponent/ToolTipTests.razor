@@ -128,16 +128,16 @@
 	public void CheckBox_WithToolTip_RendersTitleAttribute()
 	{
 		var cut = Render(@<CheckBox Text="Accept" ToolTip="CheckBox tooltip" />);
-		var span = cut.Find("span");
-		span.HasAttribute("title").ShouldBeTrue();
-		span.GetAttribute("title").ShouldBe("CheckBox tooltip");
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("title").ShouldBeTrue();
+		input.GetAttribute("title").ShouldBe("CheckBox tooltip");
 	}
 
 	[Fact]
 	public void CheckBox_WithoutToolTip_DoesNotRenderTitleAttribute()
 	{
 		var cut = Render(@<CheckBox Text="Accept" />);
-		cut.Find("span").HasAttribute("title").ShouldBeFalse();
+		cut.Find("input[type='checkbox']").HasAttribute("title").ShouldBeFalse();
 	}
 
 	[Fact]
