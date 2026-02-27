@@ -1,5 +1,6 @@
 @inherits BlazorWebFormsTestContext
 @using Shouldly
+@using System.Text.RegularExpressions
 
 @code {
 
@@ -12,6 +13,48 @@
 		// Assert
 		var input = cut.Find("input[type='file']");
 		input.ShouldNotBeNull();
+	}
+
+	// --- Bug fix #383: No stray GUID attributes ---
+
+	[Fact]
+	public void FileUpload_Render_NoStrayGuidAttributes()
+	{
+		// Bug #383: FileUpload should not render attributes with GUID patterns
+		var cut = Render(@<FileUpload />);
+		var input = cut.Find("input[type='file']");
+
+		var guidPattern = new Regex(
+			@"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
+		foreach (var attr in input.Attributes)
+		{
+			guidPattern.IsMatch(attr.Name).ShouldBeFalse(
+				$"Stray GUID in attribute name: '{attr.Name}'");
+		}
+	}
+
+	[Fact]
+	public void FileUpload_Render_OnlyExpectedAttributes()
+	{
+		// Bug #383: A default FileUpload should only have recognized HTML attributes
+		var cut = Render(@<FileUpload />);
+		var input = cut.Find("input[type='file']");
+
+		var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+		{
+			"type", "id", "name", "class", "style", "multiple",
+			"accept", "disabled", "title"
+		};
+
+		foreach (var attr in input.Attributes)
+		{
+			// Skip Blazor framework-internal attributes (e.g. blazor:elementreference)
+			if (attr.Name.StartsWith("blazor:")) continue;
+
+			allowed.ShouldContain(attr.Name,
+				$"Unexpected attribute on FileUpload: '{attr.Name}'=\"{attr.Value}\"");
+		}
 	}
 
 }

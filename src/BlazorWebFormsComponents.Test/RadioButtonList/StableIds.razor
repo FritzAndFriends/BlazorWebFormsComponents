@@ -1,0 +1,161 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void RadioButtonList_WithID_RadioButtonIdsFollowPattern()
+	{
+		// Arrange — When ID="MyList", each radio id should be MyList_0, MyList_1, MyList_2
+		var items = new ListItemCollection
+		{
+			new ListItem("Small", "S"),
+			new ListItem("Medium", "M"),
+			new ListItem("Large", "L")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" ID="MyList" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+		radios[0].GetAttribute("id").ShouldBe("MyList_0");
+		radios[1].GetAttribute("id").ShouldBe("MyList_1");
+		radios[2].GetAttribute("id").ShouldBe("MyList_2");
+	}
+
+	[Fact]
+	public void RadioButtonList_WithID_NameAttributeEqualsControlID()
+	{
+		// Arrange — The name attribute on all radio buttons should equal the control ID
+		var items = new ListItemCollection
+		{
+			new ListItem("Option A", "A"),
+			new ListItem("Option B", "B"),
+			new ListItem("Option C", "C")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" ID="MyList" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+		foreach (var radio in radios)
+		{
+			radio.GetAttribute("name").ShouldBe("MyList");
+		}
+	}
+
+	[Fact]
+	public void RadioButtonList_WithoutID_StillRenders()
+	{
+		// Arrange — When no ID is provided, component should still render with fallback IDs
+		var items = new ListItemCollection
+		{
+			new ListItem("Yes", "Y"),
+			new ListItem("No", "N")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(2);
+
+		// Each radio should have an id attribute (generated fallback)
+		foreach (var radio in radios)
+		{
+			radio.HasAttribute("id").ShouldBeTrue();
+			radio.GetAttribute("id").ShouldNotBeNullOrEmpty();
+		}
+
+		// All radios should share the same name for mutual exclusion
+		var name = radios[0].GetAttribute("name");
+		name.ShouldNotBeNullOrEmpty();
+		radios[1].GetAttribute("name").ShouldBe(name);
+	}
+
+	[Fact]
+	public void RadioButtonList_WithID_LabelForMatchesInputId()
+	{
+		// Arrange — Labels must reference the correct input IDs for accessibility
+		var items = new ListItemCollection
+		{
+			new ListItem("Red", "R"),
+			new ListItem("Blue", "B")
+		};
+
+		// Act
+		var cut = Render(@<RadioButtonList TItem="object" ID="Colors" StaticItems="items" />);
+
+		// Assert
+		var labels = cut.FindAll("label");
+		labels.Count.ShouldBe(2);
+		labels[0].GetAttribute("for").ShouldBe("Colors_0");
+		labels[1].GetAttribute("for").ShouldBe("Colors_1");
+	}
+
+	[Fact]
+	public void RadioButtonList_WithID_FlowLayout_IdsFollowPattern()
+	{
+		// Arrange — Stable IDs should work across all RepeatLayout modes
+		var items = new ListItemCollection
+		{
+			new ListItem("A", "a"),
+			new ListItem("B", "b")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object" ID="FlowList" StaticItems="items"
+							  RepeatLayout="RepeatLayout.Flow" />
+		);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios[0].GetAttribute("id").ShouldBe("FlowList_0");
+		radios[1].GetAttribute("id").ShouldBe("FlowList_1");
+		radios[0].GetAttribute("name").ShouldBe("FlowList");
+		radios[1].GetAttribute("name").ShouldBe("FlowList");
+	}
+
+	[Fact]
+	public void CheckBox_WithID_UsesIDDirectlyOnInput()
+	{
+		// Arrange — CheckBox with a provided ID should use that ID directly on the input element
+		// Act
+		var cut = Render(@<CheckBox ID="myCheck" Text="Accept" />);
+
+		// Assert
+		var input = cut.Find("input[type='checkbox']");
+		input.GetAttribute("id").ShouldBe("myCheck");
+	}
+
+	[Fact]
+	public void RadioButtonList_WithID_UnorderedListLayout_IdsFollowPattern()
+	{
+		// Arrange — Verify pattern across UnorderedList layout too
+		var items = new ListItemCollection
+		{
+			new ListItem("X", "x"),
+			new ListItem("Y", "y"),
+			new ListItem("Z", "z")
+		};
+
+		// Act
+		var cut = Render(
+			@<RadioButtonList TItem="object" ID="UlList" StaticItems="items"
+							  RepeatLayout="RepeatLayout.UnorderedList" />
+		);
+
+		// Assert
+		var radios = cut.FindAll("input[type='radio']");
+		radios.Count.ShouldBe(3);
+		radios[0].GetAttribute("id").ShouldBe("UlList_0");
+		radios[1].GetAttribute("id").ShouldBe("UlList_1");
+		radios[2].GetAttribute("id").ShouldBe("UlList_2");
+	}
+
+}
