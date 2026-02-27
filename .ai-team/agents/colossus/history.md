@@ -125,3 +125,22 @@ Added 5 smoke tests for M17 AJAX/Migration Helper sample pages (Timer, UpdatePan
 
 
  Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
+
+## Summary: Issue #358 — Interactive Tests for 5 Gap Pages (2026-02-27)
+
+All 5 smoke test `[InlineData]` entries already existed in ControlSampleTests.cs (added in a prior session). Added 5 new `[Fact]` interaction tests in InteractiveComponentTests.cs:
+
+1. `ListView_CrudOperations_EditButton_ShowsEditMode` — clicks Edit, verifies Update/Cancel buttons and "Editing" status
+2. `ListView_CrudOperations_DeleteButton_RemovesItem` — clicks Delete, verifies row count decreases and "Deleted" status
+3. `Label_AssociatedControlID_RendersLabelFor` — verifies `<label for="emailInput">` and `<label for="nameInput">` elements rendered when AssociatedControlID is set, and basic `<span>` for plain Label
+4. `DataGrid_Styles_RendersStyledHeaderAndRows` — verifies "Customer Directory" caption, header cells, data rows, and 4 GridLines variation captions
+5. `LoginControls_Orientation_RendersAllLayouts` — verifies all 4 Login orientation title texts and at least 4 username inputs
+
+Build verified green (0 errors).
+
+## Learnings
+
+- All 5 sample pages confirmed to exist: ListView/CrudOperations, Label, Panel/BackImageUrl, LoginControls/Orientation (OrientationSample.razor), DataGrid/Styles.
+- ListView CrudOperations binds data in `OnAfterRender(firstRender)`, so tests must use `DOMContentLoaded` + `WaitForSelectorAsync` for Edit/Delete buttons.
+- Panel/BackImageUrl has no distinctive interactive elements — smoke test is sufficient coverage (no interaction test added).
+- LoginControls/Orientation renders 4 Login forms with different `Orientation` and `TextLayout` combinations; each gets a TitleText that can be used as a locator.
