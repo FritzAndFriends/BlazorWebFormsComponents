@@ -12,10 +12,10 @@
 | Control | Properties | Events | HTML Match | Migration Score | Overall |
 |---------|-----------|--------|-----------|----------------|---------|
 | Timer | 2/2 (100%) | 1/1 (100%) | ✅ N/A (no WF output) | **High** | ✅ |
-| ScriptManager | 7/17 (41%) | 0/4 (0%) | ✅ No-op stub | **High** | ⚠️ |
-| ScriptManagerProxy | 2/4 (50%) | 0/1 (0%) | ✅ No-op stub | **High** | ⚠️ |
+| ScriptManager | 8/17 (47%) | 0/4 (0%) | ✅ No-op stub | **High** | ✅ |
+| ScriptManagerProxy | 2/4 (50%) | 0/1 (0%) | ✅ No-op stub | **High** | ✅ |
 | UpdatePanel | 4/5 (80%) | 0/0 (—) | ✅ Match | **High** | ✅ |
-| UpdateProgress | 4/4 (100%) | 0/0 (—) | ⚠️ Near-match | **High** | ⚠️ |
+| UpdateProgress | 4/4 (100%) | 0/0 (—) | ✅ Match | **High** | ✅ |
 | Substitution | 1/1 (100%) | 0/0 (—) | ✅ N/A (no wrapper) | **Medium** | ✅ |
 
 > **Note on property counts:** Only *control-specific* (non-inherited-from-`Control`) public properties are counted. Inherited `Control` base properties like `ID`, `Visible`, `EnableViewState`, etc. are handled by `BaseWebFormsComponent` and are not re-audited per control.
@@ -299,15 +299,17 @@ This requires code changes beyond simple find-and-replace, hence **Medium** rath
 7. **Base class choices** — Appropriate: stubs → `BaseWebFormsComponent`, UpdateProgress → `BaseStyledComponent`
 8. **No-op stubs** (ScriptManager, ScriptManagerProxy) — Correct pattern: accept-but-ignore for compilation compatibility
 
-### Issues Requiring Follow-Up ⚠️
+### Issues Resolved ✅ (fixed in commit 355e214)
 
-| # | Severity | Control | Issue | Recommendation |
-|---|----------|---------|-------|----------------|
-| 1 | **Low** | ScriptManager | `EnablePartialRendering` defaults `false`, WF defaults `true` | Change to `= true` |
-| 2 | **Low** | ScriptManager | Missing `Scripts` collection | Add `List<ScriptReference> Scripts` for markup parity with WF |
-| 3 | **Medium** | UpdateProgress | `CssClass` not rendered on `<div>` output | Add `class="@CssClass"` to template |
-| 4 | **Low** | UpdateProgress | Non-dynamic mode missing `display:block;` | Add `display:block;` before `visibility:hidden;` |
-| 5 | **Low** | ScriptReference | Only 3 of ~8 WF properties implemented | Add `ScriptMode`, `NotifyScriptLoaded` if needed |
+| # | Severity | Control | Issue | Resolution |
+|---|----------|---------|-------|------------|
+| 1 | **Low** | ScriptManager | `EnablePartialRendering` defaults `false`, WF defaults `true` | ✅ Changed to `= true` |
+| 2 | **Low** | ScriptManager | Missing `Scripts` collection | ✅ Added `List<ScriptReference> Scripts` |
+| 3 | **Medium** | UpdateProgress | `CssClass` not rendered on `<div>` output | ✅ Added `class="@CssClass"` (null-safe) |
+| 4 | **Low** | UpdateProgress | Non-dynamic mode missing `display:block;` | ✅ Now renders `display:block;visibility:hidden;` |
+| 5 | **Low** | ScriptReference | Only 3 of ~8 WF properties implemented | ✅ Added ScriptMode, NotifyScriptLoaded, ResourceUICultures |
+
+*All 5 items verified with 9 new bUnit tests (1,367 total, 0 failures).*
 
 ### Architecture Notes
 
