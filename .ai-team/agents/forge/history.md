@@ -68,3 +68,25 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 - Base class choices appropriate: stubs use BaseWebFormsComponent, UpdateProgress uses BaseStyledComponent (has CssClass in WF)
 
 **Key pattern learned:** AJAX controls split cleanly into two categories: (1) functional components that change Blazor behavior (Timer, UpdatePanel, UpdateProgress) and (2) pure migration stubs that render nothing (ScriptManager, ScriptManagerProxy, Substitution). The stub pattern is sound — accept-but-ignore properties to prevent compilation errors during migration.
+
+### Summary: M17 Formal Fidelity Audit (2026-02-28)
+
+**By:** Forge
+**What:** Full Web Forms fidelity audit of all 6 M17 controls against Microsoft Learn .NET Framework 4.8.1 API documentation. Report saved to `planning-docs/M17-CONTROL-AUDIT.md`.
+
+**Property coverage by control:**
+- Timer: 2/2 (100%) — Interval, Enabled. OnTick event 1/1.
+- ScriptManager: 7/17 (41%) — Appropriate for no-op stub. Only declarative-markup properties needed.
+- ScriptManagerProxy: 2/4 core (50%) — Scripts and Services collections present. Service manager properties omitted (no Blazor equivalent).
+- UpdatePanel: 4/5 (80%) — Only `Triggers` missing (unnecessary in Blazor's rendering model). ContentTemplate→ChildContent is intentional adaptation.
+- UpdateProgress: 4/4 (100%) — All control-specific properties present with correct defaults.
+- Substitution: 1/1 (100%) — MethodName preserved, SubstitutionCallback added as Blazor adaptation.
+
+**5 follow-up issues identified:**
+1. ScriptManager `EnablePartialRendering` default should be `true` (currently `false`)
+2. ScriptManager missing `Scripts` collection (only on Proxy)
+3. UpdateProgress `CssClass` not rendered on output `<div>` — medium severity
+4. UpdateProgress non-dynamic mode missing `display:block;` prefix
+5. ScriptReference only has 3 of ~8 WF properties
+
+**All 3 enums** (ScriptMode, UpdatePanelRenderMode, UpdatePanelUpdateMode) verified as exact int-value matches with Web Forms originals.
