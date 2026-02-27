@@ -53,6 +53,8 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     AutoGenerateEditButton="True|False"
     AutoGenerateInsertButton="True|False"
     AutoGenerateRows="True|False"
+    Caption="string"
+    CaptionAlign="NotSet|Top|Bottom|Left|Right"
     CellPadding="integer"
     CellSpacing="integer"
     CssClass="string"
@@ -79,6 +81,26 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     Visible="True|False"
     runat="server"
 >
+    <AlternatingRowStyle />
+    <CommandRowStyle />
+    <EditRowStyle />
+    <EmptyDataRowStyle />
+    <FieldHeaderStyle />
+    <FooterStyle />
+    <HeaderStyle />
+    <InsertRowStyle />
+    <PagerSettings
+        Mode="NextPrevious|Numeric|NextPreviousFirstLast|NumericFirstLast"
+        FirstPageText="string"
+        LastPageText="string"
+        NextPageText="string"
+        PreviousPageText="string"
+        PageButtonCount="integer"
+        Position="Bottom|Top|TopAndBottom"
+        Visible="True|False"
+    />
+    <PagerStyle />
+    <RowStyle />
     <Fields>
         <asp:BoundField DataField="string" HeaderText="string" ReadOnly="True|False" />
         <asp:TemplateField HeaderText="string">
