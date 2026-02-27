@@ -1,0 +1,161 @@
+@using BlazorWebFormsComponents.LoginControls
+@using static BlazorWebFormsComponents.WebColor
+@using Moq
+
+@code {
+
+	[Fact]
+	public void PasswordRecovery_CssClass_RendersOnOuterTable()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr1" CssClass="recovery-panel" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr1");
+		table.ShouldNotBeNull();
+		table.GetAttribute("class").ShouldBe("recovery-panel");
+	}
+
+	[Fact]
+	public void PasswordRecovery_WithoutCssClass_NoClassOnOuterTable()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr2" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr2");
+		table.HasAttribute("class").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void PasswordRecovery_ToolTip_RendersAsTitleAttribute()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr3" ToolTip="Recover your password" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr3");
+		table.GetAttribute("title").ShouldBe("Recover your password");
+	}
+
+	[Fact]
+	public void PasswordRecovery_WithoutToolTip_NoTitleAttribute()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr4" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr4");
+		var title = table.GetAttribute("title");
+		(string.IsNullOrEmpty(title)).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void PasswordRecovery_BackColor_RendersInlineStyle()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr5" BackColor="LightBlue" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr5");
+		var style = table.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void PasswordRecovery_ForeColor_RendersInlineStyle()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr6" ForeColor="DarkRed" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr6");
+		var style = table.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("color");
+	}
+
+	[Fact]
+	public void PasswordRecovery_FontBold_RendersInlineStyle()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr7" Font="@(new FontInfo { Bold = true })" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr7");
+		var style = table.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("font-weight:bold");
+	}
+
+	[Fact]
+	public void PasswordRecovery_CssClassAndStyle_BothRender()
+	{
+		// Arrange
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		// Act
+		var cut = Render(
+			@<PasswordRecovery ID="pr8" CssClass="themed" BackColor="Wheat" ToolTip="Recovery form" />
+		);
+
+		// Assert
+		var table = cut.Find("table#pr8");
+		table.GetAttribute("class").ShouldBe("themed");
+		table.GetAttribute("title").ShouldBe("Recovery form");
+		table.GetAttribute("style").ShouldContain("background-color");
+	}
+
+	[Fact]
+	public void PasswordRecovery_StyleIncludesBorderCollapse()
+	{
+		// PasswordRecovery outer table always includes border-collapse:collapse
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(
+			@<PasswordRecovery ID="pr9" BackColor="LightYellow" />
+		);
+
+		var table = cut.Find("table#pr9");
+		var style = table.GetAttribute("style");
+		style.ShouldContain("border-collapse:collapse");
+		style.ShouldContain("background-color");
+	}
+
+}

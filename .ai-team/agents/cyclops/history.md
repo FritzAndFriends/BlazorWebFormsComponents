@@ -190,3 +190,25 @@
 - **GridView UseAccessibleHeader default:** Changed `UseAccessibleHeader` default from `false` to `true` in `GridView.razor.cs`, matching WebForms behavior. WebForms defaults this to true, rendering `<th scope="col">` for header cells. The existing `UseAccessibleHeader_RendersThWithScope` test explicitly passed `UseAccessibleHeader="true"` and didn't catch the wrong default. Added 2 tests in `GridView/AccessibleHeaderDefault.razor` verifying default behavior and explicit false.
 - **Key learning:** When verifying WebForms fidelity, always test the default parameter values — passing `true` explicitly masks wrong defaults. CheckBoxList uses its own inline rendering, not the CheckBox component — changes to CheckBox don't affect CheckBoxList.
 - **All 1283 tests pass**, 0 regressions.
+
+### LoginView Wrapper Element for BaseStyledComponent (#351, #352, #354)
+
+- **Panel BackImageUrl (#351):** Already implemented — `BackImageUrl` parameter and `background-image:url(...)` rendering in `BuildStyle()` were present in `Panel.razor.cs`.
+- **PasswordRecovery base class (#354):** Already migrated — inherits `BaseStyledComponent`, outer `<table>` elements already render `class="@CssClass" style="border-collapse:collapse;@Style" title="@ToolTip"`.
+- **LoginView wrapper div (#352):** Added `<div class="@CssClass" style="@Style" title="@ToolTip">` wrapper around LoginView's content in `LoginView.razor`. The component already inherited `BaseStyledComponent` but had no outer HTML element rendering the style properties. Updated 8 LoginView test files to use `cut.Find("div").TextContent.Trim()` instead of `cut.Markup.Trim()` since the new wrapper `<div>` is now part of the rendered output.
+- **Key files changed:** `LoginControls/LoginView.razor`, 8 test files in `LoginControls/LoginView/`.
+- **Pattern:** For template-switching controls without a table layout (like LoginView), use a `<div>` wrapper with `class="@CssClass" style="@Style" title="@ToolTip"` — unlike Login/ChangePassword/CreateUserWizard which use `<table>` wrappers.
+- **All 1283 tests pass**, 0 regressions.
+
+### ClientIDMode Implementation
+
+- **Created `Enums/ClientIDMode.cs`:** New enum with 4 values matching `System.Web.UI.ClientIDMode`: `Inherit` (0), `AutoID` (1), `Static` (2), `Predictable` (3).
+- **Added `ClientIDMode` parameter to `BaseWebFormsComponent.cs`:** `[Parameter] public ClientIDMode ClientIDMode { get; set; } = ClientIDMode.Inherit;` — all components inherit this property. Added `using BlazorWebFormsComponents.Enums;` import.
+- **Updated `ComponentIdGenerator.cs`:** Added `GetEffectiveClientIDMode()` helper that walks parent hierarchy to resolve `Inherit` mode (defaults to `Predictable` if no ancestor specifies a mode). Refactored `GetClientID()` to switch on effective mode: `Static` returns raw ID, `AutoID` uses `BuildAutoID()` (walks parents with ctl00 prefixes), `Predictable` uses `BuildPredictableID()` (walks parents, joins with underscore, no ctl00). Extracted `BuildAutoID` and `BuildPredictableID` private helpers.
+- **Backward compatibility:** Existing components default to `Inherit` → resolves to `Predictable`. The `Predictable` path walks parents and joins IDs with underscores, matching prior behavior. `UseCtl00Prefix` on `NamingContainer` now only takes effect in `AutoID` mode, which is correct per Web Forms semantics.
+- **Key files:** `src/BlazorWebFormsComponents/Enums/ClientIDMode.cs` (new), `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` (modified), `src/BlazorWebFormsComponents/ComponentIdGenerator.cs` (modified).
+- **Build succeeds with 0 errors.**
+
+ Team update (2026-02-26): ClientIDMode implementation consolidated with Rogue's test findings  UseCtl00Prefix backward compat via auto-AutoID mode  decided by Cyclops, Rogue
+ Team update (2026-02-26): Conditional HTML attribute rendering pattern  use null-returning helpers, CSS list-style-type only for OL, aspNetDisabled class pattern  decided by Cyclops
+ Team update (2026-02-26): M15 HTML fidelity strategy ratified  BulletedList OL fix, LinkButton class, Image longdesc, FileUpload GUID, CheckBox span, stable IDs assigned to Cyclops  decided by Forge

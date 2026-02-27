@@ -177,3 +177,19 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 - **Audit coverage:** All WebForms controls with `data-audit-control` markers now have corresponding Blazor markers. Validator samples only have their first variant marked (matching the single-demo pattern already established).
 - **Key learning:** Blazor samples split across two paths — `Components/Pages/ControlSamples/` (current .NET 8 pattern) and legacy `Pages/ControlSamples/` (RadioButton, TextBox). New pages always go in `Components/Pages/`.
 - **Build verified:** `dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj -c Release` — 0 errors, 0 warnings.
+
+### Fix Unreachable Sample Pages in ComponentCatalog.cs (#350) — Follow-up
+
+- **5 new component entries added** to ComponentCatalog.cs for pages that existed on disk but had no catalog entry:
+  - **CheckBoxList** (Editor, `/ControlSamples/CheckBoxList`) — list of checkboxes for multiple selections
+  - **DataPager** (Data, `/ControlSamples/DataPager`) — paging control for data-bound list controls
+  - **ImageButton** (Editor, `/ControlSamples/ImageButton`) — clickable image that functions as a button
+  - **ListBox** (Editor, `/ControlSamples/ListBox`) — scrollable list for single or multiple selection
+  - **LoginView** (Login, `/ControlSamples/LoginView`) — template-based display for authenticated/anonymous users
+- **DataList SubPage fix:** Changed "SimpleFlow" → "Flow" in SubPages array. The NavMenu generates SubPage URLs as `{baseRoute}/{SubPageName}`, so the SubPage name must match the @page route segment (`/ControlSamples/DataList/Flow`), not the file name (`SimpleFlow.razor`).
+- **2 structural edge cases noted but not added:** `LoginControls/Orientation` (route `/ControlSamples/LoginControls/Orientation`) and `LoginStatusNotAuthenticated` (route `/ControlSamples/LoginStatusNotAuthenticated`) don't fit the SubPage URL pattern of any existing catalog entry. These pages are reachable via in-page links but not from sidebar navigation.
+- **ComponentCatalog.cs pattern for future reference:** Each entry is a `ComponentInfo` record with (Name, Category, Route, Description, SubPages?, Keywords?). SubPages are string arrays where each name is appended to the base Route to form nav links (`{Route}/{SubPage}`). Entries are grouped by category comments and alphabetically ordered within each category. Components without an Index.razor use their specific sub-page route (e.g., Menu → `/ControlSamples/Menu/Selection`).
+- **Build verified:** `dotnet build samples\AfterBlazorServerSide\AfterBlazorServerSide.csproj -c Release --verbosity quiet` — exit code 0.
+
+ Team update (2026-02-26): M15 HTML fidelity strategy  sample data alignment (M15-01) is P0 priority, assigned to Jubilee  decided by Forge
+ Team update (2026-02-26): Data-audit-control markers (M15-08) assigned to Jubilee  ~25 new comparisons needed  decided by Forge

@@ -154,3 +154,38 @@ Re-ran full HTML capture pipeline after 14 bug fixes across 10 controls. Results
 
  Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
  Team update (2026-02-26): Login+Identity controls deferred to future milestone  do not schedule tests  decided by Jeffrey T. Fritz
+
+### Milestone 16: LoginView/PasswordRecovery OuterStyle Tests (#352, #354)
+
+Wrote 18 bUnit tests across 2 new test files for BaseStyledComponent style property rendering on login controls:
+
+**OuterStyle.razor (LoginView, 9 tests):** CssClass renders on outer element, no class when unset, ToolTip as title attribute, no title when unset, BackColor renders background-color in style, ForeColor renders color in style, Font-Bold renders font-weight:bold, combined CssClass+BackColor+ToolTip, template content still renders inside styled wrapper. Tests find outer element by `#ID` selector — will pass after Cyclops adds styled wrapper in #352.
+
+**OuterStyle.razor (PasswordRecovery, 9 tests):** CssClass renders on outer `<table>`, no class when unset, ToolTip as title attribute, no title when unset, BackColor renders background-color, ForeColor renders color, Font-Bold renders font-weight:bold, combined CssClass+BackColor+ToolTip, border-collapse:collapse always present in style. Tests use `table#ID` selector matching existing PasswordRecovery markup.
+
+**Panel BackImageUrl:** Tests already existed from Milestone 6 P2 (3 tests in `Panel/BackImageUrl.razor`). No new tests needed.
+
+📌 Test pattern: LoginView tests require AuthenticationStateProvider mock (anonymous user). PasswordRecovery tests require NavigationManager mock. Both use fully-qualified `BlazorWebFormsComponents.LoginControls.LoginView` in Razor markup to avoid ambiguity. Find outer element by `#ID` for LoginView (wrapper element unknown until Cyclops implements), `table#ID` for PasswordRecovery (outer table already renders ID/CssClass/Style/ToolTip). — Rogue
+
+📌 Test pattern: PasswordRecovery outer table always includes `border-collapse:collapse` in style — assertions for BackColor/ForeColor should check `ShouldContain` not exact match. LoginView currently has no styled wrapper; #352 will add one. — Rogue
+
+### ClientIDMode Feature Tests
+
+Wrote 12 bUnit tests in `ClientIDMode/ClientIDModeTests.razor` covering all 4 ClientIDMode values (Static, Predictable, AutoID, Inherit) plus edge cases.
+
+**Static Mode (3 tests):** Raw ID without parent prefix, inside NamingContainer ignores parent, nested NamingContainers still only raw ID.
+
+**Predictable Mode (3 tests):** Parent_Child pattern inside NamingContainer, Outer_Inner_Component with nesting, does NOT include ctl00 even with UseCtl00Prefix=true.
+
+**AutoID Mode (2 tests):** Includes ctl00 prefix from NamingContainer with UseCtl00Prefix=true, nested containers with selective ctl00 prefix.
+
+**Inherit Mode (2 tests):** Default resolves to Predictable behavior, walks up to parent's mode (parent with Static → child inherits Static).
+
+**Edge Cases (2 tests):** No ID set returns null ClientID regardless of mode, Static mode without NamingContainer returns raw ID.
+
+📌 Test pattern: ClientIDMode tests use Button as the test component (renders `<input id="@ClientID">`). `@using BlazorWebFormsComponents.Enums` is required for the enum. ClientIDMode is set directly on the component via `ClientIDMode="ClientIDMode.Static"` etc. — Rogue
+
+📌 Finding: The existing `NamingContainerTests.UseCtl00Prefix_PrependsCtl00ToClientID` test FAILS after the ClientIDMode feature because UseCtl00Prefix only takes effect in `BuildAutoID()` mode but the default Inherit→Predictable skips ctl00. The test needs `ClientIDMode="ClientIDMode.AutoID"` on the Button, OR the NamingContainer should auto-set AutoID mode when UseCtl00Prefix=true. — Rogue
+
+ Team update (2026-02-26): ClientIDMode tests consolidated with Cyclops implementation  backward compat regression fixed via NamingContainer auto-AutoID  decided by Cyclops, Rogue
+ Team update (2026-02-26): Data control divergence analysis consolidated  sample parity is #1 blocker, 5 genuine bugs identified  decided by Forge, Rogue

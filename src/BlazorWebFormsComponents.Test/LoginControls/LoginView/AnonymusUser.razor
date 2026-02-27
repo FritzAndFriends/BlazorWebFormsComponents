@@ -35,6 +35,6 @@
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
 
-		cut.Markup.Trim().ShouldBe("Anonymous");
+		cut.Find("div").TextContent.Trim().ShouldBe("Anonymous");
 	}
 }

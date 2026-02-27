@@ -109,3 +109,6 @@ Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs afte
 ## Learnings
 
 - When sample data models change (e.g., Customer→Product), integration test assertions referencing model-specific text (header text, empty data messages, caption text, field name lists in assertion messages) must be updated in lockstep. Smoke tests won't catch these because they only verify page loads without errors — interactive tests with text-matching assertions are the ones that break.
+
+ Team update (2026-02-26): M15 HTML fidelity strategy  full audit pipeline re-run (M15-11) assigned to Colossus after all fixes land  decided by Forge
+ Team update (2026-02-26): Data control analysis found normalization gaps  Blazor data control output not normalized, <!--!--> markers need stripping  decided by Forge, Rogue
