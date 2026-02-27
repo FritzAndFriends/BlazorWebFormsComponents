@@ -1,0 +1,83 @@
+@page "/ControlSamples/UpdatePanel"
+@using BlazorWebFormsComponents.Enums
+
+<h2>UpdatePanel Component Samples</h2>
+
+<p>The <code>UpdatePanel</code> component emulates the Web Forms <code>asp:UpdatePanel</code> for migration compatibility. In Web Forms, UpdatePanel enabled partial-page updates via AJAX. In Blazor, <strong>all updates are already partial</strong> — Blazor's diff-based rendering only updates changed DOM elements. The UpdatePanel component renders a <code>&lt;div&gt;</code> (Block mode) or <code>&lt;span&gt;</code> (Inline mode) wrapper around its content.</p>
+
+<hr />
+
+<h3>Block Mode (Default)</h3>
+<p>Renders as a <code>&lt;div&gt;</code> element. This is the default <code>RenderMode</code>.</p>
+
+<UpdatePanel>
+    <ChildContent>
+        <p>This content is inside an UpdatePanel in <strong>Block</strong> mode (renders as a <code>&lt;div&gt;</code>).</p>
+        <p>Click count: <strong>@blockClickCount</strong></p>
+        <button class="btn btn-primary" @onclick="IncrementBlock">Click Me</button>
+    </ChildContent>
+</UpdatePanel>
+
+<pre><code>&lt;UpdatePanel&gt;
+    &lt;ChildContent&gt;
+        &lt;p&gt;Content inside Block mode UpdatePanel.&lt;/p&gt;
+        &lt;button @@onclick="IncrementBlock"&gt;Click Me&lt;/button&gt;
+    &lt;/ChildContent&gt;
+&lt;/UpdatePanel&gt;</code></pre>
+
+<hr />
+
+<h3>Inline Mode</h3>
+<p>Renders as a <code>&lt;span&gt;</code> element, useful for inline content.</p>
+
+<p>
+    The time is:
+    <UpdatePanel RenderMode="UpdatePanelRenderMode.Inline">
+        <ChildContent>
+            <strong>@currentTime</strong>
+        </ChildContent>
+    </UpdatePanel>
+    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="RefreshTime">Refresh</button>
+</p>
+
+<pre><code>&lt;p&gt;
+    The time is:
+    &lt;UpdatePanel RenderMode="UpdatePanelRenderMode.Inline"&gt;
+        &lt;ChildContent&gt;
+            &lt;strong&gt;@@currentTime&lt;/strong&gt;
+        &lt;/ChildContent&gt;
+    &lt;/UpdatePanel&gt;
+&lt;/p&gt;</code></pre>
+
+<hr />
+
+<h3>UpdatePanel Properties</h3>
+<p>The component also supports <code>UpdateMode</code> and <code>ChildrenAsTriggers</code> properties for migration compatibility, though in Blazor these have no behavioral effect since rendering is always differential.</p>
+
+<UpdatePanel UpdateMode="UpdatePanelUpdateMode.Conditional" ChildrenAsTriggers="false">
+    <ChildContent>
+        <div class="alert alert-warning">
+            This UpdatePanel has <code>UpdateMode="Conditional"</code> and <code>ChildrenAsTriggers="false"</code>.
+            In Web Forms these controlled when the panel refreshed. In Blazor, the component simply preserves these properties for migration compatibility.
+        </div>
+    </ChildContent>
+</UpdatePanel>
+
+<hr />
+
+<h3>Web Forms Equivalent</h3>
+<pre><code class="language-aspx">&lt;!-- Web Forms --&gt;
+&lt;asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Always"&gt;
+    &lt;ContentTemplate&gt;
+        &lt;asp:Label ID="lblMessage" runat="server" /&gt;
+        &lt;asp:Button ID="btnClick" runat="server" Text="Click Me" OnClick="btnClick_Click" /&gt;
+    &lt;/ContentTemplate&gt;
+&lt;/asp:UpdatePanel&gt;</code></pre>
+
+@code {
+    private int blockClickCount = 0;
+    private string currentTime = DateTime.Now.ToString("h:mm:ss tt");
+
+    private void IncrementBlock() => blockClickCount++;
+    private void RefreshTime() => currentTime = DateTime.Now.ToString("h:mm:ss tt");
+}

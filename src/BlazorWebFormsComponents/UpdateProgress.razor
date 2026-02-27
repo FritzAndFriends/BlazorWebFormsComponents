@@ -1,0 +1,13 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	@if (DynamicLayout)
+	{
+		<div id="@ClientID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="display:none;">@ProgressTemplate</div>
+	}
+	else
+	{
+		<div id="@ClientID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="display:block;visibility:hidden;">@ProgressTemplate</div>
+	}
+}

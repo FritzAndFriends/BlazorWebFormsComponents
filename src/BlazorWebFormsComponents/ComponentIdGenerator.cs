@@ -1,3 +1,4 @@
+using BlazorWebFormsComponents.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,23 @@ namespace BlazorWebFormsComponents
 	/// </summary>
 	public static class ComponentIdGenerator
 	{
+		/// <summary>
+		/// Resolves the effective ClientIDMode for a component by walking up the parent hierarchy.
+		/// If no ancestor specifies a non-Inherit mode, defaults to Predictable (matches Web Forms page-level default).
+		/// </summary>
+		public static ClientIDMode GetEffectiveClientIDMode(BaseWebFormsComponent component)
+		{
+			var current = component;
+			while (current != null)
+			{
+				if (current.ClientIDMode != ClientIDMode.Inherit)
+					return current.ClientIDMode;
+				current = current.Parent;
+			}
+			// No ancestor specified a mode — default to Predictable (Web Forms page default)
+			return ClientIDMode.Predictable;
+		}
+
 		/// <summary>
 		/// Generates a client-side ID for a component based on its ID and parent hierarchy.
 		/// Follows Web Forms naming container pattern: ParentID_ChildID
@@ -26,25 +44,28 @@ namespace BlazorWebFormsComponents
 			if (string.IsNullOrEmpty(component.ID))
 				return null;
 
-			var parts = new List<string>();
+			var effectiveMode = GetEffectiveClientIDMode(component);
 
-			// Walk up the parent hierarchy to build the full ID path
-			var current = component;
-			while (current != null)
+			string clientId;
+
+			switch (effectiveMode)
 			{
-				if (!string.IsNullOrEmpty(current.ID))
-				{
-					parts.Insert(0, current.ID);
-				}
-				// If this is a NamingContainer with UseCtl00Prefix, prepend "ctl00"
-				if (current is NamingContainer nc && nc.UseCtl00Prefix)
-				{
-					parts.Insert(0, "ctl00");
-				}
-				current = current.Parent;
-			}
+				case ClientIDMode.Static:
+					// Static: raw ID, no parent walking
+					clientId = component.ID;
+					break;
 
-			var clientId = string.Join("_", parts);
+				case ClientIDMode.AutoID:
+					// AutoID: walk parents, include ctl00 prefixes from NamingContainers
+					clientId = BuildAutoID(component);
+					break;
+
+				case ClientIDMode.Predictable:
+				default:
+					// Predictable: walk parents, join with underscore, skip ctl00 prefixes
+					clientId = BuildPredictableID(component);
+					break;
+			}
 
 			// Add suffix if provided (for child elements)
 			if (!string.IsNullOrEmpty(suffix))
@@ -53,6 +74,53 @@ namespace BlazorWebFormsComponents
 			}
 
 			return clientId;
+		}
+
+		/// <summary>
+		/// Builds the AutoID-style client ID: walks parents and includes ctl00 prefixes
+		/// from NamingContainers that have UseCtl00Prefix set.
+		/// </summary>
+		private static string BuildAutoID(BaseWebFormsComponent component)
+		{
+			var parts = new List<string>();
+
+			var current = component;
+			while (current != null)
+			{
+				if (!string.IsNullOrEmpty(current.ID))
+				{
+					parts.Insert(0, current.ID);
+				}
+				// ctl00 prefix only applies in AutoID mode
+				if (current is NamingContainer nc && nc.UseCtl00Prefix)
+				{
+					parts.Insert(0, "ctl00");
+				}
+				current = current.Parent;
+			}
+
+			return string.Join("_", parts);
+		}
+
+		/// <summary>
+		/// Builds the Predictable-style client ID: walks parents and joins IDs with underscores,
+		/// but does not include ctl00/ctlxxx prefixes.
+		/// </summary>
+		private static string BuildPredictableID(BaseWebFormsComponent component)
+		{
+			var parts = new List<string>();
+
+			var current = component;
+			while (current != null)
+			{
+				if (!string.IsNullOrEmpty(current.ID))
+				{
+					parts.Insert(0, current.ID);
+				}
+				current = current.Parent;
+			}
+
+			return string.Join("_", parts);
 		}
 
 		/// <summary>

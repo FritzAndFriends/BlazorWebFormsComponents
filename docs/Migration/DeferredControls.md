@@ -26,93 +26,10 @@ The following 27 chart types from the Web Forms `SeriesChartType` enum are **not
 
 ---
 
-## Substitution
+## Substitution — Implemented
 
-Original Microsoft documentation: [https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.substitution?view=netframework-4.8](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.substitution?view=netframework-4.8)
-
-### What It Did in Web Forms
-
-The `<asp:Substitution>` control was a cache-control mechanism. When a Web Forms page was output-cached, `Substitution` marked a region of the page as **dynamic** — content that should be re-evaluated on every request even though the rest of the page was served from cache. It called a static method to generate fresh content for that region.
-
-```html
-<%@ OutputCache Duration="60" VaryByParam="none" %>
-
-<p>This content is cached for 60 seconds.</p>
-
-<asp:Substitution ID="TimeStamp" runat="server"
-                  MethodName="GetCurrentTime" />
-
-<p>This content is also cached.</p>
-```
-
-```csharp
-// Code-behind — must be a static method
-public static string GetCurrentTime(HttpContext context)
-{
-    return DateTime.Now.ToString("HH:mm:ss");
-}
-```
-
-### Why It's Not Implemented
-
-The `Substitution` control is **architecturally incompatible** with Blazor:
-
-- Blazor does not use ASP.NET output caching. There is no page-level cache to punch holes in.
-- In Blazor Server, the UI is maintained as a live component tree over a SignalR connection — every render is already "dynamic."
-- In Blazor WebAssembly, the entire application runs in the browser — server-side output caching is not applicable.
-- The concept of "cache substitution" simply does not exist in Blazor's rendering model.
-
-### What to Do Instead
-
-**No migration is needed.** Blazor's component lifecycle already provides what `Substitution` was designed to achieve — dynamic content that updates on every render.
-
-If your Web Forms page used `Substitution` to show a timestamp, user-specific greeting, or other per-request content, that content will naturally be dynamic in Blazor:
-
-**Before (Web Forms):**
-
-```html
-<%@ OutputCache Duration="60" VaryByParam="none" %>
-
-<p>Welcome to our site!</p>
-<asp:Substitution ID="UserGreeting" runat="server"
-                  MethodName="GetUserGreeting" />
-```
-
-```csharp
-public static string GetUserGreeting(HttpContext context)
-{
-    return $"Hello, {context.User.Identity.Name}!";
-}
-```
-
-**After (Blazor):**
-
-```razor
-<p>Welcome to our site!</p>
-<p>Hello, @username!</p>
-
-@code {
-    private string username;
-
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthState { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var state = await AuthState;
-        username = state.User.Identity?.Name ?? "Guest";
-    }
-}
-```
-
-!!! note "If you need caching in Blazor"
-    If your Web Forms application relied heavily on output caching for performance, Blazor offers different caching strategies:
-
-    - **`IMemoryCache`** or **`IDistributedCache`** for data-level caching in your services
-    - **`@attribute [OutputCache]`** on Razor components in .NET 8+ static SSR mode
-    - **`@attribute [StreamRendering]`** for progressive rendering while data loads
-
-    These are applied at different levels than Web Forms output caching, but they solve the same performance problems.
+!!! success "Substitution is IMPLEMENTED"
+    The [Substitution component](../EditorControls/Substitution.md) has been implemented as a migration compatibility component. In Web Forms, Substitution provided post-cache substitution; in Blazor, it renders callback output directly since all rendering is dynamic. See the [Substitution documentation](../EditorControls/Substitution.md) for full details.
 
 ---
 
@@ -233,7 +150,7 @@ XSLT transforms via `<asp:Xml>` are a **legacy pattern with near-zero adoption**
 | Control | Status | Recommendation |
 |---------|--------|----------------|
 | **Chart** | ✅ Complete | [Implemented](../DataControls/Chart.md) with 8 chart types via Chart.js. Unsupported types need alternative libraries. |
-| **Substitution** | ❌ Deferred | Not needed — Blazor renders dynamically by default |
+| **Substitution** | ✅ Complete | [Implemented](../EditorControls/Substitution.md) — renders callback output directly. Post-cache substitution not applicable in Blazor. |
 | **Xml** | ❌ Deferred | Use `XDocument` + data binding or `XslCompiledTransform` + `MarkupString` |
 
 ## See Also

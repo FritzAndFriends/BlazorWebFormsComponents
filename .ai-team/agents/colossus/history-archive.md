@@ -1,0 +1,15 @@
+# Colossus — History Archive
+
+<!-- Archived 2026-02-27 by Scribe — entries older than 2 weeks moved from history.md -->
+
+## Summary: Milestones 1–3 Integration Tests (2026-02-10 through 2026-02-12)
+
+Audited 74 sample routes, added 32 missing smoke tests. Added interaction tests for Sprint 2 (MultiView, ChangePassword, CreateUserWizard, Localize) and Sprint 3 (DetailsView paging/edit, PasswordRecovery 3-step flow). Fixed 7 pre-existing failures: missing `@using BlazorWebFormsComponents.LoginControls` on ChangePassword/CreateUserWizard, external placeholder URLs → local SVGs, duplicate ImageMap InlineData, Calendar console error filter, TreeView broken image path. 116 integration tests passing.
+
+## Summary: Milestone 4 Chart + Utility Tests (2026-02-12)
+
+Chart: 8 smoke tests + 11 canvas tests + 19 enhanced visual tests (dimensions, Chart.js initialization, multi-series datasets, canvas context). Used `WaitUntilState.DOMContentLoaded` for Chart tests. DataBinder + ViewState: 4 utility feature tests (Eval rendering, ViewState counter increment). Enhanced Chart tests use `BoundingBoxAsync()`, `page.EvaluateAsync<T>` for Chart.js internals, ±10px tolerance for dimensions. Total: 120 integration tests.
+
+**Key patterns:** `LocatorWaitForOptions` instead of `Expect()` (no PageTest inheritance). `PressSequentiallyAsync` + Tab for Blazor Server InputText binding. ID-specific selectors for multi-instance pages. Filter ISO 8601 timestamps from console errors.
+
+📌 Team update (2026-02-12): LoginControls sample pages MUST include `@using BlazorWebFormsComponents.LoginControls`. Never use external image URLs. — Colossus

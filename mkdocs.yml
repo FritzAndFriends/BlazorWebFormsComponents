@@ -119,6 +119,13 @@ nav:
     - LoginStatus: LoginControls/LoginStatus.md
     - LoginView: LoginControls/LoginView.md
     - PasswordRecovery: LoginControls/PasswordRecovery.md
+  - AJAX Controls:
+    - ScriptManager: EditorControls/ScriptManager.md
+    - ScriptManagerProxy: EditorControls/ScriptManagerProxy.md
+    - Substitution: EditorControls/Substitution.md
+    - Timer: EditorControls/Timer.md
+    - UpdatePanel: EditorControls/UpdatePanel.md
+    - UpdateProgress: EditorControls/UpdateProgress.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - ID Rendering: UtilityFeatures/IDRendering.md

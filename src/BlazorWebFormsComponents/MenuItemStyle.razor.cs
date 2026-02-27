@@ -64,6 +64,7 @@ namespace BlazorWebFormsComponents
 
 		protected override void OnInitialized() {
 			SetPropertiesFromUnknownAttributes();
+			this.SetFontsFromAttributes(OtherAttributes);
 			base.OnInitialized();
 		}
 

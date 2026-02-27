@@ -32,6 +32,6 @@
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
 
-		cut.Markup.Trim().ShouldBe("LoggedIn");
+		cut.Find("div").TextContent.Trim().ShouldBe("LoggedIn");
 	}
 }
