@@ -94,3 +94,5 @@ All 29 ScriptManager/UpdateProgress/ScriptReference tests pass (0 failures). Bui
 📌 Test pattern: ScriptReference properties tested as plain C# object instantiation (no bUnit render needed) — `new ScriptReference()` then assert defaults. Same pattern as ScriptManagerProxy Scripts/Services tests. — Rogue
 
 📌 Test pattern: UpdateProgress CssClass uses `class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)"` — when CssClass is empty/null, AngleSharp returns null for `GetAttribute("class")`, matching Web Forms behavior of omitting the class attribute entirely. — Rogue
+
+ Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops

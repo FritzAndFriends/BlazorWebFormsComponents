@@ -90,3 +90,7 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 5. ScriptReference only has 3 of ~8 WF properties
 
 **All 3 enums** (ScriptMode, UpdatePanelRenderMode, UpdatePanelUpdateMode) verified as exact int-value matches with Web Forms originals.
+
+ Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
+
+� Team update (2026-02-27): M17 audit fix test patterns  ScriptReference tested via C# instantiation, UpdateProgress CssClass tested with/without value, 9 new tests  decided by Rogue

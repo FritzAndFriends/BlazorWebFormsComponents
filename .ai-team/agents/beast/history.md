@@ -41,3 +41,9 @@
 
 
  Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+
+ Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
+
+ Team update (2026-02-27): No-op stub property coverage intentionally limited (41-50% acceptable)  deep AJAX infrastructure properties omitted  decided by Forge
+
+ Team update (2026-02-27): UpdatePanel Triggers collection deliberately omitted  Blazor rendering model makes it unnecessary  decided by Forge

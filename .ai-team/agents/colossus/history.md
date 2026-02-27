@@ -1,18 +1,10 @@
 # Colossus — History
 
-<!-- ⚠ Summarized 2026-02-23 by Scribe — original entries covered 2026-02-10 through 2026-02-12 -->
+<!-- ⚠ Summarized 2026-02-27 by Scribe — entries before 2026-02-13 archived to history-archive.md -->
 
-## Summary: Milestones 1–3 Integration Tests (2026-02-10 through 2026-02-12)
+## Core Context
 
-Audited 74 sample routes, added 32 missing smoke tests. Added interaction tests for Sprint 2 (MultiView, ChangePassword, CreateUserWizard, Localize) and Sprint 3 (DetailsView paging/edit, PasswordRecovery 3-step flow). Fixed 7 pre-existing failures: missing `@using BlazorWebFormsComponents.LoginControls` on ChangePassword/CreateUserWizard, external placeholder URLs → local SVGs, duplicate ImageMap InlineData, Calendar console error filter, TreeView broken image path. 116 integration tests passing.
-
-## Summary: Milestone 4 Chart + Utility Tests (2026-02-12)
-
-Chart: 8 smoke tests + 11 canvas tests + 19 enhanced visual tests (dimensions, Chart.js initialization, multi-series datasets, canvas context). Used `WaitUntilState.DOMContentLoaded` for Chart tests. DataBinder + ViewState: 4 utility feature tests (Eval rendering, ViewState counter increment). Enhanced Chart tests use `BoundingBoxAsync()`, `page.EvaluateAsync<T>` for Chart.js internals, ±10px tolerance for dimensions. Total: 120 integration tests.
-
-**Key patterns:** `LocatorWaitForOptions` instead of `Expect()` (no PageTest inheritance). `PressSequentiallyAsync` + Tab for Blazor Server InputText binding. ID-specific selectors for multi-instance pages. Filter ISO 8601 timestamps from console errors.
-
-📌 Team update (2026-02-12): LoginControls sample pages MUST include `@using BlazorWebFormsComponents.LoginControls`. Never use external image URLs. — Colossus
+Integration test engineer. Built test coverage from M1 through M17. 120+ integration tests (smoke + interaction) covering all milestone sample pages. Key patterns established: `WaitUntilState.DOMContentLoaded` for async-bound components, `Filter(HasTextString)` for specific element targeting, ISO timestamp filtering for console errors, `PressSequentiallyAsync` + Tab for Blazor Server inputs. LoginControls pages require `@using BlazorWebFormsComponents.LoginControls`. Never use external image URLs. Full early history in `history-archive.md`.
 
  Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers  decided by Forge
  Team update (2026-02-23): UI overhaul requested  Colossus assigned integration tests (UI-9)  decided by Jeffrey T. Fritz
@@ -131,3 +123,5 @@ Added 5 smoke tests for M17 AJAX/Migration Helper sample pages (Timer, UpdatePan
 
  Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests established with C# API pattern for Timer  decided by Rogue
 
+
+ Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops

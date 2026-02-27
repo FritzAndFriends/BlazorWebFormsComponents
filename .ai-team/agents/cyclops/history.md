@@ -55,3 +55,7 @@
 - **Fix 5:** ScriptReference gained `ScriptMode` (default Auto), `NotifyScriptLoaded` (default true), and `ResourceUICultures` properties from the Web Forms original. Added `using BlazorWebFormsComponents.Enums;`.
 - **Lesson:** Always verify default values against the Web Forms originals — bool properties default to `false` in C# but Web Forms often defaults them to `true`.
 
+
+ Team update (2026-02-27): No-op stub property coverage intentionally limited (41-50% acceptable)  deep AJAX infrastructure properties omitted  decided by Forge
+
+ Team update (2026-02-27): UpdatePanel Triggers collection deliberately omitted  Blazor rendering model makes it unnecessary  decided by Forge

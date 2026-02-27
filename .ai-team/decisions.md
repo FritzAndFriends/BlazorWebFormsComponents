@@ -1850,11 +1850,6 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 - `dotnet build samples/AfterBlazorServerSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet test src/BlazorWebFormsComponents.Test/ --no-restore` ΓÇö Γ£à passes
 
-### 2026-02-25: Deployment pipeline patterns for Docker versioning, Azure webhook, and NuGet publishing
-**By:** Forge
-**What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets with `if: ${{ secrets.SECRET_NAME != '' }}` so workflows don't fail when secrets aren't configured. (3) Dual NuGet publishing  always push to GitHub Packages, conditionally push to nuget.org.
-**Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating ensures the workflows work in forks and PRs where secrets aren't available. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
-
 ### 2026-02-25: Deployment pipeline patterns for Docker versioning, secret-gating, and NuGet publishing (consolidated)
 **By:** Forge
 **What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets using env var indirection — declare the secret in `env:`, check `env.VAR_NAME` in step-level `if:`, reference `env.VAR_NAME` in `run:`. Direct `secrets.*` references in step-level `if:` conditions are invalid and cause GitHub Actions validation failures. Applied to both `nuget.yml` and `deploy-server-side.yml` (PR #372). (3) Dual NuGet publishing — always push to GitHub Packages, conditionally push to nuget.org.
@@ -3067,17 +3062,39 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 
 ### 2026-02-28: M17 AJAX Controls Gate Review  APPROVE WITH NOTES
 **By:** Forge
-**What:** Reviewed all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) for Web Forms fidelity against .NET Framework 4.8 API. Verdict: **APPROVE WITH NOTES**  ready to PR with 4 minor follow-up items.
+**What:** Reviewed all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) for Web Forms fidelity against .NET Framework 4.8 API. Verdict: **APPROVE WITH NOTES**  ready to PR with 4 minor follow-up items. ✅ All 4 follow-up items resolved — see consolidated block below.
 
-**Follow-up items (non-blocking, file as issues):**
-1. ScriptManager `EnablePartialRendering` should default to `true` (Web Forms default), not `false`.
-2. ScriptManager should accept a `Scripts` collection property (like ScriptManagerProxy does) for full markup compatibility.
-3. UpdateProgress template should render `CssClass` on the `<div>` element  currently the property is accepted but silently ignored.
-4. UpdateProgress non-dynamic layout should render `style="display:block;visibility:hidden;"` to match Web Forms byte-for-byte (currently omits `display:block`).
-
-**Why:** None of these block migration. Items 12 affect no-op stubs with zero runtime behavior. Items 34 are cosmetic HTML gaps. All can be addressed in a patch follow-up without design changes.
+**Why:** None of these block migration. All follow-up items addressed by Cyclops and verified by Rogue in the same PR cycle.
 
 ### 2026-02-27: M17 AJAX Control Test Patterns + Timer Bug Fix
 **By:** Rogue
 **What:** Timer.razor.cs had duplicate `[Parameter]` on `Enabled` (shadowed base class). Fixed by removing duplicate declaration. 47 new tests across 6 M17 controls. Timer tests use C# API (`Render<Timer>(p => ...)`) instead of Razor templates due to inherited parameter. All other M17 tests use standard Razor template patterns.
 **Why:** Establishes test patterns for AJAX/migration stub components and documents the Timer parameter inheritance fix.
+
+### 2026-02-27: M17 audit fixes resolved (consolidated)
+**By:** Forge, Cyclops
+**What:** Forge audited all 6 M17 AJAX controls against .NET Framework 4.8.1 API docs and found 5 fidelity issues. Cyclops fixed all 5:
+1. ScriptManager `EnablePartialRendering` default changed from `false` to `true` (Web Forms default).
+2. ScriptManager `Scripts` collection (`List<ScriptReference>`) added, matching ScriptManagerProxy pattern.
+3. UpdateProgress now renders `class` attribute conditionally — omitted when no CssClass set.
+4. UpdateProgress non-dynamic mode uses `display:block;visibility:hidden;` matching Web Forms.
+5. ScriptReference expanded with `ScriptMode`, `NotifyScriptLoaded`, `ResourceUICultures` for markup migration compatibility.
+**Why:** Items 1–2 fixed wrong defaults on no-op stubs (migrating code got wrong property values). Items 3–4 were HTML fidelity bugs (CssClass silently dropped, style incomplete). Item 5 prevents compilation errors when migrating markup with ScriptReference attributes. All verified by 9 new bUnit tests (Rogue).
+
+### 2026-02-27: No-op stub property coverage is intentionally limited
+**By:** Forge
+**What:** ScriptManager at 41% and ScriptManagerProxy at 50% of Web Forms properties is acceptable. The missing properties are deep AJAX infrastructure (history, composite scripts, authentication service, etc.) with no Blazor equivalent. Only properties commonly found in declarative markup are included.
+**Why:** Diminishing returns  covering every infrastructure property would bloat the stubs without helping real migrations.
+
+### 2026-02-27: UpdatePanel Triggers collection deliberately omitted
+**By:** Forge
+**What:** Web Forms' Triggers collection for specifying which controls trigger partial updates is deliberately omitted. Blazor's rendering model makes this unnecessary  all Blazor rendering is already partial.
+**Why:** Architectural decision, not a gap. Including Triggers would create false expectations about partial-rendering behavior that doesn't exist in Blazor.
+
+
+### M17 Audit Fix Test Coverage
+
+**By:** Rogue
+**What:** Added 9 bUnit tests covering all 5 M17 audit fixes (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties). Updated 2 existing tests to match new behavior. All 29 ScriptManager/UpdateProgress tests pass.
+**Why:** Audit fixes change observable behavior — tests must be updated to assert the corrected defaults and new properties. ScriptReference defaults tested via plain C# instantiation (no render needed). UpdateProgress CssClass tested both with and without value to ensure no spurious `class=""` attribute.
+
