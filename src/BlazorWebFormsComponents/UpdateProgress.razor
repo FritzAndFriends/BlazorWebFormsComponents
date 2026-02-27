@@ -4,10 +4,10 @@
 {
 	@if (DynamicLayout)
 	{
-		<div id="@ClientID" style="display:none;">@ProgressTemplate</div>
+		<div id="@ClientID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="display:none;">@ProgressTemplate</div>
 	}
 	else
 	{
-		<div id="@ClientID" style="visibility:hidden;">@ProgressTemplate</div>
+		<div id="@ClientID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="display:block;visibility:hidden;">@ProgressTemplate</div>
 	}
 }

@@ -38,7 +38,7 @@
 	}
 
 	[Fact]
-	public void UpdateProgress_DynamicLayoutFalse_UsesVisibilityHidden()
+	public void UpdateProgress_DynamicLayoutFalse_UsesDisplayBlockVisibilityHidden()
 	{
 		// Arrange & Act
 		var cut = Render(
@@ -51,6 +51,7 @@
 
 		// Assert
 		var div = cut.Find("div#dynFalse");
+		div.GetAttribute("style").ShouldContain("display:block");
 		div.GetAttribute("style").ShouldContain("visibility:hidden");
 	}
 
@@ -132,5 +133,39 @@
 
 		cut.Markup.ShouldContain("Please wait...");
 		cut.Find(".spinner").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void UpdateProgress_CssClass_AppliedToDiv()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="styled" CssClass="progress-overlay">
+				<ProgressTemplate>
+					<p>Loading...</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#styled");
+		div.GetAttribute("class").ShouldBe("progress-overlay");
+	}
+
+	[Fact]
+	public void UpdateProgress_NoCssClass_NoClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="unstyled">
+				<ProgressTemplate>
+					<p>Loading...</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#unstyled");
+		div.GetAttribute("class").ShouldBeNull();
 	}
 }

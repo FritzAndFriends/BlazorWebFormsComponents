@@ -14,11 +14,11 @@
 	}
 
 	[Fact]
-	public void ScriptManager_DefaultEnablePartialRendering_IsFalse()
+	public void ScriptManager_DefaultEnablePartialRendering_IsTrue()
 	{
 		var cut = Render(@<ScriptManager />);
 		var sm = cut.FindComponent<ScriptManager>();
-		sm.Instance.EnablePartialRendering.ShouldBeFalse();
+		sm.Instance.EnablePartialRendering.ShouldBeTrue();
 	}
 
 	[Fact]
@@ -90,5 +90,51 @@
 		sm.Instance.EnablePartialRendering.ShouldBeTrue();
 		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Release);
 		sm.Instance.AsyncPostBackTimeout.ShouldBe(120);
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultScripts_IsInitialized()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.Scripts.ShouldNotBeNull();
+		sm.Instance.Scripts.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ScriptManager_Scripts_CanHoldScriptReferences()
+	{
+		var scripts = new System.Collections.Generic.List<ScriptReference>
+		{
+			new ScriptReference { Name = "jquery", Path = "~/scripts/jquery.js" },
+			new ScriptReference { Name = "app", Path = "~/scripts/app.js" }
+		};
+
+		var cut = Render(@<ScriptManager Scripts="scripts" />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.Scripts.Count.ShouldBe(2);
+		sm.Instance.Scripts[0].Name.ShouldBe("jquery");
+		sm.Instance.Scripts[1].Path.ShouldBe("~/scripts/app.js");
+	}
+
+	[Fact]
+	public void ScriptReference_DefaultScriptMode_IsAuto()
+	{
+		var scriptRef = new ScriptReference();
+		scriptRef.ScriptMode.ShouldBe(ScriptMode.Auto);
+	}
+
+	[Fact]
+	public void ScriptReference_DefaultNotifyScriptLoaded_IsTrue()
+	{
+		var scriptRef = new ScriptReference();
+		scriptRef.NotifyScriptLoaded.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ScriptReference_DefaultResourceUICultures_IsNull()
+	{
+		var scriptRef = new ScriptReference();
+		scriptRef.ResourceUICultures.ShouldBeNull();
 	}
 }

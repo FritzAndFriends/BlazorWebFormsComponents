@@ -46,3 +46,12 @@
 
  Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests established with C# API pattern for Timer  decided by Rogue
 
+### M17 Control Audit Fixes (2026-02-27)
+
+- **Fix 1:** ScriptManager `EnablePartialRendering` default changed from `false` to `true` to match Web Forms default.
+- **Fix 2:** ScriptManager now has `Scripts` collection (`List<ScriptReference>`) matching ScriptManagerProxy pattern. Added `using System.Collections.Generic;`.
+- **Fix 3:** UpdateProgress `<div>` elements now render `class="@CssClass"` conditionally (only when CssClass is non-empty) to match Web Forms styled output.
+- **Fix 4:** UpdateProgress non-dynamic mode div style changed from `visibility:hidden;` to `display:block;visibility:hidden;` matching Web Forms explicit rendering.
+- **Fix 5:** ScriptReference gained `ScriptMode` (default Auto), `NotifyScriptLoaded` (default true), and `ResourceUICultures` properties from the Web Forms original. Added `using BlazorWebFormsComponents.Enums;`.
+- **Lesson:** Always verify default values against the Web Forms originals — bool properties default to `false` in C# but Web Forms often defaults them to `true`.
+

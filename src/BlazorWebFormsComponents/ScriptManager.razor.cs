@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 
@@ -10,7 +11,7 @@ namespace BlazorWebFormsComponents
 	public partial class ScriptManager : BaseWebFormsComponent
 	{
 		[Parameter]
-		public bool EnablePartialRendering { get; set; }
+		public bool EnablePartialRendering { get; set; } = true;
 
 		[Parameter]
 		public bool EnablePageMethods { get; set; }
@@ -29,5 +30,8 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public bool EnableScriptLocalization { get; set; }
+
+		[Parameter]
+		public List<ScriptReference> Scripts { get; set; } = new();
 	}
 }

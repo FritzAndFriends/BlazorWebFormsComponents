@@ -71,3 +71,26 @@ Wrote 47 bUnit tests across 6 new test files for the M17 AJAX/migration-helper c
 📌 Test pattern: UpdateProgress DynamicLayout=true renders `display:none`, DynamicLayout=false renders `visibility:hidden`. Both use `<div>` wrapper. UpdatePanel Block mode renders `<div>`, Inline mode renders `<span>`. Both use `id="@ClientID"`. — Rogue
 
 📌 Bug fix: Removed `new bool Enabled` `[Parameter]` from Timer.razor.cs — it shadowed BaseWebFormsComponent.Enabled causing a runtime InvalidOperationException (duplicate parameter name). Timer now uses the inherited Enabled property which has the same default (true). — Rogue
+
+### M17 Audit Fix Tests
+
+Added 9 new tests covering the 5 audit fixes from Forge's M17 audit:
+
+**ScriptManagerTests.razor (6 new/updated tests):**
+- Updated `ScriptManager_DefaultEnablePartialRendering_IsTrue` — changed from `ShouldBeFalse()` to `ShouldBeTrue()` (Fix 1: default now matches Web Forms)
+- `ScriptManager_DefaultScripts_IsInitialized` — verifies Scripts collection is non-null and empty (Fix 2)
+- `ScriptManager_Scripts_CanHoldScriptReferences` — passes List<ScriptReference> with 2 items, verifies Name/Path (Fix 2)
+- `ScriptReference_DefaultScriptMode_IsAuto` — verifies ScriptMode defaults to Auto (Fix 5)
+- `ScriptReference_DefaultNotifyScriptLoaded_IsTrue` — verifies NotifyScriptLoaded defaults to true (Fix 5)
+- `ScriptReference_DefaultResourceUICultures_IsNull` — verifies ResourceUICultures defaults to null (Fix 5)
+
+**UpdateProgressTests.razor (3 new/updated tests):**
+- Updated `UpdateProgress_DynamicLayoutFalse_UsesDisplayBlockVisibilityHidden` — renamed from `UsesVisibilityHidden`, now asserts both `display:block` and `visibility:hidden` (Fix 4)
+- `UpdateProgress_CssClass_AppliedToDiv` — sets CssClass="progress-overlay", verifies class attribute on div (Fix 3)
+- `UpdateProgress_NoCssClass_NoClassAttribute` — no CssClass set, verifies class attribute is null (Fix 3)
+
+All 29 ScriptManager/UpdateProgress/ScriptReference tests pass (0 failures). Build has 60 pre-existing warnings (none from new tests).
+
+📌 Test pattern: ScriptReference properties tested as plain C# object instantiation (no bUnit render needed) — `new ScriptReference()` then assert defaults. Same pattern as ScriptManagerProxy Scripts/Services tests. — Rogue
+
+📌 Test pattern: UpdateProgress CssClass uses `class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)"` — when CssClass is empty/null, AngleSharp returns null for `GetAttribute("class")`, matching Web Forms behavior of omitting the class attribute entirely. — Rogue
