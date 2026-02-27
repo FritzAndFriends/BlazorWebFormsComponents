@@ -189,3 +189,7 @@ Wrote 12 bUnit tests in `ClientIDMode/ClientIDModeTests.razor` covering all 4 Cl
 
  Team update (2026-02-26): ClientIDMode tests consolidated with Cyclops implementation  backward compat regression fixed via NamingContainer auto-AutoID  decided by Cyclops, Rogue
  Team update (2026-02-26): Data control divergence analysis consolidated  sample parity is #1 blocker, 5 genuine bugs identified  decided by Forge, Rogue
+
+ Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz

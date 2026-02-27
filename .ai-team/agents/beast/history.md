@@ -118,3 +118,7 @@ AccessKey/ToolTip missing from base classes (universal gap). Label needs BaseSty
 
  Team update (2026-02-26): M15 HTML fidelity strategy  doc updates post-M15 if new exact matches warrant verification badges  decided by Forge
  Team update (2026-02-26): ClientIDMode implementation landed (M16)  may need documentation for ClientIDMode property on components  decided by Cyclops, Rogue
+
+ Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz

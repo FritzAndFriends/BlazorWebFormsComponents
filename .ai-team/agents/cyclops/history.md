@@ -212,3 +212,7 @@
  Team update (2026-02-26): ClientIDMode implementation consolidated with Rogue's test findings  UseCtl00Prefix backward compat via auto-AutoID mode  decided by Cyclops, Rogue
  Team update (2026-02-26): Conditional HTML attribute rendering pattern  use null-returning helpers, CSS list-style-type only for OL, aspNetDisabled class pattern  decided by Cyclops
  Team update (2026-02-26): M15 HTML fidelity strategy ratified  BulletedList OL fix, LinkButton class, Image longdesc, FileUpload GUID, CheckBox span, stable IDs assigned to Cyclops  decided by Forge
+
+ Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz

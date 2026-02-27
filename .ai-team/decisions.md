@@ -3022,3 +3022,15 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 5. **Normalization gaps:** Blazor output not normalized for data controls; `<!--!-->` markers need stripping.
 
 **Why:** Cannot distinguish component bugs from sample differences without aligned samples. Sample alignment is prerequisite for accurate audit. Bug fixes are secondary until samples match. Full analyses: `planning-docs/DATA-CONTROL-ANALYSIS.md`, `planning-docs/M15-DATA-CONTROL-ANALYSIS.md`, `planning-docs/POST-FIX-CAPTURE-RESULTS.md`.
+
+### 2026-02-27: User directive — branching workflow
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** All new feature PRs to dev should come from the personal repository (csharpfritz/BlazorWebFormsComponents) and target the shared upstream (FritzAndFriends/BlazorWebFormsComponents) dev branch. The only merges into upstream/main should come from the upstream dev branch.
+**Why:** User request — captured for team memory
+
+
+### 2026-02-27: Issues must be closed via PR references
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** All issues being addressed should be listed in the PR body using GitHub's "Closes #N" syntax so that GitHub automatically closes them when the PR is merged. Do not close issues manually — let the PR lifecycle handle it.
+**Why:** User request — ensures traceability between code changes and issue resolution. Every closed issue should have a linked PR.
+

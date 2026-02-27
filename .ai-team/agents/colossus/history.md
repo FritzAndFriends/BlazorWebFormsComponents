@@ -112,3 +112,7 @@ Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs afte
 
  Team update (2026-02-26): M15 HTML fidelity strategy  full audit pipeline re-run (M15-11) assigned to Colossus after all fixes land  decided by Forge
  Team update (2026-02-26): Data control analysis found normalization gaps  Blazor data control output not normalized, <!--!--> markers need stripping  decided by Forge, Rogue
+
+ Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz

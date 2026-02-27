@@ -193,3 +193,7 @@ Chart: 8 basic + 4 advanced sample pages (DataBinding, MultiSeries, Styling, Cha
 
  Team update (2026-02-26): M15 HTML fidelity strategy  sample data alignment (M15-01) is P0 priority, assigned to Jubilee  decided by Forge
  Team update (2026-02-26): Data-audit-control markers (M15-08) assigned to Jubilee  ~25 new comparisons needed  decided by Forge
+
+ Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
+
+ Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz
