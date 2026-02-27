@@ -119,3 +119,12 @@ Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs afte
 
 
  Team update (2026-02-27): M17 AJAX controls implemented  ScriptManager/Proxy are no-op stubs, Timer shadows Enabled, UpdatePanel uses ChildContent, UpdateProgress renders hidden, Substitution uses Func callback, new AJAX/Migration Helper categories  decided by Cyclops
+
+## Summary: M17 AJAX Control Integration Tests (2026-02-27)
+
+Added 5 smoke tests for M17 AJAX/Migration Helper sample pages (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution) as a new `AjaxControl_Loads_WithoutErrors` Theory group in ControlSampleTests.cs. Added 1 interaction test `Timer_Counter_IncrementsAutomatically` in InteractiveComponentTests.cs that verifies the auto-incrementing counter changes after a 3-second wait (Timer interval is 2000ms). Build verified green (0 errors, 0 warnings).
+
+## Learnings
+
+- M17 AJAX controls form a natural test category group ("AJAX / Migration Helper Controls") since they all relate to the Web Forms AJAX toolkit (ScriptManager, Timer, UpdatePanel, UpdateProgress, Substitution).
+- Timer interaction test needs a 3-second wait to allow at least one tick at the 2000ms interval. The tick count is displayed inside a `div.alert-info` with text "Tick count:" — use `.Filter(new() { HasTextString = "Tick count:" })` to target it specifically.

@@ -2572,4 +2572,50 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task Timer_Counter_IncrementsAutomatically()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Timer", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Get initial tick count value
+            var tickCountLocator = page.Locator("div.alert-info").Filter(new() { HasTextString = "Tick count:" }).First;
+            var initialText = await tickCountLocator.TextContentAsync();
+            Assert.NotNull(initialText);
+
+            // Wait for at least one timer tick (Timer interval is 2000ms, wait 3 seconds)
+            await page.WaitForTimeoutAsync(3000);
+
+            // Verify the tick count has incremented
+            var updatedText = await tickCountLocator.TextContentAsync();
+            Assert.NotNull(updatedText);
+            Assert.NotEqual(initialText, updatedText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }
