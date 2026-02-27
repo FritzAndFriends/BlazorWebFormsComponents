@@ -43,3 +43,28 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 
 
  Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+
+### Summary: M17 AJAX Controls Gate Review (2026-02-28)
+
+**By:** Forge
+**What:** Full Web Forms fidelity review of all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) against .NET Framework 4.8 API documentation.
+
+**Verdict: APPROVE WITH NOTES** — All 6 controls pass for PR. Four minor fidelity notes for follow-up:
+
+1. **ScriptManager `EnablePartialRendering` default** — Web Forms defaults to `true`, Blazor stub defaults to `false` (bare bool). No functional impact (no-op stub), but fidelity gap if property is read.
+2. **ScriptManager missing `Scripts` property** — Web Forms ScriptManager has a `Scripts` collection (ScriptReferenceCollection). Only ScriptManagerProxy has it in the Blazor implementation. Low-priority since ScriptManager is a no-op stub.
+3. **UpdateProgress `CssClass` not rendered** — Inherits BaseStyledComponent so accepts CssClass parameter, but the .razor template doesn't apply it to the `<div>` output. Migrating `<asp:UpdateProgress CssClass="loading">` would silently drop the class.
+4. **UpdateProgress non-dynamic layout style** — Renders `visibility:hidden` but Web Forms renders `display:block;visibility:hidden`. Functionally identical (div is block by default) but not byte-identical.
+
+**What passed clean:**
+- All 6 component names match Web Forms originals exactly
+- Timer: Interval (60000 default), Enabled (inherited), OnTick event — all correct
+- ScriptManager/Proxy: correct as no-op stubs with BaseWebFormsComponent
+- UpdatePanel: RenderMode (Block=div, Inline=span), UpdateMode, ChildrenAsTriggers — all correct. ChildContent instead of ContentTemplate is intentional per Blazor conventions.
+- UpdateProgress: AssociatedUpdatePanelID, DisplayAfter (500), DynamicLayout (true), ProgressTemplate — all correct
+- Substitution: MethodName preserved for migration, SubstitutionCallback for Blazor, no wrapper element — all correct
+- All 3 enums (ScriptMode, UpdatePanelRenderMode, UpdatePanelUpdateMode) match Web Forms values exactly with correct int assignments
+- ComponentCatalog properly categorizes AJAX and Migration Helper controls
+- Base class choices appropriate: stubs use BaseWebFormsComponent, UpdateProgress uses BaseStyledComponent (has CssClass in WF)
+
+**Key pattern learned:** AJAX controls split cleanly into two categories: (1) functional components that change Blazor behavior (Timer, UpdatePanel, UpdateProgress) and (2) pure migration stubs that render nothing (ScriptManager, ScriptManagerProxy, Substitution). The stub pattern is sound — accept-but-ignore properties to prevent compilation errors during migration.
