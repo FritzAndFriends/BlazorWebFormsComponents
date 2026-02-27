@@ -1,0 +1,13 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	@if (DynamicLayout)
+	{
+		<div id="@ClientID" style="display:none;">@ProgressTemplate</div>
+	}
+	else
+	{
+		<div id="@ClientID" style="visibility:hidden;">@ProgressTemplate</div>
+	}
+}

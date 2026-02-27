@@ -125,6 +125,22 @@ public static class ComponentCatalog
         new("PasswordRecovery", "Login", "/ControlSamples/PasswordRecovery", "Multi-step password recovery form",
             Keywords: new[] { "password", "recovery", "reset", "security" }),
 
+        // AJAX Controls
+        new("Timer", "AJAX", "/ControlSamples/Timer", "Triggers callbacks at timed intervals",
+            Keywords: new[] { "timer", "interval", "tick", "polling" }),
+        new("UpdatePanel", "AJAX", "/ControlSamples/UpdatePanel", "Partial page update container",
+            Keywords: new[] { "partial", "async", "postback", "update" }),
+        new("UpdateProgress", "AJAX", "/ControlSamples/UpdateProgress", "Shows loading indicator during async operations",
+            Keywords: new[] { "loading", "progress", "indicator", "spinner" }),
+
+        // Migration Helpers
+        new("ScriptManager", "Migration Helpers", "/ControlSamples/ScriptManager", "Migration stub for AJAX script management",
+            Keywords: new[] { "ajax", "script", "migration", "stub" }),
+        new("ScriptManagerProxy", "Migration Helpers", "/ControlSamples/ScriptManagerProxy", "Migration stub for content page script references",
+            Keywords: new[] { "ajax", "script", "proxy", "migration" }),
+        new("Substitution", "Migration Helpers", "/ControlSamples/Substitution", "Post-cache dynamic content substitution",
+            Keywords: new[] { "cache", "dynamic", "callback", "substitution" }),
+
         // Theming
         new("Theming", "Theming", "/ControlSamples/Theming", "Skins and Themes PoC with ThemeProvider and ControlSkin",
             Keywords: new[] { "skin", "theme", "provider", "skinid" }),

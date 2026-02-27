@@ -1,0 +1,6 @@
+@inherits BaseWebFormsComponent
+
+@if (Visible && SubstitutionCallback != null)
+{
+	@((MarkupString)SubstitutionCallback.Invoke(HttpContextAccessor?.HttpContext))
+}

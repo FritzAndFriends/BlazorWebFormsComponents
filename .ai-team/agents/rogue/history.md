@@ -47,3 +47,27 @@
 
 
  Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+
+### Milestone 17: AJAX Control Tests
+
+Wrote 47 bUnit tests across 6 new test files for the M17 AJAX/migration-helper controls:
+
+**TimerTests.razor (9 tests):** Default Interval=60000, default Enabled=true, renders no visible output, custom Interval accepted, Enabled=false accepted, OnTick callback invoked after interval, Enabled=false prevents ticking, IDisposable cleanup, renders without errors. Uses `Render<Timer>(p => p.Add(...))` C# API because Timer's `new Enabled` shadows BaseWebFormsComponent.Enabled — fixed by removing duplicate `[Parameter]` from Timer.razor.cs.
+
+**ScriptManagerTests.razor (9 tests):** Renders no visible output, defaults for all 7 properties verified (EnablePartialRendering=false, EnablePageMethods=false, ScriptMode=Auto, AsyncPostBackTimeout=90, EnableCdn=false, EnableScriptGlobalization=false, EnableScriptLocalization=false), setting all properties does not throw.
+
+**ScriptManagerProxyTests.razor (4 tests):** Renders no visible output, renders without errors, default Scripts is empty list, default Services is empty list.
+
+**UpdatePanelTests.razor (10 tests):** Default RenderMode=Block renders `<div>`, Inline mode renders `<span>`, ChildContent rendered, default UpdateMode=Always, Conditional mode accepted, default ChildrenAsTriggers=true, ChildrenAsTriggers=false accepted, ID attribute on div wrapper, ID attribute on span in Inline mode.
+
+**UpdateProgressTests.razor (9 tests):** Renders `<div>` with ProgressTemplate content, DynamicLayout=true uses `display:none`, DynamicLayout=false uses `visibility:hidden`, default DynamicLayout=true, default DisplayAfter=500, custom DisplayAfter accepted, AssociatedUpdatePanelID accepted, default AssociatedUpdatePanelID is null, ProgressTemplate content rendered.
+
+**SubstitutionTests.razor (6 tests):** Callback output rendered as raw markup, null callback renders nothing, MethodName property accepted, renders no wrapper element (raw text), HTML from callback rendered as markup, empty callback string renders empty.
+
+📌 Test pattern: Timer has `new bool Enabled` shadowing BaseWebFormsComponent.Enabled. Both are `[Parameter]`, causing Blazor duplicate-parameter error. Fixed by removing duplicate from Timer.razor.cs and using inherited Enabled. Timer tests must use `Render<Timer>(p => p.Add(...))` C# API, not Razor templates. — Rogue
+
+📌 Test pattern: ScriptManager and ScriptManagerProxy are no-op stubs that render no visible HTML. Test default property values and that rendering doesn't throw. Use `cut.Markup.Trim().ShouldBeEmpty()` to verify no output. — Rogue
+
+📌 Test pattern: UpdateProgress DynamicLayout=true renders `display:none`, DynamicLayout=false renders `visibility:hidden`. Both use `<div>` wrapper. UpdatePanel Block mode renders `<div>`, Inline mode renders `<span>`. Both use `id="@ClientID"`. — Rogue
+
+📌 Bug fix: Removed `new bool Enabled` `[Parameter]` from Timer.razor.cs — it shadowed BaseWebFormsComponent.Enabled causing a runtime InvalidOperationException (duplicate parameter name). Timer now uses the inherited Enabled property which has the same default (true). — Rogue

@@ -1,0 +1,94 @@
+@inherits BlazorWebFormsTestContext
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void ScriptManager_RendersNoVisibleOutput()
+	{
+		// Arrange & Act
+		var cut = Render(@<ScriptManager />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnablePartialRendering_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnablePartialRendering.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnablePageMethods_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnablePageMethods.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultScriptMode_IsAuto()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Auto);
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultAsyncPostBackTimeout_Is90()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.AsyncPostBackTimeout.ShouldBe(90);
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnableCdn_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnableCdn.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnableScriptGlobalization_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnableScriptGlobalization.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnableScriptLocalization_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnableScriptLocalization.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_SetProperties_DoesNotThrow()
+	{
+		ScriptMode mode = ScriptMode.Release;
+
+		// Arrange & Act & Assert — no exception
+		var cut = Render(
+			@<ScriptManager
+				EnablePartialRendering="true"
+				EnablePageMethods="true"
+				ScriptMode="mode"
+				AsyncPostBackTimeout="120"
+				EnableCdn="true"
+				EnableScriptGlobalization="true"
+				EnableScriptLocalization="true" />
+		);
+
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnablePartialRendering.ShouldBeTrue();
+		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Release);
+		sm.Instance.AsyncPostBackTimeout.ShouldBe(120);
+	}
+}

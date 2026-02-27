@@ -1,0 +1,86 @@
+@page "/ControlSamples/UpdateProgress"
+
+<h2>UpdateProgress Component Samples</h2>
+
+<p>The <code>UpdateProgress</code> component emulates the Web Forms <code>asp:UpdateProgress</code> control, which displayed a loading indicator during asynchronous postbacks. The component renders its <code>ProgressTemplate</code> content, hidden by default using either <code>display:none</code> (DynamicLayout=true) or <code>visibility:hidden</code> (DynamicLayout=false).</p>
+
+<hr />
+
+<h3>DynamicLayout = true (Default)</h3>
+<p>When <code>DynamicLayout</code> is <code>true</code> (the default), the progress content is rendered with <code>display:none</code>, which removes it from the page layout entirely.</p>
+
+<UpdateProgress DynamicLayout="true">
+    <ProgressTemplate>
+        <div class="alert alert-info">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Loading, please wait...
+        </div>
+    </ProgressTemplate>
+</UpdateProgress>
+
+<pre><code>&lt;UpdateProgress DynamicLayout="true"&gt;
+    &lt;ProgressTemplate&gt;
+        &lt;div class="alert alert-info"&gt;
+            &lt;span class="spinner-border spinner-border-sm"&gt;&lt;/span&gt;
+            Loading, please wait...
+        &lt;/div&gt;
+    &lt;/ProgressTemplate&gt;
+&lt;/UpdateProgress&gt;</code></pre>
+
+<p class="text-muted"><em>Note: The content above is hidden with <code>display:none</code> — it takes no space in the layout.</em></p>
+
+<hr />
+
+<h3>DynamicLayout = false</h3>
+<p>When <code>DynamicLayout</code> is <code>false</code>, the progress content is rendered with <code>visibility:hidden</code>, which hides it but reserves its layout space.</p>
+
+<UpdateProgress DynamicLayout="false">
+    <ProgressTemplate>
+        <div class="alert alert-warning">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Processing your request...
+        </div>
+    </ProgressTemplate>
+</UpdateProgress>
+
+<pre><code>&lt;UpdateProgress DynamicLayout="false"&gt;
+    &lt;ProgressTemplate&gt;
+        &lt;div class="alert alert-warning"&gt;
+            Processing your request...
+        &lt;/div&gt;
+    &lt;/ProgressTemplate&gt;
+&lt;/UpdateProgress&gt;</code></pre>
+
+<p class="text-muted"><em>Note: The content above is hidden with <code>visibility:hidden</code> — it still occupies space in the layout.</em></p>
+
+<hr />
+
+<h3>Associated with an UpdatePanel</h3>
+<p>Use <code>AssociatedUpdatePanelID</code> to link the progress indicator to a specific UpdatePanel. The <code>DisplayAfter</code> property sets the delay in milliseconds before the progress content appears (default is 500ms).</p>
+
+<UpdateProgress AssociatedUpdatePanelID="myPanel" DisplayAfter="200">
+    <ProgressTemplate>
+        <div class="d-flex align-items-center text-primary">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Updating panel content...
+        </div>
+    </ProgressTemplate>
+</UpdateProgress>
+
+<pre><code>&lt;UpdateProgress AssociatedUpdatePanelID="myPanel" DisplayAfter="200"&gt;
+    &lt;ProgressTemplate&gt;
+        Updating panel content...
+    &lt;/ProgressTemplate&gt;
+&lt;/UpdateProgress&gt;</code></pre>
+
+<hr />
+
+<h3>Web Forms Equivalent</h3>
+<pre><code class="language-aspx">&lt;!-- Web Forms --&gt;
+&lt;asp:UpdateProgress ID="UpdateProgress1" runat="server"
+    AssociatedUpdatePanelID="UpdatePanel1" DisplayAfter="500"&gt;
+    &lt;ProgressTemplate&gt;
+        &lt;img src="loading.gif" alt="Loading..." /&gt;
+        Please wait...
+    &lt;/ProgressTemplate&gt;
+&lt;/asp:UpdateProgress&gt;</code></pre>
