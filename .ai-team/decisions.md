@@ -3034,3 +3034,33 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **What:** All issues being addressed should be listed in the PR body using GitHub's "Closes #N" syntax so that GitHub automatically closes them when the PR is merged. Do not close issues manually — let the PR lifecycle handle it.
 **Why:** User request — ensures traceability between code changes and issue resolution. Every closed issue should have a linked PR.
 
+
+### 2026-02-26: AJAX Controls get their own nav category
+**By:** Beast
+**What:** Created a new "AJAX Controls" section in mkdocs.yml and README.md for Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, and Substitution. Doc files live in docs/EditorControls/ but nav groups them separately.
+**Why:** These 6 controls are conceptually related (Web Forms AJAX/partial-rendering infrastructure). Grouping helps developers migrating AJAX-heavy pages.
+
+### 2026-02-26: Migration stub doc pattern established
+**By:** Beast
+**What:** ScriptManager and ScriptManagerProxy docs use a warning admonition "Migration Stub Only", document all accepted-but-ignored properties, and include explicit "include during migration, remove when stable" guidance.
+**Why:** Future no-op migration compatibility components should follow this pattern so developers understand the component renders nothing and is temporary scaffolding.
+
+### 2026-02-26: Substitution moved from deferred to implemented
+**By:** Beast
+**What:** Updated DeferredControls.md to mark Substitution as Complete (was Deferred). Created full documentation at docs/EditorControls/Substitution.md.
+**Why:** Substitution is now implemented as a component that renders callback output directly.
+
+### 2026-02-26: UpdateProgress migration pattern  explicit state over automatic association
+**By:** Beast
+**What:** UpdateProgress docs recommend wrapping in @if (isLoading) with explicit boolean state management rather than relying on automatic UpdatePanel association.
+**Why:** This is the fundamental architectural difference developers need to understand for Blazor migration.
+
+### 2026-02-28: M17 AJAX and Migration Helper Component Patterns
+**By:** Cyclops
+**What:** Six new components (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution). Key decisions: ScriptManager/ScriptManagerProxy are no-op stubs; Timer shadows base Enabled with new keyword; UpdatePanel uses ChildContent not ContentTemplate; UpdateProgress renders initially hidden; Substitution uses Func<HttpContext, string> callback; new categories "AJAX" and "Migration Helpers" in ComponentCatalog.
+**Why:** These controls appear frequently in Web Forms applications. Even as stubs, they prevent compilation errors during migration and allow incremental removal of AJAX infrastructure.
+
+### 2026-02-27: M17 Sample pages for AJAX/Migration controls
+**By:** Jubilee
+**What:** Created 5 sample pages for M17 controls (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution). ScriptManagerProxy skipped (too similar to ScriptManager). Sample filenames use Default.razor per task spec. ComponentCatalog.cs already had entries. Timer uses 2-second demo interval; Substitution uses Func<HttpContext?, string> callbacks.
+**Why:** Samples must ship with components per project convention.
