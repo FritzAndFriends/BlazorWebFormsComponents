@@ -1850,11 +1850,6 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 - `dotnet build samples/AfterBlazorServerSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet test src/BlazorWebFormsComponents.Test/ --no-restore` ΓÇö Γ£à passes
 
-### 2026-02-25: Deployment pipeline patterns for Docker versioning, Azure webhook, and NuGet publishing
-**By:** Forge
-**What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets with `if: ${{ secrets.SECRET_NAME != '' }}` so workflows don't fail when secrets aren't configured. (3) Dual NuGet publishing  always push to GitHub Packages, conditionally push to nuget.org.
-**Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating ensures the workflows work in forks and PRs where secrets aren't available. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
-
 ### 2026-02-25: Deployment pipeline patterns for Docker versioning, secret-gating, and NuGet publishing (consolidated)
 **By:** Forge
 **What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets using env var indirection — declare the secret in `env:`, check `env.VAR_NAME` in step-level `if:`, reference `env.VAR_NAME` in `run:`. Direct `secrets.*` references in step-level `if:` conditions are invalid and cause GitHub Actions validation failures. Applied to both `nuget.yml` and `deploy-server-side.yml` (PR #372). (3) Dual NuGet publishing — always push to GitHub Packages, conditionally push to nuget.org.
@@ -3022,3 +3017,84 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 5. **Normalization gaps:** Blazor output not normalized for data controls; `<!--!-->` markers need stripping.
 
 **Why:** Cannot distinguish component bugs from sample differences without aligned samples. Sample alignment is prerequisite for accurate audit. Bug fixes are secondary until samples match. Full analyses: `planning-docs/DATA-CONTROL-ANALYSIS.md`, `planning-docs/M15-DATA-CONTROL-ANALYSIS.md`, `planning-docs/POST-FIX-CAPTURE-RESULTS.md`.
+
+### 2026-02-27: User directive — branching workflow
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** All new feature PRs to dev should come from the personal repository (csharpfritz/BlazorWebFormsComponents) and target the shared upstream (FritzAndFriends/BlazorWebFormsComponents) dev branch. The only merges into upstream/main should come from the upstream dev branch.
+**Why:** User request — captured for team memory
+
+
+### 2026-02-27: Issues must be closed via PR references
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** All issues being addressed should be listed in the PR body using GitHub's "Closes #N" syntax so that GitHub automatically closes them when the PR is merged. Do not close issues manually — let the PR lifecycle handle it.
+**Why:** User request — ensures traceability between code changes and issue resolution. Every closed issue should have a linked PR.
+
+
+### 2026-02-26: AJAX Controls get their own nav category
+**By:** Beast
+**What:** Created a new "AJAX Controls" section in mkdocs.yml and README.md for Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, and Substitution. Doc files live in docs/EditorControls/ but nav groups them separately.
+**Why:** These 6 controls are conceptually related (Web Forms AJAX/partial-rendering infrastructure). Grouping helps developers migrating AJAX-heavy pages.
+
+### 2026-02-26: Migration stub doc pattern established
+**By:** Beast
+**What:** ScriptManager and ScriptManagerProxy docs use a warning admonition "Migration Stub Only", document all accepted-but-ignored properties, and include explicit "include during migration, remove when stable" guidance.
+**Why:** Future no-op migration compatibility components should follow this pattern so developers understand the component renders nothing and is temporary scaffolding.
+
+### 2026-02-26: Substitution moved from deferred to implemented
+**By:** Beast
+**What:** Updated DeferredControls.md to mark Substitution as Complete (was Deferred). Created full documentation at docs/EditorControls/Substitution.md.
+**Why:** Substitution is now implemented as a component that renders callback output directly.
+
+### 2026-02-26: UpdateProgress migration pattern  explicit state over automatic association
+**By:** Beast
+**What:** UpdateProgress docs recommend wrapping in @if (isLoading) with explicit boolean state management rather than relying on automatic UpdatePanel association.
+**Why:** This is the fundamental architectural difference developers need to understand for Blazor migration.
+
+### 2026-02-28: M17 AJAX and Migration Helper Component Patterns
+**By:** Cyclops
+**What:** Six new components (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution). Key decisions: ScriptManager/ScriptManagerProxy are no-op stubs; Timer shadows base Enabled with new keyword; UpdatePanel uses ChildContent not ContentTemplate; UpdateProgress renders initially hidden; Substitution uses Func<HttpContext, string> callback; new categories "AJAX" and "Migration Helpers" in ComponentCatalog.
+**Why:** These controls appear frequently in Web Forms applications. Even as stubs, they prevent compilation errors during migration and allow incremental removal of AJAX infrastructure.
+
+### 2026-02-27: M17 Sample pages for AJAX/Migration controls
+**By:** Jubilee
+**What:** Created 5 sample pages for M17 controls (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution). ScriptManagerProxy skipped (too similar to ScriptManager). Sample filenames use Default.razor per task spec. ComponentCatalog.cs already had entries. Timer uses 2-second demo interval; Substitution uses Func<HttpContext?, string> callbacks.
+**Why:** Samples must ship with components per project convention.
+
+### 2026-02-28: M17 AJAX Controls Gate Review  APPROVE WITH NOTES
+**By:** Forge
+**What:** Reviewed all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) for Web Forms fidelity against .NET Framework 4.8 API. Verdict: **APPROVE WITH NOTES**  ready to PR with 4 minor follow-up items. ✅ All 4 follow-up items resolved — see consolidated block below.
+
+**Why:** None of these block migration. All follow-up items addressed by Cyclops and verified by Rogue in the same PR cycle.
+
+### 2026-02-27: M17 AJAX Control Test Patterns + Timer Bug Fix
+**By:** Rogue
+**What:** Timer.razor.cs had duplicate `[Parameter]` on `Enabled` (shadowed base class). Fixed by removing duplicate declaration. 47 new tests across 6 M17 controls. Timer tests use C# API (`Render<Timer>(p => ...)`) instead of Razor templates due to inherited parameter. All other M17 tests use standard Razor template patterns.
+**Why:** Establishes test patterns for AJAX/migration stub components and documents the Timer parameter inheritance fix.
+
+### 2026-02-27: M17 audit fixes resolved (consolidated)
+**By:** Forge, Cyclops
+**What:** Forge audited all 6 M17 AJAX controls against .NET Framework 4.8.1 API docs and found 5 fidelity issues. Cyclops fixed all 5:
+1. ScriptManager `EnablePartialRendering` default changed from `false` to `true` (Web Forms default).
+2. ScriptManager `Scripts` collection (`List<ScriptReference>`) added, matching ScriptManagerProxy pattern.
+3. UpdateProgress now renders `class` attribute conditionally — omitted when no CssClass set.
+4. UpdateProgress non-dynamic mode uses `display:block;visibility:hidden;` matching Web Forms.
+5. ScriptReference expanded with `ScriptMode`, `NotifyScriptLoaded`, `ResourceUICultures` for markup migration compatibility.
+**Why:** Items 1–2 fixed wrong defaults on no-op stubs (migrating code got wrong property values). Items 3–4 were HTML fidelity bugs (CssClass silently dropped, style incomplete). Item 5 prevents compilation errors when migrating markup with ScriptReference attributes. All verified by 9 new bUnit tests (Rogue).
+
+### 2026-02-27: No-op stub property coverage is intentionally limited
+**By:** Forge
+**What:** ScriptManager at 41% and ScriptManagerProxy at 50% of Web Forms properties is acceptable. The missing properties are deep AJAX infrastructure (history, composite scripts, authentication service, etc.) with no Blazor equivalent. Only properties commonly found in declarative markup are included.
+**Why:** Diminishing returns  covering every infrastructure property would bloat the stubs without helping real migrations.
+
+### 2026-02-27: UpdatePanel Triggers collection deliberately omitted
+**By:** Forge
+**What:** Web Forms' Triggers collection for specifying which controls trigger partial updates is deliberately omitted. Blazor's rendering model makes this unnecessary  all Blazor rendering is already partial.
+**Why:** Architectural decision, not a gap. Including Triggers would create false expectations about partial-rendering behavior that doesn't exist in Blazor.
+
+
+### M17 Audit Fix Test Coverage
+
+**By:** Rogue
+**What:** Added 9 bUnit tests covering all 5 M17 audit fixes (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties). Updated 2 existing tests to match new behavior. All 29 ScriptManager/UpdateProgress tests pass.
+**Why:** Audit fixes change observable behavior — tests must be updated to assert the corrected defaults and new properties. ScriptReference defaults tested via plain C# instantiation (no render needed). UpdateProgress CssClass tested both with and without value to ensure no spurious `class=""` attribute.
+

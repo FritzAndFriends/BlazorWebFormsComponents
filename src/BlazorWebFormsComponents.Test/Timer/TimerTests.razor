@@ -1,0 +1,94 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	// Timer uses `new Enabled` which shadows BaseWebFormsComponent.Enabled,
+	// preventing Razor-template rendering. Use Render<T> with C# parameter builder.
+
+	[Fact]
+	public void Timer_DefaultInterval_Is60000()
+	{
+		var cut = Render<Timer>();
+		cut.Instance.Interval.ShouldBe(60000);
+	}
+
+	[Fact]
+	public void Timer_DefaultEnabled_IsTrue()
+	{
+		var cut = Render<Timer>();
+		cut.Instance.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Timer_RendersNoVisibleOutput()
+	{
+		var cut = Render<Timer>();
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Timer_CanSetInterval()
+	{
+		var cut = Render<Timer>(p => p.Add(t => t.Interval, 5000));
+		cut.Instance.Interval.ShouldBe(5000);
+	}
+
+	[Fact]
+	public void Timer_EnabledFalse_CanBeSet()
+	{
+		var cut = Render<Timer>(p => p.Add(t => t.Enabled, false));
+		cut.Instance.Enabled.ShouldBeFalse();
+	}
+
+	[Fact]
+	public async Task Timer_OnTick_IsInvokedAfterInterval()
+	{
+		var tickCount = 0;
+		var tcs = new TaskCompletionSource<bool>();
+
+		var cut = Render<Timer>(p => p
+			.Add(t => t.Interval, 50)
+			.Add(t => t.OnTick, () =>
+			{
+				tickCount++;
+				if (tickCount >= 1)
+					tcs.TrySetResult(true);
+			})
+		);
+
+		// Wait for at least one tick
+		var completed = await Task.WhenAny(tcs.Task, Task.Delay(5000));
+		completed.ShouldBe(tcs.Task, "Timer should have ticked within 5 seconds");
+		tickCount.ShouldBeGreaterThanOrEqualTo(1);
+	}
+
+	[Fact]
+	public async Task Timer_EnabledFalse_DoesNotTick()
+	{
+		var tickCount = 0;
+
+		var cut = Render<Timer>(p => p
+			.Add(t => t.Interval, 50)
+			.Add(t => t.Enabled, false)
+			.Add(t => t.OnTick, () => { tickCount++; })
+		);
+
+		await Task.Delay(200);
+		tickCount.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Timer_ImplementsIDisposable()
+	{
+		var cut = Render<Timer>(p => p.Add(t => t.Interval, 100));
+		// Disposing should not throw
+		((IDisposable)cut.Instance).Dispose();
+	}
+
+	[Fact]
+	public void Timer_RendersWithoutErrors()
+	{
+		var cut = Render<Timer>();
+		cut.ShouldNotBeNull();
+	}
+}

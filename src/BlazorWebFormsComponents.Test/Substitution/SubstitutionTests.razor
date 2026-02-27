@@ -1,0 +1,82 @@
+@inherits BlazorWebFormsTestContext
+@using Microsoft.AspNetCore.Http
+
+@code {
+
+	[Fact]
+	public void Substitution_WithCallback_RendersCallbackOutput()
+	{
+		// Arrange
+		Func<HttpContext, string> callback = (ctx) => "<strong>Dynamic Content</strong>";
+
+		// Act
+		var cut = Render(@<Substitution SubstitutionCallback="callback" />);
+
+		// Assert
+		cut.Markup.ShouldContain("<strong>Dynamic Content</strong>");
+	}
+
+	[Fact]
+	public void Substitution_NullCallback_RendersNothing()
+	{
+		// Arrange & Act
+		var cut = Render(@<Substitution />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Substitution_MethodName_CanBeSet()
+	{
+		// Arrange
+		Func<HttpContext, string> callback = (ctx) => "test";
+
+		// Act
+		var cut = Render(@<Substitution MethodName="GetContent" SubstitutionCallback="callback" />);
+
+		// Assert
+		var sub = cut.FindComponent<Substitution>();
+		sub.Instance.MethodName.ShouldBe("GetContent");
+	}
+
+	[Fact]
+	public void Substitution_RendersNoWrapperElement()
+	{
+		// Arrange
+		Func<HttpContext, string> callback = (ctx) => "Plain text output";
+
+		// Act
+		var cut = Render(@<Substitution SubstitutionCallback="callback" />);
+
+		// Assert — the output should be raw text, no wrapping div/span
+		cut.Markup.Trim().ShouldBe("Plain text output");
+	}
+
+	[Fact]
+	public void Substitution_CallbackReturnsHtml_RendersAsMarkup()
+	{
+		// Arrange
+		Func<HttpContext, string> callback = (ctx) => "<em>Italic</em> and <b>Bold</b>";
+
+		// Act
+		var cut = Render(@<Substitution SubstitutionCallback="callback" />);
+
+		// Assert
+		cut.Find("em").ShouldNotBeNull();
+		cut.Find("b").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void Substitution_CallbackReturnsEmpty_RendersEmpty()
+	{
+		// Arrange
+		Func<HttpContext, string> callback = (ctx) => "";
+
+		// Act
+		var cut = Render(@<Substitution SubstitutionCallback="callback" />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+}

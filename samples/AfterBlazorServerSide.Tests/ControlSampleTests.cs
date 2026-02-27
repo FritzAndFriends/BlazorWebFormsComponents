@@ -220,6 +220,18 @@ public class ControlSampleTests
         await VerifyPageLoadsWithoutErrors(path);
     }
 
+    // AJAX / Migration Helper Controls
+    [Theory]
+    [InlineData("/ControlSamples/Timer")]
+    [InlineData("/ControlSamples/UpdatePanel")]
+    [InlineData("/ControlSamples/UpdateProgress")]
+    [InlineData("/ControlSamples/ScriptManager")]
+    [InlineData("/ControlSamples/Substitution")]
+    public async Task AjaxControl_Loads_WithoutErrors(string path)
+    {
+        await VerifyPageLoadsWithoutErrors(path);
+    }
+
     // Other Controls
     [Theory]
     [InlineData("/ControlSamples/AdRotator")]
