@@ -3064,3 +3064,20 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **By:** Jubilee
 **What:** Created 5 sample pages for M17 controls (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution). ScriptManagerProxy skipped (too similar to ScriptManager). Sample filenames use Default.razor per task spec. ComponentCatalog.cs already had entries. Timer uses 2-second demo interval; Substitution uses Func<HttpContext?, string> callbacks.
 **Why:** Samples must ship with components per project convention.
+
+### 2026-02-28: M17 AJAX Controls Gate Review  APPROVE WITH NOTES
+**By:** Forge
+**What:** Reviewed all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) for Web Forms fidelity against .NET Framework 4.8 API. Verdict: **APPROVE WITH NOTES**  ready to PR with 4 minor follow-up items.
+
+**Follow-up items (non-blocking, file as issues):**
+1. ScriptManager `EnablePartialRendering` should default to `true` (Web Forms default), not `false`.
+2. ScriptManager should accept a `Scripts` collection property (like ScriptManagerProxy does) for full markup compatibility.
+3. UpdateProgress template should render `CssClass` on the `<div>` element  currently the property is accepted but silently ignored.
+4. UpdateProgress non-dynamic layout should render `style="display:block;visibility:hidden;"` to match Web Forms byte-for-byte (currently omits `display:block`).
+
+**Why:** None of these block migration. Items 12 affect no-op stubs with zero runtime behavior. Items 34 are cosmetic HTML gaps. All can be addressed in a patch follow-up without design changes.
+
+### 2026-02-27: M17 AJAX Control Test Patterns + Timer Bug Fix
+**By:** Rogue
+**What:** Timer.razor.cs had duplicate `[Parameter]` on `Enabled` (shadowed base class). Fixed by removing duplicate declaration. 47 new tests across 6 M17 controls. Timer tests use C# API (`Render<Timer>(p => ...)`) instead of Razor templates due to inherited parameter. All other M17 tests use standard Razor template patterns.
+**Why:** Establishes test patterns for AJAX/migration stub components and documents the Timer parameter inheritance fix.

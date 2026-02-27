@@ -40,3 +40,9 @@
 
 
  Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+
+ Team update (2026-02-27): Forge approved M17 with 4 non-blocking follow-ups (ScriptManager defaults, UpdateProgress CSS/style gaps)  decided by Forge
+
+
+ Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests established with C# API pattern for Timer  decided by Rogue
+

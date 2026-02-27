@@ -128,3 +128,6 @@ Added 5 smoke tests for M17 AJAX/Migration Helper sample pages (Timer, UpdatePan
 
 - M17 AJAX controls form a natural test category group ("AJAX / Migration Helper Controls") since they all relate to the Web Forms AJAX toolkit (ScriptManager, Timer, UpdatePanel, UpdateProgress, Substitution).
 - Timer interaction test needs a 3-second wait to allow at least one tick at the 2000ms interval. The tick count is displayed inside a `div.alert-info` with text "Tick count:" — use `.Filter(new() { HasTextString = "Tick count:" })` to target it specifically.
+
+ Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests established with C# API pattern for Timer  decided by Rogue
+
