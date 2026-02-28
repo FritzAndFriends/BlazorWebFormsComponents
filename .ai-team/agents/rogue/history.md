@@ -113,3 +113,5 @@ Wrote 8 bUnit tests in `src/BlazorWebFormsComponents.Test/LinkButton/CssClass.ra
 📌 Test pattern: LinkButton has two render branches (PostBackUrl null vs non-null). Both share `GetCssClassOrNull()` which returns null for empty/null CssClass (AngleSharp `HasAttribute("class")` returns false) and appends "aspNetDisabled" when Enabled=false. Must test both branches for CssClass. — Rogue
 
 📌 Edge case: `GetCssClassOrNull()` uses `string.IsNullOrEmpty()` not `IsNullOrWhiteSpace()` — whitespace-only CssClass like " " would render `class=" "`. Not a blocker for #379 but noted for future audit. — Rogue
+
+ Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.

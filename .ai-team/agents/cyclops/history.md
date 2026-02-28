@@ -78,3 +78,5 @@
 - **Issue #379 (LinkButton CssClass pass-through):** Verified already correct from M15. `LinkButton.razor` already has `class="@GetCssClassOrNull()"` on both `<a>` elements (PostBackUrl null and non-null branches). The `GetCssClassOrNull()` method in the `@code` block correctly returns: CssClass when enabled and non-empty, `null` when enabled and empty (omitting the attribute), and `CssClass + " aspNetDisabled"` when disabled. Six bUnit tests already exist in `LinkButton/Format.razor` covering: CssClass renders, no CssClass omits attribute, disabled adds aspNetDisabled, disabled+CssClass renders both, and CssClass with PostBackUrl. All 25 LinkButton tests pass. No code change needed.
 - **Key files:** `src/BlazorWebFormsComponents/LinkButton.razor`, `src/BlazorWebFormsComponents.Test/LinkButton/Format.razor`
 - **Lesson:** M15 was thorough — always verify the current state before assuming a bug still exists. The issue was filed before M15 landed.
+
+ Team update (2026-02-28): Rogue noted GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  whitespace-only CssClass renders class=" " instead of being omitted. Low priority future cleanup.

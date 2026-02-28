@@ -56,3 +56,5 @@
   5. **DataGrid** (`docs/DataControls/DataGrid.md`) — Removed stale "not every syntax element supported" caveat (features were implemented in M6-M8). Enhanced paging section with property reference table, PagerStyle example, and admonition explaining DataGrid's built-in numeric pager vs. GridView/FormView/DetailsView PagerSettings. Added PagerSettings cross-reference in See Also.
   - All 5 pages verified present in `mkdocs.yml` nav. No nav changes needed.
   - **Pattern discovered:** DataGrid is the only pageable data control without PagerSettings sub-component support — it always uses a numeric pager. Worth noting for future migration guidance.
+
+ Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes) and CheckBox bare input id  may need doc updates. Issue #379 (LinkButton CssClass) verified as already fixed in M15, can be closed.

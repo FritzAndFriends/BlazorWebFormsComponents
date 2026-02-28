@@ -3098,3 +3098,33 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **What:** Added 9 bUnit tests covering all 5 M17 audit fixes (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties). Updated 2 existing tests to match new behavior. All 29 ScriptManager/UpdateProgress tests pass.
 **Why:** Audit fixes change observable behavior — tests must be updated to assert the corrected defaults and new properties. ScriptReference defaults tested via plain C# instantiation (no render needed). UpdateProgress CssClass tested both with and without value to ensure no spurious `class=""` attribute.
 
+
+### 2026-02-27: M6-M8 doc pages updated for #359
+**By:** Beast
+**What:** Updated 3 of 5 doc pages for Issue #359. ChangePassword and PagerSettings were already complete from prior work. FormView gained explicit CRUD event docs and a "NOT Supported" section. DetailsView Web Forms syntax block now includes Caption/CaptionAlign attributes and all style sub-component/PagerSettings child elements. DataGrid paging docs refreshed  stale caveat removed, property table and PagerSettings comparison admonition added.
+**Why:** The M9 audit identified these 5 pages as having gaps relative to M6-M8 feature additions. Key finding: DataGrid is the only pageable data control that does NOT support the <PagerSettings> sub-component.
+
+### 2026-02-27: Issue #358  5 interaction tests close audit gap
+**By:** Colossus
+**What:** Added 5 interaction tests in InteractiveComponentTests.cs for pages identified by M9 audit: ListView CrudOperations (2 tests  Edit mode, Delete row), Label (AssociatedControlID rendering), DataGrid Styles (caption/header/data rows/GridLines), LoginControls Orientation (4 layout variants). Panel/BackImageUrl skipped  static display only, smoke test sufficient.
+**Why:** M9 audit identified 5 sample pages without interaction test coverage. Smoke tests were already added in a prior session. All 5 gap pages now have both smoke AND interaction test coverage (except Panel/BackImageUrl which only warrants a smoke test).
+
+### 2026-02-27: Issue #379  LinkButton CssClass verified as already fixed
+**By:** Cyclops
+**What:** Issue #379 (LinkButton CssClass not passed to rendered class attribute) was already fixed during M15 (commit 65aedc0). LinkButton.razor already contains class="@GetCssClassOrNull()" on both <a> elements. Six bUnit tests in LinkButton/Format.razor cover all CssClass scenarios. All 25 LinkButton tests pass.
+**Why:** No code change needed. Issue #379 can be closed as already resolved.
+
+### 2026-02-27: MenuItemStyle sub-components must call SetFontsFromAttributes for Font- attributes
+**By:** Cyclops
+**What:** Added 	his.SetFontsFromAttributes(OtherAttributes) in MenuItemStyle.OnInitialized() after SetPropertiesFromUnknownAttributes(). This ensures Font-Bold, Font-Italic, Font-Size, etc. attributes declared on style sub-components (like <StaticMenuItemStyle Font-Bold="true" />) are properly applied to the FontInfo sub-object.
+**Why:** The SetPropertiesFromUnknownAttributes() method uses reflection to map attribute names to properties, but Font-Bold maps to Font.Bold (a sub-property), not a direct property. Without the explicit SetFontsFromAttributes call, all Font- attributes were silently ignored on menu style sub-components, causing CSS like ont-weight:bold to never appear in rendered output.
+
+### 2026-02-27: CheckBox must always render id attribute on input element
+**By:** Cyclops
+**What:** CheckBox.razor's bare (no-text) <input> element was missing the id="@_inputId" attribute. Added it to match the behavior of the text-present code paths. Web Forms always renders an id on CheckBox inputs regardless of whether Text is set.
+**Why:** Consistency with Web Forms HTML output and with the text-present code paths in the same component. The bare input path renders class, style, and 	itle but was missing id, which would break JavaScript targeting and CSS selectors that rely on the control's ID.
+
+### 2026-02-28: LinkButton CssClass test coverage strategy
+**By:** Rogue
+**What:** Created dedicated CssClass.razor test file (8 tests) for LinkButton, separate from Format.razor which already had some CssClass tests. Both files coexist  Format.razor tests are integration-style (MarkupMatches), CssClass.razor tests are targeted attribute assertions covering edge cases and both render paths (PostBackUrl null vs non-null).
+**Why:** Edge case noted: GetCssClassOrNull() uses string.IsNullOrEmpty() not string.IsNullOrWhiteSpace(). Whitespace-only CssClass renders class=" " instead of being omitted. Low priority future cleanup. When testing any component CssClass, verify both "no class" case and disabled state (spNetDisabled appended).
