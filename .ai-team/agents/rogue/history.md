@@ -96,3 +96,20 @@ All 29 ScriptManager/UpdateProgress/ScriptReference tests pass (0 failures). Bui
 📌 Test pattern: UpdateProgress CssClass uses `class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)"` — when CssClass is empty/null, AngleSharp returns null for `GetAttribute("class")`, matching Web Forms behavior of omitting the class attribute entirely. — Rogue
 
  Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
+
+### LinkButton CssClass Tests (Issue #379)
+
+Wrote 8 bUnit tests in `src/BlazorWebFormsComponents.Test/LinkButton/CssClass.razor` verifying CssClass pass-through on the `<a>` element:
+
+1. `SingleClass_RendersAsClassAttributeOnAnchor` — single class renders correctly
+2. `MultipleClasses_RendersSpaceSeparatedOnAnchor` — space-separated classes preserved
+3. `NoCssClass_OmitsClassAttribute` — no CssClass param omits class attribute entirely
+4. `EmptyCssClass_OmitsClassAttribute` — empty string CssClass also omits attribute
+5. `CssClass_WithIdAttribute_BothRenderOnAnchor` — CssClass + ID coexist
+6. `CssClass_WithPostBackUrl_RendersOnAnchor` — PostBackUrl branch also renders class
+7. `Disabled_NoCssClass_RendersAspNetDisabledOnly` — disabled state adds aspNetDisabled
+8. `Disabled_WithCssClass_RendersBothClasses` — disabled + CssClass combines both
+
+📌 Test pattern: LinkButton has two render branches (PostBackUrl null vs non-null). Both share `GetCssClassOrNull()` which returns null for empty/null CssClass (AngleSharp `HasAttribute("class")` returns false) and appends "aspNetDisabled" when Enabled=false. Must test both branches for CssClass. — Rogue
+
+📌 Edge case: `GetCssClassOrNull()` uses `string.IsNullOrEmpty()` not `IsNullOrWhiteSpace()` — whitespace-only CssClass like " " would render `class=" "`. Not a blocker for #379 but noted for future audit. — Rogue
