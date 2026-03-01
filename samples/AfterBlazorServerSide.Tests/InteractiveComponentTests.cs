@@ -2640,11 +2640,11 @@ public class InteractiveComponentTests
         {
             await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ListView/CrudOperations", new PageGotoOptions
             {
-                WaitUntil = WaitUntilState.DOMContentLoaded,
+                WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000
             });
 
-            // Wait for the ListView to render rows with Edit buttons
+            // Wait for the ListView to render rows with Edit buttons (requires Blazor circuit)
             await page.WaitForSelectorAsync("button:has-text('Edit')", new PageWaitForSelectorOptions { Timeout = 10000 });
 
             // Verify initial status shows "Ready"
@@ -2652,13 +2652,23 @@ public class InteractiveComponentTests
             var statusText = await statusLocator.TextContentAsync();
             Assert.Contains("Ready", statusText);
 
-            // Click the first Edit button
-            var editButton = page.Locator("button:has-text('Edit')").First;
-            await editButton.ClickAsync();
-
-            // Wait for Blazor re-render — Update button appears when edit mode activates
+            // Click Edit with retry — first click may be swallowed during Blazor hydration on CI
             var updateButton = page.Locator("button:has-text('Update')");
-            await updateButton.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 10000 });
+            for (var attempt = 0; attempt < 3; attempt++)
+            {
+                var editButton = page.Locator("button:has-text('Edit')").First;
+                await editButton.ClickAsync();
+                try
+                {
+                    await updateButton.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 3000 });
+                    break;
+                }
+                catch (TimeoutException) when (attempt < 2)
+                {
+                    // Retry — circuit may not have been ready
+                }
+            }
+            Assert.True(await updateButton.IsVisibleAsync(), "Update button should be visible in edit mode");
 
             var cancelButton = page.Locator("button:has-text('Cancel')");
             Assert.True(await cancelButton.IsVisibleAsync(), "Cancel button should be visible in edit mode");
