@@ -2,7 +2,7 @@
 
 **Created:** 2026-02-26
 **Author:** Forge (Lead / Web Forms Reviewer)
-**Status:** Initial — will be updated incrementally through M11–M13
+**Status:** Updated through M18 — 14 entries (D-01 through D-14)
 **Milestone:** M11-02
 
 ---
@@ -31,6 +31,10 @@ This document catalogs every **known intentional difference** between HTML rende
 | D-08 | Calendar Day Selection | JS Interop | Calendar | None | High |
 | D-09 | Login Control Infrastructure | Infrastructure | Login, LoginName, LoginStatus, LoginView, ChangePassword, CreateUserWizard, PasswordRecovery | None | Low |
 | D-10 | Validator Client-Side Scripts | JS Interop | RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator, ValidationSummary | None | High |
+| D-11 | GUID-Based IDs | ID Generation | CheckBox, RadioButton, RadioButtonList, FileUpload | Medium | Medium |
+| D-12 | Boolean Attribute Format | Attribute Format | DropDownList, ListBox, CheckBoxList, RadioButtonList | None | None |
+| D-13 | Calendar Previous-Month Day Padding | Structural | Calendar | Low | None |
+| D-14 | Calendar Style Property Pass-Through | Style | Calendar | Medium | None |
 
 ---
 
@@ -186,6 +190,74 @@ This document catalogs every **known intentional difference** between HTML rende
 
 ---
 
+### D-11: GUID-Based IDs
+
+| Field | Value |
+|-------|-------|
+| **Control** | CheckBox, RadioButton, RadioButtonList, FileUpload |
+| **Divergence** | Web Forms generates predictable IDs from the control naming hierarchy (e.g., `MainContent_CheckBox1`, `MainContent_RadioButtonList1_0`, `MainContent_RadioButtonList1_1`). Blazor generates GUID-based IDs for some controls (e.g., `5f017a2765e3...`), making the HTML non-deterministic across renders. |
+| **Category** | ID Generation |
+| **Reason** | This is a **separate concern from D-01** (which covers `ctl00_` prefix mangling). D-01 addresses the naming-container prefix — a structural difference that is always intentional. D-11 addresses the fact that certain Blazor controls use `Guid.NewGuid()` to generate internal IDs for linking `<input>` and `<label>` elements, rather than deriving IDs from a developer-provided `ID` parameter. Web Forms uses the control's `ClientID` with `_0`, `_1` suffixes for list items. |
+| **CSS Impact** | **Medium** — CSS rules targeting specific IDs (e.g., `#MainContent_RadioButtonList1_0`) will not match GUID-based IDs. More importantly, GUIDs change on every render, so even dynamic CSS/JS that reads the ID at runtime cannot cache it reliably. |
+| **JS Impact** | **Medium** — JavaScript using `document.getElementById()` with predictable IDs will break. The non-deterministic nature of GUIDs makes them untargetable by any ID-based selector strategy. |
+
+**Status:** 🔧 **Fix recommended.** GUIDs are a bug, not an intentional divergence. Controls should use the developer-provided `ID` parameter and append `_0`, `_1` per Web Forms convention. Registered here for tracking until the fix lands.
+
+**Normalization rule:** The normalization pipeline should replace GUID-pattern IDs (32-character hex strings) with a placeholder `[GUID]` before comparison. This prevents false divergences in the diff report while the fix is pending.
+
+---
+
+### D-12: Boolean Attribute Format
+
+| Field | Value |
+|-------|-------|
+| **Control** | DropDownList, ListBox, CheckBoxList, RadioButtonList (any control rendering `<option>` or `<input>` with boolean attributes) |
+| **Divergence** | Web Forms renders boolean HTML attributes in XHTML style: `selected="selected"`, `checked="checked"`, `disabled="disabled"`. Blazor renders them in HTML5 style: `selected=""`, `checked`, `disabled`. Both are valid per the HTML specification. |
+| **Category** | Attribute Format |
+| **Reason** | **Intentional — platform-level behavior.** Web Forms was designed in the XHTML era and renders XHTML-compliant boolean attributes. Blazor's Razor engine follows HTML5 conventions where boolean attributes are present-or-absent. The W3C HTML5 specification explicitly allows both forms: `selected=""`, `selected="selected"`, and the bare `selected` attribute are all equivalent. There is no functional difference. |
+| **CSS Impact** | **None** — CSS attribute selectors like `[selected]` match all three forms identically. |
+| **JS Impact** | **None** — `element.selected`, `element.checked`, and `element.disabled` DOM properties work identically regardless of the HTML attribute format. `getAttribute('selected')` returns `""` vs `"selected"` — but well-written code uses the boolean DOM property, not the attribute string. |
+
+**Status:** ✅ **Intentional — no fix needed.** Both formats are valid HTML. This is a platform-level rendering difference.
+
+**Normalization rule:** The normalization pipeline should normalize boolean attributes to a canonical form (e.g., always `selected="selected"` or always bare `selected`) before comparison. Recommended: normalize to bare attribute form (HTML5 canonical).
+
+---
+
+### D-13: Calendar Previous-Month Day Padding
+
+| Field | Value |
+|-------|-------|
+| **Control** | Calendar |
+| **Divergence** | Web Forms Calendar pads the first week of the displayed month with day cells from the previous month. For example, if February starts on a Wednesday, the preceding Sunday–Tuesday cells show January 29, 30, 31 with `OtherMonthDayStyle` applied. Blazor Calendar may start the grid at the 1st of the displayed month, leaving those cells empty or absent. |
+| **Category** | Structural |
+| **Reason** | Web Forms' `System.Web.UI.WebControls.Calendar` always renders a full 6-row × 7-column grid (42 cells), filling leading and trailing cells with adjacent-month days. This ensures a consistent rectangular table layout regardless of which day the month starts on. The Blazor implementation may not fill leading/trailing cells with previous/next month dates, producing a ragged or shorter grid. |
+| **CSS Impact** | **Low** — CSS targeting the calendar `<table>` structure is minimally affected. However, CSS that styles `OtherMonthDayStyle` cells (typically grayed-out previous/next month days) will have no targets if those cells are absent. |
+| **JS Impact** | **None** — JavaScript does not typically interact with the padding cells. |
+
+**Status:** 🔧 **Fix recommended.** The previous-month day padding is visible structural content, not an infrastructure concern. The Blazor Calendar should render the same 42-cell grid with adjacent-month day numbers and `OtherMonthDayStyle` applied. This directly impacts the Calendar's 73% similarity score.
+
+**Normalization rule:** None — this is a structural difference that should show up in the audit diff. Once fixed, the diff should shrink.
+
+---
+
+### D-14: Calendar Style Property Pass-Through
+
+| Field | Value |
+|-------|-------|
+| **Control** | Calendar |
+| **Divergence** | Web Forms Calendar applies inline styles from style sub-properties (`TitleStyle`, `DayStyle`, `OtherMonthDayStyle`, `WeekendDayStyle`, `TodayDayStyle`, `SelectedDayStyle`, `NextPrevStyle`, `SelectorStyle`, `DayHeaderStyle`) as inline `style` attributes on the corresponding `<td>`, `<th>`, and `<tr>` elements. Blazor Calendar does not fully pass through these style properties to the rendered HTML elements. |
+| **Category** | Style |
+| **Reason** | Web Forms' `Calendar` control has a rich style sub-property system where each visual region (title bar, day cells, weekend cells, today cell, etc.) supports `ForeColor`, `BackColor`, `Font`, `CssClass`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Height`, `Width`, `HorizontalAlign`, `VerticalAlign`, `Wrap`. These are rendered as inline CSS on the target elements. The Blazor Calendar implementation may not map all of these style sub-properties to the corresponding rendered elements, resulting in missing inline styles. |
+| **CSS Impact** | **Medium** — Migrating applications that set `DayStyle-BackColor`, `TodayDayStyle-ForeColor`, or similar sub-properties will see visual differences because the styles are not applied to the HTML output. Applications using `CssClass` on these sub-properties may be partially affected depending on which properties are actually rendered. |
+| **JS Impact** | **None** — JavaScript does not typically read Calendar cell styles. |
+
+**Status:** 🔧 **Fix progressively.** Calendar style application is incomplete — the `<table>` and cell-level styles from the various style sub-properties are not being fully applied. This is a significant fidelity gap for Calendar specifically. Prioritize `TitleStyle`, `DayStyle`, and `TodayDayStyle` first as the most commonly used.
+
+**Normalization rule:** None — style differences should show up in the audit diff. As individual style sub-properties are implemented, the diff will shrink progressively.
+
+---
+
 ## How to Use This Registry
 
 This section explains how auditors (Colossus for capture, Forge for classification) should use this registry during the HTML fidelity audit.
@@ -233,11 +305,14 @@ As auditing progresses through M11–M13, new intentional divergences may be dis
 | Category | Definition |
 |----------|-----------|
 | **ID Mangling** | Differences in `id` and `name` attribute values caused by Web Forms' `INamingContainer` hierarchy |
+| **ID Generation** | Differences in how controls generate internal IDs (e.g., GUIDs vs. deterministic naming) |
 | **PostBack** | Differences caused by Web Forms' `__doPostBack` event mechanism vs. Blazor's `@onclick` handlers |
 | **JS Interop** | Differences caused by Web Forms injecting page-level JavaScript vs. Blazor's C# event handling |
 | **Infrastructure** | Platform-level differences (ViewState, WebResource.axd, authentication providers) that exist outside individual controls |
-| **Structural** | Differences in the HTML tag structure itself (e.g., `<table>` vs. `<ul>`) — should be rare for intentional divergences |
+| **Structural** | Differences in the HTML tag structure itself (e.g., `<table>` vs. `<ul>`, missing cells) |
 | **Rendering Mode** | Differences caused by Web Forms supporting multiple rendering modes where Blazor implements only one |
+| **Attribute Format** | Differences in how HTML attributes are formatted (e.g., boolean attribute syntax) |
+| **Style** | Differences in inline style application from control style sub-properties |
 
 ---
 
@@ -246,5 +321,6 @@ As auditing progresses through M11–M13, new intentional divergences may be dis
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-02-26 | Forge | Initial creation — 10 divergence entries (D-01 through D-10) |
+| 2026-02-28 | Forge | Added D-11 through D-14 from M15–M18 audit findings (GUID IDs, boolean attrs, Calendar padding, Calendar styles). Added 3 new categories (ID Generation, Attribute Format, Style). |
 
 — Forge
