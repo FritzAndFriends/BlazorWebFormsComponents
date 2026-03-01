@@ -115,3 +115,29 @@ Wrote 8 bUnit tests in `src/BlazorWebFormsComponents.Test/LinkButton/CssClass.ra
 📌 Edge case: `GetCssClassOrNull()` uses `string.IsNullOrEmpty()` not `IsNullOrWhiteSpace()` — whitespace-only CssClass like " " would render `class=" "`. Not a blocker for #379 but noted for future audit. — Rogue
 
  Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.
+
+### M20 Skins & Themes Pipeline Tests (Issue #368)
+
+Wrote 13 bUnit end-to-end tests in `src/BlazorWebFormsComponents.Test/Theming/ThemingPipelineTests.razor` validating the ThemeProvider → BaseWebFormsComponent → BaseStyledComponent pipeline using real components (Button, Label, Panel):
+
+1. `DefaultSkin_AppliesBackColor_ToButton` — default skin applies BackColor via `#FFDEAD`
+2. `NamedSkin_AppliesVia_SkinID` — SkinID="highlight" selects named skin with BackColor + Font.Bold
+3. `ExplicitValue_OverridesTheme_StyleSheetThemeSemantics` — explicit BackColor="Red" overrides theme Blue
+4. `EnableThemingFalse_IgnoresTheme` — EnableTheming=false skips all theme application
+5. `NoThemeProvider_WorksNormally` — Button renders normally without ThemeProvider
+6. `MissingSkinID_DoesNotThrow_FallsBackGracefully` — SkinID="nonexistent" silently skips
+7. `NestedThemeProvider_InnerOverridesOuter` — inner ThemeProvider wins for its children
+8. `Theme_AppliesForeColor_ToPanel` — ForeColor on Panel div
+9. `Theme_AppliesCssClass_ToLabel` — CssClass on Label span
+10. `Theme_AppliesWidthAndHeight_ToButton` — Width/Height on Button input
+11. `Theme_AppliesFontProperties_ToLabel` — Bold, Italic, Underline on Label span
+12. `MultipleControlTypes_ThemedSimultaneously` — Button+Label+Panel in same ThemeProvider
+13. `ExplicitCssClass_OverridesThemeCssClass` — explicit CssClass beats theme CssClass
+
+Total: 1426 tests (1413 existing + 13 new), 0 failures.
+
+📌 Bug found: `ApplyThemeSkin` sets `Font.Name` but the style builder reads `Font.Names` for `font-family` rendering. Theme font-family does not render. Not blocking — deferred to M11 skin implementation. — Rogue
+
+📌 Test pattern: Button renders as `<input>`, Label as `<span>`, Panel as `<div>`. For theme pipeline tests, use `cut.Find("input")`, `cut.Find("span")`, `cut.Find("div")` respectively. Style attribute contains CSS properties like `background-color:Red`, `color:Blue`, `font-weight:bold`. — Rogue
+
+📌 Test pattern: Missing SkinID (named skin not registered) returns null from `GetSkin()` — no skin applied at all, not even the default skin for that control type. This is by design per Jeff's decision. — Rogue
