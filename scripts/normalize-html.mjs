@@ -185,6 +185,40 @@ function normalizeWhitespace(html) {
 }
 
 /**
+ * Normalize boolean HTML attributes so that both the empty-string form
+ * (e.g., selected="") and the self-named form (e.g., selected="selected")
+ * collapse to the bare attribute (e.g., selected).
+ */
+function normalizeBooleanAttributes(html) {
+  const boolAttrs = ['selected', 'checked', 'disabled', 'readonly', 'multiple', 'nowrap'];
+  for (const attr of boolAttrs) {
+    const re = new RegExp(`\\b${attr}=(?:"(?:${attr}|)"|'(?:${attr}|)')`, 'gi');
+    html = html.replace(re, attr);
+  }
+  return html;
+}
+
+/**
+ * Strip empty style="" attributes that add no styling information.
+ */
+function stripEmptyStyles(html) {
+  return html.replace(/\bstyle=""\s*/gi, '');
+}
+
+/**
+ * Replace GUID patterns inside id attribute values with a stable placeholder
+ * so that auto-generated IDs (CheckBox, RadioButtonList, FileUpload) don't
+ * cause false divergences.
+ */
+function normalizeGuidIds(html) {
+  const guidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+  return html.replace(/\bid="([^"]*)"/gi, (_match, idVal) => {
+    const normalized = idVal.replace(guidPattern, 'GUID');
+    return `id="${normalized}"`;
+  });
+}
+
+/**
  * Clean up residual empty attribute artifacts left by regex stripping.
  * e.g., double-spaces from removed attributes.
  */
@@ -203,6 +237,9 @@ function cleanupArtifacts(html) {
 function normalizeHtml(html, rules) {
   html = applyRegexRules(html, rules);
   html = normalizeStyleAttributes(html);
+  html = stripEmptyStyles(html);
+  html = normalizeBooleanAttributes(html);
+  html = normalizeGuidIds(html);
   html = sortAttributes(html);
   html = cleanupArtifacts(html);
   html = normalizeWhitespace(html);
@@ -347,16 +384,21 @@ function runCompare(dirA, dirB, reportPath) {
 
   const filesA = collectHtmlFiles(dirA).map(f => relative(dirA, f));
   const filesB = collectHtmlFiles(dirB).map(f => relative(dirB, f));
-  const allFiles = [...new Set([...filesA, ...filesB])].sort();
 
-  // Group files by control (first path segment)
+  // Case-insensitive file pairing to avoid HyperLink/Hyperlink dupes
+  const mapA = new Map(filesA.map(f => [f.toLowerCase(), f]));
+  const mapB = new Map(filesB.map(f => [f.toLowerCase(), f]));
+  const allKeys = [...new Set([...mapA.keys(), ...mapB.keys()])].sort();
+
+  // Group files by control (first path segment), prefer source A casing
   const controls = {};
-  for (const f of allFiles) {
-    const parts = f.split(sep);
+  for (const key of allKeys) {
+    const displayRel = mapA.get(key) || mapB.get(key);
+    const parts = displayRel.split(sep);
     const control = parts.length > 1 ? parts[0] : '(root)';
-    const variant = basename(f, extname(f));
+    const variant = basename(displayRel, extname(displayRel));
     if (!controls[control]) controls[control] = [];
-    controls[control].push({ rel: f, variant });
+    controls[control].push({ relA: mapA.get(key), relB: mapB.get(key), variant });
   }
 
   let totalCompared = 0;
@@ -376,17 +418,17 @@ function runCompare(dirA, dirB, reportPath) {
     const rows = [];
     const diffSections = [];
 
-    for (const { rel, variant } of variants) {
+    for (const { relA, relB, variant } of variants) {
       totalCompared++;
-      const pathA = join(dirA, rel);
-      const pathB = join(dirB, rel);
+      const pathA = relA ? join(dirA, relA) : null;
+      const pathB = relB ? join(dirB, relB) : null;
 
-      if (!existsSync(pathA)) {
+      if (!pathA) {
         divergences++;
         rows.push(`| ${variant} | ❌ Missing in source A | File only exists in second directory |`);
         continue;
       }
-      if (!existsSync(pathB)) {
+      if (!pathB) {
         divergences++;
         rows.push(`| ${variant} | ❌ Missing in source B | File only exists in first directory |`);
         continue;

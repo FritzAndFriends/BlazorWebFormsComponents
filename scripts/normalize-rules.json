@@ -152,6 +152,30 @@
       "pattern": "CUSTOM_FUNCTION",
       "replacement": "Handled by normalizeWhitespace() in code",
       "flags": ""
+    },
+    {
+      "id": "normalize-boolean-attrs",
+      "description": "Collapse boolean attributes (selected=\"selected\", selected=\"\") to bare form (selected)",
+      "enabled": true,
+      "pattern": "CUSTOM_FUNCTION",
+      "replacement": "Handled by normalizeBooleanAttributes() in code",
+      "flags": ""
+    },
+    {
+      "id": "strip-empty-styles",
+      "description": "Remove empty style=\"\" attributes that add no styling information",
+      "enabled": true,
+      "pattern": "CUSTOM_FUNCTION",
+      "replacement": "Handled by stripEmptyStyles() in code",
+      "flags": ""
+    },
+    {
+      "id": "normalize-guid-ids",
+      "description": "Replace GUID patterns in id values with GUID placeholder to avoid false divergences from auto-generated IDs",
+      "enabled": true,
+      "pattern": "CUSTOM_FUNCTION",
+      "replacement": "Handled by normalizeGuidIds() in code",
+      "flags": ""
     }
   ]
 }
