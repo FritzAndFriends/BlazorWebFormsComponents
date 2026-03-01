@@ -166,6 +166,11 @@ namespace BlazorWebFormsComponents
 			_color = color;
 		}
 
+		/// <summary>
+		/// Creates a WebColor from an HTML color string (e.g. "#FFDEAD" or "Red").
+		/// </summary>
+		public static WebColor FromHtml(string htmlColor) => new WebColor(htmlColor);
+
 		public static implicit operator WebColor(string colorString) => new WebColor(colorString);
 
 		public Color ToColor() => _color;
