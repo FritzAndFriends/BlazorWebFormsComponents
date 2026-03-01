@@ -6,7 +6,10 @@ The FormView component is meant to emulate the asp:FormView control in markup an
   - Numerical Pager
   - OnDataBinding and OnDataBound events trigger
   - ModeChanging and ModeChanged events
-  - Insert, Edit, Update, Delete actions and supporting events
+  - Insert, Edit, Update, Delete actions and supporting events:
+    - **OnItemDeleting** / **OnItemDeleted** — before and after delete operations
+    - **OnItemInserting** / **OnItemInserted** — before and after insert operations
+    - **OnItemUpdating** / **OnItemUpdated** — before and after update operations
   - **ItemCommand** event — fires when any command button within the FormView is clicked
   - **ItemCreated** event — fires when the FormView is first created and data-bound
   - **PageIndexChanging** / **PageIndexChanged** events — fires when paging occurs (cancellable)
@@ -17,6 +20,13 @@ The FormView component is meant to emulate the asp:FormView control in markup an
   - **Caption** / **CaptionAlign** — renders a `<caption>` element for table accessibility
   - **Style sub-components** (RowStyle, EditRowStyle, InsertRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle)
   - **[PagerSettings](PagerSettings.md)** — configurable pager button modes, text, images, and position
+
+## Web Forms Features NOT Supported
+
+- **DataSourceID** — Blazor does not use server-side data source controls; bind data directly via `DataSource`
+- **ViewState / EnableViewState** — Not needed; Blazor preserves component state natively
+- **Theming / SkinID / EnableTheming** — Not applicable to Blazor
+- **RenderTable** — Not implemented; the FormView always renders a table
 
 ## Usage Notes
 
@@ -388,6 +398,47 @@ Each style component accepts standard style properties: `BackColor`, `ForeColor`
         <small>End of record</small>
     </FooterTemplate>
 </FormView>
+```
+
+### CRUD Event Handling
+
+```razor
+<FormView DataSource="@Customers" ItemType="Customer" DefaultMode="FormViewMode.ReadOnly"
+          OnItemUpdating="HandleUpdating"
+          OnItemUpdated="HandleUpdated"
+          OnItemDeleting="HandleDeleting"
+          ItemCommand="HandleCommand">
+    <ItemTemplate Context="Item">
+        <p>@Item.Name — @Item.Email</p>
+    </ItemTemplate>
+    <EditItemTemplate Context="Item">
+        <p>Editing: @Item.Name</p>
+    </EditItemTemplate>
+</FormView>
+
+@code {
+    private List<Customer> Customers = new();
+
+    private void HandleUpdating(FormViewUpdateEventArgs e)
+    {
+        // Validate and apply changes; set e.Cancel = true to abort
+    }
+
+    private void HandleUpdated(FormViewUpdatedEventArgs e)
+    {
+        // Post-update logic (e.g., refresh data, show notification)
+    }
+
+    private void HandleDeleting(FormViewDeleteEventArgs e)
+    {
+        // Perform delete; e.RowIndex gives the current position
+    }
+
+    private void HandleCommand(FormViewCommandEventArgs e)
+    {
+        // Fires for any command button — check e.CommandName
+    }
+}
 ```
 
 ## See Also

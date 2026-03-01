@@ -1,0 +1,72 @@
+
+@code {
+
+	[Fact]
+	public void SingleClass_RendersAsClassAttributeOnAnchor()
+	{
+		var cut = Render(@<LinkButton Text="Test" CssClass="my-btn" />);
+		var a = cut.Find("a");
+		a.GetAttribute("class").ShouldBe("my-btn");
+	}
+
+	[Fact]
+	public void MultipleClasses_RendersSpaceSeparatedOnAnchor()
+	{
+		var cut = Render(@<LinkButton Text="Test" CssClass="btn btn-primary active" />);
+		var a = cut.Find("a");
+		a.GetAttribute("class").ShouldBe("btn btn-primary active");
+	}
+
+	[Fact]
+	public void NoCssClass_OmitsClassAttribute()
+	{
+		var cut = Render(@<LinkButton Text="Test" />);
+		var a = cut.Find("a");
+		a.HasAttribute("class").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void EmptyCssClass_OmitsClassAttribute()
+	{
+		var cut = Render(@<LinkButton Text="Test" CssClass="" />);
+		var a = cut.Find("a");
+		a.HasAttribute("class").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CssClass_WithIdAttribute_BothRenderOnAnchor()
+	{
+		var cut = Render(@<LinkButton Text="Test" ID="lnk1" CssClass="highlight" />);
+		var a = cut.Find("a");
+		a.GetAttribute("class").ShouldBe("highlight");
+		a.Id.ShouldNotBeNullOrEmpty();
+	}
+
+	[Fact]
+	public void CssClass_WithPostBackUrl_RendersOnAnchor()
+	{
+		var cut = Render(@<LinkButton Text="Go" PostBackUrl="https://example.com" CssClass="nav-link" />);
+		var a = cut.Find("a");
+		a.GetAttribute("class").ShouldBe("nav-link");
+		a.GetAttribute("href").ShouldBe("https://example.com");
+	}
+
+	[Fact]
+	public void Disabled_NoCssClass_RendersAspNetDisabledOnly()
+	{
+		var cut = Render(@<LinkButton Text="Test" Enabled="false" />);
+		var a = cut.Find("a");
+		a.GetAttribute("class").ShouldBe("aspNetDisabled");
+	}
+
+	[Fact]
+	public void Disabled_WithCssClass_RendersBothClasses()
+	{
+		var cut = Render(@<LinkButton Text="Test" CssClass="btn" Enabled="false" />);
+		var a = cut.Find("a");
+		var classValue = a.GetAttribute("class");
+		classValue.ShouldContain("btn");
+		classValue.ShouldContain("aspNetDisabled");
+	}
+
+}

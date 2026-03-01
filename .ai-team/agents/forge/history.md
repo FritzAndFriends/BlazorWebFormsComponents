@@ -94,3 +94,16 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
  Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
 
 � Team update (2026-02-27): M17 audit fix test patterns  ScriptReference tested via C# instantiation, UpdateProgress CssClass tested with/without value, 9 new tests  decided by Rogue
+
+### Summary: Divergence Registry Update D-11 through D-14 (2026-02-28)
+
+**By:** Forge
+**What:** Added 4 new divergence entries to `planning-docs/DIVERGENCE-REGISTRY.md` based on findings from M15-M18 audit work. Issue #388.
+
+**New entries:**
+- **D-11 (GUID-Based IDs):** CheckBox, RadioButton, RadioButtonList, FileUpload generate GUID-based IDs instead of predictable naming-hierarchy IDs. Status: Fix recommended -- GUIDs are non-deterministic and untargetable. Separate from D-01 (prefix mangling).
+- **D-12 (Boolean Attribute Format):** `selected=""` (HTML5) vs `selected="selected"` (XHTML). Status: Intentional -- both are valid HTML per W3C spec. Normalizer should canonicalize.
+- **D-13 (Calendar Previous-Month Day Padding):** Web Forms renders full 42-cell grid with adjacent-month days; Blazor may not fill leading cells. Status: Fix recommended -- visible structural content.
+- **D-14 (Calendar Style Property Pass-Through):** Web Forms applies inline styles from TitleStyle, DayStyle, TodayDayStyle etc.; Blazor doesn't fully pass through. Status: Fix progressively.
+
+**Also updated:** Summary table, category definitions (added ID Generation, Attribute Format, Style), revision history, header status line.

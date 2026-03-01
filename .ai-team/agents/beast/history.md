@@ -47,3 +47,14 @@
  Team update (2026-02-27): No-op stub property coverage intentionally limited (41-50% acceptable)  deep AJAX infrastructure properties omitted  decided by Forge
 
  Team update (2026-02-27): UpdatePanel Triggers collection deliberately omitted  Blazor rendering model makes it unnecessary  decided by Forge
+
+- **Issue #359 — M6-M8 doc page updates (5 pages):**
+  1. **ChangePassword** (`docs/LoginControls/ChangePassword.md`) — Verified already complete. Orientation and TextLayout sections with enum tables, migration examples, and `@using BlazorWebFormsComponents.Enums` tip were already present from a prior session.
+  2. **PagerSettings** (`docs/DataControls/PagerSettings.md`) — Verified already complete. Properties reference, enum tables, parent control usage examples, and migration notes all match `PagerSettings.cs` source.
+  3. **FormView** (`docs/DataControls/FormView.md`) — Added individual CRUD event names (OnItemDeleting/Deleted, OnItemInserting/Inserted, OnItemUpdating/Updated) to Features section. Added "Web Forms Features NOT Supported" section (DataSourceID, ViewState, Theming, RenderTable). Added CRUD event handling example with FormViewUpdateEventArgs/FormViewDeleteEventArgs.
+  4. **DetailsView** (`docs/DataControls/DetailsView.md`) — Added Caption/CaptionAlign attributes to Web Forms declarative syntax. Added all 10 style sub-component elements and PagerSettings child element to the Web Forms syntax block, bringing it to parity with actual Web Forms control markup.
+  5. **DataGrid** (`docs/DataControls/DataGrid.md`) — Removed stale "not every syntax element supported" caveat (features were implemented in M6-M8). Enhanced paging section with property reference table, PagerStyle example, and admonition explaining DataGrid's built-in numeric pager vs. GridView/FormView/DetailsView PagerSettings. Added PagerSettings cross-reference in See Also.
+  - All 5 pages verified present in `mkdocs.yml` nav. No nav changes needed.
+  - **Pattern discovered:** DataGrid is the only pageable data control without PagerSettings sub-component support — it always uses a numeric pager. Worth noting for future migration guidance.
+
+ Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes) and CheckBox bare input id  may need doc updates. Issue #379 (LinkButton CssClass) verified as already fixed in M15, can be closed.

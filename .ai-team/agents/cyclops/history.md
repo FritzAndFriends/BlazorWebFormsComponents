@@ -72,3 +72,20 @@
 - **Issue #386 (Stable deterministic IDs):** CheckBox and RadioButtonList already used `ClientID` (from `ComponentIdGenerator`) when developer provides `ID`, falling back to GUID when not. The only fix needed was adding `id="@_inputId"` to CheckBox's bare (no-text) `<input>` element (line 20) which was missing the `id` attribute. RadioButtonList was already correct: `{ClientID}_0`, `{ClientID}_1` pattern for item IDs, and `ClientID` as the `name` attribute for mutual exclusion. Tests in `CheckBox/IDRendering.razor` and `RadioButtonList/StableIds.razor` already cover all scenarios.
 - **Issue #360 (Menu level styles):** The four style sub-components (`DynamicMenuStyle`, `StaticMenuStyle`, `DynamicMenuItemStyle`, `StaticMenuItemStyle`) were already implemented in `MenuItemStyle.razor.cs` as C# classes inheriting from `MenuItemStyle`. The `IMenuStyleContainer` interface was already wired. The actual fix was that `MenuItemStyle.SetPropertiesFromUnknownAttributes()` did not process `Font-` prefixed attributes (e.g. `Font-Bold`, `Font-Italic`). Added `this.SetFontsFromAttributes(OtherAttributes)` call in `OnInitialized()` after `SetPropertiesFromUnknownAttributes()` to use the existing `HasStyleExtensions.SetFontsFromAttributes` method. This fixed the failing `Menu_StaticMenuItemStyle_FontBold_RendersFontWeight` test.
 - **Lesson:** When style sub-components use `CaptureUnmatchedValues`, font properties need explicit handling via `SetFontsFromAttributes()` because `Font-Bold` doesn't map to a simple property — it maps to `Font.Bold` on the `FontInfo` sub-object.
+
+### Issue #379 — LinkButton CssClass Verification (2026-02-27)
+
+- **Issue #379 (LinkButton CssClass pass-through):** Verified already correct from M15. `LinkButton.razor` already has `class="@GetCssClassOrNull()"` on both `<a>` elements (PostBackUrl null and non-null branches). The `GetCssClassOrNull()` method in the `@code` block correctly returns: CssClass when enabled and non-empty, `null` when enabled and empty (omitting the attribute), and `CssClass + " aspNetDisabled"` when disabled. Six bUnit tests already exist in `LinkButton/Format.razor` covering: CssClass renders, no CssClass omits attribute, disabled adds aspNetDisabled, disabled+CssClass renders both, and CssClass with PostBackUrl. All 25 LinkButton tests pass. No code change needed.
+- **Key files:** `src/BlazorWebFormsComponents/LinkButton.razor`, `src/BlazorWebFormsComponents.Test/LinkButton/Format.razor`
+- **Lesson:** M15 was thorough — always verify the current state before assuming a bug still exists. The issue was filed before M15 landed.
+
+ Team update (2026-02-28): Rogue noted GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  whitespace-only CssClass renders class=" " instead of being omitted. Low priority future cleanup.
+
+### Issue #387 — Normalizer Enhancements (2026-03-01)
+
+- **Enhancement 1 (case-insensitive matching):** Compare mode now pairs files case-insensitively using lowercase key maps, eliminating false HyperLink/Hyperlink dupes. Preference goes to source A casing for display.
+- **Enhancement 2 (boolean attributes):** New `normalizeBooleanAttributes()` collapses `selected=""` and `selected="selected"` to bare `selected` for 6 boolean attrs (selected, checked, disabled, readonly, multiple, nowrap).
+- **Enhancement 3 (empty style stripping):** New `stripEmptyStyles()` removes `style=""` attributes before comparison.
+- **Enhancement 4 (GUID ID normalization):** New `normalizeGuidIds()` replaces GUID patterns in `id` attribute values with `GUID` placeholder, covering CheckBox/RadioButtonList/FileUpload auto-generated IDs.
+- **Key files:** `scripts/normalize-html.mjs`, `scripts/normalize-rules.json`
+- **Lesson:** Normalization functions should run in a specific order: regex rules → style normalization → empty style strip → boolean attrs → GUID IDs → attribute sort → artifact cleanup → whitespace. Each step depends on the previous one leaving clean output.
