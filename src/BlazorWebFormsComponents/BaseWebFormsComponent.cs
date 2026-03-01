@@ -1,4 +1,5 @@
 ﻿using BlazorWebFormsComponents.Enums;
+using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Http;
@@ -116,6 +117,15 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Enabled { get; set; } = true;
 
+		/// <summary>
+		/// The theme configuration cascaded from a parent <see cref="ThemeProvider"/>.
+		/// Null when no ThemeProvider wraps this component.
+		/// Named CascadedTheme to avoid conflict with components like WebFormsPage
+		/// that accept ThemeConfiguration as an explicit [Parameter] named Theme.
+		/// </summary>
+		[CascadingParameter]
+		public ThemeConfiguration CascadedTheme { get; set; }
+
 		[CascadingParameter(Name = PARENTCOMPONENTNAME)]
 		public virtual BaseWebFormsComponent Parent { get; set; }
 
@@ -228,6 +238,25 @@ namespace BlazorWebFormsComponents
 				return _jsInterop;
 			}
 		}
+
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+
+			if (!EnableTheming || CascadedTheme == null) return;
+
+			var skin = CascadedTheme.GetSkin(GetType().Name, SkinID);
+			if (skin == null) return;
+
+			ApplyThemeSkin(skin);
+		}
+
+		/// <summary>
+		/// Override in derived classes to apply skin properties from the theme.
+		/// Called during OnParametersSet when theming is enabled and a matching skin is found.
+		/// The base implementation does nothing — subclasses apply properties relevant to them.
+		/// </summary>
+		protected virtual void ApplyThemeSkin(ControlSkin skin) { }
 
 		protected override async Task OnInitializedAsync()
 		{

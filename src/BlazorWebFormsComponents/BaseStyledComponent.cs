@@ -37,28 +37,13 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string ToolTip { get; set; }
 
-		[CascadingParameter]
-		public ThemeConfiguration Theme { get; set; }
-
 		protected string Style => this.ToStyle().Build().NullIfEmpty();
-
-		protected override void OnParametersSet()
-		{
-			base.OnParametersSet();
-
-			if (!EnableTheming || Theme == null) return;
-
-			var skin = Theme.GetSkin(GetType().Name, SkinID);
-			if (skin == null) return;
-
-			ApplySkin(skin);
-		}
 
 		/// <summary>
 		/// Applies skin properties using StyleSheetTheme semantics:
 		/// the theme sets defaults, but explicit component values take precedence.
 		/// </summary>
-		private void ApplySkin(ControlSkin skin)
+		protected override void ApplyThemeSkin(ControlSkin skin)
 		{
 			if (BackColor == default && skin.BackColor != default)
 				BackColor = skin.BackColor;
