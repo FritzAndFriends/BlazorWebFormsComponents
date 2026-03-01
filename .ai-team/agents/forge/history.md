@@ -107,3 +107,6 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 - **D-14 (Calendar Style Property Pass-Through):** Web Forms applies inline styles from TitleStyle, DayStyle, TodayDayStyle etc.; Blazor doesn't fully pass through. Status: Fix progressively.
 
 **Also updated:** Summary table, category definitions (added ID Generation, Attribute Format, Style), revision history, header status line.
+
+ Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (guide) and ThemesAndSkins.md (strategy). Review both for architecture audits  decided by Beast
+ Team update (2026-03-01): Normalizer pipeline order codified with 4 enhancements (case-insensitive, boolean attrs, empty styles, GUID IDs). Issue #387  decided by Cyclops

@@ -45,3 +45,6 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 📌 Team update (2026-02-27): M17 audit fixes resolved — 5 fidelity issues, 9 new tests, PR #402 — decided by Forge, Cyclops
 📌 Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests — decided by Rogue
 📌 Team update (2026-02-28): Cyclops fixed CheckBox bare input missing id attribute — integration tests targeting CheckBox by id may now work in no-text scenarios. All 5 M9 audit gap pages now have interaction test coverage.
+
+ Team update (2026-03-01): Normalizer pipeline order is fixed  regex rules  style norm  empty style strip  boolean attrs  GUID IDs  attr sort  artifact cleanup  whitespace. Case-insensitive file pairing enabled  decided by Cyclops
+ Team update (2026-03-01): D-11 through D-14 formally registered. D-12 boolean attrs and GUID IDs now handled by normalizer  decided by Forge
