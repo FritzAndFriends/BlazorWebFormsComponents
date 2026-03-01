@@ -2655,11 +2655,10 @@ public class InteractiveComponentTests
             // Click the first Edit button
             var editButton = page.Locator("button:has-text('Edit')").First;
             await editButton.ClickAsync();
-            await page.WaitForTimeoutAsync(500);
 
-            // Verify edit mode activated — Update and Cancel buttons should appear
+            // Wait for Blazor re-render — Update button appears when edit mode activates
             var updateButton = page.Locator("button:has-text('Update')");
-            Assert.True(await updateButton.IsVisibleAsync(), "Update button should be visible in edit mode");
+            await updateButton.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 10000 });
 
             var cancelButton = page.Locator("button:has-text('Cancel')");
             Assert.True(await cancelButton.IsVisibleAsync(), "Cancel button should be visible in edit mode");
@@ -2868,7 +2867,9 @@ public class InteractiveComponentTests
             Assert.True(await horizontalTop.First.IsVisibleAsync(), "Horizontal/TextOnTop layout should be rendered");
 
             // Verify Login forms render username/password inputs (4 Login forms = 4 username inputs)
-            var usernameInputs = await page.Locator("input[type='text']").AllAsync();
+            // Wait for Blazor hydration — InputText components render after interactive circuit connects
+            await page.WaitForSelectorAsync("input", new PageWaitForSelectorOptions { Timeout = 10000 });
+            var usernameInputs = await page.Locator("input:not([type='password']):not([type='submit']):not([type='image']):not([type='hidden']):not([type='checkbox'])").AllAsync();
             Assert.True(usernameInputs.Count >= 4, $"Expected at least 4 username inputs (one per Login), found {usernameInputs.Count}");
 
             Assert.Empty(consoleErrors);
