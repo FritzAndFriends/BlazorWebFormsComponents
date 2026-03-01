@@ -1,0 +1,273 @@
+@using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	/// <summary>
+	/// End-to-end theming pipeline tests (Issue #368 / WI-5).
+	/// Validates that ThemeProvider → BaseWebFormsComponent → BaseStyledComponent
+	/// pipeline works correctly with real components (Button, Label, Panel).
+	/// </summary>
+
+	// 1. Default skin applies — Button inside ThemeProvider gets theme BackColor
+	[Fact]
+	public void DefaultSkin_AppliesBackColor_ToButton()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, FromHtml("#FFDEAD")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Themed" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		input.GetAttribute("style").ShouldContain("background-color:#FFDEAD");
+	}
+
+	// 2. Named skin applies — Button with SkinID="highlight" gets the named skin
+	[Fact]
+	public void NamedSkin_AppliesVia_SkinID()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Button", "highlight", skin => skin
+				.Set(s => s.BackColor, Red)
+				.Set(s => s.Font.Bold, true));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Highlight" SkinID="highlight" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Red");
+		style.ShouldNotContain("background-color:Blue");
+		style.ShouldContain("font-weight:bold");
+	}
+
+	// 3. Explicit value overrides theme — Button with explicit BackColor keeps its value
+	[Fact]
+	public void ExplicitValue_OverridesTheme_StyleSheetThemeSemantics()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Explicit" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Red");
+		style.ShouldNotContain("background-color:Blue");
+	}
+
+	// 4. EnableTheming=false — Button ignores the theme entirely
+	[Fact]
+	public void EnableThemingFalse_IgnoresTheme()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue)
+				.Set(s => s.CssClass, "themed"));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="No Theme" EnableTheming="false" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+		input.HasAttribute("class").ShouldBeFalse();
+	}
+
+	// 5. No ThemeProvider — Button outside any ThemeProvider works normally
+	[Fact]
+	public void NoThemeProvider_WorksNormally()
+	{
+		var cut = Render(@<Button Text="Plain" />);
+
+		var input = cut.Find("input");
+		input.GetAttribute("value").ShouldBe("Plain");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+	// 6. Missing SkinID — Button with SkinID="nonexistent" doesn't throw, uses default skin
+	[Fact]
+	public void MissingSkinID_DoesNotThrow_FallsBackGracefully()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Missing" SkinID="nonexistent" />
+			</ThemeProvider>
+		);
+
+		// Named skin "nonexistent" not found → no skin applied (not even default)
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+	// 7. Nested ThemeProvider — Inner overrides outer for its children
+	[Fact]
+	public void NestedThemeProvider_InnerOverridesOuter()
+	{
+		var outerTheme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Red));
+		var innerTheme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="outerTheme">
+				<ThemeProvider Theme="innerTheme">
+					<Button Text="Inner" />
+				</ThemeProvider>
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Blue");
+		style.ShouldNotContain("background-color:Red");
+	}
+
+	// 8. Theme applies ForeColor to Panel
+	[Fact]
+	public void Theme_AppliesForeColor_ToPanel()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Panel", skin => skin
+				.Set(s => s.ForeColor, FromHtml("#333333")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel><text>Content</text></Panel>
+			</ThemeProvider>
+		);
+
+		var div = cut.Find("div");
+		div.GetAttribute("style").ShouldContain("color:#333333");
+	}
+
+	// 9. Theme applies CssClass to Label
+	[Fact]
+	public void Theme_AppliesCssClass_ToLabel()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.CssClass, "theme-label"));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="Styled" />
+			</ThemeProvider>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("theme-label");
+	}
+
+	// 10. Theme applies Width and Height to Button
+	[Fact]
+	public void Theme_AppliesWidthAndHeight_ToButton()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.Width, new Unit("200px"))
+				.Set(s => s.Height, new Unit("40px")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Sized" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("width:200px");
+		style.ShouldContain("height:40px");
+	}
+
+	// 11. Theme applies Font properties to Label
+	[Fact]
+	public void Theme_AppliesFontProperties_ToLabel()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.Font.Bold, true)
+				.Set(s => s.Font.Italic, true)
+				.Set(s => s.Font.Underline, true));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="FontTest" />
+			</ThemeProvider>
+		);
+
+		var span = cut.Find("span");
+		var style = span.GetAttribute("style");
+		style.ShouldContain("font-weight:bold");
+		style.ShouldContain("font-style:italic");
+		style.ShouldContain("text-decoration:underline");
+	}
+
+	// 12. Multiple control types themed in same ThemeProvider
+	[Fact]
+	public void MultipleControlTypes_ThemedSimultaneously()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Red))
+			.ForControl("Label", skin => skin
+				.Set(s => s.ForeColor, Blue))
+			.ForControl("Panel", skin => skin
+				.Set(s => s.BackColor, FromHtml("#EEEEEE")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Btn" />
+				<Label Text="Lbl" />
+				<Panel><text>Pnl</text></Panel>
+			</ThemeProvider>
+		);
+
+		cut.Find("input").GetAttribute("style").ShouldContain("background-color:Red");
+		cut.Find("span").GetAttribute("style").ShouldContain("color:Blue");
+		cut.Find("div").GetAttribute("style").ShouldContain("background-color:#EEEEEE");
+	}
+
+	// 13. Explicit CssClass overrides theme CssClass
+	[Fact]
+	public void ExplicitCssClass_OverridesThemeCssClass()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.CssClass, "theme-class"));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="Test" CssClass="my-class" />
+			</ThemeProvider>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("my-class");
+	}
+
+}
