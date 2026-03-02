@@ -1,4 +1,4 @@
-﻿using BlazorComponentUtilities;
+using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Components;
@@ -77,7 +77,7 @@ namespace BlazorWebFormsComponents
 				if (Font == null)
 					Font = new FontInfo();
 
-				if (string.IsNullOrEmpty(Font.Name) && !string.IsNullOrEmpty(skin.Font.Name))
+				if (string.IsNullOrEmpty(Font.Name) && string.IsNullOrEmpty(Font.Names) && !string.IsNullOrEmpty(skin.Font.Name))
 					Font.Name = skin.Font.Name;
 
 				if (Font.Size == FontUnit.Empty && skin.Font.Size != FontUnit.Empty)
