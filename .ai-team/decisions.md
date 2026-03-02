@@ -3148,3 +3148,21 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **By:** Forge
 **What:** Four new divergence patterns formally registered: D-11 (GUID-based IDs  fix, don't register as permanent), D-12 (boolean attribute format  intentional, no fix), D-13 (Calendar previous-month day padding  fix recommended), D-14 (Calendar style property pass-through  fix progressively). D-11 registered temporarily while fix is pending; D-12 is intentional platform difference; D-13 and D-14 are tracked for resolution.
 **Why:** The divergence registry is the authoritative reference for classifying audit findings. Without these entries, auditors would repeatedly investigate these patterns as potential bugs. Issue #388.
+
+### 2026-03-01: CascadedTheme property name on BaseWebFormsComponent
+**By:** Cyclops
+**What:** The cascading ThemeConfiguration parameter on `BaseWebFormsComponent` is named `CascadedTheme`, not `Theme`. This avoids a Blazor "declares more than one parameter" error caused by `_Imports.razor @inherits BaseWebFormsComponent` — every `.razor` file inherits BaseWebFormsComponent, so any `.razor` component with its own `[Parameter] Theme` (like ThemeProvider and WebFormsPage) would conflict.
+**Why:** Blazor parameter matching is case-insensitive and prohibits two parameters with the same name on a single component. Since `_Imports.razor` forces all `.razor` files to inherit from `BaseWebFormsComponent`, the property name must differ from any `Theme` parameters in individual components. `CascadedTheme` communicates intent (received via cascade) and avoids the collision.
+**Impact:** Any future code that reads the cascading theme from `BaseWebFormsComponent` should use `CascadedTheme`, not `Theme`. Components that accept theme explicitly (like WebFormsPage) keep their own `[Parameter] Theme`.
+
+### 2026-03-02: FontInfo Name/Names auto-sync (consolidated)
+**By:** Cyclops, Rogue
+**What:** `FontInfo.Name` and `FontInfo.Names` were independent auto-properties. Rogue identified the gap: `ApplyThemeSkin` sets `Font.Name` but the style builder reads `Font.Names` for `font-family`, causing theme fonts to silently not render. Cyclops fixed it by converting both properties to backing-field properties with bidirectional auto-sync matching ASP.NET Web Forms behavior: setting `Name` → `Names` gets same value; setting `Names` → `Name` gets first comma-separated entry (trimmed); setting either to null/empty clears both. `ApplyThemeSkin` now also guards against overriding explicitly set `Names`. Rogue verified the fix with 9 unit tests (`FontInfoSyncTests.cs`) and 2 pipeline tests (`ThemingPipelineTests.razor`) proving end-to-end: ThemeConfiguration → ApplyThemeSkin(Font.Name) → auto-sync → Font.Names → style builder → `font-family` in rendered HTML.
+**Why:** Web Forms `FontInfo.Name` and `FontInfo.Names` are bidirectionally synced. Without this, theme font-family was silently lost at the property boundary between ApplyThemeSkin and the style builder. All 1437 tests pass.
+**Impact:** Any code setting `Font.Name` (themes, skins, direct assignment) now automatically has `Font.Names` populated and vice versa. The style builder correctly renders `font-family`. No additional changes needed elsewhere.
+
+### 2026-03-01: Theming sample page patterns
+**By:** Jubilee
+**What:** The Theming sample page at `ControlSamples/Theming/Index.razor` demonstrates 6 scenarios in a single page (not split into sub-pages): 1. Default skins → 2. Named skins → 3. Explicit overrides → 4. Opt-out → 5. Nesting → 6. Unthemed baseline. Future theming samples should add sections to this page or create sub-pages if complexity warrants it. The `BorderStyle` enum requires fully qualified name (`BlazorWebFormsComponents.Enums.BorderStyle`) in Theming sample code due to conflict with `ControlSkin.BorderStyle` property.
+**Why:** Theming is a cross-cutting concern best understood as a progression. Single page avoids repeating ThemeConfiguration setup. ComponentList.razor link under Utility Features, ComponentCatalog has "Theming" category.
+

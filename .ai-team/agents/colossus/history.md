@@ -48,3 +48,5 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-01): Normalizer pipeline order is fixed  regex rules  style norm  empty style strip  boolean attrs  GUID IDs  attr sort  artifact cleanup  whitespace. Case-insensitive file pairing enabled  decided by Cyclops
  Team update (2026-03-01): D-11 through D-14 formally registered. D-12 boolean attrs and GUID IDs now handled by normalizer  decided by Forge
+📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally. Theme font-family renders correctly. Integration tests targeting font-family should now work — decided by Cyclops, Rogue
+📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops

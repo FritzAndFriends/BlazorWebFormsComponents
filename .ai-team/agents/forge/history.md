@@ -110,3 +110,6 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (guide) and ThemesAndSkins.md (strategy). Review both for architecture audits  decided by Beast
  Team update (2026-03-01): Normalizer pipeline order codified with 4 enhancements (case-insensitive, boolean attrs, empty styles, GUID IDs). Issue #387  decided by Cyclops
+📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally (backing fields). Theme font-family renders correctly. 11 tests verify. No code changes needed elsewhere — decided by Cyclops, Rogue
+📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent. Avoids Blazor duplicate-parameter error from _Imports.razor inheritance — decided by Cyclops
+📌 Team update (2026-03-02): Theming sample page uses 6-section progressive layout. BorderStyle enum needs FQN in theming code — decided by Jubilee

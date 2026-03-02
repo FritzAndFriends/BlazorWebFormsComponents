@@ -48,71 +48,19 @@
 
  Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
 
-### Milestone 17: AJAX Control Tests
+<!-- Summarized 2026-03-02 by Scribe -- covers M17 + Issue #379 -->
 
-Wrote 47 bUnit tests across 6 new test files for the M17 AJAX/migration-helper controls:
+### M17 and Issue #379 Test Summary (2026-02-27 through 2026-02-28)
 
-**TimerTests.razor (9 tests):** Default Interval=60000, default Enabled=true, renders no visible output, custom Interval accepted, Enabled=false accepted, OnTick callback invoked after interval, Enabled=false prevents ticking, IDisposable cleanup, renders without errors. Uses `Render<Timer>(p => p.Add(...))` C# API because Timer's `new Enabled` shadows BaseWebFormsComponent.Enabled — fixed by removing duplicate `[Parameter]` from Timer.razor.cs.
+**M17 AJAX tests (47 tests):** 6 test files -- Timer (9), ScriptManager (9), ScriptManagerProxy (4), UpdatePanel (10), UpdateProgress (9), Substitution (6). Fixed Timer duplicate [Parameter] Enabled bug (shadowed base class). Timer tests use C# API Render<Timer>(p => p.Add(...)). No-op stubs tested via cut.Markup.Trim().ShouldBeEmpty(). ScriptReference properties tested as plain C# instantiation.
 
-**ScriptManagerTests.razor (9 tests):** Renders no visible output, defaults for all 7 properties verified (EnablePartialRendering=false, EnablePageMethods=false, ScriptMode=Auto, AsyncPostBackTimeout=90, EnableCdn=false, EnableScriptGlobalization=false, EnableScriptLocalization=false), setting all properties does not throw.
+**M17 Audit fix tests (9 tests):** Covered all 5 fixes -- EnablePartialRendering default true, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties. UpdateProgress CssClass uses conditional null pattern. All 29 ScriptManager/UpdateProgress tests pass.
 
-**ScriptManagerProxyTests.razor (4 tests):** Renders no visible output, renders without errors, default Scripts is empty list, default Services is empty list.
+**LinkButton CssClass tests (8 tests, Issue #379):** Dedicated CssClass.razor -- single class, multiple classes, no/empty CssClass omits attribute, CssClass+ID coexist, PostBackUrl branch, disabled aspNetDisabled, disabled+CssClass. Two render branches tested (PostBackUrl null vs non-null). Edge case: GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace.
 
-**UpdatePanelTests.razor (10 tests):** Default RenderMode=Block renders `<div>`, Inline mode renders `<span>`, ChildContent rendered, default UpdateMode=Always, Conditional mode accepted, default ChildrenAsTriggers=true, ChildrenAsTriggers=false accepted, ID attribute on div wrapper, ID attribute on span in Inline mode.
+Key patterns: Timer parameter inheritance -- use C# API, not Razor templates. No-op stubs -- test defaults + no-throw. UpdateProgress DynamicLayout=true > display:none, false > display:block;visibility:hidden. UpdatePanel Block > div, Inline > span. LinkButton has two render paths both sharing GetCssClassOrNull().
 
-**UpdateProgressTests.razor (9 tests):** Renders `<div>` with ProgressTemplate content, DynamicLayout=true uses `display:none`, DynamicLayout=false uses `visibility:hidden`, default DynamicLayout=true, default DisplayAfter=500, custom DisplayAfter accepted, AssociatedUpdatePanelID accepted, default AssociatedUpdatePanelID is null, ProgressTemplate content rendered.
-
-**SubstitutionTests.razor (6 tests):** Callback output rendered as raw markup, null callback renders nothing, MethodName property accepted, renders no wrapper element (raw text), HTML from callback rendered as markup, empty callback string renders empty.
-
-📌 Test pattern: Timer has `new bool Enabled` shadowing BaseWebFormsComponent.Enabled. Both are `[Parameter]`, causing Blazor duplicate-parameter error. Fixed by removing duplicate from Timer.razor.cs and using inherited Enabled. Timer tests must use `Render<Timer>(p => p.Add(...))` C# API, not Razor templates. — Rogue
-
-📌 Test pattern: ScriptManager and ScriptManagerProxy are no-op stubs that render no visible HTML. Test default property values and that rendering doesn't throw. Use `cut.Markup.Trim().ShouldBeEmpty()` to verify no output. — Rogue
-
-📌 Test pattern: UpdateProgress DynamicLayout=true renders `display:none`, DynamicLayout=false renders `visibility:hidden`. Both use `<div>` wrapper. UpdatePanel Block mode renders `<div>`, Inline mode renders `<span>`. Both use `id="@ClientID"`. — Rogue
-
-📌 Bug fix: Removed `new bool Enabled` `[Parameter]` from Timer.razor.cs — it shadowed BaseWebFormsComponent.Enabled causing a runtime InvalidOperationException (duplicate parameter name). Timer now uses the inherited Enabled property which has the same default (true). — Rogue
-
-### M17 Audit Fix Tests
-
-Added 9 new tests covering the 5 audit fixes from Forge's M17 audit:
-
-**ScriptManagerTests.razor (6 new/updated tests):**
-- Updated `ScriptManager_DefaultEnablePartialRendering_IsTrue` — changed from `ShouldBeFalse()` to `ShouldBeTrue()` (Fix 1: default now matches Web Forms)
-- `ScriptManager_DefaultScripts_IsInitialized` — verifies Scripts collection is non-null and empty (Fix 2)
-- `ScriptManager_Scripts_CanHoldScriptReferences` — passes List<ScriptReference> with 2 items, verifies Name/Path (Fix 2)
-- `ScriptReference_DefaultScriptMode_IsAuto` — verifies ScriptMode defaults to Auto (Fix 5)
-- `ScriptReference_DefaultNotifyScriptLoaded_IsTrue` — verifies NotifyScriptLoaded defaults to true (Fix 5)
-- `ScriptReference_DefaultResourceUICultures_IsNull` — verifies ResourceUICultures defaults to null (Fix 5)
-
-**UpdateProgressTests.razor (3 new/updated tests):**
-- Updated `UpdateProgress_DynamicLayoutFalse_UsesDisplayBlockVisibilityHidden` — renamed from `UsesVisibilityHidden`, now asserts both `display:block` and `visibility:hidden` (Fix 4)
-- `UpdateProgress_CssClass_AppliedToDiv` — sets CssClass="progress-overlay", verifies class attribute on div (Fix 3)
-- `UpdateProgress_NoCssClass_NoClassAttribute` — no CssClass set, verifies class attribute is null (Fix 3)
-
-All 29 ScriptManager/UpdateProgress/ScriptReference tests pass (0 failures). Build has 60 pre-existing warnings (none from new tests).
-
-📌 Test pattern: ScriptReference properties tested as plain C# object instantiation (no bUnit render needed) — `new ScriptReference()` then assert defaults. Same pattern as ScriptManagerProxy Scripts/Services tests. — Rogue
-
-📌 Test pattern: UpdateProgress CssClass uses `class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)"` — when CssClass is empty/null, AngleSharp returns null for `GetAttribute("class")`, matching Web Forms behavior of omitting the class attribute entirely. — Rogue
-
- Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
-
-### LinkButton CssClass Tests (Issue #379)
-
-Wrote 8 bUnit tests in `src/BlazorWebFormsComponents.Test/LinkButton/CssClass.razor` verifying CssClass pass-through on the `<a>` element:
-
-1. `SingleClass_RendersAsClassAttributeOnAnchor` — single class renders correctly
-2. `MultipleClasses_RendersSpaceSeparatedOnAnchor` — space-separated classes preserved
-3. `NoCssClass_OmitsClassAttribute` — no CssClass param omits class attribute entirely
-4. `EmptyCssClass_OmitsClassAttribute` — empty string CssClass also omits attribute
-5. `CssClass_WithIdAttribute_BothRenderOnAnchor` — CssClass + ID coexist
-6. `CssClass_WithPostBackUrl_RendersOnAnchor` — PostBackUrl branch also renders class
-7. `Disabled_NoCssClass_RendersAspNetDisabledOnly` — disabled state adds aspNetDisabled
-8. `Disabled_WithCssClass_RendersBothClasses` — disabled + CssClass combines both
-
-📌 Test pattern: LinkButton has two render branches (PostBackUrl null vs non-null). Both share `GetCssClassOrNull()` which returns null for empty/null CssClass (AngleSharp `HasAttribute("class")` returns false) and appends "aspNetDisabled" when Enabled=false. Must test both branches for CssClass. — Rogue
-
-📌 Edge case: `GetCssClassOrNull()` uses `string.IsNullOrEmpty()` not `IsNullOrWhiteSpace()` — whitespace-only CssClass like " " would render `class=" "`. Not a blocker for #379 but noted for future audit. — Rogue
+ Team update (2026-02-27): M17 audit fixes resolved -- 5 fidelity issues fixed. 9 new tests, 1367 total. PR #402 -- decided by Forge, Cyclops
 
  Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.
 

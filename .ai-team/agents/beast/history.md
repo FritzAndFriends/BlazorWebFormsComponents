@@ -69,4 +69,7 @@
   - **Key convention:** When a feature has both a strategy/comparison doc and a practical guide, use separate files with clear nav labels distinguishing them ("Guide" vs "Strategy").
 
  Team update (2026-03-01): SkinBuilder uses expression trees for nested property access  if API changes, update SkinsAndThemes.md examples first (primary dev-facing doc)  decided by Cyclops
+📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally. Theme font-family renders correctly. Update SkinsAndThemes.md if font examples need revision — decided by Cyclops, Rogue
+📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops
+📌 Team update (2026-03-02): Theming sample page uses 6-section progressive layout (Jubilee). Docs should reference this pattern for theming examples — decided by Jubilee
 
