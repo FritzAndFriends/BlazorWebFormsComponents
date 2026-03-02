@@ -191,3 +191,19 @@ Jeff's initial catalog listed RequiredFieldValidator, RegularExpressionValidator
 - Account pages (14 files) map to ASP.NET Core Identity — recommend scaffold, not component migration
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+
+### Summary: ModelErrorMessage Component Specification (2026-03-02)
+
+**By:** Forge
+**What:** Designed component spec for `<ModelErrorMessage>` — the last control without a BWFC equivalent (28/29 WingtipToys controls had coverage). Spec written to `.ai-team/decisions/inbox/forge-modelerrormessage-spec.md`.
+
+**ModelErrorMessage design decisions:**
+- Inherits `BaseStyledComponent`, NOT `BaseValidator<T>`. ModelErrorMessage is a passive error display (like Label), not a validator. Same reasoning as AspNetValidationSummary.
+- Uses `[CascadingParameter] EditContext` as error source — maps Web Forms' `ModelState[key]` to Blazor's `EditContext.GetValidationMessages(field)`. Zero-markup migration: just remove `asp:` and `runat="server"`.
+- `ModelStateKey` parameter maps to `EditContext.Field(key)` — string-keyed like Web Forms, no lambda expressions required (unlike Blazor's `<ValidationMessage For="...">`).
+- Renders `<span class="...">message</span>` (matching Web Forms output). Renders nothing when no error (no space reservation).
+- Strips BWFC validator metadata (`\x1F` encoding, `Text,ErrorMessage` format) from messages before display.
+- `SetFocusOnError` reuses existing `bwfc.Validation.SetFocus` JS interop. Requires `AssociatedControlID` to know the target.
+- `Text` property (Label fallback) and `Display` property (validator-only) omitted — not used in any WingtipToys sample, not part of original ModelErrorMessage API.
+- Multiple errors for same key rendered with `<br>` separator inside single `<span>`.
+- Lives in `Validations/` folder alongside validators and AspNetValidationSummary for discoverability.
