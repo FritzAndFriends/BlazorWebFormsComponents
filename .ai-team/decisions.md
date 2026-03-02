@@ -5464,3 +5464,9 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **What:** Created `docs/ValidationControls/ModelErrorMessage.md` for the new ModelErrorMessage validation component. Added to `mkdocs.yml` nav (alphabetical within Validation Controls). Updated `status.md` — Validation Controls count from 7→8, total from 51→52.
 **Why:** M21 wrap-up deliverable. ModelErrorMessage is a new validation component that displays model state errors for a specific key, matching `<asp:ModelErrorMessage>`. Documentation covers: features (ModelStateKey, AssociatedControlID, SetFocusOnError, CssClass), Web Forms→Blazor syntax comparison, EditContext/ValidationMessageStore code-behind migration pattern, and HTML output. Follows established validation control documentation pattern.
 
+
+### ModelErrorMessage integration test coverage added
+
+**By:** Colossus
+**What:** Added 1 smoke test `[InlineData]` and 3 interactive tests for the ModelErrorMessage sample page (`/ControlSamples/ModelErrorMessage`). Smoke test added to `ValidationControl_Loads_WithoutErrors` Theory group. Interactive tests cover: submit-shows-errors, valid-submit-no-errors, and clear-button-removes-errors.
+**Why:** Every sample page gets an integration test — no exceptions. The ModelErrorMessage component is a validation control that conditionally renders `<span class="text-danger">` elements, so tests verify both the error-present and error-absent states via DOM element counting. The Clear button test exercises the EditContext reset path, which is unique to this sample page.
