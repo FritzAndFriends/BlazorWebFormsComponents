@@ -252,6 +252,48 @@
 		cut.Find("div").GetAttribute("style").ShouldContain("background-color:#EEEEEE");
 	}
 
+	// 14. Theme Font.Name propagates through auto-sync to Font.Names → font-family in rendered HTML
+	[Fact]
+	public void Theme_FontName_RendersFontFamily_ViaAutoSync()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.Font.Name, "Arial"));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="FontTest" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("font-family");
+		style.ShouldContain("Arial");
+	}
+
+	// 15. Theme Font.Name with multiple fonts via Names renders font-family
+	[Fact]
+	public void Theme_FontName_MultipleViaNames_RendersFontFamily()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.Font.Name, "Verdana"));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="FontTest" />
+			</ThemeProvider>
+		);
+
+		var span = cut.Find("span");
+		var style = span.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("font-family");
+		style.ShouldContain("Verdana");
+	}
+
 	// 13. Explicit CssClass overrides theme CssClass
 	[Fact]
 	public void ExplicitCssClass_OverridesThemeCssClass()
