@@ -1,0 +1,268 @@
+@using static BlazorWebFormsComponents.WebColor
+@using static BlazorWebFormsComponents.Enums.BorderStyle
+@using System.Text.RegularExpressions
+
+@code {
+
+	[Fact]
+	public void Menu_StaticMenuStyleContent_AppliesBackgroundAndForeColor()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu1">
+				<StaticMenuStyleContent>
+					<StaticMenuStyle BackColor="LightGreen" ForeColor="Black" />
+				</StaticMenuStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		// StaticMenuStyle applies to ul.level1 CSS rule
+		var reTest = new Regex(@"ul\.level1\s*\{([^}]+)\}");
+		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+	}
+
+	[Fact]
+	public void Menu_DynamicMenuStyleContent_AppliesBackgroundAndForeColor()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu2">
+				<DynamicMenuStyleContent>
+					<DynamicMenuStyle BackColor="LightSkyBlue" ForeColor="Navy" />
+				</DynamicMenuStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		// DynamicMenuStyle applies to ul.dynamic CSS rule
+		var reTest = new Regex(@"ul\.dynamic\s*\{([^}]+)\}");
+		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+	}
+
+	[Fact]
+	public void Menu_StaticMenuItemStyleContent_AppliesStyles()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu3">
+				<StaticMenuItemStyleContent>
+					<StaticMenuItemStyle BackColor="Wheat" ForeColor="Brown" />
+				</StaticMenuItemStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		// StaticMenuItemStyle applies to a.static CSS rule
+		var reTest = new Regex(@"a\.static\s*\{([^}]+)\}");
+		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+	}
+
+	[Fact]
+	public void Menu_DynamicMenuItemStyleContent_AppliesStyles()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu4">
+				<DynamicMenuItemStyleContent>
+					<DynamicMenuItemStyle BackColor="Coral" ForeColor="White" />
+				</DynamicMenuItemStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		// DynamicMenuItemStyle applies to a.dynamic CSS rule
+		var reTest = new Regex(@"a\.dynamic\s*\{([^}]+)\}");
+		reTest.Match(theMarkup).Captures.Count.ShouldBe(1);
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		theStyleRules.ShouldContain("background-color:");
+		theStyleRules.ShouldContain("color:");
+	}
+
+	[Fact]
+	public void Menu_StaticMenuStyle_WithBorder_RendersBorderStyle()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu5">
+				<StaticMenuStyleContent>
+					<StaticMenuStyle BackColor="LightGreen"
+						BorderStyle="Solid"
+						BorderWidth="2"
+						BorderColor="DarkGreen" />
+				</StaticMenuStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		var reTest = new Regex(@"ul\.level1\s*\{([^}]+)\}");
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		theStyleRules.ShouldContain("border:");
+		theStyleRules.ShouldContain("background-color:");
+	}
+
+	[Fact]
+	public void Menu_StaticMenuItemStyle_FontBold_RendersFontWeight()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu6">
+				<StaticMenuItemStyleContent>
+					<StaticMenuItemStyle ForeColor="Black" Font-Bold="true" />
+				</StaticMenuItemStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		var reTest = new Regex(@"a\.static\s*\{([^}]+)\}");
+		var theStyleRules = reTest.Match(theMarkup).Groups[1].Value;
+
+		theStyleRules.ShouldContain("font-weight:bold");
+		theStyleRules.ShouldContain("color:");
+	}
+
+	[Fact]
+	public void Menu_CombinedStyles_StaticAndDynamic_BothApply()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu7">
+				<StaticMenuStyleContent>
+					<StaticMenuStyle BackColor="LightYellow" />
+				</StaticMenuStyleContent>
+				<DynamicMenuStyleContent>
+					<DynamicMenuStyle BackColor="LightBlue" />
+				</DynamicMenuStyleContent>
+				<StaticMenuItemStyleContent>
+					<StaticMenuItemStyle ForeColor="DarkRed" />
+				</StaticMenuItemStyleContent>
+				<DynamicMenuItemStyleContent>
+					<DynamicMenuItemStyle ForeColor="DarkBlue" />
+				</DynamicMenuItemStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var theMarkup = cut.Markup;
+
+		// Verify all four style rules are present in the emitted CSS
+		var staticMenuRe = new Regex(@"ul\.level1\s*\{([^}]+)\}");
+		staticMenuRe.Match(theMarkup).Groups[1].Value.ShouldContain("background-color:");
+
+		var dynamicMenuRe = new Regex(@"ul\.dynamic\s*\{([^}]+)\}");
+		dynamicMenuRe.Match(theMarkup).Groups[1].Value.ShouldContain("background-color:");
+
+		var staticItemRe = new Regex(@"a\.static\s*\{([^}]+)\}");
+		staticItemRe.Match(theMarkup).Groups[1].Value.ShouldContain("color:");
+
+		var dynamicItemRe = new Regex(@"a\.dynamic\s*\{([^}]+)\}");
+		dynamicItemRe.Match(theMarkup).Groups[1].Value.ShouldContain("color:");
+	}
+
+	[Fact]
+	public void Menu_StaticMenuItemStyle_CssClass_IsAccessibleOnInstance()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu8">
+				<StaticMenuItemStyleContent>
+					<StaticMenuItemStyle CssClass="my-static-item" ForeColor="Black" />
+				</StaticMenuItemStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		// Verify the style was set on the Menu instance
+		var menu = cut.FindComponent<Menu>().Instance;
+		menu.StaticMenuItemStyle.CssClass.ShouldBe("my-static-item");
+	}
+
+	[Fact]
+	public void Menu_DynamicMenuStyle_CssClass_IsAccessibleOnInstance()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ID="StyleMenu9">
+				<DynamicMenuStyleContent>
+					<DynamicMenuStyle CssClass="my-dynamic-menu" BackColor="Silver" />
+				</DynamicMenuStyleContent>
+				<ChildContent>
+					<Items>
+						<MenuItem Text="Home" Value="home" />
+					</Items>
+				</ChildContent>
+			</Menu>
+		);
+
+		var menu = cut.FindComponent<Menu>().Instance;
+		menu.DynamicMenuStyle.CssClass.ShouldBe("my-dynamic-menu");
+	}
+
+}

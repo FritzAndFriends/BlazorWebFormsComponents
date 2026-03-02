@@ -165,8 +165,6 @@ The following DataGrid features from Web Forms are not currently supported:
 
 ## Blazor Syntax
 
-Currently, not every syntax element of Web Forms DataGrid is supported. In the meantime, the following DataGrid in Blazor syntax will only include the implemented ones. **Custom paging and footer templates will be included later**.
-
 ```html
 <DataGrid
     AllowPaging=bool
@@ -381,6 +379,7 @@ When `true`, header cells render as `<th scope="col">` instead of `<td>`, improv
           DataKeyField="CustomerID"
           SelectMethod="GetCustomers"
           PageIndexChanged="HandlePageChanged">
+    <PagerStyle BackColor="#DDDDDD" ForeColor="#333333" />
 </DataGrid>
 
 @code {
@@ -391,7 +390,19 @@ When `true`, header cells render as `<th scope="col">` instead of `<td>`, improv
 }
 ```
 
-When `AllowPaging="true"` and `PageSize` is set, the DataGrid automatically renders a numeric pager row. The pager displays page numbers and highlights the current page. Clicking a page number fires `PageIndexChanged` and navigates to that page.
+When `AllowPaging="true"` and `PageSize` is set, the DataGrid automatically renders a numeric pager row in the table footer. The pager displays page numbers — the current page as plain text, others as clickable links. Clicking a page number fires `PageIndexChanged` and navigates to that page.
+
+!!! note "DataGrid Paging vs. GridView/FormView/DetailsView Paging"
+    DataGrid uses a **built-in numeric pager** and does not support the `<PagerSettings>` sub-component that GridView, FormView, and DetailsView use. If you need configurable pager modes (NextPrevious, NumericFirstLast, etc.), consider migrating to [GridView](GridView.md) which offers full [PagerSettings](PagerSettings.md) support.
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `AllowPaging` | `bool` | `false` | Enables or disables paging |
+| `PageSize` | `int` | `10` | Number of items displayed per page |
+| `CurrentPageIndex` | `int` | `0` | The zero-based index of the current page |
+| `PageIndexChanged` | `EventCallback<DataGridPageChangedEventArgs>` | — | Fires when the page changes |
+
+The `PagerStyle` sub-component controls the visual appearance of the pager row.
 
 ### DataGrid with Sorting
 
@@ -443,3 +454,4 @@ When migrating DataGrid from Web Forms to Blazor:
 - [GridView](GridView.md) - The recommended data grid control for new projects
 - [DataList](DataList.md) - For custom layout of repeating data
 - [Repeater](Repeater.md) - For lightweight data repetition
+- [PagerSettings](PagerSettings.md) - Shared pager configuration (used by GridView, FormView, DetailsView)

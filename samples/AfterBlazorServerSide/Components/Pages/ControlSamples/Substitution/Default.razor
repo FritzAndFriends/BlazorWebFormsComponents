@@ -1,0 +1,78 @@
+@page "/ControlSamples/Substitution"
+@using Microsoft.AspNetCore.Http
+
+<h2>Substitution Component Samples</h2>
+
+<p>The <code>Substitution</code> component emulates the Web Forms <code>asp:Substitution</code> control, which was used to inject dynamic content into output-cached pages. In Blazor, this component invokes a <code>Func&lt;HttpContext, string&gt;</code> callback and renders the returned markup.</p>
+
+<hr />
+
+<h3>Basic Callback</h3>
+<p>The <code>SubstitutionCallback</code> parameter accepts a function that receives the current <code>HttpContext</code> and returns an HTML string.</p>
+
+<Substitution SubstitutionCallback="@GetTimestamp" />
+
+<pre><code>&lt;Substitution SubstitutionCallback="@@GetTimestamp" /&gt;
+
+@@code {
+    private string GetTimestamp(HttpContext? context) =&gt;
+        $"&lt;em&gt;Rendered at: {DateTime.Now:h:mm:ss tt}&lt;/em&gt;";
+}</code></pre>
+
+<hr />
+
+<h3>Using HttpContext</h3>
+<p>The callback receives the current <code>HttpContext</code>, allowing access to request information such as headers, query strings, or the user agent.</p>
+
+<Substitution SubstitutionCallback="@GetRequestInfo" />
+
+<pre><code>&lt;Substitution SubstitutionCallback="@@GetRequestInfo" /&gt;
+
+@@code {
+    private string GetRequestInfo(HttpContext? context)
+    {
+        if (context == null) return "&lt;em&gt;No HttpContext available&lt;/em&gt;";
+        var method = context.Request.Method;
+        var path = context.Request.Path;
+        return $"&lt;span&gt;Request: {method} {path}&lt;/span&gt;";
+    }
+}</code></pre>
+
+<hr />
+
+<h3>MethodName Property</h3>
+<p>The <code>MethodName</code> property is preserved for migration reference. In Web Forms, this specified the name of a static callback method. In Blazor, use the <code>SubstitutionCallback</code> parameter instead.</p>
+
+<Substitution MethodName="GetDynamicContent" SubstitutionCallback="@GetDynamicContent" />
+
+<pre><code>&lt;Substitution MethodName="GetDynamicContent" SubstitutionCallback="@@GetDynamicContent" /&gt;</code></pre>
+
+<hr />
+
+<h3>Web Forms Equivalent</h3>
+<pre><code class="language-aspx">&lt;!-- Web Forms — used inside output-cached pages --&gt;
+&lt;%@@ OutputCache Duration="60" VaryByParam="None" %&gt;
+
+&lt;asp:Substitution ID="Sub1" runat="server" MethodName="GetCurrentTime" /&gt;
+
+&lt;!-- Code-behind --&gt;
+public static string GetCurrentTime(HttpContext context)
+{
+    return DateTime.Now.ToString("h:mm:ss tt");
+}</code></pre>
+
+@code {
+    private string GetTimestamp(HttpContext? context) =>
+        $"<em>Rendered at: {DateTime.Now:h:mm:ss tt}</em>";
+
+    private string GetRequestInfo(HttpContext? context)
+    {
+        if (context == null) return "<em>No HttpContext available</em>";
+        var method = context.Request.Method;
+        var path = context.Request.Path;
+        return $"<span>Request: {method} {path}</span>";
+    }
+
+    private string GetDynamicContent(HttpContext? context) =>
+        $"<strong>Dynamic content generated at {DateTime.Now:h:mm:ss tt}</strong>";
+}

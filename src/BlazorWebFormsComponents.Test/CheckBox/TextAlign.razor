@@ -38,4 +38,42 @@
 		elements[1].TagName.ShouldBe("LABEL");
 	}
 
+	// --- Bug fix #382: Combined alignment + no-span-wrapper verification ---
+
+	[Fact]
+	public void CheckBox_TextAlignRight_RendersInputThenLabelWithNoSpanWrapper()
+	{
+		// Bug #382: TextAlign=Right must render <input> then <label> with NO wrapping <span>
+		var cut = Render(@<CheckBox Text="Right aligned" TextAlign="Enums.TextAlign.Right" />);
+
+		var elements = cut.FindAll("input, label");
+		elements.Count.ShouldBe(2);
+		elements[0].TagName.ShouldBe("INPUT");
+		elements[1].TagName.ShouldBe("LABEL");
+		Should.Throw<Bunit.ElementNotFoundException>(() => cut.Find("span"));
+	}
+
+	[Fact]
+	public void CheckBox_TextAlignLeft_RendersLabelThenInputWithNoSpanWrapper()
+	{
+		// Bug #382: TextAlign=Left must render <label> then <input> with NO wrapping <span>
+		var cut = Render(@<CheckBox Text="Left aligned" TextAlign="Enums.TextAlign.Left" />);
+
+		var elements = cut.FindAll("label, input");
+		elements.Count.ShouldBe(2);
+		elements[0].TagName.ShouldBe("LABEL");
+		elements[1].TagName.ShouldBe("INPUT");
+		Should.Throw<Bunit.ElementNotFoundException>(() => cut.Find("span"));
+	}
+
+	[Fact]
+	public void CheckBox_WithText_TopLevelElementIsNotSpan()
+	{
+		// Bug #382: The top-level rendered element should NOT be a <span> wrapper
+		var cut = Render(@<CheckBox Text="Test" />);
+
+		var firstElement = cut.Nodes.OfType<IElement>().First();
+		firstElement.TagName.ShouldNotBe("SPAN");
+	}
+
 }

@@ -37,6 +37,6 @@
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
 
-		cut.Markup.Trim().ShouldBeEmpty();
+		cut.Find("div").TextContent.Trim().ShouldBeEmpty();
 	}
 }

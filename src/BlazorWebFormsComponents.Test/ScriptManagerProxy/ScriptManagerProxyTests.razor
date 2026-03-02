@@ -1,0 +1,40 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void ScriptManagerProxy_RendersNoVisibleOutput()
+	{
+		// Arrange & Act
+		var cut = Render(@<ScriptManagerProxy />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void ScriptManagerProxy_CanBeRenderedWithoutErrors()
+	{
+		// Arrange & Act & Assert — no exception thrown
+		var cut = Render(@<ScriptManagerProxy />);
+		cut.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ScriptManagerProxy_DefaultScripts_IsEmptyList()
+	{
+		var cut = Render(@<ScriptManagerProxy />);
+		var proxy = cut.FindComponent<ScriptManagerProxy>();
+		proxy.Instance.Scripts.ShouldNotBeNull();
+		proxy.Instance.Scripts.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ScriptManagerProxy_DefaultServices_IsEmptyList()
+	{
+		var cut = Render(@<ScriptManagerProxy />);
+		var proxy = cut.FindComponent<ScriptManagerProxy>();
+		proxy.Instance.Services.ShouldNotBeNull();
+		proxy.Instance.Services.Count.ShouldBe(0);
+	}
+}

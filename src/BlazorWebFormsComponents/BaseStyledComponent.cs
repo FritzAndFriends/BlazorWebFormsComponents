@@ -1,4 +1,4 @@
-﻿using BlazorComponentUtilities;
+using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Components;
@@ -37,28 +37,13 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string ToolTip { get; set; }
 
-		[CascadingParameter]
-		public ThemeConfiguration Theme { get; set; }
-
 		protected string Style => this.ToStyle().Build().NullIfEmpty();
-
-		protected override void OnParametersSet()
-		{
-			base.OnParametersSet();
-
-			if (!EnableTheming || Theme == null) return;
-
-			var skin = Theme.GetSkin(GetType().Name, SkinID);
-			if (skin == null) return;
-
-			ApplySkin(skin);
-		}
 
 		/// <summary>
 		/// Applies skin properties using StyleSheetTheme semantics:
 		/// the theme sets defaults, but explicit component values take precedence.
 		/// </summary>
-		private void ApplySkin(ControlSkin skin)
+		protected override void ApplyThemeSkin(ControlSkin skin)
 		{
 			if (BackColor == default && skin.BackColor != default)
 				BackColor = skin.BackColor;
@@ -92,7 +77,7 @@ namespace BlazorWebFormsComponents
 				if (Font == null)
 					Font = new FontInfo();
 
-				if (string.IsNullOrEmpty(Font.Name) && !string.IsNullOrEmpty(skin.Font.Name))
+				if (string.IsNullOrEmpty(Font.Name) && string.IsNullOrEmpty(Font.Names) && !string.IsNullOrEmpty(skin.Font.Name))
 					Font.Name = skin.Font.Name;
 
 				if (Font.Size == FontUnit.Empty && skin.Font.Size != FontUnit.Empty)

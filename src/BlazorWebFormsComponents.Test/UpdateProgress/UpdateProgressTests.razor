@@ -1,0 +1,171 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void UpdateProgress_RendersDiv()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="prog1">
+				<ProgressTemplate>
+					<p>Loading...</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#prog1");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("Loading...");
+	}
+
+	[Fact]
+	public void UpdateProgress_DynamicLayoutTrue_UsesDisplayNone()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="dynTrue" DynamicLayout="true">
+				<ProgressTemplate>
+					<p>Loading</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#dynTrue");
+		div.GetAttribute("style").ShouldContain("display:none");
+	}
+
+	[Fact]
+	public void UpdateProgress_DynamicLayoutFalse_UsesDisplayBlockVisibilityHidden()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="dynFalse" DynamicLayout="false">
+				<ProgressTemplate>
+					<p>Loading</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#dynFalse");
+		div.GetAttribute("style").ShouldContain("display:block");
+		div.GetAttribute("style").ShouldContain("visibility:hidden");
+	}
+
+	[Fact]
+	public void UpdateProgress_DefaultDynamicLayout_IsTrue()
+	{
+		var cut = Render(
+			@<UpdateProgress>
+				<ProgressTemplate><p>X</p></ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		var prog = cut.FindComponent<UpdateProgress>();
+		prog.Instance.DynamicLayout.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void UpdateProgress_DefaultDisplayAfter_Is500()
+	{
+		var cut = Render(
+			@<UpdateProgress>
+				<ProgressTemplate><p>X</p></ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		var prog = cut.FindComponent<UpdateProgress>();
+		prog.Instance.DisplayAfter.ShouldBe(500);
+	}
+
+	[Fact]
+	public void UpdateProgress_DisplayAfter_CanBeSet()
+	{
+		var cut = Render(
+			@<UpdateProgress DisplayAfter="1000">
+				<ProgressTemplate><p>X</p></ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		var prog = cut.FindComponent<UpdateProgress>();
+		prog.Instance.DisplayAfter.ShouldBe(1000);
+	}
+
+	[Fact]
+	public void UpdateProgress_AssociatedUpdatePanelID_CanBeSet()
+	{
+		var cut = Render(
+			@<UpdateProgress AssociatedUpdatePanelID="upMain">
+				<ProgressTemplate><p>X</p></ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		var prog = cut.FindComponent<UpdateProgress>();
+		prog.Instance.AssociatedUpdatePanelID.ShouldBe("upMain");
+	}
+
+	[Fact]
+	public void UpdateProgress_DefaultAssociatedUpdatePanelID_IsNull()
+	{
+		var cut = Render(
+			@<UpdateProgress>
+				<ProgressTemplate><p>X</p></ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		var prog = cut.FindComponent<UpdateProgress>();
+		prog.Instance.AssociatedUpdatePanelID.ShouldBeNull();
+	}
+
+	[Fact]
+	public void UpdateProgress_RendersProgressTemplateContent()
+	{
+		var cut = Render(
+			@<UpdateProgress>
+				<ProgressTemplate>
+					<div class="spinner">Please wait...</div>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		cut.Markup.ShouldContain("Please wait...");
+		cut.Find(".spinner").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void UpdateProgress_CssClass_AppliedToDiv()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="styled" CssClass="progress-overlay">
+				<ProgressTemplate>
+					<p>Loading...</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#styled");
+		div.GetAttribute("class").ShouldBe("progress-overlay");
+	}
+
+	[Fact]
+	public void UpdateProgress_NoCssClass_NoClassAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdateProgress ID="unstyled">
+				<ProgressTemplate>
+					<p>Loading...</p>
+				</ProgressTemplate>
+			</UpdateProgress>
+		);
+
+		// Assert
+		var div = cut.Find("div#unstyled");
+		div.GetAttribute("class").ShouldBeNull();
+	}
+}

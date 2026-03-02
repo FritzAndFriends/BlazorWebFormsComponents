@@ -1,0 +1,80 @@
+@page "/ControlSamples/Timer"
+
+<h2>Timer Component Samples</h2>
+
+<p>The <code>Timer</code> component triggers a callback at a specified interval, similar to the ASP.NET Web Forms <code>asp:Timer</code> control. In Web Forms, Timer was typically used with UpdatePanel for periodic partial-page updates. In Blazor, all UI updates are already partial, so the Timer simply invokes its <code>OnTick</code> callback.</p>
+
+<hr />
+
+<h3>Auto-Incrementing Counter (2-Second Interval)</h3>
+<p>This timer ticks every 2 seconds and increments a counter automatically.</p>
+
+<Timer Interval="2000" OnTick="OnCounterTick" />
+
+<div class="alert alert-info">
+    <strong>Tick count:</strong> @tickCount
+</div>
+
+<pre><code>&lt;Timer Interval="2000" OnTick="OnCounterTick" /&gt;
+
+@@code {
+    private int tickCount = 0;
+    private void OnCounterTick() =&gt; tickCount++;
+}</code></pre>
+
+<hr />
+
+<h3>Timer with Start/Stop Toggle</h3>
+<p>Use the <code>Enabled</code> property to start and stop the timer at runtime.</p>
+
+<Timer Interval="1000" Enabled="@timerEnabled" OnTick="OnToggleTick" />
+
+<div class="mb-3">
+    <button class="btn @(timerEnabled ? "btn-danger" : "btn-success")" @onclick="ToggleTimer">
+        @(timerEnabled ? "Stop Timer" : "Start Timer")
+    </button>
+</div>
+
+<div class="alert @(timerEnabled ? "alert-success" : "alert-secondary")">
+    <strong>Status:</strong> @(timerEnabled ? "Running" : "Stopped") &mdash;
+    <strong>Seconds elapsed:</strong> @secondsElapsed
+</div>
+
+<pre><code>&lt;Timer Interval="1000" Enabled="@@timerEnabled" OnTick="OnToggleTick" /&gt;
+
+&lt;button @@onclick="ToggleTimer"&gt;
+    @@(timerEnabled ? "Stop Timer" : "Start Timer")
+&lt;/button&gt;
+
+@@code {
+    private bool timerEnabled = false;
+    private int secondsElapsed = 0;
+
+    private void ToggleTimer() =&gt; timerEnabled = !timerEnabled;
+    private void OnToggleTick() =&gt; secondsElapsed++;
+}</code></pre>
+
+<hr />
+
+<h3>Web Forms Equivalent</h3>
+<pre><code class="language-aspx">&lt;!-- Web Forms --&gt;
+&lt;asp:ScriptManager runat="server" /&gt;
+&lt;asp:Timer ID="Timer1" runat="server" Interval="2000" OnTick="Timer1_Tick" /&gt;
+&lt;asp:UpdatePanel runat="server"&gt;
+    &lt;ContentTemplate&gt;
+        &lt;asp:Label ID="lblCount" runat="server" /&gt;
+    &lt;/ContentTemplate&gt;
+    &lt;Triggers&gt;
+        &lt;asp:AsyncPostBackTrigger ControlID="Timer1" EventName="Tick" /&gt;
+    &lt;/Triggers&gt;
+&lt;/asp:UpdatePanel&gt;</code></pre>
+
+@code {
+    private int tickCount = 0;
+    private bool timerEnabled = false;
+    private int secondsElapsed = 0;
+
+    private void OnCounterTick() => tickCount++;
+    private void ToggleTimer() => timerEnabled = !timerEnabled;
+    private void OnToggleTick() => secondsElapsed++;
+}

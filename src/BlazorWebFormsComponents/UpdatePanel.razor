@@ -1,0 +1,14 @@
+@using BlazorWebFormsComponents.Enums
+@inherits BaseWebFormsComponent
+
+@if (Visible)
+{
+	@if (RenderMode == UpdatePanelRenderMode.Inline)
+	{
+		<span id="@ClientID">@ChildContent</span>
+	}
+	else
+	{
+		<div id="@ClientID">@ChildContent</div>
+	}
+}

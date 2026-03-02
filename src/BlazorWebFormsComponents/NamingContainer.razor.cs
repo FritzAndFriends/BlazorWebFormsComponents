@@ -1,3 +1,4 @@
+using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
 
 namespace BlazorWebFormsComponents;
@@ -16,7 +17,19 @@ public partial class NamingContainer : BaseWebFormsComponent
 	/// When true, prepends "ctl00" to the naming hierarchy for full Web Forms compatibility.
 	/// For example, a Button with ID="MyButton" inside a NamingContainer with ID="MainContent"
 	/// and UseCtl00Prefix=true would get ClientID="ctl00_MainContent_MyButton".
+	/// Automatically sets ClientIDMode to AutoID for backward compatibility.
 	/// </summary>
 	[Parameter]
 	public bool UseCtl00Prefix { get; set; }
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+
+		// UseCtl00Prefix implies AutoID mode so children inherit ctl00 behavior
+		if (UseCtl00Prefix && ClientIDMode == ClientIDMode.Inherit)
+		{
+			ClientIDMode = ClientIDMode.AutoID;
+		}
+	}
 }

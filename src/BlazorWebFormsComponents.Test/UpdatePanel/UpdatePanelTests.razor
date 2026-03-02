@@ -1,0 +1,124 @@
+@inherits BlazorWebFormsTestContext
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void UpdatePanel_DefaultRenderMode_IsBlock()
+	{
+		var cut = Render(@<UpdatePanel><p>Content</p></UpdatePanel>);
+		var panel = cut.FindComponent<UpdatePanel>();
+		panel.Instance.RenderMode.ShouldBe(UpdatePanelRenderMode.Block);
+	}
+
+	[Fact]
+	public void UpdatePanel_BlockMode_RendersDiv()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdatePanel ID="upTest">
+				<p>Content</p>
+			</UpdatePanel>
+		);
+
+		// Assert
+		var div = cut.Find("div");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("<p>Content</p>");
+	}
+
+	[Fact]
+	public void UpdatePanel_InlineMode_RendersSpan()
+	{
+		UpdatePanelRenderMode mode = UpdatePanelRenderMode.Inline;
+
+		// Arrange & Act
+		var cut = Render(
+			@<UpdatePanel ID="upInline" RenderMode="mode">
+				<span>Inner</span>
+			</UpdatePanel>
+		);
+
+		// Assert
+		var span = cut.Find("span#upInline");
+		span.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void UpdatePanel_BlockMode_RendersChildContent()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdatePanel>
+				<p>Hello World</p>
+			</UpdatePanel>
+		);
+
+		// Assert
+		cut.Markup.ShouldContain("Hello World");
+	}
+
+	[Fact]
+	public void UpdatePanel_DefaultUpdateMode_IsAlways()
+	{
+		var cut = Render(@<UpdatePanel><p>Content</p></UpdatePanel>);
+		var panel = cut.FindComponent<UpdatePanel>();
+		panel.Instance.UpdateMode.ShouldBe(UpdatePanelUpdateMode.Always);
+	}
+
+	[Fact]
+	public void UpdatePanel_ConditionalUpdateMode_Accepted()
+	{
+		UpdatePanelUpdateMode mode = UpdatePanelUpdateMode.Conditional;
+
+		var cut = Render(@<UpdatePanel UpdateMode="mode"><p>Content</p></UpdatePanel>);
+		var panel = cut.FindComponent<UpdatePanel>();
+		panel.Instance.UpdateMode.ShouldBe(UpdatePanelUpdateMode.Conditional);
+	}
+
+	[Fact]
+	public void UpdatePanel_DefaultChildrenAsTriggers_IsTrue()
+	{
+		var cut = Render(@<UpdatePanel><p>Content</p></UpdatePanel>);
+		var panel = cut.FindComponent<UpdatePanel>();
+		panel.Instance.ChildrenAsTriggers.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void UpdatePanel_ChildrenAsTriggersFalse_Accepted()
+	{
+		var cut = Render(@<UpdatePanel ChildrenAsTriggers="false"><p>Content</p></UpdatePanel>);
+		var panel = cut.FindComponent<UpdatePanel>();
+		panel.Instance.ChildrenAsTriggers.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void UpdatePanel_WithID_RendersIDOnWrapper()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<UpdatePanel ID="myPanel">
+				<p>Content</p>
+			</UpdatePanel>
+		);
+
+		// Assert
+		var div = cut.Find("div#myPanel");
+		div.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void UpdatePanel_InlineWithID_RendersIDOnSpan()
+	{
+		UpdatePanelRenderMode mode = UpdatePanelRenderMode.Inline;
+
+		var cut = Render(
+			@<UpdatePanel ID="inlinePanel" RenderMode="mode">
+				<span>Content</span>
+			</UpdatePanel>
+		);
+
+		var span = cut.Find("span#inlinePanel");
+		span.ShouldNotBeNull();
+	}
+}

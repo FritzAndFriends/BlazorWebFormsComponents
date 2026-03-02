@@ -41,6 +41,6 @@
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
 
-		cut.Markup.Trim().ShouldBe("Agent");
+		cut.Find("div").TextContent.Trim().ShouldBe("Agent");
 	}
 }

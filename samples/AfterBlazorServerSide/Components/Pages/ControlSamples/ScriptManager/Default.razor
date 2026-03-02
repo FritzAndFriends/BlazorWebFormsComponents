@@ -1,0 +1,62 @@
+@page "/ControlSamples/ScriptManager"
+@using BlazorWebFormsComponents.Enums
+
+<h2>ScriptManager Component</h2>
+
+<p>The <code>ScriptManager</code> component is a <strong>migration stub</strong> that exists solely for markup compatibility when migrating from ASP.NET Web Forms. It renders no visible output.</p>
+
+<div class="alert alert-info">
+    <h4 class="alert-heading">Migration Note</h4>
+    <p>In Web Forms, <code>ScriptManager</code> was required on every page that used AJAX features (UpdatePanel, Timer, etc.). It managed JavaScript resources, partial rendering, and web service proxies.</p>
+    <p>In Blazor, these responsibilities are handled by the framework itself:</p>
+    <ul>
+        <li><strong>Partial rendering</strong> &mdash; Blazor's diff-based rendering handles this automatically</li>
+        <li><strong>Script management</strong> &mdash; Use <code>&lt;script&gt;</code> tags or JS interop</li>
+        <li><strong>Page methods</strong> &mdash; Use Blazor component methods or API controllers</li>
+        <li><strong>Globalization/Localization</strong> &mdash; Use .NET localization middleware</li>
+    </ul>
+    <p class="mb-0">You can safely remove <code>&lt;ScriptManager&gt;</code> after migration is complete, or leave it in place — it has no effect on rendering or performance.</p>
+</div>
+
+<hr />
+
+<h3>Usage (renders nothing)</h3>
+<p>The component below is present on this page but produces no HTML output:</p>
+
+<ScriptManager EnablePartialRendering="true" ScriptMode="ScriptMode.Auto" />
+
+<p class="text-muted"><em>↑ A ScriptManager is rendered above this line. Inspect the page source to confirm it produces no HTML.</em></p>
+
+<pre><code>&lt;ScriptManager EnablePartialRendering="true" ScriptMode="ScriptMode.Auto" /&gt;</code></pre>
+
+<hr />
+
+<h3>Supported Properties (for migration compatibility)</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>EnablePartialRendering</td><td>bool</td><td>false</td><td>No effect in Blazor</td></tr>
+        <tr><td>EnablePageMethods</td><td>bool</td><td>false</td><td>No effect in Blazor</td></tr>
+        <tr><td>ScriptMode</td><td>ScriptMode</td><td>Auto</td><td>No effect in Blazor</td></tr>
+        <tr><td>AsyncPostBackTimeout</td><td>int</td><td>90</td><td>No effect in Blazor</td></tr>
+        <tr><td>EnableCdn</td><td>bool</td><td>false</td><td>No effect in Blazor</td></tr>
+        <tr><td>EnableScriptGlobalization</td><td>bool</td><td>false</td><td>No effect in Blazor</td></tr>
+        <tr><td>EnableScriptLocalization</td><td>bool</td><td>false</td><td>No effect in Blazor</td></tr>
+    </tbody>
+</table>
+
+<hr />
+
+<h3>Web Forms Equivalent</h3>
+<pre><code class="language-aspx">&lt;!-- Web Forms — required on every AJAX-enabled page --&gt;
+&lt;asp:ScriptManager ID="ScriptManager1" runat="server"
+    EnablePartialRendering="true"
+    EnablePageMethods="true"
+    AsyncPostBackTimeout="90" /&gt;</code></pre>

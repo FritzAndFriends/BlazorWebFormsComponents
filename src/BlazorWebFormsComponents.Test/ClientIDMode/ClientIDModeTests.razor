@@ -1,0 +1,196 @@
+@inherits BlazorWebFormsTestContext
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	// ===== Static Mode Tests =====
+
+	[Fact]
+	public void StaticMode_RendersRawID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Static" />
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MyButton");
+	}
+
+	[Fact]
+	public void StaticMode_InsideNamingContainer_IgnoresParentPrefix()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Parent">
+				<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Static" />
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MyButton");
+	}
+
+	[Fact]
+	public void StaticMode_NestedNamingContainers_RendersOnlyRawID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Outer">
+				<NamingContainer ID="Inner">
+					<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Static" />
+				</NamingContainer>
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MyButton");
+	}
+
+	// ===== Predictable Mode Tests =====
+
+	[Fact]
+	public void PredictableMode_InsideNamingContainer_GetsParentChildPattern()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Parent">
+				<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Predictable" />
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("Parent_MyButton");
+	}
+
+	[Fact]
+	public void PredictableMode_NestedNamingContainers_GetsFullPath()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Outer">
+				<NamingContainer ID="Inner">
+					<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Predictable" />
+				</NamingContainer>
+			</NamingContainer>
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("Outer_Inner_MyButton");
+	}
+
+	[Fact]
+	public void PredictableMode_DoesNotIncludeCtl00_EvenWhenUseCtl00PrefixIsTrue()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Parent" UseCtl00Prefix="true">
+				<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Predictable" />
+			</NamingContainer>
+		);
+
+		// Assert — Predictable mode never includes ctl00
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("Parent_MyButton");
+	}
+
+	// ===== AutoID Mode Tests =====
+
+	[Fact]
+	public void AutoIDMode_InsideNamingContainerWithCtl00_GetsCtl00Prefix()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="MainContent" UseCtl00Prefix="true">
+				<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.AutoID" />
+			</NamingContainer>
+		);
+
+		// Assert — AutoID includes ctl00 prefix from NamingContainer
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("ctl00_MainContent_MyButton");
+	}
+
+	[Fact]
+	public void AutoIDMode_IsLegacyMode_IncludesCtl00()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<NamingContainer ID="Outer" UseCtl00Prefix="true">
+				<NamingContainer ID="Inner">
+					<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.AutoID" />
+				</NamingContainer>
+			</NamingContainer>
+		);
+
+		// Assert — Only NamingContainers with UseCtl00Prefix=true add ctl00
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("ctl00_Outer_Inner_MyButton");
+	}
+
+	// ===== Inherit Mode Tests =====
+
+	[Fact]
+	public void InheritMode_DefaultResolvesToPredictable()
+	{
+		// Arrange & Act — Inherit is the default, which resolves to Predictable
+		var cut = Render(
+			@<NamingContainer ID="Parent">
+				<Button ID="MyButton" Text="Click" />
+			</NamingContainer>
+		);
+
+		// Assert — Same as Predictable: Parent_Child pattern, no ctl00
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("Parent_MyButton");
+	}
+
+	[Fact]
+	public void InheritMode_WalksUpToParentMode()
+	{
+		// Arrange & Act — NamingContainer sets Static mode, child inherits it
+		var cut = Render(
+			@<NamingContainer ID="Parent" ClientIDMode="ClientIDMode.Static">
+				<Button ID="MyButton" Text="Click" />
+			</NamingContainer>
+		);
+
+		// Assert — Child inherits Static from parent, so renders raw ID
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MyButton");
+	}
+
+	// ===== Edge Case Tests =====
+
+	[Fact]
+	public void NoIDSet_ReturnsNullClientID_RegardlessOfMode()
+	{
+		// Arrange & Act — No ID parameter set
+		var cut = Render(
+			@<NamingContainer ID="Parent">
+				<Button Text="Click" ClientIDMode="ClientIDMode.Static" />
+			</NamingContainer>
+		);
+
+		// Assert — No id attribute should be rendered (ClientID returns null)
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBeNull();
+	}
+
+	[Fact]
+	public void StaticMode_NoNamingContainer_ReturnsRawID()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<Button ID="MyButton" Text="Click" ClientIDMode="ClientIDMode.Static" />
+		);
+
+		// Assert
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MyButton");
+	}
+}

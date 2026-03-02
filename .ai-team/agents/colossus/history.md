@@ -1,111 +1,52 @@
 # Colossus — History
 
-<!-- ⚠ Summarized 2026-02-23 by Scribe — original entries covered 2026-02-10 through 2026-02-12 -->
+<!-- ⚠ Summarized 2026-02-28 by Scribe — entries before 2026-02-26 archived below as summaries. Full early history in history-archive.md -->
 
-## Summary: Milestones 1–3 Integration Tests (2026-02-10 through 2026-02-12)
+## Core Context
 
-Audited 74 sample routes, added 32 missing smoke tests. Added interaction tests for Sprint 2 (MultiView, ChangePassword, CreateUserWizard, Localize) and Sprint 3 (DetailsView paging/edit, PasswordRecovery 3-step flow). Fixed 7 pre-existing failures: missing `@using BlazorWebFormsComponents.LoginControls` on ChangePassword/CreateUserWizard, external placeholder URLs → local SVGs, duplicate ImageMap InlineData, Calendar console error filter, TreeView broken image path. 116 integration tests passing.
+Integration test engineer. Built test coverage from M1 through M19. 130+ integration tests (smoke + interaction) covering all milestone sample pages. Key patterns established: `WaitUntilState.DOMContentLoaded` for async-bound components, `Filter(HasTextString)` for specific element targeting, ISO timestamp filtering for console errors, `PressSequentiallyAsync` + Tab for Blazor Server inputs. LoginControls pages require `@using BlazorWebFormsComponents.LoginControls`. Never use external image URLs. Full early history in `history-archive.md`.
 
-## Summary: Milestone 4 Chart + Utility Tests (2026-02-12)
+## Key Learnings (Consolidated)
 
-Chart: 8 smoke tests + 11 canvas tests + 19 enhanced visual tests (dimensions, Chart.js initialization, multi-series datasets, canvas context). Used `WaitUntilState.DOMContentLoaded` for Chart tests. DataBinder + ViewState: 4 utility feature tests (Eval rendering, ViewState counter increment). Enhanced Chart tests use `BoundingBoxAsync()`, `page.EvaluateAsync<T>` for Chart.js internals, ±10px tolerance for dimensions. Total: 120 integration tests.
+- FormView/ListView bind data in `OnAfterRenderAsync`/`OnAfterRender` — use `DOMContentLoaded` + `WaitForSelectorAsync`.
+- Menu interaction tests: skip console error checks (JS interop produces expected errors in headless Playwright).
+- Playwright `text=` locator matches innermost element — use `Filter(HasTextString)` on parent container instead.
+- For strict-mode violations with duplicate text, target specific element (e.g., `page.Locator("td").Filter(...).First`).
+- Use specific selectors like `button:has-text('Edit')` instead of generic selectors to avoid premature wait resolution.
+- When sample data models change, interaction test assertions must be updated in lockstep (smoke tests won't catch text mismatches).
+- Panel/BackImageUrl has external URLs — smoke test sufficient, no interaction test needed.
+- Timer interaction test needs 3-second wait for 2000ms interval tick.
+- AJAX controls form a natural test category group.
 
-**Key patterns:** `LocatorWaitForOptions` instead of `Expect()` (no PageTest inheritance). `PressSequentiallyAsync` + Tab for Blazor Server InputText binding. ID-specific selectors for multi-instance pages. Filter ISO 8601 timestamps from console errors.
+## Summary: M1–M9 (archived)
 
-📌 Team update (2026-02-12): LoginControls sample pages MUST include `@using BlazorWebFormsComponents.LoginControls`. Never use external image URLs. — Colossus
+Covered milestones 1–9: initial smoke tests, Calendar/Chart/FileUpload/ImageMap integration tests, Sprint 2–3 components, M7 data controls (GridView, TreeView, Menu, DetailsView, FormView — 9 smoke + 9 interaction). M9 audit found 105 routes, 100 covered, 5 gaps identified.
 
- Team update (2026-02-23): Milestone 6 Work Plan ratified  54 WIs across P0/P1/P2 tiers  decided by Forge
- Team update (2026-02-23): UI overhaul requested  Colossus assigned integration tests (UI-9)  decided by Jeffrey T. Fritz
+## Summary: Issue #358 — Smoke + Interaction Tests (2026-02-25 to 2026-02-27)
 
-## Summary: Milestone 7 Integration Tests (2026-02-24)
-
-Added 9 smoke tests and 9 interaction tests for M7 sample pages: GridView Selection/DisplayProperties, TreeView Selection/ExpandCollapse, Menu Selection, DetailsView Styles/Caption, FormView Events/Styles. Menu Selection test skips console error checks (JS interop). FormView tests use DOMContentLoaded (items bound in OnAfterRenderAsync). Build verified green.
-
-## Learnings
-
-- FormView sample pages bind Items in `OnAfterRenderAsync`, so tests must use `WaitUntilState.DOMContentLoaded` + explicit `WaitForSelectorAsync` instead of `NetworkIdle`.
-- Menu interaction tests should always skip console error checks — the Menu component's JS interop (`bwfc.Page.AddScriptElement`) produces expected console errors in headless Playwright.
-- GridView Selection pages render Select links as `<a>` elements inside `<tbody>` rows — use `tbody tr:first-child a` with `HasTextString = "Select"` to target them.
-- DetailsView Caption renders actual `<caption>` HTML elements that can be directly queried.
-- **Playwright `text=` locator gotcha:** `page.Locator("text=Label:")` matches the *innermost* element containing that text. When the markup is `<p><strong>Label:</strong> value</p>`, the locator returns the `<strong>`, not the parent `<p>` — so the value portion is excluded from `TextContentAsync()`. Fix: use `page.Locator("p").Filter(new() { HasTextString = "Label:" })` (or the appropriate parent tag) to match the container element that holds both the label and value.
-- For `<div>` containers with multiple `<strong>` labels (e.g., TreeView/Menu feedback panels), use `page.Locator("div").Filter(new() { HasTextString = "Target label:" }).Last` to match the specific container div.
-- When waiting for FormView to render its item template buttons, use a specific selector like `button:has-text('Edit')` instead of generic `button, input[type='submit']` — the latter matches sidebar/nav buttons that already exist, causing the wait to resolve prematurely before the FormView renders.
-- To avoid strict-mode violations when text appears in both rendered output AND code examples, target the specific rendered element (e.g., `page.Locator("td").Filter(new() { HasTextString = "Widget Catalog" }).First`) rather than using bare `text=` locators.
-
- Team update (2026-02-24): Menu auto-ID pattern  Menu now auto-generates IDs, JS interop crash fixed  decided by Cyclops
- Team update (2026-02-24): M8 scope excludes version bump to 1.0 and release  decided by Jeffrey T. Fritz
-
- Team update (2026-02-25): Deployment pipeline patterns established  compute Docker version with nbgv before build, gate on secrets, dual NuGet publishing  decided by Forge
-
-## Summary: M9 Integration Test Coverage Audit (WI-11)
-
-Audited all sample page `@page` routes against ControlSampleTests.cs and InteractiveComponentTests.cs. Found 105 sample routes total; 100 covered by smoke tests, 57 interaction tests exist. Identified **5 pages without any smoke test**: ListView/CrudOperations (M7 — highest priority), Label, Panel/BackImageUrl, LoginControls/Orientation, and DataGrid/Styles. All other M7 features (GridView Selection/DisplayProperties, TreeView Selection/ExpandCollapse, Menu Selection, FormView Events/Styles, DetailsView Styles/Caption) have full smoke + interaction test coverage. Report written to `.ai-team/decisions/inbox/colossus-m9-test-audit.md`.
-
- Team update (2026-02-25): ToolTip moved to BaseStyledComponent (28+ controls), ValidationSummary comma-split fixed, SkinID boolstring fixed  decided by Cyclops
- Team update (2026-02-25): M9 plan ratified  12 WIs, migration fidelity  decided by Forge
- Team update (2026-02-25): Test coverage audit merged  5 gaps identified, P0: ListView CrudOperations  decided by Colossus
-
- Team update (2026-02-25): Consolidated audit reports now use `planning-docs/AUDIT-REPORT-M{N}.md` pattern for all milestone audits  decided by Beast
-
-
- Team update (2026-02-25): M12 introduces Migration Analysis Tool PoC (`bwfc-migrate` CLI, regex-based ASPX parsing, 3-phase roadmap)  decided by Forge
-
-## Summary: Issue #358 — 5 Missing Smoke Tests (2026-02-25)
-
-Added 5 missing smoke test InlineData entries to ControlSampleTests.cs covering all gaps identified in M9 audit: ListView/CrudOperations, Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles. All 5 sample pages verified to exist. Tests added as InlineData to existing Theory methods (EditorControl, DataControl, LoginControl). Build verified green (0 errors).
-
-## Learnings
-
-- Panel/BackImageUrl sample page uses external placeholder URLs (`via.placeholder.com`). The existing `VerifyPageLoadsWithoutErrors` filter for "Failed to load resource" handles this, so the smoke test works despite the team convention against external image URLs.
-- LoginControls/Orientation is at `/ControlSamples/LoginControls/Orientation` (not under `/ControlSamples/Login` or `/ControlSamples/ChangePassword` as initially suggested in the issue).
-
-
-
- Team update (2026-02-25): Future milestone work should include a doc review pass to catch stale 'NOT Supported' entries  decided by Beast
-
- Team update (2026-02-25): Shared sub-components of sufficient complexity get their own doc page (e.g., PagerSettings)  decided by Beast
-
- Team update (2026-02-25): All login controls (Login, LoginView, ChangePassword, PasswordRecovery, CreateUserWizard) now inherit from BaseStyledComponent  decided by Cyclops
-
- Team update (2026-02-25): ComponentCatalog.cs now links all sample pages; new samples must be registered there  decided by Jubilee
-
- Team update (2026-02-25): ListView now has full CRUD event parity (7 new events)  interaction tests may be needed  decided by Cyclops
- Team update (2026-02-25): Menu styles use MenuItemStyle with IMenuStyleContainer  interaction tests may be needed  decided by Cyclops
-
- Team update (2026-02-25): All new work MUST use feature branches pushed to origin with PR to upstream/dev. Never commit directly to dev.  decided by Jeffrey T. Fritz
-
-
- Team update (2026-02-25): Theme core types (#364) use nullable properties for StyleSheetTheme semantics, case-insensitive keys, empty-string default skin key. ThemeProvider is infrastructure, not a WebForms control. GetSkin returns null for missing entries.  decided by Cyclops
-
-
- Team update (2026-02-25): SkinID defaults to empty string, EnableTheming defaults to true. [Obsolete] removed  these are now functional [Parameter] properties.  decided by Cyclops
-
-
- Team update (2026-02-25): ThemeConfiguration CascadingParameter wired into BaseStyledComponent (not BaseWebFormsComponent). ApplySkin runs in OnParametersSet with StyleSheetTheme semantics. Font properties checked individually.  decided by Cyclops
-
-
- Team update (2026-02-25): Calendar selection behavior review found 7 issues (1 P0: external SelectedDate sync, 4 P1: SelectWeekText default, SelectedDates sorting/mutability, style layering, 2 P2: test gaps, allocation)  decided by Forge
-
-
- Team update (2026-02-25): HTML audit strategy approved  decided by Forge
-
- Team update (2026-02-25): HTML audit milestones M11-M13 defined, existing M12M14, Skins/ThemesM15+  decided by Forge per Jeff's directive
-
- Team update (2026-02-26): Menu RenderingMode=Table  integration tests may need table-mode variants  decided by Cyclops
-
- Team update (2026-02-26): Login+Identity strategy defined  integration tests needed when handlers implemented  decided by Forge
-
- Team update (2026-02-26): Data control divergence: normalization pipeline needs <!--!--> stripping and Blazor data control normalization  decided by Forge
-
- Team update (2026-02-26): Post-fix capture: normalizer needs GUID ID stripping and empty style="" removal  decided by Rogue
-
- Team update (2026-02-26): WebFormsPage unified wrapper  inherits NamingContainer, adds Theme cascading, replaces separate wrappers  decided by Jeffrey T. Fritz, Forge
- Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity between Blazor and WebForms  decided by Jeffrey T. Fritz
+Added 5 smoke test InlineData entries (M9 audit gaps: ListView/CrudOperations, Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles). Later added 5 interaction tests: ListView CRUD (2 tests), Label AssociatedControlID, DataGrid Styles, LoginControls Orientation. Panel/BackImageUrl skipped (static). All gaps closed.
 
 ## Summary: PR #377 DetailsView Integration Test Fix (2026-02-26)
 
-Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs after DetailsView sample pages migrated from Customer to Product model (SharedSampleObjects.Models.Product). Changes: "Customer Details"→"Product Details" (Styles), "Customer Record"→"Product Record" (Caption), "No customers found."→"No products found." (EmptyData), Customer field names→Product field names in EditMode assertion message. All 7 DetailsView integration tests passing.
+Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs after DetailsView sample pages migrated to Product model. All 7 DetailsView integration tests passing.
 
-## Learnings
+## Summary: M17 AJAX Control Integration Tests (2026-02-27)
 
-- When sample data models change (e.g., Customer→Product), integration test assertions referencing model-specific text (header text, empty data messages, caption text, field name lists in assertion messages) must be updated in lockstep. Smoke tests won't catch these because they only verify page loads without errors — interactive tests with text-matching assertions are the ones that break.
+Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution) as `AjaxControl_Loads_WithoutErrors` Theory group. Added 1 interaction test for Timer auto-increment. Build green.
+
+## Team Updates (Current)
+
+📌 Team update (2026-02-26): WebFormsPage unified wrapper — inherits NamingContainer, adds Theme cascading — decided by Jeffrey T. Fritz, Forge
+📌 Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity — decided by Jeffrey T. Fritz
+📌 Team update (2026-02-26): M15 HTML fidelity strategy — full audit pipeline re-run assigned to Colossus — decided by Forge
+📌 Team update (2026-02-27): Branching workflow directive — feature PRs from personal fork to upstream dev — decided by Jeffrey T. Fritz
+📌 Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax — decided by Jeffrey T. Fritz
+📌 Team update (2026-02-27): M17 AJAX controls implemented — decided by Cyclops
+📌 Team update (2026-02-27): M17 audit fixes resolved — 5 fidelity issues, 9 new tests, PR #402 — decided by Forge, Cyclops
+📌 Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests — decided by Rogue
+📌 Team update (2026-02-28): Cyclops fixed CheckBox bare input missing id attribute — integration tests targeting CheckBox by id may now work in no-text scenarios. All 5 M9 audit gap pages now have interaction test coverage.
+
+ Team update (2026-03-01): Normalizer pipeline order is fixed  regex rules  style norm  empty style strip  boolean attrs  GUID IDs  attr sort  artifact cleanup  whitespace. Case-insensitive file pairing enabled  decided by Cyclops
+ Team update (2026-03-01): D-11 through D-14 formally registered. D-12 boolean attrs and GUID IDs now handled by normalizer  decided by Forge
+📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally. Theme font-family renders correctly. Integration tests targeting font-family should now work — decided by Cyclops, Rogue
+📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops

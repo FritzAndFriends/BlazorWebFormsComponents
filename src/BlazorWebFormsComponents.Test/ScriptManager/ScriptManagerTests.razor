@@ -1,0 +1,140 @@
+@inherits BlazorWebFormsTestContext
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void ScriptManager_RendersNoVisibleOutput()
+	{
+		// Arrange & Act
+		var cut = Render(@<ScriptManager />);
+
+		// Assert
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnablePartialRendering_IsTrue()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnablePartialRendering.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnablePageMethods_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnablePageMethods.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultScriptMode_IsAuto()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Auto);
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultAsyncPostBackTimeout_Is90()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.AsyncPostBackTimeout.ShouldBe(90);
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnableCdn_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnableCdn.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnableScriptGlobalization_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnableScriptGlobalization.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultEnableScriptLocalization_IsFalse()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnableScriptLocalization.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScriptManager_SetProperties_DoesNotThrow()
+	{
+		ScriptMode mode = ScriptMode.Release;
+
+		// Arrange & Act & Assert — no exception
+		var cut = Render(
+			@<ScriptManager
+				EnablePartialRendering="true"
+				EnablePageMethods="true"
+				ScriptMode="mode"
+				AsyncPostBackTimeout="120"
+				EnableCdn="true"
+				EnableScriptGlobalization="true"
+				EnableScriptLocalization="true" />
+		);
+
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.EnablePartialRendering.ShouldBeTrue();
+		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Release);
+		sm.Instance.AsyncPostBackTimeout.ShouldBe(120);
+	}
+
+	[Fact]
+	public void ScriptManager_DefaultScripts_IsInitialized()
+	{
+		var cut = Render(@<ScriptManager />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.Scripts.ShouldNotBeNull();
+		sm.Instance.Scripts.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ScriptManager_Scripts_CanHoldScriptReferences()
+	{
+		var scripts = new System.Collections.Generic.List<ScriptReference>
+		{
+			new ScriptReference { Name = "jquery", Path = "~/scripts/jquery.js" },
+			new ScriptReference { Name = "app", Path = "~/scripts/app.js" }
+		};
+
+		var cut = Render(@<ScriptManager Scripts="scripts" />);
+		var sm = cut.FindComponent<ScriptManager>();
+		sm.Instance.Scripts.Count.ShouldBe(2);
+		sm.Instance.Scripts[0].Name.ShouldBe("jquery");
+		sm.Instance.Scripts[1].Path.ShouldBe("~/scripts/app.js");
+	}
+
+	[Fact]
+	public void ScriptReference_DefaultScriptMode_IsAuto()
+	{
+		var scriptRef = new ScriptReference();
+		scriptRef.ScriptMode.ShouldBe(ScriptMode.Auto);
+	}
+
+	[Fact]
+	public void ScriptReference_DefaultNotifyScriptLoaded_IsTrue()
+	{
+		var scriptRef = new ScriptReference();
+		scriptRef.NotifyScriptLoaded.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ScriptReference_DefaultResourceUICultures_IsNull()
+	{
+		var scriptRef = new ScriptReference();
+		scriptRef.ResourceUICultures.ShouldBeNull();
+	}
+}

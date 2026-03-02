@@ -1,15 +1,43 @@
 @page "/ControlSamples/Button"
 
-<h2>Button component home page</h2>
+<h2>Button Demos</h2>
 
 <Nav></Nav>
 
-<div data-audit-control="Button-1">
-    <Button OnClick="OnClick" Text="Blue Button"
+<p>
+	This button has STYLE!
+	<div data-audit-control="Button-1">
+		<Button OnClick="OnClick" Text="Blue Button"
 				BackColor="WebColor.Blue" ForeColor="WebColor.White" />
-</div>
+	</div>
+</p>
 
-<p><em>Tip:</em> This button has <code>AccessKey="b"</code> (press <kbd>Alt+B</kbd> to focus) and <code>ToolTip="Click to submit"</code> (hover to see).</p>
+<p>
+	This button does NOT cause validation:
+	<div data-audit-control="Button-2">
+		<Button CausesValidation="false" Text="No Validation for you!" />
+	</div>
+</p>
+
+<p>
+	This button is not Enabled:
+	<div data-audit-control="Button-3">
+		<Button Enabled="false" Text="I am not enabled for clicking" />
+	</div>
+
+	<br />
+	This button is Enabled:
+	<div data-audit-control="Button-4">
+		<Button Enabled="true" Text="I am enabled for clicking" />
+	</div>
+</p>
+
+<p>
+	This button posts to Bing
+	<div data-audit-control="Button-5">
+		<Button PostBackUrl="www.bing.com" Text="Post to Bing" />
+	</div>
+</p>
 
 <span style="font-weight: bold">@TheContent</span>
 
@@ -18,13 +46,6 @@
 	[Parameter]
 	public string TheContent { get; set; } = "Not clicked yet!";
 	public string bar = "bar";
-
-/*
-  protected override void OnInitialized() {
-		TheContent = "Initialized";
-		Console.WriteLine("Initialized");
-	}
-*/
 
 	void OnClick() {
 
@@ -39,8 +60,6 @@
 		TheContent = $"Command '{args.CommandName}' from button with text '{button.Text}'";
 
 	}
-
-
 
 }
 

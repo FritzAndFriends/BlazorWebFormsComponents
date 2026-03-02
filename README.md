@@ -95,8 +95,15 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [LoginStatus](docs/LoginControls/LoginStatus.md)
     - [LoginView](docs/LoginControls/LoginView.md)
     - [PasswordRecovery](docs/LoginControls/PasswordRecovery.md)
+  - AJAX Controls
+    - [ScriptManager](docs/EditorControls/ScriptManager.md)
+    - [ScriptManagerProxy](docs/EditorControls/ScriptManagerProxy.md)
+    - [Substitution](docs/EditorControls/Substitution.md)
+    - [Timer](docs/EditorControls/Timer.md)
+    - [UpdatePanel](docs/EditorControls/UpdatePanel.md)
+    - [UpdateProgress](docs/EditorControls/UpdateProgress.md)
 
-We will NOT be converting any DataSource objects (SqlDataSource, ObjectDataSource, EntityDataSource, LinqDataSource, XmlDataSource, SiteMapDataSource, AccessDataSource), Wizard components, skins or themes.  Once this first collection of controls is written, we can consider additional features like modern tag formatting.
+We will NOT be convertingany DataSource objects (SqlDataSource, ObjectDataSource, EntityDataSource, LinqDataSource, XmlDataSource, SiteMapDataSource, AccessDataSource), Wizard components, skins or themes.  Once this first collection of controls is written, we can consider additional features like modern tag formatting.
 
 ## Utility Features
 

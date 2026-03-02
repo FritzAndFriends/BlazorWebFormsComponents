@@ -74,5 +74,33 @@ namespace BlazorWebFormsComponents.Theming
 			return !string.IsNullOrEmpty(controlTypeName)
 				&& _skins.ContainsKey(controlTypeName);
 		}
+
+		/// <summary>
+		/// Fluent API: registers a default skin for a control type using a builder action.
+		/// </summary>
+		public ThemeConfiguration ForControl(string controlTypeName, Action<SkinBuilder> configure)
+		{
+			if (configure is null)
+				throw new ArgumentNullException(nameof(configure));
+
+			var builder = new SkinBuilder();
+			configure(builder);
+			AddSkin(controlTypeName, builder.Skin);
+			return this;
+		}
+
+		/// <summary>
+		/// Fluent API: registers a named skin for a control type using a builder action.
+		/// </summary>
+		public ThemeConfiguration ForControl(string controlTypeName, string skinId, Action<SkinBuilder> configure)
+		{
+			if (configure is null)
+				throw new ArgumentNullException(nameof(configure));
+
+			var builder = new SkinBuilder();
+			configure(builder);
+			AddSkin(controlTypeName, builder.Skin, skinId);
+			return this;
+		}
 	}
 }

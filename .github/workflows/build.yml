@@ -57,7 +57,7 @@ jobs:
         run: dotnet build samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --results-directory src/BlazorWebFormsComponents.Test/TestResults
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
