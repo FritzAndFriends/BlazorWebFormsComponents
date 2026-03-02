@@ -141,3 +141,28 @@ Total: 1426 tests (1413 existing + 13 new), 0 failures.
 📌 Test pattern: Button renders as `<input>`, Label as `<span>`, Panel as `<div>`. For theme pipeline tests, use `cut.Find("input")`, `cut.Find("span")`, `cut.Find("div")` respectively. Style attribute contains CSS properties like `background-color:Red`, `color:Blue`, `font-weight:bold`. — Rogue
 
 📌 Test pattern: Missing SkinID (named skin not registered) returns null from `GetSkin()` — no skin applied at all, not even the default skin for that control type. This is by design per Jeff's decision. — Rogue
+
+### FontInfo Name/Names Auto-Sync Tests
+
+Wrote 11 tests (9 unit + 2 pipeline) validating the FontInfo Name/Names auto-sync fix by Cyclops:
+
+**FontInfoSyncTests.cs (9 unit tests):**
+1. `SettingName_UpdatesNames` — Name="Arial" → Names="Arial"
+2. `SettingNames_UpdatesName_ToFirstFont` — Names="Verdana" → Name="Verdana"
+3. `SettingNames_WithMultipleFonts_SetsNameToFirst` — Names="Arial, sans-serif" → Name="Arial"
+4. `SettingName_ToNull_ClearsNames` — Name=null → Names is null/empty
+5. `SettingName_ToEmpty_ClearsNames` — Name="" → Names is null/empty
+6. `SettingNames_ToNull_ClearsName` — Names=null → Name is null/empty
+7. `SettingNames_ToEmpty_ClearsName` — Names="" → Name is null/empty
+8. `SettingNames_ThenName_NameWins` — Last-write-wins: Name overrides Names for both properties
+9. `SettingName_ThenNames_NamesWins` — Last-write-wins: Names overrides Name for both properties
+
+**ThemingPipelineTests.razor (2 pipeline tests):**
+14. `Theme_FontName_RendersFontFamily_ViaAutoSync` — Button with theme Font.Name="Arial" renders font-family:Arial
+15. `Theme_FontName_MultipleViaNames_RendersFontFamily` — Label with theme Font.Name="Verdana" renders font-family:Verdana
+
+All 1437 tests pass (0 failures). Cyclops's auto-sync fix was already in place — the previously-documented bug (ApplyThemeSkin sets Font.Name but style builder reads Font.Names) is now resolved.
+
+📌 Bug resolved: The Font.Name/Font.Names disconnect is fixed. ApplyThemeSkin sets Font.Name → auto-sync propagates to Font.Names → style builder reads Font.Names → font-family renders correctly. Full pipeline verified. — Rogue
+
+📌 Test pattern: FontInfo sync tests are pure C# unit tests (no bUnit needed). Use `new FontInfo()` then set properties and assert the counterpart. Last-write-wins semantics: setting Name then Names means Names wins, and vice versa. — Rogue
