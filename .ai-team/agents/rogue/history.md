@@ -100,3 +100,24 @@ Wrote 6 bUnit tests in `src/BlazorWebFormsComponents.Test/ListView/EditTemplateT
  Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
 
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+### FormView RenderOuterTable Tests
+
+Wrote 8 bUnit tests in `src/BlazorWebFormsComponents.Test/FormView/RenderOuterTable.razor` for the RenderOuterTable parameter:
+
+1. `FormView_Default_RendersOuterTable` — default behavior (RenderOuterTable=true), verifies `<table>` + border-collapse present
+2. `FormView_RenderOuterTableTrue_RendersOuterTable` — explicit true produces outer table
+3. `FormView_RenderOuterTableFalse_NoOuterTable` — false removes all `<table>` elements, template content still renders
+4. `FormView_RenderOuterTableFalse_RendersTemplateContent` — false still renders actual data from ItemTemplate
+5. `FormView_RenderOuterTableTrue_MatchesDefaultStructure` — explicit true matches default DOM structure (table/tr/td/a counts)
+6. `FormView_RenderOuterTableFalse_EmptyData_RendersEmptyDataText` — false + empty data still shows EmptyDataText, no table
+7. `FormView_RenderOuterTableFalse_EmptyData_RendersEmptyDataTemplate` — false + EmptyDataTemplate renders custom template, no table
+8. `FormView_RenderOuterTableFalse_EditMode_RendersEditTemplate` — false in edit mode renders EditItemTemplate, no table
+
+All 8 tests pass against the already-landed implementation.
+
+📌 Test pattern: When comparing two separate component renders for structural equivalence, do NOT use `ShouldBe` on raw Markup — Blazor generates unique internal event handler IDs per render. Compare element counts (`FindAll("table").Count`) or structural features instead. — Rogue
+
+📌 FormView RenderOuterTable convention: When `RenderOuterTable=false`, the `else` branch in FormView.razor renders template content directly without `<table>`/`<tr>`/`<td>` wrappers. Empty data path also strips table wrappers. The implementation already exists on the current branch. — Rogue
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz

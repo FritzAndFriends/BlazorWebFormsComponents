@@ -92,3 +92,12 @@ Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves
  Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
 
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+### FormView RenderOuterTable Parameter (2026-03-02)
+
+- **What:** Added `[Parameter] public bool RenderOuterTable { get; set; } = true;` to `FormView.razor.cs`. Updated `FormView.razor` to conditionally wrap content in `<table>` only when `RenderOuterTable` is true. When false, renders just the template content directly (no table, no header/footer rows, no pager — matching Web Forms behavior).
+- **Pattern:** Added the parameter in the code-behind file (`.razor.cs`) following existing parameter convention. Used `@if (RenderOuterTable)` / `else` branching in the `.razor` template to separate the two rendering paths. The `RenderOuterTable=false` path still calls `DataBinding`/`DataBound` and uses `CascadingValue` for the current item — only the table wrapper is removed.
+- **Why:** WingtipToys `ProductDetails.aspx` uses `RenderOuterTable="false"` to suppress the wrapping table. This was the only blocking gap for the WingtipToys migration. Default `true` preserves backward compatibility — all 29 existing FormView tests pass unchanged.
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+ Team update (2026-03-02): FormView RenderOuterTable implemented (default true, false suppresses table wrapper). Only blocking gap for WingtipToys resolved.  decided by Cyclops

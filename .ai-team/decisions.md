@@ -4419,3 +4419,977 @@ All 22 Web Forms controls used in WingtipToys exist in our library. The migratio
 4. **Render mode: Full InteractiveServer** — Simplest migration path. Every page is interactive via Blazor Server circuits. No SSR complexity.
 
 All decisions are overridable by Jeff. These are reasonable defaults, not mandates.
+
+
+### 2026-03-02: User directive — Repository's final product is a migration tool/skill/agent
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The final product of this repository is NOT just a component library — it's a tool/skill/agent plan that uses BlazorWebFormsComponents to enable FAST migration of WebForms ASPX/ASCX projects to Blazor and .NET 10. WingtipToys is the proof-of-concept, not the deliverable. The deliverable is reusable migration automation.
+**Why:** User request — reframes the entire project goal. All work should orient toward making ASPX/ASCX migration as easy as possible.
+
+
+### 2026-03-02: FormView RenderOuterTable implementation
+**By:** Cyclops
+**What:** Added `RenderOuterTable` bool parameter (default `true`) to FormView. When `false`, the wrapping `<table cellspacing="0" style="border-collapse:collapse;">` element is suppressed and only the template content is rendered directly — matching Web Forms behavior for `<asp:FormView RenderOuterTable="false">`. Header/footer rows and pager are also suppressed in this mode since they are table rows.
+**Why:** WingtipToys `ProductDetails.aspx` uses `RenderOuterTable="false"` and this was the only blocking gap for the migration. Default `true` preserves backward compatibility for all existing consumers. The same pattern could be applied to DetailsView if needed in the future.
+
+
+### 2026-03-02: ASPX/ASCX Migration Tooling Strategy
+**By:** Forge
+**What:** Comprehensive analysis of ASPX/ASCX syntax patterns and migration tooling design
+**Why:** Jeff reframed the project — the deliverable is reusable migration automation, not just a component library. WingtipToys is the proof-of-concept. The final product is a tool/skill/agent plan that uses BlazorWebFormsComponents to enable FAST migration of WebForms ASPX/ASCX projects to Blazor and .NET 10.
+
+---
+
+## 1. ASPX/ASCX Syntax Patterns → Blazor Transformations
+
+### Exhaustive catalog based on WingtipToys corpus (31 ASPX/ASCX files, ~1100 lines of markup, 15+ code-behind files)
+
+---
+
+### 1.1 Page/Control/Master Directives
+
+| # | Web Forms Pattern | Blazor Transformation | Example (WingtipToys) | Difficulty |
+|---|---|---|---|---|
+| D-1 | `<%@ Page Title="X" MasterPageFile="~/Site.Master" CodeBehind="Y.aspx.cs" Inherits="NS.Class" %>` | `@page "/route"` + `@layout SiteLayout` | Default.aspx, ProductList.aspx, all pages | Mechanical |
+| D-2 | `<%@ Page ... AutoEventWireup="true" %>` | Remove entirely (Blazor has no equivalent) | Every .aspx file | Mechanical |
+| D-3 | `<%@ Page ... Language="C#" %>` | Remove (implicit in .razor) | Every .aspx file | Mechanical |
+| D-4 | `<%@ Page ... Async="true" %>` | Remove (Blazor lifecycle is async by default) | Login.aspx, Forgot.aspx, Confirm.aspx, ResetPassword.aspx | Mechanical |
+| D-5 | `<%@ Master Language="C#" CodeBehind="Site.master.cs" Inherits="NS.SiteMaster" %>` | `@inherits LayoutComponentBase` | Site.Master | Structural |
+| D-6 | `<%@ Control Language="C#" CodeBehind="X.ascx.cs" Inherits="NS.Class" %>` | Remove directive; file becomes `.razor` component | ViewSwitcher.ascx, OpenAuthProviders.ascx | Structural |
+| D-7 | `<%@ Register Src="~/Account/OpenAuthProviders.ascx" TagPrefix="uc" TagName="OpenAuthProviders" %>` | `@using` or remove (Blazor uses `_Imports.razor` auto-discovery) | Login.aspx, Manage.aspx, ManageLogins.aspx | Mechanical |
+| D-8 | `Title="X"` attribute on Page directive | `<PageTitle>X</PageTitle>` component in Blazor | Every .aspx with Title | Structural |
+
+**Transformation rules:**
+```
+RULE D-1: <%@ Page ... MasterPageFile="~/Site.Master" ... %>
+  → @page "/{derivedRoute}"
+  → @layout SiteLayout
+  Route derivation: filename sans extension, lowercased, or from custom routes table.
+  
+RULE D-5: <%@ Master ... %>
+  → Create {Name}Layout.razor inheriting LayoutComponentBase
+  → Replace <asp:ContentPlaceHolder ID="MainContent"> with @Body
+  → Move <head runat="server"> content to App.razor or HeadOutlet
+
+RULE D-7: <%@ Register Src="~/X.ascx" TagPrefix="tp" TagName="Y" %>
+  → Remove line. Ensure component is discoverable via _Imports.razor.
+  → Replace <tp:Y runat="server" /> with <Y /> in markup.
+```
+
+---
+
+### 1.2 Content/ContentPlaceHolder System
+
+| # | Web Forms Pattern | Blazor Transformation | Example | Difficulty |
+|---|---|---|---|---|
+| C-1 | `<asp:ContentPlaceHolder ID="MainContent" runat="server">` | `@Body` in layout | Site.Master line 102 | Structural |
+| C-2 | `<asp:ContentPlaceHolder ID="HeadContent" runat="server" />` | `<HeadOutlet />` in App.razor | Site.Mobile.Master line 9 | Structural |
+| C-3 | `<asp:Content ContentPlaceHolderID="MainContent" runat="server">` | Remove wrapping; contents become the page body | Every content page | Mechanical |
+| C-4 | Multiple ContentPlaceHolder IDs (HeadContent, FeaturedContent, MainContent) | Blazor layouts only have `@Body`; use `<SectionOutlet>` / `<SectionContent>` for named sections | Site.Mobile.Master | Structural |
+
+**Transformation rules:**
+```
+RULE C-1: <asp:ContentPlaceHolder ID="MainContent" runat="server">...</asp:ContentPlaceHolder>
+  → @Body (in layout)
+
+RULE C-3: <asp:Content ID="X" ContentPlaceHolderID="MainContent" runat="server">
+             {markup}
+           </asp:Content>
+  → Remove <asp:Content> wrapper entirely. {markup} becomes the page body.
+  → If page has ONLY MainContent, markup is the whole .razor file body.
+  → If page has MULTIPLE ContentPlaceHolderIDs, wrap non-main content in
+    <SectionContent SectionName="SectionName"> for .NET 8+ SectionOutlet.
+```
+
+---
+
+### 1.3 Server Controls → BWFC Components
+
+| # | Web Forms Control | BWFC Component | Occurrences in WingtipToys | Key Attributes Used | Difficulty |
+|---|---|---|---|---|---|
+| S-1 | `<asp:Label>` | `<Label>` | 25+ (ErrorPage, ShoppingCart, Checkout, Admin, Account) | `ID`, `runat`, `Text`, `Font-Size`, `CssClass`, `AssociatedControlID`, `EnableViewState` | Mechanical |
+| S-2 | `<asp:TextBox>` | `<TextBox>` | 15+ (Admin, Account forms) | `ID`, `runat`, `CssClass`, `TextMode` (Password, Email, Phone), `Width`, `Text` | Mechanical |
+| S-3 | `<asp:Button>` | `<Button>` | 12+ (ShoppingCart, Checkout, Admin, Account) | `ID`, `runat`, `Text`, `OnClick`, `CssClass`, `CausesValidation`, `ValidationGroup`, `CommandName` | Structural |
+| S-4 | `<asp:ImageButton>` | `<ImageButton>` | 1 (ShoppingCart) | `ImageUrl`, `Width`, `AlternateText`, `OnClick`, `BackColor`, `BorderWidth` | Mechanical |
+| S-5 | `<asp:CheckBox>` | `<CheckBox>` | 3 (ShoppingCart, Login 2FA) | `ID`, `runat`, `Text` | Mechanical |
+| S-6 | `<asp:HyperLink>` | `<HyperLink>` | 6+ (Manage, Confirm, ResetPasswordConfirmation) | `NavigateUrl`, `Text`, `ID`, `Visible`, `ViewStateMode` | Mechanical |
+| S-7 | `<asp:Image>` | `<Image>` | 1 (Site.Master) | `ID`, `ImageUrl`, `BorderStyle` | Mechanical |
+| S-8 | `<asp:DropDownList>` | `<DropDownList>` | 3 (Admin, 2FA) | `ID`, `ItemType`, `SelectMethod`, `DataTextField`, `DataValueField`, `AppendDataBoundItems` | Structural |
+| S-9 | `<asp:FileUpload>` | `<FileUpload>` | 1 (AdminPage) | `ID` | Mechanical |
+| S-10 | `<asp:ListView>` | `<ListView>` | 4 (Site.Master categories, ProductList, OpenAuthProviders, ManageLogins) | `ItemType`, `SelectMethod`, `DataKeyNames`, `GroupItemCount`, `DeleteMethod`, `ViewStateMode` | Structural |
+| S-11 | `<asp:GridView>` | `<GridView>` | 2 (ShoppingCart, CheckoutReview) | `AutoGenerateColumns`, `ShowFooter`, `GridLines`, `CellPadding`, `CssClass`, `ItemType`, `SelectMethod`, `Width`, `BorderColor`, `BorderWidth` | Structural |
+| S-12 | `<asp:FormView>` | `<FormView>` | 1 (ProductDetails) | `ItemType`, `SelectMethod`, `RenderOuterTable` | Structural |
+| S-13 | `<asp:DetailsView>` | `<DetailsView>` | 1 (CheckoutReview) | `AutoGenerateRows`, `GridLines`, `CellPadding`, `BorderStyle`, `CommandRowStyle-BorderStyle` | Structural |
+| S-14 | `<asp:BoundField>` | `<BoundField>` | 6 (ShoppingCart, CheckoutReview) | `DataField`, `HeaderText`, `SortExpression`, `DataFormatString` | Mechanical |
+| S-15 | `<asp:TemplateField>` | `<TemplateField>` | 4 (ShoppingCart, CheckoutReview) | `HeaderText`, `ItemTemplate`, `ItemStyle` | Structural |
+| S-16 | `<asp:RequiredFieldValidator>` | `<RequiredFieldValidator>` | 10+ (Admin, Account forms) | `ControlToValidate`, `Text`, `ErrorMessage`, `CssClass`, `SetFocusOnError`, `Display`, `ValidationGroup` | Mechanical |
+| S-17 | `<asp:RegularExpressionValidator>` | `<RegularExpressionValidator>` | 1 (AdminPage price) | `ControlToValidate`, `Text`, `Display`, `ValidationExpression`, `SetFocusOnError` | Mechanical |
+| S-18 | `<asp:CompareValidator>` | `<CompareValidator>` | 3 (Register, ManagePassword, ResetPassword) | `ControlToCompare`, `ControlToValidate`, `CssClass`, `Display`, `ErrorMessage`, `ValidationGroup` | Mechanical |
+| S-19 | `<asp:ValidationSummary>` | `<ValidationSummary>` | 5 (Register, ManagePassword, AddPhoneNumber, VerifyPhoneNumber, RegisterExternalLogin) | `CssClass`, `ShowModelStateErrors` | Mechanical |
+| S-20 | `<asp:LoginView>` | `<LoginView>` | 1 (Site.Master) | `ViewStateMode`, `AnonymousTemplate`, `LoggedInTemplate` | Structural |
+| S-21 | `<asp:LoginStatus>` | `<LoginStatus>` | 1 (Site.Master) | `LogoutAction`, `LogoutText`, `LogoutPageUrl`, `OnLoggingOut` | Structural |
+| S-22 | `<asp:Literal>` | `<Literal>` | 5 (Login, Register, Forgot, ResetPassword, VerifyPhoneNumber) | `ID` | Mechanical |
+| S-23 | `<asp:PlaceHolder>` | `<PlaceHolder>` / `@if` block | 10+ (Login, Manage, ManagePassword, Forgot, Confirm, 2FA) | `ID`, `Visible`, `ViewStateMode` | Structural |
+| S-24 | `<asp:HiddenField>` | `<HiddenField>` | 2 (2FA, VerifyPhoneNumber) | `ID` | Mechanical |
+| S-25 | `<asp:Panel>` | `<Panel>` | 1 (ErrorPage) | `ID`, `Visible` | Mechanical |
+| S-26 | `<asp:ScriptManager>` | `<ScriptManager>` (no-op stub) | 1 (Site.Master) | Scripts collection | Mechanical |
+| S-27 | `<asp:ScriptReference>` | Remove (BWFC ScriptManager is no-op) | 12 (Site.Master) | `Name`, `Assembly`, `Path` | Mechanical |
+| S-28 | `<asp:LinkButton>` | `<LinkButton>` | 2 (Manage — commented out) | `Text`, `OnClick`, `CommandArgument` | Mechanical |
+| S-29 | `<asp:ModelErrorMessage>` | **NOT IN BWFC** — custom Blazor validation | 2 (ManagePassword, RegisterExternalLogin) | `ModelStateKey`, `AssociatedControlID`, `CssClass`, `SetFocusOnError` | Semantic |
+
+**Universal transformation rule for server controls:**
+```
+RULE S-UNIVERSAL:
+  <asp:{ControlName} runat="server" {attributes}>
+    → <{ControlName} {transformedAttributes}>
+  
+  Step 1: Remove "asp:" prefix
+  Step 2: Remove runat="server"
+  Step 3: Remove ID attribute (unless referenced in @code block, then use @ref)
+  Step 4: Transform attributes per control-specific rules (see Section 4)
+```
+
+---
+
+### 1.4 Data-Binding Expressions
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| B-1 | `<%#: Item.Property %>` | `@context.Property` (inside templates) | ProductList, ProductDetails, Site.Master categories, ShoppingCart, OpenAuthProviders, ManageLogins | Mechanical |
+| B-2 | `<%#: String.Format("{0:c}", Item.UnitPrice) %>` | `@($"{context.UnitPrice:C}")` | ProductList (price), ShoppingCart (item total) | Mechanical |
+| B-3 | `<%#: Eval("Property") %>` | `@context.Property` (with typed TItem) or `@GetPropertyValue(context, "Property")` | CheckoutReview (ShipInfo labels) | Structural |
+| B-4 | `<%#: Eval("Property", "{0:C}") %>` | `@($"{context.Property:C}")` | CheckoutReview Total label | Mechanical |
+| B-5 | `<%#:Item.ImagePath%>` (inside HTML attribute) | `@context.ImagePath` (in Blazor attribute) | ProductList (img src), ProductDetails (img src) | Mechanical |
+| B-6 | `Text="<%#: Item.Quantity %>"` (in server control attribute) | `Text="@context.Quantity.ToString()"` or `@bind-Value="context.Quantity"` | ShoppingCart (PurchaseQuantity TextBox) | Structural |
+| B-7 | `Text='<%#: Eval("FirstName") %>'` (in DetailsView template) | `Text="@context.FirstName"` | CheckoutReview shipping info | Mechanical |
+| B-8 | Complex expression: `<%#: String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice)))%>` | `@($"{(context.Quantity * (double)context.Product.UnitPrice):C}")` | ShoppingCart item total | Structural |
+| B-9 | `Visible="<%# CanRemoveExternalLogins %>"` (binding to code-behind property) | `Visible="@canRemoveExternalLogins"` | ManageLogins | Structural |
+| B-10 | `ToolTip='<%# "Remove this " + Item.LoginProvider + " login from your account" %>'` | `ToolTip="@($"Remove this {context.LoginProvider} login from your account")"` | ManageLogins | Mechanical |
+
+**Transformation rules:**
+```
+RULE B-1: <%#: Item.Property %>     → @context.Property
+RULE B-2: <%#: Item %>              → @context  (for System.String ItemType)
+RULE B-3: <%#: Eval("Prop") %>      → @context.Prop  (when ItemType is known)
+RULE B-4: <%#: Eval("P", "{0:F}") %>→ @($"{context.P:F}")
+RULE B-5: <%#: String.Format("{0:c}", Item.X) %> → @($"{context.X:C}")
+
+REGEX for B-1 through B-5:
+  <%#:\s*(Item\.(\w+))\s*%>  →  @context.$2
+  <%#:\s*Eval\("(\w+)"\)\s*%>  →  @context.$1
+  <%#:\s*Eval\("(\w+)",\s*"([^"]+)"\)\s*%>  →  @($"{context.$1:$FORMAT}")
+  <%#:\s*String\.Format\("\{0:([^}]+)\}",\s*Item\.(\w+)\)\s*%>  →  @($"{context.$2:$1}")
+```
+
+---
+
+### 1.5 Code Render Expressions
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| E-1 | `<%: Title %>` | `@Title` (with `@code { string Title = "X"; }`) | Default.aspx, About.aspx, Contact.aspx, Account pages | Structural |
+| E-2 | `<%: Page.Title %>` | `@Title` (page title set via `<PageTitle>`) | Site.Master, ProductList | Structural |
+| E-3 | `<%: DateTime.Now.Year %>` | `@DateTime.Now.Year` | Site.Master footer | Mechanical |
+| E-4 | `<%: Context.User.Identity.GetUserName() %>` | `@context.User.Identity?.Name` (or AuthenticationState) | Site.Master logged-in template | Structural |
+| E-5 | `<%: SuccessMessage %>` | `@SuccessMessage` (field in @code block) | Manage.aspx, ManageLogins.aspx | Mechanical |
+| E-6 | `<%: ProviderName %>` | `@ProviderName` (field in @code block) | RegisterExternalLogin.aspx | Mechanical |
+| E-7 | `<%: CurrentView %>`, `<%: SwitchUrl %>`, `<%: AlternateView %>` | `@CurrentView`, `@SwitchUrl`, `@AlternateView` | ViewSwitcher.ascx | Mechanical |
+| E-8 | `<%= Request.QueryString.Get("ErrorCode") %>` | `@ErrorCode` (from `[SupplyParameterFromQuery]`) | CheckoutError.aspx | Structural |
+| E-9 | `<%: LoginsCount %>` | `@LoginsCount` | Manage.aspx | Mechanical |
+| E-10 | `<%: Scripts.Render("~/bundles/modernizr") %>` | Remove (no bundling in Blazor; use `<script>` tags or CSS isolation) | Site.Master | Mechanical |
+
+**Transformation rules:**
+```
+RULE E-1: <%: expression %>  →  @(expression)
+  Where 'expression' is a C# code-behind property/field:
+  - If it references Page.Title → use @Title field + <PageTitle>
+  - If it references Context.User → use AuthenticationStateProvider
+  - If it references Request.QueryString → use [SupplyParameterFromQuery]
+  
+RULE E-8: <%= expression %> (unencoded output)
+  → @((MarkupString)expression)  if HTML output intended
+  → @expression  if text output intended
+  NOTE: <%= is rare and potentially unsafe. Flag for human review.
+
+RULE E-10: <%: Scripts.Render(...) %>, <webopt:bundlereference ...>
+  → Remove entirely. Replace with direct <link>/<script> tags in App.razor.
+```
+
+---
+
+### 1.6 Route Expressions
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| R-1 | `GetRouteUrl("ProductsByCategoryRoute", new {categoryName = Item.CategoryName})` | `$"/Category/{context.CategoryName}"` | Site.Master category links | Structural |
+| R-2 | `GetRouteUrl("ProductByNameRoute", new {productName = Item.ProductName})` | `$"/Product/{context.ProductName}"` | ProductList product links | Structural |
+| R-3 | `href="/AddToCart.aspx?productID=<%#:Item.ProductID %>"` | `href="/AddToCart?productID=@context.ProductID"` | ProductList | Mechanical |
+
+**Transformation rules:**
+```
+RULE R-1: GetRouteUrl("RouteName", new { param = Item.Prop })
+  → String interpolation: $"/route-path/{context.Prop}"
+  Requires: Route table as input configuration.
+  The migration tool must accept a route map: { "RouteName": "/pattern/{param}" }
+  
+RULE R-3: href="X.aspx?key=<%#:Item.Prop%>"
+  → href="/X?key=@context.Prop"  (remove .aspx extension)
+```
+
+---
+
+### 1.7 runat="server" on HTML Elements
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| H-1 | `<head runat="server">` | Plain `<head>` (in App.razor, not layout) | Site.Master, Site.Mobile.Master | Mechanical |
+| H-2 | `<form runat="server">` | Remove entirely (Blazor doesn't use a global form) | Site.Master, Site.Mobile.Master, AddToCart.aspx | Mechanical |
+| H-3 | `<div runat="server" id="X" class="Y">` | Plain `<div class="Y">` (use `@ref` if code-behind references it) | ShoppingCart (ShoppingCartTitle), ProductList (GroupTemplate elements) | Structural |
+| H-4 | `<a runat="server" href="~/X">` | `<a href="/X">` or `<NavLink href="X">` | Site.Master nav links (6 instances) | Mechanical |
+| H-5 | `<a runat="server" id="X" visible="false" href="~/Y">` | `@if (showX) { <a href="/Y">...  }` | Site.Master adminLink | Structural |
+| H-6 | `<tr runat="server" id="itemPlaceholder">` | Remove runat="server" (ListView handles this via LayoutTemplate) | ProductList, ManageLogins | Mechanical |
+| H-7 | `<td runat="server">` | Plain `<td>` | ProductList ItemTemplate | Mechanical |
+
+**Transformation rules:**
+```
+RULE H-UNIVERSAL: <element runat="server" ...>
+  Step 1: Remove runat="server"
+  Step 2: If id="X" is referenced in code-behind:
+    - For text/visibility manipulation → use @field and @if blocks
+    - For DOM access → use @ref ElementReference
+  Step 3: If href="~/path" → href="/path" (remove tilde prefix)
+  Step 4: If visible="false" → wrap in @if (condition) { }
+```
+
+---
+
+### 1.8 Event Handlers
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| EV-1 | `OnClick="Handler"` (Button) | `OnClick="@Handler"` (BWFC Button preserves this) | ShoppingCart, Checkout, Admin, all Account forms | Structural |
+| EV-2 | `OnClick="Handler"` (ImageButton with `ImageClickEventArgs`) | `OnClick="@Handler"` (BWFC handles args) | ShoppingCart CheckoutImageBtn | Structural |
+| EV-3 | `OnLoggingOut="Handler"` (LoginStatus) | `OnLoggingOut="@Handler"` | Site.Master | Structural |
+| EV-4 | `SelectMethod="GetProducts"` | `Items="@products"` (load data in OnInitializedAsync) | ProductList, ProductDetails, Admin DropDownLists, OpenAuthProviders, ManageLogins | Structural |
+| EV-5 | `DeleteMethod="RemoveLogin"` | Wire up via `OnItemDeleting` / `OnItemCommand` event | ManageLogins | Semantic |
+| EV-6 | `CommandName="Delete"` (Button in template) | `OnClick` handler that performs deletion | ManageLogins | Semantic |
+
+**Transformation rules:**
+```
+RULE EV-1: OnClick="MethodName" on <asp:Button>
+  → OnClick="@MethodName"
+  Method signature change: 
+    void MethodName(object sender, EventArgs e) 
+    → async Task MethodName(EventArgs e)  (or void MethodName())
+  BWFC Button accepts Action<EventArgs> or EventCallback<EventArgs>.
+
+RULE EV-4: SelectMethod="GetX" + ItemType="NS.Model"
+  → Items="@xList" + TItem="Model"
+  → In @code: List<Model> xList; OnInitializedAsync() { xList = await GetX(); }
+  This is the MOST COMMON structural transform in WingtipToys.
+```
+
+---
+
+### 1.9 Model Binding Attributes
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| MB-1 | `SelectMethod="GetProducts"` | `Items="@products"` — load in OnInitializedAsync | Every data-bound control | Structural |
+| MB-2 | `ItemType="WingtipToys.Models.Product"` | `TItem="Product"` (generic type parameter) | ListView, GridView, FormView, DropDownList, DetailsView | Mechanical |
+| MB-3 | `DataKeyNames="ProductID"` | `DataKeyNames="ProductID"` (BWFC supports this) | ListView in ProductList | Mechanical |
+| MB-4 | `GroupItemCount="4"` | `GroupItemCount="4"` (BWFC ListView supports this) | ProductList | Mechanical |
+| MB-5 | `DataTextField="CategoryName"` | `DataTextField="CategoryName"` (BWFC DropDownList) | Admin DropDownAddCategory | Mechanical |
+| MB-6 | `DataValueField="CategoryID"` | `DataValueField="CategoryID"` (BWFC DropDownList) | Admin DropDownAddCategory | Mechanical |
+| MB-7 | `AppendDataBoundItems="true"` | `AppendDataBoundItems="true"` (BWFC DropDownList) | Admin DropDownRemoveProduct | Mechanical |
+| MB-8 | `[QueryString("id")] int? categoryId` (in SelectMethod params) | `[SupplyParameterFromQuery(Name="id")] int? CategoryId` | ProductList.aspx.cs | Structural |
+| MB-9 | `[RouteData] string categoryName` (in SelectMethod params) | `[Parameter] string CategoryName` (from @page route) | ProductList.aspx.cs, ProductDetails.aspx.cs | Structural |
+
+---
+
+### 1.10 Server-Side Comments
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| CM-1 | `<%-- comment --%>` | `@* comment *@` | Site.Master, Manage.aspx (extensive) | Mechanical |
+| CM-2 | `<%-- ... --%>` multi-line with commented-out code | `@* ... *@` | Manage.aspx (phone/2FA sections) | Mechanical |
+
+---
+
+### 1.11 Code Block Expressions (Inline C#)
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| CB-1 | `<% if (condition) { %>` ... `<% } %>` | `@if (condition) { ... }` | Manage.aspx (TwoFactorEnabled, HasPhoneNumber) | Structural |
+| CB-2 | `<% if (X) { %> ... <% } else { %> ... <% } %>` | `@if (X) { ... } else { ... }` | Manage.aspx | Structural |
+
+---
+
+### 1.12 Visibility Patterns
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| V-1 | `Visible="false"` on `<asp:PlaceHolder>` | `@if (showPlaceholder) { ... }` | Login ErrorMessage, ManagePassword setPassword/changePasswordHolder, Forgot DisplayEmail, 2FA verifycode, Confirm errorPanel | Structural |
+| V-2 | `Visible="false"` on `<asp:Panel>` | `@if (showPanel) { ... }` | ErrorPage DetailedErrorPanel | Structural |
+| V-3 | `Visible="false"` on `<asp:HyperLink>` | `@if (showLink) { <HyperLink ... /> }` | Manage ChangePassword/CreatePassword | Structural |
+| V-4 | `Visible="false"` on `<a runat="server">` | `@if (showLink) { <a ...> }` | Site.Master adminLink | Structural |
+| V-5 | `Visible="<%# CanRemoveExternalLogins %>"` (data-bound) | `Visible="@canRemoveExternalLogins"` or `@if` wrapping | ManageLogins | Structural |
+| V-6 | Server-side Visible set in code-behind: `control.Visible = true` | Set bool field → `@if` re-renders | ShoppingCart (UpdateBtn, CheckoutImageBtn), ManagePassword, Forgot, Confirm | Structural |
+
+**Transformation rules:**
+```
+RULE V-UNIVERSAL: Visible="false" on a server control
+  Option A (BWFC): If the BWFC component has a Visible parameter, use it:
+    Visible="@showControl"
+  Option B (Preferred for non-BWFC HTML): Wrap in @if block:
+    @if (showControl) { <ComponentOrHtml ... /> }
+  
+  In @code block, the code-behind's control.Visible = X becomes:
+    showControl = X; StateHasChanged();
+```
+
+---
+
+### 1.13 Special Controls & Patterns
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| SP-1 | `<asp:ScriptManager>` with `<Scripts>` collection | Remove entirely (BWFC ScriptManager is no-op stub) | Site.Master | Mechanical |
+| SP-2 | `<webopt:bundlereference runat="server" path="~/Content/css" />` | `<link rel="stylesheet" href="~/css/site.css" />` in App.razor | Site.Master | Mechanical |
+| SP-3 | `<asp:ModelErrorMessage ModelStateKey="X" AssociatedControlID="Y">` | Custom validation — no BWFC equivalent. Use `<ValidationMessage For="@(() => Model.X)" />` | ManagePassword, RegisterExternalLogin | Semantic |
+| SP-4 | `ViewStateMode="Disabled"` on controls | Remove (no ViewState in Blazor) | LoginView, HyperLink, PlaceHolder, ListView | Mechanical |
+| SP-5 | `EnableViewState="false"` on Label | Remove (no ViewState in Blazor) | ShoppingCart lblTotal | Mechanical |
+| SP-6 | User control registration: `<friendlyUrls:ViewSwitcher runat="server" />` | `<ViewSwitcher />` | Site.Mobile.Master | Mechanical |
+| SP-7 | `<uc:OpenAuthProviders runat="server" ID="OpenAuthLogin" />` | `<OpenAuthProviders />` | Login.aspx | Mechanical |
+| SP-8 | `<uc:OpenAuthProviders runat="server" ReturnUrl="~/Account/ManageLogins" />` | `<OpenAuthProviders ReturnUrl="/Account/ManageLogins" />` | ManageLogins.aspx | Mechanical |
+
+---
+
+### 1.14 Code-Behind Patterns → @code Block
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| CO-1 | `Page_Load(object sender, EventArgs e)` | `OnInitializedAsync()` or `OnParametersSetAsync()` | Every code-behind file | Structural |
+| CO-2 | `Page_PreRender(object sender, EventArgs e)` | `OnAfterRenderAsync(bool firstRender)` | Site.Master.cs | Structural |
+| CO-3 | `Page_Init(object sender, EventArgs e)` | `OnInitialized()` | Site.Master.cs | Structural |
+| CO-4 | `Response.Redirect("URL")` | `NavigationManager.NavigateTo("/URL")` | ShoppingCart, CheckoutStart, CheckoutReview, AdminPage | Mechanical |
+| CO-5 | `Session["key"] = value` | Scoped DI service (e.g., `CartStateService.PaymentAmount = value`) | ShoppingCart, CheckoutStart, CheckoutReview | Semantic |
+| CO-6 | `Request.QueryString["key"]` | `[SupplyParameterFromQuery] string Key { get; set; }` | AdminPage, CheckoutError, ProductList | Structural |
+| CO-7 | `Request.Url.AbsoluteUri` | `NavigationManager.Uri` | AdminPage | Mechanical |
+| CO-8 | `Server.MapPath("~/path")` | `IWebHostEnvironment.WebRootPath + "/path"` | AdminPage | Structural |
+| CO-9 | `FindControl("controlID")` | `@ref` variable or `@bind` pattern | ShoppingCart (GridView row traversal) | Semantic |
+| CO-10 | `DataBind()` | `StateHasChanged()` or re-assign Items | CheckoutReview | Structural |
+| CO-11 | `IsPostBack` check | Remove (Blazor re-renders on state change) | CheckoutReview | Mechanical |
+| CO-12 | `new ProductContext()` (direct instantiation) | Inject `IDbContextFactory<ProductContext>` via DI | Every data access page | Structural |
+| CO-13 | `HttpContext.Current.User.IsInRole("canEdit")` | `AuthenticationStateProvider` + `[Authorize(Roles="canEdit")]` | Site.Master.cs | Structural |
+| CO-14 | `HttpContext.Current.Session[CartSessionKey]` | `CartStateService` (scoped DI) | ShoppingCartActions | Semantic |
+| CO-15 | `HttpContext.Current.User.Identity.Name` | `AuthenticationStateProvider` → `AuthenticationState.User.Identity.Name` | ShoppingCartActions, CheckoutReview | Structural |
+| CO-16 | `Server.Transfer("ErrorPage.aspx?handler=X")` | `NavigationManager.NavigateTo("/ErrorPage?handler=X")` | Default.aspx.cs, Global.asax.cs | Structural |
+| CO-17 | `Server.GetLastError()` | Global error handling via `ErrorBoundary` component | Default.aspx.cs, Global.asax.cs | Semantic |
+| CO-18 | `FormsAuthentication.RequireSSL` | ASP.NET Core HTTPS middleware | Site.Master.cs | Semantic |
+| CO-19 | Anti-XSRF token management (ViewState-based) | Remove — Blazor handles anti-forgery automatically | Site.Master.cs | Mechanical |
+| CO-20 | `Context.GetOwinContext().Authentication.SignOut()` | `SignInManager.SignOutAsync()` (ASP.NET Core Identity) | Site.Master.cs | Semantic |
+
+---
+
+### 1.15 Template Patterns in Data Controls
+
+| # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
+|---|---|---|---|---|
+| T-1 | `<ItemTemplate>` | `<ItemTemplate>` (BWFC preserves this) | ListView, GridView TemplateField, FormView, DetailsView | Mechanical |
+| T-2 | `<EmptyDataTemplate>` | `<EmptyDataTemplate>` (BWFC preserves this) | ProductList ListView, OpenAuthProviders ListView | Mechanical |
+| T-3 | `<EmptyItemTemplate>` | `<EmptyItemTemplate>` (BWFC preserves this) | ProductList ListView | Mechanical |
+| T-4 | `<GroupTemplate>` | `<GroupTemplate>` (BWFC preserves this) | ProductList ListView | Mechanical |
+| T-5 | `<LayoutTemplate>` | `<LayoutTemplate>` (BWFC preserves this) | ProductList ListView, ManageLogins ListView | Mechanical |
+| T-6 | `<ItemSeparatorTemplate>` | `<ItemSeparatorTemplate>` (BWFC preserves this) | Site.Master category ListView | Mechanical |
+| T-7 | `<AnonymousTemplate>` | `<AnonymousTemplate>` (BWFC LoginView preserves) | Site.Master LoginView | Mechanical |
+| T-8 | `<LoggedInTemplate>` | `<LoggedInTemplate>` (BWFC LoginView preserves) | Site.Master LoginView | Mechanical |
+| T-9 | `<ItemStyle HorizontalAlign="Left" />` | `<ItemStyle HorizontalAlign="Left" />` (BWFC preserves) | CheckoutReview DetailsView | Mechanical |
+| T-10 | `<Fields>` (DetailsView) | `<Fields>` (BWFC preserves) | CheckoutReview DetailsView | Mechanical |
+| T-11 | `<Columns>` (GridView) | `<Columns>` (BWFC preserves) | ShoppingCart, CheckoutReview | Mechanical |
+
+---
+
+## 2. Migration Difficulty Classification
+
+### 2.1 Mechanical (100% Automatable — Regex/Script)
+
+These require no understanding of application logic. A script can handle them with 100% accuracy:
+
+| ID | Transformation | Regex/Script Approach |
+|---|---|---|
+| D-2,D-3,D-4 | Remove `AutoEventWireup`, `Language`, `Async` attributes from directives | Regex on `<%@ Page` lines |
+| D-7 | Remove `<%@ Register %>` directives | Delete lines matching `<%@ Register` |
+| S-UNIVERSAL | Remove `asp:` prefix, `runat="server"` | `s/\basp:(\w+)/\1/g`, `s/\s+runat="server"//g` |
+| SP-1 | Remove `<asp:ScriptManager>` block including all `<Scripts>` | Multi-line regex or XML parser |
+| SP-2 | Remove `<webopt:bundlereference>` | Line delete |
+| SP-4,SP-5 | Remove `ViewStateMode="X"`, `EnableViewState="X"` | Regex attribute removal |
+| CM-1,CM-2 | Convert `<%-- X --%>` to `@* X *@` | Regex replacement |
+| E-3 | `<%: DateTime.Now.Year %>` → `@DateTime.Now.Year` | Regex: `<%:\s*(.+?)\s*%>` → `@($1)` |
+| B-1 | `<%#: Item.Property %>` → `@context.Property` | Regex: `<%#:\s*Item\.(\w+)\s*%>` → `@context.$1` |
+| H-1 | `<head runat="server">` → `<head>` | Remove runat from head |
+| H-2 | Remove `<form runat="server">` / `</form>` wrapping | Structural delete |
+| H-4 | `<a runat="server" href="~/X">` → `<a href="/X">` | Remove runat, `~/` → `/` |
+| CO-19 | Remove entire Anti-XSRF code block | Delete known pattern |
+| T-1..T-11 | Template names preserved | No change needed |
+| MB-2 | `ItemType="NS.Model"` → `TItem="Model"` | Regex: extract class name from namespace |
+| MB-3..MB-7 | Most data attributes pass through unchanged | Identity transform |
+
+**Estimated coverage: ~40% of all transformations**
+
+### 2.2 Structural (Semi-Automatable — Deterministic Rules)
+
+These follow deterministic rules but require understanding of page structure:
+
+| ID | Transformation | Automation Approach |
+|---|---|---|
+| D-1 | Page directive → `@page` + `@layout` | Parse directive attributes, generate route from filename or route table |
+| D-5 | Master page → Layout component | Template-based: `@inherits LayoutComponentBase`, replace ContentPlaceHolder with `@Body` |
+| D-8 | Title from directive → `<PageTitle>` | Extract Title attribute, generate `<PageTitle>@Title</PageTitle>` |
+| C-1..C-4 | Content/ContentPlaceHolder system | Parse tree: identify MainContent → @Body, strip Content wrappers |
+| S-3 | Button OnClick → event binding | `OnClick="Handler"` → `OnClick="@Handler"`, transform method signature in code-behind |
+| EV-4 | SelectMethod → Items parameter | Replace `SelectMethod="X"` with `Items="@xList"`, add load logic to OnInitializedAsync |
+| MB-8,MB-9 | `[QueryString]`/`[RouteData]` → `[SupplyParameterFromQuery]`/`[Parameter]` | Pattern-match code-behind method parameters |
+| V-1..V-6 | Visibility patterns → `@if` blocks | When `Visible="false"`, wrap element in `@if`; create bool field |
+| H-3,H-5 | runat="server" div/a with ID → code-referenced element | Parse code-behind for ID references; decide @ref vs @if |
+| CB-1,CB-2 | Inline `<% if %> ... <% } %>` → `@if { }` | Regex: `<% if \((.+)\) { %>` → `@if ($1) {` |
+| CO-1..CO-3 | Lifecycle methods → Blazor lifecycle | Map: Page_Load → OnInitializedAsync, Page_PreRender → OnAfterRenderAsync |
+| CO-4 | Response.Redirect → NavigationManager.NavigateTo | Regex in .cs files |
+| CO-6 | Request.QueryString → [SupplyParameterFromQuery] | Pattern match and generate parameter |
+| CO-10,CO-11 | DataBind/IsPostBack → StateHasChanged/remove | Known patterns |
+| CO-12 | new DbContext() → injected factory | Regex in .cs files, add `@inject` |
+| E-1,E-2 | Title expression → field reference | Map Page.Title → Title field |
+| E-8 | Request.QueryString in markup → parameter | Generate [SupplyParameterFromQuery] |
+| B-2..B-4 | Format string expressions | Regex: extract format specifier, wrap in interpolated string |
+| R-1,R-2 | GetRouteUrl → string interpolation | Requires route table input; mechanical with config |
+
+**Estimated coverage: ~45% of all transformations**
+
+### 2.3 Semantic (Requires Judgment — Agent/Human)
+
+These require understanding of application logic and cannot be fully automated:
+
+| ID | Transformation | Why It Needs Judgment |
+|---|---|---|
+| CO-5 | Session → DI services | Must design service shape: what state, what scope, what interface? |
+| CO-9 | FindControl grid row traversal → @bind | Shopping cart update pattern requires complete redesign |
+| CO-13,CO-15 | HttpContext.Current identity → AuthenticationState | Must decide: Blazor Server (cascading parameter) vs. WASM (different pattern) |
+| CO-14 | Session-based cart → scoped service | Must design CartStateService, decide persistence strategy |
+| CO-17 | Server.GetLastError → ErrorBoundary | Global error handling architecture decision |
+| CO-18,CO-20 | FormsAuth/OWIN → ASP.NET Core Identity | Identity system migration (15+ Account pages) |
+| EV-5,EV-6 | DeleteMethod/CommandName patterns | CRUD operation wiring differs fundamentally |
+| SP-3 | ModelErrorMessage → Blazor validation | No BWFC equivalent; must map to DataAnnotationsValidator/ValidationMessage |
+| — | EF6 → EF Core | Model/context/migration changes |
+| — | PayPal NVP integration → HttpClient | API client rewrite |
+| — | Custom route registration (Global.asax) → @page directives | Route table design |
+| — | Role/Identity setup (RoleActions, IdentityConfig) → ASP.NET Core Identity | Architecture decision |
+| — | Bundling (BundleConfig) → static assets | CSS/JS strategy |
+
+**Estimated coverage: ~15% of all transformations (but ~50% of effort)**
+
+---
+
+## 3. Copilot Agent/Skill Design
+
+### 3.1 Architecture: Three-Layer Migration Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Layer 1: MECHANICAL SCRIPT (bwfc-migrate CLI)              │
+│  ─────────────────────────────────────────────────────────── │
+│  PowerShell/Python script. No AI needed.                     │
+│  Runs FIRST. Handles ~40% of transforms.                     │
+│  Input: .aspx/.ascx files                                    │
+│  Output: .razor files with mechanical transforms applied     │
+│  Deterministic. Idempotent. Can be re-run safely.            │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Layer 2: COPILOT SKILL (structural transforms)              │
+│  ─────────────────────────────────────────────────────────── │
+│  Copilot custom instructions + skill file.                   │
+│  Handles structural transforms that follow rules but need    │
+│  context awareness (code-behind → @code, lifecycle methods,  │
+│  data binding patterns, visibility → @if).                   │
+│  Semi-automated: Copilot applies rules, user reviews.        │
+│  ~45% of transforms.                                         │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Layer 3: INTERACTIVE AGENT (semantic decisions)             │
+│  ─────────────────────────────────────────────────────────── │
+│  Copilot agent with full repo context.                       │
+│  Presents choices to the developer for semantic transforms:  │
+│  - Session → DI service design                               │
+│  - Identity migration strategy                               │
+│  - Data access pattern (EF Core setup)                       │
+│  - Error handling architecture                               │
+│  ~15% of transforms but ~50% of effort.                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Layer 1: Mechanical Migration Script (`bwfc-migrate`)
+
+**Implementation: PowerShell script (cross-platform via pwsh)**
+
+**What it does:**
+1. Copies .aspx → .razor, .ascx → .razor (component)
+2. Strips `<%@ Page %>` directive → generates `@page "/route"` line
+3. Removes `asp:` prefix from all control tags
+4. Removes `runat="server"` from all elements
+5. Converts `<%-- comment --%>` → `@* comment *@`
+6. Converts `<%: expression %>` → `@(expression)`
+7. Converts `<%#: Item.Property %>` → `@context.Property`
+8. Converts `<%#: Eval("Property") %>` → `@context.Property`
+9. Converts simple `<%#: String.Format(...)%>` → `@($"...")`
+10. Removes `ViewStateMode`, `EnableViewState`, `AutoEventWireup` attributes
+11. Strips `<form runat="server">` / `</form>` wrapper
+12. Strips `<asp:ScriptManager>` blocks
+13. Strips `<webopt:bundlereference>` tags
+14. Converts `<%@ Register %>` lines to comments noting the component reference
+15. Converts `href="~/X"` → `href="/X"` on anchor tags
+16. Renames `ItemType="NS.Class"` → `TItem="Class"`
+17. Generates a migration report (what was changed, what needs manual attention)
+
+**Script configuration file (`bwfc-migrate.config.json`):**
+```json
+{
+  "routeTable": {
+    "ProductsByCategoryRoute": "/Category/{categoryName}",
+    "ProductByNameRoute": "/Product/{productName}"
+  },
+  "layoutMapping": {
+    "~/Site.Master": "SiteLayout"
+  },
+  "excludeFiles": ["*.designer.cs", "Web.config", "packages.config"],
+  "outputDirectory": "./BlazorMigrated/Pages",
+  "componentLibraryNamespace": "Fritz.BlazorWebFormsComponents"
+}
+```
+
+**Output per file:**
+```
+✅ Default.aspx → Default.razor (6 mechanical transforms applied)
+⚠️  ProductList.aspx → ProductList.razor (4 mechanical + 3 structural flagged)
+❌  ShoppingCart.aspx → ShoppingCart.razor (2 mechanical + 5 semantic flagged)
+```
+
+### 3.3 Layer 2: Copilot Migration Skill File
+
+**File: `.github/copilot-instructions-migration.md` or `.copilot/skills/webforms-migration.md`**
+
+This is the core skill file that teaches Copilot the structural transformation rules. It should contain:
+
+1. **Component mapping table** (Section 4 below) — what maps to what
+2. **Attribute transformation rules** — per-control attribute mappings
+3. **Code-behind migration patterns** — lifecycle method mapping, DI injection patterns
+4. **Template migration rules** — how to handle ItemTemplate/LayoutTemplate/etc.
+5. **Data binding migration** — SelectMethod → Items pattern with OnInitializedAsync
+6. **Visibility migration** — Visible="false" → @if patterns
+7. **Route migration** — GetRouteUrl → string interpolation
+8. **Common anti-patterns** to avoid (FindControl, ViewState, IsPostBack, etc.)
+
+**Skill invocation flow:**
+```
+User: "Migrate ShoppingCart.aspx to Blazor"
+Copilot (with skill loaded):
+1. Reads ShoppingCart.aspx and ShoppingCart.aspx.cs
+2. Applies structural rules from skill file
+3. Generates ShoppingCart.razor with @page, @layout, @code block
+4. Flags semantic decisions: "Session → DI service", "FindControl → @bind"
+5. Proposes concrete implementation for each flagged item
+6. User approves/modifies
+```
+
+### 3.4 Layer 3: Interactive Migration Agent
+
+**File: `.github/agents/migration.agent.md`**
+
+The agent definition for Copilot Workspace / Copilot Chat agent mode. This handles the full-project migration workflow:
+
+**Agent capabilities:**
+1. **Project scanner** — Analyze a Web Forms project, inventory all pages/controls/code-behind
+2. **Dependency analyzer** — Identify Session usage, HttpContext dependencies, EF6 patterns
+3. **Architecture advisor** — Recommend DI services, layout structure, routing plan
+4. **File migrator** — Apply mechanical + structural transforms, flag semantic decisions
+5. **Progress tracker** — Track which pages are migrated, what's pending, what's blocked
+
+**Agent workflow:**
+```
+Phase 1: SCAN (automated)
+  → Inventory all .aspx/.ascx/.master files
+  → Parse control usage, code-behind dependencies
+  → Generate migration complexity report
+  → Output: migration-plan.md with per-page status
+
+Phase 2: SCAFFOLD (automated)
+  → Create Blazor project structure
+  → Copy static assets
+  → Create _Imports.razor with BWFC usings
+  → Create layout from master page
+  → Set up DI services skeleton
+
+Phase 3: MIGRATE PAGES (per-page, interactive)
+  → For each page (ordered by complexity, simple first):
+    1. Run mechanical script
+    2. Apply structural rules
+    3. Present semantic decisions to user
+    4. Generate .razor + @code
+
+Phase 4: WIRE UP (interactive)
+  → Configure routing
+  → Set up authentication/authorization
+  → Configure EF Core
+  → Create DI services for Session replacements
+  → Integration test
+
+Phase 5: VERIFY (automated)
+  → Build check
+  → Route reachability test
+  → Side-by-side comparison guide
+```
+
+### 3.5 Recommended File Layout
+
+```
+.github/
+  agents/
+    migration.agent.md         ← Interactive migration agent definition
+  copilot-instructions.md      ← Existing library dev instructions (keep separate)
+
+.copilot/
+  skills/
+    webforms-migration/
+      SKILL.md                 ← Copilot skill: structural transformation rules
+      component-map.md         ← Component mapping table (Section 4)
+      attribute-map.md         ← Per-control attribute transformations
+      code-behind-patterns.md  ← Lifecycle, DI, event handler patterns
+      anti-patterns.md         ← What NOT to do (FindControl, ViewState, etc.)
+
+scripts/
+  bwfc-migrate.ps1             ← Mechanical transformation script
+  bwfc-migrate.config.json     ← Route table, layout mapping, config
+  bwfc-scan.ps1                ← Project scanner (inventory generator)
+
+docs/
+  Migration/
+    AutomatedMigration.md      ← MkDocs guide: how to use the tooling
+    ManualPatterns.md           ← Reference: semantic patterns that need manual work
+    WingtipToysWalkthrough.md  ← Step-by-step WingtipToys migration example
+```
+
+---
+
+## 4. Component Library Coverage Map
+
+### Complete mapping for all controls found in WingtipToys:
+
+#### 4.1 Data Controls
+
+```
+asp:ListView → <ListView>
+  ItemType          → TItem (generic parameter)              ⚠️ pattern change
+  SelectMethod      → Items (load in OnInitializedAsync)     ⚠️ pattern change
+  DataKeyNames      → DataKeyNames                           ✅ direct
+  GroupItemCount    → GroupItemCount                          ✅ direct
+  DeleteMethod      → OnItemDeleting event                   ⚠️ pattern change
+  ViewStateMode     → REMOVE                                 ✅ mechanical
+  <ItemTemplate>    → <ItemTemplate>                          ✅ direct
+  <EmptyDataTemplate> → <EmptyDataTemplate>                  ✅ direct
+  <EmptyItemTemplate> → <EmptyItemTemplate>                  ✅ direct
+  <GroupTemplate>   → <GroupTemplate>                         ✅ direct
+  <LayoutTemplate>  → <LayoutTemplate>                       ✅ direct
+  <ItemSeparatorTemplate> → <ItemSeparatorTemplate>          ✅ direct
+
+asp:GridView → <GridView>
+  AutoGenerateColumns → AutoGenerateColumns                  ✅ direct
+  ShowFooter        → ShowFooter                             ✅ direct
+  GridLines         → GridLines                              ✅ direct
+  CellPadding       → CellPadding                            ✅ direct
+  ItemType          → TItem                                  ⚠️ pattern change
+  SelectMethod      → Items                                  ⚠️ pattern change
+  CssClass          → CssClass                               ✅ direct
+  Width             → Width                                  ✅ direct
+  BorderColor       → BorderColor                            ✅ direct
+  BorderWidth       → BorderWidth                            ✅ direct
+  <Columns>         → <Columns>                              ✅ direct
+
+asp:FormView → <FormView>
+  ItemType          → TItem                                  ⚠️ pattern change
+  SelectMethod      → Items                                  ⚠️ pattern change
+  RenderOuterTable  → RenderOuterTable                       ⚠️ BLOCKING: not yet implemented (see history)
+  <ItemTemplate>    → <ItemTemplate>                          ✅ direct
+
+asp:DetailsView → <DetailsView>
+  AutoGenerateRows  → AutoGenerateRows                       ✅ direct
+  GridLines         → GridLines                              ✅ direct
+  CellPadding       → CellPadding                            ✅ direct
+  BorderStyle       → BorderStyle                            ✅ direct
+  CommandRowStyle-BorderStyle → via <DetailsViewCommandRowStyle>  ⚠️ sub-component
+  <Fields>          → <Fields>                                ✅ direct
+
+asp:BoundField → <BoundField>
+  DataField         → DataField                              ✅ direct
+  HeaderText        → HeaderText                             ✅ direct
+  SortExpression    → SortExpression                         ✅ direct
+  DataFormatString  → DataFormatString                       ✅ direct
+
+asp:TemplateField → <TemplateField>
+  HeaderText        → HeaderText                             ✅ direct
+  <ItemTemplate>    → <ItemTemplate>                          ✅ direct
+  <ItemStyle>       → <ItemStyle>                             ✅ direct
+```
+
+#### 4.2 Standard Controls
+
+```
+asp:Label → <Label>
+  ID                → @ref (if code-behind references it)    ⚠️ structural
+  Text              → Text                                   ✅ direct
+  CssClass          → CssClass                               ✅ direct
+  Font-Size         → Font-Size                              ✅ direct
+  AssociatedControlID → AssociatedControlID                  ✅ direct
+  EnableViewState   → REMOVE                                 ✅ mechanical
+  style="color:red" → style="color:red" (pass-through)      ✅ direct
+
+asp:TextBox → <TextBox>
+  ID                → @ref or @bind                          ⚠️ structural
+  CssClass          → CssClass                               ✅ direct
+  TextMode          → TextMode (Password, Email, Phone)      ✅ direct  
+  Width             → Width                                  ✅ direct
+  Text              → Text / @bind-Text                      ⚠️ depends on usage
+
+asp:Button → <Button>
+  Text              → Text                                   ✅ direct
+  OnClick           → OnClick="@Handler"                     ⚠️ signature change
+  CssClass          → CssClass                               ✅ direct
+  CausesValidation  → CausesValidation                       ✅ direct
+  ValidationGroup   → ValidationGroup                        ✅ direct
+  CommandName       → CommandName                             ✅ direct
+
+asp:ImageButton → <ImageButton>
+  ImageUrl          → ImageUrl                               ✅ direct
+  Width             → Width                                  ✅ direct
+  AlternateText     → AlternateText                          ✅ direct
+  OnClick           → OnClick="@Handler"                     ⚠️ signature change
+  BackColor         → BackColor                              ✅ direct
+  BorderWidth       → BorderWidth                            ✅ direct
+
+asp:CheckBox → <CheckBox>
+  ID                → @ref                                   ⚠️ structural
+  Text              → Text                                   ✅ direct
+
+asp:HyperLink → <HyperLink>
+  NavigateUrl       → NavigateUrl (~/X → /X)                 ⚠️ tilde transform
+  Text              → Text                                   ✅ direct
+  Visible           → Visible or @if wrapper                  ⚠️ structural
+  ViewStateMode     → REMOVE                                 ✅ mechanical
+
+asp:Image → <Image>
+  ImageUrl          → ImageUrl (~/X → /X)                    ⚠️ tilde transform
+  BorderStyle       → BorderStyle                            ✅ direct
+
+asp:DropDownList → <DropDownList>
+  ItemType          → TItem                                  ⚠️ pattern change
+  SelectMethod      → Items                                  ⚠️ pattern change
+  DataTextField     → DataTextField                          ✅ direct
+  DataValueField    → DataValueField                         ✅ direct
+  AppendDataBoundItems → AppendDataBoundItems                ✅ direct
+
+asp:FileUpload → <FileUpload>
+  ID                → @ref                                   ⚠️ structural
+  (PostedFile, HasFile, FileName, SaveAs in code-behind)     ⚠️ API difference
+
+asp:Literal → <Literal>
+  ID                → @ref                                   ⚠️ structural
+  (Text set in code-behind)                                  ✅ via Text parameter
+
+asp:PlaceHolder → @if block
+  ID                → bool field name                        ⚠️ structural
+  Visible           → @if (showX)                            ⚠️ structural
+  (Wrapper element removed entirely in Blazor)
+
+asp:Panel → <Panel>
+  ID                → @ref                                   ⚠️ structural
+  Visible           → Visible or @if wrapper                  ⚠️ structural
+
+asp:HiddenField → <HiddenField>
+  ID                → @ref                                   ⚠️ structural
+
+asp:LinkButton → <LinkButton>
+  Text              → Text                                   ✅ direct
+  OnClick           → OnClick="@Handler"                     ⚠️ signature change
+  CommandArgument   → CommandArgument                        ✅ direct
+```
+
+#### 4.3 Validation Controls
+
+```
+asp:RequiredFieldValidator → <RequiredFieldValidator>
+  ControlToValidate → ControlToValidate                      ✅ direct
+  Text              → Text                                   ✅ direct
+  ErrorMessage      → ErrorMessage                           ✅ direct
+  CssClass          → CssClass                               ✅ direct
+  SetFocusOnError   → SetFocusOnError                        ✅ direct
+  Display           → Display (Dynamic/Static/None)          ✅ direct
+  ValidationGroup   → ValidationGroup                        ✅ direct
+
+asp:RegularExpressionValidator → <RegularExpressionValidator>
+  ControlToValidate → ControlToValidate                      ✅ direct
+  Text              → Text                                   ✅ direct
+  Display           → Display                                ✅ direct
+  ValidationExpression → ValidationExpression                ✅ direct
+  SetFocusOnError   → SetFocusOnError                        ✅ direct
+
+asp:CompareValidator → <CompareValidator>
+  ControlToCompare  → ControlToCompare                       ✅ direct
+  ControlToValidate → ControlToValidate                      ✅ direct
+  CssClass          → CssClass                               ✅ direct
+  Display           → Display                                ✅ direct
+  ErrorMessage      → ErrorMessage                           ✅ direct
+  ValidationGroup   → ValidationGroup                        ✅ direct
+
+asp:ValidationSummary → <ValidationSummary>
+  CssClass          → CssClass                               ✅ direct
+  ShowModelStateErrors → ❌ NOT IN BWFC (ASP.NET-specific)   ⚠️ remove or custom
+
+asp:ModelErrorMessage → ❌ NOT IN BWFC
+  → Use <ValidationMessage For="..." /> from Blazor's EditForm
+  → Requires restructuring form to use EditForm + EditContext
+```
+
+#### 4.4 Login Controls
+
+```
+asp:LoginView → <LoginView>
+  ViewStateMode     → REMOVE                                 ✅ mechanical
+  <AnonymousTemplate> → <AnonymousTemplate>                  ✅ direct
+  <LoggedInTemplate>  → <LoggedInTemplate>                   ✅ direct
+
+asp:LoginStatus → <LoginStatus>
+  LogoutAction      → LogoutAction                           ✅ direct
+  LogoutText        → LogoutText                             ✅ direct
+  LogoutPageUrl     → LogoutPageUrl (~/X → /X)               ⚠️ tilde transform
+  OnLoggingOut      → OnLoggingOut="@Handler"                ⚠️ signature change
+```
+
+#### 4.5 AJAX Controls (Migration Stubs)
+
+```
+asp:ScriptManager → <ScriptManager> (no-op stub)
+  <Scripts> collection → REMOVE (no equivalent)              ✅ mechanical
+  All <asp:ScriptReference> → REMOVE                         ✅ mechanical
+
+asp:ScriptReference → REMOVE
+```
+
+#### 4.6 Controls NOT in BWFC (Found in WingtipToys)
+
+| Web Forms Control | Status | Migration Strategy |
+|---|---|---|
+| `<asp:ModelErrorMessage>` | ❌ Not in BWFC | Use Blazor's `<ValidationMessage For="..." />` with `EditForm` |
+| `<webopt:bundlereference>` | N/A (not a control) | Remove; use direct CSS `<link>` tags |
+
+**Coverage: 28 of 29 distinct controls used in WingtipToys are covered by BWFC (96.6%).**
+The only gap is `<asp:ModelErrorMessage>`, which is an ASP.NET 4.5+ Identity scaffold control with no standard Web Forms equivalent. It maps to Blazor's native `<ValidationMessage>`.
+
+---
+
+## 5. Recommended Deliverables
+
+### Priority-ordered list of what the team should build:
+
+#### 5.1 MUST HAVE (Core Deliverables)
+
+| # | Deliverable | Owner | Description | Effort |
+|---|---|---|---|---|
+| 1 | **`.copilot/skills/webforms-migration/SKILL.md`** | Forge (design) + Beast (write) | The core Copilot skill file. Contains ALL transformation rules from Section 1 in a format Copilot can apply. This is the highest-value deliverable — it makes every Copilot-assisted migration faster. | M |
+| 2 | **`scripts/bwfc-migrate.ps1`** | Cyclops | Mechanical transformation script. Handles the ~40% of transforms that are pure regex. Produces .razor stubs with TODO markers for structural/semantic work. | M |
+| 3 | **`.github/agents/migration.agent.md`** | Forge (design) + Cyclops (implement) | Copilot agent definition for interactive migration. Orchestrates the three-layer pipeline. Knows how to scan a project, run the script, apply skills, and guide semantic decisions. | L |
+| 4 | **`docs/Migration/AutomatedMigration.md`** | Beast | MkDocs guide: "How to migrate a Web Forms app to Blazor using BWFC + Copilot". Step-by-step walkthrough with the WingtipToys example. | M |
+
+#### 5.2 SHOULD HAVE (Quality & Completeness)
+
+| # | Deliverable | Owner | Description | Effort |
+|---|---|---|---|---|
+| 5 | **`scripts/bwfc-scan.ps1`** | Cyclops | Project scanner. Inventories .aspx/.ascx files, counts controls, classifies complexity per page, generates migration-plan.md. | S |
+| 6 | **Component map data files** (`.copilot/skills/webforms-migration/component-map.md`, `attribute-map.md`) | Forge (data) + Beast (format) | Machine-readable mapping tables for the skill/agent to reference. Section 4 above in structured format. | S |
+| 7 | **FormView RenderOuterTable fix** | Cyclops | The only blocking BWFC component gap for WingtipToys. Must ship before migration demo. | S |
+| 8 | **WingtipToys migrated example** | Jubilee | The proof-of-concept: WingtipToys fully migrated to Blazor Server using BWFC + the tooling. Lives in `samples/WingtipToys.Blazor/`. | L |
+
+#### 5.3 NICE TO HAVE (Polish)
+
+| # | Deliverable | Owner | Description | Effort |
+|---|---|---|---|---|
+| 9 | **`docs/Migration/ManualPatterns.md`** | Beast | Reference doc for semantic patterns (Session → DI, Identity migration, EF6 → EF Core, etc.) | M |
+| 10 | **`scripts/bwfc-migrate.config.json` schema** | Cyclops | JSON schema for the config file, enabling route table, layout mapping, namespace configuration. | S |
+| 11 | **Integration test: migrated vs. original** | Colossus | Side-by-side Playwright tests comparing WingtipToys original output to migrated Blazor output. | L |
+
+### 5.4 What NOT to Build
+
+- ❌ **A standalone CLI tool** (`bwfc-migrate` as a .NET tool) — overkill for now. PowerShell scripts are sufficient and more portable.
+- ❌ **A VS Code extension** — Copilot skills/agents serve this purpose better.
+- ❌ **A Roslyn analyzer** — code-behind transforms are better handled by Copilot's AI than static analysis.
+- ❌ **Full ASP.NET parser** — We're targeting practical migration, not 100% parsing coverage. Regex + Copilot handles 95%+ of real-world patterns.
+
+### 5.5 Migration Flow (End-to-End User Experience)
+
+```
+Developer has: legacy Web Forms app (e.g., WingtipToys)
+Developer wants: Blazor Server app using BWFC components
+
+Step 1: SCAN
+  $ pwsh scripts/bwfc-scan.ps1 -Path ./MyWebFormsApp
+  → Generates migration-plan.md:
+    "31 ASPX files, 2 ASCX files, 1 Master page
+     22 distinct controls (28/29 covered by BWFC)
+     Complexity: 8 Green (mechanical), 12 Yellow (structural), 11 Red (semantic)"
+
+Step 2: SCAFFOLD
+  $ pwsh scripts/bwfc-migrate.ps1 -Path ./MyWebFormsApp -Output ./MyBlazorApp -Config bwfc-migrate.config.json
+  → Creates Blazor project structure
+  → Copies static assets
+  → Generates .razor files with mechanical transforms applied
+  → Produces migration-report.md with per-file status
+
+Step 3: REFINE (Copilot-assisted)
+  Developer opens migrated project in VS Code / VS
+  Copilot skill (webforms-migration) is auto-loaded
+  Developer: "Complete the migration of ShoppingCart.razor"
+  Copilot: Applies structural rules, proposes @code block, flags Session usage
+  Developer: Reviews, approves, iterates
+
+Step 4: ARCHITECT (Agent-guided)
+  Developer: "@migration plan the data access layer migration"
+  Agent: "I see 5 pages using ProductContext (EF6). Here's my recommendation:
+    1. Create ProductContext.cs inheriting DbContext (EF Core)
+    2. Register with AddDbContextFactory<ProductContext> in Program.cs
+    3. Inject IDbContextFactory<ProductContext> in each page
+    ... Shall I generate this?"
+  Developer: "Yes"
+
+Step 5: VERIFY
+  $ dotnet build
+  $ dotnet test
+  → Fix any remaining issues with Copilot assistance
+```
+
+---
+
+## Summary Statistics
+
+| Metric | Value |
+|---|---|
+| Total ASPX/ASCX/Master files in WingtipToys | 33 (31 ASPX + 2 ASCX) |
+| Total lines of markup | ~1,100 |
+| Distinct syntax patterns catalogued | 85+ (across 15 categories) |
+| Distinct Web Forms controls used | 29 |
+| BWFC coverage of those controls | 28/29 (96.6%) |
+| Mechanical transforms (script-automatable) | ~40% |
+| Structural transforms (skill-automatable) | ~45% |
+| Semantic transforms (human-required) | ~15% |
+| Recommended deliverables | 11 (4 must-have, 4 should-have, 3 nice-to-have) |
+| Blocking component gap | 1 (FormView RenderOuterTable) |
+| Missing control | 1 (ModelErrorMessage — use Blazor's ValidationMessage) |

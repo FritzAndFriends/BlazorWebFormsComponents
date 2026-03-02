@@ -148,3 +148,46 @@ Jeff's initial catalog listed RequiredFieldValidator, RegularExpressionValidator
 - Phase 5: Auth (6 items) — Identity, LoginView/LoginStatus, admin authorization
 
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+### Summary: ASPX/ASCX Migration Tooling Strategy (2026-03-02)
+
+**By:** Forge
+**What:** Exhaustive analysis of 33 ASPX/ASCX/Master files from WingtipToys (1,100+ lines), cataloguing 85+ syntax patterns across 15 categories. Designed three-layer migration pipeline and recommended 11 deliverables. Full analysis: `.ai-team/decisions/inbox/forge-migration-tooling-strategy.md`.
+
+**ASPX syntax patterns catalogued:**
+- 15 directive patterns (Page, Master, Control, Register)
+- 4 Content/ContentPlaceHolder patterns
+- 29 distinct server control types mapped to BWFC (96.6% coverage)
+- 10 data-binding expression patterns (Item.X, Eval, String.Format)
+- 10 code render expression patterns (<%: %>, <%= %>)
+- 3 route expression patterns (GetRouteUrl → interpolation)
+- 7 runat="server" HTML element patterns
+- 6 event handler patterns (OnClick, SelectMethod, DeleteMethod)
+- 9 model binding attribute patterns
+- 2 comment syntax patterns
+- 2 inline code block patterns (<% if %>)
+- 6 visibility patterns (Visible="false" → @if blocks)
+- 8 special patterns (ScriptManager, bundling, ModelErrorMessage)
+- 15 template patterns (all preserved 1:1 in BWFC)
+- 20 code-behind patterns (lifecycle, navigation, session, identity, data access)
+
+**Migration automation strategy (three layers):**
+- Layer 1: `bwfc-migrate.ps1` — mechanical script, ~40% of transforms, regex-based, deterministic
+- Layer 2: `.copilot/skills/webforms-migration/SKILL.md` — structural transforms via Copilot, ~45% of transforms
+- Layer 3: `.github/agents/migration.agent.md` — interactive agent for semantic decisions, ~15% of transforms
+
+**Copilot agent/skill design decisions:**
+- Copilot skill file is highest-value deliverable (teaches Copilot all structural rules)
+- Mechanical script handles safe deterministic transforms first (no AI needed)
+- Agent orchestrates full workflow: scan → scaffold → migrate → architect → verify
+- Route table and layout mapping provided via JSON config file
+- NOT building: standalone CLI tool, VS Code extension, Roslyn analyzer, full ASP.NET parser
+
+**Key findings:**
+- 28/29 controls used in WingtipToys have BWFC equivalents (only ModelErrorMessage missing — use Blazor's ValidationMessage)
+- FormView RenderOuterTable remains only blocking component gap
+- SelectMethod → Items is the most common structural transform (every data-bound control)
+- Session → scoped DI services is the hardest semantic transform (ShoppingCartActions)
+- Account pages (14 files) map to ASP.NET Core Identity — recommend scaffold, not component migration
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
