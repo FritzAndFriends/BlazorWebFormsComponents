@@ -72,35 +72,17 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
 
 
- Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
-### Issue #406 — ListView EditItemTemplate Not Rendering (2026-03-02)
 
-- **Bug:** Clicking Edit in a ListView with EditItemTemplate fired the ItemEditing event and set EditIndex correctly, but the ListView did not visually swap from ItemTemplate to EditItemTemplate.
-- **Root cause:** The `<CascadingValue>` elements wrapping each item in the `foreach` loop lacked `@key` directives. Without `@key`, Blazor's positional diff algorithm could not reliably detect that a specific row's template changed from `ItemTemplate` to `EditItemTemplate` when `EditIndex` changed, because the surrounding structure (CascadingValue with same Name/Value shape) looked identical to the diff engine.
-- **Fix:** Added `@key="dataItemIndex"` to both `<CascadingValue>` elements in `ListView.razor` — the non-grouped rendering path (line 60) and the grouped rendering path (line 105). This forces Blazor to track each row by its data index, ensuring template swaps are detected and re-rendered.
-- **Lesson:** Always add `@key` to elements inside loops where the rendered content can change based on external state (like EditIndex, SelectedIndex). Without `@key`, Blazor's positional diffing may skip re-rendering rows where only the template selection changed but the data stayed the same. This applies to any data-bound component (GridView, DetailsView, etc.) that uses template switching inside iteration loops.
+📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
 
-### Issue #406 — ListView EditItemTemplate Closure Bug (2026-03-01)
+### Issue #406 — ListView EditItemTemplate (2026-03-01 through 2026-03-02)
 
-- **Root cause:** In `ListView.razor`, the template selection logic (`EditIndex >= 0 && dataItemIndex == EditIndex`) and even/odd toggle (`even = !even`) were inside `<CascadingValue>`'s ChildContent — a deferred RenderFragment. The `dataItemIndex` variable was declared outside the foreach loop and captured by the closure. Since CascadingValue components render their ChildContent AFTER the parent's BuildRenderTree completes, all closures saw the final loop value (item count) instead of the per-iteration value.
-- **Fix:** Moved template selection and even/odd toggle from inside the CascadingValue's ChildContent to before the CascadingValue element. These expressions now execute during BuildRenderTree when `dataItemIndex` has the correct per-iteration value. The resolved `currentTemplate` variable is captured correctly by the closure since it's a new local each iteration.
-- **Key files:** `src/BlazorWebFormsComponents/ListView.razor` (lines 57-61), `src/BlazorWebFormsComponents.Test/ListView/EditTemplateTests.razor`, `src/BlazorWebFormsComponents.Test/ListView/CrudEvents.razor`
-- **Pattern:** In Blazor Razor templates, NEVER reference loop-external mutable variables inside a component's ChildContent (CascadingValue, etc.). Either capture values in loop-local variables before the component, or evaluate expressions before the component tag. This applies to any `<Component>@{code using loop var}</Component>` pattern.
-- **Lesson:** `foreach` iteration variables are safe in closures (new per iteration since C# 5), but variables declared outside the loop body are shared across all closures. Blazor components defer ChildContent rendering, so loop-external variables will have their final values.
-
-
- Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
-
- Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+Two root causes fixed: (1) **Closure bug:** Template selection and even/odd toggle were inside CascadingValue ChildContent (deferred RenderFragment), capturing loop-external dataItemIndex at final value. Fix: moved expressions before CascadingValue element. (2) **Diffing bug:** CascadingValue elements lacked @key, so Blazor's positional diff skipped re-rendering template swaps. Fix: added @key="dataItemIndex" to both rendering paths (line 60 ungrouped, line 105 grouped).
+- **Lessons:** Always add @key inside loops with state-dependent template switching. Never reference loop-external mutable variables inside ChildContent. foreach iteration vars safe (new per iteration since C# 5), outer vars shared.
+- **Key files:** ListView.razor, ListView/EditTemplateTests.razor, ListView/CrudEvents.razor
 
 ### FormView RenderOuterTable Parameter (2026-03-02)
 
-- **What:** Added `[Parameter] public bool RenderOuterTable { get; set; } = true;` to `FormView.razor.cs`. Updated `FormView.razor` to conditionally wrap content in `<table>` only when `RenderOuterTable` is true. When false, renders just the template content directly (no table, no header/footer rows, no pager — matching Web Forms behavior).
-- **Pattern:** Added the parameter in the code-behind file (`.razor.cs`) following existing parameter convention. Used `@if (RenderOuterTable)` / `else` branching in the `.razor` template to separate the two rendering paths. The `RenderOuterTable=false` path still calls `DataBinding`/`DataBound` and uses `CascadingValue` for the current item — only the table wrapper is removed.
-- **Why:** WingtipToys `ProductDetails.aspx` uses `RenderOuterTable="false"` to suppress the wrapping table. This was the only blocking gap for the WingtipToys migration. Default `true` preserves backward compatibility — all 29 existing FormView tests pass unchanged.
+Added [Parameter] public bool RenderOuterTable = true to FormView. When false, suppresses table wrapper, header/footer rows, and pager — matching Web Forms. @if (RenderOuterTable) / else branching. RenderOuterTable=false still calls DataBinding/DataBound + CascadingValue. WingtipToys ProductDetails.aspx was the driver. All 29 existing tests pass.
 
- Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
- Team update (2026-03-02): FormView RenderOuterTable implemented (default true, false suppresses table wrapper). Only blocking gap for WingtipToys resolved.  decided by Cyclops
-
- Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
-
+📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered, SelectMethod→Items #1 Layer 2 transform, 4 ready/21 skill/8 architecture (Forge).
