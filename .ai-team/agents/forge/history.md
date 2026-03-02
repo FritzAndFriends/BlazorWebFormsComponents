@@ -108,8 +108,65 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 
 **Also updated:** Summary table, category definitions (added ID Generation, Attribute Format, Style), revision history, header status line.
 
+### Summary: Full Skins & Themes Roadmap (#369) (2026-02-28)
+
+**By:** Forge
+**What:** Created prioritized 3-wave roadmap for full theming implementation, 15 work items total.
+
+**Architecture decisions:**
+- Sub-component styles use `Dictionary<string, TableItemStyle>` on `ControlSkin`, keyed by style name ("HeaderStyle", "RowStyle", etc.)
+- ThemeMode enum (`StyleSheetTheme` vs `Theme`) controls priority — StyleSheetTheme = defaults, Theme = overrides
+- Container-level EnableTheming propagation via dedicated cascading bool, not parent chain walking (O(1) vs O(n))
+- Runtime theme switching requires new ThemeConfiguration instance (CascadingValue reference equality)
+- .skin file parser recommended as build-time source generator (works in all Blazor hosting models)
+- JSON theme format is complementary to C# config, not a replacement
+
+**Key findings from code audit:**
+- DataBound inheritance chain is correct: DataBoundComponent<T> → BaseDataBoundComponent → BaseStyledComponent — all data controls get top-level theming automatically
+- 6 style container interfaces already exist (IGridViewStyleContainer, IDetailsViewStyleContainer, IFormViewStyleContainer, ICalendarStyleContainer, IDataGridStyleContainer, IDataListStyleContainer) with ~41 total sub-style slots
+- UiStyle<T> / UiTableItemStyle classes provide sub-component style rendering infrastructure
+- ControlSkin is flat (no sub-styles) — extending it is the biggest single work item
+
+**File paths:**
+- Roadmap: `.ai-team/decisions/inbox/forge-themes-full-roadmap.md`
+- Existing theming code: `src/BlazorWebFormsComponents/Theming/` (ThemeConfiguration.cs, ControlSkin.cs, ThemeProvider.razor)
+- Style container interfaces: `src/BlazorWebFormsComponents/Interfaces/I*StyleContainer.cs`
+- Base class wiring: `src/BlazorWebFormsComponents/BaseStyledComponent.cs` (OnParametersSet + ApplySkin)
+
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (guide) and ThemesAndSkins.md (strategy). Review both for architecture audits  decided by Beast
  Team update (2026-03-01): Normalizer pipeline order codified with 4 enhancements (case-insensitive, boolean attrs, empty styles, GUID IDs). Issue #387  decided by Cyclops
 📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally (backing fields). Theme font-family renders correctly. 11 tests verify. No code changes needed elsewhere — decided by Cyclops, Rogue
 📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent. Avoids Blazor duplicate-parameter error from _Imports.razor inheritance — decided by Cyclops
 📌 Team update (2026-03-02): Theming sample page uses 6-section progressive layout. BorderStyle enum needs FQN in theming code — decided by Jubilee
+
+### Summary: Build/Version/Release Process Audit (2026-03-02)
+
+**By:** Forge
+**What:** Full audit of 7 CI/CD workflows, NBGV version management, and release coordination. Audit saved to `.ai-team/decisions/inbox/forge-version-release-audit.md`.
+
+**Critical findings:**
+1. `version.json` on main says `0.15` but latest tag is `v0.16` — NBGV computes `0.15.X`, not `0.16.0`. Every artifact built from main has wrong version prefix.
+2. NuGet (tag-triggered), Docker (main-push-triggered), docs (main-push or tag), and demos (main-push) all fire independently with no version coordination.
+3. `docs.yml` uses deprecated `::set-output` and has a release-detection regex that never matches this project's 2-segment tags (`v0.16`). Docs only deploy on main push, never on tag.
+4. No GitHub Release automation — releases are created manually, not all tags have releases.
+5. Docker image version comes from `nbgv get-version` on runner which reads stale `version.json`, not the tag.
+
+**Recommendation:**
+- Create unified `release.yml` triggered by GitHub Release `published` event. One trigger → NuGet + Docker + docs + demos, all with same version from tag.
+- Keep NBGV but use it correctly: version.json drives dev/CI versions, release workflow overrides with `-p:Version=${TAG}` for exact release version.
+- Standardize on 3-segment SemVer tags (`v0.17.0`).
+- Retire independent deployment triggers (nuget.yml tag trigger, deploy-server-side.yml main-push trigger).
+- Automate post-release version bump via PR to dev.
+- Fix docs.yml deprecated syntax and broken regex immediately.
+
+**Key infrastructure details learned:**
+- NBGV 3.9.50 in `Directory.Build.props`, applied to all projects
+- NuGet PackageId: `Fritz.BlazorWebFormsComponents`
+- Docker image: `ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples`
+- Dockerfile strips NBGV via `sed`, accepts `VERSION` build-arg, passes `-p:Version=$VERSION`
+- `version.json` `publicReleaseRefSpec` includes main, master, v-branches, and v-tags
+- `version.json` `firstUnstableTag` is `preview` — dev branch gets `-preview.X` suffix
+- MkDocs uses Docker-based build (`docs/Dockerfile`), deploys to gh-pages branch via `crazy-max/ghaction-github-pages@v2.1.1`
+- `docs.yml` deploy guard: `github.event_name != 'pull_request' && (endsWith(github.ref, 'main') || steps.prepare.outputs.release == 'true')`
+
+ Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
