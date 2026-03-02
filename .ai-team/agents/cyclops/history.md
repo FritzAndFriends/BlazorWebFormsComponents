@@ -59,3 +59,20 @@ Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by 
 Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
  Team update (2026-03-01): D-11 through D-14 formally registered  D-11 GUID IDs needs fix, D-12 boolean attrs intentional, D-13/D-14 Calendar fixes recommended  decided by Forge
+
+### Issue #366 — Base Class Theme Integration (2026-03-01)
+
+- **Theme wiring moved to BaseWebFormsComponent:** Added `[CascadingParameter] ThemeConfiguration CascadedTheme` to BaseWebFormsComponent. Added `OnParametersSet` override that resolves the ControlSkin via `GetType().Name + SkinID` and calls virtual `ApplyThemeSkin(ControlSkin)`. Base implementation is no-op; BaseStyledComponent overrides to apply IStyle properties.
+- **BaseStyledComponent simplified:** Removed `[CascadingParameter] Theme` and `OnParametersSet` override. Renamed `ApplySkin` to `ApplyThemeSkin` (protected override). StyleSheetTheme semantics preserved: theme sets defaults, explicit values win.
+- **Property naming:** Named the cascading parameter `CascadedTheme` (not `Theme`) because `_Imports.razor` has `@inherits BaseWebFormsComponent` making ALL `.razor` files inherit from it. WebFormsPage and ThemeProvider both have their own `[Parameter] Theme` — same name would cause Blazor's "declares more than one parameter" error.
+- **ThemeProvider fix:** Added `@inherits ComponentBase` to ThemeProvider.razor so it doesn't inherit BaseWebFormsComponent via _Imports.razor. ThemeProvider is infrastructure, not a Web Forms control.
+- **WebFormsPage fix:** Changed `<CascadingValue Value="Theme">` to `Value="@(Theme ?? CascadedTheme)"` so the cascade works whether the user passes Theme explicitly or inherits it from a parent ThemeProvider.
+- **Lesson:** `_Imports.razor @inherits BaseWebFormsComponent` affects ALL .razor files in the project, including infrastructure components like ThemeProvider. When adding properties to BaseWebFormsComponent, check for name conflicts with every .razor component's @code block.
+- **Lesson:** C# `virtual`/`override` on properties with different attributes ([CascadingParameter] vs [Parameter]) does NOT work for Blazor — reflection returns the base class's attribute, not the override's. Use different property names instead.
+
+### FontInfo Name/Names Auto-Sync Fix (2026-03-01)
+
+- **FontInfo auto-sync:** Converted `Name` and `Names` from auto-properties to backing-field properties with bidirectional sync. Setting `Name` also sets `Names` (single value). Setting `Names` also sets `Name` (first comma-separated entry, trimmed). Setting either to null/empty clears both. Matches ASP.NET Web Forms `FontInfo` behavior.
+- **ApplyThemeSkin guard:** Updated `BaseStyledComponent.ApplyThemeSkin` to check both `Font.Name` AND `Font.Names` are empty before applying theme font. Prevents theme from overriding an explicitly set `Names` value.
+- **Root cause:** `ApplyThemeSkin` set `Font.Name` but `HasStyleExtensions.ToStyle()` reads `Font.Names` for `font-family`. Without auto-sync, theme fonts were silently lost.
+- **Lesson:** When Web Forms has paired/synced properties (Name↔Names, Value↔SelectedValue, etc.), our Blazor equivalents must replicate the sync behavior or the rendering pipeline breaks at property boundaries.
