@@ -207,3 +207,6 @@ Jeff's initial catalog listed RequiredFieldValidator, RegularExpressionValidator
 - `Text` property (Label fallback) and `Display` property (validator-only) omitted — not used in any WingtipToys sample, not part of original ModelErrorMessage API.
 - Multiple errors for same key rendered with `<br>` separator inside single `<span>`.
 - Lives in `Validations/` folder alongside validators and AspNetValidationSummary for discoverability.
+
+� Team update (2026-03-02): ModelErrorMessage documentation shipped  docs/ValidationControls/ModelErrorMessage.md, status.md updated to 52 components  decided by Beast
+

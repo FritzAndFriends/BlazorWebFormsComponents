@@ -85,3 +85,6 @@
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
  Team update (2026-03-02): ASPX/ASCX migration tooling strategy produced  85+ patterns, 3-layer pipeline (mechanical/structural/semantic), 11 deliverables.  decided by Forge
+
+ Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
+

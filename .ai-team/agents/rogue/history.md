@@ -121,3 +121,6 @@ All 8 tests pass against the already-landed implementation.
 📌 FormView RenderOuterTable convention: When `RenderOuterTable=false`, the `else` branch in FormView.razor renders template content directly without `<table>`/`<tr>`/`<td>` wrappers. Empty data path also strips table wrappers. The implementation already exists on the current branch. — Rogue
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
+

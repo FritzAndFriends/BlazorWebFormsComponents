@@ -101,3 +101,6 @@ Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
  Team update (2026-03-02): FormView RenderOuterTable implemented (default true, false suppresses table wrapper). Only blocking gap for WingtipToys resolved.  decided by Cyclops
+
+ Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
+
