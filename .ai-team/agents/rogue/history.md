@@ -118,3 +118,21 @@ All 1437 tests pass (0 failures). Cyclops's auto-sync fix was already in place �
  Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
 
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+### ListView EditItemTemplate Rendering Tests (Issue #406)
+
+Wrote 6 bUnit tests in `src/BlazorWebFormsComponents.Test/ListView/EditTemplateTests.razor` for the EditItemTemplate rendering fix:
+
+1. `EditIndex_MatchingItem_RendersEditItemTemplate` — EditIndex=0 parameter, verify span.edit appears for item 0
+2. `EditIndex_NonMatchingItems_StillUseItemTemplate` — EditIndex=0, verify items 1+ still use span.display
+3. `EditIndexNegativeOne_AllItemsUseItemTemplate` — default EditIndex=-1, all items use ItemTemplate ✅
+4. `HandleCommand_Edit_SwapsToEditItemTemplate` — HandleCommand("Edit") triggers template swap in DOM
+5. `HandleCommand_Cancel_RestoresItemTemplate` — Start in edit mode, cancel returns to ItemTemplate
+6. `EditItemTemplateNull_FallsBackToItemTemplate` — EditIndex=0 but no EditItemTemplate, falls back to ItemTemplate ✅
+
+**TDD results:** 2 pass (negative/null cases), 4 fail (template swap behavior — the exact bug #406 describes). All 39 pre-existing ListView tests unaffected.
+
+📌 Test pattern: ListView EditItemTemplate rendering tests use CSS class selectors (`span.display` vs `span.edit`) to distinguish which template rendered for each item. This avoids fragile markup matching and clearly shows template selection per row. — Rogue
+
+📌 Edge case: ListView.razor line 59 has the correct template selection logic (`EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null`) but it doesn't produce the expected DOM output when EditIndex is set via parameter. The bug is in the rendering pipeline, not the conditional logic. Tests confirm this — `theListView.EditIndex` is correctly set but the rendered HTML doesn't reflect it. — Rogue
+
+📌 Test pattern: For HandleCommand-based tests, use `cut.InvokeAsync(() => theListView.HandleCommand(...))` pattern (from CrudEvents.razor) to ensure Blazor dispatcher context. Verify DOM state with `cut.FindAll()` AFTER the invoke, not just property values. — Rogue
