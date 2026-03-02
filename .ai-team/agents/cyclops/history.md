@@ -86,3 +86,24 @@ Two root causes fixed: (1) **Closure bug:** Template selection and even/odd togg
 Added [Parameter] public bool RenderOuterTable = true to FormView. When false, suppresses table wrapper, header/footer rows, and pager — matching Web Forms. @if (RenderOuterTable) / else branching. RenderOuterTable=false still calls DataBinding/DataBound + CascadingValue. WingtipToys ProductDetails.aspx was the driver. All 29 existing tests pass.
 
 📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered, SelectMethod→Items #1 Layer 2 transform, 4 ready/21 skill/8 architecture (Forge).
+
+### Original WingtipToys ASP.NET Web Forms App — Build & Run (2026-03-02)
+
+Built and ran the original WingtipToys sample from `samples/WingtipToys/` for screenshot capture.
+
+**Connection string fix:** Updated `Web.config` — replaced all `(LocalDb)\v11.0` with `(LocalDb)\MSSQLLocalDB` (2 connection strings + EF defaultConnectionFactory parameter). The v11.0 instance is SQL Server 2012 LocalDB; this machine has MSSQLLocalDB (SQL Server 2025).
+
+**NBGV inheritance fix:** Repo-root `Directory.Build.props` injects Nerdbank.GitVersioning, which auto-generates AssemblyVersion/AssemblyFileVersion attributes — conflicting with the existing `Properties/AssemblyInfo.cs`. Fix: created `samples/WingtipToys/Directory.Build.props` (empty `<Project>`) to stop MSBuild inheritance.
+
+**NuGet restore for packages.config:** `nuget restore <sln>` generates PackageReference-style files but does NOT populate the `packages/` folder for packages.config projects. Must use `nuget install <packages.config> -OutputDirectory <packages-dir>` instead.
+
+**Exact commands that worked:**
+1. `nuget.exe install WingtipToys\packages.config -OutputDirectory packages -Source "https://api.nuget.org/v3/index.json"`
+2. `& "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" WingtipToys.csproj /p:Configuration=Debug /v:minimal`
+3. `& "C:\Program Files (x86)\IIS Express\iisexpress.exe" /path:<project-dir> /port:5200`
+
+**Running at:** http://localhost:5200/ — verified HTTP 200, page title "Welcome - Wingtip Toys".
+
+**Files changed:**
+- `samples/WingtipToys/WingtipToys/Web.config` — connection strings updated
+- `samples/WingtipToys/Directory.Build.props` — created (empty, blocks NBGV inheritance)

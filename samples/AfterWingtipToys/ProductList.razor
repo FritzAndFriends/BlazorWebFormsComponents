@@ -6,30 +6,22 @@
             </hgroup>
 
             <ListView ID="productList" 
-                DataKeyNames="ProductID" GroupItemCount="4"
+                DataKeyNames="ProductID"
                 TItem="Product" Items="@Products">
                 <EmptyDataTemplate>
-                    <table >
+                    <table>
                         <tr>
                             <td>No data was returned.</td>
                         </tr>
                     </table>
                 </EmptyDataTemplate>
-                <EmptyItemTemplate>
-                    <td/>
-                </EmptyItemTemplate>
-                <GroupTemplate>
-                    <tr id="itemPlaceholderContainer">
-                        <td id="itemPlaceholder"></td>
-                    </tr>
-                </GroupTemplate>
                 <ItemTemplate>
-                    <td>
+                    <td style="padding:10px;vertical-align:top;">
                         <table>
                             <tr>
                                 <td>
                                   <a href="@($"/ProductDetails?id={context.ProductID}")">
-                                    <img src="/Catalog/Images/Thumbs/@context.ImagePath"
+                                    <img src="/Images/Products/@context.ImagePath"
                                       width="100" height="75" style="border:1px solid" />
                                   </a>
                                 </td>
@@ -37,7 +29,7 @@
                             <tr>
                                 <td>
                                     <a href="@($"/ProductDetails?id={context.ProductID}")">
-                                      @context.ProductName
+                                      <b>@context.ProductName</b>
                                     </a>
                                     <br />
                                     <span>
@@ -51,29 +43,9 @@
                                     </a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
                         </table>
                     </td>
                 </ItemTemplate>
-                <LayoutTemplate>
-                    <table style="width:100%;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table id="groupPlaceholderContainer" style="width:100%">
-                                        <tr id="groupPlaceholder"></tr>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                            </tr>
-                            <tr></tr>
-                        </tbody>
-                    </table>
-                </LayoutTemplate>
             </ListView>
         </div>
     </section>
