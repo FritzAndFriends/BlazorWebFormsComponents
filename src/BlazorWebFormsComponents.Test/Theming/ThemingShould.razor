@@ -131,4 +131,70 @@
 		span.HasAttribute("style").ShouldBeFalse();
 	}
 
+	[Fact]
+	public void NestedThemeProviderOverridesOuter()
+	{
+		// Arrange
+		var outerTheme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.BackColor, Red));
+		var innerTheme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="outerTheme">
+				<ThemeProvider Theme="innerTheme">
+					<Label Text="inner" />
+				</ThemeProvider>
+			</ThemeProvider>
+		);
+
+		// Assert — inner theme should win
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Blue");
+		span.GetAttribute("style").ShouldNotContain("background-color:Red");
+	}
+
+	[Fact]
+	public void ThemeProviderRendersNoExtraHtmlElements()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" />
+			</ThemeProvider>
+		);
+
+		// Assert — only the label span, no wrapper divs
+		cut.FindAll("div").Count.ShouldBe(0);
+		cut.Find("span").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void FluentApiWorksWithThemeProvider()
+	{
+		// Arrange — use fluent API to build the theme
+		var theme = new ThemeConfiguration()
+			.ForControl("Label", skin => skin
+				.Set(s => s.BackColor, Blue)
+				.Set(s => s.CssClass, "themed-label"));
+
+		// Act
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Label Text="test" />
+			</ThemeProvider>
+		);
+
+		// Assert
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Blue");
+		span.GetAttribute("class").ShouldBe("themed-label");
+	}
+
 }

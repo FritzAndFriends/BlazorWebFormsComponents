@@ -58,3 +58,18 @@
   - **Pattern discovered:** DataGrid is the only pageable data control without PagerSettings sub-component support — it always uses a numeric pager. Worth noting for future migration guidance.
 
  Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes) and CheckBox bare input id  may need doc updates. Issue #379 (LinkButton CssClass) verified as already fixed in M15, can be closed.
+
+- **M10 Skins & Themes Developer Guide (`docs/Migration/SkinsAndThemes.md`):**
+  - Created comprehensive developer guide following the Utility Feature Documentation Template.
+  - Structure: Background → Web Forms Usage → Blazor Implementation → Migration Path (6 steps) → Code Examples (4 scenarios) → Limitations (PoC) → Moving On.
+  - Uses tabbed before/after comparison (pymdownx.tabbed) for the complete migration example.
+  - Coexists with existing `ThemesAndSkins.md` (strategy/architecture comparison). New doc is the practical "how to use it" guide; existing doc is the "why this approach" analysis.
+  - Added to `mkdocs.yml` nav as "Skins and Themes Guide" (alphabetical before "Themes and Skins Strategy").
+  - Updated `README.md` to replace "skins or themes" deferred statement with active ThemeProvider link.
+  - **Key convention:** When a feature has both a strategy/comparison doc and a practical guide, use separate files with clear nav labels distinguishing them ("Guide" vs "Strategy").
+
+ Team update (2026-03-01): SkinBuilder uses expression trees for nested property access  if API changes, update SkinsAndThemes.md examples first (primary dev-facing doc)  decided by Cyclops
+📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally. Theme font-family renders correctly. Update SkinsAndThemes.md if font examples need revision — decided by Cyclops, Rogue
+📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops
+📌 Team update (2026-03-02): Theming sample page uses 6-section progressive layout (Jubilee). Docs should reference this pattern for theming examples — decided by Jubilee
+

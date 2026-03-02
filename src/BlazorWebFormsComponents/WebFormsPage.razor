@@ -2,7 +2,7 @@
 
 @if (Visible)
 {
-	<CascadingValue Value="Theme">
+	<CascadingValue Value="@(Theme ?? CascadedTheme)">
 		@ChildContent
 	</CascadingValue>
 }

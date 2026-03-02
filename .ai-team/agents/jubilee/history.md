@@ -40,3 +40,16 @@
 
 
  Team update (2026-02-27): M17 AJAX controls implemented  ScriptManager/Proxy are no-op stubs, Timer shadows Enabled, UpdatePanel uses ChildContent, UpdateProgress renders hidden, Substitution uses Func callback, new AJAX/Migration Helper categories  decided by Cyclops
+
+### M20 Theming Sample Page (#367) (2026-03-01)
+
+- **Enhanced Theming/Index.razor** with 6 demo sections: (1) Default skins on Button/Label/TextBox, (2) Named skins via SkinID (Danger, Success), (3) Explicit value overrides (StyleSheetTheme semantics), (4) EnableTheming=false opt-out, (5) Nested ThemeProviders with alternate theme, (6) Unthemed baseline controls outside ThemeProvider.
+- **Migration guide** section with Web Forms before/after comparison and step-by-step instructions.
+- **Source Code section** per documentation skill template — shows complete `@code` block with theme configuration.
+- **ComponentList.razor** updated — added Theming link under Utility Features (alphabetical order between PageService and ViewState).
+- **ComponentCatalog.cs** already had Theming entry in "Theming" category — no changes needed there.
+- **Lesson:** `BorderStyle` enum in `BlazorWebFormsComponents.Enums` conflicts with `ControlSkin.BorderStyle` property — used fully qualified `BlazorWebFormsComponents.Enums.BorderStyle.Solid` in `@code` block. The `_Imports.razor` `@using BlazorWebFormsComponents` brings in the type but not the enum.
+- **Lesson:** Nested `ThemeProvider` works via Blazor's cascading value override — inner `CascadingValue<ThemeConfiguration>` shadows outer for its subtree. No special code needed.
+
+📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally. Theme font-family renders correctly — decided by Cyclops, Rogue
+📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent. Use CascadedTheme in any sample code accessing the cascading theme — decided by Cyclops

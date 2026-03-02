@@ -31,61 +31,48 @@
 
 **Key patterns:** Orientation enum collides with parameter name  use `Enums.Orientation.Vertical`. `_ = callback.InvokeAsync()` for render-time events. `Path.GetFileName()` for file save security. CI secret-gating: env var indirection. Null-returning helpers for conditional HTML attributes. aspNetDisabled class for disabled controls. Always test default parameter values explicitly.
 
- Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
 
- Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz
+<!--  Summarized 2026-03-01 by Scribe  covers M17-M20 Wave 1 -->
 
+### M17-M20 Wave 1 Context (2026-02-27 through 2026-03-01)
 
- Team update (2026-02-27): AJAX Controls nav category created; migration stub doc pattern for no-op components; Substitution moved from deferred to implemented; UpdateProgress uses explicit state pattern  decided by Beast
+**M17 AJAX audit fixes:** ScriptManager EnablePartialRendering default false>true. Scripts collection added (List<ScriptReference>). UpdateProgress conditional CssClass + display:block;visibility:hidden for non-dynamic mode. ScriptReference gained ScriptMode/NotifyScriptLoaded/ResourceUICultures. Lesson: C# bool defaults false, but Web Forms often defaults true.
 
+**M18 bug verification:** #380 BulletedList, #382 CheckBox span, #383 FileUpload GUID  all verified already fixed in M15. FileUpload blazor:elementReference is inherent InputFile artifact. Lesson: verify current state before assuming bugs still exist.
 
- Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+**M18 deterministic IDs & Menu fonts:** CheckBox bare input gained id (#386). MenuItemStyle needed SetFontsFromAttributes(OtherAttributes) in OnInitialized (#360)  Font-Bold maps to Font.Bold sub-property. Lesson: CaptureUnmatchedValues + Font- attrs need explicit SetFontsFromAttributes handling.
 
- Team update (2026-02-27): Forge approved M17 with 4 non-blocking follow-ups (ScriptManager defaults, UpdateProgress CSS/style gaps)  decided by Forge
+**Issue #379:** LinkButton CssClass verified already correct from M15. GetCssClassOrNull() returns null for empty, appends aspNetDisabled when disabled. Edge case: IsNullOrEmpty not IsNullOrWhiteSpace.
 
+**Issue #387 normalizer:** 4 enhancements  case-insensitive file pairing, boolean attr collapse (6 attrs), empty style stripping, GUID ID placeholders. Pipeline order: regex > style norm > empty style strip > boolean attrs > GUID IDs > attr sort > artifact cleanup > whitespace. Key files: scripts/normalize-html.mjs, scripts/normalize-rules.json.
 
- Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests established with C# API pattern for Timer  decided by Rogue
+**Issues #364/#365 theming:** SkinBuilder uses expression trees for Set<TValue>()  supports direct (s.BackColor) and nested (s.Font.Bold) via recursive GetOrCreateValue. ThemeConfiguration gained ForControl(name, configure) fluent methods. ThemeProvider cascades via unnamed CascadingValue  nesting naturally overrides. WebColor.FromHtml() added. 14 unit + 4 bUnit tests. Lesson: expression trees require recursive auto-init of intermediate nulls. CascadingValue by type sufficient for unique types.
 
-### M17 Control Audit Fixes (2026-02-27)
+Team update (2026-02-27): Branching workflow  feature PRs from personal fork to upstream dev, only dev>main on upstream  decided by Jeffrey T. Fritz
+Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N'  decided by Jeffrey T. Fritz
+Team update (2026-02-27): AJAX Controls nav category; migration stub doc pattern for no-ops  decided by Beast
+Team update (2026-02-27): M17 sample pages created  decided by Jubilee
+Team update (2026-02-27): Forge approved M17 with 4 non-blocking follow-ups  decided by Forge
+Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests  decided by Rogue
+Team update (2026-02-27): No-op stub property coverage 41-50% acceptable  decided by Forge
+Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by Forge
+Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
+ Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
+ Team update (2026-03-01): D-11 through D-14 formally registered  D-11 GUID IDs needs fix, D-12 boolean attrs intentional, D-13/D-14 Calendar fixes recommended  decided by Forge
 
-- **Fix 1:** ScriptManager `EnablePartialRendering` default changed from `false` to `true` to match Web Forms default.
-- **Fix 2:** ScriptManager now has `Scripts` collection (`List<ScriptReference>`) matching ScriptManagerProxy pattern. Added `using System.Collections.Generic;`.
-- **Fix 3:** UpdateProgress `<div>` elements now render `class="@CssClass"` conditionally (only when CssClass is non-empty) to match Web Forms styled output.
-- **Fix 4:** UpdateProgress non-dynamic mode div style changed from `visibility:hidden;` to `display:block;visibility:hidden;` matching Web Forms explicit rendering.
-- **Fix 5:** ScriptReference gained `ScriptMode` (default Auto), `NotifyScriptLoaded` (default true), and `ResourceUICultures` properties from the Web Forms original. Added `using BlazorWebFormsComponents.Enums;`.
-- **Lesson:** Always verify default values against the Web Forms originals — bool properties default to `false` in C# but Web Forms often defaults them to `true`.
+### Issue #366 — Base Class Theme Integration (2026-03-01)
 
+- **Theme wiring moved to BaseWebFormsComponent:** Added `[CascadingParameter] ThemeConfiguration CascadedTheme` to BaseWebFormsComponent. Added `OnParametersSet` override that resolves the ControlSkin via `GetType().Name + SkinID` and calls virtual `ApplyThemeSkin(ControlSkin)`. Base implementation is no-op; BaseStyledComponent overrides to apply IStyle properties.
+- **BaseStyledComponent simplified:** Removed `[CascadingParameter] Theme` and `OnParametersSet` override. Renamed `ApplySkin` to `ApplyThemeSkin` (protected override). StyleSheetTheme semantics preserved: theme sets defaults, explicit values win.
+- **Property naming:** Named the cascading parameter `CascadedTheme` (not `Theme`) because `_Imports.razor` has `@inherits BaseWebFormsComponent` making ALL `.razor` files inherit from it. WebFormsPage and ThemeProvider both have their own `[Parameter] Theme` — same name would cause Blazor's "declares more than one parameter" error.
+- **ThemeProvider fix:** Added `@inherits ComponentBase` to ThemeProvider.razor so it doesn't inherit BaseWebFormsComponent via _Imports.razor. ThemeProvider is infrastructure, not a Web Forms control.
+- **WebFormsPage fix:** Changed `<CascadingValue Value="Theme">` to `Value="@(Theme ?? CascadedTheme)"` so the cascade works whether the user passes Theme explicitly or inherits it from a parent ThemeProvider.
+- **Lesson:** `_Imports.razor @inherits BaseWebFormsComponent` affects ALL .razor files in the project, including infrastructure components like ThemeProvider. When adding properties to BaseWebFormsComponent, check for name conflicts with every .razor component's @code block.
+- **Lesson:** C# `virtual`/`override` on properties with different attributes ([CascadingParameter] vs [Parameter]) does NOT work for Blazor — reflection returns the base class's attribute, not the override's. Use different property names instead.
 
- Team update (2026-02-27): No-op stub property coverage intentionally limited (41-50% acceptable)  deep AJAX infrastructure properties omitted  decided by Forge
+### FontInfo Name/Names Auto-Sync Fix (2026-03-01)
 
- Team update (2026-02-27): UpdatePanel Triggers collection deliberately omitted  Blazor rendering model makes it unnecessary  decided by Forge
-
-### M18 Bug Fix Verification (2026-02-27)
-
-- **Bug #380 (BulletedList `<ol>` rendering):** Verified already correct from M15. `IsOrderedList` property correctly maps Numbered/LowerAlpha/UpperAlpha/LowerRoman/UpperRoman → `true`. Razor template branches `<ol>` vs `<ul>` based on `IsOrderedList`. `ListStyleType` correctly maps all 8 styles (disc, circle, square, decimal, lower-alpha, upper-alpha, lower-roman, upper-roman). All 13 BulletStyle tests pass.
-- **Bug #382 (CheckBox span wrapper):** Verified already correct from M15. CheckBox.razor renders bare `<input>` + `<label>` with NO wrapping `<span>` for both TextAlign=Left and TextAlign=Right. Tests for both alignments pass (8 total).
-- **Bug #383 (FileUpload GUID attribute leak):** Investigated. The only "stray" attribute is `blazor:elementReference=""` from Blazor's `InputFile` component internal `@ref` directive. Root cause: `InputFile` needs `@ref` for JS interop to handle file change events; this adds `blazor:elementReference` to rendered markup. In production, Blazor's JS runtime processes and removes it from the DOM. Cannot be removed without replacing `InputFile` entirely (which would break `IBrowserFile` file data access). Tests confirm no GUID leaks into `id` or other user-facing attributes; `blazor:elementReference` is accepted as a known framework artifact.
-- **Lesson:** The M15 HTML fidelity fixes were thorough — all three "bugs" turned out to be already resolved in code. The `blazor:elementReference` on FileUpload is inherent to using Blazor's `InputFile` component and is not a bug in our code.
-
-### M18 Wave 2 — Deterministic IDs & Menu Font Styles (2026-02-27)
-
-- **Issue #386 (Stable deterministic IDs):** CheckBox and RadioButtonList already used `ClientID` (from `ComponentIdGenerator`) when developer provides `ID`, falling back to GUID when not. The only fix needed was adding `id="@_inputId"` to CheckBox's bare (no-text) `<input>` element (line 20) which was missing the `id` attribute. RadioButtonList was already correct: `{ClientID}_0`, `{ClientID}_1` pattern for item IDs, and `ClientID` as the `name` attribute for mutual exclusion. Tests in `CheckBox/IDRendering.razor` and `RadioButtonList/StableIds.razor` already cover all scenarios.
-- **Issue #360 (Menu level styles):** The four style sub-components (`DynamicMenuStyle`, `StaticMenuStyle`, `DynamicMenuItemStyle`, `StaticMenuItemStyle`) were already implemented in `MenuItemStyle.razor.cs` as C# classes inheriting from `MenuItemStyle`. The `IMenuStyleContainer` interface was already wired. The actual fix was that `MenuItemStyle.SetPropertiesFromUnknownAttributes()` did not process `Font-` prefixed attributes (e.g. `Font-Bold`, `Font-Italic`). Added `this.SetFontsFromAttributes(OtherAttributes)` call in `OnInitialized()` after `SetPropertiesFromUnknownAttributes()` to use the existing `HasStyleExtensions.SetFontsFromAttributes` method. This fixed the failing `Menu_StaticMenuItemStyle_FontBold_RendersFontWeight` test.
-- **Lesson:** When style sub-components use `CaptureUnmatchedValues`, font properties need explicit handling via `SetFontsFromAttributes()` because `Font-Bold` doesn't map to a simple property — it maps to `Font.Bold` on the `FontInfo` sub-object.
-
-### Issue #379 — LinkButton CssClass Verification (2026-02-27)
-
-- **Issue #379 (LinkButton CssClass pass-through):** Verified already correct from M15. `LinkButton.razor` already has `class="@GetCssClassOrNull()"` on both `<a>` elements (PostBackUrl null and non-null branches). The `GetCssClassOrNull()` method in the `@code` block correctly returns: CssClass when enabled and non-empty, `null` when enabled and empty (omitting the attribute), and `CssClass + " aspNetDisabled"` when disabled. Six bUnit tests already exist in `LinkButton/Format.razor` covering: CssClass renders, no CssClass omits attribute, disabled adds aspNetDisabled, disabled+CssClass renders both, and CssClass with PostBackUrl. All 25 LinkButton tests pass. No code change needed.
-- **Key files:** `src/BlazorWebFormsComponents/LinkButton.razor`, `src/BlazorWebFormsComponents.Test/LinkButton/Format.razor`
-- **Lesson:** M15 was thorough — always verify the current state before assuming a bug still exists. The issue was filed before M15 landed.
-
- Team update (2026-02-28): Rogue noted GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  whitespace-only CssClass renders class=" " instead of being omitted. Low priority future cleanup.
-
-### Issue #387 — Normalizer Enhancements (2026-03-01)
-
-- **Enhancement 1 (case-insensitive matching):** Compare mode now pairs files case-insensitively using lowercase key maps, eliminating false HyperLink/Hyperlink dupes. Preference goes to source A casing for display.
-- **Enhancement 2 (boolean attributes):** New `normalizeBooleanAttributes()` collapses `selected=""` and `selected="selected"` to bare `selected` for 6 boolean attrs (selected, checked, disabled, readonly, multiple, nowrap).
-- **Enhancement 3 (empty style stripping):** New `stripEmptyStyles()` removes `style=""` attributes before comparison.
-- **Enhancement 4 (GUID ID normalization):** New `normalizeGuidIds()` replaces GUID patterns in `id` attribute values with `GUID` placeholder, covering CheckBox/RadioButtonList/FileUpload auto-generated IDs.
-- **Key files:** `scripts/normalize-html.mjs`, `scripts/normalize-rules.json`
-- **Lesson:** Normalization functions should run in a specific order: regex rules → style normalization → empty style strip → boolean attrs → GUID IDs → attribute sort → artifact cleanup → whitespace. Each step depends on the previous one leaving clean output.
+- **FontInfo auto-sync:** Converted `Name` and `Names` from auto-properties to backing-field properties with bidirectional sync. Setting `Name` also sets `Names` (single value). Setting `Names` also sets `Name` (first comma-separated entry, trimmed). Setting either to null/empty clears both. Matches ASP.NET Web Forms `FontInfo` behavior.
+- **ApplyThemeSkin guard:** Updated `BaseStyledComponent.ApplyThemeSkin` to check both `Font.Name` AND `Font.Names` are empty before applying theme font. Prevents theme from overriding an explicitly set `Names` value.
+- **Root cause:** `ApplyThemeSkin` set `Font.Name` but `HasStyleExtensions.ToStyle()` reads `Font.Names` for `font-family`. Without auto-sync, theme fonts were silently lost.
+- **Lesson:** When Web Forms has paired/synced properties (Name↔Names, Value↔SelectedValue, etc.), our Blazor equivalents must replicate the sync behavior or the rendering pipeline breaks at property boundaries.

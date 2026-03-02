@@ -5,54 +5,134 @@
 
 <h2>Skins &amp; Themes PoC</h2>
 
-<p>This sample demonstrates the Skins &amp; Themes system, which emulates ASP.NET Web Forms'
-<code>.skin</code> file behavior using Blazor's cascading values.</p>
+<p>This sample demonstrates the <strong>Skins &amp; Themes</strong> system, which emulates
+ASP.NET Web Forms' <code>.skin</code> file behavior using Blazor's cascading values.
+A <code>ThemeProvider</code> wraps components and delivers a <code>ThemeConfiguration</code>
+via <code>CascadingValue</code>. Each control automatically picks up its matching skin.</p>
 
-<h3>Themed Components</h3>
-<p>These components receive their visual properties from a <code>ThemeConfiguration</code>
-provided via <code>ThemeProvider</code>.</p>
+@* ───────────────────────── Section 1: Default Skins ───────────────────────── *@
 
-<ThemeProvider Theme="@SampleTheme">
-    <h4>Default Skin</h4>
-    <p>Button and Label with default theme skin applied:</p>
-    <Button Text="Themed Button" />
-    <br /><br />
-    <Label Text="Themed Label" />
+<div class="demo-container">
+    <h3>1. Default Skins</h3>
+    <p>All controls inside the <code>ThemeProvider</code> receive the default skin for their
+    control type — no extra attributes needed.</p>
 
-    <h4>Named Skin (SkinID)</h4>
-    <p>Button with <code>SkinID="Danger"</code> gets a different skin:</p>
-    <Button Text="Danger Button" SkinID="Danger" />
+    <ThemeProvider Theme="@SampleTheme">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <Button Text="Themed Button" />
+            <Label Text="Themed Label" />
+            <TextBox Text="Themed TextBox" />
+        </div>
+    </ThemeProvider>
+</div>
 
-    <h4>EnableTheming = false</h4>
-    <p>This button opts out of theming entirely:</p>
-    <Button Text="Unthemed Button" EnableTheming="false" />
-</ThemeProvider>
+@* ───────────────────────── Section 2: Named Skins (SkinID) ───────────────── *@
 
-<h3>Without ThemeProvider</h3>
-<p>Components outside the <code>ThemeProvider</code> keep their default appearance:</p>
-<Button Text="No Theme Button" />
+<div class="demo-container">
+    <h3>2. Named Skins (SkinID)</h3>
+    <p>Set <code>SkinID</code> on a control to select a named skin instead of the default.
+    This maps directly to the Web Forms <code>SkinID</code> attribute.</p>
+
+    <ThemeProvider Theme="@SampleTheme">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <Button Text="Default" />
+            <Button Text="Danger" SkinID="Danger" />
+            <Button Text="Success" SkinID="Success" />
+        </div>
+    </ThemeProvider>
+</div>
+
+@* ─────────────────── Section 3: Explicit Overrides (StyleSheetTheme) ─────── *@
+
+<div class="demo-container">
+    <h3>3. Explicit Values Override Theme</h3>
+    <p>The theme uses <strong>StyleSheetTheme</strong> semantics: properties you set explicitly
+    in markup always win. The theme only fills in defaults for properties left unset.</p>
+
+    <ThemeProvider Theme="@SampleTheme">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <Button Text="Theme Default (Blue)" />
+            <Button Text="Explicit Green" BackColor="WebColor.Green" ForeColor="WebColor.White" />
+            <Label Text="Theme Label (Navy)" />
+            <Label Text="Explicit Red Label" ForeColor="WebColor.Red" />
+        </div>
+    </ThemeProvider>
+</div>
+
+@* ───────────────────── Section 4: EnableTheming = false ──────────────────── *@
+
+<div class="demo-container">
+    <h3>4. EnableTheming Opt-Out</h3>
+    <p>Set <code>EnableTheming="false"</code> on any control to skip theme application entirely.
+    The control renders with only its explicit properties.</p>
+
+    <ThemeProvider Theme="@SampleTheme">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <Button Text="Themed (Blue)" />
+            <Button Text="Opted Out" EnableTheming="false" />
+            <Button Text="Opted Out + Explicit" EnableTheming="false"
+                    BackColor="WebColor.Purple" ForeColor="WebColor.White" />
+        </div>
+    </ThemeProvider>
+</div>
+
+@* ───────────────────── Section 5: Nested ThemeProviders ──────────────────── *@
+
+<div class="demo-container">
+    <h3>5. Nested ThemeProviders</h3>
+    <p>An inner <code>ThemeProvider</code> overrides the outer theme for its subtree.
+    This lets you apply different themes to different sections of a page.</p>
+
+    <ThemeProvider Theme="@SampleTheme">
+        <p><em>Outer theme (blue buttons, navy labels):</em></p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <Button Text="Outer Theme" />
+            <Label Text="Outer Label" />
+        </div>
+
+        <ThemeProvider Theme="@AlternateTheme">
+            <p><em>Inner theme (teal buttons, dark-green labels):</em></p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <Button Text="Inner Theme" />
+                <Label Text="Inner Label" />
+            </div>
+        </ThemeProvider>
+    </ThemeProvider>
+</div>
+
+@* ───────────────────── Section 6: Outside ThemeProvider ──────────────────── *@
+
+<div class="demo-container">
+    <h3>6. Without ThemeProvider</h3>
+    <p>Components outside any <code>ThemeProvider</code> receive no theme and render
+    with their default appearance.</p>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <Button Text="No Theme Button" />
+        <Label Text="No Theme Label" />
+        <TextBox Text="No Theme TextBox" />
+    </div>
+</div>
 
 <hr />
 
+@* ───────────────────── Migration Guide ───────────────────────────────────── *@
+
 <h2>Migration Guide &mdash; Before &amp; After</h2>
 
-<p>The Skins &amp; Themes system maps directly from ASP.NET Web Forms concepts.
-Here is a concrete example showing how to migrate themed controls.</p>
+<p>The Skins &amp; Themes system maps directly from ASP.NET Web Forms concepts.</p>
 
 <h3>Before (Web Forms)</h3>
 
 <pre><code>App_Themes/Corporate/controls.skin:
 
 &lt;asp:Button runat="server"
-    BackColor="#336699"
-    ForeColor="White"
-    Font-Names="Segoe UI"
-    Font-Size="9pt"
+    BackColor="#336699" ForeColor="White"
+    Font-Names="Segoe UI" Font-Size="9pt"
     BorderStyle="None" /&gt;
 
 &lt;asp:Button runat="server" SkinID="danger"
-    BackColor="#CC3333"
-    ForeColor="White"
+    BackColor="#CC3333" ForeColor="White"
     Font-Bold="True" /&gt;
 
 web.config:
@@ -62,28 +142,135 @@ Products.aspx:
 &lt;asp:Button ID="btnSave" runat="server" Text="Save" /&gt;
 &lt;asp:Button ID="btnDelete" runat="server" Text="Delete" SkinID="danger" /&gt;</code></pre>
 
-<h3>Migration Steps</h3>
-
-<ol>
-    <li>Create a <code>ThemeConfiguration</code> in C# matching your <code>.skin</code> file</li>
-    <li>Wrap your app (or page) in a <code>ThemeProvider</code></li>
-    <li>Remove <code>asp:</code> prefix and <code>runat="server"</code> from markup</li>
-    <li>Keep <code>SkinID</code> attributes &mdash; they work the same way</li>
-</ol>
-
 <h3>After (Blazor)</h3>
 
-<pre><code class="language-razor">@@* Program.cs or App.razor *@@
+<pre><code class="language-csharp">// CorporateTheme.cs
+var theme = new ThemeConfiguration();
+theme.AddSkin("Button", new ControlSkin
+{
+    BackColor = WebColor.FromHtml("#336699"),
+    ForeColor = WebColor.FromName("White"),
+    Font = new FontInfo { Name = "Segoe UI", Size = new FontUnit("9pt") }
+});
+theme.AddSkin("Button", new ControlSkin
+{
+    BackColor = WebColor.FromHtml("#CC3333"),
+    ForeColor = WebColor.FromName("White"),
+    Font = new FontInfo { Bold = true }
+}, skinId: "danger");</code></pre>
+
+<pre><code class="language-razor">@@* App.razor or layout *@@
 &lt;ThemeProvider Theme="@@corporateTheme"&gt;
     &lt;Router ... /&gt;
 &lt;/ThemeProvider&gt;
 
 @@* Products.razor — markup barely changes *@@
-&lt;Button ID="btnSave" Text="Save" /&gt;
-&lt;Button ID="btnDelete" Text="Delete" SkinID="danger" /&gt;</code></pre>
+&lt;Button Text="Save" /&gt;
+&lt;Button Text="Delete" SkinID="danger" /&gt;</code></pre>
+
+<h3>Migration Steps</h3>
+<ol>
+    <li>Convert each <code>.skin</code> file entry to a <code>ThemeConfiguration.AddSkin()</code> call</li>
+    <li>Wrap your app (or page section) in a <code>&lt;ThemeProvider&gt;</code></li>
+    <li>Remove <code>asp:</code> prefix and <code>runat="server"</code> from markup</li>
+    <li>Keep <code>SkinID</code> attributes &mdash; they work identically</li>
+    <li>Use <code>EnableTheming="false"</code> for controls that should ignore the theme</li>
+</ol>
+
+<hr />
+
+@* ───────────────────── Source Code ───────────────────────────────────────── *@
+
+<div class="code-container">
+    <h2>Source Code</h2>
+
+    <pre><code class="language-razor">@@page "/ControlSamples/Theming"
+@@using BlazorWebFormsComponents.Theming
+
+&lt;ThemeProvider Theme="@@SampleTheme"&gt;
+    &lt;!-- Default skins applied automatically --&gt;
+    &lt;Button Text="Themed Button" /&gt;
+    &lt;Label Text="Themed Label" /&gt;
+    &lt;TextBox Text="Themed TextBox" /&gt;
+
+    &lt;!-- Named skins via SkinID --&gt;
+    &lt;Button Text="Danger" SkinID="Danger" /&gt;
+    &lt;Button Text="Success" SkinID="Success" /&gt;
+
+    &lt;!-- Explicit values override theme --&gt;
+    &lt;Button Text="Explicit Green" BackColor="WebColor.Green" ForeColor="WebColor.White" /&gt;
+
+    &lt;!-- Opt out of theming entirely --&gt;
+    &lt;Button Text="Opted Out" EnableTheming="false" /&gt;
+&lt;/ThemeProvider&gt;
+
+&lt;!-- Nested ThemeProvider overrides outer theme --&gt;
+&lt;ThemeProvider Theme="@@SampleTheme"&gt;
+    &lt;ThemeProvider Theme="@@AlternateTheme"&gt;
+        &lt;Button Text="Inner Theme" /&gt;
+    &lt;/ThemeProvider&gt;
+&lt;/ThemeProvider&gt;
+
+@@code {
+    private ThemeConfiguration SampleTheme;
+    private ThemeConfiguration AlternateTheme;
+
+    protected override void OnInitialized()
+    {
+        SampleTheme = new ThemeConfiguration();
+
+        // Default Button skin
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue,
+            ForeColor = WebColor.White
+        });
+
+        // Named skins
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Red,
+            ForeColor = WebColor.White
+        }, "Danger");
+
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.FromHtml("#006633"),
+            ForeColor = WebColor.White
+        }, "Success");
+
+        // Label and TextBox skins
+        SampleTheme.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy,
+            Font = new FontInfo { Bold = true }
+        });
+
+        SampleTheme.AddSkin("TextBox", new ControlSkin
+        {
+            BorderColor = WebColor.Blue,
+            BorderStyle = BorderStyle.Solid
+        });
+
+        // Alternate theme for nesting demo
+        AlternateTheme = new ThemeConfiguration();
+        AlternateTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Teal,
+            ForeColor = WebColor.White
+        });
+        AlternateTheme.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.FromHtml("#006633"),
+            Font = new FontInfo { Italic = true }
+        });
+    }
+}</code></pre>
+</div>
 
 @code {
     private ThemeConfiguration SampleTheme;
+    private ThemeConfiguration AlternateTheme;
 
     protected override void OnInitialized()
     {
@@ -93,23 +280,50 @@ Products.aspx:
         SampleTheme.AddSkin("Button", new ControlSkin
         {
             BackColor = WebColor.Blue,
-            ForeColor = WebColor.White,
-            CssClass = "themed-button"
+            ForeColor = WebColor.White
         });
 
         // Named "Danger" Button skin — red background
         SampleTheme.AddSkin("Button", new ControlSkin
         {
             BackColor = WebColor.Red,
-            ForeColor = WebColor.White,
-            CssClass = "themed-button-danger"
+            ForeColor = WebColor.White
         }, "Danger");
+
+        // Named "Success" Button skin — green background
+        SampleTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.FromHtml("#006633"),
+            ForeColor = WebColor.White
+        }, "Success");
 
         // Default Label skin — bold navy text
         SampleTheme.AddSkin("Label", new ControlSkin
         {
             ForeColor = WebColor.Navy,
             Font = new FontInfo { Bold = true }
+        });
+
+        // Default TextBox skin — blue border
+        SampleTheme.AddSkin("TextBox", new ControlSkin
+        {
+            BorderColor = WebColor.Blue,
+            BorderStyle = BlazorWebFormsComponents.Enums.BorderStyle.Solid
+        });
+
+        // Alternate theme for nested ThemeProvider demo
+        AlternateTheme = new ThemeConfiguration();
+
+        AlternateTheme.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Teal,
+            ForeColor = WebColor.White
+        });
+
+        AlternateTheme.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.FromHtml("#006633"),
+            Font = new FontInfo { Italic = true }
         });
     }
 }
