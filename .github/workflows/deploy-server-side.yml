@@ -1,14 +1,6 @@
 name: Deploy Server-Side Demo to Azure
 
 on:
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'src/BlazorWebFormsComponents/**'
-      - 'samples/AfterBlazorServerSide/**'
-      - 'samples/SharedSampleObjects/**'
-      - '.github/workflows/deploy-server-side.yml'
   workflow_dispatch:
 
 permissions:
