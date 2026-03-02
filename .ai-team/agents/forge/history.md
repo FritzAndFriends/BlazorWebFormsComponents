@@ -44,100 +44,18 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 
  Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
 
-### Summary: M17 AJAX Controls Gate Review (2026-02-28)
+<!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
 
-**By:** Forge
-**What:** Full Web Forms fidelity review of all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) against .NET Framework 4.8 API documentation.
+### M17-M18 Audit & Themes Roadmap Summary (2026-02-28 through 2026-03-01)
 
-**Verdict: APPROVE WITH NOTES** — All 6 controls pass for PR. Four minor fidelity notes for follow-up:
+**M17 gate review:** All 6 AJAX controls approved with notes. Property coverage: Timer 100%, UpdateProgress 100%, UpdatePanel 80%, ScriptManager 41% (appropriate for no-op stub), Substitution 100%. 5 follow-up fidelity fixes all resolved in PR #402 (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block, ScriptReference properties). Key pattern: AJAX controls split into functional (Timer, UpdatePanel, UpdateProgress) and migration stubs (ScriptManager, ScriptManagerProxy, Substitution). Audit report: planning-docs/M17-CONTROL-AUDIT.md.
 
-1. **ScriptManager `EnablePartialRendering` default** — Web Forms defaults to `true`, Blazor stub defaults to `false` (bare bool). No functional impact (no-op stub), but fidelity gap if property is read.
-2. **ScriptManager missing `Scripts` property** — Web Forms ScriptManager has a `Scripts` collection (ScriptReferenceCollection). Only ScriptManagerProxy has it in the Blazor implementation. Low-priority since ScriptManager is a no-op stub.
-3. **UpdateProgress `CssClass` not rendered** — Inherits BaseStyledComponent so accepts CssClass parameter, but the .razor template doesn't apply it to the `<div>` output. Migrating `<asp:UpdateProgress CssClass="loading">` would silently drop the class.
-4. **UpdateProgress non-dynamic layout style** — Renders `visibility:hidden` but Web Forms renders `display:block;visibility:hidden`. Functionally identical (div is block by default) but not byte-identical.
+**Divergence registry D-11 to D-14:** D-11 GUID IDs (fix recommended), D-12 boolean attrs (intentional, normalize), D-13 Calendar day padding (fix recommended), D-14 Calendar style pass-through (fix progressively). File: planning-docs/DIVERGENCE-REGISTRY.md.
 
-**What passed clean:**
-- All 6 component names match Web Forms originals exactly
-- Timer: Interval (60000 default), Enabled (inherited), OnTick event — all correct
-- ScriptManager/Proxy: correct as no-op stubs with BaseWebFormsComponent
-- UpdatePanel: RenderMode (Block=div, Inline=span), UpdateMode, ChildrenAsTriggers — all correct. ChildContent instead of ContentTemplate is intentional per Blazor conventions.
-- UpdateProgress: AssociatedUpdatePanelID, DisplayAfter (500), DynamicLayout (true), ProgressTemplate — all correct
-- Substitution: MethodName preserved for migration, SubstitutionCallback for Blazor, no wrapper element — all correct
-- All 3 enums (ScriptMode, UpdatePanelRenderMode, UpdatePanelUpdateMode) match Web Forms values exactly with correct int assignments
-- ComponentCatalog properly categorizes AJAX and Migration Helper controls
-- Base class choices appropriate: stubs use BaseWebFormsComponent, UpdateProgress uses BaseStyledComponent (has CssClass in WF)
+**Skins & Themes roadmap (#369):** 3 waves, 15 work items. Sub-component styles via Dictionary<string, TableItemStyle> on ControlSkin. ThemeMode enum (StyleSheetTheme vs Theme). 6 style container interfaces with ~41 sub-style slots. EnableTheming propagation via cascading bool. .skin parser as build-time source generator.
 
-**Key pattern learned:** AJAX controls split cleanly into two categories: (1) functional components that change Blazor behavior (Timer, UpdatePanel, UpdateProgress) and (2) pure migration stubs that render nothing (ScriptManager, ScriptManagerProxy, Substitution). The stub pattern is sound — accept-but-ignore properties to prevent compilation errors during migration.
+Team updates: M17 audit fixes resolved (PR #402), Skins dual docs (SkinsAndThemes.md + ThemesAndSkins.md), Normalizer pipeline codified (Issue #387).
 
-### Summary: M17 Formal Fidelity Audit (2026-02-28)
-
-**By:** Forge
-**What:** Full Web Forms fidelity audit of all 6 M17 controls against Microsoft Learn .NET Framework 4.8.1 API documentation. Report saved to `planning-docs/M17-CONTROL-AUDIT.md`.
-
-**Property coverage by control:**
-- Timer: 2/2 (100%) — Interval, Enabled. OnTick event 1/1.
-- ScriptManager: 7/17 (41%) — Appropriate for no-op stub. Only declarative-markup properties needed.
-- ScriptManagerProxy: 2/4 core (50%) — Scripts and Services collections present. Service manager properties omitted (no Blazor equivalent).
-- UpdatePanel: 4/5 (80%) — Only `Triggers` missing (unnecessary in Blazor's rendering model). ContentTemplate→ChildContent is intentional adaptation.
-- UpdateProgress: 4/4 (100%) — All control-specific properties present with correct defaults.
-- Substitution: 1/1 (100%) — MethodName preserved, SubstitutionCallback added as Blazor adaptation.
-
-**5 follow-up issues identified:**
-1. ScriptManager `EnablePartialRendering` default should be `true` (currently `false`)
-2. ScriptManager missing `Scripts` collection (only on Proxy)
-3. UpdateProgress `CssClass` not rendered on output `<div>` — medium severity
-4. UpdateProgress non-dynamic mode missing `display:block;` prefix
-5. ScriptReference only has 3 of ~8 WF properties
-
-**All 3 enums** (ScriptMode, UpdatePanelRenderMode, UpdatePanelUpdateMode) verified as exact int-value matches with Web Forms originals.
-
- Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
-
-� Team update (2026-02-27): M17 audit fix test patterns  ScriptReference tested via C# instantiation, UpdateProgress CssClass tested with/without value, 9 new tests  decided by Rogue
-
-### Summary: Divergence Registry Update D-11 through D-14 (2026-02-28)
-
-**By:** Forge
-**What:** Added 4 new divergence entries to `planning-docs/DIVERGENCE-REGISTRY.md` based on findings from M15-M18 audit work. Issue #388.
-
-**New entries:**
-- **D-11 (GUID-Based IDs):** CheckBox, RadioButton, RadioButtonList, FileUpload generate GUID-based IDs instead of predictable naming-hierarchy IDs. Status: Fix recommended -- GUIDs are non-deterministic and untargetable. Separate from D-01 (prefix mangling).
-- **D-12 (Boolean Attribute Format):** `selected=""` (HTML5) vs `selected="selected"` (XHTML). Status: Intentional -- both are valid HTML per W3C spec. Normalizer should canonicalize.
-- **D-13 (Calendar Previous-Month Day Padding):** Web Forms renders full 42-cell grid with adjacent-month days; Blazor may not fill leading cells. Status: Fix recommended -- visible structural content.
-- **D-14 (Calendar Style Property Pass-Through):** Web Forms applies inline styles from TitleStyle, DayStyle, TodayDayStyle etc.; Blazor doesn't fully pass through. Status: Fix progressively.
-
-**Also updated:** Summary table, category definitions (added ID Generation, Attribute Format, Style), revision history, header status line.
-
-### Summary: Full Skins & Themes Roadmap (#369) (2026-02-28)
-
-**By:** Forge
-**What:** Created prioritized 3-wave roadmap for full theming implementation, 15 work items total.
-
-**Architecture decisions:**
-- Sub-component styles use `Dictionary<string, TableItemStyle>` on `ControlSkin`, keyed by style name ("HeaderStyle", "RowStyle", etc.)
-- ThemeMode enum (`StyleSheetTheme` vs `Theme`) controls priority — StyleSheetTheme = defaults, Theme = overrides
-- Container-level EnableTheming propagation via dedicated cascading bool, not parent chain walking (O(1) vs O(n))
-- Runtime theme switching requires new ThemeConfiguration instance (CascadingValue reference equality)
-- .skin file parser recommended as build-time source generator (works in all Blazor hosting models)
-- JSON theme format is complementary to C# config, not a replacement
-
-**Key findings from code audit:**
-- DataBound inheritance chain is correct: DataBoundComponent<T> → BaseDataBoundComponent → BaseStyledComponent — all data controls get top-level theming automatically
-- 6 style container interfaces already exist (IGridViewStyleContainer, IDetailsViewStyleContainer, IFormViewStyleContainer, ICalendarStyleContainer, IDataGridStyleContainer, IDataListStyleContainer) with ~41 total sub-style slots
-- UiStyle<T> / UiTableItemStyle classes provide sub-component style rendering infrastructure
-- ControlSkin is flat (no sub-styles) — extending it is the biggest single work item
-
-**File paths:**
-- Roadmap: `.ai-team/decisions/inbox/forge-themes-full-roadmap.md`
-- Existing theming code: `src/BlazorWebFormsComponents/Theming/` (ThemeConfiguration.cs, ControlSkin.cs, ThemeProvider.razor)
-- Style container interfaces: `src/BlazorWebFormsComponents/Interfaces/I*StyleContainer.cs`
-- Base class wiring: `src/BlazorWebFormsComponents/BaseStyledComponent.cs` (OnParametersSet + ApplySkin)
-
- Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (guide) and ThemesAndSkins.md (strategy). Review both for architecture audits  decided by Beast
- Team update (2026-03-01): Normalizer pipeline order codified with 4 enhancements (case-insensitive, boolean attrs, empty styles, GUID IDs). Issue #387  decided by Cyclops
-📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally (backing fields). Theme font-family renders correctly. 11 tests verify. No code changes needed elsewhere — decided by Cyclops, Rogue
-📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent. Avoids Blazor duplicate-parameter error from _Imports.razor inheritance — decided by Cyclops
-📌 Team update (2026-03-02): Theming sample page uses 6-section progressive layout. BorderStyle enum needs FQN in theming code — decided by Jubilee
 
 ### Summary: Build/Version/Release Process Audit (2026-03-02)
 

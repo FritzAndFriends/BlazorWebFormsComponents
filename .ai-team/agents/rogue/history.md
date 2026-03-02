@@ -64,58 +64,17 @@ Key patterns: Timer parameter inheritance -- use C# API, not Razor templates. No
 
  Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.
 
-### M20 Skins & Themes Pipeline Tests (Issue #368)
+<!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + FontInfo tests -->
 
-Wrote 13 bUnit end-to-end tests in `src/BlazorWebFormsComponents.Test/Theming/ThemingPipelineTests.razor` validating the ThemeProvider → BaseWebFormsComponent → BaseStyledComponent pipeline using real components (Button, Label, Panel):
+### M20 Theming & FontInfo Test Summary (2026-03-01 through 2026-03-02)
 
-1. `DefaultSkin_AppliesBackColor_ToButton` — default skin applies BackColor via `#FFDEAD`
-2. `NamedSkin_AppliesVia_SkinID` — SkinID="highlight" selects named skin with BackColor + Font.Bold
-3. `ExplicitValue_OverridesTheme_StyleSheetThemeSemantics` — explicit BackColor="Red" overrides theme Blue
-4. `EnableThemingFalse_IgnoresTheme` — EnableTheming=false skips all theme application
-5. `NoThemeProvider_WorksNormally` — Button renders normally without ThemeProvider
-6. `MissingSkinID_DoesNotThrow_FallsBackGracefully` — SkinID="nonexistent" silently skips
-7. `NestedThemeProvider_InnerOverridesOuter` — inner ThemeProvider wins for its children
-8. `Theme_AppliesForeColor_ToPanel` — ForeColor on Panel div
-9. `Theme_AppliesCssClass_ToLabel` — CssClass on Label span
-10. `Theme_AppliesWidthAndHeight_ToButton` — Width/Height on Button input
-11. `Theme_AppliesFontProperties_ToLabel` — Bold, Italic, Underline on Label span
-12. `MultipleControlTypes_ThemedSimultaneously` — Button+Label+Panel in same ThemeProvider
-13. `ExplicitCssClass_OverridesThemeCssClass` — explicit CssClass beats theme CssClass
+**Skins & Themes pipeline tests (13 tests, Issue #368):** ThemingPipelineTests.razor validates ThemeProvider > BaseWebFormsComponent > BaseStyledComponent pipeline using Button/Label/Panel. Covers: default skin, named SkinID, explicit-overrides-theme, EnableTheming=false, no ThemeProvider, missing SkinID graceful, nested ThemeProvider override, ForeColor/CssClass/Width/Height/Font properties, multi-control theming. Total: 1426 tests.
 
-Total: 1426 tests (1413 existing + 13 new), 0 failures.
+**FontInfo sync tests (11 tests):** 9 unit tests (FontInfoSyncTests.cs) + 2 pipeline tests verifying Name/Names bidirectional sync. Setting Name updates Names, setting Names updates Name (first entry). Null/empty clears both. Last-write-wins semantics. Pipeline tests confirm theme Font.Name renders font-family via auto-sync. Total: 1437 tests.
 
-📌 Bug found: `ApplyThemeSkin` sets `Font.Name` but the style builder reads `Font.Names` for `font-family` rendering. Theme font-family does not render. Not blocking — deferred to M11 skin implementation. — Rogue
+Key patterns: Button=input, Label=span, Panel=div for theme tests. Missing SkinID returns null (no skin, not even default). FontInfo sync tests are pure C# (no bUnit). Theme font-family pipeline: ApplyThemeSkin sets Font.Name > auto-sync > Font.Names > style builder renders.
 
-📌 Test pattern: Button renders as `<input>`, Label as `<span>`, Panel as `<div>`. For theme pipeline tests, use `cut.Find("input")`, `cut.Find("span")`, `cut.Find("div")` respectively. Style attribute contains CSS properties like `background-color:Red`, `color:Blue`, `font-weight:bold`. — Rogue
-
-📌 Test pattern: Missing SkinID (named skin not registered) returns null from `GetSkin()` — no skin applied at all, not even the default skin for that control type. This is by design per Jeff's decision. — Rogue
-
-### FontInfo Name/Names Auto-Sync Tests
-
-Wrote 11 tests (9 unit + 2 pipeline) validating the FontInfo Name/Names auto-sync fix by Cyclops:
-
-**FontInfoSyncTests.cs (9 unit tests):**
-1. `SettingName_UpdatesNames` — Name="Arial" → Names="Arial"
-2. `SettingNames_UpdatesName_ToFirstFont` — Names="Verdana" → Name="Verdana"
-3. `SettingNames_WithMultipleFonts_SetsNameToFirst` — Names="Arial, sans-serif" → Name="Arial"
-4. `SettingName_ToNull_ClearsNames` — Name=null → Names is null/empty
-5. `SettingName_ToEmpty_ClearsNames` — Name="" → Names is null/empty
-6. `SettingNames_ToNull_ClearsName` — Names=null → Name is null/empty
-7. `SettingNames_ToEmpty_ClearsName` — Names="" → Name is null/empty
-8. `SettingNames_ThenName_NameWins` — Last-write-wins: Name overrides Names for both properties
-9. `SettingName_ThenNames_NamesWins` — Last-write-wins: Names overrides Name for both properties
-
-**ThemingPipelineTests.razor (2 pipeline tests):**
-14. `Theme_FontName_RendersFontFamily_ViaAutoSync` — Button with theme Font.Name="Arial" renders font-family:Arial
-15. `Theme_FontName_MultipleViaNames_RendersFontFamily` — Label with theme Font.Name="Verdana" renders font-family:Verdana
-
-All 1437 tests pass (0 failures). Cyclops's auto-sync fix was already in place — the previously-documented bug (ApplyThemeSkin sets Font.Name but style builder reads Font.Names) is now resolved.
-
-📌 Bug resolved: The Font.Name/Font.Names disconnect is fixed. ApplyThemeSkin sets Font.Name → auto-sync propagates to Font.Names → style builder reads Font.Names → font-family renders correctly. Full pipeline verified. — Rogue
-
-📌 Test pattern: FontInfo sync tests are pure C# unit tests (no bUnit needed). Use `new FontInfo()` then set properties and assert the counterpart. Last-write-wins semantics: setting Name then Names means Names wins, and vice versa. — Rogue
-
- Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
 
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
 ### ListView EditItemTemplate Rendering Tests (Issue #406)
