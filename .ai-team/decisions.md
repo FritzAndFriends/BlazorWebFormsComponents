@@ -3166,3 +3166,755 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **What:** The Theming sample page at `ControlSamples/Theming/Index.razor` demonstrates 6 scenarios in a single page (not split into sub-pages): 1. Default skins → 2. Named skins → 3. Explicit overrides → 4. Opt-out → 5. Nesting → 6. Unthemed baseline. Future theming samples should add sections to this page or create sub-pages if complexity warrants it. The `BorderStyle` enum requires fully qualified name (`BlazorWebFormsComponents.Enums.BorderStyle`) in Theming sample code due to conflict with `ControlSkin.BorderStyle` property.
 **Why:** Theming is a cross-cutting concern best understood as a progression. Single page avoids repeating ThemeConfiguration setup. ComponentList.razor link under Utility Features, ComponentCatalog has "Theming" category.
 
+
+### 2026-03-02: Build/Version/Release Process Audit and Proposal
+**By:** Forge
+**What:** Comprehensive audit of all 7 CI/CD workflows, NBGV version management, and release coordination — with a concrete proposal for a unified release process.
+**Why:** NuGet package version, Docker image version, docs deployment, demo builds, and GitHub Releases are all independently triggered with no coordination. version.json is manually managed and has already drifted out of sync with tags, causing NBGV to compute wrong versions. This is a ticking time bomb: the next release will ship mismatched versions across artifacts. Jeff asked for alignment. Here it is.
+
+---
+
+## 1. Current State Inventory
+
+### 1.1 Workflows
+
+| # | Workflow | File | Trigger | Version Source | Publishes |
+|---|---------|------|---------|---------------|-----------|
+| 1 | **Build and Test** | `build.yml` | Push/PR to main/dev/v* (paths-ignore docs) | None | Test results artifact |
+| 2 | **Integration Tests** | `integration-tests.yml` | Push/PR to main/dev/v* (paths-ignore docs) | None | Test results artifact |
+| 3 | **Publish NuGet Package** | `nuget.yml` | Push tag `v*` | NBGV (implicit via `dotnet build`) reads `version.json` | NuGet to GitHub Packages + nuget.org |
+| 4 | **Deploy Server-Side Demo** | `deploy-server-side.yml` | Push to main (path-filtered) OR manual | NBGV CLI (`nbgv get-version -v NuGetPackageVersion`) | Docker image to GHCR + Azure webhook |
+| 5 | **docs** | `docs.yml` | Push to main/v* branch OR v* tag (path-filtered) | Tag stripping (`${GITHUB_REF#refs/tags/v}`) — but uses deprecated `::set-output` | GitHub Pages |
+| 6 | **Build Demo Sites** | `demo.yml` | Push to main/v* (path-filtered) OR after Integration Tests pass | None | Build artifacts only |
+| 7 | **CodeQL** | `codeql.yml` | Push/PR to main/dev/v* + weekly schedule | N/A | Security scan results |
+
+### 1.2 Version Infrastructure
+
+| Component | Current Value | Notes |
+|-----------|--------------|-------|
+| `version.json` (dev) | `0.17` | Bumped on dev, not yet on main |
+| `version.json` (main) | `0.15` | **Stale** — should be 0.16 or 0.17 |
+| Latest git tag | `v0.16` | Points to merge commit on main |
+| NBGV package | `3.9.50` | Via `Directory.Build.props` |
+| NuGet PackageId | `Fritz.BlazorWebFormsComponents` | In `.csproj` |
+| Docker image | `ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples` | Tagged with NBGV version + SHA + latest |
+
+### 1.3 How NBGV Computes Versions
+
+NBGV reads `version.json` for the major.minor base, then appends a patch number based on git height (commit count since the version was set). So with `version.json` at `0.15` on main:
+
+- Commit immediately after setting 0.15 → `0.15.1`
+- 10 commits later → `0.15.11`
+- Tag `v0.16` has **no effect on NBGV** — NBGV ignores tags entirely
+
+This means:
+- `nuget.yml` (triggered by `v0.16` tag) runs `dotnet build` which uses NBGV, which reads `version.json` = `0.15`, which computes something like `0.15.47` — **not** `0.16.0`
+- The NuGet package published for tag `v0.16` will have version `0.15.X`, not `0.16.anything`
+
+### 1.4 Dockerfile Version Injection
+
+The Dockerfile (`samples/AfterBlazorServerSide/Dockerfile`):
+1. Strips NBGV from `Directory.Build.props` via `sed` (correct — no `.git` in Docker)
+2. Accepts `VERSION` build-arg (default `0.0.0`)
+3. Passes `-p:Version=$VERSION -p:InformationalVersion=$VERSION`
+
+The `deploy-server-side.yml` computes VERSION via `nbgv get-version -v NuGetPackageVersion` on the runner — which reads `version.json` = `0.15` — so the Docker image gets `0.15.X` while the tag might be `v0.16`.
+
+---
+
+## 2. Problem Analysis
+
+### P1: version.json ↔ Tag Mismatch (CRITICAL)
+
+**State:** `version.json` on main says `0.15`. Tag `v0.16` exists. NBGV will compute `0.15.X` for all builds on main.
+
+**Impact:** Every artifact built from main gets a version starting with `0.15`, regardless of what tag was pushed. The NuGet package for the `v0.16` release is **not** version `0.16.0` — it's `0.15.something`.
+
+**Root cause:** version.json must be bumped **before** the tag is created, not after. The current process has no enforcement of this.
+
+### P2: Independent Triggers = Independent Versions (CRITICAL)
+
+Each workflow fires on different events:
+
+| Event | nuget.yml | deploy-server-side.yml | docs.yml | demo.yml |
+|-------|-----------|----------------------|----------|----------|
+| Tag `v0.16` push | ✅ fires | ❌ no | ✅ fires (if 3-segment) | ❌ no |
+| Push to main | ❌ no | ✅ fires (if paths match) | ✅ fires (if docs paths) | ✅ fires |
+| PR merge to main | ❌ no | ✅ fires (if paths match) | ✅ fires (if docs paths) | ✅ fires |
+
+Result: A tag push publishes NuGet but doesn't deploy Docker or demos. A main push deploys Docker/demos but not NuGet. Docs may or may not deploy depending on whether doc files changed. There is **no single event** that triggers all release artifacts.
+
+### P3: No GitHub Release Automation (HIGH)
+
+Tag `v0.16` was created with `gh release create` manually. There is no workflow that creates a GitHub Release. The release notes, changelog, and asset attachment are all manual. Releases exist for some tags but not others (gaps: v0.3.0, v0.4.0, v0.6.0, v0.7.0, v0.15, v0.15.2, v0.16).
+
+### P4: docs.yml Uses Deprecated `::set-output` (MEDIUM)
+
+Line 44: `echo ::set-output name=release::${RELEASE}` — this was deprecated by GitHub in October 2022 and will eventually stop working. Should use `>> $GITHUB_OUTPUT`.
+
+### P5: docs.yml Release Detection is Broken for This Project's Tag Format (MEDIUM)
+
+The regex `^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$` requires 3-segment versions (e.g., `0.16.0`). But this project uses 2-segment tags (`v0.16`, `v0.15`). So the `RELEASE` variable is **always** `false` for every tag this project has ever pushed. The deploy guard `steps.prepare.outputs.release == 'true'` never fires on tag events — docs only deploy on main pushes.
+
+### P6: Docker Deploy Has Path Filter Race Condition (LOW-MEDIUM)
+
+`deploy-server-side.yml` triggers on `push to main` with paths filtered to `src/BlazorWebFormsComponents/**`, `samples/AfterBlazorServerSide/**`, etc. If a release only changes docs or tests, the Docker image won't rebuild — so the "latest" Docker image stays at whatever version it was before, even though a new NuGet package was released.
+
+### P7: Demo Build Has No Version (LOW)
+
+`demo.yml` builds and uploads artifacts but doesn't version them. The artifacts are named `demo-server-side` and `demo-client-side` — no version in the name, no way to know which version they correspond to.
+
+### P8: No Version Embedding in Docs (LOW)
+
+MkDocs config has no version variable. There's no way for a user reading the docs to know which version of the library the docs correspond to.
+
+### P9: Tag History is Inconsistent (COSMETIC)
+
+Tags jump from `v0.8.2` to `v0.13.0`, mixing 2-segment and 3-segment formats. Some tags use `.0` suffix, some don't. This doesn't break anything but signals manual process drift.
+
+---
+
+## 3. Proposed Solution
+
+### 3.0 Philosophy
+
+Stop fighting NBGV. NBGV is designed for a specific workflow: you set a version in `version.json`, it auto-increments the patch based on git height, and you bump the minor/major when you want a new version line. The problems here aren't NBGV's fault — they're from not following NBGV's intended workflow and from layering manual tags on top.
+
+**My recommendation: Keep NBGV, but use it correctly.** Here's why:
+- NBGV handles prerelease versioning (preview builds from dev) automatically
+- NBGV handles NuGet SemVer compliance
+- NBGV handles assembly version, file version, informational version consistently
+- The alternative (manual version management) is even more error-prone at this scale
+
+### 3.1 Unified Release Workflow
+
+**Replace** the independent deployment triggers with a single coordinated release workflow triggered by **GitHub Release publication**.
+
+#### Why GitHub Release (not tag, not push)?
+
+- **Tags** are low-level git primitives. Anyone can push a tag from any commit. No review, no guard.
+- **Push to main** is a development event, not a release event. Not every merge is a release.
+- **GitHub Release** is an intentional act in the UI (or via `gh release create`). It creates a tag, attaches notes, and is visible on the repo's Releases page. It requires `contents: write` permission. It's the right abstraction for "I'm shipping a version."
+
+#### Workflow: `release.yml` (NEW)
+
+```yaml
+name: Release
+
+on:
+  release:
+    types: [published]
+
+# Coordinates: NuGet publish, Docker build+push, docs deploy, demo build
+```
+
+This single workflow:
+1. Extracts the version from the release tag (e.g., `v0.17.0` → `0.17.0`)
+2. Builds and tests the library
+3. Packs and publishes NuGet (to GitHub Packages + nuget.org)
+4. Builds and pushes Docker image with that version
+5. Builds and deploys docs
+6. Builds demo artifacts
+7. Attaches NuGet package + demo artifacts to the GitHub Release
+
+All artifacts get the **same version** because they all derive it from the same release tag in the same workflow run.
+
+### 3.2 Version Management with NBGV
+
+#### The Correct NBGV Workflow
+
+1. **On `dev` branch:** `version.json` contains the **next** version (e.g., `0.17`). NBGV computes `0.17.1-preview.X` for each commit. These are prerelease versions — safe for CI feeds.
+2. **PR from dev → main:** version.json comes along. Merge commit on main gets `0.17.1` (stable, no prerelease suffix because `main` matches `publicReleaseRefSpec`).
+3. **Create GitHub Release** from main at that merge commit, tag `v0.17.0`. The release workflow reads the tag and uses `0.17.0` as the release version.
+4. **Immediately after release:** Bump `version.json` on dev to `0.18` (the next version). This prevents subsequent dev commits from producing `0.17.X` versions.
+
+#### Key Rule: version.json Version ≈ Tag Version
+
+`version.json` should always contain the version that **the next release from this branch will be**. On main after merging dev with `0.17`, the NBGV-computed version will be `0.17.X`. The release tag should be `v0.17.0` (or `v0.17.1` if there's a hotfix). These must align.
+
+#### Automating the Bump
+
+Add a step to the release workflow (or a separate post-release workflow) that opens a PR to dev bumping `version.json` to the next minor. This prevents forgetting.
+
+### 3.3 What Happens to Existing Workflows
+
+| Workflow | Action | Rationale |
+|---------|--------|-----------|
+| `build.yml` | **KEEP AS-IS** | CI gatekeeper for PRs and pushes. No versioning needed. |
+| `integration-tests.yml` | **KEEP AS-IS** | CI gatekeeper. No versioning needed. |
+| `nuget.yml` | **REMOVE** — functionality moves into `release.yml` | Eliminates independent trigger, prevents version mismatch. |
+| `deploy-server-side.yml` | **REPLACE** trigger — move deployment into `release.yml`. Keep `workflow_dispatch` as a standalone escape hatch. | Eliminates path-filter race condition. Manual dispatch still works for emergencies. |
+| `docs.yml` | **MODIFY** — keep PR preview builds, move production deploy into `release.yml`. Fix deprecated `::set-output`. | Docs deploy with every release, guaranteed. PRs still get preview builds. |
+| `demo.yml` | **MODIFY** — keep PR/push builds for CI. Add version to artifact names. Attach release artifacts in `release.yml`. | Demo artifacts become part of the release. |
+| `codeql.yml` | **KEEP AS-IS** | Security scanning. Not relevant to release. |
+
+### 3.4 The Developer Workflow (Step by Step)
+
+When Jeff wants to release version 0.17:
+
+1. **Ensure `version.json` on dev says `"version": "0.17"`** (it should already — this was set after the last release).
+2. **Merge dev → main** via PR. CI (build.yml + integration-tests.yml) runs and must pass.
+3. **Go to GitHub → Releases → Draft a new release.**
+4. **Create tag `v0.17.0`** targeting the main branch (the merge commit).
+5. **Write release notes** (or use auto-generate).
+6. **Click "Publish release."**
+7. The `release.yml` workflow fires and:
+   - Builds + tests the library ✅
+   - Publishes NuGet `Fritz.BlazorWebFormsComponents` version `0.17.0` ✅
+   - Builds + pushes Docker image tagged `0.17.0` + `latest` ✅
+   - Deploys docs to GitHub Pages ✅
+   - Builds demos, attaches to release ✅
+8. **Bump `version.json` on dev to `0.18`** (either manually or via automated PR from the workflow).
+
+If something goes wrong:
+- Fix on dev, merge to main, create `v0.17.1` release. The release workflow handles everything.
+- For emergency Docker redeployment without a full release, use `workflow_dispatch` on the standalone deploy workflow.
+
+### 3.5 Version Number Format Decision
+
+**Recommendation: Use 3-segment SemVer tags going forward.**
+
+| Format | Example | Rationale |
+|--------|---------|-----------|
+| ~~2-segment~~ | `v0.17` | Ambiguous. NBGV appends git height as patch. Tag `v0.17` ≠ NBGV `0.17.42`. |
+| **3-segment** ✅ | `v0.17.0` | Unambiguous. NuGet requires 3+ segments. Docker tag is clean. Patch segment available for hotfixes (`v0.17.1`). |
+
+Update `version.json` to use 3-segment:
+```json
+{
+  "version": "0.17.0"
+}
+```
+
+This makes NBGV compute `0.17.0` for the first commit, `0.17.1` for the next, etc. Tags should match: `v0.17.0`.
+
+### 3.6 Docker Version Alignment
+
+The Dockerfile's `VERSION` build-arg approach is correct — NBGV can't run in Docker (no `.git`). But the version must come from the release tag, not from `nbgv get-version` on the runner (which reads version.json and computes git-height-based version).
+
+In `release.yml`:
+```yaml
+- name: Extract version from tag
+  id: version
+  run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+# ... later in Docker build:
+build-args: VERSION=${{ steps.version.outputs.version }}
+```
+
+This guarantees the Docker image version matches the tag exactly.
+
+### 3.7 Docs Version Embedding
+
+Add a version variable to `mkdocs.yml`:
+```yaml
+extra:
+  version: "0.17.0"  # Injected at build time by release workflow
+```
+
+In the release workflow, use `sed` or `yq` to inject the version into `mkdocs.yml` before building docs:
+```yaml
+- name: Inject version into docs
+  run: |
+    VERSION=${GITHUB_REF_NAME#v}
+    sed -i "s/version: .*/version: \"$VERSION\"/" mkdocs.yml
+```
+
+Then in docs templates: `{{ config.extra.version }}`.
+
+---
+
+## 4. Implementation Plan
+
+Ordered by priority. Each item is a concrete file change.
+
+### Phase 1: Fix the Broken State (Do First)
+
+| # | Task | File(s) | Detail |
+|---|------|---------|--------|
+| 1.1 | Sync version.json to match current reality | `version.json` | Change `"version": "0.17"` to `"version": "0.17.0"` on dev. After merge to main, it should read `0.17.0`. |
+| 1.2 | Fix deprecated `::set-output` in docs.yml | `.github/workflows/docs.yml` | Replace `echo ::set-output name=release::${RELEASE}` with `echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"` |
+| 1.3 | Fix release detection regex in docs.yml | `.github/workflows/docs.yml` | Change regex to also accept 2-segment versions, OR standardize on 3-segment tags (per §3.5) |
+
+### Phase 2: Create Unified Release Workflow
+
+| # | Task | File(s) | Detail |
+|---|------|---------|--------|
+| 2.1 | Create `release.yml` | `.github/workflows/release.yml` | New workflow triggered on `release: published`. Includes: build, test, NuGet pack+push, Docker build+push, docs deploy, demo build, artifact attachment to release. Extract version from `${GITHUB_REF_NAME#v}`. |
+| 2.2 | Add version injection to Docker step | `.github/workflows/release.yml` | Use extracted tag version as Docker `VERSION` build-arg. |
+| 2.3 | Add NuGet version override | `.github/workflows/release.yml` | Pass `-p:Version=$VERSION` to `dotnet pack` to override NBGV-computed version with the exact tag version. This is the belt-and-suspenders guarantee. |
+| 2.4 | Add GitHub Release asset attachment | `.github/workflows/release.yml` | Use `gh release upload` to attach `.nupkg` and demo artifacts to the release. |
+
+### Phase 3: Retire / Modify Existing Workflows
+
+| # | Task | File(s) | Detail |
+|---|------|---------|--------|
+| 3.1 | Remove tag trigger from nuget.yml | `.github/workflows/nuget.yml` | Delete file entirely, or repurpose as a manual-dispatch-only workflow for emergency republishes. |
+| 3.2 | Remove main-push trigger from deploy-server-side.yml | `.github/workflows/deploy-server-side.yml` | Keep only `workflow_dispatch` trigger. All release-path deployments go through `release.yml`. |
+| 3.3 | Modify docs.yml | `.github/workflows/docs.yml` | Remove production deploy logic. Keep PR preview builds only. Production deploy moves to `release.yml`. |
+| 3.4 | Add version to demo artifact names | `.github/workflows/demo.yml` | Read version from NBGV or pass through. Name artifacts `demo-server-side-0.17.0`. |
+
+### Phase 4: Automation Polish
+
+| # | Task | File(s) | Detail |
+|---|------|---------|--------|
+| 4.1 | Add post-release version bump automation | `.github/workflows/release.yml` or new `post-release.yml` | After release completes, open a PR to dev bumping version.json to next minor. |
+| 4.2 | Add version embedding in docs | `mkdocs.yml` + docs templates | Add `extra.version` and inject at build time. |
+| 4.3 | Add release checklist as PR template | `.github/RELEASE_CHECKLIST.md` | Document the release steps so they're not just in tribal knowledge. |
+
+---
+
+## 5. What I'd Do Differently if Starting Fresh
+
+If I were greenfielding this, I'd drop NBGV entirely and use a simple `VERSION` file + release-tag-driven versioning. NBGV's git-height patch versioning is elegant for large teams with continuous delivery, but for a library with periodic releases and a single maintainer, it adds indirection.
+
+But we're not greenfielding. NBGV is already wired into `Directory.Build.props`, the `.csproj`, the Dockerfile, and two workflows. Ripping it out is more work and more risk than fixing the workflow around it. So: **keep NBGV, but use it as designed** — version.json drives everything, tags are informational, and the release workflow overrides with `-p:Version=` for exact version control.
+
+---
+
+## 6. Summary of Recommendations
+
+1. **Create a unified `release.yml`** triggered by GitHub Release publication. One event, all artifacts, same version.
+2. **Use 3-segment SemVer** (`0.17.0`) everywhere — version.json, tags, NuGet, Docker, docs.
+3. **Override version at pack time** with `-p:Version=${TAG}` — NBGV computes the dev/CI version, the release workflow pins the exact release version.
+4. **Fix version.json immediately** — it's out of sync with reality.
+5. **Fix docs.yml** — deprecated `::set-output` and broken release regex.
+6. **Retire independent deployment triggers** — nuget.yml (tag), deploy-server-side.yml (main push). Replace with release.yml.
+7. **Automate post-release version bump** — open PR to dev bumping to next minor.
+8. **Embed version in docs** — users should know what version the docs describe.
+
+This gets Jeff a workflow where "publish a GitHub Release" is the single action that ships everything — NuGet, Docker, docs, demos — all with the same version number. No more manual coordination, no more version drift.
+
+
+### 2026-03-02: Unified Release Process Implementation
+**By:** Cyclops
+**Status:** Implemented on branch `ci/unified-release-process`
+
+---
+
+## Decision
+
+Implemented the unified release process as designed by Forge and approved by Jeff. All release artifacts (NuGet, Docker, docs, demos) are now coordinated through a single `release.yml` workflow triggered by GitHub Release publication.
+
+## Changes Made
+
+| File | Change |
+|------|--------|
+| `version.json` | `"version": "0.17"` → `"version": "0.17.0"` (3-segment SemVer) |
+| `.github/workflows/release.yml` | **NEW** — unified release workflow with 5 jobs: build-and-test, publish-nuget, deploy-docker, deploy-docs, build-demos |
+| `.github/workflows/deploy-server-side.yml` | Removed push trigger + path filters, kept `workflow_dispatch` only |
+| `.github/workflows/nuget.yml` | Removed tag trigger, added `workflow_dispatch` with version input for manual emergency republish |
+| `.github/workflows/docs.yml` | Fixed deprecated `::set-output` → `$GITHUB_OUTPUT`. Kept push-to-main deploy for doc-only changes. |
+| `.github/workflows/demo.yml` | Added NBGV version computation, versioned artifact names |
+
+## Key Design Decisions
+
+1. **Version from release tag, not NBGV:** release.yml extracts version from `github.event.release.tag_name` and passes it explicitly via `-p:Version=` and `-p:PackageVersion=`. This overrides NBGV to guarantee all artifacts match the tag exactly.
+
+2. **Existing workflows kept as escape hatches:** deploy-server-side.yml and nuget.yml are now `workflow_dispatch` only — manual emergency paths that don't interfere with the release workflow.
+
+3. **docs.yml still deploys on push to main:** Doc-only changes (typo fixes, new guides) deploy without waiting for a release. Production docs deploy happens both on push-to-main AND via release.yml.
+
+4. **Fan-out job structure:** build-and-test gates all other jobs. publish-nuget, deploy-docker, deploy-docs, and build-demos run in parallel after tests pass.
+
+## What Team Members Should Know
+
+- **To release:** Create a GitHub Release with tag `v0.17.0` targeting main. Everything else is automatic.
+- **Emergency Docker deploy:** Use `workflow_dispatch` on deploy-server-side.yml.
+- **Emergency NuGet publish:** Use `workflow_dispatch` on nuget.yml with explicit version input.
+- **After each release:** Bump `version.json` on dev to the next minor (e.g., `0.18.0`).
+
+
+### 2026-02-28: Full Skins & Themes Implementation Roadmap (#369)
+**By:** Forge
+**What:** Prioritized roadmap for full theming implementation, broken into waves
+**Why:** M20 PoC is complete — need a plan for the production implementation
+
+---
+
+## Executive Summary
+
+The M20 PoC proved the architecture: `CascadingValue<ThemeConfiguration>` with nullable `ControlSkin` properties and StyleSheetTheme-default semantics. 24 tests pass, the sample page works, and the base class wiring is clean.
+
+Now we build the real thing. I've split the 9 scope items from Issue #369 into three waves based on **migration value** — what helps a developer with an existing Web Forms app move their themes to Blazor fastest.
+
+---
+
+## What the PoC Delivered (Current State)
+
+| Component | File | What It Does |
+|-----------|------|-------------|
+| `ThemeConfiguration` | `Theming/ThemeConfiguration.cs` | Dictionary of control type → default/named `ControlSkin`, case-insensitive keys |
+| `ControlSkin` | `Theming/ControlSkin.cs` | Flat property bag: BackColor, ForeColor, Border*, CssClass, Height, Width, Font, ToolTip |
+| `ThemeProvider` | `Theming/ThemeProvider.razor` | Simple `CascadingValue<ThemeConfiguration>` wrapper |
+| Base class wiring | `BaseStyledComponent.cs` | `OnParametersSet` reads Theme, calls `ApplySkin()` with StyleSheetTheme semantics |
+| SkinID + EnableTheming | `BaseWebFormsComponent.cs` | Un-obsoleted, wired: `SkinID=""` default, `EnableTheming=true` default |
+
+**What's missing for production:**
+- Only StyleSheetTheme semantics (no Theme override mode)
+- `ControlSkin` is flat — no sub-component styles (HeaderStyle, RowStyle, etc.)
+- No .skin file parser
+- No CSS bundling
+- No container-level EnableTheming propagation
+- No runtime theme switching
+- No JSON format
+- No migration tooling integration
+- No documentation
+
+---
+
+## Prioritization Rationale
+
+I ranked by **"how many migrating developers hit this wall?"**:
+
+1. **Sub-component styles** — #1 priority. GridView/DetailsView skins are the most common .skin file content in the wild. Without HeaderStyle/RowStyle support, theming is useless for data controls. Every Web Forms app with a theme has GridView skins.
+
+2. **StyleSheetTheme vs Theme mode** — #2 priority. Most production Web Forms apps use `Theme` (enforced overrides), not `StyleSheetTheme`. The PoC only does StyleSheetTheme. Migrating developers will get wrong behavior until this ships.
+
+3. **Container-level EnableTheming propagation** — #3 priority. Web Forms devs use `EnableTheming="false"` on containers to carve out exceptions. Without propagation, each child must opt out individually.
+
+4. **Runtime theme switching** — Important for admin panels and multi-tenant apps, but fewer apps use it than the items above.
+
+5. **.skin file parser** — High migration value but complex. Developers CAN manually convert .skin files to C# (4–7 hours per theme per the compatibility report). The parser saves time but isn't blocking.
+
+6. **JSON theme format** — Nice alternative to C#, easier for designers and config-driven apps, but not required when C# works.
+
+7. **CSS bundling** — Web Forms auto-includes CSS from theme folders. Useful but can be handled with explicit `<link>` tags today.
+
+8. **Migration tooling** — Synergy with `bwfc-migrate` CLI from M12–M14. Depends on the parser.
+
+9. **Documentation** — Must ship alongside Wave 1, but content follows implementation.
+
+---
+
+## Wave 1: Core Theme Fidelity (Ship First)
+
+**Goal:** Make theming actually useful for real Web Forms migrations. A developer with a GridView-heavy .skin file can reproduce their theme in Blazor.
+
+**Estimated total effort:** 5–7 work items, M-sized milestone
+
+### WI-1: StyleSheetTheme vs Theme Priority Mode
+**Size:** M (Medium)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- Add `ThemeMode` enum: `StyleSheetTheme` (default — theme as defaults, explicit values win) and `Theme` (theme overrides explicit values)
+- Add `ThemeMode Mode` property to `ThemeConfiguration`
+- Add `ThemeMode` parameter to `ThemeProvider.razor`
+- Modify `BaseStyledComponent.ApplySkin()` to check mode:
+  - `StyleSheetTheme`: current behavior (skip if property already set)
+  - `Theme`: always apply skin value, overriding explicit parameters
+- **Key design decision:** In Theme mode, how do we detect "explicitly set" vs "default value"? Blazor doesn't have a `ParameterView.IsSet()` in `OnParametersSet`. Options:
+  - Track which parameters were explicitly set via a `HashSet<string>` populated in `SetParametersAsync`
+  - Use nullable backing fields (current approach for most properties)
+  - Accept that Theme mode simply always overwrites — matching Web Forms behavior where Theme beats page declarations
+
+**Open question for Jeff:** Should Theme mode always override (true Web Forms behavior), or should we provide a way to mark specific properties as "locked"? My recommendation: always override. That's what Web Forms does, and migration fidelity is the goal.
+
+### WI-2: Sub-Component Style Theming
+**Size:** L (Large)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- Extend `ControlSkin` with a `Dictionary<string, TableItemStyle> SubStyles` property (keyed by style name: "HeaderStyle", "RowStyle", etc.)
+- Add fluent builder API: `.ForControl("GridView", skin => skin.SubStyle("HeaderStyle", s => { s.CssClass = "header"; s.BackColor = WebColor.FromHtml("#333"); }))`
+- Modify data control base classes to read sub-styles from `ControlSkin` during initialization
+- Leverage existing infrastructure: `IGridViewStyleContainer`, `IDetailsViewStyleContainer`, `IFormViewStyleContainer`, `ICalendarStyleContainer`, `IDataGridStyleContainer`, `IDataListStyleContainer` — all already define the style properties
+- Implementation approach: In each style container component's initialization, check if a theme skin has a matching sub-style and apply it (same StyleSheetTheme/Theme precedence logic)
+
+**Scope of sub-styles to support (from interface audit):**
+
+| Control | Sub-Styles | Count |
+|---------|-----------|-------|
+| GridView | RowStyle, AlternatingRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle, EditRowStyle, SelectedRowStyle | 8 |
+| DetailsView | RowStyle, AlternatingRowStyle, HeaderStyle, FooterStyle, CommandRowStyle, EditRowStyle, InsertRowStyle, FieldHeaderStyle, EmptyDataRowStyle, PagerStyle | 10 |
+| FormView | RowStyle, EditRowStyle, InsertRowStyle, HeaderStyle, FooterStyle, EmptyDataRowStyle, PagerStyle | 7 |
+| Calendar | DayStyle, TitleStyle, DayHeaderStyle, TodayDayStyle, SelectedDayStyle, OtherMonthDayStyle, WeekendDayStyle, NextPrevStyle, SelectorStyle | 9 |
+| DataGrid | HeaderStyle, FooterStyle, RowStyle (via items), AlternatingRowStyle | 4 |
+| DataList | HeaderStyle, FooterStyle, AlternatingRowStyle (+ others via UiStyle) | 3+ |
+
+**Total: ~41 sub-style slots across 6 controls.** This is the biggest work item. Recommend splitting: WI-2a (GridView + DetailsView — most common), WI-2b (FormView + Calendar), WI-2c (DataGrid + DataList).
+
+### WI-3: Container-Level EnableTheming Propagation
+**Size:** S (Small)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- When `EnableTheming=false` is set on a container component (Panel, PlaceHolder, or any component with children), propagate the disabled state to children
+- Implementation: Add a `CascadingValue<bool>` for EnableTheming state, or piggyback on the existing parent cascading parameter
+- In `BaseStyledComponent.OnParametersSet`, check if any ancestor has `EnableTheming=false` before applying skin
+- Web Forms behavior: if a parent has `EnableTheming=false`, ALL descendants skip theming, even if they set `EnableTheming=true`
+
+**Design note:** The existing `Parent` cascading parameter (`BaseWebFormsComponent.Parent`) already cascades. We can walk the parent chain to check `EnableTheming`, but that's O(n) per component. Better: cascade a dedicated `bool _themingDisabledByAncestor` value.
+
+### WI-4: Runtime Theme Switching
+**Size:** M (Medium)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- Make `ThemeProvider` reactive: when `Theme` parameter changes, all descendant components re-apply skins
+- This should work automatically because changing a `CascadingValue` triggers `OnParametersSet` in all consumers
+- **Verify:** Does changing `ThemeProvider.Theme` at runtime trigger re-renders? If `ThemeConfiguration` is a reference type and the same instance is mutated, `CascadingValue` won't detect the change. May need:
+  - `ThemeProvider` to implement change detection (compare by reference or version counter)
+  - Or require developers to assign a new `ThemeConfiguration` instance for switching
+- Add a `ThemeProvider.SwitchTheme(ThemeConfiguration newTheme)` convenience method
+- Sample page demonstrating runtime theme switching with a dropdown
+
+**Risk:** Cascading value change detection. Blazor's `CascadingValue` re-renders children when the value reference changes, but NOT when properties of the same object change. This means theme switching must assign a new `ThemeConfiguration`, not mutate the existing one.
+
+### WI-5: Wave 1 Tests
+**Size:** M (Medium)
+**Agent:** Rogue
+**What:**
+- Tests for Theme mode (overrides explicit values)
+- Tests for StyleSheetTheme mode (does not override explicit values) — already partially covered by PoC
+- Tests for sub-component style application (GridView HeaderStyle from theme, DetailsView RowStyle from theme, etc.)
+- Tests for container-level EnableTheming propagation (Panel with EnableTheming=false → child Button gets no theme)
+- Tests for runtime theme switching (change ThemeProvider.Theme, verify child re-renders with new skin)
+- Negative tests: missing sub-style gracefully ignored, theme mode transitions
+
+### WI-6: Wave 1 Documentation
+**Size:** M (Medium)
+**Agent:** Beast
+**What:**
+- Migration guide: "Converting Web Forms Themes to Blazor"
+  - Before/after comparison of .skin file → C# `ThemeConfiguration`
+  - Step-by-step for each sub-component style
+  - StyleSheetTheme vs Theme mode explanation
+  - EnableTheming opt-out patterns
+- API reference for ThemeConfiguration, ControlSkin, ThemeProvider
+- Update existing theming sample page with sub-component styles and theme switching
+- Add to MkDocs nav under a new "Theming" section
+
+### WI-7: Wave 1 Sample Page Updates
+**Size:** S (Small)
+**Agent:** Jubilee
+**What:**
+- Update the existing theming sample page to demonstrate:
+  - GridView with themed HeaderStyle, RowStyle, AlternatingRowStyle
+  - Theme vs StyleSheetTheme mode toggle
+  - Container-level EnableTheming=false
+  - Runtime theme switching dropdown
+- Register in ComponentCatalog if not already present
+
+---
+
+## Wave 2: Migration Accelerators (Ship Second)
+
+**Goal:** Reduce manual conversion effort. Developers can use their existing .skin files directly or via JSON.
+
+**Estimated total effort:** 3–4 work items, M-sized milestone
+
+### WI-8: .skin File Parser
+**Size:** L (Large)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- Parse `.skin` files into `ThemeConfiguration` objects
+- .skin format is pseudo-ASPX: `<asp:Button runat="server" BackColor="#FFF" />` — no root element, multiple control declarations per file
+- Parser must handle:
+  - Control type extraction (strip `asp:` prefix)
+  - Property value parsing (strings, colors, units, enums, booleans)
+  - Sub-component style elements (`<HeaderStyle CssClass="header" />` nested inside control declarations)
+  - SkinID attribute (named skins)
+  - Comments (`<%-- --%>`)
+  - Multiple .skin files per theme folder
+- Output: `ThemeConfiguration` object ready to pass to `ThemeProvider`
+- **Hosting model concern:** File reading works in Server-side Blazor but NOT in WebAssembly. Options:
+  - Build-time parsing (MSBuild target or source generator) — works everywhere
+  - Runtime file reading with fallback — Server only
+  - HTTP fetch from `wwwroot/` — works in WASM but requires files to be deployed
+- **Recommendation:** Build-time source generator that converts .skin files to C# `ThemeConfiguration` factory methods. This works in all hosting models and has zero runtime cost.
+
+**Open question for Jeff:** Source generator vs runtime parser? Source generators are more complex to build but produce better results. Runtime parsers are simpler but hosting-model dependent.
+
+### WI-9: JSON Theme Format
+**Size:** M (Medium)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- Define a JSON schema for theme configuration:
+```json
+{
+  "mode": "Theme",
+  "controls": {
+    "Button": {
+      "default": { "BackColor": "#FFDEAD", "Font-Bold": true },
+      "goButton": { "Text": "Go", "Width": "120px" }
+    },
+    "GridView": {
+      "default": {
+        "CssClass": "DataWebControlStyle",
+        "subStyles": {
+          "HeaderStyle": { "CssClass": "HeaderStyle" },
+          "RowStyle": { "CssClass": "RowStyle" },
+          "AlternatingRowStyle": { "CssClass": "AlternatingRowStyle" }
+        }
+      }
+    }
+  }
+}
+```
+- Custom JSON deserializer for WebColor, Unit, FontInfo, BorderStyle, TableItemStyle
+- `ThemeConfiguration.FromJson(string json)` factory method
+- `ThemeConfiguration.FromJsonFile(string path)` for file loading
+- JSON schema file for IDE IntelliSense (publish as `.schema.json`)
+- This is complementary to C# config — developers choose whichever format they prefer
+
+### WI-10: CSS File Bundling from Theme Folders
+**Size:** S (Small)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- In Web Forms, all `.css` files in `App_Themes/{ThemeName}/` are automatically `<link>`ed to every page using the theme
+- Blazor equivalent: `ThemeProvider` renders `<link>` elements for CSS files associated with the theme
+- Add `CssFiles` property to `ThemeConfiguration` — list of CSS file paths
+- `ThemeProvider.razor` renders `<link rel="stylesheet" href="@file" />` for each entry
+- For .skin parser (WI-8): auto-discover `.css` files in the same theme folder
+- For JSON format (WI-9): `"cssFiles": ["themes/CoolTheme/theme.css"]` property
+
+**Note:** This is intentionally simple — explicit file list, no directory scanning at runtime. The .skin parser or JSON config specifies which CSS files to include.
+
+### WI-11: Wave 2 Tests
+**Size:** M (Medium)
+**Agent:** Rogue
+**What:**
+- .skin file parser tests: single control, multiple controls, named skins, sub-component styles, comments, malformed input
+- JSON deserialization tests: round-trip, WebColor/Unit/FontInfo parsing, sub-styles, mode setting
+- CSS bundling tests: ThemeProvider renders `<link>` elements, empty list renders nothing
+- Integration: .skin file → ThemeConfiguration → ThemeProvider → themed GridView
+
+### WI-12: Wave 2 Documentation
+**Size:** S (Small)
+**Agent:** Beast
+**What:**
+- .skin file migration guide: "Drop your .skin files into the project and use them directly"
+- JSON theme format reference with full schema
+- CSS bundling guide
+- Update theming docs with new format options
+
+---
+
+## Wave 3: Tooling & Polish (Stretch)
+
+**Goal:** Integrate with the broader migration tooling story and polish rough edges.
+
+**Estimated total effort:** 2–3 work items, S-sized milestone
+
+### WI-13: Migration Tooling Integration
+**Size:** M (Medium)
+**Agent:** Cyclops (implementation), Forge (review)
+**What:**
+- Integrate theme detection with the `bwfc-migrate` CLI from M12–M14
+- CLI should:
+  - Detect `App_Themes/` folders in Web Forms projects
+  - Report theme usage (which pages use which themes, StyleSheetTheme vs Theme)
+  - Generate `ThemeConfiguration` C# code from .skin files (leveraging WI-8 parser)
+  - Flag incompatible skin properties (behavioral properties that can't be themed)
+  - Produce a migration score for theme complexity
+- This depends on WI-8 (.skin parser) being complete
+
+### WI-14: Theme Validation & Diagnostics
+**Size:** S (Small)
+**Agent:** Cyclops
+**What:**
+- Validate `ThemeConfiguration` at startup: warn about skin entries for unknown control types
+- Validate `SkinID` references: warn if a component references a SkinID that doesn't exist (graceful degradation, not exception — per project convention)
+- Add diagnostic logging: which skins were applied to which components, which were skipped
+- `ThemeConfiguration.Validate()` method that returns a list of warnings
+- Optional: Blazor dev-tools integration (browser console warnings in development mode)
+
+### WI-15: Wave 3 Documentation & Samples
+**Size:** S (Small)
+**Agent:** Beast (docs), Jubilee (samples)
+**What:**
+- Migration tooling guide: "Using bwfc-migrate to convert themes"
+- Troubleshooting guide for common theme migration issues
+- Advanced sample: multi-theme app with runtime switching and JSON-loaded themes
+- Sample: .skin file → Blazor theme conversion walkthrough
+
+---
+
+## Risk Register
+
+| # | Risk | Impact | Mitigation |
+|---|------|--------|-----------|
+| R1 | **Theme mode "explicitly set" detection** — Blazor has no built-in way to distinguish "parameter was explicitly set" from "parameter has default value" in OnParametersSet | HIGH — Theme override mode may incorrectly override properties that weren't set by the developer | Use nullable backing fields or track explicit sets in `SetParametersAsync`. Prototype in WI-1 before committing to approach. |
+| R2 | **Sub-component style wiring is labor-intensive** — 41 sub-style slots across 6 controls, each needs manual wiring | MEDIUM — Lots of boilerplate, risk of inconsistency | Extract common pattern into a helper method. Do GridView first as template, then follow for others. Consider reflection-based approach using style container interfaces. |
+| R3 | **.skin file format is ambiguous** — No formal grammar, pseudo-ASPX with Web Forms preprocessor directives | MEDIUM — Parser may fail on edge cases | Start with the 80% case (simple property declarations). Document unsupported syntax. Use the compatibility report as reference. |
+| R4 | **CascadingValue change detection for theme switching** — Mutating a ThemeConfiguration object won't trigger re-renders | LOW — Well-understood Blazor behavior | Document that theme switching requires assigning a new ThemeConfiguration instance. Add helper method. |
+| R5 | **Hosting model differences for .skin file reading** — WASM can't read files at runtime | MEDIUM — Feature works differently across hosting models | Build-time source generator approach (WI-8 recommendation) eliminates this entirely. |
+| R6 | **DataBound controls inherit through BaseStyledComponent** — Confirmed: BaseDataBoundComponent → BaseStyledComponent. Theme wiring works for top-level properties, but sub-style wiring needs to be done per-control | LOW — Already verified, just need sub-style work |
+
+---
+
+## Open Questions for Jeff
+
+1. **Theme override mode behavior (WI-1):** Should Theme mode always override explicit values (true Web Forms behavior), or should we provide an escape hatch? I recommend always-override for fidelity. Web Forms developers expect this.
+
+2. **Source generator vs runtime parser for .skin files (WI-8):** Source generators work in all hosting models but are more complex to build. Runtime parsers are simpler but Server-only. Which approach? I recommend source generator for long-term correctness.
+
+3. **Wave 1 scope — include runtime theme switching?** WI-4 is medium effort and fewer apps use it. Could defer to Wave 2 if we want Wave 1 lean. I included it in Wave 1 because the CascadingValue mechanism makes it nearly free once the base wiring exists.
+
+4. **Sub-component style priority for Wave 1 split:** I recommend GridView + DetailsView first (WI-2a), then FormView + Calendar (WI-2b), then DataGrid + DataList (WI-2c). GridView is the most common data control in Web Forms apps. Agree?
+
+5. **JSON schema publishing (WI-9):** Should we publish the JSON theme schema to SchemaStore.org for IDE support, or just include it in the repo? SchemaStore gets us VS Code / VS IntelliSense for free.
+
+---
+
+## Agent Assignments Summary
+
+| Agent | Wave 1 | Wave 2 | Wave 3 |
+|-------|--------|--------|--------|
+| **Cyclops** | WI-1 (Theme mode), WI-2 (Sub-styles), WI-3 (EnableTheming propagation), WI-4 (Theme switching) | WI-8 (.skin parser), WI-9 (JSON format), WI-10 (CSS bundling) | WI-13 (Migration tooling), WI-14 (Validation) |
+| **Rogue** | WI-5 (Wave 1 tests) | WI-11 (Wave 2 tests) | — |
+| **Beast** | WI-6 (Wave 1 docs) | WI-12 (Wave 2 docs) | WI-15 (Wave 3 docs) |
+| **Jubilee** | WI-7 (Wave 1 samples) | — | WI-15 (Wave 3 samples) |
+| **Forge** | Review all Wave 1 PRs | Review all Wave 2 PRs, .skin format decisions | Review all Wave 3 PRs |
+
+---
+
+## Size Summary
+
+| Work Item | Description | Size | Wave |
+|-----------|-------------|------|------|
+| WI-1 | StyleSheetTheme vs Theme priority mode | M | 1 |
+| WI-2 | Sub-component style theming (split into 2a/2b/2c) | L | 1 |
+| WI-3 | Container-level EnableTheming propagation | S | 1 |
+| WI-4 | Runtime theme switching | M | 1 |
+| WI-5 | Wave 1 tests | M | 1 |
+| WI-6 | Wave 1 documentation | M | 1 |
+| WI-7 | Wave 1 sample page updates | S | 1 |
+| WI-8 | .skin file parser | L | 2 |
+| WI-9 | JSON theme format | M | 2 |
+| WI-10 | CSS file bundling | S | 2 |
+| WI-11 | Wave 2 tests | M | 2 |
+| WI-12 | Wave 2 documentation | S | 2 |
+| WI-13 | Migration tooling integration | M | 3 |
+| WI-14 | Theme validation & diagnostics | S | 3 |
+| WI-15 | Wave 3 docs & samples | S | 3 |
+
+**Total: 15 work items — 2L + 5M + 2S (Wave 1), 1L + 2M + 2S (Wave 2), 1M + 2S (Wave 3)**
+
+---
+
+## Dependency Graph
+
+```
+Wave 1 (parallel start):
+  WI-1 (Theme mode) ──────────────┐
+  WI-2a (GridView/DetailsView sub-styles) ──┤
+  WI-3 (EnableTheming propagation) ─────────┼──→ WI-5 (Tests) ──→ WI-6 (Docs) ──→ WI-7 (Samples)
+  WI-4 (Theme switching) ──────────────────┘
+
+Wave 2 (after Wave 1):
+  WI-8 (.skin parser) ──→ WI-10 (CSS bundling)
+  WI-9 (JSON format) ───┤
+                         ├──→ WI-11 (Tests) ──→ WI-12 (Docs)
+  WI-2b (FormView/Calendar sub-styles) ──┘
+  WI-2c (DataGrid/DataList sub-styles) ──┘
+
+Wave 3 (after Wave 2):
+  WI-8 (.skin parser) ──→ WI-13 (Migration tooling)
+  WI-14 (Validation) ─── independent
+  WI-15 (Docs/samples) ── depends on WI-13
+```
+
+---
+
+*— Forge, Lead / Web Forms Reviewer*
+*"Sub-component styles are the whole game. Without HeaderStyle on GridView, theming is a toy demo."*
+

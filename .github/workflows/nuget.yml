@@ -1,9 +1,12 @@
-name: Publish NuGet Package
+name: Publish NuGet Package (Manual)
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g., 0.17.0)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -11,7 +14,10 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
+    env:
+      VERSION: ${{ inputs.version }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,7 +33,7 @@ jobs:
         run: dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
 
       - name: Build
-        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
+        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore -p:Version=${{ env.VERSION }}
 
       - name: Run tests
         run: |
@@ -35,7 +41,7 @@ jobs:
           dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --verbosity normal
 
       - name: Pack
-        run: dotnet pack src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-build --output ./nupkg
+        run: dotnet pack src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-build --output ./nupkg -p:PackageVersion=${{ env.VERSION }} -p:Version=${{ env.VERSION }}
 
       - name: Push to GitHub Packages
         run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate

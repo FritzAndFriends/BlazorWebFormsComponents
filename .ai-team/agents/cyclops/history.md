@@ -76,3 +76,24 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 - **ApplyThemeSkin guard:** Updated `BaseStyledComponent.ApplyThemeSkin` to check both `Font.Name` AND `Font.Names` are empty before applying theme font. Prevents theme from overriding an explicitly set `Names` value.
 - **Root cause:** `ApplyThemeSkin` set `Font.Name` but `HasStyleExtensions.ToStyle()` reads `Font.Names` for `font-family`. Without auto-sync, theme fonts were silently lost.
 - **Lesson:** When Web Forms has paired/synced properties (Name↔Names, Value↔SelectedValue, etc.), our Blazor equivalents must replicate the sync behavior or the rendering pipeline breaks at property boundaries.
+
+### CI/CD Unified Release Process (2026-03-02)
+
+- **Unified release.yml:** Created `.github/workflows/release.yml` triggered on `release: published`. Single workflow coordinates all release artifacts: NuGet publish, Docker build+push to GHCR, docs deploy to GitHub Pages, demo builds with release attachment. All jobs extract version from `github.event.release.tag_name` stripping the `v` prefix, ensuring every artifact gets the same version.
+- **Version extraction pattern:** Use `${{ github.event.release.tag_name }}` (not `${{ github.ref_name }}`) for release events. Strip `v` prefix via bash `${VERSION#v}` and write to `$GITHUB_ENV` for use across steps.
+- **NuGet version override:** Pass both `-p:PackageVersion=$VERSION` and `-p:Version=$VERSION` to `dotnet pack` and `dotnet build` respectively, overriding NBGV-computed versions with the exact release tag version.
+- **Secret-gating pattern:** Use `env: NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}` at step level, then `if: env.NUGET_API_KEY != ''` — this is the GitHub Actions idiom for conditional steps based on secret availability.
+- **gh CLI in workflows:** Set `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` as env var for `gh release upload` commands.
+- **Docker image tags lowercase:** Registry/image path must be lowercase: `ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples`.
+- **deploy-server-side.yml refactored:** Removed `push: branches: [main]` trigger and path filters. Now `workflow_dispatch` only — emergency manual escape hatch.
+- **nuget.yml refactored:** Removed `push: tags: [v*]` trigger. Now `workflow_dispatch` with version input — emergency manual NuGet republish.
+- **docs.yml fix:** Replaced deprecated `echo ::set-output name=release::${RELEASE}` with `echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"`. Kept push-to-main deploy for doc-only changes between releases.
+- **demo.yml versioned artifacts:** Added NBGV version computation step. Artifact names now include version: `demo-server-side-${{ steps.nbgv.outputs.version }}`.
+- **version.json:** Changed from `"version": "0.17"` (2-segment) to `"version": "0.17.0"` (3-segment SemVer). NBGV now computes clean 3-segment versions matching our tag format.
+- **NBGV key lesson:** NBGV ignores git tags entirely — it reads `version.json` for major.minor and computes patch from git height. Tags are informational; `version.json` must be kept in sync. For releases, override NBGV output with explicit `-p:Version=` from the tag.
+- **Workflow dependency order:** release.yml uses `needs:` to enforce: build-and-test → [publish-nuget, deploy-docker, deploy-docs, build-demos] (fan-out after gate job).
+- **Lesson:** GitHub Actions `$GITHUB_OUTPUT` replaced `::set-output` (deprecated Oct 2022). Always use `echo "key=value" >> "$GITHUB_OUTPUT"` for step outputs.
+
+ Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+
+ Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge

@@ -39,6 +39,14 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Compute version with NBGV
+        id: nbgv
+        run: |
+          dotnet tool install --global nbgv
+          VERSION=$(nbgv get-version -v NuGetPackageVersion)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Computed version: $VERSION"
+
       - name: Restore dependencies
         run: |
           dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
@@ -53,11 +61,11 @@ jobs:
       - name: Upload Server-Side Demo artifact
         uses: actions/upload-artifact@v4
         with:
-          name: demo-server-side
+          name: demo-server-side-${{ steps.nbgv.outputs.version }}
           path: ./publish/server-side
 
       - name: Upload Client-Side Demo artifact
         uses: actions/upload-artifact@v4
         with:
-          name: demo-client-side
+          name: demo-client-side-${{ steps.nbgv.outputs.version }}
           path: ./publish/client-side
