@@ -1,0 +1,141 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	ListView<Widget> theListView;
+
+	// Event tracking
+	ListViewEditEventArgs _editingArgs;
+	ListViewCancelEventArgs _cancelingArgs;
+
+	[Fact]
+	public void EditIndex_MatchingItem_RendersEditItemTemplate()
+	{
+		// Set EditIndex=0 via parameter — the first item should render EditItemTemplate
+		int editIdx = 0;
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						EditIndex="editIdx"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span class="display">@Item.Name</span></ItemTemplate>
+			<EditItemTemplate><span class="edit">EDITING @Item.Name</span></EditItemTemplate>
+		</ListView>);
+
+		// Item 0 should use EditItemTemplate
+		var editSpans = cut.FindAll("span.edit");
+		editSpans.Count.ShouldBe(1);
+		editSpans[0].TextContent.ShouldContain("EDITING");
+		editSpans[0].TextContent.ShouldContain("First Widget");
+	}
+
+	[Fact]
+	public void EditIndex_NonMatchingItems_StillUseItemTemplate()
+	{
+		// EditIndex=0 — items 1+ should still render via ItemTemplate
+		int editIdx = 0;
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						EditIndex="editIdx"
+						Context="Item">
+			<ItemTemplate><span class="display">@Item.Name</span></ItemTemplate>
+			<EditItemTemplate><span class="edit">EDITING @Item.Name</span></EditItemTemplate>
+		</ListView>);
+
+		// All items except item 0 should use ItemTemplate
+		var displaySpans = cut.FindAll("span.display");
+		displaySpans.Count.ShouldBe(Widget.SimpleWidgetList.Length - 1);
+
+		// Only one item in edit mode
+		cut.FindAll("span.edit").Count.ShouldBe(1);
+	}
+
+	[Fact]
+	public void EditIndexNegativeOne_AllItemsUseItemTemplate()
+	{
+		// Default EditIndex=-1 — no items should be in edit mode
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						Context="Item">
+			<ItemTemplate><span class="display">@Item.Name</span></ItemTemplate>
+			<EditItemTemplate><span class="edit">EDITING</span></EditItemTemplate>
+		</ListView>);
+
+		cut.FindAll("span.display").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+		cut.FindAll("span.edit").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void HandleCommand_Edit_SwapsToEditItemTemplate()
+	{
+		// After HandleCommand("edit"), the edited row should render EditItemTemplate
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						ItemEditing="OnEditing"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span class="display">@Item.Name</span></ItemTemplate>
+			<EditItemTemplate><span class="edit">EDITING @Item.Name</span></EditItemTemplate>
+		</ListView>);
+
+		// Before edit — all items in display mode
+		cut.FindAll("span.edit").Count.ShouldBe(0);
+
+		// Trigger edit on item 1
+		cut.InvokeAsync(() => theListView.HandleCommand("Edit", null, 1));
+
+		// After edit — item 1 should be in edit mode
+		var editSpans = cut.FindAll("span.edit");
+		editSpans.Count.ShouldBe(1);
+		editSpans[0].TextContent.ShouldContain("Second Widget");
+
+		// Other items should remain in display mode
+		cut.FindAll("span.display").Count.ShouldBe(Widget.SimpleWidgetList.Length - 1);
+	}
+
+	[Fact]
+	public void HandleCommand_Cancel_RestoresItemTemplate()
+	{
+		// Start with item 1 in edit mode, then cancel — should go back to ItemTemplate
+		int editIdx = 1;
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						EditIndex="editIdx"
+						ItemCanceling="OnCanceling"
+						Context="Item"
+						@ref="theListView">
+			<ItemTemplate><span class="display">@Item.Name</span></ItemTemplate>
+			<EditItemTemplate><span class="edit">EDITING @Item.Name</span></EditItemTemplate>
+		</ListView>);
+
+		// Verify edit mode is active first
+		cut.FindAll("span.edit").Count.ShouldBe(1);
+
+		// Cancel editing
+		cut.InvokeAsync(() => theListView.HandleCommand("Cancel", null, 1));
+
+		// All items should be back to display mode
+		cut.FindAll("span.edit").Count.ShouldBe(0);
+		cut.FindAll("span.display").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void EditItemTemplateNull_FallsBackToItemTemplate()
+	{
+		// Even with EditIndex=0, if no EditItemTemplate is provided, ItemTemplate is used
+		int editIdx = 0;
+		var cut = Render(@<ListView Items="Widget.SimpleWidgetList"
+						ItemType="Widget"
+						EditIndex="editIdx"
+						Context="Item">
+			<ItemTemplate><span class="display">@Item.Name</span></ItemTemplate>
+		</ListView>);
+
+		// All items should use ItemTemplate since EditItemTemplate is null
+		cut.FindAll("span.display").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	// Event handlers
+	void OnEditing(ListViewEditEventArgs args) => _editingArgs = args;
+	void OnCanceling(ListViewCancelEventArgs args) => _cancelingArgs = args;
+}

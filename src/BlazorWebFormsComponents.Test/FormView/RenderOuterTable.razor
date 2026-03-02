@@ -1,0 +1,160 @@
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+
+@code {
+
+	[Fact]
+	public void FormView_Default_RendersOuterTable()
+	{
+		// Default behavior — RenderOuterTable defaults to true, outer <table> should be present
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span class="item">@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").ShouldNotBeNull();
+		cut.Markup.ShouldContain("border-collapse:collapse");
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableTrue_RendersOuterTable()
+	{
+		// Explicitly setting RenderOuterTable=true should match default behavior
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				RenderOuterTable="true">
+				<ItemTemplate>
+					<span class="item">@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").ShouldNotBeNull();
+		cut.Markup.ShouldContain("border-collapse:collapse");
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableFalse_NoOuterTable()
+	{
+		// RenderOuterTable=false — no wrapping <table> element, just template content
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				RenderOuterTable="false">
+				<ItemTemplate>
+					<span class="item">@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.FindAll("table").ShouldBeEmpty();
+		cut.Find("span.item").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableFalse_RendersTemplateContent()
+	{
+		// Ensure the actual template content still renders when outer table is off
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				RenderOuterTable="false">
+				<ItemTemplate>
+					<span class="item">@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain(Widget.SimpleWidgetList[0].Name);
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableTrue_MatchesDefaultStructure()
+	{
+		// Explicit true should produce the same DOM structure as default
+		var cutDefault = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		var cutExplicit = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				RenderOuterTable="true">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		// Both should have the same element structure (table, tr, td counts)
+		cutDefault.FindAll("table").Count.ShouldBe(cutExplicit.FindAll("table").Count);
+		cutDefault.FindAll("tr").Count.ShouldBe(cutExplicit.FindAll("tr").Count);
+		cutDefault.FindAll("td").Count.ShouldBe(cutExplicit.FindAll("td").Count);
+		cutDefault.FindAll("a").Count.ShouldBe(cutExplicit.FindAll("a").Count);
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableFalse_EmptyData_RendersEmptyDataText()
+	{
+		// Edge case: RenderOuterTable=false with empty data should still render EmptyDataText
+		Widget[] emptyItems = Array.Empty<Widget>();
+
+		var cut = Render(
+			@<FormView Items="emptyItems" ItemType="Widget" Context="Item"
+				RenderOuterTable="false" EmptyDataText="No records found">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Markup.ShouldContain("No records found");
+		cut.FindAll("table").ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableFalse_EmptyData_RendersEmptyDataTemplate()
+	{
+		// Edge case: RenderOuterTable=false with EmptyDataTemplate
+		Widget[] emptyItems = Array.Empty<Widget>();
+
+		var cut = Render(
+			@<FormView Items="emptyItems" ItemType="Widget" Context="Item"
+				RenderOuterTable="false">
+				<EmptyDataTemplate>
+					<div id="emptyCustom">Custom empty state</div>
+				</EmptyDataTemplate>
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("#emptyCustom").TextContent.ShouldBe("Custom empty state");
+		cut.FindAll("table").ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void FormView_RenderOuterTableFalse_EditMode_RendersEditTemplate()
+	{
+		// Edge case: RenderOuterTable=false in edit mode — edit template should still render
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				RenderOuterTable="false" DefaultMode="FormViewMode.Edit">
+				<EditItemTemplate>
+					<span class="edit">Editing @Item.Name</span>
+				</EditItemTemplate>
+				<ItemTemplate>
+					<span class="item">@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("span.edit").ShouldNotBeNull();
+		cut.FindAll("table").ShouldBeEmpty();
+	}
+}

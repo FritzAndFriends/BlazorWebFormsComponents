@@ -4,10 +4,10 @@
 |----------|-----------|-------------|-------------|----------|-------|
 | Editor Controls | 25 | 0 | 0 | 2 | 27 |
 | Data Controls | 9 | 0 | 0 | 0 | 9 |
-| Validation Controls | 7 | 0 | 0 | 0 | 7 |
+| Validation Controls | 8 | 0 | 0 | 0 | 8 |
 | Navigation Controls | 3 | 0 | 0 | 0 | 3 |
 | Login Controls | 7 | 0 | 0 | 0 | 7 |
-| **TOTAL** | **51** | **0** | **0** | **2** | **53** |
+| **TOTAL** | **52** | **0** | **0** | **2** | **54** |
 
 ---
 
@@ -60,7 +60,7 @@
 | DataPager | ✅ Complete | Documented in DataPager.md |
 | DetailsView | ✅ Complete | Single-record display/edit, documented, tested, sample page exists |
 
-### ✅ Validation Controls (7/7 - 100% Complete)
+### ✅ Validation Controls (8/8 - 100% Complete)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -72,6 +72,7 @@
 | RegularExpressionValidator | ✅ Complete | Documented |
 | RequiredFieldValidator | ✅ Complete | Documented |
 | ValidationSummary | ✅ Complete | Documented |
+| ModelErrorMessage | ✅ Complete | Displays model state errors for a specific key, documented |
 
 ### ✅ Navigation Controls (3/3 - 100% Complete)
 
