@@ -54,13 +54,11 @@ else
 						{
 							DataItem = item
 						};
+						var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
+							? EditItemTemplate : oddOrEvenTemplate(even);
+						even = !even;
 						<CascadingValue Name="CurrentDataBoundItem" Value="item">
-							@{
-								var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
-									? EditItemTemplate : oddOrEvenTemplate(even);
-							}
 							@currentTemplate(item)
-							@{ even = !even; }
 						</CascadingValue>
 						if (ItemSeparatorTemplate != null)
 						{
