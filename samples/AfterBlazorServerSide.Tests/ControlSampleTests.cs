@@ -172,6 +172,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/CustomValidator")]
     [InlineData("/ControlSamples/RegularExpressionValidator")]
     [InlineData("/ControlSamples/ValidationSummary")]
+    [InlineData("/ControlSamples/ModelErrorMessage")]
     public async Task ValidationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
