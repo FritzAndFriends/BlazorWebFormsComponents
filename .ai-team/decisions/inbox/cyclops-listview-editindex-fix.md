@@ -1,5 +1,0 @@
-### ListView EditItemTemplate rendering fix (Issue #406)
-**By:** Cyclops
-**What:** Added `@key="dataItemIndex"` to the `<CascadingValue>` elements wrapping each item's template in `ListView.razor` — both in the non-grouped path (line 60) and the grouped path (line 105). This ensures Blazor's diff algorithm tracks each item by its data index, forcing correct re-evaluation of template selection when `EditIndex` changes.
-**Why:** Without `@key`, Blazor uses positional diffing in the `foreach` loop. When `EditIndex` changes (e.g., from -1 to 1), the template selection at line 57 switches from `ItemTemplate` to `EditItemTemplate` for one row. However, since the items themselves don't change (same list, same count), Blazor's positional diff may not detect that a specific row's template changed — the `CascadingValue` at that position looks structurally similar. Adding `@key="dataItemIndex"` forces Blazor to identify each row by index, ensuring template swaps are always detected and re-rendered.
-**Impact:** All 1443 tests pass including all 6 EditTemplate tests. No changes to sample pages or ListView.razor.cs. Minimal two-line change in ListView.razor.

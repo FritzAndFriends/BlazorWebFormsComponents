@@ -3918,3 +3918,66 @@ Wave 3 (after Wave 2):
 *— Forge, Lead / Web Forms Reviewer*
 *"Sub-component styles are the whole game. Without HeaderStyle on GridView, theming is a toy demo."*
 
+
+### ListView EditItemTemplate rendering fix (Issue #406)
+**By:** Cyclops
+**What:** Added `@key="dataItemIndex"` to the `<CascadingValue>` elements wrapping each item's template in `ListView.razor` — both in the non-grouped path (line 60) and the grouped path (line 105). This ensures Blazor's diff algorithm tracks each item by its data index, forcing correct re-evaluation of template selection when `EditIndex` changes.
+**Why:** Without `@key`, Blazor uses positional diffing in the `foreach` loop. When `EditIndex` changes (e.g., from -1 to 1), the template selection at line 57 switches from `ItemTemplate` to `EditItemTemplate` for one row. However, since the items themselves don't change (same list, same count), Blazor's positional diff may not detect that a specific row's template changed — the `CascadingValue` at that position looks structurally similar. Adding `@key="dataItemIndex"` forces Blazor to identify each row by index, ensuring template swaps are always detected and re-rendered.
+**Impact:** All 1443 tests pass including all 6 EditTemplate tests. No changes to sample pages or ListView.razor.cs. Minimal two-line change in ListView.razor.
+
+
+### 2026-03-02: M22 — Copilot-Led Migration Showcase plan
+**By:** Forge
+**What:** Comprehensive plan for M22 focusing on demonstrating BlazorWebFormsComponents value through Copilot-guided migration
+**Why:** Jeff wants to show these components provide significant value as part of a Copilot-led migration workflow
+
+#### Summary
+
+M22 is a strategic milestone that repositions BlazorWebFormsComponents from a component library into a **migration platform**. The plan delivers 12 work items across 4 waves:
+
+**Wave 1 (Critical):** Reference Web Forms app (curated from existing BeforeWebForms sample), Copilot migration instructions file, step-by-step migration walkthrough document.
+
+**Wave 2 (High):** Migrated "after" Blazor app, before/after diff document, migration docs updated to .NET 10, readiness checklist.
+
+**Wave 3 (Medium):** Fix ListView EditItemTemplate bug (#406), optional ListView CRUD events subset (#356 — 4 of 16 events).
+
+**Wave 4 (High):** Demo script with timing marks, integration test for migrated app.
+
+#### Key Decisions
+
+1. **Use existing BeforeWebForms sample as demo base** — curate 6-8 pages into a "Contoso Widgets" narrative rather than building from scratch. The 48 existing control samples provide a strong foundation.
+
+2. **All 16 core demo controls are already Tier 1 ready** — Button, TextBox, Label, DropDownList, CheckBox, GridView, Repeater, FormView, validators, Panel, HyperLink, Menu/SiteMapPath, ScriptManager. No blocking component work needed.
+
+3. **Create separate migration instructions file** (`.github/copilot-migration-instructions.md`) — distinct from the existing `copilot-instructions.md` which is for library development. Migration instructions are for library *consumption*.
+
+4. **Skins & Themes (#369) OUT of M22** — CssClass-based styling is sufficient for the demo. Full theming is a separate feature milestone.
+
+5. **AJAX Control Toolkit extenders (#297) OUT of M22** — Not core Web Forms controls. Migration guide will note they're unsupported.
+
+6. **ListView CRUD (#356) partially in** — Take 4 essential events (ItemEditing, ItemUpdating, ItemDeleting, ItemCanceling) only if demo includes ListView editing. Defer remaining 12.
+
+7. **ListView EditItemTemplate bug (#406) IN M22** — Real bug that blocks realistic ListView usage regardless of demo needs.
+
+#### Component Inventory Assessment
+
+- 57 total controls (51 functional, 6 stubs/deferred)
+- ~35 controls are "Tier 1 demo-ready" with high migration fidelity
+- ~10 controls are "Tier 2" with known gaps (mostly ListView events, Calendar divergences, JS-heavy nav)
+- 1,367+ unit tests
+- 48 BeforeWebForms sample pages, 162+ AfterBlazor sample pages
+
+#### Success Criteria
+
+Jeff can perform a live 30-minute migration demo from running Web Forms to running Blazor, with same visual appearance, using Copilot + BWFC migration instructions. A developer watching can replicate it independently.
+
+#### Full Plan
+
+See `planning-docs/MILESTONE22-COPILOT-MIGRATION-SHOWCASE.md` for complete 12-work-item plan with timeline, agent assignments, risk assessment, and control translation table.
+
+
+### 2026-03-01: ListView EditItemTemplate TDD tests use CSS class selectors for template identification
+**By:** Rogue
+**What:** Created `EditTemplateTests.razor` with 6 tests for Issue #406. Tests use `span.display` and `span.edit` CSS classes to identify which template (ItemTemplate vs EditItemTemplate) rendered for each row. 4 tests intentionally fail pre-fix (TDD), 2 pass for negative/null edge cases.
+**Why:** Previous CrudEvents.razor tests only verified `EditIndex` property values, not the actual rendered DOM. The new tests verify the **visual template swap** — which is the actual user-facing bug. CSS class selectors are stable, readable, and clearly communicate which template owns each row. Cyclops should ensure the fix makes all 6 tests pass.
+

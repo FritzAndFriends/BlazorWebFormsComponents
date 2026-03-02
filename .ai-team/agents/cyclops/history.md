@@ -111,3 +111,6 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 - **Key files:** `src/BlazorWebFormsComponents/ListView.razor` (lines 57-61), `src/BlazorWebFormsComponents.Test/ListView/EditTemplateTests.razor`, `src/BlazorWebFormsComponents.Test/ListView/CrudEvents.razor`
 - **Pattern:** In Blazor Razor templates, NEVER reference loop-external mutable variables inside a component's ChildContent (CascadingValue, etc.). Either capture values in loop-local variables before the component, or evaluate expressions before the component tag. This applies to any `<Component>@{code using loop var}</Component>` pattern.
 - **Lesson:** `foreach` iteration variables are safe in closures (new per iteration since C# 5), but variables declared outside the loop body are shared across all closures. Blazor components defer ChildContent rendering, so loop-external variables will have their final values.
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge

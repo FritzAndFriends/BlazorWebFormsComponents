@@ -170,3 +170,24 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 - `docs.yml` deploy guard: `github.event_name != 'pull_request' && (endsWith(github.ref, 'main') || steps.prepare.outputs.release == 'true')`
 
  Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+
+### Summary: M22 Planning — Copilot-Led Migration Showcase (2026-03-02)
+
+**By:** Forge
+**What:** Comprehensive plan for M22 strategic milestone. 12 work items across 4 waves. Targets a live demo where Jeff migrates a Web Forms app to Blazor using Copilot + BWFC in under 30 minutes.
+
+**Component inventory assessment:** 57 total controls (51 functional, 6 stubs/deferred). ~35 are Tier 1 demo-ready with high migration fidelity. All 16 core demo controls (Button, TextBox, GridView, validators, etc.) are ready — no blocking component work needed.
+
+**Key scope decisions:**
+- Use existing BeforeWebForms sample (curate 6-8 pages, not build from scratch)
+- Create separate `.github/copilot-migration-instructions.md` for migration guidance (distinct from library dev instructions)
+- Skins & Themes (#369) OUT — CssClass styling sufficient for demo
+- AJAX Toolkit extenders (#297) OUT — not core WF controls
+- ListView CRUD (#356) partially in — 4 essential events only if demo needs them
+- ListView EditItemTemplate bug (#406) IN — real bug, fix regardless
+- New migration walkthrough doc, before/after comparison, demo script, integration test
+
+**Files:** `planning-docs/MILESTONE22-COPILOT-MIGRATION-SHOWCASE.md`, `.ai-team/decisions/inbox/forge-m22-copilot-migration-plan.md`
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge

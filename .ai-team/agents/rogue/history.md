@@ -136,3 +136,6 @@ Wrote 6 bUnit tests in `src/BlazorWebFormsComponents.Test/ListView/EditTemplateT
 📌 Edge case: ListView.razor line 59 has the correct template selection logic (`EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null`) but it doesn't produce the expected DOM output when EditIndex is set via parameter. The bug is in the rendering pipeline, not the conditional logic. Tests confirm this — `theListView.EditIndex` is correctly set but the rendered HTML doesn't reflect it. — Rogue
 
 📌 Test pattern: For HandleCommand-based tests, use `cut.InvokeAsync(() => theListView.HandleCommand(...))` pattern (from CrudEvents.razor) to ensure Blazor dispatcher context. Verify DOM state with `cut.FindAll()` AFTER the invoke, not just property values. — Rogue
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
