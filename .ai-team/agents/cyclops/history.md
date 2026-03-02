@@ -97,6 +97,13 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
  Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
 
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+### Issue #406 — ListView EditItemTemplate Not Rendering (2026-03-02)
+
+- **Bug:** Clicking Edit in a ListView with EditItemTemplate fired the ItemEditing event and set EditIndex correctly, but the ListView did not visually swap from ItemTemplate to EditItemTemplate.
+- **Root cause:** The `<CascadingValue>` elements wrapping each item in the `foreach` loop lacked `@key` directives. Without `@key`, Blazor's positional diff algorithm could not reliably detect that a specific row's template changed from `ItemTemplate` to `EditItemTemplate` when `EditIndex` changed, because the surrounding structure (CascadingValue with same Name/Value shape) looked identical to the diff engine.
+- **Fix:** Added `@key="dataItemIndex"` to both `<CascadingValue>` elements in `ListView.razor` — the non-grouped rendering path (line 60) and the grouped rendering path (line 105). This forces Blazor to track each row by its data index, ensuring template swaps are detected and re-rendered.
+- **Lesson:** Always add `@key` to elements inside loops where the rendered content can change based on external state (like EditIndex, SelectedIndex). Without `@key`, Blazor's positional diffing may skip re-rendering rows where only the template selection changed but the data stayed the same. This applies to any data-bound component (GridView, DetailsView, etc.) that uses template switching inside iteration loops.
+
 ### Issue #406 — ListView EditItemTemplate Closure Bug (2026-03-01)
 
 - **Root cause:** In `ListView.razor`, the template selection logic (`EditIndex >= 0 && dataItemIndex == EditIndex`) and even/odd toggle (`even = !even`) were inside `<CascadingValue>`'s ChildContent — a deferred RenderFragment. The `dataItemIndex` variable was declared outside the foreach loop and captured by the closure. Since CascadingValue components render their ChildContent AFTER the parent's BuildRenderTree completes, all closures saw the final loop value (item count) instead of the per-iteration value.

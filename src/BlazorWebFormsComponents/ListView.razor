@@ -57,7 +57,7 @@ else
 						var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
 							? EditItemTemplate : oddOrEvenTemplate(even);
 						even = !even;
-						<CascadingValue Name="CurrentDataBoundItem" Value="item">
+						<CascadingValue @key="dataItemIndex" Name="CurrentDataBoundItem" Value="item">
 							@currentTemplate(item)
 						</CascadingValue>
 						if (ItemSeparatorTemplate != null)
@@ -102,7 +102,7 @@ else
 									{
 										DataItem = item
 									};
-									<CascadingValue Name="CurrentDataBoundItem" Value="item">
+									<CascadingValue @key="dataItemIndex" Name="CurrentDataBoundItem" Value="item">
 										@builderTemplate(item)
 									</CascadingValue>
 
