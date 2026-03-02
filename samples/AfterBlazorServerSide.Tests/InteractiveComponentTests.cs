@@ -2828,4 +2828,150 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task ModelErrorMessage_Submit_ShowsErrors()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ModelErrorMessage", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Click the submit button without entering any values
+            var submitButton = page.Locator("button[type='submit']:has-text('Submit')");
+            await submitButton.WaitForAsync(new() { Timeout = 5000 });
+            await submitButton.ClickAsync();
+
+            // Wait for error spans to appear
+            var errorSpan = page.Locator("span.text-danger").First;
+            await errorSpan.WaitForAsync(new() { Timeout = 10000 });
+
+            // Assert error spans are visible with error text
+            var errorCount = await page.Locator("span.text-danger").CountAsync();
+            Assert.True(errorCount >= 1, $"Expected at least 1 error span, found {errorCount}");
+
+            var errorText = await errorSpan.TextContentAsync();
+            Assert.False(string.IsNullOrWhiteSpace(errorText), "Error span should contain error text");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ModelErrorMessage_ValidSubmit_NoErrors()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ModelErrorMessage", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Fill in valid matching passwords
+            var passwordInput = page.Locator("#password");
+            await passwordInput.WaitForAsync(new() { Timeout = 5000 });
+            await passwordInput.ClickAsync();
+            await passwordInput.PressSequentiallyAsync("ValidPassword123");
+            await page.Keyboard.PressAsync("Tab");
+
+            var confirmInput = page.Locator("#confirmPassword");
+            await confirmInput.ClickAsync();
+            await confirmInput.PressSequentiallyAsync("ValidPassword123");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("button[type='submit']:has-text('Submit')");
+            await submitButton.ClickAsync();
+
+            // Wait for success message to appear
+            var successText = page.Locator("text=Form submitted successfully");
+            await successText.WaitForAsync(new() { Timeout = 10000 });
+
+            // Assert no error spans are visible
+            var errorCount = await page.Locator("span.text-danger").CountAsync();
+            Assert.Equal(0, errorCount);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ModelErrorMessage_ClearButton_RemovesErrors()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ModelErrorMessage", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Submit to trigger errors
+            var submitButton = page.Locator("button[type='submit']:has-text('Submit')");
+            await submitButton.WaitForAsync(new() { Timeout = 5000 });
+            await submitButton.ClickAsync();
+
+            // Wait for error spans to appear
+            var errorSpan = page.Locator("span.text-danger").First;
+            await errorSpan.WaitForAsync(new() { Timeout = 10000 });
+            var errorCountBefore = await page.Locator("span.text-danger").CountAsync();
+            Assert.True(errorCountBefore >= 1, "Expected errors after submit");
+
+            // Click the Clear button
+            var clearButton = page.Locator("button[type='button']:has-text('Clear')");
+            await clearButton.ClickAsync();
+
+            // Wait for errors to disappear — the span.text-danger elements should be removed from DOM
+            await page.WaitForSelectorAsync("span.text-danger", new PageWaitForSelectorOptions
+            {
+                State = WaitForSelectorState.Hidden,
+                Timeout = 10000
+            });
+
+            var errorCountAfter = await page.Locator("span.text-danger").CountAsync();
+            Assert.Equal(0, errorCountAfter);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }

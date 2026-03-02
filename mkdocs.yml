@@ -101,6 +101,7 @@ nav:
     - CompareValidator: ValidationControls/CompareValidator.md
     - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md
+    - ModelErrorMessage: ValidationControls/ModelErrorMessage.md
     - RangeValidator: ValidationControls/RangeValidator.md
     - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md
     - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md

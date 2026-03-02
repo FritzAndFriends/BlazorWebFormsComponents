@@ -43,7 +43,17 @@
 			}
 	};
 
+  var Validation = {
+    SetFocus: function(controlId) {
+      var el = document.getElementById(controlId);
+      if (el && typeof el.focus === 'function') {
+        el.focus();
+      }
+    }
+  };
+
   window.bwfc = window.bwfc ?? {};
   window.bwfc.Page = Page;
+  window.bwfc.Validation = Validation;
 
 })();

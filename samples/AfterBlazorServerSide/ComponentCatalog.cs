@@ -97,6 +97,8 @@ public static class ComponentCatalog
             Keywords: new[] { "regex", "pattern", "validation" }),
         new("RequiredFieldValidator", "Validation", "/ControlSamples/RequiredFieldValidator", "Ensures a field has a value",
             Keywords: new[] { "required", "mandatory", "validation" }),
+        new("ModelErrorMessage", "Validation", "/ControlSamples/ModelErrorMessage", "Displays model state errors for a specific key",
+            Keywords: new[] { "model", "error", "validation", "key" }),
         new("ValidationSummary", "Validation", "/ControlSamples/ValidationSummary", "Displays summary of all validation errors",
             Keywords: new[] { "summary", "errors", "validation" }),
 

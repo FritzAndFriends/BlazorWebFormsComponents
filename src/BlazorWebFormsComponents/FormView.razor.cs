@@ -92,6 +92,13 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
+		/// <summary>
+		/// Gets or sets whether the FormView renders an outer table element.
+		/// When false, only the template content is rendered without a wrapping table.
+		/// </summary>
+		[Parameter]
+		public bool RenderOuterTable { get; set; } = true;
+
 
 		public ItemType CurrentItem { get; set; }
 
