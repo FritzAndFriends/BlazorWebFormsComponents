@@ -3981,3 +3981,427 @@ See `planning-docs/MILESTONE22-COPILOT-MIGRATION-SHOWCASE.md` for complete 12-wo
 **What:** Created `EditTemplateTests.razor` with 6 tests for Issue #406. Tests use `span.display` and `span.edit` CSS classes to identify which template (ItemTemplate vs EditItemTemplate) rendered for each row. 4 tests intentionally fail pre-fix (TDD), 2 pass for negative/null edge cases.
 **Why:** Previous CrudEvents.razor tests only verified `EditIndex` property values, not the actual rendered DOM. The new tests verify the **visual template swap** — which is the actual user-facing bug. CSS class selectors are stable, readable, and clearly communicate which template owns each row. Cyclops should ensure the fix makes all 6 tests pass.
 
+
+
+### 2026-03-02: User directive — Use WingTip Toys as M22 demo app
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Do NOT build a custom "Contoso Widgets" demo app. Use the official Microsoft WingTip Toys Web Forms sample application as the M22 migration demo source. Jeff will provide a copy.
+**Why:** User request — WingTip Toys is a well-known, realistic Web Forms demo that the community recognizes. More credible than a purpose-built sample.
+
+### 2026-03-02: WingtipToys Migration Analysis and Plan
+**By:** Forge
+**What:** Comprehensive analysis of WingtipToys Web Forms demo for migration to Blazor Server Side
+**Why:** Jeff wants this as the canonical M22 migration demo — we need a complete picture of scope, gaps, and work items
+
+---
+
+## 1. Control Coverage Audit
+
+For each Web Forms control used in WingtipToys, here's whether our Blazor component library covers it and which specific features are exercised.
+
+### 1.1 Controls with FULL Coverage (No Gaps)
+
+| # | Web Forms Control | Used In | BWFC Status | Feature Notes |
+|---|---|---|---|---|
+| 1 | `asp:Label` | Throughout (Site.Master, ShoppingCart, Admin, Checkout, ErrorPage) | ✅ Ready | Text property, inline content. Standard usage. |
+| 2 | `asp:Button` | ShoppingCart, Admin, CheckoutComplete, CheckoutReview | ✅ Ready | Text, OnClick, CausesValidation=true/false. All supported. |
+| 3 | `asp:ImageButton` | ShoppingCart (PayPal checkout) | ✅ Ready | ImageUrl, Width, AlternateText, OnClick, BackColor, BorderWidth. |
+| 4 | `asp:Image` | Site.Master (logo) | ✅ Ready | ImageUrl, BorderStyle. |
+| 5 | `asp:CheckBox` | ShoppingCart (Remove item) | ✅ Ready | Simple checked state, no events needed. |
+| 6 | `asp:TextBox` | ShoppingCart (quantity), Admin (name, description, price) | ✅ Ready | Text, Width. No TextMode or multiline needed. |
+| 7 | `asp:BoundField` | ShoppingCart GridView, CheckoutReview GridView | ✅ Ready | DataField, HeaderText, SortExpression, DataFormatString. All supported. |
+| 8 | `asp:TemplateField` | ShoppingCart GridView, CheckoutReview DetailsView | ✅ Ready | HeaderText, ItemTemplate, ItemStyle. |
+| 9 | `asp:ContentPlaceHolder` / `asp:Content` | Site.Master + all pages | ✅ Ready | Standard layout system. Maps to Blazor `@Body` / layout. |
+| 10 | `asp:ScriptManager` | Site.Master | ✅ Ready (no-op stub) | Renders nothing in Blazor — correct behavior. |
+| 11 | `asp:PlaceHolder` | Site.Master (head scripts) | ✅ Ready | Conditional rendering container. |
+
+### 1.2 Controls with PARTIAL Coverage (Gaps Identified)
+
+| # | Web Forms Control | Used In | BWFC Status | Gap Details |
+|---|---|---|---|---|
+| 12 | `asp:GridView` | ShoppingCart, CheckoutReview | ⚠️ Partial | **ShowFooter="True"** — property exists ✅. **GridLines="Vertical"** — supported ✅. **CellPadding="4"** — supported ✅. **AutoGenerateColumns="False"** — supported ✅. **CssClass** — supported ✅. **SelectMethod** — NOT supported ❌ (use `Items` parameter instead). **ItemType** — NOT a parameter ❌ (use generic `<GridView TItem="CartItem">`). **BorderColor, BorderWidth** on CheckoutReview — need to verify these pass through. |
+| 13 | `asp:ListView` | Site.Master (categories), ProductList (product grid) | ⚠️ Partial | **GroupItemCount="4"** — property exists ✅. **GroupTemplate** — parameter exists ✅. **EmptyDataTemplate** — exists ✅. **EmptyItemTemplate** — exists ✅. **ItemSeparatorTemplate** — exists ✅. **LayoutTemplate** — exists ✅. **DataKeyNames** — NOT on ListView ❌ (not critical here). **SelectMethod** — NOT supported ❌ (use `Items`). **ItemType** — NOT a parameter ❌ (use generic `<ListView TItem="Product">`). **Data-binding expressions** (`<%#: Item.PropertyName %>`) — must be rewritten to `@context.PropertyName`. **GetRouteUrl()** in templates — must be rewritten to Blazor `NavigationManager` or `@($"/Category/{context.CategoryName}")`. |
+| 14 | `asp:FormView` | ProductDetails | ⚠️ Partial | **RenderOuterTable="false"** — NOT SUPPORTED ❌. Our FormView always renders a wrapping `<table>`. This is a **blocking gap** for WingtipToys because ProductDetails explicitly sets `RenderOuterTable="false"` to get clean HTML. **SelectMethod** — NOT supported ❌ (use `Items`). **ItemType** — NOT a parameter ❌ (use generic). |
+| 15 | `asp:DetailsView` | CheckoutReview (shipping info) | ⚠️ Partial | **AutoGenerateRows="false"** — supported ✅. **GridLines="None"** — verify ✅. **BorderStyle="None"** — need to verify passes through. **CommandRowStyle-BorderStyle="None"** — may not be supported ❌. **Manual DataSource assignment** (`ShipInfo.DataSource = orderList; ShipInfo.DataBind()`) — in Blazor this maps to `Items` parameter, but the pattern needs adaptation. |
+| 16 | `asp:DropDownList` | Admin (category, product selection) | ⚠️ Partial | **DataTextField, DataValueField** — supported ✅ (via BaseListControl). **AppendDataBoundItems="true"** — supported ✅. **SelectMethod** — NOT supported ❌ (use `Items`). **ItemType** — NOT a parameter ❌ (use generic). **SelectedValue** — supported ✅. |
+| 17 | `asp:FileUpload` | Admin (product image) | ⚠️ Partial | **HasFile** — supported ✅. **FileName** — supported ✅. **PostedFile.SaveAs()** — supported ✅ (with path sanitization). In Blazor Server, file saving works differently (IBrowserFile → Stream), so the code-behind will need significant rewriting. |
+| 18 | `asp:Panel` | ErrorPage (DetailedErrorPanel) | ✅ Ready | Visible property for conditional rendering. |
+
+### 1.3 Controls MISSING from Library — Used in WingtipToys
+
+| # | Web Forms Control | Used In | BWFC Status | Impact |
+|---|---|---|---|---|
+| 19 | `asp:RequiredFieldValidator` | Admin (4 instances) | ✅ **EXISTS** | Already in `Validations/RequiredFieldValidator.cs`. Generic type `RequiredFieldValidator<Type>`. Supports `ControlToValidate`, `Text`, `SetFocusOnError`, `Display`. **This is NOT missing — Jeff's initial catalog was wrong.** |
+| 20 | `asp:RegularExpressionValidator` | Admin (price validation) | ✅ **EXISTS** | Already in `Validations/RegularExpressionValidator.cs`. Supports `ValidationExpression`, `ControlToValidate`, `Text`, `Display`. **Also NOT missing.** |
+| 21 | `asp:LoginView` | Site.Master | ✅ **EXISTS** | Already in `LoginControls/LoginView.razor`. Supports `AnonymousTemplate`, `LoggedInTemplate`, `RoleGroups`. Uses `AuthenticationStateProvider`. |
+| 22 | `asp:LoginStatus` | Site.Master | ✅ **EXISTS** | Already in `LoginControls/LoginStatus.razor`. Supports `LogoutAction`, `LogoutText`, `LogoutPageUrl`, `OnLoggingOut`. |
+
+**CRITICAL CORRECTION:** All four controls Jeff listed as "missing" actually EXIST in our library. The component library has **100% control coverage** for WingtipToys. The gaps are in *feature completeness* of existing controls, not missing controls.
+
+---
+
+## 2. Missing Component Analysis (REVISED — Feature Gaps, Not Missing Controls)
+
+Since all 22 controls used by WingtipToys exist in our library, the real analysis is about **feature gaps** in existing controls.
+
+### 2.1 FormView — RenderOuterTable="false" (BLOCKING)
+
+**What WingtipToys does:** `ProductDetails.aspx` sets `RenderOuterTable="false"` so the FormView renders only the ItemTemplate content without a wrapping `<table>`.
+
+**Current behavior:** Our FormView.razor always renders `<table cellspacing="0" style="border-collapse:collapse;">` wrapping everything. There's no `RenderOuterTable` parameter.
+
+**Impact:** HIGH — ProductDetails will render with an unwanted wrapping table, breaking CSS layout.
+
+**Fix complexity:** LOW-MEDIUM. Add `[Parameter] public bool RenderOuterTable { get; set; } = true;` and wrap the `<table>` element in `@if (RenderOuterTable)`. When false, render just the template content directly. Similar pattern already exists on ChangePassword, CreateUserWizard, and PasswordRecovery (which have `RenderOuterTable` but don't use it yet).
+
+### 2.2 SelectMethod Pattern (DESIGN — Not a Bug)
+
+**What WingtipToys does:** Every data-bound control uses `SelectMethod="GetProducts"` with `ItemType="WingtipToys.Models.Product"` — the Web Forms model-binding pattern.
+
+**Current BWFC approach:** Our controls use `Items` parameter with `TItem` generic type: `<GridView TItem="Product" Items="@products">`.
+
+**Impact:** MEDIUM — Every page needs this pattern change during migration. This is a deliberate design decision (Blazor doesn't have model binding), but it means markup can't be 1:1 migrated. The Copilot instructions should explain this pattern.
+
+### 2.3 Data-Binding Expression Syntax
+
+**What WingtipToys does:** `<%#: Item.ProductName %>`, `<%#: String.Format("{0:c}", Item.UnitPrice) %>`, `<%#: Eval("FirstName") %>`
+
+**Blazor equivalent:** `@context.ProductName`, `@($"{context.UnitPrice:c}")`, `@context.FirstName`
+
+**Impact:** LOW — Mechanical find/replace. Copilot should handle this well.
+
+### 2.4 GridView ShowFooter with TemplateField Footer
+
+WingtipToys ShoppingCart sets `ShowFooter="True"` but doesn't define FooterTemplate content in the TemplateFields. Web Forms renders empty footer cells. Need to verify our GridView renders footer row when `ShowFooter="True"` even without explicit footer templates. Likely works already.
+
+### 2.5 LoginView / LoginStatus Integration
+
+**LoginView** uses `AuthenticationStateProvider` — ✅ works with ASP.NET Core Identity.
+**LoginStatus** has `OnLoggingOut` event and `LogoutAction="Redirect"`, `LogoutPageUrl="~/"` — all parameters exist. However, the **actual sign-out logic** (`Context.GetOwinContext().Authentication.SignOut()`) must be handled by the app's auth infrastructure, not the component. The component fires events but can't do HTTP-level sign-out in Blazor Server. This is an **architectural concern**, not a component gap.
+
+### 2.6 DropDownList — No Issues
+
+BaseListControl provides `DataTextField`, `DataValueField`, `AppendDataBoundItems` — all used in WingtipToys Admin. No gaps.
+
+---
+
+## 3. Migration Architecture
+
+### 3.1 Master Page → Blazor Layout
+
+**Web Forms:** `Site.Master` → `<asp:ContentPlaceHolder ID="MainContent">`
+**Blazor:** `MainLayout.razor` → `@Body`
+
+The WingtipToys Site.Master structure:
+1. Navbar with brand, nav links, admin link (role-conditional), cart count
+2. LoginView with AnonymousTemplate/LoggedInTemplate
+3. Logo image
+4. Category navigation (ListView iterating categories)
+5. ContentPlaceHolder (main content)
+6. Footer
+
+**Blazor Layout Plan:**
+```razor
+@inherits LayoutComponentBase
+<!-- Navbar -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">...</div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <NavLink href="/">Home</NavLink>
+                <NavLink href="/About">About</NavLink>
+                ...
+                <AuthorizeView Roles="canEdit">
+                    <NavLink href="/Admin/AdminPage">Admin</NavLink>
+                </AuthorizeView>
+                <NavLink href="/ShoppingCart">Cart (@cartCount)</NavLink>
+            </ul>
+            <LoginView>
+                <AnonymousTemplate>...</AnonymousTemplate>
+                <LoggedInTemplate>
+                    <LoginStatus LogoutAction="Redirect" LogoutText="Log off" LogoutPageUrl="/" />
+                </LoggedInTemplate>
+            </LoginView>
+        </div>
+    </div>
+</div>
+<!-- Category Menu -->
+<ListView TItem="Category" Items="@categories">
+    <ItemTemplate>...</ItemTemplate>
+    <ItemSeparatorTemplate> | </ItemSeparatorTemplate>
+</ListView>
+<!-- Main Content -->
+<div class="container body-content">
+    @Body
+    <footer>...</footer>
+</div>
+```
+
+### 3.2 Routing
+
+**Web Forms routes:**
+- Friendly URLs (extensionless): `/Default`, `/About`, `/Contact`, etc.
+- Custom routes: `Category/{categoryName}` → ProductList.aspx, `Product/{productName}` → ProductDetails.aspx
+- Query strings: `?ProductID=5`, `?id=3`, `?ProductAction=add`
+
+**Blazor routing:**
+```razor
+// Default.razor
+@page "/"
+@page "/Default"
+
+// ProductList.razor
+@page "/ProductList"
+@page "/Category/{CategoryName}"
+
+// ProductDetails.razor
+@page "/ProductDetails"
+@page "/Product/{ProductName}"
+
+// ShoppingCart.razor
+@page "/ShoppingCart"
+
+// Admin/AdminPage.razor
+@page "/Admin/AdminPage"
+
+// Checkout pages
+@page "/Checkout/CheckoutStart"
+@page "/Checkout/CheckoutReview"
+// etc.
+```
+
+Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8+, or manual `NavigationManager.Uri` parsing.
+
+### 3.3 Data Access (EF → EF Core)
+
+**Web Forms:** `ProductContext : DbContext` using EF6 with `System.Data.Entity`. Database initializer seeds data. `new ProductContext()` instantiated inline everywhere.
+
+**Blazor Server:**
+- Migrate to EF Core (`Microsoft.EntityFrameworkCore.SqlServer` or `.Sqlite`)
+- Register `ProductContext` in DI: `builder.Services.AddDbContext<ProductContext>(...)`
+- Inject into components/services: `@inject ProductContext db` or better, use `IDbContextFactory<ProductContext>` for Blazor Server (avoids scope issues)
+- Seed data via `ProductDatabaseInitializer` adapted to EF Core's `DbContext.Database.EnsureCreated()` + `HasData()` or `OnModelCreating` seed
+
+**Model changes:**
+- `Product`, `Category`, `CartItem`, `Order`, `OrderDetail` — mostly unchanged
+- `Product.UnitPrice` is `double?` — consider converting to `decimal?` (EF Core handles this fine)
+- Navigation properties (`virtual`) remain the same but remove `virtual` keyword (EF Core proxies are opt-in)
+
+### 3.4 Session/State Management
+
+**Web Forms uses Session for:**
+1. `CartSessionKey` ("CartId") — shopping cart identity
+2. `Session["payment_amt"]` — PayPal payment amount
+3. `Session["token"]` — PayPal token
+4. `Session["payerId"]` — PayPal payer ID
+5. `Session["currentOrderId"]` — order being processed
+6. `Session["userCheckoutCompleted"]` — checkout completion flag
+
+**Blazor Server approach:**
+- **Shopping cart state**: Use a scoped `CartStateService` injected via DI. Blazor circuits are per-connection, so scoped services approximate session behavior. For persistence across reconnects, store cart ID in `ProtectedSessionStorage` or a cookie.
+- **PayPal checkout state**: Use a scoped service or `ProtectedSessionStorage` to hold token/payerID/amount across the checkout flow.
+- **Pattern**: Create `CheckoutStateService` (scoped) to hold all checkout flow data.
+
+### 3.5 Identity/Auth
+
+**Web Forms:** ASP.NET Identity 2.x with OWIN, `ApplicationUser : IdentityUser`, `ApplicationUserManager`, cookie-based auth, role-based authorization (`User.IsInRole("canEdit")`).
+
+**Blazor Server:**
+- ASP.NET Core Identity with `Microsoft.AspNetCore.Identity.EntityFrameworkCore`
+- Same `ApplicationUser : IdentityUser` model
+- `builder.Services.AddDefaultIdentity<ApplicationUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()`
+- Cookie auth configured in `Program.cs`
+- `<AuthorizeView>` for conditional rendering (replaces LoginView's auth check)
+- `AuthenticationStateProvider` injected into components
+- Our `LoginView` component already uses `AuthenticationStateProvider` — compatible
+- **Account pages**: ASP.NET Core Identity UI scaffolding (`dotnet aspnet-codegenerator identity`) provides Login, Register, Manage, ForgotPassword, etc. as Razor Pages. These work alongside Blazor Server in the same app.
+
+**Scope decision needed:** The 14 Account/* pages are heavily Identity-specific. Recommend using ASP.NET Core Identity UI scaffolding (Razor Pages) rather than converting to Blazor. This is standard practice and Jeff can address it in the demo narration.
+
+### 3.6 PayPal Integration
+
+**Web Forms:** `NVPAPICaller` uses `HttpWebRequest` to call PayPal NVP API. Hardcoded sandbox URLs. Redirect flow: Cart → CheckoutStart (API call, redirect to PayPal) → PayPal → CheckoutReview (return URL, get details) → CheckoutComplete (do payment).
+
+**Blazor Server:**
+- Replace `HttpWebRequest` with `HttpClient` injected via `IHttpClientFactory`
+- Same NVP protocol, just modernized HTTP calls
+- Replace `Response.Redirect()` with `NavigationManager.NavigateTo()`
+- Replace `Session["token"]` with scoped `CheckoutStateService`
+- Return/cancel URLs update from `.aspx` to Blazor routes
+- Keep PayPal sandbox mode for demo
+
+---
+
+## 4. Page-by-Page Migration Plan
+
+### Complexity Rating: 🟢 Trivial | 🟡 Medium | 🔴 Complex
+
+| Page | Complexity | Controls | Migration Notes |
+|---|---|---|---|
+| **Default.aspx** | 🟢 Trivial | Content only | Static HTML. Just set `@page "/"` and paste content. |
+| **About.aspx** | 🟢 Trivial | Content only | Static HTML. |
+| **Contact.aspx** | 🟢 Trivial | Content only | Static HTML. |
+| **ErrorPage.aspx** | 🟢 Trivial | Label, Panel | Map Label.Text to bound properties, Panel.Visible to `@if`. |
+| **CheckoutCancel.aspx** | 🟢 Trivial | Content only | Static HTML. |
+| **CheckoutError.aspx** | 🟢 Trivial | Content + QueryString | Replace `Request.QueryString` with `[SupplyParameterFromQuery]`. |
+| **CheckoutComplete.aspx** | 🟡 Medium | Label, Button | Simple UI but code-behind does PayPal DoCheckoutPayment + DB save + cart clear. Needs CheckoutStateService. |
+| **ProductList.aspx** | 🟡 Medium | ListView (GroupItemCount=4, GroupTemplate, LayoutTemplate, ItemTemplate, EmptyDataTemplate, EmptyItemTemplate, ItemSeparatorTemplate) | Most complex ListView usage in the app. GroupTemplate with 4 items per row. Needs data-binding expression rewrite. Route parameter `{categoryName}` and query string `?id=`. |
+| **ProductDetails.aspx** | 🟡 Medium | FormView (RenderOuterTable=false, ItemTemplate) | **BLOCKED** until FormView gets `RenderOuterTable` support. Otherwise straightforward single-item display. Route parameter `{productName}` and query string `?ProductID=`. |
+| **AddToCart.aspx** | 🟡 Medium | None (code-behind only) | Redirect page that adds item to cart. In Blazor, this becomes a route that calls shopping cart service and navigates to `/ShoppingCart`. Or eliminate the page entirely and add-to-cart via a button click in ProductList. |
+| **ShoppingCart.aspx** | 🔴 Complex | GridView (ShowFooter, BoundField×3, TemplateField×3 with TextBox/CheckBox), Label×2, Button, ImageButton | Interactive GridView with editable quantities and remove checkboxes. The `UpdateCartItems()` method iterates GridView rows to extract values — this pattern doesn't translate to Blazor. Need to use `@bind` on TextBox and event handlers on CheckBox. **Most complex data page.** |
+| **CheckoutStart.aspx** | 🟡 Medium | None (code-behind only) | PayPal API call + redirect. In Blazor: inject HttpClient, call API in OnInitializedAsync, NavigateTo PayPal URL. Need CheckoutStateService for token. |
+| **CheckoutReview.aspx** | 🔴 Complex | GridView (BoundField×4), DetailsView (TemplateField with Labels), Button | Code-behind does PayPal GetCheckoutDetails, creates Order in DB, sets up OrderDetails, binds both controls. Needs CheckoutStateService + EF Core. The DetailsView usage with a TemplateField containing multiple Labels for shipping address is straightforward. |
+| **Admin/AdminPage.aspx** | 🔴 Complex | DropDownList×2, TextBox×3, Label×7, Button×2, FileUpload, RequiredFieldValidator×4, RegularExpressionValidator×1 | Form validation with multiple validators, file upload with extension checking, two separate operations (Add/Remove product). Needs `EditForm` with `EditContext` for validators to work. File upload in Blazor Server requires IBrowserFile stream handling. |
+| **Site.Master** | 🔴 Complex | LoginView, LoginStatus, ListView (categories), Image, PlaceHolder, ScriptManager, dynamic admin link, cart count | Layout with auth-conditional rendering, data-bound category nav, dynamic cart count. Requires `AuthenticationStateProvider`, category data service, cart state service. |
+| **ErrorPage.aspx** | 🟢 Trivial | Label×5, Panel | Conditional error display. |
+| **Account/* (14 pages)** | ⬛ Out of Scope | Various Identity controls | Use ASP.NET Core Identity UI scaffolding. |
+
+---
+
+## 5. Prioritized Work Items
+
+### Phase 1: Core Infrastructure (Project Setup, Layout, Data Layer, Routing)
+
+| # | Work Item | Estimate | Dependencies |
+|---|---|---|---|
+| 1.1 | Create Blazor Server project (`samples/WingtipToysBlazor/`) with .NET 8 | S | None |
+| 1.2 | Port models (Product, Category, CartItem, Order, OrderDetail) to EF Core | S | 1.1 |
+| 1.3 | Create `ProductContext` for EF Core with seed data | M | 1.2 |
+| 1.4 | Create `MainLayout.razor` from Site.Master (navbar, footer, static structure) | M | 1.1 |
+| 1.5 | Configure routing and `App.razor` | S | 1.1 |
+| 1.6 | Add BWFC NuGet reference | S | 1.1 |
+| 1.7 | Create `CartStateService` (scoped) replacing HttpContext.Session cart logic | M | 1.2 |
+| 1.8 | Port static content CSS/images from WingtipToys Content/Images | S | 1.1 |
+
+### Phase 2: Product Browsing (Home, Product List, Product Details)
+
+| # | Work Item | Estimate | Dependencies |
+|---|---|---|---|
+| 2.1 | Default.razor — static home page | S | 1.4 |
+| 2.2 | About.razor — static page | S | 1.4 |
+| 2.3 | Contact.razor — static page | S | 1.4 |
+| 2.4 | **FIX: Add `RenderOuterTable` to FormView** | M | None (library fix) |
+| 2.5 | ProductList.razor — ListView with GroupItemCount=4, category filtering | L | 1.3, 1.5 |
+| 2.6 | ProductDetails.razor — FormView with RenderOuterTable=false | M | 1.3, 2.4 |
+| 2.7 | Category navigation in MainLayout (ListView with categories) | M | 1.3, 1.4 |
+| 2.8 | ErrorPage.razor — error display | S | 1.4 |
+
+### Phase 3: Shopping Cart & Checkout
+
+| # | Work Item | Estimate | Dependencies |
+|---|---|---|---|
+| 3.1 | ShoppingCart.razor — GridView with editable quantities, remove checkboxes | XL | 1.7, 2.5 |
+| 3.2 | Add-to-cart flow (replace AddToCart.aspx with service call + redirect) | M | 1.7 |
+| 3.3 | Create `CheckoutStateService` (scoped) for PayPal flow state | M | 1.7 |
+| 3.4 | Port `NVPAPICaller` to use HttpClient | M | 1.1 |
+| 3.5 | CheckoutStart.razor — PayPal redirect | M | 3.3, 3.4 |
+| 3.6 | CheckoutReview.razor — GridView + DetailsView + order persistence | L | 3.3, 3.4, 1.3 |
+| 3.7 | CheckoutComplete.razor — PayPal confirmation + cart clear | M | 3.3, 3.4 |
+| 3.8 | CheckoutCancel.razor — static page | S | 1.4 |
+| 3.9 | CheckoutError.razor — query string error display | S | 1.4 |
+
+### Phase 4: Admin
+
+| # | Work Item | Estimate | Dependencies |
+|---|---|---|---|
+| 4.1 | AdminPage.razor — Add product form with DropDownList, TextBox, FileUpload | L | 1.3 |
+| 4.2 | AdminPage validation — RequiredFieldValidator×4, RegularExpressionValidator×1 in EditForm | M | 4.1 |
+| 4.3 | AdminPage — Remove product form with DropDownList | M | 4.1 |
+| 4.4 | File upload handling (IBrowserFile → save to wwwroot) | M | 4.1 |
+| 4.5 | Admin route authorization (`[Authorize(Roles = "canEdit")]`) | S | 5.1 |
+
+### Phase 5: Authentication (SCOPING DECISION NEEDED)
+
+| # | Work Item | Estimate | Dependencies |
+|---|---|---|---|
+| 5.1 | Configure ASP.NET Core Identity with cookie auth | M | 1.1, 1.3 |
+| 5.2 | Scaffold Identity UI (Razor Pages for Login, Register, Manage, etc.) | M | 5.1 |
+| 5.3 | Wire LoginView + LoginStatus in MainLayout | M | 5.1 |
+| 5.4 | Seed admin user/role (port RoleActions) | S | 5.1 |
+| 5.5 | Admin link visibility (role-based) in MainLayout | S | 5.1, 5.4 |
+| 5.6 | Cart count display in navbar | S | 1.7 |
+
+**Recommendation:** Phase 5 should be Phase 1.5 — auth infrastructure is needed by the layout (LoginView/LoginStatus) and Admin (authorization). The Account pages themselves can use Identity UI scaffolding and don't need BWFC components.
+
+---
+
+## 6. Component Library Gaps — Specific Blockers for WingtipToys
+
+### 6.1 BLOCKING: FormView RenderOuterTable (Priority: HIGH)
+
+**Issue:** FormView always renders a wrapping `<table>`. ProductDetails.aspx requires `RenderOuterTable="false"`.
+
+**Fix:** Add `[Parameter] public bool RenderOuterTable { get; set; } = true;` to `FormView.razor.cs`. In `FormView.razor`, conditionally wrap content in `<table>` only when `RenderOuterTable` is true. When false, render style sub-components + template content directly.
+
+**Estimate:** 2-4 hours. Low risk — additive change, defaults to current behavior.
+
+### 6.2 NON-BLOCKING: SelectMethod/ItemType Pattern Difference
+
+**Issue:** Web Forms uses `SelectMethod="GetProducts" ItemType="Product"`. BWFC uses `Items="@products" TItem="Product"`. This is a deliberate design decision.
+
+**Mitigation:** Document in migration instructions. Copilot can handle this pattern change mechanically.
+
+### 6.3 NON-BLOCKING: GridView Row Value Extraction
+
+**Issue:** ShoppingCart.aspx code-behind iterates `CartList.Rows` and calls `FindControl("Remove")` and `FindControl("PurchaseQuantity")` to extract values. This imperative DOM-walking pattern doesn't exist in Blazor.
+
+**Mitigation:** In Blazor, bind TextBox values and CheckBox states to the data model directly using `@bind`. The update logic reads from the bound model, not the UI controls. This is a **code-behind architecture change**, not a component gap.
+
+### 6.4 NON-BLOCKING: GetRouteUrl() Helper
+
+**Issue:** WingtipToys uses `GetRouteUrl("ProductsByCategoryRoute", new {categoryName = Item.CategoryName})` in data-binding expressions.
+
+**Mitigation:** Replace with simple string interpolation: `@($"/Category/{context.CategoryName}")`. No component change needed.
+
+### 6.5 LOW PRIORITY: GridView BorderColor/BorderWidth on CheckoutReview
+
+**Issue:** CheckoutReview GridView uses `BorderColor="#efeeef" BorderWidth="33"`. These are table-level style attributes. Our GridView renders `CssClass` and `style` but may not map `BorderColor`/`BorderWidth` to individual HTML attributes.
+
+**Mitigation:** Use `CssClass` with a CSS rule, or `style="border-color:#efeeef; border-width:33px"` on the component.
+
+### 6.6 LOW PRIORITY: DetailsView CommandRowStyle-BorderStyle
+
+**Issue:** CheckoutReview uses `CommandRowStyle-BorderStyle="None"` — a sub-property syntax that sets the border style on the command row.
+
+**Mitigation:** Our DetailsView has `DetailsViewCommandRowStyle` sub-component. Verify it supports BorderStyle. Low priority since CheckoutReview doesn't use DetailsView command buttons.
+
+---
+
+## 7. Summary and Recommendations
+
+### Total Effort Estimate
+
+| Phase | Work Items | Estimate |
+|---|---|---|
+| Phase 1: Infrastructure | 8 | 3-5 days |
+| Phase 2: Product Browsing | 8 | 3-5 days |
+| Phase 3: Shopping Cart & Checkout | 9 | 5-8 days |
+| Phase 4: Admin | 5 | 3-5 days |
+| Phase 5: Auth | 6 | 2-3 days |
+| **Total** | **36** | **16-26 days** |
+
+### Critical Path
+1. **FormView RenderOuterTable fix** — must land before ProductDetails migration
+2. **CartStateService** — needed by ShoppingCart, Checkout, and MainLayout (cart count)
+3. **EF Core migration** — everything depends on data access
+4. **Auth infrastructure** — needed by LoginView/LoginStatus in layout and Admin authorization
+
+### Key Architecture Decisions Needed
+1. **EF Core database**: SQLite for demo simplicity, or SQL Server for production fidelity?
+2. **Account pages**: Scaffold Identity UI (Razor Pages) or convert to Blazor? **Recommendation: Scaffold.**
+3. **PayPal**: Keep NVP API integration or stub it for demo? The API is functional code but uses sandbox credentials — probably keep it.
+4. **Render mode**: Blazor Server (InteractiveServer) throughout, or static SSR with interactive islands? **Recommendation: Full InteractiveServer for simplest migration.**
+
+### What Makes This a Great Demo
+
+The WingtipToys migration demonstrates:
+- **Layout migration** (Master Page → Blazor Layout)
+- **Data controls** (ListView, GridView, FormView, DetailsView — our showcase)
+- **Form validation** (RequiredFieldValidator, RegularExpressionValidator — our validation system)
+- **Auth integration** (LoginView, LoginStatus — our login controls)
+- **Interactive data** (Shopping cart with editable grid)
+- **External API integration** (PayPal)
+- **File upload** (Admin product images)
+
+All 22 Web Forms controls used in WingtipToys exist in our library. The migration is entirely about **pattern translation** (SelectMethod→Items, data-binding→Razor, Session→DI services, EF6→EF Core) plus one component fix (FormView RenderOuterTable).

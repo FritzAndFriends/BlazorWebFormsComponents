@@ -109,3 +109,42 @@ Team updates: M17 audit fixes resolved (PR #402), Skins dual docs (SkinsAndTheme
 
 
  Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
+
+### Summary: WingtipToys Migration Analysis (2026-03-02)
+
+**By:** Forge
+**What:** Comprehensive page-by-page analysis of WingtipToys Web Forms demo for migration to Blazor Server Side. Full analysis saved to `.ai-team/decisions/inbox/forge-wingtiptoys-migration-plan.md`.
+
+**WingtipToys app structure:**
+- 15+ pages including Site.Master, product browsing (list/details), shopping cart, checkout flow (5 pages with PayPal NVP integration), admin (add/remove products with file upload and validation), and 14 Account/* identity pages
+- 22 distinct Web Forms controls used: ListView, FormView, GridView, DetailsView, BoundField, TemplateField, Label, TextBox, Button, ImageButton, Image, CheckBox, DropDownList, FileUpload, RequiredFieldValidator, RegularExpressionValidator, LoginView, LoginStatus, ContentPlaceHolder/Content, ScriptManager, PlaceHolder, Panel
+- Models: Product, Category, CartItem, Order, OrderDetail with EF6 ProductContext
+- Logic: ShoppingCartActions (Session-based cart), PayPalFunctions (NVP API), RoleActions, AddProducts
+- Custom routes: `Category/{categoryName}` → ProductList, `Product/{productName}` → ProductDetails
+
+**CRITICAL CORRECTION — All controls exist in library:**
+Jeff's initial catalog listed RequiredFieldValidator, RegularExpressionValidator, LoginView, and LoginStatus as "missing" — **all four already exist** in our library (Validations/ and LoginControls/ directories). The component library has 100% control coverage for WingtipToys.
+
+**Component library gaps identified:**
+1. **BLOCKING: FormView RenderOuterTable** — ProductDetails.aspx sets `RenderOuterTable="false"` but our FormView always renders a wrapping `<table>`. Must add `RenderOuterTable` parameter (property exists on ChangePassword/CreateUserWizard/PasswordRecovery already, but not FormView). LOW-MEDIUM fix effort.
+2. **SelectMethod/ItemType pattern** — Web Forms uses `SelectMethod="GetProducts" ItemType="Product"`, BWFC uses `Items="@products" TItem="Product"`. Deliberate design decision, not a bug. Mechanical pattern change.
+3. **GridView row value extraction** — ShoppingCart code-behind walks `CartList.Rows` with `FindControl()`. No Blazor equivalent — must use `@bind` pattern instead. Architecture change, not component gap.
+4. **GetRouteUrl()** — Used in data-binding templates. Replace with string interpolation in Blazor.
+
+**Architecture decisions for migration:**
+- Master Page → Blazor LayoutComponentBase with @Body
+- Routing: @page directives + [SupplyParameterFromQuery] for query strings
+- Data access: EF6 → EF Core, register ProductContext in DI, use IDbContextFactory for Blazor Server
+- Session → Scoped DI services (CartStateService, CheckoutStateService)
+- Identity: ASP.NET Core Identity + scaffold Identity UI (Razor Pages) for Account pages
+- PayPal: Port NVPAPICaller to use HttpClient, keep NVP protocol
+- Render mode: Full InteractiveServer for simplest migration
+
+**Migration phases (36 work items, ~16-26 days):**
+- Phase 1: Core infrastructure (8 items) — project, models, EF Core, layout, routing
+- Phase 2: Product browsing (8 items) — home, product list/details, category nav, FormView fix
+- Phase 3: Shopping cart & checkout (9 items) — most complex phase
+- Phase 4: Admin (5 items) — forms, validation, file upload
+- Phase 5: Auth (6 items) — Identity, LoginView/LoginStatus, admin authorization
+
+ Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
