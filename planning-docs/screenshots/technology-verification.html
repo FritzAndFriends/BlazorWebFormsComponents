@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; padding: 20px; color: #333; }
+  h1 { font-size: 20px; margin-bottom: 16px; color: #1a1a2e; }
+  h2 { font-size: 15px; margin: 16px 0 8px; color: #283593; border-bottom: 2px solid #e8eaf6; padding-bottom: 4px; }
+  .evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .evidence-card { background: white; border-radius: 6px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+  .evidence-card.full { grid-column: 1 / -1; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; margin-right: 6px; }
+  .badge-blazor { background: #512bd4; color: white; }
+  .badge-bwfc { background: #2e7d32; color: white; }
+  .badge-proof { background: #c62828; color: white; }
+  .url-bar { background: #e8eaf6; border-radius: 20px; padding: 6px 14px; font-family: 'Consolas', monospace; font-size: 12px; color: #283593; margin: 6px 0; display: flex; align-items: center; }
+  .url-bar::before { content: '🔒'; margin-right: 8px; font-size: 12px; }
+  pre { background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 4px; font-size: 11px; overflow-x: auto; line-height: 1.4; white-space: pre-wrap; word-break: break-all; }
+  .highlight { color: #569cd6; }
+  .highlight-tag { color: #4ec9b0; }
+  .highlight-attr { color: #9cdcfe; }
+  .highlight-str { color: #ce9178; }
+  .highlight-comment { color: #6a9955; }
+  .marker { background: #fff3cd; padding: 1px 4px; border-radius: 2px; font-weight: 600; }
+  .check { color: #2e7d32; font-weight: bold; }
+  .label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  table.summary { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.summary td, table.summary th { padding: 5px 8px; text-align: left; border-bottom: 1px solid #eee; }
+  table.summary th { background: #f5f5f5; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>🔬 Technology Verification — Migrated WingtipToys Application</h1>
+
+<div class="evidence-grid">
+
+  <div class="evidence-card full">
+    <div class="label">Application Identity</div>
+    <table class="summary">
+      <tr><th>Framework</th><td><span class="badge badge-blazor">Blazor Server</span> ASP.NET Core on .NET 10</td></tr>
+      <tr><th>Component Library</th><td><span class="badge badge-bwfc">BWFC</span> BlazorWebFormsComponents (ProjectReference)</td></tr>
+      <tr><th>Render Mode</th><td>Server-Side Rendering (SSR) with Interactive Server</td></tr>
+      <tr><th>Server</th><td>Kestrel — http://localhost:5201</td></tr>
+      <tr><th>Source</th><td><code>samples/AfterWingtipToys/</code> in the BlazorWebFormsComponents repo</td></tr>
+    </table>
+  </div>
+
+  <div class="evidence-card">
+    <h2><span class="badge badge-proof">PROOF 1</span> Blazor Framework Script</h2>
+    <div class="label">Extracted from page &lt;head&gt;</div>
+    <pre><span class="highlight-comment">&lt;!-- Blazor SSR navigation helper --&gt;</span>
+<span class="highlight-tag">&lt;blazor-focus-on-navigate</span> <span class="highlight-attr">selector</span>=<span class="highlight-str">"h1"</span><span class="highlight-tag">&gt;&lt;/blazor-focus-on-navigate&gt;</span>
+
+<span class="highlight-comment">&lt;!-- Blazor framework JavaScript --&gt;</span>
+<span class="highlight-tag">&lt;script</span> <span class="highlight-attr">src</span>=<span class="highlight-str">"<span class="marker">_framework/blazor.web.js</span>"</span><span class="highlight-tag">&gt;&lt;/script&gt;</span></pre>
+    <p style="font-size:11px; margin-top:6px;"><span class="check">✓</span> <code>blazor.web.js</code> is the Blazor Server framework — only present in Blazor apps</p>
+  </div>
+
+  <div class="evidence-card">
+    <h2><span class="badge badge-proof">PROOF 2</span> Live Server URLs</h2>
+    <div class="label">Pages served by Blazor Kestrel at localhost:5201</div>
+    <div class="url-bar">http://localhost:5201/</div>
+    <div class="url-bar">http://localhost:5201/ProductList?id=1</div>
+    <div class="url-bar">http://localhost:5201/ShoppingCart</div>
+    <p style="font-size:11px; margin-top:6px;"><span class="check">✓</span> All pages served by a live .NET 10 Blazor Server process</p>
+  </div>
+
+  <div class="evidence-card">
+    <h2><span class="badge badge-proof">PROOF 3</span> BWFC GridView Rendered HTML</h2>
+    <div class="label">ShoppingCart page — GridView component output</div>
+    <pre><span class="highlight-tag">&lt;table</span> <span class="highlight-attr">class</span>=<span class="highlight-str">"table table-striped table-bordered"</span>
+       <span class="highlight-attr"><span class="marker">rules</span></span>=<span class="highlight-str">"cols"</span> <span class="highlight-attr"><span class="marker">border</span></span>=<span class="highlight-str">"1"</span>
+       <span class="highlight-attr"><span class="marker">cellpadding</span></span>=<span class="highlight-str">"4"</span><span class="highlight-tag">&gt;</span>
+  <span class="highlight-tag">&lt;thead&gt;&lt;tr&gt;</span>
+    <span class="highlight-tag">&lt;th</span> <span class="highlight-attr">scope</span>=<span class="highlight-str">"col"</span><span class="highlight-tag">&gt;</span>ID<span class="highlight-tag">&lt;/th&gt;</span>
+    <span class="highlight-tag">&lt;th</span> <span class="highlight-attr">scope</span>=<span class="highlight-str">"col"</span><span class="highlight-tag">&gt;</span>Name<span class="highlight-tag">&lt;/th&gt;</span>
+    ...
+  <span class="highlight-tag">&lt;/tr&gt;&lt;/thead&gt;</span>
+  <span class="highlight-tag">&lt;tbody&gt;&lt;tr&gt;</span>
+    <span class="highlight-tag">&lt;td&gt;</span>1<span class="highlight-tag">&lt;/td&gt;</span>
+    <span class="highlight-tag">&lt;td&gt;</span>Convertible Car<span class="highlight-tag">&lt;/td&gt;</span>
+    <span class="highlight-tag">&lt;td&gt;</span>22.50<span class="highlight-tag">&lt;/td&gt;</span>
+    <span class="highlight-tag">&lt;td&gt;&lt;input</span> <span class="highlight-attr">type</span>=<span class="highlight-str">"text"</span> <span class="highlight-attr">value</span>=<span class="highlight-str">"2"</span>
+           <span class="highlight-attr"><span class="marker">id</span></span>=<span class="highlight-str">"<span class="marker">CartList_PurchaseQuantity</span>"</span><span class="highlight-tag">&gt;&lt;/td&gt;</span></pre>
+    <p style="font-size:11px; margin-top:6px;"><span class="check">✓</span> <code>rules="cols"</code>, <code>cellpadding</code>, <code>CartList_*</code> IDs — classic Web Forms HTML output, generated by BWFC's GridView component</p>
+  </div>
+
+  <div class="evidence-card">
+    <h2><span class="badge badge-proof">PROOF 4</span> BWFC ListView Rendered HTML</h2>
+    <div class="label">ProductList page — ListView component output</div>
+    <pre><span class="highlight-tag">&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;</span>
+  <span class="highlight-tag">&lt;a</span> <span class="highlight-attr">href</span>=<span class="highlight-str">"/ProductDetails?id=1"</span><span class="highlight-tag">&gt;</span>
+    <span class="highlight-tag">&lt;img</span> <span class="highlight-attr">src</span>=<span class="highlight-str">"/Images/Products/<span class="marker">carconvert.png</span>"</span>
+         <span class="highlight-attr">width</span>=<span class="highlight-str">"100"</span> <span class="highlight-attr">height</span>=<span class="highlight-str">"75"</span>
+         <span class="highlight-attr">style</span>=<span class="highlight-str">"border:1px solid"</span><span class="highlight-tag">&gt;</span>
+  <span class="highlight-tag">&lt;/a&gt;</span>
+<span class="highlight-tag">&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="highlight-tag">&lt;tr&gt;&lt;td&gt;</span>
+  <span class="highlight-tag">&lt;a</span> <span class="highlight-attr">href</span>=<span class="highlight-str">"/ProductDetails?id=1"</span><span class="highlight-tag">&gt;</span>
+    <span class="highlight-tag">&lt;b&gt;</span>Convertible Car<span class="highlight-tag">&lt;/b&gt;</span>
+  <span class="highlight-tag">&lt;/a&gt;</span>
+  <span class="highlight-tag">&lt;span&gt;&lt;b&gt;</span>Price: <span class="highlight-tag">&lt;/b&gt;</span>$22.50<span class="highlight-tag">&lt;/span&gt;</span>
+  <span class="highlight-tag">&lt;a</span> <span class="highlight-attr">href</span>=<span class="highlight-str">"/AddToCart?productID=1"</span><span class="highlight-tag">&gt;</span>
+    <span class="highlight-tag">&lt;span</span> <span class="highlight-attr">class</span>=<span class="highlight-str">"<span class="marker">ProductListItem</span>"</span><span class="highlight-tag">&gt;</span>
+      <span class="highlight-tag">&lt;b&gt;</span>Add To Cart<span class="highlight-tag">&lt;/b&gt;</span>
+    <span class="highlight-tag">&lt;/span&gt;&lt;/a&gt;</span></pre>
+    <p style="font-size:11px; margin-top:6px;"><span class="check">✓</span> ListView ItemTemplate rendered as individual <code>&lt;table&gt;</code> elements — same HTML structure as ASP.NET Web Forms ListView</p>
+  </div>
+
+</div>
+
+</body>
+</html>
