@@ -54,6 +54,7 @@ else
 						{
 							DataItem = item
 						};
+						RaiseItemCreated(listViewDataItem);
 						var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
 							? EditItemTemplate : oddOrEvenTemplate(even);
 						even = !even;
@@ -102,6 +103,7 @@ else
 									{
 										DataItem = item
 									};
+									RaiseItemCreated(listViewDataItem);
 									<CascadingValue @key="dataItemIndex" Name="CurrentDataBoundItem" Value="item">
 										@builderTemplate(item)
 									</CascadingValue>

@@ -125,3 +125,11 @@ Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves
 
  Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
 
+### ListView CRUD Events — Correctness Fixes (2026-03-03)
+
+- **Issue #356 audit:** All 16 CRUD events were already declared (EventCallback parameters + EventArgs classes + HandleCommand routing) from M7 and M21. The issue was open because the work was done incrementally across milestones.
+- **Bug 1 — ItemCreated firing wrong:** Was `EventCallback` (no type param) firing once in `OnAfterRenderAsync(firstRender)`. Web Forms fires `ItemCreated` with `ListViewItemEventArgs` per-item during data binding, BEFORE `ItemDataBound`. Fixed: changed to `EventCallback<ListViewItemEventArgs>`, added `RaiseItemCreated()` helper, wired per-item in both non-grouped and grouped rendering paths in ListView.razor.
+- **Bug 2 — ItemCommand not firing for known commands:** Was only firing for unknown commands (in `default` case of switch). Web Forms fires `ItemCommand` for ALL commands first, then routes to the specific handler (ItemEditing, ItemDeleting, etc.). Fixed: moved `ItemCommand.InvokeAsync()` before the switch statement.
+- **Pattern:** Web Forms event order for commands is: ItemCommand → specific event (ItemEditing/ItemDeleting/etc.). ItemCreated fires per-item before ItemDataBound. These are documented Web Forms lifecycle behaviors that must be matched.
+- **EventArgs completeness:** Web Forms EventArgs have IOrderedDictionary properties (Keys, Values, NewValues, OldValues) tied to the DataSource control paradigm. These are deliberately omitted since Blazor has no DataSource controls — consumers work directly with typed objects via templates.
+
