@@ -59,76 +59,24 @@ Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by 
 Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
 
-<!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + release process -->
+<!--  Summarized 2026-03-03 by Scribe  covers M20 theming through CSS fixes -->
 
-### M20 Theming & Release Process Summary (2026-03-01 through 2026-03-02)
+### M20 Theming, Release & WingtipToys Context (2026-03-01 through 2026-03-03)
 
-**Issue #366 theme wiring:** Moved CascadingParameter ThemeConfiguration to BaseWebFormsComponent (named CascadedTheme to avoid Blazor duplicate-parameter error from _Imports.razor). ApplySkin renamed to ApplyThemeSkin (virtual override chain). ThemeProvider got @inherits ComponentBase to exclude from BaseWebFormsComponent inheritance. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files including infrastructure components.
+**Issue #366 theme wiring:** CascadingParameter ThemeConfiguration moved to BaseWebFormsComponent (named CascadedTheme). ApplySkin>ApplyThemeSkin (virtual override chain). ThemeProvider uses @inherits ComponentBase. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files.
 
-**FontInfo auto-sync:** Name and Names converted to backing-field properties with bidirectional sync (setting Name updates Names and vice versa). ApplyThemeSkin guard checks both Font.Name AND Font.Names before applying theme font. Root cause: ApplyThemeSkin set Font.Name but ToStyle() reads Font.Names. Lesson: paired/synced Web Forms properties must replicate sync behavior.
+**FontInfo auto-sync:** Name/Names backing-field properties with bidirectional sync. ApplyThemeSkin guards both Font.Name AND Font.Names. Lesson: paired Web Forms properties must replicate sync behavior.
 
-**Unified release.yml:** Single workflow on release:published coordinates NuGet + Docker + GHCR + docs + demos. Version from tag_name stripping v prefix. NuGet override: -p:PackageVersion + -p:Version. version.json changed to 3-segment SemVer (0.17.0). deploy-server-side.yml and nuget.yml refactored to workflow_dispatch-only. docs.yml fixed deprecated ::set-output. NBGV ignores git tags -- reads version.json only.
+**Unified release.yml:** Single workflow on release:published. Version from tag_name. NuGet override: -p:PackageVersion + -p:Version. version.json 3-segment SemVer. deploy-server-side.yml/nuget.yml to workflow_dispatch-only.
 
-Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
+**Issue #406 ListView EditItemTemplate:** (1) Closure bug: moved template selection before CascadingValue. (2) Diffing bug: added @key. Lessons: @key in loops with template switching; never reference loop-external mutable vars in ChildContent.
 
+**FormView RenderOuterTable:** [Parameter] bool RenderOuterTable=true. When false, suppresses table wrapper/header/footer/pager. Driven by WingtipToys ProductDetails.aspx.
 
+**Original WingtipToys build:** Connection strings v11.0 to MSSQLLocalDB. Empty Directory.Build.props blocks NBGV. `nuget install` for packages.config. IIS Express port 5200.
+
+**CSS fixes screenshot refresh (2026-03-03):** 7 visual fixes applied (Cerulean theme, 4-column grid, BoundField currency, Trucks category, Site.css, category IDs). 6 screenshots updated. Lessons: Playwright blocks file:// -- serve via HTTP; verify visual requirements before capturing; detached dotnet run needs Get-NetTCPConnection for PID cleanup.
 
 📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
-
-### Issue #406 — ListView EditItemTemplate (2026-03-01 through 2026-03-02)
-
-Two root causes fixed: (1) **Closure bug:** Template selection and even/odd toggle were inside CascadingValue ChildContent (deferred RenderFragment), capturing loop-external dataItemIndex at final value. Fix: moved expressions before CascadingValue element. (2) **Diffing bug:** CascadingValue elements lacked @key, so Blazor's positional diff skipped re-rendering template swaps. Fix: added @key="dataItemIndex" to both rendering paths (line 60 ungrouped, line 105 grouped).
-- **Lessons:** Always add @key inside loops with state-dependent template switching. Never reference loop-external mutable variables inside ChildContent. foreach iteration vars safe (new per iteration since C# 5), outer vars shared.
-- **Key files:** ListView.razor, ListView/EditTemplateTests.razor, ListView/CrudEvents.razor
-
-### FormView RenderOuterTable Parameter (2026-03-02)
-
-Added [Parameter] public bool RenderOuterTable = true to FormView. When false, suppresses table wrapper, header/footer rows, and pager — matching Web Forms. @if (RenderOuterTable) / else branching. RenderOuterTable=false still calls DataBinding/DataBound + CascadingValue. WingtipToys ProductDetails.aspx was the driver. All 29 existing tests pass.
-
-📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered, SelectMethod→Items #1 Layer 2 transform, 4 ready/21 skill/8 architecture (Forge).
-
-### Original WingtipToys ASP.NET Web Forms App — Build & Run (2026-03-02)
-
-Built and ran the original WingtipToys sample from `samples/WingtipToys/` for screenshot capture.
-
-**Connection string fix:** Updated `Web.config` — replaced all `(LocalDb)\v11.0` with `(LocalDb)\MSSQLLocalDB` (2 connection strings + EF defaultConnectionFactory parameter). The v11.0 instance is SQL Server 2012 LocalDB; this machine has MSSQLLocalDB (SQL Server 2025).
-
-**NBGV inheritance fix:** Repo-root `Directory.Build.props` injects Nerdbank.GitVersioning, which auto-generates AssemblyVersion/AssemblyFileVersion attributes — conflicting with the existing `Properties/AssemblyInfo.cs`. Fix: created `samples/WingtipToys/Directory.Build.props` (empty `<Project>`) to stop MSBuild inheritance.
-
-**NuGet restore for packages.config:** `nuget restore <sln>` generates PackageReference-style files but does NOT populate the `packages/` folder for packages.config projects. Must use `nuget install <packages.config> -OutputDirectory <packages-dir>` instead.
-
-**Exact commands that worked:**
-1. `nuget.exe install WingtipToys\packages.config -OutputDirectory packages -Source "https://api.nuget.org/v3/index.json"`
-2. `& "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" WingtipToys.csproj /p:Configuration=Debug /v:minimal`
-3. `& "C:\Program Files (x86)\IIS Express\iisexpress.exe" /path:<project-dir> /port:5200`
-
-**Running at:** http://localhost:5200/ — verified HTTP 200, page title "Welcome - Wingtip Toys".
-
-**Files changed:**
-- `samples/WingtipToys/WingtipToys/Web.config` — connection strings updated
-- `samples/WingtipToys/Directory.Build.props` — created (empty, blocks NBGV inheritance)
-
-### Screenshot Refresh After CSS Fixes (2026-03-03)
-
-Took fresh screenshots of the migrated AfterWingtipToys site after 7 CSS/visual fixes (Cerulean theme, 4-column product grid, 16 products, BoundField currency formatting).
-
-**Workflow:**
-1. `dotnet run --project samples/AfterWingtipToys/WingtipToys.csproj --urls "http://localhost:5201"` — detached background process
-2. Playwright screenshots at 900×700 viewport for individual pages, 1400×900 for comparisons
-3. Served comparison HTML files via `python -m http.server` since Playwright blocks `file://` URLs
-4. Verified all 3 key visual requirements before capturing: blue Cerulean navbar ✓, 4-column product grid ✓, dollar signs on cart prices ✓
-
-**Original site (port 5200):** Not running at time of screenshot refresh. Existing original screenshots retained — they were captured in the prior session and remain valid.
-
-**Screenshots updated (6 files):**
-- `planning-docs/screenshots/migrated-home-real.png` — home page with Cerulean navbar
-- `planning-docs/screenshots/migrated-products-real.png` — 16 products in 4-column grid (full page)
-- `planning-docs/screenshots/migrated-cart-real.png` — cart with $ currency formatting
-- `planning-docs/screenshots/comparison-home-visual.png` — side-by-side home
-- `planning-docs/screenshots/comparison-products-visual.png` — side-by-side products (full page)
-- `planning-docs/screenshots/comparison-cart-visual.png` — side-by-side cart
-
-**Lessons:**
-- Playwright MCP blocks `file://` protocol — must serve local HTML via HTTP (e.g., `python -m http.server`) for comparison screenshots
-- Always verify visual requirements (navbar color, grid layout, currency format) from the accessibility snapshot BEFORE taking screenshots to avoid capturing stale/broken state
-- Detached `dotnet run` exits cleanly from the shell but the process keeps running — use `Get-NetTCPConnection` to find the PID for cleanup
+📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered.
+📌 Team update (2026-03-03): WingtipToys CSS fidelity — 7 visual differences identified requiring fixes (Cerulean theme, 4-column grid, BoundField bug, Trucks category, Site.css, category IDs) — decided by Forge

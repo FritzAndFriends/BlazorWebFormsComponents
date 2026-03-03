@@ -95,3 +95,5 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 7. **BoundField DataFormatString bug:** `BoundField.razor.cs` line 48: `string.Format(DataFormatString, obj?.ToString())` converts obj to string BEFORE formatting, so `{0:c}` currency format is lost. Cart "Price (each)" shows "15.95" instead of "$15.95". Fix: use `obj` not `obj?.ToString()`.
 
 **Key files:** Original CSS: `samples/WingtipToys/WingtipToys/Content/bootstrap.css` (Bootswatch Cerulean). Migrated layout: `samples/AfterWingtipToys/Components/App.razor` (CDN bootstrap ref). Migrated content: `samples/AfterWingtipToys/Components/Layout/MainLayout.razor`. BWFC bug: `src/BlazorWebFormsComponents/BoundField.razor.cs:48`.
+
+ Team update (2026-03-03): Original WingtipToys build/run config documented (LocalDB, NBGV isolation, NuGet restore, IIS Express port 5200)  decided by Cyclops
