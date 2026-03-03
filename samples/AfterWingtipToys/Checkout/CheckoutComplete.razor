@@ -1,9 +1,13 @@
 @page "/CheckoutComplete"
+@rendermode InteractiveServer
+@inject WingtipToys.Services.CheckoutStateService CheckoutState
+@inject NavigationManager Navigation
+
 <h1>Checkout Complete</h1>
     <p></p>
-    <h3>Payment Transaction ID:</h3> <Label ID="TransactionId" Text="DEMO-12345"></Label>
+    <h3>Payment Transaction ID:</h3> <Label ID="TransactionId" Text="@_transactionId"></Label>
     <p></p>
     <h3>Thank You!</h3>
     <p></p>
     <hr />
-    <Button ID="Continue" Text="Continue Shopping" />
+    <Button ID="Continue" Text="Continue Shopping" OnClick="ContinueShopping_Click" />

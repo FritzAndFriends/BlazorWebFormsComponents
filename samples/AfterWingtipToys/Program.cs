@@ -15,6 +15,8 @@ builder.Services.AddBlazorWebFormsComponents();
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
 builder.Services.AddScoped<CartStateService>();
+builder.Services.AddScoped<CheckoutStateService>();
+builder.Services.AddScoped<IPayPalService, MockPayPalService>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
