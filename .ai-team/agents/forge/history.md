@@ -75,3 +75,23 @@ Team updates: M17 audit fixes resolved (PR #402), Skins dual docs (SkinsAndTheme
 **WingtipToys pipeline validation (post-script):** Layer 1 ~70% markup: 147+ tag removals, 165+ runat removals, 35+ expression conversions. 18 data-binding expressions unconverted (<%#: inside GetRouteUrl/String.Format/Eval). 3 user-control prefixes survive. FormView RenderOuterTable working. ModelErrorMessage in 2 files. Actionable: (1) add <%#: regex, (2) strip uc:/friendlyUrls: prefixes, (3) SelectMethod->Items as #1 Layer 2 example, (4) Identity scaffold guidance. **18-26 hours total, 4-6 hours for demo subset.**
 
 Team updates (2026-03-02): Unified release (PR #408), project reframed as migration acceleration system (Jeff), ModelErrorMessage docs (52 components, Beast), WingtipToys pipeline validated (4 ready, 21 skill, 8 architecture).
+
+### WingtipToys CSS Fidelity Audit (2026-03-02)
+
+**7 visual differences found** between original WingtipToys (:5200) and migrated Blazor (:5201):
+
+1. **Navbar color (CRITICAL):** Original uses Bootswatch Cerulean v3.2.0 (`#033c73` dark blue navbar, `#ffffff` white link text). Migrated loads stock Bootstrap 3.4.1 from CDN (`#222222` dark gray navbar, `#999999` gray link text). Root cause: `App.razor` references CDN bootstrap instead of the custom `Content/bootstrap.css`. File: `samples/WingtipToys/WingtipToys/Content/bootstrap.css` line 1 = `bootswatch v3.2.0`, line 4177 = `background-color: #033c73`.
+
+2. **Heading colors:** Bootswatch Cerulean sets `h1-h6 { color: #317eac }` (line 995). Stock Bootstrap uses `#333333`. Visible on "Welcome.", "Shopping Cart", "Products" headings.
+
+3. **Link colors:** Cerulean: `a { color: #2fa4e7 }` (line 906). Stock Bootstrap 3.4.1: `#337ab7`. Affects category menu, product names, "Add To Cart" links.
+
+4. **Product grid layout (CRITICAL):** Original `ProductList.aspx` uses `GroupItemCount="4"` + `GroupTemplate` + `LayoutTemplate` for 4-column grid. Migrated `ProductList.razor` omits all three — products render in single column. BWFC ListView supports GroupItemCount (lines 80-134 of `ListView.razor`), so this is a migration omission.
+
+5. **Missing "Trucks" category:** Original has 5 categories (data-driven via ListView). `MainLayout.razor` hardcodes only 4 (Cars, Planes, Boats, Rockets — missing Trucks).
+
+6. **Site.css not loaded:** `Content/Site.css` exists in migrated project but is not referenced in `App.razor`. Original bundles it via `Bundle.config`. Missing `body { padding-top: 50px }` and `.body-content` padding rules.
+
+7. **BoundField DataFormatString bug:** `BoundField.razor.cs` line 48: `string.Format(DataFormatString, obj?.ToString())` converts obj to string BEFORE formatting, so `{0:c}` currency format is lost. Cart "Price (each)" shows "15.95" instead of "$15.95". Fix: use `obj` not `obj?.ToString()`.
+
+**Key files:** Original CSS: `samples/WingtipToys/WingtipToys/Content/bootstrap.css` (Bootswatch Cerulean). Migrated layout: `samples/AfterWingtipToys/Components/App.razor` (CDN bootstrap ref). Migrated content: `samples/AfterWingtipToys/Components/Layout/MainLayout.razor`. BWFC bug: `src/BlazorWebFormsComponents/BoundField.razor.cs:48`.

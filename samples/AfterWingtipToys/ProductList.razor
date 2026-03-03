@@ -7,7 +7,8 @@
 
             <ListView ID="productList" 
                 DataKeyNames="ProductID"
-                TItem="Product" Items="@Products">
+                TItem="Product" Items="@Products"
+                GroupItemCount="4">
                 <EmptyDataTemplate>
                     <table>
                         <tr>
@@ -15,6 +16,27 @@
                         </tr>
                     </table>
                 </EmptyDataTemplate>
+                <EmptyItemTemplate>
+                    <td></td>
+                </EmptyItemTemplate>
+                <GroupTemplate>
+                    <tr>
+                        @context
+                    </tr>
+                </GroupTemplate>
+                <LayoutTemplate>
+                    <table style="width:100%;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table style="width:100%">
+                                        @context
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </LayoutTemplate>
                 <ItemTemplate>
                     <td style="padding:10px;vertical-align:top;">
                         <table>
@@ -42,6 +64,9 @@
                                         </span>           
                                     </a>
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
                             </tr>
                         </table>
                     </td>

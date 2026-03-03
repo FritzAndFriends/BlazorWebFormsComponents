@@ -47,7 +47,7 @@ The comparisons below show the **original WingtipToys Web Forms application** (l
 
 ![Product Catalog Comparison](screenshots/comparison-products-visual.png)
 
-*Left: **Live Web Forms app** — 16 products in a 4-column grid via `asp:ListView` with `GroupItemCount="4"`. Right: **Live Blazor app** — same products via BWFC's `ListView<Product>` with `Items` binding. Layout difference (single column vs grid) is a known gap in the ListView GroupTemplate migration — a CSS-only fix.*
+*Left: **Live Web Forms app** — 16 products in a 4-column grid via `asp:ListView` with `GroupItemCount="4"`. Right: **Live Blazor app** — same 16 products via BWFC's `ListView<Product>` with `GroupItemCount="4"`, `GroupTemplate`, and `LayoutTemplate` — matching the original 4-column grid layout.*
 
 ### Shopping Cart — GridView
 
@@ -224,6 +224,33 @@ The proof-of-concept validated feasibility. The next step is executing the full 
 ### Migration Platform Vision
 
 The project has evolved beyond a component library into a **migration acceleration platform** — combining the BWFC component library, automated scripts, and AI-assisted guidance into a unified toolchain for Web Forms → Blazor migration.
+
+---
+
+## CSS Fidelity Analysis: Visual Differences Identified and Resolved
+
+A pixel-level comparison of the running applications identified **7 visual differences** between the original and migrated sites. All were analyzed to root cause and resolved.
+
+### Critical Fixes Applied
+
+| # | Issue | Root Cause | Fix |
+|---|---|---|---|
+| 1 | **Navbar background wrong** (dark gray instead of blue) | Original uses Bootswatch "Cerulean" v3.2.0 theme; migrated loaded stock Bootstrap 3 from CDN | Switched `App.razor` from CDN to local Cerulean CSS (`/Content/bootstrap.min.css`) |
+| 2 | **Products in single column** instead of 4-column grid | `GroupItemCount`, `GroupTemplate`, and `LayoutTemplate` were removed from ListView during migration (to avoid a NullReferenceException that was since fixed) | Restored all three templates to `ProductList.razor` matching original ASPX structure |
+| 3 | **BoundField currency formatting** — shows `15.95` instead of `$15.95` | **Library bug**: `BoundField.razor.cs` called `obj?.ToString()` before passing to `string.Format()`, killing numeric format specifiers | Fixed: pass `obj` directly to `string.Format(DataFormatString, obj)` |
+
+### Moderate Fixes Applied
+
+| # | Issue | Root Cause | Fix |
+|---|---|---|---|
+| 4 | **"Trucks" category missing** from navigation | `MainLayout.razor` hardcoded 4 categories; original has 5 | Added Trucks (category 3) to navigation menu |
+| 5 | **Only 8 products** instead of 16 | `ProductList.razor.cs` had incomplete product data | Updated to all 16 products matching original database seeder |
+| 6 | **Site.css not loaded** — body padding, responsive rules missing | CSS files in `Content/` folder not served (outside `wwwroot/`) | Copied to `wwwroot/Content/` and added `<link>` in `App.razor` |
+| 7 | **Wrong category IDs** — Boats and Rockets had incorrect IDs | Categories renumbered when Trucks was omitted | Corrected: Cars(1), Planes(2), Trucks(3), Boats(4), Rockets(5) |
+
+### Key Takeaway
+
+Six of seven differences were **migration omissions** (wrong CSS reference, missing templates, incomplete data). Only one — the BoundField `DataFormatString` bug — was a **library defect**, and it has been fixed in the BWFC source. This validates the BWFC approach: when the migration is done correctly, the output matches the original.
 
 ---
 

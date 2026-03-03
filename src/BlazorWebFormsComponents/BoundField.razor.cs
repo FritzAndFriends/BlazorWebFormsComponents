@@ -45,7 +45,7 @@ namespace BlazorWebFormsComponents
 			}
 			if (DataFormatString != null)
 			{
-				return RenderString(string.Format(DataFormatString, obj?.ToString()));
+				return RenderString(string.Format(DataFormatString, obj));
 			}
 			else
 			{
