@@ -39,39 +39,31 @@ The comparisons below show the **original WingtipToys Web Forms application** (l
 
 ### Home Page
 
-![Home Page — Blazor Migration](screenshots/migrated-home-v2.png)
+![Home Page — Side by Side Comparison](screenshots/comparison-home-v2.png)
 
-*The migrated home page preserves the full layout: Cerulean Bootstrap navbar with auth-aware links (Register/Login), logo (Image component), dynamic category navigation from EF Core (Cars, Planes, Trucks, Boats, Rockets), welcome content, and footer.*
+*The migrated home page (right) preserves the full layout of the original (left): Cerulean Bootstrap navbar with auth-aware links (Register/Login), logo (Image component), dynamic category navigation from EF Core (Cars, Planes, Trucks, Boats, Rockets), welcome content, and footer.*
 
 ### Product Catalog — ListView with EF Core Data Binding
 
-![Product Catalog — Blazor Migration](screenshots/migrated-products-v2.png)
+![Product Catalog — Side by Side Comparison](screenshots/comparison-products-v2.png)
 
-*All 16 products in a 4-column grid via BWFC's `ListView<Product>` with `GroupItemCount="4"`, `GroupTemplate`, and `LayoutTemplate`. Data sourced from EF Core + SQLite (not hardcoded). Currency formatting works correctly ($22.50, $15.95, etc.). Each product links to ProductDetails and has an "Add To Cart" link.*
-
-### Category Filtering — Cars Only
-
-![Category Filter — Cars](screenshots/migrated-cars-filter-v2.png)
-
-*Clicking "Cars" in the category nav filters to 5 car products via `[SupplyParameterFromQuery] int? id` → EF Core LINQ query. The original Web Forms app used `SelectMethod` with query string — same UX, modern implementation.*
-
-### Product Details — Data-Bound Display
-
-![Product Details](screenshots/migrated-details-v2.png)
-
-*Product detail page showing data-bound content from EF Core: product image, description, price ($22.50), and product number. Loaded via `[SupplyParameterFromQuery] int productID`.*
+*All 16 products displayed in a 4-column grid on both sides. The migrated version (right) uses BWFC's `ListView<Product>` with `GroupItemCount="4"`, `GroupTemplate`, and `LayoutTemplate` — identical structure to the original `<asp:ListView>` (left). Data sourced from EF Core + SQLite (not hardcoded). Currency formatting, product images, and "Add To Cart" links all match.*
 
 ### Shopping Cart — GridView with Actions
 
-![Shopping Cart](screenshots/migrated-cart-empty-v2.png)
+![Shopping Cart — Side by Side Comparison](screenshots/comparison-cart-v2.png)
 
-*Shopping cart page using BWFC's `GridView` with `BoundField` and `TemplateField` (TextBox for quantity, CheckBox for removal). Cart powered by scoped `CartStateService` (replaces Web Forms Session state). Update button and PayPal checkout button preserved from original.*
+*Shopping cart page comparison. The original (left) shows a populated cart with GridView columns (ID, Name, Price, Quantity, Item Total, Remove). The migrated version (right) uses BWFC's `GridView` with `BoundField` and `TemplateField` (TextBox for quantity, CheckBox for removal). Cart powered by scoped `CartStateService` replacing Web Forms Session state. Update button and PayPal checkout button preserved.*
 
-### Login Page — ASP.NET Core Identity
+### Additional Migrated Pages
 
-![Login Page](screenshots/migrated-login-v2.png)
+The following pages demonstrate additional functionality in the migrated application:
 
-*Login page wired to ASP.NET Core Identity with `SignInManager`. Email/Password fields, "Forgot your password?" and "Register as a new user" links. Seeded admin user (admin@wingtiptoys.com) with "canEdit" role for admin page authorization.*
+| Page | Screenshot | Key Features |
+|------|-----------|-------------|
+| **Category Filtering** | ![Cars Filter](screenshots/migrated-cars-filter-v2.png) | `[SupplyParameterFromQuery]` → EF Core LINQ query filters to 5 car products |
+| **Product Details** | ![Details](screenshots/migrated-details-v2.png) | Data-bound display: image, description, price ($22.50), product number |
+| **Login** | ![Login](screenshots/migrated-login-v2.png) | ASP.NET Core Identity with `SignInManager`, seeded admin user |
 
 ---
 
