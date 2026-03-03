@@ -137,6 +137,7 @@ nav:
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
+      - Automated Migration Guide: Migration/AutomatedMigration.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Deferred Controls: Migration/DeferredControls.md

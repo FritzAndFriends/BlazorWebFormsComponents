@@ -76,6 +76,18 @@ Key patterns: Button=input, Label=span, Panel=div for theme tests. Missing SkinI
 
 Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
 
+
+### ListView EditItemTemplate Tests (Issue #406, 2026-03-02)
+
+6 bUnit tests in ListView/EditTemplateTests.razor: EditIndex matching/non-matching/negative, HandleCommand Edit/Cancel swap, null EditItemTemplate fallback. TDD: 2 pass (negative/null), 4 fail (the bug). CSS class selectors (span.display vs span.edit) for template identification. HandleCommand tests use cut.InvokeAsync() for Blazor dispatcher context.
+
+### FormView RenderOuterTable Tests (2026-03-02)
+
+8 bUnit tests in FormView/RenderOuterTable.razor: default/true/false rendering, template content, structural equivalence, empty data (text + template), edit mode. All pass. Compare element counts not raw Markup (Blazor generates unique event handler IDs per render). RenderOuterTable=false: no table/tr/td wrappers, empty data path also strips wrappers.
+
+📌 Test patterns: (1) CSS class selectors for template switching tests. (2) cut.InvokeAsync for HandleCommand. (3) FindAll().Count for structural comparison, not ShouldBe on Markup.
+
+📌 Team updates (2026-03-02): Skins roadmap (3 waves, 15 WIs, Forge), M22 planned (Forge), project reframed as migration system (Jeff), ModelErrorMessage 29/29 (Forge), WingtipToys pipeline validated — three-layer pipeline (Script→Skill→Agent), 18-26 hours total, scaffolded Identity UI for Account pages (Forge).
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
 ### ListView EditItemTemplate Rendering Tests (Issue #406)
 

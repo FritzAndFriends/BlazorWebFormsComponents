@@ -59,6 +59,27 @@ Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by 
 Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
 
+<!--  Summarized 2026-03-03 by Scribe  covers M20 theming through CSS fixes -->
+
+### M20 Theming, Release & WingtipToys Context (2026-03-01 through 2026-03-03)
+
+**Issue #366 theme wiring:** CascadingParameter ThemeConfiguration moved to BaseWebFormsComponent (named CascadedTheme). ApplySkin>ApplyThemeSkin (virtual override chain). ThemeProvider uses @inherits ComponentBase. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files.
+
+**FontInfo auto-sync:** Name/Names backing-field properties with bidirectional sync. ApplyThemeSkin guards both Font.Name AND Font.Names. Lesson: paired Web Forms properties must replicate sync behavior.
+
+**Unified release.yml:** Single workflow on release:published. Version from tag_name. NuGet override: -p:PackageVersion + -p:Version. version.json 3-segment SemVer. deploy-server-side.yml/nuget.yml to workflow_dispatch-only.
+
+**Issue #406 ListView EditItemTemplate:** (1) Closure bug: moved template selection before CascadingValue. (2) Diffing bug: added @key. Lessons: @key in loops with template switching; never reference loop-external mutable vars in ChildContent.
+
+**FormView RenderOuterTable:** [Parameter] bool RenderOuterTable=true. When false, suppresses table wrapper/header/footer/pager. Driven by WingtipToys ProductDetails.aspx.
+
+**Original WingtipToys build:** Connection strings v11.0 to MSSQLLocalDB. Empty Directory.Build.props blocks NBGV. `nuget install` for packages.config. IIS Express port 5200.
+
+**CSS fixes screenshot refresh (2026-03-03):** 7 visual fixes applied (Cerulean theme, 4-column grid, BoundField currency, Trucks category, Site.css, category IDs). 6 screenshots updated. Lessons: Playwright blocks file:// -- serve via HTTP; verify visual requirements before capturing; detached dotnet run needs Get-NetTCPConnection for PID cleanup.
+
+📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
+📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered.
+📌 Team update (2026-03-03): WingtipToys CSS fidelity — 7 visual differences identified requiring fixes (Cerulean theme, 4-column grid, BoundField bug, Trucks category, Site.css, category IDs) — decided by Forge
 <!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + release process -->
 
 ### M20 Theming & Release Process Summary (2026-03-01 through 2026-03-02)

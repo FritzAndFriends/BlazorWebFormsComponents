@@ -5470,3 +5470,27 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **By:** Colossus
 **What:** Added 1 smoke test `[InlineData]` and 3 interactive tests for the ModelErrorMessage sample page (`/ControlSamples/ModelErrorMessage`). Smoke test added to `ValidationControl_Loads_WithoutErrors` Theory group. Interactive tests cover: submit-shows-errors, valid-submit-no-errors, and clear-button-removes-errors.
 **Why:** Every sample page gets an integration test — no exceptions. The ModelErrorMessage component is a validation control that conditionally renders `<span class="text-danger">` elements, so tests verify both the error-present and error-absent states via DOM element counting. The Clear button test exercises the EditContext reset path, which is unique to this sample page.
+
+### 2026-03-02: PR target repository directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** PRs should always target the upstream repository (FritzAndFriends/BlazorWebFormsComponents), not the fork (csharpfritz/BlazorWebFormsComponents). Use cross-fork PR format: head = csharpfritz:{branch}, base = dev on FritzAndFriends.
+**Why:** User request  captured for team memory
+
+
+### 2026-03-02: WingtipToys Migration Analysis Results
+**By:** Forge
+**What:** Comprehensive page-by-page comparison of all 33 WingtipToys source files (.aspx/.ascx/.master) against their migrated Blazor equivalents (.razor). Layer 1 (bwfc-migrate.ps1) successfully handled ~70% of markup transforms: 147+ tag prefix removals, 165+ runat="server" removals, Content wrapper stripping, @page directive generation, ~35 expression conversions, ItemType→TItem conversion, comment syntax, and URL prefix conversion. 18 data-binding expressions remain unconverted (<%#: syntax), 8 SelectMethod attributes need Items/DataItem replacement, 3 GetRouteUrl calls need route interpolation, 3 user-control tag prefixes (uc:, friendlyUrls:) need stripping. BWFC has 100% control coverage for WingtipToys (28/29 controls exist; ContentPlaceHolder maps to @Body). 4 pages are fully ready, 21 need Layer 2 skill work, 8 need Layer 3 architecture (Identity, EF, Session, PayPal). Estimated total migration effort: 18-26 hours across all three layers.
+**Why:** Jeff needs to understand the effectiveness of the three-layer migration pipeline (Script → Skill → Agent) before the M22 Copilot-Led Migration Showcase. This analysis validates that Layer 1 handles high-volume mechanical transforms effectively, Layer 2 covers structural patterns via the Copilot Skill, and Layer 3 architectural decisions are limited to auth/data/session/integrations. The pipeline is proven: a developer using all three layers could migrate WingtipToys to a running Blazor app in under a day. Key actionable findings: (1) Layer 1 should add regex for <%#: Item.X %> → @context.X conversion, (2) Layer 1 should strip user-control tag prefixes during Register directive removal, (3) Account pages should use scaffolded Identity UI rather than migrating OWIN code-behind, (4) SelectMethod→Items is the #1 most common Layer 2 transform.
+
+
+### 2026-03-02: Original WingtipToys Build & Run Configuration
+**By:** Cyclops
+**Date:** 2026-03-02
+**What:** Documented how to build and run the original WingtipToys ASP.NET Web Forms app locally. Connection strings changed from `(LocalDb)\v11.0` to `(LocalDb)\MSSQLLocalDB`. Created empty `samples/WingtipToys/Directory.Build.props` to block NBGV inheritance. Use `nuget install` for packages.config restore. IIS Express on port 5200.
+**Why:** Machine-specific config needed for any dev running the original app for comparison screenshots. Changes confined to samples/WingtipToys/.
+
+### 2026-03-02: WingtipToys CSS Fidelity  7 Visual Differences Identified
+**By:** Forge
+**Date:** 2026-03-02
+**What:** Side-by-side comparison found 7 CSS/visual differences: (1) Wrong Bootstrap theme  stock BS3 instead of Bootswatch Cerulean, (2) Single-column product grid instead of 4-column, (3) Missing Trucks category, (4) Site.css not referenced, (5) BoundField DataFormatString bug  premature .ToString() loses numeric formatting, (6) bootstrap-theme.min.css adding unwanted gradients, (7) Cart prices missing dollar sign (symptom of #5). Fixes: replace CDN with local Cerulean CSS, add GroupItemCount/templates to ListView, add Trucks category, fix BoundField.razor.cs line 48.
+**Why:** Migration showcase screenshots must visually match the original. The BoundField bug is a library-level defect affecting all DataFormatString consumers.

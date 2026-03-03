@@ -1,0 +1,9 @@
+using Microsoft.AspNetCore.Components;
+
+namespace WingtipToys.Checkout
+{
+    public partial class CheckoutComplete : ComponentBase
+    {
+        // Layer 2+ migration needed
+    }
+}

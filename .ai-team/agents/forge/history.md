@@ -57,26 +57,46 @@ Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView
 Team updates: M17 audit fixes resolved (PR #402), Skins dual docs (SkinsAndThemes.md + ThemesAndSkins.md), Normalizer pipeline codified (Issue #387).
 
 
-### Summary: Build/Version/Release Process Audit (2026-03-02)
 
-**By:** Forge
-**What:** Full audit of 7 CI/CD workflows, NBGV version management, and release coordination. Audit saved to `.ai-team/decisions/inbox/forge-version-release-audit.md`.
+<!-- Summarized 2026-03-02 by Scribe -- covers Build/Release audit through WingtipToys pipeline validation -->
 
-**Critical findings:**
-1. `version.json` on main says `0.15` but latest tag is `v0.16` — NBGV computes `0.15.X`, not `0.16.0`. Every artifact built from main has wrong version prefix.
-2. NuGet (tag-triggered), Docker (main-push-triggered), docs (main-push or tag), and demos (main-push) all fire independently with no version coordination.
-3. `docs.yml` uses deprecated `::set-output` and has a release-detection regex that never matches this project's 2-segment tags (`v0.16`). Docs only deploy on main push, never on tag.
-4. No GitHub Release automation — releases are created manually, not all tags have releases.
-5. Docker image version comes from `nbgv get-version` on runner which reads stale `version.json`, not the tag.
+### Build/Release & M22 Migration Summary (2026-03-02)
 
-**Recommendation:**
-- Create unified `release.yml` triggered by GitHub Release `published` event. One trigger → NuGet + Docker + docs + demos, all with same version from tag.
-- Keep NBGV but use it correctly: version.json drives dev/CI versions, release workflow overrides with `-p:Version=${TAG}` for exact release version.
-- Standardize on 3-segment SemVer tags (`v0.17.0`).
-- Retire independent deployment triggers (nuget.yml tag trigger, deploy-server-side.yml main-push trigger).
-- Automate post-release version bump via PR to dev.
-- Fix docs.yml deprecated syntax and broken regex immediately.
+**Build/Version/Release audit:** version.json on main said 0.15 vs latest tag v0.16. Unified release.yml implemented (PR #408)  single workflow on release:published coordinates NuGet + Docker + docs + demos. NBGV 3.9.50, PackageId Fritz.BlazorWebFormsComponents, Docker ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples. version.json now 0.17.0 (3-segment SemVer). Old nuget.yml/deploy-server-side.yml refactored to workflow_dispatch-only.
 
+**M22 Copilot-Led Migration Showcase:** 12 work items, 4 waves. 57 controls (51 functional, 6 stubs). All 16 core demo controls ready. Use existing BeforeWebForms sample (6-8 pages). Separate .github/copilot-migration-instructions.md. Skins & AJAX Toolkit OUT. ListView EditItemTemplate bug (#406) IN.
+
+**WingtipToys initial analysis:** 15+ pages, 22 controls, 100% BWFC coverage (all 4 "missing" controls already existed). Only blocking gap was FormView RenderOuterTable (resolved). Architecture: LayoutComponentBase, @page directives, EF Core + IDbContextFactory, scoped DI services, scaffolded Identity UI, HttpClient for PayPal, InteractiveServer. 36 work items, 5 phases.
+
+**ASPX/ASCX tooling strategy:** 85+ syntax patterns from 33 WingtipToys files. Three-layer pipeline: Layer 1 (bwfc-migrate.ps1, ~40%, mechanical regex), Layer 2 (Copilot skill, ~45%, structural), Layer 3 (Copilot agent, ~15%, semantic). NOT building: standalone CLI, VS Code extension, Roslyn analyzer. SelectMethod->Items = #1 structural transform. Session->scoped DI = hardest semantic transform.
+
+**ModelErrorMessage spec:** BaseStyledComponent (not BaseValidator). CascadingParameter EditContext. ModelStateKey->Field(key). Renders <span>, nothing when no error. Strips \x1F metadata. Validations/ folder. 29/29 WingtipToys coverage.
+
+**WingtipToys pipeline validation (post-script):** Layer 1 ~70% markup: 147+ tag removals, 165+ runat removals, 35+ expression conversions. 18 data-binding expressions unconverted (<%#: inside GetRouteUrl/String.Format/Eval). 3 user-control prefixes survive. FormView RenderOuterTable working. ModelErrorMessage in 2 files. Actionable: (1) add <%#: regex, (2) strip uc:/friendlyUrls: prefixes, (3) SelectMethod->Items as #1 Layer 2 example, (4) Identity scaffold guidance. **18-26 hours total, 4-6 hours for demo subset.**
+
+Team updates (2026-03-02): Unified release (PR #408), project reframed as migration acceleration system (Jeff), ModelErrorMessage docs (52 components, Beast), WingtipToys pipeline validated (4 ready, 21 skill, 8 architecture).
+
+### WingtipToys CSS Fidelity Audit (2026-03-02)
+
+**7 visual differences found** between original WingtipToys (:5200) and migrated Blazor (:5201):
+
+1. **Navbar color (CRITICAL):** Original uses Bootswatch Cerulean v3.2.0 (`#033c73` dark blue navbar, `#ffffff` white link text). Migrated loads stock Bootstrap 3.4.1 from CDN (`#222222` dark gray navbar, `#999999` gray link text). Root cause: `App.razor` references CDN bootstrap instead of the custom `Content/bootstrap.css`. File: `samples/WingtipToys/WingtipToys/Content/bootstrap.css` line 1 = `bootswatch v3.2.0`, line 4177 = `background-color: #033c73`.
+
+2. **Heading colors:** Bootswatch Cerulean sets `h1-h6 { color: #317eac }` (line 995). Stock Bootstrap uses `#333333`. Visible on "Welcome.", "Shopping Cart", "Products" headings.
+
+3. **Link colors:** Cerulean: `a { color: #2fa4e7 }` (line 906). Stock Bootstrap 3.4.1: `#337ab7`. Affects category menu, product names, "Add To Cart" links.
+
+4. **Product grid layout (CRITICAL):** Original `ProductList.aspx` uses `GroupItemCount="4"` + `GroupTemplate` + `LayoutTemplate` for 4-column grid. Migrated `ProductList.razor` omits all three — products render in single column. BWFC ListView supports GroupItemCount (lines 80-134 of `ListView.razor`), so this is a migration omission.
+
+5. **Missing "Trucks" category:** Original has 5 categories (data-driven via ListView). `MainLayout.razor` hardcodes only 4 (Cars, Planes, Boats, Rockets — missing Trucks).
+
+6. **Site.css not loaded:** `Content/Site.css` exists in migrated project but is not referenced in `App.razor`. Original bundles it via `Bundle.config`. Missing `body { padding-top: 50px }` and `.body-content` padding rules.
+
+7. **BoundField DataFormatString bug:** `BoundField.razor.cs` line 48: `string.Format(DataFormatString, obj?.ToString())` converts obj to string BEFORE formatting, so `{0:c}` currency format is lost. Cart "Price (each)" shows "15.95" instead of "$15.95". Fix: use `obj` not `obj?.ToString()`.
+
+**Key files:** Original CSS: `samples/WingtipToys/WingtipToys/Content/bootstrap.css` (Bootswatch Cerulean). Migrated layout: `samples/AfterWingtipToys/Components/App.razor` (CDN bootstrap ref). Migrated content: `samples/AfterWingtipToys/Components/Layout/MainLayout.razor`. BWFC bug: `src/BlazorWebFormsComponents/BoundField.razor.cs:48`.
+
+ Team update (2026-03-03): Original WingtipToys build/run config documented (LocalDB, NBGV isolation, NuGet restore, IIS Express port 5200)  decided by Cyclops
 **Key infrastructure details learned:**
 - NBGV 3.9.50 in `Directory.Build.props`, applied to all projects
 - NuGet PackageId: `Fritz.BlazorWebFormsComponents`

@@ -69,5 +69,17 @@
  Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
 
 
+📌 Team update (2026-03-02): ModelErrorMessage documentation shipped — docs/ValidationControls/ModelErrorMessage.md, status.md updated to 52 components — decided by Beast
+
+### M22 Executive Screenshot Comparison Pages (2026-03-02)
+
+- **Created 3 HTML comparison pages** in `planning-docs/screenshots/` for Playwright screenshots at 1400×900:
+  - `comparison-productlist.html` — ListView before/after (Web Forms → Blazor+BWFC)
+  - `comparison-shoppingcart.html` — GridView, BoundField, TemplateField, TextBox, CheckBox, Label, Button
+  - `comparison-login.html` — PlaceHolder, Literal, Label, TextBox, RequiredFieldValidator, CheckBox, Button, HyperLink
+- **Used dark theme** (#1e1e1e background) with red (`#f48771`) highlighting for removed Web Forms artifacts and green (`#89d185`) for new Blazor syntax.
+- **Highlighted key migration changes:** `asp:` prefix removal, `runat="server"` removal, `ItemType` → `TItem`, server binding expressions → `@context`, `ViewStateMode`/`EnableViewState` removal.
+- **Stats bar** at bottom of each page shows controls migrated, attributes preserved, and lines changed.
+- **Source files read:** ProductList.aspx, ShoppingCart.aspx, Account/Login.aspx and their AfterWingtipToys .razor counterparts.
 � Team update (2026-03-02): ModelErrorMessage documentation shipped  docs/ValidationControls/ModelErrorMessage.md, status.md updated to 52 components  decided by Beast
 
