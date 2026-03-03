@@ -107,3 +107,28 @@ Built and ran the original WingtipToys sample from `samples/WingtipToys/` for sc
 **Files changed:**
 - `samples/WingtipToys/WingtipToys/Web.config` — connection strings updated
 - `samples/WingtipToys/Directory.Build.props` — created (empty, blocks NBGV inheritance)
+
+### Screenshot Refresh After CSS Fixes (2026-03-03)
+
+Took fresh screenshots of the migrated AfterWingtipToys site after 7 CSS/visual fixes (Cerulean theme, 4-column product grid, 16 products, BoundField currency formatting).
+
+**Workflow:**
+1. `dotnet run --project samples/AfterWingtipToys/WingtipToys.csproj --urls "http://localhost:5201"` — detached background process
+2. Playwright screenshots at 900×700 viewport for individual pages, 1400×900 for comparisons
+3. Served comparison HTML files via `python -m http.server` since Playwright blocks `file://` URLs
+4. Verified all 3 key visual requirements before capturing: blue Cerulean navbar ✓, 4-column product grid ✓, dollar signs on cart prices ✓
+
+**Original site (port 5200):** Not running at time of screenshot refresh. Existing original screenshots retained — they were captured in the prior session and remain valid.
+
+**Screenshots updated (6 files):**
+- `planning-docs/screenshots/migrated-home-real.png` — home page with Cerulean navbar
+- `planning-docs/screenshots/migrated-products-real.png` — 16 products in 4-column grid (full page)
+- `planning-docs/screenshots/migrated-cart-real.png` — cart with $ currency formatting
+- `planning-docs/screenshots/comparison-home-visual.png` — side-by-side home
+- `planning-docs/screenshots/comparison-products-visual.png` — side-by-side products (full page)
+- `planning-docs/screenshots/comparison-cart-visual.png` — side-by-side cart
+
+**Lessons:**
+- Playwright MCP blocks `file://` protocol — must serve local HTML via HTTP (e.g., `python -m http.server`) for comparison screenshots
+- Always verify visual requirements (navbar color, grid layout, currency format) from the accessibility snapshot BEFORE taking screenshots to avoid capturing stale/broken state
+- Detached `dotnet run` exits cleanly from the shell but the process keeps running — use `Get-NetTCPConnection` to find the PID for cleanup
