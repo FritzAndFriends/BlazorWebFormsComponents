@@ -256,3 +256,18 @@ Jeff's initial catalog listed RequiredFieldValidator, RegularExpressionValidator
 
 
  Team update (2026-03-03): Migration toolkit pivoted from 9-doc folder to single SKILL.md in Copilot skill format  decided by Jeffrey T. Fritz
+
+### Summary: Migration Toolkit Restructure (2026-03-03)
+
+**By:** Forge
+**What:** Per Jeff's directive, moved distributable migration assets out of `.github/skills/` into `migration-toolkit/` — the one-stop distribution package.
+
+**Changes made:**
+- `git mv` 3 distributable skill files (bwfc-migration, bwfc-identity-migration, bwfc-data-migration) from `.github/skills/` to `migration-toolkit/skills/`
+- Copied `bwfc-scan.ps1` and `bwfc-migrate.ps1` from `scripts/` into `migration-toolkit/scripts/` (originals remain in `scripts/` for internal project use)
+- Rewrote `migration-toolkit/README.md` with self-contained structure: lists skills/ and scripts/ subfolders with descriptions, includes usage instructions ("copy skills/ into .github/skills/, copy scripts/ to project root"), links to NuGet package
+- Removed empty `.github/skills/bwfc-*` directories after move
+
+**What stayed in `.github/skills/`:** 5 internal project skills (webforms-migration, documentation, component-development, bunit-test-migration, aspire) — these are NOT distributable.
+
+**Key learning:** Distributable assets (things end-users copy to their own projects) live in `migration-toolkit/`. Internal project skills (things that help contributors work on THIS repo) live in `.github/skills/`. Clean separation prevents confusion about what ships to customers vs what's internal tooling.
