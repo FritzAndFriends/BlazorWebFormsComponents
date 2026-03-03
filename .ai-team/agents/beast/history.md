@@ -108,3 +108,15 @@
  Team update (2026-03-03): ListView CRUD events  ItemCreated now fires per-item, ItemCommand fires for ALL commands before specific handlers  decided by Cyclops
 
  Team update (2026-03-03): Migration toolkit pivoted from 9-doc folder to single SKILL.md in Copilot skill format  decided by Jeffrey T. Fritz
+
+- **Distributable BWFC Migration Skill (`.github/skills/bwfc-migration/SKILL.md`):**
+  - Created single distributable Copilot skill file consolidating all migration toolkit content into one self-contained document.
+  - **Key content decisions vs. internal webforms-migration skill:**
+    1. **Self-contained and NuGet-first:** No references to internal repo scripts (`bwfc-scan.ps1`, `bwfc-migrate.ps1`), agents, or `.ai-team/` paths. BWFC comes from NuGet, not repo clone. Designed to be dropped into any project's `.github/skills/` folder.
+    2. **Added three-layer methodology section:** Extracted from executive report — Layer 1 (mechanical, ~40%), Layer 2 (structural, ~45%), Layer 3 (architecture, ~15%) with expected page-readiness breakdown.
+    3. **Added 10 architecture decision templates (NEW content):** Master Page→Layout, Session→Scoped Services, Identity→Blazor Identity, EF6→EF Core, Global.asax→Program.cs, Web.config→appsettings.json, DataSource→Service Injection, RouteTable→@page, Handlers/Modules→Middleware, Third-Party→HttpClient. Each has before/after code.
+    4. **Added per-page migration checklist:** Layer-organized checkbox template from Forge's CHECKLIST design.
+    5. **Expanded component coverage summary:** Added category counts, component list per category, and "What BWFC Does NOT Cover" table (DataSource controls, Wizard, Web Parts, AJAX Toolkit extenders).
+    6. **Expanded common gotchas:** Added event handler signatures, TextMode casing, ScriptManager no-op guidance.
+    7. **Removed WingtipToys-specific section:** Not applicable for a distributable skill — that content is project-specific.
+  - Total: ~750 lines. Preserves ~90% of existing internal skill content, adds ~30% new content from design doc and executive report.
