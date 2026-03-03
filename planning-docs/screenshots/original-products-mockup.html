@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=700" />
+    <title>Wingtip Toys - Products (Original)</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" />
+    <style>
+        body { padding-top: 50px; }
+        .version-badge {
+            position: fixed; top: 0; right: 0; z-index: 9999;
+            background: #7986cb; color: #fff; font-size: 10px;
+            padding: 2px 8px; border-radius: 0 0 0 4px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div class="version-badge">ASP.NET Web Forms (.NET 4.5)</div>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Wingtip Toys</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="/About">About</a></li>
+                <li><a href="/Contact">Contact</a></li>
+                <li><a href="/ProductList">Products</a></li>
+                <li><a href="/ShoppingCart">Cart</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/Account/Register">Register</a></li>
+                <li><a href="/Account/Login">Log in</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="TitleContent" style="text-align: center">
+    <a href="/">
+        <img src="http://localhost:5201/Images/logo.jpg" style="border:none;" alt="Wingtip Toys logo" />
+    </a>
+    <br />
+</div>
+<div id="CategoryMenu" style="text-align: center">
+    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=1">Cars</a></b>
+    &nbsp;|&nbsp;
+    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=2">Planes</a></b>
+    &nbsp;|&nbsp;
+    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=3">Boats</a></b>
+    &nbsp;|&nbsp;
+    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=4">Rockets</a></b>
+</div>
+<div class="container body-content">
+    <section>
+        <div>
+            <hgroup>
+                <h2>Products</h2>
+            </hgroup>
+            <!-- asp:ListView renders each ItemTemplate -->
+            <table>
+                <tr><td><a href="/ProductDetails?id=1"><img src="http://localhost:5201/Images/Products/carconvert.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=1"><b>Convertible Car</b></a><br /><span><b>Price: </b>$22.50</span><br /><a href="/AddToCart?productID=1"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=2"><img src="http://localhost:5201/Images/Products/carearly.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=2"><b>Old-time Car</b></a><br /><span><b>Price: </b>$15.95</span><br /><a href="/AddToCart?productID=2"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=3"><img src="http://localhost:5201/Images/Products/carfast.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=3"><b>Fast Car</b></a><br /><span><b>Price: </b>$32.99</span><br /><a href="/AddToCart?productID=3"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=4"><img src="http://localhost:5201/Images/Products/planeprop.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=4"><b>Super Plane</b></a><br /><span><b>Price: </b>$8.95</span><br /><a href="/AddToCart?productID=4"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=5"><img src="http://localhost:5201/Images/Products/planepaper.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=5"><b>Paper Plane</b></a><br /><span><b>Price: </b>$4.95</span><br /><a href="/AddToCart?productID=5"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=6"><img src="http://localhost:5201/Images/Products/boatsail.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=6"><b>Sail Boat</b></a><br /><span><b>Price: </b>$14.95</span><br /><a href="/AddToCart?productID=6"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=7"><img src="http://localhost:5201/Images/Products/rocket.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=7"><b>Rocket</b></a><br /><span><b>Price: </b>$12.95</span><br /><a href="/AddToCart?productID=7"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+            <table>
+                <tr><td><a href="/ProductDetails?id=8"><img src="http://localhost:5201/Images/Products/truckfire.png" width="100" height="75" style="border:1px solid" /></a></td></tr>
+                <tr><td><a href="/ProductDetails?id=8"><b>Fire Truck</b></a><br /><span><b>Price: </b>$26.00</span><br /><a href="/AddToCart?productID=8"><span class="ProductListItem"><b>Add To Cart</b></span></a></td></tr>
+            </table>
+        </div>
+    </section>
+    <hr />
+    <footer>
+        <p>&copy; 2013 - Wingtip Toys</p>
+    </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -101,6 +101,7 @@ nav:
     - CompareValidator: ValidationControls/CompareValidator.md
     - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md
+    - ModelErrorMessage: ValidationControls/ModelErrorMessage.md
     - RangeValidator: ValidationControls/RangeValidator.md
     - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md
     - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md
@@ -136,6 +137,7 @@ nav:
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
+      - Automated Migration Guide: Migration/AutomatedMigration.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Deferred Controls: Migration/DeferredControls.md

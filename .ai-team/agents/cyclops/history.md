@@ -58,42 +58,70 @@ Team update (2026-02-27): No-op stub property coverage 41-50% acceptable  decide
 Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by Forge
 Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
- Team update (2026-03-01): D-11 through D-14 formally registered  D-11 GUID IDs needs fix, D-12 boolean attrs intentional, D-13/D-14 Calendar fixes recommended  decided by Forge
 
-### Issue #366 — Base Class Theme Integration (2026-03-01)
+<!--  Summarized 2026-03-03 by Scribe  covers M20 theming through CSS fixes -->
 
-- **Theme wiring moved to BaseWebFormsComponent:** Added `[CascadingParameter] ThemeConfiguration CascadedTheme` to BaseWebFormsComponent. Added `OnParametersSet` override that resolves the ControlSkin via `GetType().Name + SkinID` and calls virtual `ApplyThemeSkin(ControlSkin)`. Base implementation is no-op; BaseStyledComponent overrides to apply IStyle properties.
-- **BaseStyledComponent simplified:** Removed `[CascadingParameter] Theme` and `OnParametersSet` override. Renamed `ApplySkin` to `ApplyThemeSkin` (protected override). StyleSheetTheme semantics preserved: theme sets defaults, explicit values win.
-- **Property naming:** Named the cascading parameter `CascadedTheme` (not `Theme`) because `_Imports.razor` has `@inherits BaseWebFormsComponent` making ALL `.razor` files inherit from it. WebFormsPage and ThemeProvider both have their own `[Parameter] Theme` — same name would cause Blazor's "declares more than one parameter" error.
-- **ThemeProvider fix:** Added `@inherits ComponentBase` to ThemeProvider.razor so it doesn't inherit BaseWebFormsComponent via _Imports.razor. ThemeProvider is infrastructure, not a Web Forms control.
-- **WebFormsPage fix:** Changed `<CascadingValue Value="Theme">` to `Value="@(Theme ?? CascadedTheme)"` so the cascade works whether the user passes Theme explicitly or inherits it from a parent ThemeProvider.
-- **Lesson:** `_Imports.razor @inherits BaseWebFormsComponent` affects ALL .razor files in the project, including infrastructure components like ThemeProvider. When adding properties to BaseWebFormsComponent, check for name conflicts with every .razor component's @code block.
-- **Lesson:** C# `virtual`/`override` on properties with different attributes ([CascadingParameter] vs [Parameter]) does NOT work for Blazor — reflection returns the base class's attribute, not the override's. Use different property names instead.
+### M20 Theming, Release & WingtipToys Context (2026-03-01 through 2026-03-03)
 
-### FontInfo Name/Names Auto-Sync Fix (2026-03-01)
+**Issue #366 theme wiring:** CascadingParameter ThemeConfiguration moved to BaseWebFormsComponent (named CascadedTheme). ApplySkin>ApplyThemeSkin (virtual override chain). ThemeProvider uses @inherits ComponentBase. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files.
 
-- **FontInfo auto-sync:** Converted `Name` and `Names` from auto-properties to backing-field properties with bidirectional sync. Setting `Name` also sets `Names` (single value). Setting `Names` also sets `Name` (first comma-separated entry, trimmed). Setting either to null/empty clears both. Matches ASP.NET Web Forms `FontInfo` behavior.
-- **ApplyThemeSkin guard:** Updated `BaseStyledComponent.ApplyThemeSkin` to check both `Font.Name` AND `Font.Names` are empty before applying theme font. Prevents theme from overriding an explicitly set `Names` value.
-- **Root cause:** `ApplyThemeSkin` set `Font.Name` but `HasStyleExtensions.ToStyle()` reads `Font.Names` for `font-family`. Without auto-sync, theme fonts were silently lost.
-- **Lesson:** When Web Forms has paired/synced properties (Name↔Names, Value↔SelectedValue, etc.), our Blazor equivalents must replicate the sync behavior or the rendering pipeline breaks at property boundaries.
+**FontInfo auto-sync:** Name/Names backing-field properties with bidirectional sync. ApplyThemeSkin guards both Font.Name AND Font.Names. Lesson: paired Web Forms properties must replicate sync behavior.
 
-### CI/CD Unified Release Process (2026-03-02)
+**Unified release.yml:** Single workflow on release:published. Version from tag_name. NuGet override: -p:PackageVersion + -p:Version. version.json 3-segment SemVer. deploy-server-side.yml/nuget.yml to workflow_dispatch-only.
 
-- **Unified release.yml:** Created `.github/workflows/release.yml` triggered on `release: published`. Single workflow coordinates all release artifacts: NuGet publish, Docker build+push to GHCR, docs deploy to GitHub Pages, demo builds with release attachment. All jobs extract version from `github.event.release.tag_name` stripping the `v` prefix, ensuring every artifact gets the same version.
-- **Version extraction pattern:** Use `${{ github.event.release.tag_name }}` (not `${{ github.ref_name }}`) for release events. Strip `v` prefix via bash `${VERSION#v}` and write to `$GITHUB_ENV` for use across steps.
-- **NuGet version override:** Pass both `-p:PackageVersion=$VERSION` and `-p:Version=$VERSION` to `dotnet pack` and `dotnet build` respectively, overriding NBGV-computed versions with the exact release tag version.
-- **Secret-gating pattern:** Use `env: NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}` at step level, then `if: env.NUGET_API_KEY != ''` — this is the GitHub Actions idiom for conditional steps based on secret availability.
-- **gh CLI in workflows:** Set `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` as env var for `gh release upload` commands.
-- **Docker image tags lowercase:** Registry/image path must be lowercase: `ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples`.
-- **deploy-server-side.yml refactored:** Removed `push: branches: [main]` trigger and path filters. Now `workflow_dispatch` only — emergency manual escape hatch.
-- **nuget.yml refactored:** Removed `push: tags: [v*]` trigger. Now `workflow_dispatch` with version input — emergency manual NuGet republish.
-- **docs.yml fix:** Replaced deprecated `echo ::set-output name=release::${RELEASE}` with `echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"`. Kept push-to-main deploy for doc-only changes between releases.
-- **demo.yml versioned artifacts:** Added NBGV version computation step. Artifact names now include version: `demo-server-side-${{ steps.nbgv.outputs.version }}`.
-- **version.json:** Changed from `"version": "0.17"` (2-segment) to `"version": "0.17.0"` (3-segment SemVer). NBGV now computes clean 3-segment versions matching our tag format.
-- **NBGV key lesson:** NBGV ignores git tags entirely — it reads `version.json` for major.minor and computes patch from git height. Tags are informational; `version.json` must be kept in sync. For releases, override NBGV output with explicit `-p:Version=` from the tag.
-- **Workflow dependency order:** release.yml uses `needs:` to enforce: build-and-test → [publish-nuget, deploy-docker, deploy-docs, build-demos] (fan-out after gate job).
-- **Lesson:** GitHub Actions `$GITHUB_OUTPUT` replaced `::set-output` (deprecated Oct 2022). Always use `echo "key=value" >> "$GITHUB_OUTPUT"` for step outputs.
+**Issue #406 ListView EditItemTemplate:** (1) Closure bug: moved template selection before CascadingValue. (2) Diffing bug: added @key. Lessons: @key in loops with template switching; never reference loop-external mutable vars in ChildContent.
 
- Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+**FormView RenderOuterTable:** [Parameter] bool RenderOuterTable=true. When false, suppresses table wrapper/header/footer/pager. Driven by WingtipToys ProductDetails.aspx.
+
+**Original WingtipToys build:** Connection strings v11.0 to MSSQLLocalDB. Empty Directory.Build.props blocks NBGV. `nuget install` for packages.config. IIS Express port 5200.
+
+**CSS fixes screenshot refresh (2026-03-03):** 7 visual fixes applied (Cerulean theme, 4-column grid, BoundField currency, Trucks category, Site.css, category IDs). 6 screenshots updated. Lessons: Playwright blocks file:// -- serve via HTTP; verify visual requirements before capturing; detached dotnet run needs Get-NetTCPConnection for PID cleanup.
+
+📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
+📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered.
+📌 Team update (2026-03-03): WingtipToys CSS fidelity — 7 visual differences identified requiring fixes (Cerulean theme, 4-column grid, BoundField bug, Trucks category, Site.css, category IDs) — decided by Forge
+<!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + release process -->
+
+### M20 Theming & Release Process Summary (2026-03-01 through 2026-03-02)
+
+**Issue #366 theme wiring:** Moved CascadingParameter ThemeConfiguration to BaseWebFormsComponent (named CascadedTheme to avoid Blazor duplicate-parameter error from _Imports.razor). ApplySkin renamed to ApplyThemeSkin (virtual override chain). ThemeProvider got @inherits ComponentBase to exclude from BaseWebFormsComponent inheritance. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files including infrastructure components.
+
+**FontInfo auto-sync:** Name and Names converted to backing-field properties with bidirectional sync (setting Name updates Names and vice versa). ApplyThemeSkin guard checks both Font.Name AND Font.Names before applying theme font. Root cause: ApplyThemeSkin set Font.Name but ToStyle() reads Font.Names. Lesson: paired/synced Web Forms properties must replicate sync behavior.
+
+**Unified release.yml:** Single workflow on release:published coordinates NuGet + Docker + GHCR + docs + demos. Version from tag_name stripping v prefix. NuGet override: -p:PackageVersion + -p:Version. version.json changed to 3-segment SemVer (0.17.0). deploy-server-side.yml and nuget.yml refactored to workflow_dispatch-only. docs.yml fixed deprecated ::set-output. NBGV ignores git tags -- reads version.json only.
+
+Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
+
 
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+### Issue #406 — ListView EditItemTemplate Not Rendering (2026-03-02)
+
+- **Bug:** Clicking Edit in a ListView with EditItemTemplate fired the ItemEditing event and set EditIndex correctly, but the ListView did not visually swap from ItemTemplate to EditItemTemplate.
+- **Root cause:** The `<CascadingValue>` elements wrapping each item in the `foreach` loop lacked `@key` directives. Without `@key`, Blazor's positional diff algorithm could not reliably detect that a specific row's template changed from `ItemTemplate` to `EditItemTemplate` when `EditIndex` changed, because the surrounding structure (CascadingValue with same Name/Value shape) looked identical to the diff engine.
+- **Fix:** Added `@key="dataItemIndex"` to both `<CascadingValue>` elements in `ListView.razor` — the non-grouped rendering path (line 60) and the grouped rendering path (line 105). This forces Blazor to track each row by its data index, ensuring template swaps are detected and re-rendered.
+- **Lesson:** Always add `@key` to elements inside loops where the rendered content can change based on external state (like EditIndex, SelectedIndex). Without `@key`, Blazor's positional diffing may skip re-rendering rows where only the template selection changed but the data stayed the same. This applies to any data-bound component (GridView, DetailsView, etc.) that uses template switching inside iteration loops.
+
+### Issue #406 — ListView EditItemTemplate Closure Bug (2026-03-01)
+
+- **Root cause:** In `ListView.razor`, the template selection logic (`EditIndex >= 0 && dataItemIndex == EditIndex`) and even/odd toggle (`even = !even`) were inside `<CascadingValue>`'s ChildContent — a deferred RenderFragment. The `dataItemIndex` variable was declared outside the foreach loop and captured by the closure. Since CascadingValue components render their ChildContent AFTER the parent's BuildRenderTree completes, all closures saw the final loop value (item count) instead of the per-iteration value.
+- **Fix:** Moved template selection and even/odd toggle from inside the CascadingValue's ChildContent to before the CascadingValue element. These expressions now execute during BuildRenderTree when `dataItemIndex` has the correct per-iteration value. The resolved `currentTemplate` variable is captured correctly by the closure since it's a new local each iteration.
+- **Key files:** `src/BlazorWebFormsComponents/ListView.razor` (lines 57-61), `src/BlazorWebFormsComponents.Test/ListView/EditTemplateTests.razor`, `src/BlazorWebFormsComponents.Test/ListView/CrudEvents.razor`
+- **Pattern:** In Blazor Razor templates, NEVER reference loop-external mutable variables inside a component's ChildContent (CascadingValue, etc.). Either capture values in loop-local variables before the component, or evaluate expressions before the component tag. This applies to any `<Component>@{code using loop var}</Component>` pattern.
+- **Lesson:** `foreach` iteration variables are safe in closures (new per iteration since C# 5), but variables declared outside the loop body are shared across all closures. Blazor components defer ChildContent rendering, so loop-external variables will have their final values.
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
+
+ Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+### FormView RenderOuterTable Parameter (2026-03-02)
+
+- **What:** Added `[Parameter] public bool RenderOuterTable { get; set; } = true;` to `FormView.razor.cs`. Updated `FormView.razor` to conditionally wrap content in `<table>` only when `RenderOuterTable` is true. When false, renders just the template content directly (no table, no header/footer rows, no pager — matching Web Forms behavior).
+- **Pattern:** Added the parameter in the code-behind file (`.razor.cs`) following existing parameter convention. Used `@if (RenderOuterTable)` / `else` branching in the `.razor` template to separate the two rendering paths. The `RenderOuterTable=false` path still calls `DataBinding`/`DataBound` and uses `CascadingValue` for the current item — only the table wrapper is removed.
+- **Why:** WingtipToys `ProductDetails.aspx` uses `RenderOuterTable="false"` to suppress the wrapping table. This was the only blocking gap for the WingtipToys migration. Default `true` preserves backward compatibility — all 29 existing FormView tests pass unchanged.
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+ Team update (2026-03-02): FormView RenderOuterTable implemented (default true, false suppresses table wrapper). Only blocking gap for WingtipToys resolved.  decided by Cyclops
+
+ Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
+

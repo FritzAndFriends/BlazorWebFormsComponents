@@ -64,57 +64,75 @@ Key patterns: Timer parameter inheritance -- use C# API, not Razor templates. No
 
  Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.
 
-### M20 Skins & Themes Pipeline Tests (Issue #368)
+<!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + FontInfo tests -->
 
-Wrote 13 bUnit end-to-end tests in `src/BlazorWebFormsComponents.Test/Theming/ThemingPipelineTests.razor` validating the ThemeProvider → BaseWebFormsComponent → BaseStyledComponent pipeline using real components (Button, Label, Panel):
+### M20 Theming & FontInfo Test Summary (2026-03-01 through 2026-03-02)
 
-1. `DefaultSkin_AppliesBackColor_ToButton` — default skin applies BackColor via `#FFDEAD`
-2. `NamedSkin_AppliesVia_SkinID` — SkinID="highlight" selects named skin with BackColor + Font.Bold
-3. `ExplicitValue_OverridesTheme_StyleSheetThemeSemantics` — explicit BackColor="Red" overrides theme Blue
-4. `EnableThemingFalse_IgnoresTheme` — EnableTheming=false skips all theme application
-5. `NoThemeProvider_WorksNormally` — Button renders normally without ThemeProvider
-6. `MissingSkinID_DoesNotThrow_FallsBackGracefully` — SkinID="nonexistent" silently skips
-7. `NestedThemeProvider_InnerOverridesOuter` — inner ThemeProvider wins for its children
-8. `Theme_AppliesForeColor_ToPanel` — ForeColor on Panel div
-9. `Theme_AppliesCssClass_ToLabel` — CssClass on Label span
-10. `Theme_AppliesWidthAndHeight_ToButton` — Width/Height on Button input
-11. `Theme_AppliesFontProperties_ToLabel` — Bold, Italic, Underline on Label span
-12. `MultipleControlTypes_ThemedSimultaneously` — Button+Label+Panel in same ThemeProvider
-13. `ExplicitCssClass_OverridesThemeCssClass` — explicit CssClass beats theme CssClass
+**Skins & Themes pipeline tests (13 tests, Issue #368):** ThemingPipelineTests.razor validates ThemeProvider > BaseWebFormsComponent > BaseStyledComponent pipeline using Button/Label/Panel. Covers: default skin, named SkinID, explicit-overrides-theme, EnableTheming=false, no ThemeProvider, missing SkinID graceful, nested ThemeProvider override, ForeColor/CssClass/Width/Height/Font properties, multi-control theming. Total: 1426 tests.
 
-Total: 1426 tests (1413 existing + 13 new), 0 failures.
+**FontInfo sync tests (11 tests):** 9 unit tests (FontInfoSyncTests.cs) + 2 pipeline tests verifying Name/Names bidirectional sync. Setting Name updates Names, setting Names updates Name (first entry). Null/empty clears both. Last-write-wins semantics. Pipeline tests confirm theme Font.Name renders font-family via auto-sync. Total: 1437 tests.
 
-📌 Bug found: `ApplyThemeSkin` sets `Font.Name` but the style builder reads `Font.Names` for `font-family` rendering. Theme font-family does not render. Not blocking — deferred to M11 skin implementation. — Rogue
+Key patterns: Button=input, Label=span, Panel=div for theme tests. Missing SkinID returns null (no skin, not even default). FontInfo sync tests are pure C# (no bUnit). Theme font-family pipeline: ApplyThemeSkin sets Font.Name > auto-sync > Font.Names > style builder renders.
 
-📌 Test pattern: Button renders as `<input>`, Label as `<span>`, Panel as `<div>`. For theme pipeline tests, use `cut.Find("input")`, `cut.Find("span")`, `cut.Find("div")` respectively. Style attribute contains CSS properties like `background-color:Red`, `color:Blue`, `font-weight:bold`. — Rogue
+Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
 
-📌 Test pattern: Missing SkinID (named skin not registered) returns null from `GetSkin()` — no skin applied at all, not even the default skin for that control type. This is by design per Jeff's decision. — Rogue
 
-### FontInfo Name/Names Auto-Sync Tests
+### ListView EditItemTemplate Tests (Issue #406, 2026-03-02)
 
-Wrote 11 tests (9 unit + 2 pipeline) validating the FontInfo Name/Names auto-sync fix by Cyclops:
+6 bUnit tests in ListView/EditTemplateTests.razor: EditIndex matching/non-matching/negative, HandleCommand Edit/Cancel swap, null EditItemTemplate fallback. TDD: 2 pass (negative/null), 4 fail (the bug). CSS class selectors (span.display vs span.edit) for template identification. HandleCommand tests use cut.InvokeAsync() for Blazor dispatcher context.
 
-**FontInfoSyncTests.cs (9 unit tests):**
-1. `SettingName_UpdatesNames` — Name="Arial" → Names="Arial"
-2. `SettingNames_UpdatesName_ToFirstFont` — Names="Verdana" → Name="Verdana"
-3. `SettingNames_WithMultipleFonts_SetsNameToFirst` — Names="Arial, sans-serif" → Name="Arial"
-4. `SettingName_ToNull_ClearsNames` — Name=null → Names is null/empty
-5. `SettingName_ToEmpty_ClearsNames` — Name="" → Names is null/empty
-6. `SettingNames_ToNull_ClearsName` — Names=null → Name is null/empty
-7. `SettingNames_ToEmpty_ClearsName` — Names="" → Name is null/empty
-8. `SettingNames_ThenName_NameWins` — Last-write-wins: Name overrides Names for both properties
-9. `SettingName_ThenNames_NamesWins` — Last-write-wins: Names overrides Name for both properties
+### FormView RenderOuterTable Tests (2026-03-02)
 
-**ThemingPipelineTests.razor (2 pipeline tests):**
-14. `Theme_FontName_RendersFontFamily_ViaAutoSync` — Button with theme Font.Name="Arial" renders font-family:Arial
-15. `Theme_FontName_MultipleViaNames_RendersFontFamily` — Label with theme Font.Name="Verdana" renders font-family:Verdana
+8 bUnit tests in FormView/RenderOuterTable.razor: default/true/false rendering, template content, structural equivalence, empty data (text + template), edit mode. All pass. Compare element counts not raw Markup (Blazor generates unique event handler IDs per render). RenderOuterTable=false: no table/tr/td wrappers, empty data path also strips wrappers.
 
-All 1437 tests pass (0 failures). Cyclops's auto-sync fix was already in place — the previously-documented bug (ApplyThemeSkin sets Font.Name but style builder reads Font.Names) is now resolved.
+📌 Test patterns: (1) CSS class selectors for template switching tests. (2) cut.InvokeAsync for HandleCommand. (3) FindAll().Count for structural comparison, not ShouldBe on Markup.
 
-📌 Bug resolved: The Font.Name/Font.Names disconnect is fixed. ApplyThemeSkin sets Font.Name → auto-sync propagates to Font.Names → style builder reads Font.Names → font-family renders correctly. Full pipeline verified. — Rogue
-
-📌 Test pattern: FontInfo sync tests are pure C# unit tests (no bUnit needed). Use `new FontInfo()` then set properties and assert the counterpart. Last-write-wins semantics: setting Name then Names means Names wins, and vice versa. — Rogue
-
- Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
-
+📌 Team updates (2026-03-02): Skins roadmap (3 waves, 15 WIs, Forge), M22 planned (Forge), project reframed as migration system (Jeff), ModelErrorMessage 29/29 (Forge), WingtipToys pipeline validated — three-layer pipeline (Script→Skill→Agent), 18-26 hours total, scaffolded Identity UI for Account pages (Forge).
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+### ListView EditItemTemplate Rendering Tests (Issue #406)
+
+Wrote 6 bUnit tests in `src/BlazorWebFormsComponents.Test/ListView/EditTemplateTests.razor` for the EditItemTemplate rendering fix:
+
+1. `EditIndex_MatchingItem_RendersEditItemTemplate` — EditIndex=0 parameter, verify span.edit appears for item 0
+2. `EditIndex_NonMatchingItems_StillUseItemTemplate` — EditIndex=0, verify items 1+ still use span.display
+3. `EditIndexNegativeOne_AllItemsUseItemTemplate` — default EditIndex=-1, all items use ItemTemplate ✅
+4. `HandleCommand_Edit_SwapsToEditItemTemplate` — HandleCommand("Edit") triggers template swap in DOM
+5. `HandleCommand_Cancel_RestoresItemTemplate` — Start in edit mode, cancel returns to ItemTemplate
+6. `EditItemTemplateNull_FallsBackToItemTemplate` — EditIndex=0 but no EditItemTemplate, falls back to ItemTemplate ✅
+
+**TDD results:** 2 pass (negative/null cases), 4 fail (template swap behavior — the exact bug #406 describes). All 39 pre-existing ListView tests unaffected.
+
+📌 Test pattern: ListView EditItemTemplate rendering tests use CSS class selectors (`span.display` vs `span.edit`) to distinguish which template rendered for each item. This avoids fragile markup matching and clearly shows template selection per row. — Rogue
+
+📌 Edge case: ListView.razor line 59 has the correct template selection logic (`EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null`) but it doesn't produce the expected DOM output when EditIndex is set via parameter. The bug is in the rendering pipeline, not the conditional logic. Tests confirm this — `theListView.EditIndex` is correctly set but the rendered HTML doesn't reflect it. — Rogue
+
+📌 Test pattern: For HandleCommand-based tests, use `cut.InvokeAsync(() => theListView.HandleCommand(...))` pattern (from CrudEvents.razor) to ensure Blazor dispatcher context. Verify DOM state with `cut.FindAll()` AFTER the invoke, not just property values. — Rogue
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
+
+ Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+### FormView RenderOuterTable Tests
+
+Wrote 8 bUnit tests in `src/BlazorWebFormsComponents.Test/FormView/RenderOuterTable.razor` for the RenderOuterTable parameter:
+
+1. `FormView_Default_RendersOuterTable` — default behavior (RenderOuterTable=true), verifies `<table>` + border-collapse present
+2. `FormView_RenderOuterTableTrue_RendersOuterTable` — explicit true produces outer table
+3. `FormView_RenderOuterTableFalse_NoOuterTable` — false removes all `<table>` elements, template content still renders
+4. `FormView_RenderOuterTableFalse_RendersTemplateContent` — false still renders actual data from ItemTemplate
+5. `FormView_RenderOuterTableTrue_MatchesDefaultStructure` — explicit true matches default DOM structure (table/tr/td/a counts)
+6. `FormView_RenderOuterTableFalse_EmptyData_RendersEmptyDataText` — false + empty data still shows EmptyDataText, no table
+7. `FormView_RenderOuterTableFalse_EmptyData_RendersEmptyDataTemplate` — false + EmptyDataTemplate renders custom template, no table
+8. `FormView_RenderOuterTableFalse_EditMode_RendersEditTemplate` — false in edit mode renders EditItemTemplate, no table
+
+All 8 tests pass against the already-landed implementation.
+
+📌 Test pattern: When comparing two separate component renders for structural equivalence, do NOT use `ShouldBe` on raw Markup — Blazor generates unique internal event handler IDs per render. Compare element counts (`FindAll("table").Count`) or structural features instead. — Rogue
+
+📌 FormView RenderOuterTable convention: When `RenderOuterTable=false`, the `else` branch in FormView.razor renders template content directly without `<table>`/`<tr>`/`<td>` wrappers. Empty data path also strips table wrappers. The implementation already exists on the current branch. — Rogue
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
+

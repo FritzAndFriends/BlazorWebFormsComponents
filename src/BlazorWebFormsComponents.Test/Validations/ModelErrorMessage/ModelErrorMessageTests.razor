@@ -1,0 +1,269 @@
+
+@code {
+
+	private ExampleModel exampleModel = new ExampleModel();
+
+	[Fact]
+	public void ModelErrorMessage_NoErrors_RendersNothing()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		cut.FindAll("span").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ModelErrorMessage_SingleError_RendersSpanWithMessage()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		// Add an error to the EditContext
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Name is required.");
+		editContext.NotifyValidationStateChanged();
+
+		var span = cut.Find("span");
+		span.TextContent.ShouldContain("Name is required.");
+		span.GetAttribute("class").ShouldBe("text-danger");
+	}
+
+	[Fact]
+	public void ModelErrorMessage_MultipleErrors_RendersWithBrSeparator()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Name is required.");
+		messageStore.Add(editContext.Field("Name"), "Name must be at least 3 characters.");
+		editContext.NotifyValidationStateChanged();
+
+		var span = cut.Find("span");
+		span.InnerHtml.ShouldContain("Name is required.");
+		span.InnerHtml.ShouldContain("<br>");
+		span.InnerHtml.ShouldContain("Name must be at least 3 characters.");
+	}
+
+	[Fact]
+	public void ModelErrorMessage_CssClassApplied()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-error custom-class" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Error");
+		editContext.NotifyValidationStateChanged();
+
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("text-error custom-class");
+	}
+
+	[Fact]
+	public void ModelErrorMessage_NoCssClass_NoClassAttribute()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Error");
+		editContext.NotifyValidationStateChanged();
+
+		var span = cut.Find("span");
+		span.HasAttribute("class").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ModelErrorMessage_NullModelStateKey_RendersNothing()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Error");
+		editContext.NotifyValidationStateChanged();
+
+		cut.FindAll("span").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ModelErrorMessage_DifferentKey_RendersNothing()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Email" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Name is required.");
+		editContext.NotifyValidationStateChanged();
+
+		cut.FindAll("span").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ModelErrorMessage_ErrorCleared_RendersNothing()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+
+		// Add error
+		messageStore.Add(editContext.Field("Name"), "Name is required.");
+		editContext.NotifyValidationStateChanged();
+		cut.Find("span").TextContent.ShouldContain("Name is required.");
+
+		// Clear error
+		messageStore.Clear();
+		editContext.NotifyValidationStateChanged();
+		cut.FindAll("span").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ModelErrorMessage_SetFocusOnError_CallsJsInterop()
+	{
+		JSInterop.SetupVoid("bwfc.Validation.SetFocus", "password");
+
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Password"
+					AssociatedControlID="password"
+					SetFocusOnError="true"
+					CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Password"), "Password too short.");
+		editContext.NotifyValidationStateChanged();
+
+		var invocation = JSInterop.VerifyInvoke("bwfc.Validation.SetFocus");
+		invocation.Arguments[0].ShouldBe("password");
+	}
+
+	[Fact]
+	public void ModelErrorMessage_SetFocusOnError_NoAssociatedControl_NoJsCall()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Password"
+					SetFocusOnError="true"
+					CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Password"), "Password too short.");
+		editContext.NotifyValidationStateChanged();
+
+		JSInterop.VerifyNotInvoke("bwfc.Validation.SetFocus");
+	}
+
+	[Fact]
+	public void ModelErrorMessage_VisibleFalse_RendersNothing()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" Visible="false" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "Error");
+		editContext.NotifyValidationStateChanged();
+
+		cut.FindAll("span").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ModelErrorMessage_HtmlEncodesMessages()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		messageStore.Add(editContext.Field("Name"), "<script>alert('xss')</script>");
+		editContext.NotifyValidationStateChanged();
+
+		var span = cut.Find("span");
+		span.InnerHtml.ShouldNotContain("<script>");
+		span.InnerHtml.ShouldContain("&lt;script&gt;");
+	}
+
+	[Fact]
+	public void ModelErrorMessage_StripsBwfcValidatorMetadata()
+	{
+		var cut = Render(
+			@<EditForm Model="@exampleModel">
+				<ModelErrorMessage ModelStateKey="Name" CssClass="text-danger" />
+			</EditForm>
+		);
+
+		var editForm = cut.FindComponent<EditForm>();
+		var editContext = editForm.Instance.EditContext;
+		var messageStore = new ValidationMessageStore(editContext);
+		// BWFC validators encode as "Text,ErrorMessage\x1FValidationGroup"
+		messageStore.Add(editContext.Field("Name"), "* Required,Name is required.\x1FGroup1");
+		editContext.NotifyValidationStateChanged();
+
+		var span = cut.Find("span");
+		span.TextContent.ShouldBe("Name is required.");
+		span.TextContent.ShouldNotContain("Group1");
+		span.TextContent.ShouldNotContain("* Required");
+	}
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+		public string Email { get; set; }
+		public string Password { get; set; }
+	}
+}

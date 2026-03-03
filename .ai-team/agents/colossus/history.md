@@ -52,3 +52,22 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops
 
  Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
+
+ Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+
+## Learnings
+
+### ModelErrorMessage Integration Tests (added by task request)
+- Added 1 smoke test `[InlineData]` for `/ControlSamples/ModelErrorMessage` in the `ValidationControl_Loads_WithoutErrors` Theory group.
+- Added 3 interactive tests in `InteractiveComponentTests.cs`:
+  - `ModelErrorMessage_Submit_ShowsErrors` — submits empty form, asserts `span.text-danger` appears with error text.
+  - `ModelErrorMessage_ValidSubmit_NoErrors` — fills matching valid passwords, asserts no error spans and success message appears.
+  - `ModelErrorMessage_ClearButton_RemovesErrors` — triggers errors then clicks Clear, asserts errors are removed from DOM.
+- The ModelErrorMessage component renders nothing when no errors exist (conditional `@if`), so error-gone assertions use `CountAsync() == 0` rather than visibility checks.
+- For the Clear button test, used `WaitForSelectorAsync` with `State.Hidden` to reliably wait for Blazor re-render after clearing the EditContext.
+- `PressSequentiallyAsync` + `Tab` pattern used for Blazor Server InputText fields, consistent with established team conventions.
