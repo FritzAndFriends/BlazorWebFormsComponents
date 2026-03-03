@@ -5501,7 +5501,47 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **What:** Fixed two Web Forms lifecycle deviations in ListView: (1) `ItemCreated` changed from `EventCallback` firing once on first render to `EventCallback<ListViewItemEventArgs>` firing per-item before `ItemDataBound` in both grouped and non-grouped paths; (2) `ItemCommand` now fires for ALL commands before routing to specific handlers (Edit, Delete, Update, etc.), not just for unknown commands.
 **Why:** Web Forms fires `ItemCommand` first for every command, then the specific event. `ItemCreated` fires per-item during data binding. These are documented lifecycle behaviors that migration code depends on. The IOrderedDictionary properties (Keys, Values, NewValues, OldValues) from Web Forms EventArgs are deliberately omitted — they're tied to the DataSource control paradigm that doesn't exist in Blazor.
 
-### 2026-03-03: Migration toolkit delivery format (consolidated)
-**By:** Forge, Jeffrey T. Fritz
-**What:** Forge designed a migration toolkit package with 9 documents in \/migration-toolkit/\ (README, QUICKSTART, METHODOLOGY, ARCHITECTURE-GUIDE, CONTROL-COVERAGE, CASE-STUDY, FAQ, CHECKLIST, copilot-instructions-template) referencing existing scripts, Copilot skill, and migration agent. Full design: \planning-docs/MIGRATION-TOOLKIT-DESIGN.md\. Jeff then directed a pivot: instead of 9 separate docs, deliver a single SKILL.md in GitHub Copilot skill format containing migration instructions plus links to the BWFC NuGet package.
-**Why:** The component library, scripts, skills, and agent exist but lack a unified entry point for developers. Forge's design addressed this with a comprehensive document set. Jeff refined the delivery format to a single portable skill file, which is directly consumable by Copilot instances  simpler distribution, same content goals.
+### 2026-03-03: Migration toolkit delivery format and distributable skill (consolidated)
+**By:** Forge, Jeffrey T. Fritz, Beast
+**What:** Forge designed a migration toolkit package with 9 documents in `/migration-toolkit/` (README, QUICKSTART, METHODOLOGY, ARCHITECTURE-GUIDE, CONTROL-COVERAGE, CASE-STUDY, FAQ, CHECKLIST, copilot-instructions-template). Full design: `planning-docs/MIGRATION-TOOLKIT-DESIGN.md`. Jeff then directed a pivot: instead of 9 separate docs, deliver a single SKILL.md in GitHub Copilot skill format. Beast implemented this as `.github/skills/bwfc-migration/SKILL.md` — a distributable, self-contained skill file designed to be copied into any project's `.github/skills/` folder. Key design decisions: (1) Single file, not 9 documents — Jeff explicitly changed direction to skill format. (2) Self-contained / NuGet-first — zero internal repo path references, works when dropped into any project. (3) Copilot-optimized — tables over prose, exact code transforms, literal before/after examples. (4) Preserves existing internal `webforms-migration/SKILL.md` for internal use. (5) Includes 10 architecture decision templates (Session→DI, Identity→Blazor Identity, EF6→EF Core, etc.). (6) Honest about BWFC limitations (DataSource controls, Wizard, Web Parts, AJAX Toolkit extenders).
+**Why:** The component library, scripts, skills, and agent lacked a unified entry point. Forge's design addressed this with a comprehensive document set. Jeff refined the format to a single portable skill file — more portable, discoverable, and Copilot-native than a folder of markdown documents. The skill is the primary user-facing deliverable; `migration-toolkit/` documents are now secondary artifacts.
+**Impact:** Forge/Cyclops must update `bwfc-migration` skill if components are added/removed or APIs change. Jubilee: no sample page changes needed.
+
+### 2026-03-03: Migration Toolkit Content Structure
+
+# Decision: Migration Toolkit Content Structure
+
+**By:** Beast (Technical Writer)
+**Date:** 2026-03-03
+**Context:** Migration toolkit authoring per Forge's MIGRATION-TOOLKIT-DESIGN.md
+
+## What
+
+Created 6 priority documents in `/migration-toolkit/` following Forge's design:
+1. README.md (entry point)
+2. QUICKSTART.md (step-by-step)
+3. CONTROL-COVERAGE.md (52-component table)
+4. METHODOLOGY.md (three-layer pipeline)
+5. CHECKLIST.md (per-page template)
+6. copilot-instructions-template.md (drop-in Copilot config)
+
+## Key Content Decisions
+
+1. **copilot-instructions-template.md is self-contained** — unlike other toolkit docs that use relative links to scripts/skill/agent, this template includes condensed migration rules inline. Reason: developers copy this file into their own project where BWFC relative paths don't exist. It must work standalone.
+
+2. **CONTROL-COVERAGE.md is the single coverage table** — other toolkit docs link to it rather than duplicating the 52-component table. This follows Forge's "no duplication" directive.
+
+3. **Remaining 3 documents deferred** — ARCHITECTURE-GUIDE.md, FAQ.md, and CASE-STUDY.md from the design are not yet written. They are lower priority per Forge's priority ordering. Can be authored in a follow-up.
+
+## Why
+
+Jeff reframed the project as a "migration acceleration system." The toolkit is the user-facing product documentation for that system. These 6 docs cover the critical path from discovery to execution.
+
+## Impact on Other Agents
+
+- **Cyclops/Forge:** If scripts (`bwfc-scan.ps1`, `bwfc-migrate.ps1`) or skill (`SKILL.md`) change parameters or behavior, toolkit docs may need updates (especially QUICKSTART.md and copilot-instructions-template.md).
+- **Jubilee:** The QUICKSTART references `samples/AfterWingtipToys/` as reference implementation.
+- **All:** Three remaining docs (ARCHITECTURE-GUIDE.md, FAQ.md, CASE-STUDY.md) can be authored when prioritized.
+
+
+
