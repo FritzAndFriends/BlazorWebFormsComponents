@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys.Data
 {
-    public class ProductContext : DbContext
+    public class ProductContext : IdentityDbContext<IdentityUser>
     {
         public ProductContext(DbContextOptions<ProductContext> options) : base(options) { }
 
@@ -15,6 +17,7 @@ namespace WingtipToys.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Product>().HasKey(p => p.ProductID);
             modelBuilder.Entity<Category>().HasKey(c => c.CategoryID);
         }
