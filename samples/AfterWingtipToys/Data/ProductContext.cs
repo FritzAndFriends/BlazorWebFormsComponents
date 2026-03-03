@@ -20,6 +20,7 @@ namespace WingtipToys.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Product>().HasKey(p => p.ProductID);
             modelBuilder.Entity<Category>().HasKey(c => c.CategoryID);
+            modelBuilder.Entity<CartItem>().HasKey(c => c.ItemId);
         }
     }
 }
