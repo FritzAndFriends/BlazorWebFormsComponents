@@ -81,4 +81,5 @@
 - **Highlighted key migration changes:** `asp:` prefix removal, `runat="server"` removal, `ItemType` → `TItem`, server binding expressions → `@context`, `ViewStateMode`/`EnableViewState` removal.
 - **Stats bar** at bottom of each page shows controls migrated, attributes preserved, and lines changed.
 - **Source files read:** ProductList.aspx, ShoppingCart.aspx, Account/Login.aspx and their AfterWingtipToys .razor counterparts.
+� Team update (2026-03-02): ModelErrorMessage documentation shipped  docs/ValidationControls/ModelErrorMessage.md, status.md updated to 52 components  decided by Beast
 
