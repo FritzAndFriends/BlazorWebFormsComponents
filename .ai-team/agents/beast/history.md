@@ -94,3 +94,17 @@
   - Structured for non-technical readers: bottom-line callout, business value lead, tables for data, minimal jargon
   - Sections: What is BWFC, Migration Scope, Component Coverage, Three-Layer Pipeline, Time & Cost Impact, Layer 1 Results, Page Readiness, Risk Reduction, What's Next
 
+- **Migration Toolkit (6 priority documents in `/migration-toolkit/`):**
+  1. **README.md** — Entry point. Prerequisites, three-layer pipeline overview, quick overview (scan→transform→guide→verify), file map, links to existing artifacts, honest "what BWFC doesn't cover" section. 100% net-new.
+  2. **QUICKSTART.md** — Linear 9-step walkthrough from "I have a Web Forms app" to running Blazor. ~30% extracted from migration skill, ~70% net-new.
+  3. **CONTROL-COVERAGE.md** — Full 52-component table with complexity ratings (Trivial/Easy/Medium/Complex), key changes, gotchas. Includes unsupported controls (DataSource, Wizard, Web Parts, AJAX Toolkit). ~70% extracted from migration skill, ~30% net-new.
+  4. **METHODOLOGY.md** — Three-layer pipeline deep-dive with ASCII diagram, layer boundaries, readiness categories, time estimates. ~60% from executive report, ~40% net-new.
+  5. **CHECKLIST.md** — Copy-paste per-page migration checklist organized by layer. Usage tips for GitHub issues and tracking. 100% net-new.
+  6. **copilot-instructions-template.md** — Drop-in `.github/copilot-instructions.md` template with condensed rules, expression tables, placeholder sections. ~60% from migration skill, ~40% net-new.
+  - **Key decisions:** No content duplication — all docs reference scripts/skill/agent by relative path. CONTROL-COVERAGE.md is single source for coverage table in toolkit. copilot-instructions-template.md is self-contained (copied out of repo). Practitioner tone throughout.
+  - **Sources:** MIGRATION-TOOLKIT-DESIGN.md (blueprint), SKILL.md (rules/tables), WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md (metrics), migration.agent.md (decision frameworks), bwfc-scan.ps1/bwfc-migrate.ps1 (parameter docs).
+
+
+ Team update (2026-03-03): ListView CRUD events  ItemCreated now fires per-item, ItemCommand fires for ALL commands before specific handlers  decided by Cyclops
+
+ Team update (2026-03-03): Migration toolkit pivoted from 9-doc folder to single SKILL.md in Copilot skill format  decided by Jeffrey T. Fritz

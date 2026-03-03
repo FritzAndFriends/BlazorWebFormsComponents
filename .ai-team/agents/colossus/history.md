@@ -71,3 +71,5 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - The ModelErrorMessage component renders nothing when no errors exist (conditional `@if`), so error-gone assertions use `CountAsync() == 0` rather than visibility checks.
 - For the Clear button test, used `WaitForSelectorAsync` with `State.Hidden` to reliably wait for Blazor re-render after clearing the EditContext.
 - `PressSequentiallyAsync` + `Tab` pattern used for Blazor Server InputText fields, consistent with established team conventions.
+
+ Team update (2026-03-03): ListView CRUD events  ItemCreated now fires per-item, ItemCommand fires for ALL commands before specific handlers  decided by Cyclops

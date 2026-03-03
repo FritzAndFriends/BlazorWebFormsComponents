@@ -5494,3 +5494,14 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **Date:** 2026-03-02
 **What:** Side-by-side comparison found 7 CSS/visual differences: (1) Wrong Bootstrap theme  stock BS3 instead of Bootswatch Cerulean, (2) Single-column product grid instead of 4-column, (3) Missing Trucks category, (4) Site.css not referenced, (5) BoundField DataFormatString bug  premature .ToString() loses numeric formatting, (6) bootstrap-theme.min.css adding unwanted gradients, (7) Cart prices missing dollar sign (symptom of #5). Fixes: replace CDN with local Cerulean CSS, add GroupItemCount/templates to ListView, add Trucks category, fix BoundField.razor.cs line 48.
 **Why:** Migration showcase screenshots must visually match the original. The BoundField bug is a library-level defect affecting all DataFormatString consumers.
+
+### 2026-03-03: ListView CRUD events — correctness fixes for ItemCreated and ItemCommand
+
+**By:** Cyclops
+**What:** Fixed two Web Forms lifecycle deviations in ListView: (1) `ItemCreated` changed from `EventCallback` firing once on first render to `EventCallback<ListViewItemEventArgs>` firing per-item before `ItemDataBound` in both grouped and non-grouped paths; (2) `ItemCommand` now fires for ALL commands before routing to specific handlers (Edit, Delete, Update, etc.), not just for unknown commands.
+**Why:** Web Forms fires `ItemCommand` first for every command, then the specific event. `ItemCreated` fires per-item during data binding. These are documented lifecycle behaviors that migration code depends on. The IOrderedDictionary properties (Keys, Values, NewValues, OldValues) from Web Forms EventArgs are deliberately omitted — they're tied to the DataSource control paradigm that doesn't exist in Blazor.
+
+### 2026-03-03: Migration toolkit delivery format (consolidated)
+**By:** Forge, Jeffrey T. Fritz
+**What:** Forge designed a migration toolkit package with 9 documents in \/migration-toolkit/\ (README, QUICKSTART, METHODOLOGY, ARCHITECTURE-GUIDE, CONTROL-COVERAGE, CASE-STUDY, FAQ, CHECKLIST, copilot-instructions-template) referencing existing scripts, Copilot skill, and migration agent. Full design: \planning-docs/MIGRATION-TOOLKIT-DESIGN.md\. Jeff then directed a pivot: instead of 9 separate docs, deliver a single SKILL.md in GitHub Copilot skill format containing migration instructions plus links to the BWFC NuGet package.
+**Why:** The component library, scripts, skills, and agent exist but lack a unified entry point for developers. Forge's design addressed this with a comprehensive document set. Jeff refined the delivery format to a single portable skill file, which is directly consumable by Copilot instances  simpler distribution, same content goals.

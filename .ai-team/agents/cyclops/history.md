@@ -80,20 +80,7 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
 📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered.
 📌 Team update (2026-03-03): WingtipToys CSS fidelity — 7 visual differences identified requiring fixes (Cerulean theme, 4-column grid, BoundField bug, Trucks category, Site.css, category IDs) — decided by Forge
-<!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + release process -->
-
-### M20 Theming & Release Process Summary (2026-03-01 through 2026-03-02)
-
-**Issue #366 theme wiring:** Moved CascadingParameter ThemeConfiguration to BaseWebFormsComponent (named CascadedTheme to avoid Blazor duplicate-parameter error from _Imports.razor). ApplySkin renamed to ApplyThemeSkin (virtual override chain). ThemeProvider got @inherits ComponentBase to exclude from BaseWebFormsComponent inheritance. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files including infrastructure components.
-
-**FontInfo auto-sync:** Name and Names converted to backing-field properties with bidirectional sync (setting Name updates Names and vice versa). ApplyThemeSkin guard checks both Font.Name AND Font.Names before applying theme font. Root cause: ApplyThemeSkin set Font.Name but ToStyle() reads Font.Names. Lesson: paired/synced Web Forms properties must replicate sync behavior.
-
-**Unified release.yml:** Single workflow on release:published coordinates NuGet + Docker + GHCR + docs + demos. Version from tag_name stripping v prefix. NuGet override: -p:PackageVersion + -p:Version. version.json changed to 3-segment SemVer (0.17.0). deploy-server-side.yml and nuget.yml refactored to workflow_dispatch-only. docs.yml fixed deprecated ::set-output. NBGV ignores git tags -- reads version.json only.
-
-Team updates: Unified release process (PR #408), Skins & Themes roadmap (3 waves, 15 WIs).
-
-
- Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+<!-- Note: M20 Theming & Release Process summary (2026-03-02) removed — superseded by M20 Theming, Release & WingtipToys Context above -->
 ### Issue #406 — ListView EditItemTemplate Not Rendering (2026-03-02)
 
 - **Bug:** Clicking Edit in a ListView with EditItemTemplate fired the ItemEditing event and set EditIndex correctly, but the ListView did not visually swap from ItemTemplate to EditItemTemplate.
