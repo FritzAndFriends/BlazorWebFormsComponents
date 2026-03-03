@@ -94,3 +94,10 @@
   - Structured for non-technical readers: bottom-line callout, business value lead, tables for data, minimal jargon
   - Sections: What is BWFC, Migration Scope, Component Coverage, Three-Layer Pipeline, Time & Cost Impact, Layer 1 Results, Page Readiness, Risk Reduction, What's Next
 
+
+
+ Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz
+
+
+ Team update (2026-03-03): ListView EventArgs now include IOrderedDictionary properties (Keys, Values, OldValues, NewValues) for full Web Forms parity  decided by Cyclops
+

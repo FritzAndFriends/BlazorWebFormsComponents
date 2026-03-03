@@ -1445,7 +1445,7 @@ ListView CRUD events follow the same dual-event pattern as GridView and FormView
 
 ## Why
 
-Consistent with GridView's `EditRow`/`UpdateRow`/`DeleteRow`/`CancelEdit` and FormView's `HandleCommandArgs` patterns. ListView event args are intentionally simpler than FormView's (no OrderedDictionary) because the task spec said "don't over-engineer dictionaries if simpler patterns work."
+Consistent with GridView's `EditRow`/`UpdateRow`/`DeleteRow`/`CancelEdit` and FormView's `HandleCommandArgs` patterns. ~~ListView event args are intentionally simpler than FormView's (no OrderedDictionary).~~ **Update (2026-03-04):** IOrderedDictionary properties were later added to ListView EventArgs for full Web Forms parity — see decision "2026-03-04: ListView EventArgs use IOrderedDictionary for Web Forms parity."
 
 ## Key Decisions
 
@@ -5494,3 +5494,21 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **Date:** 2026-03-02
 **What:** Side-by-side comparison found 7 CSS/visual differences: (1) Wrong Bootstrap theme  stock BS3 instead of Bootswatch Cerulean, (2) Single-column product grid instead of 4-column, (3) Missing Trucks category, (4) Site.css not referenced, (5) BoundField DataFormatString bug  premature .ToString() loses numeric formatting, (6) bootstrap-theme.min.css adding unwanted gradients, (7) Cart prices missing dollar sign (symptom of #5). Fixes: replace CDN with local Cerulean CSS, add GroupItemCount/templates to ListView, add Trucks category, fix BoundField.razor.cs line 48.
 **Why:** Migration showcase screenshots must visually match the original. The BoundField bug is a library-level defect affecting all DataFormatString consumers.
+
+### 2026-03-02: User directive  Themes implementation last
+**By:** Jeff Fritz (via Copilot)
+**What:** Themes (#369, M11 Full Skins & Themes) should come LAST in priority. ListView CRUD events first, then WingtipToys remaining features, then themes.
+**Why:** User request  captured for team memory
+### 2026-03-04: ListView EventArgs use IOrderedDictionary for Web Forms parity
+**By:** Cyclops
+**What:** Added IOrderedDictionary properties to ListViewInsertEventArgs (Values), ListViewUpdateEventArgs (Keys, OldValues, NewValues), and ListViewDeleteEventArgs (Keys, Values), initialized to empty OrderedDictionary in constructors. Matches FormViewUpdateEventArgs/FormViewDeleteEventArgs pattern. Also added TotalRowCount to ListViewPagePropertiesChangingEventArgs.
+**Why:** ListView CRUD EventArgs were missing dictionary-based properties (Keys, Values, OldValues, NewValues) that Web Forms originals expose. Consumers can now populate these in event handlers, matching the Web Forms programming model. No breaking changes  all new properties are additive. This supersedes the earlier M7 decision to avoid OrderedDictionary on ListView; full parity is now required.
+### 2026-03-02: ListView CRUD Event Test Conventions
+**By:** Rogue
+**What:** 43 bUnit tests for all 16 ListView CRUD events. Conventions: (1) event ordering via List<string> with ShouldBe assertions, (2) cancellation tests set Cancel=true and assert -ed handler stays null, (3) DataBound/ItemDataBound use ShouldBeGreaterThanOrEqualTo for bUnit double-render, (4) ItemCreated needs async test with InvokeAsync, (5) CancelMode detection: InsertItemPosition!=None && EditIndex<0 = CancelingInsert.
+**Why:** Proactive tests written ahead of implementation for immediate CI validation. Patterns should be followed for any future ListView event tests.
+### 2026-03-03: WingtipToys remaining feature schedule
+**By:** Forge
+**What:** 7-phase prioritized schedule for WingtipToys migration: (1) Data Foundation  EF Core, models, CartStateService, BoundField fix; (2) Product Browsing  ProductList/Details data binding; (3) Shopping Cart  AddToCart, ShoppingCart wiring; (4) Checkout Flow  CheckoutStateService, mock PayPal, checkout pages; (5) Admin  add/remove product, FileUpload, validation; (6) Identity & Auth  ASP.NET Core Identity, login/register, authorization; (7) Polish  CSS verification, smoke test. 26 work items total (10S + 13M + 2L). Critical path: Phase 1  2  3  4  7. Max parallelism after Phase 1.
+**Why:** Jeff requested prioritization of remaining WingtipToys features. Gap is almost entirely code-behind logic  markup/BWFC migration is done. ~10-14 working days with parallel execution.
+
