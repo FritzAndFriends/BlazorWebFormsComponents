@@ -94,6 +94,32 @@
   - Structured for non-technical readers: bottom-line callout, business value lead, tables for data, minimal jargon
   - Sections: What is BWFC, Migration Scope, Component Coverage, Three-Layer Pipeline, Time & Cost Impact, Layer 1 Results, Page Readiness, Risk Reduction, What's Next
 
+- **Migration Toolkit (6 priority documents in `/migration-toolkit/`):**
+  1. **README.md** — Entry point. Prerequisites, three-layer pipeline overview, quick overview (scan→transform→guide→verify), file map, links to existing artifacts, honest "what BWFC doesn't cover" section. 100% net-new.
+  2. **QUICKSTART.md** — Linear 9-step walkthrough from "I have a Web Forms app" to running Blazor. ~30% extracted from migration skill, ~70% net-new.
+  3. **CONTROL-COVERAGE.md** — Full 52-component table with complexity ratings (Trivial/Easy/Medium/Complex), key changes, gotchas. Includes unsupported controls (DataSource, Wizard, Web Parts, AJAX Toolkit). ~70% extracted from migration skill, ~30% net-new.
+  4. **METHODOLOGY.md** — Three-layer pipeline deep-dive with ASCII diagram, layer boundaries, readiness categories, time estimates. ~60% from executive report, ~40% net-new.
+  5. **CHECKLIST.md** — Copy-paste per-page migration checklist organized by layer. Usage tips for GitHub issues and tracking. 100% net-new.
+  6. **copilot-instructions-template.md** — Drop-in `.github/copilot-instructions.md` template with condensed rules, expression tables, placeholder sections. ~60% from migration skill, ~40% net-new.
+  - **Key decisions:** No content duplication — all docs reference scripts/skill/agent by relative path. CONTROL-COVERAGE.md is single source for coverage table in toolkit. copilot-instructions-template.md is self-contained (copied out of repo). Practitioner tone throughout.
+  - **Sources:** MIGRATION-TOOLKIT-DESIGN.md (blueprint), SKILL.md (rules/tables), WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md (metrics), migration.agent.md (decision frameworks), bwfc-scan.ps1/bwfc-migrate.ps1 (parameter docs).
+
+
+ Team update (2026-03-03): ListView CRUD events  ItemCreated now fires per-item, ItemCommand fires for ALL commands before specific handlers  decided by Cyclops
+
+ Team update (2026-03-03): Migration toolkit pivoted from 9-doc folder to single SKILL.md in Copilot skill format  decided by Jeffrey T. Fritz
+
+- **Distributable BWFC Migration Skill (`.github/skills/bwfc-migration/SKILL.md`):**
+  - Created single distributable Copilot skill file consolidating all migration toolkit content into one self-contained document.
+  - **Key content decisions vs. internal webforms-migration skill:**
+    1. **Self-contained and NuGet-first:** No references to internal repo scripts (`bwfc-scan.ps1`, `bwfc-migrate.ps1`), agents, or `.ai-team/` paths. BWFC comes from NuGet, not repo clone. Designed to be dropped into any project's `.github/skills/` folder.
+    2. **Added three-layer methodology section:** Extracted from executive report — Layer 1 (mechanical, ~40%), Layer 2 (structural, ~45%), Layer 3 (architecture, ~15%) with expected page-readiness breakdown.
+    3. **Added 10 architecture decision templates (NEW content):** Master Page→Layout, Session→Scoped Services, Identity→Blazor Identity, EF6→EF Core, Global.asax→Program.cs, Web.config→appsettings.json, DataSource→Service Injection, RouteTable→@page, Handlers/Modules→Middleware, Third-Party→HttpClient. Each has before/after code.
+    4. **Added per-page migration checklist:** Layer-organized checkbox template from Forge's CHECKLIST design.
+    5. **Expanded component coverage summary:** Added category counts, component list per category, and "What BWFC Does NOT Cover" table (DataSource controls, Wizard, Web Parts, AJAX Toolkit extenders).
+    6. **Expanded common gotchas:** Added event handler signatures, TextMode casing, ScriptManager no-op guidance.
+    7. **Removed WingtipToys-specific section:** Not applicable for a distributable skill — that content is project-specific.
+  - Total: ~750 lines. Preserves ~90% of existing internal skill content, adds ~30% new content from design doc and executive report.
 
 
  Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz

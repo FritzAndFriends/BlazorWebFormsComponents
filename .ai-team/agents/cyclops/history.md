@@ -80,6 +80,8 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
 📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered.
 📌 Team update (2026-03-03): WingtipToys CSS fidelity — 7 visual differences identified requiring fixes (Cerulean theme, 4-column grid, BoundField bug, Trucks category, Site.css, category IDs) — decided by Forge
+<!-- Note: M20 Theming & Release Process summary (2026-03-02) removed — superseded by M20 Theming, Release & WingtipToys Context above -->
+### Issue #406 — ListView EditItemTemplate Not Rendering (2026-03-02)
 <!-- Archived 2026-03-03 by Scribe — M20 theming + release detail moved to summary above -->
 
 
@@ -91,4 +93,12 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
 
  Team update (2026-03-03): ListView CRUD test conventions established  43 tests, event ordering via List<string>, cancellation assertions, bUnit double-render handling  decided by Rogue
+
+### ListView CRUD Events — Correctness Fixes (2026-03-03)
+
+- **Issue #356 audit:** All 16 CRUD events were already declared (EventCallback parameters + EventArgs classes + HandleCommand routing) from M7 and M21. The issue was open because the work was done incrementally across milestones.
+- **Bug 1 — ItemCreated firing wrong:** Was `EventCallback` (no type param) firing once in `OnAfterRenderAsync(firstRender)`. Web Forms fires `ItemCreated` with `ListViewItemEventArgs` per-item during data binding, BEFORE `ItemDataBound`. Fixed: changed to `EventCallback<ListViewItemEventArgs>`, added `RaiseItemCreated()` helper, wired per-item in both non-grouped and grouped rendering paths in ListView.razor.
+- **Bug 2 — ItemCommand not firing for known commands:** Was only firing for unknown commands (in `default` case of switch). Web Forms fires `ItemCommand` for ALL commands first, then routes to the specific handler (ItemEditing, ItemDeleting, etc.). Fixed: moved `ItemCommand.InvokeAsync()` before the switch statement.
+- **Pattern:** Web Forms event order for commands is: ItemCommand → specific event (ItemEditing/ItemDeleting/etc.). ItemCreated fires per-item before ItemDataBound. These are documented Web Forms lifecycle behaviors that must be matched.
+- **EventArgs completeness:** Web Forms EventArgs have IOrderedDictionary properties (Keys, Values, NewValues, OldValues) tied to the DataSource control paradigm. These are deliberately omitted since Blazor has no DataSource controls — consumers work directly with typed objects via templates.
 

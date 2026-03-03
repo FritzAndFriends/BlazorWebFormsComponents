@@ -96,4 +96,45 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 
 **Key infrastructure:** NBGV 3.9.50, PackageId Fritz.BlazorWebFormsComponents, Docker ghcr.io path, version.json publicReleaseRefSpec, firstUnstableTag=preview, MkDocs Docker build -> gh-pages.
 
+### Summary: Migration Toolkit Package Design (2026-03-03)
+
+**By:** Forge
+**What:** Designed the structure and content inventory for a portable migration toolkit package at `/migration-toolkit/`. 9 documents total. Analyzed all existing skills, scripts, agents, and the executive report to determine what can be extracted vs. what's net-new.
+
+**Key decisions:**
+- Toolkit lives at `/migration-toolkit/` (top-level, not in docs/ or .github/) because migration is the primary product per Jeff's reframing
+- Toolkit REFERENCES existing artifacts (scripts, skills, agent) by relative path — no duplication
+- 5 documents are primarily extraction/adaptation from existing content; 4 are primarily net-new
+- Highest-value deliverable is `copilot-instructions-template.md` — a drop-in template developers copy into their own project to give Copilot migration context
+- `CHECKLIST.md` is fully net-new — no existing per-page migration checklist exists
+
+**Existing content reusable:**
+- `.github/skills/webforms-migration/SKILL.md` — the core Layer 2 skill, heavily referenced by QUICKSTART, CONTROL-COVERAGE, and copilot-instructions-template
+- `.github/agents/migration.agent.md` — Layer 3 decision frameworks, extracted into ARCHITECTURE-GUIDE
+- `planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md` — metrics, timelines, screenshots for METHODOLOGY and CASE-STUDY
+- `scripts/bwfc-scan.ps1` and `scripts/bwfc-migrate.ps1` — referenced as-is, not modified
+- Forge's own history entries on WingtipToys analysis, CSS fidelity audit, and ASPX tooling strategy — lessons learned for CASE-STUDY and FAQ
+
+**Net-new content needed:**
+- README.md (entry point), QUICKSTART.md (step-by-step), CHECKLIST.md (per-page template), copilot-instructions-template.md (Copilot handoff with project-specific placeholders)
+
+**Design doc:** `planning-docs/MIGRATION-TOOLKIT-DESIGN.md`
+
+
+ Team update (2026-03-03): Migration toolkit pivoted from 9-doc folder to single SKILL.md in Copilot skill format  decided by Jeffrey T. Fritz
+
+### Summary: Migration Toolkit Restructure (2026-03-03)
+
+**By:** Forge
+**What:** Per Jeff's directive, moved distributable migration assets out of `.github/skills/` into `migration-toolkit/` — the one-stop distribution package.
+
+**Changes made:**
+- `git mv` 3 distributable skill files (bwfc-migration, bwfc-identity-migration, bwfc-data-migration) from `.github/skills/` to `migration-toolkit/skills/`
+- Copied `bwfc-scan.ps1` and `bwfc-migrate.ps1` from `scripts/` into `migration-toolkit/scripts/` (originals remain in `scripts/` for internal project use)
+- Rewrote `migration-toolkit/README.md` with self-contained structure: lists skills/ and scripts/ subfolders with descriptions, includes usage instructions ("copy skills/ into .github/skills/, copy scripts/ to project root"), links to NuGet package
+- Removed empty `.github/skills/bwfc-*` directories after move
+
+**What stayed in `.github/skills/`:** 5 internal project skills (webforms-migration, documentation, component-development, bunit-test-migration, aspire) — these are NOT distributable.
+
+**Key learning:** Distributable assets (things end-users copy to their own projects) live in `migration-toolkit/`. Internal project skills (things that help contributors work on THIS repo) live in `.github/skills/`. Clean separation prevents confusion about what ships to customers vs what's internal tooling.
 Team updates (2026-03-02-03): Unified release (PR #408), project reframed as migration system (Jeff), ModelErrorMessage docs (Beast), themes last directive (Jeff Fritz).

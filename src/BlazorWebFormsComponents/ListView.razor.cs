@@ -164,10 +164,10 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewUpdatedEventArgs> ItemUpdated { get; set; }
 
 		/// <summary>
-		/// Occurs when an item template is instantiated.
+		/// Occurs when an item is created in the ListView control, before data binding.
 		/// </summary>
 		[Parameter]
-		public EventCallback ItemCreated { get; set; }
+		public EventCallback<ListViewItemEventArgs> ItemCreated { get; set; }
 
 		/// <summary>
 		/// Occurs before a sort operation. Can be cancelled.
@@ -217,16 +217,24 @@ namespace BlazorWebFormsComponents
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
-			if (firstRender && ItemCreated.HasDelegate)
-			{
-				await ItemCreated.InvokeAsync();
-			}
 			await base.OnAfterRenderAsync(firstRender);
 		}
 
 		protected virtual void ItemDataBound(ListViewItemEventArgs e)
 		{
 			OnItemDataBound.InvokeAsync(e);
+		}
+
+		/// <summary>
+		/// Raises the ItemCreated event for the specified item.
+		/// In Web Forms, this fires for each item before data binding.
+		/// </summary>
+		internal void RaiseItemCreated(ListViewItem item)
+		{
+			if (ItemCreated.HasDelegate)
+			{
+				_ = ItemCreated.InvokeAsync(new ListViewItemEventArgs(item) { Sender = this });
+			}
 		}
 
 		/// <summary>
@@ -244,9 +252,14 @@ namespace BlazorWebFormsComponents
 
 		/// <summary>
 		/// Routes a command to the appropriate event handler based on command name.
+		/// In Web Forms, ItemCommand fires first for every command, then the specific handler runs.
 		/// </summary>
 		public async Task HandleCommand(string commandName, object commandArgument, int itemIndex)
 		{
+			// Web Forms always fires ItemCommand first, regardless of command type
+			var cmdArgs = new ListViewCommandEventArgs(commandName, commandArgument);
+			await ItemCommand.InvokeAsync(cmdArgs);
+
 			switch (commandName.ToLowerInvariant())
 			{
 				case "edit":
@@ -269,10 +282,6 @@ namespace BlazorWebFormsComponents
 					break;
 				case "select":
 					await HandleSelectCommand(itemIndex);
-					break;
-				default:
-					var cmdArgs = new ListViewCommandEventArgs(commandName, commandArgument);
-					await ItemCommand.InvokeAsync(cmdArgs);
 					break;
 			}
 
