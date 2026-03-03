@@ -2,7 +2,10 @@
 
 **Migrate your ASP.NET Web Forms application to Blazor — systematically, not heroically.**
 
-This toolkit packages everything you need to take a Web Forms app and bring it to Blazor using the [BlazorWebFormsComponents](../README.md) (BWFC) library. It combines automated scripts, a Copilot skill, and a decision-making agent into a three-layer pipeline that handles ~85% of migration work mechanically or with AI assistance, leaving you to focus on the architecture decisions that actually need a human.
+This toolkit packages everything you need to take a Web Forms app and bring it to Blazor using the [BlazorWebFormsComponents](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents) (BWFC) library. It combines automated scripts, Copilot skills, and a decision-making agent into a three-layer pipeline that handles ~85% of migration work mechanically or with AI assistance, leaving you to focus on the architecture decisions that actually need a human.
+
+- **NuGet Package:** <https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents>
+- **GitHub Repository:** <https://github.com/FritzAndFriends/BlazorWebFormsComponents>
 
 ---
 
@@ -23,15 +26,47 @@ You're a .NET developer who owns a Web Forms application and wants to migrate it
 
 ---
 
+## How to Use This Toolkit
+
+1. **Copy the `skills/` folder** into your project's `.github/skills/` directory.
+2. **Copy the `scripts/` folder** to your project root.
+3. Install the BWFC NuGet package: `dotnet add package Fritz.BlazorWebFormsComponents`
+4. Follow the [QUICKSTART.md](QUICKSTART.md) guide.
+
+---
+
+## What's Included
+
+### `skills/` — Copilot Skills
+
+Copy these into your project's `.github/skills/` directory so Copilot can use them during migration.
+
+| Skill | Description |
+|---|---|
+| [`bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | **Core markup migration** — control translation, expression conversion, data binding, code-behind lifecycle, and Master Page to Layout conversion. Covers Layer 2 structural transforms (~45% of migration work). |
+| [`bwfc-identity-migration/SKILL.md`](skills/bwfc-identity-migration/SKILL.md) | **Identity & auth migration** — OWIN to ASP.NET Core auth middleware, login page migration, BWFC login controls, role-based authorization, and AuthorizeView patterns. |
+| [`bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) | **Data access & architecture migration** — EF6 to EF Core, DataSource controls to service injection, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json. Covers Layer 3 architecture decisions. |
+
+### `scripts/` — PowerShell Migration Scripts
+
+Copy these to your project root. Requires PowerShell 7.0+.
+
+| Script | Description |
+|---|---|
+| [`bwfc-scan.ps1`](scripts/bwfc-scan.ps1) | **Scanner** — inventories your Web Forms project, identifies controls, counts pages, and outputs a migration readiness report. Run this first. |
+| [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | **Mechanical transformer** — Layer 1 automated transforms: strips `asp:` prefixes, removes `runat="server"`, converts expressions, renames `.aspx`→`.razor`. Handles ~40% of migration work deterministically. |
+
+---
+
 ## The Three-Layer Pipeline
 
 Migration isn't one step — it's three layers that handle different kinds of work:
 
 | Layer | What | How | Coverage |
 |---|---|---|---|
-| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming | [`bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) | ~40% of work |
-| **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method migration | [Copilot migration skill](../.github/skills/webforms-migration/SKILL.md) | ~45% of work |
-| **Layer 3** — Architecture Decisions | Identity, EF Core, session state, third-party integrations | [Migration agent](../.github/agents/migration.agent.md) + human judgment | ~15% of work |
+| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming | [`scripts/bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | ~40% of work |
+| **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method migration | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~45% of work |
+| **Layer 3** — Architecture Decisions | Identity, EF Core, session state, third-party integrations | [`skills/bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) + human judgment | ~15% of work |
 
 **Start here:** [QUICKSTART.md](QUICKSTART.md) — the linear "just tell me what to do" path.
 
@@ -48,7 +83,7 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 
 ---
 
-## What's In This Toolkit
+## Documentation
 
 | Document | What It Covers |
 |---|---|
@@ -58,21 +93,6 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 | [**METHODOLOGY.md**](METHODOLOGY.md) | Three-layer pipeline deep-dive |
 | [**CHECKLIST.md**](CHECKLIST.md) | Per-page migration checklist template |
 | [**copilot-instructions-template.md**](copilot-instructions-template.md) | Drop-in `.github/copilot-instructions.md` for your project |
-
----
-
-## Existing Artifacts (Referenced, Not Duplicated)
-
-The toolkit ties together artifacts that already exist in this repo. You don't need to find them — the docs link to them — but here's the map:
-
-| Artifact | Location | Role |
-|---|---|---|
-| Scanner script | [`scripts/bwfc-scan.ps1`](../scripts/bwfc-scan.ps1) | Layer 0 — inventories your Web Forms project |
-| Migration script | [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) | Layer 1 — mechanical transforms |
-| Copilot skill | [`.github/skills/webforms-migration/SKILL.md`](../.github/skills/webforms-migration/SKILL.md) | Layer 2 — teaches Copilot the BWFC control mappings |
-| Migration agent | [`.github/agents/migration.agent.md`](../.github/agents/migration.agent.md) | Layer 3 — interactive architecture guidance |
-| WingtipToys (before) | [`samples/WingtipToys/`](../samples/WingtipToys/) | Reference — original Web Forms application |
-| WingtipToys (after) | [`samples/AfterWingtipToys/`](../samples/AfterWingtipToys/) | Reference — migrated Blazor application |
 
 ---
 
