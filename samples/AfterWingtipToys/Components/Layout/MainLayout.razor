@@ -19,8 +19,26 @@
                 <li><a href="/ShoppingCart">Cart</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/Account/Register">Register</a></li>
-                <li><a href="/Account/Login">Log in</a></li>
+                <AuthorizeView>
+                    <Authorized>
+                        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
+                        <AuthorizeView Roles="canEdit" Context="adminContext">
+                            <Authorized>
+                                <li><a href="/AdminPage">Admin</a></li>
+                            </Authorized>
+                        </AuthorizeView>
+                        <li>
+                            <form method="post" action="/Account/Login?handler=logout">
+                                <AntiforgeryToken />
+                                <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>
+                            </form>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li><a href="/Account/Register">Register</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                    </NotAuthorized>
+                </AuthorizeView>
             </ul>
         </div>
     </div>
@@ -32,15 +50,14 @@
     <br />
 </div>
 <div id="CategoryMenu" style="text-align: center">
-    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=1">Cars</a></b>
-    &nbsp;|&nbsp;
-    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=2">Planes</a></b>
-    &nbsp;|&nbsp;
-    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=3">Trucks</a></b>
-    &nbsp;|&nbsp;
-    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=4">Boats</a></b>
-    &nbsp;|&nbsp;
-    <b style="font-size: large; font-style: normal"><a href="/ProductList?id=5">Rockets</a></b>
+    @for (int i = 0; i < Categories.Count; i++)
+    {
+        if (i > 0)
+        {
+            @:&nbsp;|&nbsp;
+        }
+        <b style="font-size: large; font-style: normal"><a href="/ProductList?id=@Categories[i].CategoryID">@Categories[i].CategoryName</a></b>
+    }
 </div>
 <div class="container body-content">
     @Body

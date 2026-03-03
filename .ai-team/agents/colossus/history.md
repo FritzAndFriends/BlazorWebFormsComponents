@@ -71,3 +71,13 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - The ModelErrorMessage component renders nothing when no errors exist (conditional `@if`), so error-gone assertions use `CountAsync() == 0` rather than visibility checks.
 - For the Clear button test, used `WaitForSelectorAsync` with `State.Hidden` to reliably wait for Blazor re-render after clearing the EditContext.
 - `PressSequentiallyAsync` + `Tab` pattern used for Blazor Server InputText fields, consistent with established team conventions.
+
+
+ Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz
+
+
+ Team update (2026-03-03): WingtipToys 7-phase feature schedule established  26 work items, critical path through Data Foundation  Product Browsing  Shopping Cart  Checkout  Polish  decided by Forge
+
+
+ Team update (2026-03-03): ListView CRUD test conventions established  43 tests, event ordering via List<string>, cancellation assertions, bUnit double-render handling  decided by Rogue
+
