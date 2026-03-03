@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
     public partial class Manage : ComponentBase
     {
-        // Layer 2+ migration needed
+        [SupplyParameterFromQuery] private string? StatusMessage { get; set; }
+
+        private string statusMessage => StatusMessage ?? "";
     }
 }

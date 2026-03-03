@@ -1,5 +1,9 @@
-@page "/Manage"
+@page "/Account/Manage"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
 <h2>Manage Account.</h2>
+<p class="text-success">@statusMessage</p>
 <div>
     <h4>Change your account settings</h4>
     <hr />

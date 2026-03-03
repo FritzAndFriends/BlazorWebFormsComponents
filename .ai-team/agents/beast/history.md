@@ -120,3 +120,10 @@
     6. **Expanded common gotchas:** Added event handler signatures, TextMode casing, ScriptManager no-op guidance.
     7. **Removed WingtipToys-specific section:** Not applicable for a distributable skill — that content is project-specific.
   - Total: ~750 lines. Preserves ~90% of existing internal skill content, adds ~30% new content from design doc and executive report.
+
+
+ Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz
+
+
+ Team update (2026-03-03): ListView EventArgs now include IOrderedDictionary properties (Keys, Values, OldValues, NewValues) for full Web Forms parity  decided by Cyclops
+
