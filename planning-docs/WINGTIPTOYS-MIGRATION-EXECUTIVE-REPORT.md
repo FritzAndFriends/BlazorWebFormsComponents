@@ -53,7 +53,7 @@ The comparisons below show the **original WingtipToys Web Forms application** (l
 
 ![Shopping Cart — Side by Side Comparison](screenshots/comparison-cart-v2.png)
 
-*Shopping cart page comparison. The original (left) shows a populated cart with GridView columns (ID, Name, Price, Quantity, Item Total, Remove). The migrated version (right) uses BWFC's `GridView` with `BoundField` and `TemplateField` (TextBox for quantity, CheckBox for removal). Cart powered by scoped `CartStateService` replacing Web Forms Session state. Update button and PayPal checkout button preserved.*
+*Both carts contain the same 3 items (Super Fast Car $8.95, Convertible Car $22.50, Old-time Car $15.95 — total $47.40). The migrated version (right) uses BWFC's `GridView` with `BoundField` and `TemplateField` columns (TextBox for quantity, CheckBox for removal) — matching the original's GridView output. Cart powered by scoped `CartStateService` + EF Core + SQLite replacing Web Forms Session state. Update button and PayPal checkout button preserved.*
 
 ### Additional Migrated Pages
 
