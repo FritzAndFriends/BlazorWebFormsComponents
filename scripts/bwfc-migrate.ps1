@@ -236,6 +236,61 @@ app.Run();
     }
 }
 
+function New-AppRazorScaffold {
+    param(
+        [string]$OutputRoot,
+        [string]$ProjectName
+    )
+
+    $componentsDir = Join-Path $OutputRoot "Components"
+
+    $appRazorContent = @"
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>
+"@
+
+    $routesRazorContent = @"
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
+"@
+
+    if ($PSCmdlet.ShouldProcess($componentsDir, "Create App.razor and Routes.razor scaffold")) {
+        if (-not (Test-Path $componentsDir)) {
+            New-Item -ItemType Directory -Force $componentsDir | Out-Null
+        }
+
+        $appPath = Join-Path $componentsDir "App.razor"
+        Set-Content -Path $appPath -Value $appRazorContent -Encoding UTF8
+        Write-TransformLog -File $appPath -Transform 'Scaffold' -Detail 'Generated Components/App.razor'
+
+        $routesPath = Join-Path $componentsDir "Routes.razor"
+        Set-Content -Path $routesPath -Value $routesRazorContent -Encoding UTF8
+        Write-TransformLog -File $routesPath -Transform 'Scaffold' -Detail 'Generated Components/Routes.razor'
+    }
+    else {
+        Write-Host "[WhatIf] Would create: Components/App.razor"
+        Write-Host "[WhatIf] Would create: Components/Routes.razor"
+    }
+}
+
 #endregion
 
 #region --- Directive Transforms ---
@@ -388,6 +443,103 @@ function ConvertFrom-FormWrapper {
 
 #endregion
 
+#region --- Master Page Transforms ---
+
+function ConvertFrom-MasterPage {
+    param([string]$Content, [string]$RelPath)
+
+    # 1. Remove <asp:ScriptManager> block (can be multi-line with nested <Scripts>)
+    $smRegex = [regex]'(?s)<asp:ScriptManager[^>]*>.*?</asp:ScriptManager>\s*\r?\n?'
+    if ($Content -match '<asp:ScriptManager') {
+        $Content = $smRegex.Replace($Content, '')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Removed <asp:ScriptManager> block'
+    }
+    # Also handle self-closing ScriptManager
+    $smSelfRegex = [regex]'<asp:ScriptManager[^>]*/>\s*\r?\n?'
+    $Content = $smSelfRegex.Replace($Content, '')
+
+    # 2. Extract head metadata (<meta>, <link>, <title>) before stripping <head> section
+    $headContentBlock = ''
+    $headSectionRegex = [regex]'(?s)<head[^>]*>(.*?)</head>'
+    $headMatch = $headSectionRegex.Match($Content)
+    if ($headMatch.Success) {
+        $headInner = $headMatch.Groups[1].Value
+        $extractedTags = [System.Collections.Generic.List[string]]::new()
+
+        foreach ($m in ([regex]'<meta\s[^>]*>').Matches($headInner)) {
+            $extractedTags.Add("    " + $m.Value.Trim())
+        }
+        foreach ($m in ([regex]'(?s)<title>.*?</title>').Matches($headInner)) {
+            $extractedTags.Add("    " + $m.Value.Trim())
+        }
+        foreach ($m in ([regex]'<link\s[^>]*>').Matches($headInner)) {
+            $extractedTags.Add("    " + $m.Value.Trim())
+        }
+
+        if ($extractedTags.Count -gt 0) {
+            $headContentBlock = "<HeadContent>`n" + ($extractedTags -join "`n") + "`n</HeadContent>"
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Extracted $($extractedTags.Count) head element(s) into <HeadContent>"
+        }
+
+        # Remove the entire <head>...</head> section
+        $Content = $headSectionRegex.Replace($Content, '')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Removed <head> section'
+    }
+
+    # 3. Strip document wrapper tags
+    $Content = $Content -replace '<!DOCTYPE[^>]*>\s*\r?\n?', ''
+    $Content = $Content -replace '<html[^>]*>\s*\r?\n?', ''
+    $Content = $Content -replace '</html>\s*\r?\n?', ''
+    $Content = $Content -replace '<body[^>]*>\s*\r?\n?', ''
+    $Content = $Content -replace '</body>\s*\r?\n?', ''
+    Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Stripped document wrapper (DOCTYPE, html, body)'
+
+    # 4. Replace <asp:ContentPlaceHolder ID="MainContent"> → @Body
+    $mainCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*>.*?</asp:ContentPlaceHolder>'
+    if ($mainCphRegex.IsMatch($Content)) {
+        $Content = $mainCphRegex.Replace($Content, '@Body')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body'
+    }
+    # Self-closing MainContent
+    $mainCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*/>'
+    if ($mainCphSelfRegex.IsMatch($Content)) {
+        $Content = $mainCphSelfRegex.Replace($Content, '@Body')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body (self-closing)'
+    }
+
+    # Other ContentPlaceHolders → TODO comment
+    $otherCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*>.*?</asp:ContentPlaceHolder>'
+    foreach ($m in $otherCphRegex.Matches($Content)) {
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion"
+    }
+    $Content = $otherCphRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+    # Self-closing other ContentPlaceHolders
+    $otherCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*/>'
+    foreach ($m in $otherCphSelfRegex.Matches($Content)) {
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion (self-closing)"
+    }
+    $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+
+    # 5. Flag items needing Layer 2 attention
+    if ($Content -match '<asp:LoginView') {
+        Write-ManualItem -File $RelPath -Category 'LoginView' -Detail 'LoginView requires conversion to AuthorizeView with Authorized/NotAuthorized templates'
+    }
+    if ($Content -match 'SelectMethod\s*=') {
+        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod requires manual data-binding conversion (OnInitializedAsync)'
+    }
+
+    # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
+    $header = "@inherits LayoutComponentBase`n"
+    if ($headContentBlock) {
+        $header += "`n" + $headContentBlock + "`n"
+    }
+    $Content = $header + "`n" + $Content
+
+    return $Content
+}
+
+#endregion
+
 #region --- Expression Transforms ---
 
 function ConvertFrom-Expressions {
@@ -399,6 +551,22 @@ function ConvertFrom-Expressions {
     if ($commentMatches.Count -gt 0) {
         $Content = $commentRegex.Replace($Content, '@*$1*@')
         Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($commentMatches.Count) comment(s) to Razor syntax"
+    }
+
+    # Data binding with Eval and format string: <%#: Eval("prop", "{0:fmt}") %> → @context.prop.ToString("fmt")
+    $evalFmtRegex = [regex]'<%#:\s*Eval\("(\w+)",\s*"\{0:([^}]+)\}"\)\s*%>'
+    $evalFmtMatches = $evalFmtRegex.Matches($Content)
+    if ($evalFmtMatches.Count -gt 0) {
+        $Content = $evalFmtRegex.Replace($Content, '@context.$1.ToString("$2")')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($evalFmtMatches.Count) Eval() with format string to @context.ToString()"
+    }
+
+    # String.Format with Item.Property: <%#: String.Format("{0:fmt}", Item.Prop) %> → @($"{context.Prop:fmt}")
+    $strFmtRegex = [regex]'<%#:\s*String\.Format\("\{0:([^}]+)\}",\s*Item\.(\w+)\)\s*%>'
+    $strFmtMatches = $strFmtRegex.Matches($Content)
+    if ($strFmtMatches.Count -gt 0) {
+        $Content = $strFmtRegex.Replace($Content, '@($$"{context.$2:$1}")')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($strFmtMatches.Count) String.Format(Item.) to interpolated string"
     }
 
     # Data binding with Eval: <%#:\s*Eval("prop")\s*%> → @context.prop
@@ -586,7 +754,14 @@ function Convert-WebFormsFile {
     switch ($extension) {
         '.aspx'   { $razorRelPath = $razorRelPath -replace '\.aspx$', '.razor' }
         '.ascx'   { $razorRelPath = $razorRelPath -replace '\.ascx$', '.razor' }
-        '.master' { $razorRelPath = $razorRelPath -replace '\.master$', '.razor' }
+        '.master' {
+            $baseName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+            if ($baseName -eq 'Site') {
+                $razorRelPath = 'Components\Layout\MainLayout.razor'
+            } else {
+                $razorRelPath = "Components\Layout\${baseName}Layout.razor"
+            }
+        }
     }
 
     $outputFile = Join-Path $OutputRoot $razorRelPath
@@ -608,6 +783,7 @@ function Convert-WebFormsFile {
         }
         '.master' {
             $content = ConvertFrom-MasterDirective -Content $content -RelPath $relativePath
+            $content = ConvertFrom-MasterPage -Content $content -RelPath $relativePath
         }
         '.ascx' {
             $content = ConvertFrom-ControlDirective -Content $content -RelPath $relativePath
@@ -652,7 +828,7 @@ function Convert-WebFormsFile {
             switch ($extension) {
                 '.aspx'   { $cbOutputRel = $cbOutputRel -replace '\.aspx\.', '.razor.' }
                 '.ascx'   { $cbOutputRel = $cbOutputRel -replace '\.ascx\.', '.razor.' }
-                '.master' { $cbOutputRel = $cbOutputRel -replace '\.master\.', '.razor.' }
+                '.master' { $cbOutputRel = $razorRelPath + $cbSuffix }
             }
             $cbOutputFile = Join-Path $OutputRoot $cbOutputRel
             Copy-CodeBehind -SourceFile $cbSource -OutputFile $cbOutputFile -RelPath $cbRelPath
@@ -710,9 +886,10 @@ if (-not $SkipProjectScaffold) {
     Write-Host 'Generating project scaffold...' -ForegroundColor Green
     if (-not $WhatIfPreference) {
         New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName
+        New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName
     }
     else {
-        Write-Host '[WhatIf] Would generate .csproj, _Imports.razor, Program.cs'
+        Write-Host '[WhatIf] Would generate .csproj, _Imports.razor, Program.cs, App.razor, Routes.razor'
     }
     Write-Host ''
 }
