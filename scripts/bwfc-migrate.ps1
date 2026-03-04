@@ -338,8 +338,11 @@ function ConvertFrom-RegisterDirective {
     $regex = [regex]'<%@\s*Register[^%]*%>\s*\r?\n?'
     $matches_ = $regex.Matches($Content)
     foreach ($m in $matches_) {
-        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Removed <%@ Register %> (review component references)"
-        Write-ManualItem -File $RelPath -Category 'Register' -Detail "Removed Register directive — verify component tag prefixes: $($m.Value.Trim())"
+        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Removed <%@ Register %> directive"
+        if ($m.Value -match 'TagPrefix\s*=\s*"[Uu][Cc]"') {
+            Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Register directive contained uc: TagPrefix — verify user control tags are converted"
+        }
+        Write-ManualItem -File $RelPath -Category 'RegisterDirective' -Detail "Register directive removed — verify tag prefixes in converted markup are handled"
     }
     $Content = $regex.Replace($Content, '')
     return $Content
@@ -585,6 +588,14 @@ function ConvertFrom-Expressions {
         Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($itemMatches.Count) Item binding(s) to @context"
     }
 
+    # Bare Item binding: <%#: Item %> → @context
+    $bareItemRegex = [regex]'<%#:\s*Item\s*%>'
+    $bareItemMatches = $bareItemRegex.Matches($Content)
+    if ($bareItemMatches.Count -gt 0) {
+        $Content = $bareItemRegex.Replace($Content, '@context')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($bareItemMatches.Count) bare Item binding(s) to @context"
+    }
+
     # Encoded expressions: <%: expr %> → @(expr)
     $encodedRegex = [regex]'<%:\s*(.+?)\s*%>'
     $encodedMatches = $encodedRegex.Matches($Content)
@@ -772,6 +783,25 @@ function ConvertFrom-AspPrefix {
     if ($closeMatches.Count -gt 0) {
         $Content = $closeRegex.Replace($Content, '</$1>')
         Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed asp: prefix from $($closeMatches.Count) closing tag(s)"
+    }
+
+    # Opening tags: <uc1:Control → <Control (handles uc, uc1, uc2, etc.)
+    $ucOpenRegex = [regex]'<uc\d*:(\w+)'
+    $ucOpenMatches = $ucOpenRegex.Matches($Content)
+    if ($ucOpenMatches.Count -gt 0) {
+        $Content = $ucOpenRegex.Replace($Content, '<$1')
+    }
+
+    # Closing tags: </uc1:Control> → </Control>
+    $ucCloseRegex = [regex]'</uc\d*:(\w+)>'
+    $ucCloseMatches = $ucCloseRegex.Matches($Content)
+    if ($ucCloseMatches.Count -gt 0) {
+        $Content = $ucCloseRegex.Replace($Content, '</$1>')
+    }
+
+    $ucTotal = $ucOpenMatches.Count + $ucCloseMatches.Count
+    if ($ucTotal -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed uc: prefix from $ucTotal opening/closing tag(s)"
     }
 
     return $Content
