@@ -132,3 +132,18 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 
  Team update (2026-03-05): Event handler audit complete  ~50 naming mismatches found, On-prefix aliases recommended  decided by Forge, Rogue
 
+### On-Prefix EventCallback Aliases (2026-03-05)
+
+**What:** Added 50 On-prefixed `[Parameter] EventCallback` aliases across 7 data components for Web Forms migration compatibility. Pattern: add a new `[Parameter]` property with the `On` prefix alongside each existing property. At invocation sites, coalesce with `var handler = Original.HasDelegate ? Original : OnOriginal;` so whichever name the consumer uses in markup works.
+
+**Components modified:** GridView (9 aliases), DetailsView (11), FormView (6), ListView (16), DataGrid (5), Menu (2), TreeView (1).
+
+**Key details:**
+- Existing properties untouched (non-breaking). Only new `On`-prefixed aliases added.
+- Invocation sites updated to prefer the original property if it has a delegate, falling back to the alias.
+- `HasDelegate` guard checks updated where present (GridView.ShowCommandColumn, Menu.NotifyItemClicked, ListView.RaiseItemCreated) to check both original and alias.
+- FormView already had `On`-prefixed events for delete/insert/update (OnItemDeleting, etc.). Only added aliases for the 6 events that lacked them (ModeChanging, ModeChanged, ItemCommand, ItemCreated, PageIndexChanging, PageIndexChanged).
+- Build verified clean: 0 errors, 70 pre-existing warnings.
+
+**Lesson:** Blazor sets `[Parameter]` properties independently by name during diffing. You cannot use a C# property getter/setter that delegates to another property — the framework won't see changes. Two independent properties with coalescing at invocation is the correct pattern.
+

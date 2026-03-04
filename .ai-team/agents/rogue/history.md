@@ -131,3 +131,15 @@ Key patterns: `FindComponent<PageTitle>()` and `FindComponent<HeadContent>()` fo
 
 **Findings written to:** `.ai-team/decisions/inbox/rogue-event-handler-migration-gaps.md`
 
+### Migration Script Fixes — AutoPostBack & Event Handler Gaps (2026-03-06)
+
+**Fix 1 — AutoPostBack stripping:** Added `'AutoPostBack\s*=\s*"(true|false)"'` to `$StripAttributes` array (line 81). Added conditional ManualItem emission inside `Remove-WebFormsAttributes` loop — when `$friendlyName -eq 'AutoPostBack'`, emits category `AutoPostBack` warning about Blazor's immediate-fire event model vs Web Forms delayed postback.
+
+**Fix 2 — Event handler signature warnings:** Added post-`Remove-WebFormsAttributes` scan in `Convert-WebFormsFile` pipeline (after line 1045). Uses `[regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')` to find event handler attributes in the already-transformed Blazor markup. Collects unique handler names via `Sort-Object -Unique`, emits ONE `EventHandler` category ManualItem per file listing all found handlers with sender-parameter signature guidance.
+
+**Patterns used:**
+- `$StripAttributes` array: regex patterns matching `attribute="value"` with `\s*=\s*` whitespace tolerance
+- ManualItem emission: conditional check on friendly name extracted by the existing `$pattern -replace` chain
+- Event handler detection: `(On[A-Z]\w+)="[^"]*"` — captures attribute name in group 1, excludes lowercase-after-On to avoid false positives
+- Summary-level ManualItem: one per file with comma-joined unique handler list, not per-attribute
+

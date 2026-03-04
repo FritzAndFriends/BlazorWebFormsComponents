@@ -5870,11 +5870,11 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **Why:** Jeff asked to consolidate the 5-piece page system into fewer entry points. Option B is the only approach that works with Blazor's render model (<PageTitle> and <HeadContent> must appear in markup, not a base class). Result: two-line setup (one @inherits in _Imports.razor, one <WebFormsPage> in MainLayout.razor) delivers naming, theming, and head rendering. Migration scripts generate one component instead of two.
 
 
-### 2026-03-05: Event Handler Naming Parity and Migration Script Gaps (consolidated)
+### 2026-03-05: Event Handler Naming Parity, Aliases, and Migration Script Fixes (consolidated)
 
-**By:** Forge, Rogue
+**By:** Forge, Rogue, Cyclops
 **Requested by:** Jeff Fritz
-**Status:** DECIDED  action items identified
+**Status:** IMPLEMENTED
 **Branch:** squad/event-handler-investigation
 
 ---
@@ -5929,16 +5929,8 @@ The migration script (wfc-migrate.ps1) does zero event handler transformation b
 
 **4. Decisions**
 
-1. **APPROVED: Add On-prefix aliases (Option A, non-breaking)**
-   Add a second [Parameter] with the On prefix that delegates to the existing parameter for all ~50 mismatched EventCallbacks. Example:
-   `csharp
-   [Parameter] public EventCallback<GridViewSortEventArgs> Sorting { get; set; }
-   [Parameter] public EventCallback<GridViewSortEventArgs> OnSorting {
-       get => Sorting;
-       set => Sorting = value;
-   }
-   `
-   This preserves backward compatibility while enabling zero-touch migration from Web Forms.
+1. **IMPLEMENTED: On-prefix aliases (Cyclops)**
+   50 aliases added across GridView (9), DetailsView (11), FormView (6), ListView (16), DataGrid (5), Menu (2), TreeView (1). Both the original property and the On-prefixed alias are independent `[Parameter]` properties. At invocation sites, the component coalesces: `var handler = Original.HasDelegate ? Original : OnOriginal;`. Blazor's parameter diffing requires independent properties — getter/setter delegation won't work. Build clean, all 1479 bUnit tests pass.
 
 2. **APPROVED: Prioritize missing event implementations**
    - P1: Repeater (add OnItemCommand, OnItemDataBound, OnItemCreated)
@@ -5947,13 +5939,11 @@ The migration script (wfc-migrate.ps1) does zero event handler transformation b
    - P2: CustomValidator (add OnServerValidate)
    - P3: TreeView OnTreeNodePopulate, LoginView OnViewChanged
 
-3. **APPROVED: Add AutoPostBack to migration script ${'$'}StripAttributes**
-   `powershell
-   'AutoPostBack\s*=\s*"(true|false)"'
-   `
+3. **IMPLEMENTED: AutoPostBack stripping in migration script (Rogue)**
+   Added `AutoPostBack` regex to `$StripAttributes` for automatic removal. Emits ManualItem warning (category `AutoPostBack`) noting behavioral difference: Blazor events fire immediately on change vs Web Forms delayed postback model.
 
-4. **APPROVED: Add ManualItem detection for event handlers**
-   After Remove-WebFormsAttributes, scan for On\w+="[^"]*" patterns and emit ManualItem warnings noting code-behind signature change requirement.
+4. **IMPLEMENTED: ManualItem detection for event handlers (Rogue)**
+   Added post-transform scan using `(On[A-Z]\w+)="[^"]*"` to detect event handler attributes. Emits one summary ManualItem per file (category `EventHandler`) listing all unique handler attribute names. Scan placed after `Remove-WebFormsAttributes` and before `ConvertFrom-UrlReferences`. The `On[A-Z]` pattern avoids matching HTML native events (onclick, onchange).
 
 5. **APPROVED: Create event handler mapping table in skill doc**
    Cover every BWFC component's event parameters, Web Forms equivalents, and required signature changes.
@@ -5973,3 +5963,5 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 | oid gv_RowCommand(object sender, GridViewCommandEventArgs e) | EventCallback<GridViewCommandEventArgs> | oid gv_RowCommand(GridViewCommandEventArgs e) |
 | oid gv_Sorting(object sender, GridViewSortEventArgs e) | EventCallback<GridViewSortEventArgs> | oid gv_Sorting(GridViewSortEventArgs e) |
 | oid lnk_Command(object sender, CommandEventArgs e) | EventCallback<CommandEventArgs> | oid lnk_Command(CommandEventArgs e) |
+
+ 
