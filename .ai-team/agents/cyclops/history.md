@@ -78,42 +78,54 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
 **Layer 2+3 Benchmark:** 563s (~9.4 min) total. Clean build after 3 rounds. Account pages copied from reference. Key transforms: SelectMethod to Items, Page_Load to OnInitializedAsync, Session to scoped services, EF6 to EF Core. ~9 min with Copilot vs 4-8 hours manual.
 
-### Key Team Updates (2026-03-02 through 2026-03-04)
+<!-- Summarized 2026-03-04 by Scribe — covers team updates and script enhancements 2026-03-02 through 2026-03-04 -->
 
-- Skins & Themes roadmap: 3 waves, 15 WIs (Forge)
-- Project reframed as migration system (Jeff), M22 planned (Forge)
-- FormView RenderOuterTable resolved, ModelErrorMessage 29/29 coverage
-- WingtipToys CSS fidelity: 7 fixes identified (Forge)
-- Themes (#369) last  ListView CRUD first, WingtipToys second (Jeff)
-- WingtipToys 7-phase schedule: 26 work items (Forge)
-- ListView CRUD test conventions: 43 tests (Rogue)
+### Script & Toolkit Summary (2026-03-02 through 2026-03-04)
 
- Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
- Team update (2026-03-04): Migration Run 2  11/11 features pass, PR #418 fixes confirmed critical, toolkit ready for docs  decided by Forge
- Team update (2026-03-04): Migration toolkit restructured into self-contained migration-toolkit/ package  decided by Jeffrey T. Fritz, Forge
+**Team context:** PRs target upstream (not fork). Migration toolkit restructured into self-contained migration-toolkit/ package. Migration Run 2 validated 11/11 features (PR #418 critical). Project reframed as migration system. M22 planned. ListView CRUD first, Themes last.
 
- Team update (2026-03-04): Forge proposed 2 regex additions to bwfc-migrate.ps1 for Eval format-string and String.Format patterns (eval-regex-enhancement, status: Proposed)  decided by Forge
+**Script enhancements (bwfc-migrate.ps1):** ConvertFrom-MasterPage (6 transforms: @inherits injection, document wrapper strip, ContentPlaceHolder→@Body, ScriptManager removal, HeadContent extraction, layout path remap). New-AppRazorScaffold (App.razor + Routes.razor). Eval format-string regex (`Eval("prop","{0:fmt}")` → `@context.prop.ToString("fmt")`). String.Format regex (`String.Format("{0:fmt}",Item.Prop)` → `@($"{context.Prop:fmt}")`). Regex ordering: specific patterns before general. ScriptManager uses `(?s)`, ContentPlaceHolder uses `(?si)`.
 
-### Master Page & Expression Enhancements (2026-03-04)
+<!-- Summarized 2026-03-05 by Scribe -- covers GetRouteUrl through migration-toolkit sync -->
 
-**ConvertFrom-MasterPage function:** Added to bwfc-migrate.ps1 for .master-file-specific transforms. 6 mechanical transforms: (1) inject `@inherits LayoutComponentBase`, (2) strip document wrapper (DOCTYPE/html/head/body), (3) ContentPlaceHolder MainContent → @Body (other CPHs get TODO comments), (4) remove ScriptManager block (multiline (?s) regex), (5) extract meta/link/title from head into `<HeadContent>` block, (6) output path remap to `Components\Layout\{Name}Layout.razor` (Site.Master → MainLayout.razor). Called after ConvertFrom-MasterDirective in the pipeline. Flags LoginView and SelectMethod as manual items.
+### GetRouteUrl, Run 5 & Toolkit Sync Summary (2026-03-04 through 2026-03-05)
 
-**New-AppRazorScaffold function:** Generates `Components/App.razor` (Blazor document shell with HeadOutlet + Routes @rendermode) and `Components/Routes.razor` (Router with DefaultLayout=MainLayout). Called alongside New-ProjectScaffold from entry point.
+**GetRouteUrl:** 4 extension method overloads on BaseWebFormsComponent (2 object, 2 RouteValueDictionary), all delegate to LinkGenerator.GetPathByRouteValues. WingtipToys uses anonymous-object overloads only.
 
-**Eval format-string regex:** `<%#: Eval("prop", "{0:fmt}") %>` → `@context.prop.ToString("fmt")`. Placed BEFORE existing single-arg Eval regex so specific pattern matches first.
+**Run 5 migration:** 3.25s, 309 transforms, 32 files. 6 new enhancements confirmed (LoginView, GetRouteUrl hints, SelectMethod TODO, Register cleanup, ContentPlaceHolder, String.Format). Clean build after stubbing Account/Checkout. Gaps: static assets need wwwroot/ copy, csproj TFM still net8.0.
 
-**String.Format regex:** `<%#: String.Format("{0:fmt}", Item.Prop) %>` → `@($"{context.Prop:fmt}")`. Uses `$$` in replacement for literal `$` in .NET regex. Placed before existing Eval/Item regexes.
+**Toolkit sync:** migration-toolkit/ is canonical home. Synced 47KB bwfc-migrate.ps1 over stale 29KB copy. PageService.Title already exists -- updated analysis and skill. .NET SDK prereq updated to 10.0+. Lesson: always check existing BWFC components before flagging as missing.
 
-**Key decisions:** ScriptManager regex uses `(?s)` for multiline matching across `<Scripts>` block. ContentPlaceHolder regex uses `(?si)` for case-insensitive + singleline. Head metadata extraction happens before head section removal. Code-behind output path for .master files reuses computed `$razorRelPath + $cbSuffix`.
+Team updates: Migration report 3-level traversal (Beast). Run 5 reports need Works/Doesn't-Work sections (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC data controls preferred, migration-toolkit/ canonical (Jeff/Forge).
 
-### GetRouteUrl Completion (2026-03-05)
+<!-- Summarized 2026-03-04 by Scribe -- covers Run 6 script enhancements -->
 
-- `GetRouteUrlHelper.cs` has 4 extension method overloads on `BaseWebFormsComponent`: two taking `object routeParameters` (working), two taking `RouteValueDictionary` (were stubbed, now complete). All delegate to `LinkGenerator.GetPathByRouteValues`.
-- `RouteValueDictionary` is accepted by `LinkGenerator.GetPathByRouteValues` as the `object values` parameter — it's already the internal type, so no conversion needed.
-- WingtipToys uses `GetRouteUrl("RouteName", new { param = value })` exclusively (anonymous objects) — the `object` overloads cover all WingtipToys scenarios. `RouteValueDictionary` overloads exist for completeness with the Web Forms API surface.
-- `LinkGenerator` is auto-registered by ASP.NET Core routing. `IHttpContextAccessor` requires explicit `services.AddHttpContextAccessor()` — the sample already does this in Program.cs.
-- In Web Forms, `GetRouteUrl` is an instance method on `Control`/`Page`. In Blazor, it's an extension method on `BaseWebFormsComponent`, so migrated code uses `this.GetRouteUrl(...)` in code-behind or `@(this.GetRouteUrl(...))` in Razor markup.
-- Migration toolkit currently suggests inlining route URLs (e.g., `@($"/Products/{context.ID}")`) rather than using the extension method. Both approaches are valid — inlining is simpler, extension method is more faithful to route-name resolution.
+### Run 6 Script Enhancements (2026-03-05)
+
+4 enhancements to bwfc-migrate.ps1: (1) TFM net8.0->net10.0 + RenderMode using (line 139), (2) SelectMethod TODO->BWFC Items guidance (-120s, line 756), (3) static files->wwwroot/ (line 1103), (4) compilable stubs for unconvertible pages (Test-UnconvertiblePage + New-CompilableStub, lines 907-988). Bug found: @rendermode InteractiveServer in _Imports.razor is invalid in .NET 10. Test-UnconvertiblePage must also scan .aspx.cs code-behind.
+
+Team update (2026-03-04): Run 6 improvement analysis -> decided by Forge
+Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffold is invalid in .NET 10 -- must be removed from bwfc-migrate.ps1 line 164. Also: Test-UnconvertiblePage must scan .aspx.cs code-behind files. -- decided by Forge
+
+### @rendermode Scaffold Fix (2026-03-05)
+
+**Fix applied:** Removed `@rendermode InteractiveServer` standalone directive from _Imports.razor scaffold in both migration-toolkit/scripts/bwfc-migrate.ps1 and scripts/bwfc-migrate.ps1. The `@using static Microsoft.AspNetCore.Components.Web.RenderMode` using directive was kept (correct — enables shorthand `InteractiveServer`). App.razor scaffold already had the correct pattern: `<Routes @rendermode="InteractiveServer" />` and `<HeadOutlet @rendermode="InteractiveServer" />`.
+
+**Lesson:** `@rendermode` is a directive *attribute* that goes on component instances (e.g., `<Routes @rendermode="InteractiveServer" />`), NOT a standalone Razor directive. Placing it as a bare directive in _Imports.razor causes build errors. For global interactivity, apply it to `<Routes>` and `<HeadOutlet>` in App.razor. The `@using static` import in _Imports.razor is the correct way to make `InteractiveServer` available as a shorthand across all pages.
+ Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
 
 
- Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
+ Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+
+### WebFormsPageBase Implementation (2026-03-05)
+
+**WebFormsPageBase:** Created `src/BlazorWebFormsComponents/WebFormsPageBase.cs` — abstract base class inheriting `ComponentBase` (not `BaseWebFormsComponent`). Injects `IPageService` privately, exposes `Title`, `MetaDescription`, `MetaKeywords` as delegate properties. `IsPostBack => false` so `if (!IsPostBack)` compiles and always enters. `Page => this` self-reference enables `Page.Title = "X"` to compile unchanged from Web Forms code-behind. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). Build verified clean (63 pre-existing warnings, 0 errors). Lesson: Pages are top-level containers, not child controls — inheriting `ComponentBase` directly avoids the CascadingValue wrapping and control-tree logic in `BaseWebFormsComponent`.
+
+ Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+### WebFormsPage IPageService Consolidation (2026-03-05)
+
+**WebFormsPage enhanced:** Merged `Page.razor` head-rendering capability into `WebFormsPage`. Added optional `IPageService` resolution via `ServiceProvider.GetService<IPageService>()` — WebFormsPage still works for naming/theming when IPageService is not registered. Subscribes to `TitleChanged`, `MetaDescriptionChanged`, `MetaKeywordsChanged` events in `OnInitialized()`. Renders `<PageTitle>` and `<HeadContent>` before the existing CascadingValue wrapper. Added `RenderPageHead` parameter (default true) to allow opting out. Implements `IDisposable` to unsubscribe from events. `Page.razor` left untouched as standalone option. Build verified clean (70 pre-existing warnings, 0 errors). Lesson: `IServiceProvider` in `BaseWebFormsComponent` is private — child classes needing it must inject their own via `[Inject]`.
+
+� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
+

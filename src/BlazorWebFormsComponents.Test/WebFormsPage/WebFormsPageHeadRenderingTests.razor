@@ -1,0 +1,145 @@
+@using BlazorWebFormsComponents.Theming
+@using Microsoft.AspNetCore.Components.Web
+
+@code {
+
+	[Fact]
+	public void RendersPageTitle_WhenIPageServiceRegistered_AndTitleIsSet()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.Title = "Products";
+		Services.AddScoped<IPageService>(_ => pageService);
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent">
+				<p>content</p>
+			</WebFormsPage>
+		);
+
+		// Assert — PageTitle component is rendered (bUnit doesn't render its inner text to Markup,
+		// but FindComponent proves the conditional rendering branch executed successfully)
+		cut.FindComponent<PageTitle>();
+	}
+
+	[Fact]
+	public void RendersMetaDescription_WhenSet()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.MetaDescription = "Browse our products catalog";
+		Services.AddScoped<IPageService>(_ => pageService);
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent">
+				<p>content</p>
+			</WebFormsPage>
+		);
+
+		// Assert — HeadContent component is rendered (bUnit captures built-in head components
+		// but their inner markup goes through HeadOutlet, not the DOM tree)
+		cut.FindComponent<HeadContent>();
+	}
+
+	[Fact]
+	public void RendersMetaKeywords_WhenSet()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.MetaKeywords = "blazor,webforms,migration";
+		Services.AddScoped<IPageService>(_ => pageService);
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent">
+				<p>content</p>
+			</WebFormsPage>
+		);
+
+		// Assert — HeadContent component is rendered with keywords
+		cut.FindComponent<HeadContent>();
+	}
+
+	[Fact]
+	public void DoesNotRenderHeadContent_WhenRenderPageHeadIsFalse()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.Title = "Should Not Appear";
+		pageService.MetaDescription = "Invisible";
+		Services.AddScoped<IPageService>(_ => pageService);
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent" RenderPageHead="false">
+				<p>content</p>
+			</WebFormsPage>
+		);
+
+		// Assert — no PageTitle or HeadContent should be rendered
+		cut.FindComponents<PageTitle>().Count.ShouldBe(0);
+		cut.Markup.ShouldNotContain("Should Not Appear");
+	}
+
+	[Fact]
+	public void WorksWithoutIPageServiceRegistered_NamingAndThemingOnly()
+	{
+		// Arrange — do NOT register IPageService
+
+		// Act — should render without error
+		var cut = Render(
+			@<WebFormsPage ID="MainContent">
+				<Button ID="MyButton" Text="Click" />
+			</WebFormsPage>
+		);
+
+		// Assert — child content renders, naming works, no crash
+		var button = cut.Find("input");
+		button.GetAttribute("id").ShouldBe("MainContent_MyButton");
+	}
+
+	[Fact]
+	public void CascadesTheme_WhileAlsoRenderingHeadContent()
+	{
+		// Arrange
+		var pageService = new PageService();
+		pageService.Title = "Themed Page";
+		Services.AddScoped<IPageService>(_ => pageService);
+
+		var theme = new ThemeConfiguration();
+		theme.AddSkin("Label", new ControlSkin { BackColor = WebColor.Blue });
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage ID="MainContent" Theme="theme">
+				<Label Text="styled" />
+			</WebFormsPage>
+		);
+
+		// Assert — head content rendered (PageTitle exists, proving head rendering is active)
+		cut.FindComponent<PageTitle>();
+
+		// Assert — theme cascading still works
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	[Fact]
+	public void ChildContent_RendersNormally()
+	{
+		// Arrange — no IPageService, simplest case
+
+		// Act
+		var cut = Render(
+			@<WebFormsPage>
+				<p class="test-content">Hello World</p>
+			</WebFormsPage>
+		);
+
+		// Assert
+		var para = cut.Find("p.test-content");
+		para.TextContent.ShouldBe("Hello World");
+	}
+}

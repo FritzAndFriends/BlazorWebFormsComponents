@@ -29,7 +29,9 @@ Use this skill when you need to:
 ## 1. Entity Framework 6 → EF Core
 
 **Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod`.
-**Blazor:** EF Core with `IDbContextFactory` registered in DI.
+**Blazor:** EF Core **10.0.3** (latest .NET 10) with `IDbContextFactory` registered in DI.
+
+> **Always use the latest .NET 10 EF Core packages** (currently 10.0.3): `Microsoft.EntityFrameworkCore`, `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`.
 
 ```csharp
 // Web Forms — direct DbContext in code-behind

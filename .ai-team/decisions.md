@@ -5468,10 +5468,10 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **What:** Added 1 smoke test `[InlineData]` and 3 interactive tests for the ModelErrorMessage sample page (`/ControlSamples/ModelErrorMessage`). Smoke test added to `ValidationControl_Loads_WithoutErrors` Theory group. Interactive tests cover: submit-shows-errors, valid-submit-no-errors, and clear-button-removes-errors.
 **Why:** Every sample page gets an integration test — no exceptions. The ModelErrorMessage component is a validation control that conditionally renders `<span class="text-danger">` elements, so tests verify both the error-present and error-absent states via DOM element counting. The Clear button test exercises the EditContext reset path, which is unique to this sample page.
 
-### 2026-03-02: PR target repository directive
+### 2026-03-04: PRs always target upstream/dev (consolidated)
 **By:** Jeffrey T. Fritz (via Copilot)
-**What:** PRs should always target the upstream repository (FritzAndFriends/BlazorWebFormsComponents), not the fork (csharpfritz/BlazorWebFormsComponents). Use cross-fork PR format: head = csharpfritz:{branch}, base = dev on FritzAndFriends.
-**Why:** User request  captured for team memory
+**What:** NEVER create a PR to the origin repo (csharpfritz fork). Pull requests should ALWAYS be created to the upstream repository (FritzAndFriends/BlazorWebFormsComponents) targeting the dev branch. Use cross-fork PR format: head = csharpfritz:{branch}, base = dev on FritzAndFriends. Use `gh pr create --repo FritzAndFriends/BlazorWebFormsComponents` or equivalent.
+**Why:** User request — captured for team memory. The fork is for pushing branches; PRs belong on the org repo. This is a workflow rule for the project. (Consolidated from directives on 2026-03-02, 2026-03-03, and 2026-03-04.)
 
 ### 2026-03-02: WingtipToys Migration Analysis Results
 **By:** Forge
@@ -5563,16 +5563,12 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 **What:** Migration test runs with screenshots and measurements go in `docs/migration-tests/` with a subfolder per run containing a markdown report and supporting images. This is the standard location for all migration benchmarking.
 **Why:** User request — establishes a repeatable pattern for tracking migration test results over time.
 
-### 2026-03-03: User directive — PRs target upstream
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Pull requests should be created on the upstream repository (FritzAndFriends/BlazorWebFormsComponents), not the origin fork (csharpfritz/BlazorWebFormsComponents). Use `gh pr create --repo FritzAndFriends/BlazorWebFormsComponents` or equivalent.
-**Why:** User request — captured for team memory. The fork is for pushing branches; PRs belong on the org repo.
 
-### 2026-03-03: Migration toolkit restructure  self-contained distribution (consolidated)
+### 2026-03-04: migration-toolkit/ is the canonical home for all deliverable migration assets (consolidated)
 **By:** Jeffrey T. Fritz, Forge
 **Status:** Implemented
-**What:** Distributable migration skills and PowerShell scripts must NOT live in \.github/skills/\. All distributable migration assets moved into \migration-toolkit/\ as a self-contained distribution package: \migration-toolkit/skills/\ (3 Copilot skill files), \migration-toolkit/scripts/\ (bwfc-scan.ps1, bwfc-migrate.ps1). \.github/skills/\ retains only internal project skills. Scripts are copied (not moved) because \scripts/\ originals are still used internally.
-**Why:** The toolkit is a product to distribute, not internal project configuration. Eliminates confusion about which skills are for end-users vs internal. README.md updated with usage instructions and NuGet link.
+**What:** All tools, scripts, and skills used for migration tests and delivered to users must live in `migration-toolkit/` as a self-contained distribution package: `migration-toolkit/skills/` (Copilot skill files), `migration-toolkit/scripts/` (bwfc-scan.ps1, bwfc-migrate.ps1). This is the canonical location — not `scripts/`, not `.ai-team/skills/`, not `.github/skills/`. `.github/skills/` retains only internal project skills. Scripts are copied (not moved) because `scripts/` originals are still used internally.
+**Why:** User directive — establishing single source of truth for deliverable migration assets. The toolkit is a product to distribute, not internal project configuration. Eliminates confusion about which skills are for end-users vs internal. README.md updated with usage instructions and NuGet link.
 
 ### 2026-03-04: Layer 1 Benchmark Baseline Established
 
@@ -5760,3 +5756,115 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
 **Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
 
+
+### 2026-03-04: User directive — exclude FreshWingtipToys and feasibility doc
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** FreshWingtipToys sample site (samples/FreshWingtipToys/) and the ASPX middleware feasibility doc (planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md) should NOT be committed to the repo. They are scratch artifacts from the migration benchmarking work.
+**Why:** User request — captured for team memory
+
+
+
+
+### 2026-03-04: Run 5 Migration Patterns
+
+**By:** Cyclops
+**What:** Run 5 of WingtipToys full migration tested 6 new script enhancements. 309 transforms total (up from 276 in Run 4). LoginViewAuthorizeView, GetRouteUrl injection hints, SelectMethod TODO annotations, Register directive cleanup, ContentPlaceHolder@Body, and String.Format conversions all fired correctly. Account/Checkout pages need full stubbing. Static assets should copy to wwwroot/ not project root. csproj scaffold TFM should be parameterized (default net10.0).
+**Why:** Documents migration patterns and script improvement recommendations from Run 5 validation. Establishes that all 6 new enhancements work correctly and identifies remaining gaps (static asset relocation, TFM parameterization, stub generation).
+
+### 2026-03-05: Run 5 Report Structure with Works/Doesn't-Work Sections
+
+**By:** Beast
+**What:** Run 5 benchmark report introduces two new structural sections: (1) "What Works  Automated (Layer 1)"  complete inventory of all automated transforms with counts and examples, and (2) "What Doesn't Work  Still Manual (Layer 2)"  categorized by difficulty (mechanical-tedious vs requires-architectural-decisions). Replaces implicit "unconverted patterns" section with explicit, scannable breakdown. Pattern carries forward to Run 6+.
+**Why:** Self-contained report for stakeholders who haven't followed run history. Difficulty categorization helps project managers estimate effort. Forward-compatible for diffing against future runs.
+
+### 2026-03-04: Migration standards for Web Forms → Blazor projects
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:**
+1. EF6 should ALWAYS be migrated to EF Core
+2. Target application should always be a .NET 10 Blazor Global Server Interactive project, scaffolded with `dotnet new blazor --interactivity Server`
+3. When ASP.NET Identity is used in the Web Forms project, prefer ASP.NET Core Identity in the Blazor migration
+4. Event handler migration should leverage BWFC component event parameters (OnClick, OnCommand, OnSelectedIndexChanged, etc.) which already have similar names to Web Forms originals
+**Why:** User request — establishing canonical migration standards based on Run 5 learnings. These should be reflected in migration scripts, documentation, and skills.
+
+
+
+### 2026-03-05: Migration Toolkit Run 6  BWFC-first migration standards and 8 script enhancements (consolidated)
+
+**By:** Forge, Cyclops
+**What:**
+
+**Standards (from Run 5 analysis):**
+1. BWFC data controls (ListView, FormView, GridView) must be preferred over raw HTML  Run 5 revealed 3 of 4 top page rewrites unnecessarily replaced BWFC-compatible controls with `@foreach` loops.
+2. BWFC's 95+ EventCallback parameters with Web Forms-matching names (OnClick, OnCommand, OnSelectedIndexChanged, etc.) must be preserved verbatim; only annotate signature changes.
+3. Component improvement priorities: add `OnRowDataBound`/`OnRowCreated` to GridView, add events to Repeater, document FormView and ListView `Items` parameter in migration context.
+
+**Script enhancements (priority order):**
+1. Fix scaffold TFM: net8.0  net10.0. Add `@using static Microsoft.AspNetCore.Components.Web.RenderMode` to _Imports.razor. *5 min, -15s.*
+2. Improve SelectMethod TODO to reference BWFC `Items` parameter instead of generic DI advice. *10 min, -120s.*
+3. Copy static files to `wwwroot/` instead of project root. *10 min, -15s.*
+4. Generate compilable stubs for unconvertible pages (Identity/Auth/Payment). *30 min, -60s.*
+5. Page.Title  PageTitle conversion via PageService. *20 min, -4 manual items.*
+6. Page base class swap: `: Page`  `: ComponentBase` in code-behinds. *10 min, -4+ items.*
+7. Event handler signature annotation TODOs. *20 min.*
+8. BundleConfig  link/script tags in App.razor. *45 min, -30s.*
+
+**Why:** Run 5 Layer 2 spent ~180s on page fixes, ~120s unnecessarily rewriting data controls to raw HTML. Combined enhancements project ~55% total time reduction (from ~10 min to ~4.5 min). The remaining ~4 min is inherently manual architectural work (EF Core, Identity, SessionDI). These standards formalize that BWFC event handlers have matching names and should be preserved.
+
+### 2026-03-05: Run 6 Script Enhancements (4 changes to bwfc-migrate.ps1)
+
+**By:** Cyclops
+**What:** Implemented 4 highest-ROI enhancements to `migration-toolkit/scripts/bwfc-migrate.ps1`:
+
+1. **Scaffold TFM** → `net10.0` (was `net8.0`). _Imports.razor now includes `@using static Microsoft.AspNetCore.Components.Web.RenderMode` and `@rendermode InteractiveServer`.
+2. **SelectMethod TODO** → BWFC-aware guidance: tells developers to use `Items="@_data"` parameter on BWFC data controls and load in `OnInitializedAsync`, instead of generic service injection advice.
+3. **Static files** → Copy to `$Output\wwwroot\$relPath` instead of `$Output\$relPath`.
+4. **Compilable stubs** → Pages containing Identity/Auth/Payment patterns (SignInManager, UserManager, FormsAuthentication, Session[, PayPal, Checkout) get minimal compilable `@page`/`@code{}` stubs instead of broken partial conversions.
+
+**Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
+
+
+
+### 2026-03-04: @rendermode InteractiveServer belongs in App.razor, not _Imports.razor (consolidated)
+
+**By:** Forge, Cyclops, Jeffrey T. Fritz
+**What:** `@rendermode InteractiveServer` must not appear as a standalone directive in `_Imports.razor`. It is a directive attribute, not a standalone Razor directive. The correct pattern for global server interactivity is to apply `@rendermode="InteractiveServer"` on component instances (`<Routes>` and `<HeadOutlet>`) in App.razor. The `@using static Microsoft.AspNetCore.Components.Web.RenderMode` import in `_Imports.razor` is correct and should be kept — it enables the shorthand `InteractiveServer` without the `RenderMode.` prefix. Cyclops removed the invalid line from `bwfc-migrate.ps1` scaffold. Beast updated migration-standards, bwfc-migration, and METHODOLOGY skill docs with the correct pattern. Supersedes the `@rendermode InteractiveServer` addition from the Run 6 Script Enhancements decision.
+**Why:** Placing `@rendermode InteractiveServer` bare in `_Imports.razor` caused 8 build errors in Run 6 benchmarks (RZ10003, CS0103 × 2, RZ10024). User directive from Jeffrey T. Fritz confirmed the correct placement. Per Microsoft Learn documentation, `@rendermode` is applied as a directive attribute on component instances. All changes shipped in PR #419.
+
+### 2026-03-04: Scan code-behind files for unconvertible patterns
+
+**By:** Forge
+**What:** `Test-UnconvertiblePage` must also check the corresponding `.aspx.cs` code-behind file content for unconvertible patterns (SignInManager, UserManager, etc.), not just `.aspx` markup. 15 Account pages were not auto-stubbed because their Identity references were only in code-behind.
+**Why:** Manual stubbing took ~15s per run. Every migration with Identity pages will hit this gap.
+
+### 2026-03-04: Run 6 validates migration-standards SKILL.md patterns
+
+**By:** Forge
+**What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
+**Why:** These patterns should be considered validated for external migration guidance.
+
+
+### 2026-03-04: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Entity Framework Core migrations should always use the latest .NET 10 version of the package, currently 10.0.3. Use `Microsoft.EntityFrameworkCore` version 10.0.3 (and related packages like `.SqlServer`, `.Tools`, `.Design` at the same version).
+**Why:** User request — captured for team memory. Ensures migrated projects use current stable EF Core matching the net10.0 TFM.
+
+
+### 2026-03-04: WebFormsPageBase  Page base class for converted ASPX pages (consolidated)
+
+**By:** Forge, Cyclops
+**Requested by:** Jeffrey T. Fritz
+**Status:** Implemented (ff50b85, PR #419)
+
+**What:** Created `WebFormsPageBase : ComponentBase` as a separate page base class for converted Web Forms pages. Inherits `ComponentBase` directly (not `BaseWebFormsComponent`) because pages are top-level containers, not child controls. Provides: `Title`, `MetaDescription`, `MetaKeywords` (delegating to `IPageService`), `IsPostBack => false`, and `protected WebFormsPageBase Page => this` self-reference. `[Inject] private IPageService` is auto-injected, eliminating per-page `@inject IPageService Page` boilerplate. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). `Page.Title = "X"` and `if (!IsPostBack)` compile with zero changes from Web Forms code-behind. `Page.Request`, `Page.Response`, `Page.Session` deliberately omitted to force proper Blazor migration. Uses tabs for indentation matching existing project style.
+
+**Why:** Jeff asked if converted ASPX pages could inherit from a BWFC Page component to dramatically improve migration. Analysis of `System.Web.UI.Page` surface area showed Title and IsPostBack are the most common patterns (27 pages, 12+ IsPostBack occurrences in WingtipToys). Option C (base class + Page self-reference shim) was selected over adding properties to `BaseWebFormsComponent` (would pollute all controls) or a base class without Page property (wouldn't support `Page.Title` syntax). Conservative estimate: saves 15-25 minutes of manual work for WingtipToys, eliminates 100% of IsPostBack compiler errors. 8 bUnit tests written and passing (1472 total). 3 migration docs updated (bwfc-migration SKILL, migration-standards SKILL, METHODOLOGY).
+
+### 2026-03-05: WebFormsPage IPageService head rendering consolidation (consolidated)
+
+**By:** Forge, Cyclops
+**Requested by:** Jeffrey T. Fritz
+**Status:** Implemented (005c254, PR #419)
+
+**What:** Merged Page.razor's head-rendering capability into WebFormsPage (Option B from Forge's consolidation analysis). WebFormsPage now injects IServiceProvider, optionally resolves IPageService, subscribes to title/meta change events, and renders <PageTitle> + <HeadContent> alongside its existing <CascadingValue> wrapper. New [Parameter] bool RenderPageHead (default: 	rue) allows opting out. IPageService resolution is optional  WebFormsPage works for naming/theming even without AddBlazorWebFormsComponents(). Layout simplifies from 2 components (<Page /> + <WebFormsPage>) to 1 (<WebFormsPage> only). Page.razor remains as standalone option for apps not using WebFormsPage. NamingContainer and ThemeProvider unchanged. Forge analyzed 4 options: A (WebFormsPageBase renders  rejected, breaks SSR), B (merge into WebFormsPage  recommended and implemented), C (JSInterop  rejected, breaks SSR), D (status quo  acceptable fallback). WebFormsPageBase inheritance unchanged (stays as ComponentBase, not NamingContainer). 7 new tests, 1479 total passing.
+
+**Why:** Jeff asked to consolidate the 5-piece page system into fewer entry points. Option B is the only approach that works with Blazor's render model (<PageTitle> and <HeadContent> must appear in markup, not a base class). Result: two-line setup (one @inherits in _Imports.razor, one <WebFormsPage> in MainLayout.razor) delivers naming, theming, and head rendering. Migration scripts generate one component instead of two.

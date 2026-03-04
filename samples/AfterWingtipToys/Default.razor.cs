@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Components;
 
-namespace WingtipToys
+namespace WingtipToys;
+
+public partial class _Default : ComponentBase
 {
-    public partial class Default : ComponentBase
-    {
-        protected string Title = "Welcome";
-    }
 }
 

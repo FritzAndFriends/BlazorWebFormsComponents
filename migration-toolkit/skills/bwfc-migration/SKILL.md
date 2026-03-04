@@ -39,15 +39,52 @@ dotnet add package Fritz.BlazorWebFormsComponents
 ```razor
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.Enums
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 ```
 
-### Step 3: Register BWFC Services
+The `@inherits` line makes every page inherit from `WebFormsPageBase`, which provides `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` — so Web Forms code-behind patterns compile unchanged. No per-page `@inject IPageService` is needed for page-level usage. Individual pages can override with their own `@inherits` if needed.
+
+> **Note:** The `@using static` import lets you write `InteractiveServer` as shorthand in `App.razor`. Do **not** add `@rendermode InteractiveServer` as a line in `_Imports.razor` — `@rendermode` is a directive attribute that belongs on component instances, not a standalone directive.
+
+> **Note:** `@inject IPageService` is still valid for non-page components (e.g., a shared header component) that need access to page metadata. `WebFormsPageBase` only applies to routable pages.
+
+### Step 2b: Configure Render Mode in `App.razor`
+
+The `dotnet new blazor --interactivity Server` template generates `App.razor` with render mode already set. Verify it contains:
+
+```razor
+<HeadOutlet @rendermode="InteractiveServer" />
+...
+<Routes @rendermode="InteractiveServer" />
+```
+
+This enables global server interactivity for all pages. See [ASP.NET Core Blazor render modes](https://learn.microsoft.com/aspnet/core/blazor/components/render-modes) for per-page alternatives.
+
+### Step 3: Register BWFC Services and Add Page Component to Layout
 
 In `Program.cs`:
 
 ```csharp
 builder.Services.AddBlazorWebFormsComponents();
 ```
+
+In your layout file (`MainLayout.razor`), add the `<Page />` render component once. This subscribes to `IPageService` and emits `<PageTitle>` and `<meta>` tags:
+
+```razor
+@inherits LayoutComponentBase
+
+<BlazorWebFormsComponents.Page />
+
+<header>
+    <!-- ... -->
+</header>
+<main>
+    @Body
+</main>
+```
+
+> **Important:** `WebFormsPageBase` provides the code-behind API (`Page.Title`, `IsPostBack`). The `<BlazorWebFormsComponents.Page />` component does the rendering (`<PageTitle>`, `<meta>` tags). Both are required.
 
 ### Step 4: Add BWFC JavaScript
 
@@ -309,7 +346,8 @@ These are 100% mechanical — apply to every file:
 | `Page_Load(object sender, EventArgs e)` | `protected override async Task OnInitializedAsync()` | First load |
 | `Page_PreRender(...)` | `protected override async Task OnParametersSetAsync()` | Before each render |
 | `Page_Init(...)` | `protected override void OnInitialized()` | Sync initialization |
-| `IsPostBack` check | (not needed) | Blazor doesn't have postback |
+| `if (!IsPostBack)` | Works unchanged via `WebFormsPageBase` | Always enters the block — correct for first-render code |
+| `if (IsPostBack)` (without `!`) | **Dead code — flag for manual review** | Never enters the block in Blazor; move logic to event handlers |
 
 ```csharp
 // Web Forms
@@ -322,7 +360,16 @@ protected void Page_Load(object sender, EventArgs e)
     }
 }
 
-// Blazor
+// Blazor (with WebFormsPageBase — IsPostBack compiles unchanged)
+protected override async Task OnInitializedAsync()
+{
+    if (!IsPostBack)  // ✅ compiles — always true, block always executes
+    {
+        products = await ProductService.GetProductsAsync();
+    }
+}
+
+// Or, simplified (since IsPostBack is always false):
 protected override async Task OnInitializedAsync()
 {
     products = await ProductService.GetProductsAsync();
@@ -472,7 +519,7 @@ For FormView, DetailsView:
 Replace `ViewState["key"]` with component fields.
 
 ### No PostBack
-`if (!IsPostBack)` → move to `OnInitializedAsync()`.
+`if (!IsPostBack)` → works AS-IS with `WebFormsPageBase` (always enters the block). `if (IsPostBack)` (without `!`) → **dead code** in Blazor; flag for manual review and move logic to event handlers.
 
 ### No DataSource Controls
 `SqlDataSource`, `ObjectDataSource`, `EntityDataSource` → injected services. See `/bwfc-data-migration`.
@@ -549,6 +596,12 @@ Include during migration to prevent errors, remove when stable.
 | **Navigation** | 3 | Menu, SiteMapPath, TreeView |
 | **Login** | 7 | ChangePassword, CreateUserWizard, Login, LoginName, LoginStatus, LoginView, PasswordRecovery |
 | **AJAX** | 5 | ScriptManager, ScriptManagerProxy, Timer, UpdatePanel, UpdateProgress |
+
+### Page Base Class
+
+| Web Forms | BWFC | Notes |
+|-----------|------|-------|
+| `System.Web.UI.Page` (base class) | `WebFormsPageBase` | `@inherits WebFormsPageBase` in `_Imports.razor`; `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack` work unchanged |
 
 ### Not Covered by BWFC
 

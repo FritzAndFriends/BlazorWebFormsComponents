@@ -1,77 +1,82 @@
 @page "/ProductList"
-	<section>
-        <div>
-            <hgroup>
-                <h2>Products</h2>
-            </hgroup>
 
-            <ListView ID="productList" 
-                DataKeyNames="ProductID"
-                TItem="Product" Items="@Products"
-                GroupItemCount="4">
-                <EmptyDataTemplate>
+<PageTitle>Products</PageTitle>
+
+<section>
+    <div>
+        <hgroup>
+            <h2>Products</h2>
+        </hgroup>
+
+        <ListView Items="@_products" TItem="Product"
+            DataKeyNames="ProductID" GroupItemCount="4">
+            <EmptyDataTemplate>
+                <table>
+                    <tr>
+                        <td>No data was returned.</td>
+                    </tr>
+                </table>
+            </EmptyDataTemplate>
+            <EmptyItemTemplate>
+                <td/>
+            </EmptyItemTemplate>
+            <GroupTemplate>
+                <tr id="itemPlaceholderContainer">
+                    <td id="itemPlaceholder"></td>
+                </tr>
+            </GroupTemplate>
+            <ItemTemplate>
+                <td>
                     <table>
                         <tr>
-                            <td>No data was returned.</td>
+                            <td>
+                                <a href="/ProductDetails?productID=@context.ProductID">
+                                    <img src="/Catalog/Images/Thumbs/@context.ImagePath"
+                                        width="100" height="75" style="border:1px solid" />
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/ProductDetails?productID=@context.ProductID">
+                                    @context.ProductName
+                                </a>
+                                <br />
+                                <span>
+                                    <b>Price: </b>@($"{context.UnitPrice:c}")
+                                </span>
+                                <br />
+                                <a href="/AddToCart?productID=@context.ProductID">
+                                    <span class="ProductListItem">
+                                        <b>Add To Cart</b>
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
                         </tr>
                     </table>
-                </EmptyDataTemplate>
-                <EmptyItemTemplate>
-                    <td></td>
-                </EmptyItemTemplate>
-                <GroupTemplate>
-                    <tr>
-                        @context
-                    </tr>
-                </GroupTemplate>
-                <LayoutTemplate>
-                    <table style="width:100%;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table style="width:100%">
-                                        @context
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </LayoutTemplate>
-                <ItemTemplate>
-                    <td style="padding:10px;vertical-align:top;">
-                        <table>
-                            <tr>
-                                <td>
-                                  <a href="@($"/ProductDetails?id={context.ProductID}")">
-                                    <img src="/Images/Products/@context.ImagePath"
-                                      width="100" height="75" style="border:1px solid" />
-                                  </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="@($"/ProductDetails?id={context.ProductID}")">
-                                      <b>@context.ProductName</b>
-                                    </a>
-                                    <br />
-                                    <span>
-                                        <b>Price: </b>@($"{context.UnitPrice:c}")
-                                    </span>
-                                    <br />
-                                    <a href="@($"/AddToCart?productID={context.ProductID}")">
-                                        <span class="ProductListItem">
-                                            <b>Add To Cart</b>
-                                        </span>           
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
-                        </table>
-                    </td>
-                </ItemTemplate>
-            </ListView>
-        </div>
-    </section>
+                </td>
+            </ItemTemplate>
+            <LayoutTemplate>
+                <table style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table id="groupPlaceholderContainer" style="width:100%">
+                                    <tr id="groupPlaceholder"></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </LayoutTemplate>
+        </ListView>
+    </div>
+</section>
 

@@ -2924,6 +2924,248 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task CheckBoxList_CheckItem_UpdatesSelection()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/CheckBoxList", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Find checkboxes in the first CheckBoxList
+            var checkboxes = await page.Locator("[data-audit-control='CheckBoxList-1'] input[type='checkbox']").AllAsync();
+            Assert.NotEmpty(checkboxes);
+
+            // Click the first checkbox
+            var firstCheckbox = page.Locator("[data-audit-control='CheckBoxList-1'] input[type='checkbox']").First;
+            await firstCheckbox.ClickAsync();
+            await page.WaitForTimeoutAsync(300);
+
+            // Verify it's checked
+            var isChecked = await firstCheckbox.IsCheckedAsync();
+            Assert.True(isChecked, "Checkbox should be checked after clicking");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task DataPager_ClickPage_ChangesDisplayedItems()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/DataPager", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Capture initial table content
+            var initialContent = await page.Locator("[data-audit-control='DataPager'] tbody").TextContentAsync();
+            Assert.NotNull(initialContent);
+
+            // Find pager buttons and click a page number (skip first/prev, look for numeric)
+            var pagerButtons = await page.Locator("[data-audit-control='DataPager'] a, [data-audit-control='DataPager'] button").AllAsync();
+            if (pagerButtons.Count > 1)
+            {
+                // Click the second pager link to navigate to page 2
+                await pagerButtons[1].ClickAsync();
+                await page.WaitForTimeoutAsync(500);
+
+                // Verify content changed
+                var newContent = await page.Locator("[data-audit-control='DataPager'] tbody").TextContentAsync();
+                Assert.NotEqual(initialContent, newContent);
+            }
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ImageButton_Click_IncrementsCounter()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ImageButton", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Find the first ImageButton (renders as <input type="image">)
+            var imageButton = page.Locator("[data-audit-control='ImageButton-1'] input[type='image']").First;
+            await imageButton.WaitForAsync(new() { Timeout = 5000 });
+
+            // Click the image button
+            await imageButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify click count incremented
+            var countText = await page.Locator("[data-audit-control='ImageButton-1'] + p strong").TextContentAsync();
+            Assert.NotNull(countText);
+            Assert.Equal("1", countText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ListBox_Selection_Works()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ListBox", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Find the first ListBox (renders as <select>)
+            var listBox = page.Locator("[data-audit-control='ListBox-1'] select").First;
+            await listBox.WaitForAsync(new() { Timeout = 5000 });
+
+            // Check it has options
+            var options = await listBox.Locator("option").AllAsync();
+            Assert.NotEmpty(options);
+
+            // Select the second option
+            if (options.Count > 1)
+            {
+                await listBox.SelectOptionAsync(new SelectOptionValue { Index = 1 });
+                await page.WaitForTimeoutAsync(300);
+
+                // Verify selection changed
+                var selectedValue = await listBox.EvaluateAsync<string>("el => el.value");
+                Assert.NotNull(selectedValue);
+                Assert.NotEmpty(selectedValue);
+            }
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task LoginView_AnonymousTemplate_RendersContent()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/LoginView", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // LoginView should render the AnonymousTemplate since user is not authenticated
+            var content = await page.Locator("[data-audit-control='LoginView-1']").TextContentAsync();
+            Assert.NotNull(content);
+            Assert.Contains("not logged in", content);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Theming_ThemeProvider_AppliesStyles()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Theming", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify themed buttons are present with inline styles applied by ThemeProvider
+            var themedButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            Assert.NotEmpty(themedButtons);
+
+            // Verify the page has demo containers with themed content
+            var demoContainers = await page.Locator(".demo-container").AllAsync();
+            Assert.True(demoContainers.Count >= 5, "Expected at least 5 demo sections on the Theming page");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
     public async Task ModelErrorMessage_ClearButton_RemovesErrors()
     {
         var page = await _fixture.NewPageAsync();

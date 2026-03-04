@@ -3,30 +3,27 @@ using Microsoft.EntityFrameworkCore;
 using WingtipToys.Data;
 using WingtipToys.Models;
 
-namespace WingtipToys
+namespace WingtipToys;
+
+public partial class ProductList : ComponentBase
 {
-    public partial class ProductList : ComponentBase
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+
+    [SupplyParameterFromQuery(Name = "id")] private int? CategoryId { get; set; }
+
+    private List<Product>? _products;
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject]
-        private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+        using var db = DbFactory.CreateDbContext();
+        IQueryable<Product> query = db.Products;
 
-        [SupplyParameterFromQuery]
-        public int? id { get; set; }
-
-        public List<Product> Products { get; set; } = new();
-
-        protected override async Task OnParametersSetAsync()
+        if (CategoryId.HasValue && CategoryId > 0)
         {
-            using var context = DbFactory.CreateDbContext();
-            var query = context.Products.AsQueryable();
-
-            if (id.HasValue)
-            {
-                query = query.Where(p => p.CategoryID == id.Value);
-            }
-
-            Products = await query.ToListAsync();
+            query = query.Where(p => p.CategoryID == CategoryId);
         }
+
+        _products = await query.ToListAsync();
     }
 }
 

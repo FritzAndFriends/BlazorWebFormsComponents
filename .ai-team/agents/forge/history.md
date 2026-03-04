@@ -5,44 +5,13 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Core Context
+
+<!-- Summarized 2026-03-04 by Scribe — originals in history-archive.md -->
+
+M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2–M3 shipped (50/53 controls, 797 tests). Chart.js for Chart. DataBoundStyledComponent<T> recommended. Key patterns: Enums/ with int values, On-prefix events, feature branches→upstream/dev, ComponentCatalog.cs. Deployment: Docker+NBGV, dual NuGet, Azure webhook. M7–M14 milestone plans. HTML audit: 3 tiers, M11–M13. M15 fidelity: 132→131 divergences, 5 fixable bugs. Data controls: 90%+ sample parity, 4 remaining bugs. M17 AJAX: 6 controls shipped.
+
 ## Learnings
-
-<!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
-
-### Core Context (2026-02-10 through 2026-02-27)
-
-Reviewed 6 PRs in M1 (Calendar, FileUpload, ImageMap, PageService, ASCX CLI, VS Snippets). Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2 shipped (4148/53). M3: DetailsView + PasswordRecovery approved (50/53, 797 tests). Chart.js selected for Chart. Feature audit: DataBoundComponent<T> chain lacks style properties  recommended DataBoundStyledComponent<T>. SkinID bug (boolstring). Themes/Skins: CascadingValue ThemeProvider recommended.
-
-**Milestone planning:** M7 "Control Depth & Navigation Overhaul" (51 WIs, ~138 gaps). M9 "Migration Fidelity & Hardening" (12 WIs, ~30 gaps). M12M14 "Migration Analysis Tool PoC" (13 WIs  `bwfc-migrate` CLI, regex parsing, Green/Yellow/Red scoring). M11M13 HTML audit milestones.
-
-**Deployment pipeline:** Docker version via nbgv before build, injected via build-arg. NBGV must be stripped inside Docker. Secret-gated steps use env var indirection. Dual NuGet publishing (GitHub Packages + nuget.org). Azure webhook via curl with fallback.
-
-**Key patterns:** Enum files in `Enums/` with explicit int values. Login Controls  BaseStyledComponent. Data-bound  DataBoundComponent<T>. Events use `On` prefix. Docs + samples ship with components. Feature branches  PR to upstream/dev. ComponentCatalog.cs links all sample pages. Theme core: nullable properties, case-insensitive keys, ApplySkin in OnParametersSet. Audit reports: `planning-docs/AUDIT-REPORT-M{N}.md`.
-
-### Summary: HTML Audit Strategy and Milestones (2026-02-25 through 2026-02-26)
-
-Evaluated Playwright-based HTML audit. Three tiers: Tier 1 (clean HTML, 6 controls), Tier 2 (complex data, 4 controls), Tier 3 (JS-heavy Menu/TreeView). Only ~25% sample coverage. M11M13 plan: M11 (infrastructure + Tier 1), M12 (Tier 2 data), M13 (Tier 3 + master report). Agent distribution: Forge strategy/review, Cyclops infra scripts, Jubilee samples, Colossus capture/comparison, Beast docs, Rogue tests.
-
-### Summary: M15 HTML Fidelity Strategy (2026-02-26)
-
-Post-PR #377: 132131 divergences, 1 exact match (Literal-3). Most divergences are sample data, not bugs. 5 remaining fixable bugs (BulletedList, LinkButton, Image, FileUpload, CheckBox). 12 work items, target 15 exact matches. ~1315 controls can achieve exact normalized match. New divergence candidates D-11 through D-14.
-
-### Summary: Data Control Divergence Analysis (2026-02-26)
-
-Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView (182 lines), Repeater (64 lines). 90%+ sample parity issues. 5 genuine bugs (3 fixed in PR #377). 4 remaining: GridView UseAccessibleHeader default, GridView &nbsp; encoding, GridView thead vs tbody, DataList missing itemtype. Sample alignment alone would give ListView/Repeater exact matches. Calendar closest complex control at 73%.
-
- Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
-
- Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz
-
-
- Team update (2026-02-27): AJAX Controls nav category created; migration stub doc pattern for no-op components; Substitution moved from deferred to implemented; UpdateProgress uses explicit state pattern  decided by Beast
-
-
- Team update (2026-02-27): M17 AJAX controls implemented  ScriptManager/Proxy are no-op stubs, Timer shadows Enabled, UpdatePanel uses ChildContent, UpdateProgress renders hidden, Substitution uses Func callback, new AJAX/Migration Helper categories  decided by Cyclops
-
-
- Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
 
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
 
@@ -104,22 +73,65 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
  Team update (2026-03-04): Layer 1 benchmark baseline established  scan 0.9s, migrate 2.4s, 338 build errors (code-behind only)  decided by Cyclops
  Team update (2026-03-04): Layer 2+3 benchmark complete  ~9.4 min with Copilot, clean build, migration skills validated  decided by Cyclops
 
-### Migration Run 4 — Enhanced Script Validation (2026-03-04)
+<!-- Summarized 2026-03-05 by Scribe -- covers Run 4 review through Run 5 analysis -->
 
-**By:** Forge (Lead / Web Forms Reviewer)
+### Run 4-5 Review & BWFC Capabilities Analysis (2026-03-04 through 2026-03-05)
 
-**What was tested:** Full from-scratch migration of WingtipToys using the enhanced `bwfc-migrate.ps1` script with `ConvertFrom-MasterPage`, `New-AppRazorScaffold`, Eval format-string regex, and String.Format regex.
+**Run 4 review:** ConvertFrom-MasterPage = highest-impact enhancement (auto-generates MainLayout.razor). 289 transforms (+12 from new regexes/master page). 0 errors, 0 warnings, 11/11 features. CascadingAuthenticationState needed in Routes.razor for AuthorizeView.
 
-**Key findings vs Run 3:**
-1. **ConvertFrom-MasterPage is the highest-impact enhancement.** Auto-generates MainLayout.razor from Site.Master with correct @inherits, HeadContent extraction, ContentPlaceHolder→@Body, and LoginView/SelectMethod flagging. Eliminates the most time-consuming manual step.
-2. **App.razor + Routes.razor scaffolding saves boilerplate time.** Combined with master page conversion, the script now generates 7 scaffold files vs 4 in Run 3.
-3. **Eval format-string regex works correctly:** `<%#: Eval("Total", "{0:C}") %>` → `@context.Total.ToString("C")`.
-4. **String.Format regex works for simple cases:** `<%#: String.Format("{0:c}", Item.UnitPrice) %>` → `@($"{context.UnitPrice:c}")`. Complex expressions (arithmetic with Convert.ToDouble) correctly left as manual.
-5. **Total transforms increased from 277 to 289** (+12 from new regexes and master page processing).
-6. **Build: 0 errors, 0 warnings** (improved from Run 3's 63 warnings).
-7. **11/11 features pass** — consistent with Run 2 and Run 3.
-8. **CascadingAuthenticationState must be added to Routes.razor** when using AuthorizeView — the scaffolded Routes.razor doesn't include this automatically. Consider adding it to `New-AppRazorScaffold`.
+**Run 5 BWFC analysis:** 95+ EventCallbacks across 30+ components matching Web Forms names. 3 of 4 top manual rewrites unnecessary -- BWFC already had ListView, FormView, GridView. 40% estimated reduction if scripts preserve BWFC data controls. Gaps: Repeater has zero EventCallbacks, GridView missing OnRowDataBound/OnRowCreated. SelectMethod TODOs need `Items=@data` guidance. Deliverables: analysis-and-recommendations.md, migration-standards SKILL.md, forge-run5-standards decision.
 
- Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops
+<!-- Summarized 2026-03-04 by Scribe — covers Run 6 analysis and benchmark execution -->
 
- Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
+### Run 5→6 Analysis & Run 6 Benchmark (2026-03-04 through 2026-03-05)
+
+**Run 5→6 analysis:** 8 enhancements identified from Run 5 manual-fixes.md. Top 4 implemented: TFM net10.0, SelectMethod BWFC-aware TODO (-120s), wwwroot static file copy, compilable stubs. Remaining 4 deferred: Page.Title, base class swap, BundleConfig, event handler annotations. Repeater has zero EventCallbacks; GridView missing OnRowDataBound/OnRowCreated.
+
+**Run 6 benchmark:** 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5). Layer 1: 4.58s, 269 transforms, 79 static files, 6 auto-stubs. Layer 2: ~3m 25s manual (models, DbContext, services, layout). 4 builds to clean. All 4 enhancements validated. Bugs: @rendermode InteractiveServer invalid in _Imports.razor (line 164), Test-UnconvertiblePage misses code-behind (.aspx.cs). Report: docs/migration-tests/wingtiptoys-run6-2026-03-04/raw-data.md.
+
+Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (Jeff/Forge), migration report 3-level traversal (Beast).
+
+ Team update (2026-03-04): Run 6 benchmark decisions merged  @rendermode removal, code-behind scanning, pattern validation. All decisions propagated to Cyclops and Beast.  decided by Forge
+
+
+ Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
+
+
+ Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+
+### Page Base Class Architecture Analysis (2026-03-05)
+
+**Jeff's question:** "What if converted ASPX pages inherited from a BWFC base class? Can we dramatically improve migration?"
+
+**Analysis:** Reviewed System.Web.UI.Page surface area (Title, IsPostBack, MetaDescription, MetaKeywords, Request, Response, Session, IsValid, etc.) against current BWFC architecture (PageService as scoped DI, Page.razor render component, BaseWebFormsComponent hierarchy, WebFormsPage wrapper). Evaluated 3 options: (A) add to BaseWebFormsComponent (rejected — pollutes controls), (B) new WebFormsPageBase : ComponentBase (clean but no Page.Title syntax), (C) Option B + `Page => this` self-reference (enables literal `Page.Title = "X"` syntax).
+
+**Recommendation:** Option C — `WebFormsPageBase : ComponentBase` with `Title`, `MetaDescription`, `MetaKeywords` delegating to IPageService, `IsPostBack => false`, and `protected WebFormsPageBase Page => this;`. Converted pages use `@inherits WebFormsPageBase` (one line in _Imports.razor). Eliminates per-page `@inject IPageService Page`, makes `Page.Title = "X"` and `if (!IsPostBack)` compile unchanged. Deliberately omits Request/Response/Session to force proper Blazor migration.
+
+**Impact:** For WingtipToys (27 pages): eliminates 27 @inject lines, 12+ IsPostBack manual fixes, ~15-25 minutes of manual work. The two most common Web Forms code-behind patterns survive migration with zero changes. Verdict: dramatic improvement.
+
+**Key risks:** (1) `Page` property shadows `Page.razor` in @code — acceptable, already the pattern in samples. (2) `if (IsPostBack)` without `!` becomes dead code — scripts must flag it. (3) Doesn't inherit BaseWebFormsComponent — pages don't need CascadingValue wrapping, FindControl, or ViewState.
+
+**Decision document:** .ai-team/decisions/inbox/forge-page-base-class.md — pending Jeff's approval.
+
+ Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+### Page Consolidation Analysis (2026-03-05)
+
+**Jeff's question:** "Can we consolidate NamingContainer, ThemeProvider, and WebFormsPageBase so we have 1 entry point that delivers all features?"
+
+**Analysis:** Evaluated 4 options for reducing the 5-piece setup (WebFormsPageBase, Page.razor, WebFormsPage, NamingContainer, ThemeProvider). Option A (base class renders head) rejected — base classes can't emit `<PageTitle>`/`<HeadContent>`, breaks SSR. Option C (JSInterop) rejected — doesn't work during SSR, breaks crawlers. Option D (accept status quo) is fallback.
+
+**Recommendation:** Option B — Merge `Page.razor` functionality into `WebFormsPage`. `<PageTitle>` and `<HeadContent>` work from anywhere in the render tree, so `WebFormsPage` can render them alongside its existing `<CascadingValue>` wrapper. Add `bool RenderPageHead` parameter (default true) for opt-out. Keep `Page.razor`, `NamingContainer`, and `ThemeProvider` as standalone components — they have independent consumers and tests.
+
+**Key findings:** (1) Cannot get below 2 setup points — `@inherits` is compile-time, `<WebFormsPage>` is render-time, fundamentally different mechanisms. (2) WebFormsPageBase must NOT inherit NamingContainer — it would inject 5+ unnecessary services, add reflection overhead, create double naming scopes, and break existing tests. (3) Merging into WebFormsPage is non-breaking: existing `Page.razor` consumers unaffected, existing `WebFormsPage` consumers gain head rendering automatically.
+
+**Resulting DX:** `@inherits WebFormsPageBase` in _Imports.razor + `<WebFormsPage>@Body</WebFormsPage>` in layout. Two one-liners, total. Decision doc: `.ai-team/decisions/inbox/forge-page-consolidation.md`.
+
+**Learnings:**
+- `<PageTitle>` and `<HeadContent>` are Blazor built-ins that render into `<head>` regardless of where they appear in the component tree — they don't need DOM proximity to `<head>`.
+- Base classes (`ComponentBase` subclasses) cannot inject render components into the inheriting page's markup — they only participate in lifecycle, not BuildRenderTree.
+- The theoretical minimum setup for a library that provides both compile-time API (base class properties) and render-time services (cascading values, head injection) is two entry points: an `@inherits` directive and a wrapper component.
+- When merging render-time concerns into a single component, optional service resolution (`ServiceProvider.GetService`) is the right pattern to avoid hard dependencies on registrations the consumer may not need.
+
+� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
+

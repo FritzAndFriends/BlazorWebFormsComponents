@@ -1,99 +1,43 @@
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
 using WingtipToys.Models;
 
-namespace WingtipToys.Services
+namespace WingtipToys.Services;
+
+public class CartStateService
 {
-    public class CartStateService
+    private readonly List<CartItem> _items = new();
+    private readonly string _cartId = Guid.NewGuid().ToString();
+
+    public IReadOnlyList<CartItem> Items => _items.AsReadOnly();
+
+    public void AddItem(Product product)
     {
-        private readonly IDbContextFactory<ProductContext> _contextFactory;
-        private readonly string _cartId = Guid.NewGuid().ToString();
-
-        public CartStateService(IDbContextFactory<ProductContext> contextFactory)
+        var existing = _items.FirstOrDefault(i => i.ProductId == product.ProductID);
+        if (existing != null)
         {
-            _contextFactory = contextFactory;
+            existing.Quantity++;
         }
-
-        public string GetCartId() => _cartId;
-
-        public async Task AddToCartAsync(int productId)
+        else
         {
-            using var context = _contextFactory.CreateDbContext();
-            var existingItem = await context.CartItems
-                .FirstOrDefaultAsync(c => c.CartId == _cartId && c.ProductId == productId);
-
-            if (existingItem != null)
+            _items.Add(new CartItem
             {
-                existingItem.Quantity++;
-            }
-            else
-            {
-                context.CartItems.Add(new CartItem
-                {
-                    ItemId = Guid.NewGuid().ToString(),
-                    CartId = _cartId,
-                    ProductId = productId,
-                    Quantity = 1,
-                    DateCreated = DateTime.UtcNow
-                });
-            }
-
-            await context.SaveChangesAsync();
-        }
-
-        public async Task<List<CartItem>> GetCartItemsAsync()
-        {
-            using var context = _contextFactory.CreateDbContext();
-            return await context.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.CartId == _cartId)
-                .ToListAsync();
-        }
-
-        public async Task UpdateCartItemAsync(string cartItemId, int quantity)
-        {
-            using var context = _contextFactory.CreateDbContext();
-            var item = await context.CartItems
-                .FirstOrDefaultAsync(c => c.ItemId == cartItemId && c.CartId == _cartId);
-
-            if (item != null)
-            {
-                item.Quantity = quantity;
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public async Task RemoveCartItemAsync(string cartItemId)
-        {
-            using var context = _contextFactory.CreateDbContext();
-            var item = await context.CartItems
-                .FirstOrDefaultAsync(c => c.ItemId == cartItemId && c.CartId == _cartId);
-
-            if (item != null)
-            {
-                context.CartItems.Remove(item);
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<decimal> GetTotalAsync()
-        {
-            using var context = _contextFactory.CreateDbContext();
-            return await context.CartItems
-                .Where(c => c.CartId == _cartId)
-                .Include(c => c.Product)
-                .SumAsync(c => c.Quantity * (c.Product!.UnitPrice ?? 0));
-        }
-
-        public async Task EmptyCartAsync()
-        {
-            using var context = _contextFactory.CreateDbContext();
-            var items = await context.CartItems
-                .Where(c => c.CartId == _cartId)
-                .ToListAsync();
-
-            context.CartItems.RemoveRange(items);
-            await context.SaveChangesAsync();
+                ItemId = Guid.NewGuid().ToString(),
+                CartId = _cartId,
+                ProductId = product.ProductID,
+                Product = product,
+                Quantity = 1,
+                DateCreated = DateTime.Now
+            });
         }
     }
+
+    public void RemoveItem(string itemId)
+    {
+        var item = _items.FirstOrDefault(i => i.ItemId == itemId);
+        if (item != null) _items.Remove(item);
+    }
+
+    public decimal GetTotal() =>
+        _items.Sum(i => (decimal)(i.Product?.UnitPrice ?? 0) * i.Quantity);
+
+    public int GetCount() => _items.Sum(i => i.Quantity);
 }
