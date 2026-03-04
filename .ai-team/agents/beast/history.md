@@ -116,3 +116,17 @@
 - **Source:** Architecture decision at `.ai-team/decisions/inbox/forge-page-base-class.md`, requested by Jeffrey T. Fritz.
 
  Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+### Page System Documentation Rewrite (2026-03-05)
+
+- **PageService.md rewritten as "Page System" doc:** Restructured from single-approach `@inject IPageService` doc to comprehensive three-piece architecture guide. Leads with `WebFormsPageBase` as primary approach for converted pages, keeps `@inject IPageService` as secondary approach for non-page components.
+- **New sections added:** Architecture diagram (ASCII art showing WebFormsPageBase → IPageService → Page.razor flow), One-Time Setup, Properties Available/NOT Available tables, `if (IsPostBack)` dead code warning admonition.
+- **Key Differences table expanded:** Now has three columns (Web Forms / WebFormsPageBase / inject IPageService) and includes `IsPostBack`, inheritance, and `Page.Request`/`Page.Response` rows showing deliberate omissions.
+- **Migration Path updated:** Before/After now shows `WebFormsPageBase` inheritance approach with `if (!IsPostBack)` preserved, instead of the previous `@inject` approach.
+- **mkdocs.yml nav renamed:** `PageService` → `Page System` to reflect broader scope.
+- **README.md updated:** Utility Features entry now references "Page System" and mentions WebFormsPageBase, IPageService, and Page renderer.
+- **Key distinction preserved:** `WebFormsPage` (NamingContainer + ThemeProvider) is a completely different component — added explicit cross-reference in See Also to avoid confusion.
+- **Learning:** When a utility feature grows from "one service" to "multi-piece system," the doc title and nav label should reflect the system, not the individual service. This prevents readers from thinking the doc only covers one piece.
+
+� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
+

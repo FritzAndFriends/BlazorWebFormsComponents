@@ -122,3 +122,10 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 **WebFormsPageBase:** Created `src/BlazorWebFormsComponents/WebFormsPageBase.cs` — abstract base class inheriting `ComponentBase` (not `BaseWebFormsComponent`). Injects `IPageService` privately, exposes `Title`, `MetaDescription`, `MetaKeywords` as delegate properties. `IsPostBack => false` so `if (!IsPostBack)` compiles and always enters. `Page => this` self-reference enables `Page.Title = "X"` to compile unchanged from Web Forms code-behind. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). Build verified clean (63 pre-existing warnings, 0 errors). Lesson: Pages are top-level containers, not child controls — inheriting `ComponentBase` directly avoids the CascadingValue wrapping and control-tree logic in `BaseWebFormsComponent`.
 
  Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+### WebFormsPage IPageService Consolidation (2026-03-05)
+
+**WebFormsPage enhanced:** Merged `Page.razor` head-rendering capability into `WebFormsPage`. Added optional `IPageService` resolution via `ServiceProvider.GetService<IPageService>()` — WebFormsPage still works for naming/theming when IPageService is not registered. Subscribes to `TitleChanged`, `MetaDescriptionChanged`, `MetaKeywordsChanged` events in `OnInitialized()`. Renders `<PageTitle>` and `<HeadContent>` before the existing CascadingValue wrapper. Added `RenderPageHead` parameter (default true) to allow opting out. Implements `IDisposable` to unsubscribe from events. `Page.razor` left untouched as standalone option. Build verified clean (70 pre-existing warnings, 0 errors). Lesson: `IServiceProvider` in `BaseWebFormsComponent` is private — child classes needing it must inject their own via `[Inject]`.
+
+� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
+

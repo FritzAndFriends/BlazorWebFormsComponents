@@ -114,3 +114,24 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 **Decision document:** .ai-team/decisions/inbox/forge-page-base-class.md — pending Jeff's approval.
 
  Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+### Page Consolidation Analysis (2026-03-05)
+
+**Jeff's question:** "Can we consolidate NamingContainer, ThemeProvider, and WebFormsPageBase so we have 1 entry point that delivers all features?"
+
+**Analysis:** Evaluated 4 options for reducing the 5-piece setup (WebFormsPageBase, Page.razor, WebFormsPage, NamingContainer, ThemeProvider). Option A (base class renders head) rejected — base classes can't emit `<PageTitle>`/`<HeadContent>`, breaks SSR. Option C (JSInterop) rejected — doesn't work during SSR, breaks crawlers. Option D (accept status quo) is fallback.
+
+**Recommendation:** Option B — Merge `Page.razor` functionality into `WebFormsPage`. `<PageTitle>` and `<HeadContent>` work from anywhere in the render tree, so `WebFormsPage` can render them alongside its existing `<CascadingValue>` wrapper. Add `bool RenderPageHead` parameter (default true) for opt-out. Keep `Page.razor`, `NamingContainer`, and `ThemeProvider` as standalone components — they have independent consumers and tests.
+
+**Key findings:** (1) Cannot get below 2 setup points — `@inherits` is compile-time, `<WebFormsPage>` is render-time, fundamentally different mechanisms. (2) WebFormsPageBase must NOT inherit NamingContainer — it would inject 5+ unnecessary services, add reflection overhead, create double naming scopes, and break existing tests. (3) Merging into WebFormsPage is non-breaking: existing `Page.razor` consumers unaffected, existing `WebFormsPage` consumers gain head rendering automatically.
+
+**Resulting DX:** `@inherits WebFormsPageBase` in _Imports.razor + `<WebFormsPage>@Body</WebFormsPage>` in layout. Two one-liners, total. Decision doc: `.ai-team/decisions/inbox/forge-page-consolidation.md`.
+
+**Learnings:**
+- `<PageTitle>` and `<HeadContent>` are Blazor built-ins that render into `<head>` regardless of where they appear in the component tree — they don't need DOM proximity to `<head>`.
+- Base classes (`ComponentBase` subclasses) cannot inject render components into the inheriting page's markup — they only participate in lifecycle, not BuildRenderTree.
+- The theoretical minimum setup for a library that provides both compile-time API (base class properties) and render-time services (cascading values, head injection) is two entry points: an `@inherits` directive and a wrapper component.
+- When merging render-time concerns into a single component, optional service resolution (`ServiceProvider.GetService`) is the right pattern to avoid hard dependencies on registrations the consumer may not need.
+
+� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
+
