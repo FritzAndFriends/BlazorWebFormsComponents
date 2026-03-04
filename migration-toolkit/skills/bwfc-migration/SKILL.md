@@ -39,7 +39,22 @@ dotnet add package Fritz.BlazorWebFormsComponents
 ```razor
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.Enums
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
 ```
+
+> **Note:** The `@using static` import lets you write `InteractiveServer` as shorthand in `App.razor`. Do **not** add `@rendermode InteractiveServer` as a line in `_Imports.razor` — `@rendermode` is a directive attribute that belongs on component instances, not a standalone directive.
+
+### Step 2b: Configure Render Mode in `App.razor`
+
+The `dotnet new blazor --interactivity Server` template generates `App.razor` with render mode already set. Verify it contains:
+
+```razor
+<HeadOutlet @rendermode="InteractiveServer" />
+...
+<Routes @rendermode="InteractiveServer" />
+```
+
+This enables global server interactivity for all pages. See [ASP.NET Core Blazor render modes](https://learn.microsoft.com/aspnet/core/blazor/components/render-modes) for per-page alternatives.
 
 ### Step 3: Register BWFC Services
 

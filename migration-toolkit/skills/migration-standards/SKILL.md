@@ -24,9 +24,31 @@ Apply these standards to:
 |---|---|
 | Framework | **.NET 10** (or latest LTS/.NET preview) |
 | Project template | `dotnet new blazor --interactivity Server` |
-| Render mode | Global Server Interactive |
+| Render mode | Global Server Interactive (see [Render Mode Placement](#render-mode-placement) below) |
 | Base class | `ComponentBase` (not `System.Web.UI.Page`) |
 | Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
+
+### Render Mode Placement
+
+> **`@rendermode` is a directive *attribute*, not a standalone directive.** It goes on component instances in markup, not in `_Imports.razor`.
+
+**`_Imports.razor`** — add the static using so you can write `InteractiveServer` instead of `RenderMode.InteractiveServer`:
+
+```razor
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+```
+
+**`App.razor`** — apply render mode to the top-level routable components:
+
+```razor
+<HeadOutlet @rendermode="InteractiveServer" />
+...
+<Routes @rendermode="InteractiveServer" />
+```
+
+This gives every page global server interactivity. Do **not** place `@rendermode InteractiveServer` as a line in `_Imports.razor` — it is not a valid Razor directive and will cause build errors (RZ10003, CS0103, RZ10024).
+
+> **Reference:** [ASP.NET Core Blazor render modes](https://learn.microsoft.com/aspnet/core/blazor/components/render-modes)
 
 ### Database Migration
 

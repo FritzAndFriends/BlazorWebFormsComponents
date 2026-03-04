@@ -70,7 +70,7 @@ Layer 1 handles every transform that can be expressed as a regex find-and-replac
 | Content wrapper removals (`<asp:Content>`) | 28 | 100% |
 | URL conversions (`~/` → `/`) | All | 100% |
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
-| Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`) | Full | ✅ |
+| Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
 ### What Layer 1 Does NOT Do
 

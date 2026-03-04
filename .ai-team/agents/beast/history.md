@@ -92,3 +92,11 @@
 
  Team update (2026-03-04): Run 6 benchmark validates all migration-standards SKILL.md patterns. 32 Web Forms files  clean Blazor build in ~4.5 min (55% reduction from Run 5). 2 script bugs identified: @rendermode in _Imports.razor, stub detection misses code-behind.  decided by Forge
 
+### Render Mode Placement Correction (2026-03-05)
+
+- **Key learning:** `@rendermode` is a directive *attribute* (goes on component instances like `<Routes @rendermode="InteractiveServer" />`), NOT a standalone directive. Placing `@rendermode InteractiveServer` in `_Imports.razor` causes build errors (RZ10003, CS0103, RZ10024).
+- **Correct pattern:** `_Imports.razor` gets `@using static Microsoft.AspNetCore.Components.Web.RenderMode` (enables shorthand). `App.razor` gets `@rendermode="InteractiveServer"` on both `<Routes>` and `<HeadOutlet>`.
+- **Files updated:** `migration-toolkit/skills/migration-standards/SKILL.md` (new "Render Mode Placement" subsection under Target Architecture), `migration-toolkit/skills/bwfc-migration/SKILL.md` (Step 2 expanded with `@using static` + new Step 2b for App.razor), `migration-toolkit/METHODOLOGY.md` (scaffold table includes App.razor).
+- **Reference:** https://learn.microsoft.com/aspnet/core/blazor/components/render-modes
+- **Source:** Jeff confirmed correct pattern; Microsoft Learn docs verified.
+
