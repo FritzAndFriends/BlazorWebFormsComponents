@@ -115,3 +115,19 @@ Key patterns: `FindComponent<PageTitle>()` and `FindComponent<HeadContent>()` fo
 
 � Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
 
+### Event Handler Migration Audit (2026-03-06)
+
+**Migration script event handler handling:** bwfc-migrate.ps1 performs ZERO event handler transforms. Line 17 explicitly defers to Layer 2. Event handler attributes (`OnClick`, `OnSelectedIndexChanged`, etc.) pass through unchanged after `asp:` prefix removal. This accidental pass-through works for most BWFC components because BWFC defines matching `[Parameter] EventCallback` properties. Both `OnClick="Handler"` and `OnClick="@Handler"` compile in Blazor for EventCallback parameters.
+
+**Gaps identified:**
+1. `AutoPostBack` is NOT in `$StripAttributes` — passes through unchanged, triggers `[Obsolete]` warnings on 6+ BWFC components (DropDownList, CheckBox, RadioButton, CheckBoxList, RadioButtonList, ListBox). Should be stripped + ManualItem warning emitted.
+2. Repeater has NO event parameters in BWFC — `OnItemCommand` silently lost.
+3. GridView uses `PageIndexChanged` not `OnPageIndexChanging` — name mismatch causes silent failure.
+4. BWFC naming is inconsistent: some events keep `On` prefix (OnRowCommand, OnItemCommand on DataGrid), others drop it (Sorting, RowEditing, ItemCommand on ListView/DetailsView). Web Forms always uses `On` prefix in markup.
+5. No ManualItem warnings emitted for event handler attributes despite code-behind signature changes being required.
+6. CommandArgument with data-binding expressions may lose `@` prefix needed for Blazor attribute expression evaluation.
+
+**Web Forms vs Blazor event signature differences:** All Web Forms handlers use `(object sender, EventArgs e)` — two params. BWFC EventCallbacks accept only the event args (no sender). Every code-behind event handler will have compile errors. The code-behind TODO header mentions this generically but emits no per-handler ManualItem entries.
+
+**Findings written to:** `.ai-team/decisions/inbox/rogue-event-handler-migration-gaps.md`
+

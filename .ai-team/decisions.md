@@ -5868,3 +5868,108 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Merged Page.razor's head-rendering capability into WebFormsPage (Option B from Forge's consolidation analysis). WebFormsPage now injects IServiceProvider, optionally resolves IPageService, subscribes to title/meta change events, and renders <PageTitle> + <HeadContent> alongside its existing <CascadingValue> wrapper. New [Parameter] bool RenderPageHead (default: 	rue) allows opting out. IPageService resolution is optional  WebFormsPage works for naming/theming even without AddBlazorWebFormsComponents(). Layout simplifies from 2 components (<Page /> + <WebFormsPage>) to 1 (<WebFormsPage> only). Page.razor remains as standalone option for apps not using WebFormsPage. NamingContainer and ThemeProvider unchanged. Forge analyzed 4 options: A (WebFormsPageBase renders  rejected, breaks SSR), B (merge into WebFormsPage  recommended and implemented), C (JSInterop  rejected, breaks SSR), D (status quo  acceptable fallback). WebFormsPageBase inheritance unchanged (stays as ComponentBase, not NamingContainer). 7 new tests, 1479 total passing.
 
 **Why:** Jeff asked to consolidate the 5-piece page system into fewer entry points. Option B is the only approach that works with Blazor's render model (<PageTitle> and <HeadContent> must appear in markup, not a base class). Result: two-line setup (one @inherits in _Imports.razor, one <WebFormsPage> in MainLayout.razor) delivers naming, theming, and head rendering. Migration scripts generate one component instead of two.
+
+
+### 2026-03-05: Event Handler Naming Parity and Migration Script Gaps (consolidated)
+
+**By:** Forge, Rogue
+**Requested by:** Jeff Fritz
+**Status:** DECIDED  action items identified
+**Branch:** squad/event-handler-investigation
+
+---
+
+**What:**
+
+Two independent audits of BWFC event handler coverage and migration behavior have been consolidated into unified findings and decisions.
+
+**1. Naming Convention Analysis (Forge audit)**
+
+BWFC uses two naming patterns for EventCallbacks:
+- **Pattern A: On-prefix** (Web Forms compatible, zero migration effort)  used by Button, TextBox, CheckBox, Calendar, Login controls, etc.
+- **Pattern B: No On-prefix** (requires manual rename during migration)  used by GridView, DetailsView, FormView, ListView, DataGrid, Menu, TreeView
+- **Pattern C: Blazor-style binding** (TextChanged, CheckedChanged, etc.)  additive, irrelevant for migration
+
+The inconsistency is the single biggest migration friction point. ~50 EventCallbacks across data controls are missing the On-prefix, causing silent failures when Web Forms markup passes through the migration script unchanged.
+
+**2. Component-Level Findings (Forge audit)**
+
+| Category | Count | Details |
+|----------|-------|---------|
+| Total components audited | 57 | 51 functional + 6 stubs |
+| Components with EventCallbacks | 32 | |
+| Total unique EventCallbacks | 105+ | |
+| EventCallbacks matching Web Forms On-prefix | ~60 | Zero migration friction |
+| EventCallbacks with naming mismatches | ~50 | Missing On-prefix on data controls |
+| Missing events (not implemented) | ~18 | Repeater (3), DataList (7), GridView (5), TreeView (1), LoginView (1), CustomValidator (1) |
+
+**Key gaps by component:**
+- **Repeater:** Zero EventCallbacks  OnItemCommand, OnItemDataBound, OnItemCreated all missing
+- **DataList:** Missing 7 events  OnItemCommand, OnItemCreated, OnSelectedIndexChanged, OnEditCommand, OnCancelCommand, OnUpdateCommand, OnDeleteCommand
+- **GridView:** Missing 5 events  OnPageIndexChanging, OnRowDataBound, OnRowCreated, OnRowUpdated, OnRowDeleted; plus 9 naming mismatches
+- **DetailsView:** 11 naming mismatches (all missing On-prefix)
+- **FormView:** Inconsistent  some events have On-prefix, some don't (6 mismatches)
+- **ListView:** 16 naming mismatches (only OnLayoutCreated and OnItemDataBound have prefix)
+- **DataGrid:** 5 naming mismatches
+- **Menu:** 2 naming mismatches (MenuItemClick, MenuItemDataBound)
+- **TreeView:** 1 naming mismatch (SelectedNodeChanged)
+- **CustomValidator:** Missing OnServerValidate
+
+**3. Migration Script Analysis (Rogue audit)**
+
+The migration script (wfc-migrate.ps1) does zero event handler transformation by design (Layer 1). Issues found:
+
+| Gap | Severity | Details |
+|-----|----------|---------|
+| AutoPostBack not stripped | Medium | Not in ${'$'}StripAttributes list. Passes through, triggers [Obsolete] warnings on 6+ component types |
+| No ManualItem for event handlers | Medium | Silent pass-through with no warning about code-behind signature changes |
+| Handler signature changes undocumented | High | Web Forms (object sender, EventArgs e)  Blazor single EventArgs. Every code-behind file breaks |
+| BWFC naming inconsistency causes silent failures | High | OnSorting="Handler" in migrated markup vs Sorting parameter in BWFC = silent failure |
+| AutoPostBack behavioral difference undocumented | Medium | Web Forms: events only fire on postback. Blazor/BWFC: events fire on every change |
+
+**4. Decisions**
+
+1. **APPROVED: Add On-prefix aliases (Option A, non-breaking)**
+   Add a second [Parameter] with the On prefix that delegates to the existing parameter for all ~50 mismatched EventCallbacks. Example:
+   `csharp
+   [Parameter] public EventCallback<GridViewSortEventArgs> Sorting { get; set; }
+   [Parameter] public EventCallback<GridViewSortEventArgs> OnSorting {
+       get => Sorting;
+       set => Sorting = value;
+   }
+   `
+   This preserves backward compatibility while enabling zero-touch migration from Web Forms.
+
+2. **APPROVED: Prioritize missing event implementations**
+   - P1: Repeater (add OnItemCommand, OnItemDataBound, OnItemCreated)
+   - P1: DataList (add 7 missing events)
+   - P2: GridView (add OnPageIndexChanging, OnRowDataBound, OnRowCreated, OnRowUpdated, OnRowDeleted)
+   - P2: CustomValidator (add OnServerValidate)
+   - P3: TreeView OnTreeNodePopulate, LoginView OnViewChanged
+
+3. **APPROVED: Add AutoPostBack to migration script ${'$'}StripAttributes**
+   `powershell
+   'AutoPostBack\s*=\s*"(true|false)"'
+   `
+
+4. **APPROVED: Add ManualItem detection for event handlers**
+   After Remove-WebFormsAttributes, scan for On\w+="[^"]*" patterns and emit ManualItem warnings noting code-behind signature change requirement.
+
+5. **APPROVED: Create event handler mapping table in skill doc**
+   Cover every BWFC component's event parameters, Web Forms equivalents, and required signature changes.
+
+**Why:**
+
+The entire point of BWFC is to minimize migration friction. Every EventCallback should accept the Web Forms attribute name unchanged. The naming inconsistency (Pattern A vs Pattern B) is an accidental historical artifact  some components were authored with Web Forms compatibility in mind, others followed Blazor conventions. The On-prefix alias approach (Option A) is non-breaking, backward-compatible, and ensures migrated Web Forms markup compiles without manual event attribute renaming.
+
+The migration script gaps compound the problem: AutoPostBack passes through generating warnings, event handler signature changes are undocumented, and the naming mismatch means certain event attributes silently fail. Fixing both the components (aliases) and the script (AutoPostBack stripping + ManualItem warnings) addresses the full migration path.
+
+**Handler Signature Reference (for migration docs):**
+
+| Web Forms Signature | BWFC EventCallback Type | Correct Blazor Signature |
+|---|---|---|
+| oid Btn_Click(object sender, EventArgs e) | EventCallback<MouseEventArgs> | oid Btn_Click(MouseEventArgs e) or oid Btn_Click() |
+| oid ddl_Changed(object sender, EventArgs e) | EventCallback<ChangeEventArgs> | oid ddl_Changed(ChangeEventArgs e) or oid ddl_Changed() |
+| oid gv_RowCommand(object sender, GridViewCommandEventArgs e) | EventCallback<GridViewCommandEventArgs> | oid gv_RowCommand(GridViewCommandEventArgs e) |
+| oid gv_Sorting(object sender, GridViewSortEventArgs e) | EventCallback<GridViewSortEventArgs> | oid gv_Sorting(GridViewSortEventArgs e) |
+| oid lnk_Command(object sender, CommandEventArgs e) | EventCallback<CommandEventArgs> | oid lnk_Command(CommandEventArgs e) |

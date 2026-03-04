@@ -95,3 +95,6 @@
 � Team update (2026-03-04): Migration toolkit restructured into self-contained migration-toolkit/ package  decided by Jeffrey T. Fritz, Forge
 
  Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+ Team update (2026-03-05): Event handler audit complete  ~50 naming mismatches found, On-prefix aliases recommended  decided by Forge, Rogue
+

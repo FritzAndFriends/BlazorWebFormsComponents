@@ -135,3 +135,27 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 
 � Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
 
+### Event Handler Migration Audit (2026-03-05)
+
+**Jeff's question:** "Investigate event handler migration — OnClick, OnSelectedIndexChanged — we should have event handlers on all BWFC components."
+
+**Key findings:**
+
+1. **Naming convention split is the #1 migration blocker.** ~50 EventCallbacks across GridView, DetailsView, FormView, ListView, DataGrid, Menu, TreeView use bare names (e.g., `Sorting`, `SelectedIndexChanged`, `ModeChanging`) instead of `On`-prefixed names matching Web Forms attributes. When `bwfc-migrate.ps1` strips `asp:` and leaves `OnSorting="Handler"`, these won't compile against the BWFC components.
+
+2. **Button controls, input controls, list controls, login controls — all good.** These consistently use `On`-prefix naming and match Web Forms attributes exactly. ButtonBaseComponent (OnClick, OnCommand), TextBox (OnTextChanged), CheckBox (OnCheckedChanged), DropDownList (OnSelectedIndexChanged), all login controls — zero friction.
+
+3. **Repeater has zero EventCallbacks.** DataList is missing 7 of 8 Web Forms events. Both are migration blockers for apps that use OnItemCommand or OnItemDataBound on these controls.
+
+4. **GridView still missing OnRowDataBound, OnRowCreated** (flagged in Run 5, still not implemented). Also missing OnPageIndexChanging, OnRowUpdated, OnRowDeleted.
+
+5. **FormView has inconsistent naming** — OnItemDeleting/OnItemDeleted/OnItemInserting/etc. use `On`-prefix, but ModeChanging/ModeChanged/ItemCommand/ItemCreated/PageIndexChanging/PageIndexChanged do NOT. This is confusing and will cause partial migration failures.
+
+6. **Migration script does zero event handler transformation** — it passes attributes through unchanged after stripping `asp:`. This is correct behavior IF components use `On`-prefix naming. The fix belongs in the components, not the script.
+
+7. **CustomValidator missing OnServerValidate** — the one validation control that had a meaningful server event doesn't have it in BWFC.
+
+**Recommendation:** Add `On`-prefix aliases to all 50 mismatched EventCallbacks (non-breaking). Implement missing events on Repeater, DataList, GridView. Decision doc: `.ai-team/decisions/inbox/forge-event-handler-audit.md`.
+
+ Team update (2026-03-05): Event handler audit complete — 50 naming mismatches, 18 missing events, Repeater/DataList critically underserved. Option A (On-prefix aliases) recommended.  decided by Forge
+
