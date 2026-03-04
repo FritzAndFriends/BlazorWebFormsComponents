@@ -100,3 +100,6 @@
 - **Reference:** https://learn.microsoft.com/aspnet/core/blazor/components/render-modes
 - **Source:** Jeff confirmed correct pattern; Microsoft Learn docs verified.
 
+
+ Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
+

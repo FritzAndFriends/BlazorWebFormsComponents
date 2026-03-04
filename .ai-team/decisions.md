@@ -5824,11 +5824,11 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 
 
-### 2026-03-04: Remove @rendermode InteractiveServer from _Imports.razor scaffold
+### 2026-03-04: @rendermode InteractiveServer belongs in App.razor, not _Imports.razor (consolidated)
 
-**By:** Forge
-**What:** Line 164 of `bwfc-migrate.ps1` emits `@rendermode InteractiveServer` in the scaffolded `_Imports.razor`. This is invalid in .NET 10 — `@rendermode` is not a valid directive for component imports files. Remove line 164 from the `$importsContent` here-string in `New-ProjectScaffold`. The render mode is already correctly set on `<Routes>` and `<HeadOutlet>` in App.razor.
-**Why:** Caused 4 build errors in Run 6 (RZ10003, CS0103 × 2, RZ10024). Every migration run will hit this. Supersedes the `@rendermode InteractiveServer` addition from the Run 6 Script Enhancements decision.
+**By:** Forge, Cyclops, Jeffrey T. Fritz
+**What:** `@rendermode InteractiveServer` must not appear as a standalone directive in `_Imports.razor`. It is a directive attribute, not a standalone Razor directive. The correct pattern for global server interactivity is to apply `@rendermode="InteractiveServer"` on component instances (`<Routes>` and `<HeadOutlet>`) in App.razor. The `@using static Microsoft.AspNetCore.Components.Web.RenderMode` import in `_Imports.razor` is correct and should be kept — it enables the shorthand `InteractiveServer` without the `RenderMode.` prefix. Cyclops removed the invalid line from `bwfc-migrate.ps1` scaffold. Beast updated migration-standards, bwfc-migration, and METHODOLOGY skill docs with the correct pattern. Supersedes the `@rendermode InteractiveServer` addition from the Run 6 Script Enhancements decision.
+**Why:** Placing `@rendermode InteractiveServer` bare in `_Imports.razor` caused 8 build errors in Run 6 benchmarks (RZ10003, CS0103 × 2, RZ10024). User directive from Jeffrey T. Fritz confirmed the correct placement. Per Microsoft Learn documentation, `@rendermode` is applied as a directive attribute on component instances. All changes shipped in PR #419.
 
 ### 2026-03-04: Scan code-behind files for unconvertible patterns
 
@@ -5841,3 +5841,4 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **By:** Forge
 **What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
 **Why:** These patterns should be considered validated for external migration guidance.
+

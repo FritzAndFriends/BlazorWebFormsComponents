@@ -93,3 +93,6 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 
  Team update (2026-03-04): Run 6 benchmark decisions merged  @rendermode removal, code-behind scanning, pattern validation. All decisions propagated to Cyclops and Beast.  decided by Forge
 
+
+ Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
+
