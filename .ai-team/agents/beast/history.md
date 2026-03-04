@@ -142,3 +142,7 @@
   - Added "Migration Tests" nav section to `mkdocs.yml` after the Migration section.
   - **Convention established:** Each migration test run gets its own subfolder named `{app}-{YYYY-MM-DD}` containing `report.md` and an `images/` directory. The README.md index links to all runs.
 
+
+ Team update (2026-03-04): Migration test reports go in docs/migration-tests/  directed by Jeffrey T. Fritz
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends repo, not origin fork  directed by Jeffrey T. Fritz
+ Team update (2026-03-04): Layer 1 benchmark baseline established by Cyclops  data at docs/migration-tests/wingtiptoys-2026-03-04/  decided by Cyclops

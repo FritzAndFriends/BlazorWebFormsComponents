@@ -138,3 +138,6 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 
 **Key learning:** Distributable assets (things end-users copy to their own projects) live in `migration-toolkit/`. Internal project skills (things that help contributors work on THIS repo) live in `.github/skills/`. Clean separation prevents confusion about what ships to customers vs what's internal tooling.
 Team updates (2026-03-02-03): Unified release (PR #408), project reframed as migration system (Jeff), ModelErrorMessage docs (Beast), themes last directive (Jeff Fritz).
+
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends repo, not origin fork  directed by Jeffrey T. Fritz
+ Team update (2026-03-04): Layer 1 benchmark: 14 unconverted expressions + 4 Register directives define Layer 2 scope  decided by Cyclops

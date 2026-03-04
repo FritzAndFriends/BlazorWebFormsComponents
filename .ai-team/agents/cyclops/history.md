@@ -120,3 +120,7 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 - **Architecture:** SQLite, scoped CartStateService/CheckoutStateService, MockPayPalService, ASP.NET Core Identity with canEdit role.
 - **Pattern:** Layer 2+3 takes ~9 min with Copilot vs estimated 4-8 hours manually. The migration skills provide reliable translation rules. Having a reference implementation (AfterWingtipToys) to validate against accelerates decisions significantly.
 
+
+ Team update (2026-03-04): Migration test reports go in docs/migration-tests/  directed by Jeffrey T. Fritz
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends repo, not origin fork  directed by Jeffrey T. Fritz
+ Team update (2026-03-04): migration-toolkit/ is the distribution package for external users; .github/skills/ is internal only  decided by Forge, Jeffrey T. Fritz

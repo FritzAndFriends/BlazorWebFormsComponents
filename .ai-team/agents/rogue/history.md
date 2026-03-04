@@ -92,3 +92,5 @@ Key test patterns: (1) CSS class selectors for template switching. (2) cut.Invok
 Key file paths: `src/BlazorWebFormsComponents.Test/ListView/EditTemplateTests.razor`, `src/BlazorWebFormsComponents.Test/FormView/RenderOuterTable.razor`, `src/BlazorWebFormsComponents.Test/ListView/ListViewCrudEventTests.razor`.
 
 Team updates (2026-03-02-03): Skins roadmap (Forge), M22 planned (Forge), project reframed as migration system (Jeff), ModelErrorMessage spec (Forge), themes last directive (Jeff Fritz), IOrderedDictionary on ListView EventArgs (Cyclops), WingtipToys 7-phase schedule (Forge).
+
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends repo, not origin fork  directed by Jeffrey T. Fritz
