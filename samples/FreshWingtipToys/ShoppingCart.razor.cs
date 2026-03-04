@@ -1,116 +1,74 @@
-// =============================================================================
-// TODO: This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   - Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   - Page_PreRender → OnAfterRenderAsync
-//   - IsPostBack checks → remove or convert to state logic
-//   - ViewState usage → component [Parameter] or private fields
-//   - Session/Cache access → inject IHttpContextAccessor or use DI
-//   - Response.Redirect → NavigationManager.NavigateTo
-//   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - UpdatePanel / ScriptManager references → remove (Blazor handles updates)
-//   - User controls → Blazor component references
-// =============================================================================
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using WingtipToys.Models;
-using WingtipToys.Logic;
-using System.Collections.Specialized;
-using System.Collections;
-using System.Web.ModelBinding;
+using WingtipToys.Services;
 
 namespace WingtipToys
 {
-  public partial class ShoppingCart : System.Web.UI.Page
-  {
-    protected void Page_Load(object sender, EventArgs e)
+    public partial class ShoppingCart : ComponentBase
     {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
-        decimal cartTotal = 0;
-        cartTotal = usersShoppingCart.GetTotal();
-        if (cartTotal > 0)
+        [Inject]
+        private CartStateService CartService { get; set; } = default!;
+
+        public List<CartItem> CartItems { get; set; } = new();
+        public string CartTotal { get; set; } = "$0.00";
+
+        private Dictionary<string, int> _quantities = new();
+        private Dictionary<string, bool> _removals = new();
+
+        protected override async Task OnInitializedAsync()
         {
-          // Display Total.
-          lblTotal.Text = String.Format("{0:c}", cartTotal);
+            await LoadCartAsync();
         }
-        else
+
+        private async Task LoadCartAsync()
         {
-          LabelTotalText.Text = "";
-          lblTotal.Text = "";
-          ShoppingCartTitle.InnerText = "Shopping Cart is Empty";
-          UpdateBtn.Visible = false;
-          CheckoutImageBtn.Visible = false;
+            CartItems = await CartService.GetCartItemsAsync();
+            var total = await CartService.GetTotalAsync();
+            CartTotal = total.ToString("c");
+
+            _quantities.Clear();
+            _removals.Clear();
+            foreach (var item in CartItems)
+            {
+                _quantities[item.ItemId] = item.Quantity;
+                _removals[item.ItemId] = false;
+            }
         }
-      }
-    }
 
-    public List<CartItem> GetShoppingCartItems()
-    {
-      ShoppingCartActions actions = new ShoppingCartActions();
-      return actions.GetCartItems();
-    }
+        public string GetQuantity(string itemId)
+            => _quantities.TryGetValue(itemId, out var qty) ? qty.ToString() : "0";
 
-    public List<CartItem> UpdateCartItems()
-    {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
-        String cartId = usersShoppingCart.GetCartId();
-
-        ShoppingCartActions.ShoppingCartUpdates[] cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[CartList.Rows.Count];
-        for (int i = 0; i < CartList.Rows.Count; i++)
+        public void OnQuantityChanged(string itemId, string value)
         {
-          IOrderedDictionary rowValues = new OrderedDictionary();
-          rowValues = GetValues(CartList.Rows[i]);
-          cartUpdates[i].ProductId = Convert.ToInt32(rowValues["ProductID"]);
-
-          CheckBox cbRemove = new CheckBox();
-          cbRemove = (CheckBox)CartList.Rows[i].FindControl("Remove");
-          cartUpdates[i].RemoveItem = cbRemove.Checked;
-
-          TextBox quantityTextBox = new TextBox();
-          quantityTextBox = (TextBox)CartList.Rows[i].FindControl("PurchaseQuantity");
-          cartUpdates[i].PurchaseQuantity = Convert.ToInt16(quantityTextBox.Text.ToString());
+            if (int.TryParse(value, out var qty) && qty > 0)
+                _quantities[itemId] = qty;
         }
-        usersShoppingCart.UpdateShoppingCartDatabase(cartId, cartUpdates);
-        CartList.DataBind();
-        lblTotal.Text = String.Format("{0:c}", usersShoppingCart.GetTotal());
-        return usersShoppingCart.GetCartItems();
-      }
-    }
 
-    public static IOrderedDictionary GetValues(GridViewRow row)
-    {
-      IOrderedDictionary values = new OrderedDictionary();
-      foreach (DataControlFieldCell cell in row.Cells)
-      {
-        if (cell.Visible)
+        public bool IsMarkedForRemoval(string itemId)
+            => _removals.TryGetValue(itemId, out var marked) && marked;
+
+        public void OnRemovalChanged(string itemId, bool value)
         {
-          // Extract values from the cell.
-          cell.ContainingField.ExtractValuesFromCell(values, cell, row.RowState, true);
+            _removals[itemId] = value;
         }
-      }
-      return values;
-    }
 
-    protected void UpdateBtn_Click(object sender, EventArgs e)
-    {
-      UpdateCartItems();
-    }
+        public async Task OnUpdateCart(MouseEventArgs args)
+        {
+            foreach (var kvp in _removals.Where(r => r.Value))
+            {
+                await CartService.RemoveCartItemAsync(kvp.Key);
+            }
 
-    protected void CheckoutBtn_Click(object sender, ImageClickEventArgs e)
-    {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
-        Session["payment_amt"] = usersShoppingCart.GetTotal();
-      }
-      Response.Redirect("Checkout/CheckoutStart.aspx");
+            foreach (var kvp in _quantities)
+            {
+                if (!_removals.GetValueOrDefault(kvp.Key))
+                {
+                    await CartService.UpdateCartItemAsync(kvp.Key, kvp.Value);
+                }
+            }
+
+            await LoadCartAsync();
+        }
     }
-  }
 }

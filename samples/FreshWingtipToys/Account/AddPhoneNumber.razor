@@ -1,26 +1,20 @@
-@page "/AddPhoneNumber"
-<h2>@(Title).</h2>
+@page "/Account/AddPhoneNumber"
+@rendermode InteractiveServer
 
-    <div class="form-horizontal">
-        <h4>Add a phone number</h4>
-        <hr />
-        <ValidationSummary CssClass="text-danger" />
-        <p class="text-danger">
-            <Literal ID="ErrorMessage" />
-        </p>
-        <div class="form-group">
-            <Label AssociatedControlID="PhoneNumber" CssClass="col-md-2 control-label">Phone Number</Label>
-            <div class="col-md-10">
-                <TextBox ID="PhoneNumber" CssClass="form-control" TextMode="Phone" />
-                <RequiredFieldValidator ControlToValidate="PhoneNumber"
-                    CssClass="text-danger" ErrorMessage="The PhoneNumber field is required." />
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <Button OnClick="PhoneNumber_Click"
-                    Text="Submit" CssClass="btn btn-default" />
-            </div>
+<h2>Add Phone Number.</h2>
+<p>Enter a phone number.</p>
+<p class="text-success">@statusMessage</p>
+<div class="form-horizontal">
+    <div class="form-group">
+        <Label ID="PhoneNumber" Text="Phone Number" CssClass="col-md-2 control-label" />
+        <div class="col-md-10">
+            <TextBox ID="Phone" CssClass="form-control" TextMode="@TextBoxMode.Phone"
+                     Text="@phoneNumber" TextChanged="@(v => phoneNumber = v)" />
         </div>
     </div>
-
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <Button ID="PhoneNumber_ClickBtn" Text="Submit" CssClass="btn btn-default" OnClick="HandleSubmit" />
+        </div>
+    </div>
+</div>

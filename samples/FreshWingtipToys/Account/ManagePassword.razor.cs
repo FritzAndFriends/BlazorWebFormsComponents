@@ -1,111 +1,55 @@
-// =============================================================================
-// TODO: This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   - Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   - Page_PreRender → OnAfterRenderAsync
-//   - IsPostBack checks → remove or convert to state logic
-//   - ViewState usage → component [Parameter] or private fields
-//   - Session/Cache access → inject IHttpContextAccessor or use DI
-//   - Response.Redirect → NavigationManager.NavigateTo
-//   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - UpdatePanel / ScriptManager references → remove (Blazor handles updates)
-//   - User controls → Blazor component references
-// =============================================================================
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Identity;
 
 namespace WingtipToys.Account
 {
-    public partial class ManagePassword : System.Web.UI.Page
+    public partial class ManagePassword : ComponentBase
     {
-        protected string SuccessMessage
-        {
-            get;
-            private set;
-        }
+        [Inject] private UserManager<IdentityUser> UserManager { get; set; } = default!;
+        [Inject] private SignInManager<IdentityUser> SignInManager { get; set; } = default!;
 
-        private bool HasPassword(ApplicationUserManager manager)
-        {
-            return manager.HasPassword(User.Identity.GetUserId());
-        }
+        private string currentPassword = "";
+        private string newPassword = "";
+        private string confirmNewPassword = "";
+        private string errorMessage = "";
+        private string successMessage = "";
 
-        protected void Page_Load(object sender, EventArgs e)
+        private async Task HandleChangePassword(MouseEventArgs args)
         {
-            var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
-
-            if (!IsPostBack)
+            if (string.IsNullOrWhiteSpace(newPassword))
             {
-                // Determine the sections to render
-                if (HasPassword(manager))
-                {
-                    changePasswordHolder.Visible = true;
-                }
-                else
-                {
-                    setPassword.Visible = true;
-                    changePasswordHolder.Visible = false;
-                }
-
-                // Render success message
-                var message = Request.QueryString["m"];
-                if (message != null)
-                {
-                    // Strip the query string from action
-                    Form.Action = ResolveUrl("~/Account/Manage");
-                }
+                errorMessage = "New password is required.";
+                return;
             }
-        }
 
-        protected void ChangePassword_Click(object sender, EventArgs e)
-        {
-            if (IsValid)
+            if (newPassword != confirmNewPassword)
             {
-                var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                IdentityResult result = manager.ChangePassword(User.Identity.GetUserId(), CurrentPassword.Text, NewPassword.Text);
-                if (result.Succeeded)
-                {
-                    var user = manager.FindById(User.Identity.GetUserId());
-                    IdentityHelper.SignIn(manager, user, isPersistent: false);
-                    Response.Redirect("~/Account/Manage?m=ChangePwdSuccess");
-                }
-                else
-                {
-                    AddErrors(result);
-                }
+                errorMessage = "The new password and confirmation password do not match.";
+                return;
             }
-        }
 
-        protected void SetPassword_Click(object sender, EventArgs e)
-        {
-            if (IsValid)
+            var user = await UserManager.GetUserAsync(SignInManager.Context.User);
+            if (user == null)
             {
-                // Create the local login info and link the local account to the user
-                var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                IdentityResult result = manager.AddPassword(User.Identity.GetUserId(), password.Text);
-                if (result.Succeeded)
-                {
-                    Response.Redirect("~/Account/Manage?m=SetPwdSuccess");
-                }
-                else
-                {
-                    AddErrors(result);
-                }
+                errorMessage = "Unable to load user.";
+                return;
             }
-        }
 
-        private void AddErrors(IdentityResult result)
-        {
-            foreach (var error in result.Errors)
+            var result = await UserManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (result.Succeeded)
             {
-                ModelState.AddModelError("", error);
+                await SignInManager.RefreshSignInAsync(user);
+                successMessage = "Your password has been changed.";
+                errorMessage = "";
+                currentPassword = "";
+                newPassword = "";
+                confirmNewPassword = "";
+            }
+            else
+            {
+                errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
             }
         }
     }

@@ -1,61 +1,41 @@
-@page "/Login"
-<h2>@(Title).</h2>
+@page "/Account/Login"
+@rendermode InteractiveServer
 
-    <div class="row">
-        <div class="col-md-8">
-            <section id="loginForm">
-                <div class="form-horizontal">
-                    <h4>Use a local account to log in.</h4>
-                    <hr />
-                    <PlaceHolder ID="ErrorMessage" Visible="false">
-                        <p class="text-danger">
-                            <Literal ID="FailureText" />
-                        </p>
-                    </PlaceHolder>
-                    <div class="form-group">
-                        <Label AssociatedControlID="Email" CssClass="col-md-2 control-label">Email</Label>
-                        <div class="col-md-10">
-                            <TextBox ID="Email" CssClass="form-control" TextMode="Email" />
-                            <RequiredFieldValidator ControlToValidate="Email"
-                                CssClass="text-danger" ErrorMessage="The email field is required." />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <Label AssociatedControlID="Password" CssClass="col-md-2 control-label">Password</Label>
-                        <div class="col-md-10">
-                            <TextBox ID="Password" TextMode="Password" CssClass="form-control" />
-                            <RequiredFieldValidator ControlToValidate="Password" CssClass="text-danger" ErrorMessage="The password field is required." />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <div class="checkbox">
-                                <CheckBox ID="RememberMe" />
-                                <Label AssociatedControlID="RememberMe">Remember me?</Label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <Button OnClick="LogIn" Text="Log in" CssClass="btn btn-default" />
-                        </div>
+<h2>Log In.</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <section id="loginForm">
+            <div class="form-horizontal">
+                <h4>Use a local account to log in.</h4>
+                <hr />
+                <p class="text-danger">@errorMessage</p>
+                <div class="form-group">
+                    <Label ID="EmailLabel" Text="Email" CssClass="col-md-2 control-label" />
+                    <div class="col-md-10">
+                        <TextBox ID="Email" CssClass="form-control" TextMode="@TextBoxMode.Email"
+                                 Text="@email" TextChanged="@(v => email = v)" />
                     </div>
                 </div>
-                <p>
-                    <HyperLink ID="RegisterHyperLink">Register as a new user</HyperLink>
-                </p>
-                <p>
-                    @* Enable this once you have account confirmation enabled for password reset functionality
-                    <HyperLink ID="ForgotPasswordHyperLink">Forgot your password?</HyperLink>
-                    *@
-                </p>
-            </section>
-        </div>
-
-        <div class="col-md-4">
-            <section id="socialLoginForm">
-                <uc:OpenAuthProviders ID="OpenAuthLogin" />
-            </section>
-        </div>
+                <div class="form-group">
+                    <Label ID="PasswordLabel" Text="Password" CssClass="col-md-2 control-label" />
+                    <div class="col-md-10">
+                        <TextBox ID="Password" CssClass="form-control" TextMode="@TextBoxMode.Password"
+                                 Text="@password" TextChanged="@(v => password = v)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <Button ID="LogInBtn" Text="Log in" CssClass="btn btn-default" OnClick="HandleLogin" />
+                    </div>
+                </div>
+            </div>
+            <p>
+                <a href="/Account/Forgot">Forgot your password?</a>
+            </p>
+            <p>
+                <a href="/Account/Register">Register as a new user</a>
+            </p>
+        </section>
     </div>
-
+</div>

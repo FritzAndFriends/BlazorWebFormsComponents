@@ -1,4 +1,7 @@
 @page "/AdminPage"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "canEdit")]
+
 <h1>Administration</h1>
     <hr />
     <h3>Add Product:</h3>
@@ -6,60 +9,56 @@
         <tr>
             <td><Label ID="LabelAddCategory">Category:</Label></td>
             <td>
-                <DropDownList ID="DropDownAddCategory" 
-                    TItem="Category" 
-                    SelectMethod="GetCategories" DataTextField="CategoryName" 
-                    DataValueField="CategoryID" >
-                </DropDownList>
+                <DropDownList TItem="Category" Items="categories"
+                              DataTextField="CategoryName" DataValueField="CategoryID"
+                              SelectedValue="@selectedCategoryId"
+                              SelectedValueChanged="OnCategoryChanged"
+                              CssClass="form-control" />
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddName">Name:</Label></td>
             <td>
-                <TextBox ID="AddProductName"></TextBox>
-                <RequiredFieldValidator ID="RequiredFieldValidator1" Text="* Product name required." ControlToValidate="AddProductName" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                <TextBox ID="AddProductName" Text="@newProduct.ProductName" TextChanged="@(v => newProduct.ProductName = v)" />
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddDescription">Description:</Label></td>
             <td>
-                <TextBox ID="AddProductDescription"></TextBox>
-                <RequiredFieldValidator ID="RequiredFieldValidator2" Text="* Description required." ControlToValidate="AddProductDescription" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                <TextBox ID="AddProductDescription" Text="@(newProduct.Description ?? "")" TextChanged="@(v => newProduct.Description = v)" />
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddPrice">Price:</Label></td>
             <td>
-                <TextBox ID="AddProductPrice"></TextBox>
-                <RequiredFieldValidator ID="RequiredFieldValidator3" Text="* Price required." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
-                <RegularExpressionValidator ID="RegularExpressionValidator1" Text="* Must be a valid price without $." ControlToValidate="AddProductPrice" SetFocusOnError="True" Display="Dynamic" ValidationExpression="^[0-9]*(\.)?[0-9]?[0-9]?$"></RegularExpressionValidator>
+                <TextBox ID="AddProductPrice" Text="@priceText" TextChanged="OnPriceChanged" />
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddImageFile">Image File:</Label></td>
             <td>
-                <FileUpload ID="ProductImage" />
-                <RequiredFieldValidator ID="RequiredFieldValidator4" Text="* Image path required." ControlToValidate="ProductImage" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                <FileUpload @ref="fileUpload" Accept="image/*" MaxFileSize="5242880" />
             </td>
         </tr>
     </table>
     <p></p>
     <p></p>
-    <Button ID="AddProductButton" Text="Add Product" OnClick="AddProductButton_Click"  CausesValidation="true"/>
-    <Label ID="LabelAddStatus" Text=""></Label>
+    <Button ID="AddProductButton" Text="Add Product" CausesValidation="true" OnClick="AddProduct" />
+    <Label ID="LabelAddStatus" Text="@addStatusMessage"></Label>
     <p></p>
     <h3>Remove Product:</h3>
     <table>
         <tr>
             <td><Label ID="LabelRemoveProduct">Product:</Label></td>
-            <td><DropDownList ID="DropDownRemoveProduct" TItem="Product" 
-                    SelectMethod="GetProducts" AppendDataBoundItems="true" 
-                    DataTextField="ProductName" DataValueField="ProductID" >
-                </DropDownList>
+            <td>
+                <DropDownList TItem="Product" Items="products"
+                              DataTextField="ProductName" DataValueField="ProductID"
+                              SelectedValue="@selectedProductId"
+                              SelectedValueChanged="OnProductChanged"
+                              CssClass="form-control" />
             </td>
         </tr>
     </table>
     <p></p>
-    <Button ID="RemoveProductButton" Text="Remove Product" OnClick="RemoveProductButton_Click" CausesValidation="false"/>
-    <Label ID="LabelRemoveStatus" Text=""></Label>
-
+    <Button ID="RemoveProductButton" Text="Remove Product" CausesValidation="false" OnClick="RemoveProduct" />
+    <Label ID="LabelRemoveStatus" Text="@removeStatusMessage"></Label>
