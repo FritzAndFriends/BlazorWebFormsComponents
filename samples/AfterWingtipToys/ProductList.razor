@@ -1,5 +1,6 @@
 @page "/ProductList"
-@inject ProductContext Db
+
+<PageTitle>Products</PageTitle>
 
 <section>
     <div>
@@ -7,82 +8,75 @@
             <h2>Products</h2>
         </hgroup>
 
-        @if (_products != null && _products.Any())
-        {
-            <table style="width:100%;">
-                <tbody>
-                    @for (int i = 0; i < _products.Count; i += 4)
-                    {
-                        <tr>
-                            @for (int j = i; j < i + 4 && j < _products.Count; j++)
-                            {
-                                var p = _products[j];
-                                <td>
-                                    <table>
-                                        <tr>
-                                            <td>
-                                                <a href="@($"/ProductDetails?productID={p.ProductID}")">
-                                                    <img src="/Catalog/Images/Thumbs/@p.ImagePath" width="100" height="75" style="border-width:1px;border-style:solid" alt="@p.ProductName" />
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <a href="@($"/ProductDetails?productID={p.ProductID}")">@p.ProductName</a>
-                                                <br />
-                                                <span><b>Price: </b>@($"{p.UnitPrice:c}")</span>
-                                                <br />
-                                                <a href="@($"/AddToCart?productID={p.ProductID}")">
-                                                    <span class="ProductListItem"><b>Add To Cart</b></span>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <table>
-                <tr>
-                    <td>No data was returned.</td>
+        <ListView Items="@_products" TItem="Product"
+            DataKeyNames="ProductID" GroupItemCount="4">
+            <EmptyDataTemplate>
+                <table>
+                    <tr>
+                        <td>No data was returned.</td>
+                    </tr>
+                </table>
+            </EmptyDataTemplate>
+            <EmptyItemTemplate>
+                <td/>
+            </EmptyItemTemplate>
+            <GroupTemplate>
+                <tr id="itemPlaceholderContainer">
+                    <td id="itemPlaceholder"></td>
                 </tr>
-            </table>
-        }
+            </GroupTemplate>
+            <ItemTemplate>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="/ProductDetails?productID=@context.ProductID">
+                                    <img src="/Catalog/Images/Thumbs/@context.ImagePath"
+                                        width="100" height="75" style="border:1px solid" />
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/ProductDetails?productID=@context.ProductID">
+                                    @context.ProductName
+                                </a>
+                                <br />
+                                <span>
+                                    <b>Price: </b>@($"{context.UnitPrice:c}")
+                                </span>
+                                <br />
+                                <a href="/AddToCart?productID=@context.ProductID">
+                                    <span class="ProductListItem">
+                                        <b>Add To Cart</b>
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
+            </ItemTemplate>
+            <LayoutTemplate>
+                <table style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table id="groupPlaceholderContainer" style="width:100%">
+                                    <tr id="groupPlaceholder"></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </LayoutTemplate>
+        </ListView>
     </div>
 </section>
-
-@code {
-    [SupplyParameterFromQuery(Name = "id")]
-    public int? CategoryId { get; set; }
-
-    [SupplyParameterFromQuery(Name = "categoryName")]
-    public string? CategoryName { get; set; }
-
-    private List<Product>? _products;
-
-    protected override void OnInitialized()
-    {
-        IQueryable<Product> query = Db.Products.AsQueryable();
-
-        if (CategoryId.HasValue && CategoryId > 0)
-        {
-            query = query.Where(p => p.CategoryID == CategoryId);
-        }
-
-        if (!string.IsNullOrEmpty(CategoryName))
-        {
-            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
-        }
-
-        _products = query.ToList();
-    }
-}
 

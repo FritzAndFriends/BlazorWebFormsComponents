@@ -1,70 +1,39 @@
 @page "/ShoppingCart"
-@inject CartStateService CartService
-@inject NavigationManager Nav
 
-<div id="ShoppingCartTitle" class="ContentHead"><h1>@_title</h1></div>
+<PageTitle>Shopping Cart</PageTitle>
 
-@if (_cartItems != null && _cartItems.Any())
+<h1>Shopping Cart</h1>
+
+@if (_cart.Items.Any())
 {
-    <table class="table table-striped table-bordered" cellpadding="4">
+    <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price (each)</th>
+                <th>Product</th>
+                <th>Price</th>
                 <th>Quantity</th>
-                <th>Item Total</th>
-                <th>Remove Item</th>
+                <th>Subtotal</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in _cartItems)
+            @foreach (var item in _cart.Items)
             {
                 <tr>
-                    <td>@item.ProductId</td>
-                    <td>@item.Product.ProductName</td>
-                    <td>@($"{item.Product.UnitPrice:c}")</td>
+                    <td>@item.Product?.ProductName</td>
+                    <td>@($"{item.Product?.UnitPrice:c}")</td>
                     <td>@item.Quantity</td>
-                    <td>@($"{(Convert.ToDouble(item.Quantity) * Convert.ToDouble(item.Product.UnitPrice)):c}")</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" @onclick="() => RemoveItemAsync(item.ItemId)">Remove</button>
-                    </td>
+                    <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
                 </tr>
             }
         </tbody>
     </table>
-    <div>
-        <p></p>
-        <strong>
-            Order Total: @($"{_total:c}")
-        </strong>
-    </div>
+    <p><b>Total: @($"{_cart.GetTotal():c}")</b></p>
+}
+else
+{
+    <p>Your shopping cart is empty.</p>
 }
 
 @code {
-    private List<CartItem>? _cartItems;
-    private decimal _total;
-    private string _title = "Shopping Cart";
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadCartAsync();
-    }
-
-    private async Task LoadCartAsync()
-    {
-        _cartItems = await CartService.GetCartItemsAsync();
-        _total = await CartService.GetTotalAsync();
-        if (_cartItems == null || !_cartItems.Any())
-        {
-            _title = "Shopping Cart is Empty";
-        }
-    }
-
-    private async Task RemoveItemAsync(string itemId)
-    {
-        await CartService.RemoveCartItemAsync(itemId);
-        await LoadCartAsync();
-    }
+    [Inject] private CartStateService _cart { get; set; } = default!;
 }
-

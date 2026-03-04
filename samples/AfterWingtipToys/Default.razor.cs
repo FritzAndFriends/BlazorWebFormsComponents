@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Components;
+
 namespace WingtipToys;
 
-public partial class _Default : Microsoft.AspNetCore.Components.ComponentBase
+public partial class _Default : ComponentBase
 {
 }
+

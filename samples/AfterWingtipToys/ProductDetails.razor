@@ -1,42 +1,32 @@
 @page "/ProductDetails"
-@inject ProductContext Db
+
+<PageTitle>Product Details</PageTitle>
 
 @if (_product != null)
 {
-    <div>
-        <h1>@_product.ProductName</h1>
-    </div>
-    <br />
-    <table>
-        <tr>
-            <td>
-                <img src="/Catalog/Images/@_product.ImagePath" style="border:solid; height:300px" alt="@_product.ProductName" />
-            </td>
-            <td>&nbsp;</td>
-            <td style="vertical-align: top; text-align:left;">
-                <b>Description:</b><br />@_product.Description
-                <br />
-                <span><b>Price:</b>&nbsp;@($"{_product.UnitPrice:c}")</span>
-                <br />
-                <span><b>Product Number:</b>&nbsp;@_product.ProductID</span>
-                <br />
-            </td>
-        </tr>
-    </table>
-}
-
-@code {
-    [SupplyParameterFromQuery(Name = "productID")]
-    public int? ProductId { get; set; }
-
-    private Product? _product;
-
-    protected override void OnInitialized()
-    {
-        if (ProductId.HasValue && ProductId > 0)
-        {
-            _product = Db.Products.FirstOrDefault(p => p.ProductID == ProductId);
-        }
-    }
+    <FormView Items="@_products" TItem="Product" RenderOuterTable="false">
+        <ItemTemplate>
+            <div>
+                <h1>@context.ProductName</h1>
+            </div>
+            <br />
+            <table>
+                <tr>
+                    <td>
+                        <img src="/Catalog/Images/@context.ImagePath" style="border:solid; height:300px" alt="@context.ProductName"/>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td style="vertical-align: top; text-align:left;">
+                        <b>Description:</b><br />@context.Description
+                        <br />
+                        <span><b>Price:</b>&nbsp;@($"{context.UnitPrice:c}")</span>
+                        <br />
+                        <span><b>Product Number:</b>&nbsp;@context.ProductID</span>
+                        <br />
+                    </td>
+                </tr>
+            </table>
+        </ItemTemplate>
+    </FormView>
 }
 

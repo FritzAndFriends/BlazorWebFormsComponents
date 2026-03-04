@@ -10,28 +10,20 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazorWebFormsComponents();
 
-builder.Services.AddDbContext<ProductContext>(options =>
+builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartStateService>();
-
-builder.Services.AddAuthentication("Cookies")
-    .AddCookie("Cookies", options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Login";
-    });
-builder.Services.AddAuthorization();
-builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-// Seed the database
+// Seed database
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ProductContext>();
-    ProductDatabaseInitializer.Seed(db);
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using var db = factory.CreateDbContext();
+    db.Database.EnsureCreated();
+    ProductContext.Seed(db);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -42,8 +34,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapRazorComponents<WingtipToys.Components.App>()
