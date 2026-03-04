@@ -2,7 +2,20 @@
 
 ## 1. Executive Summary
 
-Run 4 tested the **enhanced** `bwfc-migrate.ps1` script against the WingtipToys ASP.NET Web Forms application (32 markup files, 230 control usages). The script now includes `ConvertFrom-MasterPage` (auto-generates MainLayout.razor from .master files), `New-AppRazorScaffold` (generates App.razor and Routes.razor), Eval format-string regex, and String.Format regex. All Layer 2 code was written from scratch. The build succeeded with **0 errors, 0 warnings**, and **11/11 features pass** via Playwright verification. The new script enhancements increased Layer 1 transforms from 277 to **289** and auto-generated 3 critical files (MainLayout.razor, App.razor, Routes.razor) that previously required manual creation.
+Run 4 validated four new `bwfc-migrate.ps1` enhancements — **ConvertFrom-MasterPage**, **New-AppRazorScaffold**, **Eval format-string regex**, and **String.Format regex** — against WingtipToys (32 markup files, 230 control usages). The script completed in **~3 s**, the project built cleanly in **12.32 s** (0 errors, 0 warnings), and all **11/11 Playwright feature tests passed**. Layer 1 transforms rose from 277 → **289** (+4.3 %), scaffold files from 4 → **7**, and build warnings dropped from 63 → **0** compared to Run 3. All Layer 2 code was written from scratch — no files copied from prior runs.
+
+### Quick-Reference Metrics
+
+| Metric | Value |
+|--------|-------|
+| Script execution time | **~3 s** |
+| Build time | **12.32 s** |
+| Transforms applied | **289** (+12 vs Run 3) |
+| Errors / Warnings | **0 / 0** (Run 3: 0 / 63) |
+| Feature tests | **11 / 11 pass** |
+| Scaffold files generated | **7** (+3 vs Run 3) |
+| Manual review items | **18** (unchanged) |
+| New enhancements tested | **4** — ConvertFrom-MasterPage, New-AppRazorScaffold, Eval format-string, String.Format |
 
 ## 2. Script Enhancement Impact — Run 3 vs Run 4
 
@@ -139,9 +152,9 @@ Time Elapsed 00:00:12.32
 
 | Page | Screenshot |
 |------|-----------|
-| Home Page | ![Original Home](../../planning-docs/screenshots/original-home-real.png) |
-| Product List | ![Original Products](../../planning-docs/screenshots/original-products-real.png) |
-| Shopping Cart | ![Original Cart](../../planning-docs/screenshots/original-cart-real.png) |
+| Home Page | ![Original Home](../../../planning-docs/screenshots/original-home-real.png) |
+| Product List | ![Original Products](../../../planning-docs/screenshots/original-products-real.png) |
+| Shopping Cart | ![Original Cart](../../../planning-docs/screenshots/original-cart-real.png) |
 
 ## 8. Run Comparison
 
