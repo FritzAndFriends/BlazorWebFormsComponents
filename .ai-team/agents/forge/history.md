@@ -5,33 +5,13 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Core Context
+
+<!-- Summarized 2026-03-04 by Scribe — originals in history-archive.md -->
+
+M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2–M3 shipped (50/53 controls, 797 tests). Chart.js for Chart. DataBoundStyledComponent<T> recommended. Key patterns: Enums/ with int values, On-prefix events, feature branches→upstream/dev, ComponentCatalog.cs. Deployment: Docker+NBGV, dual NuGet, Azure webhook. M7–M14 milestone plans. HTML audit: 3 tiers, M11–M13. M15 fidelity: 132→131 divergences, 5 fixable bugs. Data controls: 90%+ sample parity, 4 remaining bugs. M17 AJAX: 6 controls shipped.
+
 ## Learnings
-
-<!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
-
-### Core Context (2026-02-10 through 2026-02-27)
-
-Reviewed 6 PRs in M1 (Calendar, FileUpload, ImageMap, PageService, ASCX CLI, VS Snippets). Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2 shipped (4148/53). M3: DetailsView + PasswordRecovery approved (50/53, 797 tests). Chart.js selected for Chart. Feature audit: DataBoundComponent<T> chain lacks style properties  recommended DataBoundStyledComponent<T>. SkinID bug (boolstring). Themes/Skins: CascadingValue ThemeProvider recommended.
-
-**Milestone planning:** M7 "Control Depth & Navigation Overhaul" (51 WIs, ~138 gaps). M9 "Migration Fidelity & Hardening" (12 WIs, ~30 gaps). M12M14 "Migration Analysis Tool PoC" (13 WIs  `bwfc-migrate` CLI, regex parsing, Green/Yellow/Red scoring). M11M13 HTML audit milestones.
-
-**Deployment pipeline:** Docker version via nbgv before build, injected via build-arg. NBGV must be stripped inside Docker. Secret-gated steps use env var indirection. Dual NuGet publishing (GitHub Packages + nuget.org). Azure webhook via curl with fallback.
-
-**Key patterns:** Enum files in `Enums/` with explicit int values. Login Controls  BaseStyledComponent. Data-bound  DataBoundComponent<T>. Events use `On` prefix. Docs + samples ship with components. Feature branches  PR to upstream/dev. ComponentCatalog.cs links all sample pages. Theme core: nullable properties, case-insensitive keys, ApplySkin in OnParametersSet. Audit reports: `planning-docs/AUDIT-REPORT-M{N}.md`.
-
-### Summary: HTML Audit Strategy and Milestones (2026-02-25 through 2026-02-26)
-
-Evaluated Playwright-based HTML audit. Three tiers: Tier 1 (clean HTML, 6 controls), Tier 2 (complex data, 4 controls), Tier 3 (JS-heavy Menu/TreeView). Only ~25% sample coverage. M11M13 plan: M11 (infrastructure + Tier 1), M12 (Tier 2 data), M13 (Tier 3 + master report). Agent distribution: Forge strategy/review, Cyclops infra scripts, Jubilee samples, Colossus capture/comparison, Beast docs, Rogue tests.
-
-### Summary: M15 HTML Fidelity Strategy (2026-02-26)
-
-Post-PR #377: 132131 divergences, 1 exact match (Literal-3). Most divergences are sample data, not bugs. 5 remaining fixable bugs (BulletedList, LinkButton, Image, FileUpload, CheckBox). 12 work items, target 15 exact matches. ~1315 controls can achieve exact normalized match. New divergence candidates D-11 through D-14.
-
-### Summary: Data Control Divergence Analysis (2026-02-26)
-
-Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView (182 lines), Repeater (64 lines). 90%+ sample parity issues. 5 genuine bugs (3 fixed in PR #377). 4 remaining: GridView UseAccessibleHeader default, GridView &nbsp; encoding, GridView thead vs tbody, DataList missing itemtype. Sample alignment alone would give ListView/Repeater exact matches. Calendar closest complex control at 73%.
-
-📌 Team updates (2026-02-27): PRs from fork→upstream dev, close issues via PR refs only (Jeff). M17 AJAX controls shipped: 6 controls (Timer, UpdatePanel, UpdateProgress, ScriptManager stub, ScriptManagerProxy stub, Substitution), sample pages created, AJAX nav category + migration stub doc pattern established.
 
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
 
@@ -101,4 +81,22 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 
 **Run 5 BWFC analysis:** 95+ EventCallbacks across 30+ components matching Web Forms names. 3 of 4 top manual rewrites unnecessary -- BWFC already had ListView, FormView, GridView. 40% estimated reduction if scripts preserve BWFC data controls. Gaps: Repeater has zero EventCallbacks, GridView missing OnRowDataBound/OnRowCreated. SelectMethod TODOs need `Items=@data` guidance. Deliverables: analysis-and-recommendations.md, migration-standards SKILL.md, forge-run5-standards decision.
 
+### Run 6 Improvement Analysis (2026-03-05)
+
+**Run 5→6 delta analysis completed.** 8 concrete script enhancements identified from Run 5 manual-fixes.md breakdown. Key findings:
+
+1. **Scaffold uses net8.0** — violates migration-standards SKILL.md directive for net10.0 (line 139 of bwfc-migrate.ps1). Caused build fix round 2 (InteractiveServer import missing).
+2. **Static files not copied to wwwroot/** — script copies to project root; manual-fixes.md §10 shows all static assets had to be manually relocated. Script has zero wwwroot references.
+3. **SelectMethod TODO text doesn't mention BWFC Items parameter** — ConvertFrom-SelectMethod (line 740-763) emits generic "inject a service" guidance, not "use Items=@data on the BWFC component". This caused Layer 2 developers to replace ListView/FormView/GridView with raw HTML (~180s of unnecessary work).
+4. **No Page.Title conversion** — 4+ instances required manual fix (manual-fixes.md §8). BWFC provides PageService + Page component.
+5. **No page base class swap** — `: Page` → `: ComponentBase` in code-behinds not handled.
+6. **No stub generation** — 28 files manually stubbed (60s). Script could emit compilable stubs for pages with unconverted code-behinds.
+7. **No BundleConfig→link tag conversion** — 2+ CSS bundles required manual App.razor edits.
+8. **Repeater confirmed zero EventCallbacks** — grep verified. GridView has 10 EventCallbacks but missing OnRowDataBound/OnRowCreated.
+
+**Projected Run 6:** ~4.5 min total (vs Run 5's ~10 min) if all 8 enhancements implemented. ~55% improvement. Layer 2 manual time drops from ~440s to ~225s. Architectural work (EF Core, Identity, Session→DI, business logic) remains inherently manual at ~165s.
+
+**Decision written:** forge-run6-improvements.md in decisions/inbox — 8 prioritized enhancements with effort/impact ratings.
+
 Team updates: GetRouteUrl overloads completed (Cyclops). Migration report 3-level traversal (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation, migration-toolkit/ canonical (Jeff/Forge).
+� Team update (2026-03-04): Run 6 improvement analysis  decided by Forge

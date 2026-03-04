@@ -5788,14 +5788,24 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 
 
-### 2026-03-05: Migration standards — BWFC data controls must be preferred over raw HTML
+### 2026-03-05: Migration Toolkit Run 6  BWFC-first migration standards and 8 script enhancements (consolidated)
 
-**By:** Forge
+**By:** Forge, Cyclops
 **What:**
-1. Run 5 analysis reveals 3 of 4 top manual page rewrites (ProductList, ProductDetails, ShoppingCart) replaced BWFC-compatible controls (ListView, FormView, GridView) with raw HTML `@foreach` loops — unnecessarily.
-2. BWFC exposes **95+ EventCallback parameters** across 30+ components with names matching Web Forms originals (OnClick, OnCommand, OnSelectedIndexChanged, etc.). Migration scripts should **preserve these attributes verbatim** and only annotate signature changes.
-3. The migration script should annotate `SelectMethod` replacements with explicit `Items=@data` guidance pointing to BWFC's `Items` parameter, not just a generic "replace with DI" TODO.
-4. Script enhancement priorities: (1) preserve BWFC data control tags, (2) Page.Title → PageTitle, (3) event handler preservation, (4) Page base class swap, (5) BundleConfig → link tags.
-5. Component improvement priorities: (1) add `OnRowDataBound`/`OnRowCreated` to GridView, (2) add events to Repeater (currently zero EventCallbacks), (3) document single-item FormView usage, (4) document ListView `Items` parameter in migration context.
-**Why:** Run 5 Layer 2 spent ~180s on page fixes, of which ~120s was rewriting data controls to raw HTML that BWFC already supports. Preserving BWFC tags would reduce manual migration effort by an estimated 40% for projects with data controls. These standards formalize Jeff's directive that BWFC event handlers have matching names and should be called out.
 
+**Standards (from Run 5 analysis):**
+1. BWFC data controls (ListView, FormView, GridView) must be preferred over raw HTML  Run 5 revealed 3 of 4 top page rewrites unnecessarily replaced BWFC-compatible controls with `@foreach` loops.
+2. BWFC's 95+ EventCallback parameters with Web Forms-matching names (OnClick, OnCommand, OnSelectedIndexChanged, etc.) must be preserved verbatim; only annotate signature changes.
+3. Component improvement priorities: add `OnRowDataBound`/`OnRowCreated` to GridView, add events to Repeater, document FormView and ListView `Items` parameter in migration context.
+
+**Script enhancements (priority order):**
+1. Fix scaffold TFM: net8.0  net10.0. Add `@using static Microsoft.AspNetCore.Components.Web.RenderMode` to _Imports.razor. *5 min, -15s.*
+2. Improve SelectMethod TODO to reference BWFC `Items` parameter instead of generic DI advice. *10 min, -120s.*
+3. Copy static files to `wwwroot/` instead of project root. *10 min, -15s.*
+4. Generate compilable stubs for unconvertible pages (Identity/Auth/Payment). *30 min, -60s.*
+5. Page.Title  PageTitle conversion via PageService. *20 min, -4 manual items.*
+6. Page base class swap: `: Page`  `: ComponentBase` in code-behinds. *10 min, -4+ items.*
+7. Event handler signature annotation TODOs. *20 min.*
+8. BundleConfig  link/script tags in App.razor. *45 min, -30s.*
+
+**Why:** Run 5 Layer 2 spent ~180s on page fixes, ~120s unnecessarily rewriting data controls to raw HTML. Combined enhancements project ~55% total time reduction (from ~10 min to ~4.5 min). The remaining ~4 min is inherently manual architectural work (EF Core, Identity, SessionDI). These standards formalize that BWFC event handlers have matching names and should be preserved.
