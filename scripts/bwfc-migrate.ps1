@@ -182,7 +182,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.MapStaticAssets();
 app.UseAntiforgery();
 
 app.MapRazorComponents<$ProjectName.Components.App>()
@@ -191,10 +191,29 @@ app.MapRazorComponents<$ProjectName.Components.App>()
 app.Run();
 "@
 
+    # Properties/launchSettings.json
+    $launchSettingsContent = @"
+{
+  "profiles": {
+    "$ProjectName": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+"@
+
     if ($PSCmdlet.ShouldProcess($OutputRoot, "Create project scaffold")) {
         $csprojPath = Join-Path $OutputRoot "$ProjectName.csproj"
         $importsPath = Join-Path $OutputRoot "_Imports.razor"
         $programPath = Join-Path $OutputRoot "Program.cs"
+        $propertiesDir = Join-Path $OutputRoot "Properties"
+        $launchSettingsPath = Join-Path $propertiesDir "launchSettings.json"
 
         Set-Content -Path $csprojPath -Value $csprojContent -Encoding UTF8
         Write-TransformLog -File $csprojPath -Transform 'Scaffold' -Detail "Generated $ProjectName.csproj"
@@ -204,11 +223,16 @@ app.Run();
 
         Set-Content -Path $programPath -Value $programContent -Encoding UTF8
         Write-TransformLog -File $programPath -Transform 'Scaffold' -Detail 'Generated Program.cs'
+
+        New-Item -ItemType Directory -Force $propertiesDir | Out-Null
+        Set-Content -Path $launchSettingsPath -Value $launchSettingsContent -Encoding UTF8
+        Write-TransformLog -File $launchSettingsPath -Transform 'Scaffold' -Detail 'Generated Properties/launchSettings.json'
     }
     else {
         Write-Host "[WhatIf] Would create: $ProjectName.csproj"
         Write-Host "[WhatIf] Would create: _Imports.razor"
         Write-Host "[WhatIf] Would create: Program.cs"
+        Write-Host "[WhatIf] Would create: Properties/launchSettings.json"
     }
 }
 
