@@ -163,8 +163,6 @@ function New-ProjectScaffold {
 @using BlazorWebFormsComponents
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
-
-@rendermode InteractiveServer
 "@
 
     # Program.cs
