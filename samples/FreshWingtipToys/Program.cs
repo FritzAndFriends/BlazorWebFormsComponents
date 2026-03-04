@@ -57,7 +57,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.MapStaticAssets();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
@@ -96,6 +96,14 @@ app.MapGet("/Account/PerformRegisterSignIn", async (
         return Results.Redirect("/");
 
     return Results.Redirect("/Account/Login");
+});
+
+// HTTP endpoint for logout — requires an active HTTP response to clear auth cookies
+app.MapPost("/Account/PerformLogout", async (
+    SignInManager<IdentityUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
 });
 
 app.Run();

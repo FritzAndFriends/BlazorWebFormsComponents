@@ -42,6 +42,39 @@ In `Program.cs`:
 builder.Services.AddBlazorWebFormsComponents();
 ```
 
+### Step 3b: Configure Static Asset Middleware
+
+In `Program.cs`, use `MapStaticAssets()` (not `UseStaticFiles()`) to serve both `wwwroot/` content AND `_framework/blazor.web.js`:
+
+```csharp
+app.MapStaticAssets();   // Required for _framework/blazor.web.js in .NET 9+
+app.UseAntiforgery();
+```
+
+> **⚠️ CRITICAL:** Using `app.UseStaticFiles()` alone will NOT serve `_framework/blazor.web.js` in .NET 9+, which means the Blazor runtime never loads and NO interactivity works on any page.
+
+### Step 3c: Add `launchSettings.json`
+
+Create `Properties/launchSettings.json` so `dotnet run` uses Development mode (required for `MapStaticAssets()` to resolve framework files during development):
+
+```json
+{
+  "profiles": {
+    "MyBlazorApp": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+```
+
+> Without this file, `dotnet run` defaults to Production mode, and `MapStaticAssets()` expects a published manifest that doesn't exist during development — resulting in `blazor.web.js` 404.
+
 ### Step 4: Add BWFC JavaScript
 
 In `App.razor` or the host page `<head>`:
@@ -504,6 +537,12 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 ## Common Gotchas
 
+### blazor.web.js 404 (No Interactivity)
+If pages render as static HTML but nothing is interactive (buttons don't click, forms don't submit), check:
+1. `_framework/blazor.web.js` is returning 404 (check browser DevTools console)
+2. **Fix:** Use `app.MapStaticAssets()` in `Program.cs` instead of `app.UseStaticFiles()`
+3. **Fix:** Ensure `Properties/launchSettings.json` sets `ASPNETCORE_ENVIRONMENT=Development`
+
 ### No ViewState
 Blazor components maintain their own state in fields/properties. There is no `ViewState` dictionary. If code reads/writes `ViewState["key"]`, replace with a component field.
 
@@ -622,9 +661,93 @@ The WingtipToys canonical demo (2013) uses these specific patterns that BWFC ful
 For a typical Web Forms → Blazor migration, create these files:
 
 1. **`Program.cs`** — Service registration, middleware pipeline
-2. **`App.razor`** — Root component with Router
-3. **`_Imports.razor`** — Global usings including BWFC namespaces
-4. **`Components/Layout/MainLayout.razor`** — From Master Page
-5. **`Components/Pages/*.razor`** — One per .aspx page
-6. **`Services/*.cs`** — Replace DataSource controls and code-behind data methods
-7. **`Models/*.cs`** — Copy/migrate from Web Forms project (often .NET Standard already)
+2. **`Properties/launchSettings.json`** — Environment config for `dotnet run`
+3. **`App.razor`** — Root component with Router
+4. **`_Imports.razor`** — Global usings including BWFC namespaces
+5. **`Components/Layout/MainLayout.razor`** — From Master Page
+6. **`Components/Pages/*.razor`** — One per .aspx page
+7. **`Services/*.cs`** — Replace DataSource controls and code-behind data methods
+8. **`Models/*.cs`** — Copy/migrate from Web Forms project (often .NET Standard already)
+
+---
+
+## Identity & Authentication Migration
+
+ASP.NET Web Forms Identity uses `SignInManager` and forms authentication cookies, which require an active HTTP response. In Blazor Server (SignalR), there is no HTTP response after the initial page load. This requires a different pattern.
+
+### Authentication Endpoints
+
+Authentication operations (login, logout, register) must be HTTP endpoints, NOT Blazor component handlers:
+
+```csharp
+// Program.cs — HTTP endpoints for auth operations
+
+// Login: SignInManager needs HTTP context to set auth cookies
+app.MapGet("/Account/PerformLogin", async (
+    string email, string password,
+    SignInManager<IdentityUser> signInManager) =>
+{
+    var result = await signInManager.PasswordSignInAsync(email, password,
+        isPersistent: false, lockoutOnFailure: false);
+    if (result.Succeeded)
+        return Results.Redirect("/");
+    return Results.Redirect("/Account/Login?error=" +
+        Uri.EscapeDataString("Invalid login attempt."));
+});
+
+// Logout: must be POST for CSRF protection
+app.MapPost("/Account/PerformLogout", async (
+    SignInManager<IdentityUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
+});
+```
+
+### Login Page Pattern
+
+The Login page is an InteractiveServer component that collects credentials, then navigates to the HTTP endpoint with `forceLoad: true`:
+
+```csharp
+private void HandleLogin(MouseEventArgs args)
+{
+    var loginUrl = $"/Account/PerformLogin?email={Uri.EscapeDataString(email)}" +
+                   $"&password={Uri.EscapeDataString(password)}";
+    NavigationManager.NavigateTo(loginUrl, forceLoad: true);
+}
+```
+
+### Logout Form Pattern
+
+The logout button must be a plain HTML form (not a Blazor form) that posts to the HTTP endpoint. Use `data-enhance="false"` to prevent Blazor enhanced navigation from intercepting:
+
+```razor
+<form method="post" action="/Account/PerformLogout" data-enhance="false">
+    <AntiforgeryToken />
+    <button type="submit" class="btn btn-link">Log off</button>
+</form>
+```
+
+> **⚠️ CRITICAL:** Without `data-enhance="false"`, Blazor intercepts the form POST and tries to handle it as a Blazor form submission, which fails because there's no matching `@formname` handler.
+
+### AuthorizeView in Layout
+
+Replace Web Forms `<asp:LoginView>` with `<AuthorizeView>`:
+
+```razor
+<AuthorizeView>
+    <Authorized>
+        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
+        <li>
+            <form method="post" action="/Account/PerformLogout" data-enhance="false">
+                <AntiforgeryToken />
+                <button type="submit" class="btn btn-link">Log off</button>
+            </form>
+        </li>
+    </Authorized>
+    <NotAuthorized>
+        <li><a href="/Account/Register">Register</a></li>
+        <li><a href="/Account/Login">Log in</a></li>
+    </NotAuthorized>
+</AuthorizeView>
+```

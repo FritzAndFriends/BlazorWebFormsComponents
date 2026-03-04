@@ -72,6 +72,13 @@ namespace BlazorWebFormsComponents
 			_ => "text"
 		};
 
+		// Sync internal Text on every keystroke to prevent re-render from overwriting user input.
+		// TextChanged is NOT fired here — it fires on blur via HandleChange (Web Forms semantics).
+		private void HandleInput(ChangeEventArgs e)
+		{
+			Text = e.Value?.ToString() ?? string.Empty;
+		}
+
 		private async Task HandleChange(ChangeEventArgs e)
 		{
 			Text = e.Value?.ToString() ?? string.Empty;
