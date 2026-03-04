@@ -36,7 +36,7 @@
 
 .NOTES
     Part of the BlazorWebFormsComponents project.
-    https://github.com/AzimoLabs/BlazorWebFormsComponents
+    https://github.com/FritzAndFriends/BlazorWebFormsComponents
 #>
 
 [CmdletBinding()]

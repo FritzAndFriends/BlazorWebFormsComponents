@@ -11,7 +11,7 @@
 │    Layer 1           │    │    Layer 2           │    │    Layer 3           │
 │    AUTOMATED         │───▶│    COPILOT-ASSISTED  │───▶│    ARCHITECTURE      │
 │                      │    │                      │    │                      │
-│  bwfc-migrate.ps1    │    │  Copilot + Skill     │    │  Human + Agent       │
+│  bwfc-migrate.ps1    │    │  Copilot + Skill     │    │  Human + Copilot     │
 │  ~40% of work        │    │  ~45% of work        │    │  ~15% of work        │
 │  ~30 seconds         │    │  ~2–4 hours          │    │  ~8–12 hours         │
 │  100% accuracy       │    │  High accuracy       │    │  Requires judgment   │
@@ -27,7 +27,7 @@ Each layer handles a different *kind* of work, not just a different *amount*. Th
 |---|---|---|---|
 | Layer 1 | None — pure regex/pattern matching | PowerShell script | ~0% (deterministic) |
 | Layer 2 | Pattern recognition — knows BWFC control mappings | Copilot with migration skill | Low (guided by rules) |
-| Layer 3 | Judgment — understands your app's architecture | Human + migration agent | Varies (depends on decisions) |
+| Layer 3 | Judgment — understands your app's architecture | Human + Copilot with data migration skill | Varies (depends on decisions) |
 
 ---
 
@@ -98,7 +98,7 @@ After Layer 1, pages fall into three readiness categories:
 
 ## Layer 2: Copilot-Assisted Structural Transforms
 
-**Tool:** [Copilot migration skill](../.github/skills/webforms-migration/SKILL.md)
+**Tool:** [Copilot migration skill](skills/bwfc-migration/SKILL.md)
 
 Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably.
 
@@ -126,7 +126,7 @@ Layer 2 handles transforms that follow consistent patterns but require understan
 Or, if using Copilot Chat directly, reference the skill file:
 
 ```
-@workspace Use the rules in .github/skills/webforms-migration/SKILL.md to complete
+@workspace Use the rules in .github/skills/bwfc-migration/SKILL.md to complete
 the migration of this file. Look for TODO comments and unresolved patterns.
 ```
 
@@ -143,9 +143,9 @@ Always review Copilot's changes before committing.
 
 ## Layer 3: Architecture Decisions
 
-**Tool:** [Migration agent](../.github/agents/migration.agent.md) + your own judgment
+**Tool:** [Data migration skill](skills/bwfc-data-migration/SKILL.md) + your own judgment
 
-Layer 3 is the ~15% of migration work that requires understanding your application's architecture. No script or AI can make these decisions for you — but the migration agent can guide you through the options and trade-offs.
+Layer 3 is the ~15% of migration work that requires understanding your application's architecture. No script or AI can make these decisions for you — but the data migration skill and Copilot can guide you through the options and trade-offs.
 
 ### Common Layer 3 Decisions
 
@@ -159,16 +159,16 @@ Layer 3 is the ~15% of migration work that requires understanding your applicati
 | **HTTP handlers** | `IHttpHandler`, `IHttpModule` | ASP.NET Core middleware |
 | **Third-party APIs** | Direct `WebRequest`/`WebClient` calls | `HttpClient` via DI with `IHttpClientFactory` |
 
-### Using the Migration Agent
+### Using the Data Migration Skill
 
-The migration agent is designed for interactive sessions. Point it at your scan report and your partially-migrated files:
+The data migration skill is designed for interactive Copilot sessions. Point Copilot at your scan report and your partially-migrated files:
 
 1. Share the `bwfc-scan.ps1` output
 2. Share the `bwfc-migrate.ps1` output directory
-3. The agent identifies remaining `TODO` markers and decision points
+3. Copilot identifies remaining `TODO` markers and decision points
 4. Walk through each decision interactively
 
-The agent provides decision frameworks for common patterns — see its [full documentation](../.github/agents/migration.agent.md).
+The skill provides decision frameworks for common architecture patterns — see the [full skill reference](skills/bwfc-data-migration/SKILL.md).
 
 ---
 

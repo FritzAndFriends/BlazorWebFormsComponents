@@ -114,7 +114,7 @@ Then open `.github/copilot-instructions.md` and fill in the `<!-- FILL IN -->` s
 
 Alternatively, point Copilot at the BWFC migration skill directly:
 
-> 📄 Skill file: [`.github/skills/webforms-migration/SKILL.md`](../.github/skills/webforms-migration/SKILL.md)
+> 📄 Skill file: [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md)
 
 ---
 
@@ -148,7 +148,7 @@ These are the decisions that need a human (or a human + the migration agent):
 - **Global.asax → Program.cs:** Convert lifecycle hooks to middleware
 - **Third-party integrations:** Port to `HttpClient` pattern
 
-> 📄 For interactive guidance, use the [Migration Agent](../.github/agents/migration.agent.md)
+> 📄 For interactive guidance, use the [Data Migration Skill](skills/bwfc-data-migration/SKILL.md)
 
 ---
 

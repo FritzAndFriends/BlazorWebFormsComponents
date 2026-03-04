@@ -1,8 +1,8 @@
 # Control Coverage Reference
 
-**Can I migrate this control?** This is the complete reference for all 52 BWFC components and the Web Forms controls that are *not* covered.
+**Can I migrate this control?** This is the complete reference for all 58 BWFC components and the Web Forms controls that are *not* covered.
 
-For the full control translation rules (attribute mappings, code examples, before/after), see the [Copilot migration skill](../.github/skills/webforms-migration/SKILL.md).
+For the full control translation rules (attribute mappings, code examples, before/after), see the [Copilot migration skill](skills/bwfc-migration/SKILL.md).
 
 ---
 
@@ -10,8 +10,8 @@ For the full control translation rules (attribute mappings, code examples, befor
 
 | Metric | Value |
 |---|---|
-| BWFC components available | **52** |
-| Web Forms control categories covered | **7** (Editor, Data, Validation, Navigation, Login, AJAX, Migration Helper) |
+| BWFC components available | **58** |
+| Web Forms control categories covered | **6** (Editor, Data, Validation, Navigation, Login, AJAX) |
 | WingtipToys PoC coverage | **96.6%** (28 of 29 control types used) |
 | Controls with no BWFC equivalent | See [Not Supported](#controls-not-supported-by-bwfc) |
 
@@ -28,7 +28,7 @@ For the full control translation rules (attribute mappings, code examples, befor
 
 ---
 
-## Editor Controls (25 components)
+## Editor Controls (28 components)
 
 | Control | BWFC? | Complexity | Key Changes | Gotchas |
 |---|---|---|---|---|
@@ -36,6 +36,7 @@ For the full control translation rules (attribute mappings, code examples, befor
 | **BulletedList** | ✅ | Easy | Remove `asp:`, `runat`; bind `Items` | `DisplayMode` and `BulletStyle` preserved |
 | **Button** | ✅ | Trivial | Remove `asp:`, `runat` | `OnClick` is now `EventCallback` — no `(sender, e)` signature |
 | **Calendar** | ✅ | Easy | Remove `asp:`, `runat` | `SelectionMode` is an enum — use `CalendarSelectionMode.Day` |
+| **Chart** | ✅ | Complex | Remove `asp:`, `runat` | JS interop for rendering; use `<ChartSeries>`, `<ChartArea>`, `<ChartLegend>` children |
 | **CheckBox** | ✅ | Easy | Remove `asp:`, `runat`; add `@bind-Checked` | Two-way binding requires `@bind-Checked` |
 | **CheckBoxList** | ✅ | Easy | Remove `asp:`, `runat`; bind `Items` | Same list binding pattern as DropDownList |
 | **DropDownList** | ✅ | Easy | Remove `asp:`, `runat`; bind `Items` + `@bind-SelectedValue` | Bind both the items collection and selected value |
@@ -44,6 +45,7 @@ For the full control translation rules (attribute mappings, code examples, befor
 | **HyperLink** | ✅ | Trivial | Remove `asp:`, `runat`; `~/` → `/` | URL prefix conversion is Layer 1 automated |
 | **Image** | ✅ | Trivial | Remove `asp:`, `runat`; `~/` → `/` | `ImageUrl` preserved |
 | **ImageButton** | ✅ | Trivial | Remove `asp:`, `runat`; `~/` → `/` | `OnClick` is `EventCallback` |
+| **ImageMap** | ✅ | Easy | Remove `asp:`, `runat` | Define hotspot regions via component properties |
 | **Label** | ✅ | Trivial | Remove `asp:`, `runat` | `Text`, `CssClass`, `AssociatedControlID` preserved |
 | **LinkButton** | ✅ | Trivial | Remove `asp:`, `runat` | `CommandName`/`CommandArgument` preserved |
 | **ListBox** | ✅ | Easy | Remove `asp:`, `runat`; bind `Items` | Same binding pattern as DropDownList |
@@ -54,6 +56,7 @@ For the full control translation rules (attribute mappings, code examples, befor
 | **PlaceHolder** | ✅ | Trivial | Remove `asp:`, `runat` | Renders no HTML — structural container only |
 | **RadioButton** | ✅ | Easy | Remove `asp:`, `runat` | `GroupName` preserved |
 | **RadioButtonList** | ✅ | Easy | Remove `asp:`, `runat`; bind `Items` | Same list binding pattern |
+| **Substitution** | ✅ | Easy | Remove `asp:`, `runat` | Uses `Func<HttpContext, string>` callback; renders output directly |
 | **Table** | ✅ | Easy | Remove `asp:`, `runat` | Use with `<TableRow>` and `<TableCell>` children |
 | **TextBox** | ✅ | Easy | Remove `asp:`, `runat`; add `@bind-Text` | `TextMode` preserved — note `Multiline` (not `MultiLine`) |
 | **View** | ✅ | Trivial | Remove `asp:`, `runat` | Used inside `MultiView` |
@@ -203,7 +206,7 @@ These Web Forms controls have **no BWFC equivalent**. Each requires a different 
 ## Coverage by Category — Visual Summary
 
 ```
-Editor Controls (25)     ████████████████████████████████████████ 100% covered
+Editor Controls (28)     ████████████████████████████████████████ 100% covered
 Data Controls (8)        ████████████████████████████████████████ 100% covered
 Validation Controls (7)  ████████████████████████████████████████ 100% covered
 Navigation Controls (3)  ████████████████████████████████████████ 100% covered
@@ -221,4 +224,4 @@ DataSource controls are deliberately not covered. They represent a Web Forms-spe
 - [QUICKSTART.md](QUICKSTART.md) — step-by-step migration guide
 - [METHODOLOGY.md](METHODOLOGY.md) — why these complexity ratings matter
 - [copilot-instructions-template.md](copilot-instructions-template.md) — condensed rules for Copilot
-- [Full migration skill](../.github/skills/webforms-migration/SKILL.md) — complete attribute mappings and code examples
+- [Full migration skill](skills/bwfc-migration/SKILL.md) — complete attribute mappings and code examples

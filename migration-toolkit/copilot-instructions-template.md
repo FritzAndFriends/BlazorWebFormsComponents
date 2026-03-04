@@ -13,7 +13,7 @@
   the correct transformation rules automatically.
 
   Source: BlazorWebFormsComponents migration toolkit
-  Full skill reference: https://github.com/AzimoLabs/BlazorWebFormsComponents/blob/dev/.github/skills/webforms-migration/SKILL.md
+  Full skill reference: https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/skills/bwfc-migration/SKILL.md
 -->
 
 ## Your Application Context
@@ -208,6 +208,6 @@ When Copilot encounters these attributes during migration, remove them without c
 
 ## References
 
-- [BWFC Migration Skill (full rules)](https://github.com/AzimoLabs/BlazorWebFormsComponents/blob/dev/.github/skills/webforms-migration/SKILL.md)
-- [BWFC Control Coverage](https://github.com/AzimoLabs/BlazorWebFormsComponents/blob/dev/migration-toolkit/CONTROL-COVERAGE.md)
-- [BWFC Migration Toolkit](https://github.com/AzimoLabs/BlazorWebFormsComponents/blob/dev/migration-toolkit/README.md)
+- [BWFC Migration Skill (full rules)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/skills/bwfc-migration/SKILL.md)
+- [BWFC Control Coverage](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/CONTROL-COVERAGE.md)
+- [BWFC Migration Toolkit](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/README.md)

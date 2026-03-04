@@ -89,7 +89,7 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 |---|---|
 | [**README.md**](README.md) | You are here — overview and entry point |
 | [**QUICKSTART.md**](QUICKSTART.md) | Step-by-step: scan → migrate → verify |
-| [**CONTROL-COVERAGE.md**](CONTROL-COVERAGE.md) | Full 52-component coverage table with complexity ratings |
+| [**CONTROL-COVERAGE.md**](CONTROL-COVERAGE.md) | Full 58-component coverage table with complexity ratings |
 | [**METHODOLOGY.md**](METHODOLOGY.md) | Three-layer pipeline deep-dive |
 | [**CHECKLIST.md**](CHECKLIST.md) | Per-page migration checklist template |
 | [**copilot-instructions-template.md**](copilot-instructions-template.md) | Drop-in `.github/copilot-instructions.md` for your project |
@@ -98,7 +98,7 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 
 ## What BWFC Doesn't Cover
 
-Be honest with yourself about scope. BWFC provides 52 drop-in components, but it does **not** cover:
+Be honest with yourself about scope. BWFC provides 58 drop-in components, but it does **not** cover:
 
 - **DataSource controls** — `SqlDataSource`, `ObjectDataSource`, `EntityDataSource` have no Blazor equivalents. Replace with injected services.
 - **Wizard control** — No BWFC equivalent. Implement as a multi-step Blazor component.
