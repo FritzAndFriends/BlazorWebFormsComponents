@@ -4,6 +4,7 @@ using BlazorWebFormsComponents.Validations;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -70,6 +71,19 @@ namespace BlazorWebFormsComponents
 			TextBoxMode.Week => "week",
 			_ => "text"
 		};
+
+		private async Task HandleChange(ChangeEventArgs e)
+		{
+			Text = e.Value?.ToString() ?? string.Empty;
+
+			if (CausesValidation && Coordinator != null)
+			{
+				Coordinator.ValidateGroup(ValidationGroup);
+			}
+
+			await TextChanged.InvokeAsync(Text);
+			await OnTextChanged.InvokeAsync(e);
+		}
 
 		internal Dictionary<string, object> CalculatedAttributes
 		{

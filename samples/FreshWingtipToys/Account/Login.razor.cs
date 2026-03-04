@@ -1,19 +1,28 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Identity;
 
 namespace WingtipToys.Account
 {
     public partial class Login : ComponentBase
     {
-        [Inject] private SignInManager<IdentityUser> SignInManager { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+        [SupplyParameterFromQuery(Name = "error")]
+        public string? ErrorParam { get; set; }
 
         private string email = "";
         private string password = "";
         private string errorMessage = "";
 
-        private async Task HandleLogin(MouseEventArgs args)
+        protected override void OnParametersSet()
+        {
+            if (!string.IsNullOrEmpty(ErrorParam))
+            {
+                errorMessage = ErrorParam;
+            }
+        }
+
+        private void HandleLogin(MouseEventArgs args)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -21,20 +30,9 @@ namespace WingtipToys.Account
                 return;
             }
 
-            var result = await SignInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                Navigation.NavigateTo("/", forceLoad: true);
-            }
-            else if (result.IsLockedOut)
-            {
-                Navigation.NavigateTo("/Account/Lockout");
-            }
-            else
-            {
-                errorMessage = "Invalid login attempt.";
-            }
+            // Navigate to HTTP endpoint so SignInManager can set cookies via the HTTP response
+            var loginUrl = $"/Account/PerformLogin?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}";
+            Navigation.NavigateTo(loginUrl, forceLoad: true);
         }
     }
 }

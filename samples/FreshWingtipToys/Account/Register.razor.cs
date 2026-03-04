@@ -7,7 +7,6 @@ namespace WingtipToys.Account
     public partial class Register : ComponentBase
     {
         [Inject] private UserManager<IdentityUser> UserManager { get; set; } = default!;
-        [Inject] private SignInManager<IdentityUser> SignInManager { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
 
         private string email = "";
@@ -34,8 +33,9 @@ namespace WingtipToys.Account
 
             if (result.Succeeded)
             {
-                await SignInManager.SignInAsync(user, isPersistent: false);
-                Navigation.NavigateTo("/", forceLoad: true);
+                // Navigate to HTTP endpoint so SignInManager can set cookies via the HTTP response
+                var signInUrl = $"/Account/PerformRegisterSignIn?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}";
+                Navigation.NavigateTo(signInUrl, forceLoad: true);
             }
             else
             {

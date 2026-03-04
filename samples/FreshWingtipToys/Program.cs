@@ -65,4 +65,37 @@ app.UseAntiforgery();
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();
 
+// HTTP endpoint for login — SignInManager requires an active HTTP response to set cookies,
+// which is not available inside a SignalR circuit (InteractiveServer mode).
+app.MapGet("/Account/PerformLogin", async (
+    string email,
+    string password,
+    SignInManager<IdentityUser> signInManager) =>
+{
+    var result = await signInManager.PasswordSignInAsync(email, password,
+        isPersistent: false, lockoutOnFailure: false);
+
+    if (result.Succeeded)
+        return Results.Redirect("/");
+    if (result.IsLockedOut)
+        return Results.Redirect("/Account/Lockout");
+
+    return Results.Redirect("/Account/Login?error=" + Uri.EscapeDataString("Invalid login attempt."));
+});
+
+// HTTP endpoint for post-registration sign-in
+app.MapGet("/Account/PerformRegisterSignIn", async (
+    string email,
+    string password,
+    SignInManager<IdentityUser> signInManager) =>
+{
+    var result = await signInManager.PasswordSignInAsync(email, password,
+        isPersistent: false, lockoutOnFailure: false);
+
+    if (result.Succeeded)
+        return Results.Redirect("/");
+
+    return Results.Redirect("/Account/Login");
+});
+
 app.Run();
