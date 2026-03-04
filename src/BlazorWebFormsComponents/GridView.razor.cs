@@ -80,9 +80,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<GridViewSelectEventArgs> SelectedIndexChanging { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanging.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewSelectEventArgs> OnSelectedIndexChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the selected index has changed.
 		/// </summary>
 		[Parameter] public EventCallback<int> SelectedIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanged.
+		/// </summary>
+		[Parameter] public EventCallback<int> OnSelectedIndexChanged { get; set; }
 
 		#region TableItemStyle Properties (IGridViewStyleContainer)
 
@@ -263,9 +273,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<GridViewSortEventArgs> Sorting { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for Sorting.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewSortEventArgs> OnSorting { get; set; }
+
+		/// <summary>
 		/// Fires after sort is applied
 		/// </summary>
 		[Parameter] public EventCallback<GridViewSortEventArgs> Sorted { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for Sorted.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewSortEventArgs> OnSorted { get; set; }
 
 		/// <summary>
 		/// Gets or sets whether paging is enabled.
@@ -287,8 +307,13 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		[Parameter] public EventCallback<PageChangedEventArgs> PageIndexChanged { get; set; }
 
+		/// <summary>
+		/// Web Forms migration alias for PageIndexChanged.
+		/// </summary>
+		[Parameter] public EventCallback<PageChangedEventArgs> OnPageIndexChanged { get; set; }
+
 		///<inheritdoc/>
-		public List<IColumn<ItemType>> ColumnList { get; set; } = new List<IColumn<ItemType>>();
+		public List<IColumn<ItemType>> ColumnList{ get; set; } = new List<IColumn<ItemType>>();
 
 		/// <summary>
 		/// The Rows of the GridView
@@ -327,9 +352,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<GridViewEditEventArgs> RowEditing { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for RowEditing.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewEditEventArgs> OnRowEditing { get; set; }
+
+		/// <summary>
 		/// Occurs when a row's Update button is clicked, but before the row is updated.
 		/// </summary>
 		[Parameter] public EventCallback<GridViewUpdateEventArgs> RowUpdating { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for RowUpdating.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewUpdateEventArgs> OnRowUpdating { get; set; }
 
 		/// <summary>
 		/// Occurs when a row's Delete button is clicked, but before the row is deleted.
@@ -337,9 +372,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<GridViewDeleteEventArgs> RowDeleting { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for RowDeleting.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewDeleteEventArgs> OnRowDeleting { get; set; }
+
+		/// <summary>
 		/// Occurs when a row's Cancel button is clicked, but before the row exits edit mode.
 		/// </summary>
 		[Parameter] public EventCallback<GridViewCancelEditEventArgs> RowCancelingEdit { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for RowCancelingEdit.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewCancelEditEventArgs> OnRowCancelingEdit { get; set; }
 
 		/// <summary>
 		/// Gets the total number of pages based on item count and page size.
@@ -375,7 +420,8 @@ namespace BlazorWebFormsComponents
 			var args = new PageChangedEventArgs(newPageIndex, oldPageIndex, totalPages, startRowIndex);
 
 			PageIndex = args.NewPageIndex;
-			await PageIndexChanged.InvokeAsync(args);
+			var pageIndexChangedHandler = PageIndexChanged.HasDelegate ? PageIndexChanged : OnPageIndexChanged;
+			await pageIndexChangedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 
@@ -389,12 +435,14 @@ namespace BlazorWebFormsComponents
 				: SortDirection.Ascending;
 
 			var args = new GridViewSortEventArgs(sortExpression, newDirection);
-			await Sorting.InvokeAsync(args);
+			var sortingHandler = Sorting.HasDelegate ? Sorting : OnSorting;
+			await sortingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 
 			SortExpression = args.SortExpression;
 			SortDirection = args.SortDirection;
-			await Sorted.InvokeAsync(args);
+			var sortedHandler = Sorted.HasDelegate ? Sorted : OnSorted;
+			await sortedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 
@@ -404,7 +452,8 @@ namespace BlazorWebFormsComponents
 		internal async Task EditRow(int rowIndex)
 		{
 			var args = new GridViewEditEventArgs(rowIndex);
-			await RowEditing.InvokeAsync(args);
+			var rowEditingHandler = RowEditing.HasDelegate ? RowEditing : OnRowEditing;
+			await rowEditingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			EditIndex = args.NewEditIndex;
 			StateHasChanged();
@@ -416,7 +465,8 @@ namespace BlazorWebFormsComponents
 		internal async Task UpdateRow(int rowIndex)
 		{
 			var args = new GridViewUpdateEventArgs(rowIndex);
-			await RowUpdating.InvokeAsync(args);
+			var rowUpdatingHandler = RowUpdating.HasDelegate ? RowUpdating : OnRowUpdating;
+			await rowUpdatingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			EditIndex = -1;
 			StateHasChanged();
@@ -428,7 +478,8 @@ namespace BlazorWebFormsComponents
 		internal async Task DeleteRow(int rowIndex)
 		{
 			var args = new GridViewDeleteEventArgs(rowIndex);
-			await RowDeleting.InvokeAsync(args);
+			var rowDeletingHandler = RowDeleting.HasDelegate ? RowDeleting : OnRowDeleting;
+			await rowDeletingHandler.InvokeAsync(args);
 		}
 
 		/// <summary>
@@ -437,7 +488,8 @@ namespace BlazorWebFormsComponents
 		internal async Task CancelEdit(int rowIndex)
 		{
 			var args = new GridViewCancelEditEventArgs(rowIndex);
-			await RowCancelingEdit.InvokeAsync(args);
+			var rowCancelingEditHandler = RowCancelingEdit.HasDelegate ? RowCancelingEdit : OnRowCancelingEdit;
+			await rowCancelingEditHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			EditIndex = -1;
 			StateHasChanged();
@@ -449,17 +501,19 @@ namespace BlazorWebFormsComponents
 		internal async Task SelectRow(int rowIndex)
 		{
 			var args = new GridViewSelectEventArgs(rowIndex);
-			await SelectedIndexChanging.InvokeAsync(args);
+			var selectedIndexChangingHandler = SelectedIndexChanging.HasDelegate ? SelectedIndexChanging : OnSelectedIndexChanging;
+			await selectedIndexChangingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			SelectedIndex = args.NewSelectedIndex;
-			await SelectedIndexChanged.InvokeAsync(SelectedIndex);
+			var selectedIndexChangedHandler = SelectedIndexChanged.HasDelegate ? SelectedIndexChanged : OnSelectedIndexChanged;
+			await selectedIndexChangedHandler.InvokeAsync(SelectedIndex);
 			StateHasChanged();
 		}
 
 		/// <summary>
 		/// Gets whether the auto-generated command column should be displayed.
 		/// </summary>
-		internal bool ShowCommandColumn => AutoGenerateSelectButton || RowEditing.HasDelegate || RowUpdating.HasDelegate || RowDeleting.HasDelegate || RowCancelingEdit.HasDelegate;
+		internal bool ShowCommandColumn => AutoGenerateSelectButton || RowEditing.HasDelegate || OnRowEditing.HasDelegate || RowUpdating.HasDelegate || OnRowUpdating.HasDelegate || RowDeleting.HasDelegate || OnRowDeleting.HasDelegate || RowCancelingEdit.HasDelegate || OnRowCancelingEdit.HasDelegate;
 
 		/// <summary>
 		/// Gets the total column count including the auto-generated command column.

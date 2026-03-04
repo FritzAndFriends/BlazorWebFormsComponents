@@ -154,6 +154,12 @@ namespace BlazorWebFormsComponents
 		public EventCallback<TreeNodeEventArgs> SelectedNodeChanged { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for SelectedNodeChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> OnSelectedNodeChanged { get; set; }
+
+		/// <summary>
 		/// Called by TreeNode when it is clicked to become selected.
 		/// </summary>
 		internal async Task SelectNodeAsync(TreeNode node)
@@ -168,7 +174,8 @@ namespace BlazorWebFormsComponents
 			node.Selected = true;
 			SelectedNode = node;
 
-			await SelectedNodeChanged.InvokeAsync(new TreeNodeEventArgs(node));
+			var selectedNodeChangedHandler = SelectedNodeChanged.HasDelegate ? SelectedNodeChanged : OnSelectedNodeChanged;
+			await selectedNodeChangedHandler.InvokeAsync(new TreeNodeEventArgs(node));
 			StateHasChanged();
 		}
 

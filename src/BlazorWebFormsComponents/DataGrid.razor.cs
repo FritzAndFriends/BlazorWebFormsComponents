@@ -191,9 +191,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<DataGridPageChangedEventArgs> PageIndexChanged { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for PageIndexChanged.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridPageChangedEventArgs> OnPageIndexChanged { get; set; }
+
+		/// <summary>
 		/// Fires when a sort header is clicked.
 		/// </summary>
 		[Parameter] public EventCallback<DataGridSortCommandEventArgs> SortCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SortCommand.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridSortCommandEventArgs> OnSortCommand { get; set; }
 
 		/// <summary>
 		/// Fires when an item row is created.
@@ -201,14 +211,29 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<DataGridItemEventArgs> ItemCreated { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridItemEventArgs> OnItemCreated { get; set; }
+
+		/// <summary>
 		/// Fires after an item is data-bound.
 		/// </summary>
 		[Parameter] public EventCallback<DataGridItemEventArgs> ItemDataBound { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemDataBound.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridItemEventArgs> OnItemDataBound { get; set; }
+
+		/// <summary>
 		/// Fires when the selected index changes.
 		/// </summary>
 		[Parameter] public EventCallback SelectedIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanged.
+		/// </summary>
+		[Parameter] public EventCallback OnSelectedIndexChanged { get; set; }
 
 		#endregion
 
@@ -287,7 +312,8 @@ namespace BlazorWebFormsComponents
 			if (Items == null) return;
 			CurrentPageIndex = newPageIndex;
 			var args = new DataGridPageChangedEventArgs(newPageIndex);
-			await PageIndexChanged.InvokeAsync(args);
+			var pageIndexChangedHandler = PageIndexChanged.HasDelegate ? PageIndexChanged : OnPageIndexChanged;
+			await pageIndexChangedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 
@@ -297,7 +323,8 @@ namespace BlazorWebFormsComponents
 		internal async Task Sort(string sortExpression)
 		{
 			var args = new DataGridSortCommandEventArgs(sortExpression, this);
-			await SortCommand.InvokeAsync(args);
+			var sortCommandHandler = SortCommand.HasDelegate ? SortCommand : OnSortCommand;
+			await sortCommandHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 

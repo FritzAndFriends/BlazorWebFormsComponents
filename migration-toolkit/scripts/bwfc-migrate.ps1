@@ -77,7 +77,8 @@ $StripAttributes = @(
     'ViewStateMode\s*=\s*"[^"]*"',
     'ValidateRequest\s*=\s*"(true|false)"',
     'MaintainScrollPositionOnPostBack\s*=\s*"(true|false)"',
-    'ClientIDMode\s*=\s*"[^"]*"'
+    'ClientIDMode\s*=\s*"[^"]*"',
+    'AutoPostBack\s*=\s*"(?i)(true|false)"'
 )
 
 #endregion
@@ -819,6 +820,11 @@ function Remove-WebFormsAttributes {
             # Extract a friendly name from the pattern for logging
             $friendlyName = $pattern -replace '\\s\*=\\s\*.*', '' -replace '\\s\*', ' ' -replace '\\', ''
             Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Removed $($attrMatches.Count) '$friendlyName' attribute(s)"
+
+            # Emit manual review item for AutoPostBack behavioral difference
+            if ($friendlyName -eq 'AutoPostBack') {
+                Write-ManualItem -File $RelPath -Category 'AutoPostBack' -Detail "AutoPostBack removed — in Blazor, events fire immediately on change (no postback needed). Review event handler timing if the original code relied on delayed firing."
+            }
         }
     }
 
@@ -1037,6 +1043,15 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
+
+    # Scan for event handler attributes that need code-behind signature review
+    $eventHandlerMatches = [regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')
+    if ($eventHandlerMatches.Count -gt 0) {
+        $uniqueHandlers = $eventHandlerMatches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+        $handlerList = $uniqueHandlers -join ', '
+        Write-ManualItem -File $relativePath -Category 'EventHandler' -Detail "Event handler(s) found: $handlerList — verify code-behind handler signature. Web Forms uses (object sender, EventArgs e); Blazor EventCallbacks use only the event args type (no sender parameter)."
+    }
+
     $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath
 
     # Clean up leftover blank lines from removed directives (collapse 3+ consecutive blank lines to 2)
