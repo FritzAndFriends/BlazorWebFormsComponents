@@ -132,7 +132,7 @@ nav:
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
     - NamingContainer: UtilityFeatures/NamingContainer.md
-    - PageService: UtilityFeatures/PageService.md
+    - Page System: UtilityFeatures/PageService.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
