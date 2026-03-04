@@ -98,13 +98,11 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
 Team updates: Migration report 3-level traversal (Beast). Run 5 reports need Works/Doesn't-Work sections (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC data controls preferred, migration-toolkit/ canonical (Jeff/Forge).
 
+<!-- Summarized 2026-03-04 by Scribe -- covers Run 6 script enhancements -->
+
 ### Run 6 Script Enhancements (2026-03-05)
 
-**Enhancement 1 — Scaffold TFM fix (line 139):** Changed csproj template from `net8.0` to `net10.0`. Added `@using static Microsoft.AspNetCore.Components.Web.RenderMode` and `@rendermode InteractiveServer` to _Imports.razor scaffold (lines 161-164).
+4 enhancements to bwfc-migrate.ps1: (1) TFM net8.0->net10.0 + RenderMode using (line 139), (2) SelectMethod TODO->BWFC Items guidance (-120s, line 756), (3) static files->wwwroot/ (line 1103), (4) compilable stubs for unconvertible pages (Test-UnconvertiblePage + New-CompilableStub, lines 907-988). Bug found: @rendermode InteractiveServer in _Imports.razor is invalid in .NET 10. Test-UnconvertiblePage must also scan .aspx.cs code-behind.
 
-**Enhancement 2 — BWFC-aware SelectMethod TODO (line 756):** Replaced generic service-injection TODO in `ConvertFrom-SelectMethod` with guidance to use the BWFC component's `Items` parameter and load data in `OnInitializedAsync`. Highest impact change (-120s).
-
-**Enhancement 3 — Static files wwwroot path (line 1103):** Changed static file copy destination from `$Output\$relPath` to `$Output\wwwroot\$relPath` so CSS/JS/images land under wwwroot/ as Blazor requires.
-
-**Enhancement 4 — Compilable stubs (lines 907-960, 975-988):** Added `Test-UnconvertiblePage` function detecting Identity/Auth/Payment patterns (SignInManager, UserManager, FormsAuthentication, Session[, PayPal, Checkout). Added `New-CompilableStub` to emit minimal `@page` + `@code{}` stubs. Integrated into `Convert-WebFormsFile` before the transform pipeline — unconvertible .aspx pages get stubs instead of broken partial conversions. Ensures clean build.
-� Team update (2026-03-04): Run 6 improvement analysis  decided by Forge
+Team update (2026-03-04): Run 6 improvement analysis -> decided by Forge
+Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffold is invalid in .NET 10 -- must be removed from bwfc-migrate.ps1 line 164. Also: Test-UnconvertiblePage must scan .aspx.cs code-behind files. -- decided by Forge

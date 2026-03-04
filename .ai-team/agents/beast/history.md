@@ -79,4 +79,16 @@
 
  Team update (2026-03-04): Migration standards formalized  EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation. Documentation priorities: document single-item FormView usage, document ListView Items parameter in migration context. migration-toolkit/ is canonical home.  decided by Jeffrey T. Fritz, Forge
 
-� Team update (2026-03-04): Run 6 improvement analysis  decided by Forge
+📋 Team update (2026-03-04): Run 6 improvement analysis  decided by Forge
+
+### Run 6 Benchmark Report (2026-03-04)
+
+- **Report written:** `docs/migration-tests/wingtiptoys-run6-2026-03-04/report.md` — comprehensive 9-section report matching Run 5 format with executive summary, Run 5 vs Run 6 metrics comparison, what-works/what-doesn't breakdown, enhancement impact analysis, Layer 2 fixes summary, build results (4 rounds), gap analysis (2 script bugs), and recommendations.
+- **Key data:** 55% total time reduction (Run 5 ~10 min → Run 6 ~4.5 min). Layer 2 manual time dropped 53% (440s → 205s). 4 enhancements all fired. 269 transforms, 79 static files to wwwroot/, 6 auto-stubs.
+- **Format evolution:** Run 6 report adds explicit "Script Bugs Found" table in Gaps section (separate from "Patterns That Could Be Enhanced"). This distinguishes regressions/bugs from enhancement opportunities — important for prioritizing Run 7 fixes.
+- **Transform count can decrease:** Run 6 had fewer transforms than Run 5 (269 vs 309) because auto-stubbing replaces full transforms for unconvertible pages. Reports should explain count decreases as quality improvements, not regressions.
+- **Build rounds can increase without regression:** Run 6 had 4 build rounds vs Run 5's 2, but for entirely different root causes (NuGet auth, @rendermode bug). Reports should contextualize build round counts with root cause analysis.
+- **Highest-impact enhancement pattern:** SelectMethod BWFC-aware guidance changed the migration *approach* (preserve components vs replace with HTML), not just the speed. Enhancement impact sections should capture qualitative shifts, not just time savings.
+
+ Team update (2026-03-04): Run 6 benchmark validates all migration-standards SKILL.md patterns. 32 Web Forms files  clean Blazor build in ~4.5 min (55% reduction from Run 5). 2 script bugs identified: @rendermode in _Imports.razor, stub detection misses code-behind.  decided by Forge
+

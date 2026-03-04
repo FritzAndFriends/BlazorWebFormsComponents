@@ -5822,3 +5822,22 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 **Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
 
+
+
+### 2026-03-04: Remove @rendermode InteractiveServer from _Imports.razor scaffold
+
+**By:** Forge
+**What:** Line 164 of `bwfc-migrate.ps1` emits `@rendermode InteractiveServer` in the scaffolded `_Imports.razor`. This is invalid in .NET 10 — `@rendermode` is not a valid directive for component imports files. Remove line 164 from the `$importsContent` here-string in `New-ProjectScaffold`. The render mode is already correctly set on `<Routes>` and `<HeadOutlet>` in App.razor.
+**Why:** Caused 4 build errors in Run 6 (RZ10003, CS0103 × 2, RZ10024). Every migration run will hit this. Supersedes the `@rendermode InteractiveServer` addition from the Run 6 Script Enhancements decision.
+
+### 2026-03-04: Scan code-behind files for unconvertible patterns
+
+**By:** Forge
+**What:** `Test-UnconvertiblePage` must also check the corresponding `.aspx.cs` code-behind file content for unconvertible patterns (SignInManager, UserManager, etc.), not just `.aspx` markup. 15 Account pages were not auto-stubbed because their Identity references were only in code-behind.
+**Why:** Manual stubbing took ~15s per run. Every migration with Identity pages will hit this gap.
+
+### 2026-03-04: Run 6 validates migration-standards SKILL.md patterns
+
+**By:** Forge
+**What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
+**Why:** These patterns should be considered validated for external migration guidance.

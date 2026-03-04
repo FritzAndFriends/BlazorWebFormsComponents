@@ -81,22 +81,15 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 
 **Run 5 BWFC analysis:** 95+ EventCallbacks across 30+ components matching Web Forms names. 3 of 4 top manual rewrites unnecessary -- BWFC already had ListView, FormView, GridView. 40% estimated reduction if scripts preserve BWFC data controls. Gaps: Repeater has zero EventCallbacks, GridView missing OnRowDataBound/OnRowCreated. SelectMethod TODOs need `Items=@data` guidance. Deliverables: analysis-and-recommendations.md, migration-standards SKILL.md, forge-run5-standards decision.
 
-### Run 6 Improvement Analysis (2026-03-05)
+<!-- Summarized 2026-03-04 by Scribe — covers Run 6 analysis and benchmark execution -->
 
-**Run 5→6 delta analysis completed.** 8 concrete script enhancements identified from Run 5 manual-fixes.md breakdown. Key findings:
+### Run 5→6 Analysis & Run 6 Benchmark (2026-03-04 through 2026-03-05)
 
-1. **Scaffold uses net8.0** — violates migration-standards SKILL.md directive for net10.0 (line 139 of bwfc-migrate.ps1). Caused build fix round 2 (InteractiveServer import missing).
-2. **Static files not copied to wwwroot/** — script copies to project root; manual-fixes.md §10 shows all static assets had to be manually relocated. Script has zero wwwroot references.
-3. **SelectMethod TODO text doesn't mention BWFC Items parameter** — ConvertFrom-SelectMethod (line 740-763) emits generic "inject a service" guidance, not "use Items=@data on the BWFC component". This caused Layer 2 developers to replace ListView/FormView/GridView with raw HTML (~180s of unnecessary work).
-4. **No Page.Title conversion** — 4+ instances required manual fix (manual-fixes.md §8). BWFC provides PageService + Page component.
-5. **No page base class swap** — `: Page` → `: ComponentBase` in code-behinds not handled.
-6. **No stub generation** — 28 files manually stubbed (60s). Script could emit compilable stubs for pages with unconverted code-behinds.
-7. **No BundleConfig→link tag conversion** — 2+ CSS bundles required manual App.razor edits.
-8. **Repeater confirmed zero EventCallbacks** — grep verified. GridView has 10 EventCallbacks but missing OnRowDataBound/OnRowCreated.
+**Run 5→6 analysis:** 8 enhancements identified from Run 5 manual-fixes.md. Top 4 implemented: TFM net10.0, SelectMethod BWFC-aware TODO (-120s), wwwroot static file copy, compilable stubs. Remaining 4 deferred: Page.Title, base class swap, BundleConfig, event handler annotations. Repeater has zero EventCallbacks; GridView missing OnRowDataBound/OnRowCreated.
 
-**Projected Run 6:** ~4.5 min total (vs Run 5's ~10 min) if all 8 enhancements implemented. ~55% improvement. Layer 2 manual time drops from ~440s to ~225s. Architectural work (EF Core, Identity, Session→DI, business logic) remains inherently manual at ~165s.
+**Run 6 benchmark:** 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5). Layer 1: 4.58s, 269 transforms, 79 static files, 6 auto-stubs. Layer 2: ~3m 25s manual (models, DbContext, services, layout). 4 builds to clean. All 4 enhancements validated. Bugs: @rendermode InteractiveServer invalid in _Imports.razor (line 164), Test-UnconvertiblePage misses code-behind (.aspx.cs). Report: docs/migration-tests/wingtiptoys-run6-2026-03-04/raw-data.md.
 
-**Decision written:** forge-run6-improvements.md in decisions/inbox — 8 prioritized enhancements with effort/impact ratings.
+Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (Jeff/Forge), migration report 3-level traversal (Beast).
 
-Team updates: GetRouteUrl overloads completed (Cyclops). Migration report 3-level traversal (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation, migration-toolkit/ canonical (Jeff/Forge).
-� Team update (2026-03-04): Run 6 improvement analysis  decided by Forge
+ Team update (2026-03-04): Run 6 benchmark decisions merged  @rendermode removal, code-behind scanning, pattern validation. All decisions propagated to Cyclops and Beast.  decided by Forge
+
