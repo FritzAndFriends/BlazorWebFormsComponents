@@ -521,11 +521,11 @@ function ConvertFrom-MasterPage {
     $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
 
     # 5. Flag items needing Layer 2 attention
-    if ($Content -match '<asp:LoginView') {
-        Write-ManualItem -File $RelPath -Category 'LoginView' -Detail 'LoginView requires conversion to AuthorizeView with Authorized/NotAuthorized templates'
+    if ($Content -match '<RoleGroups>') {
+        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
     }
     if ($Content -match 'SelectMethod\s*=') {
-        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod requires manual data-binding conversion (OnInitializedAsync)'
+        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod detected — will be auto-converted to TODO annotation by ConvertFrom-SelectMethod'
     }
 
     # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
@@ -606,6 +606,146 @@ function ConvertFrom-Expressions {
     $remainingMatches = $remainingRegex.Matches($Content)
     foreach ($m in $remainingMatches) {
         Write-ManualItem -File $RelPath -Category 'CodeBlock' -Detail "Unconverted code block: $($m.Value.Substring(0, [Math]::Min(80, $m.Value.Length)))"
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- LoginView Conversion ---
+
+function ConvertFrom-LoginView {
+    param([string]$Content, [string]$RelPath)
+
+    # Flag <RoleGroups> as manual — too complex for regex
+    if ($Content -match '<RoleGroups>') {
+        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
+    }
+
+    # <asp:LoginView ...> → <AuthorizeView> (strip all attributes)
+    $openRegex = [regex]'(?i)<asp:LoginView\b[^>]*>'
+    $openMatches = $openRegex.Matches($Content)
+    if ($openMatches.Count -gt 0) {
+        $Content = $openRegex.Replace($Content, '<AuthorizeView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <AuthorizeView>"
+    }
+
+    # </asp:LoginView> → </AuthorizeView>
+    $closeRegex = [regex]'(?i)</asp:LoginView\s*>'
+    $closeMatches = $closeRegex.Matches($Content)
+    if ($closeMatches.Count -gt 0) {
+        $Content = $closeRegex.Replace($Content, '</AuthorizeView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($closeMatches.Count) </asp:LoginView> to </AuthorizeView>"
+    }
+
+    # <AnonymousTemplate> → <NotAuthorized>
+    $anonOpenRegex = [regex]'(?i)<AnonymousTemplate\s*>'
+    $anonOpenMatches = $anonOpenRegex.Matches($Content)
+    if ($anonOpenMatches.Count -gt 0) {
+        $Content = $anonOpenRegex.Replace($Content, '<NotAuthorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonOpenMatches.Count) <AnonymousTemplate> to <NotAuthorized>"
+    }
+
+    # </AnonymousTemplate> → </NotAuthorized>
+    $anonCloseRegex = [regex]'(?i)</AnonymousTemplate\s*>'
+    $anonCloseMatches = $anonCloseRegex.Matches($Content)
+    if ($anonCloseMatches.Count -gt 0) {
+        $Content = $anonCloseRegex.Replace($Content, '</NotAuthorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonCloseMatches.Count) </AnonymousTemplate> to </NotAuthorized>"
+    }
+
+    # <LoggedInTemplate> → <Authorized>
+    $loggedOpenRegex = [regex]'(?i)<LoggedInTemplate\s*>'
+    $loggedOpenMatches = $loggedOpenRegex.Matches($Content)
+    if ($loggedOpenMatches.Count -gt 0) {
+        $Content = $loggedOpenRegex.Replace($Content, '<Authorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedOpenMatches.Count) <LoggedInTemplate> to <Authorized>"
+    }
+
+    # </LoggedInTemplate> → </Authorized>
+    $loggedCloseRegex = [regex]'(?i)</LoggedInTemplate\s*>'
+    $loggedCloseMatches = $loggedCloseRegex.Matches($Content)
+    if ($loggedCloseMatches.Count -gt 0) {
+        $Content = $loggedCloseRegex.Replace($Content, '</Authorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedCloseMatches.Count) </LoggedInTemplate> to </Authorized>"
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- GetRouteUrl Conversion ---
+
+function ConvertFrom-GetRouteUrl {
+    param([string]$Content, [string]$RelPath)
+
+    $transformed = $false
+
+    # Page.GetRouteUrl( → GetRouteUrlHelper.GetRouteUrl(
+    $pageRouteRegex = [regex]'Page\.GetRouteUrl\s*\('
+    $pageRouteMatches = $pageRouteRegex.Matches($Content)
+    if ($pageRouteMatches.Count -gt 0) {
+        $Content = $pageRouteRegex.Replace($Content, 'GetRouteUrlHelper.GetRouteUrl(')
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($pageRouteMatches.Count) Page.GetRouteUrl() to GetRouteUrlHelper.GetRouteUrl()"
+        $transformed = $true
+    }
+
+    # Standalone GetRouteUrl( (not already prefixed with Helper.) → GetRouteUrlHelper.GetRouteUrl(
+    $standaloneRegex = [regex]'(?<![\w.])GetRouteUrl\s*\('
+    $standaloneMatches = $standaloneRegex.Matches($Content)
+    if ($standaloneMatches.Count -gt 0) {
+        $Content = $standaloneRegex.Replace($Content, 'GetRouteUrlHelper.GetRouteUrl(')
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($standaloneMatches.Count) GetRouteUrl() to GetRouteUrlHelper.GetRouteUrl()"
+        $transformed = $true
+    }
+
+    # Inside route value arguments, convert Eval("Prop") to context.Prop
+    $evalInRouteRegex = [regex]'Eval\("(\w+)"\)'
+    $evalInRouteMatches = $evalInRouteRegex.Matches($Content)
+    if ($evalInRouteMatches.Count -gt 0) {
+        $Content = $evalInRouteRegex.Replace($Content, 'context.$1')
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($evalInRouteMatches.Count) Eval() in route values to context.Property"
+    }
+
+    # Flag RouteValueDictionary usage as manual
+    if ($Content -match 'RouteValueDictionary') {
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'RouteValueDictionary usage detected — works but consider simplifying to anonymous object'
+    }
+
+    # Note the required @inject directive
+    if ($transformed) {
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'Add @inject GetRouteUrlHelper GetRouteUrlHelper at the top of the file'
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- SelectMethod Conversion ---
+
+function ConvertFrom-SelectMethod {
+    param([string]$Content, [string]$RelPath)
+
+    # Match SelectMethod="MethodName" in any tag, capture the method name and insert a TODO after the tag
+    $selectMethodRegex = [regex]'(?si)(<[^>]*?)\s+SelectMethod\s*=\s*"([^"]+)"([^>]*>)'
+    $selectMethodMatches = $selectMethodRegex.Matches($Content)
+    if ($selectMethodMatches.Count -gt 0) {
+        $Content = $selectMethodRegex.Replace($Content, {
+            param($m)
+            $tagBeforeAttr = $m.Groups[1].Value
+            $methodName = $m.Groups[2].Value
+            $tagAfterAttr = $m.Groups[3].Value
+            $serviceName = 'I' + $methodName.TrimStart('Get') + 'Service'
+            $varName = ($methodName.TrimStart('Get')).Substring(0,1).ToLower() + ($methodName.TrimStart('Get')).Substring(1) + 'Service'
+            "${tagBeforeAttr}${tagAfterAttr}`n@* TODO: SelectMethod=""${methodName}"" removed — inject a service that provides this data:`n   @inject ${serviceName} ${varName}`n   Then in @code { ... OnInitializedAsync() { items = await ${varName}.${methodName}(); } }`n*@"
+        })
+        Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Converted $($selectMethodMatches.Count) SelectMethod attribute(s) to TODO annotations"
+        foreach ($m in $selectMethodMatches) {
+            Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail "SelectMethod='$($m.Groups[2].Value)' removed — needs service injection and OnInitializedAsync data loading"
+        }
     }
 
     return $Content
@@ -794,7 +934,10 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-RegisterDirective -Content $content -RelPath $relativePath
     $content = ConvertFrom-ContentWrappers -Content $content -RelPath $relativePath
     $content = ConvertFrom-FormWrapper -Content $content -RelPath $relativePath
+    $content = ConvertFrom-GetRouteUrl -Content $content -RelPath $relativePath
     $content = ConvertFrom-Expressions -Content $content -RelPath $relativePath
+    $content = ConvertFrom-LoginView -Content $content -RelPath $relativePath
+    $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
     $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath
