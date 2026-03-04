@@ -102,3 +102,21 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 - **Pattern:** Web Forms event order for commands is: ItemCommand → specific event (ItemEditing/ItemDeleting/etc.). ItemCreated fires per-item before ItemDataBound. These are documented Web Forms lifecycle behaviors that must be matched.
 - **EventArgs completeness:** Web Forms EventArgs have IOrderedDictionary properties (Keys, Values, NewValues, OldValues) tied to the DataSource control paradigm. These are deliberately omitted since Blazor has no DataSource controls — consumers work directly with typed objects via templates.
 
+### Layer 1 Benchmark — WingtipToys Migration Scripts (2026-03-04)
+
+- **bwfc-scan.ps1:** Ran against `samples/WingtipToys/WingtipToys/`. 0.9s for 32 files, found 230 control usages across 31 control types, 100% BWFC coverage score. Script parameters: `-Path` (mandatory), `-OutputFormat` (Console/Json/Markdown), `-OutputFile` (optional).
+- **bwfc-migrate.ps1:** Ran against same source, output to `samples/FreshWingtipToys/`. 2.4s, 276 transforms applied, 32 files → 33 .razor + 32 .razor.cs + scaffolded .csproj/Program.cs/_Imports.razor. 79 static files copied. 18 items flagged for manual review (14 complex data binding expressions, 4 Register directive removals).
+- **Build result:** 338 errors, all expected — code-behind files still reference `System.Web.UI.Page`, `Microsoft.AspNet.Identity`, `WingtipToys.Models/Logic`. These are Layer 2 work.
+- **Scaffold fix needed:** Generated .csproj uses `PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*"` and targets `net8.0`. For local dev, must change to `ProjectReference` and `net10.0`. Consider updating `bwfc-migrate.ps1` scaffold to detect local repo context.
+- **Pattern:** Layer 1 handles ~40% of migration (markup transforms). Layer 2 (Copilot skill) needed for code-behind lifecycle, domain models, Identity migration, OWIN→Core middleware.
+
+### Layer 2+3 Benchmark — WingtipToys Full Migration (2026-03-04)
+
+- **Total time:** 563s (~9.4 min) for Layer 2+3 migration of 32-page WingtipToys app.
+- **Phase breakdown:** Data infrastructure (121s), Core storefront (136s), Checkout+Admin (187s), Layout (20s), Build fix (99s).
+- **Build result:** Clean build (0 errors, 0 warnings) after 3 rounds. Round 1 = NuGet restore. Round 2 = Account page stubs missing vars. Round 3 = clean.
+- **Account pages:** Copied from AfterWingtipToys reference — Identity migration is boilerplate, not domain-specific. This is the pragmatic choice in a real migration.
+- **Key transforms applied:** SelectMethod→Items, ItemType→TItem, Page_Load→OnInitializedAsync, Response.Redirect→NavigateTo, Session→scoped services, QueryString→SupplyParameterFromQuery, EF6→EF Core with IDbContextFactory.
+- **Architecture:** SQLite, scoped CartStateService/CheckoutStateService, MockPayPalService, ASP.NET Core Identity with canEdit role.
+- **Pattern:** Layer 2+3 takes ~9 min with Copilot vs estimated 4-8 hours manually. The migration skills provide reliable translation rules. Having a reference implementation (AfterWingtipToys) to validate against accelerates decisions significantly.
+

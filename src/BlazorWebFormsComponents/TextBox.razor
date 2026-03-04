@@ -4,10 +4,10 @@
 {
 	@if (TextMode == TextBoxMode.MultiLine)
 	{
-		<textarea @attributes="CalculatedAttributes">@Text</textarea>
+		<textarea @attributes="CalculatedAttributes" @onchange="HandleChange">@Text</textarea>
 	}
 	else
 	{
-		<input type="@CalculatedType" value="@Text" @attributes="CalculatedAttributes" />
+		<input type="@CalculatedType" value="@Text" @attributes="CalculatedAttributes" @onchange="HandleChange" />
 	}
 }

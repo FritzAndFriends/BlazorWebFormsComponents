@@ -17,7 +17,7 @@ BlazorWebFormsComponents is an open-source library that provides **drop-in Blazo
 
 - **NuGet Package:** <https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents>
 - **GitHub Repository:** <https://github.com/FritzAndFriends/BlazorWebFormsComponents>
-- **52 components** across 7 categories
+- **58 components** across 6 categories
 - **Same HTML output** — existing CSS and JavaScript continue to work
 
 > **Core Principle:** Strip `asp:` and `runat="server"`, keep everything else, and it just works.
@@ -539,11 +539,11 @@ Include during migration to prevent errors, remove when stable.
 
 ## Component Coverage Summary
 
-**52 components** across 7 categories:
+**58 components** across 6 categories:
 
 | Category | Count | Components |
 |----------|-------|-----------|
-| **Editor Controls** | 25 | AdRotator, BulletedList, Button, Calendar, CheckBox, CheckBoxList, DropDownList, FileUpload, HiddenField, HyperLink, Image, ImageButton, Label, LinkButton, ListBox, Literal, Localize, MultiView, Panel, PlaceHolder, RadioButton, RadioButtonList, Table, TextBox, View |
+| **Editor Controls** | 28 | AdRotator, BulletedList, Button, Calendar, Chart, CheckBox, CheckBoxList, DropDownList, FileUpload, HiddenField, HyperLink, Image, ImageButton, ImageMap, Label, LinkButton, ListBox, Literal, Localize, MultiView, Panel, PlaceHolder, RadioButton, RadioButtonList, Substitution, Table, TextBox, View |
 | **Data Controls** | 8 | DataGrid, DataList, DataPager, DetailsView, FormView, GridView, ListView, Repeater |
 | **Validation** | 7 | CompareValidator, CustomValidator, ModelErrorMessage, RangeValidator, RegularExpressionValidator, RequiredFieldValidator, ValidationSummary |
 | **Navigation** | 3 | Menu, SiteMapPath, TreeView |

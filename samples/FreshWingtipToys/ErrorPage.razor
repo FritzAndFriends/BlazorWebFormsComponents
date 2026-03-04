@@ -1,0 +1,26 @@
+@page "/ErrorPage"
+<h2>Error:</h2>
+    <p></p>
+    <Label ID="FriendlyErrorMsg" Text="@FriendlyMessage" Font-Size="Large" style="color: red"></Label>
+
+    <Panel ID="DetailedErrorPanel" Visible="@ShowDetail">
+        <p>&nbsp;</p>
+        <h4>Detailed Error:</h4>
+        <p>
+            <Label ID="ErrorDetailedMsg" Text="@DetailMessage" Font-Size="Small" /><br />
+        </p>
+
+        <h4>Error Handler:</h4>
+        <p>
+            <Label ID="ErrorHandler" Text="@HandlerMessage" Font-Size="Small" /><br />
+        </p>
+
+        <h4>Detailed Error Message:</h4>
+        <p>
+            <Label ID="InnerMessage" Text="@InnerMessage" Font-Size="Small" /><br />
+        </p>
+        <p>
+            <Label ID="InnerTrace"  />
+        </p>
+    </Panel>
+

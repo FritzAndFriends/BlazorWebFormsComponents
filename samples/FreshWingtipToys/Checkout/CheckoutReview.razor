@@ -1,0 +1,53 @@
+@page "/CheckoutReview"
+@rendermode InteractiveServer
+@inject WingtipToys.Services.CheckoutStateService CheckoutState
+@inject WingtipToys.Services.CartStateService CartService
+@inject WingtipToys.Services.IPayPalService PayPalService
+@inject NavigationManager Navigation
+
+<h1>Order Review</h1>
+<p></p>
+
+@if (_order != null)
+{
+    <h3 style="padding-left: 33px">Products:</h3>
+    <table class="table table-bordered" style="width:500px">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Price (each)</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in _order.OrderDetails)
+            {
+                <tr>
+                    <td>@detail.ProductId</td>
+                    <td>@detail.Product?.ProductName</td>
+                    <td>@detail.UnitPrice.ToString("C")</td>
+                    <td>@detail.Quantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        <h3>Shipping Address:</h3>
+        <br />
+        <span>@_order.FirstName @_order.LastName</span><br />
+        <span>@_order.Address</span><br />
+        <span>@_order.City @_order.State @_order.PostalCode</span>
+        <p></p>
+        <h3>Order Total:</h3>
+        <br />
+        <span>@_order.Total.ToString("C")</span>
+    </div>
+    <p></p>
+    <hr />
+    <Button ID="CheckoutConfirm" Text="Complete Order" OnClick="CompleteOrder_Click" />
+}
+else
+{
+    <p>No order found. Please <a href="/ShoppingCart">return to your cart</a>.</p>
+}

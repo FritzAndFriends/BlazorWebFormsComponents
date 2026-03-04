@@ -1,0 +1,22 @@
+@page "/ProductDetails"
+<div>
+    <h1>@SampleProduct.ProductName</h1>
+</div>
+<br />
+<table>
+    <tr>
+        <td>
+            <img src="/Images/Products/@SampleProduct.ImagePath" style="border:solid; height:300px" alt="@SampleProduct.ProductName"/>
+        </td>
+        <td>&nbsp;</td>  
+        <td style="vertical-align: top; text-align:left;">
+            <b>Description:</b><br />@SampleProduct.Description
+            <br />
+            <span><b>Price:</b>&nbsp;@($"{SampleProduct.UnitPrice:c}")</span>
+            <br />
+            <span><b>Product Number:</b>&nbsp;@SampleProduct.ProductID</span>
+            <br />
+        </td>
+    </tr>
+</table>
+
