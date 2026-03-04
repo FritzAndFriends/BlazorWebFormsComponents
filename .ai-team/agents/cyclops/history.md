@@ -59,64 +59,35 @@ Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by 
 Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
  Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
 
-<!--  Summarized 2026-03-03 by Scribe  covers M20 theming through CSS fixes -->
 
-### M20 Theming, Release & WingtipToys Context (2026-03-01 through 2026-03-03)
+<!-- Summarized 2026-03-04 by Scribe  covers M20 theming through Layer 2+3 benchmark -->
 
-**Issue #366 theme wiring:** CascadingParameter ThemeConfiguration moved to BaseWebFormsComponent (named CascadedTheme). ApplySkin>ApplyThemeSkin (virtual override chain). ThemeProvider uses @inherits ComponentBase. WebFormsPage cascades Theme ?? CascadedTheme. Lesson: _Imports.razor @inherits affects ALL .razor files.
+### M20 Theming through Migration Benchmarks (2026-03-01 through 2026-03-04)
 
-**FontInfo auto-sync:** Name/Names backing-field properties with bidirectional sync. ApplyThemeSkin guards both Font.Name AND Font.Names. Lesson: paired Web Forms properties must replicate sync behavior.
+**Theme wiring (#366):** CascadingParameter ThemeConfiguration on BaseWebFormsComponent (named CascadedTheme). ApplySkin>ApplyThemeSkin virtual chain. _Imports.razor @inherits affects ALL .razor files. FontInfo auto-sync (Name/Names bidirectional). WebFormsPage cascades Theme ?? CascadedTheme.
 
-**Unified release.yml:** Single workflow on release:published. Version from tag_name. NuGet override: -p:PackageVersion + -p:Version. version.json 3-segment SemVer. deploy-server-side.yml/nuget.yml to workflow_dispatch-only.
+**Unified release.yml:** Single workflow on release:published. Version from tag_name. NuGet -p:PackageVersion + -p:Version. version.json 3-segment SemVer. Old workflows to workflow_dispatch-only.
 
-**Issue #406 ListView EditItemTemplate:** (1) Closure bug: moved template selection before CascadingValue. (2) Diffing bug: added @key. Lessons: @key in loops with template switching; never reference loop-external mutable vars in ChildContent.
+**ListView fixes:** #406 EditItemTemplate  closure bug + @key diffing fix. #356 CRUD events  ItemCreated changed to fire per-item with ListViewItemEventArgs, ItemCommand fires for ALL commands before specific handlers. Web Forms event order: ItemCommand then specific event. EventArgs gained IOrderedDictionary properties (Keys, Values, OldValues, NewValues).
 
-**FormView RenderOuterTable:** [Parameter] bool RenderOuterTable=true. When false, suppresses table wrapper/header/footer/pager. Driven by WingtipToys ProductDetails.aspx.
+**FormView RenderOuterTable:** [Parameter] bool, suppresses table wrapper when false.
 
-**Original WingtipToys build:** Connection strings v11.0 to MSSQLLocalDB. Empty Directory.Build.props blocks NBGV. `nuget install` for packages.config. IIS Express port 5200.
+**WingtipToys CSS fixes:** 7 visual fixes (Cerulean theme, 4-column grid, BoundField currency, Trucks category, Site.css, bootstrap-theme gradients). Lessons: Playwright blocks file://, use HTTP; Get-NetTCPConnection for detached process PID cleanup.
 
-**CSS fixes screenshot refresh (2026-03-03):** 7 visual fixes applied (Cerulean theme, 4-column grid, BoundField currency, Trucks category, Site.css, category IDs). 6 screenshots updated. Lessons: Playwright blocks file:// -- serve via HTTP; verify visual requirements before capturing; detached dotnet run needs Get-NetTCPConnection for PID cleanup.
+**Layer 1 Benchmark:** bwfc-scan.ps1  0.9s, 32 files, 230 controls, 100% coverage. bwfc-migrate.ps1  2.4s, 276 transforms, 33 .razor + 32 .razor.cs, 18 manual items. 338 build errors (all code-behind). Scaffold fix needed: net8.0 to net10.0, PackageReference to ProjectReference for local dev.
 
-📌 Team update (2026-03-02): Skins & Themes roadmap — 3 waves, 15 WIs — decided by Forge
-📌 Team updates (2026-03-02): M22 planned (Forge), project reframed as migration system (Jeff), FormView RenderOuterTable resolved (Cyclops), ModelErrorMessage 29/29 coverage (Forge), WingtipToys pipeline validated — 28/29 controls covered.
-📌 Team update (2026-03-03): WingtipToys CSS fidelity — 7 visual differences identified requiring fixes (Cerulean theme, 4-column grid, BoundField bug, Trucks category, Site.css, category IDs) — decided by Forge
-<!-- Note: M20 Theming & Release Process summary (2026-03-02) removed — superseded by M20 Theming, Release & WingtipToys Context above -->
-### Issue #406 — ListView EditItemTemplate Not Rendering (2026-03-02)
-<!-- Archived 2026-03-03 by Scribe — M20 theming + release detail moved to summary above -->
+**Layer 2+3 Benchmark:** 563s (~9.4 min) total. Clean build after 3 rounds. Account pages copied from reference. Key transforms: SelectMethod to Items, Page_Load to OnInitializedAsync, Session to scoped services, EF6 to EF Core. ~9 min with Copilot vs 4-8 hours manual.
 
+### Key Team Updates (2026-03-02 through 2026-03-04)
 
+- Skins & Themes roadmap: 3 waves, 15 WIs (Forge)
+- Project reframed as migration system (Jeff), M22 planned (Forge)
+- FormView RenderOuterTable resolved, ModelErrorMessage 29/29 coverage
+- WingtipToys CSS fidelity: 7 fixes identified (Forge)
+- Themes (#369) last  ListView CRUD first, WingtipToys second (Jeff)
+- WingtipToys 7-phase schedule: 26 work items (Forge)
+- ListView CRUD test conventions: 43 tests (Rogue)
 
- Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz
-
-
- Team update (2026-03-03): WingtipToys 7-phase feature schedule established  26 work items, critical path through Data Foundation  Product Browsing  Shopping Cart  Checkout  Polish  decided by Forge
-
-
- Team update (2026-03-03): ListView CRUD test conventions established  43 tests, event ordering via List<string>, cancellation assertions, bUnit double-render handling  decided by Rogue
-
-### ListView CRUD Events — Correctness Fixes (2026-03-03)
-
-- **Issue #356 audit:** All 16 CRUD events were already declared (EventCallback parameters + EventArgs classes + HandleCommand routing) from M7 and M21. The issue was open because the work was done incrementally across milestones.
-- **Bug 1 — ItemCreated firing wrong:** Was `EventCallback` (no type param) firing once in `OnAfterRenderAsync(firstRender)`. Web Forms fires `ItemCreated` with `ListViewItemEventArgs` per-item during data binding, BEFORE `ItemDataBound`. Fixed: changed to `EventCallback<ListViewItemEventArgs>`, added `RaiseItemCreated()` helper, wired per-item in both non-grouped and grouped rendering paths in ListView.razor.
-- **Bug 2 — ItemCommand not firing for known commands:** Was only firing for unknown commands (in `default` case of switch). Web Forms fires `ItemCommand` for ALL commands first, then routes to the specific handler (ItemEditing, ItemDeleting, etc.). Fixed: moved `ItemCommand.InvokeAsync()` before the switch statement.
-- **Pattern:** Web Forms event order for commands is: ItemCommand → specific event (ItemEditing/ItemDeleting/etc.). ItemCreated fires per-item before ItemDataBound. These are documented Web Forms lifecycle behaviors that must be matched.
-- **EventArgs completeness:** Web Forms EventArgs have IOrderedDictionary properties (Keys, Values, NewValues, OldValues) tied to the DataSource control paradigm. These are deliberately omitted since Blazor has no DataSource controls — consumers work directly with typed objects via templates.
-
-### Layer 1 Benchmark — WingtipToys Migration Scripts (2026-03-04)
-
-- **bwfc-scan.ps1:** Ran against `samples/WingtipToys/WingtipToys/`. 0.9s for 32 files, found 230 control usages across 31 control types, 100% BWFC coverage score. Script parameters: `-Path` (mandatory), `-OutputFormat` (Console/Json/Markdown), `-OutputFile` (optional).
-- **bwfc-migrate.ps1:** Ran against same source, output to `samples/FreshWingtipToys/`. 2.4s, 276 transforms applied, 32 files → 33 .razor + 32 .razor.cs + scaffolded .csproj/Program.cs/_Imports.razor. 79 static files copied. 18 items flagged for manual review (14 complex data binding expressions, 4 Register directive removals).
-- **Build result:** 338 errors, all expected — code-behind files still reference `System.Web.UI.Page`, `Microsoft.AspNet.Identity`, `WingtipToys.Models/Logic`. These are Layer 2 work.
-- **Scaffold fix needed:** Generated .csproj uses `PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*"` and targets `net8.0`. For local dev, must change to `ProjectReference` and `net10.0`. Consider updating `bwfc-migrate.ps1` scaffold to detect local repo context.
-- **Pattern:** Layer 1 handles ~40% of migration (markup transforms). Layer 2 (Copilot skill) needed for code-behind lifecycle, domain models, Identity migration, OWIN→Core middleware.
-
-### Layer 2+3 Benchmark — WingtipToys Full Migration (2026-03-04)
-
-- **Total time:** 563s (~9.4 min) for Layer 2+3 migration of 32-page WingtipToys app.
-- **Phase breakdown:** Data infrastructure (121s), Core storefront (136s), Checkout+Admin (187s), Layout (20s), Build fix (99s).
-- **Build result:** Clean build (0 errors, 0 warnings) after 3 rounds. Round 1 = NuGet restore. Round 2 = Account page stubs missing vars. Round 3 = clean.
-- **Account pages:** Copied from AfterWingtipToys reference — Identity migration is boilerplate, not domain-specific. This is the pragmatic choice in a real migration.
-- **Key transforms applied:** SelectMethod→Items, ItemType→TItem, Page_Load→OnInitializedAsync, Response.Redirect→NavigateTo, Session→scoped services, QueryString→SupplyParameterFromQuery, EF6→EF Core with IDbContextFactory.
-- **Architecture:** SQLite, scoped CartStateService/CheckoutStateService, MockPayPalService, ASP.NET Core Identity with canEdit role.
-- **Pattern:** Layer 2+3 takes ~9 min with Copilot vs estimated 4-8 hours manually. The migration skills provide reliable translation rules. Having a reference implementation (AfterWingtipToys) to validate against accelerates decisions significantly.
-
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
+ Team update (2026-03-04): Migration Run 2  11/11 features pass, PR #418 fixes confirmed critical, toolkit ready for docs  decided by Forge
+ Team update (2026-03-04): Migration toolkit restructured into self-contained migration-toolkit/ package  decided by Jeffrey T. Fritz, Forge

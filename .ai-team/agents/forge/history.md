@@ -80,61 +80,26 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 
 ### CSS Fidelity & WingtipToys Schedule Summary (2026-03-02 through 2026-03-03)
 
-**WingtipToys CSS fidelity audit:** 7 visual differences found between original (:5200) and migrated (:5201). Critical: wrong Bootstrap theme (stock vs Bootswatch Cerulean), single-column product grid (missing GroupItemCount="4"). Also: missing Trucks category, Site.css not loaded, BoundField DataFormatString bug (premature .ToString()), bootstrap-theme.min.css gradients. Key files: `samples/WingtipToys/WingtipToys/Content/bootstrap.css` (Cerulean v3.2.0), `samples/AfterWingtipToys/Components/App.razor`, `src/BlazorWebFormsComponents/BoundField.razor.cs:48`.
+**WingtipToys CSS fidelity audit:** 7 visual differences — wrong Bootstrap theme (Cerulean), single-column grid, missing Trucks category, Site.css not loaded, BoundField DataFormatString bug, bootstrap-theme gradients.
 
-**M22 planning:** 12 work items, 4 waves for Copilot-Led Migration Showcase. 57 controls (51 functional, 6 stubs). All 16 core demo controls ready. Skins & AJAX Toolkit OUT. ListView EditItemTemplate bug (#406) IN.
+**M22 planning:** 12 work items, 4 waves. 57 controls ready. Skins & AJAX Toolkit OUT. ListView #406 IN.
 
-**WingtipToys migration analysis:** 15+ pages, 22 controls, 100% BWFC coverage. FormView RenderOuterTable was only blocking gap (resolved). Architecture: LayoutComponentBase, EF Core + IDbContextFactory, scoped DI, scaffolded Identity, mock PayPal, InteractiveServer.
+**WingtipToys migration:** 15+ pages, 22 controls, 100% BWFC coverage. Architecture: LayoutComponentBase, EF Core, scoped DI, scaffolded Identity, InteractiveServer. 26 work items, 7 phases, critical path 1→2→3→4→7.
 
-**ASPX/ASCX tooling strategy:** 85+ syntax patterns, 15 categories. Three-layer pipeline: Layer 1 (bwfc-migrate.ps1, ~40%, regex), Layer 2 (Copilot skill, ~45%, structural), Layer 3 (Copilot agent, ~15%, semantic). Layer 1 validated at ~70% markup. SelectMethod->Items = #1 structural transform.
+**ASPX/ASCX tooling:** Three-layer pipeline validated at ~70% markup. SelectMethod→Items = #1 structural transform.
 
-**ModelErrorMessage spec:** BaseStyledComponent, CascadingParameter EditContext, ModelStateKey->Field(key), renders <span>, strips \x1F metadata. 29/29 WingtipToys coverage.
+**ModelErrorMessage:** BaseStyledComponent, CascadingParameter EditContext, 29/29 WingtipToys coverage.
+<!-- Summarized 2026-03-04 by Scribe  covers migration toolkit design through restructure -->
 
-**WingtipToys AfterWingtipToys assessment:** Layer 1 scaffolding complete (31 .razor files). All BWFC controls correct. Missing: EF Core, services, Identity, Order/OrderDetail models. Gap is code-behind logic only.
+### Migration Toolkit Design & Restructure Summary (2026-03-03)
 
-**WingtipToys 7-phase schedule (26 work items):** Phase 1 Data Foundation, Phase 2 Product Browsing, Phase 3 Shopping Cart, Phase 4 Checkout, Phase 5 Admin, Phase 6 Identity, Phase 7 Polish. Critical path: 1->2->3->4->7. ~10-14 working days with parallel execution.
+**Toolkit design:** 9-document package at /migration-toolkit/. References existing scripts/skills by relative path  no duplication. Highest-value: copilot-instructions-template.md (drop-in for external projects). CHECKLIST.md fully net-new. Design doc: planning-docs/MIGRATION-TOOLKIT-DESIGN.md.
 
-**Key infrastructure:** NBGV 3.9.50, PackageId Fritz.BlazorWebFormsComponents, Docker ghcr.io path, version.json publicReleaseRefSpec, firstUnstableTag=preview, MkDocs Docker build -> gh-pages.
+**Toolkit restructure:** Per Jeff's directive, moved 3 distributable skills from .github/skills/ to migration-toolkit/skills/. Copied bwfc-scan.ps1 and bwfc-migrate.ps1 into migration-toolkit/scripts/. 5 internal skills remain in .github/skills/. Key: distributable assets in migration-toolkit/, internal skills in .github/skills/.
 
-### Summary: Migration Toolkit Package Design (2026-03-03)
+**Key team updates (2026-03-02-03):** Unified release (PR #408), project reframed as migration system (Jeff), ModelErrorMessage docs (Beast), themes last directive (Jeff Fritz), migration toolkit pivoted to single SKILL.md then restructured.
 
-**By:** Forge
-**What:** Designed the structure and content inventory for a portable migration toolkit package at `/migration-toolkit/`. 9 documents total. Analyzed all existing skills, scripts, agents, and the executive report to determine what can be extracted vs. what's net-new.
-
-**Key decisions:**
-- Toolkit lives at `/migration-toolkit/` (top-level, not in docs/ or .github/) because migration is the primary product per Jeff's reframing
-- Toolkit REFERENCES existing artifacts (scripts, skills, agent) by relative path — no duplication
-- 5 documents are primarily extraction/adaptation from existing content; 4 are primarily net-new
-- Highest-value deliverable is `copilot-instructions-template.md` — a drop-in template developers copy into their own project to give Copilot migration context
-- `CHECKLIST.md` is fully net-new — no existing per-page migration checklist exists
-
-**Existing content reusable:**
-- `.github/skills/webforms-migration/SKILL.md` — the core Layer 2 skill, heavily referenced by QUICKSTART, CONTROL-COVERAGE, and copilot-instructions-template
-- `.github/agents/migration.agent.md` — Layer 3 decision frameworks, extracted into ARCHITECTURE-GUIDE
-- `planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md` — metrics, timelines, screenshots for METHODOLOGY and CASE-STUDY
-- `scripts/bwfc-scan.ps1` and `scripts/bwfc-migrate.ps1` — referenced as-is, not modified
-- Forge's own history entries on WingtipToys analysis, CSS fidelity audit, and ASPX tooling strategy — lessons learned for CASE-STUDY and FAQ
-
-**Net-new content needed:**
-- README.md (entry point), QUICKSTART.md (step-by-step), CHECKLIST.md (per-page template), copilot-instructions-template.md (Copilot handoff with project-specific placeholders)
-
-**Design doc:** `planning-docs/MIGRATION-TOOLKIT-DESIGN.md`
-
-
- Team update (2026-03-03): Migration toolkit pivoted from 9-doc folder to single SKILL.md in Copilot skill format  decided by Jeffrey T. Fritz
-
-### Summary: Migration Toolkit Restructure (2026-03-03)
-
-**By:** Forge
-**What:** Per Jeff's directive, moved distributable migration assets out of `.github/skills/` into `migration-toolkit/` — the one-stop distribution package.
-
-**Changes made:**
-- `git mv` 3 distributable skill files (bwfc-migration, bwfc-identity-migration, bwfc-data-migration) from `.github/skills/` to `migration-toolkit/skills/`
-- Copied `bwfc-scan.ps1` and `bwfc-migrate.ps1` from `scripts/` into `migration-toolkit/scripts/` (originals remain in `scripts/` for internal project use)
-- Rewrote `migration-toolkit/README.md` with self-contained structure: lists skills/ and scripts/ subfolders with descriptions, includes usage instructions ("copy skills/ into .github/skills/, copy scripts/ to project root"), links to NuGet package
-- Removed empty `.github/skills/bwfc-*` directories after move
-
-**What stayed in `.github/skills/`:** 5 internal project skills (webforms-migration, documentation, component-development, bunit-test-migration, aspire) — these are NOT distributable.
-
-**Key learning:** Distributable assets (things end-users copy to their own projects) live in `migration-toolkit/`. Internal project skills (things that help contributors work on THIS repo) live in `.github/skills/`. Clean separation prevents confusion about what ships to customers vs what's internal tooling.
-Team updates (2026-03-02-03): Unified release (PR #408), project reframed as migration system (Jeff), ModelErrorMessage docs (Beast), themes last directive (Jeff Fritz).
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
+ Team update (2026-03-04): Migration test reports go in docs/migration-tests/{subfolder}/  decided by Jeffrey T. Fritz
+ Team update (2026-03-04): Layer 1 benchmark baseline established  scan 0.9s, migrate 2.4s, 338 build errors (code-behind only)  decided by Cyclops
+ Team update (2026-03-04): Layer 2+3 benchmark complete  ~9.4 min with Copilot, clean build, migration skills validated  decided by Cyclops
