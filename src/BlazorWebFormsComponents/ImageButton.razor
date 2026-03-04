@@ -16,7 +16,7 @@
 				builder.AddAttribute(2, "id", ClientID);
 			}
 			
-			builder.AddAttribute(3, "onclick", new Action(() => Click()));
+			builder.AddAttribute(3, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, _ => Click()));
 
 			if(!Enabled)
 			{
