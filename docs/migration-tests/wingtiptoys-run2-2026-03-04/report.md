@@ -53,11 +53,16 @@ See [migrate-output.md](migrate-output.md) for full output.
 - **Output files:** 32 .razor + 32 .cs code-behinds + 79 static assets
 - **Manual review items:** 18 flagged (14 unconverted code blocks, 4 Register directives)
 
-### Unconverted patterns (require Layer 2):
-- `<%#: String.Format(...)%>` — data-binding expressions with formatting
-- `<%#: GetRouteUrl(...)%>` — route URL generation
-- `<% } %>` — inline code blocks (Account/Manage)
-- `<%#: Eval("Total", "{0:C}") %>` — legacy Eval expressions
+### Unconverted patterns:
+
+**Already supported by BWFC (script enhancement, not Layer 2):**
+- `<%#: Eval("Property") %>` — ✅ already converted by `bwfc-migrate.ps1` to `@context.Property`
+- `<%#: Eval("Total", "{0:C}") %>` — ✅ **supported by BWFC's DataBinder** (`DataBinder.Eval` and `Eval()` with format strings are fully supported — see [DataBinder docs](../../UtilityFeatures/Databinder.md)). The script handles the single-arg form but not the format-string variant yet. Migration path: `@Eval("Total", "{0:C}")` (with `@using static BlazorWebFormsComponents.DataBinder`) or better: `@context.Total.ToString("C")`.
+
+**Require Layer 2 (manual/Copilot skill):**
+- `<%#: String.Format(...)%>` — data-binding expressions with formatting (e.g., `String.Format("{0:c}", Item.UnitPrice)`). Convert to `@($"{context.UnitPrice:C}")`. Mechanical regex is possible for simple cases; complex expressions (ShoppingCart arithmetic) need Copilot.
+- `<%#: GetRouteUrl(...)%>` — route URL generation. No BWFC equivalent; requires conversion to Blazor `@page` routing with `NavigationManager` or `<a href>` interpolation.
+- `<% } %>` — inline code blocks (Account/Manage). Structural C# blocks that require complete rewrite as Razor `@if`/`@foreach` or component logic.
 
 ## Layer 2+3: Reference Copy
 
