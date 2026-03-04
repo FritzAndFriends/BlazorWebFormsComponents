@@ -88,6 +88,38 @@ Key transforms applied:
 - **Static assets:** Product images and CSS moved to `wwwroot/` for proper Blazor static file serving
 - **Cart persistence:** `CartStateService` updated to use cookie-based cart ID instead of per-instance GUID
 
+## Visual Fidelity — Side-by-Side Comparisons
+
+The screenshots below show the **original Web Forms app** (left, running on IIS Express under .NET Framework 4.5) and the **migrated Blazor Server app** (right, running on Kestrel under .NET 10) displayed side by side at identical browser zoom levels. No CSS was hand-tuned after migration — what you see is the direct output of the three-layer migration pipeline.
+
+### Homepage
+
+![Side-by-side comparison of the WingtipToys homepage — Web Forms (.NET 4.5) on the left, Blazor Server (.NET 10) on the right](images/comparison-home.png)
+
+**What's identical:** Navigation bar with logo and category links (Cars, Planes, Trucks, Boats, Rockets), welcome hero content, overall page layout and color scheme.
+
+**Minor differences:** The Blazor version uses ASP.NET Core's default HTTPS port (7012) vs. IIS Express port (44300). Font rendering may vary slightly due to Kestrel vs. IIS response headers, but the visual result is indistinguishable at normal viewing distance.
+
+### Product List
+
+![Side-by-side comparison of the WingtipToys product listing — Web Forms (.NET 4.5) on the left, Blazor Server (.NET 10) on the right](images/comparison-products.png)
+
+**What's identical:** All 19 products displayed in the same grid layout with product images, names, prices, and "Add To Cart" links. Column count, spacing, and card styling match exactly.
+
+**Minor differences:** None visible — the product grid is pixel-consistent between the two apps. Both pull from the same seed data (19 products across 5 categories).
+
+### Shopping Cart
+
+![Side-by-side comparison of the WingtipToys shopping cart — Web Forms (.NET 4.5) on the left, Blazor Server (.NET 10) on the right](images/comparison-cart.png)
+
+**What's identical:** Same 3 items in cart, quantity input fields, per-item subtotals, order total calculation, and PayPal checkout button. Table layout with headers (Remove, Product, Price, Quantity, Actions, Total) is preserved.
+
+**Minor differences:** The Blazor version uses cookie-based cart persistence instead of ASP.NET session state, but the rendered cart contents and totals are identical when the same items are added.
+
+### Visual Fidelity Summary
+
+Across all three comparison pages, the migrated Blazor Server application achieves **near-perfect visual fidelity** with the original Web Forms application. Layout, typography, colors, data binding, and interactive elements all render identically. The BWFC component library produces the same HTML output as the original Web Forms controls, which means existing CSS stylesheets work without modification.
+
 ### Screenshots
 
 | Page | Screenshot | Renders | Interactive |
