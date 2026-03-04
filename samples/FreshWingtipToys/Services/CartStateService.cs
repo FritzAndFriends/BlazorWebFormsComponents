@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Data;
 using WingtipToys.Models;
@@ -7,11 +8,24 @@ namespace WingtipToys.Services
     public class CartStateService
     {
         private readonly IDbContextFactory<ProductContext> _contextFactory;
-        private readonly string _cartId = Guid.NewGuid().ToString();
+        private readonly string _cartId;
 
-        public CartStateService(IDbContextFactory<ProductContext> contextFactory)
+        public CartStateService(IDbContextFactory<ProductContext> contextFactory, IHttpContextAccessor httpContextAccessor)
         {
             _contextFactory = contextFactory;
+            // Use a cookie to persist cart ID across page navigations
+            var httpContext = httpContextAccessor.HttpContext;
+            var cookieCartId = httpContext?.Request.Cookies["WingtipCartId"];
+            if (string.IsNullOrEmpty(cookieCartId))
+            {
+                cookieCartId = Guid.NewGuid().ToString();
+                httpContext?.Response.Cookies.Append("WingtipCartId", cookieCartId, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
+            }
+            _cartId = cookieCartId;
         }
 
         public string GetCartId() => _cartId;

@@ -34,19 +34,46 @@ Three-layer migration pipeline:
 
 ## Layer 1a: Project Scan
 
-{scan output will go here}
+See [scan-output.md](scan-output.md) for full output.
+
+- **Duration:** 0.9 seconds
+- **Files scanned:** 32 (.aspx, .ascx, .master)
+- **Controls found:** 230 usages across 31 control types
+- **BWFC coverage:** 100% — all controls have BWFC equivalents
 
 ## Layer 1b: Mechanical Transform
 
-{migrate script output will go here}
+See [migrate-output.md](migrate-output.md) for full output.
+
+- **Duration:** 2.4 seconds
+- **Transforms applied:** 276
+- **Output files:** 33 .razor + 32 .cs code-behinds + 79 static assets
+- **Manual review items:** 18 flagged for human/AI attention
 
 ## Layer 2: Structural Migration
 
-{per-page migration details}
+See [layer2-3-results.md](layer2-3-results.md) for phase-by-phase breakdown.
+
+Key transforms applied:
+- `SelectMethod="X"` → `Items="@X"` with `OnParametersSetAsync` data loading
+- `ItemType="Namespace.Type"` → `TItem="Type"`
+- `<%#: Item.X %>` → `@context.X`
+- `Page_Load` → `OnInitializedAsync` / `OnParametersSetAsync`
+- `Response.Redirect` → `NavigationManager.NavigateTo`
+- `Session["key"]` → injected scoped services
+- `Request.QueryString["key"]` → `[SupplyParameterFromQuery]`
 
 ## Layer 3: Architecture Decisions
 
-{EF Core, Identity, routing details}
+| Decision | Original (Web Forms) | Migrated (Blazor) |
+|----------|---------------------|-------------------|
+| Database | EF6 + SQL Server LocalDB | EF Core + SQLite |
+| Identity | ASP.NET Identity v2 + OWIN | ASP.NET Core Identity |
+| Session state | `Session["key"]` | Scoped services (CartStateService, CheckoutStateService) |
+| Cart persistence | Session-based cart ID | Cookie-based cart ID (persists across circuits) |
+| PayPal | NVPAPICaller (NVP API) | MockPayPalService (placeholder) |
+| Mobile layout | Site.Mobile.Master + ViewSwitcher | Stubbed (Blazor handles responsive natively) |
+| Routing | Physical file paths (.aspx) | `@page` directives with query parameters |
 
 ## Verification
 
@@ -57,13 +84,35 @@ Three-layer migration pipeline:
 - **Round 2:** Account page code-behinds referenced undefined variables from legacy code
 - **Round 3:** Clean build after Account pages copied from reference implementation
 
+### Post-build Fix
+- **Static assets:** Product images and CSS moved to `wwwroot/` for proper Blazor static file serving
+- **Cart persistence:** `CartStateService` updated to use cookie-based cart ID instead of per-instance GUID
+
 ### Screenshots
 
-{screenshots pending — app builds but visual verification not yet performed}
+| Page | Screenshot | Status |
+|------|-----------|--------|
+| Homepage | ![Homepage](images/01-homepage.png) | ✅ Working — logo, nav, categories, welcome content |
+| Product List (all) | ![Products](images/02-product-list.png) | ✅ Working — 16 products in 4-column grid with images, prices, Add To Cart |
+| Product Details | ![Details](images/03-product-details.png) | ✅ Working — product image, description, price, product number |
+| Shopping Cart | ![Cart](images/04-shopping-cart.png) | ✅ Working — 2 items, quantity inputs, totals, PayPal checkout |
+| Category Filter (Planes) | ![Planes](images/05-category-filter.png) | ✅ Working — filtered to 4 plane products |
+| Login | ![Login](images/06-login.png) | ✅ Working — email/password form, forgot password, register links |
 
-## Comparison: Before and After
+### Pages Verified Working
 
-{side-by-side comparisons}
+| # | Page | Features |
+|---|------|----------|
+| 1 | Homepage (`/`) | Welcome content, category navigation |
+| 2 | Product List (`/ProductList`) | 16 products, images, prices, Add To Cart links |
+| 3 | Product List filtered (`/ProductList?id=N`) | Category filtering (Cars, Planes, Trucks, Boats, Rockets) |
+| 4 | Product Details (`/ProductDetails?id=N`) | Image, description, price, product number |
+| 5 | Add To Cart (`/AddToCart?productID=N`) | Adds item, redirects to cart |
+| 6 | Shopping Cart (`/ShoppingCart`) | Item list, quantities, totals, Update, PayPal checkout |
+| 7 | Login (`/Account/Login`) | Email/password form, forgot password link |
+| 8 | Register (`/Account/Register`) | Registration form |
+| 9 | About (`/About`) | Static content |
+| 10 | Contact (`/Contact`) | Static content |
 
 ## Conclusions
 
@@ -73,3 +122,5 @@ Three-layer migration pipeline:
 - **Account/Identity pages are the most complex:** copying from a reference implementation was the pragmatic choice
 - **BWFC component compatibility is excellent:** all 31 control types used in WingtipToys have BWFC equivalents
 - **Key architectural decisions** (SQLite, scoped services, mock PayPal) match standard Blazor Server patterns documented in the migration skills
+- **Post-migration fixes required:** static file serving (wwwroot), cart state persistence (cookie-based cart ID) — these are Blazor-specific patterns not yet covered by the migration skills
+- **10 of 33 pages fully verified** with screenshots and functional testing

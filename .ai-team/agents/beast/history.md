@@ -127,3 +127,18 @@
 
  Team update (2026-03-03): ListView EventArgs now include IOrderedDictionary properties (Keys, Values, OldValues, NewValues) for full Web Forms parity  decided by Cyclops
 
+- **Migration toolkit doc fixes (component count + internal references):**
+  - **Component count corrected:** Updated from "52 components across 7 categories" to "58 components across 6 categories" across all toolkit files (CONTROL-COVERAGE.md, SKILL.md, README.md). The tables already showed 55 items across 6 categories; added 3 missing components (Chart, ImageMap, Substitution) to the Editor Controls table to match the actual library inventory.
+  - **Internal references removed:** Replaced all `../.github/skills/webforms-migration/SKILL.md` and `../.github/agents/migration.agent.md` references with distributed toolkit paths (`skills/bwfc-migration/SKILL.md`, `skills/bwfc-data-migration/SKILL.md`). Toolkit is designed for external projects — cannot reference internal repo paths.
+  - **Wrong org name fixed:** Changed `AzimoLabs` → `FritzAndFriends` in copilot-instructions-template.md URLs and bwfc-scan.ps1.
+  - **Files changed:** CONTROL-COVERAGE.md, METHODOLOGY.md, QUICKSTART.md, README.md, copilot-instructions-template.md, bwfc-scan.ps1, skills/bwfc-migration/SKILL.md.
+  - **Key learning:** When new components are added to the library (like M17 AJAX controls), the migration toolkit coverage tables AND summary counts must both be updated. The "Migration Helper" 7th category was a phantom — no table section existed for it.
+
+- **Migration test report structure (`docs/migration-tests/`):**
+  - Created `docs/migration-tests/` as the standard location for migration benchmark reports.
+  - **README.md** — Index page with table linking to individual test runs (Run, Source App, Date, Pages, Result columns).
+  - **wingtiptoys-2026-03-04/report.md** — Template for the first benchmark run with sections: Summary metrics table, Methodology (three-layer pipeline), Phase Timing table (7 phases + total), Layer 1a–3 detail sections, Verification (build + screenshots), Before/After comparison, Conclusions.
+  - **wingtiptoys-2026-03-04/images/.gitkeep** — Placeholder for screenshots.
+  - Added "Migration Tests" nav section to `mkdocs.yml` after the Migration section.
+  - **Convention established:** Each migration test run gets its own subfolder named `{app}-{YYYY-MM-DD}` containing `report.md` and an `images/` directory. The README.md index links to all runs.
+
