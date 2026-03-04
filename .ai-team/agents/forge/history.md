@@ -103,3 +103,19 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
  Team update (2026-03-04): Migration test reports go in docs/migration-tests/{subfolder}/  decided by Jeffrey T. Fritz
  Team update (2026-03-04): Layer 1 benchmark baseline established  scan 0.9s, migrate 2.4s, 338 build errors (code-behind only)  decided by Cyclops
  Team update (2026-03-04): Layer 2+3 benchmark complete  ~9.4 min with Copilot, clean build, migration skills validated  decided by Cyclops
+
+### Migration Run 4 — Enhanced Script Validation (2026-03-04)
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**What was tested:** Full from-scratch migration of WingtipToys using the enhanced `bwfc-migrate.ps1` script with `ConvertFrom-MasterPage`, `New-AppRazorScaffold`, Eval format-string regex, and String.Format regex.
+
+**Key findings vs Run 3:**
+1. **ConvertFrom-MasterPage is the highest-impact enhancement.** Auto-generates MainLayout.razor from Site.Master with correct @inherits, HeadContent extraction, ContentPlaceHolder→@Body, and LoginView/SelectMethod flagging. Eliminates the most time-consuming manual step.
+2. **App.razor + Routes.razor scaffolding saves boilerplate time.** Combined with master page conversion, the script now generates 7 scaffold files vs 4 in Run 3.
+3. **Eval format-string regex works correctly:** `<%#: Eval("Total", "{0:C}") %>` → `@context.Total.ToString("C")`.
+4. **String.Format regex works for simple cases:** `<%#: String.Format("{0:c}", Item.UnitPrice) %>` → `@($"{context.UnitPrice:c}")`. Complex expressions (arithmetic with Convert.ToDouble) correctly left as manual.
+5. **Total transforms increased from 277 to 289** (+12 from new regexes and master page processing).
+6. **Build: 0 errors, 0 warnings** (improved from Run 3's 63 warnings).
+7. **11/11 features pass** — consistent with Run 2 and Run 3.
+8. **CascadingAuthenticationState must be added to Routes.razor** when using AuthorizeView — the scaffolded Routes.razor doesn't include this automatically. Consider adding it to `New-AppRazorScaffold`.
