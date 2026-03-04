@@ -106,3 +106,14 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
 **Key decisions:** ScriptManager regex uses `(?s)` for multiline matching across `<Scripts>` block. ContentPlaceHolder regex uses `(?si)` for case-insensitive + singleline. Head metadata extraction happens before head section removal. Code-behind output path for .master files reuses computed `$razorRelPath + $cbSuffix`.
 
+### GetRouteUrl Completion (2026-03-05)
+
+- `GetRouteUrlHelper.cs` has 4 extension method overloads on `BaseWebFormsComponent`: two taking `object routeParameters` (working), two taking `RouteValueDictionary` (were stubbed, now complete). All delegate to `LinkGenerator.GetPathByRouteValues`.
+- `RouteValueDictionary` is accepted by `LinkGenerator.GetPathByRouteValues` as the `object values` parameter — it's already the internal type, so no conversion needed.
+- WingtipToys uses `GetRouteUrl("RouteName", new { param = value })` exclusively (anonymous objects) — the `object` overloads cover all WingtipToys scenarios. `RouteValueDictionary` overloads exist for completeness with the Web Forms API surface.
+- `LinkGenerator` is auto-registered by ASP.NET Core routing. `IHttpContextAccessor` requires explicit `services.AddHttpContextAccessor()` — the sample already does this in Program.cs.
+- In Web Forms, `GetRouteUrl` is an instance method on `Control`/`Page`. In Blazor, it's an extension method on `BaseWebFormsComponent`, so migrated code uses `this.GetRouteUrl(...)` in code-behind or `@(this.GetRouteUrl(...))` in Razor markup.
+- Migration toolkit currently suggests inlining route URLs (e.g., `@($"/Products/{context.ID}")`) rather than using the extension method. Both approaches are valid — inlining is simpler, extension method is more faithful to route-name resolution.
+
+
+ Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast

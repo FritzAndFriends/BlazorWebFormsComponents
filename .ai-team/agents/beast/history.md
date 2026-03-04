@@ -59,3 +59,11 @@
  Team update (2026-03-04): Migration test reports go in docs/migration-tests/{subfolder}/  decided by Jeffrey T. Fritz
  Team update (2026-03-04): Layer 1 benchmark baseline established  data at docs/migration-tests/wingtiptoys-2026-03-04/  decided by Cyclops
  Team update (2026-03-04): Migration Run 2  11/11 features pass, toolkit ready for customer-facing documentation  decided by Forge
+
+### Migration Report Conventions (2026-03-04)
+
+- **Image path depth**: Reports in `docs/migration-tests/{app}-{run}/report.md` are 3 levels deep from repo root. Relative paths to `planning-docs/` must use `../../../planning-docs/`, not `../../planning-docs/`. This is a common off-by-one error to watch for.
+- **Executive summary pattern**: Migration reports should open with a concise paragraph summarizing enhancements tested, pass/fail, and key deltas from prior runs, followed by a quick-reference metrics table (8–10 rows). Executives should grasp the full picture in ≤10 seconds.
+- **Run 4 report location**: `docs/migration-tests/wingtiptoys-run4-2026-03-04/report.md` with local `images/` subfolder for Blazor screenshots and cross-references to `planning-docs/screenshots/` for original Web Forms screenshots.
+
+ Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops

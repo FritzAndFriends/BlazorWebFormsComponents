@@ -119,3 +119,7 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
 6. **Build: 0 errors, 0 warnings** (improved from Run 3's 63 warnings).
 7. **11/11 features pass** — consistent with Run 2 and Run 3.
 8. **CascadingAuthenticationState must be added to Routes.razor** when using AuthorizeView — the scaffolded Routes.razor doesn't include this automatically. Consider adding it to `New-AppRazorScaffold`.
+
+ Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops
+
+ Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast

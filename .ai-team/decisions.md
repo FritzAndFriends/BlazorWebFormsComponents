@@ -5746,3 +5746,17 @@ Completed Run 4 of the WingtipToys migration benchmark using the enhanced `bwfc-
 
 Run 4 validates that the enhanced script is ready for inclusion in the migration toolkit. The 3 new features (master page conversion, App/Routes scaffold, format-string regexes) collectively reduce manual Layer 2 work by approximately 30-40 minutes per migration.
 
+
+### 2026-03-05: GetRouteUrl RouteValueDictionary overloads completed
+
+**By:** Cyclops
+**What:** Completed the two stubbed `RouteValueDictionary` overloads in `GetRouteUrlHelper.cs` that previously returned `null`. They now delegate to `LinkGenerator.GetPathByRouteValues` identically to the `object` overloads. All 4 overloads match the Web Forms `Control.GetRouteUrl` API surface.
+**Why:** The Run 4 report flagged `GetRouteUrl` as needing completion. While WingtipToys only uses anonymous-object overloads (which already worked), the `RouteValueDictionary` overloads are part of the Web Forms API surface and should work correctly for any migrated code that uses them. Returning `null` was a silent failure that could confuse developers during migration.
+
+
+### 2026-03-04: Migration report image paths must use 3-level relative traversal
+
+**By:** Beast
+**What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
+**Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
+
