@@ -139,7 +139,7 @@ function New-ProjectScaffold {
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -161,7 +161,10 @@ function New-ProjectScaffold {
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
+
+@rendermode InteractiveServer
 "@
 
     # Program.cs
@@ -754,7 +757,7 @@ function ConvertFrom-SelectMethod {
             $tagAfterAttr = $m.Groups[3].Value
             $serviceName = 'I' + $methodName.TrimStart('Get') + 'Service'
             $varName = ($methodName.TrimStart('Get')).Substring(0,1).ToLower() + ($methodName.TrimStart('Get')).Substring(1) + 'Service'
-            "${tagBeforeAttr}${tagAfterAttr}`n@* TODO: SelectMethod=""${methodName}"" removed — inject a service that provides this data:`n   @inject ${serviceName} ${varName}`n   Then in @code { ... OnInitializedAsync() { items = await ${varName}.${methodName}(); } }`n*@"
+            "${tagBeforeAttr}${tagAfterAttr}`n@* TODO: Replace SelectMethod=""${methodName}"" with Items=""@_data"" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@"
         })
         Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Converted $($selectMethodMatches.Count) SelectMethod attribute(s) to TODO annotations"
         foreach ($m in $selectMethodMatches) {
@@ -905,6 +908,60 @@ function Copy-CodeBehind {
 
 #endregion
 
+#region --- Unconvertible Page Stubs ---
+
+function Test-UnconvertiblePage {
+    param([string]$Content)
+
+    $unconvertiblePatterns = @(
+        'SignInManager',
+        'UserManager',
+        'FormsAuthentication',
+        'Session\[',
+        'PayPal',
+        'Checkout'
+    )
+    foreach ($pat in $unconvertiblePatterns) {
+        if ($Content -match $pat) {
+            return $true
+        }
+    }
+    return $false
+}
+
+function New-CompilableStub {
+    param(
+        [string]$Route,
+        [string]$RelPath,
+        [string]$OutputFile,
+        [string]$OutputDir
+    )
+
+    $displayName = $RelPath -replace '\\', '/' -replace '\.aspx$', ''
+    $stubContent = @"
+@page "$Route"
+<h3>$displayName — not yet migrated</h3>
+@* TODO: Implement using ASP.NET Core Identity scaffolding *@
+@code {
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($OutputFile, "Write compilable stub for unconvertible page")) {
+        if (-not (Test-Path $OutputDir)) {
+            New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+        }
+        Set-Content -Path $OutputFile -Value $stubContent -Encoding UTF8
+    }
+    else {
+        Write-Host "[WhatIf] Would write stub: $RelPath"
+    }
+
+    Write-TransformLog -File $RelPath -Transform 'Stub' -Detail "Generated compilable stub (unconvertible page)"
+    Write-ManualItem -File $RelPath -Category 'UnconvertibleStub' -Detail "Page contains Identity/Auth/Payment code — stubbed for clean build"
+}
+
+#endregion
+
 #region --- Main File Transform Pipeline ---
 
 function Convert-WebFormsFile {
@@ -948,6 +1005,18 @@ function Convert-WebFormsFile {
     }
 
     $script:FilesProcessed++
+
+    # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
+    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content)) {
+        $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+        if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
+            $route = '/'
+        }
+        # Use relative path for a more descriptive route (e.g., /Account/Login)
+        $pathRoute = '/' + ($relativePath -replace '\\', '/' -replace '\.aspx$', '')
+        New-CompilableStub -Route $pathRoute -RelPath $relativePath -OutputFile $outputFile -OutputDir $outputDir
+        return
+    }
 
     # Apply transform pipeline in order
     switch ($extension) {
@@ -1099,7 +1168,7 @@ if ($staticCount -gt 0) {
     Write-Host "Copying $staticCount static file(s)..." -ForegroundColor Green
     foreach ($sf in $staticFiles) {
         $relPath = $sf.FullName.Substring($Path.Length).TrimStart('\', '/')
-        $destPath = Join-Path $Output $relPath
+        $destPath = Join-Path $Output "wwwroot" $relPath
         $destDir = Split-Path $destPath -Parent
 
         if ($PSCmdlet.ShouldProcess($destPath, "Copy static file")) {
@@ -1165,3 +1234,4 @@ else {
 Write-Host ''
 
 #endregion
+

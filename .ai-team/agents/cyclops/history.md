@@ -97,4 +97,14 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 **Toolkit sync:** migration-toolkit/ is canonical home. Synced 47KB bwfc-migrate.ps1 over stale 29KB copy. PageService.Title already exists -- updated analysis and skill. .NET SDK prereq updated to 10.0+. Lesson: always check existing BWFC components before flagging as missing.
 
 Team updates: Migration report 3-level traversal (Beast). Run 5 reports need Works/Doesn't-Work sections (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC data controls preferred, migration-toolkit/ canonical (Jeff/Forge).
+
+### Run 6 Script Enhancements (2026-03-05)
+
+**Enhancement 1 — Scaffold TFM fix (line 139):** Changed csproj template from `net8.0` to `net10.0`. Added `@using static Microsoft.AspNetCore.Components.Web.RenderMode` and `@rendermode InteractiveServer` to _Imports.razor scaffold (lines 161-164).
+
+**Enhancement 2 — BWFC-aware SelectMethod TODO (line 756):** Replaced generic service-injection TODO in `ConvertFrom-SelectMethod` with guidance to use the BWFC component's `Items` parameter and load data in `OnInitializedAsync`. Highest impact change (-120s).
+
+**Enhancement 3 — Static files wwwroot path (line 1103):** Changed static file copy destination from `$Output\$relPath` to `$Output\wwwroot\$relPath` so CSS/JS/images land under wwwroot/ as Blazor requires.
+
+**Enhancement 4 — Compilable stubs (lines 907-960, 975-988):** Added `Test-UnconvertiblePage` function detecting Identity/Auth/Payment patterns (SignInManager, UserManager, FormsAuthentication, Session[, PayPal, Checkout). Added `New-CompilableStub` to emit minimal `@page` + `@code{}` stubs. Integrated into `Convert-WebFormsFile` before the transform pipeline — unconvertible .aspx pages get stubs instead of broken partial conversions. Ensures clean build.
 � Team update (2026-03-04): Run 6 improvement analysis  decided by Forge
