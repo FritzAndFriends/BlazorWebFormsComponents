@@ -91,3 +91,6 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
  Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
  Team update (2026-03-04): Migration Run 2  11/11 features pass, PR #418 fixes confirmed critical, toolkit ready for docs  decided by Forge
  Team update (2026-03-04): Migration toolkit restructured into self-contained migration-toolkit/ package  decided by Jeffrey T. Fritz, Forge
+
+ Team update (2026-03-04): Forge proposed 2 regex additions to bwfc-migrate.ps1 for Eval format-string and String.Format patterns (eval-regex-enhancement, status: Proposed)  decided by Forge
+
