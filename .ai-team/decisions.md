@@ -5764,3 +5764,15 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 
 
+
+### 2026-03-04: Run 5 Migration Patterns
+
+**By:** Cyclops
+**What:** Run 5 of WingtipToys full migration tested 6 new script enhancements. 309 transforms total (up from 276 in Run 4). LoginViewAuthorizeView, GetRouteUrl injection hints, SelectMethod TODO annotations, Register directive cleanup, ContentPlaceHolder@Body, and String.Format conversions all fired correctly. Account/Checkout pages need full stubbing. Static assets should copy to wwwroot/ not project root. csproj scaffold TFM should be parameterized (default net10.0).
+**Why:** Documents migration patterns and script improvement recommendations from Run 5 validation. Establishes that all 6 new enhancements work correctly and identifies remaining gaps (static asset relocation, TFM parameterization, stub generation).
+
+### 2026-03-05: Run 5 Report Structure with Works/Doesn't-Work Sections
+
+**By:** Beast
+**What:** Run 5 benchmark report introduces two new structural sections: (1) "What Works  Automated (Layer 1)"  complete inventory of all automated transforms with counts and examples, and (2) "What Doesn't Work  Still Manual (Layer 2)"  categorized by difficulty (mechanical-tedious vs requires-architectural-decisions). Replaces implicit "unconverted patterns" section with explicit, scannable breakdown. Pattern carries forward to Run 6+.
+**Why:** Self-contained report for stakeholders who haven't followed run history. Difficulty categorization helps project managers estimate effort. Forward-compatible for diffing against future runs.

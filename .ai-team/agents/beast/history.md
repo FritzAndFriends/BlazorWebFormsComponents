@@ -67,3 +67,12 @@
 - **Run 4 report location**: `docs/migration-tests/wingtiptoys-run4-2026-03-04/report.md` with local `images/` subfolder for Blazor screenshots and cross-references to `planning-docs/screenshots/` for original Web Forms screenshots.
 
  Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops
+
+### Run 5 Benchmark Report (2026-03-05)
+
+- **Report written:** `docs/migration-tests/wingtiptoys-run5-2026-03-04/report.md` — comprehensive 9-section report with executive summary, metrics comparison table, what-works/what-doesn't breakdown, enhancement impact analysis, Layer 2 fixes summary, build results, gap analysis, and recommendations.
+- **Key convention reinforced:** When manual review item counts increase between runs, explain *why* in the report (granular flagging vs regression). Jeff needs to see that higher counts can mean better output quality.
+- **Report structure evolution:** Run 5 report adds "What Works" and "What Doesn't Work" sections (Jeff's request) plus categorization of manual items by difficulty ("mechanical but tedious" vs "requires architectural decisions"). This pattern should carry forward to future runs.
+- **Enhancement impact table pattern:** Per-enhancement rows with Fired/Count/Run4-impact/Run5-status/Net-impact columns. Effective for showing ROI of individual script improvements.
+
+ Team update (2026-03-04): Run 5 migration complete  309 transforms, clean build (0 errors, 0 warnings, 4.56s). Benchmark report pending. Key artifacts at docs/migration-tests/wingtiptoys-run5-2026-03-04/  decided by Cyclops

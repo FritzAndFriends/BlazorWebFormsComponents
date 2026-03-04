@@ -31,18 +31,7 @@ Post-PR #377: 132131 divergences, 1 exact match (Literal-3). Most divergences ar
 
 Line-by-line classification: DataList (110 lines), GridView (33 lines), ListView (182 lines), Repeater (64 lines). 90%+ sample parity issues. 5 genuine bugs (3 fixed in PR #377). 4 remaining: GridView UseAccessibleHeader default, GridView &nbsp; encoding, GridView thead vs tbody, DataList missing itemtype. Sample alignment alone would give ListView/Repeater exact matches. Calendar closest complex control at 73%.
 
- Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
-
- Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz
-
-
- Team update (2026-02-27): AJAX Controls nav category created; migration stub doc pattern for no-op components; Substitution moved from deferred to implemented; UpdateProgress uses explicit state pattern  decided by Beast
-
-
- Team update (2026-02-27): M17 AJAX controls implemented  ScriptManager/Proxy are no-op stubs, Timer shadows Enabled, UpdatePanel uses ChildContent, UpdateProgress renders hidden, Substitution uses Func callback, new AJAX/Migration Helper categories  decided by Cyclops
-
-
- Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+📌 Team updates (2026-02-27): PRs from fork→upstream dev, close issues via PR refs only (Jeff). M17 AJAX controls shipped: 6 controls (Timer, UpdatePanel, UpdateProgress, ScriptManager stub, ScriptManagerProxy stub, Substitution), sample pages created, AJAX nav category + migration stub doc pattern established.
 
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
 
