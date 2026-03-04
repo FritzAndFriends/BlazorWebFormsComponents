@@ -5468,10 +5468,10 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 **What:** Added 1 smoke test `[InlineData]` and 3 interactive tests for the ModelErrorMessage sample page (`/ControlSamples/ModelErrorMessage`). Smoke test added to `ValidationControl_Loads_WithoutErrors` Theory group. Interactive tests cover: submit-shows-errors, valid-submit-no-errors, and clear-button-removes-errors.
 **Why:** Every sample page gets an integration test — no exceptions. The ModelErrorMessage component is a validation control that conditionally renders `<span class="text-danger">` elements, so tests verify both the error-present and error-absent states via DOM element counting. The Clear button test exercises the EditContext reset path, which is unique to this sample page.
 
-### 2026-03-02: PR target repository directive
+### 2026-03-04: PRs always target upstream/dev (consolidated)
 **By:** Jeffrey T. Fritz (via Copilot)
-**What:** PRs should always target the upstream repository (FritzAndFriends/BlazorWebFormsComponents), not the fork (csharpfritz/BlazorWebFormsComponents). Use cross-fork PR format: head = csharpfritz:{branch}, base = dev on FritzAndFriends.
-**Why:** User request  captured for team memory
+**What:** NEVER create a PR to the origin repo (csharpfritz fork). Pull requests should ALWAYS be created to the upstream repository (FritzAndFriends/BlazorWebFormsComponents) targeting the dev branch. Use cross-fork PR format: head = csharpfritz:{branch}, base = dev on FritzAndFriends. Use `gh pr create --repo FritzAndFriends/BlazorWebFormsComponents` or equivalent.
+**Why:** User request — captured for team memory. The fork is for pushing branches; PRs belong on the org repo. This is a workflow rule for the project. (Consolidated from directives on 2026-03-02, 2026-03-03, and 2026-03-04.)
 
 ### 2026-03-02: WingtipToys Migration Analysis Results
 **By:** Forge
@@ -5563,10 +5563,6 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 **What:** Migration test runs with screenshots and measurements go in `docs/migration-tests/` with a subfolder per run containing a markdown report and supporting images. This is the standard location for all migration benchmarking.
 **Why:** User request — establishes a repeatable pattern for tracking migration test results over time.
 
-### 2026-03-03: User directive — PRs target upstream
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Pull requests should be created on the upstream repository (FritzAndFriends/BlazorWebFormsComponents), not the origin fork (csharpfritz/BlazorWebFormsComponents). Use `gh pr create --repo FritzAndFriends/BlazorWebFormsComponents` or equivalent.
-**Why:** User request — captured for team memory. The fork is for pushing branches; PRs belong on the org repo.
 
 ### 2026-03-03: Migration toolkit restructure  self-contained distribution (consolidated)
 **By:** Jeffrey T. Fritz, Forge
@@ -5759,4 +5755,12 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **By:** Beast
 **What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
 **Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
+
+
+### 2026-03-04: User directive — exclude FreshWingtipToys and feasibility doc
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** FreshWingtipToys sample site (samples/FreshWingtipToys/) and the ASPX middleware feasibility doc (planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md) should NOT be committed to the repo. They are scratch artifacts from the migration benchmarking work.
+**Why:** User request — captured for team memory
+
+
 
