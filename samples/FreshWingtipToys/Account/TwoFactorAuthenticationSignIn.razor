@@ -1,0 +1,48 @@
+@page "/TwoFactorAuthenticationSignIn"
+<h2>@(Title).</h2>
+    <PlaceHolder ID="sendcode">
+        <section>
+            <h4>Send verification code</h4>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    Select Two-Factor Authentication Provider:
+            <DropDownList ID="Providers">
+            </DropDownList>
+                    <Button Text="Submit" ID="ProviderSubmit" OnClick="ProviderSubmit_Click" CssClass="btn btn-default" />
+                </div>
+            </div>
+        </section>
+    </PlaceHolder>
+    <PlaceHolder ID="verifycode" Visible="false">
+        <section>
+            <h4>Enter verification code</h4>
+            <hr />
+            <HiddenField ID="SelectedProvider" />
+            <PlaceHolder ID="ErrorMessage" Visible="false">
+                <p class="text-danger">
+                    <Literal ID="FailureText" />
+                </p>
+            </PlaceHolder>
+            <div class="form-group">
+                <Label Text="Code:" AssociatedControlID="Code" CssClass="col-md-2 control-label" />
+                <div class="col-md-10">
+                    <TextBox ID="Code" CssClass="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <div class="checkbox">
+                        <Label Text="Remember Browser" />
+                        <CheckBox Text="" ID="RememberBrowser" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <Button Text="Submit" ID="CodeSubmit" OnClick="CodeSubmit_Click" CssClass="btn btn-default" />
+                </div>
+            </div>
+        </section>
+    </PlaceHolder>
+
