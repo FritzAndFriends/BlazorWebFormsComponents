@@ -90,29 +90,43 @@ Key transforms applied:
 
 ### Screenshots
 
-| Page | Screenshot | Status |
-|------|-----------|--------|
-| Homepage | ![Homepage](images/01-homepage.png) | ✅ Working — logo, nav, categories, welcome content |
-| Product List (all) | ![Products](images/02-product-list.png) | ✅ Working — 16 products in 4-column grid with images, prices, Add To Cart |
-| Product Details | ![Details](images/03-product-details.png) | ✅ Working — product image, description, price, product number |
-| Shopping Cart | ![Cart](images/04-shopping-cart.png) | ✅ Working — 2 items, quantity inputs, totals, PayPal checkout |
-| Category Filter (Planes) | ![Planes](images/05-category-filter.png) | ✅ Working — filtered to 4 plane products |
-| Login | ![Login](images/06-login.png) | ✅ Working — email/password form, forgot password, register links |
+| Page | Screenshot | Renders | Interactive |
+|------|-----------|---------|-------------|
+| Homepage | ![Homepage](images/01-homepage.png) | ✅ Page renders — logo, nav, categories, welcome content | ✅ Navigation links work |
+| Product List (all) | ![Products](images/02-product-list.png) | ✅ Page renders — 16 products in 4-column grid with images, prices, Add To Cart | ✅ Add To Cart links work |
+| Product Details | ![Details](images/03-product-details.png) | ✅ Page renders — product image, description, price, product number | ✅ Static display only |
+| Shopping Cart | ![Cart](images/04-shopping-cart.png) | ✅ Page renders — 2 items, quantity inputs, totals, PayPal checkout | ⚠️ Page load only — quantity update and remove buttons not functional |
+| Category Filter (Planes) | ![Planes](images/05-category-filter.png) | ✅ Page renders — filtered to 4 plane products | ✅ Query-parameter filtering works |
+| Login | ![Login](images/06-login.png) | ✅ Page renders — email/password form, forgot password, register links | ⚠️ Page load only — form submission not functional |
 
 ### Pages Verified Working
 
-| # | Page | Features |
-|---|------|----------|
-| 1 | Homepage (`/`) | Welcome content, category navigation |
-| 2 | Product List (`/ProductList`) | 16 products, images, prices, Add To Cart links |
-| 3 | Product List filtered (`/ProductList?id=N`) | Category filtering (Cars, Planes, Trucks, Boats, Rockets) |
-| 4 | Product Details (`/ProductDetails?id=N`) | Image, description, price, product number |
-| 5 | Add To Cart (`/AddToCart?productID=N`) | Adds item, redirects to cart |
-| 6 | Shopping Cart (`/ShoppingCart`) | Item list, quantities, totals, Update, PayPal checkout |
-| 7 | Login (`/Account/Login`) | Email/password form, forgot password link |
-| 8 | Register (`/Account/Register`) | Registration form |
-| 9 | About (`/About`) | Static content |
-| 10 | Contact (`/Contact`) | Static content |
+| # | Page | Features | Functional Test |
+|---|------|----------|-----------------|
+| 1 | Homepage (`/`) | Welcome content, category navigation | ✅ Verified |
+| 2 | Product List (`/ProductList`) | 16 products, images, prices, Add To Cart links | ✅ Verified |
+| 3 | Product List filtered (`/ProductList?id=N`) | Category filtering (Cars, Planes, Trucks, Boats, Rockets) | ✅ Verified |
+| 4 | Product Details (`/ProductDetails?id=N`) | Image, description, price, product number | ✅ Verified (static display) |
+| 5 | Add To Cart (`/AddToCart?productID=N`) | Adds item, redirects to cart | ✅ Verified |
+| 6 | Shopping Cart (`/ShoppingCart`) | Item list, quantities, totals, Update, PayPal checkout | ⚠️ Render only — see Known Issues |
+| 7 | Login (`/Account/Login`) | Email/password form, forgot password link | ⚠️ Render only — see Known Issues |
+| 8 | Register (`/Account/Register`) | Registration form | ⚠️ Render only — see Known Issues |
+| 9 | About (`/About`) | Static content | ✅ Verified |
+| 10 | Contact (`/Contact`) | Static content | ✅ Verified |
+
+## Known Issues
+
+The following pages render correctly but have interactive features that do not function:
+
+| Page | Issue | Root Cause |
+|------|-------|------------|
+| Shopping Cart (`/ShoppingCart`) | Quantity update button doesn't trigger recalculation | Post-back button event not wired in Blazor component |
+| Shopping Cart (`/ShoppingCart`) | Remove checkbox doesn't remove items from cart | Post-back checkbox event not wired in Blazor component |
+| Login (`/Account/Login`) | Form submission doesn't authenticate the user | `SignInManager` cannot set authentication cookies inside a SignalR circuit (Blazor Server limitation) |
+| Register (`/Account/Register`) | Form submission doesn't create a new account | `SignInManager` cannot set authentication cookies inside a SignalR circuit (Blazor Server limitation) |
+
+!!! warning "Page-load ≠ Functional"
+    Screenshots confirm that these pages **render correctly** (layout, data binding, styling all work). They were verified at the page-load level only. Interactive features (button clicks, form submissions, state changes) require additional fixes listed above.
 
 ## Conclusions
 
@@ -123,4 +137,6 @@ Key transforms applied:
 - **BWFC component compatibility is excellent:** all 31 control types used in WingtipToys have BWFC equivalents
 - **Key architectural decisions** (SQLite, scoped services, mock PayPal) match standard Blazor Server patterns documented in the migration skills
 - **Post-migration fixes required:** static file serving (wwwroot), cart state persistence (cookie-based cart ID) — these are Blazor-specific patterns not yet covered by the migration skills
-- **10 of 33 pages fully verified** with screenshots and functional testing
+- **Page rendering parity achieved:** 10 of 33 pages verified — all render correctly with proper layout, data binding, and styling
+- **Interactive features need additional work:** Shopping Cart (update/remove), Login, and Register pages render correctly but form submissions and button actions do not function (see Known Issues). The Login/Register limitation is inherent to Blazor Server's SignalR circuit model and requires an HTTP-based authentication flow
+- **7 of 10 verified pages are fully functional** end-to-end; the remaining 3 are render-verified only
