@@ -72,6 +72,8 @@ Layer 1 handles every transform that can be expressed as a regex find-and-replac
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
+`_Imports.razor` includes `@inherits BlazorWebFormsComponents.WebFormsPageBase` so that all converted pages get `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` without per-page injection. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
+
 ### What Layer 1 Does NOT Do
 
 - Convert `SelectMethod` to `Items` binding (requires understanding the data flow)

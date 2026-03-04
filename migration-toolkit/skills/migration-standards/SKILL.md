@@ -25,7 +25,7 @@ Apply these standards to:
 | Framework | **.NET 10** (or latest LTS/.NET preview) |
 | Project template | `dotnet new blazor --interactivity Server` |
 | Render mode | Global Server Interactive (see [Render Mode Placement](#render-mode-placement) below) |
-| Base class | `ComponentBase` (not `System.Web.UI.Page`) |
+| Base class | `WebFormsPageBase` for pages (`@inherits` in `_Imports.razor`); `ComponentBase` for non-page components |
 | Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
 
 ### Render Mode Placement
@@ -49,6 +49,42 @@ Apply these standards to:
 This gives every page global server interactivity. Do **not** place `@rendermode InteractiveServer` as a line in `_Imports.razor` — it is not a valid Razor directive and will cause build errors (RZ10003, CS0103, RZ10024).
 
 > **Reference:** [ASP.NET Core Blazor render modes](https://learn.microsoft.com/aspnet/core/blazor/components/render-modes)
+
+### Page Base Class
+
+`WebFormsPageBase` eliminates per-page boilerplate when migrating Web Forms code-behind. Instead of injecting `IPageService` into every page, a single `@inherits` directive in `_Imports.razor` gives all pages access to familiar Web Forms properties.
+
+**One-time setup:**
+
+1. **`_Imports.razor`** — add the base class directive:
+
+```razor
+@inherits BlazorWebFormsComponents.WebFormsPageBase
+```
+
+2. **Layout (`MainLayout.razor`)** — add the Page render component (renders `<PageTitle>` and `<meta>` tags):
+
+```razor
+<BlazorWebFormsComponents.Page />
+```
+
+**Properties available on every page:**
+
+| Property | Behavior |
+|---|---|
+| `Title` | Delegates to `IPageService.Title` — `Page.Title = "X"` works unchanged |
+| `MetaDescription` | Delegates to `IPageService.MetaDescription` |
+| `MetaKeywords` | Delegates to `IPageService.MetaKeywords` |
+| `IsPostBack` | Always returns `false` — `if (!IsPostBack)` always enters block |
+| `Page` | Returns `this` — enables `Page.Title = "X"` dot syntax |
+
+**What is NOT provided (forces proper Blazor migration):**
+
+- `Page.Request` — use `IHttpContextAccessor` or `NavigationManager`
+- `Page.Response` — use `NavigationManager` for redirects
+- `Page.Session` — use scoped DI services
+
+**When to still use `@inject IPageService`:** Non-page components (e.g., a shared header or sidebar) that need access to page metadata should inject `IPageService` directly. `WebFormsPageBase` only applies to routable pages.
 
 ### Database Migration
 
@@ -127,8 +163,8 @@ The script should preserve the attribute and annotate the signature change neede
 | `Page_Load` | `OnInitializedAsync` | One-time init |
 | `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
 | `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
-| `IsPostBack` check | First render check via `firstRender` param | `if (!firstRender) return;` |
-| `Page.Title` | `PageService.Title` / `<Page>` component | BWFC provides `PageService` and a `Page` component that renders `<PageTitle>`. Use `PageService.Title` in code-behind as the equivalent of `Page.Title`. |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
+| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
 ### Layer 1 (Script) vs Layer 2 (Manual) Boundary
@@ -232,12 +268,16 @@ The script should preserve the attribute and annotate the signature change neede
 @* TODO: Update Submit_Click signature: (object, EventArgs) → (MouseEventArgs) *@
 ```
 
-### ❌ Using Page as Base Class
+### ❌ Using System.Web.UI.Page as Base Class
 
 ```csharp
-// WRONG
+// WRONG — Web Forms base class
 public partial class ProductList : Page { }
 
-// RIGHT
-public partial class ProductList : ComponentBase { }
+// RIGHT — BWFC page base class (provides Page.Title, IsPostBack, etc.)
+// Set via @inherits WebFormsPageBase in _Imports.razor
+public partial class ProductList : WebFormsPageBase { }
+
+// ALSO RIGHT — for non-page components
+public partial class MyComponent : ComponentBase { }
 ```
