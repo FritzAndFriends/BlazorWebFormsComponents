@@ -86,31 +86,14 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
 **Script enhancements (bwfc-migrate.ps1):** ConvertFrom-MasterPage (6 transforms: @inherits injection, document wrapper strip, ContentPlaceHolder→@Body, ScriptManager removal, HeadContent extraction, layout path remap). New-AppRazorScaffold (App.razor + Routes.razor). Eval format-string regex (`Eval("prop","{0:fmt}")` → `@context.prop.ToString("fmt")`). String.Format regex (`String.Format("{0:fmt}",Item.Prop)` → `@($"{context.Prop:fmt}")`). Regex ordering: specific patterns before general. ScriptManager uses `(?s)`, ContentPlaceHolder uses `(?si)`.
 
-### GetRouteUrl Completion (2026-03-05)
+<!-- Summarized 2026-03-05 by Scribe -- covers GetRouteUrl through migration-toolkit sync -->
 
-- `GetRouteUrlHelper.cs`: 4 extension method overloads on `BaseWebFormsComponent` (2 `object`, 2 `RouteValueDictionary`), all delegate to `LinkGenerator.GetPathByRouteValues`. WingtipToys uses anonymous-object overloads exclusively. In Blazor, called as `this.GetRouteUrl(...)` (extension method vs Web Forms instance method). Toolkit suggests inlining route URLs as alternative.
+### GetRouteUrl, Run 5 & Toolkit Sync Summary (2026-03-04 through 2026-03-05)
 
+**GetRouteUrl:** 4 extension method overloads on BaseWebFormsComponent (2 object, 2 RouteValueDictionary), all delegate to LinkGenerator.GetPathByRouteValues. WingtipToys uses anonymous-object overloads only.
 
- Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
+**Run 5 migration:** 3.25s, 309 transforms, 32 files. 6 new enhancements confirmed (LoginView, GetRouteUrl hints, SelectMethod TODO, Register cleanup, ContentPlaceHolder, String.Format). Clean build after stubbing Account/Checkout. Gaps: static assets need wwwroot/ copy, csproj TFM still net8.0.
 
-### Run 5 WingtipToys Migration (2026-03-04)
+**Toolkit sync:** migration-toolkit/ is canonical home. Synced 47KB bwfc-migrate.ps1 over stale 29KB copy. PageService.Title already exists -- updated analysis and skill. .NET SDK prereq updated to 10.0+. Lesson: always check existing BWFC components before flagging as missing.
 
-- **Script (Layer 1):** 3.25s, 309 transforms, 32 files. New enhancements: LoginView→AuthorizeView, GetRouteUrl inject hint, SelectMethod TODO, Register cleanup, ContentPlaceHolder→@Body, String.Format + bare Item.
-- **Layer 2:** ~7m 20s. Models, DbContext, service, layout, Program.cs, 8 page fixes, 28 stubs.
-- **Build:** 0 errors, 0 warnings after fixing un-stubbed Account/Checkout pages and missing RenderMode using.
-- **Gaps:** Static assets need wwwroot/ copy. csproj scaffold still net8.0 — needs parameterization.
-
- Team update (2026-03-04): Run 5 migration validated  309 transforms, 6 new enhancements confirmed, clean build. Recommendations: static assets  wwwroot/, parameterize TFM, consider stub generation  decided by Cyclops
-
- Team update (2026-03-05): Run reports now require explicit Works/Doesn't-Work sections with difficulty categorization  decided by Beast
-
-### Migration-Toolkit Sync (2026-03-05)
-
-- **migration-toolkit/ is canonical home** for all migration assets. `scripts/bwfc-migrate.ps1` (47KB, 21 functions) synced over stale migration-toolkit copy (29KB). Dev copy in `scripts/` retained with header comment pointing to canonical location.
-- **PageService.Title already exists** — BWFC has `PageService` + `Page` component that renders `<PageTitle>`. Updated analysis-and-recommendations.md and migration-standards SKILL.md to reflect this. Script enhancement should map `Page.Title` → `PageService.Title`, not create a new `<PageTitle>` conversion.
-- **migration-standards skill** copied from `.ai-team/skills/` to `migration-toolkit/skills/` for user-facing distribution.
-- **.NET SDK prerequisite** updated from 8.0+ to 10.0+ in migration-toolkit README.
-- **bwfc-scan.ps1** verified — exists and has proper structure (synopsis, params, examples).
-- **Lesson:** Always check existing BWFC components before flagging features as missing. PageService was already there but wasn't reflected in migration analysis.
-
- Team update (2026-03-04): Migration standards formalized  EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation. migration-toolkit/ is canonical home (consolidated with earlier restructure decision). Scripts must preserve BWFC data control tags, not rewrite to raw HTML.  decided by Jeffrey T. Fritz, Forge
+Team updates: Migration report 3-level traversal (Beast). Run 5 reports need Works/Doesn't-Work sections (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC data controls preferred, migration-toolkit/ canonical (Jeff/Forge).

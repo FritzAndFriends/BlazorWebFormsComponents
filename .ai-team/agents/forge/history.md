@@ -93,42 +93,12 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
  Team update (2026-03-04): Layer 1 benchmark baseline established  scan 0.9s, migrate 2.4s, 338 build errors (code-behind only)  decided by Cyclops
  Team update (2026-03-04): Layer 2+3 benchmark complete  ~9.4 min with Copilot, clean build, migration skills validated  decided by Cyclops
 
-### Migration Run 4 — Enhanced Script Validation (2026-03-04)
+<!-- Summarized 2026-03-05 by Scribe -- covers Run 4 review through Run 5 analysis -->
 
-**By:** Forge (Lead / Web Forms Reviewer)
+### Run 4-5 Review & BWFC Capabilities Analysis (2026-03-04 through 2026-03-05)
 
-**What was tested:** Full from-scratch migration of WingtipToys using the enhanced `bwfc-migrate.ps1` script with `ConvertFrom-MasterPage`, `New-AppRazorScaffold`, Eval format-string regex, and String.Format regex.
+**Run 4 review:** ConvertFrom-MasterPage = highest-impact enhancement (auto-generates MainLayout.razor). 289 transforms (+12 from new regexes/master page). 0 errors, 0 warnings, 11/11 features. CascadingAuthenticationState needed in Routes.razor for AuthorizeView.
 
-**Key findings vs Run 3:**
-1. **ConvertFrom-MasterPage is the highest-impact enhancement.** Auto-generates MainLayout.razor from Site.Master with correct @inherits, HeadContent extraction, ContentPlaceHolder→@Body, and LoginView/SelectMethod flagging. Eliminates the most time-consuming manual step.
-2. **App.razor + Routes.razor scaffolding saves boilerplate time.** Combined with master page conversion, the script now generates 7 scaffold files vs 4 in Run 3.
-3. **Eval format-string regex works correctly:** `<%#: Eval("Total", "{0:C}") %>` → `@context.Total.ToString("C")`.
-4. **String.Format regex works for simple cases:** `<%#: String.Format("{0:c}", Item.UnitPrice) %>` → `@($"{context.UnitPrice:c}")`. Complex expressions (arithmetic with Convert.ToDouble) correctly left as manual.
-5. **Total transforms increased from 277 to 289** (+12 from new regexes and master page processing).
-6. **Build: 0 errors, 0 warnings** (improved from Run 3's 63 warnings).
-7. **11/11 features pass** — consistent with Run 2 and Run 3.
-8. **CascadingAuthenticationState must be added to Routes.razor** when using AuthorizeView — the scaffolded Routes.razor doesn't include this automatically. Consider adding it to `New-AppRazorScaffold`.
+**Run 5 BWFC analysis:** 95+ EventCallbacks across 30+ components matching Web Forms names. 3 of 4 top manual rewrites unnecessary -- BWFC already had ListView, FormView, GridView. 40% estimated reduction if scripts preserve BWFC data controls. Gaps: Repeater has zero EventCallbacks, GridView missing OnRowDataBound/OnRowCreated. SelectMethod TODOs need `Items=@data` guidance. Deliverables: analysis-and-recommendations.md, migration-standards SKILL.md, forge-run5-standards decision.
 
- Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops
-
- Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
-
-### Run 5 BWFC Capabilities Analysis (2026-03-05)
-
-**By:** Forge (Lead / Web Forms Reviewer)
-
-**What was analyzed:** Full audit of BWFC EventCallback parameters, component coverage vs Run 5 manual fixes, script enhancement opportunities, and component improvement gaps.
-
-**Key findings:**
-1. **95+ EventCallback parameters across 30+ components** with names matching Web Forms originals. OnClick, OnCommand, OnSelectedIndexChanged, etc. are all preserved. Migration scripts should keep these attributes verbatim.
-2. **3 of 4 top manual page rewrites were unnecessary.** ProductList (ListView), ProductDetails (FormView), ShoppingCart (GridView) were all replaced with raw HTML when BWFC already had functional equivalents. Estimated 40% reduction in manual page-fix effort if BWFC data controls are preserved.
-3. **SelectMethod TODO annotations need improvement.** Current "replace with DI" guidance doesn't mention BWFC's `Items` parameter. Updated guidance: `Items=@_products` loaded via `OnInitializedAsync`.
-4. **Repeater has zero EventCallbacks** — Web Forms Repeater has ItemCommand, ItemCreated, ItemDataBound. This is a gap.
-5. **GridView missing OnRowDataBound/OnRowCreated** — commonly used for conditional formatting in Web Forms.
-
-**Deliverables created:**
-- `docs/migration-tests/wingtiptoys-run5-2026-03-04/analysis-and-recommendations.md` — Full analysis report
-- `.ai-team/skills/migration-standards/SKILL.md` — Canonical migration standards skill
-- `.ai-team/decisions/inbox/forge-run5-standards.md` — Decision for Scribe to merge
-
- Team update (2026-03-04): Migration standards formalized  EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation. migration-toolkit/ is canonical home for all deliverable assets (not scripts/ or .ai-team/skills/). BWFC data controls must be preferred over raw HTML in migration scripts.  decided by Jeffrey T. Fritz, Forge
+Team updates: GetRouteUrl overloads completed (Cyclops). Migration report 3-level traversal (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation, migration-toolkit/ canonical (Jeff/Forge).
