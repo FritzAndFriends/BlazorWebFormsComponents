@@ -5709,3 +5709,10 @@ This would reduce the manual item count from 18 to ~14, pushing Layer 1 coverage
 
 Should Cyclops implement these two regexes in `bwfc-migrate.ps1`? The changes are ~10 lines of code in the `ConvertFrom-Expressions` function, with well-defined test cases from WingtipToys source files.
 
+
+### 2026-03-04: Master Page Transforms and Expression Regex Enhancements
+
+**By:** Cyclops
+**What:** Added `ConvertFrom-MasterPage` function to `bwfc-migrate.ps1` with 6 transforms (ScriptManager removal, head metadata extraction, document wrapper stripping, ContentPlaceHolder to @Body, Layer 2 flagging, @inherits injection). Added output path remapping for .master files (Site.Master to MainLayout.razor). Added `New-AppRazorScaffold` for App.razor and Routes.razor generation. Implemented Eval format-string regex and String.Format with Item.Property regex per Forge's proposal.
+**Why:** Master pages were output as flat .razor files without layout semantics. Format-string expressions were not being transformed, leaving unnecessary manual items. These changes push Layer 1 coverage from ~40% to ~45%.
+

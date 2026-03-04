@@ -94,3 +94,15 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
  Team update (2026-03-04): Forge proposed 2 regex additions to bwfc-migrate.ps1 for Eval format-string and String.Format patterns (eval-regex-enhancement, status: Proposed)  decided by Forge
 
+### Master Page & Expression Enhancements (2026-03-04)
+
+**ConvertFrom-MasterPage function:** Added to bwfc-migrate.ps1 for .master-file-specific transforms. 6 mechanical transforms: (1) inject `@inherits LayoutComponentBase`, (2) strip document wrapper (DOCTYPE/html/head/body), (3) ContentPlaceHolder MainContent → @Body (other CPHs get TODO comments), (4) remove ScriptManager block (multiline (?s) regex), (5) extract meta/link/title from head into `<HeadContent>` block, (6) output path remap to `Components\Layout\{Name}Layout.razor` (Site.Master → MainLayout.razor). Called after ConvertFrom-MasterDirective in the pipeline. Flags LoginView and SelectMethod as manual items.
+
+**New-AppRazorScaffold function:** Generates `Components/App.razor` (Blazor document shell with HeadOutlet + Routes @rendermode) and `Components/Routes.razor` (Router with DefaultLayout=MainLayout). Called alongside New-ProjectScaffold from entry point.
+
+**Eval format-string regex:** `<%#: Eval("prop", "{0:fmt}") %>` → `@context.prop.ToString("fmt")`. Placed BEFORE existing single-arg Eval regex so specific pattern matches first.
+
+**String.Format regex:** `<%#: String.Format("{0:fmt}", Item.Prop) %>` → `@($"{context.Prop:fmt}")`. Uses `$$` in replacement for literal `$` in .NET regex. Placed before existing Eval/Item regexes.
+
+**Key decisions:** ScriptManager regex uses `(?s)` for multiline matching across `<Scripts>` block. ContentPlaceHolder regex uses `(?si)` for case-insensitive + singleline. Head metadata extraction happens before head section removal. Code-behind output path for .master files reuses computed `$razorRelPath + $cbSuffix`.
+
