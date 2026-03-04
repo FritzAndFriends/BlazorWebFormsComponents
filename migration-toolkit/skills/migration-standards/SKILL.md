@@ -52,7 +52,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 
 ### Database Migration
 
-- **Always** migrate EF6 → EF Core
+- **Always** migrate EF6 → EF Core using the **latest .NET 10 packages** (currently **10.0.3**)
+- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`
 - Prefer SQLite for local dev / demos; SQL Server for production
 - Replace `DropCreateDatabaseIfModelChanges` with `EnsureCreated` + idempotent seed
 - Use `IDbContextFactory<T>` or scoped `DbContext` injection
