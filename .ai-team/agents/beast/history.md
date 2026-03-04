@@ -103,3 +103,5 @@
 
  Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
 
+
+ Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff

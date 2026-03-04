@@ -5842,3 +5842,9 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
 **Why:** These patterns should be considered validated for external migration guidance.
 
+
+### 2026-03-04: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Entity Framework Core migrations should always use the latest .NET 10 version of the package, currently 10.0.3. Use `Microsoft.EntityFrameworkCore` version 10.0.3 (and related packages like `.SqlServer`, `.Tools`, `.Design` at the same version).
+**Why:** User request — captured for team memory. Ensures migrated projects use current stable EF Core matching the net10.0 TFM.
+
