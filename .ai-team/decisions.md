@@ -5848,3 +5848,13 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Entity Framework Core migrations should always use the latest .NET 10 version of the package, currently 10.0.3. Use `Microsoft.EntityFrameworkCore` version 10.0.3 (and related packages like `.SqlServer`, `.Tools`, `.Design` at the same version).
 **Why:** User request — captured for team memory. Ensures migrated projects use current stable EF Core matching the net10.0 TFM.
 
+
+### 2026-03-04: WebFormsPageBase  Page base class for converted ASPX pages (consolidated)
+
+**By:** Forge, Cyclops
+**Requested by:** Jeffrey T. Fritz
+**Status:** Implemented (ff50b85, PR #419)
+
+**What:** Created `WebFormsPageBase : ComponentBase` as a separate page base class for converted Web Forms pages. Inherits `ComponentBase` directly (not `BaseWebFormsComponent`) because pages are top-level containers, not child controls. Provides: `Title`, `MetaDescription`, `MetaKeywords` (delegating to `IPageService`), `IsPostBack => false`, and `protected WebFormsPageBase Page => this` self-reference. `[Inject] private IPageService` is auto-injected, eliminating per-page `@inject IPageService Page` boilerplate. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). `Page.Title = "X"` and `if (!IsPostBack)` compile with zero changes from Web Forms code-behind. `Page.Request`, `Page.Response`, `Page.Session` deliberately omitted to force proper Blazor migration. Uses tabs for indentation matching existing project style.
+
+**Why:** Jeff asked if converted ASPX pages could inherit from a BWFC Page component to dramatically improve migration. Analysis of `System.Web.UI.Page` surface area showed Title and IsPostBack are the most common patterns (27 pages, 12+ IsPostBack occurrences in WingtipToys). Option C (base class + Page self-reference shim) was selected over adding properties to `BaseWebFormsComponent` (would pollute all controls) or a base class without Page property (wouldn't support `Page.Title` syntax). Conservative estimate: saves 15-25 minutes of manual work for WingtipToys, eliminates 100% of IsPostBack compiler errors. 8 bUnit tests written and passing (1472 total). 3 migration docs updated (bwfc-migration SKILL, migration-standards SKILL, METHODOLOGY).

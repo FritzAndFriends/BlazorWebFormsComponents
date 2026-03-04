@@ -98,3 +98,19 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 
 
  Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+
+### Page Base Class Architecture Analysis (2026-03-05)
+
+**Jeff's question:** "What if converted ASPX pages inherited from a BWFC base class? Can we dramatically improve migration?"
+
+**Analysis:** Reviewed System.Web.UI.Page surface area (Title, IsPostBack, MetaDescription, MetaKeywords, Request, Response, Session, IsValid, etc.) against current BWFC architecture (PageService as scoped DI, Page.razor render component, BaseWebFormsComponent hierarchy, WebFormsPage wrapper). Evaluated 3 options: (A) add to BaseWebFormsComponent (rejected — pollutes controls), (B) new WebFormsPageBase : ComponentBase (clean but no Page.Title syntax), (C) Option B + `Page => this` self-reference (enables literal `Page.Title = "X"` syntax).
+
+**Recommendation:** Option C — `WebFormsPageBase : ComponentBase` with `Title`, `MetaDescription`, `MetaKeywords` delegating to IPageService, `IsPostBack => false`, and `protected WebFormsPageBase Page => this;`. Converted pages use `@inherits WebFormsPageBase` (one line in _Imports.razor). Eliminates per-page `@inject IPageService Page`, makes `Page.Title = "X"` and `if (!IsPostBack)` compile unchanged. Deliberately omits Request/Response/Session to force proper Blazor migration.
+
+**Impact:** For WingtipToys (27 pages): eliminates 27 @inject lines, 12+ IsPostBack manual fixes, ~15-25 minutes of manual work. The two most common Web Forms code-behind patterns survive migration with zero changes. Verdict: dramatic improvement.
+
+**Key risks:** (1) `Page` property shadows `Page.razor` in @code — acceptable, already the pattern in samples. (2) `if (IsPostBack)` without `!` becomes dead code — scripts must flag it. (3) Doesn't inherit BaseWebFormsComponent — pages don't need CascadingValue wrapping, FindControl, or ViewState.
+
+**Decision document:** .ai-team/decisions/inbox/forge-page-base-class.md — pending Jeff's approval.
+
+ Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff

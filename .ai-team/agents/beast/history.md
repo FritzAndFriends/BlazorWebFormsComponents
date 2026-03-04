@@ -105,3 +105,14 @@
 
 
  Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+
+### WebFormsPageBase Documentation (2026-03-05)
+
+- **Architecture decision documented:** `WebFormsPageBase` inherits from `ComponentBase` and provides `Title`, `MetaDescription`, `MetaKeywords`, `IsPostBack`, and `Page` (self-reference) for converted ASPX pages. Eliminates per-page `@inject IPageService` boilerplate.
+- **bwfc-migration SKILL.md updated:** Step 2 (`_Imports.razor`) now includes `@inherits BlazorWebFormsComponents.WebFormsPageBase`. Step 3 expanded to include `<BlazorWebFormsComponents.Page />` in layout. Lifecycle methods table updated for `IsPostBack` (works AS-IS) and `if (IsPostBack)` (dead code — flag for review). "No PostBack" gotcha rewritten. New "Page Base Class" row added to control translation table.
+- **migration-standards SKILL.md updated:** Target Architecture table updated (`WebFormsPageBase` for pages, `ComponentBase` for non-page components). New "Page Base Class" section added with one-time setup, properties table, and guidance on when `@inject IPageService` is still needed. Page Lifecycle Mapping updated for `IsPostBack` and `Page.Title`. Anti-pattern section corrected to show `WebFormsPageBase` as the right base class.
+- **METHODOLOGY.md updated:** Layer 1 scaffold section now documents that `_Imports.razor` includes `@inherits WebFormsPageBase` and layout includes `<BlazorWebFormsComponents.Page />`.
+- **Key nuance preserved:** `@inject IPageService` remains valid and documented for non-page components. `<BlazorWebFormsComponents.Page />` render component is still required in the layout — `WebFormsPageBase` provides the code-behind API, `<Page />` does the rendering. `Page.Request`, `Page.Response`, `Page.Session` are deliberately omitted to force proper Blazor migration.
+- **Source:** Architecture decision at `.ai-team/decisions/inbox/forge-page-base-class.md`, requested by Jeffrey T. Fritz.
+
+ Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
