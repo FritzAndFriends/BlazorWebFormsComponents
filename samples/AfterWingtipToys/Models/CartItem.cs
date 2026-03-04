@@ -1,12 +1,19 @@
-namespace WingtipToys.Models
+using System.ComponentModel.DataAnnotations;
+
+namespace WingtipToys.Models;
+
+public class CartItem
 {
-    public class CartItem
-    {
-        public string ItemId { get; set; } = "";
-        public string CartId { get; set; } = "";
-        public int Quantity { get; set; }
-        public System.DateTime DateCreated { get; set; }
-        public int ProductId { get; set; }
-        public Product? Product { get; set; }
-    }
+    [Key]
+    public string ItemId { get; set; } = string.Empty;
+
+    public string CartId { get; set; } = string.Empty;
+
+    public int Quantity { get; set; }
+
+    public DateTime DateCreated { get; set; }
+
+    public int ProductId { get; set; }
+
+    public virtual Product Product { get; set; } = null!;
 }

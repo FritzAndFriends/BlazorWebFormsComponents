@@ -1,7 +1,18 @@
 @page "/AddToCart"
-@rendermode InteractiveServer
+@inject CartStateService CartService
+@inject NavigationManager Nav
 
-<div>
-    <p>Adding item to cart...</p>
-</div>
+@code {
+    [SupplyParameterFromQuery(Name = "productID")]
+    public int? ProductID { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ProductID.HasValue)
+        {
+            await CartService.AddToCartAsync(ProductID.Value);
+        }
+        Nav.NavigateTo("/ShoppingCart");
+    }
+}
 

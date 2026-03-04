@@ -1,25 +1,22 @@
 using Microsoft.AspNetCore.Components;
 
-namespace WingtipToys
+namespace WingtipToys;
+
+public partial class ErrorPage : ComponentBase
 {
-    public partial class ErrorPage : ComponentBase
+    [SupplyParameterFromQuery(Name = "handler")]
+    public string? Handler { get; set; }
+
+    [SupplyParameterFromQuery(Name = "msg")]
+    public string? Msg { get; set; }
+
+    private string _friendlyErrorMsg = "A problem has occurred on this web site. Please try again. If this error continues, please contact support.";
+
+    protected override void OnInitialized()
     {
-        [SupplyParameterFromQuery]
-        public string? error { get; set; }
-
-        [SupplyParameterFromQuery]
-        public string? handler { get; set; }
-
-        [SupplyParameterFromQuery]
-        public string? detail { get; set; }
-
-        [SupplyParameterFromQuery]
-        public string? inner { get; set; }
-
-        public string FriendlyMessage => error ?? "An error occurred while processing your request.";
-        public bool ShowDetail => !string.IsNullOrEmpty(detail) || !string.IsNullOrEmpty(handler) || !string.IsNullOrEmpty(inner);
-        public string DetailMessage => detail ?? "";
-        public string HandlerMessage => handler ?? "";
-        public string InnerMessage => inner ?? "";
+        if (Msg == "404")
+        {
+            _friendlyErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
+        }
     }
 }

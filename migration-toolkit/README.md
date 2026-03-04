@@ -19,7 +19,7 @@ You're a .NET developer who owns a Web Forms application and wants to migrate it
 
 | Requirement | Version | Why |
 |---|---|---|
-| .NET SDK | 8.0+ | Blazor Server target framework |
+| .NET SDK | 10.0+ | Blazor Server target framework (.NET 10 Global Server Interactive) |
 | PowerShell | 7.0+ | Migration scripts require PowerShell Core |
 | BWFC NuGet package | Latest | `dotnet add package Fritz.BlazorWebFormsComponents` |
 | GitHub Copilot | Any tier | Used for Layer 2 structural transforms |

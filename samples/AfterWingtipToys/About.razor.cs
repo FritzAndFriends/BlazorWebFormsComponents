@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Components;
+namespace WingtipToys;
 
-namespace WingtipToys
+public partial class About : Microsoft.AspNetCore.Components.ComponentBase
 {
-    public partial class About : ComponentBase
-    {
-        protected string Title = "About";
-    }
 }

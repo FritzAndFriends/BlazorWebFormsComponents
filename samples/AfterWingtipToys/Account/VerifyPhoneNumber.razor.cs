@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Components;
+namespace WingtipToys.Account;
 
-namespace WingtipToys.Account
+public partial class VerifyPhoneNumber : Microsoft.AspNetCore.Components.ComponentBase
 {
-    public partial class VerifyPhoneNumber : ComponentBase
-    {
-        // Layer 2+ migration needed
-    }
 }

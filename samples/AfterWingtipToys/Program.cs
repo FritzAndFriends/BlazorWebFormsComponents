@@ -1,5 +1,4 @@
 using BlazorWebFormsComponents;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Data;
 using WingtipToys.Services;
@@ -9,46 +8,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddBlazorWebFormsComponents();
 
-builder.Services.AddDbContextFactory<ProductContext>(options =>
+builder.Services.AddDbContext<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartStateService>();
-builder.Services.AddScoped<CheckoutStateService>();
-builder.Services.AddScoped<IPayPalService, MockPayPalService>();
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
-})
-.AddEntityFrameworkStores<ProductContext>()
-.AddDefaultTokenProviders();
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/Login";
-});
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Login";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-// Ensure database is created and seeded
+// Seed the database
 using (var scope = app.Services.CreateScope())
 {
-    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
-    using var context = factory.CreateDbContext();
-    ProductDatabaseInitializer.Seed(context);
-
-    // Seed Identity roles and admin user
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    await IdentityDataSeeder.SeedAsync(roleManager, userManager);
+    var db = scope.ServiceProvider.GetRequiredService<ProductContext>();
+    ProductDatabaseInitializer.Seed(db);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -58,7 +41,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.MapStaticAssets();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();

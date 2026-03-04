@@ -1,3 +1,6 @@
+# NOTE: The canonical copy of this script lives in migration-toolkit/scripts/bwfc-migrate.ps1.
+# When making changes, update the migration-toolkit copy first and sync back here.
+
 <#
 .SYNOPSIS
     Performs mechanical regex-based transforms on ASP.NET Web Forms files to produce Blazor-ready output.

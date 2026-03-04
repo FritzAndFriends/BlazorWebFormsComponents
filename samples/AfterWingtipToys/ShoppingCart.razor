@@ -1,50 +1,70 @@
 @page "/ShoppingCart"
-@rendermode InteractiveServer
-<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
-    <GridView ID="CartList" AutoGenerateColumns="@false" ShowFooter="@true" GridLines="@GridLines.Vertical" CellPadding="4"
-        TItem="CartItem" Items="@CartItems"
-        CssClass="table table-striped table-bordered" >   
-        <Columns>
-        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />        
-        <BoundField DataField="Product.ProductName" HeaderText="Name" />        
-        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
-        <TemplateField   HeaderText="Quantity">            
-                <ItemTemplate>
-                    <TextBox ID="PurchaseQuantity" Width="40" Text="@GetQuantity(context.ItemId)"
-                        TextChanged="@(val => OnQuantityChanged(context.ItemId, val))"></TextBox> 
-                </ItemTemplate>        
-        </TemplateField>    
-        <TemplateField HeaderText="Item Total">            
-                <ItemTemplate>
-                    @($"{(_quantities.GetValueOrDefault(context.ItemId, context.Quantity) * (context.Product?.UnitPrice ?? 0)):c}")
-                </ItemTemplate>        
-        </TemplateField> 
-        <TemplateField HeaderText="Remove Item">            
-                <ItemTemplate>
-                    <CheckBox id="Remove" Checked="@IsMarkedForRemoval(context.ItemId)"
-                        CheckedChanged="@(val => OnRemovalChanged(context.ItemId, val))"></CheckBox>
-                </ItemTemplate>        
-        </TemplateField>    
-        </Columns>    
-    </GridView>
+@inject CartStateService CartService
+@inject NavigationManager Nav
+
+<div id="ShoppingCartTitle" class="ContentHead"><h1>@_title</h1></div>
+
+@if (_cartItems != null && _cartItems.Any())
+{
+    <table class="table table-striped table-bordered" cellpadding="4">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price (each)</th>
+                <th>Quantity</th>
+                <th>Item Total</th>
+                <th>Remove Item</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _cartItems)
+            {
+                <tr>
+                    <td>@item.ProductId</td>
+                    <td>@item.Product.ProductName</td>
+                    <td>@($"{item.Product.UnitPrice:c}")</td>
+                    <td>@item.Quantity</td>
+                    <td>@($"{(Convert.ToDouble(item.Quantity) * Convert.ToDouble(item.Product.UnitPrice)):c}")</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" @onclick="() => RemoveItemAsync(item.ItemId)">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
     <div>
         <p></p>
         <strong>
-            <Label ID="LabelTotalText" Text="Order Total: "></Label>
-            <Label ID="lblTotal" Text="@CartTotal"></Label>
-        </strong> 
+            Order Total: @($"{_total:c}")
+        </strong>
     </div>
-    <br />
-    <table> 
-    <tr>
-      <td>
-        <Button ID="UpdateBtn" Text="Update" OnClick="@OnUpdateCart" />
-      </td>
-      <td>
-        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
-                      width="145" alt="Check out with PayPal" 
-                      style="background:transparent; border:0" />
-      </td>
-    </tr>
-    </table>
+}
+
+@code {
+    private List<CartItem>? _cartItems;
+    private decimal _total;
+    private string _title = "Shopping Cart";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCartAsync();
+    }
+
+    private async Task LoadCartAsync()
+    {
+        _cartItems = await CartService.GetCartItemsAsync();
+        _total = await CartService.GetTotalAsync();
+        if (_cartItems == null || !_cartItems.Any())
+        {
+            _title = "Shopping Cart is Empty";
+        }
+    }
+
+    private async Task RemoveItemAsync(string itemId)
+    {
+        await CartService.RemoveCartItemAsync(itemId);
+        await LoadCartAsync();
+    }
+}
 

@@ -5564,11 +5564,11 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 **Why:** User request — establishes a repeatable pattern for tracking migration test results over time.
 
 
-### 2026-03-03: Migration toolkit restructure  self-contained distribution (consolidated)
+### 2026-03-04: migration-toolkit/ is the canonical home for all deliverable migration assets (consolidated)
 **By:** Jeffrey T. Fritz, Forge
 **Status:** Implemented
-**What:** Distributable migration skills and PowerShell scripts must NOT live in \.github/skills/\. All distributable migration assets moved into \migration-toolkit/\ as a self-contained distribution package: \migration-toolkit/skills/\ (3 Copilot skill files), \migration-toolkit/scripts/\ (bwfc-scan.ps1, bwfc-migrate.ps1). \.github/skills/\ retains only internal project skills. Scripts are copied (not moved) because \scripts/\ originals are still used internally.
-**Why:** The toolkit is a product to distribute, not internal project configuration. Eliminates confusion about which skills are for end-users vs internal. README.md updated with usage instructions and NuGet link.
+**What:** All tools, scripts, and skills used for migration tests and delivered to users must live in `migration-toolkit/` as a self-contained distribution package: `migration-toolkit/skills/` (Copilot skill files), `migration-toolkit/scripts/` (bwfc-scan.ps1, bwfc-migrate.ps1). This is the canonical location — not `scripts/`, not `.ai-team/skills/`, not `.github/skills/`. `.github/skills/` retains only internal project skills. Scripts are copied (not moved) because `scripts/` originals are still used internally.
+**Why:** User directive — establishing single source of truth for deliverable migration assets. The toolkit is a product to distribute, not internal project configuration. Eliminates confusion about which skills are for end-users vs internal. README.md updated with usage instructions and NuGet link.
 
 ### 2026-03-04: Layer 1 Benchmark Baseline Established
 
@@ -5776,3 +5776,26 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **By:** Beast
 **What:** Run 5 benchmark report introduces two new structural sections: (1) "What Works  Automated (Layer 1)"  complete inventory of all automated transforms with counts and examples, and (2) "What Doesn't Work  Still Manual (Layer 2)"  categorized by difficulty (mechanical-tedious vs requires-architectural-decisions). Replaces implicit "unconverted patterns" section with explicit, scannable breakdown. Pattern carries forward to Run 6+.
 **Why:** Self-contained report for stakeholders who haven't followed run history. Difficulty categorization helps project managers estimate effort. Forward-compatible for diffing against future runs.
+
+### 2026-03-04: Migration standards for Web Forms → Blazor projects
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:**
+1. EF6 should ALWAYS be migrated to EF Core
+2. Target application should always be a .NET 10 Blazor Global Server Interactive project, scaffolded with `dotnet new blazor --interactivity Server`
+3. When ASP.NET Identity is used in the Web Forms project, prefer ASP.NET Core Identity in the Blazor migration
+4. Event handler migration should leverage BWFC component event parameters (OnClick, OnCommand, OnSelectedIndexChanged, etc.) which already have similar names to Web Forms originals
+**Why:** User request — establishing canonical migration standards based on Run 5 learnings. These should be reflected in migration scripts, documentation, and skills.
+
+
+
+### 2026-03-05: Migration standards — BWFC data controls must be preferred over raw HTML
+
+**By:** Forge
+**What:**
+1. Run 5 analysis reveals 3 of 4 top manual page rewrites (ProductList, ProductDetails, ShoppingCart) replaced BWFC-compatible controls (ListView, FormView, GridView) with raw HTML `@foreach` loops — unnecessarily.
+2. BWFC exposes **95+ EventCallback parameters** across 30+ components with names matching Web Forms originals (OnClick, OnCommand, OnSelectedIndexChanged, etc.). Migration scripts should **preserve these attributes verbatim** and only annotate signature changes.
+3. The migration script should annotate `SelectMethod` replacements with explicit `Items=@data` guidance pointing to BWFC's `Items` parameter, not just a generic "replace with DI" TODO.
+4. Script enhancement priorities: (1) preserve BWFC data control tags, (2) Page.Title → PageTitle, (3) event handler preservation, (4) Page base class swap, (5) BundleConfig → link tags.
+5. Component improvement priorities: (1) add `OnRowDataBound`/`OnRowCreated` to GridView, (2) add events to Repeater (currently zero EventCallbacks), (3) document single-item FormView usage, (4) document ListView `Items` parameter in migration context.
+**Why:** Run 5 Layer 2 spent ~180s on page fixes, of which ~120s was rewriting data controls to raw HTML that BWFC already supports. Preserving BWFC tags would reduce manual migration effort by an estimated 40% for projects with data controls. These standards formalize Jeff's directive that BWFC event handlers have matching names and should be called out.
+

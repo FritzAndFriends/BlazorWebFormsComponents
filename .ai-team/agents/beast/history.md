@@ -76,3 +76,5 @@
 - **Enhancement impact table pattern:** Per-enhancement rows with Fired/Count/Run4-impact/Run5-status/Net-impact columns. Effective for showing ROI of individual script improvements.
 
  Team update (2026-03-04): Run 5 migration complete  309 transforms, clean build (0 errors, 0 warnings, 4.56s). Benchmark report pending. Key artifacts at docs/migration-tests/wingtiptoys-run5-2026-03-04/  decided by Cyclops
+
+ Team update (2026-03-04): Migration standards formalized  EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation. Documentation priorities: document single-item FormView usage, document ListView Items parameter in migration context. migration-toolkit/ is canonical home.  decided by Jeffrey T. Fritz, Forge

@@ -112,3 +112,23 @@ Team updates (2026-03-02): Unified release (PR #408), project reframed as migrat
  Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops
 
  Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
+
+### Run 5 BWFC Capabilities Analysis (2026-03-05)
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**What was analyzed:** Full audit of BWFC EventCallback parameters, component coverage vs Run 5 manual fixes, script enhancement opportunities, and component improvement gaps.
+
+**Key findings:**
+1. **95+ EventCallback parameters across 30+ components** with names matching Web Forms originals. OnClick, OnCommand, OnSelectedIndexChanged, etc. are all preserved. Migration scripts should keep these attributes verbatim.
+2. **3 of 4 top manual page rewrites were unnecessary.** ProductList (ListView), ProductDetails (FormView), ShoppingCart (GridView) were all replaced with raw HTML when BWFC already had functional equivalents. Estimated 40% reduction in manual page-fix effort if BWFC data controls are preserved.
+3. **SelectMethod TODO annotations need improvement.** Current "replace with DI" guidance doesn't mention BWFC's `Items` parameter. Updated guidance: `Items=@_products` loaded via `OnInitializedAsync`.
+4. **Repeater has zero EventCallbacks** — Web Forms Repeater has ItemCommand, ItemCreated, ItemDataBound. This is a gap.
+5. **GridView missing OnRowDataBound/OnRowCreated** — commonly used for conditional formatting in Web Forms.
+
+**Deliverables created:**
+- `docs/migration-tests/wingtiptoys-run5-2026-03-04/analysis-and-recommendations.md` — Full analysis report
+- `.ai-team/skills/migration-standards/SKILL.md` — Canonical migration standards skill
+- `.ai-team/decisions/inbox/forge-run5-standards.md` — Decision for Scribe to merge
+
+ Team update (2026-03-04): Migration standards formalized  EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation. migration-toolkit/ is canonical home for all deliverable assets (not scripts/ or .ai-team/skills/). BWFC data controls must be preferred over raw HTML in migration scripts.  decided by Jeffrey T. Fritz, Forge

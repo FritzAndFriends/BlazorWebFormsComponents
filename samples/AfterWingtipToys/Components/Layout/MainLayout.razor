@@ -1,4 +1,12 @@
 @inherits LayoutComponentBase
+@inject ProductContext Db
+
+<HeadContent>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wingtip Toys</title>
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</HeadContent>
 
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -16,47 +24,45 @@
                 <li><a href="/About">About</a></li>
                 <li><a href="/Contact">Contact</a></li>
                 <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart">Cart</a></li>
+                <li><a href="/ShoppingCart" id="cartCount">&nbsp;</a></li>
             </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <AuthorizeView>
-                    <Authorized>
-                        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
-                        <AuthorizeView Roles="canEdit" Context="adminContext">
-                            <Authorized>
-                                <li><a href="/AdminPage">Admin</a></li>
-                            </Authorized>
-                        </AuthorizeView>
-                        <li>
-                            <form method="post" action="/Account/Login?handler=logout">
-                                <AntiforgeryToken />
-                                <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>
-                            </form>
-                        </li>
-                    </Authorized>
-                    <NotAuthorized>
+            <AuthorizeView>
+                <NotAuthorized>
+                    <ul class="nav navbar-nav navbar-right">
                         <li><a href="/Account/Register">Register</a></li>
                         <li><a href="/Account/Login">Log in</a></li>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </ul>
+                    </ul>
+                </NotAuthorized>
+                <Authorized>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Account/Manage" title="Manage your account">Hello, @context.User.Identity?.Name !</a></li>
+                        <li><a href="/Account/Login">Log off</a></li>
+                    </ul>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
 </div>
-<div id="TitleContent" style="text-align: center; padding-top: 60px;">
+<div id="TitleContent" style="text-align: center">
     <a href="/">
-        <img src="/Images/logo.jpg" style="border:none;" alt="Wingtip Toys logo" />
+        <img id="Image1" src="/Images/logo.jpg" style="border-style:none" alt="Logo" />
     </a>
     <br />
 </div>
 <div id="CategoryMenu" style="text-align: center">
-    @for (int i = 0; i < Categories.Count; i++)
+    @if (_categories != null)
     {
-        if (i > 0)
+        @for (int i = 0; i < _categories.Count; i++)
         {
-            @:&nbsp;|&nbsp;
+            var cat = _categories[i];
+            <b style="font-size: large; font-style: normal">
+                <a href="@($"/ProductList?categoryName={cat.CategoryName}")">@cat.CategoryName</a>
+            </b>
+            @if (i < _categories.Count - 1)
+            {
+                <text>  |  </text>
+            }
         }
-        <b style="font-size: large; font-style: normal"><a href="/ProductList?id=@Categories[i].CategoryID">@Categories[i].CategoryName</a></b>
     }
 </div>
 <div class="container body-content">
@@ -66,3 +72,12 @@
         <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
     </footer>
 </div>
+
+@code {
+    private List<Category>? _categories;
+
+    protected override void OnInitialized()
+    {
+        _categories = Db.Categories.OrderBy(c => c.CategoryID).ToList();
+    }
+}

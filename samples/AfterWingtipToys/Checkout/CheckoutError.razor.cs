@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Components;
+namespace WingtipToys.Checkout;
 
-namespace WingtipToys.Checkout
+public partial class CheckoutError : Microsoft.AspNetCore.Components.ComponentBase
 {
-    public partial class CheckoutError : ComponentBase
-    {
-        // Layer 2+ migration needed
-    }
 }
