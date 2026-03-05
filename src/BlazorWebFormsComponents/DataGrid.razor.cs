@@ -16,6 +16,47 @@ namespace BlazorWebFormsComponents
 	public partial class DataGrid<ItemType> : DataBoundComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>, IDataGridStyleContainer
 	{
 
+		public DataGrid()
+		{
+			BubbledEvent += DataGrid_BubbledEvent;
+		}
+
+		private void DataGrid_BubbledEvent(object sender, System.EventArgs e)
+		{
+			if (e is CommandEventArgs cmd)
+			{
+				var args = new DataGridCommandEventArgs
+				{
+					CommandName = cmd.CommandName,
+					CommandArgument = cmd.CommandArgument,
+					CommandSource = cmd.Sender ?? this
+				};
+
+				var itemCommandHandler = ItemCommand.HasDelegate ? ItemCommand : OnItemCommand;
+				if (itemCommandHandler.HasDelegate) { _ = itemCommandHandler.InvokeAsync(args); }
+
+				switch (cmd.CommandName?.ToLowerInvariant())
+				{
+					case "edit":
+						var editHandler = EditCommand.HasDelegate ? EditCommand : OnEditCommand;
+						if (editHandler.HasDelegate) { _ = editHandler.InvokeAsync(args); }
+						break;
+					case "update":
+						var updateHandler = UpdateCommand.HasDelegate ? UpdateCommand : OnUpdateCommand;
+						if (updateHandler.HasDelegate) { _ = updateHandler.InvokeAsync(args); }
+						break;
+					case "delete":
+						var deleteHandler = DeleteCommand.HasDelegate ? DeleteCommand : OnDeleteCommand;
+						if (deleteHandler.HasDelegate) { _ = deleteHandler.InvokeAsync(args); }
+						break;
+					case "cancel":
+						var cancelHandler = CancelCommand.HasDelegate ? CancelCommand : OnCancelCommand;
+						if (cancelHandler.HasDelegate) { _ = cancelHandler.InvokeAsync(args); }
+						break;
+				}
+			}
+		}
+
 		/// <summary>
 		///	Specify if the DataGrid component will autogenerate its columns
 		/// </summary>
@@ -290,16 +331,31 @@ namespace BlazorWebFormsComponents
 		}
 
 		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> ItemCommand { get; set; }
+
+		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnItemCommand { get; set; }
+
+		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> EditCommand { get; set; }
 
 		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnEditCommand { get; set; }
 
 		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> CancelCommand { get; set; }
+
+		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnCancelCommand { get; set; }
 
 		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> UpdateCommand { get; set; }
+
+		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnUpdateCommand { get; set; }
+
+		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> DeleteCommand { get; set; }
 
 		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnDeleteCommand { get; set; }

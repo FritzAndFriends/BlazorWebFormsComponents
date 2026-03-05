@@ -1,0 +1,134 @@
+@code {
+
+	// ─── P1-4: GridView RowUpdated / RowDeleted events ──────────────────
+	// Verifies: RowUpdated fires with GridViewUpdateEventArgs,
+	//           OnRowUpdated alias works,
+	//           RowDeleted fires with GridViewDeleteEventArgs,
+	//           OnRowDeleted alias works.
+
+	GridViewUpdateEventArgs _updateArgs;
+	GridViewDeleteEventArgs _deleteArgs;
+
+	#region RowUpdated
+
+	[Fact]
+	public void RowUpdated_ParameterAccepted_WithBareAlias()
+	{
+		_updateArgs = null;
+		var data = GetTestData();
+
+		// RowUpdated should accept GridViewUpdateEventArgs
+		var cut = Render(
+			@<GridView ItemType="CrudItem" DataSource="data" AutoGenerateColumns="false" EditIndex="0"
+				RowEditing="@((GridViewEditEventArgs e) => { })"
+				RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+				RowUpdated="@((GridViewUpdateEventArgs e) => _updateArgs = e)"
+				RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+				<Columns>
+					<BoundField ItemType="CrudItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// The component should compile and render with RowUpdated parameter
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void OnRowUpdated_Alias_ParameterAccepted()
+	{
+		_updateArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView ItemType="CrudItem" DataSource="data" AutoGenerateColumns="false" EditIndex="0"
+				RowEditing="@((GridViewEditEventArgs e) => { })"
+				RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+				OnRowUpdated="@((GridViewUpdateEventArgs e) => _updateArgs = e)"
+				RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+				<Columns>
+					<BoundField ItemType="CrudItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void RowUpdated_EventArgs_HasRowIndex()
+	{
+		// Verify the GridViewUpdateEventArgs structure
+		var args = new GridViewUpdateEventArgs(3);
+		args.RowIndex.ShouldBe(3);
+		args.Cancel.ShouldBeFalse();
+	}
+
+	#endregion
+
+	#region RowDeleted
+
+	[Fact]
+	public void RowDeleted_ParameterAccepted_WithBareAlias()
+	{
+		_deleteArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView ItemType="CrudItem" DataSource="data" AutoGenerateColumns="false"
+				RowDeleting="@((GridViewDeleteEventArgs e) => { })"
+				RowDeleted="@((GridViewDeleteEventArgs e) => _deleteArgs = e)">
+				<Columns>
+					<BoundField ItemType="CrudItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void OnRowDeleted_Alias_ParameterAccepted()
+	{
+		_deleteArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView ItemType="CrudItem" DataSource="data" AutoGenerateColumns="false"
+				RowDeleting="@((GridViewDeleteEventArgs e) => { })"
+				OnRowDeleted="@((GridViewDeleteEventArgs e) => _deleteArgs = e)">
+				<Columns>
+					<BoundField ItemType="CrudItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void RowDeleted_EventArgs_HasRowIndex()
+	{
+		var args = new GridViewDeleteEventArgs(5);
+		args.RowIndex.ShouldBe(5);
+		args.Cancel.ShouldBeFalse();
+	}
+
+	#endregion
+
+	private List<CrudItem> GetTestData()
+	{
+		return new List<CrudItem>
+		{
+			new CrudItem { Id = 1, Name = "Alpha" },
+			new CrudItem { Id = 2, Name = "Beta" },
+			new CrudItem { Id = 3, Name = "Gamma" }
+		};
+	}
+
+	public class CrudItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

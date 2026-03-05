@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System;
 
 namespace BlazorWebFormsComponents.DataBinding
@@ -14,6 +15,12 @@ namespace BlazorWebFormsComponents.DataBinding
 
 		[Parameter]
 		public SelectHandler<TItemType> SelectMethod { get; set; }
+
+		[Parameter]
+		public SimpleSelectHandler<TItemType> SelectItems { get; set; }
+
+		[Parameter]
+		public SelectHandlerAsync<TItemType> SelectMethodAsync { get; set; }
 
 		[Parameter]
 		public IEnumerable<TItemType> Items
@@ -110,22 +117,58 @@ namespace BlazorWebFormsComponents.DataBinding
 		{
 			base.OnParametersSet();
 
-			if (SelectMethod != null)
+			// Only run sync loading if no async method is provided
+			if (SelectMethodAsync == null)
 			{
-				Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
+				if (SelectItems != null)
+				{
+					Items = SelectItems(int.MaxValue, 0, "");
+				}
+				else if (SelectMethod != null)
+				{
+					Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
+				}
+			}
+		}
+
+		protected override async Task OnParametersSetAsync()
+		{
+			await base.OnParametersSetAsync();
+
+			if (SelectMethodAsync != null)
+			{
+				var result = await SelectMethodAsync(int.MaxValue, 0, "");
+				Items = result;
 			}
 		}
 
 		/// <summary>
-		/// Re-invokes SelectMethod to refresh data after CRUD operations (sort, page, edit, delete).
+		/// Re-invokes the appropriate select delegate to refresh data after CRUD operations (sort, page, edit, delete).
 		/// </summary>
 		protected void RefreshSelectMethod()
 		{
-			if (SelectMethod != null)
+			if (SelectMethodAsync != null)
+			{
+				_ = RefreshSelectMethodAsync();
+			}
+			else if (SelectItems != null)
+			{
+				var result = SelectItems(int.MaxValue, 0, "");
+				Items = result;
+				StateHasChanged();
+			}
+			else if (SelectMethod != null)
 			{
 				Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
 				StateHasChanged();
 			}
+		}
+
+		private async Task RefreshSelectMethodAsync()
+		{
+			var result = await SelectMethodAsync(int.MaxValue, 0, "");
+			Items = result;
+			StateHasChanged();
 		}
 	}
 }

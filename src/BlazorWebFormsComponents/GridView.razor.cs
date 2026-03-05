@@ -87,12 +87,12 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Occurs after the selected index has changed.
 		/// </summary>
-		[Parameter] public EventCallback<int> SelectedIndexChanged { get; set; }
+		[Parameter] public EventCallback<GridViewSelectEventArgs> SelectedIndexChanged { get; set; }
 
 		/// <summary>
 		/// Web Forms migration alias for SelectedIndexChanged.
 		/// </summary>
-		[Parameter] public EventCallback<int> OnSelectedIndexChanged { get; set; }
+		[Parameter] public EventCallback<GridViewSelectEventArgs> OnSelectedIndexChanged { get; set; }
 
 		#region TableItemStyle Properties (IGridViewStyleContainer)
 
@@ -303,6 +303,16 @@ namespace BlazorWebFormsComponents
 		[Parameter] public int PageIndex { get; set; }
 
 		/// <summary>
+		/// Occurs before the page index changes. Can be cancelled.
+		/// </summary>
+		[Parameter] public EventCallback<PageChangedEventArgs> PageIndexChanging { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for PageIndexChanging.
+		/// </summary>
+		[Parameter] public EventCallback<PageChangedEventArgs> OnPageIndexChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the page index has changed.
 		/// </summary>
 		[Parameter] public EventCallback<PageChangedEventArgs> PageIndexChanged { get; set; }
@@ -434,6 +444,26 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<GridViewDeleteEventArgs> OnRowDeleting { get; set; }
 
 		/// <summary>
+		/// Occurs after a row has been updated.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewUpdateEventArgs> RowUpdated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for RowUpdated.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewUpdateEventArgs> OnRowUpdated { get; set; }
+
+		/// <summary>
+		/// Occurs after a row has been deleted.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewDeleteEventArgs> RowDeleted { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for RowDeleted.
+		/// </summary>
+		[Parameter] public EventCallback<GridViewDeleteEventArgs> OnRowDeleted { get; set; }
+
+		/// <summary>
 		/// Occurs when a row's Cancel button is clicked, but before the row exits edit mode.
 		/// </summary>
 		[Parameter] public EventCallback<GridViewCancelEditEventArgs> RowCancelingEdit { get; set; }
@@ -474,7 +504,15 @@ namespace BlazorWebFormsComponents
 			var totalPages = TotalPages;
 			var startRowIndex = newPageIndex * PageSize;
 
-			var args = new PageChangedEventArgs(newPageIndex, oldPageIndex, totalPages, startRowIndex);
+			var args = new PageChangedEventArgs(newPageIndex, oldPageIndex, totalPages, startRowIndex) { Sender = this };
+
+			// Fire PageIndexChanging before page change (cancellable)
+			var pageIndexChangingHandler = PageIndexChanging.HasDelegate ? PageIndexChanging : OnPageIndexChanging;
+			if (pageIndexChangingHandler.HasDelegate)
+			{
+				await pageIndexChangingHandler.InvokeAsync(args);
+				if (args.Cancel) return;
+			}
 
 			PageIndex = args.NewPageIndex;
 			var pageIndexChangedHandler = PageIndexChanged.HasDelegate ? PageIndexChanged : OnPageIndexChanged;
@@ -491,7 +529,7 @@ namespace BlazorWebFormsComponents
 				? SortDirection.Descending
 				: SortDirection.Ascending;
 
-			var args = new GridViewSortEventArgs(sortExpression, newDirection);
+			var args = new GridViewSortEventArgs(sortExpression, newDirection) { Sender = this };
 			var sortingHandler = Sorting.HasDelegate ? Sorting : OnSorting;
 			await sortingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
@@ -509,7 +547,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task EditRow(int rowIndex)
 		{
-			var args = new GridViewEditEventArgs(rowIndex);
+			var args = new GridViewEditEventArgs(rowIndex) { Sender = this };
 			var rowEditingHandler = RowEditing.HasDelegate ? RowEditing : OnRowEditing;
 			await rowEditingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
@@ -522,11 +560,15 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task UpdateRow(int rowIndex)
 		{
-			var args = new GridViewUpdateEventArgs(rowIndex);
+			var args = new GridViewUpdateEventArgs(rowIndex) { Sender = this };
 			var rowUpdatingHandler = RowUpdating.HasDelegate ? RowUpdating : OnRowUpdating;
 			await rowUpdatingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			EditIndex = -1;
+
+			var rowUpdatedHandler = RowUpdated.HasDelegate ? RowUpdated : OnRowUpdated;
+			if (rowUpdatedHandler.HasDelegate) await rowUpdatedHandler.InvokeAsync(args);
+
 			StateHasChanged();
 		}
 
@@ -535,9 +577,13 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task DeleteRow(int rowIndex)
 		{
-			var args = new GridViewDeleteEventArgs(rowIndex);
+			var args = new GridViewDeleteEventArgs(rowIndex) { Sender = this };
 			var rowDeletingHandler = RowDeleting.HasDelegate ? RowDeleting : OnRowDeleting;
 			await rowDeletingHandler.InvokeAsync(args);
+			if (args.Cancel) return;
+
+			var rowDeletedHandler = RowDeleted.HasDelegate ? RowDeleted : OnRowDeleted;
+			if (rowDeletedHandler.HasDelegate) await rowDeletedHandler.InvokeAsync(args);
 		}
 
 		/// <summary>
@@ -545,7 +591,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task CancelEdit(int rowIndex)
 		{
-			var args = new GridViewCancelEditEventArgs(rowIndex);
+			var args = new GridViewCancelEditEventArgs(rowIndex) { Sender = this };
 			var rowCancelingEditHandler = RowCancelingEdit.HasDelegate ? RowCancelingEdit : OnRowCancelingEdit;
 			await rowCancelingEditHandler.InvokeAsync(args);
 			if (args.Cancel) return;
@@ -558,13 +604,13 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task SelectRow(int rowIndex)
 		{
-			var args = new GridViewSelectEventArgs(rowIndex);
+			var args = new GridViewSelectEventArgs(rowIndex) { Sender = this };
 			var selectedIndexChangingHandler = SelectedIndexChanging.HasDelegate ? SelectedIndexChanging : OnSelectedIndexChanging;
 			await selectedIndexChangingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			SelectedIndex = args.NewSelectedIndex;
 			var selectedIndexChangedHandler = SelectedIndexChanged.HasDelegate ? SelectedIndexChanged : OnSelectedIndexChanged;
-			await selectedIndexChangedHandler.InvokeAsync(SelectedIndex);
+			await selectedIndexChangedHandler.InvokeAsync(new GridViewSelectEventArgs(SelectedIndex) { Sender = this });
 			StateHasChanged();
 		}
 

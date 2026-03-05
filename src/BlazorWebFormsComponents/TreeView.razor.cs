@@ -285,16 +285,38 @@ namespace BlazorWebFormsComponents
 		}
 
 		[Parameter]
+		public EventCallback<TreeNodeEventArgs> TreeNodeDataBound { get; set; }
+
+		[Parameter]
 		public EventCallback<TreeNodeEventArgs> OnTreeNodeDataBound { get; set; }
+
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> TreeNodeCheckChanged { get; set; }
 
 		[Parameter]
 		public EventCallback<TreeNodeEventArgs> OnTreeNodeCheckChanged { get; set; }
 
 		[Parameter]
+		public EventCallback<TreeNodeEventArgs> TreeNodeCollapsed { get; set; }
+
+		[Parameter]
 		public EventCallback<TreeNodeEventArgs> OnTreeNodeCollapsed { get; set; }
 
 		[Parameter]
+		public EventCallback<TreeNodeEventArgs> TreeNodeExpanded { get; set; }
+
+		[Parameter]
 		public EventCallback<TreeNodeEventArgs> OnTreeNodeExpanded { get; set; }
+
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> TreeNodePopulate { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for TreeNodePopulate. Fires when a node marked
+		/// for on-demand loading is expanded.
+		/// </summary>
+		[Parameter]
+		public EventCallback<TreeNodeEventArgs> OnTreeNodePopulate { get; set; }
 
 		#endregion
 
@@ -384,7 +406,8 @@ namespace BlazorWebFormsComponents
 							}));
 						}
 						builder.CloseComponent();
-						OnTreeNodeDataBound.InvokeAsync(new TreeNodeEventArgs(null));
+						var treeNodeDataBoundHandler = TreeNodeDataBound.HasDelegate ? TreeNodeDataBound : OnTreeNodeDataBound;
+						if (treeNodeDataBoundHandler.HasDelegate) treeNodeDataBoundHandler.InvokeAsync(new TreeNodeEventArgs(null));
 
 					}
 				}

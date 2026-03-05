@@ -21,5 +21,10 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the selection should be cancelled.
 		/// </summary>
 		public bool Cancel { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }
