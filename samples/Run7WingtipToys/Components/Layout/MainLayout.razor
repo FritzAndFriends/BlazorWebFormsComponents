@@ -1,0 +1,68 @@
+@inherits LayoutComponentBase
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Wingtip Toys</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="/About">About</a></li>
+                <li><a href="/Contact">Contact</a></li>
+                <li><a href="/ProductList">Products</a></li>
+                <li><a href="/ShoppingCart">Cart</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <AuthorizeView>
+                    <Authorized>
+                        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
+                        <AuthorizeView Roles="canEdit" Context="adminContext">
+                            <Authorized>
+                                <li><a href="/Admin/AdminPage">Admin</a></li>
+                            </Authorized>
+                        </AuthorizeView>
+                        <li>
+                            <form method="post" action="/Account/PerformLogout" data-enhance="false">
+                                <AntiforgeryToken />
+                                <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>
+                            </form>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li><a href="/Account/Register">Register</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="TitleContent" style="text-align: center; padding-top: 60px;">
+    <a href="/">
+        <img src="/Images/logo.jpg" style="border:none;" alt="Wingtip Toys logo" />
+    </a>
+    <br />
+</div>
+<div id="CategoryMenu" style="text-align: center">
+    @for (int i = 0; i < Categories.Count; i++)
+    {
+        if (i > 0)
+        {
+            @:&nbsp;|&nbsp;
+        }
+        <b style="font-size: large; font-style: normal"><a href="/ProductList?id=@Categories[i].CategoryID">@Categories[i].CategoryName</a></b>
+    }
+</div>
+<div class="container body-content">
+    @Body
+    <hr />
+    <footer>
+        <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
+    </footer>
+</div>
