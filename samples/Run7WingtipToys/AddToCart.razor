@@ -1,14 +1,18 @@
 @page "/AddToCart"
-<!DOCTYPE html>
+@rendermode InteractiveServer
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title></title>
-</head>
-<body>
-    <div>
-    
-    </div>
-    </body>
-</html>
+<PageTitle>Add To Cart</PageTitle>
+
+@if (_added)
+{
+    <p>Product added to cart. <a href="/ShoppingCart">View Cart</a></p>
+}
+else if (_notFound)
+{
+    <p>Product not found.</p>
+}
+else
+{
+    <p>Adding product to cart...</p>
+}
 
