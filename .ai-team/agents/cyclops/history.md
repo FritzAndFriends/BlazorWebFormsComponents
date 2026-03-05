@@ -83,18 +83,18 @@ Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shippe
 
 ### P0 Event Handler Fixes (2026-03-06)
 
-**P0-1 Repeater events:** Added `ItemCommand`/`OnItemCommand` (`RepeaterCommandEventArgs`), `ItemCreated`/`OnItemCreated` (`RepeaterItemEventArgs`), `ItemDataBound`/`OnItemDataBound` (`RepeaterItemEventArgs`). Created `RepeaterCommandEventArgs.cs` and `RepeaterItemEventArgs.cs`. Repeater previously had ZERO EventCallbacks.
+All 7 P0 items from Forge's audit implemented:
+- **P0-1** Repeater: 3 events added (ItemCommand, ItemCreated, ItemDataBound) — had ZERO before
+- **P0-2** DataList: 7 events added + ItemDataBound bare alias. Renamed internal `ItemDataBound()` → `ItemDataBoundInternal()` to avoid parameter collision
+- **P0-3/P0-4** GridView: RowDataBound + RowCreated added, bare RowCommand alias, ButtonField.razor.cs updated to coalesce
+- **P0-5** DetailsView: ItemCreated added
+- **P0-6** FormView: OnItemInserted type fixed (FormViewInsertEventArgs → FormViewInsertedEventArgs), 6 bare CRUD aliases added
+- **P0-7** SelectMethod: moved from OnAfterRender(firstRender) to OnParametersSet(), added RefreshSelectMethod()
 
-**P0-2 DataList events:** Added 7 missing event pairs: `ItemCommand`/`OnItemCommand` (`DataListCommandEventArgs`), `SelectedIndexChanged`/`OnSelectedIndexChanged` (`EventArgs`), `EditCommand`/`OnEditCommand`, `UpdateCommand`/`OnUpdateCommand`, `DeleteCommand`/`OnDeleteCommand`, `CancelCommand`/`OnCancelCommand` (all `DataListCommandEventArgs`), `ItemCreated`/`OnItemCreated` (`DataListItemEventArgs`). Added bare `ItemDataBound` alias for existing `OnItemDataBound`. Renamed internal method from `ItemDataBound()` to `ItemDataBoundInternal()` to avoid conflict with new parameter property — updated both call sites in `DataList.razor`. Created `DataListCommandEventArgs.cs`.
+New EventArgs: `RepeaterCommandEventArgs`, `RepeaterItemEventArgs`, `DataListCommandEventArgs`, `GridViewRowEventArgs`, `FormViewInsertedEventArgs`.
 
-**P0-3/P0-4 GridView RowDataBound/RowCreated:** Added `RowDataBound`/`OnRowDataBound` and `RowCreated`/`OnRowCreated` (both `GridViewRowEventArgs`). Also added bare `RowCommand` alias for existing `OnRowCommand`. Updated `ButtonField.razor.cs` to coalesce `RowCommand`/`OnRowCommand` instead of directly accessing `OnRowCommand`. Created `GridViewRowEventArgs.cs`.
+**Pattern:** When `[Parameter]` name collides with internal method, rename method with `*Internal` suffix — never rename the parameter.
 
-**P0-5 DetailsView ItemCreated:** Added `ItemCreated`/`OnItemCreated` (`EventCallback<EventArgs>`) to DetailsView events region.
 
-**P0-6 FormView OnItemInserted type fix:** Changed `OnItemInserted` from `EventCallback<FormViewInsertEventArgs>` (wrong — Insert tense) to `EventCallback<FormViewInsertedEventArgs>` (correct — past tense). Created `FormViewInsertedEventArgs.cs` with `AffectedRows`, `Exception`, `ExceptionHandled`, `KeepInInsertMode`, `Values`. Updated `HandleCommandArgs` insert case to construct `FormViewInsertedEventArgs(0)` instead of `FormViewInsertEventArgs("insert")`. Also added bare-name aliases for all 6 FormView CRUD events (`ItemDeleting`, `ItemDeleted`, `ItemInserting`, `ItemInserted`, `ItemUpdating`, `ItemUpdated`) and updated all `HandleCommandArgs` invocation sites to coalesce bare/On-prefix.
+ Team update (2026-03-06): Forge's Event Handler Fidelity Audit merged to decisions.md (P0 items all resolved by Cyclops, tested by Rogue). 11 P1 and 7 P2 items remain for future work.  decided by Forge, implemented by Cyclops
 
-**P0-7 SelectMethod re-fire:** Moved `SelectMethod` invocation from `OnAfterRender(firstRender)` to `OnParametersSet()` in `DataBoundComponent<T>`. This fires on every parameter change, not just first render. Added `RefreshSelectMethod()` helper for post-CRUD data refresh.
-
-**Key files created:** `RepeaterCommandEventArgs.cs`, `RepeaterItemEventArgs.cs`, `DataListCommandEventArgs.cs`, `GridViewRowEventArgs.cs`, `FormViewInsertedEventArgs.cs` — all in `src/BlazorWebFormsComponents/` root.
-
-**Pattern reinforced:** When a `[Parameter]` property name collides with an internal method name (as happened with DataList's `ItemDataBound`), rename the method to `*Internal` suffix — never rename the parameter, since that breaks migration markup.

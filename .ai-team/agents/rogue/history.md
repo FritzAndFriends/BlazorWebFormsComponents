@@ -90,29 +90,7 @@ Team updates (2026-03-02-03): Skins roadmap (Forge), M22 planned (Forge), projec
 
 ### LoginStatus AuthorizeView Test Redesign (12 files)
 
-Updated all 12 LoginStatus bUnit tests to use bUnit's `this.AddAuthorization()` API instead of manual `Mock<AuthenticationStateProvider>` with `ClaimsPrincipal`/`ClaimsIdentity` setup. This mirrors the LoginView test redesign pattern.
-
-**Pattern applied:**
-- Removed `@using Microsoft.AspNetCore.Components.Authorization`, `@using System.Security.Claims;`, and (where present) `@using Moq.Protected;`
-- Replaced `ClaimsPrincipal` + `ClaimsIdentity` + `Mock<AuthenticationStateProvider>` + `Services.AddSingleton` block with `var authContext = this.AddAuthorization();`
-- Logged-in tests (8 files): `authContext.SetAuthorized("James Bond")`
-- Not-logged-in tests (4 files): `authContext.SetNotAuthorized()`
-- All NavigationManager mocks (both `Mock<NavigationManager>` and `MockNavigationManager`) left unchanged
-- All assertions left unchanged — HTML output is identical
-
-**Files updated:**
-1. LoggedInDefault.razor — SetAuthorized
-2. LoggedInText.razor — SetAuthorized
-3. LoggedInImageWithText.razor — SetAuthorized
-4. LoggedInEmpty.razor — SetAuthorized
-5. NotLoggedInDefault.razor — SetNotAuthorized
-6. NotLoggedInText.razor — SetNotAuthorized
-7. NotLoggedInImageWithText.razor — SetNotAuthorized
-8. NotLoggedInEmpty.razor — SetNotAuthorized
-9. LogoutActionRedirect.razor — SetAuthorized (uses MockNavigationManager)
-10. LogoutActionRefresh.razor — SetAuthorized (uses MockNavigationManager)
-11. LogoutEvent.razor — SetAuthorized
-12. LogoutEventCancelOnLoggingOut.razor — SetAuthorized
+Updated all 12 LoginStatus bUnit tests: replaced manual `Mock<AuthenticationStateProvider>` with `this.AddAuthorization()` API (mirrors LoginView pattern). 8 logged-in tests use `SetAuthorized("James Bond")`, 4 not-logged-in use `SetNotAuthorized()`. NavigationManager mocks and assertions unchanged.
 
 ### P0 Event Handler Tests (2026-03-06)
 
@@ -143,3 +121,7 @@ Updated all 12 LoginStatus bUnit tests to use bUnit's `this.AddAuthorization()` 
 - RowCreated should fire BEFORE RowDataBound (ordering test)
 - SelectMethod re-fire after sort requires sort links in thead — test conditionally clicks if present
 - FormViewInsertedEventArgs is distinct from FormViewInsertEventArgs — compile-time type safety test proves this
+
+
+ Team update (2026-03-06): P0 event handler decisions merged to decisions.md. All 49 bUnit tests passing. DataList double-render and RowCreated ordering findings documented.  tested by Rogue
+
