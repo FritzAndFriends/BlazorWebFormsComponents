@@ -65,58 +65,19 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 **Page consolidation:** Option B (merge Page.razor into WebFormsPage). PageTitle/HeadContent work from anywhere in render tree. RenderPageHead parameter. Minimum setup: @inherits + wrapper component. Cannot get below 2 setup points. Decision: forge-page-consolidation.md.
 
 Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, benchmarks L1/L2+3, @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shipped, WebFormsPage consolidation, 50 On-prefix aliases, AutoPostBack fix.
-<!-- Summarized 2026-03-06 by Scribe -- covers event handler audit through Run 7 transforms -->
+<!-- Summarized 2026-03-06 by Scribe -- covers event handler audit through BWFC-first rewrite -->
 
-### 2026-03-05 Architecture & Migration Summary
+### 2026-03-05 Architecture, Migration & Skills Summary
 
-**Event handler audit:** ~50 EventCallbacks across data components used bare names instead of On-prefixed names matching Web Forms attributes. Button/input/list/login controls all correct. Repeater has zero EventCallbacks (critical gap). GridView missing OnRowDataBound, OnRowCreated. FormView naming inconsistent. Script does zero event handler transformation (correct if components use On-prefix). Recommended On-prefix aliases (non-breaking).
+**Event handler audit:** ~50 EventCallbacks with bare names needed On-prefix aliases (non-breaking). Repeater has zero EventCallbacks (gap). GridView missing OnRowDataBound/OnRowCreated. Script correctly skips event transforms when components use On-prefix.
 
-**ShoppingCart gap analysis:** BWFC GridView supports ALL needed features (CssClass, AutoGenerateColumns, BoundField, TemplateField, TextBox/CheckBox in templates, ShowFooter, GridLines, CellPadding). AfterWingtipToys was plain HTML table (anti-pattern). FreshWingtipToys proves correct migration. Root cause: Layer 2 decomposed GridView to raw HTML.
+**ShoppingCart/BWFC preservation:** GridView supports all ShoppingCart features. L2 agents decomposed to raw HTML (anti-pattern). Added 5 mandatory BWFC preservation rules + `Test-BwfcControlPreservation` to bwfc-migrate.ps1. Propagated to migration-toolkit/skills/.
 
-**BWFC control preservation standards:** Updated migration-standards SKILL.md with 5 mandatory rules, ShoppingCart anti-pattern, BAD/GOOD examples. Added `Test-BwfcControlPreservation` to bwfc-migrate.ps1 (post-transform verification). Non-blocking warnings in ManualItems report. Propagated to distributable `migration-toolkit/skills/` (migration-standards + bwfc-migration).
+**Run 7 L2/3:** 6 storefront pages. FormView with single-item list wrapper, ListView/GridView preserved. 26 code-behinds + 12 .razor stubs. Build: 0 errors. L1 residuals in ItemTemplate sections.
 
-**Run 7 Layer 2/3:** 6 core storefront pages transformed. FormView preserved with `Items=@(new List<Product>{SampleProduct})` single-item wrapper. Category ListView preserved. ShoppingCart GridView preserved with @rendermode InteractiveServer. ProductContext (no Identity). 26 code-behinds + 12 .razor files stubbed to ComponentBase. Build: 0 errors. Key: FormView has no DataItem parameter, use Items with single-item list. Layer 1 residuals cluster in ItemTemplate sections.
+**Script gap review (6 gaps):** `src="~/"` not converted, `<script>` tags lost from master `<head>`, no BundleConfig detection, CSS link duplication, `url('~/')` in CSS not converted, no infrastructure file flagging. Decision: forge-script-gap-review.md.
 
-Team updates: Event handler audit, On-prefix aliases (50), ShoppingCart regression test, BWFC preservation mandatory, AfterWingtipToys output-only, Run 7 report structure, Run 7 runtime learnings.
-### Migration Script Gap Review — Run 7 Learnings (2026-03-05)
-
-**Task:** Review bwfc-migrate.ps1 for remaining gaps after Run 7 fixes were applied.
-
-**Key findings — 6 gaps identified:**
-
-1. **`src="~/"`** not in `ConvertFrom-UrlReferences` — images and scripts with `src="~/path"` keep broken `~/` prefix. Only `href`, `NavigateUrl`, `ImageUrl` are handled.
-2. **`<script>` tags lost from master page `<head>`** — CSS links are extracted to App.razor but script tags are not. The entire `<head>` is removed, silently dropping head scripts.
-3. **No BundleConfig.cs / `Styles.Render` / `Scripts.Render` detection** — bundling calls become invalid `@(Styles.Render(...))` in output with no warning.
-4. **CSS link duplication** — Same stylesheet links appear in both App.razor `<head>` (via `New-AppRazorScaffold`) and layout's `<HeadContent>` (via `ConvertFrom-MasterPage`).
-5. **`url('~/')` in CSS files not converted** — CSS files are copied verbatim; `~/` references inside them break.
-6. **No flagging of infrastructure files** — Global.asax, RouteConfig.cs, BundleConfig.cs, web.config are not detected or flagged for manual review.
-
-**Verified working (9 items):** UseStaticFiles, CSS extraction, SourceRoot parameter, LoginView→AuthorizeView, GetRouteUrl passthrough, static file directory structure, BWFC control preservation, AutoPostBack stripping, event handler scanning.
-
-**Decision document:** `.ai-team/decisions/inbox/forge-script-gap-review.md`
-
-
-
- Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
-
-### BWFC-First Migration Skill Rewrite (2026-03-05)
-
-**Task:** Rewrote all 4 migration skill files + CHECKLIST.md + METHODOLOGY.md to make BWFC library usage the #1 priority per Jeff's directive.
-
-**Root cause:** Runs 6-8 Layer 2 agents consistently replaced BWFC components with plain HTML. Skills didn't make BWFC prominent enough.
-
-**Changes across 6 files:**
-- Every skill opens with 🚫 MANDATORY banner about BWFC-first
-- Section 1 of every skill is BWFC inventory/utility features
-- Complete 110+ component inventory (was 58) in bwfc-migration and migration-standards
-- LoginView/LoginStatus explicitly called out as commonly missed (in all 4 skills)
-- Anti-pattern tables with ❌/✅ comparison pairs throughout
-- Standard Blazor patterns for static files/CSS/JS in infrastructure tables
-- BWFC utility features (AddBlazorWebFormsComponents, WebFormsPageBase, Page) marked MANDATORY
-- CHECKLIST.md: 9 new 🚫 BWFC VERIFICATION items across all 3 layers
-- METHODOLOGY.md: Layer 2 gets explicit "MUST NOT" list of 5 forbidden patterns
-- bwfc-identity-migration: LoginView/LoginStatus front-loaded as Section 1, AuthorizeView demoted to "optional upgrade"
-- bwfc-data-migration: BWFC data controls front-loaded with "BWFC Front-End + Service Back-End" pattern
+**BWFC-first skill rewrite:** All 4 skills + CHECKLIST.md + METHODOLOGY.md rewritten. 🚫 MANDATORY banners, 110+ component inventory, LoginView/LoginStatus flagged, anti-pattern tables, 9 new BWFC verification items, Layer 2 "MUST NOT" list. Root cause: Runs 6-8 L2 agents replaced BWFC with plain HTML.
 
 ### LoginStatus → AuthorizeView Redesign Analysis (2026-03-06)
 
