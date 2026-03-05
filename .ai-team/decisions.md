@@ -6309,7 +6309,13 @@ Per Forge's proposal (`forge-loginview-authorizeview-redesign.md`), LoginView no
 **Build status:** Clean build, 0 errors.
 
 
-### LoginStatus AuthorizeView Redesign Proposal
+### 2026-03-06: LoginStatus AuthorizeView Redesign Proposal (consolidated)
+
+**By:** Forge
+**Date:** 2026-03-06
+**Requested by:** Jeffrey T. Fritz
+**Related:** LoginView AuthorizeView redesign (shipped)
+
 
 **By:** Forge
 **Date:** 2026-03-06
@@ -6369,7 +6375,8 @@ The control checks `Page.Request.IsAuthenticated` on every render. It participat
 
 ## 2. Current BWFC Implementation Analysis
 
-### What's RIGHT ✅
+
+#### What's RIGHT ✅
 
 1. **Base class: `BaseStyledComponent`** — Correct. The original inherits `WebControl` which has style properties. `BaseStyledComponent` maps to this correctly.
 
@@ -6387,7 +6394,7 @@ The control checks `Page.Request.IsAuthenticated` on every render. It participat
 
 8. **LogoutPageUrl** — Correct. Maps to the Web Forms property of the same name.
 
-### What's WRONG ❌
+#### What's WRONG ❌
 
 1. **Manual `AuthenticationStateProvider` injection (HIGH)** — Same anti-pattern as LoginView. The component injects `AuthenticationStateProvider`, calls `GetAuthenticationStateAsync()` once in `OnInitializedAsync`, and stores the result in a `bool UserAuthenticated` field. This means:
    - Auth state is checked **once** at initialization — if the user logs in/out while the component is mounted, it never updates.
@@ -6400,7 +6407,7 @@ The control checks `Page.Request.IsAuthenticated` on every render. It participat
 
 4. **`LoginHandle` doesn't null-check `LoginPageUrl` (LOW)** — If no `LoginPageUrl` is set, `NavigationManager.NavigateTo(null)` will throw. The original Web Forms control falls back to `FormsAuthentication.LoginUrl` which always has a value. We should guard against null or document that it's required.
 
-### What's DEBATABLE ⚖️
+#### What's DEBATABLE ⚖️
 
 1. **`LogoutAction.RedirectToLoginPage`** — The original Web Forms enum has this value. The current impl throws `NotSupportedException`. In Blazor, this could navigate to `LoginPageUrl` (same as the login link target). The throw is defensible but surprising. Could be a TODO.
 
@@ -6408,7 +6415,7 @@ The control checks `Page.Request.IsAuthenticated` on every render. It participat
 
 ## 3. Proposed Changes
 
-### 3a. Replace manual auth state with `<AuthorizeView>` delegation
+#### 3a. Replace manual auth state with `<AuthorizeView>` delegation
 
 **Before (current):**
 ```razor
@@ -6555,7 +6562,7 @@ private RenderFragment RenderLoginElement() => builder =>
 
 **Recommendation:** Use the simpler Razor approach. The current template structure is clean and readable. Moving to RenderTreeBuilder adds complexity for no fidelity benefit. The only change is wrapping the existing `@if (UserAuthenticated) ... else ...` with `<AuthorizeView><Authorized>...<NotAuthorized>...</AuthorizeView>`.
 
-### 3b. Code-behind changes
+#### 3b. Code-behind changes
 
 ```csharp
 public partial class LoginStatus : BaseStyledComponent
@@ -6613,7 +6620,7 @@ public partial class LoginStatus : BaseStyledComponent
 }
 ```
 
-### 3c. Optional: LogoutAction enum normalization (separate PR)
+#### 3c. Optional: LogoutAction enum normalization (separate PR)
 
 The `LogoutAction` abstract-class hierarchy should be converted to a proper enum to match the project convention. However, this is a **separate concern** from the AuthorizeView migration and should be its own PR to avoid scope creep.
 
@@ -6762,7 +6769,12 @@ authContext.SetNotAuthorized();  // for not-logged-in tests
 
 **Prerequisite:** `CascadingAuthenticationState` must be in the app's component tree (standard Blazor auth setup). This is already required if the app uses `AuthorizeView` anywhere — and since LoginView now uses it, this is a given.
 
-### 2026-03-06: P0 Event Handler Implementation Decisions
+### 2026-03-06: P0 Event Handler Fidelity  Implementation, Testing & Audit (consolidated)
+
+**By:** Cyclops, Rogue, Forge
+**Status:** Complete  all P0 items implemented, tested, and audited
+
+#### 2026-03-06: P0 Event Handler Implementation Decisions
 
 **By:** Cyclops
 
@@ -6780,22 +6792,14 @@ authContext.SetNotAuthorized();  // for not-logged-in tests
 
 **Why:** Forge's audit identified these as P0 fidelity gaps — migrated Web Forms markup would fail silently because event handlers wouldn't bind. Every data control needs its full event surface to support real-world migration scenarios.
 
-### 2026-03-06: P0 Event Handler Test Coverage for All 7 Audit Items
+
+#### 2026-03-06: P0 Event Handler Test Coverage for All 7 Audit Items
 **By:** Rogue
 **What:** Created 49 bUnit tests across 6 test files covering all P0 event handler additions/fixes from Forge's event handler fidelity audit. Tests verify both bare-name and On-prefix aliases, EventArgs types and properties, lifecycle firing behavior, empty-data edge cases, and Sender property population. 12 tests pass now (FormViewInsertedEventArgs shape, SelectMethod initial render, empty-data guards, type fix). 37 tests are expected-fail pending Cyclops's event wiring in component .razor templates.
 **Why:** These tests define the acceptance criteria for Cyclops's P0 implementation work. They document the exact parameter names, types, and behavioral contracts from the audit. Once Cyclops finishes wiring events in the .razor templates, these tests become the regression safety net. Writing tests against the spec (not the implementation) ensures we catch any deviation from the audit's requirements.
 
-### 2026-03-06: DataList ItemDataBound fires 2x per item during Blazor lifecycle
-**By:** Rogue
-**What:** Discovered that DataList's `OnItemDataBound` callback fires twice per data item (6 times for 3 items) due to Blazor's double-render cycle. Tests use `ShouldBeGreaterThanOrEqualTo(N)` instead of exact count assertions.
-**Why:** This is a behavioral characteristic, not necessarily a bug — Blazor re-renders during lifecycle (OnInitialized + OnAfterRender). However, this could cause performance issues with large datasets if event handlers do expensive work. Flagging for team awareness. Future optimization: debounce or guard against duplicate firings in the DataList template.
 
-### 2026-03-06: RowCreated must fire before RowDataBound (ordering test)
-**By:** Rogue
-**What:** Added a test in GridView/RowEvents.razor that verifies RowCreated fires BEFORE RowDataBound for each row, matching Web Forms behavior where the row is structurally created before data is bound to it.
-**Why:** Web Forms developers may depend on this ordering (e.g., modifying row structure in RowCreated before data binding populates values in RowDataBound). The ordering test ensures Cyclops implements the events in the correct sequence.
-
-### 2026-03-06: Event Handler Fidelity & SelectMethod Audit (summary)
+#### 2026-03-06: Event Handler Fidelity & SelectMethod Audit (summary)
 
 **By:** Forge
 **Status:** Implemented (P0 items completed by Cyclops, tested by Rogue)
@@ -6822,3 +6826,14 @@ authContext.SetNotAuthorized();  // for not-logged-in tests
 **Full audit archived at:** .ai-team/decisions/inbox/forge-event-handler-selectmethod-audit.md (removed after merge  see git history for full text)
 
 **Why:** Run 8 benchmark flagged event handler signatures as the largest remaining migration gap. This audit provided the systematic inventory and prioritized roadmap for resolution.
+
+### 2026-03-06: DataList ItemDataBound fires 2x per item during Blazor lifecycle
+**By:** Rogue
+**What:** Discovered that DataList's `OnItemDataBound` callback fires twice per data item (6 times for 3 items) due to Blazor's double-render cycle. Tests use `ShouldBeGreaterThanOrEqualTo(N)` instead of exact count assertions.
+**Why:** This is a behavioral characteristic, not necessarily a bug — Blazor re-renders during lifecycle (OnInitialized + OnAfterRender). However, this could cause performance issues with large datasets if event handlers do expensive work. Flagging for team awareness. Future optimization: debounce or guard against duplicate firings in the DataList template.
+
+### 2026-03-06: RowCreated must fire before RowDataBound (ordering test)
+**By:** Rogue
+**What:** Added a test in GridView/RowEvents.razor that verifies RowCreated fires BEFORE RowDataBound for each row, matching Web Forms behavior where the row is structurally created before data is bound to it.
+**Why:** Web Forms developers may depend on this ordering (e.g., modifying row structure in RowCreated before data binding populates values in RowDataBound). The ordering test ensures Cyclops implements the events in the correct sequence.
+
