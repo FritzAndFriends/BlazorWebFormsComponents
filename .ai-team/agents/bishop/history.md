@@ -33,3 +33,5 @@
   - Layout files need `: LayoutComponentBase` explicitly
   - Stub page cleanup (17/35 files) is the largest Layer 2 effort — unconverted event handlers, ControlToValidate refs, `<% %>` expressions
   - `AddHttpContextAccessor()` must come BEFORE `AddBlazorWebFormsComponents()` in Program.cs
+
+ Team update (2026-03-05): Run 9 BWFC review APPROVED (98.9% preservation). 2 findings: ImageButtonimg in ShoppingCart (P0), HyperLink dropped in Manage (P2). 3 Layer 1 script bugs documented (ItemType conversion, validator type params, missing Validations using).  decided by Forge, Bishop

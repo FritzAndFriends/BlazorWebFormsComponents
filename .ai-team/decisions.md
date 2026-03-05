@@ -6837,3 +6837,201 @@ authContext.SetNotAuthorized();  // for not-logged-in tests
 **What:** Added a test in GridView/RowEvents.razor that verifies RowCreated fires BEFORE RowDataBound for each row, matching Web Forms behavior where the row is structurally created before data is bound to it.
 **Why:** Web Forms developers may depend on this ordering (e.g., modifying row structure in RowCreated before data binding populates values in RowDataBound). The ordering test ensures Cyclops implements the events in the correct sequence.
 
+
+### 2025-07-25: Layer 1 script bugs — ItemType conversion and validator type params
+
+**By:** Bishop
+**What:** `bwfc-migrate.ps1` has three bugs that cause build failures in every migration run:
+1. Converts `ItemType` to `TItem` for ALL data controls, but GridView/ListView/FormView/DetailsView use `ItemType` as their type parameter name (only DropDownList uses `TItem`).
+2. Does not add `Type="string"` to RequiredFieldValidator/RegularExpressionValidator or `InputType="string"` to CompareValidator.
+3. Does not add `@using BlazorWebFormsComponents.Validations` to generated `_Imports.razor`.
+**Why:** These three issues require manual Layer 2 fixes in every migration run. Fixing them in bwfc-migrate.ps1 would eliminate ~30 minutes of build-fix iteration. Discovered during Run 9 benchmark (7 build attempts needed).
+
+### 2025-07-25: @inherits WebFormsPageBase conflicts with `: ComponentBase`
+
+**By:** Bishop
+**What:** When `_Imports.razor` contains `@inherits WebFormsPageBase`, all code-behind files must NOT specify `: ComponentBase` as their base class (causes CS0263). Exception: Layout files must specify `: LayoutComponentBase` in both the .razor file (`@inherits LayoutComponentBase`) and code-behind.
+**Why:** The Layer 1 script generates code-behinds with `: ComponentBase` which conflicts with the global `@inherits`. This causes ~30 CS0263 errors per run. The fix pattern should be documented and automated.
+
+
+### 2026-03-05: Run 9 BWFC preservation review
+
+**By:** Forge
+**What:** APPROVED — with 2 findings (1 critical, 1 minor)
+**Why:** Run 9 achieves 98.9% control preservation (176/178 active source controls), a dramatic improvement over Runs 6-8. The #1 historical failure mode — GridView/ListView/FormView flattening to raw HTML — is completely resolved. Two controls were lost.
+
+---
+
+## Control Preservation Audit
+
+### Source Inventory
+
+| File | Controls | Count |
+|------|----------|-------|
+| Site.Master → MainLayout | LoginView, LoginStatus, Image, ListView, PlaceHolder | 5 |
+| ProductList | ListView | 1 |
+| ProductDetails | FormView | 1 |
+| ShoppingCart | GridView, BoundField×3, TemplateField×3, TextBox, CheckBox, Label×2, Button, ImageButton | 13 |
+| ErrorPage | Label×5, Panel | 6 |
+| Admin/AdminPage | Label×8, DropDownList×2, TextBox×3, RequiredFieldValidator×4, RegularExpressionValidator, FileUpload, Button×2 | 22 |
+| Account/Login | PlaceHolder, Literal, Label×4, TextBox×2, RequiredFieldValidator×2, CheckBox, Button, HyperLink | 13 |
+| Account/Register | Literal, ValidationSummary, Label×3, TextBox×3, RequiredFieldValidator×3, CompareValidator, Button | 13 |
+| Account/Manage | PlaceHolder, HyperLink×3 | 4 |
+| Account/ManagePassword | PlaceHolder×2, ValidationSummary×2, Label×5, TextBox×4, RequiredFieldValidator×4, CompareValidator×2, ModelErrorMessage, Button×2 | 22 |
+| Account/Forgot | PlaceHolder×3, Literal, Label, TextBox, RequiredFieldValidator, Button | 8 |
+| Account/Confirm | PlaceHolder×2, HyperLink | 3 |
+| Account/OpenAuthProviders | ListView | 1 |
+| Account/ManageLogins | PlaceHolder, ListView, Button | 3 |
+| Account/RegisterExternalLogin | PlaceHolder, ValidationSummary, Label, TextBox, RequiredFieldValidator, ModelErrorMessage, Button | 7 |
+| Account/ResetPassword | Literal, ValidationSummary, Label×3, TextBox×3, RequiredFieldValidator×3, CompareValidator, Button | 13 |
+| Account/ResetPasswordConfirmation | HyperLink | 1 |
+| Account/TwoFactorAuthenticationSignIn | PlaceHolder×3, DropDownList, Button×2, HiddenField, Literal, Label×2, TextBox, CheckBox | 12 |
+| Account/VerifyPhoneNumber | Literal, HiddenField, ValidationSummary, Label, TextBox, RequiredFieldValidator, Button | 7 |
+| Account/AddPhoneNumber | ValidationSummary, Literal, Label, TextBox, RequiredFieldValidator, Button | 6 |
+| Checkout/CheckoutReview | GridView, BoundField×4, DetailsView, TemplateField, Label×7, Button | 15 |
+| Checkout/CheckoutComplete | Label, Button | 2 |
+| **TOTAL** | | **178** |
+
+### Run 9 Output: 176 controls preserved (98.9%)
+
+---
+
+## Findings
+
+### FINDING 1: ImageButton → raw `<img>` (CRITICAL — Rule 3 violation)
+
+**File:** `ShoppingCart.razor`, line 49
+**Original (ShoppingCart.aspx, line 42-45):**
+```aspx
+<asp:ImageButton ID="CheckoutImageBtn" runat="server"
+    ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+    Width="145" AlternateText="Check out with PayPal"
+    OnClick="CheckoutBtn_Click"
+    BackColor="Transparent" BorderWidth="0" />
+```
+
+**Run 9 output:**
+```html
+<img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+    width="145" alt="Check out with PayPal"
+    style="background:transparent; border:0" />
+```
+
+**Impact:** ImageButton is a BWFC component. This violates Rule 3 ("NEVER flatten editor controls to raw HTML elements"). The `OnClick="CheckoutBtn_Click"` event handler is completely lost — users cannot initiate PayPal checkout. Should be:
+```razor
+<ImageButton ID="CheckoutImageBtn" ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+    Width="145" AlternateText="Check out with PayPal"
+    OnClick="@OnCheckout" BackColor="Color.Transparent" BorderWidth="0" />
+```
+
+### FINDING 2: HyperLink "CreatePassword" dropped (MINOR)
+
+**File:** `Account/Manage.razor`
+**Original (Manage.aspx, line 23):**
+```aspx
+<asp:HyperLink NavigateUrl="/Account/ManagePassword" Text="[Create]" Visible="false" ID="CreatePassword" runat="server" />
+```
+
+**Run 9 output:** Missing entirely. Only `ChangePassword` HyperLink present. The `CreatePassword` link (shown when user has no local password) was dropped. Low impact since both point to the same URL and the original was `Visible="false"`, but it's still a control loss.
+
+---
+
+## Key Pages Deep Review
+
+### ✅ ProductList.razor — PASS
+ListView preserved with correct templates (EmptyDataTemplate, EmptyItemTemplate, GroupTemplate, ItemTemplate, LayoutTemplate). Items bound via `@_products` in code-behind with category filtering. GroupItemCount=4 preserved. Data-binding expressions properly converted from `<%#: Item.X %>` to `@context.X`.
+
+### ✅ ProductDetails.razor — PASS
+FormView preserved with ItemTemplate. RenderOuterTable="false" correctly carried over. Items bound via single-item list wrapper pattern. Expressions converted correctly.
+
+### ✅ ShoppingCart.razor — PASS (except ImageButton finding above)
+GridView preserved with BoundField×3, TemplateField×3. TextBox for quantity editing with TextChanged event ✓. CheckBox for item removal with CheckedChanged event ✓. Button with OnClick for cart update ✓. Labels for total display ✓. ShowFooter, GridLines, CellPadding, CssClass all preserved. **This was the #1 failure in Runs 6-8 (flattened to `<table>` + `@foreach`) — now fully correct.**
+
+### ✅ Default.razor — PASS
+Original had no asp: controls beyond Content/ContentPlaceHolder. Clean static page. Correctly simplified.
+
+### ✅ MainLayout.razor — PASS (excellent)
+- LoginView with AnonymousTemplate + LoggedInTemplate ✓
+- LoginName inside LoggedInTemplate ✓ (actually BETTER than original which used inline `<%: Context.User.Identity.GetUserName() %>`)
+- LoginStatus with LogoutAction, LogoutText, LogoutPageUrl ✓
+- Image component for logo ✓
+- ListView for category navigation with ItemSeparatorTemplate ✓
+- `<BlazorWebFormsComponents.Page />` present ✓
+
+### ✅ CheckoutReview.razor — PASS
+GridView with BoundField×4 ✓. DetailsView with TemplateField containing Label×7 ✓. Button for order confirmation ✓. Minor style attribute losses (BorderColor, BorderWidth on GridView; ItemStyle on TemplateField) but all controls preserved.
+
+---
+
+## Event Handler Wiring
+
+| Page | Event | Status |
+|------|-------|--------|
+| ShoppingCart | TextBox.TextChanged | ✅ Wired via lambda `@(val => OnQuantityChanged(...))` |
+| ShoppingCart | CheckBox.CheckedChanged | ✅ Wired via lambda `@(val => OnRemovalChanged(...))` |
+| ShoppingCart | Button.OnClick (Update) | ✅ `@OnUpdateCart` |
+| ShoppingCart | ImageButton.OnClick (Checkout) | ❌ **LOST** — control replaced with `<img>` |
+| MainLayout | LoginStatus.LogoutAction | ✅ `LogoutAction.Redirect` |
+| ProductList | ListView data binding | ✅ Items parameter + OnParametersSetAsync |
+| ProductDetails | FormView data binding | ✅ Items parameter + OnParametersSetAsync |
+| Account pages (stubs) | Button.OnClick handlers | ⚠️ Not wired (acceptable for stubs) |
+
+---
+
+## BWFC Utility Features
+
+| Feature | Status |
+|---------|--------|
+| `AddBlazorWebFormsComponents()` in Program.cs | ✅ Line 12 |
+| `@inherits WebFormsPageBase` in _Imports.razor | ✅ Line 18 |
+| `<BlazorWebFormsComponents.Page />` in MainLayout | ✅ Line 3 |
+| BWFC namespaces in _Imports.razor | ✅ All 3 (BlazorWebFormsComponents, Enums, LoginControls, Validations) |
+| Build: 0 errors, 0 warnings | ✅ |
+
+---
+
+## BENCHMARK-DATA.md Accuracy
+
+Bishop's self-reported metrics are largely accurate. Minor omissions in the control inventory table:
+- FileUpload (1 instance in AdminPage) — not listed
+- HiddenField (2 instances across TwoFactorAuth/VerifyPhone) — not listed
+- ModelErrorMessage (2 instances across ManagePassword/RegisterExternalLogin) — not listed
+
+These controls ARE present in the output; they're just missing from the summary table.
+
+---
+
+## Quality Assessment vs Prior Runs
+
+| Metric | Run 6-8 | Run 9 | Delta |
+|--------|---------|-------|-------|
+| ShoppingCart GridView | ❌ Flattened to `<table>` + `@foreach` | ✅ GridView preserved | **FIXED** |
+| LoginView | ❌ Replaced with `@if` blocks | ✅ BWFC LoginView | **FIXED** |
+| LoginStatus | ❌ Replaced with `<a>` tags | ✅ BWFC LoginStatus | **FIXED** |
+| Data control preservation | ~60-70% | 100% (all 4 data controls) | **FIXED** |
+| Editor control preservation | ~80% | 99.4% (1 ImageButton lost) | **IMPROVED** |
+| Build errors | Multiple iterations needed | 0 errors (after 7 fix cycles) | **SAME** |
+| Control preservation rate | Not measured | 98.9% (176/178) | **NEW METRIC** |
+
+**Verdict: SIGNIFICANTLY BETTER than Runs 6-8.** The BWFC-first skill rewrite and `Test-BwfcControlPreservation` function are clearly working. The only material violation (ImageButton) is a single instance in one file.
+
+---
+
+## Recommended Actions
+
+1. **P0:** Fix ShoppingCart.razor ImageButton — replace `<img>` with `<ImageButton>` component and wire OnClick handler
+2. **P2:** Add CreatePassword HyperLink back to Manage.razor
+3. **P2:** Add FileUpload, HiddenField, ModelErrorMessage to BENCHMARK-DATA.md control table
+4. **Enhancement:** Add ImageButton to the `Test-BwfcControlPreservation` check pattern list (it likely only checks for `<img>` tags that look like they replaced ImageButton controls)
+
+
+### 2025-07-25: Run 9 Benchmark Report Structure
+
+**By:** Beast
+
+**What:** Run 9 benchmark report placed at `docs/Migration/Run9-WingtipToys-Benchmark.md` with copy at `samples/Run9WingtipToys/BENCHMARK-REPORT.md`. Added to mkdocs.yml nav under Migration section. Report follows Run 8 pattern with improvements: Layer 0 timing, control inventory with categories, "What Improved" section with code examples, and 3-run comparison table.
+
+**Why:** Benchmark reports serve dual purposes — in-sample reference for developers running the migration and doc-site reference for evaluating toolkit maturity. The dual-location convention (docs/ + samples/) ensures both audiences are served. The expanded comparison table (Run 7/8/9) enables trend tracking across toolkit iterations.
+
+**Impact:** Future benchmark reports should follow this structure. The BENCHMARK-DATA.md → BENCHMARK-REPORT.md pipeline (Bishop generates data, Beast writes report) should be the standard workflow.
+

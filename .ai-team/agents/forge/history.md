@@ -73,50 +73,18 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
 **ShoppingCart/BWFC preservation:** GridView supports all ShoppingCart features. L2 agents decomposed to raw HTML (anti-pattern). Added 5 mandatory BWFC preservation rules + `Test-BwfcControlPreservation` to bwfc-migrate.ps1. Propagated to migration-toolkit/skills/.
 
-### Comprehensive Event Handler & SelectMethod Audit (2026-03-06)
+<!-- Summarized 2026-03-05 by Scribe -- covers event handler audit, LoginStatus redesign, Run 9 review -->
 
-**Task:** Deep audit of all BWFC EventCallbacks against Web Forms 4.8 originals, triggered by Run 8 benchmark "15 instances requiring EventCallback conversion".
+### Event Handler Audit, LoginStatus Redesign & Run 9 Review (2026-03-05 through 2026-03-06)
 
-**Key findings — Event coverage by control:**
-- **ListView:** 100% (18/18 events) — best coverage
-- **DataGrid:** 100% (10/10)
-- **FormView:** 100% (12/12), but 6 CRUD events On-prefix only, `OnItemInserted` has wrong type (`FormViewInsertEventArgs` instead of `FormViewInsertedEventArgs`)
-- **DetailsView:** 92% (11/12), missing `ItemCreated`
-- **GridView:** 73% (11/15), missing PageIndexChanging, RowUpdated, RowDeleted, RowCreated, RowDataBound; SelectedIndexChanged uses `int` not `EventArgs`
-- **Repeater:** **0%** (0/3) — ZERO EventCallbacks, critical gap
-- **DataList:** **13%** (1/8) — only `OnItemDataBound`
-- **ButtonBaseComponent:** `OnClick` uses `MouseEventArgs` instead of `EventArgs` (migration friction)
-- Input controls (TextBox, CheckBox, RadioButton, DropDownList, etc.): All correct with dual-callback pattern
-- Menu: 100%, TreeView: 83% (missing TreeNodePopulate)
+**Event handler audit:** Full coverage audit of all BWFC EventCallbacks vs Web Forms 4.8. ListView/DataGrid 100%, FormView 100% (wrong type on OnItemInserted), GridView 73%, Repeater 0% (critical gap), DataList 13%. 19 events lack bare-name aliases. 37/52 EventArgs missing Sender. SelectMethod fires only once. 7 P0 items all implemented by Cyclops, tested by Rogue (49 tests, 1519 total passing). 11 P1 + 7 P2 remain.
 
-**On-prefix consistency:** 19 events have On-prefix only (no bare-name alias). Worst offenders: FormView (6), DataGrid (5), TreeView (4).
+**Script gap review (6 gaps):** src=~/ not converted, script tags lost from master head, no BundleConfig detection, CSS link duplication, url(~/) in CSS, no infrastructure file flagging.
 
-**Sender property:** Only 15 of 52 EventArgs classes have `Sender`. 37 need it added for `(object sender, e)` migration pattern.
+**BWFC-first skill rewrite:** All 4 skills + CHECKLIST + METHODOLOGY rewritten with mandatory banners, 110+ component inventory, anti-pattern tables, 9 BWFC verification items, Layer 2 MUST NOT list.
 
-**SelectMethod issues:** Fires once only (firstRender guard), `out` param blocks lambdas, sync only, hard-coded paging params. Proposed fix: move to OnParametersSetAsync, add lambda-friendly overload, add async variant.
+**Run 7 L2/3:** 6 storefront pages preserved (FormView single-item wrapper, ListView/GridView preserved). 26 code-behinds + 12 stubs. Build: 0 errors.
 
-**InsertMethod/UpdateMethod/DeleteMethod:** Not implemented anywhere. Proposed design: `Action<T>` and `Func<T, Task>` parameters that auto-invoke after CRUD events and re-invoke SelectMethod to refresh.
+**LoginStatus redesign:** AuthorizeView wrap (follow-up to LoginView). 4 issues (manual auth state HIGH, LogoutAction type MEDIUM). ZERO breaking changes. 12 tests need bUnit AddTestAuthorization update.
 
-**Prioritized 7 P0 items** (migration-blocking): Repeater events, DataList events, GridView RowDataBound/RowCreated, DetailsView ItemCreated, FormView wrong type, SelectMethod one-shot fix. **11 P1 items** (quality): Button MouseEventArgs, Sender on all EventArgs, missing GridView events, bare-name aliases, async SelectMethod. **7 P2 items** (polish): CRUD methods, remaining aliases, script transform.
-
-**Decision document:** `.ai-team/decisions/inbox/forge-event-handler-selectmethod-audit.md`
-
-**Run 7 L2/3:** 6 storefront pages. FormView with single-item list wrapper, ListView/GridView preserved. 26 code-behinds + 12 .razor stubs. Build: 0 errors. L1 residuals in ItemTemplate sections.
-
-**Script gap review (6 gaps):** `src="~/"` not converted, `<script>` tags lost from master `<head>`, no BundleConfig detection, CSS link duplication, `url('~/')` in CSS not converted, no infrastructure file flagging. Decision: forge-script-gap-review.md.
-
-**BWFC-first skill rewrite:** All 4 skills + CHECKLIST.md + METHODOLOGY.md rewritten. 🚫 MANDATORY banners, 110+ component inventory, LoginView/LoginStatus flagged, anti-pattern tables, 9 new BWFC verification items, Layer 2 "MUST NOT" list. Root cause: Runs 6-8 L2 agents replaced BWFC with plain HTML.
-
-### LoginStatus → AuthorizeView Redesign Analysis (2026-03-06)
-
-**Task:** Analyze LoginStatus for AuthorizeView-based redesign (follow-up to LoginView).
-
-**Key findings:** Inherits CompositeControl→WebControl (HAS style properties, unlike LoginView). Renders `<a>` or `<input type="image">` with no wrapper. 4 issues found: manual AuthenticationStateProvider (HIGH), LogoutAction as abstract class vs enum (MEDIUM, separate PR), misleading LoginPageUrl comment (LOW), null-check missing on LoginPageUrl (LOW). Base class, HTML rendering, events, and style application all correct.
-
-**Architecture:** Wrap markup in `<AuthorizeView>`. ZERO breaking changes (unlike LoginView's 4). All 12 tests need mechanical update to bUnit AddTestAuthorization().
-
-**Decision document:** `.ai-team/decisions/inbox/forge-loginstatus-authorizeview-redesign.md`
-
-
- Team update (2026-03-06): Event Handler Fidelity Audit merged to decisions.md. All 7 P0 items implemented by Cyclops and tested by Rogue (49 tests, all 1519 pass). P1/P2 items remain in the prioritized backlog.  audit by Forge
-
+**Run 9 BWFC review:** APPROVED -- 98.9% preservation (176/178). ShoppingCart GridView and LoginView/LoginStatus/LoginName all FIXED from Runs 6-8. 2 controls lost: ImageButton to img in ShoppingCart (CRITICAL, OnClick lost), HyperLink dropped in Manage (MINOR). ImageButton is a blind spot in Test-BwfcControlPreservation.

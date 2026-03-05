@@ -70,48 +70,17 @@
 **Page System doc rewrite:** PageService.md renamed to "Page System". Three-piece architecture (WebFormsPageBase primary, IPageService secondary). 3-column Key Differences table. mkdocs.yml + README updated.
 
 Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, benchmark baseline, Run 2/5/6 validated, GetRouteUrl overloads, standards formalized, @rendermode fix (PR #419), WebFormsPageBase/Page consolidation, 50 On-prefix aliases, AutoPostBack fix.
-### WingtipToys Migration Gotchas (2026-03-05)
 
-- Migration skill updated with three runtime gotchas from WingtipToys: ListView @context templates, OnParametersSetAsync for query params, AddHttpContextAccessor registration
-- Confidence bumped to high — patterns validated through real migration debugging
+<!-- Summarized 2026-03-05 by Scribe -- covers Run 7 reports, control preservation docs, Run 9 benchmark -->
 
-### Control Preservation Docs Update (2026-03-05)
+### Run 7-9 Reports & Control Preservation Docs (2026-03-05 through 2026-03-06)
 
-- **METHODOLOGY.md updated:** New "Post-Transform Verification: Control Preservation" subsection in Layer 1 documenting `Test-BwfcControlPreservation`. Includes warning callout: never flatten BWFC components to raw HTML.
-- **CHECKLIST.md updated:** Three new checklist items — Layer 1 control preservation verified, Layer 2 no-flattening guard, Verification section all-controls-preserved check.
-- **QUICKSTART.md updated:** Step 3 now mentions the automatic control preservation check and how to interpret deficit warnings.
-- **CONTROL-COVERAGE.md:** Reviewed, no changes needed — it's a control reference table, not a process doc.
-- **Key rule documented:** ALL `asp:` controls must be preserved as BWFC components. Flattening GridView→table or TextBox→input is always wrong. This is Jeff's directive and the script now enforces it automatically.
+**Control preservation docs:** METHODOLOGY.md, CHECKLIST.md, QUICKSTART.md updated with \Test-BwfcControlPreservation\. Rule: ALL asp: controls must be BWFC components, never raw HTML. Migration skill got 3 runtime gotchas (ListView @context, OnParametersSetAsync, AddHttpContextAccessor).
 
- Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
+**Run 7 report:** \samples/Run7WingtipToys/MIGRATION-REPORT.md\  32 files, 331 transforms, 1.2s, 97% accuracy. Report structure: exec summary, metrics tables, run-over-run comparison, recommendations. Co-located with output per Jeff.
 
-### Run 7 Migration Report (2026-03-06)
+**Run 7 skill updates:** 5 files updated for runtime failures (UseStaticFiles 404s, AuthorizeView crashes, asset paths). Key pattern: runtime failures more dangerous than compile errors.
 
-- **Report structure patterns for migration benchmarks:** Executive summary (3-4 sentences, key metrics), toolkit version table, source app description, Layer 1 metrics table + review breakdown table + stubbed pages, Layer 2/3 placeholders, What Worked/Didn't bullets, run-over-run comparison table with delta columns, recommendations for toolkit improvements, appendix file inventory. Machine-readable metrics (JSON) recommended for future automation. Run-over-run comparison should highlight both numeric deltas and qualitative fixes (e.g., ShoppingCart stubbing → proper migration).
-- **Run 7 Executive Report created:** `samples/Run7WingtipToys/MIGRATION-REPORT.md` — 32 files, 331 transforms, 1.2s, 97% preservation accuracy (2 warnings down from 64). 47 review items broken into 7 categories. Report co-located with migrated output (not in planning-docs/) per Jeff's placement request. Layer 2/3 sections are placeholders pending Forge completion.
+**Run 9 report:** \docs/Migration/Run9-WingtipToys-Benchmark.md\ + \samples/Run9WingtipToys/BENCHMARK-REPORT.md\. 667 transforms, 173 BWFC instances (23 types), 8 pages, 0 errors. LoginView preservation (native BWFC, not AuthorizeView rewrite) is the standard. \ItemType\TItem\ bug persists. Convention: BENCHMARK-DATA.md (Bishop)  BENCHMARK-REPORT.md (Beast).
 
-
- Team update (2026-03-05): Run 7 Layer 2/3 transforms consolidated  FormView/ListView preserved per control mandate, out-of-scope pages stubbed to ComponentBase. Decided by Forge
-
-### Run 7 Learnings — Skill & Doc Updates (2026-03-06)
-
-- **5 files updated** with learnings from Run 7 WingtipToys runtime failures:
-  - `bwfc-migration/SKILL.md`: New "Static File & Asset Migration" section (UseStaticFiles, CSS extraction, image path preservation), AuthorizeView gotcha added, Step 3 updated with UseStaticFiles requirement
-  - `migration-standards/SKILL.md`: "Static Asset Relocation" expanded with UseStaticFiles + CSS extraction + path preservation rule, Layer 1 boundary updated to include CSS extraction, Identity Migration subsection gets AuthorizeView requirement
-  - `bwfc-identity-migration/SKILL.md`: WARNING admonition in Step 2 for AuthorizeView without Identity, new "AuthorizeView Without Identity Setup" gotcha entry
-  - `CHECKLIST.md`: 2 new Layer 1 items (static files, CSS extraction), 4 new Verification items (static files accessible, UseStaticFiles present, image paths match, auth services if LoginView)
-  - `METHODOLOGY.md`: 2 new rows in "What Layer 1 Does" table (CSS extraction, static file copying), note in "What Layer 1 Does NOT Do" about image path validation being Layer 2
-- **Pattern:** Run 7 demonstrated that runtime failures (not compile errors) are the most dangerous migration bugs — UseStaticFiles 404s, AuthorizeView crashes, mismatched asset paths all compile fine but fail at runtime. Documenting these as admonitions ensures future migrations catch them early.
-
-
-
- Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
-
-### Run 9 Benchmark Report (2025-07-25)
-
-- **Report created:** `docs/Migration/Run9-WingtipToys-Benchmark.md` + copy at `samples/Run9WingtipToys/BENCHMARK-REPORT.md`. Added to mkdocs.yml nav under Migration section.
-- **Report structure evolution:** Run 9 report follows Run 8 pattern but adds: Layer 0 timing row, BWFC control inventory table sorted by instance count with category column, "What Improved vs Run 8" section with code examples, build issues resolution table, and expanded run-over-run comparison (Run 7/8/9 with trend column).
-- **Key data points:** 667 Layer 1 transforms (2x Run 8), 173 BWFC control instances across 23 types, 8 functional pages, 0 build errors, 7 build attempts. Layer 2 took ~45 min (vs ~3 min Run 8) due to deeper implementation.
-- **LoginView preservation pattern:** Run 9 reversed Run 8's AuthorizeView rewrite, preserving native BWFC LoginView/LoginName/LoginStatus components. This is the correct approach — document as the standard going forward.
-- **Recurring Layer 1 bug:** `ItemType`→`TItem` conversion bug persists across Runs 7-9. Only DropDownList uses TItem; all other data controls use ItemType. Must be documented as known issue until fixed in bwfc-migrate.ps1.
-- **Benchmark report convention:** BENCHMARK-DATA.md (raw metrics from Bishop) → BENCHMARK-REPORT.md (narrative report from Beast). Data file is input, report file is output. Both co-located in samples/Run{N}WingtipToys/.
+ Team update (2026-03-05): Forge APPROVED Run 9 migration (98.9% control preservation). 2 findings: ImageButtonimg (P0), HyperLink dropped (P2). Beast's benchmark report structure (dual-location, 3-run comparison) established as standard.  decided by Forge

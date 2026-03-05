@@ -98,3 +98,5 @@ New EventArgs: `RepeaterCommandEventArgs`, `RepeaterItemEventArgs`, `DataListCom
 
  Team update (2026-03-06): Forge's Event Handler Fidelity Audit merged to decisions.md (P0 items all resolved by Cyclops, tested by Rogue). 11 P1 and 7 P2 items remain for future work.  decided by Forge, implemented by Cyclops
 
+
+ Team update (2026-03-05): Run 9 BWFC review APPROVED with 2 findings  ImageButtonraw img in ShoppingCart (P0, OnClick lost), HyperLink dropped in Manage (P2). ImageButton fix needed.  decided by Forge
