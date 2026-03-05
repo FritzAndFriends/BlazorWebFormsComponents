@@ -133,6 +133,7 @@ nav:
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
     - NamingContainer: UtilityFeatures/NamingContainer.md
     - Page System: UtilityFeatures/PageService.md
+    - Service Registration: UtilityFeatures/ServiceRegistration.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
