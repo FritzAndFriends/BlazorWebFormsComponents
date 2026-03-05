@@ -206,3 +206,17 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 3. **Confidence confirmed at "high"** — already set; this pattern is battle-tested across 6 WingtipToys runs with 4 confirmed gotchas (ListView templates, service registration, OnParametersSetAsync, GridView preservation).
 
 **Key learning:** The migration script pipeline (ConvertFrom-AspPrefix) correctly preserves controls mechanically. The flattening problem occurs when humans or AI do Layer 2 work and rewrite controls as raw HTML instead of keeping the BWFC components. The verification function catches this in the migration report.
+
+### Distributable Skills — Control Preservation Propagation (2026-03-05)
+
+**Task:** Propagate BWFC control preservation rules from internal `.ai-team/skills/migration-standards/SKILL.md` to the distributable `migration-toolkit/skills/` directory.
+
+**Actions taken:**
+
+1. **`migration-toolkit/skills/migration-standards/SKILL.md`** — Added full "⚠️ BWFC Control Preservation — MANDATORY" section (all 5 rules, ShoppingCart concrete example, BAD/GOOD code blocks, Why This Matters) after Context and before Patterns. Bumped confidence from "medium" to "high" — battle-tested across 6 WingtipToys runs.
+
+2. **`migration-toolkit/skills/bwfc-migration/SKILL.md`** — Added concise "⚠️ Control Preservation — Critical Rule" warning section after "What Is BWFC?" and before Installation, with cross-reference to migration-standards SKILL.md. Added "Never Flatten Controls" gotcha entry to Common Gotchas with BAD/RIGHT one-liner examples.
+
+3. **No `.ai-team/` files modified** — internal versions already had the content.
+
+**Key learning:** Distributable skills in `migration-toolkit/skills/` must stay in sync with internal `.ai-team/skills/` — they serve different audiences (external users vs internal team) but must carry the same rules. The migration-standards skill is the authoritative source; bwfc-migration keeps a concise pointer to avoid duplication.

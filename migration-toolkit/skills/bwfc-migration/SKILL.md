@@ -24,6 +24,16 @@ BlazorWebFormsComponents is an open-source library that provides **drop-in Blazo
 
 ---
 
+## ⚠️ Control Preservation — Critical Rule
+
+> **NEVER flatten `asp:` controls to raw HTML.** Always preserve them as BWFC components.
+
+When migrating, every `<asp:GridView>` becomes `<GridView>`, every `<asp:TextBox>` becomes `<TextBox>`, etc. The BWFC library exists so these components **keep working** — with the same HTML output, the same attributes, and the same features. Decomposing them into `<table>`, `<input>`, `<span>`, or `@foreach` loops destroys functionality, breaks CSS, and defeats the purpose of the library.
+
+The migration script's `Test-BwfcControlPreservation` function catches control loss automatically. See the **migration-standards** skill (`migration-toolkit/skills/migration-standards/SKILL.md`) for the full rules, concrete examples, and anti-patterns.
+
+---
+
 ## Installation
 
 ### Step 1: Create Blazor Server Project
@@ -549,6 +559,18 @@ BWFC uses `Multiline` (lowercase 'l'), not `MultiLine`. Silent failure if wrong.
 
 ### ScriptManager/ScriptManagerProxy Are No-Ops
 Include during migration to prevent errors, remove when stable.
+
+### Never Flatten Controls
+```razor
+@* ❌ BAD — flattened to raw HTML, loses all BWFC features *@
+<table class="table">@foreach (var item in items) { <tr><td>@item.Name</td></tr> }</table>
+
+@* ✅ RIGHT — preserved as BWFC component *@
+<GridView TItem="Product" Items="@items" AutoGenerateColumns="false">
+    <Columns><BoundField DataField="Name" HeaderText="Product" /></Columns>
+</GridView>
+```
+See `migration-toolkit/skills/migration-standards/SKILL.md` for full rules.
 
 ---
 

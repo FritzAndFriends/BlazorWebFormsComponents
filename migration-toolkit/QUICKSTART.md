@@ -74,6 +74,8 @@ The migration script handles the mechanical work: stripping `asp:` prefixes, rem
 .\scripts\bwfc-migrate.ps1 -Path "C:\src\MyWebFormsApp" -Output "C:\src\MyBlazorApp" -WhatIf
 ```
 
+After transformation, the script automatically runs a **control preservation check** (`Test-BwfcControlPreservation`) on each file. If you see deficit warnings, a control was lost during transformation — report this as a script bug.
+
 > 📄 Script reference: [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1)
 
 ---

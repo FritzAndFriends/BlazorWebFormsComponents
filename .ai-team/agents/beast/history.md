@@ -140,3 +140,11 @@
 
 - Migration skill updated with three runtime gotchas from WingtipToys: ListView @context templates, OnParametersSetAsync for query params, AddHttpContextAccessor registration
 - Confidence bumped to high — patterns validated through real migration debugging
+
+### Control Preservation Docs Update (2026-03-05)
+
+- **METHODOLOGY.md updated:** New "Post-Transform Verification: Control Preservation" subsection in Layer 1 documenting `Test-BwfcControlPreservation`. Includes warning callout: never flatten BWFC components to raw HTML.
+- **CHECKLIST.md updated:** Three new checklist items — Layer 1 control preservation verified, Layer 2 no-flattening guard, Verification section all-controls-preserved check.
+- **QUICKSTART.md updated:** Step 3 now mentions the automatic control preservation check and how to interpret deficit warnings.
+- **CONTROL-COVERAGE.md:** Reviewed, no changes needed — it's a control reference table, not a process doc.
+- **Key rule documented:** ALL `asp:` controls must be preserved as BWFC components. Flattening GridView→table or TextBox→input is always wrong. This is Jeff's directive and the script now enforces it automatically.

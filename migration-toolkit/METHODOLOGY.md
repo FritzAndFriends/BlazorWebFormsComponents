@@ -74,6 +74,12 @@ Layer 1 handles every transform that can be expressed as a regex find-and-replac
 
 `_Imports.razor` includes `@inherits BlazorWebFormsComponents.WebFormsPageBase` so that all converted pages get `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` without per-page injection. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
 
+### Post-Transform Verification: Control Preservation
+
+After transforming each file, the script runs `Test-BwfcControlPreservation` to verify that **every `asp:` control in the source was preserved as a BWFC component** in the output. If the verification reports a control count deficit, it means a control was lost during transformation — this is always a bug in the migration script, not an expected outcome.
+
+> ⚠️ **Rule:** The script preserves ALL `asp:` controls as BWFC components. If the verification step reports a control deficit, it means a control was incorrectly flattened to raw HTML during Layer 2 work. Never replace a BWFC component (e.g., `<GridView>`, `<TextBox>`) with raw HTML (`<table>`, `<input>`) — the component must be preserved so that existing CSS, JavaScript, and server-side behavior continue to work.
+
 ### What Layer 1 Does NOT Do
 
 - Convert `SelectMethod` to `Items` binding (requires understanding the data flow)

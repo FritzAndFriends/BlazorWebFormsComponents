@@ -28,6 +28,7 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] `<asp:Content>` wrappers removed (page body unwrapped)
 - [ ] `ItemType` → `TItem` converted
 - [ ] Code-behind file copied (.aspx.cs → .razor.cs) with TODO annotations
+- [ ] Control preservation verified (no deficit warnings in migration report)
 
 ### Layer 2 — Copilot-Assisted (Structural Transforms)
 
@@ -43,6 +44,7 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Route parameters converted (`[RouteData]` → `[Parameter]` with `@page` route)
 - [ ] `@using` statements added for model namespaces
 - [ ] `@inject` statements added for required services
+- [ ] No asp: controls were flattened to raw HTML (GridView→table, TextBox→input, etc.)
 
 ### Layer 3 — Architecture Decisions
 
@@ -63,6 +65,7 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] No JavaScript console errors in browser dev tools
 - [ ] Data displays correctly (correct records, correct formatting)
 - [ ] Form submissions work (validation fires, data saves)
+- [ ] All original asp: controls preserved as BWFC components
 ```
 
 ---
