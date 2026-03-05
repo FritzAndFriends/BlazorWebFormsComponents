@@ -108,3 +108,36 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 7. **OpenAuthProviders** is a WingtipToys user control (.ascx), not a missing BWFC component. Correctly stubbed.
 
 **Decision:** `.ai-team/decisions/inbox/forge-cycle1-analysis.md` — 3 P0, 4 P1, 4 P2, 3 P3 items. Cycle 1 targets: P0-1 (ItemType fix), P0-2 (smart stubs), P0-3 (base class stripping), P1-1 (validator params), P1-4 (ImageButton warning). All P0/P1 assigned to Bishop except ImageButton verification (Cyclops).
+
+### Run 10 BWFC Preservation Review (2026-03-06)
+
+**Task:** Full BWFC preservation audit of Run 10 migration output against original WingtipToys .aspx source.
+
+**Key findings:**
+1. **Overall: 92.7% (164/177) — NEEDS WORK.** Below the 95% approval threshold. Two pages account for all 13 lost controls.
+2. **P0-2 fix largely successful:** 12 of 14 Account/Checkout pages now contain full BWFC markup (were empty stubs in Run 9). 113 controls preserved across these pages. Login, Register, Confirm, Manage, ManagePassword, Forgot, AddPhoneNumber, ResetPassword, TwoFactorAuth, VerifyPhoneNumber, RegisterExternalLogin, ResetPasswordConfirmation, CheckoutComplete all at 100%.
+3. **ManageLogins still a stub (0/3, 0%):** Source has PlaceHolder + ListView + Button. Output is a dismissive text-only message. P0-2 missed this page entirely.
+4. **CheckoutReview partial (6/15, 40%):** GridView + 4 BoundFields + Button preserved, but the entire DetailsView shipping address section (DetailsView + TemplateField + 7 Labels) is missing. Critical checkout UX gap.
+5. **ImageButton→img persists in ShoppingCart (12/13, 92%):** PayPal checkout button still flattened to `<img>`, losing OnClick handler. Carried from Run 9. Test-BwfcControlPreservation still does not detect this pattern.
+6. **AdminPage perfect (21/21):** Most complex non-data page fully preserved — all Labels, DropDownLists, TextBoxes, validators, FileUpload, Buttons.
+7. **ManagePassword perfect (24/24):** Most control-dense Account page fully preserved including ModelErrorMessage, dual PlaceHolder sections, 5 validators.
+8. **Run 9→10 rate regression is misleading:** Run 9 reported 98.9% because stub pages were N/A. Run 10 counts their source controls in the denominator because P0-2 attempted them. Fixing CheckoutReview DetailsView section alone brings rate to 97.7%.
+
+**Decision:** `.ai-team/decisions/inbox/forge-run10-preservation.md` — NEEDS WORK verdict. P0: Fix CheckoutReview DetailsView + ShoppingCart ImageButton. P1: Fix ManageLogins stub. P2: Add ImageButton to Test-BwfcControlPreservation.
+
+### Cycle 2 Analysis — Run 10 Deep Dive (2026-03-06)
+
+**Task:** Analyzed Run 10 benchmark report, preservation review, and actual migrated output to produce prioritized Cycle 2 fix list.
+
+**Key findings:**
+1. **CheckoutReview DetailsView omission is a Layer 2 problem, not a component gap.** The BWFC DetailsView component exists at `src/BlazorWebFormsComponents/DetailsView.razor` with full support for AutoGenerateRows, GridLines, CellPadding, Fields, TemplateField. Layer 2 simply didn't include the section (lines 14-36 of source) in the output.
+2. **ImageButton→img is also a Layer 2 problem.** The BWFC ImageButton component exists at `src/BlazorWebFormsComponents/ImageButton.razor.cs` with ImageUrl, AlternateText, OnClick. Layer 2 replaces it with `<img>` — likely because the checkout code-behind is complex. The preservation test already detects this (lines 1052-1060) but only warns, doesn't fail.
+3. **ManageLogins was stubbed due to a build error** on `@context.LoginProvider` (the ItemType `Microsoft.AspNet.Identity.UserLoginInfo` doesn't exist in .NET 10). Layer 2 gave up and replaced with text instead of creating a stub model class.
+4. **Enum conversions are the #1 remaining build cause.** 16 TextMode, 15 Display, and 3+ GridLines instances all need deterministic string→type conversion. A single `Convert-EnumAttributes` function with a mapping table would eliminate all of them.
+5. **ControlToValidate is already stripped** in Run 10 output (0 instances found), but unclear if Layer 1 or Layer 2 does this — needs verification.
+6. **About page drops `<%: Title %>` dynamic binding** — hard-codes `<h2>About</h2>` instead of using `@Title` from WebFormsPageBase.
+7. **AdminPage (21/21 controls) is ready for functional promotion** — just needs code-behind CRUD implementation.
+
+**Decision:** `.ai-team/decisions/inbox/forge-cycle2-analysis.md` — 3 P0 (CheckoutReview DetailsView +9, ImageButton +1, ManageLogins +3), 4 P1 (TextMode enum, ValidatorDisplay enum, boolean normalization, ControlToValidate verify), 5 P2 (AdminPage promotion, About Title, ImageButton detection escalation, expression cleanup, GridLines enum), 4 P3 (Identity, Checkout flow, cart persistence, Visible attributes). Cycle 2 target: preservation ≥98%, build attempts = 1.
+
+ Team update (2026-03-06): Scribe consolidated Layer 1 bugs decisions (old ItemType/validator/base-class entries merged into single block). Run 10 preservation review, Cycle 1 fix list, smart stubs, and enum conversion P2 proposal all merged to decisions.md. Inbox cleared.  decided by Scribe

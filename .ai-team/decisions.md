@@ -1,4 +1,4 @@
-# Decisions
+﻿# Decisions
 
 > Shared team decisions. All agents read this. Only Scribe writes here (by merging from inbox).
 
@@ -5763,8 +5763,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **Why:** User request — captured for team memory
 
 
-
-
 ### 2026-03-04: Run 5 Migration Patterns
 
 **By:** Cyclops
@@ -5785,7 +5783,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 3. When ASP.NET Identity is used in the Web Forms project, prefer ASP.NET Core Identity in the Blazor migration
 4. Event handler migration should leverage BWFC component event parameters (OnClick, OnCommand, OnSelectedIndexChanged, etc.) which already have similar names to Web Forms originals
 **Why:** User request — establishing canonical migration standards based on Run 5 learnings. These should be reflected in migration scripts, documentation, and skills.
-
 
 
 ### 2026-03-05: Migration Toolkit Run 6  BWFC-first migration standards and 8 script enhancements (consolidated)
@@ -5821,7 +5818,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 4. **Compilable stubs** → Pages containing Identity/Auth/Payment patterns (SignInManager, UserManager, FormsAuthentication, Session[, PayPal, Checkout) get minimal compilable `@page`/`@code{}` stubs instead of broken partial conversions.
 
 **Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
-
 
 
 ### 2026-03-04: @rendermode InteractiveServer belongs in App.razor, not _Imports.razor (consolidated)
@@ -6838,21 +6834,14 @@ authContext.SetNotAuthorized();  // for not-logged-in tests
 **Why:** Web Forms developers may depend on this ordering (e.g., modifying row structure in RowCreated before data binding populates values in RowDataBound). The ordering test ensures Cyclops implements the events in the correct sequence.
 
 
-### 2025-07-25: Layer 1 script bugs — ItemType conversion and validator type params
+### 2026-03-06: Layer 1 script bugs  ItemType, validator params, base class (consolidated)
 
-**By:** Bishop
-**What:** `bwfc-migrate.ps1` has three bugs that cause build failures in every migration run:
-1. Converts `ItemType` to `TItem` for ALL data controls, but GridView/ListView/FormView/DetailsView use `ItemType` as their type parameter name (only DropDownList uses `TItem`).
-2. Does not add `Type="string"` to RequiredFieldValidator/RegularExpressionValidator or `InputType="string"` to CompareValidator.
-3. Does not add `@using BlazorWebFormsComponents.Validations` to generated `_Imports.razor`.
-**Why:** These three issues require manual Layer 2 fixes in every migration run. Fixing them in bwfc-migrate.ps1 would eliminate ~30 minutes of build-fix iteration. Discovered during Run 9 benchmark (7 build attempts needed).
-
-### 2025-07-25: @inherits WebFormsPageBase conflicts with `: ComponentBase`
-
-**By:** Bishop
-**What:** When `_Imports.razor` contains `@inherits WebFormsPageBase`, all code-behind files must NOT specify `: ComponentBase` as their base class (causes CS0263). Exception: Layout files must specify `: LayoutComponentBase` in both the .razor file (`@inherits LayoutComponentBase`) and code-behind.
-**Why:** The Layer 1 script generates code-behinds with `: ComponentBase` which conflicts with the global `@inherits`. This causes ~30 CS0263 errors per run. The fix pattern should be documented and automated.
-
+**By:** Bishop, Forge
+**What:** Three recurring Layer 1 bugs identified in Run 9 analysis and fixed in Cycle 1:
+1. **ItemType->TItem**  Only DropDownList, ListBox, CheckBoxList, RadioButtonList, BulletedList get ItemType->TItem conversion. All other data controls (GridView, ListView, FormView, DetailsView) retain ItemType as-is. Regex uses Singleline mode for multi-line tags.
+2. **Validator type params**  All validators now get Type="string" or InputType="string" by default. Eliminates ~26 build errors per run.
+3. **Base class stripping**  Copy-CodeBehind strips : Page, : System.Web.UI.Page, : UserControl, : MasterPage and using System.Web.* directives to prevent CS0263 conflicts with @inherits WebFormsPageBase.
+**Why:** These three issues required manual Layer 2 fixes every run (~30 min of build-fix iteration, 7 build attempts in Run 9). All fixed in bwfc-migrate.ps1. Run 10 confirms: down to 3 build attempts.
 
 ### 2026-03-05: Run 9 BWFC preservation review
 
@@ -7035,3 +7024,37 @@ These controls ARE present in the output; they're just missing from the summary 
 
 **Impact:** Future benchmark reports should follow this structure. The BENCHMARK-DATA.md → BENCHMARK-REPORT.md pipeline (Bishop generates data, Beast writes report) should be the standard workflow.
 
+### 2026-03-06: Smart stubs  markup always transforms, code-behinds stubbed
+
+**By:** Bishop
+**What:** Unconvertible pages (Account/*, Checkout/*) now receive ALL Layer 1 markup transforms. Only code-behinds are stubbed with a minimal partial class + TODO banner. Layer 2 no longer needs to redo markup transforms for these pages.
+**Why:** Previously, the stub mechanism replaced entire pages with empty placeholders, discarding ~20 pages of valid BWFC markup that Layer 1 could mechanically convert. This recovers those transforms and reduces Layer 2 work by ~30 minutes per run.
+
+### 2026-03-06: Layer 1 enum attribute conversion (P2 candidate for Cycle 2)
+
+**By:** Bishop
+**What:** Proposed: Layer 1 should convert string-valued enum attributes to Blazor enum equivalents (e.g., TextMode="Email" to TextMode="TextBoxMode.Email", Display="Dynamic" to Display="@ValidatorDisplay.Dynamic", boolean attributes like AutoGenerateColumns="False" to AutoGenerateColumns="@false").
+**Why:** In Run 10, 3 of 47 initial build errors were caused by unquoted enum/boolean values. These are mechanical transforms. Would reduce build attempts from 3 to potentially 1-2 and eliminate 10-15 manual fixes per run. Deferred to Cycle 2 as low risk, well-defined patterns.
+
+### 2026-03-06: Cycle 1 prioritized fix list — 14 items across P0-P3
+
+**By:** Forge
+**What:** Analyzed Run 9 output and produced actionable fix list: 3 P0 items (ItemType conversion, smart stubs, base class stripping), 4 P1 items (validator params, code block stripping, Validations namespace, ImageButton warning), 4 P2 items (AdminPage CRUD, DropDownList AppendDataBoundItems, OpenAuthProviders, Manage HyperLink), 3 P3 items (Identity scaffolding, PayPal checkout, DB-backed cart). Cycle 1 targets: P0-1, P0-2, P0-3, P1-1, P1-4.
+**Why:** Systematic prioritization based on frequency of recurrence, impact on build iterations, and feasibility within one cycle. P0 items cause build failures every run. P1 items reduce iterations. P2/P3 deferred as they require BWFC component work or application-level changes.
+
+### 2026-03-06: Run 10 BWFC preservation review  92.7% (164/177)
+
+**By:** Forge
+**What:** Run 10 preservation rate is 92.7% (164/177), below the 95% approval threshold. P0-2 fix successful on 12 of 14 Account/Checkout pages (113 controls recovered). Three gaps remain: (1) Checkout/CheckoutReview DetailsView section missing (9 controls), (2) Account/ManageLogins still stub (3 controls), (3) ShoppingCart ImageButton flattened to img (1 control, ongoing). Fixing CheckoutReview + ManageLogins would reach 97.7%.
+**Why:** Preservation tracking ensures the migration toolkit does not silently lose BWFC controls. The 95% threshold gates Cycle 2 work. The rate appears lower than Run 9 98.9% because Account/Checkout pages now count in the denominator (previously excluded as stubs).
+
+### 2026-03-06: Cycle 2 prioritized fix list  16 items across P0-P3
+
+**By:** Forge
+**What:** Analyzed Run 10 output post-Cycle-1 fixes. 3 P0 items (CheckoutReview DetailsView +9 controls, ShoppingCart ImageButton +1, ManageLogins stub +3), 4 P1 items (TextMode enum 16 instances, ValidatorDisplay enum 15 instances, boolean True/False normalization, ControlToValidate verify), 5 P2 items (AdminPage promotion, About Title, ImageButton FAIL escalation, expression cleanup, GridLines enum), 4 P3 items (Identity scaffolding, checkout flow, cart persistence, Visible attributes). Cycle 2 target: preservation >=98%, build attempts = 1.
+**Why:** Run 10 validated Cycle 1 (build attempts 73) but preservation rate 92.7% is below 95% threshold. Two pages account for all 13 lost controls. Remaining 3 build attempts are caused by enum string-to-type conversions  all deterministic and automatable via a single Convert-EnumAttributes function with mapping table. Fixing P0 items alone brings preservation to 98.3%.
+### 2026-03-05: User directive  Stop emitting ItemType/TItem when data source exists
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Blazor components with a SelectMethod or other data-providing method (Items, SelectItems, SelectMethodAsync) do NOT need an explicit ItemType/TItem type parameter attribute. Blazor generic type inference handles it automatically from the return type. The migration script should stop emitting ItemType/TItem when a data source is present on the component.
+**Why:** User request  this eliminates the entire class of ItemType/TItem conversion bugs that have been the #1 recurring build failure across Runs 7-10. Simplifies the migration output and matches how experienced Blazor developers write components.

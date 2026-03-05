@@ -55,3 +55,15 @@
   - Empty DropDownList (no Items) can't infer TItem — must be specified explicitly.
   - ManageLogins page uses `Microsoft.AspNet.Identity.UserLoginInfo` as ItemType — needs simplification to stub.
   - Stub page cleanup still ~60% of Layer 2 effort despite P0-2 fix.
+
+### Cycle 2 Fixes Applied (Bishop) — Script-Only (P1/P2)
+
+- **P1-1 + P1-2 + P2-5 (Convert-EnumAttributes):** New function converts Web Forms string enum values to C# enum types. TextMode→TextBoxMode (5 values), Display→@ValidatorDisplay (3 values), GridLines→@GridLines (4 values). Called after Add-ValidatorTypeParameters in the pipeline. Eliminates ~34 manual fixes per run.
+- **P1-3 (Boolean normalization):** New `Convert-BooleanAttributes` function uses regex `(?<==")True(?=")` and `(?<==")False(?=")` to lowercase PascalCase boolean attribute values. Prevents subtle C# case-sensitivity build errors.
+- **P1-4 (ControlToValidate stripping):** Added `ControlToValidate` and `ValidationGroup` to `$StripAttributes` list. Both are Web Forms-only attributes with no Blazor equivalent.
+- **P2-3 (ImageButton FAIL):** Elevated ImageButton→img detection in `Test-BwfcControlPreservation` from ⚠️ WARNING to ❌ FAIL. Stronger signal for Layer 2 to preserve `<ImageButton>` component.
+- **P2-4 (Server-side expression cleanup):** Added pre-pass in `ConvertFrom-Expressions` that detects `<%:` / `<%=` expressions referencing `Request`, `Session`, `Server`, `Response`, `ProviderName`, `SuccessMessage`, `OpenID_*`, `ManageMessage`. These are wrapped in `@* TODO: Server-side expression *@` Razor comments instead of `@(Variable)` which won't compile.
+
+ Team update (2026-03-06): Forge reviewed Run 10 preservation: 92.7% (164/177), below 95% threshold. 3 gaps: CheckoutReview DetailsView missing (9 controls), ManageLogins still stub (3 controls), ShoppingCart ImageButton flattened (1 control). Fixing all 3 reaches 97.7%. Layer 1 bugs consolidated into single decision (ItemType, validators, base class).  decided by Forge
+
+ Team update (2026-03-05): User directive from Jeff  stop emitting ItemType/TItem when data source exists (SelectMethod, Items, etc.). Blazor generic type inference handles it. Eliminates #1 recurring build failure class.  decided by Jeffrey T. Fritz
