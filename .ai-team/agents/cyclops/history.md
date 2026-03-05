@@ -55,71 +55,25 @@
 
 Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX controls, theming, release.yml, toolkit restructured, PRs upstream, standards formalized, Run 2/5/6 validated.
 
+
 <!-- Summarized 2026-03-06 by Scribe -- covers @rendermode fix through On-prefix aliases -->
 
-### 2026-03-05 Implementation Summary
+<!-- Summarized 2026-03-06 by Scribe -- covers 2026-03-05 implementation through ShoppingCart fix -->
 
-**@rendermode fix:** Removed standalone `@rendermode InteractiveServer` from _Imports.razor scaffold. It's a directive *attribute* on component instances (App.razor `<Routes>`/`<HeadOutlet>`), not a standalone directive. `@using static` import enables shorthand.
+### 2026-03-05 through 2026-03-06 Implementation Summary
 
-**WebFormsPageBase:** Abstract base class inheriting `ComponentBase` (not `BaseWebFormsComponent`). Delegates Title/MetaDescription/MetaKeywords to IPageService. `IsPostBack => false`, `Page => this`.
+**@rendermode fix:** Removed standalone `@rendermode InteractiveServer` from _Imports.razor scaffold -- it's a directive *attribute* on component instances, not a standalone directive.
 
-**WebFormsPage consolidation:** Merged Page.razor head-rendering into WebFormsPage (Option B). Optional IPageService via `ServiceProvider.GetService<>()`. RenderPageHead parameter (default true). IDisposable for event unsubscription.
+**WebFormsPageBase:** Abstract base class inheriting `ComponentBase`. Delegates Title/MetaDescription/MetaKeywords to IPageService. `IsPostBack => false`, `Page => this`. **WebFormsPage consolidation:** Merged Page.razor head-rendering (Option B). Optional IPageService via `ServiceProvider.GetService<>()`. RenderPageHead parameter (default true). IDisposable for event unsubscription.
 
-**On-prefix aliases:** 50 `[Parameter] EventCallback` aliases across 7 data components (GridView 9, DetailsView 11, FormView 6, ListView 16, DataGrid 5, Menu 2, TreeView 1). Pattern: two independent properties + coalescing at invocation. Blazor sets [Parameter] properties by name independently.
+**On-prefix aliases:** 50 `[Parameter] EventCallback` aliases across 7 data components. Pattern: two independent properties + coalescing at invocation.
+
+**Run 8 Layer 2 WingtipToys:** Full Layer 2 migration of `samples/Run8WingtipToys/` -- 8 files created (EF Core models, DbContext, CartStateService), 14 modified (csproj, Program.cs, layouts, pages), 3 deleted, 26 stub files fixed. Clean build. Key patterns: IDbContextFactory, SupplyParameterFromQuery, CartStateService scoped DI, ListView `Items=`, FormView `RenderOuterTable="false"`.
+
+**ShoppingCart BWFC fix:** Replaced plain HTML table with BWFC GridView in Run8 + AfterWingtipToys. AfterWingtipToys reference was wrong (plain HTML). Run 7's ShoppingCart.razor is gold standard.
 
 Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shipped, WebFormsPage consolidation, event handler audit, ShoppingCart regression test, BWFC preservation mandatory.
-### Run 8 Layer 2 — WingtipToys Migration Implementation (2026-03-06)
 
-**What:** Completed Layer 2 migration of `samples/Run8WingtipToys/` from non-functional Layer 1 scaffold to working end-to-end shopping flow, using `samples/AfterWingtipToys/` as the reference implementation.
+ Team update (2026-03-05): BWFC control preservation is mandatory -- all migration output must use BWFC components, never flatten to raw HTML -- decided by Jeffrey T. Fritz, Forge, Cyclops
 
-**Files created (8):**
-- `Models/Product.cs`, `Models/Category.cs`, `Models/CartItem.cs`, `Models/Order.cs`, `Models/OrderDetail.cs` — EF Core entity models in `WingtipToys.Models` namespace
-- `Data/ProductContext.cs` — EF Core DbContext with seed data (5 categories, 16 products), uses SQLite
-- `Services/CartStateService.cs` — in-memory cart state (scoped DI), tracks items/quantities/totals
-
-**Files modified (14):**
-- `WingtipToys.csproj` — NuGet ref → ProjectReference to BWFC + added EF Core SQLite 10.0.3
-- `Program.cs` — added DbContextFactory, CartStateService, auth services, DB seed on startup
-- `Components/App.razor` — added CSS links for bootstrap.css and Site.css from `/Content/`
-- `_Imports.razor` — added usings for EntityFrameworkCore, WingtipToys.Models/Data/Services
-- `Components/Layout/MainLayout.razor` — replaced broken master page with working layout: navbar, logo, category ListView from DB, removed broken `GetRouteUrl`/`LoginStatus`/`Page.Title` expressions
-- `ProductList.razor` — replaced broken ListView (GetRouteUrl, .aspx links, TODO annotations) with working version using `Items="@_products"`, correct image/link paths
-- `ProductList.razor.cs` — replaced Web Forms code-behind with ComponentBase + IDbContextFactory + SupplyParameterFromQuery
-- `ProductDetails.razor` — replaced broken FormView (TODO, no Items) with working version using `Items="@_products"` + null guard
-- `ProductDetails.razor.cs` — replaced Web Forms code-behind with ComponentBase + IDbContextFactory
-- `AddToCart.razor` — replaced empty HTML shell with inline @code block using CartStateService
-- `ShoppingCart.razor` — replaced broken GridView/Label/Button markup with clean foreach table using CartStateService
-- `Default.razor` — replaced `@(Title)` with static text and added PageTitle
-- `Default.razor.cs` — replaced Web Forms Page class with empty ComponentBase
-- `About.razor`, `Contact.razor` — replaced `@(Title)` with static text
-
-**Files deleted (3):**
-- `AddToCart.razor.cs` — code now inline in .razor
-- `ShoppingCart.razor.cs` — code now inline in .razor
-- `Components/Layout/MainLayout.razor.cs` — code now inline in .razor via @code block
-
-**Out-of-scope stubs fixed (26 files):** All Account/, Checkout/, Admin/, ViewSwitcher code-behind files replaced with empty `ComponentBase` partials. Several broken razor files (Manage, ManagePassword, TwoFactorAuthenticationSignIn, CheckoutReview, CheckoutComplete, CheckoutError, Register, ResetPassword, Forgot, ManageLogins, Login, VerifyPhoneNumber, OpenAuthProviders, RegisterExternalLogin, AddPhoneNumber, Confirm, Lockout, ResetPasswordConfirmation, AdminPage, ViewSwitcher) replaced with simple stub markup to eliminate compile errors from leftover Web Forms expressions.
-
-**Build result:** 0 errors, 0 warnings. `dotnet build` clean.
-
-**Key patterns used:**
-- `IDbContextFactory<ProductContext>` injected via `[Inject]` for short-lived DbContext per operation
-- `[SupplyParameterFromQuery]` for URL query string binding (replaces Web Forms `[QueryString]`)
-- `CartStateService` as scoped service for in-memory cart state (replaces Web Forms Session-based cart)
-- ListView `Items="@_products"` pattern for data binding (replaces SelectMethod)
-- FormView with `RenderOuterTable="false"` for product details
-- Inline `@code` blocks for simple pages (AddToCart, ShoppingCart, MainLayout)
-
-### ShoppingCart BWFC Control Preservation Fix (2026-03-06)
-
-**What:** Replaced plain HTML `<table>` + `@foreach` in ShoppingCart.razor with BWFC GridView in both Run8WingtipToys and AfterWingtipToys. Added `UpdateQuantity` method to both CartStateService implementations.
-
-**Learnings:**
-- ShoppingCart MUST use BWFC GridView, not HTML table — this is the core value proposition of the library
-- AfterWingtipToys reference was wrong — it used plain HTML instead of BWFC components, causing the bug to propagate to Run 8
-- All migration output should preserve Web Forms controls as BWFC equivalents (GridView, BoundField, TemplateField, TextBox, CheckBox, Button, Label)
-- Run 7's ShoppingCart.razor is the gold standard pattern for data-bound BWFC pages with edit capabilities
-
-
-
- Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
+ Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView -- decided by Forge

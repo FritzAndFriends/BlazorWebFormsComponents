@@ -6057,3 +6057,225 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 - **`NavigateUrl="~/"` conversion** — Already handled correctly.
 - **`ImageUrl="~/"` conversion** — Already handled correctly.
 - **Expression conversion (<%: %>, <%#: %>, Eval, Item)** — All covered with good regex ordering (format string first, then simple patterns). Remaining unconverted blocks are correctly flagged as manual items.
+
+
+### 2026-03-05: LoginView redesign — delegate to AuthorizeView
+
+**By:** Forge
+
+**What:**
+
+Redesign the BWFC `LoginView` component to internally delegate to Blazor's built-in `<AuthorizeView>` while preserving the original Web Forms template names and RoleGroup semantics. This is a breaking-but-correct change that aligns our component with both the original Web Forms behavior AND Blazor's auth plumbing.
+
+#### Research: Original Web Forms LoginView
+
+Per Microsoft Learn docs (`System.Web.UI.WebControls.LoginView`):
+
+- **Inherits `Control`** (NOT `WebControl`) — therefore has NO style properties (no CssClass, Style, etc.). Renders no wrapper element.
+- **Templates:**
+  - `AnonymousTemplate` — displayed to unauthenticated users
+  - `LoggedInTemplate` — displayed to authenticated users who match no RoleGroup
+  - `RoleGroups` — collection of `RoleGroup` objects, each with `Roles` (comma-separated string) and `ContentTemplate` (ITemplate)
+- **Template selection priority:** Not authenticated → `AnonymousTemplate`. Authenticated → first matching `RoleGroup` (searched in declaration order, first-match-wins) → `LoggedInTemplate` fallback.
+- **HTML output:** The active template's content is rendered directly — NO wrapper `<div>`, `<span>`, or any other element.
+- **Events:** `ViewChanged`, `ViewChanging` (fire when the active template switches)
+
+Declarative syntax from the original:
+```xml
+<asp:LoginView runat="server">
+    <AnonymousTemplate>...</AnonymousTemplate>
+    <LoggedInTemplate>...</LoggedInTemplate>
+    <RoleGroups>
+        <asp:RoleGroup Roles="Admin">
+            <ContentTemplate>...</ContentTemplate>
+        </asp:RoleGroup>
+    </RoleGroups>
+</asp:LoginView>
+```
+
+#### Research: Blazor AuthorizeView
+
+Per Microsoft Learn docs (`Microsoft.AspNetCore.Components.Authorization.AuthorizeView`):
+
+- **Templates:** `Authorized` (RenderFragment\<AuthenticationState\>), `NotAuthorized` (RenderFragment\<AuthenticationState\>), `Authorizing` (RenderFragment)
+- **Parameters:** `Roles` (comma-delimited string), `Policy` (string), `Resource` (object)
+- **Renders no wrapper element** — only the active template's content
+- **Handles async auth state** automatically — shows `Authorizing` template during resolution, re-renders on auth state change
+- **Context:** Provides `AuthenticationState` to `Authorized`/`NotAuthorized` templates via `context` parameter
+
+#### Current BWFC Implementation: Issues Found
+
+| # | Issue | Severity |
+|---|-------|----------|
+| 1 | **Wrong base class** — inherits `BaseStyledComponent` but original is `Control` (no style properties) | High |
+| 2 | **Spurious wrapper `<div>`** — renders `<div id class style title>` wrapper; original renders NO wrapper element. Confirmed by HTML audit: `audit-output/webforms/LoginView/LoginView-1.html` shows bare template content | High |
+| 3 | **Manual auth state** — injects `AuthenticationStateProvider` and resolves user in `OnInitializedAsync`. Does NOT react to auth state changes. Does NOT handle async loading state | High |
+| 4 | **`RoleGroup.ChildContent` should be `ContentTemplate`** — Web Forms uses `<ContentTemplate>` inside `<RoleGroup>`, not bare child content | Medium |
+| 5 | **`RoleGroups` parameter is `RoleGroupCollection`** — should be `RenderFragment` so `<RoleGroups>` works as declarative markup (matching Web Forms syntax) | Medium |
+| 6 | **`ChildContent` on LoginView used as RoleGroup container** — confusing; in Web Forms there is no ChildContent, only named templates | Medium |
+| 7 | **No `ViewChanged`/`ViewChanging` events** | Low |
+| 8 | **RoleGroup timing dependency** — RoleGroup components self-register in `OnParametersSet` via cascading parameter, but this creates a render-order dependency | Low |
+
+What's working well:
+- Template selection logic (anonymous → role group → logged-in fallback) is correct
+- RoleGroupCollection.GetRoleGroup implements first-match-wins correctly
+- Comma-separated role matching is correct
+- Self-registration pattern for RoleGroup via CascadingParameter is clever Blazor-ism
+
+#### Proposed Architecture
+
+**LoginView.razor** — no wrapper element, delegates to AuthorizeView:
+
+```razor
+@inherits BaseWebFormsComponent
+
+@* Phase 1: Render RoleGroups fragment so child RoleGroup components self-register *@
+<CascadingValue Name="LoginView" Value="this">
+    @RoleGroups
+</CascadingValue>
+
+@* Phase 2: Delegate to AuthorizeView for auth state management *@
+<AuthorizeView>
+    <Authorized Context="authState">
+        @GetAuthenticatedView(authState.User)
+    </Authorized>
+    <NotAuthorized>
+        @AnonymousTemplate
+    </NotAuthorized>
+</AuthorizeView>
+```
+
+**LoginView.razor.cs** — simplified, no manual auth state:
+
+```csharp
+public partial class LoginView : BaseWebFormsComponent
+{
+    // Web Forms template parameters
+    [Parameter] public RenderFragment AnonymousTemplate { get; set; }
+    [Parameter] public RenderFragment LoggedInTemplate { get; set; }
+
+    // Declarative RoleGroup container — renders <RoleGroup> child components
+    [Parameter] public RenderFragment RoleGroups { get; set; }
+
+    // Internal collection — populated by RoleGroup children via cascading parameter
+    internal RoleGroupCollection RoleGroupCollection { get; } = new RoleGroupCollection();
+
+    // Optional: ViewChanged/ViewChanging events (low priority)
+    [Parameter] public EventCallback<EventArgs> OnViewChanged { get; set; }
+    [Parameter] public EventCallback<EventArgs> OnViewChanging { get; set; }
+
+    private RenderFragment GetAuthenticatedView(ClaimsPrincipal user)
+    {
+        var roleGroup = RoleGroupCollection.GetRoleGroup(user);
+        return roleGroup?.ContentTemplate ?? LoggedInTemplate;
+    }
+}
+```
+
+**RoleGroup.razor.cs** — rename ChildContent to ContentTemplate:
+
+```csharp
+public partial class RoleGroup : BaseWebFormsComponent
+{
+    [Parameter] public string Roles { get; set; }
+
+    // Matches Web Forms <ContentTemplate> syntax
+    [Parameter] public RenderFragment ContentTemplate { get; set; }
+
+    // Backward compatibility alias
+    [Parameter] public RenderFragment ChildContent
+    {
+        get => ContentTemplate;
+        set => ContentTemplate = value;
+    }
+
+    [CascadingParameter(Name = "LoginView")]
+    public LoginView LoginView { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!LoginView.RoleGroupCollection.Contains(this))
+        {
+            LoginView.RoleGroupCollection.Add(this);
+        }
+    }
+}
+```
+
+#### Migration Markup Comparison
+
+**Web Forms original:**
+```xml
+<asp:LoginView ID="LoginView1" runat="server">
+    <AnonymousTemplate>
+        Please log in for personalized information.
+    </AnonymousTemplate>
+    <LoggedInTemplate>
+        Thanks for logging in, <asp:LoginName runat="Server" />.
+    </LoggedInTemplate>
+    <RoleGroups>
+        <asp:RoleGroup Roles="Admin">
+            <ContentTemplate>
+                You are logged in as an administrator.
+            </ContentTemplate>
+        </asp:RoleGroup>
+    </RoleGroups>
+</asp:LoginView>
+```
+
+**BWFC Blazor (after redesign):**
+```razor
+<LoginView>
+    <AnonymousTemplate>
+        Please log in for personalized information.
+    </AnonymousTemplate>
+    <LoggedInTemplate>
+        Thanks for logging in, <LoginName />.
+    </LoggedInTemplate>
+    <RoleGroups>
+        <RoleGroup Roles="Admin">
+            <ContentTemplate>
+                You are logged in as an administrator.
+            </ContentTemplate>
+        </RoleGroup>
+    </RoleGroups>
+</LoginView>
+```
+
+The only changes from Web Forms: remove `asp:` prefix, remove `runat="server"`, remove `ID` attribute. **This is the gold standard for migration fidelity.**
+
+#### Key Benefits
+
+1. **Leverages Blazor's auth plumbing** — no manual `AuthenticationStateProvider` injection; `AuthorizeView` handles async state, re-renders on auth changes, and integrates with `CascadingAuthenticationState`
+2. **No wrapper element** — matches original Web Forms HTML output (confirmed by audit)
+3. **Correct base class** — `BaseWebFormsComponent` instead of `BaseStyledComponent` (original has no style properties)
+4. **Exact markup syntax match** — `<RoleGroups>`, `<ContentTemplate>` match Web Forms names
+5. **Simpler code** — eliminates manual auth state management, reduces component to template-selection logic only
+6. **Backward-compatible `ChildContent` alias** — existing BWFC users who wrote `<RoleGroup>` with bare content won't break
+
+#### Breaking Changes
+
+1. Wrapper `<div>` removed — CSS/JS targeting `#LoginView1` wrapper will break (but this wrapper was wrong to begin with)
+2. `RoleGroups` parameter type changes from `RoleGroupCollection` to `RenderFragment` — code that programmatically manipulated `RoleGroups` collection will need to change
+3. Base class changes from `BaseStyledComponent` to `BaseWebFormsComponent` — `CssClass`, `Style`, `ToolTip` attributes on `<LoginView>` will no longer work (correctly — the original never supported them)
+
+#### Implementation Notes
+
+- `RoleGroupCollection` stays as the internal data structure — it just moves from being a `[Parameter]` to an `internal` property
+- The two-phase render (RoleGroups first, AuthorizeView second) preserves the self-registration timing that the current implementation relies on
+- `LoginStatus` has the same manual-auth-state anti-pattern and should be considered for a similar `AuthorizeView` delegation in a follow-up
+
+**Why:**
+
+The current implementation has three critical divergences from the original Web Forms control: wrong base class, spurious wrapper `<div>`, and manual auth state management that doesn't react to changes. By delegating to `AuthorizeView`, we get correct async auth handling for free, eliminate the wrapper element to match original HTML output, and preserve the exact template naming that makes migration a find-and-replace operation. Jeff specifically asked for this to be "more akin to the Blazor AuthorizeView component" — this proposal makes LoginView a thin adapter layer over AuthorizeView with Web Forms naming conventions.
+
+### 2026-03-05: User directive  BWFC library usage is migration top priority
+**By:** Jeff Fritz (via Copilot)
+**What:** Migration skills must prioritize using BWFC components and utility features above all else. Every asp: control MUST become a BWFC component. Utility features (WebFormsPageBase, FontInfo, theming, etc.) must be preferred over raw Blazor equivalents. Standard Blazor server-side interactive features should be used for static files, CSS links, and JS references (UseStaticFiles, MapStaticAssets, HeadContent, etc.). This ensures the quickest and highest fidelity migration.
+**Why:** User request  captured for team memory. Runs 6-8 all suffered from agents replacing BWFC components with raw HTML. Making BWFC usage the #1 priority prevents this regression.
+
+### 2026-03-05: BWFC-first migration skill rewrite
+**By:** Forge
+**What:** Rewrote all 4 migration skill files (bwfc-migration, bwfc-data-migration, bwfc-identity-migration, migration-standards) plus CHECKLIST.md and METHODOLOGY.md to make BWFC library usage the #1 priority in every migration skill. Every skill now opens with a MANDATORY banner, Section 1 is always BWFC inventory/features, anti-patterns are called out with comparison tables, LoginView/LoginStatus are explicitly flagged as commonly missed, and standard Blazor patterns for static files/CSS/JS are documented. Component count updated from 58 to 110+. CHECKLIST.md gets 9 new BWFC verification items. METHODOLOGY.md Layer 2 gets explicit forbidden-pattern list.
+**Why:** Jeff's directive: "We need to make use of the library the top priority." Root cause from Runs 6-8: Layer 2 agents consistently replaced BWFC components with plain HTML (@foreach instead of GridView, <a> instead of HyperLink, @if instead of LoginView). The skills were not structured to prevent this — BWFC was mentioned but not dominant. The rewrite makes BWFC so prominent and explicit that no agent can miss it. Every skill's first section, every control table, and every verification checklist now reinforces BWFC-first.
+

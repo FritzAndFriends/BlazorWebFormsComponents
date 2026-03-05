@@ -13,6 +13,38 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### LoginView → AuthorizeView Redesign Analysis (2026-03-05)
+
+**Task:** Analyze original Web Forms LoginView, compare with current BWFC implementation, propose AuthorizeView-based redesign.
+
+**Key findings about original Web Forms LoginView:**
+- Inherits `Control` (NOT `WebControl`) — has no style properties (CssClass, Style, etc.)
+- Renders NO wrapper element — just the active template's content directly
+- Three template types: `AnonymousTemplate`, `LoggedInTemplate`, `RoleGroups` (collection of `RoleGroup` with `ContentTemplate`)
+- Template priority: unauthenticated → AnonymousTemplate; authenticated → first matching RoleGroup (declaration order, first-match-wins) → LoggedInTemplate fallback
+- Events: `ViewChanged`, `ViewChanging`
+
+**Current BWFC issues identified (8 total, 3 high severity):**
+1. Wrong base class (`BaseStyledComponent` → should be `BaseWebFormsComponent`)
+2. Spurious wrapper `<div>` (confirmed by HTML audit output)
+3. Manual auth state via injected `AuthenticationStateProvider` (doesn't react to changes, no async handling)
+4. `RoleGroup.ChildContent` should be `ContentTemplate`
+5. `RoleGroups` parameter typed as `RoleGroupCollection` instead of `RenderFragment`
+
+**Architecture decision:** Delegate to `<AuthorizeView>` internally. LoginView becomes a thin adapter: `AnonymousTemplate` → `NotAuthorized`, `LoggedInTemplate` → fallback in `Authorized`, RoleGroups rendered first for self-registration then checked in `Authorized` callback. No manual `AuthenticationStateProvider` needed.
+
+**Key file paths:**
+- `src/BlazorWebFormsComponents/LoginControls/LoginView.razor` — current component markup (with wrong `<div>` wrapper)
+- `src/BlazorWebFormsComponents/LoginControls/LoginView.razor.cs` — current code-behind (manual auth state)
+- `src/BlazorWebFormsComponents/LoginControls/RoleGroup.razor.cs` — self-registration via cascading parameter
+- `src/BlazorWebFormsComponents/LoginControls/RoleGroupCollection.cs` — first-match-wins logic (correct, keep)
+- `src/BlazorWebFormsComponents/LoginControls/LoginStatus.razor.cs` — same manual-auth-state anti-pattern (follow-up candidate)
+- `audit-output/webforms/LoginView/LoginView-1.html` — confirms no wrapper element in original
+- `docs/LoginControls/LoginView.md` — existing documentation (needs update after redesign)
+- Decision: `.ai-team/decisions/inbox/forge-loginview-authorizeview-redesign.md`
+
+**Note:** `LoginStatus` has the identical manual `AuthenticationStateProvider` pattern and should get the same AuthorizeView treatment as a follow-up.
+
 
 <!-- Summarized 2026-03-05 by Scribe -- covers M17 gate review through Page consolidation -->
 

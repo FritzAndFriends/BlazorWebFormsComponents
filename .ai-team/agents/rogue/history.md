@@ -66,57 +66,22 @@ Team updates (2026-03-02-03): Skins roadmap (Forge), M22 planned (Forge), projec
 
 <!-- Summarized 2026-03-05 by Scribe -- covers WebFormsPageBase tests -->
 
-### WebFormsPageBase Test Summary (2026-03-04)
+<!-- Summarized 2026-03-06 by Scribe -- covers WebFormsPage head tests through LoginView test redesign -->
 
-8 bUnit tests (all pass): Title/MetaDescription/MetaKeywords delegate to IPageService, IsPostBack always false, Page returns this. Used concrete `TestPage : WebFormsPageBase` with public accessors. Registered IPageService as scoped. Simpler test setup than most components (no JSInterop/LinkGenerator mocking needed).
+### WebFormsPage & Migration Script Test Summary (2026-03-04 through 2026-03-06)
 
-Team updates: PRs upstream, Run 6 analysis.
-### WebFormsPage Head Rendering Tests (2026-03-05)
+**WebFormsPageBase (8 tests):** Title/MetaDescription/MetaKeywords delegate to IPageService, IsPostBack=false, Page=this. Concrete `TestPage` subclass, IPageService as scoped. **WebFormsPage head rendering (7 tests):** TDD tests for Option B consolidation (FindComponent<PageTitle>/HeadContent, RenderPageHead=false). 3 pass (existing behavior), 4 expected failures awaiting Cyclops.
 
-**7 bUnit tests for WebFormsPage head rendering (3 pass, 4 expected failures):** Tests written ahead of Cyclops's enhancement to merge Page.razor head rendering into WebFormsPage (Option B from forge-page-consolidation decision). Test file: `src/BlazorWebFormsComponents.Test/WebFormsPage/WebFormsPageHeadRenderingTests.razor`.
+**Event handler migration audit:** bwfc-migrate.ps1 does zero event handler transforms (defers to Layer 2). Accidental pass-through works for most BWFC EventCallback params. Gaps: AutoPostBack not stripped (6+ [Obsolete] warnings), Repeater has no event params, GridView PageIndexChanged name mismatch, inconsistent On-prefix naming, no ManualItem warnings for signature changes (Web Forms 2-param vs BWFC single-param).
 
-Tests: (1) RendersPageTitle when IPageService registered + title set — uses `FindComponent<PageTitle>()`, (2) RendersMetaDescription — checks `FindComponent<HeadContent>()` markup for `<meta name="description">`, (3) RendersMetaKeywords — same pattern for keywords, (4) DoesNotRenderHeadContent when RenderPageHead=false — asserts `FindComponents<PageTitle>().Count.ShouldBe(0)`, (5) WorksWithoutIPageServiceRegistered — verifies naming still works without IPageService in DI, (6) CascadesTheme while also rendering head content — verifies theme + head coexistence, (7) ChildContent renders normally — basic child content pass-through.
+**Migration script fixes:** AutoPostBack added to $StripAttributes + ManualItem emission. Event handler signature scan via `(On[A-Z]\w+)="[^"]*"` regex, summary-level ManualItem per file.
 
-**Currently passing (3):** Tests 4, 5, 7 pass — they test existing behavior or pass vacuously since head rendering isn't implemented yet. **Expected failures (4):** Tests 1, 2, 3, 6 fail because WebFormsPage doesn't yet have IPageService integration or RenderPageHead parameter — awaiting Cyclops's implementation. Existing 6 WebFormsPage tests unaffected.
+**LoginView AuthorizeView test redesign (8 files):** Replaced manual AuthenticationStateProvider mocking with bUnit `AddTestAuthorization()` API (SetNotAuthorized/SetAuthorized/SetRoles). Wrapper `<div>` assertions → `cut.Markup` assertions. `<ChildContent>` → `<RoleGroups>` parameter. OuterStyle.razor DELETED (10 tests removed — LoginView inherits Control, not WebControl, so no style properties).
 
-Key patterns: `FindComponent<PageTitle>()` and `FindComponent<HeadContent>()` for asserting Blazor built-in head components. `RenderPageHead="false"` captured by `BaseWebFormsComponent`'s unmatched attributes until Cyclops adds the actual parameter. Pre-set `PageService` values before rendering (not after) for initial render assertions.
+**Key patterns:** `AddTestAuthorization()` for AuthorizeView-based components, `cut.Markup` for no-wrapper-element components, CSS class selectors for template switching.
 
-� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
-
-### Event Handler Migration Audit (2026-03-06)
-
-**Migration script event handler handling:** bwfc-migrate.ps1 performs ZERO event handler transforms. Line 17 explicitly defers to Layer 2. Event handler attributes (`OnClick`, `OnSelectedIndexChanged`, etc.) pass through unchanged after `asp:` prefix removal. This accidental pass-through works for most BWFC components because BWFC defines matching `[Parameter] EventCallback` properties. Both `OnClick="Handler"` and `OnClick="@Handler"` compile in Blazor for EventCallback parameters.
-
-**Gaps identified:**
-1. `AutoPostBack` is NOT in `$StripAttributes` — passes through unchanged, triggers `[Obsolete]` warnings on 6+ BWFC components (DropDownList, CheckBox, RadioButton, CheckBoxList, RadioButtonList, ListBox). Should be stripped + ManualItem warning emitted.
-2. Repeater has NO event parameters in BWFC — `OnItemCommand` silently lost.
-3. GridView uses `PageIndexChanged` not `OnPageIndexChanging` — name mismatch causes silent failure.
-4. BWFC naming is inconsistent: some events keep `On` prefix (OnRowCommand, OnItemCommand on DataGrid), others drop it (Sorting, RowEditing, ItemCommand on ListView/DetailsView). Web Forms always uses `On` prefix in markup.
-5. No ManualItem warnings emitted for event handler attributes despite code-behind signature changes being required.
-6. CommandArgument with data-binding expressions may lose `@` prefix needed for Blazor attribute expression evaluation.
-
-**Web Forms vs Blazor event signature differences:** All Web Forms handlers use `(object sender, EventArgs e)` — two params. BWFC EventCallbacks accept only the event args (no sender). Every code-behind event handler will have compile errors. The code-behind TODO header mentions this generically but emits no per-handler ManualItem entries.
-
-**Findings written to:** `.ai-team/decisions/inbox/rogue-event-handler-migration-gaps.md`
-
-### Migration Script Fixes — AutoPostBack & Event Handler Gaps (2026-03-06)
-
-**Fix 1 — AutoPostBack stripping:** Added `'AutoPostBack\s*=\s*"(true|false)"'` to `$StripAttributes` array (line 81). Added conditional ManualItem emission inside `Remove-WebFormsAttributes` loop — when `$friendlyName -eq 'AutoPostBack'`, emits category `AutoPostBack` warning about Blazor's immediate-fire event model vs Web Forms delayed postback.
-
-**Fix 2 — Event handler signature warnings:** Added post-`Remove-WebFormsAttributes` scan in `Convert-WebFormsFile` pipeline (after line 1045). Uses `[regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')` to find event handler attributes in the already-transformed Blazor markup. Collects unique handler names via `Sort-Object -Unique`, emits ONE `EventHandler` category ManualItem per file listing all found handlers with sender-parameter signature guidance.
-
-**Patterns used:**
-- `$StripAttributes` array: regex patterns matching `attribute="value"` with `\s*=\s*` whitespace tolerance
-- ManualItem emission: conditional check on friendly name extracted by the existing `$pattern -replace` chain
-- Event handler detection: `(On[A-Z]\w+)="[^"]*"` — captures attribute name in group 1, excludes lowercase-after-On to avoid false positives
-- Summary-level ManualItem: one per file with comma-joined unique handler list, not per-attribute
-
-
- Team update (2026-03-05): AfterWingtipToys must only be produced by migration toolkit output, never hand-edited  decided by Jeffrey T. Fritz
- Team update (2026-03-05): Migration scripts must preserve GridView structure (not decompose to raw HTML); ShoppingCart.aspx added as Layer 1 regression test case  decided by Forge
-
- Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
-
-
-
- Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
+📌 Team update (2026-03-05): WebFormsPage now includes IPageService head rendering — decided by Forge, implemented by Cyclops
+📌 Team update (2026-03-05): AfterWingtipToys must only be produced by migration toolkit output, never hand-edited — decided by Jeffrey T. Fritz
+📌 Team update (2026-03-05): Migration scripts must preserve GridView structure; ShoppingCart.aspx added as Layer 1 regression test — decided by Forge
+📌 Team update (2026-03-05): BWFC control preservation is mandatory — all migration output must use BWFC components, never flatten to raw HTML — decided by Jeffrey T. Fritz, Forge, Cyclops
+📌 Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView — decided by Forge
