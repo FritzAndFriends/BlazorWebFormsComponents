@@ -5977,3 +5977,19 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 **Requested by:** Jeffrey T. Fritz
 **What:** Comprehensive analysis confirms BWFC GridView supports ALL features needed for ShoppingCart migration (CssClass, BoundField, TemplateField, ShowFooter, GridLines, CellPadding, TextBox/CheckBox in templates, sorting, paging, row editing). AfterWingtipToys regression was caused by migration pipeline decomposing GridView into raw HTML table. FreshWingtipToys proves correct migration. Migration scripts (bwfc-migrate.ps1 Layer 1) must preserve GridView structure: strip asp: prefixes, convert binding syntax, preserve all attributes. ShoppingCart.aspx added as Layer 1 regression test case.
 **Why:** The AfterWingtipToys ShoppingCart is a read-only display  users cannot edit quantities, remove items, update cart, or check out. This is the anti-pattern documented in migration-standards. The fix is in the migration pipeline, not the component library.
+
+### 2026-03-05: BWFC control preservation is mandatory (consolidated)
+**By:** Jeffrey T. Fritz, Forge
+**What:** Migration must ALWAYS preserve asp: controls as BWFC components. Never flatten any control to raw HTML. This applies to data controls (GridView, ListView, Repeater, DataList, DataGrid, DetailsView, FormView), editor controls (TextBox, CheckBox, Button, Label), and navigation/structural controls (HyperLink, ImageButton, LinkButton, Panel, PlaceHolder). The ShoppingCart anti-pattern (decomposing GridView into raw HTML `<table>` with `@foreach`) proves the cost — users lose editing, sorting, paging, and footer totals. The migration script already handles this mechanically; the rule targets Layer 2 (human/AI) work that rewrites controls as raw HTML.
+**Rules:**
+1. ALL asp: controls MUST be preserved as BWFC components — no exceptions
+2. NEVER flatten data controls to raw HTML tables or `@foreach` loops
+3. NEVER flatten editor controls to raw HTML `<input>`, `<button>`, `<span>`
+4. NEVER flatten navigation/structural controls to raw HTML
+5. Post-transform verification (`Test-BwfcControlPreservation`) runs automatically after Layer 1 transforms
+**Implementation:**
+- SKILL.md: Added mandatory "BWFC Control Preservation" section with 5 rules, ShoppingCart anti-pattern, BAD vs GOOD examples
+- bwfc-migrate.ps1: `Test-BwfcControlPreservation` function counts asp: tags in source vs BWFC tags in output, warns on deficit
+**Why:** This is the core value proposition of BWFC — these components exist so migrated markup works unchanged. BWFC components render identical HTML to Web Forms controls (CSS preservation), data controls have built-in sorting/paging/editing/footer totals (feature parity), and preserving controls means 90% of markup is done after asp: prefix stripping (migration velocity).
+**Affects:** `bwfc-migrate.ps1`, `migration-standards/SKILL.md`, all Layer 2 migration work, all team members performing migrations
+
