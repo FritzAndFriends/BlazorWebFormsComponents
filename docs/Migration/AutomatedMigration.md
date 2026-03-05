@@ -215,6 +215,24 @@ dotnet run
     - **Namespace mismatches**: Update `@using` directives in `_Imports.razor`
     - **Async mismatch**: Add `async`/`await` to data access methods
 
+## Control Preservation Verification
+
+The migration script includes a built-in verification step (`Test-BwfcControlPreservation`) that runs automatically after all transforms. It compares the number of `asp:` tags in the original source against BWFC component tags in the output and warns if any controls appear to have been lost.
+
+!!! danger "Never Flatten Controls to Raw HTML"
+    All `asp:` controls MUST be preserved as BWFC components. **Never** decompose a `<asp:GridView>` into a plain `<table>` with `@foreach`, or an `<asp:TextBox>` into a raw `<input>`. The whole point of BWFC is that these components exist — use them.
+
+Example warnings in the migration report:
+
+```
+⚠️ BWFC control deficit: input had 8 asp: tag(s) but output has only 5 BWFC component tag(s)
+   Missing 1 instance(s) of <GridView>
+   Missing 1 instance(s) of <TextBox>
+   Missing 1 instance(s) of <CheckBox>
+```
+
+If you see these warnings after Layer 2 (Copilot skill) or Layer 3 (agent) work, it means a control was incorrectly flattened and should be restored to its BWFC component equivalent.
+
 ## Replacing DataSource Controls
 
 Web Forms DataSource controls (`SqlDataSource`, `ObjectDataSource`, etc.) have no BWFC equivalent. Replace them with injected services:
