@@ -78,7 +78,9 @@ $StripAttributes = @(
     'ValidateRequest\s*=\s*"(true|false)"',
     'MaintainScrollPositionOnPostBack\s*=\s*"(true|false)"',
     'ClientIDMode\s*=\s*"[^"]*"',
-    'AutoPostBack\s*=\s*"(?i)(true|false)"'
+    'AutoPostBack\s*=\s*"(?i)(true|false)"',
+    'ControlToValidate\s*=\s*"[^"]*"',
+    'ValidationGroup\s*=\s*"[^"]*"'
 )
 
 #endregion
@@ -629,6 +631,22 @@ function ConvertFrom-Expressions {
         Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($bareItemMatches.Count) bare Item binding(s) to @context"
     }
 
+    # Server-side expressions that won't compile in Blazor: wrap in TODO comment instead of @()
+    $serverSideObjects = 'Request|Session|Server|Response|ProviderName|SuccessMessage|OpenID_\w+|ManageMessage'
+    $serverEncodedRegex = [regex]"<%:\s*((?:$serverSideObjects)(?:\.\w+|\[.*?\]|\(.*?\))*)\s*%>"
+    $serverEncodedMatches = $serverEncodedRegex.Matches($Content)
+    if ($serverEncodedMatches.Count -gt 0) {
+        $Content = $serverEncodedRegex.Replace($Content, '@* TODO: Server-side expression - $1 *@')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Wrapped $($serverEncodedMatches.Count) server-side encoded expression(s) in TODO comments"
+    }
+
+    $serverUnencodedRegex = [regex]"<%=\s*((?:$serverSideObjects)(?:\.\w+|\[.*?\]|\(.*?\))*)\s*%>"
+    $serverUnencodedMatches = $serverUnencodedRegex.Matches($Content)
+    if ($serverUnencodedMatches.Count -gt 0) {
+        $Content = $serverUnencodedRegex.Replace($Content, '@* TODO: Server-side expression - $1 *@')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Wrapped $($serverUnencodedMatches.Count) server-side unencoded expression(s) in TODO comments"
+    }
+
     # Encoded expressions: <%: expr %> → @(expr)
     $encodedRegex = [regex]'<%:\s*(.+?)\s*%>'
     $encodedMatches = $encodedRegex.Matches($Content)
@@ -912,6 +930,82 @@ function Add-ValidatorTypeParameters {
     return $Content
 }
 
+function Convert-EnumAttributes {
+    <#
+    .SYNOPSIS
+        Converts Web Forms string enum attribute values to their C# enum types.
+    .DESCRIPTION
+        Web Forms accepts bare string values for enum attributes (TextMode="Email").
+        Blazor/BWFC requires the full C# enum type (TextMode="TextBoxMode.Email").
+        TextMode values don't need @ prefix; Display and GridLines need @ prefix as Razor expressions.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $convertedCount = 0
+
+    # TextMode conversions (no @ prefix needed)
+    $Content = $Content -replace 'TextMode="Email"', 'TextMode="TextBoxMode.Email"'
+    $Content = $Content -replace 'TextMode="Password"', 'TextMode="TextBoxMode.Password"'
+    $Content = $Content -replace 'TextMode="Phone"', 'TextMode="TextBoxMode.Phone"'
+    $Content = $Content -replace 'TextMode="MultiLine"', 'TextMode="TextBoxMode.MultiLine"'
+    $Content = $Content -replace 'TextMode="SingleLine"', 'TextMode="TextBoxMode.SingleLine"'
+
+    # ValidatorDisplay conversions (need @ prefix)
+    $Content = $Content -replace 'Display="Dynamic"', 'Display="@ValidatorDisplay.Dynamic"'
+    $Content = $Content -replace 'Display="Static"', 'Display="@ValidatorDisplay.Static"'
+    $Content = $Content -replace 'Display="None"', 'Display="@ValidatorDisplay.None"'
+
+    # GridLines conversions (need @ prefix)
+    $Content = $Content -replace 'GridLines="Both"', 'GridLines="@GridLines.Both"'
+    $Content = $Content -replace 'GridLines="None"', 'GridLines="@GridLines.None"'
+    $Content = $Content -replace 'GridLines="Vertical"', 'GridLines="@GridLines.Vertical"'
+    $Content = $Content -replace 'GridLines="Horizontal"', 'GridLines="@GridLines.Horizontal"'
+
+    # Count what changed by comparing before/after (use regex to count all enum patterns in output)
+    $enumPatterns = @('TextBoxMode\.', '@ValidatorDisplay\.', '@GridLines\.')
+    foreach ($ep in $enumPatterns) {
+        $convertedCount += ([regex]::Matches($Content, $ep)).Count
+    }
+
+    if ($convertedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Enum' -Detail "Converted $convertedCount enum attribute value(s) to C# enum types"
+    }
+
+    return $Content
+}
+
+function Convert-BooleanAttributes {
+    <#
+    .SYNOPSIS
+        Normalizes PascalCase boolean attribute values to lowercase on BWFC component tags.
+    .DESCRIPTION
+        Web Forms is case-insensitive for booleans (="True"/"False").
+        Blazor/C# requires lowercase (="true"/"false").
+        Only converts exact "True" or "False" values, not substrings.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $trueRegex = [regex]'(?<==")True(?=")'
+    $falseRegex = [regex]'(?<==")False(?=")'
+
+    $trueCount = $trueRegex.Matches($Content).Count
+    $falseCount = $falseRegex.Matches($Content).Count
+
+    if ($trueCount -gt 0) {
+        $Content = $trueRegex.Replace($Content, 'true')
+    }
+    if ($falseCount -gt 0) {
+        $Content = $falseRegex.Replace($Content, 'false')
+    }
+
+    $totalCount = $trueCount + $falseCount
+    if ($totalCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Boolean' -Detail "Normalized $totalCount PascalCase boolean value(s) to lowercase"
+    }
+
+    return $Content
+}
+
 function ConvertFrom-UrlReferences {
     param([string]$Content, [string]$RelPath)
 
@@ -1049,13 +1143,13 @@ function Test-BwfcControlPreservation {
         Write-TransformLog -File $RelPath -Transform 'Verify' -Detail "Control preservation check passed: $aspTagCount asp: tag(s) → $bwfcTagCount BWFC component tag(s)"
     }
 
-    # Specific warning: ImageButton → img flattening loses OnClick event handler
+    # FAIL condition: ImageButton → img flattening loses OnClick event handler
     if ($aspControlNames.ContainsKey('ImageButton')) {
         $imgTagRegex = [regex]'<img[\s>/]'
         $imgCount = $imgTagRegex.Matches($OutputContent).Count
         if ($imgCount -gt 0) {
             $imageButtonSrc = $aspControlNames['ImageButton']
-            Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "⚠️ ImageButton→img flattening risk: source has $imageButtonSrc asp:ImageButton(s) and output has $imgCount <img> tag(s). ImageButton→img loses the OnClick event handler — use BWFC <ImageButton> component instead."
+            Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "❌ FAIL: ImageButton→img flattening detected: source has $imageButtonSrc asp:ImageButton(s) and output has $imgCount <img> tag(s). ImageButton→img loses the OnClick event handler — MUST use BWFC <ImageButton> component instead. Do NOT replace <ImageButton> with <img>."
         }
     }
 }
@@ -1312,6 +1406,8 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
     $content = Add-ValidatorTypeParameters -Content $content -RelPath $relativePath
+    $content = Convert-EnumAttributes -Content $content -RelPath $relativePath
+    $content = Convert-BooleanAttributes -Content $content -RelPath $relativePath
 
     # Scan for event handler attributes that need code-behind signature review
     $eventHandlerMatches = [regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')
