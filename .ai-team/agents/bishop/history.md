@@ -35,3 +35,11 @@
   - `AddHttpContextAccessor()` must come BEFORE `AddBlazorWebFormsComponents()` in Program.cs
 
  Team update (2026-03-05): Run 9 BWFC review APPROVED (98.9% preservation). 2 findings: ImageButtonimg in ShoppingCart (P0), HyperLink dropped in Manage (P2). 3 Layer 1 script bugs documented (ItemType conversion, validator type params, missing Validations using).  decided by Forge, Bishop
+
+### Cycle 1 Fixes Applied (Bishop)
+
+- **P0-1 (ItemType→TItem):** Fixed. Regex now uses `(<(?:DropDownList|ListBox|...)\b[^>]*?)\bItemType=` with Singleline flag so only list controls get TItem. Data controls (GridView, ListView, FormView, DetailsView, DataGrid, DataList, Repeater) retain ItemType. Handles multi-line tags.
+- **P0-2 (Smart stub):** Fixed. Removed the early `return` that skipped transforms for Account/Checkout pages. All markup now gets full Layer 1 transforms. Only code-behinds are stubbed (minimal partial class + TODO banner). New `New-StubCodeBehind` function added.
+- **P0-3 (Base class stripping):** Fixed. `Copy-CodeBehind` now strips `: Page`, `: System.Web.UI.Page`, `: UserControl`, `: MasterPage` base classes and `using System.Web.*` directives before copying. Avoids CS0263 conflicts with `@inherits WebFormsPageBase`.
+- **P1-1 (Validator type params):** Fixed. New `Add-ValidatorTypeParameters` function injects `Type="string"` into RequiredFieldValidator/RegularExpressionValidator/RangeValidator and `InputType="string"` into CompareValidator. Uses negative lookahead to skip tags that already have the attribute.
+- **P1-4 (ImageButton warning):** Fixed. `Test-BwfcControlPreservation` now emits a specific warning when source has `asp:ImageButton` and output contains `<img>` tags, flagging silent OnClick event handler loss.
