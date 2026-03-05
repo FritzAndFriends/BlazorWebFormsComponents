@@ -121,3 +121,44 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
  Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
 
+### Run 7 — Layer 2/3 Core Storefront Transforms (Complete)
+
+**Task:** Transform Layer 1 output in Run7WingtipToys to working Blazor for 6 core pages + infrastructure. Used FreshWingtipToys as reference.
+
+**Infrastructure created (Layer 3):**
+- Models/Product.cs, Models/Category.cs, Models/CartItem.cs — EF Core models matching FreshWingtipToys
+- Data/ProductContext.cs (DbContext, no Identity — simplified for core storefront)
+- Data/ProductDatabaseInitializer.cs — seed data: 5 categories, 16 products
+- Services/CartStateService.cs — cookie-based cart with IDbContextFactory
+- Updated WingtipToys.csproj: ProjectReference to BWFC, Microsoft.EntityFrameworkCore.Sqlite 9.0.7
+- Updated Program.cs: AddDbContextFactory, AddHttpContextAccessor, AddScoped<CartStateService>, database seed
+- Updated _Imports.razor: added BlazorWebFormsComponents.Enums, WingtipToys.Models, WingtipToys.Components.Layout
+
+**Pages transformed (all 6 core storefront — Layer 2):**
+1. **Default.razor** — Already correct from L1. Code-behind: Page → ComponentBase.
+2. **ProductList.razor** — Fixed: residual <%#: expressions → @() interpolation, Item. → context., .aspx URLs → Blazor routes, added Items="@Products", fixed GroupTemplate/LayoutTemplate. Code-behind: IDbContextFactory, [SupplyParameterFromQuery], OnParametersSetAsync.
+3. **ProductDetails.razor** — FormView PRESERVED with Items="@(new List<Product>{SampleProduct})", fixed /Catalog/Images → /Images/Products path, removed TODO annotation. Code-behind: IDbContextFactory, [SupplyParameterFromQuery(Name="id")], OnParametersSetAsync.
+4. **ShoppingCart.razor** — GridView PRESERVED. Added @rendermode InteractiveServer, Items="@CartItems", fixed <%#: expression → computed total, added TextChanged/CheckedChanged handlers, Label with @CartTotal, Button OnClick→@OnUpdateCart, replaced ImageButton with plain img (PayPal checkout placeholder). Code-behind: full CartStateService integration with quantity/removal dictionaries.
+5. **MainLayout.razor** — Category ListView PRESERVED with Items="@Categories", fixed <%#: route expressions → @($"/ProductList?id={context.CategoryID}"), replaced LoginStatus with plain links, fixed AuthorizeView nesting, removed HeadContent block, Image→img. Code-behind: LayoutComponentBase, IDbContextFactory, OnInitializedAsync loads categories.
+6. **AdminPage.razor** — Added @rendermode InteractiveServer, @attribute [Authorize], DropDownList Items="@categories"/"@products" with SelectedValueChanged, TextBox bindings, FileUpload @ref, Button OnClick→AddProduct/RemoveProduct. Code-behind: IDbContextFactory, CRUD operations, file upload support.
+
+**Out-of-scope files stubbed (26 code-behinds + 12 .razor files):**
+- Account/ (15 files) — need Identity scaffolding
+- Checkout/ (5 files) — need checkout flow implementation
+- About, Contact, ErrorPage, ViewSwitcher, AddToCart, Site.MobileLayout — need individual migration
+
+**Build result:** ✅ BUILD SUCCEEDED — 0 errors, 0 warnings
+
+**Key learnings:**
+- FormView does NOT have a DataItem parameter — use Items with a single-item list wrapper
+- MainLayout category ListView works well — BWFC controls preserved per mandate
+- Out-of-scope code-behinds with System.Web references are the biggest build blocker; stubbing to ComponentBase is the fastest path to a clean build
+- The edit tool can fail silently on files with encoding differences — PowerShell Set-Content is more reliable for wholesale file replacement
+- Layer 1 residual expressions (<%#:, Item., .aspx URLs) cluster in ItemTemplate sections of data controls
+- ProductList GroupTemplate/LayoutTemplate need @context (not placeholder IDs from Web Forms)
+- GridView boolean attributes need @ prefix (@false, @true) and enum values need full qualification (@GridLines.Vertical)
+
+
+
+ Team update (2026-03-05): Run 7 migration report structure standardized  Executive Summary  Metrics  Comparison  Recommendations. Reports at samples/Run{N}WingtipToys/MIGRATION-REPORT.md. Decided by Beast
+

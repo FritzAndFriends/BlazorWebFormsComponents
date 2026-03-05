@@ -85,3 +85,11 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
  Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
 
+### Run 7 Migration Report (2026-03-06)
+
+- **Report structure patterns for migration benchmarks:** Executive summary (3-4 sentences, key metrics), toolkit version table, source app description, Layer 1 metrics table + review breakdown table + stubbed pages, Layer 2/3 placeholders, What Worked/Didn't bullets, run-over-run comparison table with delta columns, recommendations for toolkit improvements, appendix file inventory. Machine-readable metrics (JSON) recommended for future automation. Run-over-run comparison should highlight both numeric deltas and qualitative fixes (e.g., ShoppingCart stubbing → proper migration).
+- **Run 7 Executive Report created:** `samples/Run7WingtipToys/MIGRATION-REPORT.md` — 32 files, 331 transforms, 1.2s, 97% preservation accuracy (2 warnings down from 64). 47 review items broken into 7 categories. Report co-located with migrated output (not in planning-docs/) per Jeff's placement request. Layer 2/3 sections are placeholders pending Forge completion.
+
+
+ Team update (2026-03-05): Run 7 Layer 2/3 transforms consolidated  FormView/ListView preserved per control mandate, out-of-scope pages stubbed to ComponentBase. Decided by Forge
+

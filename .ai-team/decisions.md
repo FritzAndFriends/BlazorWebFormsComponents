@@ -5993,3 +5993,15 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 **Why:** This is the core value proposition of BWFC — these components exist so migrated markup works unchanged. BWFC components render identical HTML to Web Forms controls (CSS preservation), data controls have built-in sorting/paging/editing/footer totals (feature parity), and preserving controls means 90% of markup is done after asp: prefix stripping (migration velocity).
 **Affects:** `bwfc-migrate.ps1`, `migration-standards/SKILL.md`, all Layer 2 migration work, all team members performing migrations
 
+### 2026-03-06: Run 7 migration report structure standardized
+
+**By:** Beast
+**What:** Established the standard report structure for migration benchmark executive reports: Executive Summary → Toolkit Version → Source App → Layer 1 Metrics (with review breakdown table) → Layer 2/3 placeholders → What Worked → What Didn't → Run Comparison (with delta table) → Recommendations → Appendix. Reports live at `samples/Run{N}WingtipToys/MIGRATION-REPORT.md`.
+**Why:** Consistent report structure enables run-over-run comparison and toolkit effectiveness tracking. Placing the report inside the sample output directory keeps it co-located with the migrated files it describes. The delta table format (Run N-1 → Run N with change column) was chosen to make regressions immediately visible.
+
+
+### 2026-03-06: Run 7 Layer 2/3 Core Storefront Transforms (consolidated)
+
+**By:** Forge
+**What:** Run 7 Layer 2/3 transforms for 5 core storefront pages plus build-unblocking stubs. Key decisions: (1) ProductDetails FormView preserved as BWFC component with `Items=@(new List<Product>{SampleProduct})` single-item wrapper  flattening to direct HTML rejected per control preservation mandate; (2) MainLayout category ListView preserved as BWFC component with `Items=@Categories`  for-loop rejected per control preservation; (3) ShoppingCart GridView preserved with full interactivity, @rendermode InteractiveServer, and CartStateService injection; (4) ProductContext inherits DbContext without Identity (Account pages out of scope); (5) 26 code-behind + 12 .razor files in Account/Checkout/misc stubbed to ComponentBase placeholders to unblock build (14 errors, all out-of-scope); (6) Image paths standardized from /Catalog/Images/ to /Images/Products/ per Blazor wwwroot layout.
+**Why:** Control preservation mandate requires keeping BWFC components (FormView, ListView, GridView) rather than flattening to raw HTML. Simplification to direct binding or for-loops was considered for FormView/ListView but rejected per the mandatory preservation rules. Stubbing out-of-scope pages to ComponentBase unblocks the build without requiring full Identity scaffolding.
