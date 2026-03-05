@@ -161,3 +161,25 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 
 
  Team update (2026-03-05): 50 On-prefix EventCallback aliases added to data components + migration script AutoPostBack fix  by Cyclops, Rogue
+
+### ShoppingCart GridView Feature-Gap Analysis (2026-03-05)
+
+**Jeff's question:** "I lost my editable cart with row stripes. What was lost in the migration? Does BWFC GridView have gaps?"
+
+**Key findings:**
+
+1. **AfterWingtipToys/ShoppingCart.razor is a plain HTML table** — it does NOT use the BWFC GridView. This is exactly the anti-pattern documented in migration-standards: "Replacing BWFC Data Controls with Raw HTML."
+
+2. **Lost features in AfterWingtipToys:** Editable TextBox for quantity (now read-only), CheckBox for item removal (gone), Update button (gone), Checkout ImageButton (gone), CssClass stripes+borders (degraded to just `table`), ShowFooter, GridLines, CellPadding, BoundField columns, ProductID column, Label components for totals. The cart is **read-only** — users cannot edit or check out.
+
+3. **BWFC GridView supports ALL needed features:** CssClass ✅ (via BaseStyledComponent), AutoGenerateColumns="False" with Columns ✅, BoundField (with dotted DataField, DataFormatString) ✅, TemplateField with ItemTemplate (RenderFragment<T> with `context`) ✅, TextBox inside TemplateField ✅, CheckBox inside TemplateField ✅, ShowFooter ✅, GridLines ✅, CellPadding ✅. Zero component gaps for this page.
+
+4. **FreshWingtipToys proves it works** — correctly uses GridView with all original features preserved. This is the reference implementation.
+
+5. **Root cause:** The migration pipeline (Layer 1 script or Layer 2 Copilot) decomposed the GridView into raw HTML instead of preserving it as a BWFC component. Script fix needed: preserve `<asp:GridView>` structure, strip `asp:` prefix only, convert ItemType→TItem, SelectMethod→Items.
+
+**Decision document:** `.ai-team/decisions/inbox/forge-gridview-gap.md`
+
+ Team update (2026-03-05): ShoppingCart GridView gap analysis complete — AfterWingtipToys is a broken plain-HTML table, BWFC GridView has zero gaps for this page, migration scripts need GridView preservation rules.  decided by Forge
+
+ Team update (2026-03-05): AfterWingtipToys must only be produced by migration toolkit output, never hand-edited  decided by Jeffrey T. Fritz

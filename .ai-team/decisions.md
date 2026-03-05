@@ -5965,3 +5965,15 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 | oid lnk_Command(object sender, CommandEventArgs e) | EventCallback<CommandEventArgs> | oid lnk_Command(CommandEventArgs e) |
 
  
+
+### 2026-03-05: User directive  AfterWingtipToys is migration output only
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** We should never update the AfterWingtipToys sample app directly  it should be the output of a migration using our BWFC components and migration toolkit. Hand-editing defeats the purpose.
+**Why:** User request  captured for team memory
+
+### 2026-03-05: ShoppingCart GridView Feature-Gap Analysis  zero BWFC gaps, fix migration scripts
+
+**By:** Forge
+**Requested by:** Jeffrey T. Fritz
+**What:** Comprehensive analysis confirms BWFC GridView supports ALL features needed for ShoppingCart migration (CssClass, BoundField, TemplateField, ShowFooter, GridLines, CellPadding, TextBox/CheckBox in templates, sorting, paging, row editing). AfterWingtipToys regression was caused by migration pipeline decomposing GridView into raw HTML table. FreshWingtipToys proves correct migration. Migration scripts (bwfc-migrate.ps1 Layer 1) must preserve GridView structure: strip asp: prefixes, convert binding syntax, preserve all attributes. ShoppingCart.aspx added as Layer 1 regression test case.
+**Why:** The AfterWingtipToys ShoppingCart is a read-only display  users cannot edit quantities, remove items, update cart, or check out. This is the anti-pattern documented in migration-standards. The fix is in the migration pipeline, not the component library.

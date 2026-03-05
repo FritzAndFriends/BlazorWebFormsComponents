@@ -143,3 +143,6 @@ Key patterns: `FindComponent<PageTitle>()` and `FindComponent<HeadContent>()` fo
 - Event handler detection: `(On[A-Z]\w+)="[^"]*"` — captures attribute name in group 1, excludes lowercase-after-On to avoid false positives
 - Summary-level ManualItem: one per file with comma-joined unique handler list, not per-attribute
 
+
+ Team update (2026-03-05): AfterWingtipToys must only be produced by migration toolkit output, never hand-edited  decided by Jeffrey T. Fritz
+ Team update (2026-03-05): Migration scripts must preserve GridView structure (not decompose to raw HTML); ShoppingCart.aspx added as Layer 1 regression test case  decided by Forge

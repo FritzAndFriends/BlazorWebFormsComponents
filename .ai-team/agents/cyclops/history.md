@@ -147,3 +147,5 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 
 **Lesson:** Blazor sets `[Parameter]` properties independently by name during diffing. You cannot use a C# property getter/setter that delegates to another property — the framework won't see changes. Two independent properties with coalescing at invocation is the correct pattern.
 
+
+ Team update (2026-03-05): ShoppingCart.aspx added as Layer 1 regression test case  migration output must contain <GridView not <table class=  decided by Forge
