@@ -117,3 +117,36 @@ Team updates: Event handler audit, On-prefix aliases (50), ShoppingCart regressi
 - METHODOLOGY.md: Layer 2 gets explicit "MUST NOT" list of 5 forbidden patterns
 - bwfc-identity-migration: LoginView/LoginStatus front-loaded as Section 1, AuthorizeView demoted to "optional upgrade"
 - bwfc-data-migration: BWFC data controls front-loaded with "BWFC Front-End + Service Back-End" pattern
+
+### LoginStatus → AuthorizeView Redesign Analysis (2026-03-06)
+
+**Task:** Analyze original Web Forms LoginStatus, compare with current BWFC implementation, propose AuthorizeView-based redesign. Follow-up to LoginView redesign.
+
+**Key findings about original Web Forms LoginStatus:**
+- Inherits `CompositeControl` → `WebControl` → `Control` — HAS style properties (unlike LoginView which inherits plain `Control`)
+- Renders single `<a>` (text link) or `<input type="image">` (image button) — no wrapper element
+- Properties: LoginText, LogoutText, LoginImageUrl, LogoutImageUrl, LogoutPageUrl, LogoutAction (enum: Redirect/RedirectToLoginPage/Refresh)
+- Events: LoggingOut (LoginCancelEventArgs with Cancel), LoggedOut (EventArgs)
+- Does NOT have a `LoginPageUrl` property — uses `FormsAuthentication.LoginUrl` from web.config
+
+**Current BWFC issues identified (4 total, 1 high severity):**
+1. Manual `AuthenticationStateProvider` injection — checks auth once in OnInitializedAsync, doesn't react to changes (HIGH)
+2. `LogoutAction` implemented as abstract class hierarchy instead of standard enum (MEDIUM — separate PR)
+3. `LoginPageUrl` comment misleading — says "not in Webforms" but doesn't explain why it exists in Blazor (LOW)
+4. `LoginHandle` doesn't null-check `LoginPageUrl` — NavigateTo(null) will throw (LOW)
+
+**What's CORRECT (keep unchanged):**
+- Base class `BaseStyledComponent` — correct, WebControl has style properties
+- HTML rendering: `<a>` for text, `<input type="image">` for images — no wrapper
+- Style/class applied directly on elements
+- Event names with On-prefix: OnLoggingOut, OnLoggedOut
+- Event cancellation via LoginCancelEventArgs.Cancel
+- Default text: LoginText="Login", LogoutText="Logout"
+
+**Architecture decision:** Wrap existing Razor markup in `<AuthorizeView><Authorized>...<NotAuthorized>...</AuthorizeView>`. Remove manual AuthenticationStateProvider injection, UserAuthenticated field, and OnInitializedAsync override. ZERO breaking changes — public API identical.
+
+**Key difference from LoginView redesign:** LoginView had 4 breaking changes (base class, wrapper div, parameter types). LoginStatus has 0 — only the internal auth mechanism changes. Much narrower scope.
+
+**Test impact:** All 12 tests need mechanical update: replace manual AuthenticationStateProvider mock with bUnit's AddTestAuthorization(). Same assertions, same expected markup.
+
+**Decision document:** `.ai-team/decisions/inbox/forge-loginstatus-authorizeview-redesign.md`

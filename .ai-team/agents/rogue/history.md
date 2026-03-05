@@ -85,3 +85,5 @@ Team updates (2026-03-02-03): Skins roadmap (Forge), M22 planned (Forge), projec
 📌 Team update (2026-03-05): Migration scripts must preserve GridView structure; ShoppingCart.aspx added as Layer 1 regression test — decided by Forge
 📌 Team update (2026-03-05): BWFC control preservation is mandatory — all migration output must use BWFC components, never flatten to raw HTML — decided by Jeffrey T. Fritz, Forge, Cyclops
 📌 Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView — decided by Forge
+
+ Team update (2026-03-05): LoginStatus flagged for AuthorizeView redesign  decided by Forge

@@ -6279,3 +6279,486 @@ The current implementation has three critical divergences from the original Web 
 **What:** Rewrote all 4 migration skill files (bwfc-migration, bwfc-data-migration, bwfc-identity-migration, migration-standards) plus CHECKLIST.md and METHODOLOGY.md to make BWFC library usage the #1 priority in every migration skill. Every skill now opens with a MANDATORY banner, Section 1 is always BWFC inventory/features, anti-patterns are called out with comparison tables, LoginView/LoginStatus are explicitly flagged as commonly missed, and standard Blazor patterns for static files/CSS/JS are documented. Component count updated from 58 to 110+. CHECKLIST.md gets 9 new BWFC verification items. METHODOLOGY.md Layer 2 gets explicit forbidden-pattern list.
 **Why:** Jeff's directive: "We need to make use of the library the top priority." Root cause from Runs 6-8: Layer 2 agents consistently replaced BWFC components with plain HTML (@foreach instead of GridView, <a> instead of HyperLink, @if instead of LoginView). The skills were not structured to prevent this — BWFC was mentioned but not dominant. The rewrite makes BWFC so prominent and explicit that no agent can miss it. Every skill's first section, every control table, and every verification checklist now reinforces BWFC-first.
 
+
+### LoginView AuthorizeView Redesign — Implementation Notes
+
+**By:** Cyclops
+**Date:** 2026-03-06
+
+**What was implemented:**
+
+Per Forge's proposal (`forge-loginview-authorizeview-redesign.md`), LoginView now delegates to `<AuthorizeView>` internally. Key decisions made during implementation:
+
+1. **RoleGroup parameter alias pattern:** `ContentTemplate` and `ChildContent` are independent `[Parameter]` auto-properties per the project's alias convention. Coalescing happens in `LoginView.GetAuthenticatedView()`: `roleGroup.ContentTemplate ?? roleGroup.ChildContent`. This means `ContentTemplate` takes priority when both are set.
+
+2. **Two-phase render confirmed working:** The Razor template renders `@RoleGroups` inside a `<CascadingValue>` first (Phase 1 — RoleGroup children self-register), then `<AuthorizeView>` renders (Phase 2 — uses the populated `RoleGroupCollection`). Blazor's top-to-bottom rendering order makes this work without explicit synchronization.
+
+3. **No wrapper element:** LoginView now renders zero wrapper HTML, matching the original Web Forms `Control`-based `LoginView` that renders only the active template's content. CSS/JS targeting a `#LoginView1` wrapper div will break — this is intentional and correct.
+
+4. **Breaking changes:**
+   - `ChildContent` parameter removed from `LoginView` (was being misused as RoleGroup container)
+   - `RoleGroups` parameter type changed from `RoleGroupCollection` to `RenderFragment`
+   - Base class changed from `BaseStyledComponent` to `BaseWebFormsComponent` (no more `CssClass`, `Style`, `ToolTip` on LoginView)
+   - Manual `AuthenticationStateProvider` injection removed
+
+**Who needs to know:**
+- **Rogue (Tests):** Existing bUnit tests use bare `ChildContent` on `RoleGroup` — these still work. Tests that checked for wrapper `<div>` markup will need updating. The `ShouldBeEmpty()` test may need adjustment since AuthorizeView might render differently than raw null RenderFragment.
+- **Beast (Docs):** LoginView docs should be updated to show `<ContentTemplate>` syntax and note the AuthorizeView dependency.
+- **Jubilee (Samples):** The sample page at `ControlSamples/LoginView/Index.razor` should still work but may need `CascadingAuthenticationState` in the app's auth setup.
+
+**Build status:** Clean build, 0 errors.
+
+
+### LoginStatus AuthorizeView Redesign Proposal
+
+**By:** Forge
+**Date:** 2026-03-06
+**Requested by:** Jeffrey T. Fritz
+**Related:** LoginView AuthorizeView redesign (shipped — see `cyclops-loginview-implementation.md`)
+
+---
+
+## 1. Original Web Forms LoginStatus Behavior
+
+`System.Web.UI.WebControls.LoginStatus` — a composite control that shows a login or logout link depending on authentication state.
+
+**Inheritance chain:**
+`LoginStatus` → `CompositeControl` → `WebControl` → `Control`
+
+Because it inherits `WebControl`, it **HAS** style properties: `CssClass`, `Style`, `Font`, `ForeColor`, `BackColor`, `BorderColor`, `BorderWidth`, `BorderStyle`, `Height`, `Width`, `ToolTip`.
+
+**Rendered HTML:**
+- **Text link (default):** `<a id="ctl00_LoginStatus1" href="javascript:__doPostBack(...)">Logout</a>`
+- **Image button:** `<input type="image" name="ctl00$LoginStatus1" id="ctl00_LoginStatus1" title="Logout" src="/images/logout.gif" alt="Logout" />`
+- **No wrapper element** — renders a single `<a>` or `<input>`, never a `<span>` or `<div>` around it.
+- Style attributes are applied directly on the `<a>` or `<input>` element.
+
+**Properties:**
+| Property | Type | Default | Notes |
+|---|---|---|---|
+| `LoginText` | `string` | `"Login"` | Text for the login link |
+| `LogoutText` | `string` | `"Logout"` | Text for the logout link |
+| `LoginImageUrl` | `string` | `""` | Image URL — switches to `<input type="image">` |
+| `LogoutImageUrl` | `string` | `""` | Image URL — switches to `<input type="image">` |
+| `LogoutPageUrl` | `string` | `""` | Redirect target after logout |
+| `LogoutAction` | `LogoutAction` enum | `Redirect` | Enum: `Redirect` (0), `RedirectToLoginPage` (1), `Refresh` (2) |
+
+**Events:**
+| Event | EventArgs | Notes |
+|---|---|---|
+| `LoggingOut` | `LoginCancelEventArgs` | Fires before logout; set `Cancel = true` to abort |
+| `LoggedOut` | `EventArgs` | Fires after logout completes |
+
+**Key behavior — login link:**
+The original Web Forms LoginStatus does NOT have a `LoginPageUrl` property. When unauthenticated, the login link navigates to `FormsAuthentication.LoginUrl` (from web.config). There is no configurable property for the login URL on the control itself.
+
+**Key behavior — LogoutAction enum:**
+`System.Web.UI.WebControls.LogoutAction` is a standard .NET enum:
+```csharp
+public enum LogoutAction {
+    Redirect = 0,
+    RedirectToLoginPage = 1,
+    Refresh = 2
+}
+```
+
+**Key behavior — auth state:**
+The control checks `Page.Request.IsAuthenticated` on every render. It participates in the page lifecycle — re-renders on postback, so auth state changes are reflected immediately.
+
+---
+
+## 2. Current BWFC Implementation Analysis
+
+### What's RIGHT ✅
+
+1. **Base class: `BaseStyledComponent`** — Correct. The original inherits `WebControl` which has style properties. `BaseStyledComponent` maps to this correctly.
+
+2. **No wrapper element** — Correct. The component renders a single `<a>` or `<input type="image">` with no surrounding element.
+
+3. **Style rendering** — Correct. `style="@Style"` and `class="@CssClass"` are applied directly on the `<a>` and `<input>` elements. Matches Web Forms behavior.
+
+4. **HTML element selection** — Correct. Text → `<a>`, image URL set → `<input type="image">`. Alt text populated from `LoginText`/`LogoutText`.
+
+5. **Event names** — Correct. `OnLoggingOut` (with `LoginCancelEventArgs`) and `OnLoggedOut` (with `EventArgs`) follow the Web Forms event names with the project's `On-` prefix convention.
+
+6. **Event cancellation** — Correct. `LoginCancelEventArgs.Cancel = true` in `OnLoggingOut` prevents `OnLoggedOut` from firing and aborts navigation.
+
+7. **Default text values** — Correct. `LoginText = "Login"`, `LogoutText = "Logout"`.
+
+8. **LogoutPageUrl** — Correct. Maps to the Web Forms property of the same name.
+
+### What's WRONG ❌
+
+1. **Manual `AuthenticationStateProvider` injection (HIGH)** — Same anti-pattern as LoginView. The component injects `AuthenticationStateProvider`, calls `GetAuthenticationStateAsync()` once in `OnInitializedAsync`, and stores the result in a `bool UserAuthenticated` field. This means:
+   - Auth state is checked **once** at initialization — if the user logs in/out while the component is mounted, it never updates.
+   - No subscription to `AuthenticationStateProvider.AuthenticationStateChanged`.
+   - The Blazor `<AuthorizeView>` component handles all of this automatically via cascading `Task<AuthenticationState>`.
+
+2. **`LogoutAction` is an abstract class hierarchy, not an enum (MEDIUM)** — Web Forms defines `LogoutAction` as a plain enum with int values. The current BWFC implementation uses an abstract class with subclasses (`RefreshLogoutAction`, `RedirectLogoutAction`). This is non-standard for the project — all other Web Forms enums use the `Enums/` convention with int values. The `RedirectToLoginPage` value throws `NotSupportedException` instead of being omitted or documented.
+
+3. **`LoginPageUrl` comment is misleading (LOW)** — The code-behind says `// This property was not in Webforms`. This is **correct** — the original Web Forms `LoginStatus` does NOT have a `LoginPageUrl` property; it uses `FormsAuthentication.LoginUrl` from web.config. However, having `LoginPageUrl` as a parameter is a **reasonable Blazor adaptation** since `FormsAuthentication` doesn't exist in Blazor. The comment should be updated to explain *why* it exists rather than just noting its absence.
+
+4. **`LoginHandle` doesn't null-check `LoginPageUrl` (LOW)** — If no `LoginPageUrl` is set, `NavigationManager.NavigateTo(null)` will throw. The original Web Forms control falls back to `FormsAuthentication.LoginUrl` which always has a value. We should guard against null or document that it's required.
+
+### What's DEBATABLE ⚖️
+
+1. **`LogoutAction.RedirectToLoginPage`** — The original Web Forms enum has this value. The current impl throws `NotSupportedException`. In Blazor, this could navigate to `LoginPageUrl` (same as the login link target). The throw is defensible but surprising. Could be a TODO.
+
+---
+
+## 3. Proposed Changes
+
+### 3a. Replace manual auth state with `<AuthorizeView>` delegation
+
+**Before (current):**
+```razor
+@inherits BaseStyledComponent
+
+@if (UserAuthenticated)
+{
+    @* logout link/image *@
+}
+else
+{
+    @* login link/image *@
+}
+```
+
+```csharp
+[Inject]
+protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+private bool UserAuthenticated { get; set; }
+
+protected override async Task OnInitializedAsync()
+{
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    UserAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
+    await base.OnInitializedAsync();
+}
+```
+
+**After (proposed):**
+```razor
+@inherits BaseStyledComponent
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized>
+        @RenderLogoutElement()
+    </Authorized>
+    <NotAuthorized>
+        @RenderLoginElement()
+    </NotAuthorized>
+</AuthorizeView>
+```
+
+```csharp
+// REMOVE: AuthenticationStateProvider injection
+// REMOVE: UserAuthenticated field
+// REMOVE: OnInitializedAsync auth check
+
+private RenderFragment RenderLogoutElement() => builder =>
+{
+    if (!string.IsNullOrEmpty(LogoutImageUrl))
+    {
+        // <input type="image" ...>
+        builder.OpenElement(0, "input");
+        builder.AddAttribute(1, "style", Style);
+        builder.AddAttribute(2, "class", CssClass);
+        builder.AddAttribute(3, "id", $"{ID}_status");
+        builder.AddAttribute(4, "type", "image");
+        builder.AddAttribute(5, "title", ToolTip);
+        builder.AddAttribute(6, "src", LogoutImageUrl);
+        builder.AddAttribute(7, "alt", LogoutText);
+        builder.AddAttribute(8, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, LogoutHandle));
+        builder.CloseElement();
+    }
+    else if (!string.IsNullOrEmpty(LogoutText))
+    {
+        // <a ...>LogoutText</a>
+        builder.OpenElement(0, "a");
+        builder.AddAttribute(1, "style", Style);
+        builder.AddAttribute(2, "class", CssClass);
+        builder.AddAttribute(3, "id", $"{ID}_status");
+        builder.AddAttribute(4, "title", ToolTip);
+        builder.AddAttribute(5, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, LogoutHandle));
+        builder.AddContent(6, LogoutText);
+        builder.CloseElement();
+    }
+};
+
+private RenderFragment RenderLoginElement() => builder =>
+{
+    if (!string.IsNullOrEmpty(LoginImageUrl))
+    {
+        // <input type="image" ...>
+        builder.OpenElement(0, "input");
+        builder.AddAttribute(1, "style", Style);
+        builder.AddAttribute(2, "class", CssClass);
+        builder.AddAttribute(3, "id", $"{ID}_status");
+        builder.AddAttribute(4, "type", "image");
+        builder.AddAttribute(5, "title", ToolTip);
+        builder.AddAttribute(6, "src", LoginImageUrl);
+        builder.AddAttribute(7, "alt", LoginText);
+        builder.AddAttribute(8, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, LoginHandle));
+        builder.CloseElement();
+    }
+    else if (!string.IsNullOrEmpty(LoginText))
+    {
+        // <a ...>LoginText</a>
+        builder.OpenElement(0, "a");
+        builder.AddAttribute(1, "style", Style);
+        builder.AddAttribute(2, "class", CssClass);
+        builder.AddAttribute(3, "id", $"{ID}_status");
+        builder.AddAttribute(4, "title", ToolTip);
+        builder.AddAttribute(5, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, LoginHandle));
+        builder.AddContent(6, LoginText);
+        builder.CloseElement();
+    }
+};
+```
+
+**Alternative (simpler — keep Razor template):** Since LoginStatus renders concrete HTML elements (unlike LoginView which renders templates), we can keep the Razor markup and just wrap it in `<AuthorizeView>`:
+
+```razor
+@inherits BaseStyledComponent
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized>
+        @if (!string.IsNullOrEmpty(LogoutImageUrl))
+        {
+            <input style="@Style" class="@CssClass" id="@(ID + "_status")" type="image"
+                   title="@ToolTip" @onclick="LogoutHandle" src="@LogoutImageUrl" alt="@LogoutText">
+        }
+        else if (!string.IsNullOrEmpty(LogoutText))
+        {
+            <a style="@Style" class="@CssClass" id="@(ID + "_status")" title="@ToolTip"
+               @onclick="LogoutHandle">@LogoutText</a>
+        }
+    </Authorized>
+    <NotAuthorized>
+        @if (!string.IsNullOrEmpty(LoginImageUrl))
+        {
+            <input style="@Style" class="@CssClass" id="@(ID + "_status")" type="image"
+                   title="@ToolTip" @onclick="LoginHandle" src="@LoginImageUrl" alt="@LoginText">
+        }
+        else if (!string.IsNullOrEmpty(LoginText))
+        {
+            <a style="@Style" class="@CssClass" id="@(ID + "_status")" title="@ToolTip"
+               @onclick="LoginHandle">@LoginText</a>
+        }
+    </NotAuthorized>
+</AuthorizeView>
+```
+
+**Recommendation:** Use the simpler Razor approach. The current template structure is clean and readable. Moving to RenderTreeBuilder adds complexity for no fidelity benefit. The only change is wrapping the existing `@if (UserAuthenticated) ... else ...` with `<AuthorizeView><Authorized>...<NotAuthorized>...</AuthorizeView>`.
+
+### 3b. Code-behind changes
+
+```csharp
+public partial class LoginStatus : BaseStyledComponent
+{
+    [Parameter] public LogoutAction LogoutAction { get; set; } = Refresh;
+
+    // REMOVED: [Inject] AuthenticationStateProvider
+    // REMOVED: private bool UserAuthenticated
+
+    [Inject]
+    protected NavigationManager NavigationManager { get; set; }
+
+    [Parameter] public string LoginText { get; set; } = "Login";
+    [Parameter] public string LoginImageUrl { get; set; }
+
+    /// <summary>
+    /// URL to navigate to for login. Not present in Web Forms (which used
+    /// FormsAuthentication.LoginUrl from web.config). Required in Blazor
+    /// since FormsAuthentication does not exist.
+    /// </summary>
+    [Parameter] public string LoginPageUrl { get; set; }
+
+    [Parameter] public string LogoutText { get; set; } = "Logout";
+    [Parameter] public string LogoutImageUrl { get; set; }
+    [Parameter] public string LogoutPageUrl { get; set; }
+
+    [Parameter] public EventCallback<LoginCancelEventArgs> OnLoggingOut { get; set; }
+    [Parameter] public EventCallback<EventArgs> OnLoggedOut { get; set; }
+
+    private void LoginHandle(MouseEventArgs args)
+    {
+        if (!string.IsNullOrEmpty(LoginPageUrl))
+        {
+            NavigationManager.NavigateTo(LoginPageUrl);
+        }
+    }
+
+    private async Task LogoutHandle(MouseEventArgs args)
+    {
+        var logoutCancelEventArgs = new LoginCancelEventArgs() { Sender = this };
+        await OnLoggingOut.InvokeAsync(logoutCancelEventArgs);
+
+        if (!logoutCancelEventArgs.Cancel)
+        {
+            await OnLoggedOut.InvokeAsync(EventArgs.Empty);
+
+            if (LogoutAction == Redirect)
+            {
+                NavigationManager.NavigateTo(LogoutPageUrl);
+            }
+        }
+    }
+
+    // REMOVED: OnInitializedAsync — no longer needed
+}
+```
+
+### 3c. Optional: LogoutAction enum normalization (separate PR)
+
+The `LogoutAction` abstract-class hierarchy should be converted to a proper enum to match the project convention. However, this is a **separate concern** from the AuthorizeView migration and should be its own PR to avoid scope creep.
+
+Current (abstract class hierarchy):
+```csharp
+public abstract class LogoutAction { ... }
+public class RefreshLogoutAction : LogoutAction { }
+public class RedirectLogoutAction : LogoutAction { }
+```
+
+Proposed (standard enum, matching Web Forms):
+```csharp
+public enum LogoutAction
+{
+    Redirect = 0,
+    RedirectToLoginPage = 1,
+    Refresh = 2
+}
+```
+
+**Note:** `RedirectToLoginPage` could be implemented as navigating to `LoginPageUrl` (if set), or left as a documented no-op / throw. This is a design decision for the implementer.
+
+---
+
+## 4. Breaking Changes
+
+| Change | Breaking? | Who's affected |
+|---|---|---|
+| Remove `AuthenticationStateProvider` injection | **No** — internal implementation detail | No consumer impact |
+| Remove `UserAuthenticated` field | **No** — it's `private` | No consumer impact |
+| Remove `OnInitializedAsync` override | **No** — internal implementation detail | No consumer impact |
+| Add null guard on `LoginHandle` for `LoginPageUrl` | **No** — prevents runtime `NullReferenceException` | Bug fix |
+| Update `LoginPageUrl` comment | **No** — source-only | No consumer impact |
+
+**Summary: ZERO breaking changes.** The public API (`[Parameter]` properties, `EventCallback` events) is completely unchanged. The only change is the internal auth-state mechanism — consumers never interacted with `AuthenticationStateProvider` directly.
+
+This is narrower than the LoginView redesign, which changed base class, removed wrapper element, and changed parameter types.
+
+---
+
+## 5. Migration Markup Comparison
+
+**There is no markup change.** The component's public API is identical before and after:
+
+```razor
+<!-- Before AND After — identical -->
+<LoginStatus
+    LoginText="Sign In"
+    LogoutText="Sign Out"
+    LoginPageUrl="/login"
+    LogoutPageUrl="/goodbye"
+    LogoutAction="@LogoutAction.Redirect"
+    OnLoggingOut="HandleLoggingOut"
+    OnLoggedOut="HandleLoggedOut"
+    CssClass="my-login-status"
+/>
+```
+
+**Rendered HTML — also identical:**
+```html
+<!-- Authenticated user sees: -->
+<a style="" class="my-login-status" id="_status" title="">Sign Out</a>
+
+<!-- Unauthenticated user sees: -->
+<a style="" class="my-login-status" id="_status" title="">Sign In</a>
+```
+
+---
+
+## 6. Test Impact
+
+All 12 existing tests mock `AuthenticationStateProvider` directly. After this change, `AuthorizeView` gets its auth state from a cascading `Task<AuthenticationState>`. The tests will need to provide auth state differently.
+
+### Tests that need updating (all 12):
+
+**Current pattern:**
+```csharp
+Services.AddSingleton(new Mock<AuthenticationStateProvider>().Object);
+// ... mock returns ClaimsPrincipal
+```
+
+**New pattern — provide cascading `Task<AuthenticationState>` for `AuthorizeView`:**
+```razor
+<CascadingAuthenticationState>
+    <LoginStatus ... />
+</CascadingAuthenticationState>
+```
+
+Or in bUnit, register `TestAuthorizationContext`:
+```csharp
+var authContext = this.AddTestAuthorization();
+authContext.SetAuthorized("testuser");  // for logged-in tests
+// or
+authContext.SetNotAuthorized();  // for not-logged-in tests
+```
+
+### Test-by-test impact:
+
+| Test File | Auth State | Change Needed |
+|---|---|---|
+| `LoggedInDefault.razor` | Authenticated | Switch to `AddTestAuthorization().SetAuthorized()` |
+| `LoggedInEmpty.razor` | Authenticated | Same |
+| `LoggedInImageWithText.razor` | Authenticated | Same |
+| `LoggedInText.razor` | Authenticated | Same |
+| `LogoutActionRedirect.razor` | Authenticated | Same |
+| `LogoutActionRefresh.razor` | Authenticated | Same |
+| `LogoutEvent.razor` | Authenticated | Same |
+| `LogoutEventCancelOnLoggingOut.razor` | Authenticated | Same |
+| `NotLoggedInDefault.razor` | Not authenticated | Switch to `AddTestAuthorization().SetNotAuthorized()` |
+| `NotLoggedInEmpty.razor` | Not authenticated | Same |
+| `NotLoggedInImageWithText.razor` | Not authenticated | Same |
+| `NotLoggedInText.razor` | Not authenticated | Same |
+
+**All 12 tests need the same mechanical change:** replace manual `AuthenticationStateProvider` mock with bUnit's `TestAuthorizationContext`. No test logic changes — same assertions, same expected markup, same event behavior.
+
+**NOTE:** bUnit's `AddTestAuthorization()` provides the cascading `Task<AuthenticationState>` that `AuthorizeView` requires. This is a well-supported bUnit pattern and simpler than the current manual mock setup.
+
+---
+
+## 7. Implementation Notes
+
+**Scope:** This is a NARROW redesign — much narrower than LoginView:
+- LoginView changed base class, removed wrapper div, changed parameter types, restructured templates → **4 breaking changes**
+- LoginStatus changes ONLY the internal auth mechanism → **0 breaking changes**
+
+**What stays the same:**
+- Base class: `BaseStyledComponent` ✅
+- HTML output: `<a>` / `<input type="image">` ✅
+- Style rendering on elements ✅
+- All `[Parameter]` properties ✅
+- All `EventCallback` events ✅
+- `LoginCancelEventArgs` cancellation ✅
+- `LogoutAction` handling ✅
+- `NavigationManager` injection ✅
+
+**What changes:**
+- Remove `[Inject] AuthenticationStateProvider`
+- Remove `private bool UserAuthenticated`
+- Remove `OnInitializedAsync` override
+- Wrap existing Razor markup in `<AuthorizeView><Authorized>...<NotAuthorized>...</AuthorizeView>`
+- Add `@using Microsoft.AspNetCore.Components.Authorization`
+- Add null guard on `LoginPageUrl` in `LoginHandle`
+- Update `LoginPageUrl` comment
+
+**Estimated effort:** Small. Cyclops could implement this in one pass. Rogue's test updates are mechanical.
+
+**Prerequisite:** `CascadingAuthenticationState` must be in the app's component tree (standard Blazor auth setup). This is already required if the app uses `AuthorizeView` anywhere — and since LoginView now uses it, this is a given.
+
