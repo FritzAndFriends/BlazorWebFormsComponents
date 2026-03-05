@@ -86,3 +86,7 @@
   - AdminPage fully functional with EF Core CRUD (add/remove products)
   - Stub model pattern: create lightweight model classes when original types unavailable (UserLoginInfo, OrderShipInfo)
 - **BWFC preservation rate:** ~100% (178/178 controls in output have BWFC components)
+
+📌 Team update (2025-07-25): Forge reviewed Run 11 preservation: 98.9% (176/178 adjusted) — APPROVED. All 3 P0 gaps from Run 10 CLOSED. 1 minor gap: HyperLink conditional visibility in Manage.razor. Cycle 3 priorities shift to functional code-behinds (Login/Register per Jeff's directive). — decided by Forge
+
+📌 Team update (2025-07-25): Jeff directive — Login and Register pages must have functional code-behinds, not just BWFC markup. Mock auth service required. — decided by Jeffrey T. Fritz

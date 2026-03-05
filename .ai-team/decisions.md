@@ -7058,3 +7058,40 @@ These controls ARE present in the output; they're just missing from the summary 
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Blazor components with a SelectMethod or other data-providing method (Items, SelectItems, SelectMethodAsync) do NOT need an explicit ItemType/TItem type parameter attribute. Blazor generic type inference handles it automatically from the return type. The migration script should stop emitting ItemType/TItem when a data source is present on the component.
 **Why:** User request  this eliminates the entire class of ItemType/TItem conversion bugs that have been the #1 recurring build failure across Runs 7-10. Simplifies the migration output and matches how experienced Blazor developers write components.
+
+
+### 2025-07-25: User directive -- Login and Register must be functional
+
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Login and Register pages must have working code-behinds in migration output. At minimum, they should have a mock/stub authentication service that actually processes form submissions (even if it doesn't do real Identity). BWFC markup alone is not sufficient -- the pages must be functional.
+**Why:** User feedback -- Run 10 had Login.razor and Register.razor with correct BWFC markup but empty code-behinds. A migration benchmark that can't log in or register is incomplete. These are the most visible pages after the core shopping flow.
+
+### 2025-07-25: ItemType/TItem stripping when SelectMethod present (Run 11)
+
+**By:** Bishop
+**What:** Added `Remove-ItemTypeWithDataSource` function to bwfc-migrate.ps1. Strips ItemType/TItem when SelectMethod is co-present on the same tag. Runs before `ConvertFrom-SelectMethod` so it can detect both attributes. Tags without SelectMethod keep ItemType as-is.
+**Why:** Implements Jeff's directive (2026-03-05). Eliminates redundant type parameter errors -- the #1 recurring build failure class across Runs 9-10. Affects GridView, ListView, FormView, DetailsView, DropDownList and any control with SelectMethod+ItemType combination.
+
+### 2025-07-25: Stub model pattern for missing types (Run 11)
+
+**By:** Bishop
+**What:** Create lightweight stub model classes in the project's Models/ directory when original types don't exist in Blazor: `UserLoginInfo` (LoginProvider, ProviderKey) for ManageLogins, `OrderShipInfo` (FirstName, LastName, Address, City, State, PostalCode, Total) for CheckoutReview DetailsView. Preserves ALL BWFC markup while making the project compile. Stubs can be replaced with real implementations later.
+**Why:** ManageLogins uses `Microsoft.AspNet.Identity.UserLoginInfo` and CheckoutReview uses shipping info types that don't exist in .NET 10. Previous runs either deleted BWFC markup (stub page) or left compile errors.
+
+### 2025-07-25: DetailsView data binding with placeholder list (Run 11)
+
+**By:** Bishop
+**What:** Bind DetailsView with `Items="@_shipInfoList"` where `_shipInfoList` contains a single `OrderShipInfo` with placeholder data populated in OnInitialized. Preserves the full DetailsView+TemplateField+Label structure.
+**Why:** CheckoutReview DetailsView needs shipping address data from a payment processor (PayPal) that doesn't exist in the Blazor app. Placeholder data makes the page functional while preserving all BWFC components.
+
+### 2025-07-25: ImageButton preserved with OnClick navigation (Run 11)
+
+**By:** Bishop
+**What:** Preserve ShoppingCart checkout button as `<ImageButton>` with `OnClick="@OnCheckout"` that calls `Nav.NavigateTo("/CheckoutReview")`. PayPal-specific behavior replaced with in-app navigation.
+**Why:** Run 10 flattened this to `<img>`, losing the OnClick handler. BWFC has an ImageButton component. Preserving it maintains the visual appearance and interaction pattern.
+
+### 2025-07-25: Cycle 3 prioritized fix list -- Run 11 review (98.9% preservation)
+
+**By:** Forge
+**What:** Run 11 preservation reviewed at 98.9% (176/178 adjusted). All 3 P0 gaps from Run 10 CLOSED. Cycle 3 priorities: P0 -- Login.razor and Register.razor must have functional code-behinds (per Jeff's directive), requires mock auth service (`Services/MockAuthService.cs` + `MockAuthenticationStateProvider`). P1 -- Manage.razor code-behind, ManageLogins code-behind, conditional Visible to @if conversion, enum conversion gaps (LogoutAction, BorderStyle, WebColor). P2 -- bwfc-scan.ps1 parse error, hex color escaping, remaining account page stubs, ModelErrorMessage equivalent. 3-sprint plan: Sprint 1 auth foundation, Sprint 2 script improvements, Sprint 3 account pages polish.
+**Why:** Run 11 achieved near-perfect BWFC preservation. The gap has shifted from markup fidelity to functional completeness -- pages render correctly but code-behinds are stubs. Login/Register are the highest-value targets per user directive.

@@ -99,3 +99,12 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 - **4-run comparison table established:** Run-over-Run table now covers Runs 7–10. Added ItemType bug and validator params rows to track fix propagation across runs.
 
  Team update (2026-03-06): Run 10 BWFC preservation review: 92.7% (164/177)  NEEDS WORK. Below 95% threshold. P0-2 smart stubs fix recovered 113 controls across 12 pages. 3 gaps remain for Cycle 2.  decided by Forge
+
+### Run 11 Benchmark Report (2025-07-25)
+
+- **Run 11 report written:** Commit 49b556be. Cycle 2 of 3-cycle improvement loop. 178 BWFC instances (26 unique types), 4 build attempts, 0 errors. All 3 P0 gaps from Run 10 closed.
+- **Key metrics:** Preservation rate 92.7% to 98.9% (Cycle 2 target of >=98% met). Build attempts 3 to 4 (slight increase due to stub model iteration). Layer 2 time ~20min.
+- **5-run comparison table:** Runs 7-11 now tracked. ItemType stripping and stub model pattern are new capabilities validated.
+- **Convention:** BENCHMARK-DATA.md (Bishop) to BENCHMARK-REPORT.md (Beast) pipeline continues.
+
+ Team update (2025-07-25): Forge reviewed Run 11 preservation: 98.9% (176/178 adjusted) -- APPROVED. All 3 P0 gaps CLOSED. Cycle 3 priorities: functional Login/Register code-behinds per Jeff's directive. -- decided by Forge

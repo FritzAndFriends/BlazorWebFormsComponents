@@ -141,3 +141,23 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 **Decision:** `.ai-team/decisions/inbox/forge-cycle2-analysis.md` — 3 P0 (CheckoutReview DetailsView +9, ImageButton +1, ManageLogins +3), 4 P1 (TextMode enum, ValidatorDisplay enum, boolean normalization, ControlToValidate verify), 5 P2 (AdminPage promotion, About Title, ImageButton detection escalation, expression cleanup, GridLines enum), 4 P3 (Identity, Checkout flow, cart persistence, Visible attributes). Cycle 2 target: preservation ≥98%, build attempts = 1.
 
  Team update (2026-03-06): Scribe consolidated Layer 1 bugs decisions (old ItemType/validator/base-class entries merged into single block). Run 10 preservation review, Cycle 1 fix list, smart stubs, and enum conversion P2 proposal all merged to decisions.md. Inbox cleared.  decided by Scribe
+
+
+### Run 11 BWFC Preservation Review (2025-07-25)
+
+- **Task:** Full BWFC preservation audit of Run 11 migration output against original WingtipToys source.
+- **Result:** 98.9% (176/178 adjusted) -- APPROVED. All 3 P0 gaps from Run 10 CLOSED:
+  - CheckoutReview DetailsView -- fully preserved with OrderShipInfo stub model (+9 controls)
+  - ShoppingCart ImageButton -- preserved as `<ImageButton>` with OnClick navigation (+1 control)
+  - ManageLogins -- full ListView + Button + PlaceHolder preserved with UserLoginInfo stub model (+3 controls)
+- **Remaining:** 1 HyperLink dropped in Manage.razor (conditional Visible pattern). 2 ModelErrorMessage (non-standard, no BWFC equivalent expected).
+- **Build:** 0 errors, 70 warnings (all BL0007 from BWFC library, not Run 11).
+
+### Cycle 3 Priority Analysis (2025-07-25)
+
+- **Task:** Produced Cycle 3 prioritized fix list based on Run 11 review and Jeff's Login/Register directive.
+- **Key shift:** Markup fidelity now at ~99%. Focus moves to functional completeness -- code-behinds are stubs.
+- **P0:** Login.razor + Register.razor functional code-behinds, MockAuthService, MockAuthenticationStateProvider.
+- **P1:** Manage.razor code-behind, ManageLogins code-behind, Visible to @if conversion, enum gaps (LogoutAction, BorderStyle, WebColor).
+- **P2:** bwfc-scan.ps1 parse error, hex color escaping, remaining account page stubs, ModelErrorMessage equivalent.
+- **Decision:** `.ai-team/decisions/inbox/forge-cycle3-analysis.md` -- 3-sprint plan (auth foundation, script improvements, account pages polish).
