@@ -39,5 +39,11 @@ public class CartStateService
     public decimal GetTotal() =>
         _items.Sum(i => (decimal)(i.Product?.UnitPrice ?? 0) * i.Quantity);
 
+    public void UpdateQuantity(string itemId, int quantity)
+    {
+        var item = _items.FirstOrDefault(i => i.ItemId == itemId);
+        if (item != null) item.Quantity = quantity;
+    }
+
     public int GetCount() => _items.Sum(i => i.Quantity);
 }

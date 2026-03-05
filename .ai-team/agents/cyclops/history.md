@@ -142,3 +142,13 @@ Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX contr
 - FormView with `RenderOuterTable="false"` for product details
 - Inline `@code` blocks for simple pages (AddToCart, ShoppingCart, MainLayout)
 
+### ShoppingCart BWFC Control Preservation Fix (2026-03-06)
+
+**What:** Replaced plain HTML `<table>` + `@foreach` in ShoppingCart.razor with BWFC GridView in both Run8WingtipToys and AfterWingtipToys. Added `UpdateQuantity` method to both CartStateService implementations.
+
+**Learnings:**
+- ShoppingCart MUST use BWFC GridView, not HTML table — this is the core value proposition of the library
+- AfterWingtipToys reference was wrong — it used plain HTML instead of BWFC components, causing the bug to propagate to Run 8
+- All migration output should preserve Web Forms controls as BWFC equivalents (GridView, BoundField, TemplateField, TextBox, CheckBox, Button, Label)
+- Run 7's ShoppingCart.razor is the gold standard pattern for data-bound BWFC pages with edit capabilities
+

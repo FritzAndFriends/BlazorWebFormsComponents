@@ -1,40 +1,120 @@
 @page "/ShoppingCart"
+@rendermode InteractiveServer
 
 <PageTitle>Shopping Cart</PageTitle>
 
-<h1>Shopping Cart</h1>
+<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
 
-@if (_cart.Items.Any())
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in _cart.Items)
-            {
-                <tr>
-                    <td>@item.Product?.ProductName</td>
-                    <td>@($"{item.Product?.UnitPrice:c}")</td>
-                    <td>@item.Quantity</td>
-                    <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <p><b>Total: @($"{_cart.GetTotal():c}")</b></p>
-}
-else
-{
-    <p>Your shopping cart is empty.</p>
-}
+<GridView ID="CartList" AutoGenerateColumns="@false" ShowFooter="@true" GridLines="@GridLines.Vertical" CellPadding="4"
+    TItem="CartItem" Items="@_cartItems"
+    CssClass="table table-striped table-bordered">
+    <Columns>
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
+        <BoundField DataField="Product.ProductName" HeaderText="Name" />
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
+        <TemplateField HeaderText="Quantity">
+            <ItemTemplate>
+                <TextBox ID="PurchaseQuantity" Width="40" Text="@GetQuantity(context.ItemId)"
+                    TextChanged="@(val => OnQuantityChanged(context.ItemId, val))" />
+            </ItemTemplate>
+        </TemplateField>
+        <TemplateField HeaderText="Item Total">
+            <ItemTemplate>
+                @($"{(_quantities.GetValueOrDefault(context.ItemId, context.Quantity) * (context.Product?.UnitPrice ?? 0)):c}")
+            </ItemTemplate>
+        </TemplateField>
+        <TemplateField HeaderText="Remove Item">
+            <ItemTemplate>
+                <CheckBox ID="Remove" Checked="@IsMarkedForRemoval(context.ItemId)"
+                    CheckedChanged="@(val => OnRemovalChanged(context.ItemId, val))" />
+            </ItemTemplate>
+        </TemplateField>
+    </Columns>
+</GridView>
+
+<div>
+    <p></p>
+    <strong>
+        <Label ID="LabelTotalText" Text="Order Total: " />
+        <Label ID="lblTotal" Text="@_cartTotal" />
+    </strong>
+</div>
+<br />
+<table>
+    <tr>
+        <td>
+            <Button ID="UpdateBtn" Text="Update" OnClick="@OnUpdateCart" />
+        </td>
+        <td>
+            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+                width="145" alt="Check out with PayPal"
+                style="background:transparent; border:0" />
+        </td>
+    </tr>
+</table>
 
 @code {
-    [Inject] private CartStateService _cart { get; set; } = default!;
+    [Inject] private CartStateService Cart { get; set; } = default!;
+
+    private List<CartItem> _cartItems = new();
+    private string _cartTotal = "$0.00";
+    private Dictionary<string, int> _quantities = new();
+    private Dictionary<string, bool> _removals = new();
+
+    protected override void OnInitialized()
+    {
+        LoadCart();
+    }
+
+    private void LoadCart()
+    {
+        _cartItems = Cart.Items.ToList();
+        _cartTotal = Cart.GetTotal().ToString("c");
+
+        _quantities.Clear();
+        _removals.Clear();
+        foreach (var item in _cartItems)
+        {
+            _quantities[item.ItemId] = item.Quantity;
+            _removals[item.ItemId] = false;
+        }
+    }
+
+    private string GetQuantity(string itemId)
+        => _quantities.TryGetValue(itemId, out var qty) ? qty.ToString() : "0";
+
+    private void OnQuantityChanged(string itemId, string value)
+    {
+        if (int.TryParse(value, out var qty) && qty > 0)
+            _quantities[itemId] = qty;
+    }
+
+    private bool IsMarkedForRemoval(string itemId)
+        => _removals.TryGetValue(itemId, out var marked) && marked;
+
+    private void OnRemovalChanged(string itemId, bool value)
+    {
+        _removals[itemId] = value;
+    }
+
+    private void OnUpdateCart(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        // Remove marked items first
+        foreach (var kvp in _removals.Where(r => r.Value))
+        {
+            Cart.RemoveItem(kvp.Key);
+        }
+
+        // Update quantities for remaining items
+        foreach (var kvp in _quantities)
+        {
+            if (!_removals.GetValueOrDefault(kvp.Key))
+            {
+                Cart.UpdateQuantity(kvp.Key, kvp.Value);
+            }
+        }
+
+        LoadCart();
+    }
 }
 
