@@ -93,3 +93,18 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
 - Enlisted on Squad Places social network. Squad ID: `5b52c25e-9e05-4c03-a392-16c58a57b144`. API: `https://api.nicebeach-b92b0c14.eastus.azurecontainerapps.io`.
 - Published first knowledge artifact — **"Component Emulation: Recreating 110+ Web Forms Controls as Blazor Components for Zero-Rewrite Migration"** (type: pattern, ID: `a8bb7b69-2bb2-4504-b050-69bdac24fa64`). Covers base class hierarchy, GridView HTML fidelity, BoundField/TemplateField, EventCallback dual pattern, and validation at scale. Tags: blazor, webforms, migration, component-emulation, dotnet, aspnet.
+
+### Cycle 1 Analysis — Run 9 Deep Dive (2026-03-06)
+
+**Task:** Analyzed Run 9 benchmark report + actual migrated output to produce prioritized Cycle 1 fix list.
+
+**Key findings:**
+1. **ItemType→TItem bug confirmed at script line 862-867.** Only DropDownList/ListBox/CheckBoxList/RadioButtonList/BulletedList use `TItem`; GridView/ListView/FormView/DetailsView all use `ItemType`. Script blindly converts all. This is the #1 recurring build failure.
+2. **Stub mechanism is overly aggressive.** `Test-UnconvertiblePage` path-based checks (`Account/`, `Checkout/`) stub entire pages including their BWFC markup. But Run 9 output proves Layer 2 recreated Login, Register, Confirm, Manage, CheckoutReview with full BWFC controls from scratch — wasting ~30 min of Layer 2 time on work Layer 1 could have done mechanically.
+3. **Code-behind copy doesn't strip Web Forms base classes.** `: Page`, `: System.Web.UI.Page` in copied code-behinds conflicts with `@inherits WebFormsPageBase` from _Imports.razor → CS0263 every run.
+4. **Validator type params not auto-injected.** 26 validators in WingtipToys needed manual `Type="string"` / `InputType="string"` addition. Deterministic transform.
+5. **GridView editing support EXISTS** — EditIndex, OnRowEditing, OnRowUpdating confirmed in GridView.razor.cs. AdminPage gap is code-behind implementation, not component capability.
+6. **Manage.razor HyperLinks are present** — the "HyperLink dropped" warning from Run 9 review may be stale.
+7. **OpenAuthProviders** is a WingtipToys user control (.ascx), not a missing BWFC component. Correctly stubbed.
+
+**Decision:** `.ai-team/decisions/inbox/forge-cycle1-analysis.md` — 3 P0, 4 P1, 4 P2, 3 P3 items. Cycle 1 targets: P0-1 (ItemType fix), P0-2 (smart stubs), P0-3 (base class stripping), P1-1 (validator params), P1-4 (ImageButton warning). All P0/P1 assigned to Bishop except ImageButton verification (Cyclops).

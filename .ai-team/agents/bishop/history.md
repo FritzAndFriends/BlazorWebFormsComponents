@@ -43,3 +43,15 @@
 - **P0-3 (Base class stripping):** Fixed. `Copy-CodeBehind` now strips `: Page`, `: System.Web.UI.Page`, `: UserControl`, `: MasterPage` base classes and `using System.Web.*` directives before copying. Avoids CS0263 conflicts with `@inherits WebFormsPageBase`.
 - **P1-1 (Validator type params):** Fixed. New `Add-ValidatorTypeParameters` function injects `Type="string"` into RequiredFieldValidator/RegularExpressionValidator/RangeValidator and `InputType="string"` into CompareValidator. Uses negative lookahead to skip tags that already have the attribute.
 - **P1-4 (ImageButton warning):** Fixed. `Test-BwfcControlPreservation` now emits a specific warning when source has `asp:ImageButton` and output contains `<img>` tags, flagging silent OnClick event handler loss.
+
+### 2025-07-25: Run 10 WingtipToys Migration Benchmark
+
+- **Result:** Build succeeded — 0 errors, 0 warnings, 3 build attempts (down from 7 in Run 9)
+- **Pipeline:** Layer 0 (0.91s) → Layer 1 (3.35s, 673 ops) → Layer 2 (~25min) → Build (~13s, 3 attempts)
+- **Output:** 35 .razor, 44 .cs, 79 wwwroot, 28 routable pages, 172 BWFC control instances (26 unique types)
+- **P0/P1 fixes validated:** All 5 fixes confirmed working — ItemType correct on data controls, smart stubs fully transform Account/Checkout markup, base class stripping works, validator type params injected, ImageButton warning active.
+- **Remaining Layer 2 issues discovered:**
+  - TextMode/Display/SetFocusOnError enum values not converted by Layer 1 (TextMode="Email" should be TextMode="TextBoxMode.Email"). Candidate for P2 fix.
+  - Empty DropDownList (no Items) can't infer TItem — must be specified explicitly.
+  - ManageLogins page uses `Microsoft.AspNet.Identity.UserLoginInfo` as ItemType — needs simplification to stub.
+  - Stub page cleanup still ~60% of Layer 2 effort despite P0-2 fix.
