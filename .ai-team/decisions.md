@@ -6005,3 +6005,56 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 **By:** Forge
 **What:** Run 7 Layer 2/3 transforms for 5 core storefront pages plus build-unblocking stubs. Key decisions: (1) ProductDetails FormView preserved as BWFC component with `Items=@(new List<Product>{SampleProduct})` single-item wrapper  flattening to direct HTML rejected per control preservation mandate; (2) MainLayout category ListView preserved as BWFC component with `Items=@Categories`  for-loop rejected per control preservation; (3) ShoppingCart GridView preserved with full interactivity, @rendermode InteractiveServer, and CartStateService injection; (4) ProductContext inherits DbContext without Identity (Account pages out of scope); (5) 26 code-behind + 12 .razor files in Account/Checkout/misc stubbed to ComponentBase placeholders to unblock build (14 errors, all out-of-scope); (6) Image paths standardized from /Catalog/Images/ to /Images/Products/ per Blazor wwwroot layout.
 **Why:** Control preservation mandate requires keeping BWFC components (FormView, ListView, GridView) rather than flattening to raw HTML. Simplification to direct binding or for-loops was considered for FormView/ListView but rejected per the mandatory preservation rules. Stubbing out-of-scope pages to ComponentBase unblocks the build without requiring full Identity scaffolding.
+### 2026-03-06: Run 7 runtime failure learnings codified in migration toolkit skills and docs
+**By:** Beast
+**What:** Five migration toolkit files updated with learnings from Run 7 WingtipToys runtime failures: (1) UseStaticFiles() is required alongside MapStaticAssets() in Program.cs, (2) CSS links must be extracted from master pages to App.razor, (3) AuthorizeView crashes without AddCascadingAuthenticationState/AddAuthorization, (4) image paths in templates must match wwwroot directory structure, (5) GetRouteUrl works via WebFormsPageBase. AuthorizeView crash documented as DANGER-level admonition in both bwfc-migration and bwfc-identity-migration skills.
+**Why:** Runtime failures (404s, crashes, missing styles) are harder to catch than compile errors. Documenting these as prominent admonitions in the skills ensures future migrations — whether script-driven or Copilot-assisted — avoid these pitfalls. The learnings also update the Layer 1/Layer 2 boundary: CSS extraction and static file copying are now Layer 1 (script-automated), while image path validation remains Layer 2 work.
+
+
+### 2026-03-05: Migration Script Gap Review (Run 7 Learnings)
+**By:** Forge
+**What:** Reviewed bwfc-migrate.ps1 for remaining gaps after Run 7 fixes
+**Why:** Ensure all Run 7 learnings are captured in the script
+
+## Gaps Found
+
+1. **`src="~/"` not converted in URL references** — `ConvertFrom-UrlReferences` (line 873) handles `href="~/"`, `NavigateUrl="~/"`, and `ImageUrl="~/"`, but does NOT handle `src="~/"`. This means `<img src="~/Catalog/Images/foo.png">` and `<script src="~/Scripts/app.js">` will retain the `~/` prefix, which Blazor won't resolve. **Recommendation:** Add `@{ Pattern = 'src="~/'; Replacement = 'src="/'; Name = 'src' }` to the `$urlPatterns` array.
+
+2. **`<script>` tags from master page `<head>` not extracted** — `New-AppRazorScaffold` (line 242) extracts `<link rel="stylesheet">` tags from master pages for App.razor, but does NOT extract `<script src="...">` tags. Similarly, `ConvertFrom-MasterPage` (line 497) extracts `<meta>`, `<title>`, and `<link>` into `<HeadContent>`, but skips `<script>` tags. Since the entire `<head>` section is then removed (line 521), any scripts in the master page head are silently lost. Body-level scripts survive in the layout. **Recommendation:** Extract `<script src="...">` tags from the master page head and inject them into App.razor's `<body>` (before the blazor.web.js script), or into the layout. Add a manual review item flagging them.
+
+3. **No BundleConfig.cs / bundling detection** — Web Forms apps using `System.Web.Optimization` have `App_Start/BundleConfig.cs` and use `<%: Styles.Render("~/Content/css") %>` / `<%: Scripts.Render("~/bundles/modernizr") %>` in master pages. The expression converter turns these into `@(Styles.Render("~/Content/css"))` which won't compile — `Styles.Render()` doesn't exist in Blazor. The `~/` inside the method call is also not caught by `ConvertFrom-UrlReferences` (which only handles attribute patterns like `href="~/"`). **Recommendation:** Detect `Styles.Render` / `Scripts.Render` calls and emit a manual review item. Optionally flag `BundleConfig.cs` if found in the source tree.
+
+4. **CSS link duplication between App.razor and layout HeadContent** — `New-AppRazorScaffold` injects stylesheet links directly into App.razor's `<head>`, and `ConvertFrom-MasterPage` also puts the same links into a `<HeadContent>` block at the top of the converted layout. Since `<HeadOutlet>` renders `<HeadContent>` into the `<head>`, stylesheet links appear twice. **Recommendation:** Either skip stylesheet links in the `ConvertFrom-MasterPage` head extraction (since App.razor already has them), or skip injecting them into App.razor (and rely on the layout's HeadContent). The App.razor approach is more robust for SSR, so removing them from the layout's HeadContent extraction is the safer fix.
+
+5. **`url('~/')` in CSS files not converted** — CSS files are copied verbatim to `wwwroot/` by the static file copier. Any `url('~/path')` references inside CSS files will break in Blazor. **Recommendation:** Add a post-copy pass over `.css` files that replaces `url('~/` with `url('/` (and `url("~/` with `url("/`). Alternatively, emit a manual review item flagging CSS files that contain `~/`.
+
+6. **No detection of Global.asax, RouteConfig.cs, web.config** — These Web Forms infrastructure files contain app configuration (routes, handlers, HTTP modules) that needs manual migration. The script doesn't detect or flag them. **Recommendation:** After static file copy, scan the source tree for `Global.asax`, `RouteConfig.cs`, `BundleConfig.cs`, `Startup.cs`, and `web.config`. Emit manual review items for each one found, with guidance on what to migrate.
+
+## Verified Working
+
+1. **UseStaticFiles()** — Program.cs scaffold (line 187) correctly includes `app.UseStaticFiles();` before `app.MapStaticAssets();`. Confirmed.
+
+2. **CSS extraction from master pages** — `New-AppRazorScaffold` correctly reads all `.Master` files, matches `<link rel="stylesheet">`, converts `~/` to `/`, strips `runat="server"`, and injects into App.razor `<head>`. Confirmed working.
+
+3. **SourceRoot parameter** — `New-AppRazorScaffold` receives `-SourceRoot $Path` from the entry point (line ~1308). CSS extraction activates when `$SourceRoot` is set and the path exists. Confirmed.
+
+4. **LoginView → AuthorizeView** — `ConvertFrom-LoginView` (line 662) correctly converts `<asp:LoginView>` → `<AuthorizeView>`, `<AnonymousTemplate>` → `<NotAuthorized>`, `<LoggedInTemplate>` → `<Authorized>`, and emits a manual review item for auth service registration. Confirmed working.
+
+5. **GetRouteUrl** — `ConvertFrom-GetRouteUrl` (line 726) correctly leaves `Page.GetRouteUrl()` and standalone `GetRouteUrl()` calls untouched (WebFormsPageBase handles them). Logs them for visibility. Confirmed working.
+
+6. **Static file copying directory structure** — The copy logic (entry point section) calculates `$relPath = $sf.FullName.Substring($Path.Length)` and destinations as `Join-Path $Output "wwwroot" $relPath`. This correctly preserves directory structure, e.g., `Source/Catalog/Images/foo.png` → `Output/wwwroot/Catalog/Images/foo.png`. Confirmed correct.
+
+7. **BWFC control preservation verification** — `Test-BwfcControlPreservation` (line 897) correctly compares asp: tag counts to BWFC component counts in output, handles intentionally-converted controls (Content, ContentPlaceHolder, ScriptManager), and accounts for semantic equivalences (LoginView → AuthorizeView). Confirmed thorough.
+
+8. **AutoPostBack stripping** — `$StripAttributes` (line 81) removes `AutoPostBack` attributes and `Remove-WebFormsAttributes` (line 856) emits a manual review item explaining the behavioral difference. Confirmed.
+
+9. **Event handler scanning** — Pipeline (line 1213) scans for `On[A-Z]...="..."` patterns and flags them for code-behind signature review. Confirmed.
+
+## No Action Needed
+
+- **LoginView auth services in Program.cs** — The script correctly flags this as a manual review item rather than conditionally modifying Program.cs. Auth service registration is a Layer 2/3 concern that depends on the specific auth provider (Identity, OIDC, cookie, etc.). Layer 1 should not guess. Flagging is the right approach.
+- **`href="~/"` conversion** — Already handled correctly.
+- **`NavigateUrl="~/"` conversion** — Already handled correctly.
+- **`ImageUrl="~/"` conversion** — Already handled correctly.
+- **Expression conversion (<%: %>, <%#: %>, Eval, Item)** — All covered with good regex ordering (format string first, then simple patterns). Remaining unconverted blocks are correctly flagged as manual items.
+

@@ -100,3 +100,45 @@ Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX contr
 
  Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
 
+### Run 8 Layer 2 — WingtipToys Migration Implementation (2026-03-06)
+
+**What:** Completed Layer 2 migration of `samples/Run8WingtipToys/` from non-functional Layer 1 scaffold to working end-to-end shopping flow, using `samples/AfterWingtipToys/` as the reference implementation.
+
+**Files created (8):**
+- `Models/Product.cs`, `Models/Category.cs`, `Models/CartItem.cs`, `Models/Order.cs`, `Models/OrderDetail.cs` — EF Core entity models in `WingtipToys.Models` namespace
+- `Data/ProductContext.cs` — EF Core DbContext with seed data (5 categories, 16 products), uses SQLite
+- `Services/CartStateService.cs` — in-memory cart state (scoped DI), tracks items/quantities/totals
+
+**Files modified (14):**
+- `WingtipToys.csproj` — NuGet ref → ProjectReference to BWFC + added EF Core SQLite 10.0.3
+- `Program.cs` — added DbContextFactory, CartStateService, auth services, DB seed on startup
+- `Components/App.razor` — added CSS links for bootstrap.css and Site.css from `/Content/`
+- `_Imports.razor` — added usings for EntityFrameworkCore, WingtipToys.Models/Data/Services
+- `Components/Layout/MainLayout.razor` — replaced broken master page with working layout: navbar, logo, category ListView from DB, removed broken `GetRouteUrl`/`LoginStatus`/`Page.Title` expressions
+- `ProductList.razor` — replaced broken ListView (GetRouteUrl, .aspx links, TODO annotations) with working version using `Items="@_products"`, correct image/link paths
+- `ProductList.razor.cs` — replaced Web Forms code-behind with ComponentBase + IDbContextFactory + SupplyParameterFromQuery
+- `ProductDetails.razor` — replaced broken FormView (TODO, no Items) with working version using `Items="@_products"` + null guard
+- `ProductDetails.razor.cs` — replaced Web Forms code-behind with ComponentBase + IDbContextFactory
+- `AddToCart.razor` — replaced empty HTML shell with inline @code block using CartStateService
+- `ShoppingCart.razor` — replaced broken GridView/Label/Button markup with clean foreach table using CartStateService
+- `Default.razor` — replaced `@(Title)` with static text and added PageTitle
+- `Default.razor.cs` — replaced Web Forms Page class with empty ComponentBase
+- `About.razor`, `Contact.razor` — replaced `@(Title)` with static text
+
+**Files deleted (3):**
+- `AddToCart.razor.cs` — code now inline in .razor
+- `ShoppingCart.razor.cs` — code now inline in .razor
+- `Components/Layout/MainLayout.razor.cs` — code now inline in .razor via @code block
+
+**Out-of-scope stubs fixed (26 files):** All Account/, Checkout/, Admin/, ViewSwitcher code-behind files replaced with empty `ComponentBase` partials. Several broken razor files (Manage, ManagePassword, TwoFactorAuthenticationSignIn, CheckoutReview, CheckoutComplete, CheckoutError, Register, ResetPassword, Forgot, ManageLogins, Login, VerifyPhoneNumber, OpenAuthProviders, RegisterExternalLogin, AddPhoneNumber, Confirm, Lockout, ResetPasswordConfirmation, AdminPage, ViewSwitcher) replaced with simple stub markup to eliminate compile errors from leftover Web Forms expressions.
+
+**Build result:** 0 errors, 0 warnings. `dotnet build` clean.
+
+**Key patterns used:**
+- `IDbContextFactory<ProductContext>` injected via `[Inject]` for short-lived DbContext per operation
+- `[SupplyParameterFromQuery]` for URL query string binding (replaces Web Forms `[QueryString]`)
+- `CartStateService` as scoped service for in-memory cart state (replaces Web Forms Session-based cart)
+- ListView `Items="@_products"` pattern for data binding (replaces SelectMethod)
+- FormView with `RenderOuterTable="false"` for product details
+- Inline `@code` blocks for simple pages (AddToCart, ShoppingCart, MainLayout)
+

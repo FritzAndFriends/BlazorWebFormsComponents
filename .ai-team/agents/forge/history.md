@@ -162,3 +162,20 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
  Team update (2026-03-05): Run 7 migration report structure standardized  Executive Summary  Metrics  Comparison  Recommendations. Reports at samples/Run{N}WingtipToys/MIGRATION-REPORT.md. Decided by Beast
 
+### Migration Script Gap Review — Run 7 Learnings (2026-03-05)
+
+**Task:** Review bwfc-migrate.ps1 for remaining gaps after Run 7 fixes were applied.
+
+**Key findings — 6 gaps identified:**
+
+1. **`src="~/"`** not in `ConvertFrom-UrlReferences` — images and scripts with `src="~/path"` keep broken `~/` prefix. Only `href`, `NavigateUrl`, `ImageUrl` are handled.
+2. **`<script>` tags lost from master page `<head>`** — CSS links are extracted to App.razor but script tags are not. The entire `<head>` is removed, silently dropping head scripts.
+3. **No BundleConfig.cs / `Styles.Render` / `Scripts.Render` detection** — bundling calls become invalid `@(Styles.Render(...))` in output with no warning.
+4. **CSS link duplication** — Same stylesheet links appear in both App.razor `<head>` (via `New-AppRazorScaffold`) and layout's `<HeadContent>` (via `ConvertFrom-MasterPage`).
+5. **`url('~/')` in CSS files not converted** — CSS files are copied verbatim; `~/` references inside them break.
+6. **No flagging of infrastructure files** — Global.asax, RouteConfig.cs, BundleConfig.cs, web.config are not detected or flagged for manual review.
+
+**Verified working (9 items):** UseStaticFiles, CSS extraction, SourceRoot parameter, LoginView→AuthorizeView, GetRouteUrl passthrough, static file directory structure, BWFC control preservation, AutoPostBack stripping, event handler scanning.
+
+**Decision document:** `.ai-team/decisions/inbox/forge-script-gap-review.md`
+

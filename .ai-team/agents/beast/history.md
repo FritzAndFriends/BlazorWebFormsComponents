@@ -93,3 +93,13 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
  Team update (2026-03-05): Run 7 Layer 2/3 transforms consolidated  FormView/ListView preserved per control mandate, out-of-scope pages stubbed to ComponentBase. Decided by Forge
 
+### Run 7 Learnings — Skill & Doc Updates (2026-03-06)
+
+- **5 files updated** with learnings from Run 7 WingtipToys runtime failures:
+  - `bwfc-migration/SKILL.md`: New "Static File & Asset Migration" section (UseStaticFiles, CSS extraction, image path preservation), AuthorizeView gotcha added, Step 3 updated with UseStaticFiles requirement
+  - `migration-standards/SKILL.md`: "Static Asset Relocation" expanded with UseStaticFiles + CSS extraction + path preservation rule, Layer 1 boundary updated to include CSS extraction, Identity Migration subsection gets AuthorizeView requirement
+  - `bwfc-identity-migration/SKILL.md`: WARNING admonition in Step 2 for AuthorizeView without Identity, new "AuthorizeView Without Identity Setup" gotcha entry
+  - `CHECKLIST.md`: 2 new Layer 1 items (static files, CSS extraction), 4 new Verification items (static files accessible, UseStaticFiles present, image paths match, auth services if LoginView)
+  - `METHODOLOGY.md`: 2 new rows in "What Layer 1 Does" table (CSS extraction, static file copying), note in "What Layer 1 Does NOT Do" about image path validation being Layer 2
+- **Pattern:** Run 7 demonstrated that runtime failures (not compile errors) are the most dangerous migration bugs — UseStaticFiles 404s, AuthorizeView crashes, mismatched asset paths all compile fine but fail at runtime. Documenting these as admonitions ensures future migrations catch them early.
+
