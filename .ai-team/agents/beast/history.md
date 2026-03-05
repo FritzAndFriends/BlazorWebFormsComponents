@@ -135,3 +135,8 @@
 
 
  Team update (2026-03-05): 50 On-prefix EventCallback aliases added to data components + migration script AutoPostBack fix  by Cyclops, Rogue
+
+### WingtipToys Migration Gotchas (2026-03-05)
+
+- Migration skill updated with three runtime gotchas from WingtipToys: ListView @context templates, OnParametersSetAsync for query params, AddHttpContextAccessor registration
+- Confidence bumped to high — patterns validated through real migration debugging
