@@ -90,3 +90,34 @@
 📌 Team update (2025-07-25): Forge reviewed Run 11 preservation: 98.9% (176/178 adjusted) — APPROVED. All 3 P0 gaps from Run 10 CLOSED. 1 minor gap: HyperLink conditional visibility in Manage.razor. Cycle 3 priorities shift to functional code-behinds (Login/Register per Jeff's directive). — decided by Forge
 
 📌 Team update (2025-07-25): Jeff directive — Login and Register pages must have functional code-behinds, not just BWFC markup. Mock auth service required. — decided by Jeffrey T. Fritz
+
+### Cycle 3 Fixes Applied (Bishop) — Script + Auth Services
+
+- **P0.3 (Mock Auth Service Generation):** New `Add-MockAuthService` function in bwfc-migrate.ps1 auto-generates `Services/MockAuthService.cs` (in-memory user store with email/password) and `Services/MockAuthenticationStateProvider.cs` (Blazor auth state provider with login/logout) when Account/Login.aspx is detected in source. Eliminates manual auth scaffolding in Layer 2.
+- **P0.1+P0.2 (Program.cs Auth Injection):** `New-ProjectScaffold` now accepts `$HasIdentityPages` parameter and conditionally adds `AddScoped<MockAuthService>()`, `AddScoped<MockAuthenticationStateProvider>()`, `AddCascadingAuthenticationState()`, and `AddAuthorization()` to Program.cs template.
+- **P1.4 (LogoutAction Enum):** Added LogoutAction enum conversions: Redirect, RedirectToLoginPage, Refresh → `@LogoutAction.{Value}`.
+- **P1.4 (BorderStyle Enum):** Added BorderStyle enum conversions: None, NotSet, Dotted, Dashed, Solid, Double, Groove, Ridge, Inset, Outset → `@BorderStyle.{Value}`.
+- **P1.3 (Visible Attribute):** New `Convert-VisibleAttribute` function strips `Visible="true"` (default value), preserves `Visible="false"` for BWFC components.
+- **P2.2 (Hex Color Escaping):** New `Convert-HexColors` function escapes hex color values like `BorderColor="#efeeef"` to `BorderColor="@("#efeeef")"` to prevent C# preprocessor directive interpretation in Razor.
+
+### 2026-03-05: Run 12 WingtipToys Migration Benchmark
+
+- **Result:** Build succeeded — 0 errors, 0 warnings, 2 build attempts (best ever — down from 4 in Run 11)
+- **Pipeline:** Layer 1 (~3.5s, 365 ops) → Layer 2 (~15min) → Build (~3s, 2 attempts)
+- **Output:** 32 .razor, 32 .cs, 79 wwwroot, 28 routable pages, 184 BWFC control instances (27 unique types)
+- **Auth services fully functional (P0 complete):**
+  - Login.razor.cs: Injects MockAuthenticationStateProvider + MockAuthService, calls LoginAsync, NavigateTo "/" on success
+  - Register.razor.cs: Calls CreateUserAsync, auto-login on success, NavigateTo "/Account/Login"
+  - MockAuthService: In-memory user store (admin@wingtiptoys.com / Pass@word1 default)
+  - LoginStatus: Preserved as BWFC component on MainLayout with `LogoutAction="@LogoutAction.Redirect"`
+  - Login/Register markup uses `@bind-Text` for TextBox → code-behind field binding
+- **Layer 1 script improvements (6 new features):**
+  - Mock auth service generation (conditional on Account/Login.aspx)
+  - Program.cs auth injection (conditional)
+  - LogoutAction + BorderStyle enum conversions
+  - Visible attribute handling (strip true, preserve false)
+  - Hex color escaping for Razor safety
+- **BWFC preservation rate:** ~100% (184 instances, 27 unique types — up from 178/26 in Run 11)
+- **LinkButton newly preserved:** 3 instances (ManageLogins, Checkout pages) — previously flattened
+
+📌 Team update (2026-03-05): Run 12 BENCHMARK complete. All quality gates passed: 0 build errors, ≤3 attempts (2), auth functional, 184 BWFC instances (≥178), ~100% preservation. First run with functional Login/Register. — decided by Bishop
