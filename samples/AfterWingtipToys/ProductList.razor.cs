@@ -13,7 +13,7 @@ public partial class ProductList : ComponentBase
 
     private List<Product>? _products;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         using var db = DbFactory.CreateDbContext();
         IQueryable<Product> query = db.Products;
