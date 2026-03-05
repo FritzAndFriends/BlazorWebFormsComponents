@@ -188,7 +188,7 @@ These are 100% mechanical — apply to every file:
 |-----------|--------|
 | `href="~/Products"` | `href="/Products"` |
 | `NavigateUrl="~/Products/<%: Item.ID %>"` | `NavigateUrl="@($"/Products/{context.ID}")"` |
-| `<%: GetRouteUrl("ProductRoute", new { id = Item.ID }) %>` | `@($"/Products/{context.ID}")` |
+| `<%: GetRouteUrl("ProductRoute", new { id = Item.ID }) %>` | `@GetRouteUrl("ProductRoute", new { id = context.ID })` (via WebFormsPageBase) |
 | `Response.Redirect("~/Products")` | `NavigationManager.NavigateTo("/Products")` |
 
 ### Content/Layout Conversion

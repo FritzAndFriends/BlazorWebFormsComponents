@@ -696,21 +696,20 @@ function ConvertFrom-GetRouteUrl {
 
     $transformed = $false
 
-    # Page.GetRouteUrl( → GetRouteUrlHelper.GetRouteUrl(
+    # Page.GetRouteUrl( stays as-is — WebFormsPageBase.Page returns this,
+    # and GetRouteUrl is now a method on WebFormsPageBase. Just log that we found it.
     $pageRouteRegex = [regex]'Page\.GetRouteUrl\s*\('
     $pageRouteMatches = $pageRouteRegex.Matches($Content)
     if ($pageRouteMatches.Count -gt 0) {
-        $Content = $pageRouteRegex.Replace($Content, 'GetRouteUrlHelper.GetRouteUrl(')
-        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($pageRouteMatches.Count) Page.GetRouteUrl() to GetRouteUrlHelper.GetRouteUrl()"
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Found $($pageRouteMatches.Count) Page.GetRouteUrl() — works via WebFormsPageBase (no transform needed)"
         $transformed = $true
     }
 
-    # Standalone GetRouteUrl( (not already prefixed with Helper.) → GetRouteUrlHelper.GetRouteUrl(
+    # Standalone GetRouteUrl( also works via WebFormsPageBase — just log it.
     $standaloneRegex = [regex]'(?<![\w.])GetRouteUrl\s*\('
     $standaloneMatches = $standaloneRegex.Matches($Content)
     if ($standaloneMatches.Count -gt 0) {
-        $Content = $standaloneRegex.Replace($Content, 'GetRouteUrlHelper.GetRouteUrl(')
-        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($standaloneMatches.Count) GetRouteUrl() to GetRouteUrlHelper.GetRouteUrl()"
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Found $($standaloneMatches.Count) GetRouteUrl() — works via WebFormsPageBase (no transform needed)"
         $transformed = $true
     }
 
@@ -727,9 +726,9 @@ function ConvertFrom-GetRouteUrl {
         Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'RouteValueDictionary usage detected — works but consider simplifying to anonymous object'
     }
 
-    # Note the required @inject directive
+    # GetRouteUrl now works via @inherits WebFormsPageBase — no @inject needed
     if ($transformed) {
-        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'Add @inject GetRouteUrlHelper GetRouteUrlHelper at the top of the file'
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail 'GetRouteUrl calls will resolve via WebFormsPageBase — ensure page uses @inherits WebFormsPageBase'
     }
 
     return $Content
