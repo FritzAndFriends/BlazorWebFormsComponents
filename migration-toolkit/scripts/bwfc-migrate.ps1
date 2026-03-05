@@ -131,7 +131,8 @@ function Write-ManualItem {
 function New-ProjectScaffold {
     param(
         [string]$OutputRoot,
-        [string]$ProjectName
+        [string]$ProjectName,
+        [bool]$HasIdentityPages = $false
     )
 
     # .csproj
@@ -165,17 +166,36 @@ function New-ProjectScaffold {
 @using $ProjectName
 "@
 
-    # Program.cs
+    # Program.cs — conditionally include auth services when Identity pages detected
+    $authUsings = ''
+    $authServices = ''
+    if ($HasIdentityPages) {
+        $authUsings = @"
+
+using ${ProjectName}.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+"@
+        $authServices = @"
+
+// Auth services (mock for migration benchmark)
+builder.Services.AddScoped<MockAuthService>();
+builder.Services.AddScoped<MockAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<MockAuthenticationStateProvider>());
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
+"@
+    }
+
     $programContent = @"
 // TODO: Review and adjust this generated Program.cs for your application needs.
-using BlazorWebFormsComponents;
+using BlazorWebFormsComponents;${authUsings}
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddBlazorWebFormsComponents();
+builder.Services.AddBlazorWebFormsComponents();${authServices}
 
 var app = builder.Build();
 
@@ -190,7 +210,7 @@ app.UseStaticFiles();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
-app.MapRazorComponents<$ProjectName.Components.App>()
+app.MapRazorComponents<${ProjectName}.Components.App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
@@ -323,6 +343,106 @@ function New-AppRazorScaffold {
     else {
         Write-Host "[WhatIf] Would create: Components/App.razor"
         Write-Host "[WhatIf] Would create: Components/Routes.razor"
+    }
+}
+
+function Add-MockAuthService {
+    <#
+    .SYNOPSIS
+        Generates mock authentication services for migrated Identity pages.
+    .DESCRIPTION
+        Creates MockAuthService.cs (in-memory user store) and
+        MockAuthenticationStateProvider.cs (Blazor auth state) in the Services folder.
+        Called conditionally when Account/Login.aspx is detected in the source.
+    #>
+    param(
+        [string]$OutputRoot,
+        [string]$ProjectName
+    )
+
+    $servicesDir = Join-Path $OutputRoot "Services"
+    if (-not (Test-Path $servicesDir)) {
+        New-Item -ItemType Directory -Force $servicesDir | Out-Null
+    }
+
+    $mockAuthContent = @"
+namespace ${ProjectName}.Services;
+
+public class MockAuthService
+{
+    private readonly Dictionary<string, string> _users = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["admin@wingtiptoys.com"] = "Pass@word1"
+    };
+
+    public Task<bool> AuthenticateAsync(string email, string password)
+    {
+        return Task.FromResult(_users.TryGetValue(email, out var stored) && stored == password);
+    }
+
+    public Task<(bool Success, string? Error)> CreateUserAsync(string email, string password)
+    {
+        if (_users.ContainsKey(email))
+            return Task.FromResult((false, (string?)"A user with that email already exists."));
+        _users[email] = password;
+        return Task.FromResult((true, (string?)null));
+    }
+}
+"@
+
+    $mockAuthStateContent = @"
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
+
+namespace ${ProjectName}.Services;
+
+public class MockAuthenticationStateProvider : AuthenticationStateProvider
+{
+    private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        => Task.FromResult(new AuthenticationState(_currentUser));
+
+    public Task<bool> LoginAsync(string email, string password, MockAuthService authService)
+    {
+        return Task.Run(async () =>
+        {
+            if (await authService.AuthenticateAsync(email, password))
+            {
+                var identity = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, email),
+                    new Claim(ClaimTypes.Email, email)
+                }, "MockAuth");
+                _currentUser = new ClaimsPrincipal(identity);
+                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public Task LogoutAsync()
+    {
+        _currentUser = new(new ClaimsIdentity());
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        return Task.CompletedTask;
+    }
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($servicesDir, "Create mock authentication services")) {
+        $authPath = Join-Path $servicesDir "MockAuthService.cs"
+        Set-Content -Path $authPath -Value $mockAuthContent -Encoding UTF8
+        Write-TransformLog -File $authPath -Transform 'Scaffold' -Detail 'Generated Services/MockAuthService.cs'
+
+        $authStatePath = Join-Path $servicesDir "MockAuthenticationStateProvider.cs"
+        Set-Content -Path $authStatePath -Value $mockAuthStateContent -Encoding UTF8
+        Write-TransformLog -File $authStatePath -Transform 'Scaffold' -Detail 'Generated Services/MockAuthenticationStateProvider.cs'
+    }
+    else {
+        Write-Host "[WhatIf] Would create: Services/MockAuthService.cs"
+        Write-Host "[WhatIf] Would create: Services/MockAuthenticationStateProvider.cs"
     }
 }
 
@@ -1024,8 +1144,25 @@ function Convert-EnumAttributes {
     $Content = $Content -replace 'GridLines="Vertical"', 'GridLines="@GridLines.Vertical"'
     $Content = $Content -replace 'GridLines="Horizontal"', 'GridLines="@GridLines.Horizontal"'
 
+    # LogoutAction conversions (need @ prefix)
+    $Content = $Content -replace 'LogoutAction="Redirect"', 'LogoutAction="@LogoutAction.Redirect"'
+    $Content = $Content -replace 'LogoutAction="RedirectToLoginPage"', 'LogoutAction="@LogoutAction.RedirectToLoginPage"'
+    $Content = $Content -replace 'LogoutAction="Refresh"', 'LogoutAction="@LogoutAction.Refresh"'
+
+    # BorderStyle conversions (need @ prefix)
+    $Content = $Content -replace 'BorderStyle="None"', 'BorderStyle="@BorderStyle.None"'
+    $Content = $Content -replace 'BorderStyle="NotSet"', 'BorderStyle="@BorderStyle.NotSet"'
+    $Content = $Content -replace 'BorderStyle="Dotted"', 'BorderStyle="@BorderStyle.Dotted"'
+    $Content = $Content -replace 'BorderStyle="Dashed"', 'BorderStyle="@BorderStyle.Dashed"'
+    $Content = $Content -replace 'BorderStyle="Solid"', 'BorderStyle="@BorderStyle.Solid"'
+    $Content = $Content -replace 'BorderStyle="Double"', 'BorderStyle="@BorderStyle.Double"'
+    $Content = $Content -replace 'BorderStyle="Groove"', 'BorderStyle="@BorderStyle.Groove"'
+    $Content = $Content -replace 'BorderStyle="Ridge"', 'BorderStyle="@BorderStyle.Ridge"'
+    $Content = $Content -replace 'BorderStyle="Inset"', 'BorderStyle="@BorderStyle.Inset"'
+    $Content = $Content -replace 'BorderStyle="Outset"', 'BorderStyle="@BorderStyle.Outset"'
+
     # Count what changed by comparing before/after (use regex to count all enum patterns in output)
-    $enumPatterns = @('TextBoxMode\.', '@ValidatorDisplay\.', '@GridLines\.')
+    $enumPatterns = @('TextBoxMode\.', '@ValidatorDisplay\.', '@GridLines\.', '@LogoutAction\.', '@BorderStyle\.')
     foreach ($ep in $enumPatterns) {
         $convertedCount += ([regex]::Matches($Content, $ep)).Count
     }
@@ -1064,6 +1201,54 @@ function Convert-BooleanAttributes {
     $totalCount = $trueCount + $falseCount
     if ($totalCount -gt 0) {
         Write-TransformLog -File $RelPath -Transform 'Boolean' -Detail "Normalized $totalCount PascalCase boolean value(s) to lowercase"
+    }
+
+    return $Content
+}
+
+function Convert-VisibleAttribute {
+    <#
+    .SYNOPSIS
+        Handles Web Forms Visible attribute conversion for BWFC components.
+    .DESCRIPTION
+        Visible="false" is preserved as-is (BWFC supports the Visible bool parameter).
+        Visible="true" is removed since true is the default value.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $removedCount = 0
+
+    # Remove Visible="true" (default value, not needed)
+    $visibleTrueRegex = [regex]'\s*Visible="true"'
+    $trueMatches = $visibleTrueRegex.Matches($Content)
+    if ($trueMatches.Count -gt 0) {
+        $Content = $visibleTrueRegex.Replace($Content, '')
+        $removedCount += $trueMatches.Count
+    }
+
+    if ($removedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Visible' -Detail "Removed $removedCount Visible=`"true`" default attribute(s); Visible=`"false`" preserved for BWFC"
+    }
+
+    return $Content
+}
+
+function Convert-HexColors {
+    <#
+    .SYNOPSIS
+        Escapes hex color values in attributes to avoid C# preprocessor directive issues in Razor.
+    .DESCRIPTION
+        Converts attribute values like BorderColor="#efeeef" to BorderColor="@("#efeeef")"
+        so Razor doesn't interpret the # as a C# preprocessor directive.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $hexColorRegex = [regex]'(\w+Color)="(#[0-9a-fA-F]{3,8})"'
+    $hexMatches = $hexColorRegex.Matches($Content)
+
+    if ($hexMatches.Count -gt 0) {
+        $Content = $hexColorRegex.Replace($Content, '$1="@("$2")"')
+        Write-TransformLog -File $RelPath -Transform 'HexColor' -Detail "Escaped $($hexMatches.Count) hex color value(s) for Razor compatibility"
     }
 
     return $Content
@@ -1472,6 +1657,8 @@ function Convert-WebFormsFile {
     $content = Add-ValidatorTypeParameters -Content $content -RelPath $relativePath
     $content = Convert-EnumAttributes -Content $content -RelPath $relativePath
     $content = Convert-BooleanAttributes -Content $content -RelPath $relativePath
+    $content = Convert-VisibleAttribute -Content $content -RelPath $relativePath
+    $content = Convert-HexColors -Content $content -RelPath $relativePath
 
     # Scan for event handler attributes that need code-behind signature review
     $eventHandlerMatches = [regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')
@@ -1572,15 +1759,27 @@ if (-not $WhatIfPreference) {
     $Output = (Resolve-Path $Output).Path
 }
 
+# Detect Identity pages for conditional auth service generation
+$hasIdentityPages = Test-Path (Join-Path $Path 'Account' 'Login.aspx')
+if ($hasIdentityPages) {
+    Write-Host "Detected Account/Login.aspx — will generate mock authentication services." -ForegroundColor Yellow
+}
+
 # Project scaffolding
 if (-not $SkipProjectScaffold) {
     Write-Host 'Generating project scaffold...' -ForegroundColor Green
     if (-not $WhatIfPreference) {
-        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName
+        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName -HasIdentityPages $hasIdentityPages
         New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName -SourceRoot $Path
+        if ($hasIdentityPages) {
+            Add-MockAuthService -OutputRoot $Output -ProjectName $projectName
+        }
     }
     else {
         Write-Host '[WhatIf] Would generate .csproj, _Imports.razor, Program.cs, App.razor, Routes.razor'
+        if ($hasIdentityPages) {
+            Write-Host '[WhatIf] Would generate Services/MockAuthService.cs, Services/MockAuthenticationStateProvider.cs'
+        }
     }
     Write-Host ''
 }
