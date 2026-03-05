@@ -1,0 +1,29 @@
+@page "/ErrorPage"
+
+<PageTitle>Error</PageTitle>
+
+<h2>Error:</h2>
+<p></p>
+<Label ID="FriendlyErrorMsg" Text="A problem has occurred on this web site. Please try again." Font-Size="Large" style="color: red"></Label>
+
+<Panel ID="DetailedErrorPanel" Visible="false">
+    <p>&nbsp;</p>
+    <h4>Detailed Error:</h4>
+    <p>
+        <Label ID="ErrorDetailedMsg" Font-Size="Small" /><br />
+    </p>
+
+    <h4>Error Handler:</h4>
+    <p>
+        <Label ID="ErrorHandler" Font-Size="Small" /><br />
+    </p>
+
+    <h4>Detailed Error Message:</h4>
+    <p>
+        <Label ID="InnerMessage" Font-Size="Small" /><br />
+    </p>
+    <p>
+        <Label ID="InnerTrace" />
+    </p>
+</Panel>
+

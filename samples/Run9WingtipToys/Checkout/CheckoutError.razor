@@ -1,0 +1,25 @@
+@page "/CheckoutError"
+<h1>Checkout Error</h1>
+    <p></p>
+	<table id="ErrorTable">
+		<tr>
+			<td class="field"></td>
+			<td>@_errorCode</td>
+		</tr>
+		<tr>
+			<td class="field"></td>
+			<td>@_errorDesc</td>
+		</tr>
+		<tr>
+			<td class="field"></td>
+			<td>@_errorDesc2</td>
+		</tr>
+	</table>
+
+@code {
+    [SupplyParameterFromQuery(Name = "ErrorCode")] private string _errorCode { get; set; } = "";
+    [SupplyParameterFromQuery(Name = "Desc")] private string _errorDesc { get; set; } = "";
+    [SupplyParameterFromQuery(Name = "Desc2")] private string _errorDesc2 { get; set; } = "";
+}
+    <p></p>
+

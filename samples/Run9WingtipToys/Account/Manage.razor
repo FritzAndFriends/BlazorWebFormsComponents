@@ -1,0 +1,41 @@
+@page "/Manage"
+
+<PageTitle>Manage Account</PageTitle>
+
+<h2>Manage Account</h2>
+
+<div>
+    <PlaceHolder ID="successMessage" Visible="false">
+        <p class="text-success">Account settings updated.</p>
+    </PlaceHolder>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-horizontal">
+            <h4>Change your account settings</h4>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>Password:</dt>
+                <dd>
+                    <HyperLink NavigateUrl="/Account/ManagePassword" Text="[Change]" ID="ChangePassword" />
+                </dd>
+                <dt>External Logins:</dt>
+                <dd>
+                    <HyperLink NavigateUrl="/Account/ManageLogins" Text="[Manage]" />
+                </dd>
+                <dt>Phone Number:</dt>
+                <dd>
+                    <HyperLink NavigateUrl="/Account/AddPhoneNumber" Text="[Add]" />
+                </dd>
+                <dt>Two-Factor Authentication:</dt>
+                <dd>
+                    <p>
+                        There are no two-factor authentication providers configured. See <a href="http://go.microsoft.com/fwlink/?LinkId=313242">this article</a>
+                        for details on setting up this ASP.NET application to support two-factor authentication.
+                    </p>
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
