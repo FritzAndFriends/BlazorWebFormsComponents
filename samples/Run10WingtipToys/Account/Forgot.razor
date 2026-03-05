@@ -1,0 +1,37 @@
+@page "/Forgot"
+<h2>Forgot</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <PlaceHolder id="loginForm">
+                <div class="form-horizontal">
+                    <h4>Forgot your password?</h4>
+                    <hr />
+                    <PlaceHolder ID="ErrorMessage" Visible="false">
+                        <p class="text-danger">
+                            <Literal ID="FailureText" />
+                        </p>
+                    </PlaceHolder>
+                    <div class="form-group">
+                        <Label AssociatedControlID="Email" CssClass="col-md-2 control-label">Email</Label>
+                        <div class="col-md-10">
+                            <TextBox ID="Email" CssClass="form-control" TextMode="TextBoxMode.Email" />
+                            <RequiredFieldValidator Type="string"
+                                CssClass="text-danger" ErrorMessage="The email field is required." />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <Button Text="Submit" CssClass="btn btn-default" />
+                        </div>
+                    </div>
+                </div>
+            </PlaceHolder>
+            <PlaceHolder ID="DisplayEmail" Visible="false">
+                <p class="text-info">
+                    Please check your email to reset your password.
+                </p>
+            </PlaceHolder>
+        </div>
+    </div>
+

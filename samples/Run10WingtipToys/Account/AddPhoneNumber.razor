@@ -1,0 +1,26 @@
+@page "/AddPhoneNumber"
+<h2>AddPhoneNumber</h2>
+
+    <div class="form-horizontal">
+        <h4>Add a phone number</h4>
+        <hr />
+        <ValidationSummary CssClass="text-danger" />
+        <p class="text-danger">
+            <Literal ID="ErrorMessage" />
+        </p>
+        <div class="form-group">
+            <Label AssociatedControlID="PhoneNumber" CssClass="col-md-2 control-label">Phone Number</Label>
+            <div class="col-md-10">
+                <TextBox ID="PhoneNumber" CssClass="form-control" TextMode="TextBoxMode.Phone" />
+                <RequiredFieldValidator Type="string"
+                    CssClass="text-danger" ErrorMessage="The PhoneNumber field is required." />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <Button
+                    Text="Submit" CssClass="btn btn-default" />
+            </div>
+        </div>
+    </div>
+
