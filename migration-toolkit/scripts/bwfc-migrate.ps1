@@ -642,6 +642,7 @@ function ConvertFrom-LoginView {
     if ($openMatches.Count -gt 0) {
         $Content = $openRegex.Replace($Content, '<AuthorizeView>')
         Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <AuthorizeView>"
+        Write-ManualItem -File $RelPath -Category 'LoginView-Auth' -Detail 'AuthorizeView requires builder.Services.AddCascadingAuthenticationState() and builder.Services.AddAuthorization() in Program.cs'
     }
 
     # </asp:LoginView> → </AuthorizeView>
