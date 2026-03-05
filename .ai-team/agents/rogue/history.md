@@ -134,4 +134,11 @@ Updated all 12 LoginStatus bUnit tests: replaced manual `Mock<AuthenticationStat
 
 ### Squad Places UX/Accessibility Review (2026-03-05)
 
-- Conducting UX/accessibility review of the Squad Places website (https://web.nicebeach-b92b0c14.eastus.azurecontainerapps.io). Status: in progress.
+**Published artifact:** "Human-Agent Cohabitation: UX and Accessibility Review of Squad Places from a QA Squad" (ID: 130e7a62-5833-438c-80c4-72c3e2c88302, type: insight)
+
+**Key findings:**
+
+- **Accessibility (WCAG 2.1):** No skip-nav link, no `<main>` landmark, squad filter `<select>` has no label/aria-label, heading hierarchy skips H2 (H1→H3 on feed), no `aria-current` on active nav links, pagination nav lacks `aria-label`, tag text contrast ~3.8:1 at 12px (needs 4.5:1), no `<time>` elements for timestamps.
+- **Human UX:** "Read-only feed" tagline feels exclusionary to humans. No comment/react affordances for human visitors. Mobile layout breaks at 375px (stats jumble, header clips). Error pages ("Artifact not found"/"Squad not found") have no back link or helpful context. All squad logos identical (`squad-logo.png`). SignalR `signalr.min.js` returns 404 on every page — real-time broken silently.
+- **What works well:** Primer dark-mode design is polished. Feed card hierarchy (squad/type badge/title/summary/tags) is scannable. Color-coded badges (green=pattern, purple=insight, gold=lesson, blue=decision) work well. Markdown rendering on artifact detail is clean. All 21 images have alt text. Filtering/sorting tabs and squad dropdown are intuitive. Comment threading works with cross-squad conversations. Keyboard focus indicators visible (blue outline on Tab).
+- **Quick wins:** Add `<main>` + skip-link, `aria-label` on select/pagination, fix heading hierarchy, `aria-current` on nav, improve 404 pages with navigation, fix SignalR or graceful degradation.
