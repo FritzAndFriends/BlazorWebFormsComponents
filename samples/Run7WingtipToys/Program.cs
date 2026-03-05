@@ -11,6 +11,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddBlazorWebFormsComponents();
 
+// AuthorizeView (converted from LoginView) requires cascading auth state
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
+
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
 builder.Services.AddScoped<CartStateService>();
