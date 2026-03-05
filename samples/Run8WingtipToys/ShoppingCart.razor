@@ -1,0 +1,40 @@
+@page "/ShoppingCart"
+
+<PageTitle>Shopping Cart</PageTitle>
+
+<h1>Shopping Cart</h1>
+
+@if (_cart.Items.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _cart.Items)
+            {
+                <tr>
+                    <td>@item.Product?.ProductName</td>
+                    <td>@($"{item.Product?.UnitPrice:c}")</td>
+                    <td>@item.Quantity</td>
+                    <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p><b>Total: @($"{_cart.GetTotal():c}")</b></p>
+}
+else
+{
+    <p>Your shopping cart is empty.</p>
+}
+
+@code {
+    [Inject] private CartStateService _cart { get; set; } = default!;
+}
+
