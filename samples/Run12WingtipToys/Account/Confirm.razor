@@ -1,0 +1,16 @@
+@page "/Confirm"
+<h2>@(Title).</h2>
+
+    <div>
+        <PlaceHolder ID="successPanel">
+            <p>
+                Thank you for confirming your account. Click <HyperLink ID="login" NavigateUrl="/Account/Login">here</HyperLink>  to login             
+            </p>
+        </PlaceHolder>
+        <PlaceHolder ID="errorPanel" Visible="false">
+            <p class="text-danger">
+                An error has occurred.
+            </p>
+        </PlaceHolder>
+    </div>
+

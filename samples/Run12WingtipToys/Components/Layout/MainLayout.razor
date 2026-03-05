@@ -1,0 +1,76 @@
+@inherits LayoutComponentBase
+
+<HeadContent>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wingtip Toys</title>
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</HeadContent>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">Wingtip Toys</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a id="adminLink" visible="false" 
+                          href="/Admin/AdminPage">Admin</a></li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/About">About</a></li>
+                        <li><a href="/Contact">Contact</a></li>
+                        <li><a href="/ProductList">Products</a></li>
+                        <li><a href="/ShoppingCart" ID="cartCount">&nbsp;</a></li>
+                    </ul>
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="/Account/Register">Register</a></li>
+                                <li><a href="/Account/Login">Log in</a></li>
+                            </ul>
+                        </NotAuthorized>
+                        <Authorized>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="/Account/Manage" title="Manage your account">Hello, @context.User.Identity?.Name !</a></li>
+                                <li>
+                                    <LoginStatus LogoutAction="@LogoutAction.Redirect" LogoutText="Log off" LogoutPageUrl="/" />
+                                </li>
+                            </ul>
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </div>
+        <div id="TitleContent" style="text-align: center">
+            <a href="/">
+                <Image  ID="Image1" ImageUrl="/Images/logo.jpg" BorderStyle="@BorderStyle.None" />
+            </a>  
+            <br />  
+        </div>
+        <div id="CategoryMenu" style="text-align: center">       
+            <ListView ID="categoryList"  
+                ItemType="WingtipToys.Models.Category" >
+@* TODO: Replace SelectMethod="GetCategories" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
+                <ItemTemplate>
+                    <b style="font-size: large; font-style: normal">
+                        <a href="/ProductList?id=@context.CategoryID">
+                        @context.CategoryName
+                    </a>
+                    </b>
+                </ItemTemplate>
+                <ItemSeparatorTemplate>  |  </ItemSeparatorTemplate>
+            </ListView>
+        </div>
+        <div class="container body-content">
+            @Body
+            <hr />
+            <footer>
+                <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
+            </footer>
+        </div>
+    

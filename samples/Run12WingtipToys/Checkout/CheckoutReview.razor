@@ -1,0 +1,40 @@
+@page "/CheckoutReview"
+<h1>Order Review</h1>
+    <p></p>
+    <h3 style="padding-left: 33px">Products:</h3>
+    <GridView ID="OrderItemList" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500" BorderColor="@("#efeeef")" BorderWidth="33"
+        ItemType="WingtipToys.Models.CartItem">              
+        <Columns>
+            <BoundField DataField="ProductId" HeaderText=" Product ID" />        
+            <BoundField DataField="Product.ProductName" HeaderText=" Product Name" />        
+            <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+            <BoundField DataField="Quantity" HeaderText="Quantity" />        
+        </Columns>    
+    </GridView>
+    <DetailsView ID="ShipInfo" AutoGenerateRows="false" GridLines="@GridLines.None" CellPadding="10" BorderStyle="@BorderStyle.None" CommandRowStyle-BorderStyle="@BorderStyle.None"
+        ItemType="WingtipToys.Models.OrderShipInfo">
+        <Fields>
+        <TemplateField ItemType="WingtipToys.Models.OrderShipInfo">
+            <ItemTemplate>
+                <h3>Shipping Address:</h3>
+                <br />
+                <Label ID="FirstName" Text='@context.FirstName'></Label>  
+                <Label ID="LastName" Text='@context.LastName'></Label>
+                <br />
+                <Label ID="Address" Text='@context.Address'></Label>
+                <br />
+                <Label ID="City" Text='@context.City'></Label>
+                <Label ID="State" Text='@context.State'></Label>
+                <Label ID="PostalCode" Text='@context.PostalCode'></Label>
+                <p></p>
+                <h3>Order Total:</h3>
+                <br />
+                <Label ID="Total" Text='@context.Total.ToString("C")'></Label>
+            </ItemTemplate>
+        </TemplateField>
+          </Fields>
+    </DetailsView>
+    <p></p>
+    <hr />
+    <Button ID="CheckoutConfirm" Text="Complete Order" OnClick="OnCheckoutConfirm" />
+

@@ -1,0 +1,21 @@
+<div id="socialLoginList">
+    <h4>Use another service to log in.</h4>
+    <hr />
+    <ListView ID="providerDetails" ItemType="System.String">
+@* TODO: Replace SelectMethod="GetProviderNames" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
+        <ItemTemplate>
+            <p>
+                <button type="submit" class="btn btn-default" name="provider" value="@context"
+                    title="Log in using your @context account.">
+                    @context
+                </button>
+            </p>
+        </ItemTemplate>
+        <EmptyDataTemplate>
+            <div>
+                <p>There are no external authentication services configured. See <a href="http://go.microsoft.com/fwlink/?LinkId=252803">this article</a> for details on setting up this ASP.NET application to support logging in via external services.</p>
+            </div>
+        </EmptyDataTemplate>
+    </ListView>
+</div>
+

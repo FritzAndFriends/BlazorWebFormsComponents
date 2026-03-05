@@ -1,0 +1,50 @@
+@page "/ShoppingCart"
+<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+    <GridView ID="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+        ItemType="WingtipToys.Models.CartItem" 
+        CssClass="table table-striped table-bordered" >
+@* TODO: Replace SelectMethod="GetShoppingCartItems" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@   
+        <Columns>
+        <BoundField DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField   HeaderText="Quantity">            
+                <ItemTemplate>
+                    <TextBox ID="PurchaseQuantity" Width="40" Text="@context.Quantity.ToString()"></TextBox> 
+                </ItemTemplate>        
+        </TemplateField>    
+        <TemplateField HeaderText="Item Total">            
+                <ItemTemplate>
+                    @($"{(Convert.ToDouble(context.Quantity) * Convert.ToDouble(context.Product?.UnitPrice ?? 0)):c}")
+                </ItemTemplate>
+        </TemplateField> 
+        <TemplateField HeaderText="Remove Item">            
+                <ItemTemplate>
+                    <CheckBox id="Remove"></CheckBox>
+                </ItemTemplate>        
+        </TemplateField>    
+        </Columns>    
+    </GridView>
+    <div>
+        <p></p>
+        <strong>
+            <Label ID="LabelTotalText" Text="Order Total: "></Label>
+            <Label ID="lblTotal"></Label>
+        </strong> 
+    </div>
+    <br />
+    <table> 
+    <tr>
+      <td>
+        <Button ID="UpdateBtn" Text="Update" OnClick="OnUpdateCart" />
+      </td>
+      <td>
+        <ImageButton ID="CheckoutImageBtn" 
+                      ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
+                      Width="145" AlternateText="Check out with PayPal" 
+                      OnClick="OnCheckout" 
+                      BackColor="@("#00000000")" BorderWidth="0" />
+      </td>
+    </tr>
+    </table>
+
