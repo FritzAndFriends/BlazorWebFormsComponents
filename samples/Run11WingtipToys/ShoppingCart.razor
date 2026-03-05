@@ -1,0 +1,56 @@
+@page "/ShoppingCart"
+
+<PageTitle>Shopping Cart</PageTitle>
+
+<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+
+<GridView ID="CartList" AutoGenerateColumns="@false" ShowFooter="@true" GridLines="@GridLines.Vertical" CellPadding="4"
+    ItemType="CartItem" Items="@_cartItems"
+    CssClass="table table-striped table-bordered">
+    <Columns>
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
+        <BoundField DataField="Product.ProductName" HeaderText="Name" />
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
+        <TemplateField HeaderText="Quantity">
+            <ItemTemplate>
+                <TextBox ID="PurchaseQuantity" Width="40" Text="@GetQuantity(context.ItemId)"
+                    TextChanged="@(val => OnQuantityChanged(context.ItemId, val))" />
+            </ItemTemplate>
+        </TemplateField>
+        <TemplateField HeaderText="Item Total">
+            <ItemTemplate>
+                @($"{(_quantities.GetValueOrDefault(context.ItemId, context.Quantity) * (context.Product?.UnitPrice ?? 0)):c}")
+            </ItemTemplate>
+        </TemplateField>
+        <TemplateField HeaderText="Remove Item">
+            <ItemTemplate>
+                <CheckBox ID="Remove" Checked="@IsMarkedForRemoval(context.ItemId)"
+                    CheckedChanged="@(val => OnRemovalChanged(context.ItemId, val))" />
+            </ItemTemplate>
+        </TemplateField>
+    </Columns>
+</GridView>
+
+<div>
+    <p></p>
+    <strong>
+        <Label ID="LabelTotalText" Text="Order Total: " />
+        <Label ID="lblTotal" Text="@_cartTotal" />
+    </strong>
+</div>
+<br />
+<table>
+    <tr>
+        <td>
+            <Button ID="UpdateBtn" Text="Update" OnClick="@OnUpdateCart" />
+        </td>
+        <td>
+            <ImageButton ID="CheckoutImageBtn"
+                ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+                Width="145" AlternateText="Check out with PayPal"
+                OnClick="@OnCheckout"
+                BackColor="@WebColor.Transparent" BorderWidth="0" />
+        </td>
+    </tr>
+</table>
+

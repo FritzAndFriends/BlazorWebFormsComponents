@@ -1,0 +1,32 @@
+@page "/ProductDetails"
+
+<PageTitle>Product Details</PageTitle>
+
+@if (_product != null)
+{
+    <FormView Items="@_products" ItemType="Product" RenderOuterTable="false">
+        <ItemTemplate>
+            <div>
+                <h1>@context.ProductName</h1>
+            </div>
+            <br />
+            <table>
+                <tr>
+                    <td>
+                        <img src="/Catalog/Images/@context.ImagePath" style="border:solid; height:300px" alt="@context.ProductName" />
+                    </td>
+                    <td>&nbsp;</td>
+                    <td style="vertical-align: top; text-align:left;">
+                        <b>Description:</b><br />@context.Description
+                        <br />
+                        <span><b>Price:</b>&nbsp;@($"{context.UnitPrice:c}")</span>
+                        <br />
+                        <span><b>Product Number:</b>&nbsp;@context.ProductID</span>
+                        <br />
+                    </td>
+                </tr>
+            </table>
+        </ItemTemplate>
+    </FormView>
+}
+
