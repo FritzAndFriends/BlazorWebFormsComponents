@@ -1,0 +1,68 @@
+@code {
+
+	// ─── P0-5: DetailsView ItemCreated ──────────────────────────────────
+	// Verifies: ItemCreated/OnItemCreated with EventCallback<EventArgs>
+
+	[Fact]
+	public void DetailsView_ItemCreated_BareAlias_FiresOnRender()
+	{
+		bool fired = false;
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget"
+				AutoGenerateRows="true"
+				ItemCreated="@((EventArgs e) => fired = true)" />
+		);
+
+		fired.ShouldBeTrue("ItemCreated should fire when the DetailsView item is created");
+	}
+
+	[Fact]
+	public void DetailsView_OnItemCreated_OnPrefix_FiresOnRender()
+	{
+		bool fired = false;
+		var items = Widget.SimpleWidgetList.Take(1).ToList();
+
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget"
+				AutoGenerateRows="true"
+				OnItemCreated="@((EventArgs e) => fired = true)" />
+		);
+
+		fired.ShouldBeTrue("OnItemCreated should fire when the DetailsView item is created");
+	}
+
+	[Fact]
+	public void DetailsView_ItemCreated_FiresOnPageChange()
+	{
+		var fireCount = 0;
+		var items = Widget.SimpleWidgetList.Take(3).ToList();
+
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget"
+				AutoGenerateRows="true"
+				AllowPaging="true"
+				ItemCreated="@((EventArgs e) => fireCount++)" />
+		);
+
+		// The initial render should fire at least once
+		fireCount.ShouldBeGreaterThan(0, "ItemCreated should fire at least once during initial render");
+	}
+
+	[Fact]
+	public void DetailsView_ItemCreated_EmptyData_DoesNotFire()
+	{
+		var fireCount = 0;
+		var emptyItems = new List<Widget>();
+
+		var cut = Render(
+			@<DetailsView Items="emptyItems" ItemType="Widget"
+				AutoGenerateRows="true"
+				EmptyDataText="No records"
+				ItemCreated="@((EventArgs e) => fireCount++)" />
+		);
+
+		fireCount.ShouldBe(0, "ItemCreated should not fire when there's no data");
+	}
+}

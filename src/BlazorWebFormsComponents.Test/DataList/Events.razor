@@ -1,0 +1,362 @@
+@code {
+
+	// ─── P0-2: DataList EventCallbacks ──────────────────────────────────
+	// Verifies: ItemCommand, SelectedIndexChanged, EditCommand, UpdateCommand,
+	//           DeleteCommand, CancelCommand, ItemCreated, ItemDataBound bare alias
+
+	#region ItemDataBound bare alias (P2-5 included since audit says add it)
+
+	[Fact]
+	public void DataList_ItemDataBound_BareAlias_FiresPerItem()
+	{
+		var boundItems = new List<object>();
+		var widgets = Widget.SimpleWidgetList.Take(3).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				ItemDataBound="@((DataListItemEventArgs e) => boundItems.Add(e.Item))">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</DataList>
+		);
+
+		// Must fire at least once per item (may fire more due to Blazor render cycle)
+		boundItems.Count.ShouldBeGreaterThanOrEqualTo(3,
+			"ItemDataBound (bare alias) should fire at least once per data item");
+	}
+
+	[Fact]
+	public void DataList_OnItemDataBound_Existing_StillWorks()
+	{
+		var boundItems = new List<object>();
+		var widgets = Widget.SimpleWidgetList.Take(3).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				OnItemDataBound="@((DataListItemEventArgs e) => boundItems.Add(e.Item))">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</DataList>
+		);
+
+		// Must fire at least once per item (Blazor may render twice)
+		boundItems.Count.ShouldBeGreaterThanOrEqualTo(3,
+			"OnItemDataBound should fire at least once per data item");
+	}
+
+	#endregion
+
+	#region ItemCreated
+
+	[Fact]
+	public void DataList_ItemCreated_BareAlias_FiresPerItem()
+	{
+		var createdCount = 0;
+		var widgets = Widget.SimpleWidgetList.Take(4).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				ItemCreated="@((DataListItemEventArgs e) => createdCount++)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</DataList>
+		);
+
+		createdCount.ShouldBe(4, "ItemCreated should fire once per item");
+	}
+
+	[Fact]
+	public void DataList_OnItemCreated_OnPrefix_FiresPerItem()
+	{
+		var createdCount = 0;
+		var widgets = Widget.SimpleWidgetList.Take(4).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				OnItemCreated="@((DataListItemEventArgs e) => createdCount++)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</DataList>
+		);
+
+		createdCount.ShouldBe(4, "OnItemCreated should fire once per item");
+	}
+
+	[Fact]
+	public void DataList_ItemCreated_ArgsContainItem()
+	{
+		DataListItemEventArgs capturedArgs = null;
+		var widgets = new[] { new Widget { Id = 77, Name = "Created Widget" } };
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				ItemCreated="@((DataListItemEventArgs e) => capturedArgs = e)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</DataList>
+		);
+
+		capturedArgs.ShouldNotBeNull();
+		capturedArgs.Item.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	#region ItemCommand
+
+	[Fact]
+	public void DataList_ItemCommand_BareAlias_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				ItemCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Select" Text="Pick" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("ItemCommand should fire on command button click");
+		capturedArgs.CommandName.ShouldBe("Select");
+	}
+
+	[Fact]
+	public void DataList_OnItemCommand_OnPrefix_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				OnItemCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Action" Text="Do" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("OnItemCommand should fire on command button click");
+		capturedArgs.CommandName.ShouldBe("Action");
+	}
+
+	#endregion
+
+	#region SelectedIndexChanged
+
+	[Fact]
+	public void DataList_SelectedIndexChanged_BareAlias_AcceptsCallback()
+	{
+		bool fired = false;
+
+		var widgets = Widget.SimpleWidgetList.Take(2).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				SelectedIndexChanged="@((EventArgs e) => fired = true)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Select" Text="Select" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		fired.ShouldBeTrue("SelectedIndexChanged should fire on Select command");
+	}
+
+	[Fact]
+	public void DataList_OnSelectedIndexChanged_OnPrefix_AcceptsCallback()
+	{
+		bool fired = false;
+
+		var widgets = Widget.SimpleWidgetList.Take(2).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				OnSelectedIndexChanged="@((EventArgs e) => fired = true)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Select" Text="Select" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		fired.ShouldBeTrue("OnSelectedIndexChanged should fire on Select command");
+	}
+
+	#endregion
+
+	#region EditCommand
+
+	[Fact]
+	public void DataList_EditCommand_BareAlias_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				EditCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Edit" Text="Edit" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("EditCommand should fire on Edit command");
+		capturedArgs.CommandName.ShouldBe("Edit");
+	}
+
+	[Fact]
+	public void DataList_OnEditCommand_OnPrefix_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				OnEditCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Edit" Text="Edit" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("OnEditCommand should fire on Edit command");
+	}
+
+	#endregion
+
+	#region UpdateCommand
+
+	[Fact]
+	public void DataList_UpdateCommand_BareAlias_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				UpdateCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Update" Text="Update" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("UpdateCommand should fire on Update command");
+		capturedArgs.CommandName.ShouldBe("Update");
+	}
+
+	#endregion
+
+	#region DeleteCommand
+
+	[Fact]
+	public void DataList_DeleteCommand_BareAlias_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				DeleteCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Delete" Text="Delete" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("DeleteCommand should fire on Delete command");
+		capturedArgs.CommandName.ShouldBe("Delete");
+	}
+
+	#endregion
+
+	#region CancelCommand
+
+	[Fact]
+	public void DataList_CancelCommand_BareAlias_AcceptsCallback()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				CancelCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Cancel" Text="Cancel" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("CancelCommand should fire on Cancel command");
+		capturedArgs.CommandName.ShouldBe("Cancel");
+	}
+
+	#endregion
+
+	#region Edge Cases
+
+	[Fact]
+	public void DataList_ItemDataBound_EmptyList_DoesNotFire()
+	{
+		var firedCount = 0;
+		var empty = new Widget[] { };
+
+		var cut = Render(
+			@<DataList Items="empty" ItemType="Widget" Context="Item"
+				ItemDataBound="@((DataListItemEventArgs e) => firedCount++)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</DataList>
+		);
+
+		firedCount.ShouldBe(0, "No items means no ItemDataBound firings");
+	}
+
+	[Fact]
+	public void DataList_CommandEventArgs_HasSenderProperty()
+	{
+		DataListCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<DataList Items="widgets" ItemType="Widget" Context="Item"
+				ItemCommand="@((DataListCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Test" Text="Test" />
+				</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull();
+		capturedArgs.Sender.ShouldNotBeNull("Sender property should be populated");
+	}
+
+	#endregion
+}

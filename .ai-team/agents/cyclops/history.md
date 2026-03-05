@@ -80,3 +80,21 @@ Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shippe
  Team update (2026-03-05): LoginStatus flagged for AuthorizeView redesign  decided by Forge
 
 - **LoginStatus AuthorizeView redesign:** Replaced manual `AuthenticationStateProvider` injection + `OnInitializedAsync` auth check + `UserAuthenticated` bool with `<AuthorizeView>` delegation (same pattern as LoginView). Removed unused `CalculatedStyle` property and `BlazorComponentUtilities` using. Added null guard on `LoginHandle` so missing `LoginPageUrl` doesn't throw. Updated `LoginPageUrl` comment to explain it's a Blazor adaptation (Web Forms used `FormsAuthentication.LoginUrl`). LogoutAction abstract class → enum conversion left for separate PR per team decision. Build clean.
+
+### P0 Event Handler Fixes (2026-03-06)
+
+**P0-1 Repeater events:** Added `ItemCommand`/`OnItemCommand` (`RepeaterCommandEventArgs`), `ItemCreated`/`OnItemCreated` (`RepeaterItemEventArgs`), `ItemDataBound`/`OnItemDataBound` (`RepeaterItemEventArgs`). Created `RepeaterCommandEventArgs.cs` and `RepeaterItemEventArgs.cs`. Repeater previously had ZERO EventCallbacks.
+
+**P0-2 DataList events:** Added 7 missing event pairs: `ItemCommand`/`OnItemCommand` (`DataListCommandEventArgs`), `SelectedIndexChanged`/`OnSelectedIndexChanged` (`EventArgs`), `EditCommand`/`OnEditCommand`, `UpdateCommand`/`OnUpdateCommand`, `DeleteCommand`/`OnDeleteCommand`, `CancelCommand`/`OnCancelCommand` (all `DataListCommandEventArgs`), `ItemCreated`/`OnItemCreated` (`DataListItemEventArgs`). Added bare `ItemDataBound` alias for existing `OnItemDataBound`. Renamed internal method from `ItemDataBound()` to `ItemDataBoundInternal()` to avoid conflict with new parameter property — updated both call sites in `DataList.razor`. Created `DataListCommandEventArgs.cs`.
+
+**P0-3/P0-4 GridView RowDataBound/RowCreated:** Added `RowDataBound`/`OnRowDataBound` and `RowCreated`/`OnRowCreated` (both `GridViewRowEventArgs`). Also added bare `RowCommand` alias for existing `OnRowCommand`. Updated `ButtonField.razor.cs` to coalesce `RowCommand`/`OnRowCommand` instead of directly accessing `OnRowCommand`. Created `GridViewRowEventArgs.cs`.
+
+**P0-5 DetailsView ItemCreated:** Added `ItemCreated`/`OnItemCreated` (`EventCallback<EventArgs>`) to DetailsView events region.
+
+**P0-6 FormView OnItemInserted type fix:** Changed `OnItemInserted` from `EventCallback<FormViewInsertEventArgs>` (wrong — Insert tense) to `EventCallback<FormViewInsertedEventArgs>` (correct — past tense). Created `FormViewInsertedEventArgs.cs` with `AffectedRows`, `Exception`, `ExceptionHandled`, `KeepInInsertMode`, `Values`. Updated `HandleCommandArgs` insert case to construct `FormViewInsertedEventArgs(0)` instead of `FormViewInsertEventArgs("insert")`. Also added bare-name aliases for all 6 FormView CRUD events (`ItemDeleting`, `ItemDeleted`, `ItemInserting`, `ItemInserted`, `ItemUpdating`, `ItemUpdated`) and updated all `HandleCommandArgs` invocation sites to coalesce bare/On-prefix.
+
+**P0-7 SelectMethod re-fire:** Moved `SelectMethod` invocation from `OnAfterRender(firstRender)` to `OnParametersSet()` in `DataBoundComponent<T>`. This fires on every parameter change, not just first render. Added `RefreshSelectMethod()` helper for post-CRUD data refresh.
+
+**Key files created:** `RepeaterCommandEventArgs.cs`, `RepeaterItemEventArgs.cs`, `DataListCommandEventArgs.cs`, `GridViewRowEventArgs.cs`, `FormViewInsertedEventArgs.cs` — all in `src/BlazorWebFormsComponents/` root.
+
+**Pattern reinforced:** When a `[Parameter]` property name collides with an internal method name (as happened with DataList's `ItemDataBound`), rename the method to `*Internal` suffix — never rename the parameter, since that breaks migration markup.

@@ -306,26 +306,26 @@ namespace BlazorWebFormsComponents
 				case "delete":
 					Exception caughtException = null;
 					try {
-						OnItemDeleting.InvokeAsync(new FormViewDeleteEventArgs(Position) { Sender = this }).GetAwaiter().GetResult();
+						(ItemDeleting.HasDelegate ? ItemDeleting : OnItemDeleting).InvokeAsync(new FormViewDeleteEventArgs(Position) { Sender = this }).GetAwaiter().GetResult();
 					} catch (Exception ex) {
 						caughtException = ex;
 					}
 					// do we do the deletion?
-					OnItemDeleted.InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException) { Sender = this }).GetAwaiter().GetResult();
+					(ItemDeleted.HasDelegate ? ItemDeleted : OnItemDeleted).InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					Position = (Position == 0) ? 0 : Position - 1;
 					break;
 				case "insert":
-					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
+					(ItemInserting.HasDelegate ? ItemInserting : OnItemInserting).InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
 					(ModeChanging.HasDelegate ? ModeChanging : OnModeChanging).InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
-					OnItemInserted.InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
+					(ItemInserted.HasDelegate ? ItemInserted : OnItemInserted).InvokeAsync(new FormViewInsertedEventArgs(0) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Insert;
 					(ModeChanged.HasDelegate ? ModeChanged : OnModeChanged).InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
 					break;
 				case "update":
-					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update") { Sender = this }).GetAwaiter().GetResult();
+					(ItemUpdating.HasDelegate ? ItemUpdating : OnItemUpdating).InvokeAsync(new FormViewUpdateEventArgs("update") { Sender = this }).GetAwaiter().GetResult();
 					(ModeChanging.HasDelegate ? ModeChanging : OnModeChanging).InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
-					OnItemUpdated.InvokeAsync(new FormViewUpdatedEventArgs(0, null) { Sender = this }).GetAwaiter().GetResult();
+					(ItemUpdated.HasDelegate ? ItemUpdated : OnItemUpdated).InvokeAsync(new FormViewUpdatedEventArgs(0, null) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					(ModeChanged.HasDelegate ? ModeChanged : OnModeChanged).InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
 					break;
@@ -377,19 +377,37 @@ namespace BlazorWebFormsComponents
 		#region Custom Events
 
 		[Parameter]
+		public EventCallback<FormViewDeleteEventArgs> ItemDeleting { get; set; }
+
+		[Parameter]
 		public EventCallback<FormViewDeleteEventArgs> OnItemDeleting { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewDeletedEventArgs> ItemDeleted { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewDeletedEventArgs> OnItemDeleted { get; set; }
 
 		[Parameter]
+		public EventCallback<FormViewInsertEventArgs> ItemInserting { get; set; }
+
+		[Parameter]
 		public EventCallback<FormViewInsertEventArgs> OnItemInserting { get; set; }
 
 		[Parameter]
-		public EventCallback<FormViewInsertEventArgs> OnItemInserted { get; set; }
+		public EventCallback<FormViewInsertedEventArgs> ItemInserted { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewInsertedEventArgs> OnItemInserted { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewUpdateEventArgs> ItemUpdating { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewUpdateEventArgs> OnItemUpdating { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewUpdatedEventArgs> ItemUpdated { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewUpdatedEventArgs> OnItemUpdated { get; set; }

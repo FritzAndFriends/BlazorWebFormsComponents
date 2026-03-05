@@ -103,13 +103,29 @@ namespace BlazorWebFormsComponents.DataBinding
 
 		protected override void OnAfterRender(bool firstRender)
 		{
-			if (firstRender && SelectMethod != null)
+			base.OnAfterRender(firstRender);
+		}
+
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+
+			if (SelectMethod != null)
 			{
-				// Model Binding
 				Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
 			}
+		}
 
-			base.OnAfterRender(firstRender);
+		/// <summary>
+		/// Re-invokes SelectMethod to refresh data after CRUD operations (sort, page, edit, delete).
+		/// </summary>
+		protected void RefreshSelectMethod()
+		{
+			if (SelectMethod != null)
+			{
+				Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
+				StateHasChanged();
+			}
 		}
 	}
 }
