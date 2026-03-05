@@ -106,3 +106,12 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
 
  Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
+
+### Run 9 Benchmark Report (2025-07-25)
+
+- **Report created:** `docs/Migration/Run9-WingtipToys-Benchmark.md` + copy at `samples/Run9WingtipToys/BENCHMARK-REPORT.md`. Added to mkdocs.yml nav under Migration section.
+- **Report structure evolution:** Run 9 report follows Run 8 pattern but adds: Layer 0 timing row, BWFC control inventory table sorted by instance count with category column, "What Improved vs Run 8" section with code examples, build issues resolution table, and expanded run-over-run comparison (Run 7/8/9 with trend column).
+- **Key data points:** 667 Layer 1 transforms (2x Run 8), 173 BWFC control instances across 23 types, 8 functional pages, 0 build errors, 7 build attempts. Layer 2 took ~45 min (vs ~3 min Run 8) due to deeper implementation.
+- **LoginView preservation pattern:** Run 9 reversed Run 8's AuthorizeView rewrite, preserving native BWFC LoginView/LoginName/LoginStatus components. This is the correct approach — document as the standard going forward.
+- **Recurring Layer 1 bug:** `ItemType`→`TItem` conversion bug persists across Runs 7-9. Only DropDownList uses TItem; all other data controls use ItemType. Must be documented as known issue until fixed in bwfc-migrate.ps1.
+- **Benchmark report convention:** BENCHMARK-DATA.md (raw metrics from Bishop) → BENCHMARK-REPORT.md (narrative report from Beast). Data file is input, report file is output. Both co-located in samples/Run{N}WingtipToys/.
