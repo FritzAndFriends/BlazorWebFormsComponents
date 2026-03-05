@@ -343,8 +343,65 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+			FireRowEvents();
+		}
+
+		private void FireRowEvents()
+		{
+			if (!HasData) return;
+
+			var createdHandler = OnRowCreated.HasDelegate ? OnRowCreated : RowCreated;
+			var boundHandler = OnRowDataBound.HasDelegate ? OnRowDataBound : RowDataBound;
+
+			var index = 0;
+			foreach (var item in PagedItems)
+			{
+				if (createdHandler.HasDelegate)
+				{
+					_ = createdHandler.InvokeAsync(new GridViewRowEventArgs(item, index) { Sender = this });
+				}
+
+				if (boundHandler.HasDelegate)
+				{
+					_ = boundHandler.InvokeAsync(new GridViewRowEventArgs(item, index) { Sender = this });
+				}
+
+				index++;
+			}
+		}
+
+		[Parameter]
+		public EventCallback<GridViewCommandEventArgs> RowCommand { get; set; }
+
 		[Parameter]
 		public EventCallback<GridViewCommandEventArgs> OnRowCommand { get; set; }
+
+		/// <summary>
+		/// Occurs when a data row is bound to data in the GridView control.
+		/// </summary>
+		[Parameter]
+		public EventCallback<GridViewRowEventArgs> RowDataBound { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for RowDataBound.
+		/// </summary>
+		[Parameter]
+		public EventCallback<GridViewRowEventArgs> OnRowDataBound { get; set; }
+
+		/// <summary>
+		/// Occurs when a data row is created in the GridView control.
+		/// </summary>
+		[Parameter]
+		public EventCallback<GridViewRowEventArgs> RowCreated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for RowCreated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<GridViewRowEventArgs> OnRowCreated { get; set; }
 
 		/// <summary>
 		/// Occurs when a row's Edit button is clicked, but before the row enters edit mode.
@@ -443,6 +500,7 @@ namespace BlazorWebFormsComponents
 			SortDirection = args.SortDirection;
 			var sortedHandler = Sorted.HasDelegate ? Sorted : OnSorted;
 			await sortedHandler.InvokeAsync(args);
+			RefreshSelectMethod();
 			StateHasChanged();
 		}
 

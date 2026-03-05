@@ -389,6 +389,18 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public EventCallback<PageChangedEventArgs> OnPageIndexChanged { get; set; }
 
+		/// <summary>
+		/// Occurs when the DetailsView control is first created.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> ItemCreated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnItemCreated { get; set; }
+
 		#endregion
 
 		#region Field Management
@@ -499,6 +511,18 @@ namespace BlazorWebFormsComponents
 		{
 			base.OnParametersSet();
 			UpdateCurrentItem();
+			FireItemCreatedEvent();
+		}
+
+		private void FireItemCreatedEvent()
+		{
+			if (CurrentItem == null) return;
+
+			var handler = OnItemCreated.HasDelegate ? OnItemCreated : ItemCreated;
+			if (handler.HasDelegate)
+			{
+				_ = handler.InvokeAsync(EventArgs.Empty);
+			}
 		}
 
 		private void UpdateCurrentItem()
