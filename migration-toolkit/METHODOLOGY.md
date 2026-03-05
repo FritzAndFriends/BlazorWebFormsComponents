@@ -70,6 +70,8 @@ Layer 1 handles every transform that can be expressed as a regex find-and-replac
 | Content wrapper removals (`<asp:Content>`) | 28 | 100% |
 | URL conversions (`~/` → `/`) | All | 100% |
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
+| CSS extraction from master pages | 1 per master | 100% |
+| Static file copying to wwwroot | all | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
 `_Imports.razor` includes `@inherits BlazorWebFormsComponents.WebFormsPageBase` so that all converted pages get `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` without per-page injection. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
@@ -87,6 +89,7 @@ After transforming each file, the script runs `Test-BwfcControlPreservation` to 
 - Replace DataSource controls (requires architecture decisions)
 - Wire authentication (requires knowing your auth strategy)
 - Convert Master Pages to layouts (partially — removes directives but doesn't create `@Body`)
+- Validate that image paths in templates match the copied file locations in `wwwroot/` — that is Layer 2 work
 
 These are intentionally left for Layer 2 and Layer 3.
 

@@ -34,6 +34,15 @@ dotnet add package Microsoft.AspNetCore.Identity.UI
 
 ## Step 2: Configure Identity in Program.cs
 
+!!! warning "AuthorizeView Without Full Identity"
+    Even WITHOUT full Identity setup, if you convert `LoginView` → `AuthorizeView`, you **MUST** add:
+    ```csharp
+    builder.Services.AddCascadingAuthenticationState();
+    builder.Services.AddAuthorization();
+    ```
+    Without these, ANY page containing `<AuthorizeView>` crashes at runtime with:
+    `InvalidOperationException: Authorization requires a cascading parameter of type Task<AuthenticationState>`
+
 ```csharp
 // Program.cs
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -329,6 +338,20 @@ app.MapPost("/Account/Logout", async (SignInManager<ApplicationUser> signInManag
 
 ### SignalR Circuit vs HTTP Request
 Authentication state is captured when the circuit starts. If the user's session expires mid-circuit, they remain "authenticated" until the page refreshes. Use `RevalidatingServerAuthenticationStateProvider` for periodic revalidation.
+
+### AuthorizeView Without Identity Setup
+
+!!! danger "CRASH-LEVEL: Runtime exception on any page with AuthorizeView"
+    If `<asp:LoginView>` was converted to `<AuthorizeView>` (either by the migration script or manually), the app will crash immediately with `InvalidOperationException` unless auth services are registered.
+
+Even if you are NOT implementing full ASP.NET Core Identity (e.g., you just want the app to compile and render), you must add these two lines to `Program.cs`:
+
+```csharp
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
+```
+
+This is the minimum required to prevent the crash. Full Identity setup (Step 1–4 above) provides actual authentication functionality. These two lines only provide the cascading parameter infrastructure that `<AuthorizeView>` demands.
 
 ### Blazor Identity UI Scaffolding
 For a complete Identity UI (login, register, manage profile), scaffold it:

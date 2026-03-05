@@ -195,6 +195,7 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 - Postback-based auth → HTTP endpoints + cookie auth
 - Use `dotnet aspnet-codegenerator identity` for scaffolding
 - `SignInManager` / `UserManager` APIs change — full subsystem replacement
+- **AuthorizeView requirement:** If `LoginView` → `AuthorizeView` conversion is used, `Program.cs` MUST have `AddCascadingAuthenticationState()` and `AddAuthorization()` — even without full Identity. Without these, any page containing `<AuthorizeView>` crashes at runtime.
 
 ### Event Handler Strategy
 
@@ -243,11 +244,14 @@ The script should preserve the attribute and annotate the signature change neede
 
 ### Static Asset Relocation
 
-- All static files → `wwwroot/`
+- All static files → `wwwroot/` (preserving original directory structure)
+- `UseStaticFiles()` MUST be in the middleware pipeline BEFORE `MapStaticAssets()` — without it, files in `wwwroot/` subdirectories (e.g., `wwwroot/Content/`, `wwwroot/Catalog/Images/`) may return 404
 - CSS bundles (`BundleConfig.cs`) → explicit `<link>` tags in `App.razor`
+- CSS/JS `<link>` and `<script>` tags from master pages (`Site.Master`) must be extracted into `App.razor` `<head>` — the migration script does this automatically via `New-AppRazorScaffold -SourceRoot`
 - JS bundles → explicit `<script>` tags in `App.razor`
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
+- **Image path preservation rule:** Paths in templates (e.g., `<Image ImageUrl="...">`) must match WHERE files actually land in `wwwroot/`. Do not invent paths — check the source project's actual directory structure
 
 ### Page Lifecycle Mapping
 
@@ -267,6 +271,7 @@ The script should preserve the attribute and annotate the signature change neede
 - Data-binding expression conversion (5 variants)
 - LoginView → AuthorizeView
 - Master page → MainLayout.razor
+- CSS/JS link extraction from master pages → `App.razor` (via `New-AppRazorScaffold -SourceRoot`)
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup

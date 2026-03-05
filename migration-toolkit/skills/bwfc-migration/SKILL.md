@@ -71,13 +71,23 @@ The `dotnet new blazor --interactivity Server` template generates `App.razor` wi
 
 This enables global server interactivity for all pages. See [ASP.NET Core Blazor render modes](https://learn.microsoft.com/aspnet/core/blazor/components/render-modes) for per-page alternatives.
 
-### Step 3: Register BWFC Services and Add Page Component to Layout
+### Step 3: Register BWFC Services and Configure Program.cs
 
 In `Program.cs`:
 
 ```csharp
 builder.Services.AddBlazorWebFormsComponents();
+builder.Services.AddHttpContextAccessor();
 ```
+
+Also ensure the middleware pipeline includes static file serving:
+
+```csharp
+app.UseStaticFiles();   // MUST come before MapStaticAssets
+app.MapStaticAssets();
+```
+
+> **Important:** `MapStaticAssets()` alone does NOT reliably serve files from `wwwroot/` subdirectories (e.g., `wwwroot/Content/`, `wwwroot/Catalog/Images/`). You MUST also call `UseStaticFiles()` and it MUST come first.
 
 In your layout file (`MainLayout.razor`), add the `<Page />` render component once. This subscribes to `IPageService` and emits `<PageTitle>` and `<meta>` tags:
 
@@ -523,6 +533,56 @@ For FormView, DetailsView:
 
 ---
 
+## Static File & Asset Migration
+
+When migrating a Web Forms application, static files (CSS, images, fonts, scripts) must be relocated to the Blazor `wwwroot/` directory and all references updated.
+
+### UseStaticFiles() + MapStaticAssets() in Program.cs
+
+Both middleware calls are required for static files to load correctly:
+
+```csharp
+app.UseStaticFiles();   // Serves files from wwwroot/ subdirectories
+app.MapStaticAssets();   // Optimized static asset delivery
+```
+
+`UseStaticFiles()` **must** come before `MapStaticAssets()`. Without `UseStaticFiles()`, files in subdirectories like `wwwroot/Content/` or `wwwroot/Catalog/Images/` may return 404.
+
+### CSS Link Extraction from Master Pages → App.razor
+
+Web Forms master pages (`Site.Master`) contain `<link rel="stylesheet">` tags in the `<head>` section. These must be extracted and placed in `App.razor`'s `<head>`:
+
+```razor
+@* App.razor — extracted from Site.Master *@
+<head>
+    <link rel="stylesheet" href="/Content/Site.css" />
+    <link rel="stylesheet" href="/Content/bootstrap.css" />
+    @* ... other stylesheets from the master page *@
+</head>
+```
+
+**Conversion rules:**
+- `~/Content/Site.css` → `/Content/Site.css` (strip `~` prefix)
+- Remove `runat="server"` from link tags
+- `<script>` tags from the master page `<head>` should also be noted for `App.razor`
+
+The migration script handles this automatically via `New-AppRazorScaffold -SourceRoot`, which extracts stylesheet links from the master page and writes them into the generated `App.razor`.
+
+### Image/Asset Path Preservation
+
+!!! warning "Paths must match actual file locations"
+    Template markup that references images (e.g., `<img src="...">`, `<Image ImageUrl="...">`) must use paths that match WHERE the files actually land in `wwwroot/`. A common mistake is generating invented paths like `/Images/Products/foo.png` when the actual files are at `/Catalog/Images/foo.png`.
+
+**Rule:** Check the source project's actual image directory structure and preserve it. The migration script copies all static files to `wwwroot/` preserving the original directory structure.
+
+| Web Forms Path | wwwroot Path | Blazor Reference |
+|---|---|---|
+| `~/Catalog/Images/foo.png` | `wwwroot/Catalog/Images/foo.png` | `/Catalog/Images/foo.png` |
+| `~/Content/Site.css` | `wwwroot/Content/Site.css` | `/Content/Site.css` |
+| `~/Scripts/app.js` | `wwwroot/Scripts/app.js` | `/Scripts/app.js` |
+
+---
+
 ## Common Gotchas
 
 ### No ViewState
@@ -556,6 +616,21 @@ Remove `runat="server"` from plain HTML elements. Use `@ref` if programmatic acc
 
 ### `TextMode="MultiLine"` Casing
 BWFC uses `Multiline` (lowercase 'l'), not `MultiLine`. Silent failure if wrong.
+
+### AuthorizeView Requires Auth Services
+
+!!! danger "CRASH-LEVEL: App will throw at runtime"
+    When `<asp:LoginView>` is converted to `<AuthorizeView>`, the app **will crash** with:
+    `InvalidOperationException: Authorization requires a cascading parameter of type Task<AuthenticationState>`
+
+Even without full ASP.NET Core Identity, if ANY page uses `<AuthorizeView>`, `Program.cs` MUST include:
+
+```csharp
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
+```
+
+The migration script flags this as a manual review item when `LoginView` is detected in the source. See `/bwfc-identity-migration` for full Identity setup.
 
 ### ScriptManager/ScriptManagerProxy Are No-Ops
 Include during migration to prevent errors, remove when stable.

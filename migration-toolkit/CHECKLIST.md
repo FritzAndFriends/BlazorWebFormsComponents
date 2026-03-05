@@ -28,6 +28,8 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] `<asp:Content>` wrappers removed (page body unwrapped)
 - [ ] `ItemType` → `TItem` converted
 - [ ] Code-behind file copied (.aspx.cs → .razor.cs) with TODO annotations
+- [ ] Static files copied to `wwwroot/` preserving directory structure
+- [ ] CSS stylesheet links extracted from master page to `App.razor`
 - [ ] Control preservation verified (no deficit warnings in migration report)
 
 ### Layer 2 — Copilot-Assisted (Structural Transforms)
@@ -61,6 +63,10 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Page builds without errors (`dotnet build`)
 - [ ] Page renders in browser without exceptions
 - [ ] Visual layout matches original Web Forms page
+- [ ] Static files accessible in browser (images, CSS load correctly)
+- [ ] `UseStaticFiles()` present in `Program.cs` before `MapStaticAssets()`
+- [ ] Image paths in templates match `wwwroot/` directory structure
+- [ ] If LoginView→AuthorizeView: auth services registered in `Program.cs`
 - [ ] All interactive features work (buttons, forms, navigation, sorting, paging)
 - [ ] No JavaScript console errors in browser dev tools
 - [ ] Data displays correctly (correct records, correct formatting)
