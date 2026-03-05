@@ -66,3 +66,22 @@ Team updates: Event handler audit, On-prefix aliases (50), ShoppingCart regressi
 
 
  Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
+
+### BWFC-First Migration Skill Rewrite (2026-03-05)
+
+**Task:** Rewrote all 4 migration skill files + CHECKLIST.md + METHODOLOGY.md to make BWFC library usage the #1 priority per Jeff's directive.
+
+**Root cause:** Runs 6-8 Layer 2 agents consistently replaced BWFC components with plain HTML. Skills didn't make BWFC prominent enough.
+
+**Changes across 6 files:**
+- Every skill opens with 🚫 MANDATORY banner about BWFC-first
+- Section 1 of every skill is BWFC inventory/utility features
+- Complete 110+ component inventory (was 58) in bwfc-migration and migration-standards
+- LoginView/LoginStatus explicitly called out as commonly missed (in all 4 skills)
+- Anti-pattern tables with ❌/✅ comparison pairs throughout
+- Standard Blazor patterns for static files/CSS/JS in infrastructure tables
+- BWFC utility features (AddBlazorWebFormsComponents, WebFormsPageBase, Page) marked MANDATORY
+- CHECKLIST.md: 9 new 🚫 BWFC VERIFICATION items across all 3 layers
+- METHODOLOGY.md: Layer 2 gets explicit "MUST NOT" list of 5 forbidden patterns
+- bwfc-identity-migration: LoginView/LoginStatus front-loaded as Section 1, AuthorizeView demoted to "optional upgrade"
+- bwfc-data-migration: BWFC data controls front-loaded with "BWFC Front-End + Service Back-End" pattern

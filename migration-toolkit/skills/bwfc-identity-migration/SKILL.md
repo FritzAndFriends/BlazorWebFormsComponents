@@ -5,15 +5,161 @@ description: "Migrate ASP.NET Web Forms Identity and Membership authentication t
 
 # Web Forms Identity → Blazor Identity Migration
 
+> ## 🚫 MANDATORY: USE BWFC LOGIN CONTROLS FIRST
+>
+> BWFC provides **LoginView, LoginStatus, LoginName, Login, CreateUserWizard, ChangePassword, PasswordRecovery, and RoleGroup** components.
+> Use these BWFC components for initial migration. Do NOT skip them and jump straight to `<AuthorizeView>` or raw HTML.
+> `<AuthorizeView>` is an **optional long-term upgrade**, not the first step.
+
 This skill covers migrating ASP.NET Web Forms authentication (Identity, Membership, FormsAuthentication) to Blazor Server using ASP.NET Core Identity.
 
 **Related skills:**
-- `/bwfc-migration` — Core markup migration (controls, expressions, layouts)
+- `/bwfc-migration` — Core markup migration (controls, expressions, layouts) — **read this first**
 - `/bwfc-data-migration` — EF6 → EF Core, data access, architecture decisions
 
 ---
 
-## Overview
+## 1. BWFC Login Controls — USE THESE FIRST
+
+BWFC provides drop-in replacements for ALL Web Forms login controls. **Use these during migration for maximum markup fidelity.** Converting to native Blazor `<AuthorizeView>` is an optional step AFTER the migration is working.
+
+### Complete Login Control Mapping
+
+| Web Forms | BWFC Component | Purpose |
+|-----------|----------------|---------|
+| `<asp:Login runat="server" />` | `<Login />` | Login form with username/password |
+| `<asp:LoginName runat="server" />` | `<LoginName />` | Displays authenticated username |
+| `<asp:LoginStatus runat="server" />` | **`<LoginStatus />`** | Login/Logout toggle link — **commonly missed!** |
+| `<asp:LoginView runat="server">` | **`<LoginView>`** | Shows different content for anon vs auth — **commonly missed!** |
+| `<asp:CreateUserWizard runat="server" />` | `<CreateUserWizard />` | Registration form |
+| `<asp:ChangePassword runat="server" />` | `<ChangePassword />` | Password change form |
+| `<asp:PasswordRecovery runat="server" />` | `<PasswordRecovery />` | Password reset flow |
+| `<asp:RoleGroup Roles="Admin">` | `<RoleGroup Roles="Admin">` | Role-specific content within LoginView |
+
+### ⚠️ Commonly Missed: LoginView and LoginStatus
+
+These two controls are the **most frequently broken** during migration. Agents consistently replace them with raw `@if` blocks or `<a>` tags, destroying BWFC functionality:
+
+```razor
+@* ❌ WRONG — LoginView replaced with raw @if block *@
+@if (isAuthenticated)
+{
+    <span>Welcome, @userName!</span>
+    <a href="/Account/Logout">Log out</a>
+}
+else
+{
+    <a href="/Account/Login">Log in</a>
+}
+
+@* ✅ CORRECT — BWFC LoginView preserved with all sub-controls *@
+<LoginView>
+    <AnonymousTemplate>
+        <a href="/Account/Login">Log in</a>
+    </AnonymousTemplate>
+    <LoggedInTemplate>
+        Welcome, <LoginName />!
+        <LoginStatus LogoutAction="Redirect" LogoutPageUrl="/" />
+    </LoggedInTemplate>
+</LoginView>
+```
+
+### Full LoginView Migration Example
+
+```html
+<!-- Web Forms — Site.Master header -->
+<asp:LoginView runat="server">
+    <AnonymousTemplate>
+        <a href="~/Account/Login">Log in</a>
+    </AnonymousTemplate>
+    <LoggedInTemplate>
+        Welcome, <asp:LoginName runat="server" />!
+        <asp:LoginStatus runat="server" LogoutAction="Redirect" LogoutPageUrl="~/" />
+    </LoggedInTemplate>
+    <RoleGroups>
+        <asp:RoleGroup Roles="Administrator">
+            <ContentTemplate><a href="~/Admin">Admin Panel</a></ContentTemplate>
+        </asp:RoleGroup>
+    </RoleGroups>
+</asp:LoginView>
+```
+
+```razor
+@* Blazor — BWFC controls preserved (initial migration) *@
+<LoginView>
+    <AnonymousTemplate>
+        <a href="/Account/Login">Log in</a>
+    </AnonymousTemplate>
+    <LoggedInTemplate>
+        Welcome, <LoginName />!
+        <LoginStatus LogoutAction="Redirect" LogoutPageUrl="/" />
+    </LoggedInTemplate>
+    <RoleGroups>
+        <RoleGroup Roles="Administrator">
+            <ContentTemplate><a href="/Admin">Admin Panel</a></ContentTemplate>
+        </RoleGroup>
+    </RoleGroups>
+</LoginView>
+```
+
+### Login Page Migration Example
+
+```html
+<!-- Web Forms — Login.aspx -->
+<%@ Page Title="Log in" MasterPageFile="~/Site.Master" ... %>
+<asp:Content ContentPlaceHolderID="MainContent" runat="server">
+    <h2>Log in</h2>
+    <asp:Login ID="LoginCtrl" runat="server"
+        ViewStateMode="Disabled"
+        RenderOuterTable="false">
+        <LayoutTemplate>
+            <asp:TextBox ID="UserName" runat="server" CssClass="form-control" />
+            <asp:RequiredFieldValidator ControlToValidate="UserName"
+                ErrorMessage="Required" runat="server" />
+            <asp:TextBox ID="Password" TextMode="Password" runat="server" />
+            <asp:Button Text="Log in" CommandName="Login" runat="server" />
+        </LayoutTemplate>
+    </asp:Login>
+</asp:Content>
+```
+
+```razor
+@* Blazor — ALL controls preserved as BWFC *@
+@page "/Account/Login"
+
+<h2>Log in</h2>
+<Login RenderOuterTable="false">
+    <LayoutTemplate>
+        <TextBox @bind-Text="model.UserName" CssClass="form-control" />
+        <RequiredFieldValidator ControlToValidate="UserName" ErrorMessage="Required" />
+        <TextBox TextMode="Password" @bind-Text="model.Password" />
+        <Button Text="Log in" CommandName="Login" />
+    </LayoutTemplate>
+</Login>
+```
+
+### Optional Long-Term Upgrade: BWFC → Native AuthorizeView
+
+After the BWFC migration is working and verified, you MAY optionally convert `LoginView` → `AuthorizeView` for native Blazor auth:
+
+```razor
+@* Optional upgrade — native AuthorizeView (recommended long-term) *@
+<AuthorizeView>
+    <NotAuthorized>
+        <a href="/Account/Login">Log in</a>
+    </NotAuthorized>
+    <Authorized>
+        Welcome, @context.User.Identity?.Name!
+        <a href="/Account/Logout">Log out</a>
+    </Authorized>
+</AuthorizeView>
+```
+
+> **This is an optimization step, not a migration step.** Do BWFC first, verify it works, then upgrade if desired.
+
+---
+
+## 2. Auth System Overview
 
 Web Forms authentication typically uses one of three systems. The migration path depends on which one:
 
@@ -23,16 +169,14 @@ Web Forms authentication typically uses one of three systems. The migration path
 | ASP.NET Membership | 2005-2013 | ASP.NET Core Identity (schema migration required) |
 | FormsAuthentication | 2002-2005 | ASP.NET Core Identity or cookie auth |
 
----
-
-## Step 1: Add Identity Packages
+## 3. Add Identity Packages
 
 ```bash
 dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 dotnet add package Microsoft.AspNetCore.Identity.UI
 ```
 
-## Step 2: Configure Identity in Program.cs
+## 4. Configure Identity in Program.cs
 
 !!! warning "AuthorizeView Without Full Identity"
     Even WITHOUT full Identity setup, if you convert `LoginView` → `AuthorizeView`, you **MUST** add:
@@ -61,7 +205,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-## Step 3: Create ApplicationUser and DbContext
+## 5. Create ApplicationUser and DbContext
 
 ```csharp
 // Models/ApplicationUser.cs
@@ -83,7 +227,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 }
 ```
 
-## Step 4: Migrate the Database Schema
+## 6. Migrate the Database Schema
 
 If migrating from ASP.NET Identity (OWIN), the schema is similar but not identical:
 
@@ -106,151 +250,12 @@ dotnet ef database update
 > **Important:** ASP.NET Identity v2 password hashes (from Web Forms) are compatible with ASP.NET Core Identity. Users will NOT need to reset passwords.
 
 If migrating from **Membership** (older):
-- Use the `Microsoft.AspNetCore.Identity.MicrosoftAccountMigration` or a custom SQL migration script
+- Use a custom SQL migration script
 - Membership password hashes are NOT compatible — users will need password resets
 
 ---
 
-## Step 5: Migrate Login Pages
-
-### BWFC Login Controls
-
-BWFC provides login controls that match Web Forms markup. Use these during migration, then optionally replace with Blazor Identity UI later.
-
-| Web Forms | BWFC | Notes |
-|-----------|------|-------|
-| `<asp:Login runat="server" />` | `<Login />` | Login form with username/password |
-| `<asp:LoginName runat="server" />` | `<LoginName />` | Displays authenticated username |
-| `<asp:LoginStatus runat="server" />` | `<LoginStatus />` | Login/Logout toggle link |
-| `<asp:LoginView runat="server">` | `<LoginView>` | Shows different content for anon vs auth users |
-| `<asp:CreateUserWizard runat="server" />` | `<CreateUserWizard />` | Registration form |
-| `<asp:ChangePassword runat="server" />` | `<ChangePassword />` | Password change form |
-| `<asp:PasswordRecovery runat="server" />` | `<PasswordRecovery />` | Password reset flow |
-
-### Login Page Migration Example
-
-```html
-<!-- Web Forms — Login.aspx -->
-<%@ Page Title="Log in" MasterPageFile="~/Site.Master" ... %>
-<asp:Content ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Log in</h2>
-    <asp:Login ID="LoginCtrl" runat="server"
-        ViewStateMode="Disabled"
-        RenderOuterTable="false">
-        <LayoutTemplate>
-            <asp:TextBox ID="UserName" runat="server" CssClass="form-control" />
-            <asp:RequiredFieldValidator ControlToValidate="UserName"
-                ErrorMessage="Required" runat="server" />
-            <asp:TextBox ID="Password" TextMode="Password" runat="server" />
-            <asp:Button Text="Log in" CommandName="Login" runat="server" />
-        </LayoutTemplate>
-    </asp:Login>
-</asp:Content>
-```
-
-```razor
-@* Blazor — Login.razor *@
-@page "/Account/Login"
-
-<h2>Log in</h2>
-<Login RenderOuterTable="false">
-    <LayoutTemplate>
-        <TextBox @bind-Text="model.UserName" CssClass="form-control" />
-        <RequiredFieldValidator ControlToValidate="UserName" ErrorMessage="Required" />
-        <TextBox TextMode="Password" @bind-Text="model.Password" />
-        <Button Text="Log in" CommandName="Login" />
-    </LayoutTemplate>
-</Login>
-```
-
----
-
-## Step 6: Migrate Authorization Patterns
-
-### Web.config Authorization → Blazor Authorization
-
-```xml
-<!-- Web Forms — Web.config -->
-<location path="Admin">
-    <system.web>
-        <authorization>
-            <allow roles="Administrator" />
-            <deny users="*" />
-        </authorization>
-    </system.web>
-</location>
-```
-
-```razor
-@* Blazor — Admin pages use [Authorize] attribute *@
-@page "/Admin"
-@attribute [Authorize(Roles = "Administrator")]
-
-<h1>Admin Panel</h1>
-```
-
-### LoginView Conditional Content
-
-```html
-<!-- Web Forms -->
-<asp:LoginView runat="server">
-    <AnonymousTemplate>
-        <a href="~/Account/Login">Log in</a>
-    </AnonymousTemplate>
-    <LoggedInTemplate>
-        Welcome, <asp:LoginName runat="server" />!
-        <asp:LoginStatus runat="server" LogoutAction="Redirect" LogoutPageUrl="~/" />
-    </LoggedInTemplate>
-</asp:LoginView>
-```
-
-```razor
-@* Blazor option 1: BWFC controls (markup migration) *@
-<LoginView>
-    <AnonymousTemplate>
-        <a href="/Account/Login">Log in</a>
-    </AnonymousTemplate>
-    <LoggedInTemplate>
-        Welcome, <LoginName />!
-        <LoginStatus LogoutAction="Redirect" LogoutPageUrl="/" />
-    </LoggedInTemplate>
-</LoginView>
-
-@* Blazor option 2: Native AuthorizeView (recommended long-term) *@
-<AuthorizeView>
-    <NotAuthorized>
-        <a href="/Account/Login">Log in</a>
-    </NotAuthorized>
-    <Authorized>
-        Welcome, @context.User.Identity?.Name!
-        <a href="/Account/Logout">Log out</a>
-    </Authorized>
-</AuthorizeView>
-```
-
-### Role-Based Content
-
-```html
-<!-- Web Forms -->
-<asp:LoginView runat="server">
-    <RoleGroups>
-        <asp:RoleGroup Roles="Administrator">
-            <ContentTemplate><a href="~/Admin">Admin Panel</a></ContentTemplate>
-        </asp:RoleGroup>
-    </RoleGroups>
-</asp:LoginView>
-```
-
-```razor
-@* Blazor *@
-<AuthorizeView Roles="Administrator">
-    <a href="/Admin">Admin Panel</a>
-</AuthorizeView>
-```
-
----
-
-## Step 7: Migrate Authentication State Access
+## 7. Migrate Authentication State Access
 
 ### Code-Behind Auth Patterns
 

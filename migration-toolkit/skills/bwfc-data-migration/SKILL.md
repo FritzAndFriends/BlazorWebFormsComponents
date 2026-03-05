@@ -5,18 +5,105 @@ description: "Migrate Web Forms data access and application architecture to Blaz
 
 # Web Forms Data Access & Architecture Migration
 
+> ## 🚫 REMINDER: ALL DATA CONTROLS MUST USE BWFC COMPONENTS
+>
+> This skill covers the **back-end architecture** (services, EF Core, DI, config).
+> The **front-end data controls** (`GridView`, `ListView`, `Repeater`, `FormView`, `DetailsView`, `DataList`, `DataGrid`) are BWFC components.
+> **NEVER** replace them with `@foreach` loops, raw `<table>` elements, or manual HTML rendering.
+
 This skill covers migrating Web Forms data access patterns and application architecture to Blazor Server. These are the **Layer 3 architecture decisions** that require project-specific judgment.
 
 **Related skills:**
-- `/bwfc-migration` — Core markup migration (controls, expressions, layouts)
+- `/bwfc-migration` — Core markup migration (controls, expressions, layouts) — **read this first**
 - `/bwfc-identity-migration` — Authentication and authorization migration
+
+---
+
+## BWFC Data Controls — Use Them, Don't Replace Them
+
+The BWFC library provides drop-in replacements for ALL Web Forms data controls. When migrating data access, the **front-end components stay as BWFC components** — only the **back-end data loading** changes (from `SelectMethod`/`DataSource` to injected services).
+
+### The Pattern: BWFC Front-End + Service Back-End
+
+```xml
+<!-- Web Forms — declarative data binding -->
+<asp:SqlDataSource ID="ProductsDS" runat="server"
+    ConnectionString="<%$ ConnectionStrings:DefaultConnection %>"
+    SelectCommand="SELECT * FROM Products" />
+<asp:GridView ID="Grid" runat="server" DataSourceID="ProductsDS"
+    AutoGenerateColumns="false">
+    <Columns>
+        <asp:BoundField DataField="Name" HeaderText="Product" />
+        <asp:BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:c}" />
+    </Columns>
+</asp:GridView>
+```
+
+```razor
+@* Blazor — BWFC GridView preserved, only data loading changes *@
+@inject IProductService ProductService
+
+<GridView Items="products" TItem="Product" AutoGenerateColumns="false">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Product" />
+        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:c}" />
+    </Columns>
+</GridView>
+
+@code {
+    private List<Product> products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductService.GetProductsAsync();
+    }
+}
+```
+
+**Key insight:** The `GridView` markup is almost identical — only the data source changes. The `SqlDataSource` is removed and replaced with an injected service. The `GridView` component, its columns, and all attributes are preserved.
+
+### 🚫 Anti-Pattern: Replacing Data Controls with Raw HTML
+
+```razor
+@* ❌ WRONG — GridView replaced with @foreach + <table> *@
+@* This loses sorting, paging, editing, footer totals, GridLines, CellPadding *@
+<table class="table">
+    <thead><tr><th>Product</th><th>Price</th></tr></thead>
+    <tbody>
+        @foreach (var p in products)
+        {
+            <tr><td>@p.Name</td><td>@p.Price.ToString("c")</td></tr>
+        }
+    </tbody>
+</table>
+
+@* ✅ CORRECT — Use BWFC GridView *@
+<GridView Items="products" TItem="Product" AutoGenerateColumns="false">
+    <Columns>
+        <BoundField DataField="Name" HeaderText="Product" />
+        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:c}" />
+    </Columns>
+</GridView>
+```
+
+### BWFC Data Control Quick Reference
+
+| Web Forms Control | BWFC Component | Data Property | Use Instead Of |
+|---|---|---|---|
+| `<asp:GridView>` | `<GridView Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + `<table>` |
+| `<asp:ListView>` | `<ListView Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + HTML divs |
+| `<asp:Repeater>` | `<Repeater Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` loops |
+| `<asp:DataList>` | `<DataList Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + grid HTML |
+| `<asp:DataGrid>` | `<DataGrid Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + `<table>` |
+| `<asp:FormView>` | `<FormView DataItem="@item" TItem="T">` | `DataItem` (single) | ❌ Direct HTML rendering |
+| `<asp:DetailsView>` | `<DetailsView Items="@data" TItem="T">` | `Items` (collection) | ❌ Manual field rendering |
 
 ---
 
 ## When to Use This Skill
 
 Use this skill when you need to:
-- Replace `SelectMethod`/`DataSource` controls with service injection
+- Replace `SelectMethod`/`DataSource` controls with service injection (back-end only — keep BWFC front-end)
 - Migrate Entity Framework 6 to EF Core
 - Convert `Session`/`ViewState`/`Application` state to Blazor patterns
 - Migrate `Global.asax` to `Program.cs`
@@ -102,9 +189,11 @@ public class ProductService(IDbContextFactory<ProductContext> factory)
 
 ---
 
-## 2. DataSource Controls → Service Injection
+## 2. DataSource Controls → Service Injection (Back-End Only)
 
-Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with injected services.
+Web Forms `DataSource` controls have **no BWFC equivalent** — they are the ONE thing you replace. But the **data-bound controls** (`GridView`, `ListView`, etc.) **ARE BWFC components** and MUST be preserved.
+
+> **Rule:** Replace the `DataSource` control with an injected service. Keep the `GridView`/`ListView`/etc. as a BWFC component. Only change `DataSourceID` → `Items`.
 
 ```xml
 <!-- Web Forms — declarative data binding -->
@@ -115,7 +204,7 @@ Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with inject
 ```
 
 ```razor
-@* Blazor — service injection *@
+@* Blazor — service injection, BWFC GridView preserved *@
 @inject IProductService ProductService
 
 <GridView Items="products" TItem="Product" AutoGenerateColumns="true" />

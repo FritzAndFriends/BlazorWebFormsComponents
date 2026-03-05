@@ -4,6 +4,10 @@
 
 The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work top to bottom — each section assumes the previous one is complete.
 
+> ## 🚫 BWFC-FIRST RULE: Every `asp:` control MUST become a BWFC component.
+> Never replace BWFC components with raw HTML (`<table>`, `<input>`, `<span>`, `<a>`, `@foreach`).
+> This is verified at the end of every layer.
+
 ---
 
 ## Template
@@ -30,7 +34,8 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Code-behind file copied (.aspx.cs → .razor.cs) with TODO annotations
 - [ ] Static files copied to `wwwroot/` preserving directory structure
 - [ ] CSS stylesheet links extracted from master page to `App.razor`
-- [ ] Control preservation verified (no deficit warnings in migration report)
+- [ ] **🚫 BWFC VERIFICATION: Control preservation verified (no deficit warnings)**
+- [ ] **🚫 BWFC VERIFICATION: All asp: controls present as BWFC components in output**
 
 ### Layer 2 — Copilot-Assisted (Structural Transforms)
 
@@ -46,7 +51,11 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Route parameters converted (`[RouteData]` → `[Parameter]` with `@page` route)
 - [ ] `@using` statements added for model namespaces
 - [ ] `@inject` statements added for required services
-- [ ] No asp: controls were flattened to raw HTML (GridView→table, TextBox→input, etc.)
+- [ ] **🚫 BWFC VERIFICATION: No asp: controls were flattened to raw HTML**
+- [ ] **🚫 BWFC VERIFICATION: GridView/ListView/Repeater preserved (not @foreach)**
+- [ ] **🚫 BWFC VERIFICATION: TextBox/CheckBox/Button preserved (not <input>/<button>)**
+- [ ] **🚫 BWFC VERIFICATION: HyperLink/Label/Panel preserved (not <a>/<span>/<div>)**
+- [ ] **🚫 BWFC VERIFICATION: LoginView/LoginStatus preserved (not @if block)**
 
 ### Layer 3 — Architecture Decisions
 
@@ -60,18 +69,21 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 
 ### Verification
 
+- [ ] **🚫 BWFC FINAL CHECK: All original asp: controls preserved as BWFC components**
+- [ ] **🚫 BWFC FINAL CHECK: BWFC utility features configured (AddBlazorWebFormsComponents, WebFormsPageBase, Page component)**
 - [ ] Page builds without errors (`dotnet build`)
 - [ ] Page renders in browser without exceptions
 - [ ] Visual layout matches original Web Forms page
 - [ ] Static files accessible in browser (images, CSS load correctly)
 - [ ] `UseStaticFiles()` present in `Program.cs` before `MapStaticAssets()`
+- [ ] CSS links in `App.razor` `<head>` (standard Blazor pattern)
+- [ ] JS references in `App.razor` after `<Routes>` (standard Blazor pattern)
 - [ ] Image paths in templates match `wwwroot/` directory structure
 - [ ] If LoginView→AuthorizeView: auth services registered in `Program.cs`
 - [ ] All interactive features work (buttons, forms, navigation, sorting, paging)
 - [ ] No JavaScript console errors in browser dev tools
 - [ ] Data displays correctly (correct records, correct formatting)
 - [ ] Form submissions work (validation fires, data saves)
-- [ ] All original asp: controls preserved as BWFC components
 ```
 
 ---

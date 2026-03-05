@@ -111,9 +111,16 @@ After Layer 1, pages fall into three readiness categories:
 
 **Tool:** [Copilot migration skill](skills/bwfc-migration/SKILL.md)
 
-Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably.
+> ## 🚫 CRITICAL: BWFC Components Must Be Preserved
+>
+> Layer 2 is where BWFC control loss has historically occurred. Agents replace `<GridView>` with `@foreach` + `<table>`, `<TextBox>` with `<input>`, `<LoginView>` with `@if` blocks, etc.
+> **This is ALWAYS wrong.** BWFC components must be preserved — only their data loading and event wiring changes.
+
+Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably — **as long as it uses BWFC components, not raw HTML**.
 
 ### What Layer 2 Handles
+
+> **BWFC-FIRST RULE:** Every transform below changes the DATA LOADING or EVENT WIRING — it does NOT replace BWFC components with raw HTML.
 
 | Transform | Before | After |
 |---|---|---|
@@ -126,6 +133,13 @@ Layer 2 handles transforms that follow consistent patterns but require understan
 | Layout conversion | `<asp:ContentPlaceHolder ID="MainContent">` | `@Body` |
 | Query parameters | `[QueryString] int? id` | `[SupplyParameterFromQuery]` |
 | Route parameters | `[RouteData] int id` | `@page "/path/{id:int}"` + `[Parameter]` |
+
+**What Layer 2 MUST NOT do:**
+- ❌ Replace `<GridView>` with `@foreach` + `<table>`
+- ❌ Replace `<TextBox>` with `<input>`
+- ❌ Replace `<LoginView>` with `@if (isAuth) { ... }`
+- ❌ Replace `<HyperLink>` with `<a href="...">`
+- ❌ Replace ANY BWFC component with raw HTML
 
 ### How to Use Layer 2
 
@@ -147,6 +161,8 @@ Layer 2 is "high accuracy" rather than "100% accuracy" because:
 - Data binding patterns vary by application (Copilot needs context about your data layer)
 - Some event handler signatures have application-specific parameters
 - Navigation routes depend on your URL structure
+
+**Always verify that Copilot preserved ALL BWFC components.** The #1 failure mode in Runs 6-8 was Layer 2 replacing BWFC controls with raw HTML. Check every data control (`GridView`, `ListView`, `Repeater`), every form control (`TextBox`, `Button`, `CheckBox`), and every login control (`LoginView`, `LoginStatus`) to confirm they remain as BWFC components.
 
 Always review Copilot's changes before committing.
 

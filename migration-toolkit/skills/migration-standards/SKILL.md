@@ -16,21 +16,75 @@ Apply these standards to:
 - Migration documentation and checklists
 - Any new migration test runs
 
-## ⚠️ BWFC Control Preservation — MANDATORY
+---
+
+## 🚫 BWFC CONTROL PRESERVATION — MANDATORY (ZERO EXCEPTIONS)
 
 > **Jeff's directive:** "We need to ALWAYS preserve the default asp: controls by using the BWFC components."
+>
+> **This is the #1 rule of every migration. No exceptions. No shortcuts.**
 
 **The entire purpose of BlazorWebFormsComponents is that these components exist — USE THEM.**
 
 Every `asp:` control in the Web Forms source MUST become a BWFC component in the migration output. The migration strips the `asp:` prefix (`<asp:GridView>` → `<GridView>`) and converts Web Forms attributes to BWFC parameters. The resulting markup should look nearly identical to the original, minus the `asp:` prefix and `runat="server"`.
 
-### Rules
+### The 5 Mandatory Rules
 
-1. **ALL asp: controls MUST be preserved as BWFC components.** The script strips the prefix; the component name stays.
-2. **NEVER flatten data controls to raw HTML.** This means: GridView, ListView, Repeater, DataList, DataGrid, DetailsView, FormView. These MUST remain as their BWFC component equivalents with proper column/template definitions.
-3. **NEVER flatten editor controls to raw HTML elements.** This means: TextBox → `<input>`, CheckBox → `<input type="checkbox">`, Button → `<button>`, Label → `<span>`, etc. are all WRONG. Keep them as `<TextBox>`, `<CheckBox>`, `<Button>`, `<Label>`.
-4. **NEVER flatten navigation/structural controls.** HyperLink, ImageButton, LinkButton, Panel, PlaceHolder, etc. must all remain as BWFC components.
-5. **The migration script `Test-BwfcControlPreservation` verification function runs post-transform** to catch any control loss. Warnings indicate a human or AI flattened a control during Layer 2 work.
+1. **ALL `asp:` controls MUST be preserved as BWFC components.** The script strips the prefix; the component name stays.
+2. **NEVER flatten data controls to raw HTML.** GridView, ListView, Repeater, DataList, DataGrid, DetailsView, FormView → MUST remain as BWFC components.
+3. **NEVER flatten editor controls to raw HTML elements.** TextBox → `<input>`, CheckBox → `<input type="checkbox">`, Button → `<button>`, Label → `<span>` are all FORBIDDEN.
+4. **NEVER flatten navigation/login/structural controls.** HyperLink, ImageButton, LinkButton, Panel, PlaceHolder, LoginView, LoginStatus, LoginName → MUST remain as BWFC components.
+5. **The migration script `Test-BwfcControlPreservation` verification function runs post-transform** to catch any control loss.
+
+### Complete BWFC Component Inventory (110+ Components)
+
+The BWFC library provides drop-in replacements for ALL of these controls. Every one MUST be used:
+
+| Category | Components |
+|----------|-----------|
+| **Editor Controls** (33) | AdRotator, Button, BulletedList, Calendar, Chart, CheckBox, CheckBoxList, DropDownList, FileUpload, HiddenField, HyperLink, Image, ImageButton, ImageMap, Label, LinkButton, ListBox, Literal, MultiView, Panel, PlaceHolder, RadioButton, RadioButtonList, Substitution, Table, TableCell, TableRow, TableHeaderRow, TableFooterRow, TableHeaderCell, TextBox, Timer, View |
+| **Data Controls** (22+) | BoundField, ButtonField, DataGrid, DataList, DataPager, DetailsView, FormView, GridView, GridViewRow, HyperLinkField, ListView, Repeater, TemplateField + style sub-components: AlternatingItemStyle, EditRowStyle, FooterStyle, HeaderStyle, ItemStyle, PagerStyle, PagerSettings, RowStyle, SelectedRowStyle |
+| **Navigation** (6+) | Menu, MenuItem, MenuItemStyle, SiteMapPath, TreeView, TreeNode + node style sub-components |
+| **Login** (18+) | ChangePassword, CreateUserWizard, Login, **LoginName**, **LoginStatus**, **LoginView**, PasswordRecovery, RoleGroup + style sub-components |
+| **Validation** (7) | CompareValidator, CustomValidator, ModelErrorMessage, RangeValidator, RegularExpressionValidator, RequiredFieldValidator, ValidationSummary |
+| **Layout/AJAX** (14) | Content, ContentPlaceHolder, MasterPage, EmptyLayout, NamingContainer, ScriptManager, ScriptManagerProxy, Timer, UpdatePanel, UpdateProgress |
+| **Utility** | WebFormsPageBase, Page (render component), AddBlazorWebFormsComponents(), BaseWebFormsComponent, BaseStyledComponent, ThemeProvider, FontInfo |
+
+### BWFC Utility Features — MANDATORY for Every Migration
+
+1. **`AddBlazorWebFormsComponents()`** in `Program.cs` — registers IPageService, IHttpContextAccessor, JS interop
+2. **`@inherits WebFormsPageBase`** in `_Imports.razor` — provides Page.Title, IsPostBack, GetRouteUrl
+3. **`<BlazorWebFormsComponents.Page />`** in `MainLayout.razor` — renders PageTitle and meta tags
+4. **`BaseStyledComponent`** — provides CssClass, BackColor, ForeColor, Font, Border*, Height, Width, ToolTip
+
+### ⚠️ Commonly Missed Controls: LoginView and LoginStatus
+
+`<asp:LoginView>` and `<asp:LoginStatus>` are BWFC components. They are the **most frequently broken** controls during migration — agents consistently replace them with raw `@if` blocks or `<a>` tags.
+
+```razor
+@* ❌ WRONG — LoginView replaced with @if block *@
+@if (isAuthenticated) { <span>Welcome</span> } else { <a href="/login">Log in</a> }
+
+@* ✅ CORRECT — BWFC LoginView preserved *@
+<LoginView>
+    <AnonymousTemplate><a href="/Account/Login">Log in</a></AnonymousTemplate>
+    <LoggedInTemplate>Welcome, <LoginName />! <LoginStatus LogoutAction="Redirect" LogoutPageUrl="/" /></LoggedInTemplate>
+</LoginView>
+```
+
+### What "Flattening" Means (Quick Reference)
+
+| BWFC Component (✅ CORRECT) | Flattened HTML (❌ FORBIDDEN) |
+|---|---|
+| `<GridView Items="@data">` | `<table>` + `@foreach` loop |
+| `<ListView Items="@data">` | `@foreach` + HTML divs |
+| `<TextBox @bind-Text="val" />` | `<input @bind="val" />` |
+| `<Label Text="Hello" />` | `<span>Hello</span>` |
+| `<HyperLink NavigateUrl="/x" />` | `<a href="/x">` |
+| `<Button Text="Go" OnClick="X" />` | `<button @onclick="X">` |
+| `<LoginView>` | `@if (isAuth) { ... }` |
+| `<LoginStatus />` | `<a href="/logout">` |
+| `<Panel CssClass="x">` | `<div class="x">` |
 
 ### Concrete Example: ShoppingCart GridView (WingtipToys)
 
@@ -120,6 +174,23 @@ The cart became **read-only** — users could not edit quantities or check out. 
 | Render mode | Global Server Interactive (see [Render Mode Placement](#render-mode-placement) below) |
 | Base class | `WebFormsPageBase` for pages (`@inherits` in `_Imports.razor`); `ComponentBase` for non-page components |
 | Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
+| **BWFC service registration** | **`builder.Services.AddBlazorWebFormsComponents()`** in `Program.cs` — MANDATORY |
+| **Page render component** | **`<BlazorWebFormsComponents.Page />`** in `MainLayout.razor` — MANDATORY |
+
+### Standard Blazor Server-Side Patterns (for infrastructure)
+
+These patterns use standard Blazor/ASP.NET Core features (NOT BWFC components) for application infrastructure:
+
+| Concern | Pattern | Where |
+|---------|---------|-------|
+| **Static files** | `app.UseStaticFiles()` + `app.MapStaticAssets()` | `Program.cs` — `UseStaticFiles()` MUST come first |
+| **CSS links** | `<link rel="stylesheet" href="/Content/Site.css" />` | `App.razor` `<head>` section |
+| **JS references** | `<script src="/Scripts/app.js"></script>` | `App.razor` after `<Routes>` |
+| **BWFC JS** | `<script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>` | `App.razor` `<head>` |
+| **Render mode** | `@rendermode="InteractiveServer"` on `HeadOutlet` and `Routes` | `App.razor` |
+| **CSS isolation** | `{Component}.razor.css` for component-scoped styles | Per-component |
+| **CSS bundles** | `BundleConfig.cs` → explicit `<link>` tags in `App.razor` | `App.razor` `<head>` |
+| **JS bundles** | `Scripts.Render(...)` → explicit `<script>` tags in `App.razor` | `App.razor` |
 
 ### Render Mode Placement
 
@@ -222,16 +293,19 @@ private async Task Button1_Click(MouseEventArgs e) { ... }
 
 The script should preserve the attribute and annotate the signature change needed.
 
-### Data Control Strategy — Prefer BWFC Over Raw HTML
+### Data Control Strategy — ALWAYS Use BWFC (Never Raw HTML)
 
-| Web Forms Control | BWFC Component | Use Instead Of |
+> **This is the #1 failure mode in migration runs.** Layer 2 agents consistently replace BWFC data controls with `@foreach` loops and HTML tables. This is ALWAYS wrong.
+
+| Web Forms Control | BWFC Component (✅ USE THIS) | Raw HTML (❌ NEVER USE) |
 |---|---|---|
 | `<asp:ListView>` | `<ListView Items="@data">` with `ItemTemplate` | `@foreach` + HTML table |
 | `<asp:GridView>` | `<GridView Items="@data">` with columns | `@foreach` + `<table>` |
-| `<asp:FormView>` | `<FormView Items="@data">` with `ItemTemplate` | Direct HTML rendering |
+| `<asp:FormView>` | `<FormView DataItem="@item">` with `ItemTemplate` | Direct HTML rendering |
 | `<asp:Repeater>` | `<Repeater Items="@data">` with `ItemTemplate` | `@foreach` loops |
 | `<asp:DetailsView>` | `<DetailsView Items="@data">` with fields | Manual field rendering |
 | `<asp:DataList>` | `<DataList Items="@data">` with `ItemTemplate` | `@foreach` + grid HTML |
+| `<asp:DataGrid>` | `<DataGrid Items="@data">` with columns | `@foreach` + `<table>` |
 
 **SelectMethod → Items:** Replace `SelectMethod="GetProducts"` with `Items="@_products"` where `_products` is populated in `OnInitializedAsync` via an injected service or DbContext.
 
