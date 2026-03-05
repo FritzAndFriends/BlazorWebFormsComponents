@@ -5565,7 +5565,7 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 
 
 ### 2026-03-04: migration-toolkit/ is the canonical home for all deliverable migration assets (consolidated)
-**By:** Jeffrey T. Fritz, Forge
+**By:** Jeffrey T. Fritz, Forge, Cyclops
 **Status:** Implemented
 **What:** All tools, scripts, and skills used for migration tests and delivered to users must live in `migration-toolkit/` as a self-contained distribution package: `migration-toolkit/skills/` (Copilot skill files), `migration-toolkit/scripts/` (bwfc-scan.ps1, bwfc-migrate.ps1). This is the canonical location — not `scripts/`, not `.ai-team/skills/`, not `.github/skills/`. `.github/skills/` retains only internal project skills. Scripts are copied (not moved) because `scripts/` originals are still used internally.
 **Why:** User directive — establishing single source of truth for deliverable migration assets. The toolkit is a product to distribute, not internal project configuration. Eliminates confusion about which skills are for end-users vs internal. README.md updated with usage instructions and NuGet link.
@@ -5979,7 +5979,7 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 **Why:** The AfterWingtipToys ShoppingCart is a read-only display  users cannot edit quantities, remove items, update cart, or check out. This is the anti-pattern documented in migration-standards. The fix is in the migration pipeline, not the component library.
 
 ### 2026-03-05: BWFC control preservation is mandatory (consolidated)
-**By:** Jeffrey T. Fritz, Forge
+**By:** Jeffrey T. Fritz, Forge, Cyclops
 **What:** Migration must ALWAYS preserve asp: controls as BWFC components. Never flatten any control to raw HTML. This applies to data controls (GridView, ListView, Repeater, DataList, DataGrid, DetailsView, FormView), editor controls (TextBox, CheckBox, Button, Label), and navigation/structural controls (HyperLink, ImageButton, LinkButton, Panel, PlaceHolder). The ShoppingCart anti-pattern (decomposing GridView into raw HTML `<table>` with `@foreach`) proves the cost — users lose editing, sorting, paging, and footer totals. The migration script already handles this mechanically; the rule targets Layer 2 (human/AI) work that rewrites controls as raw HTML.
 **Rules:**
 1. ALL asp: controls MUST be preserved as BWFC components — no exceptions
@@ -6057,4 +6057,3 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 - **`NavigateUrl="~/"` conversion** — Already handled correctly.
 - **`ImageUrl="~/"` conversion** — Already handled correctly.
 - **Expression conversion (<%: %>, <%#: %>, Eval, Item)** — All covered with good regex ordering (format string first, then simple patterns). Remaining unconverted blocks are correctly flagged as manual items.
-

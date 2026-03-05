@@ -55,51 +55,19 @@
 
 Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX controls, theming, release.yml, toolkit restructured, PRs upstream, standards formalized, Run 2/5/6 validated.
 
-### @rendermode Scaffold Fix (2026-03-05)
+<!-- Summarized 2026-03-06 by Scribe -- covers @rendermode fix through On-prefix aliases -->
 
-**Fix applied:** Removed `@rendermode InteractiveServer` standalone directive from _Imports.razor scaffold in both migration-toolkit/scripts/bwfc-migrate.ps1 and scripts/bwfc-migrate.ps1. The `@using static Microsoft.AspNetCore.Components.Web.RenderMode` using directive was kept (correct — enables shorthand `InteractiveServer`). App.razor scaffold already had the correct pattern: `<Routes @rendermode="InteractiveServer" />` and `<HeadOutlet @rendermode="InteractiveServer" />`.
+### 2026-03-05 Implementation Summary
 
-**Lesson:** `@rendermode` is a directive *attribute* that goes on component instances (e.g., `<Routes @rendermode="InteractiveServer" />`), NOT a standalone Razor directive. Placing it as a bare directive in _Imports.razor causes build errors. For global interactivity, apply it to `<Routes>` and `<HeadOutlet>` in App.razor. The `@using static` import in _Imports.razor is the correct way to make `InteractiveServer` available as a shorthand across all pages.
- Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
+**@rendermode fix:** Removed standalone `@rendermode InteractiveServer` from _Imports.razor scaffold. It's a directive *attribute* on component instances (App.razor `<Routes>`/`<HeadOutlet>`), not a standalone directive. `@using static` import enables shorthand.
 
+**WebFormsPageBase:** Abstract base class inheriting `ComponentBase` (not `BaseWebFormsComponent`). Delegates Title/MetaDescription/MetaKeywords to IPageService. `IsPostBack => false`, `Page => this`.
 
- Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+**WebFormsPage consolidation:** Merged Page.razor head-rendering into WebFormsPage (Option B). Optional IPageService via `ServiceProvider.GetService<>()`. RenderPageHead parameter (default true). IDisposable for event unsubscription.
 
-### WebFormsPageBase Implementation (2026-03-05)
+**On-prefix aliases:** 50 `[Parameter] EventCallback` aliases across 7 data components (GridView 9, DetailsView 11, FormView 6, ListView 16, DataGrid 5, Menu 2, TreeView 1). Pattern: two independent properties + coalescing at invocation. Blazor sets [Parameter] properties by name independently.
 
-**WebFormsPageBase:** Created `src/BlazorWebFormsComponents/WebFormsPageBase.cs` — abstract base class inheriting `ComponentBase` (not `BaseWebFormsComponent`). Injects `IPageService` privately, exposes `Title`, `MetaDescription`, `MetaKeywords` as delegate properties. `IsPostBack => false` so `if (!IsPostBack)` compiles and always enters. `Page => this` self-reference enables `Page.Title = "X"` to compile unchanged from Web Forms code-behind. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). Build verified clean (63 pre-existing warnings, 0 errors). Lesson: Pages are top-level containers, not child controls — inheriting `ComponentBase` directly avoids the CascadingValue wrapping and control-tree logic in `BaseWebFormsComponent`.
-
- Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
-
-### WebFormsPage IPageService Consolidation (2026-03-05)
-
-**WebFormsPage enhanced:** Merged `Page.razor` head-rendering capability into `WebFormsPage`. Added optional `IPageService` resolution via `ServiceProvider.GetService<IPageService>()` — WebFormsPage still works for naming/theming when IPageService is not registered. Subscribes to `TitleChanged`, `MetaDescriptionChanged`, `MetaKeywordsChanged` events in `OnInitialized()`. Renders `<PageTitle>` and `<HeadContent>` before the existing CascadingValue wrapper. Added `RenderPageHead` parameter (default true) to allow opting out. Implements `IDisposable` to unsubscribe from events. `Page.razor` left untouched as standalone option. Build verified clean (70 pre-existing warnings, 0 errors). Lesson: `IServiceProvider` in `BaseWebFormsComponent` is private — child classes needing it must inject their own via `[Inject]`.
-
-� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
-
-
- Team update (2026-03-05): Event handler audit complete  ~50 naming mismatches found, On-prefix aliases recommended  decided by Forge, Rogue
-
-### On-Prefix EventCallback Aliases (2026-03-05)
-
-**What:** Added 50 On-prefixed `[Parameter] EventCallback` aliases across 7 data components for Web Forms migration compatibility. Pattern: add a new `[Parameter]` property with the `On` prefix alongside each existing property. At invocation sites, coalesce with `var handler = Original.HasDelegate ? Original : OnOriginal;` so whichever name the consumer uses in markup works.
-
-**Components modified:** GridView (9 aliases), DetailsView (11), FormView (6), ListView (16), DataGrid (5), Menu (2), TreeView (1).
-
-**Key details:**
-- Existing properties untouched (non-breaking). Only new `On`-prefixed aliases added.
-- Invocation sites updated to prefer the original property if it has a delegate, falling back to the alias.
-- `HasDelegate` guard checks updated where present (GridView.ShowCommandColumn, Menu.NotifyItemClicked, ListView.RaiseItemCreated) to check both original and alias.
-- FormView already had `On`-prefixed events for delete/insert/update (OnItemDeleting, etc.). Only added aliases for the 6 events that lacked them (ModeChanging, ModeChanged, ItemCommand, ItemCreated, PageIndexChanging, PageIndexChanged).
-- Build verified clean: 0 errors, 70 pre-existing warnings.
-
-**Lesson:** Blazor sets `[Parameter]` properties independently by name during diffing. You cannot use a C# property getter/setter that delegates to another property — the framework won't see changes. Two independent properties with coalescing at invocation is the correct pattern.
-
-
- Team update (2026-03-05): ShoppingCart.aspx added as Layer 1 regression test case  migration output must contain <GridView not <table class=  decided by Forge
-
- Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
-
+Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shipped, WebFormsPage consolidation, event handler audit, ShoppingCart regression test, BWFC preservation mandatory.
 ### Run 8 Layer 2 — WingtipToys Migration Implementation (2026-03-06)
 
 **What:** Completed Layer 2 migration of `samples/Run8WingtipToys/` from non-functional Layer 1 scaffold to working end-to-end shopping flow, using `samples/AfterWingtipToys/` as the reference implementation.
@@ -152,3 +120,6 @@ Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX contr
 - All migration output should preserve Web Forms controls as BWFC equivalents (GridView, BoundField, TemplateField, TextBox, CheckBox, Button, Label)
 - Run 7's ShoppingCart.razor is the gold standard pattern for data-bound BWFC pages with edit capabilities
 
+
+
+ Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops

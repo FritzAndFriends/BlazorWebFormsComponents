@@ -103,3 +103,6 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
   - `METHODOLOGY.md`: 2 new rows in "What Layer 1 Does" table (CSS extraction, static file copying), note in "What Layer 1 Does NOT Do" about image path validation being Layer 2
 - **Pattern:** Run 7 demonstrated that runtime failures (not compile errors) are the most dangerous migration bugs — UseStaticFiles 404s, AuthorizeView crashes, mismatched asset paths all compile fine but fail at runtime. Documenting these as admonitions ensures future migrations catch them early.
 
+
+
+ Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
