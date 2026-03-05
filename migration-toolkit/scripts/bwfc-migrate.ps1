@@ -879,7 +879,7 @@ function Test-BwfcControlPreservation {
         [string]$RelPath
     )
 
-    # Known BWFC component names (data controls, editor controls, navigation, structural)
+    # Known BWFC component names (data controls, editor controls, navigation, validation, structural)
     $BwfcComponents = @(
         'GridView', 'ListView', 'Repeater', 'DataList', 'DataGrid', 'DetailsView', 'FormView',
         'TextBox', 'CheckBox', 'RadioButton', 'Button', 'ImageButton', 'LinkButton', 'Label',
@@ -888,7 +888,7 @@ function Test-BwfcControlPreservation {
         'Table', 'TableRow', 'TableCell', 'TableHeaderRow', 'TableHeaderCell', 'TableFooterRow',
         'Calendar', 'AdRotator', 'Menu', 'TreeView', 'SiteMapPath',
         'RequiredFieldValidator', 'RangeValidator', 'RegularExpressionValidator',
-        'CompareValidator', 'CustomValidator', 'ValidationSummary',
+        'CompareValidator', 'CustomValidator', 'ValidationSummary', 'ModelErrorMessage',
         'BoundField', 'TemplateField', 'CommandField', 'HyperLinkField', 'ImageField', 'CheckBoxField', 'ButtonField',
         'LoginView', 'LoginName', 'LoginStatus',
         'Timer', 'UpdatePanel', 'UpdateProgress', 'ScriptManager',
@@ -896,19 +896,35 @@ function Test-BwfcControlPreservation {
         'FileUpload', 'Xml'
     )
 
-    # Count asp: tags in source (opening tags only, deduplicate self-closing)
+    # Controls intentionally removed or converted by earlier pipeline stages.
+    # These are NOT expected in output as BWFC components.
+    $IntentionallyConverted = @(
+        'Content'              # asp:Content wrapper stripped by ConvertFrom-ContentWrappers
+        'ContentPlaceHolder'   # converted to @Body in layouts by ConvertFrom-MasterPage
+        'ScriptManager'        # removed by ConvertFrom-MasterPage (no Blazor equivalent)
+        'ScriptReference'      # removed with ScriptManager
+    )
+
+    # Semantic equivalences: source control → output component name
+    $SemanticEquivalences = @{
+        'LoginView' = 'AuthorizeView'   # ConvertFrom-LoginView converts to AuthorizeView
+    }
+
+    # Count asp: tags in source (opening tags only), excluding intentionally-converted controls
     $aspTagRegex = [regex]'<asp:(\w+)'
     $aspMatches = $aspTagRegex.Matches($SourceContent)
-    $aspTagCount = $aspMatches.Count
     $aspControlNames = @{}
     foreach ($m in $aspMatches) {
         $name = $m.Groups[1].Value
+        if ($IntentionallyConverted -contains $name) { continue }
         if ($aspControlNames.ContainsKey($name)) {
             $aspControlNames[$name]++
         } else {
             $aspControlNames[$name] = 1
         }
     }
+    $aspTagCount = 0
+    foreach ($v in $aspControlNames.Values) { $aspTagCount += $v }
 
     if ($aspTagCount -eq 0) {
         # No asp: tags in input — nothing to verify
@@ -916,10 +932,11 @@ function Test-BwfcControlPreservation {
     }
 
     # Count BWFC component tags in output (opening tags only)
+    # Also count semantic equivalences (e.g., AuthorizeView for LoginView)
     $bwfcTagCount = 0
     $bwfcControlNames = @{}
-    foreach ($component in $BwfcComponents) {
-        # Match opening tags: <ComponentName followed by space, >, or / (self-closing)
+    $allComponentsToSearch = $BwfcComponents + @($SemanticEquivalences.Values | ForEach-Object { $_ })
+    foreach ($component in ($allComponentsToSearch | Select-Object -Unique)) {
         $componentRegex = [regex]"<${component}[\s>/]"
         $componentMatches = $componentRegex.Matches($OutputContent)
         if ($componentMatches.Count -gt 0) {
@@ -939,6 +956,13 @@ function Test-BwfcControlPreservation {
             $outputCount = 0
             if ($bwfcControlNames.ContainsKey($aspName)) {
                 $outputCount = $bwfcControlNames[$aspName]
+            }
+            # Check semantic equivalence (e.g., LoginView → AuthorizeView)
+            if ($SemanticEquivalences.ContainsKey($aspName)) {
+                $equivName = $SemanticEquivalences[$aspName]
+                if ($bwfcControlNames.ContainsKey($equivName)) {
+                    $outputCount += $bwfcControlNames[$equivName]
+                }
             }
             if ($outputCount -lt $inputCount) {
                 $missing = $inputCount - $outputCount
@@ -1006,21 +1030,35 @@ function Copy-CodeBehind {
 #region --- Unconvertible Page Stubs ---
 
 function Test-UnconvertiblePage {
-    param([string]$Content)
+    param(
+        [string]$Content,
+        [string]$RelPath = ''
+    )
 
-    $unconvertiblePatterns = @(
+    # Content-based patterns: code constructs that cannot be mechanically converted
+    $contentPatterns = @(
         'SignInManager',
         'UserManager',
         'FormsAuthentication',
-        'Session\[',
-        'PayPal',
-        'Checkout'
+        'Session\['
     )
-    foreach ($pat in $unconvertiblePatterns) {
+    foreach ($pat in $contentPatterns) {
         if ($Content -match $pat) {
             return $true
         }
     }
+
+    # Path-based patterns: files in folders known to need manual migration
+    $pathPatterns = @(
+        '[\\/]Checkout[\\/]',
+        '[\\/]Account[\\/]'
+    )
+    foreach ($pat in $pathPatterns) {
+        if ($RelPath -match $pat) {
+            return $true
+        }
+    }
+
     return $false
 }
 
@@ -1105,7 +1143,7 @@ function Convert-WebFormsFile {
     $script:FilesProcessed++
 
     # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
-    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content)) {
+    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content -RelPath $relativePath)) {
         $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
         if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
             $route = '/'
