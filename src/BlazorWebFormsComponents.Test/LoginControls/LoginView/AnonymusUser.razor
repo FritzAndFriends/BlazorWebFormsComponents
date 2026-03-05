@@ -1,17 +1,11 @@
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims;
 @using Moq;
 
 @code {
 	[Fact]
 	public void LoginView_AnonymousUser_DisplaysAnonymousTemplate()
 	{
-		var principal = new ClaimsPrincipal();
-
-		var autheMock = new Mock<AuthenticationStateProvider>();
-		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
-
-		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		var authContext = this.AddAuthorization();
+		authContext.SetNotAuthorized();
 
 		var navMock = new Mock<NavigationManager>();
 		Services.AddSingleton<NavigationManager>(navMock.Object);
@@ -24,17 +18,17 @@
 				<LoggedInTemplate>
 					LoggedIn
 				</LoggedInTemplate>
-				<ChildContent>
+				<RoleGroups>
 					<BlazorWebFormsComponents.LoginControls.RoleGroup Roles="Agent">
 						Agent
 					</BlazorWebFormsComponents.LoginControls.RoleGroup>
 					<BlazorWebFormsComponents.LoginControls.RoleGroup Roles="Spy,Agent">
 						Spy,Agent
 					</BlazorWebFormsComponents.LoginControls.RoleGroup>
-				</ChildContent>
+				</RoleGroups>
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
 
-		cut.Find("div").TextContent.Trim().ShouldBe("Anonymous");
+		cut.Markup.Trim().ShouldContain("Anonymous");
 	}
 }

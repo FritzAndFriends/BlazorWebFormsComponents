@@ -73,6 +73,34 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
 **ShoppingCart/BWFC preservation:** GridView supports all ShoppingCart features. L2 agents decomposed to raw HTML (anti-pattern). Added 5 mandatory BWFC preservation rules + `Test-BwfcControlPreservation` to bwfc-migrate.ps1. Propagated to migration-toolkit/skills/.
 
+### Comprehensive Event Handler & SelectMethod Audit (2026-03-06)
+
+**Task:** Deep audit of all BWFC EventCallbacks against Web Forms 4.8 originals, triggered by Run 8 benchmark "15 instances requiring EventCallback conversion".
+
+**Key findings — Event coverage by control:**
+- **ListView:** 100% (18/18 events) — best coverage
+- **DataGrid:** 100% (10/10)
+- **FormView:** 100% (12/12), but 6 CRUD events On-prefix only, `OnItemInserted` has wrong type (`FormViewInsertEventArgs` instead of `FormViewInsertedEventArgs`)
+- **DetailsView:** 92% (11/12), missing `ItemCreated`
+- **GridView:** 73% (11/15), missing PageIndexChanging, RowUpdated, RowDeleted, RowCreated, RowDataBound; SelectedIndexChanged uses `int` not `EventArgs`
+- **Repeater:** **0%** (0/3) — ZERO EventCallbacks, critical gap
+- **DataList:** **13%** (1/8) — only `OnItemDataBound`
+- **ButtonBaseComponent:** `OnClick` uses `MouseEventArgs` instead of `EventArgs` (migration friction)
+- Input controls (TextBox, CheckBox, RadioButton, DropDownList, etc.): All correct with dual-callback pattern
+- Menu: 100%, TreeView: 83% (missing TreeNodePopulate)
+
+**On-prefix consistency:** 19 events have On-prefix only (no bare-name alias). Worst offenders: FormView (6), DataGrid (5), TreeView (4).
+
+**Sender property:** Only 15 of 52 EventArgs classes have `Sender`. 37 need it added for `(object sender, e)` migration pattern.
+
+**SelectMethod issues:** Fires once only (firstRender guard), `out` param blocks lambdas, sync only, hard-coded paging params. Proposed fix: move to OnParametersSetAsync, add lambda-friendly overload, add async variant.
+
+**InsertMethod/UpdateMethod/DeleteMethod:** Not implemented anywhere. Proposed design: `Action<T>` and `Func<T, Task>` parameters that auto-invoke after CRUD events and re-invoke SelectMethod to refresh.
+
+**Prioritized 7 P0 items** (migration-blocking): Repeater events, DataList events, GridView RowDataBound/RowCreated, DetailsView ItemCreated, FormView wrong type, SelectMethod one-shot fix. **11 P1 items** (quality): Button MouseEventArgs, Sender on all EventArgs, missing GridView events, bare-name aliases, async SelectMethod. **7 P2 items** (polish): CRUD methods, remaining aliases, script transform.
+
+**Decision document:** `.ai-team/decisions/inbox/forge-event-handler-selectmethod-audit.md`
+
 **Run 7 L2/3:** 6 storefront pages. FormView with single-item list wrapper, ListView/GridView preserved. 26 code-behinds + 12 .razor stubs. Build: 0 errors. L1 residuals in ItemTemplate sections.
 
 **Script gap review (6 gaps):** `src="~/"` not converted, `<script>` tags lost from master `<head>`, no BundleConfig detection, CSS link duplication, `url('~/')` in CSS not converted, no infrastructure file flagging. Decision: forge-script-gap-review.md.

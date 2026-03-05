@@ -78,3 +78,5 @@ Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shippe
 
  Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView -- decided by Forge
  Team update (2026-03-05): LoginStatus flagged for AuthorizeView redesign  decided by Forge
+
+- **LoginStatus AuthorizeView redesign:** Replaced manual `AuthenticationStateProvider` injection + `OnInitializedAsync` auth check + `UserAuthenticated` bool with `<AuthorizeView>` delegation (same pattern as LoginView). Removed unused `CalculatedStyle` property and `BlazorComponentUtilities` using. Added null guard on `LoginHandle` so missing `LoginPageUrl` doesn't throw. Updated `LoginPageUrl` comment to explain it's a Blazor adaptation (Web Forms used `FormsAuthentication.LoginUrl`). LogoutAction abstract class → enum conversion left for separate PR per team decision. Build clean.

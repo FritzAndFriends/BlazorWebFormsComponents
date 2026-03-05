@@ -1,66 +1,35 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
+using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents.LoginControls
 {
-	public partial class LoginView : BaseStyledComponent
+	public partial class LoginView : BaseWebFormsComponent
 	{
-		[Inject]
-		protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-
-		[Parameter] public RoleGroupCollection RoleGroups { get; set; } = new RoleGroupCollection();
-
-		[Parameter] public RenderFragment LoggedInTemplate { get; set; }
 		[Parameter] public RenderFragment AnonymousTemplate { get; set; }
-		[Parameter] public RenderFragment ChildContent { get; set; }
+		[Parameter] public RenderFragment LoggedInTemplate { get; set; }
 
+		/// <summary>
+		/// Declarative RoleGroup container — renders RoleGroup child components that self-register.
+		/// </summary>
+		[Parameter] public RenderFragment RoleGroups { get; set; }
 
-		private RenderFragment GetView()
+		/// <summary>
+		/// Internal collection populated by RoleGroup children via cascading parameter.
+		/// </summary>
+		internal RoleGroupCollection RoleGroupCollection { get; } = new RoleGroupCollection();
+
+		[Parameter] public EventCallback<EventArgs> OnViewChanged { get; set; }
+		[Parameter] public EventCallback<EventArgs> OnViewChanging { get; set; }
+
+		private RenderFragment GetAuthenticatedView(ClaimsPrincipal user)
 		{
-
-			if (!(_user.Identity?.IsAuthenticated ?? false))
+			var roleGroup = RoleGroupCollection.GetRoleGroup(user);
+			if (roleGroup != null)
 			{
-
-				return AnonymousTemplate;
-
+				return roleGroup.ContentTemplate ?? roleGroup.ChildContent;
 			}
-			else
-			{
-
-				var roleGroup = RoleGroups.GetRoleGroup(_user);
-				if (roleGroup != null)
-				{
-
-					return roleGroup.ChildContent;
-
-				}
-				else
-				{
-
-					return LoggedInTemplate;
-
-				}
-
-			}
-
+			return LoggedInTemplate;
 		}
-
-		private ClaimsPrincipal _user;
-
-
-
-		protected override async Task OnInitializedAsync()
-		{
-
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-			_user = authState.User;
-
-			await base.OnInitializedAsync();
-
-		}
-
 	}
 }

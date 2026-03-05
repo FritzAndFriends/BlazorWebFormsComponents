@@ -1,24 +1,25 @@
 ﻿@inherits BaseStyledComponent
+@using Microsoft.AspNetCore.Components.Authorization
 
-@if (UserAuthenticated)
-{
-	@if (!string.IsNullOrEmpty(LogoutText) && string.IsNullOrEmpty(LogoutImageUrl))
-	{
-		<a style="@Style" class="@CssClass" id="@(ID + "_status")" title="@ToolTip" @onclick="LogoutHandle">@LogoutText</a>
-	}
-	else if (!string.IsNullOrEmpty(LogoutImageUrl))
-	{
-		<input style="@Style" class="@CssClass" id="@(ID + "_status")" type="image" title="@ToolTip" @onclick="LogoutHandle" src="@LogoutImageUrl" alt="@LogoutText">
-	}
-}
-else
-{
-	@if (!string.IsNullOrEmpty(LoginText) && string.IsNullOrEmpty(LoginImageUrl))
-	{
-		<a style="@Style" class="@CssClass" id="@(ID + "_status")" title="@ToolTip" @onclick="LoginHandle">@LoginText</a>
-	}
-	else if (!string.IsNullOrEmpty(LoginImageUrl))
-	{
-		<input style="@Style" class="@CssClass" id="@(ID + "_status")" type="image" title="@ToolTip" @onclick="LoginHandle" src="@LoginImageUrl" alt="@LoginText">
-	}
-}
+<AuthorizeView>
+	<Authorized>
+		@if (!string.IsNullOrEmpty(LogoutText) && string.IsNullOrEmpty(LogoutImageUrl))
+		{
+			<a style="@Style" class="@CssClass" id="@(ID + "_status")" title="@ToolTip" @onclick="LogoutHandle">@LogoutText</a>
+		}
+		else if (!string.IsNullOrEmpty(LogoutImageUrl))
+		{
+			<input style="@Style" class="@CssClass" id="@(ID + "_status")" type="image" title="@ToolTip" @onclick="LogoutHandle" src="@LogoutImageUrl" alt="@LogoutText">
+		}
+	</Authorized>
+	<NotAuthorized>
+		@if (!string.IsNullOrEmpty(LoginText) && string.IsNullOrEmpty(LoginImageUrl))
+		{
+			<a style="@Style" class="@CssClass" id="@(ID + "_status")" title="@ToolTip" @onclick="LoginHandle">@LoginText</a>
+		}
+		else if (!string.IsNullOrEmpty(LoginImageUrl))
+		{
+			<input style="@Style" class="@CssClass" id="@(ID + "_status")" type="image" title="@ToolTip" @onclick="LoginHandle" src="@LoginImageUrl" alt="@LoginText">
+		}
+	</NotAuthorized>
+</AuthorizeView>
