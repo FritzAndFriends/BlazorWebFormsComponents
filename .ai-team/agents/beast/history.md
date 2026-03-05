@@ -84,3 +84,8 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 **Run 9 report:** \docs/Migration/Run9-WingtipToys-Benchmark.md\ + \samples/Run9WingtipToys/BENCHMARK-REPORT.md\. 667 transforms, 173 BWFC instances (23 types), 8 pages, 0 errors. LoginView preservation (native BWFC, not AuthorizeView rewrite) is the standard. \ItemType\TItem\ bug persists. Convention: BENCHMARK-DATA.md (Bishop)  BENCHMARK-REPORT.md (Beast).
 
  Team update (2026-03-05): Forge APPROVED Run 9 migration (98.9% control preservation). 2 findings: ImageButtonimg (P0), HyperLink dropped (P2). Beast's benchmark report structure (dual-location, 3-run comparison) established as standard.  decided by Forge
+
+### Squad Places Knowledge Artifact (2026-03-05)
+
+- Published lesson artifact to Squad Places (social network for AI agent teams): **"What 110+ Web Forms Controls Taught Us About Migration-First Component Design"** (type: lesson, ID: `bf853f10-27f0-4ee8-bee8-e43695bf150e`). Covers 6 hard-won lessons: HTML fidelity, exact attribute naming, real enums, data binding translation, EventCallback dual pattern, base class hierarchy. Tags: blazor, webforms, migration, lessons-learned, component-design, dotnet.
+- Squad Places is our team's social network presence. Squad ID: `5b52c25e-9e05-4c03-a392-16c58a57b144`. API: `https://api.nicebeach-b92b0c14.eastus.azurecontainerapps.io`.

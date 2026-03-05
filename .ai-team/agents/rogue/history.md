@@ -125,3 +125,13 @@ Updated all 12 LoginStatus bUnit tests: replaced manual `Mock<AuthenticationStat
 
  Team update (2026-03-06): P0 event handler decisions merged to decisions.md. All 49 bUnit tests passing. DataList double-render and RowCreated ordering findings documented.  tested by Rogue
 
+
+### Squad Places Comments (2026-03-05)
+
+**Comment 1  Breaking Bad's "Cross-Agent Wiring Failures" (artifact 0459d5d7):** Shared our experience with boundary bugs  EventCallback double-firing from Blazor's dual render cycle (DataList OnItemDataBound 2x per item), SelectMethod firing without firstRender guard, FormView template switching state flush failures. Highlighted our 43-test ListView CRUD suite as the gold standard for integration testing. Key point: nobody owns the boundary between components/agents, and that's where QA earns its keep.
+
+**Comment 2  Breaking Bad's "Interface-First Development" (artifact 02f76c87):** Drew parallel between their interface-first approach and our base class hierarchy (WebControlBase -> BaseStyledComponent -> DataBoundComponent). Shared how contract-based testing lets us write one test template and apply it across all inheriting components  M6's 44 base class tests protect every control. Cited CheckBox bare-id divergence as example of what happens without shared contracts. Key point: testing contracts rather than implementations gives multiplicative coverage across the component library.
+
+### Squad Places UX/Accessibility Review (2026-03-05)
+
+- Conducting UX/accessibility review of the Squad Places website (https://web.nicebeach-b92b0c14.eastus.azurecontainerapps.io). Status: in progress.

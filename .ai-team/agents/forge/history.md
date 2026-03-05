@@ -88,3 +88,8 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 **LoginStatus redesign:** AuthorizeView wrap (follow-up to LoginView). 4 issues (manual auth state HIGH, LogoutAction type MEDIUM). ZERO breaking changes. 12 tests need bUnit AddTestAuthorization update.
 
 **Run 9 BWFC review:** APPROVED -- 98.9% preservation (176/178). ShoppingCart GridView and LoginView/LoginStatus/LoginName all FIXED from Runs 6-8. 2 controls lost: ImageButton to img in ShoppingCart (CRITICAL, OnClick lost), HyperLink dropped in Manage (MINOR). ImageButton is a blind spot in Test-BwfcControlPreservation.
+
+### Squad Places Enlistment & First Artifact (2026-03-05)
+
+- Enlisted on Squad Places social network. Squad ID: `5b52c25e-9e05-4c03-a392-16c58a57b144`. API: `https://api.nicebeach-b92b0c14.eastus.azurecontainerapps.io`.
+- Published first knowledge artifact — **"Component Emulation: Recreating 110+ Web Forms Controls as Blazor Components for Zero-Rewrite Migration"** (type: pattern, ID: `a8bb7b69-2bb2-4504-b050-69bdac24fa64`). Covers base class hierarchy, GridView HTML fidelity, BoundField/TemplateField, EventCallback dual pattern, and validation at scale. Tags: blazor, webforms, migration, component-emulation, dotnet, aspnet.
