@@ -861,6 +861,100 @@ function ConvertFrom-UrlReferences {
 
 #endregion
 
+#region --- BWFC Control Preservation Verification ---
+
+function Test-BwfcControlPreservation {
+    <#
+    .SYNOPSIS
+        Post-transform verification: ensures asp: controls were preserved as BWFC components.
+    .DESCRIPTION
+        Compares the count of asp: control tags in the original Web Forms source against
+        the count of known BWFC component tags in the transformed output. Emits warnings
+        if the output has fewer component tags than the input had asp: tags, which suggests
+        a control was flattened to raw HTML instead of being preserved as a BWFC component.
+    #>
+    param(
+        [string]$SourceContent,
+        [string]$OutputContent,
+        [string]$RelPath
+    )
+
+    # Known BWFC component names (data controls, editor controls, navigation, structural)
+    $BwfcComponents = @(
+        'GridView', 'ListView', 'Repeater', 'DataList', 'DataGrid', 'DetailsView', 'FormView',
+        'TextBox', 'CheckBox', 'RadioButton', 'Button', 'ImageButton', 'LinkButton', 'Label',
+        'HyperLink', 'Image', 'Panel', 'PlaceHolder', 'Literal', 'HiddenField',
+        'DropDownList', 'ListBox', 'CheckBoxList', 'RadioButtonList', 'BulletedList',
+        'Table', 'TableRow', 'TableCell', 'TableHeaderRow', 'TableHeaderCell', 'TableFooterRow',
+        'Calendar', 'AdRotator', 'Menu', 'TreeView', 'SiteMapPath',
+        'RequiredFieldValidator', 'RangeValidator', 'RegularExpressionValidator',
+        'CompareValidator', 'CustomValidator', 'ValidationSummary',
+        'BoundField', 'TemplateField', 'CommandField', 'HyperLinkField', 'ImageField', 'CheckBoxField', 'ButtonField',
+        'LoginView', 'LoginName', 'LoginStatus',
+        'Timer', 'UpdatePanel', 'UpdateProgress', 'ScriptManager',
+        'Wizard', 'WizardStep', 'MultiView', 'View',
+        'FileUpload', 'Xml'
+    )
+
+    # Count asp: tags in source (opening tags only, deduplicate self-closing)
+    $aspTagRegex = [regex]'<asp:(\w+)'
+    $aspMatches = $aspTagRegex.Matches($SourceContent)
+    $aspTagCount = $aspMatches.Count
+    $aspControlNames = @{}
+    foreach ($m in $aspMatches) {
+        $name = $m.Groups[1].Value
+        if ($aspControlNames.ContainsKey($name)) {
+            $aspControlNames[$name]++
+        } else {
+            $aspControlNames[$name] = 1
+        }
+    }
+
+    if ($aspTagCount -eq 0) {
+        # No asp: tags in input — nothing to verify
+        return
+    }
+
+    # Count BWFC component tags in output (opening tags only)
+    $bwfcTagCount = 0
+    $bwfcControlNames = @{}
+    foreach ($component in $BwfcComponents) {
+        # Match opening tags: <ComponentName followed by space, >, or / (self-closing)
+        $componentRegex = [regex]"<${component}[\s>/]"
+        $componentMatches = $componentRegex.Matches($OutputContent)
+        if ($componentMatches.Count -gt 0) {
+            $bwfcTagCount += $componentMatches.Count
+            $bwfcControlNames[$component] = $componentMatches.Count
+        }
+    }
+
+    # Compare: warn if output has fewer BWFC components than input had asp: tags
+    if ($bwfcTagCount -lt $aspTagCount) {
+        $deficit = $aspTagCount - $bwfcTagCount
+        Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "⚠️ BWFC control deficit: input had $aspTagCount asp: tag(s) but output has only $bwfcTagCount BWFC component tag(s) ($deficit control(s) may have been flattened to raw HTML)."
+
+        # Identify which specific controls may be missing
+        foreach ($aspName in $aspControlNames.Keys) {
+            $inputCount = $aspControlNames[$aspName]
+            $outputCount = 0
+            if ($bwfcControlNames.ContainsKey($aspName)) {
+                $outputCount = $bwfcControlNames[$aspName]
+            }
+            if ($outputCount -lt $inputCount) {
+                $missing = $inputCount - $outputCount
+                Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "Missing $missing instance(s) of <$aspName> — was asp:$aspName in source, expected BWFC <$aspName> in output."
+            }
+        }
+
+        Write-TransformLog -File $RelPath -Transform 'Verify' -Detail "Control preservation check: $deficit of $aspTagCount asp: control(s) not found as BWFC components in output"
+    }
+    else {
+        Write-TransformLog -File $RelPath -Transform 'Verify' -Detail "Control preservation check passed: $aspTagCount asp: tag(s) → $bwfcTagCount BWFC component tag(s)"
+    }
+}
+
+#endregion
+
 #region --- Code-Behind Handling ---
 
 function Copy-CodeBehind {
@@ -1005,6 +1099,9 @@ function Convert-WebFormsFile {
         return
     }
 
+    # Preserve original content for post-transform BWFC control preservation check
+    $originalContent = $content
+
     $script:FilesProcessed++
 
     # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
@@ -1057,6 +1154,9 @@ function Convert-WebFormsFile {
     # Clean up leftover blank lines from removed directives (collapse 3+ consecutive blank lines to 2)
     $content = $content -replace '(\r?\n){3,}', "`n`n"
     $content = $content.TrimStart("`r", "`n")
+
+    # Post-transform verification: check that asp: controls were preserved as BWFC components
+    Test-BwfcControlPreservation -SourceContent $originalContent -OutputContent $content -RelPath $relativePath
 
     Write-TransformLog -File $relativePath -Transform 'Rename' -Detail "$extension → .razor"
 

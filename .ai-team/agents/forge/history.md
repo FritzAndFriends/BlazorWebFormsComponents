@@ -183,3 +183,26 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
  Team update (2026-03-05): ShoppingCart GridView gap analysis complete — AfterWingtipToys is a broken plain-HTML table, BWFC GridView has zero gaps for this page, migration scripts need GridView preservation rules.  decided by Forge
 
  Team update (2026-03-05): AfterWingtipToys must only be produced by migration toolkit output, never hand-edited  decided by Jeffrey T. Fritz
+
+### BWFC Control Preservation Standards (2026-03-05)
+
+**Jeff's directive:** "We need to ALWAYS preserve the default asp: controls by using the BWFC components."
+
+**Actions taken:**
+
+1. **Migration standards SKILL.md updated** — Added mandatory "BWFC Control Preservation" section at top of patterns with:
+   - 5 explicit rules: preserve all asp: controls, never flatten data controls, never flatten editor controls, never flatten navigation/structural controls, post-transform verification catches loss
+   - ShoppingCart GridView documented as concrete anti-pattern (flattened to read-only HTML table)
+   - BAD vs GOOD code examples showing flattened GridView vs preserved BWFC GridView with BoundField/TemplateField
+   - Explanation of why this matters (CSS preservation, feature parity, migration velocity, fidelity guarantee)
+
+2. **`Test-BwfcControlPreservation` function added to bwfc-migrate.ps1** — Post-transform verification that:
+   - Counts asp: tags in source, counts BWFC component tags in output
+   - Warns if output has fewer BWFC components than input had asp: tags (control deficit)
+   - Identifies specific controls that may be missing by name
+   - Runs after all transforms in Convert-WebFormsFile, before file write
+   - Non-blocking: emits warnings in ManualItems report, does not prevent output
+
+3. **Confidence confirmed at "high"** — already set; this pattern is battle-tested across 6 WingtipToys runs with 4 confirmed gotchas (ListView templates, service registration, OnParametersSetAsync, GridView preservation).
+
+**Key learning:** The migration script pipeline (ConvertFrom-AspPrefix) correctly preserves controls mechanically. The flattening problem occurs when humans or AI do Layer 2 work and rewrite controls as raw HTML instead of keeping the BWFC components. The verification function catches this in the migration report.

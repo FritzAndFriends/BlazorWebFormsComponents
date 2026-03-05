@@ -16,6 +16,101 @@ Apply these standards to:
 - Migration documentation and checklists
 - Any new migration test runs
 
+---
+
+## ⚠️ BWFC Control Preservation — MANDATORY
+
+> **Jeff's directive:** "We need to ALWAYS preserve the default asp: controls by using the BWFC components."
+
+**The entire purpose of BlazorWebFormsComponents is that these components exist — USE THEM.**
+
+Every `asp:` control in the Web Forms source MUST become a BWFC component in the migration output. The migration strips the `asp:` prefix (`<asp:GridView>` → `<GridView>`) and converts Web Forms attributes to BWFC parameters. The resulting markup should look nearly identical to the original, minus the `asp:` prefix and `runat="server"`.
+
+### Rules
+
+1. **ALL asp: controls MUST be preserved as BWFC components.** The script strips the prefix; the component name stays.
+2. **NEVER flatten data controls to raw HTML.** This means: GridView, ListView, Repeater, DataList, DataGrid, DetailsView, FormView. These MUST remain as their BWFC component equivalents with proper column/template definitions.
+3. **NEVER flatten editor controls to raw HTML elements.** This means: TextBox → `<input>`, CheckBox → `<input type="checkbox">`, Button → `<button>`, Label → `<span>`, etc. are all WRONG. Keep them as `<TextBox>`, `<CheckBox>`, `<Button>`, `<Label>`.
+4. **NEVER flatten navigation/structural controls.** HyperLink, ImageButton, LinkButton, Panel, PlaceHolder, etc. must all remain as BWFC components.
+5. **The migration script `Test-BwfcControlPreservation` verification function runs post-transform** to catch any control loss. Warnings indicate a human or AI flattened a control during Layer 2 work.
+
+### Concrete Example: ShoppingCart GridView (WingtipToys)
+
+The AfterWingtipToys `ShoppingCart.razor` was migrated BEFORE the migration scripts existed. Someone (AI or human) decomposed the `<asp:GridView>` into a plain HTML `<table>` with `@foreach`. This destroyed:
+- Editable TextBox for quantity (became read-only)
+- CheckBox for item removal (gone)
+- Update/Checkout buttons (gone)
+- CssClass stripes, GridLines, CellPadding (degraded)
+- ShowFooter with totals (gone)
+
+The cart became **read-only** — users could not edit quantities or check out. Meanwhile, the BWFC GridView supports ALL of these features. Zero component gaps.
+
+### Anti-Pattern: Flattened GridView (BAD)
+
+```razor
+@* ❌ BAD — Someone decomposed the GridView into raw HTML *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in _cartItems)
+        {
+            <tr>
+                <td>@item.Product.ProductName</td>
+                <td>@item.Product.UnitPrice?.ToString("c")</td>
+                <td>@item.Quantity</td>
+                <td>@((item.Quantity * item.Product.UnitPrice)?.ToString("c"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+```
+
+### Correct Pattern: Preserved GridView (GOOD)
+
+```razor
+@* ✅ GOOD — GridView preserved as BWFC component with full functionality *@
+<GridView TItem="CartItem" Items="@_cartItems"
+    AutoGenerateColumns="false" CssClass="table table-striped"
+    ShowFooter="true" GridLines="GridLines.Both" CellPadding="5">
+    <Columns>
+        <BoundField DataField="Product.ProductName" HeaderText="Product" />
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price"
+            DataFormatString="{0:c}" />
+        <TemplateField HeaderText="Quantity">
+            <ItemTemplate>
+                <TextBox Text="@context.Quantity.ToString()" />
+            </ItemTemplate>
+        </TemplateField>
+        <TemplateField HeaderText="Remove">
+            <ItemTemplate>
+                <CheckBox />
+            </ItemTemplate>
+        </TemplateField>
+        <TemplateField HeaderText="Total">
+            <ItemTemplate>
+                @((context.Quantity * context.Product.UnitPrice)?.ToString("c"))
+            </ItemTemplate>
+        </TemplateField>
+    </Columns>
+</GridView>
+```
+
+### Why This Matters
+
+- **CSS preservation:** BWFC components render the same HTML as Web Forms controls. Raw HTML tables don't.
+- **Feature parity:** GridView has sorting, paging, editing, footer totals, GridLines, CellPadding built-in. A `@foreach` loop has none of these.
+- **Migration velocity:** Preserving the component means the markup is 90% done after `asp:` prefix stripping. Flattening requires rewriting the entire page.
+- **Fidelity guarantee:** The `Test-BwfcControlPreservation` function in the migration script catches control loss automatically.
+
+---
+
 ## Patterns
 
 ### Target Architecture
