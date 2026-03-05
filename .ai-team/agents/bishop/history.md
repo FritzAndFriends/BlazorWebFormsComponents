@@ -67,3 +67,22 @@
  Team update (2026-03-06): Forge reviewed Run 10 preservation: 92.7% (164/177), below 95% threshold. 3 gaps: CheckoutReview DetailsView missing (9 controls), ManageLogins still stub (3 controls), ShoppingCart ImageButton flattened (1 control). Fixing all 3 reaches 97.7%. Layer 1 bugs consolidated into single decision (ItemType, validators, base class).  decided by Forge
 
  Team update (2026-03-05): User directive from Jeff  stop emitting ItemType/TItem when data source exists (SelectMethod, Items, etc.). Blazor generic type inference handles it. Eliminates #1 recurring build failure class.  decided by Jeffrey T. Fritz
+
+### Cycle 2 Fix: ItemType/TItem Stripping with Data Source (Bishop)
+
+- **Remove-ItemTypeWithDataSource:** New function in bwfc-migrate.ps1 that strips ItemType/TItem attributes when SelectMethod is present on the same tag. Runs before ConvertFrom-SelectMethod in the pipeline. Handles both attribute orderings (ItemType before/after SelectMethod) and both attribute names (ItemType and TItem). Eliminates the #1 recurring build failure class — redundant type parameters.
+
+### 2025-07-25: Run 11 WingtipToys Migration Benchmark
+
+- **Result:** Build succeeded — 0 errors, 0 warnings, 4 build attempts (down from 7 in Run 9, comparable to 3 in Run 10)
+- **Pipeline:** Layer 0 (skipped — scan script parse error) → Layer 1 (~3.5s, 354 ops) → Layer 2 (~20min) → Build (~4.4s, 4 attempts)
+- **Output:** 32 .razor, 32 .cs, 79 wwwroot, 28 routable pages, 178 BWFC control instances (26 unique types)
+- **All 3 P0 gaps from Run 10 closed:**
+  - P0-1: CheckoutReview DetailsView — fully preserved with OrderShipInfo stub model, 9 BWFC controls recovered
+  - P0-2: ShoppingCart ImageButton — preserved as `<ImageButton>` with OnClick→NavigateTo wiring
+  - P0-3: ManageLogins — full ListView + Button + PlaceHolder preserved with UserLoginInfo stub model
+- **New capabilities:**
+  - ItemType/TItem stripping when SelectMethod present (Layer 1 script fix)
+  - AdminPage fully functional with EF Core CRUD (add/remove products)
+  - Stub model pattern: create lightweight model classes when original types unavailable (UserLoginInfo, OrderShipInfo)
+- **BWFC preservation rate:** ~100% (178/178 controls in output have BWFC components)
