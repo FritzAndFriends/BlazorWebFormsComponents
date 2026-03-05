@@ -859,12 +859,54 @@ function Remove-WebFormsAttributes {
         }
     }
 
-    # ItemType="Namespace.Class" → TItem="Class"
-    $itemTypeRegex = [regex]'ItemType="(?:[^"]*\.)?([^"]+)"'
-    $itemTypeMatches = $itemTypeRegex.Matches($Content)
-    if ($itemTypeMatches.Count -gt 0) {
-        $Content = $itemTypeRegex.Replace($Content, 'TItem="$1"')
-        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($itemTypeMatches.Count) ItemType to TItem"
+    # ItemType → TItem: ONLY for list controls (DropDownList, ListBox, CheckBoxList, RadioButtonList, BulletedList)
+    # Data controls (GridView, ListView, FormView, DetailsView, DataGrid, DataList, Repeater) keep ItemType as-is
+    $listControlsPattern = 'DropDownList|ListBox|CheckBoxList|RadioButtonList|BulletedList'
+    $listItemTypeRegex = [regex]::new("(<(?:$listControlsPattern)\b[^>]*?)\bItemType=""(?:[^""]*\.)?([^""]+)""", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $listItemTypeMatches = $listItemTypeRegex.Matches($Content)
+    if ($listItemTypeMatches.Count -gt 0) {
+        $Content = $listItemTypeRegex.Replace($Content, '${1}TItem="$2"')
+        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($listItemTypeMatches.Count) ItemType to TItem on list controls (data controls retain ItemType)"
+    }
+
+    return $Content
+}
+
+function Add-ValidatorTypeParameters {
+    <#
+    .SYNOPSIS
+        Injects required type parameters into BWFC validator components.
+    .DESCRIPTION
+        BWFC validators require explicit type parameters that Web Forms controls don't have.
+        - RequiredFieldValidator, RegularExpressionValidator, RangeValidator → Type="string"
+        - CompareValidator → InputType="string"
+        Only injects if the attribute is not already present.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $addedCount = 0
+
+    # Inject Type="string" into validators that need it
+    $typeValidators = @('RequiredFieldValidator', 'RegularExpressionValidator', 'RangeValidator')
+    foreach ($validator in $typeValidators) {
+        $regex = [regex]::new("(<${validator}\b)(?=[^>]*>)(?![^>]*\bType\s*=)", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        $matches = $regex.Matches($Content)
+        if ($matches.Count -gt 0) {
+            $Content = $regex.Replace($Content, '$1 Type="string"')
+            $addedCount += $matches.Count
+        }
+    }
+
+    # Inject InputType="string" into CompareValidator
+    $compareRegex = [regex]::new('(<CompareValidator\b)(?=[^>]*>)(?![^>]*\bInputType\s*=)', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $compareMatches = $compareRegex.Matches($Content)
+    if ($compareMatches.Count -gt 0) {
+        $Content = $compareRegex.Replace($Content, '$1 InputType="string"')
+        $addedCount += $compareMatches.Count
+    }
+
+    if ($addedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Validator' -Detail "Injected type parameters into $addedCount validator(s)"
     }
 
     return $Content
@@ -1006,6 +1048,16 @@ function Test-BwfcControlPreservation {
     else {
         Write-TransformLog -File $RelPath -Transform 'Verify' -Detail "Control preservation check passed: $aspTagCount asp: tag(s) → $bwfcTagCount BWFC component tag(s)"
     }
+
+    # Specific warning: ImageButton → img flattening loses OnClick event handler
+    if ($aspControlNames.ContainsKey('ImageButton')) {
+        $imgTagRegex = [regex]'<img[\s>/]'
+        $imgCount = $imgTagRegex.Matches($OutputContent).Count
+        if ($imgCount -gt 0) {
+            $imageButtonSrc = $aspControlNames['ImageButton']
+            Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "⚠️ ImageButton→img flattening risk: source has $imageButtonSrc asp:ImageButton(s) and output has $imgCount <img> tag(s). ImageButton→img loses the OnClick event handler — use BWFC <ImageButton> component instead."
+        }
+    }
 }
 
 #endregion
@@ -1021,6 +1073,11 @@ function Copy-CodeBehind {
 
     if ($PSCmdlet.ShouldProcess($OutputFile, "Copy code-behind with TODO annotations")) {
         $content = Get-Content -Path $SourceFile -Raw -Encoding UTF8
+
+        # Strip Web Forms base classes (handled by @inherits WebFormsPageBase in _Imports.razor)
+        $content = $content -replace '\s*:\s*(?:System\.Web\.UI\.)?(?:Page|UserControl|MasterPage)\b', ''
+        # Strip System.Web using directives
+        $content = $content -replace '(?m)^\s*using\s+System\.Web(?:\.\w+)*;\s*\r?\n', ''
 
         $todoHeader = @"
 // =============================================================================
@@ -1124,6 +1181,55 @@ function New-CompilableStub {
     Write-ManualItem -File $RelPath -Category 'UnconvertibleStub' -Detail "Page contains Identity/Auth/Payment code — stubbed for clean build"
 }
 
+function New-StubCodeBehind {
+    <#
+    .SYNOPSIS
+        Creates a minimal compilable code-behind stub for unconvertible pages.
+    .DESCRIPTION
+        Used for pages matching unconvertible patterns (Account/*, Checkout/*).
+        The markup gets full Layer 1 transforms; this function generates a minimal
+        partial class so the page compiles, with a TODO banner for Layer 2.
+    #>
+    param(
+        [string]$OutputFile,
+        [string]$RelPath
+    )
+
+    $fileName = [System.IO.Path]::GetFileName($RelPath)
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+    $className = [System.IO.Path]::GetFileNameWithoutExtension($baseName)
+    $className = $className -replace '[^a-zA-Z0-9_]', '_'
+
+    $stubContent = @"
+// =============================================================================
+// TODO: Requires Identity/Payment migration — this is a stub code-behind.
+//
+// The markup (.razor) has been converted with Layer 1 mechanical transforms.
+// Implement the code-behind logic using ASP.NET Core patterns:
+//   - ASP.NET Core Identity (UserManager<T>, SignInManager<T>)
+//   - Payment service integration
+//   - Navigation via NavigationManager
+// =============================================================================
+
+public partial class $className
+{
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($OutputFile, "Write stub code-behind for unconvertible page")) {
+        $outputDir = Split-Path $OutputFile -Parent
+        if (-not (Test-Path $outputDir)) {
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+        }
+        Set-Content -Path $OutputFile -Value $stubContent -Encoding UTF8
+    }
+    else {
+        Write-Host "[WhatIf] Would write stub code-behind: $RelPath"
+    }
+
+    Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Generated stub code-behind (unconvertible page) → $OutputFile"
+}
+
 #endregion
 
 #region --- Main File Transform Pipeline ---
@@ -1173,16 +1279,12 @@ function Convert-WebFormsFile {
 
     $script:FilesProcessed++
 
-    # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
+    # Check for unconvertible pages (Identity/Auth/Payment) — markup still gets all
+    # Layer 1 transforms, but code-behind will be stubbed instead of copied (smart stub)
+    $isUnconvertiblePage = $false
     if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content -RelPath $relativePath)) {
-        $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
-        if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
-            $route = '/'
-        }
-        # Use relative path for a more descriptive route (e.g., /Account/Login)
-        $pathRoute = '/' + ($relativePath -replace '\\', '/' -replace '\.aspx$', '')
-        New-CompilableStub -Route $pathRoute -RelPath $relativePath -OutputFile $outputFile -OutputDir $outputDir
-        return
+        $isUnconvertiblePage = $true
+        Write-ManualItem -File $relativePath -Category 'UnconvertiblePage' -Detail "Page contains Identity/Auth/Payment code — markup transformed with Layer 1, code-behind stubbed with TODO"
     }
 
     # Apply transform pipeline in order
@@ -1209,6 +1311,7 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
+    $content = Add-ValidatorTypeParameters -Content $content -RelPath $relativePath
 
     # Scan for event handler attributes that need code-behind signature review
     $eventHandlerMatches = [regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')
@@ -1255,7 +1358,11 @@ function Convert-WebFormsFile {
                 '.master' { $cbOutputRel = $razorRelPath + $cbSuffix }
             }
             $cbOutputFile = Join-Path $OutputRoot $cbOutputRel
-            Copy-CodeBehind -SourceFile $cbSource -OutputFile $cbOutputFile -RelPath $cbRelPath
+            if ($isUnconvertiblePage) {
+                New-StubCodeBehind -OutputFile $cbOutputFile -RelPath $cbRelPath
+            } else {
+                Copy-CodeBehind -SourceFile $cbSource -OutputFile $cbOutputFile -RelPath $cbRelPath
+            }
         }
     }
 }
