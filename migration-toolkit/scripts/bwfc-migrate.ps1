@@ -786,6 +786,69 @@ function ConvertFrom-GetRouteUrl {
 
 #endregion
 
+#region --- ItemType/TItem Data-Source Stripping ---
+
+function Remove-ItemTypeWithDataSource {
+    <#
+    .SYNOPSIS
+        Strips ItemType/TItem attributes when a data source (SelectMethod) is present.
+    .DESCRIPTION
+        Blazor's generic type inference automatically resolves the item type from the
+        data source binding. Emitting ItemType or TItem alongside SelectMethod causes
+        redundant type parameters and is the #1 recurring build failure class.
+
+        Rules:
+        - Tag has BOTH ItemType="X" AND SelectMethod="..." → strip ItemType
+        - Tag has BOTH TItem="X" AND SelectMethod="..." → strip TItem
+        - Tag has ItemType="X" but NO SelectMethod → keep as-is (Blazor needs it)
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $strippedCount = 0
+
+    # Match tags that contain BOTH SelectMethod and ItemType (in either order)
+    # Pattern 1: ItemType before SelectMethod
+    $regex1 = [regex]::new('<[A-Z]\w*\b[^>]*?\bItemType\s*=\s*"[^"]*"[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    # Pattern 2: SelectMethod before ItemType
+    $regex2 = [regex]::new('<[A-Z]\w*\b[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*?\bItemType\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+
+    # Strip ItemType from matches of either pattern
+    $itemTypeAttr = [regex]::new('\s+ItemType\s*=\s*"[^"]*"', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    foreach ($rx in @($regex1, $regex2)) {
+        foreach ($m in $rx.Matches($Content)) {
+            $original = $m.Value
+            $replaced = $itemTypeAttr.Replace($original, '', 1)
+            if ($original -ne $replaced) {
+                $Content = $Content.Replace($original, $replaced)
+                $strippedCount++
+            }
+        }
+    }
+
+    # Same for TItem + SelectMethod
+    $regex3 = [regex]::new('<[A-Z]\w*\b[^>]*?\bTItem\s*=\s*"[^"]*"[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $regex4 = [regex]::new('<[A-Z]\w*\b[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*?\bTItem\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $tItemAttr = [regex]::new('\s+TItem\s*=\s*"[^"]*"', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    foreach ($rx in @($regex3, $regex4)) {
+        foreach ($m in $rx.Matches($Content)) {
+            $original = $m.Value
+            $replaced = $tItemAttr.Replace($original, '', 1)
+            if ($original -ne $replaced) {
+                $Content = $Content.Replace($original, $replaced)
+                $strippedCount++
+            }
+        }
+    }
+
+    if ($strippedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'ItemType-Inference' -Detail "Stripped $strippedCount ItemType/TItem attribute(s) where SelectMethod provides type inference"
+    }
+
+    return $Content
+}
+
+#endregion
+
 #region --- SelectMethod Conversion ---
 
 function ConvertFrom-SelectMethod {
@@ -1402,6 +1465,7 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-GetRouteUrl -Content $content -RelPath $relativePath
     $content = ConvertFrom-Expressions -Content $content -RelPath $relativePath
     $content = ConvertFrom-LoginView -Content $content -RelPath $relativePath
+    $content = Remove-ItemTypeWithDataSource -Content $content -RelPath $relativePath
     $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
