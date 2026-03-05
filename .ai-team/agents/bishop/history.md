@@ -18,3 +18,18 @@
 - Migration must preserve all asp: controls as BWFC components — never flatten to raw HTML
 
 ## Learnings
+
+### 2025-07-25: Run 9 WingtipToys Migration Benchmark
+
+- **Result:** Build succeeded — 0 errors, 0 warnings (Run9-specific)
+- **Pipeline:** Layer 0 (0.66s) → Layer 1 (4.49s, 667 ops) → Layer 2 (~45min) → Build (6.13s, 7 attempts)
+- **Output:** 35 .razor, 46 .cs, 79 wwwroot, 28 routable pages, 173 BWFC control instances (23 unique types)
+- **Layer 1 bugs found:**
+  - `ItemType→TItem` conversion is wrong for GridView/ListView/FormView/DetailsView (they use `ItemType`, only DropDownList uses `TItem`)
+  - Validators missing type params: RequiredFieldValidator needs `Type="string"`, CompareValidator needs `InputType="string"`
+  - No `BlazorWebFormsComponents.Validations` using added to `_Imports.razor`
+- **Layer 2 patterns:**
+  - `@inherits WebFormsPageBase` in `_Imports.razor` conflicts with `: ComponentBase` in code-behinds — must remove `: ComponentBase`
+  - Layout files need `: LayoutComponentBase` explicitly
+  - Stub page cleanup (17/35 files) is the largest Layer 2 effort — unconverted event handlers, ControlToValidate refs, `<% %>` expressions
+  - `AddHttpContextAccessor()` must come BEFORE `AddBlazorWebFormsComponents()` in Program.cs
