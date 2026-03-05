@@ -67,7 +67,7 @@ $ErrorActionPreference = 'Stop'
 
 $WebFormsExtensions = @('.aspx', '.ascx', '.master')
 $CodeBehindExtensions = @('.aspx.cs', '.ascx.cs', '.master.cs', '.aspx.vb', '.ascx.vb', '.master.vb')
-$StaticExtensions = @('.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot')
+$StaticExtensions = @('.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map')
 
 # Attributes to strip completely (case-insensitive patterns)
 $StripAttributes = @(
@@ -270,13 +270,30 @@ function New-AppRazorScaffold {
 
     $componentsDir = Join-Path $OutputRoot "Components"
 
-    # Extract <link> stylesheet tags from the source master page (Site.Master)
+    # Extract <link> stylesheet tags and <webopt:bundlereference> from the source master page (Site.Master)
     $cssLinks = @()
     if ($SourceRoot -and (Test-Path $SourceRoot)) {
         $masterFiles = Get-ChildItem -Path $SourceRoot -Recurse -Filter '*.Master' -ErrorAction SilentlyContinue
         foreach ($masterFile in $masterFiles) {
             $masterContent = Get-Content -Path $masterFile.FullName -Raw -ErrorAction SilentlyContinue
             if ($masterContent) {
+                # Handle <webopt:bundlereference> — expand to individual CSS links from the referenced folder
+                $bundleRegex = [regex]'<webopt:bundlereference[^>]*\bpath\s*=\s*"([^"]+)"[^>]*/?\s*>'
+                $bundleMatches = $bundleRegex.Matches($masterContent)
+                foreach ($bm in $bundleMatches) {
+                    $bundlePath = $bm.Groups[1].Value -replace '^~/', ''
+                    $cssFolder = Join-Path $SourceRoot $bundlePath
+                    if (Test-Path $cssFolder) {
+                        $cssFiles = Get-ChildItem -Path $cssFolder -Filter '*.css' | Where-Object { $_.Name -notmatch '\.min\.css$' } | Sort-Object Name
+                        foreach ($cf in $cssFiles) {
+                            $cssHref = "/$bundlePath/$($cf.Name)" -replace '\\','/'
+                            $cssLinks += "    <link href=`"$cssHref`" rel=`"stylesheet`" />"
+                        }
+                        Write-TransformLog -File $masterFile.Name -Transform 'BundleExpand' -Detail "Expanded bundlereference '$bundlePath' → $($cssFiles.Count) CSS file(s) for App.razor"
+                    }
+                }
+
+                # Handle explicit <link rel="stylesheet"> tags
                 $linkRegex = [regex]'<link\b[^>]*\brel\s*=\s*["\x27]stylesheet["\x27][^>]*/?\s*>'
                 $linkMatches = $linkRegex.Matches($masterContent)
                 foreach ($m in $linkMatches) {
@@ -287,8 +304,8 @@ function New-AppRazorScaffold {
                     $link = $link -replace '\s+runat\s*=\s*"server"',''
                     $cssLinks += "    $link"
                 }
-                if ($linkMatches.Count -gt 0) {
-                    Write-TransformLog -File $masterFile.Name -Transform 'CssExtract' -Detail "Extracted $($linkMatches.Count) stylesheet link(s) from master page for App.razor"
+                if ($linkMatches.Count -gt 0 -or $bundleMatches.Count -gt 0) {
+                    Write-TransformLog -File $masterFile.Name -Transform 'CssExtract' -Detail "Extracted $($linkMatches.Count) link(s) + $($bundleMatches.Count) bundle(s) from master page for App.razor"
                 }
             }
         }
@@ -453,8 +470,9 @@ public class MockAuthenticationStateProvider : AuthenticationStateProvider
 function ConvertFrom-PageDirective {
     param([string]$Content, [string]$FileName, [string]$RelPath)
 
-    # <%@ Page ... %> → @page "/route"
-    $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($FileName)
+    # <%@ Page ... %> → @page "/route" (preserving folder structure)
+    $routePath = ($RelPath -replace '\\', '/') -replace '\.(aspx|ascx)$', ''
+    $route = '/' + $routePath
     if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
         $route = '/'
     }
