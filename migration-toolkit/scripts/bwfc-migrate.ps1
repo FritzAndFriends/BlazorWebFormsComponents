@@ -184,6 +184,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
@@ -241,10 +242,40 @@ app.Run();
 function New-AppRazorScaffold {
     param(
         [string]$OutputRoot,
-        [string]$ProjectName
+        [string]$ProjectName,
+        [string]$SourceRoot = ''
     )
 
     $componentsDir = Join-Path $OutputRoot "Components"
+
+    # Extract <link> stylesheet tags from the source master page (Site.Master)
+    $cssLinks = @()
+    if ($SourceRoot -and (Test-Path $SourceRoot)) {
+        $masterFiles = Get-ChildItem -Path $SourceRoot -Recurse -Filter '*.Master' -ErrorAction SilentlyContinue
+        foreach ($masterFile in $masterFiles) {
+            $masterContent = Get-Content -Path $masterFile.FullName -Raw -ErrorAction SilentlyContinue
+            if ($masterContent) {
+                $linkRegex = [regex]'<link\b[^>]*\brel\s*=\s*["\x27]stylesheet["\x27][^>]*/?\s*>'
+                $linkMatches = $linkRegex.Matches($masterContent)
+                foreach ($m in $linkMatches) {
+                    $link = $m.Value
+                    # Convert ~/path to /path for Blazor static files
+                    $link = $link -replace '~/','/'
+                    # Strip runat="server" if present
+                    $link = $link -replace '\s+runat\s*=\s*"server"',''
+                    $cssLinks += "    $link"
+                }
+                if ($linkMatches.Count -gt 0) {
+                    Write-TransformLog -File $masterFile.Name -Transform 'CssExtract' -Detail "Extracted $($linkMatches.Count) stylesheet link(s) from master page for App.razor"
+                }
+            }
+        }
+    }
+
+    $cssBlock = ''
+    if ($cssLinks.Count -gt 0) {
+        $cssBlock = "`n" + ($cssLinks -join "`n")
+    }
 
     $appRazorContent = @"
 <!DOCTYPE html>
@@ -253,7 +284,7 @@ function New-AppRazorScaffold {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
+    <base href="/" />$cssBlock
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
@@ -1279,7 +1310,7 @@ if (-not $SkipProjectScaffold) {
     Write-Host 'Generating project scaffold...' -ForegroundColor Green
     if (-not $WhatIfPreference) {
         New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName
-        New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName
+        New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName -SourceRoot $Path
     }
     else {
         Write-Host '[WhatIf] Would generate .csproj, _Imports.razor, Program.cs, App.razor, Routes.razor'
