@@ -75,3 +75,26 @@
 
  Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
 
+### Run 9 Skill Documentation Fixes (2026-03-07)
+
+- **Scope:** 6 fixes (RF-01, RF-02, RF-05, RF-09, RF-13, RF-14) across 4 skill files, identified by Forge in Run 8 post-mortem.
+- **bwfc-identity-migration/SKILL.md updated:**
+  - RF-01 (P0): Added "⚠️ Cookie Auth Under Interactive Server Mode" section after Overview — documents that HttpContext is NULL during WebSocket circuits, cookie auth MUST use `<form method="post">` → minimal API endpoints, not Blazor event handlers.
+  - RF-02 (P0): Added "Ready-to-Use Endpoint Templates" section with complete copy-paste C# code for login, register, and logout minimal API endpoints (based on actual Run 8 Program.cs).
+  - RF-05 (P1): Added bold warning callout "NEVER replace LoginView with AuthorizeView" after the LoginView conditional content section.
+  - RF-14 (P1): Added "DisableAntiforgery Requirement" section explaining that `.DisableAntiforgery()` is required on all minimal API endpoints receiving Blazor form POSTs.
+- **bwfc-data-migration/SKILL.md updated:**
+  - RF-01 (P0): Added "⚠️ Session State Under Interactive Server Mode" section — documents three options (minimal API, scoped services, database-backed) for handling session-dependent state when HttpContext.Session is null.
+  - RF-09 (P1): Added "Blazor Enhanced Navigation" section with the problem, three workaround options (form POST, data-enhance-nav, JS), and a decision table for which to use.
+  - RF-14 (P1): Added DisableAntiforgery notes inline wherever `<form method="post">` patterns appear.
+- **migration-standards/SKILL.md updated:**
+  - RF-05 (P1): Reinforced LoginView → "preserve as BWFC LoginView — do NOT rewrite as AuthorizeView" with expanded explanation.
+  - RF-09 (P1): Added "Blazor Enhanced Navigation" pattern under standards — documents the `<form method="post">` / `data-enhance-nav="false"` requirement for minimal API links.
+- **bwfc-migration/SKILL.md updated:**
+  - RF-13 (P1): Added "ListView with GroupItemCount" example showing Web Forms 4-column grid → BWFC equivalent with LayoutTemplate, GroupTemplate, and ItemTemplate.
+- **Key patterns documented:**
+  - The `<form method="post">` → minimal API → redirect pattern is the canonical way to do auth + session operations under Interactive Server mode.
+  - `.DisableAntiforgery()` is required on all minimal API endpoints receiving form POSTs from Blazor pages.
+  - Enhanced navigation breaks `<a href>` links to API endpoints; use `<form>` or `data-enhance-nav="false"`.
+  - LoginView is a first-class Blazor component, never convert to AuthorizeView.
+

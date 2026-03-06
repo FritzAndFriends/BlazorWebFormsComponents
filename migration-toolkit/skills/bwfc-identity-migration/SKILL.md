@@ -25,6 +25,54 @@ Web Forms authentication typically uses one of three systems. The migration path
 
 ---
 
+## ⚠️ Cookie Auth Under Interactive Server Mode
+
+> **CRITICAL:** When using `<Routes @rendermode="InteractiveServer" />` (global interactive server mode), `HttpContext` is **NULL** during WebSocket circuits. This means cookie-based authentication operations — login, register, logout — **cannot** be performed via Blazor component event handlers (e.g., `@onclick`). They will silently fail: no exception is thrown, but no cookie is set.
+
+**Why this happens:** After the initial HTTP request, Blazor Server communicates over a WebSocket (SignalR circuit). There is no HTTP response to attach a `Set-Cookie` header to. `SignInAsync()` called inside a component event handler has no `HttpContext.Response` to write the cookie.
+
+**Required pattern:** Use standard HTML `<form method="post">` elements that submit to **minimal API endpoints** via full HTTP POST requests. The endpoint performs the auth operation and redirects back to a Blazor page.
+
+```razor
+@* Login.razor — form posts to a minimal API endpoint, NOT a Blazor event handler *@
+<form method="post" action="/Account/LoginHandler">
+    <div>
+        <label>Email</label>
+        <input type="email" name="email" required />
+    </div>
+    <div>
+        <label>Password</label>
+        <input type="password" name="password" required />
+    </div>
+    <button type="submit">Log in</button>
+</form>
+```
+
+```csharp
+// Program.cs — minimal API endpoint handles the actual SignInAsync()
+app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+    return result.Succeeded
+        ? Results.Redirect("/")
+        : Results.Redirect("/Account/Login?error=Invalid+login+attempt");
+}).DisableAntiforgery();
+```
+
+**Key points:**
+- The `<form>` submits a standard HTTP POST — this is a full page navigation, not a Blazor event
+- The minimal API endpoint has a real `HttpContext` with a real HTTP response → cookies work
+- After the operation, the endpoint redirects back to a Blazor page
+- This pattern applies to **all** cookie-writing operations: login, register, logout, external auth callbacks
+- This is **NOT optional** — without it, auth silently fails
+
+> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements. See [DisableAntiforgery Requirement](#disableantiforgery-requirement) below.
+
+---
+
 ## Step 1: Add Identity Packages
 
 ```bash
@@ -225,6 +273,8 @@ BWFC provides login controls that match Web Forms markup. These controls use nat
 </AuthorizeView>
 ```
 
+> ⚠️ **NEVER replace LoginView with AuthorizeView.** The BWFC `LoginView` component is a fully functional Blazor component that injects `AuthenticationStateProvider` natively. It uses the SAME template names as `asp:LoginView` (`AnonymousTemplate`, `LoggedInTemplate`). The migration script handles this automatically — do NOT convert to `AuthorizeView` manually. Use `AuthorizeView` only when you need Blazor-native role-based content (`<AuthorizeView Roles="...">`) with no Web Forms equivalent.
+
 ### Role-Based Content
 
 ```html
@@ -310,6 +360,124 @@ protected override async Task OnInitializedAsync()
 | `ConfigureAuth(app)` in `Startup.Auth.cs` | Configuration in `Program.cs` services section |
 | `app.CreatePerOwinContext<ApplicationUserManager>(...)` | `builder.Services.AddIdentity<ApplicationUser, IdentityRole>()` |
 | `SecurityStampValidator.OnValidateIdentity(...)` | Built into ASP.NET Core Identity automatically |
+
+---
+
+## Ready-to-Use Endpoint Templates
+
+These minimal API endpoints handle authentication operations that **must** run over HTTP (not WebSocket). Add them to `Program.cs` after building the app but before `app.Run()`. Each endpoint reads form data, performs the auth operation, and redirects back to a Blazor page.
+
+> **Important:** Every endpoint below calls `.DisableAntiforgery()` because Blazor-rendered `<form>` elements do not include antiforgery tokens. See [DisableAntiforgery Requirement](#disableantiforgery-requirement).
+
+### Login Endpoint
+
+```csharp
+// Program.cs — authenticates user and sets auth cookie via HTTP response
+app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+
+    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+    if (result.Succeeded)
+        return Results.Redirect("/");
+    return Results.Redirect("/Account/Login?error=Invalid+login+attempt");
+}).DisableAntiforgery();
+```
+
+**Blazor form that submits to this endpoint:**
+
+```razor
+@page "/Account/Login"
+
+<h2>Log in</h2>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="text-danger">@errorMessage</div>
+}
+<form method="post" action="/Account/LoginHandler">
+    <div>
+        <label>Email</label>
+        <input type="email" name="email" required />
+    </div>
+    <div>
+        <label>Password</label>
+        <input type="password" name="password" required />
+    </div>
+    <button type="submit">Log in</button>
+</form>
+
+@code {
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        errorMessage = Error;
+    }
+}
+```
+
+### Register Endpoint
+
+```csharp
+// Program.cs — creates user, signs in, and redirects
+app.MapPost("/Account/RegisterHandler", async (HttpContext context,
+    UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+
+    var user = new IdentityUser { UserName = email, Email = email };
+    var result = await userManager.CreateAsync(user, password);
+    if (result.Succeeded)
+    {
+        await signInManager.SignInAsync(user, isPersistent: false);
+        return Results.Redirect("/");
+    }
+    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+    return Results.Redirect($"/Account/Register?error={Uri.EscapeDataString(errors)}");
+}).DisableAntiforgery();
+```
+
+### Logout Endpoint
+
+```csharp
+// Program.cs — signs out and redirects to home page
+app.MapPost("/Account/Logout", async (SignInManager<IdentityUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
+}).DisableAntiforgery();
+```
+
+**Blazor logout form (use instead of a link):**
+
+```razor
+<form method="post" action="/Account/Logout">
+    <button type="submit" class="nav-link btn btn-link">Log out</button>
+</form>
+```
+
+> **Note:** Do NOT use `<a href="/Account/Logout">` — Blazor's enhanced navigation will intercept the click and attempt client-side navigation instead of a real HTTP POST. Use a `<form method="post">` with a submit button, or add `data-enhance-nav="false"` to the link. See [Blazor Enhanced Navigation](#blazor-enhanced-navigation) in the data migration skill.
+
+---
+
+## DisableAntiforgery Requirement
+
+> **Important:** When using `<form method="post">` to submit to minimal API endpoints from Blazor-rendered pages, the endpoint **MUST** call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens. Without this, the request will fail with a 400 Bad Request.
+>
+> ```csharp
+> // ✅ CORRECT — DisableAntiforgery() required for Blazor form submissions
+> app.MapPost("/Account/LoginHandler", handler).DisableAntiforgery();
+>
+> // ❌ WRONG — will reject POST from Blazor-rendered forms
+> app.MapPost("/Account/LoginHandler", handler);
+> ```
+>
+> If you need antiforgery protection, you must manually include the token in the form using `@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery` and render a hidden field. For most migration scenarios, `.DisableAntiforgery()` is the pragmatic choice.
 
 ---
 

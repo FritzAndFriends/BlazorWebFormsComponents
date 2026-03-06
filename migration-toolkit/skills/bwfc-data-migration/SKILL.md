@@ -26,6 +26,74 @@ Use this skill when you need to:
 
 ---
 
+## ⚠️ Session State Under Interactive Server Mode
+
+> **CRITICAL:** When using `<Routes @rendermode="InteractiveServer" />` (global interactive server mode), `HttpContext.Session` is **NULL** during WebSocket rendering. Any code that accesses `HttpContext.Session` inside a Blazor component event handler or lifecycle method will throw a `NullReferenceException` or silently fail.
+
+**Why this happens:** After the initial HTTP request establishes the SignalR circuit, Blazor communicates over WebSocket. There is no HTTP request/response — and therefore no session middleware processing — during component interactions.
+
+**Options for session-dependent operations (shopping cart, user preferences, etc.):**
+
+### Option A: Minimal API Endpoints (most reliable for HTTP-dependent state)
+
+Use the same `<form method="post">` → minimal API pattern used for auth. The endpoint has a real `HttpContext` with session access.
+
+```csharp
+// Program.cs — cart add operation via minimal API
+app.MapPost("/Cart/Add", async (HttpContext context, ShoppingCartService cart) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    if (int.TryParse(form["productId"], out var productId))
+        cart.AddToCart(productId);
+    return Results.Redirect("/ShoppingCart");
+}).DisableAntiforgery();
+```
+
+```razor
+@* Blazor page — form submits via HTTP POST, not a Blazor event *@
+<form method="post" action="/Cart/Add">
+    <input type="hidden" name="productId" value="@product.ProductID" />
+    <button type="submit">Add to Cart</button>
+</form>
+```
+
+> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens. Example: `app.MapPost("/endpoint", handler).DisableAntiforgery();`
+
+### Option B: Scoped Services (in-memory, per-circuit)
+
+Replace `Session["key"]` with a scoped DI service. State lives in server memory for the duration of the SignalR circuit.
+
+```csharp
+// CartService.cs — registered as AddScoped<CartService>()
+public class CartService
+{
+    public ShoppingCart Cart { get; set; } = new();
+    public void AddItem(int productId) { /* ... */ }
+}
+```
+
+**Trade-off:** State is lost if the user refreshes the page or the circuit disconnects. Good for transient UI state, not for durable cart data.
+
+### Option C: Database-Backed State (most durable)
+
+Store state in the database, keyed by user ID or a cookie-based session token. Survives circuit disconnects, page refreshes, and server restarts.
+
+```csharp
+public class CartService(IDbContextFactory<ProductContext> factory)
+{
+    public async Task AddItemAsync(string userId, int productId)
+    {
+        using var db = factory.CreateDbContext();
+        db.CartItems.Add(new CartItem { UserId = userId, ProductId = productId });
+        await db.SaveChangesAsync();
+    }
+}
+```
+
+**Recommendation:** For shopping carts and other business-critical state, prefer Option A (minimal API) or Option C (database). Use Option B only for transient UI state that can be safely lost.
+
+---
+
 ## 1. Entity Framework 6 → EF Core
 
 **Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod`.
@@ -476,3 +544,61 @@ Web Forms `SelectMethod` returns `IQueryable` synchronously. Blazor services sho
 
 ### Static Helpers with HttpContext
 Web Forms often has static helper classes that access `HttpContext.Current`. These must be refactored to accept dependencies via constructor injection.
+
+---
+
+## Blazor Enhanced Navigation
+
+Blazor's **enhanced navigation** intercepts `<a href>` clicks and handles them as client-side SPA navigation. This is seamless for navigating between Blazor pages, but it **breaks links to minimal API endpoints** because the request never actually hits the server as an HTTP request.
+
+### The Problem
+
+```razor
+@* ❌ BROKEN — Blazor intercepts the click, attempts client-side navigation *@
+<a href="/AddToCart?productID=@product.ProductID">Add to Cart</a>
+
+@* The user sees a blank page or "not found" because Blazor tries to render
+   "/AddToCart" as a Razor component, but it's a minimal API endpoint *@
+```
+
+### Workaround Options
+
+**Option 1: Use `<form method="post">` (Recommended)**
+
+```razor
+@* ✅ CORRECT — form POST is a full HTTP request, not intercepted by Blazor *@
+<form method="post" action="/Cart/Add">
+    <input type="hidden" name="productId" value="@product.ProductID" />
+    <button type="submit" class="btn btn-primary">Add to Cart</button>
+</form>
+```
+
+> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens. Example: `app.MapPost("/endpoint", handler).DisableAntiforgery();`
+
+**Option 2: Add `data-enhance-nav="false"` to the link**
+
+```razor
+@* ✅ CORRECT — disables enhanced navigation for this specific link *@
+<a href="/AddToCart?productID=@product.ProductID" data-enhance-nav="false">Add to Cart</a>
+```
+
+This tells Blazor to let the browser handle the navigation normally (full HTTP request).
+
+**Option 3: JavaScript workaround**
+
+```razor
+@* ✅ Works — forces a full page navigation via JavaScript *@
+<a href="/AddToCart?productID=@product.ProductID"
+   onclick="window.location.href=this.href; return false;">Add to Cart</a>
+```
+
+### Which Workaround to Use
+
+| Scenario | Recommended Approach |
+|----------|---------------------|
+| Auth operations (login/register/logout) | `<form method="post">` — always |
+| Cart operations (add/remove/update) | `<form method="post">` — most reliable |
+| Simple GET redirects to API endpoints | `data-enhance-nav="false"` on the `<a>` tag |
+| Download links to file endpoints | `data-enhance-nav="false"` on the `<a>` tag |
+
+> **Rule of thumb:** Any link that targets a minimal API endpoint (not a Blazor page) needs either `<form method="post">` or `data-enhance-nav="false"` to work correctly.

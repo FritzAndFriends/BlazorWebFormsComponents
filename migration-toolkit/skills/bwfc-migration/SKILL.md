@@ -302,6 +302,52 @@ These are 100% mechanical — apply to every file:
 </ListView>
 ```
 
+#### ListView with GroupItemCount
+
+Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 products per row). BWFC preserves this attribute and the `GroupTemplate`/`LayoutTemplate` structure.
+
+```xml
+<!-- Web Forms — ListView with GroupItemCount for 4-column grid -->
+<asp:ListView ID="productList" runat="server"
+    ItemType="WingtipToys.Models.Product" SelectMethod="GetProducts"
+    GroupItemCount="4">
+    <LayoutTemplate>
+        <table><tr runat="server" id="groupPlaceholder" /></table>
+    </LayoutTemplate>
+    <GroupTemplate>
+        <tr><td runat="server" id="itemPlaceholder" /></tr>
+    </GroupTemplate>
+    <ItemTemplate>
+        <td>
+            <a href="<%#: GetRouteUrl("ProductRoute", new { productId = Item.ProductID }) %>">
+                <img src="<%#: Item.ImagePath %>" alt="<%#: Item.ProductName %>" />
+            </a>
+            <span><%#: Item.ProductName %></span>
+            <span><%#: Item.UnitPrice.ToString("C") %></span>
+        </td>
+    </ItemTemplate>
+</asp:ListView>
+```
+
+```razor
+@* Blazor — BWFC ListView preserves GroupItemCount and templates *@
+<ListView Items="products" TItem="Product" GroupItemCount="4">
+    <LayoutTemplate>@context</LayoutTemplate>
+    <GroupTemplate>@context</GroupTemplate>
+    <ItemTemplate>
+        <td>
+            <a href="@($"/Products/{context.ProductID}")">
+                <img src="@context.ImagePath" alt="@context.ProductName" />
+            </a>
+            <span>@context.ProductName</span>
+            <span>@context.UnitPrice.ToString("C")</span>
+        </td>
+    </ItemTemplate>
+</ListView>
+```
+
+**Key changes:** `GroupItemCount` preserved as-is. `LayoutTemplate` and `GroupTemplate` use `@context` as the placeholder (BWFC renders the table/tr structure). `ItemTemplate` uses `@context.Property` instead of `<%#: Item.Property %>`.
+
 #### FormView
 
 ```razor
