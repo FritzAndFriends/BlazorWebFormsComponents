@@ -4,6 +4,7 @@
 
 <!-- Decisions are appended below by the Scribe after merging from .ai-team/decisions/inbox/ -->
 
+
 ### 2026-02-10: Sample pages use Components/Pages path
 
 **By:** Jubilee
@@ -5563,7 +5564,6 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 **What:** Migration test runs with screenshots and measurements go in `docs/migration-tests/` with a subfolder per run containing a markdown report and supporting images. This is the standard location for all migration benchmarking.
 **Why:** User request — establishes a repeatable pattern for tracking migration test results over time.
 
-
 ### 2026-03-04: migration-toolkit/ is the canonical home for all deliverable migration assets (consolidated)
 **By:** Jeffrey T. Fritz, Forge, Cyclops
 **Status:** Implemented
@@ -5705,7 +5705,6 @@ This would reduce the manual item count from 18 to ~14, pushing Layer 1 coverage
 
 Should Cyclops implement these two regexes in `bwfc-migrate.ps1`? The changes are ~10 lines of code in the `ConvertFrom-Expressions` function, with well-defined test cases from WingtipToys source files.
 
-
 ### 2026-03-04: Master Page Transforms and Expression Regex Enhancements
 
 **By:** Cyclops
@@ -5742,13 +5741,11 @@ Completed Run 4 of the WingtipToys migration benchmark using the enhanced `bwfc-
 
 Run 4 validates that the enhanced script is ready for inclusion in the migration toolkit. The 3 new features (master page conversion, App/Routes scaffold, format-string regexes) collectively reduce manual Layer 2 work by approximately 30-40 minutes per migration.
 
-
 ### 2026-03-05: GetRouteUrl RouteValueDictionary overloads completed
 
 **By:** Cyclops
 **What:** Completed the two stubbed `RouteValueDictionary` overloads in `GetRouteUrlHelper.cs` that previously returned `null`. They now delegate to `LinkGenerator.GetPathByRouteValues` identically to the `object` overloads. All 4 overloads match the Web Forms `Control.GetRouteUrl` API surface.
 **Why:** The Run 4 report flagged `GetRouteUrl` as needing completion. While WingtipToys only uses anonymous-object overloads (which already worked), the `RouteValueDictionary` overloads are part of the Web Forms API surface and should work correctly for any migrated code that uses them. Returning `null` was a silent failure that could confuse developers during migration.
-
 
 ### 2026-03-04: Migration report image paths must use 3-level relative traversal
 
@@ -5756,12 +5753,10 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
 **Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
 
-
 ### 2026-03-04: User directive — exclude FreshWingtipToys and feasibility doc
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** FreshWingtipToys sample site (samples/FreshWingtipToys/) and the ASPX middleware feasibility doc (planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md) should NOT be committed to the repo. They are scratch artifacts from the migration benchmarking work.
 **Why:** User request — captured for team memory
-
 
 ### 2026-03-04: Run 5 Migration Patterns
 
@@ -5783,7 +5778,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 3. When ASP.NET Identity is used in the Web Forms project, prefer ASP.NET Core Identity in the Blazor migration
 4. Event handler migration should leverage BWFC component event parameters (OnClick, OnCommand, OnSelectedIndexChanged, etc.) which already have similar names to Web Forms originals
 **Why:** User request — establishing canonical migration standards based on Run 5 learnings. These should be reflected in migration scripts, documentation, and skills.
-
 
 ### 2026-03-05: Migration Toolkit Run 6  BWFC-first migration standards and 8 script enhancements (consolidated)
 
@@ -5819,7 +5813,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 **Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
 
-
 ### 2026-03-04: @rendermode InteractiveServer belongs in App.razor, not _Imports.razor (consolidated)
 
 **By:** Forge, Cyclops, Jeffrey T. Fritz
@@ -5838,12 +5831,10 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
 **Why:** These patterns should be considered validated for external migration guidance.
 
-
 ### 2026-03-04: User directive
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Entity Framework Core migrations should always use the latest .NET 10 version of the package, currently 10.0.3. Use `Microsoft.EntityFrameworkCore` version 10.0.3 (and related packages like `.SqlServer`, `.Tools`, `.Design` at the same version).
 **Why:** User request — captured for team memory. Ensures migrated projects use current stable EF Core matching the net10.0 TFM.
-
 
 ### 2026-03-04: WebFormsPageBase  Page base class for converted ASPX pages (consolidated)
 
@@ -5864,7 +5855,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Merged Page.razor's head-rendering capability into WebFormsPage (Option B from Forge's consolidation analysis). WebFormsPage now injects IServiceProvider, optionally resolves IPageService, subscribes to title/meta change events, and renders <PageTitle> + <HeadContent> alongside its existing <CascadingValue> wrapper. New [Parameter] bool RenderPageHead (default: 	rue) allows opting out. IPageService resolution is optional  WebFormsPage works for naming/theming even without AddBlazorWebFormsComponents(). Layout simplifies from 2 components (<Page /> + <WebFormsPage>) to 1 (<WebFormsPage> only). Page.razor remains as standalone option for apps not using WebFormsPage. NamingContainer and ThemeProvider unchanged. Forge analyzed 4 options: A (WebFormsPageBase renders  rejected, breaks SSR), B (merge into WebFormsPage  recommended and implemented), C (JSInterop  rejected, breaks SSR), D (status quo  acceptable fallback). WebFormsPageBase inheritance unchanged (stays as ComponentBase, not NamingContainer). 7 new tests, 1479 total passing.
 
 **Why:** Jeff asked to consolidate the 5-piece page system into fewer entry points. Option B is the only approach that works with Blazor's render model (<PageTitle> and <HeadContent> must appear in markup, not a base class). Result: two-line setup (one @inherits in _Imports.razor, one <WebFormsPage> in MainLayout.razor) delivers naming, theming, and head rendering. Migration scripts generate one component instead of two.
-
 
 ### 2026-03-05: Event Handler Naming Parity, Aliases, and Migration Script Fixes (consolidated)
 
@@ -5960,8 +5950,6 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 | oid gv_Sorting(object sender, GridViewSortEventArgs e) | EventCallback<GridViewSortEventArgs> | oid gv_Sorting(GridViewSortEventArgs e) |
 | oid lnk_Command(object sender, CommandEventArgs e) | EventCallback<CommandEventArgs> | oid lnk_Command(CommandEventArgs e) |
 
- 
-
 ### 2026-03-05: User directive  AfterWingtipToys is migration output only
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** We should never update the AfterWingtipToys sample app directly  it should be the output of a migration using our BWFC components and migration toolkit. Hand-editing defeats the purpose.
@@ -5995,17 +5983,16 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 **What:** Established the standard report structure for migration benchmark executive reports: Executive Summary → Toolkit Version → Source App → Layer 1 Metrics (with review breakdown table) → Layer 2/3 placeholders → What Worked → What Didn't → Run Comparison (with delta table) → Recommendations → Appendix. Reports live at `samples/Run{N}WingtipToys/MIGRATION-REPORT.md`.
 **Why:** Consistent report structure enables run-over-run comparison and toolkit effectiveness tracking. Placing the report inside the sample output directory keeps it co-located with the migrated files it describes. The delta table format (Run N-1 → Run N with change column) was chosen to make regressions immediately visible.
 
-
 ### 2026-03-06: Run 7 Layer 2/3 Core Storefront Transforms (consolidated)
 
 **By:** Forge
 **What:** Run 7 Layer 2/3 transforms for 5 core storefront pages plus build-unblocking stubs. Key decisions: (1) ProductDetails FormView preserved as BWFC component with `Items=@(new List<Product>{SampleProduct})` single-item wrapper  flattening to direct HTML rejected per control preservation mandate; (2) MainLayout category ListView preserved as BWFC component with `Items=@Categories`  for-loop rejected per control preservation; (3) ShoppingCart GridView preserved with full interactivity, @rendermode InteractiveServer, and CartStateService injection; (4) ProductContext inherits DbContext without Identity (Account pages out of scope); (5) 26 code-behind + 12 .razor files in Account/Checkout/misc stubbed to ComponentBase placeholders to unblock build (14 errors, all out-of-scope); (6) Image paths standardized from /Catalog/Images/ to /Images/Products/ per Blazor wwwroot layout.
 **Why:** Control preservation mandate requires keeping BWFC components (FormView, ListView, GridView) rather than flattening to raw HTML. Simplification to direct binding or for-loops was considered for FormView/ListView but rejected per the mandatory preservation rules. Stubbing out-of-scope pages to ComponentBase unblocks the build without requiring full Identity scaffolding.
+
 ### 2026-03-06: Run 7 runtime failure learnings codified in migration toolkit skills and docs
 **By:** Beast
 **What:** Five migration toolkit files updated with learnings from Run 7 WingtipToys runtime failures: (1) UseStaticFiles() is required alongside MapStaticAssets() in Program.cs, (2) CSS links must be extracted from master pages to App.razor, (3) AuthorizeView crashes without AddCascadingAuthenticationState/AddAuthorization, (4) image paths in templates must match wwwroot directory structure, (5) GetRouteUrl works via WebFormsPageBase. AuthorizeView crash documented as DANGER-level admonition in both bwfc-migration and bwfc-identity-migration skills.
 **Why:** Runtime failures (404s, crashes, missing styles) are harder to catch than compile errors. Documenting these as prominent admonitions in the skills ensures future migrations — whether script-driven or Copilot-assisted — avoid these pitfalls. The learnings also update the Layer 1/Layer 2 boundary: CSS extraction and static file copying are now Layer 1 (script-automated), while image path validation remains Layer 2 work.
-
 
 ### 2026-03-05: Migration Script Gap Review (Run 7 Learnings)
 **By:** Forge
@@ -6053,7 +6040,6 @@ The migration script gaps compound the problem: AutoPostBack passes through gene
 - **`NavigateUrl="~/"` conversion** — Already handled correctly.
 - **`ImageUrl="~/"` conversion** — Already handled correctly.
 - **Expression conversion (<%: %>, <%#: %>, Eval, Item)** — All covered with good regex ordering (format string first, then simple patterns). Remaining unconverted blocks are correctly flagged as manual items.
-
 
 ### 2026-03-05: LoginView redesign — delegate to AuthorizeView
 
@@ -6275,7 +6261,6 @@ The current implementation has three critical divergences from the original Web 
 **What:** Rewrote all 4 migration skill files (bwfc-migration, bwfc-data-migration, bwfc-identity-migration, migration-standards) plus CHECKLIST.md and METHODOLOGY.md to make BWFC library usage the #1 priority in every migration skill. Every skill now opens with a MANDATORY banner, Section 1 is always BWFC inventory/features, anti-patterns are called out with comparison tables, LoginView/LoginStatus are explicitly flagged as commonly missed, and standard Blazor patterns for static files/CSS/JS are documented. Component count updated from 58 to 110+. CHECKLIST.md gets 9 new BWFC verification items. METHODOLOGY.md Layer 2 gets explicit forbidden-pattern list.
 **Why:** Jeff's directive: "We need to make use of the library the top priority." Root cause from Runs 6-8: Layer 2 agents consistently replaced BWFC components with plain HTML (@foreach instead of GridView, <a> instead of HyperLink, @if instead of LoginView). The skills were not structured to prevent this — BWFC was mentioned but not dominant. The rewrite makes BWFC so prominent and explicit that no agent can miss it. Every skill's first section, every control table, and every verification checklist now reinforces BWFC-first.
 
-
 ### LoginView AuthorizeView Redesign — Implementation Notes
 
 **By:** Cyclops
@@ -6303,7 +6288,6 @@ Per Forge's proposal (`forge-loginview-authorizeview-redesign.md`), LoginView no
 - **Jubilee (Samples):** The sample page at `ControlSamples/LoginView/Index.razor` should still work but may need `CascadingAuthenticationState` in the app's auth setup.
 
 **Build status:** Clean build, 0 errors.
-
 
 ### 2026-03-06: LoginStatus AuthorizeView Redesign Proposal (consolidated)
 
@@ -6833,7 +6817,6 @@ authContext.SetNotAuthorized();  // for not-logged-in tests
 **What:** Added a test in GridView/RowEvents.razor that verifies RowCreated fires BEFORE RowDataBound for each row, matching Web Forms behavior where the row is structurally created before data is bound to it.
 **Why:** Web Forms developers may depend on this ordering (e.g., modifying row structure in RowCreated before data binding populates values in RowDataBound). The ordering test ensures Cyclops implements the events in the correct sequence.
 
-
 ### 2026-03-06: Layer 1 script bugs  ItemType, validator params, base class (consolidated)
 
 **By:** Bishop, Forge
@@ -7013,7 +6996,6 @@ These controls ARE present in the output; they're just missing from the summary 
 3. **P2:** Add FileUpload, HiddenField, ModelErrorMessage to BENCHMARK-DATA.md control table
 4. **Enhancement:** Add ImageButton to the `Test-BwfcControlPreservation` check pattern list (it likely only checks for `<img>` tags that look like they replaced ImageButton controls)
 
-
 ### 2025-07-25: Run 9 Benchmark Report Structure
 
 **By:** Beast
@@ -7053,12 +7035,12 @@ These controls ARE present in the output; they're just missing from the summary 
 **By:** Forge
 **What:** Analyzed Run 10 output post-Cycle-1 fixes. 3 P0 items (CheckoutReview DetailsView +9 controls, ShoppingCart ImageButton +1, ManageLogins stub +3), 4 P1 items (TextMode enum 16 instances, ValidatorDisplay enum 15 instances, boolean True/False normalization, ControlToValidate verify), 5 P2 items (AdminPage promotion, About Title, ImageButton FAIL escalation, expression cleanup, GridLines enum), 4 P3 items (Identity scaffolding, checkout flow, cart persistence, Visible attributes). Cycle 2 target: preservation >=98%, build attempts = 1.
 **Why:** Run 10 validated Cycle 1 (build attempts 73) but preservation rate 92.7% is below 95% threshold. Two pages account for all 13 lost controls. Remaining 3 build attempts are caused by enum string-to-type conversions  all deterministic and automatable via a single Convert-EnumAttributes function with mapping table. Fixing P0 items alone brings preservation to 98.3%.
+
 ### 2026-03-05: User directive  Stop emitting ItemType/TItem when data source exists
 
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Blazor components with a SelectMethod or other data-providing method (Items, SelectItems, SelectMethodAsync) do NOT need an explicit ItemType/TItem type parameter attribute. Blazor generic type inference handles it automatically from the return type. The migration script should stop emitting ItemType/TItem when a data source is present on the component.
 **Why:** User request  this eliminates the entire class of ItemType/TItem conversion bugs that have been the #1 recurring build failure across Runs 7-10. Simplifies the migration output and matches how experienced Blazor developers write components.
-
 
 ### 2025-07-25: User directive -- Login and Register must be functional
 
@@ -7095,6 +7077,7 @@ These controls ARE present in the output; they're just missing from the summary 
 **By:** Forge
 **What:** Run 11 preservation reviewed at 98.9% (176/178 adjusted). All 3 P0 gaps from Run 10 CLOSED. Cycle 3 priorities: P0 -- Login.razor and Register.razor must have functional code-behinds (per Jeff's directive), requires mock auth service (`Services/MockAuthService.cs` + `MockAuthenticationStateProvider`). P1 -- Manage.razor code-behind, ManageLogins code-behind, conditional Visible to @if conversion, enum conversion gaps (LogoutAction, BorderStyle, WebColor). P2 -- bwfc-scan.ps1 parse error, hex color escaping, remaining account page stubs, ModelErrorMessage equivalent. 3-sprint plan: Sprint 1 auth foundation, Sprint 2 script improvements, Sprint 3 account pages polish.
 **Why:** Run 11 achieved near-perfect BWFC preservation. The gap has shifted from markup fidelity to functional completeness -- pages render correctly but code-behinds are stubs. Login/Register are the highest-value targets per user directive.
+
 ### 2026-03-06: Documentation reorganization proposal
 
 **By:** Forge  
@@ -7415,12 +7398,10 @@ Added documentation for remaining folders:
 1,055 files staged (`git status` shows R=rename, D=delete, A=add).  
 Ready for commit and push.
 
-
 ### 2026-03-06: User directive — migration-toolkit is end-user distributable
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** The `migration-toolkit/` folder is the output distributable included with the NuGet package for end-users. Migration skills belong in `migration-toolkit/skills/`, NOT in `.ai-team/skills/`.
 **Why:** User request — clarifies that migration-toolkit is a product artifact, not internal tooling. Skills there serve end-users, not AI team development.
-
 
 ### 2026-03-06: Folder consolidation executed
 **By:** Beast (Technical Writer)
@@ -7431,7 +7412,249 @@ Ready for commit and push.
 **By:** Bishop
 **What:** Clean Layer 1 migration via bwfc-migrate.ps1: 3.33s, 366 transforms, 32 files processed, 152 total output files, 0 errors. Script uses `-Path` and `-Output` params (not `-SourcePath`/`-DestinationPath`). App.razor placed at `Components/App.razor`. 1 PlaceHolder loss flagged (FeaturedContent in Site.Master). Mock auth auto-generated from Account/Login.aspx detection.
 **Why:** Recording results for team reference. Parameter name corrections prevent future task spec errors.
+
 ### 2026-03-06: Layer 2 conventions for AfterWingtipToys (Run 7)
 **By:** Cyclops
 **What:** Five conventions established: (1) BWFC Button OnClick uses `EventArgs`, not `MouseEventArgs`. (2) Code-behind partial class names must match .razor filenames exactly (no underscore prefix). (3) Use `Version="10.0.0-*"` for EF Core in .NET 10 previews. (4) CartStateService pattern replaces Session["CartId"] using cookie via IHttpContextAccessor. (5) GridView needs explicit `TItem` attribute when using TemplateField with `@context`.
 **Why:** Compile-time errors (CS1503, CS0246) and runtime failures traced to these patterns. All Layer 2 agents must follow these conventions.
+
+# Decision: Run 7 Report Conventions
+
+**Date:** 2026-03-06
+**Author:** Beast (Technical Writer)
+**Status:** Proposed
+
+## Context
+
+Run 7 is the first migration benchmark to include acceptance tests. The report needed a new section (§5 Acceptance Test Results) and a pattern for documenting test-fix iterations.
+
+## Decisions
+
+1. **Acceptance Test Results section (§5):** Added between "What Doesn't Work" and "Build Log Summary." Contains test project location, full test breakdown table (category / test name / status), and detailed fix iteration subsections with Problem/Fix/Impact structure.
+
+2. **Fix iteration pattern:** Each iteration gets a heading (#### Iteration N: Title), followed by Symptom, Root Cause, Fix (with code sample), and Tests Unblocked. This pattern makes runtime issues as discoverable as build errors.
+
+3. **Review item count increase is positive:** Run 7's 46 review items vs Run 6's 28 is a *quality improvement* — more granular detection (EventHandlers as a named category) gives developers better guidance. The report explains this in the metrics note.
+
+4. **On-disk vs total file count:** The "601 total files" figure includes bin/obj artifacts. The raw-data.md clarifies: 163 source files excluding build output. Future reports should distinguish source files from build artifacts.
+
+5. **Runtime correctness as primary quality gate:** The report's Overall Assessment explicitly states that runtime correctness (acceptance tests) supersedes compilation as the primary quality gate going forward.
+
+## Implications
+
+- Future benchmark reports (Run 8+) should always include an Acceptance Test Results section if tests exist.
+- Fix iterations should be documented with the Problem/Fix/Impact pattern established here.
+- The comparison table now needs an "Acceptance tests" and "Test fix iterations" row for all future runs.
+
+### 2026-03-06: User directive — MasterPage migration handled by BWFC library
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The BWFC library has a MasterPage migration strategy built in. There is no need to rewrite master page handling in the migration scripts — use the BWFC approach.
+**Why:** User request — captured for team memory
+
+### 2026-03-06: User directive — CSS links from master page go to App.razor
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** When migrating a master page, CSS `<link>` elements should be migrated to the `App.razor` file in the Blazor project (not the layout file).
+**Why:** User request — captured for team memory
+
+### 2026-03-06: User directive — Page.Title works via WebFormsPageBase (no PageTitle wrapping needed)
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** `WebFormsPageBase` provides a `Page` property (returns `this`) and a `Title` property (delegates to `IPageService`), so `Page.Title = "..."` in code-behinds compiles unchanged. The migration script should NOT wrap `Page.Title` in `<PageTitle>` components. Instead, the script's `_Imports.razor` scaffold must include `@inherits WebFormsPageBase` so all migrated pages inherit this compatibility layer automatically.
+**Why:** User correction — Run 7 report incorrectly listed Page.Title as a gap needing `<PageTitle>` wrapping
+
+### 2026-03-06: BWFC Library & Script Improvement Recommendations (Run 7 Analysis)
+
+**By:** Forge
+**What:** Prioritized recommendations for BWFC library enhancements and `bwfc-migrate.ps1` script improvements based on analysis of Run 7 benchmark report, AfterWingtipToys migration output, and current BWFC component/service inventory. 14 specific items ranked by impact.
+**Why:** Run 7 achieved 14/14 acceptance tests but required 33 code-behind rewrites, 14 modified files, and 8 new files in Layer 2. Many of these manual steps follow repeatable patterns that the library or script could automate. Each recommendation below eliminates concrete Layer 2 work.
+
+---
+
+## Part 1: BWFC Library Improvements
+
+### L1. WebFormsPageBase — Response.Redirect Shim
+**Impact: HIGH (every page with a redirect)**
+**What:** Add a `Response` property to `WebFormsPageBase` that provides a `Redirect(string url)` method wrapping `NavigationManager.NavigateTo()`.
+**Layer 2 work eliminated:** Every `Response.Redirect("/path")` call in every code-behind currently requires manual conversion to `NavigationManager.NavigateTo("/path")` plus `[Inject] private NavigationManager Nav { get; set; }` injection. WingtipToys had this in ShoppingCart, Checkout, Login, Register, and 5+ other pages.
+**Example:**
+```csharp
+// Before (requires manual conversion)
+public partial class ShoppingCart : ComponentBase
+{
+    [Inject] private NavigationManager Nav { get; set; } = default!;
+    private void CheckoutBtn_Click(EventArgs e) => Nav.NavigateTo("/Checkout/CheckoutStart");
+}
+
+// After (works unchanged from Web Forms code-behind)
+// WebFormsPageBase provides Response.Redirect() automatically
+public partial class ShoppingCart : WebFormsPageBase
+{
+    protected void CheckoutBtn_Click(object sender, EventArgs e) => Response.Redirect("/Checkout/CheckoutStart");
+}
+```
+**Implementation:** Add inner `ResponseShim` class with `Redirect(string url)`, inject `NavigationManager` in WebFormsPageBase, expose as `protected ResponseShim Response => new(_nav)`.
+**Assign to:** Cyclops
+
+### L2. WebFormsPageBase — Request.QueryString Shim
+**Impact: MEDIUM (pages with query parameters)**
+**What:** Add a `Request` property to `WebFormsPageBase` that provides `QueryString[key]` access by parsing `NavigationManager.Uri`.
+**Layer 2 work eliminated:** Web Forms pages access query params via `Request.QueryString["productID"]`. Currently each must be manually converted to `[SupplyParameterFromQuery]` parameters. A shim lets the original code compile as-is.
+**Example:**
+```csharp
+// Before (manual conversion)
+[SupplyParameterFromQuery(Name = "productID")]
+private int? ProductId { get; set; }
+
+// After (compiles unchanged from Web Forms)
+var productId = Request.QueryString["productID"];
+```
+**Implementation:** Parse `NavigationManager.Uri` into a `NameValueCollection`-like wrapper.
+**Assign to:** Cyclops
+
+### L3. WebFormsPageBase — DataBind() No-Op
+**Impact: LOW-MEDIUM (every page that calls DataBind)**
+**What:** Add a `protected void DataBind() { }` no-op method to `WebFormsPageBase`.
+**Layer 2 work eliminated:** Web Forms pages frequently end `Page_Load` with `DataBind()`. In Blazor this is unnecessary (components re-render on state change), but it causes build errors. A no-op lets it compile harmlessly.
+**Assign to:** Cyclops
+
+### L4. Ship `form-submit.js` Helper in BWFC
+**Impact: MEDIUM (any migration with form POST)**
+**What:** Include a small JavaScript helper in the BWFC NuGet package's `wwwroot/` that provides a `submitForm(formId)` function for the `<a role="button" onclick="...">` pattern.
+**Layer 2 work eliminated:** Run 7's third fix iteration discovered that Blazor strips `onclick` from `<button>` during enhanced navigation. The workaround (`<a role="button">` + minimal API POST) was manually created. A BWFC-provided JS helper makes this a documented pattern instead of a rediscovery.
+**Example:**
+```html
+<!-- BWFC provides the script, user just references it -->
+<script src="_content/Fritz.BlazorWebFormsComponents/bwfc-forms.js"></script>
+<a role="button" onclick="bwfc.submitForm('registerForm')">Register</a>
+```
+**Assign to:** Cyclops
+
+### L5. WebFormsSessionService — Session State Replacement
+**Impact: MEDIUM (any app using Session)**
+**What:** Provide a `WebFormsSessionService` in BWFC that wraps cookie-based state, providing a `Session["key"]` API via `IHttpContextAccessor`.
+**Layer 2 work eliminated:** WingtipToys required manual creation of `CartStateService` (cookie-based cart ID). Any Web Forms app using `Session["key"]` needs a similar replacement. A BWFC-provided service standardizes this.
+**Example:**
+```csharp
+// Instead of manually creating CartStateService, inject:
+[Inject] private WebFormsSessionService Session { get; set; }
+// Then: Session["CartId"] works like Web Forms
+```
+**Implementation:** Thin wrapper over `IHttpContextAccessor.HttpContext.Items` for per-request state, cookies for persistent state. String-keyed dictionary API.
+**Assign to:** Cyclops
+
+### S1. Add `@inherits WebFormsPageBase` to `_Imports.razor` Scaffold
+**Impact: HIGH (every page in the project)**
+**What:** The `New-ProjectScaffold` function (line 156) generates `_Imports.razor` without `@inherits WebFormsPageBase`. Per Jeff's directive, add this line.
+**Layer 2 work eliminated:** Without this, every page needs manual base class configuration. With it, all pages without explicit code-behind base classes automatically inherit WebFormsPageBase, getting Title, IsPostBack, Page.GetRouteUrl, MetaDescription, and MetaKeywords for free.
+**Change:** Add `@inherits BlazorWebFormsComponents.WebFormsPageBase` to generated `_Imports.razor`.
+**Assign to:** Bishop
+
+### S2. Add `AddHttpContextAccessor()` to Program.cs Scaffold
+**Impact: HIGH (required for WebFormsPageBase to function)**
+**What:** `WebFormsPageBase` injects `IHttpContextAccessor`, which requires `builder.Services.AddHttpContextAccessor()` in Program.cs. The scaffold doesn't include this.
+**Layer 2 work eliminated:** Without this, the app throws at runtime when any page inheriting WebFormsPageBase tries to resolve IHttpContextAccessor. Currently a manual fix every run.
+**Change:** Add `builder.Services.AddHttpContextAccessor();` before `AddBlazorWebFormsComponents()` in `New-ProjectScaffold`.
+**Assign to:** Bishop
+
+### S3. Replace Stripped `: Page` with `: WebFormsPageBase` in Code-Behinds
+**Impact: HIGH (33 files in WingtipToys)**
+**What:** `Copy-CodeBehind` (line 1438) strips `: Page` and `: System.Web.UI.Page` but replaces with nothing. For pages with code-behinds, the code-behind class declaration determines the base class, NOT `_Imports.razor`. So these pages lose WebFormsPageBase benefits.
+**Layer 2 work eliminated:** Currently Layer 2 must manually add `: ComponentBase` (or `: WebFormsPageBase`) to every code-behind. Script can do this mechanically.
+**Change:** Replace the stripping regex with a replacement that substitutes `: WebFormsPageBase`:
+```powershell
+$content = $content -replace '\s*:\s*(?:System\.Web\.UI\.)?(?:Page|UserControl|MasterPage)\b', ' : WebFormsPageBase'
+```
+**Assign to:** Bishop
+
+### S4. Add `@using BlazorWebFormsComponents.Enums` to `_Imports.razor`
+**Impact: MEDIUM (every file with enum attributes)**
+**What:** The script's `Convert-EnumAttributes` function outputs `@ValidatorDisplay.Dynamic`, `@GridLines.Vertical`, `@BorderStyle.None`, etc. These types live in `BlazorWebFormsComponents.Enums` namespace. Without the using directive, every file with an enum attribute fails to build.
+**Layer 2 work eliminated:** Currently Layer 2 must manually add this using directive. The AfterWingtipToys `_Imports.razor` already has it — proof it's needed.
+**Change:** Add `@using BlazorWebFormsComponents.Enums` to generated `_Imports.razor`.
+**Assign to:** Bishop
+
+### S6. Cookie Auth Pattern in Program.cs Scaffold
+**Impact: MEDIUM (any project with Identity pages)**
+**What:** When `$hasIdentityPages` is true, the scaffold generates a `MockAuthenticationStateProvider` that is registered without cookie auth. Run 7 proved this doesn't work (auth state bleeds across sessions). The scaffold should generate the cookie-based pattern from the start.
+**Layer 2 work eliminated:** Run 7's second fix iteration (cookie authentication + scoped provider) was entirely about fixing the scaffold's default pattern. Include cookie auth from the start.
+**Change:** Update `New-ProjectScaffold` auth services block to include `AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()`.
+**Assign to:** Bishop
+
+### S7. `src=~/` and `action=~/` URL Conversion
+**Impact: LOW (completeness)**
+**What:** `ConvertFrom-UrlReferences` handles `href=~/`, `NavigateUrl=~/`, `ImageUrl=~/` but not `src=~/` or `action=~/`. Web Forms pages use `src="~/Scripts/..."` for script tags.
+**Layer 2 work eliminated:** Manual find-and-replace of remaining tilde references.
+**Change:** Add `src` and `action` to the URL patterns array.
+**Assign to:** Bishop
+
+### S8. Stub Code-Behinds Should NOT Inherit ComponentBase
+**Impact: LOW (correctness)**
+**What:** `New-StubCodeBehind` (line 1563) generates `public partial class ClassName { }` with no base class. This is correct IF `_Imports.razor` has `@inherits WebFormsPageBase` (S1 above). But if S1 isn't implemented, these stubs need an explicit base class.
+**Depends on:** S1. If S1 ships, S8 is automatically resolved.
+**Assign to:** Bishop
+
+---
+
+## Part 3: Priority Ranking
+
+| Rank | ID | Type | Impact | Files/Hours Saved | Description |
+|------|----|------|--------|-------------------|-------------|
+| 1 | S1 | Script | HIGH | ~35 files, ~1 hr | `@inherits WebFormsPageBase` in _Imports.razor |
+| 2 | S3 | Script | HIGH | ~33 files, ~1 hr | Code-behind `: Page` → `: WebFormsPageBase` |
+| 3 | S2 | Script | HIGH | 1 file, ~15 min | `AddHttpContextAccessor()` in Program.cs |
+| 4 | L1 | Library | HIGH | ~10+ files, ~2 hr | Response.Redirect shim on WebFormsPageBase |
+| 5 | S4 | Script | MEDIUM | ~10 files, ~30 min | `@using BlazorWebFormsComponents.Enums` |
+| 6 | S5 | Script | MEDIUM | ~33 files, ~2 hr | Page_Load → OnInitializedAsync rename |
+| 7 | S6 | Script | MEDIUM | 1 file, ~30 min | Cookie auth default in Program.cs scaffold |
+| 8 | L2 | Library | MEDIUM | ~5 files, ~1 hr | Request.QueryString shim |
+| 9 | L5 | Library | MEDIUM | ~3 files, ~1 hr | WebFormsSessionService |
+| 10 | L4 | Library | MEDIUM | ~2 files, ~30 min | form-submit.js helper in BWFC |
+| 11 | L3 | Library | LOW-MED | ~5 files, ~15 min | DataBind() no-op |
+| 12 | L6 | Script | LOW | ~1 file, ~10 min | Stop LoginView → AuthorizeView conversion |
+| 13 | S7 | Script | LOW | ~2 files, ~10 min | `src=~/` URL conversion |
+| 14 | S8 | Script | LOW | N/A (dep on S1) | Stub code-behind base class |
+
+**Estimated total Layer 2 savings if all implemented:** ~10 hours on a WingtipToys-scale migration (~35 files, ~55 Layer 2 touches). That's roughly a 40% reduction in Layer 2 work.
+
+**Recommended Cycle targets:**
+- **Immediate (Cycle 1):** S1 + S2 + S3 + S4 — all script changes, no library API changes, massive collective impact. Bishop can ship in a single PR.
+- **Next (Cycle 2):** L1 + S5 + S6 — WebFormsPageBase shim + lifecycle rename + auth scaffold. Cyclops + Bishop.
+- **Backlog:** L2 + L3 + L4 + L5 + L6 + S7 + S8 — nice-to-have, do when opportunity arises.
+
+---
+
+## Appendix: Key Observations from AfterWingtipToys Output
+
+1. **Every code-behind inherits `ComponentBase` explicitly** — WebFormsPageBase is completely unused in the actual migration output, despite being available. The script doesn't wire it up.
+
+2. **`_Imports.razor` in AfterWingtipToys has `@using BlazorWebFormsComponents.Enums`** — but the script scaffold doesn't generate it. This was a manual Layer 2 fix.
+
+3. **Title handling is ad-hoc** — `Default.razor.cs` has `private string Title => "Home"` instead of using `WebFormsPageBase.Title`. Because the page inherits `ComponentBase`, not `WebFormsPageBase`, the Title property from WebFormsPageBase isn't available.
+
+4. **Auth pages are raw HTML forms, not BWFC components** — Login.razor uses `<input type="email">` not `<TextBox>`. This is correct for form POST submission pattern, but means BWFC components aren't used for auth pages.
+
+5. **3 service classes were manually created** — CartStateService, MockAuthService, MockAuthenticationStateProvider. Two of these (MockAuth*) are already scaffolded by the script. CartStateService is project-specific but follows a generalizable pattern (L5).
+
+6. **`NavigationManager` injected in 5+ code-behinds** — Would be eliminated by L1 (Response.Redirect shim).
+
+### 2026-03-06: Run 7 learnings codified into 3 skills (1 updated, 2 new)
+**By:** Psylocke
+**What:** Updated `migration-standards` SKILL.md with WebFormsPageBase as canonical base class, LoginView as native BWFC component, Page_Load → OnInitializedAsync default rule, CSS → App.razor directive, MasterPage preservation, and Runtime Gotchas table. Created `blazor-auth-migration` (medium confidence) for scoped cookie auth pattern, and `blazor-form-submission` (low confidence) for anchor-based form submission workaround.
+**Why:** Run 7 was the first benchmark with runtime acceptance tests (14/14 pass). The three fix iterations exposed real patterns that agents need to follow: singleton auth providers cause session bleed, Blazor strips onclick from buttons, and CSS links in the wrong file breaks navbar rendering. These aren't theoretical — they were each confirmed by test failures and fixes. The WebFormsPageBase and LoginView changes come directly from Jeff's directives correcting assumptions in the existing skill. Without these updates, agents will scaffold `ComponentBase` instead of `WebFormsPageBase`, convert LoginView to AuthorizeView (wrong), and register auth providers as singletons (broken).
+
+### 2026-03-06: blazor-form-submission marked LOW confidence intentionally
+**By:** Psylocke
+**What:** The `<a role="button">` pattern for form submission is marked low confidence despite working in Run 7.
+**Why:** This is a workaround for Blazor enhanced navigation stripping onclick from buttons. It's a first observation — the Blazor team may fix this in future releases, or there may be a better pattern (e.g., `data-enhance="false"` on the form). I'm not going to mark something as canonical when it smells like a framework gap. Watch for changes in .NET 10+ that address button onclick stripping.
+
+### 2026-03-06: LoginView is native BWFC  migration script must preserve it (consolidated)
+**By:** Jeffrey T. Fritz (via Copilot), Forge
+**What:** The BWFC library has a native `LoginView` component at `src/BlazorWebFormsComponents/LoginControls/LoginView.razor` that uses Blazor's `AuthorizeView` internally. The migration script's `ConvertFrom-LoginView` function should NOT convert `<asp:LoginView>`  `<AuthorizeView>`. Instead, strip the `asp:` prefix (like all other controls) and let the BWFC `LoginView` component handle it natively. Keep template name mappings as BWFC LoginView uses `AnonymousTemplate`/`LoggedInTemplate`/`RoleGroups` natively.
+**Why:** User directive from Jeff + Forge's Run 7 analysis (L6). The script was converting LoginView to AuthorizeView, which is now incorrect since BWFC provides the component natively. This eliminates confusion in Layer 2 about whether to keep AuthorizeView output or revert to BWFC LoginView.
+**Assign to:** Bishop (script change)
+
+### 2026-03-06: Page_Load  OnInitializedAsync is canonical mapping (consolidated)
+**By:** Jeffrey T. Fritz (via Copilot), Forge
+**What:** Web Forms `Page_Load` event handlers must always be mapped to Blazor `OnInitializedAsync`. In `Copy-CodeBehind`, add a regex to rename `Page_Load(object sender, EventArgs e)` to `protected override async Task OnInitializedAsync()` and strip the `sender`/`e` parameters. Also rename `Page_PreRender`  `protected override async Task OnAfterRenderAsync(bool firstRender)`. Do not use other lifecycle methods as the default.
+**Why:** User directive from Jeff + Forge's S5 recommendation. This is the single most common code-behind edit (33 files in WingtipToys). Even a partial rename saves significant time.
+**Risk:** Method body may contain `sender` or `e` references that become invalid. Mitigate by flagging a TODO if those identifiers appear in the method body.
+**Assign to:** Bishop

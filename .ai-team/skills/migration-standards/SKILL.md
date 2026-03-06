@@ -8,7 +8,9 @@ source: "earned"
 
 ## Context
 
-When migrating an ASP.NET Web Forms application to Blazor using BlazorWebFormsComponents, these standards define the canonical target architecture, tooling choices, and migration patterns. Established through five WingtipToys migration benchmark runs and codified as a directive by Jeffrey T. Fritz.
+Updated 2026-03-06 with Run 7 learnings: WebFormsPageBase as canonical base class, LoginView native component, cookie auth pattern, form submission gotchas.
+
+When migrating an ASP.NET Web Forms application to Blazor using BlazorWebFormsComponents, these standards define the canonical target architecture, tooling choices, and migration patterns. Established through seven WingtipToys migration benchmark runs and codified as a directive by Jeffrey T. Fritz.
 
 Apply these standards to:
 - Migration script (`bwfc-migrate.ps1`) enhancements
@@ -120,8 +122,10 @@ The cart became **read-only** — users could not edit quantities or check out. 
 | Framework | **.NET 10** (or latest LTS/.NET preview) |
 | Project template | `dotnet new blazor --interactivity Server` |
 | Render mode | Global Server Interactive |
-| Base class | `ComponentBase` (not `System.Web.UI.Page`) |
+| Base class | `WebFormsPageBase` (from the BWFC library) — extends `ComponentBase` with `Page.Title`, `Page.MetaDescription`, `IsPostBack` (always false), and `Page.GetRouteUrl()` compatibility. Layout files still use `LayoutComponentBase`. |
 | Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
+
+> **`_Imports.razor` MUST include `@inherits WebFormsPageBase`** so all migrated pages automatically get `Page.Title`, `IsPostBack`, and `GetRouteUrl()` compatibility. This is a Layer 1 (script) scaffold requirement.
 
 ### Database Migration
 
@@ -237,6 +241,8 @@ builder.Services.AddBlazorWebFormsComponents();
 - All static files → `wwwroot/`
 - CSS bundles (`BundleConfig.cs`) → explicit `<link>` tags in `App.razor`
 - JS bundles → explicit `<script>` tags in `App.razor`
+
+> **DIRECTIVE:** CSS `<link>` elements from the master page **MUST** be migrated to `App.razor`, not the layout file. This includes Bootstrap, site CSS, and any other stylesheets. The layout file handles structural markup; `App.razor` handles document-level `<head>` elements.
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
 
@@ -249,21 +255,27 @@ builder.Services.AddBlazorWebFormsComponents();
 | `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
 | `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
 | `IsPostBack` check | First render check via `firstRender` param | `if (!firstRender) return;` |
-| `Page.Title` | `<PageTitle>` component | Built-in Blazor |
+| `Page.Title` | `WebFormsPageBase.Title` (via `Page => this` property) | Migrated pages inheriting from `WebFormsPageBase` get `Page.Title` for free — no `<PageTitle>` wrapping needed. `Page.Title = "..."` in code-behinds compiles unchanged. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
 ⚠️ **`OnInitializedAsync` vs `OnParametersSetAsync`:** When a page uses `[SupplyParameterFromQuery]` and the user navigates to the same page with different query params (e.g., `/ProductList?id=1` → `/ProductList?id=3`), `OnInitializedAsync` does NOT re-run. Use `OnParametersSetAsync` so data reloads when query params change. `Page_Load` fires on every postback in Web Forms; `OnParametersSetAsync` is the closer equivalent when parameters change.
+
+> **DEFAULT RULE:** Always map Web Forms `Page_Load` to Blazor `OnInitializedAsync`. This is the canonical mapping for first-load data initialization. Only use `OnParametersSetAsync` when the page uses `[SupplyParameterFromQuery]` and needs to reload on param changes.
 
 ### Layer 1 (Script) vs Layer 2 (Manual) Boundary
 
 **Script handles (Layer 1):**
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
-- LoginView → AuthorizeView
+- LoginView `asp:` prefix stripping (keep as `<LoginView>` — BWFC native component)
 - Master page → MainLayout.razor
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
+
+> **LoginView — BWFC native component:** The migration script should strip the `asp:` prefix from `<asp:LoginView>` and keep it as `<LoginView>`. The BWFC library now has a native LoginView component (`src/BlazorWebFormsComponents/LoginControls/LoginView.razor`) that wraps `<AuthorizeView>` internally. The script should **NOT** convert LoginView to AuthorizeView.
+
+> **MasterPage migration:** The BWFC library has a MasterPage migration strategy. The script should preserve `<MasterPage>` semantics and NOT rewrite the layout approach.
 
 **Always manual (Layer 2):**
 - EF6 → EF Core (models, DbContext, seed)
@@ -271,6 +283,17 @@ builder.Services.AddBlazorWebFormsComponents();
 - Session → scoped services
 - Business logic (checkout, payment, admin CRUD)
 - Complex data-binding with arithmetic/method chains
+
+---
+
+## Runtime Gotchas (Discovered in Benchmarks)
+
+| Issue | Impact | Resolution |
+|-------|--------|------------|
+| Blazor strips `onclick` from buttons | Form submissions silently fail | Use `<a role="button">` or minimal API POST endpoints |
+| Singleton auth state providers | Auth state bleeds across sessions | Register as scoped + use cookie auth (see `blazor-auth-migration` skill) |
+| Missing Bootstrap CSS in App.razor | Navbar renders unstyled, locators fail | Add explicit `<link>` tags to `App.razor` `<head>` |
+| `_Imports.razor` missing `@inherits WebFormsPageBase` | Page.Title, IsPostBack, GetRouteUrl all fail | Add `@inherits WebFormsPageBase` to scaffolded _Imports.razor |
 
 ## Examples
 
@@ -366,8 +389,8 @@ builder.Services.AddBlazorWebFormsComponents();
 // WRONG
 public partial class ProductList : Page { }
 
-// RIGHT
-public partial class ProductList : ComponentBase { }
+// RIGHT — WebFormsPageBase provides Page.Title, IsPostBack, GetRouteUrl compatibility
+public partial class ProductList : WebFormsPageBase { }
 ```
 
 ### ❌ Using Web Forms Placeholder IDs in ListView Templates

@@ -111,5 +111,18 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
 📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .ai-team/skills/ — decided by Jeffrey T. Fritz
 
+### Run 7 Benchmark Report (2026-03-06)
+
+- **Run 7 report written:** `dev-docs/migration-tests/wingtiptoys-run7-2026-03-06/report.md` + `raw-data.md`. First runtime-validated benchmark with acceptance tests.
+- **Key metrics:** 3.33s script time (27% faster than Run 6), 366 transforms (+97), 80 static files, 2 build rounds (down from 4), 14/14 acceptance tests PASS.
+- **New report section:** §5 Acceptance Test Results — test project location, full test breakdown table, fix iteration documentation with Problem/Fix/Impact pattern.
+- **Three runtime patterns documented:** Bootstrap CSS links in App.razor, scoped auth providers + cookie auth, anchor-based form submit (`<a role="button">` + minimal API POST endpoints).
+- **Layer 2 scope:** 33 files rewritten, 14 modified, 8 created. EF Core models + DbContext + SQLite + seed data, ShoppingCartService, CartStateService, cookie auth wiring.
+- **Convention established:** Runtime correctness (acceptance tests) supersedes compilation as the primary quality gate for migration benchmarks going forward.
+- **README.md updated:** Added Runs 5–7 to migration test index table.
+
  Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
 
+
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz

@@ -190,3 +190,31 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
  Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
 
+### Run 7 BWFC Gap Analysis & Improvement Recommendations (2026-03-06)
+
+**Task:** Analyzed Run 7 benchmark report + AfterWingtipToys migration output + current BWFC library to produce actionable BWFC improvement recommendations.
+
+**Key BWFC gaps identified:**
+1. **WebFormsPageBase completely unused in migration output.** Every AfterWingtipToys code-behind inherits `ComponentBase` explicitly because: (a) `_Imports.razor` scaffold doesn't include `@inherits WebFormsPageBase`, (b) code-behind stripping removes `: Page` but doesn't replace with `: WebFormsPageBase`, (c) Program.cs scaffold missing `AddHttpContextAccessor()`.
+2. **No Response.Redirect shim.** NavigationManager.NavigateTo injected in 5+ code-behinds — could be provided via `WebFormsPageBase.Response.Redirect()`.
+3. **No Request.QueryString shim.** Manual `[SupplyParameterFromQuery]` on every page with query params.
+4. **`@using BlazorWebFormsComponents.Enums` missing from scaffold** — but required by the script's own enum conversions.
+5. **LoginView→AuthorizeView conversion still in script** despite native BWFC LoginView component existing.
+6. **No Session state service** — CartStateService manually created every migration.
+
+**Key recommendations made (14 items, ranked by impact):**
+- **Immediate (S1-S4):** Script-only changes — `@inherits WebFormsPageBase` in _Imports, code-behind base class replacement, `AddHttpContextAccessor()` in Program.cs, Enums using directive. Collectively eliminate ~35 files of manual Layer 2 work.
+- **Next (L1, S5, S6):** Response.Redirect shim on WebFormsPageBase, Page_Load→OnInitializedAsync rename, cookie auth default in scaffold.
+- **Backlog (L2-L6, S7-S8):** Request.QueryString shim, DataBind no-op, form-submit.js, Session service, LoginView fix, src=~/ URLs.
+
+**Patterns observed in AfterWingtipToys:**
+- Title handling is ad-hoc (`private string Title => "Home"`) because pages don't inherit WebFormsPageBase.
+- Auth pages use raw HTML forms for POST submission (correct pattern for cookie auth), not BWFC components.
+- 3 service classes manually created; 2 already scaffolded by script, 1 (CartStateService) generalizable.
+- Estimated 40% Layer 2 reduction (~10 hours saved on WingtipToys-scale) if all recommendations implemented.
+
+**Decision:** `.ai-team/decisions/inbox/forge-bwfc-improvements.md`
+
+
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz

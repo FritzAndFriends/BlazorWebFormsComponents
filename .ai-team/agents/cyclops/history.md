@@ -142,3 +142,6 @@ New EventArgs: `RepeaterCommandEventArgs`, `RepeaterItemEventArgs`, `DataListCom
 
  Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
 
+
+ Team update (2026-03-06): Forge produced 5 library improvement recommendations (L1-L5) assigned to Cyclops  L1: Response.Redirect shim on WebFormsPageBase (HIGH), L2: Request.QueryString shim (MEDIUM), L3: DataBind() no-op (LOW-MED), L4: form-submit.js helper (MEDIUM), L5: WebFormsSessionService (MEDIUM). Recommended Cycle 2: L1  decided by Forge
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz

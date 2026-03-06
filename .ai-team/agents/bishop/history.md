@@ -145,3 +145,7 @@
 
  Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
 
+
+ Team update (2026-03-06): Forge produced 8 script improvement recommendations (S1-S8) assigned to Bishop  S1: @inherits WebFormsPageBase in _Imports.razor, S2: AddHttpContextAccessor in Program.cs, S3: : Page  : WebFormsPageBase, S4: @using Enums, S5: Page_Load rename, S6: Cookie auth scaffold, S7: src~/action~ URL conversion, S8: Stub base class. Recommended Cycle 1: S1+S2+S3+S4  decided by Forge
+ Team update (2026-03-06): LoginView is native BWFC  migration script must stop converting to AuthorizeView. Strip asp: prefix only, preserve template names  decided by Jeffrey T. Fritz, Forge
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
