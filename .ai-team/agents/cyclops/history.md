@@ -93,3 +93,5 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 📬 Team update (2026-03-06): Beast completed 6 skill fixes (RF-01/02/05/09/13/14) across 4 SKILL.md files — complements Cyclops's 9 script fixes. All 15 P0+P1 items done on squad/run8-improvements. — decided by Forge (analysis), implemented by Cyclops + Beast
 
 
+
+ Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge

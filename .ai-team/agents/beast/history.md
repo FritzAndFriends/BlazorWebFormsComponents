@@ -100,3 +100,5 @@
 
 📬 Team update (2026-03-06): All 15 P0+P1 Run 9 prep items implemented — Cyclops completed 9 script fixes (RF-03/04/06/07/08/10/11/12/13) in bwfc-migrate.ps1. Combined with Beast's 6 skill fixes, all P0+P1 items done on squad/run8-improvements. — decided by Forge (analysis), implemented by Cyclops + Beast
 
+
+ Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge

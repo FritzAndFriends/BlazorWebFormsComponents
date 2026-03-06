@@ -105,3 +105,21 @@ Page Consolidation: Option B — merged Page.razor head rendering into WebFormsP
 
 📬 Team update (2026-03-06): All 15 P0+P1 items from Run 8 post-mortem implemented — Cyclops did 9 script fixes (RF-03/04/06/07/08/10/11/12/13), Beast did 6 skill fixes (RF-01/02/05/09/13/14). Committed to squad/run8-improvements branch. — decided by Forge (analysis), implemented by Cyclops + Beast
 
+### Run 9 CSS/Image Failure — Root Cause Analysis (2026-03-06)
+
+**Investigation:** Deep-dive into why Run 9 screenshots show completely unstyled HTML (navbar as bullet list, all product images 404) despite 14/14 acceptance tests passing and Run 8 having proper Bootstrap styling.
+
+**Three independent root causes identified:**
+
+1. **RC-1 (P0 Script):** `ConvertFrom-MasterPage` doesn't handle `<webopt:bundlereference>` — the source `Site.Master` uses ASP.NET Web Optimization bundle syntax (`<webopt:bundlereference path="~/Content/css" />`) instead of explicit `<link>` tags. The script's regex only matches `<link>`, `<meta>`, `<title>`. The `New-AppRazorScaffold` also generates App.razor with zero CSS links. Result: Layer 1 output has NO CSS references anywhere.
+
+2. **RC-2 (P0 Layer 2):** Run 9's Cyclops agent changed image `src` paths from `/Catalog/Images/` (where files actually are in `wwwroot/Catalog/Images/`) to `/Images/Products/` (FreshWingtipToys convention) without moving the files. Run 8's Layer 2 preserved the original paths and worked. Verified at runtime: `/Images/Products/carconvert.png` → 404; `/Catalog/Images/carconvert.png` → 200.
+
+3. **RC-3 (P1 Tests):** All 14 acceptance tests check only functional behavior (navigation, auth, forms). None verify CSS loads, Bootstrap classes are styled, or images render. This creates a false-positive pass rate.
+
+**Key evidence:** The committed App.razor DOES have CSS links (added by Layer 2 after screenshots), and CSS loads correctly at runtime. The wwwroot diff between Run 8 and Run 9 is empty — identical files. Only the references differ. The Run 9 REPORT.md mischaracterizes broken screenshots as working.
+
+**5 fixes proposed** (prioritized): immediate image path repair, script CSS auto-detection, script bundle reference handling, Layer 2 skill guidance, visual smoke test.
+
+**Decision document:** `.ai-team/decisions/inbox/forge-run9-css-failure-rca.md`
+

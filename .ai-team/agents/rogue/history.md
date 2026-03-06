@@ -75,3 +75,5 @@ Key patterns: `FindComponent<PageTitle>()` and `FindComponent<HeadContent>()` fo
 
  Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
 
+
+ Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge

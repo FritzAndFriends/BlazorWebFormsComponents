@@ -5955,7 +5955,6 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 **What:** STOP rewriting `asp:LoginView` as `AuthorizeView`. The migration script (`ConvertFrom-LoginView` in `bwfc-migrate.ps1`) was converting `<asp:LoginView>` → `<AuthorizeView>` and renaming `AnonymousTemplate`/`LoggedInTemplate` → `NotAuthorized`/`Authorized`. Fixed to: convert `<asp:LoginView>` → `<LoginView>` (BWFC), leave `<AnonymousTemplate>` and `<LoggedInTemplate>` as-is, reference BWFC `RoleGroup` for `<RoleGroups>`. All migration scripts and skills must preserve the BWFC LoginView — not bypass it with native AuthorizeView.
 **Why:** The BWFC `LoginView` component exposes templates with the same names as Web Forms (AnonymousTemplate, LoggedInTemplate), injects `AuthenticationStateProvider`, and routes to AuthorizeView internally. Converting directly to AuthorizeView breaks the component, forces template rewrites, and defeats the purpose of the BWFC library. User directive from Jeff — captured for team memory.
 
-
 ### 2026-03-06: Run 9 preparation — post-mortem analysis of Run 8
 **By:** Forge
 **What:** Analyzed Run 8 migration results and identified 22 improvements for Run 9
@@ -6319,3 +6318,201 @@ Blazor's enhanced navigation intercepts `<a href>` clicks. Links to minimal API 
 
 This was already a team decision but was reinforced with prominent callouts in both the identity and standards skill files after Run 8 showed it was still being attempted.
 
+### 2026-03-06: Run 9 CSS/Image Failure — Root Cause Analysis
+**By:** Forge
+**What:** Root cause analysis of why Run 9 has no CSS styling or product images
+**Why:** Run 9 screenshots show completely unstyled HTML (navbar as bullet list, all product images 404) despite 14/14 acceptance tests passing. Run 8 had proper Bootstrap styling with dark navbar, styled links, and working product images.
+
+## Root Cause
+
+**Three independent failures conspired to produce a visually broken app that passes all functional tests.**
+
+### RC-1: Script drops CSS bundle references from master page `<head>` (P0 — Layer 1)
+
+The source `Site.Master` uses ASP.NET Web Optimization bundle syntax for CSS:
+```html
+<webopt:bundlereference runat="server" path="~/Content/css" />
+```
+
+The script's `ConvertFrom-MasterPage` (line 540–566 of `bwfc-migrate.ps1`) only extracts three tag types from `<head>`:
+- `<meta>` tags (regex: `<meta\s[^>]*>`)
+- `<title>` tags (regex: `<title>.*?</title>`)
+- `<link>` tags (regex: `<link\s[^>]*>`)
+
+**`<webopt:bundlereference>` is silently dropped.** It's not a `<link>` tag, so the regex never matches it. The `<asp:PlaceHolder>` wrapping `Scripts.Render("~/bundles/modernizr")` is also dropped.
+
+Additionally, the `New-AppRazorScaffold` function (line 301–354) generates an App.razor with **zero CSS `<link>` tags** — only `<meta>`, `<base>`, and `<HeadOutlet>`:
+
+```html
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+```
+
+**Result:** Layer 1 output has NO CSS references anywhere — not in App.razor, not in MainLayout.razor's `<HeadContent>`. The CSS files ARE correctly copied to `wwwroot/Content/`, but nothing in the generated Blazor app references them. Layer 2 must discover and wire up CSS entirely on its own.
+
+**Why Run 8 worked:** Run 8's Layer 2 agent manually added CSS links to App.razor early in its process, before screenshots. Run 9's Layer 2 added CSS links AFTER screenshots were captured (the committed code has them, but the screenshots don't).
+
+### RC-2: Layer 2 changed product image paths without moving files (P0 — Layer 2)
+
+| | Source (Web Forms) | Run 8 (Layer 2) | Run 9 (Layer 2) | FreshWingtipToys |
+|---|---|---|---|---|
+| **Image `src` path** | `/Catalog/Images/{name}.png` | `/Catalog/Images/{name}.png` ✅ | `/Images/Products/{name}.png` ❌ | `/Images/Products/{name}.png` ✅ |
+| **Physical location** | `Catalog/Images/` | `wwwroot/Catalog/Images/` ✅ | `wwwroot/Catalog/Images/` | `wwwroot/Images/Products/` ✅ |
+
+The Layer 1 script correctly copies images from source `Catalog/Images/` to `wwwroot/Catalog/Images/`. The source markup references `/Catalog/Images/<%#:Item.ImagePath%>`.
+
+Run 8's Layer 2 preserved the `/Catalog/Images/` convention → images loaded.
+
+Run 9's Layer 2 rewrote image paths to `/Images/Products/` (the FreshWingtipToys convention) in `ProductList.razor` and `ProductDetails.razor`, but **did NOT create `wwwroot/Images/Products/` or copy files there**.
+
+**Verified at runtime:**
+- `GET /Images/Products/carconvert.png` → **404 Not Found**
+- `GET /Catalog/Images/carconvert.png` → **200 OK**
+- `GET /Images/logo.jpg` → **200 OK** (logo is separate, at correct path)
+
+### RC-3: Acceptance tests don't verify visual output (P1 — Test Infrastructure)
+
+All 14 acceptance tests in `src/WingtipToys.AcceptanceTests/` check:
+- Page loads (HTTP 200)
+- Navigation links work
+- Form submissions succeed
+- Authentication flows complete
+
+**No test checks:**
+- Whether CSS files return 200
+- Whether Bootstrap classes are styled
+- Whether product images render
+- Any visual comparison
+
+This allows a completely unstyled app with all-404 images to score 14/14.
+
+### RC-4: Run 9 report mischaracterizes screenshots (P2 — Documentation)
+
+The Run 9 `REPORT.md` describes screenshots as:
+- "Home page with Wingtip Toys branding and navigation" — actual: unstyled bullet list
+- "Product catalog grid with images, prices, and Add To Cart links" — actual: broken image icons
+
+The report was auto-generated without visual validation, creating a false positive.
+
+## Evidence
+
+### CSS Failure Evidence
+1. **Script App.razor scaffold** (line 309–326): No `<link>` tags for CSS
+2. **Site.Master line 14**: `<webopt:bundlereference runat="server" path="~/Content/css" />` — not matched by script's `<link>` regex
+3. **Run 9 homepage.png**: Navbar renders as unstyled `<ul>` with bullet points — definitively proves no Bootstrap CSS
+4. **Run 8 homepage.png**: Dark blue navbar with white text — Bootstrap 3 `.navbar-inverse` correctly styled
+5. **Current committed App.razor** (Run 9): HAS CSS links (`<link rel="stylesheet" href="/Content/bootstrap.min.css" />`) — added by Layer 2 AFTER screenshots
+6. **Runtime verification**: `GET /Content/bootstrap.min.css` returns 200 OK, 114273 bytes, Content-Type: text/css — confirming static file serving works; the issue is purely missing `<link>` tags at screenshot time
+
+### Image Failure Evidence
+1. **Run 9 ProductList.razor line 46**: `<img src="/Images/Products/@context.ImagePath"` — references non-existent path
+2. **Run 8 ProductList.razor**: `<img src="/Catalog/Images/Thumbs/@p.ImagePath"` — correct path matching file location
+3. **Source ProductList.aspx line 34**: `<image src='/Catalog/Images/Thumbs/<%#:Item.ImagePath%>'` — original path convention
+4. **`wwwroot/Images/Products/` does NOT exist** in AfterWingtipToys
+5. **`wwwroot/Catalog/Images/` DOES exist** with all 19 product images + 19 thumbnails
+6. **Runtime verification**: `/Images/Products/carconvert.png` → 404; `/Catalog/Images/carconvert.png` → 200
+7. **Run 9 productlist.png**: All 16 products show broken image icon
+8. **Run 8 productlist.png**: All 16 products show correct images
+
+### wwwroot diff Run 8 → Run 9
+```
+git diff ba1ab77d bfec0c69 -- samples/AfterWingtipToys/wwwroot/
+(empty — identical files)
+```
+Both runs have the same wwwroot content. The CSS files and image files are identical. Only the **references** differ.
+
+## Affected Components
+
+| Component | Issue | Severity |
+|-----------|-------|----------|
+| `migration-toolkit/scripts/bwfc-migrate.ps1` — `ConvertFrom-MasterPage` (line 540–566) | Doesn't handle `<webopt:bundlereference>` or `<asp:PlaceHolder>` with script bundles | P0 |
+| `migration-toolkit/scripts/bwfc-migrate.ps1` — `New-AppRazorScaffold` (line 301–354) | App.razor scaffold has no CSS `<link>` tags | P0 |
+| Layer 2 skill (Cyclops agent) | Rewrote image paths to FreshWingtipToys convention without moving files | P0 |
+| `src/WingtipToys.AcceptanceTests/` | No visual/CSS/image verification tests | P1 |
+| Run 9 `REPORT.md` screenshot descriptions | Mischaracterize broken screenshots as working | P2 |
+
+## Proposed Fixes
+
+### Fix 1: Script — Extract CSS from bundle references and add to App.razor (P0)
+**File:** `migration-toolkit/scripts/bwfc-migrate.ps1`
+
+**1a.** In `ConvertFrom-MasterPage` (after line 554), add extraction for `<webopt:bundlereference>`:
+```powershell
+# Extract webopt:bundlereference paths
+foreach ($m in ([regex]'<webopt:bundlereference[^>]*path\s*=\s*"([^"]*)"[^>]*>').Matches($headInner)) {
+    $bundlePath = $m.Groups[1].Value -replace '^~/', '/'
+    $extractedTags.Add("    <!-- TODO: Bundle '$bundlePath' — add explicit <link> tags for CSS files -->")
+    Write-ManualItem -File $RelPath -Category 'CSSBundle' -Detail "CSS bundle reference '$bundlePath' needs manual conversion to <link> tags"
+}
+```
+
+**1b.** In `New-AppRazorScaffold` (line 309–326), add CSS auto-detection after static file copy. OR better: add a new post-processing step that scans `wwwroot/Content/` for `.css` files and injects `<link>` tags into App.razor's `<head>`:
+```powershell
+# After static file copy (after line 1284)
+$cssFiles = Get-ChildItem -Path (Join-Path $Output 'wwwroot' 'Content') -Filter '*.css' -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match '\.min\.css$' -or $_.Name -eq 'Site.css' }
+if ($cssFiles) {
+    $appRazorPath = Join-Path $Output 'Components' 'App.razor'
+    if (Test-Path $appRazorPath) {
+        $appContent = Get-Content $appRazorPath -Raw
+        $cssLinks = ($cssFiles | ForEach-Object {
+            "    <link rel=`"stylesheet`" href=`"/Content/$($_.Name)`" />"
+        }) -join "`n"
+        $appContent = $appContent.Replace('<HeadOutlet', "$cssLinks`n    <HeadOutlet")
+        Set-Content -Path $appRazorPath -Value $appContent -Encoding UTF8
+    }
+}
+```
+
+### Fix 2: Layer 2 skill — Preserve source image paths (P0)
+**File:** `migration-toolkit/skills/migration-standards.md` (and `.ai-team/skills/migration-standards.md`)
+
+Add explicit guidance:
+```
+## Image Path Convention
+- PRESERVE the source image path structure when migrating
+- Source uses `/Catalog/Images/{name}.png` → keep `/Catalog/Images/{name}.png` in Blazor
+- Do NOT change to FreshWingtipToys convention (`/Images/Products/`) unless you also move the files
+- The Layer 1 script copies static files preserving their relative directory structure into wwwroot/
+```
+
+### Fix 3: Add visual smoke test (P1)
+**File:** `src/WingtipToys.AcceptanceTests/NavigationTests.cs`
+
+Add a basic visual verification test:
+```csharp
+[Fact]
+public async Task StaticAssets_AreServed()
+{
+    var page = await _fixture.NewPageAsync();
+    var cssResponse = await page.APIRequest.GetAsync(TestConfiguration.BaseUrl + "/Content/bootstrap.min.css");
+    Assert.True(cssResponse.Ok, "Bootstrap CSS should be served");
+
+    await page.GotoAsync(TestConfiguration.BaseUrl + "/ProductList");
+    var brokenImages = await page.EvalOnSelectorAllAsync<int>("img", 
+        "imgs => imgs.filter(i => !i.complete || i.naturalWidth === 0).length");
+    Assert.Equal(0, brokenImages);
+}
+```
+
+### Fix 4: Fix current AfterWingtipToys image paths (P0 — immediate)
+**Files:** `samples/AfterWingtipToys/ProductList.razor`, `samples/AfterWingtipToys/ProductDetails.razor`
+
+Change `/Images/Products/` → `/Catalog/Images/` to match actual file locations:
+- `ProductList.razor:46`: `src="/Images/Products/@context.ImagePath"` → `src="/Catalog/Images/Thumbs/@context.ImagePath"`
+- `ProductDetails.razor:9`: `src="/Images/Products/@SampleProduct.ImagePath"` → `src="/Catalog/Images/@SampleProduct.ImagePath"`
+
+## Priority
+
+**P0 — Critical** — This is a pipeline regression that produces visually broken output on every migration run. The combination of RC-1 (no CSS) and RC-2 (no images) means every Run 9+ output looks completely unprofessional despite passing all tests. The acceptance tests provide a false sense of security (RC-3). Fix 1 and Fix 2 should be implemented before Run 10.
+
+### Fix Priority Order
+1. **Fix 4** (immediate) — Repair AfterWingtipToys image paths in committed code
+2. **Fix 1b** (script) — Auto-detect CSS files and inject into App.razor
+3. **Fix 1a** (script) — Handle `<webopt:bundlereference>` in master page conversion
+4. **Fix 2** (skill) — Add image path preservation guidance to Layer 2 skills
+5. **Fix 3** (tests) — Add visual smoke test to acceptance suite
