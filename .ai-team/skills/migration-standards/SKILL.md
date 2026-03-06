@@ -25,12 +25,57 @@ Apply these standards to:
 | Framework | **.NET 10** (or latest LTS/.NET preview) |
 | Project template | `dotnet new blazor --interactivity Server` |
 | Render mode | Global Server Interactive |
-| Base class | `ComponentBase` (not `System.Web.UI.Page`) |
+| Base class | `WebFormsPageBase` for pages (`@inherits` in `_Imports.razor`); `ComponentBase` for non-page components |
+| Service registration | `builder.Services.AddBlazorWebFormsComponents()` in `Program.cs` |
 | Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
+
+### Render Mode Placement
+
+> **`@rendermode` is a directive *attribute*, not a standalone directive.** It goes on component instances in markup, not in `_Imports.razor`.
+
+**`_Imports.razor`** — add the static using so you can write `InteractiveServer` instead of `RenderMode.InteractiveServer`:
+
+```razor
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@inherits BlazorWebFormsComponents.WebFormsPageBase
+```
+
+**`App.razor`** — apply render mode to the top-level routable components:
+
+```razor
+<HeadOutlet @rendermode="InteractiveServer" />
+...
+<Routes @rendermode="InteractiveServer" />
+```
+
+Do **not** place `@rendermode InteractiveServer` as a line in `_Imports.razor` — it will cause build errors (RZ10003, CS0103, RZ10024).
+
+### Page Base Class
+
+`WebFormsPageBase` eliminates per-page boilerplate when migrating Web Forms code-behind. A single `@inherits` directive in `_Imports.razor` gives all pages access to familiar Web Forms properties.
+
+**One-time setup:**
+
+1. **`_Imports.razor`** — add `@inherits BlazorWebFormsComponents.WebFormsPageBase`
+2. **`Program.cs`** — add `builder.Services.AddBlazorWebFormsComponents()`
+3. **Layout (`MainLayout.razor`)** — add `<BlazorWebFormsComponents.Page />` (renders `<PageTitle>` and `<meta>` tags)
+
+**Properties available on every page:**
+
+| Property | Behavior |
+|---|---|
+| `Title` | Delegates to `IPageService.Title` — `Page.Title = "X"` works unchanged |
+| `MetaDescription` | Delegates to `IPageService.MetaDescription` |
+| `MetaKeywords` | Delegates to `IPageService.MetaKeywords` |
+| `IsPostBack` | Always returns `false` — `if (!IsPostBack)` always enters block |
+| `Page` | Returns `this` — enables `Page.Title = "X"` dot syntax |
+
+**When to still use `@inject IPageService`:** Non-page components (e.g., a shared header) that need access to page metadata should inject `IPageService` directly.
 
 ### Database Migration
 
-- **Always** migrate EF6 → EF Core
+- **Always** migrate EF6 → EF Core using the **latest .NET 10 packages** (currently **10.0.3**)
+- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`
 - Prefer SQLite for local dev / demos; SQL Server for production
 - Replace `DropCreateDatabaseIfModelChanges` with `EnsureCreated` + idempotent seed
 - Use `IDbContextFactory<T>` or scoped `DbContext` injection
@@ -104,8 +149,8 @@ The script should preserve the attribute and annotate the signature change neede
 | `Page_Load` | `OnInitializedAsync` | One-time init |
 | `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
 | `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
-| `IsPostBack` check | First render check via `firstRender` param | `if (!firstRender) return;` |
-| `Page.Title` | `<PageTitle>` component | Built-in Blazor |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
+| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
 ### Layer 1 (Script) vs Layer 2 (Manual) Boundary
@@ -113,7 +158,7 @@ The script should preserve the attribute and annotate the signature change neede
 **Script handles (Layer 1):**
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
-- LoginView → AuthorizeView
+- LoginView → **preserve as BWFC LoginView** (uses `AuthenticationStateProvider` natively)
 - Master page → MainLayout.razor
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
@@ -212,9 +257,13 @@ The script should preserve the attribute and annotate the signature change neede
 ### ❌ Using Page as Base Class
 
 ```csharp
-// WRONG
+// WRONG — Web Forms base class
 public partial class ProductList : Page { }
 
-// RIGHT
-public partial class ProductList : ComponentBase { }
+// RIGHT — BWFC page base class (provides Page.Title, IsPostBack, etc.)
+// Set via @inherits WebFormsPageBase in _Imports.razor
+public partial class ProductList : WebFormsPageBase { }
+
+// ALSO RIGHT — for non-page components
+public partial class MyComponent : ComponentBase { }
 ```

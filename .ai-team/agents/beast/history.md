@@ -132,3 +132,17 @@
 
 
  Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
+
+### Comprehensive Skills Cross-Reference Review (2026-03-06)
+
+- **Scope:** Reviewed all 7 skill files + 4 supporting migration-toolkit docs against actual BWFC library source code.
+- **Most stale file:** `.ai-team/skills/migration-standards/SKILL.md` — had 7 issues including wrong base class (`ComponentBase` instead of `WebFormsPageBase`), stale IsPostBack/Page.Title mappings, and incorrect LoginView→AuthorizeView guidance.
+- **Key discrepancy pattern:** Two versions of `migration-standards/SKILL.md` exist (`.ai-team/` and `migration-toolkit/`). The migration-toolkit version was well-maintained but the .ai-team version was severely stale. **Both must be updated whenever migration standards change.**
+- **LoginView is NOT a shim:** All 3 docs that mentioned LoginView→AuthorizeView were wrong. `LoginView.razor.cs` injects `AuthenticationStateProvider` natively — it's a first-class Blazor component, not a shim that needs replacement.
+- **WebFormsPageBase not propagated everywhere:** `bwfc-migration` SKILL had it, but `copilot-instructions-template.md`, `QUICKSTART.md`, and `CHECKLIST.md` still referenced the old "remove IsPostBack" or "no PostBack" patterns.
+- **Missing BWFC features:** The `bwfc-migration` SKILL was missing: WebFormsPage (unified wrapper), MasterPage/Content/ContentPlaceHolder components, DataBinder.Eval shim, NamingContainer, Theming infrastructure, EmptyLayout, CustomControls base classes.
+- **Report location:** `dev-docs/skills-review-2026-03-06.md`
+- **Files updated:** 7 files, 16+ individual fixes across skills and supporting docs.
+- **Pattern observed:** Internal `.ai-team/skills/` files drift behind `migration-toolkit/skills/` files because team updates primarily target the external-facing toolkit.
+
+ Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge

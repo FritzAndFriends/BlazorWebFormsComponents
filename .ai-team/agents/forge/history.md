@@ -137,3 +137,33 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 
 
  Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
+
+### Full Library Audit (2026-03-06)
+
+**Scope:** Comprehensive audit of all files in `src/BlazorWebFormsComponents/`.
+
+**Key Findings:**
+- Library ships **153 Razor components** and **197 standalone C# classes** (enums, event args, base classes, interfaces, utilities)
+- CONTROL-COVERAGE.md documented 58 primary controls — count was accurate for top-level Web Forms equivalents, but omitted 95 supporting Razor components
+- **ContentPlaceHolder** was listed as "Not Supported" in CONTROL-COVERAGE.md — WRONG, a working component exists alongside Content.razor and MasterPage.razor
+- **4 field column components** (BoundField, ButtonField, HyperLinkField, TemplateField) shipped but undocumented as separate entries
+- **7 infrastructure components** (Content, ContentPlaceHolder, MasterPage, WebFormsPage, Page, NamingContainer, EmptyLayout) shipped but undocumented
+- **63 style sub-components** + 3 PagerSettings shipped but undocumented
+- **3 helper components** (BlazorWebFormsHead, BlazorWebFormsScripts, Eval) shipped but undocumented
+- Theming system (ThemeProvider + ThemeConfiguration + ControlSkin + SkinBuilder) undocumented
+- 54 enums, 22 interfaces, 3 extensions, 4 data binding classes, 3 custom control shims all present
+- All 58 listed primary controls verified present in code — no phantom entries
+
+**Changes Made:**
+1. Updated `migration-toolkit/CONTROL-COVERAGE.md`:
+   - Fixed component count from "58" to "58 primary + 95 supporting (153 total)"
+   - Removed ContentPlaceHolder from "Not Supported" — added to new Infrastructure section
+   - Added Infrastructure Controls section (7 components)
+   - Added Field Column Components section (4 components)
+   - Added Style Sub-Components section (66 components)
+   - Added Utilities & Infrastructure section (base classes, services, shims, enums, helpers)
+   - Updated visual summary
+2. Created `dev-docs/bwfc-audit-2026-03-06.md` — full audit report with complete catalog
+3. Created `.ai-team/decisions/inbox/forge-bwfc-audit.md` — decision document for team
+
+� Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast

@@ -5892,3 +5892,64 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **Context:** Issued after Copilot incorrectly merged PR #421 into upstream main without authorization. Branch `squad/run8-improvements` was recreated from `dev` (was incorrectly based on `main`).
 
 **Why:** Production safety. `main` is the production release branch. `dev` is where integration happens. Jeff is the sole gatekeeper for upstream main.
+
+### 2026-03-06: BWFC Library Audit — CONTROL-COVERAGE.md Major Update
+
+**By:** Forge
+**Date:** 2026-03-06
+**Status:** Implemented
+
+## What
+
+Comprehensive audit revealed CONTROL-COVERAGE.md significantly understated the library's scope. The document listed 58 components; the library actually ships 153 Razor components plus 197 standalone C# classes.
+
+**Key corrections:**
+
+1. **ContentPlaceHolder reclassified** — Was listed under "Not Supported". A working ContentPlaceHolder.razor + Content.razor + MasterPage.razor system exists. Moved to new Infrastructure Controls section.
+
+2. **Component count updated** — From "58 components" to "58 primary + 95 supporting (153 total Razor components)".
+
+3. **Four new sections added:**
+   - Infrastructure Controls (7): Content, ContentPlaceHolder, MasterPage, WebFormsPage, Page, NamingContainer, EmptyLayout
+   - Field Column Components (4): BoundField, ButtonField, HyperLinkField, TemplateField
+   - Style Sub-Components (66): All declarative style child components
+   - Utilities & Infrastructure: Base classes, services, shims, enums, helper components
+
+## Why
+
+Migration developers using CONTROL-COVERAGE.md as their reference were getting an incomplete picture. The Master Page migration path (Content/ContentPlaceHolder/MasterPage) was completely invisible. Field columns (BoundField, TemplateField) are used in every GridView migration but weren't documented as components. The theming system, custom control shims, and setup requirements (AddBlazorWebFormsComponents, WebFormsPageBase) were absent.
+
+## Impact
+
+- All agents should reference updated CONTROL-COVERAGE.md for accurate component counts
+- Migration skills should reference Infrastructure Controls section for Master Page migration
+- Full audit report: `dev-docs/bwfc-audit-2026-03-06.md`
+
+## Files Changed
+
+- `migration-toolkit/CONTROL-COVERAGE.md` — Major update
+- `dev-docs/bwfc-audit-2026-03-06.md` — New audit report
+- `.ai-team/agents/forge/history.md` — Updated with audit findings
+
+
+### 2026-03-06: Skills cross-reference review — LoginView is native, not a shim
+**By:** Beast (Technical Writer)
+**Requested by:** Jeffrey T. Fritz
+**Status:** Completed
+
+**What:** Comprehensive cross-reference review of all migration-toolkit and .ai-team skill files against actual BWFC library code. Found 16+ discrepancies across 7 files.
+
+**Key decisions for team awareness:**
+
+1. **LoginView must NOT be replaced with AuthorizeView in migration guidance.** `LoginView.razor.cs` injects `AuthenticationStateProvider` and evaluates auth state natively. It is a first-class Blazor component, not a Web Forms shim. Three skill files were saying "replace LoginView with AuthorizeView" — all corrected.
+
+2. **Both migration-standards SKILL files must be kept in sync.** `.ai-team/skills/migration-standards/SKILL.md` and `migration-toolkit/skills/migration-standards/SKILL.md` are separate files with overlapping content. The .ai-team version had drifted severely behind the toolkit version (7 issues vs 1). Any future update to migration standards must touch BOTH files.
+
+3. **WebFormsPageBase changes must propagate to all docs.** After the WebFormsPageBase implementation, only the core skill files were updated. Supporting docs (QUICKSTART, CHECKLIST, copilot-instructions-template) still referenced the old "no PostBack" / "remove IsPostBack" patterns. All now corrected.
+
+4. **New BWFC features need skill coverage.** WebFormsPage, MasterPage/Content/ContentPlaceHolder, DataBinder.Eval, NamingContainer, Theming, EmptyLayout, and CustomControls were all missing from the bwfc-migration SKILL. Now documented.
+
+**Report:** `dev-docs/skills-review-2026-03-06.md`
+
+**Why:** Skills are the primary interface between the BWFC library and migration developers (both human and AI). Inaccurate skills cause incorrect migrations. This review ensures every feature reference is accurate and no BWFC features are missing.
+
