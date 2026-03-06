@@ -1,10 +1,8 @@
 @page "/ShoppingCart"
 
-<PageTitle>Shopping Cart</PageTitle>
+<h2>Shopping Cart</h2>
 
-<h1>Shopping Cart</h1>
-
-@if (_cart.Items.Any())
+@if (cartItems != null && cartItems.Count > 0)
 {
     <table class="table">
         <thead>
@@ -12,22 +10,30 @@
                 <th>Product</th>
                 <th>Price</th>
                 <th>Quantity</th>
-                <th>Subtotal</th>
+                <th>Total</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in _cart.Items)
+            @foreach (var item in cartItems)
             {
                 <tr>
                     <td>@item.Product?.ProductName</td>
                     <td>@($"{item.Product?.UnitPrice:c}")</td>
-                    <td>@item.Quantity</td>
+                    <td>
+                        <input type="number" value="@item.Quantity"
+                               @onchange="(e) => UpdateQuantity(item.ItemId, e)" min="1" />
+                    </td>
                     <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => RemoveItem(item.ItemId)">Remove</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
-    <p><b>Total: @($"{_cart.GetTotal():c}")</b></p>
+    <p><strong>Total: @($"{total:c}")</strong></p>
+    <button class="btn btn-primary" @onclick="UpdateCart">Update</button>
 }
 else
 {
@@ -35,5 +41,44 @@ else
 }
 
 @code {
-    [Inject] private CartStateService _cart { get; set; } = default!;
+    [Inject] private ShoppingCartService Cart { get; set; } = default!;
+
+    private List<WingtipToys.Models.CartItem>? cartItems;
+    private decimal total;
+    private Dictionary<string, int> pendingUpdates = new();
+
+    protected override void OnInitialized()
+    {
+        LoadCart();
+    }
+
+    private void LoadCart()
+    {
+        cartItems = Cart.GetCartItems();
+        total = Cart.GetTotal();
+        pendingUpdates.Clear();
+    }
+
+    private void UpdateQuantity(string itemId, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int qty) && qty > 0)
+        {
+            pendingUpdates[itemId] = qty;
+        }
+    }
+
+    private void UpdateCart()
+    {
+        foreach (var (itemId, qty) in pendingUpdates)
+        {
+            Cart.UpdateItem(itemId, qty);
+        }
+        LoadCart();
+    }
+
+    private void RemoveItem(string itemId)
+    {
+        Cart.RemoveItem(itemId);
+        LoadCart();
+    }
 }

@@ -5,23 +5,20 @@ using WingtipToys.Models;
 
 namespace WingtipToys;
 
-public partial class ProductDetails : ComponentBase
+public partial class ProductDetails : BlazorWebFormsComponents.WebFormsPageBase
 {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+    [Inject] private ProductContext Db { get; set; } = default!;
 
-    [SupplyParameterFromQuery(Name = "productID")] private int? ProductId { get; set; }
+    [SupplyParameterFromQuery(Name = "ProductID")]
+    public int? ProductID { get; set; }
 
-    private Product? _product;
-    private List<Product>? _products;
+    private Product? product;
 
     protected override async Task OnInitializedAsync()
     {
-        using var db = DbFactory.CreateDbContext();
-        if (ProductId.HasValue && ProductId > 0)
+        if (ProductID.HasValue && ProductID > 0)
         {
-            _product = await db.Products.FirstOrDefaultAsync(p => p.ProductID == ProductId);
+            product = await Db.Products.FirstOrDefaultAsync(p => p.ProductID == ProductID);
         }
-        _products = _product != null ? new List<Product> { _product } : new();
     }
 }
-

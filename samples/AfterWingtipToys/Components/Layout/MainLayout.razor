@@ -23,30 +23,45 @@
                 <li><a href="/About">About</a></li>
                 <li><a href="/Contact">Contact</a></li>
                 <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart">Cart</a></li>
+                <li><a href="/ShoppingCart" id="cartCount">Cart (@cartCount)</a></li>
             </ul>
+            <AuthorizeView>
+                <NotAuthorized>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Account/Register">Register</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                    </ul>
+                </NotAuthorized>
+                <Authorized>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Account/Manage" title="Manage your account">Hello, @context.User.Identity?.Name !</a></li>
+                        <li><a href="/Account/Logout">Log off</a></li>
+                    </ul>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
 </div>
 <div id="TitleContent" style="text-align: center">
     <a href="/">
-        <img src="/Images/logo.jpg" style="border:none" alt="Wingtip Toys" />
+        <img id="Image1" src="/Images/logo.jpg" style="border-style:none" alt="Wingtip Toys logo" />
     </a>
     <br />
 </div>
 <div id="CategoryMenu" style="text-align: center">
-    @if (_categories != null)
+    @if (categories != null)
     {
-        <ListView Items="@_categories" TItem="Category">
-            <ItemTemplate>
-                <b style="font-size: large; font-style: normal">
-                    <a href="/ProductList?id=@context.CategoryID">
-                        @context.CategoryName
-                    </a>
-                </b>
-            </ItemTemplate>
-            <ItemSeparatorTemplate>  |  </ItemSeparatorTemplate>
-        </ListView>
+        @for (int i = 0; i < categories.Count; i++)
+        {
+            var cat = categories[i];
+            <b style="font-size: large; font-style: normal">
+                <a href="/ProductList?id=@cat.CategoryID">@cat.CategoryName</a>
+            </b>
+            @if (i < categories.Count - 1)
+            {
+                <text>  |  </text>
+            }
+        }
     }
 </div>
 <div class="container body-content">
@@ -56,14 +71,3 @@
         <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
     </footer>
 </div>
-
-@code {
-    [Inject] private IDbContextFactory<Data.ProductContext> DbFactory { get; set; } = default!;
-    private List<Category>? _categories;
-
-    protected override async Task OnInitializedAsync()
-    {
-        using var db = DbFactory.CreateDbContext();
-        _categories = await db.Categories.ToListAsync();
-    }
-}
