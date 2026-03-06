@@ -182,3 +182,5 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 - **Deliverables:**
   - Decision inbox: `.ai-team/decisions/inbox/forge-docs-reorganization.md`
   - Detailed proposal: `planning-docs/proposals/DOCS-REORGANIZATION.md`
+
+📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .ai-team/skills/ — decided by Jeffrey T. Fritz

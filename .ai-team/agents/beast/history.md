@@ -108,3 +108,5 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 - **Convention:** BENCHMARK-DATA.md (Bishop) to BENCHMARK-REPORT.md (Beast) pipeline continues.
 
  Team update (2025-07-25): Forge reviewed Run 11 preservation: 98.9% (176/178 adjusted) -- APPROVED. All 3 P0 gaps CLOSED. Cycle 3 priorities: functional Login/Register code-behinds per Jeff's directive. -- decided by Forge
+
+📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .ai-team/skills/ — decided by Jeffrey T. Fritz

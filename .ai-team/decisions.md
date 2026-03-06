@@ -7415,3 +7415,14 @@ Added documentation for remaining folders:
 1,055 files staged (`git status` shows R=rename, D=delete, A=add).  
 Ready for commit and push.
 
+
+### 2026-03-06: User directive — migration-toolkit is end-user distributable
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The `migration-toolkit/` folder is the output distributable included with the NuGet package for end-users. Migration skills belong in `migration-toolkit/skills/`, NOT in `.ai-team/skills/`.
+**Why:** User request — clarifies that migration-toolkit is a product artifact, not internal tooling. Skills there serve end-users, not AI team development.
+
+
+### 2026-03-06: Folder consolidation executed
+**By:** Beast (Technical Writer)
+**What:** Consolidated dev-docs folder structure. Moved audit-output/ to dev-docs/audits/, planning-docs/ subfolders to dev-docs/ (analysis, milestones, proposals, component-specs, reports). Deleted duplicate migration scripts from scripts/ (kept migration-toolkit/scripts/ as authoritative). Committed as e0fe898.
+**Why:** Reduces top-level directory sprawl. Consolidates all internal dev documentation in one location. migration-toolkit/ remains separate as it ships with NuGet package.
