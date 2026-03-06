@@ -630,58 +630,29 @@ function ConvertFrom-Expressions {
 function ConvertFrom-LoginView {
     param([string]$Content, [string]$RelPath)
 
-    # Flag <RoleGroups> as manual — too complex for regex
+    # Flag <RoleGroups> as manual — use BWFC RoleGroup component
     if ($Content -match '<RoleGroups>') {
-        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
+        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> should use the BWFC RoleGroup child component inside <LoginView>'
     }
 
-    # <asp:LoginView ...> → <AuthorizeView> (strip all attributes)
+    # <asp:LoginView ...> → <LoginView> (strip asp: prefix and all attributes)
     $openRegex = [regex]'(?i)<asp:LoginView\b[^>]*>'
     $openMatches = $openRegex.Matches($Content)
     if ($openMatches.Count -gt 0) {
-        $Content = $openRegex.Replace($Content, '<AuthorizeView>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <AuthorizeView>"
+        $Content = $openRegex.Replace($Content, '<LoginView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <LoginView>"
     }
 
-    # </asp:LoginView> → </AuthorizeView>
+    # </asp:LoginView> → </LoginView>
     $closeRegex = [regex]'(?i)</asp:LoginView\s*>'
     $closeMatches = $closeRegex.Matches($Content)
     if ($closeMatches.Count -gt 0) {
-        $Content = $closeRegex.Replace($Content, '</AuthorizeView>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($closeMatches.Count) </asp:LoginView> to </AuthorizeView>"
+        $Content = $closeRegex.Replace($Content, '</LoginView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($closeMatches.Count) </asp:LoginView> to </LoginView>"
     }
 
-    # <AnonymousTemplate> → <NotAuthorized>
-    $anonOpenRegex = [regex]'(?i)<AnonymousTemplate\s*>'
-    $anonOpenMatches = $anonOpenRegex.Matches($Content)
-    if ($anonOpenMatches.Count -gt 0) {
-        $Content = $anonOpenRegex.Replace($Content, '<NotAuthorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonOpenMatches.Count) <AnonymousTemplate> to <NotAuthorized>"
-    }
-
-    # </AnonymousTemplate> → </NotAuthorized>
-    $anonCloseRegex = [regex]'(?i)</AnonymousTemplate\s*>'
-    $anonCloseMatches = $anonCloseRegex.Matches($Content)
-    if ($anonCloseMatches.Count -gt 0) {
-        $Content = $anonCloseRegex.Replace($Content, '</NotAuthorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonCloseMatches.Count) </AnonymousTemplate> to </NotAuthorized>"
-    }
-
-    # <LoggedInTemplate> → <Authorized>
-    $loggedOpenRegex = [regex]'(?i)<LoggedInTemplate\s*>'
-    $loggedOpenMatches = $loggedOpenRegex.Matches($Content)
-    if ($loggedOpenMatches.Count -gt 0) {
-        $Content = $loggedOpenRegex.Replace($Content, '<Authorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedOpenMatches.Count) <LoggedInTemplate> to <Authorized>"
-    }
-
-    # </LoggedInTemplate> → </Authorized>
-    $loggedCloseRegex = [regex]'(?i)</LoggedInTemplate\s*>'
-    $loggedCloseMatches = $loggedCloseRegex.Matches($Content)
-    if ($loggedCloseMatches.Count -gt 0) {
-        $Content = $loggedCloseRegex.Replace($Content, '</Authorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedCloseMatches.Count) </LoggedInTemplate> to </Authorized>"
-    }
+    # AnonymousTemplate and LoggedInTemplate are already the correct
+    # BWFC LoginView parameter names — no conversion needed.
 
     return $Content
 }

@@ -25,20 +25,20 @@
                 <li><a href="/ProductList">Products</a></li>
                 <li><a href="/ShoppingCart" id="cartCount">Cart (@cartCount)</a></li>
             </ul>
-            <AuthorizeView>
-                <NotAuthorized>
+            <LoginView>
+                <AnonymousTemplate>
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="/Account/Register">Register</a></li>
                         <li><a href="/Account/Login">Log in</a></li>
                     </ul>
-                </NotAuthorized>
-                <Authorized>
+                </AnonymousTemplate>
+                <LoggedInTemplate>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/Account/Manage" title="Manage your account">Hello, @context.User.Identity?.Name !</a></li>
+                        <li><a href="/Account/Manage" title="Manage your account">Hello, <LoginName /> !</a></li>
                         <li><a href="/Account/Logout">Log off</a></li>
                     </ul>
-                </Authorized>
-            </AuthorizeView>
+                </LoggedInTemplate>
+            </LoginView>
         </div>
     </div>
 </div>
