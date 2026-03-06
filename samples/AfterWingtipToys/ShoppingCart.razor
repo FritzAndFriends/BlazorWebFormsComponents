@@ -1,59 +1,50 @@
 @page "/ShoppingCart"
-
-<h2>Shopping Cart</h2>
-
-@if (cartItems != null && cartItems.Count > 0)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in cartItems)
-            {
-                <tr>
-                    <td>@item.Product?.ProductName</td>
-                    <td>@($"{item.Product?.UnitPrice:c}")</td>
-                    <td>
-                        <form method="post" action="/Cart/Update" style="display:inline">
-                            <input type="hidden" name="itemId" value="@item.ItemId" />
-                            <input type="number" name="quantity" value="@item.Quantity" min="1" style="width:60px" />
-                            <button type="submit" class="btn btn-default btn-sm">Update</button>
-                        </form>
-                    </td>
-                    <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
-                    <td>
-                        <form method="post" action="/Cart/Remove" style="display:inline">
-                            <input type="hidden" name="itemId" value="@item.ItemId" />
-                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
+@rendermode InteractiveServer
+<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+    <GridView ID="CartList" AutoGenerateColumns="@false" ShowFooter="@true" GridLines="@GridLines.Vertical" CellPadding="4"
+        TItem="CartItem" Items="@CartItems"
+        CssClass="table table-striped table-bordered" >   
+        <Columns>
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />        
+        <BoundField DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField   HeaderText="Quantity">            
+                <ItemTemplate>
+                    <TextBox ID="PurchaseQuantity" Width="40" Text="@GetQuantity(context.ItemId)"
+                        TextChanged="@(val => OnQuantityChanged(context.ItemId, val))"></TextBox> 
+                </ItemTemplate>        
+        </TemplateField>    
+        <TemplateField HeaderText="Item Total">            
+                <ItemTemplate>
+                    @($"{(_quantities.GetValueOrDefault(context.ItemId, context.Quantity) * (context.Product?.UnitPrice ?? 0)):c}")
+                </ItemTemplate>        
+        </TemplateField> 
+        <TemplateField HeaderText="Remove Item">            
+                <ItemTemplate>
+                    <CheckBox id="Remove" Checked="@IsMarkedForRemoval(context.ItemId)"
+                        CheckedChanged="@(val => OnRemovalChanged(context.ItemId, val))"></CheckBox>
+                </ItemTemplate>        
+        </TemplateField>    
+        </Columns>    
+    </GridView>
+    <div>
+        <p></p>
+        <strong>
+            <Label ID="LabelTotalText" Text="Order Total: "></Label>
+            <Label ID="lblTotal" Text="@CartTotal"></Label>
+        </strong> 
+    </div>
+    <br />
+    <table> 
+    <tr>
+      <td>
+        <Button ID="UpdateBtn" Text="Update" OnClick="@OnUpdateCart" />
+      </td>
+      <td>
+        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
+                      width="145" alt="Check out with PayPal" 
+                      style="background:transparent; border:0" />
+      </td>
+    </tr>
     </table>
-    <p><strong>Total: @($"{total:c}")</strong></p>
-}
-else
-{
-    <p>Your shopping cart is empty.</p>
-}
 
-@code {
-    [Inject] private ShoppingCartService Cart { get; set; } = default!;
-
-    private List<WingtipToys.Models.CartItem>? cartItems;
-    private decimal total;
-
-    protected override void OnInitialized()
-    {
-        cartItems = Cart.GetCartItems();
-        total = Cart.GetTotal();
-    }
-}

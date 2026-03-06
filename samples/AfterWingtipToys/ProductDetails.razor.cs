@@ -3,22 +3,22 @@ using Microsoft.EntityFrameworkCore;
 using WingtipToys.Data;
 using WingtipToys.Models;
 
-namespace WingtipToys;
-
-public partial class ProductDetails : BlazorWebFormsComponents.WebFormsPageBase
+namespace WingtipToys
 {
-    [Inject] private ProductContext Db { get; set; } = default!;
-
-    [SupplyParameterFromQuery(Name = "ProductID")]
-    public int? ProductID { get; set; }
-
-    private Product? product;
-
-    protected override async Task OnInitializedAsync()
+    public partial class ProductDetails : ComponentBase
     {
-        if (ProductID.HasValue && ProductID > 0)
+        [Inject]
+        private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+
+        [SupplyParameterFromQuery(Name = "id")]
+        public int productID { get; set; }
+
+        public Product SampleProduct { get; set; } = new();
+
+        protected override async Task OnParametersSetAsync()
         {
-            product = await Db.Products.FirstOrDefaultAsync(p => p.ProductID == ProductID);
+            using var context = DbFactory.CreateDbContext();
+            SampleProduct = await context.Products.FirstOrDefaultAsync(p => p.ProductID == productID) ?? new();
         }
     }
 }

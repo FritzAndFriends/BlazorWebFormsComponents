@@ -1,5 +1,9 @@
-namespace WingtipToys;
+using Microsoft.AspNetCore.Components;
 
-public partial class About : BlazorWebFormsComponents.WebFormsPageBase
+namespace WingtipToys
 {
+    public partial class About : ComponentBase
+    {
+        protected string Title = "About";
+    }
 }

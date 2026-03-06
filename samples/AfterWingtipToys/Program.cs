@@ -1,45 +1,53 @@
 using BlazorWebFormsComponents;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Data;
 using WingtipToys.Services;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddBlazorWebFormsComponents();
+
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddBlazorWebFormsComponents();
 
-// EF Core with SQLite
-builder.Services.AddDbContext<ProductContext>(options =>
+builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
+builder.Services.AddScoped<CartStateService>();
+builder.Services.AddScoped<CheckoutStateService>();
+builder.Services.AddScoped<IPayPalService, MockPayPalService>();
 
-// ASP.NET Core Identity
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
 })
-.AddEntityFrameworkStores<ProductContext>();
+.AddEntityFrameworkStores<ProductContext>()
+.AddDefaultTokenProviders();
 
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
-builder.Services.AddScoped<ShoppingCartService>();
-builder.Services.AddCascadingAuthenticationState();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/Login";
+});
 
 var app = builder.Build();
 
-// Seed database
+// Ensure database is created and seeded
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ProductContext>();
-    db.Database.EnsureCreated();
-    ProductDatabaseInitializer.Initialize(db);
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using var context = factory.CreateDbContext();
+    ProductDatabaseInitializer.Seed(context);
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    await IdentityDataSeeder.SeedAsync(roleManager, userManager);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -50,71 +58,56 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
-app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-// AddToCart endpoint — adds product to session cart and redirects to ShoppingCart
-app.MapGet("/AddToCart", (int? productID, ShoppingCartService cart) =>
-{
-    if (productID.HasValue && productID > 0)
-        cart.AddToCart(productID.Value);
-    return Results.Redirect("/ShoppingCart");
-});
-
-// Cart Update endpoint — updates item quantity and redirects back
-app.MapPost("/Cart/Update", async (HttpContext context, ShoppingCartService cart) =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var itemId = form["itemId"].ToString();
-    if (int.TryParse(form["quantity"], out var qty) && qty > 0)
-        cart.UpdateItem(itemId, qty);
-    return Results.Redirect("/ShoppingCart");
-}).DisableAntiforgery();
-
-// Cart Remove endpoint — removes item and redirects back
-app.MapPost("/Cart/Remove", async (HttpContext context, ShoppingCartService cart) =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var itemId = form["itemId"].ToString();
-    cart.RemoveItem(itemId);
-    return Results.Redirect("/ShoppingCart");
-}).DisableAntiforgery();
-
-// Login POST endpoint — authenticates user and sets auth cookie via HTTP response
-app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var email = form["email"].ToString();
-    var password = form["password"].ToString();
-
-    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
-    if (result.Succeeded)
-        return Results.Redirect("/");
-    return Results.Redirect("/Account/Login?error=Invalid+login+attempt");
-}).DisableAntiforgery();
-
-// Register POST endpoint — creates user, signs in, and redirects
-app.MapPost("/Account/RegisterHandler", async (HttpContext context,
-    UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var email = form["email"].ToString();
-    var password = form["password"].ToString();
-
-    var user = new IdentityUser { UserName = email, Email = email };
-    var result = await userManager.CreateAsync(user, password);
-    if (result.Succeeded)
-    {
-        await signInManager.SignInAsync(user, isPersistent: false);
-        return Results.Redirect("/");
-    }
-    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-    return Results.Redirect($"/Account/Register?error={Uri.EscapeDataString(errors)}");
-}).DisableAntiforgery();
-
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();
 
+// HTTP endpoint for login — SignInManager requires an active HTTP response to set cookies,
+// which is not available inside a SignalR circuit (InteractiveServer mode).
+app.MapGet("/Account/PerformLogin", async (
+    string email,
+    string password,
+    SignInManager<IdentityUser> signInManager) =>
+{
+    var result = await signInManager.PasswordSignInAsync(email, password,
+        isPersistent: false, lockoutOnFailure: false);
+
+    if (result.Succeeded)
+        return Results.Redirect("/");
+    if (result.IsLockedOut)
+        return Results.Redirect("/Account/Lockout");
+
+    return Results.Redirect("/Account/Login?error=" + Uri.EscapeDataString("Invalid login attempt."));
+});
+
+// HTTP endpoint for registration — creates user then redirects to login
+app.MapGet("/Account/PerformRegister", async (
+    string email,
+    string password,
+    UserManager<IdentityUser> userManager) =>
+{
+    var user = new IdentityUser { UserName = email, Email = email };
+    var createResult = await userManager.CreateAsync(user, password);
+
+    if (createResult.Succeeded)
+    {
+        return Results.Redirect("/Account/Login");
+    }
+
+    var errors = string.Join(" ", createResult.Errors.Select(e => e.Description));
+    return Results.Redirect("/Account/Register?error=" + Uri.EscapeDataString(errors));
+});
+
+// HTTP endpoint for logout — requires an active HTTP response to clear auth cookies
+app.MapPost("/Account/PerformLogout", async (
+    SignInManager<IdentityUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
+});
+
 app.Run();
+

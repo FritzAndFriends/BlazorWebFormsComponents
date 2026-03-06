@@ -1,38 +1,43 @@
 @page "/Account/Login"
-<h2>Log in</h2>
+
+<h2>Log In.</h2>
 
 <div class="row">
     <div class="col-md-8">
         <section id="loginForm">
-            <form method="post" action="/Account/LoginHandler" class="form-horizontal">
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <p class="text-danger">@errorMessage</p>
-                }
-                <div class="form-group">
-                    <label class="col-md-2 control-label">Email</label>
-                    <div class="col-md-10">
-                        <input type="email" name="email" class="form-control" />
+            <form action="/Account/PerformLogin" method="get" data-enhance="false">
+                <div class="form-horizontal">
+                    <h4>Use a local account to log in.</h4>
+                    <hr />
+                    @if (!string.IsNullOrEmpty(Error))
+                    {
+                        <p class="text-danger">@Error</p>
+                    }
+                    <div class="form-group">
+                        <label for="email" class="col-md-2 control-label">Email</label>
+                        <div class="col-md-10">
+                            <input type="email" id="email" name="email" class="form-control" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label">Password</label>
-                    <div class="col-md-10">
-                        <input type="password" name="password" class="form-control" />
+                    <div class="form-group">
+                        <label for="password" class="col-md-2 control-label">Password</label>
+                        <div class="col-md-10">
+                            <input type="password" id="password" name="password" class="form-control" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-default">Log in</button>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <button type="submit" class="btn btn-default">Log in</button>
+                        </div>
                     </div>
                 </div>
             </form>
+            <p>
+                <a href="/Account/Forgot">Forgot your password?</a>
+            </p>
             <p>
                 <a href="/Account/Register">Register as a new user</a>
             </p>
         </section>
     </div>
 </div>
-

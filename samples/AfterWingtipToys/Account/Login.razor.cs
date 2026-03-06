@@ -1,16 +1,10 @@
 using Microsoft.AspNetCore.Components;
 
-namespace WingtipToys.Account;
-
-public partial class Login : BlazorWebFormsComponents.WebFormsPageBase
+namespace WingtipToys.Account
 {
-    [SupplyParameterFromQuery(Name = "error")]
-    public string? ErrorParam { get; set; }
-
-    private string? errorMessage;
-
-    protected override void OnParametersSet()
+    public partial class Login : ComponentBase
     {
-        errorMessage = ErrorParam;
+        [SupplyParameterFromQuery(Name = "error")]
+        public string? Error { get; set; }
     }
 }

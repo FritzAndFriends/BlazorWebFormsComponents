@@ -1,20 +1,13 @@
 @inherits LayoutComponentBase
 
-<HeadContent>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wingtip Toys</title>
-    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-</HeadContent>
-
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <a role="navigation" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
-            </button>
+            </a>
             <a class="navbar-brand" href="/">Wingtip Toys</a>
         </div>
         <div class="navbar-collapse collapse">
@@ -23,45 +16,47 @@
                 <li><a href="/About">About</a></li>
                 <li><a href="/Contact">Contact</a></li>
                 <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart" id="cartCount">Cart (@cartCount)</a></li>
+                <li><a href="/ShoppingCart">Cart</a></li>
             </ul>
-            <LoginView>
-                <AnonymousTemplate>
-                    <ul class="nav navbar-nav navbar-right">
+            <ul class="nav navbar-nav navbar-right">
+                <AuthorizeView>
+                    <Authorized>
+                        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
+                        <AuthorizeView Roles="canEdit" Context="adminContext">
+                            <Authorized>
+                                <li><a href="/AdminPage">Admin</a></li>
+                            </Authorized>
+                        </AuthorizeView>
+                        <li>
+                            <form method="post" action="/Account/PerformLogout" data-enhance="false">
+                                <AntiforgeryToken />
+                                <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>
+                            </form>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
                         <li><a href="/Account/Register">Register</a></li>
                         <li><a href="/Account/Login">Log in</a></li>
-                    </ul>
-                </AnonymousTemplate>
-                <LoggedInTemplate>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/Account/Manage" title="Manage your account">Hello, <LoginName /> !</a></li>
-                        <li><a href="/Account/Logout">Log off</a></li>
-                    </ul>
-                </LoggedInTemplate>
-            </LoginView>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </ul>
         </div>
     </div>
 </div>
-<div id="TitleContent" style="text-align: center">
+<div id="TitleContent" style="text-align: center; padding-top: 60px;">
     <a href="/">
-        <img id="Image1" src="/Images/logo.jpg" style="border-style:none" alt="Wingtip Toys logo" />
+        <img src="/Images/logo.jpg" style="border:none;" alt="Wingtip Toys logo" />
     </a>
     <br />
 </div>
 <div id="CategoryMenu" style="text-align: center">
-    @if (categories != null)
+    @for (int i = 0; i < Categories.Count; i++)
     {
-        @for (int i = 0; i < categories.Count; i++)
+        if (i > 0)
         {
-            var cat = categories[i];
-            <b style="font-size: large; font-style: normal">
-                <a href="/ProductList?id=@cat.CategoryID">@cat.CategoryName</a>
-            </b>
-            @if (i < categories.Count - 1)
-            {
-                <text>  |  </text>
-            }
+            @:&nbsp;|&nbsp;
         }
+        <b style="font-size: large; font-style: normal"><a href="/ProductList?id=@Categories[i].CategoryID">@Categories[i].CategoryName</a></b>
     }
 </div>
 <div class="container body-content">
