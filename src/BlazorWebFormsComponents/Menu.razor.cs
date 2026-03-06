@@ -153,10 +153,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<MenuEventArgs> MenuItemClick { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for MenuItemClick.
+		/// </summary>
+		[Parameter]
+		public EventCallback<MenuEventArgs> OnMenuItemClick { get; set; }
+
+		/// <summary>
 		/// Fires after each MenuItem is data-bound.
 		/// </summary>
 		[Parameter]
 		public EventCallback<MenuEventArgs> MenuItemDataBound { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for MenuItemDataBound.
+		/// </summary>
+		[Parameter]
+		public EventCallback<MenuEventArgs> OnMenuItemDataBound { get; set; }
 
 		/// <summary>
 		/// Called by MenuItem when it is clicked.
@@ -164,9 +176,10 @@ namespace BlazorWebFormsComponents
 		internal async Task NotifyItemClicked(MenuItem item)
 		{
 			SelectedItem = item;
-			if (MenuItemClick.HasDelegate)
+			if (MenuItemClick.HasDelegate || OnMenuItemClick.HasDelegate)
 			{
-				await MenuItemClick.InvokeAsync(new MenuEventArgs(item));
+				var handler = MenuItemClick.HasDelegate ? MenuItemClick : OnMenuItemClick;
+				await handler.InvokeAsync(new MenuEventArgs(item));
 			}
 			StateHasChanged();
 		}
@@ -411,9 +424,10 @@ namespace BlazorWebFormsComponents
 						builder.CloseComponent();
 
 						// Fire MenuItemDataBound after each data-bound item
-						if (MenuItemDataBound.HasDelegate)
+						if (MenuItemDataBound.HasDelegate || OnMenuItemDataBound.HasDelegate)
 						{
-							_ = MenuItemDataBound.InvokeAsync(new MenuEventArgs(null));
+							var dataBoundHandler = MenuItemDataBound.HasDelegate ? MenuItemDataBound : OnMenuItemDataBound;
+							_ = dataBoundHandler.InvokeAsync(new MenuEventArgs(null));
 						}
 
 					}

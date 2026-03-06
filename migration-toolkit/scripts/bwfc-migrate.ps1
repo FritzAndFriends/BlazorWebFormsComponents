@@ -1,0 +1,1899 @@
+<#
+.SYNOPSIS
+    Performs mechanical regex-based transforms on ASP.NET Web Forms files to produce Blazor-ready output.
+
+.DESCRIPTION
+    bwfc-migrate.ps1 is Layer 1 of the three-layer Web Forms to Blazor migration pipeline.
+    It automates ~40% of the migration by applying safe, mechanical regex transforms:
+
+      - Renames .aspx/.ascx/.master files to .razor
+      - Strips Web Forms directives and converts to Razor equivalents
+      - Removes asp: prefixes and runat="server" attributes
+      - Converts Web Forms expressions to Razor syntax
+      - Transforms URL references from ~/ to /
+      - Cleans up Web Forms-specific attributes
+      - Copies code-behind files with TODO annotations
+
+    Semantic transforms (lifecycle methods, data binding logic, event handlers)
+    are NOT handled here — those require the Copilot skill layer (Layer 2).
+
+.PARAMETER Path
+    Path to the Web Forms project root directory containing .aspx/.ascx/.master files.
+
+.PARAMETER Output
+    Path for the Blazor output project directory. Will be created if it does not exist.
+
+.PARAMETER WhatIf
+    Show what transforms would be applied without writing any files.
+
+.PARAMETER Verbose
+    Show detailed per-file transform log during processing.
+
+.PARAMETER SkipProjectScaffold
+    Skip generating .csproj, Program.cs, and _Imports.razor scaffold files.
+
+.EXAMPLE
+    .\bwfc-migrate.ps1 -Path C:\src\MyWebFormsApp -Output C:\src\MyBlazorApp
+
+    Migrates all Web Forms files from MyWebFormsApp into a new Blazor project at MyBlazorApp.
+
+.EXAMPLE
+    .\bwfc-migrate.ps1 -Path C:\src\MyWebFormsApp -Output C:\src\MyBlazorApp -WhatIf
+
+    Shows what transforms would be applied without creating any files.
+
+.EXAMPLE
+    .\bwfc-migrate.ps1 -Path .\LegacyApp -Output .\BlazorApp -SkipProjectScaffold -Verbose
+
+    Transforms files with detailed logging, skipping project scaffold generation.
+#>
+
+[CmdletBinding(SupportsShouldProcess)]
+param(
+    [Parameter(Mandatory = $true, HelpMessage = "Path to the Web Forms project root")]
+    [string]$Path,
+
+    [Parameter(Mandatory = $true, HelpMessage = "Path for the Blazor output project")]
+    [string]$Output,
+
+    [Parameter(HelpMessage = "Skip creating .csproj, Program.cs, and _Imports.razor")]
+    [switch]$SkipProjectScaffold
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+#region --- Configuration ---
+
+$WebFormsExtensions = @('.aspx', '.ascx', '.master')
+$CodeBehindExtensions = @('.aspx.cs', '.ascx.cs', '.master.cs', '.aspx.vb', '.ascx.vb', '.master.vb')
+$StaticExtensions = @('.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map')
+
+# Attributes to strip completely (case-insensitive patterns)
+$StripAttributes = @(
+    'runat\s*=\s*"server"',
+    'AutoEventWireup\s*=\s*"(true|false)"',
+    'EnableViewState\s*=\s*"(true|false)"',
+    'ViewStateMode\s*=\s*"[^"]*"',
+    'ValidateRequest\s*=\s*"(true|false)"',
+    'MaintainScrollPositionOnPostBack\s*=\s*"(true|false)"',
+    'ClientIDMode\s*=\s*"[^"]*"',
+    'AutoPostBack\s*=\s*"(?i)(true|false)"',
+    'ControlToValidate\s*=\s*"[^"]*"',
+    'ValidationGroup\s*=\s*"[^"]*"'
+)
+
+#endregion
+
+#region --- Logging & Tracking ---
+
+$script:TransformLog = [System.Collections.Generic.List[PSCustomObject]]::new()
+$script:ManualItems = [System.Collections.Generic.List[PSCustomObject]]::new()
+$script:FilesProcessed = 0
+$script:TransformsApplied = 0
+
+function Write-TransformLog {
+    param(
+        [string]$File,
+        [string]$Transform,
+        [string]$Detail
+    )
+    $entry = [PSCustomObject]@{
+        File      = $File
+        Transform = $Transform
+        Detail    = $Detail
+    }
+    $script:TransformLog.Add($entry)
+    $script:TransformsApplied++
+    if ($VerbosePreference -eq 'Continue') {
+        Write-Verbose "  [$Transform] $Detail"
+    }
+}
+
+function Write-ManualItem {
+    param(
+        [string]$File,
+        [string]$Category,
+        [string]$Detail
+    )
+    $entry = [PSCustomObject]@{
+        File     = $File
+        Category = $Category
+        Detail   = $Detail
+    }
+    $script:ManualItems.Add($entry)
+}
+
+#endregion
+
+#region --- Project Scaffolding ---
+
+function New-ProjectScaffold {
+    param(
+        [string]$OutputRoot,
+        [string]$ProjectName,
+        [bool]$HasIdentityPages = $false
+    )
+
+    # .csproj
+    $csprojContent = @"
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />
+  </ItemGroup>
+
+</Project>
+"@
+
+    # _Imports.razor
+    $importsContent = @"
+@using System.Net.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using BlazorWebFormsComponents
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using $ProjectName
+"@
+
+    # Program.cs — conditionally include auth services when Identity pages detected
+    $authUsings = ''
+    $authServices = ''
+    if ($HasIdentityPages) {
+        $authUsings = @"
+
+using ${ProjectName}.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+"@
+        $authServices = @"
+
+// Auth services (mock for migration benchmark)
+builder.Services.AddScoped<MockAuthService>();
+builder.Services.AddScoped<MockAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<MockAuthenticationStateProvider>());
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
+"@
+    }
+
+    $programContent = @"
+// TODO: Review and adjust this generated Program.cs for your application needs.
+using BlazorWebFormsComponents;${authUsings}
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+builder.Services.AddBlazorWebFormsComponents();${authServices}
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.MapStaticAssets();
+app.UseAntiforgery();
+
+app.MapRazorComponents<${ProjectName}.Components.App>()
+    .AddInteractiveServerRenderMode();
+
+app.Run();
+"@
+
+    # Properties/launchSettings.json
+    $launchSettingsContent = @"
+{
+  "profiles": {
+    "$ProjectName": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($OutputRoot, "Create project scaffold")) {
+        $csprojPath = Join-Path $OutputRoot "$ProjectName.csproj"
+        $importsPath = Join-Path $OutputRoot "_Imports.razor"
+        $programPath = Join-Path $OutputRoot "Program.cs"
+        $propertiesDir = Join-Path $OutputRoot "Properties"
+        $launchSettingsPath = Join-Path $propertiesDir "launchSettings.json"
+
+        Set-Content -Path $csprojPath -Value $csprojContent -Encoding UTF8
+        Write-TransformLog -File $csprojPath -Transform 'Scaffold' -Detail "Generated $ProjectName.csproj"
+
+        Set-Content -Path $importsPath -Value $importsContent -Encoding UTF8
+        Write-TransformLog -File $importsPath -Transform 'Scaffold' -Detail 'Generated _Imports.razor'
+
+        Set-Content -Path $programPath -Value $programContent -Encoding UTF8
+        Write-TransformLog -File $programPath -Transform 'Scaffold' -Detail 'Generated Program.cs'
+
+        New-Item -ItemType Directory -Force $propertiesDir | Out-Null
+        Set-Content -Path $launchSettingsPath -Value $launchSettingsContent -Encoding UTF8
+        Write-TransformLog -File $launchSettingsPath -Transform 'Scaffold' -Detail 'Generated Properties/launchSettings.json'
+    }
+    else {
+        Write-Host "[WhatIf] Would create: $ProjectName.csproj"
+        Write-Host "[WhatIf] Would create: _Imports.razor"
+        Write-Host "[WhatIf] Would create: Program.cs"
+        Write-Host "[WhatIf] Would create: Properties/launchSettings.json"
+    }
+}
+
+function New-AppRazorScaffold {
+    param(
+        [string]$OutputRoot,
+        [string]$ProjectName,
+        [string]$SourceRoot = ''
+    )
+
+    $componentsDir = Join-Path $OutputRoot "Components"
+
+    # Extract <link> stylesheet tags and <webopt:bundlereference> from the source master page (Site.Master)
+    $cssLinks = @()
+    if ($SourceRoot -and (Test-Path $SourceRoot)) {
+        $masterFiles = Get-ChildItem -Path $SourceRoot -Recurse -Filter '*.Master' -ErrorAction SilentlyContinue
+        foreach ($masterFile in $masterFiles) {
+            $masterContent = Get-Content -Path $masterFile.FullName -Raw -ErrorAction SilentlyContinue
+            if ($masterContent) {
+                # Handle <webopt:bundlereference> — expand to individual CSS links from the referenced folder
+                $bundleRegex = [regex]'<webopt:bundlereference[^>]*\bpath\s*=\s*"([^"]+)"[^>]*/?\s*>'
+                $bundleMatches = $bundleRegex.Matches($masterContent)
+                foreach ($bm in $bundleMatches) {
+                    $bundlePath = $bm.Groups[1].Value -replace '^~/', ''
+                    $cssFolder = Join-Path $SourceRoot $bundlePath
+                    if (Test-Path $cssFolder) {
+                        $cssFiles = Get-ChildItem -Path $cssFolder -Filter '*.css' | Where-Object { $_.Name -notmatch '\.min\.css$' } | Sort-Object Name
+                        foreach ($cf in $cssFiles) {
+                            $cssHref = "/$bundlePath/$($cf.Name)" -replace '\\','/'
+                            $cssLinks += "    <link href=`"$cssHref`" rel=`"stylesheet`" />"
+                        }
+                        Write-TransformLog -File $masterFile.Name -Transform 'BundleExpand' -Detail "Expanded bundlereference '$bundlePath' → $($cssFiles.Count) CSS file(s) for App.razor"
+                    }
+                }
+
+                # Handle explicit <link rel="stylesheet"> tags
+                $linkRegex = [regex]'<link\b[^>]*\brel\s*=\s*["\x27]stylesheet["\x27][^>]*/?\s*>'
+                $linkMatches = $linkRegex.Matches($masterContent)
+                foreach ($m in $linkMatches) {
+                    $link = $m.Value
+                    # Convert ~/path to /path for Blazor static files
+                    $link = $link -replace '~/','/'
+                    # Strip runat="server" if present
+                    $link = $link -replace '\s+runat\s*=\s*"server"',''
+                    $cssLinks += "    $link"
+                }
+                if ($linkMatches.Count -gt 0 -or $bundleMatches.Count -gt 0) {
+                    Write-TransformLog -File $masterFile.Name -Transform 'CssExtract' -Detail "Extracted $($linkMatches.Count) link(s) + $($bundleMatches.Count) bundle(s) from master page for App.razor"
+                }
+            }
+        }
+    }
+
+    $cssBlock = ''
+    if ($cssLinks.Count -gt 0) {
+        $cssBlock = "`n" + ($cssLinks -join "`n")
+    }
+
+    $appRazorContent = @"
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />$cssBlock
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>
+"@
+
+    $routesRazorContent = @"
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
+"@
+
+    if ($PSCmdlet.ShouldProcess($componentsDir, "Create App.razor and Routes.razor scaffold")) {
+        if (-not (Test-Path $componentsDir)) {
+            New-Item -ItemType Directory -Force $componentsDir | Out-Null
+        }
+
+        $appPath = Join-Path $componentsDir "App.razor"
+        Set-Content -Path $appPath -Value $appRazorContent -Encoding UTF8
+        Write-TransformLog -File $appPath -Transform 'Scaffold' -Detail 'Generated Components/App.razor'
+
+        $routesPath = Join-Path $componentsDir "Routes.razor"
+        Set-Content -Path $routesPath -Value $routesRazorContent -Encoding UTF8
+        Write-TransformLog -File $routesPath -Transform 'Scaffold' -Detail 'Generated Components/Routes.razor'
+    }
+    else {
+        Write-Host "[WhatIf] Would create: Components/App.razor"
+        Write-Host "[WhatIf] Would create: Components/Routes.razor"
+    }
+}
+
+function Add-MockAuthService {
+    <#
+    .SYNOPSIS
+        Generates mock authentication services for migrated Identity pages.
+    .DESCRIPTION
+        Creates MockAuthService.cs (in-memory user store) and
+        MockAuthenticationStateProvider.cs (Blazor auth state) in the Services folder.
+        Called conditionally when Account/Login.aspx is detected in the source.
+    #>
+    param(
+        [string]$OutputRoot,
+        [string]$ProjectName
+    )
+
+    $servicesDir = Join-Path $OutputRoot "Services"
+    if (-not (Test-Path $servicesDir)) {
+        New-Item -ItemType Directory -Force $servicesDir | Out-Null
+    }
+
+    $mockAuthContent = @"
+namespace ${ProjectName}.Services;
+
+public class MockAuthService
+{
+    private readonly Dictionary<string, string> _users = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["admin@wingtiptoys.com"] = "Pass@word1"
+    };
+
+    public Task<bool> AuthenticateAsync(string email, string password)
+    {
+        return Task.FromResult(_users.TryGetValue(email, out var stored) && stored == password);
+    }
+
+    public Task<(bool Success, string? Error)> CreateUserAsync(string email, string password)
+    {
+        if (_users.ContainsKey(email))
+            return Task.FromResult((false, (string?)"A user with that email already exists."));
+        _users[email] = password;
+        return Task.FromResult((true, (string?)null));
+    }
+}
+"@
+
+    $mockAuthStateContent = @"
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
+
+namespace ${ProjectName}.Services;
+
+public class MockAuthenticationStateProvider : AuthenticationStateProvider
+{
+    private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        => Task.FromResult(new AuthenticationState(_currentUser));
+
+    public Task<bool> LoginAsync(string email, string password, MockAuthService authService)
+    {
+        return Task.Run(async () =>
+        {
+            if (await authService.AuthenticateAsync(email, password))
+            {
+                var identity = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, email),
+                    new Claim(ClaimTypes.Email, email)
+                }, "MockAuth");
+                _currentUser = new ClaimsPrincipal(identity);
+                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public Task LogoutAsync()
+    {
+        _currentUser = new(new ClaimsIdentity());
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        return Task.CompletedTask;
+    }
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($servicesDir, "Create mock authentication services")) {
+        $authPath = Join-Path $servicesDir "MockAuthService.cs"
+        Set-Content -Path $authPath -Value $mockAuthContent -Encoding UTF8
+        Write-TransformLog -File $authPath -Transform 'Scaffold' -Detail 'Generated Services/MockAuthService.cs'
+
+        $authStatePath = Join-Path $servicesDir "MockAuthenticationStateProvider.cs"
+        Set-Content -Path $authStatePath -Value $mockAuthStateContent -Encoding UTF8
+        Write-TransformLog -File $authStatePath -Transform 'Scaffold' -Detail 'Generated Services/MockAuthenticationStateProvider.cs'
+    }
+    else {
+        Write-Host "[WhatIf] Would create: Services/MockAuthService.cs"
+        Write-Host "[WhatIf] Would create: Services/MockAuthenticationStateProvider.cs"
+    }
+}
+
+#endregion
+
+#region --- Directive Transforms ---
+
+function ConvertFrom-PageDirective {
+    param([string]$Content, [string]$FileName, [string]$RelPath)
+
+    # <%@ Page ... %> → @page "/route" (preserving folder structure)
+    $routePath = ($RelPath -replace '\\', '/') -replace '\.(aspx|ascx)$', ''
+    $route = '/' + $routePath
+    if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
+        $route = '/'
+    }
+
+    if ($Content -match '<%@\s*Page[^%]*%>') {
+        $Content = $Content -replace '<%@\s*Page[^%]*%>\s*\r?\n?', ''
+        $Content = "@page `"$route`"`n" + $Content
+        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "<%@ Page %> → @page `"$route`""
+    }
+    return $Content
+}
+
+function ConvertFrom-MasterDirective {
+    param([string]$Content, [string]$RelPath)
+
+    if ($Content -match '<%@\s*Master[^%]*%>') {
+        $Content = $Content -replace '<%@\s*Master[^%]*%>\s*\r?\n?', ''
+        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail 'Removed <%@ Master %>'
+    }
+    return $Content
+}
+
+function ConvertFrom-ControlDirective {
+    param([string]$Content, [string]$RelPath)
+
+    if ($Content -match '<%@\s*Control[^%]*%>') {
+        $Content = $Content -replace '<%@\s*Control[^%]*%>\s*\r?\n?', ''
+        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail 'Removed <%@ Control %>'
+    }
+    return $Content
+}
+
+function ConvertFrom-RegisterDirective {
+    param([string]$Content, [string]$RelPath)
+
+    $regex = [regex]'<%@\s*Register[^%]*%>\s*\r?\n?'
+    $matches_ = $regex.Matches($Content)
+    foreach ($m in $matches_) {
+        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Removed <%@ Register %> directive"
+        if ($m.Value -match 'TagPrefix\s*=\s*"[Uu][Cc]"') {
+            Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Register directive contained uc: TagPrefix — verify user control tags are converted"
+        }
+        Write-ManualItem -File $RelPath -Category 'RegisterDirective' -Detail "Register directive removed — verify tag prefixes in converted markup are handled"
+    }
+    $Content = $regex.Replace($Content, '')
+    return $Content
+}
+
+function ConvertFrom-ImportDirective {
+    param([string]$Content, [string]$RelPath)
+
+    $regex = [regex]'<%@\s*Import\s+Namespace="([^"]+)"\s*%>\s*\r?\n?'
+    $matches_ = $regex.Matches($Content)
+    foreach ($m in $matches_) {
+        $ns = $m.Groups[1].Value
+        Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "<%@ Import Namespace=`"$ns`" %> → @using $ns"
+    }
+    $Content = $regex.Replace($Content, { param($m) "@using $($m.Groups[1].Value)`n" })
+    return $Content
+}
+
+#endregion
+
+#region --- Content & Form Transforms ---
+
+function ConvertFrom-ContentWrappers {
+    param([string]$Content, [string]$RelPath)
+
+    # HeadContent placeholder → <HeadContent> / </HeadContent>
+    $headOpenRegex = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"HeadContent"[^>]*>'
+    $headOpenRegex2 = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"head"[^>]*>'
+    if ($Content -match $headOpenRegex -or $Content -match $headOpenRegex2) {
+        $Content = $headOpenRegex.Replace($Content, '<HeadContent>')
+        $Content = $headOpenRegex2.Replace($Content, '<HeadContent>')
+        Write-TransformLog -File $RelPath -Transform 'Content' -Detail 'HeadContent placeholder → <HeadContent>'
+    }
+
+    # MainContent / other ContentPlaceHolderIDs → strip wrapper entirely
+    $mainRegex = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"[^"]*"[^>]*>\s*\r?\n?'
+    $matches_ = $mainRegex.Matches($Content)
+    foreach ($m in $matches_) {
+        Write-TransformLog -File $RelPath -Transform 'Content' -Detail "Removed asp:Content open tag"
+    }
+    $Content = $mainRegex.Replace($Content, '')
+
+    # Closing </asp:Content> tags
+    $closeRegex = [regex]'</asp:Content>\s*\r?\n?'
+    $closeCount = $closeRegex.Matches($Content).Count
+    if ($closeCount -gt 0) {
+        # Keep matching number of </HeadContent> if we converted HeadContent above
+        $headContentCount = ([regex]'<HeadContent>').Matches($Content).Count
+        if ($headContentCount -gt 0) {
+            # Replace first N closing tags with </HeadContent>, remove the rest
+            $replaced = 0
+            $Content = $closeRegex.Replace($Content, {
+                param($m)
+                $script:replaced_count++
+                if ($script:replaced_count -le $headContentCount) {
+                    return "</HeadContent>`n"
+                }
+                return ''
+            })
+            # Reset and redo with proper scoping
+            $script:replaced_count = 0
+            $tempContent = $Content
+            $Content = ''
+            $lastIndex = 0
+            $closeMatches = $closeRegex.Matches($tempContent)
+            $headCount = 0
+            foreach ($cm in $closeMatches) {
+                $Content += $tempContent.Substring($lastIndex, $cm.Index - $lastIndex)
+                $headCount++
+                if ($headCount -le $headContentCount) {
+                    $Content += "</HeadContent>`n"
+                }
+                $lastIndex = $cm.Index + $cm.Length
+            }
+            $Content += $tempContent.Substring($lastIndex)
+        }
+        else {
+            $Content = $closeRegex.Replace($Content, '')
+        }
+        Write-TransformLog -File $RelPath -Transform 'Content' -Detail "Removed $closeCount </asp:Content> closing tag(s)"
+    }
+
+    return $Content
+}
+
+function ConvertFrom-FormWrapper {
+    param([string]$Content, [string]$RelPath)
+
+    # Remove <form ... runat="server" ...> and its closing </form> — but only the server form
+    $formOpenRegex = [regex]'<form\s+[^>]*runat\s*=\s*"server"[^>]*>\s*\r?\n?'
+    if ($Content -match $formOpenRegex) {
+        $Content = $formOpenRegex.Replace($Content, '', 1)
+        # Remove the corresponding closing </form> (the last one, or the first one after removal)
+        # Simple approach: remove one </form> tag
+        $formCloseRegex = [regex]'</form>\s*\r?\n?'
+        $Content = $formCloseRegex.Replace($Content, '', 1)
+        Write-TransformLog -File $RelPath -Transform 'Form' -Detail 'Removed <form runat="server"> and </form>'
+    }
+    return $Content
+}
+
+#endregion
+
+#region --- Master Page Transforms ---
+
+function ConvertFrom-MasterPage {
+    param([string]$Content, [string]$RelPath)
+
+    # 1. Remove <asp:ScriptManager> block (can be multi-line with nested <Scripts>)
+    $smRegex = [regex]'(?s)<asp:ScriptManager[^>]*>.*?</asp:ScriptManager>\s*\r?\n?'
+    if ($Content -match '<asp:ScriptManager') {
+        $Content = $smRegex.Replace($Content, '')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Removed <asp:ScriptManager> block'
+    }
+    # Also handle self-closing ScriptManager
+    $smSelfRegex = [regex]'<asp:ScriptManager[^>]*/>\s*\r?\n?'
+    $Content = $smSelfRegex.Replace($Content, '')
+
+    # 2. Extract head metadata (<meta>, <link>, <title>) before stripping <head> section
+    $headContentBlock = ''
+    $headSectionRegex = [regex]'(?s)<head[^>]*>(.*?)</head>'
+    $headMatch = $headSectionRegex.Match($Content)
+    if ($headMatch.Success) {
+        $headInner = $headMatch.Groups[1].Value
+        $extractedTags = [System.Collections.Generic.List[string]]::new()
+
+        foreach ($m in ([regex]'<meta\s[^>]*>').Matches($headInner)) {
+            $extractedTags.Add("    " + $m.Value.Trim())
+        }
+        foreach ($m in ([regex]'(?s)<title>.*?</title>').Matches($headInner)) {
+            $extractedTags.Add("    " + $m.Value.Trim())
+        }
+        foreach ($m in ([regex]'<link\s[^>]*>').Matches($headInner)) {
+            $extractedTags.Add("    " + $m.Value.Trim())
+        }
+
+        if ($extractedTags.Count -gt 0) {
+            $headContentBlock = "<HeadContent>`n" + ($extractedTags -join "`n") + "`n</HeadContent>"
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Extracted $($extractedTags.Count) head element(s) into <HeadContent>"
+        }
+
+        # Remove the entire <head>...</head> section
+        $Content = $headSectionRegex.Replace($Content, '')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Removed <head> section'
+    }
+
+    # 3. Strip document wrapper tags
+    $Content = $Content -replace '<!DOCTYPE[^>]*>\s*\r?\n?', ''
+    $Content = $Content -replace '<html[^>]*>\s*\r?\n?', ''
+    $Content = $Content -replace '</html>\s*\r?\n?', ''
+    $Content = $Content -replace '<body[^>]*>\s*\r?\n?', ''
+    $Content = $Content -replace '</body>\s*\r?\n?', ''
+    Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Stripped document wrapper (DOCTYPE, html, body)'
+
+    # 4. Replace <asp:ContentPlaceHolder ID="MainContent"> → @Body
+    $mainCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*>.*?</asp:ContentPlaceHolder>'
+    if ($mainCphRegex.IsMatch($Content)) {
+        $Content = $mainCphRegex.Replace($Content, '@Body')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body'
+    }
+    # Self-closing MainContent
+    $mainCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*/>'
+    if ($mainCphSelfRegex.IsMatch($Content)) {
+        $Content = $mainCphSelfRegex.Replace($Content, '@Body')
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body (self-closing)'
+    }
+
+    # Other ContentPlaceHolders → TODO comment
+    $otherCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*>.*?</asp:ContentPlaceHolder>'
+    foreach ($m in $otherCphRegex.Matches($Content)) {
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion"
+    }
+    $Content = $otherCphRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+    # Self-closing other ContentPlaceHolders
+    $otherCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*/>'
+    foreach ($m in $otherCphSelfRegex.Matches($Content)) {
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion (self-closing)"
+    }
+    $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+
+    # 5. Flag items needing Layer 2 attention
+    if ($Content -match '<RoleGroups>') {
+        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
+    }
+    if ($Content -match 'SelectMethod\s*=') {
+        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod detected — will be auto-converted to TODO annotation by ConvertFrom-SelectMethod'
+    }
+
+    # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
+    $header = "@inherits LayoutComponentBase`n"
+    if ($headContentBlock) {
+        $header += "`n" + $headContentBlock + "`n"
+    }
+    $Content = $header + "`n" + $Content
+
+    return $Content
+}
+
+#endregion
+
+#region --- Expression Transforms ---
+
+function ConvertFrom-Expressions {
+    param([string]$Content, [string]$RelPath)
+
+    # Comments: <%-- ... --%> → @* ... *@
+    $commentRegex = [regex]'(?s)<%--(.+?)--%>'
+    $commentMatches = $commentRegex.Matches($Content)
+    if ($commentMatches.Count -gt 0) {
+        $Content = $commentRegex.Replace($Content, '@*$1*@')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($commentMatches.Count) comment(s) to Razor syntax"
+    }
+
+    # Data binding with Eval and format string: <%#: Eval("prop", "{0:fmt}") %> → @context.prop.ToString("fmt")
+    $evalFmtRegex = [regex]'<%#:\s*Eval\("(\w+)",\s*"\{0:([^}]+)\}"\)\s*%>'
+    $evalFmtMatches = $evalFmtRegex.Matches($Content)
+    if ($evalFmtMatches.Count -gt 0) {
+        $Content = $evalFmtRegex.Replace($Content, '@context.$1.ToString("$2")')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($evalFmtMatches.Count) Eval() with format string to @context.ToString()"
+    }
+
+    # String.Format with Item.Property: <%#: String.Format("{0:fmt}", Item.Prop) %> → @($"{context.Prop:fmt}")
+    $strFmtRegex = [regex]'<%#:\s*String\.Format\("\{0:([^}]+)\}",\s*Item\.(\w+)\)\s*%>'
+    $strFmtMatches = $strFmtRegex.Matches($Content)
+    if ($strFmtMatches.Count -gt 0) {
+        $Content = $strFmtRegex.Replace($Content, '@($$"{context.$2:$1}")')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($strFmtMatches.Count) String.Format(Item.) to interpolated string"
+    }
+
+    # Data binding with Eval: <%#:\s*Eval("prop")\s*%> → @context.prop
+    $evalRegex = [regex]'<%#:\s*Eval\("(\w+)"\)\s*%>'
+    $evalMatches = $evalRegex.Matches($Content)
+    if ($evalMatches.Count -gt 0) {
+        $Content = $evalRegex.Replace($Content, '@context.$1')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($evalMatches.Count) Eval() binding(s) to @context"
+    }
+
+    # Data binding with Item: <%#:\s*Item.Prop\s*%> → @context.Prop
+    $itemRegex = [regex]'<%#:\s*Item\.(\w+)\s*%>'
+    $itemMatches = $itemRegex.Matches($Content)
+    if ($itemMatches.Count -gt 0) {
+        $Content = $itemRegex.Replace($Content, '@context.$1')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($itemMatches.Count) Item binding(s) to @context"
+    }
+
+    # Bare Item binding: <%#: Item %> → @context
+    $bareItemRegex = [regex]'<%#:\s*Item\s*%>'
+    $bareItemMatches = $bareItemRegex.Matches($Content)
+    if ($bareItemMatches.Count -gt 0) {
+        $Content = $bareItemRegex.Replace($Content, '@context')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($bareItemMatches.Count) bare Item binding(s) to @context"
+    }
+
+    # Server-side expressions that won't compile in Blazor: wrap in TODO comment instead of @()
+    $serverSideObjects = 'Request|Session|Server|Response|ProviderName|SuccessMessage|OpenID_\w+|ManageMessage'
+    $serverEncodedRegex = [regex]"<%:\s*((?:$serverSideObjects)(?:\.\w+|\[.*?\]|\(.*?\))*)\s*%>"
+    $serverEncodedMatches = $serverEncodedRegex.Matches($Content)
+    if ($serverEncodedMatches.Count -gt 0) {
+        $Content = $serverEncodedRegex.Replace($Content, '@* TODO: Server-side expression - $1 *@')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Wrapped $($serverEncodedMatches.Count) server-side encoded expression(s) in TODO comments"
+    }
+
+    $serverUnencodedRegex = [regex]"<%=\s*((?:$serverSideObjects)(?:\.\w+|\[.*?\]|\(.*?\))*)\s*%>"
+    $serverUnencodedMatches = $serverUnencodedRegex.Matches($Content)
+    if ($serverUnencodedMatches.Count -gt 0) {
+        $Content = $serverUnencodedRegex.Replace($Content, '@* TODO: Server-side expression - $1 *@')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Wrapped $($serverUnencodedMatches.Count) server-side unencoded expression(s) in TODO comments"
+    }
+
+    # Encoded expressions: <%: expr %> → @(expr)
+    $encodedRegex = [regex]'<%:\s*(.+?)\s*%>'
+    $encodedMatches = $encodedRegex.Matches($Content)
+    if ($encodedMatches.Count -gt 0) {
+        $Content = $encodedRegex.Replace($Content, '@($1)')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($encodedMatches.Count) encoded expression(s)"
+    }
+
+    # Unencoded expressions: <%= expr %> → @(expr)
+    $unencodedRegex = [regex]'<%=\s*(.+?)\s*%>'
+    $unencodedMatches = $unencodedRegex.Matches($Content)
+    if ($unencodedMatches.Count -gt 0) {
+        $Content = $unencodedRegex.Replace($Content, '@($1)')
+        Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($unencodedMatches.Count) unencoded expression(s)"
+    }
+
+    # Flag any remaining <% ... %> blocks as manual
+    $remainingRegex = [regex]'<%[^@].*?%>'
+    $remainingMatches = $remainingRegex.Matches($Content)
+    foreach ($m in $remainingMatches) {
+        Write-ManualItem -File $RelPath -Category 'CodeBlock' -Detail "Unconverted code block: $($m.Value.Substring(0, [Math]::Min(80, $m.Value.Length)))"
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- LoginView Conversion ---
+
+function ConvertFrom-LoginView {
+    param([string]$Content, [string]$RelPath)
+
+    # Flag <RoleGroups> as manual — too complex for regex
+    if ($Content -match '<RoleGroups>') {
+        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
+    }
+
+    # <asp:LoginView ...> → <AuthorizeView> (strip all attributes)
+    $openRegex = [regex]'(?i)<asp:LoginView\b[^>]*>'
+    $openMatches = $openRegex.Matches($Content)
+    if ($openMatches.Count -gt 0) {
+        $Content = $openRegex.Replace($Content, '<AuthorizeView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <AuthorizeView>"
+        Write-ManualItem -File $RelPath -Category 'LoginView-Auth' -Detail 'AuthorizeView requires builder.Services.AddCascadingAuthenticationState() and builder.Services.AddAuthorization() in Program.cs'
+    }
+
+    # </asp:LoginView> → </AuthorizeView>
+    $closeRegex = [regex]'(?i)</asp:LoginView\s*>'
+    $closeMatches = $closeRegex.Matches($Content)
+    if ($closeMatches.Count -gt 0) {
+        $Content = $closeRegex.Replace($Content, '</AuthorizeView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($closeMatches.Count) </asp:LoginView> to </AuthorizeView>"
+    }
+
+    # <AnonymousTemplate> → <NotAuthorized>
+    $anonOpenRegex = [regex]'(?i)<AnonymousTemplate\s*>'
+    $anonOpenMatches = $anonOpenRegex.Matches($Content)
+    if ($anonOpenMatches.Count -gt 0) {
+        $Content = $anonOpenRegex.Replace($Content, '<NotAuthorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonOpenMatches.Count) <AnonymousTemplate> to <NotAuthorized>"
+    }
+
+    # </AnonymousTemplate> → </NotAuthorized>
+    $anonCloseRegex = [regex]'(?i)</AnonymousTemplate\s*>'
+    $anonCloseMatches = $anonCloseRegex.Matches($Content)
+    if ($anonCloseMatches.Count -gt 0) {
+        $Content = $anonCloseRegex.Replace($Content, '</NotAuthorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonCloseMatches.Count) </AnonymousTemplate> to </NotAuthorized>"
+    }
+
+    # <LoggedInTemplate> → <Authorized>
+    $loggedOpenRegex = [regex]'(?i)<LoggedInTemplate\s*>'
+    $loggedOpenMatches = $loggedOpenRegex.Matches($Content)
+    if ($loggedOpenMatches.Count -gt 0) {
+        $Content = $loggedOpenRegex.Replace($Content, '<Authorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedOpenMatches.Count) <LoggedInTemplate> to <Authorized>"
+    }
+
+    # </LoggedInTemplate> → </Authorized>
+    $loggedCloseRegex = [regex]'(?i)</LoggedInTemplate\s*>'
+    $loggedCloseMatches = $loggedCloseRegex.Matches($Content)
+    if ($loggedCloseMatches.Count -gt 0) {
+        $Content = $loggedCloseRegex.Replace($Content, '</Authorized>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedCloseMatches.Count) </LoggedInTemplate> to </Authorized>"
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- GetRouteUrl Conversion ---
+
+function ConvertFrom-GetRouteUrl {
+    param([string]$Content, [string]$RelPath)
+
+    $transformed = $false
+
+    # Page.GetRouteUrl( stays as-is — WebFormsPageBase.Page returns this,
+    # and GetRouteUrl is now a method on WebFormsPageBase. Just log that we found it.
+    $pageRouteRegex = [regex]'Page\.GetRouteUrl\s*\('
+    $pageRouteMatches = $pageRouteRegex.Matches($Content)
+    if ($pageRouteMatches.Count -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Found $($pageRouteMatches.Count) Page.GetRouteUrl() — works via WebFormsPageBase (no transform needed)"
+        $transformed = $true
+    }
+
+    # Standalone GetRouteUrl( also works via WebFormsPageBase — just log it.
+    $standaloneRegex = [regex]'(?<![\w.])GetRouteUrl\s*\('
+    $standaloneMatches = $standaloneRegex.Matches($Content)
+    if ($standaloneMatches.Count -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Found $($standaloneMatches.Count) GetRouteUrl() — works via WebFormsPageBase (no transform needed)"
+        $transformed = $true
+    }
+
+    # Inside route value arguments, convert Eval("Prop") to context.Prop
+    $evalInRouteRegex = [regex]'Eval\("(\w+)"\)'
+    $evalInRouteMatches = $evalInRouteRegex.Matches($Content)
+    if ($evalInRouteMatches.Count -gt 0) {
+        $Content = $evalInRouteRegex.Replace($Content, 'context.$1')
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($evalInRouteMatches.Count) Eval() in route values to context.Property"
+    }
+
+    # Flag RouteValueDictionary usage as manual
+    if ($Content -match 'RouteValueDictionary') {
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'RouteValueDictionary usage detected — works but consider simplifying to anonymous object'
+    }
+
+    # GetRouteUrl now works via @inherits WebFormsPageBase — no @inject needed
+    if ($transformed) {
+        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail 'GetRouteUrl calls will resolve via WebFormsPageBase — ensure page uses @inherits WebFormsPageBase'
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- ItemType/TItem Data-Source Stripping ---
+
+function Remove-ItemTypeWithDataSource {
+    <#
+    .SYNOPSIS
+        Strips ItemType/TItem attributes when a data source (SelectMethod) is present.
+    .DESCRIPTION
+        Blazor's generic type inference automatically resolves the item type from the
+        data source binding. Emitting ItemType or TItem alongside SelectMethod causes
+        redundant type parameters and is the #1 recurring build failure class.
+
+        Rules:
+        - Tag has BOTH ItemType="X" AND SelectMethod="..." → strip ItemType
+        - Tag has BOTH TItem="X" AND SelectMethod="..." → strip TItem
+        - Tag has ItemType="X" but NO SelectMethod → keep as-is (Blazor needs it)
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $strippedCount = 0
+
+    # Match tags that contain BOTH SelectMethod and ItemType (in either order)
+    # Pattern 1: ItemType before SelectMethod
+    $regex1 = [regex]::new('<[A-Z]\w*\b[^>]*?\bItemType\s*=\s*"[^"]*"[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    # Pattern 2: SelectMethod before ItemType
+    $regex2 = [regex]::new('<[A-Z]\w*\b[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*?\bItemType\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+
+    # Strip ItemType from matches of either pattern
+    $itemTypeAttr = [regex]::new('\s+ItemType\s*=\s*"[^"]*"', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    foreach ($rx in @($regex1, $regex2)) {
+        foreach ($m in $rx.Matches($Content)) {
+            $original = $m.Value
+            $replaced = $itemTypeAttr.Replace($original, '', 1)
+            if ($original -ne $replaced) {
+                $Content = $Content.Replace($original, $replaced)
+                $strippedCount++
+            }
+        }
+    }
+
+    # Same for TItem + SelectMethod
+    $regex3 = [regex]::new('<[A-Z]\w*\b[^>]*?\bTItem\s*=\s*"[^"]*"[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $regex4 = [regex]::new('<[A-Z]\w*\b[^>]*?\bSelectMethod\s*=\s*"[^"]*"[^>]*?\bTItem\s*=\s*"[^"]*"[^>]*>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $tItemAttr = [regex]::new('\s+TItem\s*=\s*"[^"]*"', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    foreach ($rx in @($regex3, $regex4)) {
+        foreach ($m in $rx.Matches($Content)) {
+            $original = $m.Value
+            $replaced = $tItemAttr.Replace($original, '', 1)
+            if ($original -ne $replaced) {
+                $Content = $Content.Replace($original, $replaced)
+                $strippedCount++
+            }
+        }
+    }
+
+    if ($strippedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'ItemType-Inference' -Detail "Stripped $strippedCount ItemType/TItem attribute(s) where SelectMethod provides type inference"
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- SelectMethod Conversion ---
+
+function ConvertFrom-SelectMethod {
+    param([string]$Content, [string]$RelPath)
+
+    # Match SelectMethod="MethodName" in any tag, capture the method name and insert a TODO after the tag
+    $selectMethodRegex = [regex]'(?si)(<[^>]*?)\s+SelectMethod\s*=\s*"([^"]+)"([^>]*>)'
+    $selectMethodMatches = $selectMethodRegex.Matches($Content)
+    if ($selectMethodMatches.Count -gt 0) {
+        $Content = $selectMethodRegex.Replace($Content, {
+            param($m)
+            $tagBeforeAttr = $m.Groups[1].Value
+            $methodName = $m.Groups[2].Value
+            $tagAfterAttr = $m.Groups[3].Value
+            $serviceName = 'I' + $methodName.TrimStart('Get') + 'Service'
+            $varName = ($methodName.TrimStart('Get')).Substring(0,1).ToLower() + ($methodName.TrimStart('Get')).Substring(1) + 'Service'
+            "${tagBeforeAttr}${tagAfterAttr}`n@* TODO: Replace SelectMethod=""${methodName}"" with Items=""@_data"" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@"
+        })
+        Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Converted $($selectMethodMatches.Count) SelectMethod attribute(s) to TODO annotations"
+        foreach ($m in $selectMethodMatches) {
+            Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail "SelectMethod='$($m.Groups[2].Value)' removed — needs service injection and OnInitializedAsync data loading"
+        }
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- Tag & Attribute Transforms ---
+
+function ConvertFrom-AspPrefix {
+    param([string]$Content, [string]$RelPath)
+
+    # Opening tags: <asp:Button → <Button
+    $openRegex = [regex]'<asp:(\w+)'
+    $openMatches = $openRegex.Matches($Content)
+    if ($openMatches.Count -gt 0) {
+        $Content = $openRegex.Replace($Content, '<$1')
+        Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed asp: prefix from $($openMatches.Count) opening tag(s)"
+    }
+
+    # Closing tags: </asp:Button> → </Button>
+    $closeRegex = [regex]'</asp:(\w+)>'
+    $closeMatches = $closeRegex.Matches($Content)
+    if ($closeMatches.Count -gt 0) {
+        $Content = $closeRegex.Replace($Content, '</$1>')
+        Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed asp: prefix from $($closeMatches.Count) closing tag(s)"
+    }
+
+    # Opening tags: <uc1:Control → <Control (handles uc, uc1, uc2, etc.)
+    $ucOpenRegex = [regex]'<uc\d*:(\w+)'
+    $ucOpenMatches = $ucOpenRegex.Matches($Content)
+    if ($ucOpenMatches.Count -gt 0) {
+        $Content = $ucOpenRegex.Replace($Content, '<$1')
+    }
+
+    # Closing tags: </uc1:Control> → </Control>
+    $ucCloseRegex = [regex]'</uc\d*:(\w+)>'
+    $ucCloseMatches = $ucCloseRegex.Matches($Content)
+    if ($ucCloseMatches.Count -gt 0) {
+        $Content = $ucCloseRegex.Replace($Content, '</$1>')
+    }
+
+    $ucTotal = $ucOpenMatches.Count + $ucCloseMatches.Count
+    if ($ucTotal -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed uc: prefix from $ucTotal opening/closing tag(s)"
+    }
+
+    return $Content
+}
+
+function Remove-WebFormsAttributes {
+    param([string]$Content, [string]$RelPath)
+
+    foreach ($pattern in $StripAttributes) {
+        $attrRegex = [regex]"\s*$pattern"
+        $attrMatches = $attrRegex.Matches($Content)
+        if ($attrMatches.Count -gt 0) {
+            $Content = $attrRegex.Replace($Content, '')
+            # Extract a friendly name from the pattern for logging
+            $friendlyName = $pattern -replace '\\s\*=\\s\*.*', '' -replace '\\s\*', ' ' -replace '\\', ''
+            Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Removed $($attrMatches.Count) '$friendlyName' attribute(s)"
+
+            # Emit manual review item for AutoPostBack behavioral difference
+            if ($friendlyName -eq 'AutoPostBack') {
+                Write-ManualItem -File $RelPath -Category 'AutoPostBack' -Detail "AutoPostBack removed — in Blazor, events fire immediately on change (no postback needed). Review event handler timing if the original code relied on delayed firing."
+            }
+        }
+    }
+
+    # ItemType → TItem: ONLY for list controls (DropDownList, ListBox, CheckBoxList, RadioButtonList, BulletedList)
+    # Data controls (GridView, ListView, FormView, DetailsView, DataGrid, DataList, Repeater) keep ItemType as-is
+    $listControlsPattern = 'DropDownList|ListBox|CheckBoxList|RadioButtonList|BulletedList'
+    $listItemTypeRegex = [regex]::new("(<(?:$listControlsPattern)\b[^>]*?)\bItemType=""(?:[^""]*\.)?([^""]+)""", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $listItemTypeMatches = $listItemTypeRegex.Matches($Content)
+    if ($listItemTypeMatches.Count -gt 0) {
+        $Content = $listItemTypeRegex.Replace($Content, '${1}TItem="$2"')
+        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($listItemTypeMatches.Count) ItemType to TItem on list controls (data controls retain ItemType)"
+    }
+
+    return $Content
+}
+
+function Add-ValidatorTypeParameters {
+    <#
+    .SYNOPSIS
+        Injects required type parameters into BWFC validator components.
+    .DESCRIPTION
+        BWFC validators require explicit type parameters that Web Forms controls don't have.
+        - RequiredFieldValidator, RegularExpressionValidator, RangeValidator → Type="string"
+        - CompareValidator → InputType="string"
+        Only injects if the attribute is not already present.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $addedCount = 0
+
+    # Inject Type="string" into validators that need it
+    $typeValidators = @('RequiredFieldValidator', 'RegularExpressionValidator', 'RangeValidator')
+    foreach ($validator in $typeValidators) {
+        $regex = [regex]::new("(<${validator}\b)(?=[^>]*>)(?![^>]*\bType\s*=)", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        $matches = $regex.Matches($Content)
+        if ($matches.Count -gt 0) {
+            $Content = $regex.Replace($Content, '$1 Type="string"')
+            $addedCount += $matches.Count
+        }
+    }
+
+    # Inject InputType="string" into CompareValidator
+    $compareRegex = [regex]::new('(<CompareValidator\b)(?=[^>]*>)(?![^>]*\bInputType\s*=)', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $compareMatches = $compareRegex.Matches($Content)
+    if ($compareMatches.Count -gt 0) {
+        $Content = $compareRegex.Replace($Content, '$1 InputType="string"')
+        $addedCount += $compareMatches.Count
+    }
+
+    if ($addedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Validator' -Detail "Injected type parameters into $addedCount validator(s)"
+    }
+
+    return $Content
+}
+
+function Convert-EnumAttributes {
+    <#
+    .SYNOPSIS
+        Converts Web Forms string enum attribute values to their C# enum types.
+    .DESCRIPTION
+        Web Forms accepts bare string values for enum attributes (TextMode="Email").
+        Blazor/BWFC requires the full C# enum type (TextMode="TextBoxMode.Email").
+        TextMode values don't need @ prefix; Display and GridLines need @ prefix as Razor expressions.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $convertedCount = 0
+
+    # TextMode conversions (no @ prefix needed)
+    $Content = $Content -replace 'TextMode="Email"', 'TextMode="TextBoxMode.Email"'
+    $Content = $Content -replace 'TextMode="Password"', 'TextMode="TextBoxMode.Password"'
+    $Content = $Content -replace 'TextMode="Phone"', 'TextMode="TextBoxMode.Phone"'
+    $Content = $Content -replace 'TextMode="MultiLine"', 'TextMode="TextBoxMode.MultiLine"'
+    $Content = $Content -replace 'TextMode="SingleLine"', 'TextMode="TextBoxMode.SingleLine"'
+
+    # ValidatorDisplay conversions (need @ prefix)
+    $Content = $Content -replace 'Display="Dynamic"', 'Display="@ValidatorDisplay.Dynamic"'
+    $Content = $Content -replace 'Display="Static"', 'Display="@ValidatorDisplay.Static"'
+    $Content = $Content -replace 'Display="None"', 'Display="@ValidatorDisplay.None"'
+
+    # GridLines conversions (need @ prefix)
+    $Content = $Content -replace 'GridLines="Both"', 'GridLines="@GridLines.Both"'
+    $Content = $Content -replace 'GridLines="None"', 'GridLines="@GridLines.None"'
+    $Content = $Content -replace 'GridLines="Vertical"', 'GridLines="@GridLines.Vertical"'
+    $Content = $Content -replace 'GridLines="Horizontal"', 'GridLines="@GridLines.Horizontal"'
+
+    # LogoutAction conversions (need @ prefix)
+    $Content = $Content -replace 'LogoutAction="Redirect"', 'LogoutAction="@LogoutAction.Redirect"'
+    $Content = $Content -replace 'LogoutAction="RedirectToLoginPage"', 'LogoutAction="@LogoutAction.RedirectToLoginPage"'
+    $Content = $Content -replace 'LogoutAction="Refresh"', 'LogoutAction="@LogoutAction.Refresh"'
+
+    # BorderStyle conversions (need @ prefix)
+    $Content = $Content -replace 'BorderStyle="None"', 'BorderStyle="@BorderStyle.None"'
+    $Content = $Content -replace 'BorderStyle="NotSet"', 'BorderStyle="@BorderStyle.NotSet"'
+    $Content = $Content -replace 'BorderStyle="Dotted"', 'BorderStyle="@BorderStyle.Dotted"'
+    $Content = $Content -replace 'BorderStyle="Dashed"', 'BorderStyle="@BorderStyle.Dashed"'
+    $Content = $Content -replace 'BorderStyle="Solid"', 'BorderStyle="@BorderStyle.Solid"'
+    $Content = $Content -replace 'BorderStyle="Double"', 'BorderStyle="@BorderStyle.Double"'
+    $Content = $Content -replace 'BorderStyle="Groove"', 'BorderStyle="@BorderStyle.Groove"'
+    $Content = $Content -replace 'BorderStyle="Ridge"', 'BorderStyle="@BorderStyle.Ridge"'
+    $Content = $Content -replace 'BorderStyle="Inset"', 'BorderStyle="@BorderStyle.Inset"'
+    $Content = $Content -replace 'BorderStyle="Outset"', 'BorderStyle="@BorderStyle.Outset"'
+
+    # Count what changed by comparing before/after (use regex to count all enum patterns in output)
+    $enumPatterns = @('TextBoxMode\.', '@ValidatorDisplay\.', '@GridLines\.', '@LogoutAction\.', '@BorderStyle\.')
+    foreach ($ep in $enumPatterns) {
+        $convertedCount += ([regex]::Matches($Content, $ep)).Count
+    }
+
+    if ($convertedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Enum' -Detail "Converted $convertedCount enum attribute value(s) to C# enum types"
+    }
+
+    return $Content
+}
+
+function Convert-BooleanAttributes {
+    <#
+    .SYNOPSIS
+        Normalizes PascalCase boolean attribute values to lowercase on BWFC component tags.
+    .DESCRIPTION
+        Web Forms is case-insensitive for booleans (="True"/"False").
+        Blazor/C# requires lowercase (="true"/"false").
+        Only converts exact "True" or "False" values, not substrings.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $trueRegex = [regex]'(?<==")True(?=")'
+    $falseRegex = [regex]'(?<==")False(?=")'
+
+    $trueCount = $trueRegex.Matches($Content).Count
+    $falseCount = $falseRegex.Matches($Content).Count
+
+    if ($trueCount -gt 0) {
+        $Content = $trueRegex.Replace($Content, 'true')
+    }
+    if ($falseCount -gt 0) {
+        $Content = $falseRegex.Replace($Content, 'false')
+    }
+
+    $totalCount = $trueCount + $falseCount
+    if ($totalCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Boolean' -Detail "Normalized $totalCount PascalCase boolean value(s) to lowercase"
+    }
+
+    return $Content
+}
+
+function Convert-VisibleAttribute {
+    <#
+    .SYNOPSIS
+        Handles Web Forms Visible attribute conversion for BWFC components.
+    .DESCRIPTION
+        Visible="false" is preserved as-is (BWFC supports the Visible bool parameter).
+        Visible="true" is removed since true is the default value.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $removedCount = 0
+
+    # Remove Visible="true" (default value, not needed)
+    $visibleTrueRegex = [regex]'\s*Visible="true"'
+    $trueMatches = $visibleTrueRegex.Matches($Content)
+    if ($trueMatches.Count -gt 0) {
+        $Content = $visibleTrueRegex.Replace($Content, '')
+        $removedCount += $trueMatches.Count
+    }
+
+    if ($removedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Visible' -Detail "Removed $removedCount Visible=`"true`" default attribute(s); Visible=`"false`" preserved for BWFC"
+    }
+
+    return $Content
+}
+
+function Convert-HexColors {
+    <#
+    .SYNOPSIS
+        Escapes hex color values in attributes to avoid C# preprocessor directive issues in Razor.
+    .DESCRIPTION
+        Converts attribute values like BorderColor="#efeeef" to BorderColor="@("#efeeef")"
+        so Razor doesn't interpret the # as a C# preprocessor directive.
+    #>
+    param([string]$Content, [string]$RelPath)
+
+    $hexColorRegex = [regex]'(\w+Color)="(#[0-9a-fA-F]{3,8})"'
+    $hexMatches = $hexColorRegex.Matches($Content)
+
+    if ($hexMatches.Count -gt 0) {
+        $Content = $hexColorRegex.Replace($Content, '$1="@("$2")"')
+        Write-TransformLog -File $RelPath -Transform 'HexColor' -Detail "Escaped $($hexMatches.Count) hex color value(s) for Razor compatibility"
+    }
+
+    return $Content
+}
+
+function ConvertFrom-UrlReferences {
+    param([string]$Content, [string]$RelPath)
+
+    $urlPatterns = @(
+        @{ Pattern = 'href="~/';       Replacement = 'href="/';       Name = 'href' }
+        @{ Pattern = 'NavigateUrl="~/'; Replacement = 'NavigateUrl="/'; Name = 'NavigateUrl' }
+        @{ Pattern = 'ImageUrl="~/';    Replacement = 'ImageUrl="/';    Name = 'ImageUrl' }
+    )
+
+    foreach ($up in $urlPatterns) {
+        $count = ([regex]::Matches($Content, [regex]::Escape($up.Pattern))).Count
+        if ($count -gt 0) {
+            $Content = $Content.Replace($up.Pattern, $up.Replacement)
+            Write-TransformLog -File $RelPath -Transform 'URL' -Detail "Converted $count $($up.Name) ~/ reference(s) to /"
+        }
+    }
+
+    return $Content
+}
+
+#endregion
+
+#region --- BWFC Control Preservation Verification ---
+
+function Test-BwfcControlPreservation {
+    <#
+    .SYNOPSIS
+        Post-transform verification: ensures asp: controls were preserved as BWFC components.
+    .DESCRIPTION
+        Compares the count of asp: control tags in the original Web Forms source against
+        the count of known BWFC component tags in the transformed output. Emits warnings
+        if the output has fewer component tags than the input had asp: tags, which suggests
+        a control was flattened to raw HTML instead of being preserved as a BWFC component.
+    #>
+    param(
+        [string]$SourceContent,
+        [string]$OutputContent,
+        [string]$RelPath
+    )
+
+    # Known BWFC component names (data controls, editor controls, navigation, validation, structural)
+    $BwfcComponents = @(
+        'GridView', 'ListView', 'Repeater', 'DataList', 'DataGrid', 'DetailsView', 'FormView',
+        'TextBox', 'CheckBox', 'RadioButton', 'Button', 'ImageButton', 'LinkButton', 'Label',
+        'HyperLink', 'Image', 'Panel', 'PlaceHolder', 'Literal', 'HiddenField',
+        'DropDownList', 'ListBox', 'CheckBoxList', 'RadioButtonList', 'BulletedList',
+        'Table', 'TableRow', 'TableCell', 'TableHeaderRow', 'TableHeaderCell', 'TableFooterRow',
+        'Calendar', 'AdRotator', 'Menu', 'TreeView', 'SiteMapPath',
+        'RequiredFieldValidator', 'RangeValidator', 'RegularExpressionValidator',
+        'CompareValidator', 'CustomValidator', 'ValidationSummary', 'ModelErrorMessage',
+        'BoundField', 'TemplateField', 'CommandField', 'HyperLinkField', 'ImageField', 'CheckBoxField', 'ButtonField',
+        'LoginView', 'LoginName', 'LoginStatus',
+        'Timer', 'UpdatePanel', 'UpdateProgress', 'ScriptManager',
+        'Wizard', 'WizardStep', 'MultiView', 'View',
+        'FileUpload', 'Xml'
+    )
+
+    # Controls intentionally removed or converted by earlier pipeline stages.
+    # These are NOT expected in output as BWFC components.
+    $IntentionallyConverted = @(
+        'Content'              # asp:Content wrapper stripped by ConvertFrom-ContentWrappers
+        'ContentPlaceHolder'   # converted to @Body in layouts by ConvertFrom-MasterPage
+        'ScriptManager'        # removed by ConvertFrom-MasterPage (no Blazor equivalent)
+        'ScriptReference'      # removed with ScriptManager
+    )
+
+    # Semantic equivalences: source control → output component name
+    $SemanticEquivalences = @{
+        'LoginView' = 'AuthorizeView'   # ConvertFrom-LoginView converts to AuthorizeView
+    }
+
+    # Count asp: tags in source (opening tags only), excluding intentionally-converted controls
+    $aspTagRegex = [regex]'<asp:(\w+)'
+    $aspMatches = $aspTagRegex.Matches($SourceContent)
+    $aspControlNames = @{}
+    foreach ($m in $aspMatches) {
+        $name = $m.Groups[1].Value
+        if ($IntentionallyConverted -contains $name) { continue }
+        if ($aspControlNames.ContainsKey($name)) {
+            $aspControlNames[$name]++
+        } else {
+            $aspControlNames[$name] = 1
+        }
+    }
+    $aspTagCount = 0
+    foreach ($v in $aspControlNames.Values) { $aspTagCount += $v }
+
+    if ($aspTagCount -eq 0) {
+        # No asp: tags in input — nothing to verify
+        return
+    }
+
+    # Count BWFC component tags in output (opening tags only)
+    # Also count semantic equivalences (e.g., AuthorizeView for LoginView)
+    $bwfcTagCount = 0
+    $bwfcControlNames = @{}
+    $allComponentsToSearch = $BwfcComponents + @($SemanticEquivalences.Values | ForEach-Object { $_ })
+    foreach ($component in ($allComponentsToSearch | Select-Object -Unique)) {
+        $componentRegex = [regex]"<${component}[\s>/]"
+        $componentMatches = $componentRegex.Matches($OutputContent)
+        if ($componentMatches.Count -gt 0) {
+            $bwfcTagCount += $componentMatches.Count
+            $bwfcControlNames[$component] = $componentMatches.Count
+        }
+    }
+
+    # Compare: warn if output has fewer BWFC components than input had asp: tags
+    if ($bwfcTagCount -lt $aspTagCount) {
+        $deficit = $aspTagCount - $bwfcTagCount
+        Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "⚠️ BWFC control deficit: input had $aspTagCount asp: tag(s) but output has only $bwfcTagCount BWFC component tag(s) ($deficit control(s) may have been flattened to raw HTML)."
+
+        # Identify which specific controls may be missing
+        foreach ($aspName in $aspControlNames.Keys) {
+            $inputCount = $aspControlNames[$aspName]
+            $outputCount = 0
+            if ($bwfcControlNames.ContainsKey($aspName)) {
+                $outputCount = $bwfcControlNames[$aspName]
+            }
+            # Check semantic equivalence (e.g., LoginView → AuthorizeView)
+            if ($SemanticEquivalences.ContainsKey($aspName)) {
+                $equivName = $SemanticEquivalences[$aspName]
+                if ($bwfcControlNames.ContainsKey($equivName)) {
+                    $outputCount += $bwfcControlNames[$equivName]
+                }
+            }
+            if ($outputCount -lt $inputCount) {
+                $missing = $inputCount - $outputCount
+                Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "Missing $missing instance(s) of <$aspName> — was asp:$aspName in source, expected BWFC <$aspName> in output."
+            }
+        }
+
+        Write-TransformLog -File $RelPath -Transform 'Verify' -Detail "Control preservation check: $deficit of $aspTagCount asp: control(s) not found as BWFC components in output"
+    }
+    else {
+        Write-TransformLog -File $RelPath -Transform 'Verify' -Detail "Control preservation check passed: $aspTagCount asp: tag(s) → $bwfcTagCount BWFC component tag(s)"
+    }
+
+    # FAIL condition: ImageButton → img flattening loses OnClick event handler
+    if ($aspControlNames.ContainsKey('ImageButton')) {
+        $imgTagRegex = [regex]'<img[\s>/]'
+        $imgCount = $imgTagRegex.Matches($OutputContent).Count
+        if ($imgCount -gt 0) {
+            $imageButtonSrc = $aspControlNames['ImageButton']
+            Write-ManualItem -File $RelPath -Category 'ControlPreservation' -Detail "❌ FAIL: ImageButton→img flattening detected: source has $imageButtonSrc asp:ImageButton(s) and output has $imgCount <img> tag(s). ImageButton→img loses the OnClick event handler — MUST use BWFC <ImageButton> component instead. Do NOT replace <ImageButton> with <img>."
+        }
+    }
+}
+
+#endregion
+
+#region --- Code-Behind Handling ---
+
+function Copy-CodeBehind {
+    param(
+        [string]$SourceFile,
+        [string]$OutputFile,
+        [string]$RelPath
+    )
+
+    if ($PSCmdlet.ShouldProcess($OutputFile, "Copy code-behind with TODO annotations")) {
+        $content = Get-Content -Path $SourceFile -Raw -Encoding UTF8
+
+        # Strip Web Forms base classes (handled by @inherits WebFormsPageBase in _Imports.razor)
+        $content = $content -replace '\s*:\s*(?:System\.Web\.UI\.)?(?:Page|UserControl|MasterPage)\b', ''
+        # Strip System.Web using directives
+        $content = $content -replace '(?m)^\s*using\s+System\.Web(?:\.\w+)*;\s*\r?\n', ''
+
+        $todoHeader = @"
+// =============================================================================
+// TODO: This code-behind was copied from Web Forms and needs manual migration.
+//
+// Common transforms needed (use the BWFC Copilot skill for assistance):
+//   - Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
+//   - Page_PreRender → OnAfterRenderAsync
+//   - IsPostBack checks → remove or convert to state logic
+//   - ViewState usage → component [Parameter] or private fields
+//   - Session/Cache access → inject IHttpContextAccessor or use DI
+//   - Response.Redirect → NavigationManager.NavigateTo
+//   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
+//   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
+//   - UpdatePanel / ScriptManager references → remove (Blazor handles updates)
+//   - User controls → Blazor component references
+// =============================================================================
+
+"@
+
+        $annotatedContent = $todoHeader + $content
+
+        $outputDir = Split-Path $OutputFile -Parent
+        if (-not (Test-Path $outputDir)) {
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+        }
+
+        Set-Content -Path $OutputFile -Value $annotatedContent -Encoding UTF8
+        Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Copied with TODO annotations → $OutputFile"
+    }
+    else {
+        Write-Host "[WhatIf] Would copy code-behind: $RelPath → $OutputFile"
+    }
+}
+
+#endregion
+
+#region --- Unconvertible Page Stubs ---
+
+function Test-UnconvertiblePage {
+    param(
+        [string]$Content,
+        [string]$RelPath = ''
+    )
+
+    # Content-based patterns: code constructs that cannot be mechanically converted
+    $contentPatterns = @(
+        'SignInManager',
+        'UserManager',
+        'FormsAuthentication',
+        'Session\['
+    )
+    foreach ($pat in $contentPatterns) {
+        if ($Content -match $pat) {
+            return $true
+        }
+    }
+
+    # Path-based patterns: files in folders known to need manual migration
+    $pathPatterns = @(
+        '[\\/]Checkout[\\/]',
+        '[\\/]Account[\\/]'
+    )
+    foreach ($pat in $pathPatterns) {
+        if ($RelPath -match $pat) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function New-CompilableStub {
+    param(
+        [string]$Route,
+        [string]$RelPath,
+        [string]$OutputFile,
+        [string]$OutputDir
+    )
+
+    $displayName = $RelPath -replace '\\', '/' -replace '\.aspx$', ''
+    $stubContent = @"
+@page "$Route"
+<h3>$displayName — not yet migrated</h3>
+@* TODO: Implement using ASP.NET Core Identity scaffolding *@
+@code {
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($OutputFile, "Write compilable stub for unconvertible page")) {
+        if (-not (Test-Path $OutputDir)) {
+            New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+        }
+        Set-Content -Path $OutputFile -Value $stubContent -Encoding UTF8
+    }
+    else {
+        Write-Host "[WhatIf] Would write stub: $RelPath"
+    }
+
+    Write-TransformLog -File $RelPath -Transform 'Stub' -Detail "Generated compilable stub (unconvertible page)"
+    Write-ManualItem -File $RelPath -Category 'UnconvertibleStub' -Detail "Page contains Identity/Auth/Payment code — stubbed for clean build"
+}
+
+function New-StubCodeBehind {
+    <#
+    .SYNOPSIS
+        Creates a minimal compilable code-behind stub for unconvertible pages.
+    .DESCRIPTION
+        Used for pages matching unconvertible patterns (Account/*, Checkout/*).
+        The markup gets full Layer 1 transforms; this function generates a minimal
+        partial class so the page compiles, with a TODO banner for Layer 2.
+    #>
+    param(
+        [string]$OutputFile,
+        [string]$RelPath
+    )
+
+    $fileName = [System.IO.Path]::GetFileName($RelPath)
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+    $className = [System.IO.Path]::GetFileNameWithoutExtension($baseName)
+    $className = $className -replace '[^a-zA-Z0-9_]', '_'
+
+    $stubContent = @"
+// =============================================================================
+// TODO: Requires Identity/Payment migration — this is a stub code-behind.
+//
+// The markup (.razor) has been converted with Layer 1 mechanical transforms.
+// Implement the code-behind logic using ASP.NET Core patterns:
+//   - ASP.NET Core Identity (UserManager<T>, SignInManager<T>)
+//   - Payment service integration
+//   - Navigation via NavigationManager
+// =============================================================================
+
+public partial class $className
+{
+}
+"@
+
+    if ($PSCmdlet.ShouldProcess($OutputFile, "Write stub code-behind for unconvertible page")) {
+        $outputDir = Split-Path $OutputFile -Parent
+        if (-not (Test-Path $outputDir)) {
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+        }
+        Set-Content -Path $OutputFile -Value $stubContent -Encoding UTF8
+    }
+    else {
+        Write-Host "[WhatIf] Would write stub code-behind: $RelPath"
+    }
+
+    Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Generated stub code-behind (unconvertible page) → $OutputFile"
+}
+
+#endregion
+
+#region --- Main File Transform Pipeline ---
+
+function Convert-WebFormsFile {
+    param(
+        [string]$SourceFile,
+        [string]$OutputRoot,
+        [string]$SourceRoot
+    )
+
+    $relativePath = $SourceFile.Substring($SourceRoot.Length).TrimStart('\', '/')
+    $extension = [System.IO.Path]::GetExtension($SourceFile).ToLower()
+    $fileName = [System.IO.Path]::GetFileName($SourceFile)
+
+    if ($VerbosePreference -eq 'Continue') {
+        Write-Verbose "Processing: $relativePath"
+    }
+
+    # Determine output path with .razor extension
+    $razorRelPath = $relativePath
+    switch ($extension) {
+        '.aspx'   { $razorRelPath = $razorRelPath -replace '\.aspx$', '.razor' }
+        '.ascx'   { $razorRelPath = $razorRelPath -replace '\.ascx$', '.razor' }
+        '.master' {
+            $baseName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+            if ($baseName -eq 'Site') {
+                $razorRelPath = 'Components\Layout\MainLayout.razor'
+            } else {
+                $razorRelPath = "Components\Layout\${baseName}Layout.razor"
+            }
+        }
+    }
+
+    $outputFile = Join-Path $OutputRoot $razorRelPath
+    $outputDir = Split-Path $outputFile -Parent
+
+    # Read source content
+    $content = Get-Content -Path $SourceFile -Raw -Encoding UTF8
+    if ([string]::IsNullOrEmpty($content)) {
+        Write-Warning "Skipping empty file: $relativePath"
+        return
+    }
+
+    # Preserve original content for post-transform BWFC control preservation check
+    $originalContent = $content
+
+    $script:FilesProcessed++
+
+    # Check for unconvertible pages (Identity/Auth/Payment) — markup still gets all
+    # Layer 1 transforms, but code-behind will be stubbed instead of copied (smart stub)
+    $isUnconvertiblePage = $false
+    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content -RelPath $relativePath)) {
+        $isUnconvertiblePage = $true
+        Write-ManualItem -File $relativePath -Category 'UnconvertiblePage' -Detail "Page contains Identity/Auth/Payment code — markup transformed with Layer 1, code-behind stubbed with TODO"
+    }
+
+    # Apply transform pipeline in order
+    switch ($extension) {
+        '.aspx' {
+            $content = ConvertFrom-PageDirective -Content $content -FileName $fileName -RelPath $relativePath
+        }
+        '.master' {
+            $content = ConvertFrom-MasterDirective -Content $content -RelPath $relativePath
+            $content = ConvertFrom-MasterPage -Content $content -RelPath $relativePath
+        }
+        '.ascx' {
+            $content = ConvertFrom-ControlDirective -Content $content -RelPath $relativePath
+        }
+    }
+
+    $content = ConvertFrom-ImportDirective -Content $content -RelPath $relativePath
+    $content = ConvertFrom-RegisterDirective -Content $content -RelPath $relativePath
+    $content = ConvertFrom-ContentWrappers -Content $content -RelPath $relativePath
+    $content = ConvertFrom-FormWrapper -Content $content -RelPath $relativePath
+    $content = ConvertFrom-GetRouteUrl -Content $content -RelPath $relativePath
+    $content = ConvertFrom-Expressions -Content $content -RelPath $relativePath
+    $content = ConvertFrom-LoginView -Content $content -RelPath $relativePath
+    $content = Remove-ItemTypeWithDataSource -Content $content -RelPath $relativePath
+    $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
+    $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
+    $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
+    $content = Add-ValidatorTypeParameters -Content $content -RelPath $relativePath
+    $content = Convert-EnumAttributes -Content $content -RelPath $relativePath
+    $content = Convert-BooleanAttributes -Content $content -RelPath $relativePath
+    $content = Convert-VisibleAttribute -Content $content -RelPath $relativePath
+    $content = Convert-HexColors -Content $content -RelPath $relativePath
+
+    # Scan for event handler attributes that need code-behind signature review
+    $eventHandlerMatches = [regex]::Matches($content, '(On[A-Z]\w+)="[^"]*"')
+    if ($eventHandlerMatches.Count -gt 0) {
+        $uniqueHandlers = $eventHandlerMatches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+        $handlerList = $uniqueHandlers -join ', '
+        Write-ManualItem -File $relativePath -Category 'EventHandler' -Detail "Event handler(s) found: $handlerList — verify code-behind handler signature. Web Forms uses (object sender, EventArgs e); Blazor EventCallbacks use only the event args type (no sender parameter)."
+    }
+
+    $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath
+
+    # Clean up leftover blank lines from removed directives (collapse 3+ consecutive blank lines to 2)
+    $content = $content -replace '(\r?\n){3,}', "`n`n"
+    $content = $content.TrimStart("`r", "`n")
+
+    # Post-transform verification: check that asp: controls were preserved as BWFC components
+    Test-BwfcControlPreservation -SourceContent $originalContent -OutputContent $content -RelPath $relativePath
+
+    Write-TransformLog -File $relativePath -Transform 'Rename' -Detail "$extension → .razor"
+
+    # Write output
+    if ($PSCmdlet.ShouldProcess($outputFile, "Write transformed Razor file")) {
+        if (-not (Test-Path $outputDir)) {
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+        }
+        Set-Content -Path $outputFile -Value $content -Encoding UTF8
+    }
+    else {
+        Write-Host "[WhatIf] Would write: $razorRelPath ($($script:TransformLog.Count) transforms)"
+    }
+
+    # Handle code-behind files (.aspx.cs, .aspx.vb, etc.)
+    $relevantCbExtensions = $CodeBehindExtensions | Where-Object { $_.StartsWith($extension + '.') }
+    foreach ($cbExt in $relevantCbExtensions) {
+        $cbSuffix = $cbExt.Substring($extension.Length)  # e.g., ".cs" or ".vb"
+        $cbSource = $SourceFile + $cbSuffix
+
+        if (Test-Path $cbSource) {
+            $cbRelPath = $cbSource.Substring($SourceRoot.Length).TrimStart('\', '/')
+            $cbOutputRel = $cbRelPath
+            switch ($extension) {
+                '.aspx'   { $cbOutputRel = $cbOutputRel -replace '\.aspx\.', '.razor.' }
+                '.ascx'   { $cbOutputRel = $cbOutputRel -replace '\.ascx\.', '.razor.' }
+                '.master' { $cbOutputRel = $razorRelPath + $cbSuffix }
+            }
+            $cbOutputFile = Join-Path $OutputRoot $cbOutputRel
+            if ($isUnconvertiblePage) {
+                New-StubCodeBehind -OutputFile $cbOutputFile -RelPath $cbRelPath
+            } else {
+                Copy-CodeBehind -SourceFile $cbSource -OutputFile $cbOutputFile -RelPath $cbRelPath
+            }
+        }
+    }
+}
+
+#endregion
+
+#region --- Entry Point ---
+
+# Resolve paths
+$Path = (Resolve-Path $Path -ErrorAction Stop).Path
+if (-not (Test-Path $Path -PathType Container)) {
+    Write-Error "Source path is not a directory: $Path"
+    return
+}
+
+$projectName = Split-Path $Path -Leaf
+if (-not $projectName) {
+    $projectName = 'BlazorApp'
+}
+# Sanitize project name for C# namespace
+$projectName = $projectName -replace '[^a-zA-Z0-9_]', ''
+if ($projectName -match '^\d') {
+    $projectName = '_' + $projectName
+}
+if ([string]::IsNullOrEmpty($projectName)) {
+    $projectName = 'BlazorApp'
+}
+
+Write-Host ''
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host '  BWFC Migration Tool — Layer 1: Mechanical Transforms' -ForegroundColor Cyan
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host "  Source:  $Path"
+Write-Host "  Output:  $Output"
+Write-Host "  Project: $projectName"
+if ($WhatIfPreference) {
+    Write-Host '  Mode:    WhatIf (dry run)' -ForegroundColor Yellow
+}
+Write-Host ''
+
+# Create output directory
+if (-not $WhatIfPreference) {
+    if (-not (Test-Path $Output)) {
+        New-Item -ItemType Directory -Path $Output -Force | Out-Null
+        Write-Host "Created output directory: $Output"
+    }
+    $Output = (Resolve-Path $Output).Path
+}
+
+# Detect Identity pages for conditional auth service generation
+$hasIdentityPages = Test-Path (Join-Path $Path 'Account' 'Login.aspx')
+if ($hasIdentityPages) {
+    Write-Host "Detected Account/Login.aspx — will generate mock authentication services." -ForegroundColor Yellow
+}
+
+# Project scaffolding
+if (-not $SkipProjectScaffold) {
+    Write-Host 'Generating project scaffold...' -ForegroundColor Green
+    if (-not $WhatIfPreference) {
+        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName -HasIdentityPages $hasIdentityPages
+        New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName -SourceRoot $Path
+        if ($hasIdentityPages) {
+            Add-MockAuthService -OutputRoot $Output -ProjectName $projectName
+        }
+    }
+    else {
+        Write-Host '[WhatIf] Would generate .csproj, _Imports.razor, Program.cs, App.razor, Routes.razor'
+        if ($hasIdentityPages) {
+            Write-Host '[WhatIf] Would generate Services/MockAuthService.cs, Services/MockAuthenticationStateProvider.cs'
+        }
+    }
+    Write-Host ''
+}
+
+# Discover and transform Web Forms files
+Write-Host 'Discovering Web Forms files...' -ForegroundColor Green
+$sourceFiles = Get-ChildItem -Path $Path -Recurse -File | Where-Object {
+    $ext = $_.Extension.ToLower()
+    $ext -in $WebFormsExtensions
+}
+
+$fileCount = ($sourceFiles | Measure-Object).Count
+Write-Host "Found $fileCount Web Forms file(s) to transform."
+Write-Host ''
+
+if ($fileCount -gt 0) {
+    Write-Host 'Applying transforms...' -ForegroundColor Green
+    foreach ($file in $sourceFiles) {
+        Convert-WebFormsFile -SourceFile $file.FullName -OutputRoot $Output -SourceRoot $Path
+    }
+    Write-Host ''
+}
+
+# Copy static files (css, js, images)
+$staticFiles = Get-ChildItem -Path $Path -Recurse -File | Where-Object {
+    $ext = $_.Extension.ToLower()
+    $ext -in $StaticExtensions
+}
+$staticCount = ($staticFiles | Measure-Object).Count
+if ($staticCount -gt 0) {
+    Write-Host "Copying $staticCount static file(s)..." -ForegroundColor Green
+    foreach ($sf in $staticFiles) {
+        $relPath = $sf.FullName.Substring($Path.Length).TrimStart('\', '/')
+        $destPath = Join-Path $Output "wwwroot" $relPath
+        $destDir = Split-Path $destPath -Parent
+
+        if ($PSCmdlet.ShouldProcess($destPath, "Copy static file")) {
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+            Copy-Item -Path $sf.FullName -Destination $destPath -Force
+        }
+        else {
+            Write-Host "[WhatIf] Would copy: $relPath"
+        }
+    }
+    Write-Host ''
+}
+
+#endregion
+
+#region --- Summary ---
+
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host '  Migration Summary' -ForegroundColor Cyan
+Write-Host '============================================================' -ForegroundColor Cyan
+Write-Host "  Files processed:       $($script:FilesProcessed)"
+Write-Host "  Transforms applied:    $($script:TransformsApplied)"
+Write-Host "  Static files copied:   $staticCount"
+Write-Host "  Items needing review:  $($script:ManualItems.Count)"
+Write-Host ''
+
+if ($script:ManualItems.Count -gt 0) {
+    Write-Host '--- Items Needing Manual Attention ---' -ForegroundColor Yellow
+    $grouped = $script:ManualItems | Group-Object -Property Category
+    foreach ($group in $grouped) {
+        Write-Host "  [$($group.Name)] ($($group.Count) item(s)):" -ForegroundColor Yellow
+        foreach ($item in $group.Group) {
+            Write-Host "    • $($item.File): $($item.Detail)"
+        }
+    }
+    Write-Host ''
+}
+
+if ($VerbosePreference -eq 'Continue' -and $script:TransformLog.Count -gt 0) {
+    Write-Host '--- Detailed Transform Log ---' -ForegroundColor DarkGray
+    $groupedByFile = $script:TransformLog | Group-Object -Property File
+    foreach ($fileGroup in $groupedByFile) {
+        Write-Host "  $($fileGroup.Name):" -ForegroundColor DarkGray
+        foreach ($entry in $fileGroup.Group) {
+            Write-Host "    [$($entry.Transform)] $($entry.Detail)" -ForegroundColor DarkGray
+        }
+    }
+    Write-Host ''
+}
+
+if (-not $WhatIfPreference) {
+    Write-Host 'Migration complete. Next steps:' -ForegroundColor Green
+    Write-Host '  1. Review items flagged above for manual attention'
+    Write-Host '  2. Use the BWFC Copilot skill for code-behind transforms (Layer 2)'
+    Write-Host '  3. Build and test: dotnet build && dotnet run'
+}
+else {
+    Write-Host 'Dry run complete. Run without -WhatIf to apply transforms.' -ForegroundColor Yellow
+}
+
+Write-Host ''
+
+#endregion

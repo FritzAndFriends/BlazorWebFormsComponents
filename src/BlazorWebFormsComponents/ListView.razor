@@ -54,13 +54,12 @@ else
 						{
 							DataItem = item
 						};
-						<CascadingValue Name="CurrentDataBoundItem" Value="item">
-							@{
-								var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
-									? EditItemTemplate : oddOrEvenTemplate(even);
-							}
+						RaiseItemCreated(listViewDataItem);
+						var currentTemplate = (EditIndex >= 0 && dataItemIndex == EditIndex && EditItemTemplate != null)
+							? EditItemTemplate : oddOrEvenTemplate(even);
+						even = !even;
+						<CascadingValue @key="dataItemIndex" Name="CurrentDataBoundItem" Value="item">
 							@currentTemplate(item)
-							@{ even = !even; }
 						</CascadingValue>
 						if (ItemSeparatorTemplate != null)
 						{
@@ -104,7 +103,8 @@ else
 									{
 										DataItem = item
 									};
-									<CascadingValue Name="CurrentDataBoundItem" Value="item">
+									RaiseItemCreated(listViewDataItem);
+									<CascadingValue @key="dataItemIndex" Name="CurrentDataBoundItem" Value="item">
 										@builderTemplate(item)
 									</CascadingValue>
 

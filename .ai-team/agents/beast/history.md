@@ -19,61 +19,110 @@
 
 **Pending doc needs:** ClientIDMode property documentation (M16). Menu dual rendering modes. ListView CRUD events. Menu styles (IMenuStyleContainer). Post-M15 verification badges if new exact matches achieved. Login+Identity deferred — do not schedule docs.
 
-- **M17 AJAX Controls documentation (6 pages):** Created documentation for 6 AJAX-era Web Forms controls added in M17:
-  1. **Timer.md** (`docs/EditorControls/Timer.md`) — Interval-based tick events using System.Threading.Timer internally. No ScriptManager dependency. Full before/after migration with auto-refresh and countdown examples.
-  2. **ScriptManager.md** (`docs/EditorControls/ScriptManager.md`) — Migration stub that renders nothing. Documented all accepted-but-ignored properties. Emphasized "scaffolding" approach: include during migration, remove when stable.
-  3. **ScriptManagerProxy.md** (`docs/EditorControls/ScriptManagerProxy.md`) — Migration stub for content pages. Documented IJSRuntime replacement for script registration.
-  4. **UpdatePanel.md** (`docs/EditorControls/UpdatePanel.md`) — Structural wrapper rendering `<div>` or `<span>`. Key message: Blazor already does partial rendering, UpdatePanel is for HTML structure preservation. Documented RenderMode Block/Inline.
-  5. **UpdateProgress.md** (`docs/EditorControls/UpdateProgress.md`) — Loading indicator with ProgressTemplate. Key migration pattern: replace automatic UpdatePanel association with explicit `bool IsLoading` state management.
-  6. **Substitution.md** (`docs/EditorControls/Substitution.md`) — Renders callback output directly. Migrated from "deferred" to "implemented" in DeferredControls.md summary table.
-  - Added "AJAX Controls" section to mkdocs.yml nav (alphabetical within section, between Login Controls and Utility Features).
-  - Added AJAX Controls category to README.md component listing with links to all 6 doc pages.
-  - Updated `docs/Migration/DeferredControls.md` — changed Substitution from ❌ Deferred to ✅ Complete with implementation note.
-- **Migration stub documentation pattern:** ScriptManager and ScriptManagerProxy establish a new "migration stub" doc pattern: lead with a `!!! warning "Migration Stub Only"` admonition, document all accepted-but-ignored properties, and include explicit "include → remove" lifecycle guidance. Reuse this pattern for any future no-op migration compatibility components.
-- **AJAX Controls nav category:** Created a new "AJAX Controls" nav section in mkdocs.yml separate from "Editor Controls" to group the AJAX-era controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution). This keeps them discoverable as a cohesive migration topic.
+<!-- ⚠ Summarized 2026-03-04 by Scribe — covers M17 docs through migration toolkit -->
 
- Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
+### Doc Work Summary (2026-02-27 through 2026-03-03)
 
- Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz
+**M17 AJAX docs (6 pages):** Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution. New "AJAX Controls" nav section in mkdocs.yml. Migration stub doc pattern established (warning admonition + ignored props + include→remove lifecycle). Substitution moved from deferred to implemented.
 
+**Issue #359 doc updates (5 pages):** ChangePassword and PagerSettings verified complete. FormView got CRUD events + NOT Supported section. DetailsView got full style sub-component elements. DataGrid paging section enhanced. Pattern: DataGrid is the only pageable control without PagerSettings.
 
- Team update (2026-02-27): M17 AJAX controls implemented  ScriptManager/Proxy are no-op stubs, Timer shadows Enabled, UpdatePanel uses ChildContent, UpdateProgress renders hidden, Substitution uses Func callback, new AJAX/Migration Helper categories  decided by Cyclops
+**M10 Skins & Themes Guide:** Created `docs/Migration/SkinsAndThemes.md` — practical guide coexisting with `ThemesAndSkins.md` (strategy). Convention: separate "Guide" vs "Strategy" docs with clear nav labels.
 
+**Executive Report:** `planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md` — 96.6% coverage, 55-70% time savings, 18-26 hour estimate.
 
- Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
+**Migration Toolkit (6 docs):** README, QUICKSTART, CONTROL-COVERAGE (58 components, 6 categories), METHODOLOGY, CHECKLIST, copilot-instructions-template. Key: no content duplication, copilot-instructions-template is self-contained for external projects.
 
- Team update (2026-02-27): M17 audit fixes resolved  5 fidelity issues fixed (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block style, ScriptReference properties). 9 new tests, 1367 total. PR #402  decided by Forge, Cyclops
+**Distributable BWFC Migration Skill:** Single self-contained SKILL.md (~750 lines) with 10 architecture decision templates, three-layer methodology, per-page checklist. NuGet-first, no internal repo references.
 
- Team update (2026-02-27): No-op stub property coverage intentionally limited (41-50% acceptable)  deep AJAX infrastructure properties omitted  decided by Forge
+**Toolkit fixes:** Component count 52→58, internal references→distributed paths, AzimoLabs→FritzAndFriends. Key learning: toolkit coverage tables must be updated when new components are added.
 
- Team update (2026-02-27): UpdatePanel Triggers collection deliberately omitted  Blazor rendering model makes it unnecessary  decided by Forge
+**Migration test report structure:** `docs/migration-tests/` standard location. Per-run subfolder `{app}-{YYYY-MM-DD}` with `report.md` + `images/`. README.md index. Added "Migration Tests" nav section to mkdocs.yml.
 
-- **Issue #359 — M6-M8 doc page updates (5 pages):**
-  1. **ChangePassword** (`docs/LoginControls/ChangePassword.md`) — Verified already complete. Orientation and TextLayout sections with enum tables, migration examples, and `@using BlazorWebFormsComponents.Enums` tip were already present from a prior session.
-  2. **PagerSettings** (`docs/DataControls/PagerSettings.md`) — Verified already complete. Properties reference, enum tables, parent control usage examples, and migration notes all match `PagerSettings.cs` source.
-  3. **FormView** (`docs/DataControls/FormView.md`) — Added individual CRUD event names (OnItemDeleting/Deleted, OnItemInserting/Inserted, OnItemUpdating/Updated) to Features section. Added "Web Forms Features NOT Supported" section (DataSourceID, ViewState, Theming, RenderTable). Added CRUD event handling example with FormViewUpdateEventArgs/FormViewDeleteEventArgs.
-  4. **DetailsView** (`docs/DataControls/DetailsView.md`) — Added Caption/CaptionAlign attributes to Web Forms declarative syntax. Added all 10 style sub-component elements and PagerSettings child element to the Web Forms syntax block, bringing it to parity with actual Web Forms control markup.
-  5. **DataGrid** (`docs/DataControls/DataGrid.md`) — Removed stale "not every syntax element supported" caveat (features were implemented in M6-M8). Enhanced paging section with property reference table, PagerStyle example, and admonition explaining DataGrid's built-in numeric pager vs. GridView/FormView/DetailsView PagerSettings. Added PagerSettings cross-reference in See Also.
-  - All 5 pages verified present in `mkdocs.yml` nav. No nav changes needed.
-  - **Pattern discovered:** DataGrid is the only pageable data control without PagerSettings sub-component support — it always uses a numeric pager. Worth noting for future migration guidance.
+**Pending doc needs:** ClientIDMode property. Menu dual rendering modes. ListView CRUD events. Menu styles (IMenuStyleContainer). Post-M15 verification badges.
 
- Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes) and CheckBox bare input id  may need doc updates. Issue #379 (LinkButton CssClass) verified as already fixed in M15, can be closed.
+### Key Team Updates (2026-02-27 through 2026-03-03)
 
-- **M10 Skins & Themes Developer Guide (`docs/Migration/SkinsAndThemes.md`):**
-  - Created comprehensive developer guide following the Utility Feature Documentation Template.
-  - Structure: Background → Web Forms Usage → Blazor Implementation → Migration Path (6 steps) → Code Examples (4 scenarios) → Limitations (PoC) → Moving On.
-  - Uses tabbed before/after comparison (pymdownx.tabbed) for the complete migration example.
-  - Coexists with existing `ThemesAndSkins.md` (strategy/architecture comparison). New doc is the practical "how to use it" guide; existing doc is the "why this approach" analysis.
-  - Added to `mkdocs.yml` nav as "Skins and Themes Guide" (alphabetical before "Themes and Skins Strategy").
-  - Updated `README.md` to replace "skins or themes" deferred statement with active ThemeProvider link.
-  - **Key convention:** When a feature has both a strategy/comparison doc and a practical guide, use separate files with clear nav labels distinguishing them ("Guide" vs "Strategy").
-
- Team update (2026-03-01): SkinBuilder uses expression trees for nested property access  if API changes, update SkinsAndThemes.md examples first (primary dev-facing doc)  decided by Cyclops
-📌 Team update (2026-03-02): FontInfo.Name/Names now auto-synced bidirectionally. Theme font-family renders correctly. Update SkinsAndThemes.md if font examples need revision — decided by Cyclops, Rogue
-📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops
-📌 Team update (2026-03-02): Theming sample page uses 6-section progressive layout (Jubilee). Docs should reference this pattern for theming examples — decided by Jubilee
+- Branching: feature PRs from personal fork to upstream dev (Jeff)
+- Issues closed via PR references only (Jeff)
+- CascadedTheme (not Theme) is cascading parameter name (Cyclops)
+- Theming sample page uses 6-section progressive layout (Jubilee)
+- Unified release.yml — single workflow, version.json 3-segment SemVer (PR #408)
+- Skins & Themes roadmap: 3 waves, 15 work items (Forge)
+- Project reframed as migration acceleration system (Jeff)
+- Themes (#369) implementation last — ListView CRUD first, WingtipToys second (Jeff)
+- ListView EventArgs now include IOrderedDictionary properties (Cyclops)
+- Migration toolkit restructured into self-contained migration-toolkit/ package (Jeff, Forge)
 
 
- Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+<!-- Summarized 2026-03-05 by Scribe -- covers Run 4-6 reports, render mode, WebFormsPageBase, Page System docs -->
 
- Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+### Migration Reports & Page System Docs Summary (2026-03-04 through 2026-03-05)
+
+**Report conventions:** 3-level deep paths (`../../../planning-docs/`). Executive summary pattern (metrics table, 10-sec grasp). Works/Doesn't-Work sections (Run 5+). Script Bugs table (Run 6+). Enhancement impact table per-enhancement. Transform count decreases = quality improvements.
+
+**Benchmark reports written:** Run 4 (`wingtiptoys-run4-2026-03-04`), Run 5 (`wingtiptoys-run5-2026-03-04`, 309 transforms), Run 6 (`wingtiptoys-run6-2026-03-04`, 269 transforms, ~4.5 min, 55% reduction). Run 5 added difficulty categorization. Run 6 added bug vs enhancement distinction.
+
+**@rendermode correction:** Directive attribute on instances, not standalone. `_Imports.razor` gets `@using static`, `App.razor` gets `@rendermode="InteractiveServer"` on Routes/HeadOutlet. Updated migration-standards, bwfc-migration, METHODOLOGY.
+
+**WebFormsPageBase docs:** Documented across bwfc-migration SKILL.md (`@inherits`, lifecycle table), migration-standards (target architecture, page base class), METHODOLOGY (scaffold). IPageService still valid for non-page components. Page.Request/Response/Session deliberately omitted.
+
+**Page System doc rewrite:** PageService.md renamed to "Page System". Three-piece architecture (WebFormsPageBase primary, IPageService secondary). 3-column Key Differences table. mkdocs.yml + README updated.
+
+Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, benchmark baseline, Run 2/5/6 validated, GetRouteUrl overloads, standards formalized, @rendermode fix (PR #419), WebFormsPageBase/Page consolidation, 50 On-prefix aliases, AutoPostBack fix.
+
+<!-- Summarized 2026-03-05 by Scribe -- covers Run 7 reports, control preservation docs, Run 9 benchmark -->
+
+### Run 7-9 Reports & Control Preservation Docs (2026-03-05 through 2026-03-06)
+
+**Control preservation docs:** METHODOLOGY.md, CHECKLIST.md, QUICKSTART.md updated with \Test-BwfcControlPreservation\. Rule: ALL asp: controls must be BWFC components, never raw HTML. Migration skill got 3 runtime gotchas (ListView @context, OnParametersSetAsync, AddHttpContextAccessor).
+
+**Run 7 report:** \samples/Run7WingtipToys/MIGRATION-REPORT.md\  32 files, 331 transforms, 1.2s, 97% accuracy. Report structure: exec summary, metrics tables, run-over-run comparison, recommendations. Co-located with output per Jeff.
+
+**Run 7 skill updates:** 5 files updated for runtime failures (UseStaticFiles 404s, AuthorizeView crashes, asset paths). Key pattern: runtime failures more dangerous than compile errors.
+
+**Run 9 report:** \docs/Migration/Run9-WingtipToys-Benchmark.md\ + \samples/Run9WingtipToys/BENCHMARK-REPORT.md\. 667 transforms, 173 BWFC instances (23 types), 8 pages, 0 errors. LoginView preservation (native BWFC, not AuthorizeView rewrite) is the standard. \ItemType\TItem\ bug persists. Convention: BENCHMARK-DATA.md (Bishop)  BENCHMARK-REPORT.md (Beast).
+
+ Team update (2026-03-05): Forge APPROVED Run 9 migration (98.9% control preservation). 2 findings: ImageButtonimg (P0), HyperLink dropped (P2). Beast's benchmark report structure (dual-location, 3-run comparison) established as standard.  decided by Forge
+
+### Squad Places Knowledge Artifact (2026-03-05)
+
+- Published lesson artifact to Squad Places (social network for AI agent teams): **"What 110+ Web Forms Controls Taught Us About Migration-First Component Design"** (type: lesson, ID: `bf853f10-27f0-4ee8-bee8-e43695bf150e`). Covers 6 hard-won lessons: HTML fidelity, exact attribute naming, real enums, data binding translation, EventCallback dual pattern, base class hierarchy. Tags: blazor, webforms, migration, lessons-learned, component-design, dotnet.
+- Squad Places is our team's social network presence. Squad ID: `5b52c25e-9e05-4c03-a392-16c58a57b144`. API: `https://api.nicebeach-b92b0c14.eastus.azurecontainerapps.io`.
+
+### Run 10 Benchmark Report (2025-07-25)
+
+- **Run 10 report written:** `docs/Migration/Run10-WingtipToys-Benchmark.md` + `samples/Run10WingtipToys/BENCHMARK-REPORT.md`. Cycle 1 of 3-cycle improvement loop. 673 transforms, 172 BWFC instances (26 types), 8 functional pages, 3 build attempts (down from 7). All 5 P0/P1 fixes validated. mkdocs.yml nav updated.
+- **Improvement loop report pattern:** When reporting on fix-validation runs, lead Executive Summary with fix impact table, add "Measured Impact" subsection under improvements, and include "Recommendations for Cycle N+1" section targeting specific build-attempt reduction goals.
+- **On-disk vs benchmark discrepancy:** BENCHMARK-DATA.md reported 44 .cs files but on-disk count was 38. Used benchmark numbers for consistency — discrepancy likely due to intermediate files consolidated during Layer 2 optimization.
+- **Run 10 key metrics:** Build attempts 7→3 (57% fewer), Layer 2 time 45→25 min (44% faster), 3 new BWFC types counted (LinkButton, ModelErrorMessage, FileUpload). Remaining 3 build attempts target enum string→type conversions (P2 candidates for Cycle 2).
+- **4-run comparison table established:** Run-over-Run table now covers Runs 7–10. Added ItemType bug and validator params rows to track fix propagation across runs.
+
+ Team update (2026-03-06): Run 10 BWFC preservation review: 92.7% (164/177)  NEEDS WORK. Below 95% threshold. P0-2 smart stubs fix recovered 113 controls across 12 pages. 3 gaps remain for Cycle 2.  decided by Forge
+
+### Run 11 Benchmark Report (2025-07-25)
+
+- **Run 11 report written:** Commit 49b556be. Cycle 2 of 3-cycle improvement loop. 178 BWFC instances (26 unique types), 4 build attempts, 0 errors. All 3 P0 gaps from Run 10 closed.
+- **Key metrics:** Preservation rate 92.7% to 98.9% (Cycle 2 target of >=98% met). Build attempts 3 to 4 (slight increase due to stub model iteration). Layer 2 time ~20min.
+- **5-run comparison table:** Runs 7-11 now tracked. ItemType stripping and stub model pattern are new capabilities validated.
+- **Convention:** BENCHMARK-DATA.md (Bishop) to BENCHMARK-REPORT.md (Beast) pipeline continues.
+
+ Team update (2025-07-25): Forge reviewed Run 11 preservation: 98.9% (176/178 adjusted) -- APPROVED. All 3 P0 gaps CLOSED. Cycle 3 priorities: functional Login/Register code-behinds per Jeff's directive. -- decided by Forge
+
+📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .ai-team/skills/ — decided by Jeffrey T. Fritz
+
+### Run 7 Benchmark Report (2026-03-06)
+
+- **Run 7 report written:** `dev-docs/migration-tests/wingtiptoys-run7-2026-03-06/report.md` + `raw-data.md`. First runtime-validated benchmark with acceptance tests.
+- **Key metrics:** 3.33s script time (27% faster than Run 6), 366 transforms (+97), 80 static files, 2 build rounds (down from 4), 14/14 acceptance tests PASS.
+- **New report section:** §5 Acceptance Test Results — test project location, full test breakdown table, fix iteration documentation with Problem/Fix/Impact pattern.
+- **Three runtime patterns documented:** Bootstrap CSS links in App.razor, scoped auth providers + cookie auth, anchor-based form submit (`<a role="button">` + minimal API POST endpoints).
+- **Layer 2 scope:** 33 files rewritten, 14 modified, 8 created. EF Core models + DbContext + SQLite + seed data, ShoppingCartService, CartStateService, cookie auth wiring.
+- **Convention established:** Runtime correctness (acceptance tests) supersedes compilation as the primary quality gate for migration benchmarks going forward.
+- **README.md updated:** Added Runs 5–7 to migration test index table.
+
+ Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
+
+
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz

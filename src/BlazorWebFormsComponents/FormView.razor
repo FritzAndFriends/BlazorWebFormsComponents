@@ -13,6 +13,8 @@
 	@PagerSettingsContent
 </CascadingValue>
 
+@if (RenderOuterTable)
+{
 <table cellspacing="0" style="border-collapse:collapse;" title="@ToolTip">
 	@if (!string.IsNullOrEmpty(Caption))
 	{
@@ -131,3 +133,38 @@
 		</tr>
 	}
 </table>
+}
+else
+{
+	@if (Items == null || !Items.Any())
+	{
+		@if (EmptyDataTemplate != null)
+		{
+			@EmptyDataTemplate
+		}
+		else if (!string.IsNullOrEmpty(EmptyDataText))
+		{
+			@EmptyDataText
+		}
+	}
+	else if (CurrentItem != null)
+	{
+		DataBinding(EventArgs.Empty);
+
+		<CascadingValue Name="CurrentDataBoundItem" Value="CurrentItem">
+			@switch (CurrentMode) {
+				case Enums.FormViewMode.ReadOnly:
+					@ItemTemplate(CurrentItem);
+					break;
+				case Enums.FormViewMode.Edit:
+					@EditItemTemplate(CurrentItem);
+					break;
+				case Enums.FormViewMode.Insert:
+					@InsertItemTemplate(CurrentItem);
+					break;
+			}
+		</CascadingValue>
+
+		DataBound(EventArgs.Empty);
+	}
+}

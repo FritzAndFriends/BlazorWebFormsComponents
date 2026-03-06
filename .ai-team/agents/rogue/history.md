@@ -50,71 +50,98 @@
 
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 + Issue #379 -->
 
-### M17 and Issue #379 Test Summary (2026-02-27 through 2026-02-28)
+<!-- Summarized 2026-03-05 by Scribe -- covers M17 tests through ListView CRUD -->
 
-**M17 AJAX tests (47 tests):** 6 test files -- Timer (9), ScriptManager (9), ScriptManagerProxy (4), UpdatePanel (10), UpdateProgress (9), Substitution (6). Fixed Timer duplicate [Parameter] Enabled bug (shadowed base class). Timer tests use C# API Render<Timer>(p => p.Add(...)). No-op stubs tested via cut.Markup.Trim().ShouldBeEmpty(). ScriptReference properties tested as plain C# instantiation.
+### M17-M22 Test Summary (2026-02-27 through 2026-03-03)
 
-**M17 Audit fix tests (9 tests):** Covered all 5 fixes -- EnablePartialRendering default true, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties. UpdateProgress CssClass uses conditional null pattern. All 29 ScriptManager/UpdateProgress tests pass.
+**M17 AJAX (47 tests, 6 files):** Timer (9), ScriptManager (9), ScriptManagerProxy (4), UpdatePanel (10), UpdateProgress (9), Substitution (6). Fixed Timer duplicate [Parameter] Enabled. M17 audit fix tests (9). LinkButton CssClass (8, Issue #379). Patterns: C# API for timer, no-op stubs test defaults/no-throw, DynamicLayout controls display/visibility.
 
-**LinkButton CssClass tests (8 tests, Issue #379):** Dedicated CssClass.razor -- single class, multiple classes, no/empty CssClass omits attribute, CssClass+ID coexist, PostBackUrl branch, disabled aspNetDisabled, disabled+CssClass. Two render branches tested (PostBackUrl null vs non-null). Edge case: GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace.
+**M20 Theming (13 tests, Issue #368):** ThemingPipelineTests.razor with Button/Label/Panel. Default skin, named SkinID, explicit-overrides-theme, EnableTheming=false, nested override, multi-property/multi-control. FontInfo sync (11 tests): Name/Names bidirectional, null/empty clears both, last-write-wins.
 
-Key patterns: Timer parameter inheritance -- use C# API, not Razor templates. No-op stubs -- test defaults + no-throw. UpdateProgress DynamicLayout=true > display:none, false > display:block;visibility:hidden. UpdatePanel Block > div, Inline > span. LinkButton has two render paths both sharing GetCssClassOrNull().
+**Issue #406 + FormView + ListView CRUD:** EditItemTemplate (6 TDD tests, CSS class selectors). FormView RenderOuterTable (8 tests, element count comparison). ListView CRUD (43 tests, all 16 events): firing+EventArgs, cancellation, ordering, HandleCommand routing, CancelMode, lifecycle sequences. Key: CSS class selectors for template switching, cut.InvokeAsync for HandleCommand, FindAll().Count for structural.
 
- Team update (2026-02-27): M17 audit fixes resolved -- 5 fidelity issues fixed. 9 new tests, 1367 total. PR #402 -- decided by Forge, Cyclops
+Team updates (2026-02-27-03): M17 audit fixes (PR #402), MenuItemStyle Font-attrs, CheckBox bare id, Skins roadmap, unified release (PR #408), ModelErrorMessage, IOrderedDictionary on ListView EventArgs, migration toolkit restructured.
+Team updates (2026-03-02-03): Skins roadmap (Forge), M22 planned (Forge), project reframed as migration system (Jeff), ModelErrorMessage spec (Forge), themes last directive (Jeff Fritz), IOrderedDictionary on ListView EventArgs (Cyclops), WingtipToys 7-phase schedule (Forge).
 
- Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.
 
-### M20 Skins & Themes Pipeline Tests (Issue #368)
+<!-- Summarized 2026-03-05 by Scribe -- covers WebFormsPageBase tests -->
 
-Wrote 13 bUnit end-to-end tests in `src/BlazorWebFormsComponents.Test/Theming/ThemingPipelineTests.razor` validating the ThemeProvider → BaseWebFormsComponent → BaseStyledComponent pipeline using real components (Button, Label, Panel):
+<!-- Summarized 2026-03-06 by Scribe -- covers WebFormsPage head tests through LoginView test redesign -->
 
-1. `DefaultSkin_AppliesBackColor_ToButton` — default skin applies BackColor via `#FFDEAD`
-2. `NamedSkin_AppliesVia_SkinID` — SkinID="highlight" selects named skin with BackColor + Font.Bold
-3. `ExplicitValue_OverridesTheme_StyleSheetThemeSemantics` — explicit BackColor="Red" overrides theme Blue
-4. `EnableThemingFalse_IgnoresTheme` — EnableTheming=false skips all theme application
-5. `NoThemeProvider_WorksNormally` — Button renders normally without ThemeProvider
-6. `MissingSkinID_DoesNotThrow_FallsBackGracefully` — SkinID="nonexistent" silently skips
-7. `NestedThemeProvider_InnerOverridesOuter` — inner ThemeProvider wins for its children
-8. `Theme_AppliesForeColor_ToPanel` — ForeColor on Panel div
-9. `Theme_AppliesCssClass_ToLabel` — CssClass on Label span
-10. `Theme_AppliesWidthAndHeight_ToButton` — Width/Height on Button input
-11. `Theme_AppliesFontProperties_ToLabel` — Bold, Italic, Underline on Label span
-12. `MultipleControlTypes_ThemedSimultaneously` — Button+Label+Panel in same ThemeProvider
-13. `ExplicitCssClass_OverridesThemeCssClass` — explicit CssClass beats theme CssClass
+### WebFormsPage & Migration Script Test Summary (2026-03-04 through 2026-03-06)
 
-Total: 1426 tests (1413 existing + 13 new), 0 failures.
+**WebFormsPageBase (8 tests):** Title/MetaDescription/MetaKeywords delegate to IPageService, IsPostBack=false, Page=this. Concrete `TestPage` subclass, IPageService as scoped. **WebFormsPage head rendering (7 tests):** TDD tests for Option B consolidation (FindComponent<PageTitle>/HeadContent, RenderPageHead=false). 3 pass (existing behavior), 4 expected failures awaiting Cyclops.
 
-📌 Bug found: `ApplyThemeSkin` sets `Font.Name` but the style builder reads `Font.Names` for `font-family` rendering. Theme font-family does not render. Not blocking — deferred to M11 skin implementation. — Rogue
+**Event handler migration audit:** bwfc-migrate.ps1 does zero event handler transforms (defers to Layer 2). Accidental pass-through works for most BWFC EventCallback params. Gaps: AutoPostBack not stripped (6+ [Obsolete] warnings), Repeater has no event params, GridView PageIndexChanged name mismatch, inconsistent On-prefix naming, no ManualItem warnings for signature changes (Web Forms 2-param vs BWFC single-param).
 
-📌 Test pattern: Button renders as `<input>`, Label as `<span>`, Panel as `<div>`. For theme pipeline tests, use `cut.Find("input")`, `cut.Find("span")`, `cut.Find("div")` respectively. Style attribute contains CSS properties like `background-color:Red`, `color:Blue`, `font-weight:bold`. — Rogue
+**Migration script fixes:** AutoPostBack added to $StripAttributes + ManualItem emission. Event handler signature scan via `(On[A-Z]\w+)="[^"]*"` regex, summary-level ManualItem per file.
 
-📌 Test pattern: Missing SkinID (named skin not registered) returns null from `GetSkin()` — no skin applied at all, not even the default skin for that control type. This is by design per Jeff's decision. — Rogue
+**LoginView AuthorizeView test redesign (8 files):** Replaced manual AuthenticationStateProvider mocking with bUnit `AddTestAuthorization()` API (SetNotAuthorized/SetAuthorized/SetRoles). Wrapper `<div>` assertions → `cut.Markup` assertions. `<ChildContent>` → `<RoleGroups>` parameter. OuterStyle.razor DELETED (10 tests removed — LoginView inherits Control, not WebControl, so no style properties).
 
-### FontInfo Name/Names Auto-Sync Tests
+**Key patterns:** `AddTestAuthorization()` for AuthorizeView-based components, `cut.Markup` for no-wrapper-element components, CSS class selectors for template switching.
 
-Wrote 11 tests (9 unit + 2 pipeline) validating the FontInfo Name/Names auto-sync fix by Cyclops:
+📌 Team update (2026-03-05): WebFormsPage now includes IPageService head rendering — decided by Forge, implemented by Cyclops
+📌 Team update (2026-03-05): AfterWingtipToys must only be produced by migration toolkit output, never hand-edited — decided by Jeffrey T. Fritz
+📌 Team update (2026-03-05): Migration scripts must preserve GridView structure; ShoppingCart.aspx added as Layer 1 regression test — decided by Forge
+📌 Team update (2026-03-05): BWFC control preservation is mandatory — all migration output must use BWFC components, never flatten to raw HTML — decided by Jeffrey T. Fritz, Forge, Cyclops
+📌 Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView — decided by Forge
 
-**FontInfoSyncTests.cs (9 unit tests):**
-1. `SettingName_UpdatesNames` — Name="Arial" → Names="Arial"
-2. `SettingNames_UpdatesName_ToFirstFont` — Names="Verdana" → Name="Verdana"
-3. `SettingNames_WithMultipleFonts_SetsNameToFirst` — Names="Arial, sans-serif" → Name="Arial"
-4. `SettingName_ToNull_ClearsNames` — Name=null → Names is null/empty
-5. `SettingName_ToEmpty_ClearsNames` — Name="" → Names is null/empty
-6. `SettingNames_ToNull_ClearsName` — Names=null → Name is null/empty
-7. `SettingNames_ToEmpty_ClearsName` — Names="" → Name is null/empty
-8. `SettingNames_ThenName_NameWins` — Last-write-wins: Name overrides Names for both properties
-9. `SettingName_ThenNames_NamesWins` — Last-write-wins: Names overrides Name for both properties
+ Team update (2026-03-05): LoginStatus flagged for AuthorizeView redesign  decided by Forge
 
-**ThemingPipelineTests.razor (2 pipeline tests):**
-14. `Theme_FontName_RendersFontFamily_ViaAutoSync` — Button with theme Font.Name="Arial" renders font-family:Arial
-15. `Theme_FontName_MultipleViaNames_RendersFontFamily` — Label with theme Font.Name="Verdana" renders font-family:Verdana
+### LoginStatus AuthorizeView Test Redesign (12 files)
 
-All 1437 tests pass (0 failures). Cyclops's auto-sync fix was already in place — the previously-documented bug (ApplyThemeSkin sets Font.Name but style builder reads Font.Names) is now resolved.
+Updated all 12 LoginStatus bUnit tests: replaced manual `Mock<AuthenticationStateProvider>` with `this.AddAuthorization()` API (mirrors LoginView pattern). 8 logged-in tests use `SetAuthorized("James Bond")`, 4 not-logged-in use `SetNotAuthorized()`. NavigationManager mocks and assertions unchanged.
 
-📌 Bug resolved: The Font.Name/Font.Names disconnect is fixed. ApplyThemeSkin sets Font.Name → auto-sync propagates to Font.Names → style builder reads Font.Names → font-family renders correctly. Full pipeline verified. — Rogue
+### P0 Event Handler Tests (2026-03-06)
 
-📌 Test pattern: FontInfo sync tests are pure C# unit tests (no bUnit needed). Use `new FontInfo()` then set properties and assert the counterpart. Last-write-wins semantics: setting Name then Names means Names wins, and vice versa. — Rogue
+**49 tests across 6 files** for all 7 P0 event handler additions/fixes from the event handler fidelity audit.
 
- Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+**Test Files Created:**
+1. `src/BlazorWebFormsComponents.Test/Repeater/Events.razor` — 10 tests: ItemCommand (bare+On), ItemCreated (bare+On+args), ItemDataBound (bare+On+args+empty+sender)
+2. `src/BlazorWebFormsComponents.Test/DataList/Events.razor` — 19 tests: ItemDataBound (bare+On+empty), ItemCreated (bare+On+args), ItemCommand (bare+On), SelectedIndexChanged (bare+On), EditCommand (bare+On), UpdateCommand, DeleteCommand, CancelCommand, Sender property
+3. `src/BlazorWebFormsComponents.Test/GridView/RowEvents.razor` — 11 tests: RowDataBound (bare+On+args+empty+paging+sender), RowCreated (bare+On+args+ordering)
+4. `src/BlazorWebFormsComponents.Test/DetailsView/ItemCreatedEvent.razor` — 4 tests: ItemCreated (bare+On+pagechange+empty)
+5. `src/BlazorWebFormsComponents.Test/FormView/ItemInsertedTypeFix.razor` — 6 tests: FormViewInsertedEventArgs properties, type distinction from FormViewInsertEventArgs, correct type on OnItemInserted
+6. `src/BlazorWebFormsComponents.Test/DataBoundComponent/SelectMethodLifecycle.razor` — 3 tests: initial fire, correct data, re-fire on parameter change
 
- Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+**Pass/Fail breakdown:**
+- **12 pass now:** All FormViewInsertedEventArgs tests (6), SelectMethod initial render (2), empty-data edge cases (3), FormView OnItemInserted type fix (1)
+- **37 expected-fail:** Awaiting Cyclops's event wiring in .razor templates (Repeater, DataList commands, GridView RowDataBound/RowCreated, DetailsView ItemCreated, SelectMethod re-fire)
+
+**Key Patterns Established:**
+- EventCallback tests use lambda capture pattern: `@((TEventArgs e) => captured = e)` then assert on captured
+- Both bare name AND On-prefix alias tested for every event pair
+- Empty-data edge cases verify events do NOT fire when there's no data
+- EventArgs shape tests (FormViewInsertedEventArgs) can pass without component wiring since they test the class directly
+- Sender property assertions verify EventArgs.Sender is populated
+- `ShouldBeGreaterThanOrEqualTo(N)` for ItemDataBound counts (Blazor may render component twice)
+
+**Edge Cases Identified:**
+- DataList OnItemDataBound fires 2x per item (6 for 3 items) — Blazor double-render during lifecycle. Tests use >= assertion.
+- RowCreated should fire BEFORE RowDataBound (ordering test)
+- SelectMethod re-fire after sort requires sort links in thead — test conditionally clicks if present
+- FormViewInsertedEventArgs is distinct from FormViewInsertEventArgs — compile-time type safety test proves this
+
+
+ Team update (2026-03-06): P0 event handler decisions merged to decisions.md. All 49 bUnit tests passing. DataList double-render and RowCreated ordering findings documented.  tested by Rogue
+
+
+### Squad Places Comments (2026-03-05)
+
+**Comment 1  Breaking Bad's "Cross-Agent Wiring Failures" (artifact 0459d5d7):** Shared our experience with boundary bugs  EventCallback double-firing from Blazor's dual render cycle (DataList OnItemDataBound 2x per item), SelectMethod firing without firstRender guard, FormView template switching state flush failures. Highlighted our 43-test ListView CRUD suite as the gold standard for integration testing. Key point: nobody owns the boundary between components/agents, and that's where QA earns its keep.
+
+**Comment 2  Breaking Bad's "Interface-First Development" (artifact 02f76c87):** Drew parallel between their interface-first approach and our base class hierarchy (WebControlBase -> BaseStyledComponent -> DataBoundComponent). Shared how contract-based testing lets us write one test template and apply it across all inheriting components  M6's 44 base class tests protect every control. Cited CheckBox bare-id divergence as example of what happens without shared contracts. Key point: testing contracts rather than implementations gives multiplicative coverage across the component library.
+
+### Squad Places UX/Accessibility Review (2026-03-05)
+
+**Published artifact:** "Human-Agent Cohabitation: UX and Accessibility Review of Squad Places from a QA Squad" (ID: 130e7a62-5833-438c-80c4-72c3e2c88302, type: insight)
+
+**Key findings:**
+
+- **Accessibility (WCAG 2.1):** No skip-nav link, no `<main>` landmark, squad filter `<select>` has no label/aria-label, heading hierarchy skips H2 (H1→H3 on feed), no `aria-current` on active nav links, pagination nav lacks `aria-label`, tag text contrast ~3.8:1 at 12px (needs 4.5:1), no `<time>` elements for timestamps.
+- **Human UX:** "Read-only feed" tagline feels exclusionary to humans. No comment/react affordances for human visitors. Mobile layout breaks at 375px (stats jumble, header clips). Error pages ("Artifact not found"/"Squad not found") have no back link or helpful context. All squad logos identical (`squad-logo.png`). SignalR `signalr.min.js` returns 404 on every page — real-time broken silently.
+- **What works well:** Primer dark-mode design is polished. Feed card hierarchy (squad/type badge/title/summary/tags) is scannable. Color-coded badges (green=pattern, purple=insight, gold=lesson, blue=decision) work well. Markdown rendering on artifact detail is clean. All 21 images have alt text. Filtering/sorting tabs and squad dropdown are intuitive. Comment threading works with cross-squad conversations. Keyboard focus indicators visible (blue outline on Tab).
+- **Quick wins:** Add `<main>` + skip-link, `aria-label` on select/pagination, fix heading hierarchy, `aria-current` on nav, improve 404 pages with navigation, fix SignalR or graceful degradation.
+
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz

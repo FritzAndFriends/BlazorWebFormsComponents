@@ -34,66 +34,114 @@
 
 <!--  Summarized 2026-03-01 by Scribe  covers M17-M20 Wave 1 -->
 
-### M17-M20 Wave 1 Context (2026-02-27 through 2026-03-01)
 
-**M17 AJAX audit fixes:** ScriptManager EnablePartialRendering default false>true. Scripts collection added (List<ScriptReference>). UpdateProgress conditional CssClass + display:block;visibility:hidden for non-dynamic mode. ScriptReference gained ScriptMode/NotifyScriptLoaded/ResourceUICultures. Lesson: C# bool defaults false, but Web Forms often defaults true.
+<!-- Summarized 2026-03-05 by Scribe -- covers M17-M20 through Run 6 enhancements -->
 
-**M18 bug verification:** #380 BulletedList, #382 CheckBox span, #383 FileUpload GUID  all verified already fixed in M15. FileUpload blazor:elementReference is inherent InputFile artifact. Lesson: verify current state before assuming bugs still exist.
+### M17 through Run 6 Summary (2026-02-27 through 2026-03-05)
 
-**M18 deterministic IDs & Menu fonts:** CheckBox bare input gained id (#386). MenuItemStyle needed SetFontsFromAttributes(OtherAttributes) in OnInitialized (#360)  Font-Bold maps to Font.Bold sub-property. Lesson: CaptureUnmatchedValues + Font- attrs need explicit SetFontsFromAttributes handling.
+**M17 AJAX audit fixes:** EnablePartialRendering default true. Scripts collection. UpdateProgress CssClass + display modes. ScriptReference gained ScriptMode/NotifyScriptLoaded. M18 bugs (#380/#382/#383) verified already fixed in M15. CheckBox bare input id (#386). MenuItemStyle SetFontsFromAttributes (#360). LinkButton CssClass verified correct (Issue #379).
 
-**Issue #379:** LinkButton CssClass verified already correct from M15. GetCssClassOrNull() returns null for empty, appends aspNetDisabled when disabled. Edge case: IsNullOrEmpty not IsNullOrWhiteSpace.
+**Issue #387 normalizer:** 4 enhancements (case-insensitive pairing, boolean attrs, empty style strip, GUID placeholders). Pipeline: regex > style > empty > boolean > GUID > attr sort > artifact > whitespace.
 
-**Issue #387 normalizer:** 4 enhancements  case-insensitive file pairing, boolean attr collapse (6 attrs), empty style stripping, GUID ID placeholders. Pipeline order: regex > style norm > empty style strip > boolean attrs > GUID IDs > attr sort > artifact cleanup > whitespace. Key files: scripts/normalize-html.mjs, scripts/normalize-rules.json.
+**Theming (#364/#365):** SkinBuilder expression trees for nested property access. ThemeConfiguration ForControl() fluent API. CascadingValue by type (unnamed). WebColor.FromHtml(). Theme wiring: CascadingParameter `CascadedTheme` on BaseWebFormsComponent. ApplySkin chain. FontInfo auto-sync. WebFormsPage cascades Theme ?? CascadedTheme.
 
-**Issues #364/#365 theming:** SkinBuilder uses expression trees for Set<TValue>()  supports direct (s.BackColor) and nested (s.Font.Bold) via recursive GetOrCreateValue. ThemeConfiguration gained ForControl(name, configure) fluent methods. ThemeProvider cascades via unnamed CascadingValue  nesting naturally overrides. WebColor.FromHtml() added. 14 unit + 4 bUnit tests. Lesson: expression trees require recursive auto-init of intermediate nulls. CascadingValue by type sufficient for unique types.
+**Release & ListView:** Unified release.yml (single workflow, tag-based version). ListView #406 EditItemTemplate (closure + @key fix). #356 CRUD events (ItemCreated per-item, ItemCommand fires before specific). EventArgs gained IOrderedDictionary. FormView RenderOuterTable parameter.
 
-Team update (2026-02-27): Branching workflow  feature PRs from personal fork to upstream dev, only dev>main on upstream  decided by Jeffrey T. Fritz
-Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N'  decided by Jeffrey T. Fritz
-Team update (2026-02-27): AJAX Controls nav category; migration stub doc pattern for no-ops  decided by Beast
-Team update (2026-02-27): M17 sample pages created  decided by Jubilee
-Team update (2026-02-27): Forge approved M17 with 4 non-blocking follow-ups  decided by Forge
-Team update (2026-02-27): Timer duplicate [Parameter] bug fixed; 47 M17 tests  decided by Rogue
-Team update (2026-02-27): No-op stub property coverage 41-50% acceptable  decided by Forge
-Team update (2026-02-27): UpdatePanel Triggers deliberately omitted  decided by Forge
-Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace  low priority  noted by Rogue
- Team update (2026-03-01): Skins & Themes has dual docs  SkinsAndThemes.md (practical guide, update first) and ThemesAndSkins.md (architecture). Update SkinsAndThemes.md first for API changes  decided by Beast
- Team update (2026-03-01): D-11 through D-14 formally registered  D-11 GUID IDs needs fix, D-12 boolean attrs intentional, D-13/D-14 Calendar fixes recommended  decided by Forge
+**CSS fixes:** 7 WingtipToys visual fixes. Playwright blocks file://, use HTTP. Get-NetTCPConnection for PID cleanup.
 
-### Issue #366 — Base Class Theme Integration (2026-03-01)
+**Layer 1 benchmark:** scan 0.9s, migrate 2.4s, 276 transforms, 338 build errors (code-behind). Layer 2+3: 563s total, clean build after 3 rounds.
 
-- **Theme wiring moved to BaseWebFormsComponent:** Added `[CascadingParameter] ThemeConfiguration CascadedTheme` to BaseWebFormsComponent. Added `OnParametersSet` override that resolves the ControlSkin via `GetType().Name + SkinID` and calls virtual `ApplyThemeSkin(ControlSkin)`. Base implementation is no-op; BaseStyledComponent overrides to apply IStyle properties.
-- **BaseStyledComponent simplified:** Removed `[CascadingParameter] Theme` and `OnParametersSet` override. Renamed `ApplySkin` to `ApplyThemeSkin` (protected override). StyleSheetTheme semantics preserved: theme sets defaults, explicit values win.
-- **Property naming:** Named the cascading parameter `CascadedTheme` (not `Theme`) because `_Imports.razor` has `@inherits BaseWebFormsComponent` making ALL `.razor` files inherit from it. WebFormsPage and ThemeProvider both have their own `[Parameter] Theme` — same name would cause Blazor's "declares more than one parameter" error.
-- **ThemeProvider fix:** Added `@inherits ComponentBase` to ThemeProvider.razor so it doesn't inherit BaseWebFormsComponent via _Imports.razor. ThemeProvider is infrastructure, not a Web Forms control.
-- **WebFormsPage fix:** Changed `<CascadingValue Value="Theme">` to `Value="@(Theme ?? CascadedTheme)"` so the cascade works whether the user passes Theme explicitly or inherits it from a parent ThemeProvider.
-- **Lesson:** `_Imports.razor @inherits BaseWebFormsComponent` affects ALL .razor files in the project, including infrastructure components like ThemeProvider. When adding properties to BaseWebFormsComponent, check for name conflicts with every .razor component's @code block.
-- **Lesson:** C# `virtual`/`override` on properties with different attributes ([CascadingParameter] vs [Parameter]) does NOT work for Blazor — reflection returns the base class's attribute, not the override's. Use different property names instead.
+**Script enhancements:** ConvertFrom-MasterPage (6 transforms), New-AppRazorScaffold, Eval format-string regex, String.Format regex. Run 5: GetRouteUrl 4 overloads, 309 transforms, 6 new enhancements. Toolkit sync: migration-toolkit/ canonical, 47KB bwfc-migrate.ps1 synced. Run 6: 4 enhancements (TFM net10.0, SelectMethod BWFC-aware, wwwroot copy, compilable stubs). Bug: @rendermode in _Imports invalid.
 
-### FontInfo Name/Names Auto-Sync Fix (2026-03-01)
+Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX controls, theming, release.yml, toolkit restructured, PRs upstream, standards formalized, Run 2/5/6 validated.
 
-- **FontInfo auto-sync:** Converted `Name` and `Names` from auto-properties to backing-field properties with bidirectional sync. Setting `Name` also sets `Names` (single value). Setting `Names` also sets `Name` (first comma-separated entry, trimmed). Setting either to null/empty clears both. Matches ASP.NET Web Forms `FontInfo` behavior.
-- **ApplyThemeSkin guard:** Updated `BaseStyledComponent.ApplyThemeSkin` to check both `Font.Name` AND `Font.Names` are empty before applying theme font. Prevents theme from overriding an explicitly set `Names` value.
-- **Root cause:** `ApplyThemeSkin` set `Font.Name` but `HasStyleExtensions.ToStyle()` reads `Font.Names` for `font-family`. Without auto-sync, theme fonts were silently lost.
-- **Lesson:** When Web Forms has paired/synced properties (Name↔Names, Value↔SelectedValue, etc.), our Blazor equivalents must replicate the sync behavior or the rendering pipeline breaks at property boundaries.
 
-### CI/CD Unified Release Process (2026-03-02)
+<!-- Summarized 2026-03-06 by Scribe -- covers @rendermode fix through On-prefix aliases -->
 
-- **Unified release.yml:** Created `.github/workflows/release.yml` triggered on `release: published`. Single workflow coordinates all release artifacts: NuGet publish, Docker build+push to GHCR, docs deploy to GitHub Pages, demo builds with release attachment. All jobs extract version from `github.event.release.tag_name` stripping the `v` prefix, ensuring every artifact gets the same version.
-- **Version extraction pattern:** Use `${{ github.event.release.tag_name }}` (not `${{ github.ref_name }}`) for release events. Strip `v` prefix via bash `${VERSION#v}` and write to `$GITHUB_ENV` for use across steps.
-- **NuGet version override:** Pass both `-p:PackageVersion=$VERSION` and `-p:Version=$VERSION` to `dotnet pack` and `dotnet build` respectively, overriding NBGV-computed versions with the exact release tag version.
-- **Secret-gating pattern:** Use `env: NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}` at step level, then `if: env.NUGET_API_KEY != ''` — this is the GitHub Actions idiom for conditional steps based on secret availability.
-- **gh CLI in workflows:** Set `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` as env var for `gh release upload` commands.
-- **Docker image tags lowercase:** Registry/image path must be lowercase: `ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples`.
-- **deploy-server-side.yml refactored:** Removed `push: branches: [main]` trigger and path filters. Now `workflow_dispatch` only — emergency manual escape hatch.
-- **nuget.yml refactored:** Removed `push: tags: [v*]` trigger. Now `workflow_dispatch` with version input — emergency manual NuGet republish.
-- **docs.yml fix:** Replaced deprecated `echo ::set-output name=release::${RELEASE}` with `echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"`. Kept push-to-main deploy for doc-only changes between releases.
-- **demo.yml versioned artifacts:** Added NBGV version computation step. Artifact names now include version: `demo-server-side-${{ steps.nbgv.outputs.version }}`.
-- **version.json:** Changed from `"version": "0.17"` (2-segment) to `"version": "0.17.0"` (3-segment SemVer). NBGV now computes clean 3-segment versions matching our tag format.
-- **NBGV key lesson:** NBGV ignores git tags entirely — it reads `version.json` for major.minor and computes patch from git height. Tags are informational; `version.json` must be kept in sync. For releases, override NBGV output with explicit `-p:Version=` from the tag.
-- **Workflow dependency order:** release.yml uses `needs:` to enforce: build-and-test → [publish-nuget, deploy-docker, deploy-docs, build-demos] (fan-out after gate job).
-- **Lesson:** GitHub Actions `$GITHUB_OUTPUT` replaced `::set-output` (deprecated Oct 2022). Always use `echo "key=value" >> "$GITHUB_OUTPUT"` for step outputs.
+<!-- Summarized 2026-03-06 by Scribe -- covers 2026-03-05 implementation through ShoppingCart fix -->
 
- Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+### 2026-03-05 through 2026-03-06 Implementation Summary
 
- Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+**@rendermode fix:** Removed standalone `@rendermode InteractiveServer` from _Imports.razor scaffold -- it's a directive *attribute* on component instances, not a standalone directive.
+
+**WebFormsPageBase:** Abstract base class inheriting `ComponentBase`. Delegates Title/MetaDescription/MetaKeywords to IPageService. `IsPostBack => false`, `Page => this`. **WebFormsPage consolidation:** Merged Page.razor head-rendering (Option B). Optional IPageService via `ServiceProvider.GetService<>()`. RenderPageHead parameter (default true). IDisposable for event unsubscription.
+
+**On-prefix aliases:** 50 `[Parameter] EventCallback` aliases across 7 data components. Pattern: two independent properties + coalescing at invocation.
+
+**Run 8 Layer 2 WingtipToys:** Full Layer 2 migration of `samples/Run8WingtipToys/` -- 8 files created (EF Core models, DbContext, CartStateService), 14 modified (csproj, Program.cs, layouts, pages), 3 deleted, 26 stub files fixed. Clean build. Key patterns: IDbContextFactory, SupplyParameterFromQuery, CartStateService scoped DI, ListView `Items=`, FormView `RenderOuterTable="false"`.
+
+**ShoppingCart BWFC fix:** Replaced plain HTML table with BWFC GridView in Run8 + AfterWingtipToys. AfterWingtipToys reference was wrong (plain HTML). Run 7's ShoppingCart.razor is gold standard.
+
+Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shipped, WebFormsPage consolidation, event handler audit, ShoppingCart regression test, BWFC preservation mandatory.
+
+ Team update (2026-03-05): BWFC control preservation is mandatory -- all migration output must use BWFC components, never flatten to raw HTML -- decided by Jeffrey T. Fritz, Forge, Cyclops
+
+ Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView -- decided by Forge
+ Team update (2026-03-05): LoginStatus flagged for AuthorizeView redesign  decided by Forge
+
+- **LoginStatus AuthorizeView redesign:** Replaced manual `AuthenticationStateProvider` injection + `OnInitializedAsync` auth check + `UserAuthenticated` bool with `<AuthorizeView>` delegation (same pattern as LoginView). Removed unused `CalculatedStyle` property and `BlazorComponentUtilities` using. Added null guard on `LoginHandle` so missing `LoginPageUrl` doesn't throw. Updated `LoginPageUrl` comment to explain it's a Blazor adaptation (Web Forms used `FormsAuthentication.LoginUrl`). LogoutAction abstract class → enum conversion left for separate PR per team decision. Build clean.
+
+### P0 Event Handler Fixes (2026-03-06)
+
+All 7 P0 items from Forge's audit implemented:
+- **P0-1** Repeater: 3 events added (ItemCommand, ItemCreated, ItemDataBound) — had ZERO before
+- **P0-2** DataList: 7 events added + ItemDataBound bare alias. Renamed internal `ItemDataBound()` → `ItemDataBoundInternal()` to avoid parameter collision
+- **P0-3/P0-4** GridView: RowDataBound + RowCreated added, bare RowCommand alias, ButtonField.razor.cs updated to coalesce
+- **P0-5** DetailsView: ItemCreated added
+- **P0-6** FormView: OnItemInserted type fixed (FormViewInsertEventArgs → FormViewInsertedEventArgs), 6 bare CRUD aliases added
+- **P0-7** SelectMethod: moved from OnAfterRender(firstRender) to OnParametersSet(), added RefreshSelectMethod()
+
+New EventArgs: `RepeaterCommandEventArgs`, `RepeaterItemEventArgs`, `DataListCommandEventArgs`, `GridViewRowEventArgs`, `FormViewInsertedEventArgs`.
+
+**Pattern:** When `[Parameter]` name collides with internal method, rename method with `*Internal` suffix — never rename the parameter.
+
+
+ Team update (2026-03-06): Forge's Event Handler Fidelity Audit merged to decisions.md (P0 items all resolved by Cyclops, tested by Rogue). 11 P1 and 7 P2 items remain for future work.  decided by Forge, implemented by Cyclops
+
+
+ Team update (2026-03-05): Run 9 BWFC review APPROVED with 2 findings  ImageButtonraw img in ShoppingCart (P0, OnClick lost), HyperLink dropped in Manage (P2). ImageButton fix needed.  decided by Forge
+
+- **Squad Places comments (2026-03-05):** Posted 2 comments on Breaking Bad squad's articles (Terrarium .NET 3.5→10 migration). Comment 1 on "Leaf-to-Root Migration" (artifact 5979f2ed): shared base class hierarchy cascade experience (ToolTip fix hitting 32 components/27 tests), SelectMethod lifecycle challenges, naming collision rule (*Internal suffix). Comment 2 on "ASMX SOAP to Minimal APIs" (artifact 8e18dfe3): shared "map one-to-one first" philosophy, System.Text.Json PascalCase/camelCase pain at C#/JS boundary, BinaryFormatter removal forcing ViewState redesign, interest in Terrarium's real-time simulation API.
+
+ Team update (2026-03-06): Run 10 preservation 92.7% (164/177)  NEEDS WORK. ImageButtonimg still persists in ShoppingCart (P0). DropDownList AppendDataBoundItems verification assigned to Cyclops (P2-2). Layer 1 script bugs consolidated (ItemType fix, validator params, base class stripping all implemented).  decided by Forge, Bishop
+
+📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .ai-team/skills/ — decided by Jeffrey T. Fritz
+
+### Run 7 Layer 2 WingtipToys (AfterWingtipToys)
+
+**Build rounds:** 2 (round 1 had 7 errors, round 2 was clean 0/0)
+
+**Layer 2 fix categories applied:**
+
+1. **Project Configuration:** Changed csproj from NuGet `Fritz.BlazorWebFormsComponents` to project reference. Added EF Core SQLite packages with wildcard version `10.0.0-*`. Added `RootNamespace=WingtipToys`. Fixed Program.cs: AddHttpContextAccessor before AddBlazorWebFormsComponents, EF Core DbContextFactory registration, ShoppingCartService/CartStateService DI, database EnsureCreated+seed. Fixed _Imports.razor: added BlazorWebFormsComponents.Enums, Microsoft.EntityFrameworkCore, WingtipToys.Models/Data/Services namespaces.
+
+2. **Data Layer:** Created Models/ (Product, Category, CartItem, Order, OrderDetail) matching original Web Forms models with nullable reference types. Created Data/ProductContext.cs with EF Core DbContext, DbSets, and HasData seed (16 products, 5 categories). SQLite provider.
+
+3. **Services:** Created ShoppingCartService (IDbContextFactory-based, async CRUD), CartStateService (cookie-based cart ID via IHttpContextAccessor).
+
+4. **Identity/Auth Stubs:** Register.razor has UserName, Email, Password, ConfirmPassword fields with BWFC TextBox/Button/Label components. Login.razor has Email, Password, RememberMe fields. Both wire to MockAuthService/MockAuthenticationStateProvider.
+
+5. **Code-Behind Rewrites (33 files):** All .razor.cs files rewritten from raw Web Forms (System.Web, OWIN, Microsoft.AspNet.Identity) to Blazor ComponentBase. Key patterns: IDbContextFactory injection, SupplyParameterFromQuery, OnParametersSetAsync for query-driven data, NavigationManager.NavigateTo for redirects.
+
+6. **Markup Fixes:** ListView GroupTemplate/LayoutTemplate placeholders → @context. Removed GetRouteUrl calls → href with query params. Removed <%# %> expressions → @context. Fixed ImageButton → Button. Removed runat artifacts. Fixed category links to use /ProductList?id=N. ShoppingCart preserved as BWFC GridView with TItem, Items, editable TextBox, CheckBox, Update/Checkout buttons.
+
+7. **Misc Cleanup:** Removed <friendlyUrls:ViewSwitcher/>, cleaned Mobile layout, stubbed all Account/Checkout pages, AdminPage wired with EF Core data loading.
+
+**Build round 1 errors (7):**
+- CS0103 `Title` not found → class name `_Default` didn't match razor file `Default.razor`
+- CS0103 `_categories`/`_cartCount` not found → MainLayout code-behind was class `SiteMaster` in wrong namespace
+- CS1503 type mismatch (4x) → BWFC Button OnClick is `EventCallback<EventArgs>`, not `MouseEventArgs`
+
+**Build round 2:** 0 errors, 0 warnings. Clean.
+
+**Key patterns discovered:**
+- BWFC Button.OnClick is `EventCallback<EventArgs>` (not MouseEventArgs) — all click handlers must use `EventArgs`
+- Code-behind partial class name MUST match the .razor filename exactly (no underscore prefix for Default)
+- Layout code-behind namespace must match Components/Layout/ path → `WingtipToys.Components.Layout`
+- EF Core wildcard version `10.0.0-*` avoids NU1603 warnings for preview packages
+
+ Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
+
+
+ Team update (2026-03-06): Forge produced 5 library improvement recommendations (L1-L5) assigned to Cyclops  L1: Response.Redirect shim on WebFormsPageBase (HIGH), L2: Request.QueryString shim (MEDIUM), L3: DataBind() no-op (LOW-MED), L4: form-submit.js helper (MEDIUM), L5: WebFormsSessionService (MEDIUM). Recommended Cycle 2: L1  decided by Forge
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz

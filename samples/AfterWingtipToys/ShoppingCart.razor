@@ -1,0 +1,57 @@
+@page "/ShoppingCart"
+<div id="ShoppingCartTitle" class="ContentHead"><h1>@_title</h1></div>
+@if (_cartItems.Any())
+{
+    <GridView TItem="CartItem" Items="@_cartItems" AutoGenerateColumns="@false" ShowFooter="@true"
+        GridLines="@GridLines.Vertical" CellPadding="4"
+        CssClass="table table-striped table-bordered">
+        <Columns>
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField HeaderText="Quantity">            
+                <ItemTemplate>
+                    <TextBox Width="40" Text="@context.Quantity.ToString()"
+                        OnTextChanged="@(e => OnQuantityChanged(context, e))" /> 
+                </ItemTemplate>        
+        </TemplateField>    
+        <TemplateField HeaderText="Item Total">            
+                <ItemTemplate>
+                    @($"{(context.Quantity * (context.Product.UnitPrice ?? 0)):c}")
+                </ItemTemplate>        
+        </TemplateField> 
+        <TemplateField HeaderText="Remove Item">            
+                <ItemTemplate>
+                    <CheckBox Checked="@_removeFlags.GetValueOrDefault(context.ProductId)"
+                        OnCheckedChanged="@(e => OnRemoveChanged(context, e))" />
+                </ItemTemplate>        
+        </TemplateField>    
+        </Columns>    
+    </GridView>
+    <div>
+        <p></p>
+        <strong>
+            <Label Text="Order Total: " />
+            <Label Text="@_total.ToString("c")" />
+        </strong> 
+    </div>
+    <br />
+    <table> 
+    <tr>
+      <td>
+        <Button Text="Update" OnClick="UpdateBtn_Click" />
+      </td>
+      <td>
+        <a href="/RemoveAllCartItems" role="button" onclick="event.preventDefault(); window.location.href=this.href;">Remove</a>
+      </td>
+      <td>
+        <Button Text="Checkout" OnClick="CheckoutBtn_Click" />
+      </td>
+    </tr>
+    </table>
+}
+else
+{
+    <p>Your shopping cart is empty.</p>
+}
+

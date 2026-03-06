@@ -11,9 +11,9 @@ namespace BlazorWebFormsComponents.Extensions
 			=> component.LinkGenerator.GetPathByRouteValues(component.HttpContextAccessor.HttpContext, routeName, routeParameters);
 
 		public static string GetRouteUrl(this BaseWebFormsComponent component, RouteValueDictionary routeParameters)
-			=> null;
+			=> component.LinkGenerator.GetPathByRouteValues(component.HttpContextAccessor.HttpContext, null, routeParameters);
 
 		public static string GetRouteUrl(this BaseWebFormsComponent component, string routeName, RouteValueDictionary routeParameters)
-			=> null;
+			=> component.LinkGenerator.GetPathByRouteValues(component.HttpContextAccessor.HttpContext, routeName, routeParameters);
 	}
 }

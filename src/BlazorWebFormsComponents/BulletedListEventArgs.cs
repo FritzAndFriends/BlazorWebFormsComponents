@@ -20,5 +20,10 @@ namespace BlazorWebFormsComponents
 		/// Gets the zero-based index of the item that was clicked in the BulletedList control.
 		/// </summary>
 		public int Index { get; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

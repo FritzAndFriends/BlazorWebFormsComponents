@@ -52,3 +52,49 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 📌 Team update (2026-03-02): CascadedTheme (not Theme) is the cascading parameter name on BaseWebFormsComponent — decided by Cyclops
 
  Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
+
+ Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+
+## Learnings
+
+### ModelErrorMessage Integration Tests (added by task request)
+- Added 1 smoke test `[InlineData]` for `/ControlSamples/ModelErrorMessage` in the `ValidationControl_Loads_WithoutErrors` Theory group.
+- Added 3 interactive tests in `InteractiveComponentTests.cs`:
+  - `ModelErrorMessage_Submit_ShowsErrors` — submits empty form, asserts `span.text-danger` appears with error text.
+  - `ModelErrorMessage_ValidSubmit_NoErrors` — fills matching valid passwords, asserts no error spans and success message appears.
+  - `ModelErrorMessage_ClearButton_RemovesErrors` — triggers errors then clicks Clear, asserts errors are removed from DOM.
+- The ModelErrorMessage component renders nothing when no errors exist (conditional `@if`), so error-gone assertions use `CountAsync() == 0` rather than visibility checks.
+- For the Clear button test, used `WaitForSelectorAsync` with `State.Hidden` to reliably wait for Blazor re-render after clearing the EditContext.
+- `PressSequentiallyAsync` + `Tab` pattern used for Blazor Server InputText fields, consistent with established team conventions.
+
+ Team update (2026-03-03): ListView CRUD events  ItemCreated now fires per-item, ItemCommand fires for ALL commands before specific handlers  decided by Cyclops
+
+ Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz
+
+
+ Team update (2026-03-03): WingtipToys 7-phase feature schedule established  26 work items, critical path through Data Foundation  Product Browsing  Shopping Cart  Checkout  Polish  decided by Forge
+
+
+ Team update (2026-03-03): ListView CRUD test conventions established  43 tests, event ordering via List<string>, cancellation assertions, bUnit double-render handling  decided by Rogue
+
+
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
+
+ Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
+
+
+ Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
+
+
+ Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
+
+
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz

@@ -43,6 +43,11 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the event should be canceled.
 		/// </summary>
 		public bool Cancel { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 
 	/// <summary>
@@ -70,6 +75,11 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the exception was handled.
 		/// </summary>
 		public bool ExceptionHandled { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 
 	/// <summary>
@@ -91,6 +101,11 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the event should be canceled.
 		/// </summary>
 		public bool Cancel { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 
 	/// <summary>
@@ -118,6 +133,11 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the exception was handled.
 		/// </summary>
 		public bool ExceptionHandled { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 
 	/// <summary>
@@ -139,6 +159,11 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the event should be canceled.
 		/// </summary>
 		public bool Cancel { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 
 	/// <summary>
@@ -166,6 +191,11 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the exception was handled.
 		/// </summary>
 		public bool ExceptionHandled { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 
 	/// <summary>
@@ -193,5 +223,10 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the event should be canceled.
 		/// </summary>
 		public bool Cancel { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

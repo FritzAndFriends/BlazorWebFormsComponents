@@ -1,0 +1,95 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	// ─── P0-6: FormView OnItemInserted type fix ─────────────────────────
+	// The audit found OnItemInserted was typed as FormViewInsertEventArgs (pre-insert).
+	// It should be FormViewInsertedEventArgs (post-insert, past tense).
+	// This test verifies the corrected type compiles and fires correctly.
+
+	[Fact]
+	public void FormView_OnItemInserted_UsesCorrectType_FormViewInsertedEventArgs()
+	{
+		FormViewInsertedEventArgs capturedArgs = null;
+
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				OnItemInserted="@((FormViewInsertedEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="Insert" Text="Save" />
+				</ItemTemplate>
+				<InsertItemTemplate>
+					<span>Insert mode</span>
+				</InsertItemTemplate>
+			</FormView>
+		);
+
+		// Trigger an insert command
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("OnItemInserted should fire with FormViewInsertedEventArgs (past tense)");
+		capturedArgs.ShouldBeOfType<FormViewInsertedEventArgs>();
+	}
+
+	[Fact]
+	public void FormView_FormViewInsertedEventArgs_HasExpectedProperties()
+	{
+		// Verify the new EventArgs class has the correct shape
+		var args = new FormViewInsertedEventArgs(1, null);
+
+		args.AffectedRows.ShouldBe(1);
+		args.Exception.ShouldBeNull();
+		args.ExceptionHandled.ShouldBeFalse();
+		args.KeepInInsertMode.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void FormView_FormViewInsertedEventArgs_ExceptionProperty()
+	{
+		var ex = new InvalidOperationException("test error");
+		var args = new FormViewInsertedEventArgs(0, ex);
+
+		args.AffectedRows.ShouldBe(0);
+		args.Exception.ShouldBe(ex);
+		args.ExceptionHandled.ShouldBeFalse();
+
+		// Can mark as handled
+		args.ExceptionHandled = true;
+		args.ExceptionHandled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void FormView_FormViewInsertedEventArgs_KeepInInsertMode()
+	{
+		var args = new FormViewInsertedEventArgs(1);
+		args.KeepInInsertMode = true;
+		args.KeepInInsertMode.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void FormView_FormViewInsertedEventArgs_HasSenderProperty()
+	{
+		var args = new FormViewInsertedEventArgs(1);
+		args.Sender.ShouldBeNull();
+
+		var fakeSender = new object();
+		args.Sender = fakeSender;
+		args.Sender.ShouldBe(fakeSender);
+	}
+
+	[Fact]
+	public void FormView_OnItemInserted_TypeIsDifferentFromOnItemInserting()
+	{
+		// Compile-time proof that the two types are distinct:
+		// OnItemInserting uses FormViewInsertEventArgs (present tense — about to insert)
+		// OnItemInserted uses FormViewInsertedEventArgs (past tense — already inserted)
+		FormViewInsertEventArgs insertingArgs = new FormViewInsertEventArgs("insert");
+		FormViewInsertedEventArgs insertedArgs = new FormViewInsertedEventArgs(1);
+
+		insertingArgs.ShouldNotBeNull();
+		insertedArgs.ShouldNotBeNull();
+		insertingArgs.ShouldNotBeOfType<FormViewInsertedEventArgs>();
+		insertedArgs.ShouldNotBeOfType<FormViewInsertEventArgs>();
+	}
+}

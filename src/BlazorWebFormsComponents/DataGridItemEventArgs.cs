@@ -19,5 +19,10 @@ namespace BlazorWebFormsComponents
 		{
 			Item = item;
 		}
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

@@ -1,0 +1,16 @@
+@page "/Checkout/CheckoutReview"
+<h1>Order Review</h1>
+    <p></p>
+    <h3 style="padding-left: 33px">Products:</h3>
+    <GridView TItem="object" ID="OrderItemList" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500" BorderColor="@("#efeeef")" BorderWidth="33" Items="@(new List<object>())">
+        <Columns>
+            <BoundField DataField="ProductId" HeaderText=" Product ID" />        
+            <BoundField DataField="Product.ProductName" HeaderText=" Product Name" />        
+            <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+            <BoundField DataField="Quantity" HeaderText="Quantity" />        
+        </Columns>    
+    </GridView>
+    <p></p>
+    <hr />
+    <Button ID="CheckoutConfirm" Text="Complete Order" OnClick="CheckoutConfirm_Click" />
+

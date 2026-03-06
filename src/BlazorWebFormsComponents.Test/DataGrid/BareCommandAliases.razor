@@ -1,0 +1,213 @@
+@code {
+
+	// ─── P1-11: DataGrid bare command event aliases ─────────────────────
+	// Verifies that ItemCommand, EditCommand, CancelCommand, UpdateCommand,
+	// and DeleteCommand bare aliases are accepted as parameters.
+
+	DataGridCommandEventArgs _itemCmdArgs;
+	DataGridCommandEventArgs _editCmdArgs;
+	DataGridCommandEventArgs _cancelCmdArgs;
+	DataGridCommandEventArgs _updateCmdArgs;
+	DataGridCommandEventArgs _deleteCmdArgs;
+
+	#region ItemCommand
+
+	[Fact]
+	public void ItemCommand_BareAlias_ParameterAccepted()
+	{
+		_itemCmdArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="data" AutoGenerateColumns="false"
+				ItemCommand="@((DataGridCommandEventArgs e) => _itemCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull("DataGrid should accept bare ItemCommand parameter");
+	}
+
+	[Fact]
+	public void OnItemCommand_Prefix_Also_Accepted()
+	{
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="GetTestData()" AutoGenerateColumns="false"
+				OnItemCommand="@((DataGridCommandEventArgs e) => _itemCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	#region EditCommand
+
+	[Fact]
+	public void EditCommand_BareAlias_ParameterAccepted()
+	{
+		_editCmdArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="data" AutoGenerateColumns="false"
+				EditCommand="@((DataGridCommandEventArgs e) => _editCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull("DataGrid should accept bare EditCommand parameter");
+	}
+
+	[Fact]
+	public void OnEditCommand_Prefix_Also_Accepted()
+	{
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="GetTestData()" AutoGenerateColumns="false"
+				OnEditCommand="@((DataGridCommandEventArgs e) => _editCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	#region CancelCommand
+
+	[Fact]
+	public void CancelCommand_BareAlias_ParameterAccepted()
+	{
+		_cancelCmdArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="data" AutoGenerateColumns="false"
+				CancelCommand="@((DataGridCommandEventArgs e) => _cancelCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull("DataGrid should accept bare CancelCommand parameter");
+	}
+
+	[Fact]
+	public void OnCancelCommand_Prefix_Also_Accepted()
+	{
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="GetTestData()" AutoGenerateColumns="false"
+				OnCancelCommand="@((DataGridCommandEventArgs e) => _cancelCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	#region UpdateCommand
+
+	[Fact]
+	public void UpdateCommand_BareAlias_ParameterAccepted()
+	{
+		_updateCmdArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="data" AutoGenerateColumns="false"
+				UpdateCommand="@((DataGridCommandEventArgs e) => _updateCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull("DataGrid should accept bare UpdateCommand parameter");
+	}
+
+	[Fact]
+	public void OnUpdateCommand_Prefix_Also_Accepted()
+	{
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="GetTestData()" AutoGenerateColumns="false"
+				OnUpdateCommand="@((DataGridCommandEventArgs e) => _updateCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	#region DeleteCommand
+
+	[Fact]
+	public void DeleteCommand_BareAlias_ParameterAccepted()
+	{
+		_deleteCmdArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="data" AutoGenerateColumns="false"
+				DeleteCommand="@((DataGridCommandEventArgs e) => _deleteCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull("DataGrid should accept bare DeleteCommand parameter");
+	}
+
+	[Fact]
+	public void OnDeleteCommand_Prefix_Also_Accepted()
+	{
+		var cut = Render(
+			@<DataGrid ItemType="DgCmdItem" Items="GetTestData()" AutoGenerateColumns="false"
+				OnDeleteCommand="@((DataGridCommandEventArgs e) => _deleteCmdArgs = e)">
+				<Columns>
+					<BoundField ItemType="DgCmdItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</DataGrid>
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	private List<DgCmdItem> GetTestData()
+	{
+		return new List<DgCmdItem>
+		{
+			new DgCmdItem { Id = 1, Name = "Alpha" },
+			new DgCmdItem { Id = 2, Name = "Beta" },
+			new DgCmdItem { Id = 3, Name = "Gamma" }
+		};
+	}
+
+	public class DgCmdItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

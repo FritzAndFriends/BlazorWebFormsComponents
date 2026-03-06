@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using BlazorWebFormsComponents.Validations;
+using System;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -32,12 +33,12 @@ namespace BlazorWebFormsComponents
 		public string OnClientClick { get; set; }
 
 		[Parameter]
-		public EventCallback<MouseEventArgs> OnClick { get; set; }
+		public EventCallback<EventArgs> OnClick { get; set; }
 
 		[Parameter]
 		public EventCallback<CommandEventArgs> OnCommand { get; set; }
 
-		protected void Click()
+		protected async Task Click()
 		{
 			// Trigger validation for the specific ValidationGroup if CausesValidation is true
 			// Note: In Blazor, validation state is managed by EditContext. The OnClick event
@@ -51,12 +52,12 @@ namespace BlazorWebFormsComponents
 			if (!string.IsNullOrEmpty(CommandName))
 			{
 				var args = new CommandEventArgs(CommandName, CommandArgument) { Sender = this };
-				OnCommand.InvokeAsync(args);
+				await OnCommand.InvokeAsync(args);
 				OnBubbledEvent(this, args);
 			}
 			else
 			{
-				OnClick.InvokeAsync(new MouseEventArgs());
+				await OnClick.InvokeAsync(EventArgs.Empty);
 			}
 		}
 	}

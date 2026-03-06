@@ -1,0 +1,100 @@
+@page "/ControlSamples/ModelErrorMessage"
+@using BlazorWebFormsComponents.Validations
+
+<h3>ModelErrorMessage</h3>
+
+<p>The <code>ModelErrorMessage</code> component displays model state errors for a specific key,
+matching the ASP.NET Web Forms <code>&lt;asp:ModelErrorMessage&gt;</code> control.</p>
+
+<h4>Basic Usage with CssClass and SetFocusOnError</h4>
+
+<div data-audit-control="ModelErrorMessage-1">
+<EditForm EditContext="@_editContext" OnValidSubmit="@HandleValidSubmit">
+    <label for="password">Password (min 6 characters):</label>
+    <InputText id="password" @bind-Value="_model.Password" />
+    <ModelErrorMessage ModelStateKey="Password"
+        AssociatedControlID="password"
+        CssClass="text-danger"
+        SetFocusOnError="true" />
+    <br />
+    <label for="confirmPassword">Confirm Password:</label>
+    <InputText id="confirmPassword" @bind-Value="_model.ConfirmPassword" />
+    <ModelErrorMessage ModelStateKey="ConfirmPassword"
+        AssociatedControlID="confirmPassword"
+        CssClass="text-danger" />
+    <br /><br />
+    <button type="submit">Submit</button>
+    <button type="button" @onclick="ClearErrors">Clear</button>
+
+    @if (_submitted)
+    {
+        <p style="color:green;"><strong>Form submitted successfully!</strong></p>
+    }
+</EditForm>
+</div>
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;EditForm EditContext="@@_editContext" OnValidSubmit="@@HandleValidSubmit"&gt;<br />
+&nbsp;&nbsp;&lt;InputText id="password" @@bind-Value="_model.Password" /&gt;<br />
+&nbsp;&nbsp;&lt;ModelErrorMessage ModelStateKey="Password"<br />
+&nbsp;&nbsp;&nbsp;&nbsp;AssociatedControlID="password"<br />
+&nbsp;&nbsp;&nbsp;&nbsp;CssClass="text-danger"<br />
+&nbsp;&nbsp;&nbsp;&nbsp;SetFocusOnError="true" /&gt;<br />
+&lt;/EditForm&gt;
+</code>
+
+@code {
+    private PasswordModel _model = new();
+    private EditContext _editContext;
+    private ValidationMessageStore _messageStore;
+    private bool _submitted;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(_model);
+        _messageStore = new ValidationMessageStore(_editContext);
+        _editContext.OnValidationRequested += HandleValidation;
+    }
+
+    private void HandleValidation(object sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+        _submitted = false;
+
+        if (string.IsNullOrWhiteSpace(_model.Password) || _model.Password.Length < 6)
+        {
+            _messageStore.Add(_editContext.Field("Password"), "Password must be at least 6 characters.");
+        }
+
+        if (_model.ConfirmPassword != _model.Password)
+        {
+            _messageStore.Add(_editContext.Field("ConfirmPassword"), "Passwords do not match.");
+        }
+
+        _editContext.NotifyValidationStateChanged();
+    }
+
+    private void HandleValidSubmit()
+    {
+        _submitted = true;
+    }
+
+    private void ClearErrors()
+    {
+        _messageStore.Clear();
+        _model = new PasswordModel();
+        _editContext = new EditContext(_model);
+        _messageStore = new ValidationMessageStore(_editContext);
+        _editContext.OnValidationRequested += HandleValidation;
+        _submitted = false;
+    }
+
+    private class PasswordModel
+    {
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

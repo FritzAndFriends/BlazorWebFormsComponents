@@ -1,0 +1,64 @@
+@code {
+
+	// ─── P1-1: Button OnClick fires with EventArgs (not MouseEventArgs) ─────
+	// The OnClick parameter should be EventCallback<EventArgs> and the handler
+	// should receive EventArgs.Empty when the button is clicked.
+
+	EventArgs _receivedArgs;
+	bool _clickFired;
+
+	[Fact]
+	public void Button_OnClick_FiresWithEventArgs()
+	{
+		_receivedArgs = null;
+		_clickFired = false;
+
+		var cut = Render(@<Button OnClick="@((EventArgs e) => { _receivedArgs = e; _clickFired = true; })">Click</Button>);
+
+		cut.Find("input").Click();
+
+		_clickFired.ShouldBeTrue("OnClick should fire when button is clicked");
+		_receivedArgs.ShouldNotBeNull("EventArgs should not be null");
+	}
+
+	[Fact]
+	public void Button_OnClick_ReceivesEventArgsEmpty()
+	{
+		_receivedArgs = null;
+
+		var cut = Render(@<Button OnClick="@((EventArgs e) => _receivedArgs = e)">Click</Button>);
+
+		cut.Find("input").Click();
+
+		_receivedArgs.ShouldBe(EventArgs.Empty, "Handler should receive EventArgs.Empty");
+	}
+
+	[Fact]
+	public void Button_Renders_And_OnClick_Invokes()
+	{
+		var content = "not clicked";
+
+		var cut = Render(@<Button OnClick="@((EventArgs e) => content = "clicked")" Text="Go" />);
+
+		// Button renders as an input element
+		var input = cut.Find("input");
+		input.ShouldNotBeNull();
+
+		input.Click();
+		content.ShouldBe("clicked");
+	}
+
+	[Fact]
+	public void Button_OnClick_ParameterType_IsEventArgs_NotMouseEventArgs()
+	{
+		// Compile-time check: if this compiles, the parameter type is EventCallback<EventArgs>
+		EventCallback<EventArgs> handler = EventCallback.Factory.Create<EventArgs>(this, (EventArgs e) => { });
+
+		var cut = Render<Button>(p => p
+			.Add(ps => ps.OnClick, handler)
+			.Add(ps => ps.Text, "Test")
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+}

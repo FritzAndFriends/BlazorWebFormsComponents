@@ -134,8 +134,7 @@
 	public void EditItemTemplate_RendersWhenEditIndexMatchesItemIndex()
 	{
 		// Verify that the HandleCommand("Edit") properly sets EditIndex and the re-render
-		// shows EditItemTemplate. This test uses HandleCommand since parameter-only
-		// EditIndex changes aren't fully re-evaluated by the ListView's Razor template.
+		// shows EditItemTemplate.
 		var widgets = Widget.SimpleWidgetList;
 
 		var cut = Render(@<ListView Items="widgets"
@@ -153,10 +152,13 @@
 		// Verify EditIndex was updated
 		theListView.EditIndex.ShouldBe(1);
 
-		// Note: The ListView component's current implementation does not re-render the
-		// template with the updated EditIndex after StateHasChanged(). The EditIndex IS
-		// set correctly (confirmed above), but the Razor template does not re-evaluate.
-		// This is a known component behavior gap.
+		// Verify the edited row renders with EditItemTemplate
+		var editSpans = cut.FindAll("span.edit");
+		editSpans.Count.ShouldBe(1);
+		editSpans[0].TextContent.ShouldContain("Second Widget");
+
+		// Other items should remain in display mode
+		cut.FindAll("span.display").Count.ShouldBe(Widget.SimpleWidgetList.Length - 1);
 	}
 
 	[Fact]

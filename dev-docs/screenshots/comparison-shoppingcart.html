@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1e1e1e; color: #d4d4d4; padding: 24px; }
+        h1 { text-align: center; color: #fff; margin-bottom: 8px; font-size: 28px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1400px; margin: 0 auto; }
+        .panel { background: #252526; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .panel-header { padding: 12px 16px; font-weight: 600; font-size: 14px; }
+        .panel-header.before { background: #4a1919; color: #f48771; border-bottom: 2px solid #f48771; }
+        .panel-header.after { background: #1a3a1a; color: #89d185; border-bottom: 2px solid #89d185; }
+        pre { padding: 16px; font-size: 12.5px; line-height: 1.5; overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; }
+        .highlight { background: rgba(255, 255, 0, 0.08); }
+        .removed { color: #f48771; }
+        .added { color: #89d185; }
+        .badge { display: inline-block; background: #0078d4; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 8px; }
+        .stats { text-align: center; margin-top: 16px; color: #888; font-size: 13px; }
+        .stats strong { color: #89d185; }
+    </style>
+</head>
+<body>
+    <h1>ShoppingCart — Before &amp; After</h1>
+    <p class="subtitle">WingtipToys Migration: ASP.NET Web Forms → Blazor with BWFC</p>
+    <div class="container">
+        <div class="panel">
+            <div class="panel-header before">❌ Before — Web Forms (.aspx)</div>
+            <pre>&lt;div id="ShoppingCartTitle" <span class="removed">runat="server"</span> class="ContentHead"&gt;
+    &lt;h1&gt;Shopping Cart&lt;/h1&gt;
+&lt;/div&gt;
+<span class="removed">&lt;asp:GridView</span> ID="CartList" <span class="removed">runat="server"</span>
+    AutoGenerateColumns="False" ShowFooter="True"
+    GridLines="Vertical" CellPadding="4"
+    <span class="removed">ItemType="WingtipToys.Models.CartItem"</span>
+    SelectMethod="GetShoppingCartItems"
+    CssClass="table table-striped table-bordered"&gt;
+    &lt;Columns&gt;
+    <span class="removed">&lt;asp:BoundField</span> DataField="ProductID" HeaderText="ID"
+        SortExpression="ProductID" /&gt;
+    <span class="removed">&lt;asp:BoundField</span> DataField="Product.ProductName" HeaderText="Name" /&gt;
+    <span class="removed">&lt;asp:BoundField</span> DataField="Product.UnitPrice"
+        HeaderText="Price (each)" DataFormatString="{0:c}" /&gt;
+    <span class="removed">&lt;asp:TemplateField</span> HeaderText="Quantity"&gt;
+        &lt;ItemTemplate&gt;
+            <span class="removed">&lt;asp:TextBox</span> ID="PurchaseQuantity" Width="40"
+                <span class="removed">runat="server"</span> Text="<span class="removed">&lt;%#: Item.Quantity %&gt;</span>"&gt;
+            <span class="removed">&lt;/asp:TextBox&gt;</span>
+        &lt;/ItemTemplate&gt;
+    <span class="removed">&lt;/asp:TemplateField&gt;</span>
+    <span class="removed">&lt;asp:TemplateField</span> HeaderText="Remove Item"&gt;
+        &lt;ItemTemplate&gt;
+            <span class="removed">&lt;asp:CheckBox</span> id="Remove" <span class="removed">runat="server"</span>&gt;
+            <span class="removed">&lt;/asp:CheckBox&gt;</span>
+        &lt;/ItemTemplate&gt;
+    <span class="removed">&lt;/asp:TemplateField&gt;</span>
+    &lt;/Columns&gt;
+<span class="removed">&lt;/asp:GridView&gt;</span>
+&lt;strong&gt;
+    <span class="removed">&lt;asp:Label</span> ID="LabelTotalText" <span class="removed">runat="server"</span>
+        Text="Order Total: "&gt;<span class="removed">&lt;/asp:Label&gt;</span>
+    <span class="removed">&lt;asp:Label</span> ID="lblTotal" <span class="removed">runat="server"</span>
+        <span class="removed">EnableViewState="false"</span>&gt;<span class="removed">&lt;/asp:Label&gt;</span>
+&lt;/strong&gt;
+<span class="removed">&lt;asp:Button</span> ID="UpdateBtn" <span class="removed">runat="server"</span>
+    Text="Update" OnClick="UpdateBtn_Click" /&gt;</pre>
+        </div>
+        <div class="panel">
+            <div class="panel-header after">✅ After — Blazor + BWFC (.razor)</div>
+            <pre>&lt;div id="ShoppingCartTitle" class="ContentHead"&gt;
+    &lt;h1&gt;Shopping Cart&lt;/h1&gt;
+&lt;/div&gt;
+<span class="added">&lt;GridView</span> ID="CartList"
+    AutoGenerateColumns="False" ShowFooter="True"
+    GridLines="Vertical" CellPadding="4"
+    <span class="added">TItem="CartItem"</span>
+    SelectMethod="GetShoppingCartItems"
+    CssClass="table table-striped table-bordered"&gt;
+    &lt;Columns&gt;
+    <span class="added">&lt;BoundField</span> DataField="ProductID" HeaderText="ID"
+        SortExpression="ProductID" /&gt;
+    <span class="added">&lt;BoundField</span> DataField="Product.ProductName" HeaderText="Name" /&gt;
+    <span class="added">&lt;BoundField</span> DataField="Product.UnitPrice"
+        HeaderText="Price (each)" DataFormatString="{0:c}" /&gt;
+    <span class="added">&lt;TemplateField</span> HeaderText="Quantity"&gt;
+        &lt;ItemTemplate&gt;
+            <span class="added">&lt;TextBox</span> ID="PurchaseQuantity" Width="40"
+                Text="<span class="added">@context.Quantity</span>"&gt;
+            <span class="added">&lt;/TextBox&gt;</span>
+        &lt;/ItemTemplate&gt;
+    <span class="added">&lt;/TemplateField&gt;</span>
+    <span class="added">&lt;TemplateField</span> HeaderText="Remove Item"&gt;
+        &lt;ItemTemplate&gt;
+            <span class="added">&lt;CheckBox</span> id="Remove"&gt;
+            <span class="added">&lt;/CheckBox&gt;</span>
+        &lt;/ItemTemplate&gt;
+    <span class="added">&lt;/TemplateField&gt;</span>
+    &lt;/Columns&gt;
+<span class="added">&lt;/GridView&gt;</span>
+&lt;strong&gt;
+    <span class="added">&lt;Label</span> ID="LabelTotalText"
+        Text="Order Total: "&gt;<span class="added">&lt;/Label&gt;</span>
+    <span class="added">&lt;Label</span> ID="lblTotal"&gt;<span class="added">&lt;/Label&gt;</span>
+&lt;/strong&gt;
+<span class="added">&lt;Button</span> ID="UpdateBtn"
+    Text="Update" OnClick="UpdateBtn_Click" /&gt;</pre>
+        </div>
+    </div>
+    <p class="stats">
+        Controls migrated: <strong>7 (GridView, BoundField ×3, TextBox, CheckBox, Label ×2, Button)</strong> | 
+        Attributes preserved: <strong>18 of 20</strong> | 
+        Lines changed: <strong>16 of 36</strong> — <strong>removed</strong> asp: prefixes, runat="server", EnableViewState, server binding
+    </p>
+</body>
+</html>

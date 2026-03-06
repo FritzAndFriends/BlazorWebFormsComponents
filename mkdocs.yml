@@ -101,6 +101,7 @@ nav:
     - CompareValidator: ValidationControls/CompareValidator.md
     - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md
+    - ModelErrorMessage: ValidationControls/ModelErrorMessage.md
     - RangeValidator: ValidationControls/RangeValidator.md
     - RegularExpressionValidator: ValidationControls/RegularExpressionValidator.md
     - RequiredFieldValidator: ValidationControls/RequiredFieldValidator.md
@@ -131,11 +132,13 @@ nav:
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
     - NamingContainer: UtilityFeatures/NamingContainer.md
-    - PageService: UtilityFeatures/PageService.md
+    - Page System: UtilityFeatures/PageService.md
+    - Service Registration: UtilityFeatures/ServiceRegistration.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
+      - Automated Migration Guide: Migration/AutomatedMigration.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Deferred Controls: Migration/DeferredControls.md

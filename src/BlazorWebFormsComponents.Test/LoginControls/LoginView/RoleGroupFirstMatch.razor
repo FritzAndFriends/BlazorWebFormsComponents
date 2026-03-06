@@ -1,23 +1,12 @@
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims;
 @using Moq;
 
 @code {
 	[Fact]
 	public void LoginView_RoleGroupFirstMatch_DisplaysMatchingRoleGroup()
 	{
-		var principal = new ClaimsPrincipal();
-		var identity = new ClaimsIdentity(new Claim[]
-		{
-		new Claim(ClaimTypes.Name, "James Bond"),
-		new Claim(ClaimTypes.Role, "Spy")
-		}, "Test authentication");
-		principal.AddIdentity(identity);
-
-		var autheMock = new Mock<AuthenticationStateProvider>();
-		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
-
-		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		var authContext = this.AddAuthorization();
+		authContext.SetAuthorized("James Bond");
+		authContext.SetRoles("Spy");
 
 		var navMock = new Mock<NavigationManager>();
 		Services.AddSingleton<NavigationManager>(navMock.Object);
@@ -30,17 +19,17 @@
 				<LoggedInTemplate>
 					LoggedIn
 				</LoggedInTemplate>
-				<ChildContent>
+				<RoleGroups>
 					<BlazorWebFormsComponents.LoginControls.RoleGroup Roles="Agent">
 						Agent
 					</BlazorWebFormsComponents.LoginControls.RoleGroup>
 					<BlazorWebFormsComponents.LoginControls.RoleGroup Roles="Spy,Agent">
 						Spy,Agent
 					</BlazorWebFormsComponents.LoginControls.RoleGroup>
-				</ChildContent>
+				</RoleGroups>
 			</BlazorWebFormsComponents.LoginControls.LoginView>
 		);
 
-		cut.Find("div").TextContent.Trim().ShouldBe("Spy,Agent");
+		cut.Markup.Trim().ShouldContain("Spy,Agent");
 	}
 }

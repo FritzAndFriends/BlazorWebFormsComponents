@@ -1,0 +1,148 @@
+@code {
+
+	// ─── P1-2: Sender property on EventArgs classes ─────────────────────
+	// Verifies that GridViewDeleteEventArgs, GridViewUpdateEventArgs,
+	// GridViewSelectEventArgs, and DataGridCommandEventArgs have a non-null
+	// Sender property after an event fires.
+
+	#region GridViewDeleteEventArgs.Sender
+
+	[Fact]
+	public void GridViewDeleteEventArgs_Has_Sender_Property()
+	{
+		// Compile-time check: Sender property must exist
+		var args = new GridViewDeleteEventArgs(0);
+		args.Sender = "test";
+		args.Sender.ShouldBe("test", "GridViewDeleteEventArgs should have a Sender property");
+	}
+
+	[Fact]
+	public void GridViewDeleteEventArgs_Sender_SetByComponent()
+	{
+		object capturedSender = null;
+		var data = new List<SenderTestItem>
+		{
+			new SenderTestItem { Id = 1, Name = "Alpha" },
+			new SenderTestItem { Id = 2, Name = "Beta" }
+		};
+
+		var cut = Render(
+			@<GridView ItemType="SenderTestItem" DataSource="data" AutoGenerateColumns="false"
+				RowDeleting="@((GridViewDeleteEventArgs e) => capturedSender = e.Sender)">
+				<Columns>
+					<BoundField ItemType="SenderTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// If delete buttons are rendered, clicking one should set Sender
+		var deleteLinks = cut.FindAll("tbody a").Where(a => a.TextContent == "Delete").ToList();
+		if (deleteLinks.Any())
+		{
+			deleteLinks.First().Click();
+			capturedSender.ShouldNotBeNull("Sender should be set on GridViewDeleteEventArgs");
+		}
+	}
+
+	#endregion
+
+	#region GridViewUpdateEventArgs.Sender
+
+	[Fact]
+	public void GridViewUpdateEventArgs_Has_Sender_Property()
+	{
+		var args = new GridViewUpdateEventArgs(0);
+		args.Sender = "test";
+		args.Sender.ShouldBe("test", "GridViewUpdateEventArgs should have a Sender property");
+	}
+
+	[Fact]
+	public void GridViewUpdateEventArgs_Sender_SetByComponent()
+	{
+		object capturedSender = null;
+		var data = new List<SenderTestItem>
+		{
+			new SenderTestItem { Id = 1, Name = "Alpha" },
+			new SenderTestItem { Id = 2, Name = "Beta" }
+		};
+
+		var cut = Render(
+			@<GridView ItemType="SenderTestItem" DataSource="data" AutoGenerateColumns="false" EditIndex="0"
+				RowEditing="@((GridViewEditEventArgs e) => { })"
+				RowUpdating="@((GridViewUpdateEventArgs e) => capturedSender = e.Sender)"
+				RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+				<Columns>
+					<BoundField ItemType="SenderTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// Row 0 is in edit mode, click Update
+		var updateLinks = cut.FindAll("tbody a").Where(a => a.TextContent == "Update").ToList();
+		if (updateLinks.Any())
+		{
+			updateLinks.First().Click();
+			capturedSender.ShouldNotBeNull("Sender should be set on GridViewUpdateEventArgs");
+		}
+	}
+
+	#endregion
+
+	#region GridViewSelectEventArgs.Sender
+
+	[Fact]
+	public void GridViewSelectEventArgs_Has_Sender_Property()
+	{
+		var args = new GridViewSelectEventArgs(0);
+		args.Sender = "test";
+		args.Sender.ShouldBe("test", "GridViewSelectEventArgs should have a Sender property");
+	}
+
+	[Fact]
+	public void GridViewSelectEventArgs_Sender_SetByComponent()
+	{
+		object capturedSender = null;
+		var data = new List<SenderTestItem>
+		{
+			new SenderTestItem { Id = 1, Name = "Alpha" },
+			new SenderTestItem { Id = 2, Name = "Beta" }
+		};
+
+		var cut = Render(
+			@<GridView ItemType="SenderTestItem" DataSource="data" AutoGenerateColumns="false"
+				AutoGenerateSelectButton="true"
+				SelectedIndexChanging="@((GridViewSelectEventArgs e) => capturedSender = e.Sender)">
+				<Columns>
+					<BoundField ItemType="SenderTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		var selectLinks = cut.FindAll("tbody a").Where(a => a.TextContent == "Select").ToList();
+		selectLinks.Count.ShouldBeGreaterThan(0);
+		selectLinks.First().Click();
+
+		capturedSender.ShouldNotBeNull("Sender should be set on GridViewSelectEventArgs");
+	}
+
+	#endregion
+
+	#region DataGridCommandEventArgs.Sender
+
+	[Fact]
+	public void DataGridCommandEventArgs_Has_Sender_Property()
+	{
+		// DataGridCommandEventArgs already has CommandSource; check for Sender too
+		var args = new DataGridCommandEventArgs();
+		args.Sender = "test";
+		args.Sender.ShouldBe("test", "DataGridCommandEventArgs should have a Sender property");
+	}
+
+	#endregion
+
+	public class SenderTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

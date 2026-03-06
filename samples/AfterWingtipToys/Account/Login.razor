@@ -1,0 +1,44 @@
+@page "/Account/Login"
+<h2>Log in</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <section id="loginForm">
+            <div class="form-horizontal">
+                <h4>Use a local account to log in.</h4>
+                <hr />
+                <form method="post" action="/Account/DoLogin" data-enhance="false">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Email</label>
+                        <div class="col-md-10">
+                            <input type="email" name="email" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Password</label>
+                        <div class="col-md-10">
+                            <input type="password" name="password" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <div class="checkbox">
+                                <input type="checkbox" name="rememberMe" />
+                                <label>Remember me?</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <a href="#" role="button" class="btn btn-default" onclick="event.preventDefault(); this.closest('form').submit();">Log in</a>
+                        </div>
+                    </div>
+                </form>
+                <p>
+                    <a href="/Account/Register">Register as a new user</a>
+                </p>
+            </div>
+        </section>
+    </div>
+</div>
+

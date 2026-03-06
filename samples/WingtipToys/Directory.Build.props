@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stop inheriting from repo-root Directory.Build.props (NBGV, analyzers) -->
+</Project>

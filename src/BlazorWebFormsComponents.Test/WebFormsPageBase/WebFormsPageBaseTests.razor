@@ -1,0 +1,136 @@
+@using Microsoft.AspNetCore.Components.Rendering
+
+@code {
+
+	/// <summary>
+	/// Concrete test component inheriting WebFormsPageBase for testing purposes.
+	/// Uses BuildRenderTree to render a simple div so bUnit can instantiate it.
+	/// Exposes the protected Page property via a public accessor for test assertions.
+	/// </summary>
+	private class TestPage : WebFormsPageBase
+	{
+		public WebFormsPageBase ExposedPage => Page;
+		public bool IsPostBackValue => IsPostBack;
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenElement(0, "div");
+			builder.AddContent(1, "TestPage");
+			builder.CloseElement();
+		}
+	}
+
+	private IRenderedComponent<TestPage> RenderTestPage()
+	{
+		Services.AddScoped<IPageService, PageService>();
+		return Render<TestPage>();
+	}
+
+	[Fact]
+	public void Title_DelegatesToIPageService()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+		var pageService = Services.GetRequiredService<IPageService>();
+
+		// Act
+		cut.Instance.Title = "Products";
+
+		// Assert
+		pageService.Title.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void MetaDescription_DelegatesToIPageService()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+		var pageService = Services.GetRequiredService<IPageService>();
+
+		// Act
+		cut.Instance.MetaDescription = "Browse our products";
+
+		// Assert
+		pageService.MetaDescription.ShouldBe("Browse our products");
+	}
+
+	[Fact]
+	public void MetaKeywords_DelegatesToIPageService()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+		var pageService = Services.GetRequiredService<IPageService>();
+
+		// Act
+		cut.Instance.MetaKeywords = "blazor,webforms,migration";
+
+		// Assert
+		pageService.MetaKeywords.ShouldBe("blazor,webforms,migration");
+	}
+
+	[Fact]
+	public void IsPostBack_AlwaysReturnsFalse()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+
+		// Assert
+		cut.Instance.IsPostBackValue.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Page_ReturnsThis()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+
+		// Assert — Page property should return the same reference as the component instance
+		cut.Instance.ExposedPage.ShouldBeSameAs(cut.Instance);
+	}
+
+	[Fact]
+	public void PageTitle_ShimPattern_DelegatesCorrectly()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+		var pageService = Services.GetRequiredService<IPageService>();
+
+		// Act — simulate Page.Title = "X" pattern from Web Forms code-behind
+		cut.Instance.ExposedPage.Title = "Products";
+
+		// Assert
+		pageService.Title.ShouldBe("Products");
+		cut.Instance.Title.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void ReadingTitle_AfterSettingViaPageService()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+		var pageService = Services.GetRequiredService<IPageService>();
+
+		// Act — set directly via PageService
+		pageService.Title = "Set Externally";
+
+		// Assert — reading via component should reflect the change
+		cut.Instance.Title.ShouldBe("Set Externally");
+	}
+
+	[Fact]
+	public void IsPostBack_GuardPattern_BlockExecutes()
+	{
+		// Arrange
+		var cut = RenderTestPage();
+		var blockExecuted = false;
+
+		// Act — simulate the Web Forms if (!IsPostBack) { ... } pattern
+		if (!cut.Instance.IsPostBackValue)
+		{
+			blockExecuted = true;
+		}
+
+		// Assert — block should always execute because IsPostBack is always false
+		blockExecuted.ShouldBeTrue();
+	}
+}

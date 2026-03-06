@@ -1,0 +1,8 @@
+﻿@inherits BaseStyledComponent
+
+@if (Enabled && Visible && _hasErrors)
+{
+	<span class="@GetCssClass()" style="@Style" title="@ToolTip" @attributes="AdditionalAttributes">
+		@((MarkupString)_errorHtml)
+	</span>
+}

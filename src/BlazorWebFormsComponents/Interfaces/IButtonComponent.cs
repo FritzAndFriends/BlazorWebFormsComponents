@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using System;
 
 namespace BlazorWebFormsComponents
 {
@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 
 		public string Text { get; set; }
 
-		public EventCallback<MouseEventArgs> OnClick { get; set; }
+		public EventCallback<EventArgs> OnClick { get; set; }
 
 		public EventCallback<CommandEventArgs> OnCommand { get; set; }
 	}

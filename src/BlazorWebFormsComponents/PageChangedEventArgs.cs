@@ -42,5 +42,10 @@ namespace BlazorWebFormsComponents
 			TotalPages = totalPages;
 			StartRowIndex = startRowIndex;
 		}
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

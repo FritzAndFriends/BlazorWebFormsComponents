@@ -92,6 +92,13 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
+		/// <summary>
+		/// Gets or sets whether the FormView renders an outer table element.
+		/// When false, only the template content is rendered without a wrapping table.
+		/// </summary>
+		[Parameter]
+		public bool RenderOuterTable { get; set; } = true;
+
 
 		public ItemType CurrentItem { get; set; }
 
@@ -145,7 +152,8 @@ namespace BlazorWebFormsComponents
 			if (firstRender)
 			{
 				if ((CurrentItem is null) && Items != null && Items.Any()) Position = 1;
-				await ItemCreated.InvokeAsync();
+				var itemCreatedHandler = ItemCreated.HasDelegate ? ItemCreated : OnItemCreated;
+				await itemCreatedHandler.InvokeAsync();
 			}
 
 			await base.OnAfterRenderAsync(firstRender);
@@ -204,10 +212,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<FormViewModeEventArgs> ModeChanging { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ModeChanging.
+		/// </summary>
+		[Parameter]
+		public EventCallback<FormViewModeEventArgs> OnModeChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the mode of the control has changed.
 		/// </summary>
 		[Parameter]
 		public EventCallback<FormViewModeEventArgs> ModeChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ModeChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<FormViewModeEventArgs> OnModeChanged { get; set; }
 
 		/// <summary>
 		/// Occurs when a command button within the FormView is clicked.
@@ -216,10 +236,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<FormViewCommandEventArgs> ItemCommand { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<FormViewCommandEventArgs> OnItemCommand { get; set; }
+
+		/// <summary>
 		/// Occurs when the FormView control is first created and data-bound.
 		/// </summary>
 		[Parameter]
 		public EventCallback ItemCreated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter]
+		public EventCallback OnItemCreated { get; set; }
 
 		/// <summary>
 		/// Occurs when the page index is changing. Supports cancellation.
@@ -228,10 +260,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<PageChangedEventArgs> PageIndexChanging { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for PageIndexChanging.
+		/// </summary>
+		[Parameter]
+		public EventCallback<PageChangedEventArgs> OnPageIndexChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the page index has changed.
 		/// </summary>
 		[Parameter]
 		public EventCallback<PageChangedEventArgs> PageIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for PageIndexChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<PageChangedEventArgs> OnPageIndexChanged { get; set; }
 
 		private void FormView_BubbledEvent(object sender, System.EventArgs e)
 		{
@@ -245,45 +289,45 @@ namespace BlazorWebFormsComponents
 			// Fire ItemCommand for all commands
 			var commandArgs = new FormViewCommandEventArgs(args);
 			commandArgs.Sender = this;
-			ItemCommand.InvokeAsync(commandArgs).GetAwaiter().GetResult();
+			(ItemCommand.HasDelegate ? ItemCommand : OnItemCommand).InvokeAsync(commandArgs).GetAwaiter().GetResult();
 
 			switch (args.CommandName.ToLowerInvariant())
 			{
 				case "cancel":
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
+					(ModeChanging.HasDelegate ? ModeChanging : OnModeChanging).InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
-					ModeChanged.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
+					(ModeChanged.HasDelegate ? ModeChanged : OnModeChanged).InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
 					break;
 				case "edit":
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit, Sender = this }).GetAwaiter().GetResult();
+					(ModeChanging.HasDelegate ? ModeChanging : OnModeChanging).InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit, Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Edit;
-					ModeChanged.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit, Sender = this }).GetAwaiter().GetResult();
+					(ModeChanged.HasDelegate ? ModeChanged : OnModeChanged).InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Edit, Sender = this }).GetAwaiter().GetResult();
 					break;
 				case "delete":
 					Exception caughtException = null;
 					try {
-						OnItemDeleting.InvokeAsync(new FormViewDeleteEventArgs(Position) { Sender = this }).GetAwaiter().GetResult();
+						(ItemDeleting.HasDelegate ? ItemDeleting : OnItemDeleting).InvokeAsync(new FormViewDeleteEventArgs(Position) { Sender = this }).GetAwaiter().GetResult();
 					} catch (Exception ex) {
 						caughtException = ex;
 					}
 					// do we do the deletion?
-					OnItemDeleted.InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException) { Sender = this }).GetAwaiter().GetResult();
+					(ItemDeleted.HasDelegate ? ItemDeleted : OnItemDeleted).InvokeAsync(new FormViewDeletedEventArgs(Position, caughtException) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
 					Position = (Position == 0) ? 0 : Position - 1;
 					break;
 				case "insert":
-					OnItemInserting.InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
-					OnItemInserted.InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
+					(ItemInserting.HasDelegate ? ItemInserting : OnItemInserting).InvokeAsync(new FormViewInsertEventArgs("insert") { Sender = this }).GetAwaiter().GetResult();
+					(ModeChanging.HasDelegate ? ModeChanging : OnModeChanging).InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
+					(ItemInserted.HasDelegate ? ItemInserted : OnItemInserted).InvokeAsync(new FormViewInsertedEventArgs(0) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = FormViewMode.Insert;
-					ModeChanged.InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
+					(ModeChanged.HasDelegate ? ModeChanged : OnModeChanged).InvokeAsync(new FormViewModeEventArgs() { NewMode = FormViewMode.Insert, Sender = this }).GetAwaiter().GetResult();
 					break;
 				case "update":
-					OnItemUpdating.InvokeAsync(new FormViewUpdateEventArgs("update") { Sender = this }).GetAwaiter().GetResult();
-					ModeChanging.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
-					OnItemUpdated.InvokeAsync(new FormViewUpdatedEventArgs(0, null) { Sender = this }).GetAwaiter().GetResult();
+					(ItemUpdating.HasDelegate ? ItemUpdating : OnItemUpdating).InvokeAsync(new FormViewUpdateEventArgs("update") { Sender = this }).GetAwaiter().GetResult();
+					(ModeChanging.HasDelegate ? ModeChanging : OnModeChanging).InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
+					(ItemUpdated.HasDelegate ? ItemUpdated : OnItemUpdated).InvokeAsync(new FormViewUpdatedEventArgs(0, null) { Sender = this }).GetAwaiter().GetResult();
 					CurrentMode = DefaultMode;
-					ModeChanged.InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
+					(ModeChanged.HasDelegate ? ModeChanged : OnModeChanged).InvokeAsync(new FormViewModeEventArgs() { NewMode = DefaultMode, Sender = this }).GetAwaiter().GetResult();
 					break;
 				case "page":
 					HandlePageCommand(args);
@@ -320,12 +364,12 @@ namespace BlazorWebFormsComponents
 			}
 
 			var pageArgs = new PageChangedEventArgs(newPosition - 1, oldPosition - 1, totalItems, newPosition - 1);
-			PageIndexChanging.InvokeAsync(pageArgs).GetAwaiter().GetResult();
+			(PageIndexChanging.HasDelegate ? PageIndexChanging : OnPageIndexChanging).InvokeAsync(pageArgs).GetAwaiter().GetResult();
 
 			if (pageArgs.Cancel) return;
 
 			Position = pageArgs.NewPageIndex + 1;
-			PageIndexChanged.InvokeAsync(pageArgs).GetAwaiter().GetResult();
+			(PageIndexChanged.HasDelegate ? PageIndexChanged : OnPageIndexChanged).InvokeAsync(pageArgs).GetAwaiter().GetResult();
 		}
 
 		#endregion
@@ -333,19 +377,37 @@ namespace BlazorWebFormsComponents
 		#region Custom Events
 
 		[Parameter]
+		public EventCallback<FormViewDeleteEventArgs> ItemDeleting { get; set; }
+
+		[Parameter]
 		public EventCallback<FormViewDeleteEventArgs> OnItemDeleting { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewDeletedEventArgs> ItemDeleted { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewDeletedEventArgs> OnItemDeleted { get; set; }
 
 		[Parameter]
+		public EventCallback<FormViewInsertEventArgs> ItemInserting { get; set; }
+
+		[Parameter]
 		public EventCallback<FormViewInsertEventArgs> OnItemInserting { get; set; }
 
 		[Parameter]
-		public EventCallback<FormViewInsertEventArgs> OnItemInserted { get; set; }
+		public EventCallback<FormViewInsertedEventArgs> ItemInserted { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewInsertedEventArgs> OnItemInserted { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewUpdateEventArgs> ItemUpdating { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewUpdateEventArgs> OnItemUpdating { get; set; }
+
+		[Parameter]
+		public EventCallback<FormViewUpdatedEventArgs> ItemUpdated { get; set; }
 
 		[Parameter]
 		public EventCallback<FormViewUpdatedEventArgs> OnItemUpdated { get; set; }

@@ -1,0 +1,97 @@
+@code {
+
+	// ─── P1-3: GridView PageIndexChanging fires before page change ──────
+	// Verifies: PageIndexChanging fires, OnPageIndexChanging alias works,
+	// and bare alias is preferred over On-prefix (coalescing behavior).
+
+	PageChangedEventArgs _changingArgs;
+
+	[Fact]
+	public void PageIndexChanging_Fires_Before_PageChange()
+	{
+		_changingArgs = null;
+		var data = Enumerable.Range(1, 25).Select(i => new PageItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(
+			@<GridView ItemType="PageItem" DataSource="data" AutoGenerateColumns="true"
+				AllowPaging="true" PageSize="10"
+				PageIndexChanging="@((PageChangedEventArgs e) => _changingArgs = e)" />
+		);
+
+		// Click page 2
+		var pagerLinks = cut.FindAll("tfoot a");
+		pagerLinks.Count.ShouldBeGreaterThan(0, "Pager links should exist");
+		pagerLinks.First().Click();
+
+		_changingArgs.ShouldNotBeNull("PageIndexChanging should fire before page change");
+		_changingArgs.NewPageIndex.ShouldBe(1, "NewPageIndex should be 1 for page 2");
+	}
+
+	[Fact]
+	public void OnPageIndexChanging_Alias_Also_Fires()
+	{
+		_changingArgs = null;
+		var data = Enumerable.Range(1, 25).Select(i => new PageItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(
+			@<GridView ItemType="PageItem" DataSource="data" AutoGenerateColumns="true"
+				AllowPaging="true" PageSize="10"
+				OnPageIndexChanging="@((PageChangedEventArgs e) => _changingArgs = e)" />
+		);
+
+		var pagerLinks = cut.FindAll("tfoot a");
+		pagerLinks.Count.ShouldBeGreaterThan(0);
+		pagerLinks.First().Click();
+
+		_changingArgs.ShouldNotBeNull("OnPageIndexChanging alias should fire");
+	}
+
+	[Fact]
+	public void PageIndexChanging_Cancel_Prevents_PageChange()
+	{
+		var data = Enumerable.Range(1, 25).Select(i => new PageItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(
+			@<GridView ItemType="PageItem" DataSource="data" AutoGenerateColumns="true"
+				AllowPaging="true" PageSize="10"
+				PageIndexChanging="@((PageChangedEventArgs e) => e.Cancel = true)" />
+		);
+
+		// Click page 2
+		var pagerLinks = cut.FindAll("tfoot a");
+		pagerLinks.First().Click();
+
+		// Should still be on page 1 — first row should be item 1
+		var firstCell = cut.Find("tbody tr td");
+		firstCell.TextContent.Trim().ShouldBe("1", "Page should not change when Cancel is set");
+	}
+
+	[Fact]
+	public void Bare_PageIndexChanging_Preferred_Over_OnPrefix()
+	{
+		// When both PageIndexChanging and OnPageIndexChanging are set,
+		// the bare alias should be preferred (coalescing).
+		var bareFired = false;
+		var onPrefixFired = false;
+		var data = Enumerable.Range(1, 25).Select(i => new PageItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(
+			@<GridView ItemType="PageItem" DataSource="data" AutoGenerateColumns="true"
+				AllowPaging="true" PageSize="10"
+				PageIndexChanging="@((PageChangedEventArgs e) => bareFired = true)"
+				OnPageIndexChanging="@((PageChangedEventArgs e) => onPrefixFired = true)" />
+		);
+
+		var pagerLinks = cut.FindAll("tfoot a");
+		pagerLinks.First().Click();
+
+		bareFired.ShouldBeTrue("Bare PageIndexChanging should fire");
+		onPrefixFired.ShouldBeFalse("OnPageIndexChanging should NOT fire when bare alias is also set");
+	}
+
+	public class PageItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

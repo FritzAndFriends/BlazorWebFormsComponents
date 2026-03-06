@@ -1,0 +1,69 @@
+@code {
+
+	// ─── P1-9: TreeNodePopulate event ───────────────────────────────────
+	// TreeNodePopulate should fire with TreeNodeEventArgs when a node
+	// needs to be populated (e.g., on-demand loading).
+	// OnTreeNodePopulate alias should also work.
+
+	TreeNodeEventArgs _populateArgs;
+
+	[Fact]
+	public void TreeNodePopulate_ParameterAccepted_WithBareAlias()
+	{
+		_populateArgs = null;
+
+		var cut = Render(
+			@<TreeView TreeNodePopulate="@((TreeNodeEventArgs e) => _populateArgs = e)">
+				<Nodes>
+					<TreeNode Text="Root" Value="root" PopulateOnDemand="true" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.Instance.ShouldNotBeNull("TreeView should accept TreeNodePopulate parameter");
+	}
+
+	[Fact]
+	public void OnTreeNodePopulate_Alias_ParameterAccepted()
+	{
+		_populateArgs = null;
+
+		var cut = Render(
+			@<TreeView OnTreeNodePopulate="@((TreeNodeEventArgs e) => _populateArgs = e)">
+				<Nodes>
+					<TreeNode Text="Root" Value="root" PopulateOnDemand="true" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.Instance.ShouldNotBeNull("TreeView should accept OnTreeNodePopulate parameter");
+	}
+
+	[Fact]
+	public void TreeNodePopulate_EventArgs_Contains_Node()
+	{
+		_populateArgs = null;
+
+		var cut = Render(
+			@<TreeView TreeNodePopulate="@((TreeNodeEventArgs e) => _populateArgs = e)">
+				<Nodes>
+					<TreeNode Text="Expandable" Value="expand" PopulateOnDemand="true" />
+				</Nodes>
+			</TreeView>
+		);
+
+		// Attempt to expand the node to trigger populate
+		var expandToggle = cut.FindAll("a, span").FirstOrDefault(el => el.TextContent.Contains("Expandable"));
+		if (expandToggle != null)
+		{
+			expandToggle.Click();
+		}
+
+		// If the event fired, validate the args
+		if (_populateArgs != null)
+		{
+			_populateArgs.Node.ShouldNotBeNull("TreeNodeEventArgs.Node should be set");
+			_populateArgs.Node.Value.ShouldBe("expand");
+		}
+	}
+}

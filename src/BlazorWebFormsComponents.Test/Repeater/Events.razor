@@ -1,0 +1,197 @@
+@code {
+
+	// ─── P0-1: Repeater EventCallbacks ───────────────────────────────────
+	// Verifies: ItemCommand/OnItemCommand, ItemCreated/OnItemCreated, ItemDataBound/OnItemDataBound
+
+	#region ItemDataBound
+
+	[Fact]
+	public void Repeater_ItemDataBound_BareAlias_FiresPerItem()
+	{
+		var boundItems = new List<object>();
+		var widgets = Widget.SimpleWidgetList.Take(3).ToArray();
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				ItemDataBound="@((RepeaterItemEventArgs e) => boundItems.Add(e.Item))">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		boundItems.Count.ShouldBe(3, "ItemDataBound should fire once per data item");
+	}
+
+	[Fact]
+	public void Repeater_OnItemDataBound_OnPrefix_FiresPerItem()
+	{
+		var boundItems = new List<object>();
+		var widgets = Widget.SimpleWidgetList.Take(3).ToArray();
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				OnItemDataBound="@((RepeaterItemEventArgs e) => boundItems.Add(e.Item))">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		boundItems.Count.ShouldBe(3, "OnItemDataBound should fire once per data item");
+	}
+
+	[Fact]
+	public void Repeater_ItemDataBound_ArgsContainCorrectItem()
+	{
+		RepeaterItemEventArgs lastArgs = null;
+		var widgets = new[] { new Widget { Id = 42, Name = "Target" } };
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				ItemDataBound="@((RepeaterItemEventArgs e) => lastArgs = e)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		lastArgs.ShouldNotBeNull();
+		lastArgs.Item.ShouldNotBeNull();
+		((Widget)lastArgs.Item).Name.ShouldBe("Target");
+	}
+
+	#endregion
+
+	#region ItemCreated
+
+	[Fact]
+	public void Repeater_ItemCreated_BareAlias_FiresPerItem()
+	{
+		var createdCount = 0;
+		var widgets = Widget.SimpleWidgetList.Take(4).ToArray();
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				ItemCreated="@((RepeaterItemEventArgs e) => createdCount++)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		createdCount.ShouldBe(4, "ItemCreated should fire once per item");
+	}
+
+	[Fact]
+	public void Repeater_OnItemCreated_OnPrefix_FiresPerItem()
+	{
+		var createdCount = 0;
+		var widgets = Widget.SimpleWidgetList.Take(4).ToArray();
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				OnItemCreated="@((RepeaterItemEventArgs e) => createdCount++)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		createdCount.ShouldBe(4, "OnItemCreated should fire once per item");
+	}
+
+	[Fact]
+	public void Repeater_ItemCreated_ArgsContainItem()
+	{
+		RepeaterItemEventArgs capturedArgs = null;
+		var widgets = new[] { new Widget { Id = 99, Name = "Created" } };
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				ItemCreated="@((RepeaterItemEventArgs e) => capturedArgs = e)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		capturedArgs.ShouldNotBeNull();
+		capturedArgs.Item.ShouldNotBeNull();
+	}
+
+	#endregion
+
+	#region ItemCommand
+
+	[Fact]
+	public void Repeater_ItemCommand_BareAlias_ParameterAccepted()
+	{
+		RepeaterCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				ItemCommand="@((RepeaterCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="DoSomething" CommandArgument="@Item.Id.ToString()" Text="Act" />
+				</ItemTemplate>
+			</Repeater>
+		);
+
+		// Click the button to trigger the command
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("ItemCommand should fire when a command button is clicked");
+		capturedArgs.CommandName.ShouldBe("DoSomething");
+	}
+
+	[Fact]
+	public void Repeater_OnItemCommand_OnPrefix_ParameterAccepted()
+	{
+		RepeaterCommandEventArgs capturedArgs = null;
+		var widgets = Widget.SimpleWidgetList.Take(1).ToArray();
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				OnItemCommand="@((RepeaterCommandEventArgs e) => capturedArgs = e)">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+					<Button CommandName="TestCmd" CommandArgument="@Item.Id.ToString()" Text="Go" />
+				</ItemTemplate>
+			</Repeater>
+		);
+
+		cut.Find("input[type=submit]").Click();
+
+		capturedArgs.ShouldNotBeNull("OnItemCommand should fire when a command button is clicked");
+		capturedArgs.CommandName.ShouldBe("TestCmd");
+	}
+
+	#endregion
+
+	#region Edge Cases
+
+	[Fact]
+	public void Repeater_ItemDataBound_EmptyList_DoesNotFire()
+	{
+		var firedCount = 0;
+		var empty = new Widget[] { };
+
+		var cut = Render(
+			@<Repeater Items="empty" ItemType="Widget" Context="Item"
+				ItemDataBound="@((RepeaterItemEventArgs e) => firedCount++)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		firedCount.ShouldBe(0, "ItemDataBound should not fire when there are no items");
+	}
+
+	[Fact]
+	public void Repeater_ItemDataBound_ArgsHaveSenderSet()
+	{
+		object capturedSender = null;
+		var widgets = new[] { new Widget { Id = 1, Name = "Test" } };
+
+		var cut = Render(
+			@<Repeater Items="widgets" ItemType="Widget" Context="Item"
+				ItemDataBound="@((RepeaterItemEventArgs e) => capturedSender = e.Sender)">
+				<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		capturedSender.ShouldNotBeNull("Sender should be set on RepeaterItemEventArgs");
+	}
+
+	#endregion
+}

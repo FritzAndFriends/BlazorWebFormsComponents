@@ -32,5 +32,10 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the inserted values were cleared.
 		/// </summary>
 		public bool KeepInsertedValues { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

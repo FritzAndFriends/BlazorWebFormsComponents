@@ -341,6 +341,10 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder
 .mfractor/
 
+# Migration benchmark scratch artifacts
+samples/FreshWingtipToys/
+planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md
+
 # macOS
 .DS_Store
 .AppleDouble

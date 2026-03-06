@@ -27,5 +27,10 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the exception was handled.
 		/// </summary>
 		public bool ExceptionHandled { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

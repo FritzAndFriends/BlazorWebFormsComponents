@@ -24,13 +24,16 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/CheckBox")]
     [InlineData("/ControlSamples/CheckBox/Events")]
     [InlineData("/ControlSamples/CheckBox/Style")]
+    [InlineData("/ControlSamples/CheckBoxList")]
     [InlineData("/ControlSamples/DropDownList")]
     [InlineData("/ControlSamples/FileUpload")]
     [InlineData("/ControlSamples/HiddenField")]
     [InlineData("/ControlSamples/HyperLink")]
     [InlineData("/ControlSamples/Image")]
+    [InlineData("/ControlSamples/ImageButton")]
     [InlineData("/ControlSamples/LinkButton")]
     [InlineData("/ControlSamples/LinkButton/JavaScript")]
+    [InlineData("/ControlSamples/ListBox")]
     [InlineData("/ControlSamples/Literal")]
     [InlineData("/ControlSamples/Localize")]
     [InlineData("/ControlSamples/MultiView")]
@@ -59,6 +62,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/DataList/FooterStyle")]
     [InlineData("/ControlSamples/DataList/HeaderStyle")]
     [InlineData("/ControlSamples/DataList/ComplexStyle")]
+    [InlineData("/ControlSamples/DataPager")]
     [InlineData("/ControlSamples/Repeater")]
     [InlineData("/ControlSamples/ListView")]
     [InlineData("/ControlSamples/ListView/ItemDataBound")]
@@ -172,6 +176,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/CustomValidator")]
     [InlineData("/ControlSamples/RegularExpressionValidator")]
     [InlineData("/ControlSamples/ValidationSummary")]
+    [InlineData("/ControlSamples/ModelErrorMessage")]
     public async Task ValidationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
@@ -183,6 +188,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/LoginName")]
     [InlineData("/ControlSamples/LoginStatusAuthenticated")]
     [InlineData("/ControlSamples/LoginStatusNotAuthenticated")]
+    [InlineData("/ControlSamples/LoginView")]
     [InlineData("/ControlSamples/ChangePassword")]
     [InlineData("/ControlSamples/CreateUserWizard")]
     [InlineData("/ControlSamples/PasswordRecovery")]
@@ -214,6 +220,7 @@ public class ControlSampleTests
     // Utility Features
     [Theory]
     [InlineData("/ControlSamples/DataBinder")]
+    [InlineData("/ControlSamples/Theming")]
     [InlineData("/ControlSamples/ViewState")]
     public async Task UtilityFeature_Loads_WithoutErrors(string path)
     {

@@ -57,3 +57,55 @@
  Team update (2026-03-02): Unified release process implemented  single release.yml triggered by GitHub Release publication coordinates all artifacts (NuGet, Docker, docs, demos). version.json now uses 3-segment SemVer (0.17.0). Existing nuget.yml and deploy-server-side.yml are workflow_dispatch-only escape hatches. PR #408  decided by Forge (audit), Cyclops (implementation)
 
  Team update (2026-03-02): Full Skins & Themes roadmap defined  3 waves, 15 work items. Wave 1: Theme mode, sub-component styles (41 slots across 6 controls), EnableTheming propagation, runtime switching. See decisions.md for full roadmap and agent assignments  decided by Forge
+
+
+ Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
+
+ Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
+
+ Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
+ Team update (2026-03-02): ASPX/ASCX migration tooling strategy produced  85+ patterns, 3-layer pipeline (mechanical/structural/semantic), 11 deliverables.  decided by Forge
+
+ Team update (2026-03-02): ModelErrorMessage component spec consolidated  29/29 WingtipToys coverage, BaseStyledComponent, EditContext pattern  decided by Forge
+
+
+📌 Team update (2026-03-02): ModelErrorMessage documentation shipped — docs/ValidationControls/ModelErrorMessage.md, status.md updated to 52 components — decided by Beast
+
+### M22 Executive Screenshot Comparison Pages (2026-03-02)
+
+- **Created 3 HTML comparison pages** in `planning-docs/screenshots/` for Playwright screenshots at 1400×900:
+  - `comparison-productlist.html` — ListView before/after (Web Forms → Blazor+BWFC)
+  - `comparison-shoppingcart.html` — GridView, BoundField, TemplateField, TextBox, CheckBox, Label, Button
+  - `comparison-login.html` — PlaceHolder, Literal, Label, TextBox, RequiredFieldValidator, CheckBox, Button, HyperLink
+- **Used dark theme** (#1e1e1e background) with red (`#f48771`) highlighting for removed Web Forms artifacts and green (`#89d185`) for new Blazor syntax.
+- **Highlighted key migration changes:** `asp:` prefix removal, `runat="server"` removal, `ItemType` → `TItem`, server binding expressions → `@context`, `ViewStateMode`/`EnableViewState` removal.
+- **Stats bar** at bottom of each page shows controls migrated, attributes preserved, and lines changed.
+- **Source files read:** ProductList.aspx, ShoppingCart.aspx, Account/Login.aspx and their AfterWingtipToys .razor counterparts.
+� Team update (2026-03-02): ModelErrorMessage documentation shipped  docs/ValidationControls/ModelErrorMessage.md, status.md updated to 52 components  decided by Beast
+
+
+
+ Team update (2026-03-03): Themes (#369) implementation last  ListView CRUD first, WingtipToys features second, themes last  directed by Jeff Fritz
+
+
+ Team update (2026-03-03): WingtipToys 7-phase feature schedule established  26 work items, critical path through Data Foundation  Product Browsing  Shopping Cart  Checkout  Polish  decided by Forge
+
+
+ Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
+� Team update (2026-03-04): Migration toolkit restructured into self-contained migration-toolkit/ package  decided by Jeffrey T. Fritz, Forge
+
+ Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+ Team update (2026-03-05): Event handler audit complete  ~50 naming mismatches found, On-prefix aliases recommended  decided by Forge, Rogue
+
+
+ Team update (2026-03-05): 50 On-prefix EventCallback aliases added to data components + migration script AutoPostBack fix  by Cyclops, Rogue
+
+ Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
+
+
+
+ Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
+
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz
