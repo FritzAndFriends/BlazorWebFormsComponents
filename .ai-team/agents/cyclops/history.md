@@ -90,4 +90,6 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 - Transform pipeline order matters: RF-13 must check BEFORE `ConvertFrom-AspPrefix` strips the `asp:` prefix.
 - DbContext constructor patterns vary: parameterless `() : base("name")`, parameterized `(string x) : base(x)`, etc. Multiple regexes needed.
 
+📬 Team update (2026-03-06): Beast completed 6 skill fixes (RF-01/02/05/09/13/14) across 4 SKILL.md files — complements Cyclops's 9 script fixes. All 15 P0+P1 items done on squad/run8-improvements. — decided by Forge (analysis), implemented by Cyclops + Beast
+
 

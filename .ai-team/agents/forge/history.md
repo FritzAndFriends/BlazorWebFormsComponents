@@ -25,55 +25,21 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 - Migration Toolkit Design & Restructure Summary (2026-03-03)
 - Run 4-5 Review & BWFC Capabilities Analysis (2026-03-04 through 2026-03-05)
 
-### Run 5→6 Analysis & Run 6 Benchmark (2026-03-04 through 2026-03-05)
+<!-- ⚠ Summarized 2026-03-06 by Scribe — Run 5→6 and Page Architecture entries archived -->
 
-**Run 5→6 analysis:** 8 enhancements identified from Run 5 manual-fixes.md. Top 4 implemented: TFM net10.0, SelectMethod BWFC-aware TODO (-120s), wwwroot static file copy, compilable stubs. Remaining 4 deferred: Page.Title, base class swap, BundleConfig, event handler annotations. Repeater has zero EventCallbacks; GridView missing OnRowDataBound/OnRowCreated.
+### Archived Sessions (cont.)
 
-**Run 6 benchmark:** 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5). Layer 1: 4.58s, 269 transforms, 79 static files, 6 auto-stubs. Layer 2: ~3m 25s manual (models, DbContext, services, layout). 4 builds to clean. All 4 enhancements validated. Bugs: @rendermode InteractiveServer invalid in _Imports.razor (line 164), Test-UnconvertiblePage misses code-behind (.aspx.cs). Report: docs/migration-tests/wingtiptoys-run6-2026-03-04/raw-data.md.
+- Run 5→6 Analysis & Run 6 Benchmark (2026-03-04 through 2026-03-05)
+- Page Base Class Architecture Analysis (2026-03-05)
+- Page Consolidation Analysis (2026-03-05)
 
-Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (Jeff/Forge), migration report 3-level traversal (Beast).
+### Run 5→6 + Page Architecture Summary (2026-03-04 through 2026-03-05)
 
- Team update (2026-03-04): Run 6 benchmark decisions merged  @rendermode removal, code-behind scanning, pattern validation. All decisions propagated to Cyclops and Beast.  decided by Forge
+Run 5→6: 8 enhancements identified, top 4 implemented (TFM net10.0, SelectMethod BWFC TODO, wwwroot copy, compilable stubs). Run 6: 32 files → clean build in ~4.5 min (55% reduction). Bugs found: @rendermode in _Imports invalid, Test-UnconvertiblePage misses .aspx.cs. EF Core 10.0.3 mandated. @rendermode belongs in App.razor only.
 
+WebFormsPageBase: Option C chosen — `WebFormsPageBase : ComponentBase` with `Page => this` self-reference, Title/MetaDescription/MetaKeywords delegating to IPageService, `IsPostBack => false`. Eliminates 27 @inject lines, 12+ manual fixes for WingtipToys. Deliberately omits Request/Response/Session.
 
- Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
-
-
- Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
-
-### Page Base Class Architecture Analysis (2026-03-05)
-
-**Jeff's question:** "What if converted ASPX pages inherited from a BWFC base class? Can we dramatically improve migration?"
-
-**Analysis:** Reviewed System.Web.UI.Page surface area (Title, IsPostBack, MetaDescription, MetaKeywords, Request, Response, Session, IsValid, etc.) against current BWFC architecture (PageService as scoped DI, Page.razor render component, BaseWebFormsComponent hierarchy, WebFormsPage wrapper). Evaluated 3 options: (A) add to BaseWebFormsComponent (rejected — pollutes controls), (B) new WebFormsPageBase : ComponentBase (clean but no Page.Title syntax), (C) Option B + `Page => this` self-reference (enables literal `Page.Title = "X"` syntax).
-
-**Recommendation:** Option C — `WebFormsPageBase : ComponentBase` with `Title`, `MetaDescription`, `MetaKeywords` delegating to IPageService, `IsPostBack => false`, and `protected WebFormsPageBase Page => this;`. Converted pages use `@inherits WebFormsPageBase` (one line in _Imports.razor). Eliminates per-page `@inject IPageService Page`, makes `Page.Title = "X"` and `if (!IsPostBack)` compile unchanged. Deliberately omits Request/Response/Session to force proper Blazor migration.
-
-**Impact:** For WingtipToys (27 pages): eliminates 27 @inject lines, 12+ IsPostBack manual fixes, ~15-25 minutes of manual work. The two most common Web Forms code-behind patterns survive migration with zero changes. Verdict: dramatic improvement.
-
-**Key risks:** (1) `Page` property shadows `Page.razor` in @code — acceptable, already the pattern in samples. (2) `if (IsPostBack)` without `!` becomes dead code — scripts must flag it. (3) Doesn't inherit BaseWebFormsComponent — pages don't need CascadingValue wrapping, FindControl, or ViewState.
-
-**Decision document:** .ai-team/decisions/inbox/forge-page-base-class.md — pending Jeff's approval.
-
- Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
-
-### Page Consolidation Analysis (2026-03-05)
-
-**Jeff's question:** "Can we consolidate NamingContainer, ThemeProvider, and WebFormsPageBase so we have 1 entry point that delivers all features?"
-
-**Analysis:** Evaluated 4 options for reducing the 5-piece setup (WebFormsPageBase, Page.razor, WebFormsPage, NamingContainer, ThemeProvider). Option A (base class renders head) rejected — base classes can't emit `<PageTitle>`/`<HeadContent>`, breaks SSR. Option C (JSInterop) rejected — doesn't work during SSR, breaks crawlers. Option D (accept status quo) is fallback.
-
-**Recommendation:** Option B — Merge `Page.razor` functionality into `WebFormsPage`. `<PageTitle>` and `<HeadContent>` work from anywhere in the render tree, so `WebFormsPage` can render them alongside its existing `<CascadingValue>` wrapper. Add `bool RenderPageHead` parameter (default true) for opt-out. Keep `Page.razor`, `NamingContainer`, and `ThemeProvider` as standalone components — they have independent consumers and tests.
-
-**Key findings:** (1) Cannot get below 2 setup points — `@inherits` is compile-time, `<WebFormsPage>` is render-time, fundamentally different mechanisms. (2) WebFormsPageBase must NOT inherit NamingContainer — it would inject 5+ unnecessary services, add reflection overhead, create double naming scopes, and break existing tests. (3) Merging into WebFormsPage is non-breaking: existing `Page.razor` consumers unaffected, existing `WebFormsPage` consumers gain head rendering automatically.
-
-**Resulting DX:** `@inherits WebFormsPageBase` in _Imports.razor + `<WebFormsPage>@Body</WebFormsPage>` in layout. Two one-liners, total. Decision doc: `.ai-team/decisions/inbox/forge-page-consolidation.md`.
-
-**Learnings:**
-- `<PageTitle>` and `<HeadContent>` are Blazor built-ins that render into `<head>` regardless of where they appear in the component tree — they don't need DOM proximity to `<head>`.
-- Base classes (`ComponentBase` subclasses) cannot inject render components into the inheriting page's markup — they only participate in lifecycle, not BuildRenderTree.
-- The theoretical minimum setup for a library that provides both compile-time API (base class properties) and render-time services (cascading values, head injection) is two entry points: an `@inherits` directive and a wrapper component.
-- When merging render-time concerns into a single component, optional service resolution (`ServiceProvider.GetService`) is the right pattern to avoid hard dependencies on registrations the consumer may not need.
+Page Consolidation: Option B — merged Page.razor head rendering into WebFormsPage. `<PageTitle>`/`<HeadContent>` work anywhere in render tree. Min setup: `@inherits WebFormsPageBase` + `<WebFormsPage>@Body</WebFormsPage>`. WebFormsPageBase must NOT inherit NamingContainer (breaks tests, adds overhead). Page.razor remains standalone.
 
 � Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
 
@@ -136,4 +102,6 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 **Estimated impact:** P0+P1 implementation could reduce Run 9 from ~1h 55m to ~50-60 min.
 
 **Decision document:** `.ai-team/decisions/inbox/forge-run9-analysis.md`
+
+📬 Team update (2026-03-06): All 15 P0+P1 items from Run 8 post-mortem implemented — Cyclops did 9 script fixes (RF-03/04/06/07/08/10/11/12/13), Beast did 6 skill fixes (RF-01/02/05/09/13/14). Committed to squad/run8-improvements branch. — decided by Forge (analysis), implemented by Cyclops + Beast
 
