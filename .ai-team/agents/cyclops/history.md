@@ -62,3 +62,6 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 **Sample fixed:** `samples/AfterWingtipToys/Components/Layout/MainLayout.razor` was using `<AuthorizeView>` with `<NotAuthorized>`/`<Authorized>`. Replaced with `<LoginView>` using `<AnonymousTemplate>`/`<LoggedInTemplate>` and `<LoginName />`. Added `@using BlazorWebFormsComponents.LoginControls` to `_Imports.razor`.
 
 **Pattern:** BWFC LoginView preserves Web Forms template names (AnonymousTemplate, LoggedInTemplate) -- the migration script should only strip the asp: prefix and attributes, never rename child templates.
+
+ Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
+

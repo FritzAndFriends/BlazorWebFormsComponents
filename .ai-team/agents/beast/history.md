@@ -72,3 +72,6 @@
 - **Key file paths:** Report at `dev-docs/migration-tests/wingtiptoys-run8-2026-03-06/REPORT.md`, screenshots in `screenshots/` subfolder, Web Forms source at `samples/WingtipToys/WingtipToys/`, Blazor output at `samples/AfterWingtipToys/`.
 
  Team update (2026-03-06): Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
+

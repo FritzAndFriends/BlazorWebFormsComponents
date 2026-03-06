@@ -113,3 +113,6 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
  Team update (2026-03-06): Migration reports should lead with executive content (timing, screenshots, before/after code), technical details below the fold. Pattern established in Run 8 report.  decided by Beast
 
  Team update (2026-03-06): Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
+

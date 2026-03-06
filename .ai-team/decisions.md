@@ -5948,3 +5948,9 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.
 **Why:** User request — captured for team memory
+
+### 2026-03-06: LoginView must be preserved as BWFC component, not converted to AuthorizeView (consolidated)
+**By:** Jeffrey T. Fritz (directive), Cyclops (implementation)
+**Status:** Implemented
+**What:** STOP rewriting `asp:LoginView` as `AuthorizeView`. The migration script (`ConvertFrom-LoginView` in `bwfc-migrate.ps1`) was converting `<asp:LoginView>` → `<AuthorizeView>` and renaming `AnonymousTemplate`/`LoggedInTemplate` → `NotAuthorized`/`Authorized`. Fixed to: convert `<asp:LoginView>` → `<LoginView>` (BWFC), leave `<AnonymousTemplate>` and `<LoggedInTemplate>` as-is, reference BWFC `RoleGroup` for `<RoleGroups>`. All migration scripts and skills must preserve the BWFC LoginView — not bypass it with native AuthorizeView.
+**Why:** The BWFC `LoginView` component exposes templates with the same names as Web Forms (AnonymousTemplate, LoggedInTemplate), injects `AuthenticationStateProvider`, and routes to AuthorizeView internally. Converting directly to AuthorizeView breaks the component, forces template rewrites, and defeats the purpose of the BWFC library. User directive from Jeff — captured for team memory.
