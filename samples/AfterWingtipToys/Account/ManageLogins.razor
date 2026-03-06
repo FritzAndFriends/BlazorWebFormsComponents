@@ -1,5 +1,13 @@
 @page "/Account/ManageLogins"
-<h3>ManageLogins  not yet migrated</h3>
-@* TODO: Implement using ASP.NET Core Identity scaffolding *@
-@code {
-}
+<h2>Manage your external logins.</h2>
+
+    <div>
+        <section id="externalLoginsForm">
+            <h4>Registered Logins</h4>
+            <p>No external logins are configured.</p>
+        </section>
+    </div>
+    <div>
+        <OpenAuthProviders ReturnUrl="/Account/ManageLogins" />
+    </div>
+
