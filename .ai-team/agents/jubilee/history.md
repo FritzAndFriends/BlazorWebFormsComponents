@@ -95,3 +95,5 @@
 � Team update (2026-03-04): Migration toolkit restructured into self-contained migration-toolkit/ package  decided by Jeffrey T. Fritz, Forge
 
  Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+
+ Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz

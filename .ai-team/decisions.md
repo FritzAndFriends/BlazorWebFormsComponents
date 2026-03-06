@@ -5868,3 +5868,27 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Merged Page.razor's head-rendering capability into WebFormsPage (Option B from Forge's consolidation analysis). WebFormsPage now injects IServiceProvider, optionally resolves IPageService, subscribes to title/meta change events, and renders <PageTitle> + <HeadContent> alongside its existing <CascadingValue> wrapper. New [Parameter] bool RenderPageHead (default: 	rue) allows opting out. IPageService resolution is optional  WebFormsPage works for naming/theming even without AddBlazorWebFormsComponents(). Layout simplifies from 2 components (<Page /> + <WebFormsPage>) to 1 (<WebFormsPage> only). Page.razor remains as standalone option for apps not using WebFormsPage. NamingContainer and ThemeProvider unchanged. Forge analyzed 4 options: A (WebFormsPageBase renders  rejected, breaks SSR), B (merge into WebFormsPage  recommended and implemented), C (JSInterop  rejected, breaks SSR), D (status quo  acceptable fallback). WebFormsPageBase inheritance unchanged (stays as ComponentBase, not NamingContainer). 7 new tests, 1479 total passing.
 
 **Why:** Jeff asked to consolidate the 5-piece page system into fewer entry points. Option B is the only approach that works with Blazor's render model (<PageTitle> and <HeadContent> must appear in markup, not a base class). Result: two-line setup (one @inherits in _Imports.razor, one <WebFormsPage> in MainLayout.razor) delivers naming, theming, and head rendering. Migration scripts generate one component instead of two.
+
+### 2026-03-06: CRITICAL  Git branching workflow (consolidated)
+
+**By:** Jeff Fritz  HIGHEST PRIORITY DIRECTIVE
+**Severity:** BLOCKING  violating this is a critical error.
+
+**What:** The correct git workflow for this repository:
+1. `main` branch = PRODUCTION RELEASES ONLY. Never push, never merge PRs here. Jeff handles releases.
+2. `dev` branch = the working/integration branch. All feature work merges here.
+3. Feature branches are created FROM `dev` (e.g., `squad/run8-improvements` branches off `dev`).
+4. PRs target `dev`, not `main`.
+5. Jeff merges PRs into `dev` himself  agents create PRs and wait.
+
+**Branch flow:** `feature-branch`  PR  `dev`  (Jeff releases)  `main`
+
+**Prohibited actions (any of these is a critical error):**
+- Push directly to upstream main
+- Merge PRs into upstream main
+- Use `gh pr merge` against upstream main
+- Any action that modifies upstream main
+
+**Context:** Issued after Copilot incorrectly merged PR #421 into upstream main without authorization. Branch `squad/run8-improvements` was recreated from `dev` (was incorrectly based on `main`).
+
+**Why:** Production safety. `main` is the production release branch. `dev` is where integration happens. Jeff is the sole gatekeeper for upstream main.
