@@ -20,7 +20,7 @@
                 <span><b>Product Number:</b>&nbsp;@product.ProductID</span>
                 <br />
                 <br />
-                <a href="/AddToCart?productID=@product.ProductID">
+                <a href="/AddToCart?productID=@product.ProductID" onclick="window.location.href=this.href; return false;">
                     <b>Add To Cart</b>
                 </a>
             </td>

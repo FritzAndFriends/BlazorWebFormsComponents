@@ -55,6 +55,65 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
+// AddToCart endpoint — adds product to session cart and redirects to ShoppingCart
+app.MapGet("/AddToCart", (int? productID, ShoppingCartService cart) =>
+{
+    if (productID.HasValue && productID > 0)
+        cart.AddToCart(productID.Value);
+    return Results.Redirect("/ShoppingCart");
+});
+
+// Cart Update endpoint — updates item quantity and redirects back
+app.MapPost("/Cart/Update", async (HttpContext context, ShoppingCartService cart) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var itemId = form["itemId"].ToString();
+    if (int.TryParse(form["quantity"], out var qty) && qty > 0)
+        cart.UpdateItem(itemId, qty);
+    return Results.Redirect("/ShoppingCart");
+}).DisableAntiforgery();
+
+// Cart Remove endpoint — removes item and redirects back
+app.MapPost("/Cart/Remove", async (HttpContext context, ShoppingCartService cart) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var itemId = form["itemId"].ToString();
+    cart.RemoveItem(itemId);
+    return Results.Redirect("/ShoppingCart");
+}).DisableAntiforgery();
+
+// Login POST endpoint — authenticates user and sets auth cookie via HTTP response
+app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+
+    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+    if (result.Succeeded)
+        return Results.Redirect("/");
+    return Results.Redirect("/Account/Login?error=Invalid+login+attempt");
+}).DisableAntiforgery();
+
+// Register POST endpoint — creates user, signs in, and redirects
+app.MapPost("/Account/RegisterHandler", async (HttpContext context,
+    UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+
+    var user = new IdentityUser { UserName = email, Email = email };
+    var result = await userManager.CreateAsync(user, password);
+    if (result.Succeeded)
+    {
+        await signInManager.SignInAsync(user, isPersistent: false);
+        return Results.Redirect("/");
+    }
+    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+    return Results.Redirect($"/Account/Register?error={Uri.EscapeDataString(errors)}");
+}).DisableAntiforgery();
+
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();
 

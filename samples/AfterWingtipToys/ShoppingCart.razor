@@ -21,19 +21,24 @@
                     <td>@item.Product?.ProductName</td>
                     <td>@($"{item.Product?.UnitPrice:c}")</td>
                     <td>
-                        <input type="number" value="@item.Quantity"
-                               @onchange="(e) => UpdateQuantity(item.ItemId, e)" min="1" />
+                        <form method="post" action="/Cart/Update" style="display:inline">
+                            <input type="hidden" name="itemId" value="@item.ItemId" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" style="width:60px" />
+                            <button type="submit" class="btn btn-default btn-sm">Update</button>
+                        </form>
                     </td>
                     <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
                     <td>
-                        <button class="btn btn-danger" @onclick="() => RemoveItem(item.ItemId)">Remove</button>
+                        <form method="post" action="/Cart/Remove" style="display:inline">
+                            <input type="hidden" name="itemId" value="@item.ItemId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
     <p><strong>Total: @($"{total:c}")</strong></p>
-    <button class="btn btn-primary" @onclick="UpdateCart">Update</button>
 }
 else
 {
@@ -45,40 +50,10 @@ else
 
     private List<WingtipToys.Models.CartItem>? cartItems;
     private decimal total;
-    private Dictionary<string, int> pendingUpdates = new();
 
     protected override void OnInitialized()
     {
-        LoadCart();
-    }
-
-    private void LoadCart()
-    {
         cartItems = Cart.GetCartItems();
         total = Cart.GetTotal();
-        pendingUpdates.Clear();
-    }
-
-    private void UpdateQuantity(string itemId, ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out int qty) && qty > 0)
-        {
-            pendingUpdates[itemId] = qty;
-        }
-    }
-
-    private void UpdateCart()
-    {
-        foreach (var (itemId, qty) in pendingUpdates)
-        {
-            Cart.UpdateItem(itemId, qty);
-        }
-        LoadCart();
-    }
-
-    private void RemoveItem(string itemId)
-    {
-        Cart.RemoveItem(itemId);
-        LoadCart();
     }
 }

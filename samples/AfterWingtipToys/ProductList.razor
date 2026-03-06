@@ -35,7 +35,7 @@
                                                     <b>Price: </b>@($"{p.UnitPrice:c}")
                                                 </span>
                                                 <br />
-                                                <a href="/AddToCart?productID=@p.ProductID">
+                                                <a href="/AddToCart?productID=@p.ProductID" onclick="window.location.href=this.href; return false;">
                                                     <span class="ProductListItem">
                                                         <b>Add To Cart</b>
                                                     </span>

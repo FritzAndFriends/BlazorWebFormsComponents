@@ -6,31 +6,31 @@
     <p class="text-danger">@errorMessage</p>
 }
 
-<div class="form-horizontal">
+<form method="post" action="/Account/RegisterHandler" class="form-horizontal">
     <h4>Create a new account</h4>
     <hr />
     <div class="form-group">
         <label class="col-md-2 control-label">Email</label>
         <div class="col-md-10">
-            <input type="email" class="form-control" @bind="email" />
+            <input type="email" name="email" class="form-control" />
         </div>
     </div>
     <div class="form-group">
         <label class="col-md-2 control-label">Password</label>
         <div class="col-md-10">
-            <input type="password" class="form-control" @bind="password" />
+            <input type="password" name="password" class="form-control" />
         </div>
     </div>
     <div class="form-group">
         <label class="col-md-2 control-label">Confirm password</label>
         <div class="col-md-10">
-            <input type="password" class="form-control" @bind="confirmPassword" />
+            <input type="password" name="confirmPassword" class="form-control" />
         </div>
     </div>
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button class="btn btn-default" @onclick="CreateUser_Click">Register</button>
+            <button type="submit" class="btn btn-default">Register</button>
         </div>
     </div>
-</div>
+</form>
 
