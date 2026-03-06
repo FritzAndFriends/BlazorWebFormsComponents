@@ -7,6 +7,22 @@
 
 ## Contents
 
+### `/analysis/`
+
+Cross-cutting architecture analysis including data controls, login/identity, theming, and migration toolkit design documents.
+
+---
+
+### `/audits/`
+
+HTML output comparison audits between Web Forms and Blazor components. Contains:
+- `blazor/` — Captured HTML output from Blazor components
+- `webforms/` — Captured HTML output from original Web Forms controls
+- `normalized/` — Normalized HTML for diff comparison
+- `diff-report*.md` — HTML comparison reports
+
+---
+
 ### `/benchmarks/`
 
 WingtipToys migration benchmark reports measuring transform counts, build attempts, and BWFC control preservation rates.
@@ -16,6 +32,26 @@ WingtipToys migration benchmark reports measuring transform counts, build attemp
 | `Run9-WingtipToys-Benchmark.md` | Cycle 0 baseline (667 transforms, 173 BWFC instances) |
 | `Run10-WingtipToys-Benchmark.md` | Cycle 1 improvements (673 transforms, 172 BWFC instances) |
 | `Run11-WingtipToys-Benchmark.md` | Cycle 2 improvements (178 BWFC instances, 98.9% preservation) |
+
+---
+
+### `/component-specs/`
+
+Per-component analysis and HTML output research (~58 docs). Each document compares the original .NET Framework 4.8 API surface against the Blazor component implementation — covering properties, events, methods, and HTML output.
+
+**Status Categories:**
+| Status | Meaning |
+|--------|---------|
+| ✅ Match | Feature exists and works the same as Web Forms |
+| ⚠️ Needs Work | Feature exists but is incomplete or behaves differently |
+| 🔴 Missing | Feature does not exist in the Blazor component |
+| N/A | Feature is server-side only (ViewState, PostBack, etc.) |
+
+---
+
+### `/html-samples/`
+
+HTML capture files from original Web Forms controls. Used as reference for verifying Blazor component HTML output fidelity.
 
 ---
 
@@ -34,15 +70,21 @@ Test run reports from automated migration testing. Each subfolder contains a `re
 
 ---
 
-### `/migration-runs/`
+### `/milestones/`
 
-*Empty* — Old Run7-12 WingtipToys project folders were deleted per Jeff's approval.
+Milestone plans, audits, and post-fix reports tracking project progress across development cycles.
 
 ---
 
-### `/html-samples/`
+### `/proposals/`
 
-HTML capture files from original Web Forms controls. Used as reference for verifying Blazor component HTML output fidelity.
+Feature proposals and design documents for new functionality.
+
+---
+
+### `/reports/`
+
+Executive reports and migration benchmarks including the WingtipToys migration executive report.
 
 ---
 
@@ -60,20 +102,18 @@ Visual comparison screenshots showing original Web Forms pages vs. migrated Blaz
 
 ## Purpose
 
-This folder separates internal development artifacts from user-facing documentation:
+This folder consolidates all internal development artifacts:
 
 | Folder | Audience | Published? |
 |--------|----------|------------|
 | `docs/` | Library users | ✅ Yes (MkDocs) |
 | `dev-docs/` | Contributors, team | ❌ No |
-| `planning-docs/` | Project team | ❌ No |
 | `samples/` | Developers (demo) | ❌ No |
-| `migration-toolkit/` | Migration users | ❌ No |
+| `migration-toolkit/` | Migration users | ❌ No (ships with NuGet) |
 
 ---
 
 ## Related
 
 - [User documentation](../docs/README.md) — Published MkDocs site
-- [Planning documents](../planning-docs/README.md) — Architecture analysis, milestone plans
-- [Migration toolkit](../migration-toolkit/README.md) — Standalone migration tooling
+- [Migration toolkit](../migration-toolkit/README.md) — Standalone migration tooling (end-user distributable)
