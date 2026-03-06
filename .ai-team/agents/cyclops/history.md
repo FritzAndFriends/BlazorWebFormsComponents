@@ -106,3 +106,39 @@ New EventArgs: `RepeaterCommandEventArgs`, `RepeaterItemEventArgs`, `DataListCom
  Team update (2026-03-06): Run 10 preservation 92.7% (164/177)  NEEDS WORK. ImageButtonimg still persists in ShoppingCart (P0). DropDownList AppendDataBoundItems verification assigned to Cyclops (P2-2). Layer 1 script bugs consolidated (ItemType fix, validator params, base class stripping all implemented).  decided by Forge, Bishop
 
 📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .ai-team/skills/ — decided by Jeffrey T. Fritz
+
+### Run 7 Layer 2 WingtipToys (AfterWingtipToys)
+
+**Build rounds:** 2 (round 1 had 7 errors, round 2 was clean 0/0)
+
+**Layer 2 fix categories applied:**
+
+1. **Project Configuration:** Changed csproj from NuGet `Fritz.BlazorWebFormsComponents` to project reference. Added EF Core SQLite packages with wildcard version `10.0.0-*`. Added `RootNamespace=WingtipToys`. Fixed Program.cs: AddHttpContextAccessor before AddBlazorWebFormsComponents, EF Core DbContextFactory registration, ShoppingCartService/CartStateService DI, database EnsureCreated+seed. Fixed _Imports.razor: added BlazorWebFormsComponents.Enums, Microsoft.EntityFrameworkCore, WingtipToys.Models/Data/Services namespaces.
+
+2. **Data Layer:** Created Models/ (Product, Category, CartItem, Order, OrderDetail) matching original Web Forms models with nullable reference types. Created Data/ProductContext.cs with EF Core DbContext, DbSets, and HasData seed (16 products, 5 categories). SQLite provider.
+
+3. **Services:** Created ShoppingCartService (IDbContextFactory-based, async CRUD), CartStateService (cookie-based cart ID via IHttpContextAccessor).
+
+4. **Identity/Auth Stubs:** Register.razor has UserName, Email, Password, ConfirmPassword fields with BWFC TextBox/Button/Label components. Login.razor has Email, Password, RememberMe fields. Both wire to MockAuthService/MockAuthenticationStateProvider.
+
+5. **Code-Behind Rewrites (33 files):** All .razor.cs files rewritten from raw Web Forms (System.Web, OWIN, Microsoft.AspNet.Identity) to Blazor ComponentBase. Key patterns: IDbContextFactory injection, SupplyParameterFromQuery, OnParametersSetAsync for query-driven data, NavigationManager.NavigateTo for redirects.
+
+6. **Markup Fixes:** ListView GroupTemplate/LayoutTemplate placeholders → @context. Removed GetRouteUrl calls → href with query params. Removed <%# %> expressions → @context. Fixed ImageButton → Button. Removed runat artifacts. Fixed category links to use /ProductList?id=N. ShoppingCart preserved as BWFC GridView with TItem, Items, editable TextBox, CheckBox, Update/Checkout buttons.
+
+7. **Misc Cleanup:** Removed <friendlyUrls:ViewSwitcher/>, cleaned Mobile layout, stubbed all Account/Checkout pages, AdminPage wired with EF Core data loading.
+
+**Build round 1 errors (7):**
+- CS0103 `Title` not found → class name `_Default` didn't match razor file `Default.razor`
+- CS0103 `_categories`/`_cartCount` not found → MainLayout code-behind was class `SiteMaster` in wrong namespace
+- CS1503 type mismatch (4x) → BWFC Button OnClick is `EventCallback<EventArgs>`, not `MouseEventArgs`
+
+**Build round 2:** 0 errors, 0 warnings. Clean.
+
+**Key patterns discovered:**
+- BWFC Button.OnClick is `EventCallback<EventArgs>` (not MouseEventArgs) — all click handlers must use `EventArgs`
+- Code-behind partial class name MUST match the .razor filename exactly (no underscore prefix for Default)
+- Layout code-behind namespace must match Components/Layout/ path → `WingtipToys.Components.Layout`
+- EF Core wildcard version `10.0.0-*` avoids NU1603 warnings for preview packages
+
+ Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
+

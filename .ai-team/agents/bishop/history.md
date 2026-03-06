@@ -121,3 +121,27 @@
 - **LinkButton newly preserved:** 3 instances (ManageLogins, Checkout pages) — previously flattened
 
 📌 Team update (2026-03-05): Run 12 BENCHMARK complete. All quality gates passed: 0 build errors, ≤3 attempts (2), auth functional, 184 BWFC instances (≥178), ~100% preservation. First run with functional Login/Register. — decided by Bishop
+
+### Fresh Layer 1 Migration Run (Bishop) — AfterWingtipToys
+
+- **Date:** Run executed against cleared `samples/AfterWingtipToys/`
+- **Script:** `bwfc-migrate.ps1` with `-Path samples/WingtipToys/WingtipToys -Output samples/AfterWingtipToys`
+- **Execution time:** 3.33 seconds
+- **Transforms applied:** 366
+- **Files processed:** 32 Web Forms files
+- **Static files copied:** 80
+- **Items needing review:** 46 (14 CodeBlock, 1 ContentPlaceHolder, 2 ControlPreservation, 15 EventHandler, 1 LoginView-Auth, 4 RegisterDirective, 9 SelectMethod)
+- **Output:**
+  - 35 .razor files, 35 .cs files, 80 wwwroot files, 152 total files
+  - Scaffold: WingtipToys.csproj ✓, Program.cs ✓, _Imports.razor ✓, Components/App.razor ✓, Components/Routes.razor ✓
+  - Layout: MainLayout.razor + Site.MobileLayout.razor in Components/Layout/
+  - Auth: Services/MockAuthService.cs + MockAuthenticationStateProvider.cs auto-generated (Account/Login.aspx detected)
+  - Pages: 10 root pages, 15 Account pages, 6 Checkout pages, 1 Admin page
+- **Observations:**
+  - Task spec listed `-SourcePath`/`-DestinationPath`/`-ProjectName` params — actual params are `-Path`/`-Output` (no ProjectName). Script auto-detects project name from directory.
+  - App.razor lives at `Components/App.razor` (Blazor Web App convention), not project root. Task verification should check there.
+  - ControlPreservation flagged Site.Master: 1 `<PlaceHolder>` lost (5 asp: tags in → 4 BWFC tags out). Known issue from prior runs.
+  - 0 errors during script execution. Clean run.
+
+ Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
+

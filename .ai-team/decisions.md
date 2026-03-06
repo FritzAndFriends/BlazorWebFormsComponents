@@ -7426,3 +7426,12 @@ Ready for commit and push.
 **By:** Beast (Technical Writer)
 **What:** Consolidated dev-docs folder structure. Moved audit-output/ to dev-docs/audits/, planning-docs/ subfolders to dev-docs/ (analysis, milestones, proposals, component-specs, reports). Deleted duplicate migration scripts from scripts/ (kept migration-toolkit/scripts/ as authoritative). Committed as e0fe898.
 **Why:** Reduces top-level directory sprawl. Consolidates all internal dev documentation in one location. migration-toolkit/ remains separate as it ships with NuGet package.
+
+### 2026-03-06: Fresh Layer 1 migration of AfterWingtipToys (Run 7)
+**By:** Bishop
+**What:** Clean Layer 1 migration via bwfc-migrate.ps1: 3.33s, 366 transforms, 32 files processed, 152 total output files, 0 errors. Script uses `-Path` and `-Output` params (not `-SourcePath`/`-DestinationPath`). App.razor placed at `Components/App.razor`. 1 PlaceHolder loss flagged (FeaturedContent in Site.Master). Mock auth auto-generated from Account/Login.aspx detection.
+**Why:** Recording results for team reference. Parameter name corrections prevent future task spec errors.
+### 2026-03-06: Layer 2 conventions for AfterWingtipToys (Run 7)
+**By:** Cyclops
+**What:** Five conventions established: (1) BWFC Button OnClick uses `EventArgs`, not `MouseEventArgs`. (2) Code-behind partial class names must match .razor filenames exactly (no underscore prefix). (3) Use `Version="10.0.0-*"` for EF Core in .NET 10 previews. (4) CartStateService pattern replaces Session["CartId"] using cookie via IHttpContextAccessor. (5) GridView needs explicit `TItem` attribute when using TemplateField with `@context`.
+**Why:** Compile-time errors (CS1503, CS0246) and runtime failures traced to these patterns. All Layer 2 agents must follow these conventions.
