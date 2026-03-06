@@ -147,9 +147,3 @@ nav:
       - Themes and Skins: Migration/ThemesAndSkins.md
       - User Controls: Migration/User-Controls.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
-      - Run 9 WingtipToys Benchmark: Migration/Run9-WingtipToys-Benchmark.md
-      - Run 10 WingtipToys Benchmark: Migration/Run10-WingtipToys-Benchmark.md
-      - Run 11 WingtipToys Benchmark: Migration/Run11-WingtipToys-Benchmark.md
-  - Migration Tests:
-      - Overview: migration-tests/README.md
-      - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md

@@ -7324,3 +7324,94 @@ Keep in nav:
 
 **Decision Requested:** Approve this reorganization proposal so Beast and team can execute the file moves and mkdocs.yml updates.
 
+
+---
+
+# Decision: Documentation Reorganization Complete
+
+**Date:** 2026-03-06  
+**Author:** Beast (Technical Writer)  
+**Status:** COMPLETED  
+**Requested by:** Jeffrey T. Fritz
+
+---
+
+## Summary
+
+Executed the approved DOCS-REORGANIZATION proposal to separate internal development artifacts from user-facing documentation.
+
+---
+
+## Actions Completed
+
+### 1. Created `dev-docs/` Structure
+
+```
+dev-docs/
+├── README.md           (new index for contributors)
+├── benchmarks/         (3 benchmark reports)
+├── migration-tests/    (6 test run folders + README)
+├── migration-runs/     (empty — old runs deleted)
+├── html-samples/       (1 HTML capture file)
+└── screenshots/        (47 visual comparison files)
+```
+
+### 2. Files Moved (git mv, history preserved)
+
+| Source | Destination |
+|--------|-------------|
+| `docs/Migration/Run9-WingtipToys-Benchmark.md` | `dev-docs/benchmarks/` |
+| `docs/Migration/Run10-WingtipToys-Benchmark.md` | `dev-docs/benchmarks/` |
+| `docs/Migration/Run11-WingtipToys-Benchmark.md` | `dev-docs/benchmarks/` |
+| `docs/migration-tests/` (entire folder) | `dev-docs/migration-tests/` |
+| `docs/Migration/WebformsHtml/` | `dev-docs/html-samples/` |
+| `planning-docs/screenshots/` | `dev-docs/screenshots/` |
+
+### 3. Files Deleted (per Jeff's approval)
+
+- `samples/Run7WingtipToys/` — DELETED
+- `samples/Run8WingtipToys/` — DELETED  
+- `samples/Run9WingtipToys/` — DELETED
+- `samples/Run10WingtipToys/` — DELETED
+- `samples/Run11WingtipToys/` — DELETED
+- `samples/Run12WingtipToys/` — DELETED
+- `docs/samples/` — DELETED (only contained netstandard-1)
+
+### 4. mkdocs.yml Updated
+
+Removed from nav:
+- "Migration Tests" section (entire section)
+- Run 9/10/11 WingtipToys Benchmark entries from Migration section
+
+### 5. samples/readme.md Updated
+
+Added documentation for remaining folders:
+- WingtipToys, FreshWingtipToys, AfterWingtipToys
+- AfterBlazorServerSide.Tests
+
+---
+
+## Results
+
+| Metric | Before | After |
+|--------|--------|-------|
+| docs/ files | ~89 | ~74 (user-facing only) |
+| samples/ folders | 14 | 8 (clean demos only) |
+| Internal artifacts in MkDocs nav | 4 entries | 0 entries |
+| dev-docs/ files | — | ~100+ |
+
+---
+
+## Impact
+
+- **Library users**: Cleaner published docs site with no internal benchmark noise
+- **Contributors**: Consolidated internal docs in `dev-docs/` with clear README
+- **samples/**: Now contains only legitimate demo projects
+
+---
+
+## Staged for Commit
+
+1,055 files staged (`git status` shows R=rename, D=delete, A=add).  
+Ready for commit and push.
+
