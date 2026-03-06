@@ -89,9 +89,10 @@ Add `Context="Item"` to all data templates:
 | Web Forms | Blazor |
 |---|---|
 | `Page_Load(sender, e)` | `OnInitializedAsync()` |
-| `if (!IsPostBack)` | Remove — `OnInitializedAsync` runs once |
+| `if (!IsPostBack)` | Works AS-IS via `WebFormsPageBase` (always enters block); optionally simplify |
 | `Page_PreRender` | `OnParametersSetAsync()` |
 | `Response.Redirect("~/path")` | `NavigationManager.NavigateTo("/path")` |
+| `Page.Title = "X"` | Works AS-IS via `WebFormsPageBase` |
 | `Session["key"]` | Scoped service or `ProtectedSessionStorage` |
 | `ViewState["key"]` | Component field (automatic in Blazor) |
 
@@ -196,7 +197,7 @@ When Copilot encounters these attributes during migration, remove them without c
 ## Common Gotchas
 
 1. **No ViewState** — Blazor components maintain state in fields/properties. Replace `ViewState["key"]` with a component field.
-2. **No PostBack** — There is no `IsPostBack`. Code in `Page_Load` that checks `if (!IsPostBack)` should move to `OnInitializedAsync()`.
+2. **IsPostBack works AS-IS** — `WebFormsPageBase` provides `IsPostBack` (always `false`), so `if (!IsPostBack)` compiles and runs correctly. Optionally simplify by removing the check since the block always executes.
 3. **No DataSource controls** — `SqlDataSource`, `ObjectDataSource`, `EntityDataSource` must be replaced with injected services.
 4. **Template Context** — In Web Forms, `Item` is implicitly available. In BWFC, add `Context="Item"` on template elements.
 5. **ID Rendering** — Blazor doesn't generate client IDs like `ctl00_MainContent_Grid`. If CSS/JS targets these IDs, switch to class selectors.

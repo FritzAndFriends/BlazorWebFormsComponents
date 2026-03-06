@@ -106,7 +106,9 @@ If migrating from **Membership** (older):
 
 ### BWFC Login Controls
 
-BWFC provides login controls that match Web Forms markup. Use these during migration, then optionally replace with Blazor Identity UI later.
+BWFC provides login controls that match Web Forms markup. These controls use native Blazor `AuthenticationStateProvider` internally — they are **not shims** and do not need to be replaced with `AuthorizeView`.
+
+> **Important:** BWFC login controls require `builder.Services.AddBlazorWebFormsComponents()` in `Program.cs` and `builder.Services.AddCascadingAuthenticationState()` for authentication state propagation.
 
 | Web Forms | BWFC | Notes |
 |-----------|------|-------|
@@ -196,7 +198,7 @@ BWFC provides login controls that match Web Forms markup. Use these during migra
 ```
 
 ```razor
-@* Blazor option 1: BWFC controls (markup migration) *@
+@* Blazor — BWFC LoginView (recommended — preserves markup and uses AuthenticationStateProvider natively) *@
 <LoginView>
     <AnonymousTemplate>
         <a href="/Account/Login">Log in</a>
@@ -206,8 +208,12 @@ BWFC provides login controls that match Web Forms markup. Use these during migra
         <LoginStatus LogoutAction="Redirect" LogoutPageUrl="/" />
     </LoggedInTemplate>
 </LoginView>
+```
 
-@* Blazor option 2: Native AuthorizeView (recommended long-term) *@
+> **Note:** BWFC's `LoginView` internally injects `AuthenticationStateProvider` and evaluates authentication state natively — it is NOT a shim that needs to be replaced. Keep it for markup compatibility. If you prefer native Blazor syntax long-term:
+
+```razor
+@* Blazor — Native AuthorizeView (alternative — different template names) *@
 <AuthorizeView>
     <NotAuthorized>
         <a href="/Account/Login">Log in</a>

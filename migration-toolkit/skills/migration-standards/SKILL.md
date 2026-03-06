@@ -172,7 +172,7 @@ The script should preserve the attribute and annotate the signature change neede
 **Script handles (Layer 1):**
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
-- LoginView → AuthorizeView
+- LoginView → **preserve as BWFC LoginView** (uses `AuthenticationStateProvider` natively)
 - Master page → MainLayout.razor
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging

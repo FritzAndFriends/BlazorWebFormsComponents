@@ -499,6 +499,12 @@ For FormView, DetailsView:
 - `<form runat="server">` → removed
 - `<asp:ContentPlaceHolder ID="MainContent">` → `@Body`
 - `<asp:ScriptManager>` → `<ScriptManager />` (renders nothing)
+- CSS `<link>` elements from master page `<head>` → `App.razor` `<head>` section
+- `<head runat="server">` content → `<HeadContent>` in layout or `App.razor`
+
+> **Alternative:** For a more gradual migration, BWFC provides `<MasterPage>`, `<Content>`, and `<ContentPlaceHolder>` components that preserve Web Forms-style markup. Use these as a stepping stone, then refactor to native Blazor layouts when ready.
+
+> **Tip:** Use `<WebFormsPage>@Body</WebFormsPage>` as the layout wrapper instead of plain `@Body` to get NamingContainer (ID scoping), theming, and head rendering in one component.
 
 ### Nested Master Pages → Nested Layouts
 
@@ -602,6 +608,57 @@ Include during migration to prevent errors, remove when stable.
 | Web Forms | BWFC | Notes |
 |-----------|------|-------|
 | `System.Web.UI.Page` (base class) | `WebFormsPageBase` | `@inherits WebFormsPageBase` in `_Imports.razor`; `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack` work unchanged |
+
+### Structural & Infrastructure Components
+
+These BWFC components support the migration infrastructure — they aren't direct control replacements but provide essential bridging capabilities:
+
+| Component | Purpose | Usage |
+|-----------|---------|-------|
+| `WebFormsPage` | Unified layout wrapper combining NamingContainer + ThemeProvider + head rendering | `<WebFormsPage>@Body</WebFormsPage>` in `MainLayout.razor` — single component replaces multiple wrappers |
+| `Page` | Standalone head renderer (renders `<PageTitle>` + `<meta>` from `IPageService`) | `<BlazorWebFormsComponents.Page />` in layout — use if you don't need `WebFormsPage` |
+| `NamingContainer` | Establishes naming scope for child component IDs (emulates `INamingContainer`) | `<NamingContainer ID="MainContent">` — children get prefixed IDs like `MainContent_ButtonName` |
+| `MasterPage` | Emulates Web Forms MasterPage with ContentPlaceHolder support | Gradual migration path — allows preserving `<MasterPage>` / `<Content>` / `<ContentPlaceHolder>` markup |
+| `Content` | Provides content for a `ContentPlaceHolder` in a `MasterPage` | `<Content ContentPlaceHolderID="MainContent">...</Content>` |
+| `ContentPlaceHolder` | Defines a replaceable region in a `MasterPage` | `<ContentPlaceHolder ID="MainContent" />` |
+| `EmptyLayout` | Minimal layout component (`@inherits LayoutComponentBase` + `@Body`) | Use for pages that need no layout chrome |
+
+### DataBinder.Eval Compatibility Shim
+
+BWFC provides a `DataBinder` static class for legacy code that uses `DataBinder.Eval()`. This is marked `[Obsolete]` — use direct property access (`@context.Property`) instead.
+
+```csharp
+// Web Forms — DataBinder.Eval
+<%# DataBinder.Eval(Container.DataItem, "ProductName") %>
+
+// BWFC shim (compiles, but marked obsolete)
+@DataBinder.Eval(context, "ProductName")
+
+// Recommended — direct property access
+@context.ProductName
+```
+
+### Theming Infrastructure
+
+BWFC includes a theming system for migrating Web Forms skin files:
+
+| Component | Purpose |
+|-----------|---------|
+| `ThemeProvider` (in `Theming/`) | Cascades `ThemeConfiguration` to child components |
+| `ThemeConfiguration` | Defines theme settings (skin mappings) |
+| `ControlSkin` / `SkinBuilder` | Internal — apply skin properties to controls |
+
+> **Note:** Theming is an advanced feature. Most migrations can ignore it initially and add theming later if needed.
+
+### Custom Control Base Classes
+
+For migrating custom Web Forms controls that extend `System.Web.UI.WebControls.WebControl`:
+
+| BWFC Class | Purpose |
+|-----------|---------|
+| `WebControl` (in `CustomControls/`) | Base class shim for custom controls |
+| `CompositeControl` | Base class for controls that contain child controls |
+| `HtmlTextWriter` | Shim for `Render(HtmlTextWriter)` patterns — use for gradual migration |
 
 ### Not Covered by BWFC
 
