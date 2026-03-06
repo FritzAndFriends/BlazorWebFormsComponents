@@ -1,5 +1,33 @@
 @page "/Account/Register"
-<h3>Register  not yet migrated</h3>
-@* TODO: Implement using ASP.NET Core Identity scaffolding *@
-@code {
-}
+<h2>Register</h2>
+
+<div class="form-horizontal">
+    <h4>Create a new account</h4>
+    <hr />
+    <form method="post" action="/Account/DoRegister" data-enhance="false">
+        <div class="form-group">
+            <label class="col-md-2 control-label">Email</label>
+            <div class="col-md-10">
+                <input type="email" name="email" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Password</label>
+            <div class="col-md-10">
+                <input type="password" name="password" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Confirm password</label>
+            <div class="col-md-10">
+                <input type="password" name="confirmPassword" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <a href="#" role="button" class="btn btn-default" onclick="event.preventDefault(); this.closest('form').submit();">Register</a>
+            </div>
+        </div>
+    </form>
+</div>
+

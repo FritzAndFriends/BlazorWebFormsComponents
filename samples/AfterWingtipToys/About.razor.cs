@@ -1,0 +1,9 @@
+using Microsoft.AspNetCore.Components;
+
+namespace WingtipToys;
+
+public partial class About : ComponentBase
+{
+    private string Title => "About";
+}
+

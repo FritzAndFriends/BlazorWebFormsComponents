@@ -1,49 +1,46 @@
-using WingtipToys.Models;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace WingtipToys.Services;
 
+/// <summary>
+/// Manages the shopping cart ID for the current user session via a cookie-based approach.
+/// </summary>
 public class CartStateService
 {
-    private readonly List<CartItem> _items = new();
-    private readonly string _cartId = Guid.NewGuid().ToString();
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private string? _cartId;
 
-    public IReadOnlyList<CartItem> Items => _items.AsReadOnly();
-
-    public void AddItem(Product product)
+    public CartStateService(IHttpContextAccessor httpContextAccessor)
     {
-        var existing = _items.FirstOrDefault(i => i.ProductId == product.ProductID);
-        if (existing != null)
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public string CartId
+    {
+        get
         {
-            existing.Quantity++;
-        }
-        else
-        {
-            _items.Add(new CartItem
+            if (_cartId != null) return _cartId;
+
+            var context = _httpContextAccessor.HttpContext;
+            if (context != null)
             {
-                ItemId = Guid.NewGuid().ToString(),
-                CartId = _cartId,
-                ProductId = product.ProductID,
-                Product = product,
-                Quantity = 1,
-                DateCreated = DateTime.Now
-            });
+                _cartId = context.Request.Cookies["CartId"];
+                if (string.IsNullOrEmpty(_cartId))
+                {
+                    _cartId = Guid.NewGuid().ToString();
+                    context.Response.Cookies.Append("CartId", _cartId, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Expires = DateTimeOffset.Now.AddDays(30)
+                    });
+                }
+            }
+            else
+            {
+                _cartId = Guid.NewGuid().ToString();
+            }
+
+            return _cartId;
         }
     }
-
-    public void RemoveItem(string itemId)
-    {
-        var item = _items.FirstOrDefault(i => i.ItemId == itemId);
-        if (item != null) _items.Remove(item);
-    }
-
-    public decimal GetTotal() =>
-        _items.Sum(i => (decimal)(i.Product?.UnitPrice ?? 0) * i.Quantity);
-
-    public void UpdateQuantity(string itemId, int quantity)
-    {
-        var item = _items.FirstOrDefault(i => i.ItemId == itemId);
-        if (item != null) item.Quantity = quantity;
-    }
-
-    public int GetCount() => _items.Sum(i => i.Quantity);
 }

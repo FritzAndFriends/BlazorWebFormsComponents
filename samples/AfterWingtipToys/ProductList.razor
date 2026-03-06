@@ -1,15 +1,11 @@
 @page "/ProductList"
-
-<PageTitle>Products</PageTitle>
-
 <section>
     <div>
         <hgroup>
             <h2>Products</h2>
         </hgroup>
 
-        <ListView Items="@_products" TItem="Product"
-            DataKeyNames="ProductID" GroupItemCount="4">
+        <ListView Items="@_products" GroupItemCount="4">
             <EmptyDataTemplate>
                 <table>
                     <tr>
@@ -30,26 +26,26 @@
                     <table>
                         <tr>
                             <td>
-                                <a href="/ProductDetails?productID=@context.ProductID">
-                                    <img src="/Catalog/Images/Thumbs/@context.ImagePath"
-                                        width="100" height="75" style="border:1px solid" />
-                                </a>
+                              <a href="/ProductDetails?productID=@context.ProductID">
+                                <img src="/Catalog/Images/Thumbs/@context.ImagePath"
+                                  width="100" height="75" style="border-width:1px;border-style:solid;" alt="@context.ProductName" />
+                              </a>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <a href="/ProductDetails?productID=@context.ProductID">
-                                    @context.ProductName
+                                  @context.ProductName
                                 </a>
                                 <br />
                                 <span>
                                     <b>Price: </b>@($"{context.UnitPrice:c}")
                                 </span>
                                 <br />
-                                <a href="/AddToCart?productID=@context.ProductID">
+                                <a href="/AddToCart?productID=@context.ProductID" onclick="event.preventDefault(); window.location.href=this.href;">               
                                     <span class="ProductListItem">
                                         <b>Add To Cart</b>
-                                    </span>
+                                    </span>           
                                 </a>
                             </td>
                         </tr>
@@ -69,10 +65,6 @@
                                 </table>
                             </td>
                         </tr>
-                        <tr>
-                            <td></td>
-                        </tr>
-                        <tr></tr>
                     </tbody>
                 </table>
             </LayoutTemplate>
