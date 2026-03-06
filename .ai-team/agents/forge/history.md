@@ -116,3 +116,24 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 
  Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
 
+### Run 8 Post-Mortem & Run 9 Preparation (2026-03-06)
+
+**Analysis:** Comprehensive post-mortem of Run 8 (14/14 acceptance tests, 1h 55m total). Compared all original WingtipToys Web Forms files against migrated Blazor output. Read full report, migration script, all 4 skills, and every key source/output file pair.
+
+**Key patterns found:**
+- HTTP Session + Interactive Server is the #1 architectural blocker — HttpContext is null during WebSocket circuits, so cookie auth and session-based operations must use minimal API endpoints with HTML form POSTs
+- Blazor enhanced navigation intercepts `<a>` clicks — links to server endpoints need `onclick` workaround or `data-enhance-nav="false"`
+- Models directory contains reusable entities that can be auto-copied with minimal transforms (EF6→EF Core namespace swap)
+- Redirect-only pages (like AddToCart.aspx) should generate minimal API endpoint TODOs, not dead stubs
+- Page Title extracted from `<%@ Page %>` directive is lost — should be preserved
+- `[QueryString]`/`[RouteData]` attributes need `[SupplyParameterFromQuery]` annotation hints
+
+**Priority fixes identified (22 total):**
+- P0 (3): Session/auth warning in skills, minimal API endpoint templates, auto-copy Models
+- P1 (11): DbContext transform, LoginView preservation, .csproj packages, Program.cs boilerplate, redirect page detection, enhanced nav warning, Page.Title extraction, GetRouteUrl hints, QueryString/RouteData annotations, ListView GroupItemCount guidance, DisableAntiforgery docs
+- P2 (8): Skip .designer.cs, WebFormsPageBase in _Imports, CSS bundle handling, coverage doc gotchas, session service pattern, Logic/ detection, webopt removal, component count update
+
+**Estimated impact:** P0+P1 implementation could reduce Run 9 from ~1h 55m to ~50-60 min.
+
+**Decision document:** `.ai-team/decisions/inbox/forge-run9-analysis.md`
+

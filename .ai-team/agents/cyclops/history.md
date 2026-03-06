@@ -65,3 +65,29 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 
  Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
 
+### Run 9 Script Fixes (2026-03-06)
+
+**9 fixes implemented in `migration-toolkit/scripts/bwfc-migrate.ps1`** to reduce Layer 2 manual work:
+
+**Functions modified:**
+- `New-ProjectScaffold` (lines ~128-238): Added `$SourcePath` parameter, conditional EF Core + Identity package refs (RF-06), and Identity/Session boilerplate in Program.cs (RF-07). Detection logic checks for `Models/`, `Account/`, `Login.aspx`, `Register.aspx` in source.
+- `ConvertFrom-PageDirective` (lines ~299-330): Extracts `Title="..."` attribute from `<%@ Page %>` directive before stripping, emits `<PageTitle>` (RF-10).
+- `ConvertFrom-GetRouteUrl` (lines ~664-720): After converting route calls, scans for route names in `GetRouteUrlHelper.GetRouteUrl("RouteName", ...)` and emits Write-ManualItem with concrete URL replacement hints (RF-11).
+- `Copy-CodeBehind` (lines ~831-970): Added regex transforms for `[QueryString("param")]` → `[SupplyParameterFromQuery(Name = "param")]` and `[RouteData]` → `[Parameter]` with TODO comment (RF-12).
+
+**Functions added:**
+- `Test-RedirectHandler`: Detects pages with `Response.Redirect` in code-behind and minimal markup (<100 chars after directive stripping). Flags for minimal API conversion (RF-08).
+
+**Entry point sections added:**
+- Models copy section (RF-03/RF-04): After static file copy, detects and copies `Models/*.cs` files. Strips EF6 usings, adds TODO headers. For `*Context.cs` files: replaces EF6 → EF Core using, removes old constructors (including parameterless `base("connectionName")` pattern), adds `DbContextOptions<T>` constructor.
+- ListView GroupItemCount detection (RF-13): Before asp: prefix stripping, checks for `<asp:ListView ... GroupItemCount="N"` and emits manual item with BWFC guidance.
+- Redirect handler Program.cs annotation (RF-08): After processing, appends TODO comments to Program.cs for detected redirect handler pages.
+- `$script:RedirectHandlers` tracking list added to logging region.
+
+**Key patterns:**
+- Script uses here-strings (`@"..."@`) for code templates with variable expansion. Conditional blocks are best injected via `.Replace()` after template creation.
+- `Test-Path` is used for feature detection before scaffold generation.
+- Transform pipeline order matters: RF-13 must check BEFORE `ConvertFrom-AspPrefix` strips the `asp:` prefix.
+- DbContext constructor patterns vary: parameterless `() : base("name")`, parameterized `(string x) : base(x)`, etc. Multiple regexes needed.
+
+

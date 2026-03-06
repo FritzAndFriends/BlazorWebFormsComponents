@@ -86,6 +86,7 @@ $StripAttributes = @(
 
 $script:TransformLog = [System.Collections.Generic.List[PSCustomObject]]::new()
 $script:ManualItems = [System.Collections.Generic.List[PSCustomObject]]::new()
+$script:RedirectHandlers = [System.Collections.Generic.List[string]]::new()
 $script:FilesProcessed = 0
 $script:TransformsApplied = 0
 
@@ -128,8 +129,33 @@ function Write-ManualItem {
 function New-ProjectScaffold {
     param(
         [string]$OutputRoot,
-        [string]$ProjectName
+        [string]$ProjectName,
+        [string]$SourcePath
     )
+
+    # RF-06: Detect features that need additional packages
+    $hasModels = $false
+    $hasIdentity = $false
+    if ($SourcePath) {
+        $modelsDir = Join-Path $SourcePath 'Models'
+        $hasModels = Test-Path $modelsDir -PathType Container
+        $accountDir = Join-Path $SourcePath 'Account'
+        $hasIdentity = (Test-Path $accountDir -PathType Container) -or
+                       (Test-Path (Join-Path $SourcePath 'Login.aspx')) -or
+                       (Test-Path (Join-Path $SourcePath 'Register.aspx'))
+    }
+
+    # RF-06: Build conditional package references
+    $additionalPackages = ''
+    if ($hasModels) {
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Sqlite`" Version=`"10.0.0-*`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0-*`" />"
+    }
+    if ($hasIdentity) {
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.EntityFrameworkCore`" Version=`"10.0.0-*`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.UI`" Version=`"10.0.0-*`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0-*`" />"
+    }
 
     # .csproj
     $csprojContent = @"
@@ -142,7 +168,7 @@ function New-ProjectScaffold {
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />
+    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />${additionalPackages}
   </ItemGroup>
 
 </Project>
@@ -191,6 +217,41 @@ app.MapRazorComponents<$ProjectName.Components.App>()
 
 app.Run();
 "@
+
+    # RF-07: Add Identity/Session boilerplate when detected
+    if ($hasIdentity) {
+        $identityServiceBlock = @"
+
+// TODO: Configure database connection
+// builder.Services.AddDbContext<ProductContext>(options => options.UseSqlite("Data Source=app.db"));
+
+// TODO: Configure Identity
+// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+//     .AddEntityFrameworkStores<ProductContext>();
+
+// TODO: Configure session for cart/state management
+// builder.Services.AddDistributedMemoryCache();
+// builder.Services.AddSession();
+// builder.Services.AddHttpContextAccessor();
+// builder.Services.AddCascadingAuthenticationState();
+"@
+        $programContent = $programContent.Replace(
+            'builder.Services.AddBlazorWebFormsComponents();',
+            "builder.Services.AddBlazorWebFormsComponents();`n$identityServiceBlock"
+        )
+
+        $identityMiddlewareBlock = @"
+
+// TODO: Add middleware in the pipeline
+// app.UseSession();
+// app.UseAuthentication();
+// app.UseAuthorization();
+"@
+        $programContent = $programContent.Replace(
+            'app.UseAntiforgery();',
+            "app.UseAntiforgery();`n$identityMiddlewareBlock"
+        )
+    }
 
     # Properties/launchSettings.json
     $launchSettingsContent = @"
@@ -306,8 +367,22 @@ function ConvertFrom-PageDirective {
     }
 
     if ($Content -match '<%@\s*Page[^%]*%>') {
+        # RF-10: Extract Title attribute before stripping the directive
+        $pageTitle = $null
+        if ($Content -match '<%@\s*Page[^%]*Title\s*=\s*"([^"]*)"') {
+            $pageTitle = $Matches[1]
+        }
+
         $Content = $Content -replace '<%@\s*Page[^%]*%>\s*\r?\n?', ''
-        $Content = "@page `"$route`"`n" + $Content
+        $pageHeader = "@page `"$route`"`n"
+
+        # RF-10: Add <PageTitle> if title was extracted
+        if ($pageTitle) {
+            $pageHeader += "<PageTitle>$pageTitle</PageTitle>`n"
+            Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Extracted Title=`"$pageTitle`" → <PageTitle>"
+        }
+
+        $Content = $pageHeader + $Content
         Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "<%@ Page %> → @page `"$route`""
     }
     return $Content
@@ -702,6 +777,14 @@ function ConvertFrom-GetRouteUrl {
         Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'Add @inject GetRouteUrlHelper GetRouteUrlHelper at the top of the file'
     }
 
+    # RF-11: Flag GetRouteUrl patterns with concrete replacement hints
+    $routeNameRegex = [regex]'GetRouteUrlHelper\.GetRouteUrl\s*\(\s*"([^"]+)"'
+    $routeNameMatches = $routeNameRegex.Matches($Content)
+    foreach ($m in $routeNameMatches) {
+        $routeName = $m.Groups[1].Value
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail "Replace route name '$routeName' with direct URL pattern, e.g., /ProductDetails?ProductID=@Item.ProductID"
+    }
+
     return $Content
 }
 
@@ -859,6 +942,21 @@ function Copy-CodeBehind {
 
         $annotatedContent = $todoHeader + $content
 
+        # RF-12: Convert [QueryString] and [RouteData] parameter attributes
+        $qsRegex = [regex]'\[QueryString\("([^"]+)"\)\]'
+        $qsMatches = $qsRegex.Matches($annotatedContent)
+        if ($qsMatches.Count -gt 0) {
+            $annotatedContent = $qsRegex.Replace($annotatedContent, '[SupplyParameterFromQuery(Name = "$1")]')
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
+        }
+
+        $rdRegex = [regex]'\[RouteData\]'
+        $rdMatches = $rdRegex.Matches($annotatedContent)
+        if ($rdMatches.Count -gt 0) {
+            $annotatedContent = $rdRegex.Replace($annotatedContent, "[Parameter] // TODO: Verify RouteData → [Parameter] conversion — ensure @page route template has matching {parameter}")
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
+        }
+
         $outputDir = Split-Path $OutputFile -Parent
         if (-not (Test-Path $outputDir)) {
             New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
@@ -893,6 +991,22 @@ function Test-UnconvertiblePage {
         }
     }
     return $false
+}
+
+function Test-RedirectHandler {
+    param(
+        [string]$MarkupContent,
+        [string]$CodeBehindPath
+    )
+
+    if (-not (Test-Path $CodeBehindPath)) { return $false }
+    $cbContent = Get-Content -Path $CodeBehindPath -Raw -Encoding UTF8
+    if ($cbContent -notmatch 'Response\.Redirect') { return $false }
+
+    # Check if markup is minimal (strip directives, check remaining content)
+    $stripped = $MarkupContent -replace '<%@\s*\w+[^%]*%>\s*', ''
+    $stripped = $stripped.Trim()
+    return ($stripped.Length -lt 100)
 }
 
 function New-CompilableStub {
@@ -972,6 +1086,17 @@ function Convert-WebFormsFile {
 
     $script:FilesProcessed++
 
+    # RF-08: Check for redirect-only pages
+    if ($extension -eq '.aspx') {
+        $cbPath = $SourceFile + '.cs'
+        if (Test-RedirectHandler -MarkupContent $content -CodeBehindPath $cbPath) {
+            $pageName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+            $script:RedirectHandlers.Add($pageName)
+            Write-ManualItem -File $relativePath -Category 'RedirectHandler' -Detail "$pageName was a redirect handler (Response.Redirect in code-behind) — convert to minimal API endpoint"
+            Write-TransformLog -File $relativePath -Transform 'RedirectHandler' -Detail "Detected redirect handler — flagged for minimal API conversion"
+        }
+    }
+
     # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
     if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content)) {
         $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
@@ -1006,6 +1131,15 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-Expressions -Content $content -RelPath $relativePath
     $content = ConvertFrom-LoginView -Content $content -RelPath $relativePath
     $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
+
+    # RF-13: Detect ListView GroupItemCount before asp: prefix is stripped
+    $lvGroupRegex = [regex]'(?i)<asp:ListView[^>]*GroupItemCount\s*=\s*"(\d+)"'
+    $lvGroupMatches = $lvGroupRegex.Matches($content)
+    foreach ($m in $lvGroupMatches) {
+        $groupCount = $m.Groups[1].Value
+        Write-ManualItem -File $relativePath -Category 'ListView-GroupItemCount' -Detail "ListView with GroupItemCount=$groupCount — use BWFC <ListView GroupItemCount='$groupCount' Items='...' TItem='...'> with GroupTemplate and ItemTemplate"
+    }
+
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
     $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath
@@ -1096,7 +1230,7 @@ if (-not $WhatIfPreference) {
 if (-not $SkipProjectScaffold) {
     Write-Host 'Generating project scaffold...' -ForegroundColor Green
     if (-not $WhatIfPreference) {
-        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName
+        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName -SourcePath $Path
         New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName
     }
     else {
@@ -1152,6 +1286,106 @@ if ($staticCount -gt 0) {
 
 #endregion
 
+#region --- Models Copy & DbContext Transform (RF-03 / RF-04) ---
+
+$modelsDir = Join-Path $Path 'Models'
+$modelsCopied = 0
+if (Test-Path $modelsDir -PathType Container) {
+    $modelFiles = Get-ChildItem -Path $modelsDir -Filter '*.cs' -File
+    if ($modelFiles.Count -gt 0) {
+        Write-Host "Copying $($modelFiles.Count) model file(s) from Models/..." -ForegroundColor Green
+        $modelsOutDir = Join-Path $Output 'Models'
+
+        foreach ($mf in $modelFiles) {
+            $destFile = Join-Path $modelsOutDir $mf.Name
+            $relPath = "Models/$($mf.Name)"
+
+            if ($PSCmdlet.ShouldProcess($destFile, "Copy model file")) {
+                if (-not (Test-Path $modelsOutDir)) {
+                    New-Item -ItemType Directory -Path $modelsOutDir -Force | Out-Null
+                }
+
+                $csContent = Get-Content -Path $mf.FullName -Raw -Encoding UTF8
+
+                # RF-04: Check if this is a DbContext file
+                $isDbContext = $mf.Name -like '*Context.cs'
+
+                if ($isDbContext) {
+                    # RF-04: Transform DbContext for EF Core
+                    $csContent = $csContent -replace 'using System\.Data\.Entity;', 'using Microsoft.EntityFrameworkCore; // TODO: Verify EF Core using directive'
+                    $csContent = $csContent -replace 'using System\.Data\.Entity\.ModelConfiguration\.Conventions;\s*\r?\n?', ''
+
+                    # Extract class name
+                    $ctxClassName = $null
+                    if ($csContent -match 'class\s+(\w+)') {
+                        $ctxClassName = $Matches[1]
+                    }
+
+                    # Remove constructors with string connectionName parameter
+                    $ctorRegex = [regex]'(?s)\s*public\s+\w+\s*\(\s*string\s+\w+\s*\)\s*:\s*base\s*\([^)]*\)\s*\{[^}]*\}'
+                    $csContent = $ctorRegex.Replace($csContent, '')
+
+                    # Also remove simpler string constructors without base call
+                    $simpleCtorRegex = [regex]'(?s)\s*public\s+\w+\s*\(\s*string\s+\w+\s*\)\s*\{[^}]*\}'
+                    $csContent = $simpleCtorRegex.Replace($csContent, '')
+
+                    # Remove parameterless constructors that pass connection name to base
+                    $paramlessCtorRegex = [regex]'(?s)\s*public\s+\w+\s*\(\s*\)\s*:\s*base\s*\("[^"]*"\)\s*\{[^}]*\}'
+                    $csContent = $paramlessCtorRegex.Replace($csContent, '')
+
+                    # Add EF Core constructor after class opening brace
+                    if ($ctxClassName) {
+                        $classOpenRegex = [regex]('(class\s+' + [regex]::Escape($ctxClassName) + '[^{]*\{)')
+                        $newCtor = "`n    // TODO: EF Core constructor — auto-generated by migration script`n    public ${ctxClassName}(DbContextOptions<${ctxClassName}> options) : base(options) { }`n"
+                        $csContent = $classOpenRegex.Replace($csContent, "`$1$newCtor", 1)
+                    }
+
+                    $todoHeader = "// TODO: Review — auto-copied and transformed DbContext from Web Forms source`n// TODO: Verify EF Core configuration and connection string setup`n`n"
+                    $csContent = $todoHeader + $csContent
+
+                    Write-TransformLog -File $relPath -Transform 'DbContext' -Detail "Transformed DbContext for EF Core: $($mf.Name)"
+                    Write-ManualItem -File $relPath -Category 'DbContext' -Detail 'DbContext auto-transformed — verify EF Core configuration'
+                }
+                else {
+                    # RF-03: Standard model file — strip EF6 usings and add header
+                    $csContent = $csContent -replace 'using System\.Data\.Entity;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using System\.Data\.Entity\.ModelConfiguration\.Conventions;\s*\r?\n?', ''
+                    $csContent = "// TODO: Review — auto-copied from Web Forms source`n`n" + $csContent
+                }
+
+                Set-Content -Path $destFile -Value $csContent -Encoding UTF8
+                Write-TransformLog -File $relPath -Transform 'ModelCopy' -Detail "Copied model file → $destFile"
+                $modelsCopied++
+            }
+            else {
+                Write-Host "[WhatIf] Would copy model: $relPath"
+            }
+        }
+        Write-Host ''
+    }
+}
+
+#endregion
+
+#region --- Redirect Handler Program.cs Annotations (RF-08) ---
+
+if ($script:RedirectHandlers.Count -gt 0 -and -not $WhatIfPreference) {
+    $programPath = Join-Path $Output 'Program.cs'
+    if (Test-Path $programPath) {
+        $programContent = Get-Content -Path $programPath -Raw -Encoding UTF8
+        $redirectComments = "`n// --- Redirect Handler Pages (convert to minimal API endpoints) ---"
+        foreach ($handler in $script:RedirectHandlers) {
+            $redirectComments += "`n// TODO: $handler was a redirect handler — convert to minimal API endpoint"
+        }
+        $redirectComments += "`n"
+        $programContent = $programContent.Replace('app.Run();', "${redirectComments}`napp.Run();")
+        Set-Content -Path $programPath -Value $programContent -Encoding UTF8
+        Write-TransformLog -File 'Program.cs' -Transform 'RedirectHandler' -Detail "Added $($script:RedirectHandlers.Count) redirect handler TODO(s) to Program.cs"
+    }
+}
+
+#endregion
+
 #region --- Summary ---
 
 Write-Host '============================================================' -ForegroundColor Cyan
@@ -1160,6 +1394,7 @@ Write-Host '============================================================' -Foreg
 Write-Host "  Files processed:       $($script:FilesProcessed)"
 Write-Host "  Transforms applied:    $($script:TransformsApplied)"
 Write-Host "  Static files copied:   $staticCount"
+Write-Host "  Model files copied:    $modelsCopied"
 Write-Host "  Items needing review:  $($script:ManualItems.Count)"
 Write-Host ''
 
