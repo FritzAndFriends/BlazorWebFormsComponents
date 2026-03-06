@@ -161,3 +161,24 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 - **P1:** Manage.razor code-behind, ManageLogins code-behind, Visible to @if conversion, enum gaps (LogoutAction, BorderStyle, WebColor).
 - **P2:** bwfc-scan.ps1 parse error, hex color escaping, remaining account page stubs, ModelErrorMessage equivalent.
 - **Decision:** `.ai-team/decisions/inbox/forge-cycle3-analysis.md` -- 3-sprint plan (auth foundation, script improvements, account pages polish).
+
+### Documentation Reorganization Proposal (2026-03-06)
+
+- **Task:** Audited docs/, planning-docs/, and samples/ to propose consolidation of end-user vs developer documentation.
+- **Key findings:**
+  - `docs/` mixes user guides with internal benchmark reports (Run9-Run11) and 6 migration-tests/ folders
+  - `samples/` has 6 `Run*WingtipToys/` test run folders mixed with demo samples
+  - `mkdocs.yml` nav publishes internal content to end users (Migration Tests section, benchmark links)
+- **Proposed structure:**
+  - `docs/` — End-user only (55+ component docs, migration guides, utility features)
+  - `dev-docs/` — New folder for contributor docs (benchmarks/, migration-tests/, migration-runs/, screenshots/)
+  - `planning-docs/` — Unchanged (analysis/, components/, milestones/, reports/, proposals/)
+  - `samples/` — Clean demos only (AfterBlazor*, BeforeWebForms, WingtipToys targets)
+- **Key decisions in proposal:**
+  1. Create `dev-docs/` as new top-level internal documentation folder
+  2. Move `Run*WingtipToys/` from samples/ to `dev-docs/migration-runs/`
+  3. Remove benchmark reports and migration-tests from mkdocs.yml nav
+  4. Consolidate screenshots from planning-docs/ to dev-docs/
+- **Deliverables:**
+  - Decision inbox: `.ai-team/decisions/inbox/forge-docs-reorganization.md`
+  - Detailed proposal: `planning-docs/proposals/DOCS-REORGANIZATION.md`

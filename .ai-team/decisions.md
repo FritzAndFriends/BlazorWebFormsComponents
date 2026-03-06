@@ -7095,3 +7095,232 @@ These controls ARE present in the output; they're just missing from the summary 
 **By:** Forge
 **What:** Run 11 preservation reviewed at 98.9% (176/178 adjusted). All 3 P0 gaps from Run 10 CLOSED. Cycle 3 priorities: P0 -- Login.razor and Register.razor must have functional code-behinds (per Jeff's directive), requires mock auth service (`Services/MockAuthService.cs` + `MockAuthenticationStateProvider`). P1 -- Manage.razor code-behind, ManageLogins code-behind, conditional Visible to @if conversion, enum conversion gaps (LogoutAction, BorderStyle, WebColor). P2 -- bwfc-scan.ps1 parse error, hex color escaping, remaining account page stubs, ModelErrorMessage equivalent. 3-sprint plan: Sprint 1 auth foundation, Sprint 2 script improvements, Sprint 3 account pages polish.
 **Why:** Run 11 achieved near-perfect BWFC preservation. The gap has shifted from markup fidelity to functional completeness -- pages render correctly but code-behinds are stubs. Login/Register are the highest-value targets per user directive.
+### 2026-03-06: Documentation reorganization proposal
+
+**By:** Forge  
+**What:** Proposed new structure separating end-user docs, developer docs, and migration test artifacts  
+**Why:** Current docs/, planning-docs/, and samples/ folders have mixed content making it hard for users to find library docs vs internal development materials
+
+## Current State Analysis
+
+### docs/ (MkDocs Source — Published to GitHub Pages)
+
+The `docs/` folder is both published documentation AND internal development artifacts:
+
+**End-User Content (SHOULD stay):**
+- `README.md` — Library homepage
+- `EditorControls/`, `DataControls/`, `ValidationControls/`, `NavigationControls/`, `LoginControls/` — 55+ component API docs
+- `UtilityFeatures/` — Databinder, ViewState, Page system docs
+- `Migration/readme.md`, `Strategies.md`, `MasterPages.md`, `User-Controls.md`, etc. — Migration guides for users
+- `assets/`, `images/` — Static assets
+
+**Developer/Internal Content (SHOULD move):**
+- `Migration/Run9-WingtipToys-Benchmark.md`, `Run10-WingtipToys-Benchmark.md`, `Run11-WingtipToys-Benchmark.md` — Internal benchmark reports, not user guides
+- `migration-tests/` folder — 6 test run folders with build outputs, layer results, scan outputs
+- `Migration/WebformsHtml/` — HTML capture samples (internal reference)
+- `samples/netstandard-1/` — Single sample project reference
+
+### planning-docs/ (Internal Development)
+
+This folder is correctly developer-focused, but structure is flat:
+
+- `analysis/` — 9 deep analysis docs (audits, POC plans, data control analysis)
+- `components/` — 52 per-control analysis docs comparing Web Forms vs BWFC
+- `milestones/` — 11 milestone plans and audit reports
+- `reports/` — Executive reports
+- `screenshots/` — 49 comparison screenshots
+- `README.md`, `SUMMARY.md` — Documentation for the planning-docs folder
+
+### samples/ (Mixed Purposes)
+
+- **Reference Samples** (SHOULD stay): `AfterBlazorClientSide/`, `AfterBlazorServerSide/`, `BeforeWebForms/`, `SharedSampleObjects/`
+- **Migration Target**: `WingtipToys/`, `FreshWingtipToys/`, `AfterWingtipToys/`
+- **Migration Test Runs** (SHOULD move): `Run7WingtipToys/`, `Run8WingtipToys/`, `Run9WingtipToys/`, `Run10WingtipToys/`, `Run11WingtipToys/`, `Run12WingtipToys/`
+
+### mkdocs.yml nav
+
+Currently publishes ALL content including internal benchmark reports and migration test folders — mixing end-user docs with developer artifacts.
+
+## Proposed Structure
+
+### 1. `docs/` — End-User Documentation Only (Published)
+
+Keep clean for library users. Remove all internal/development content.
+
+```
+docs/
+├── README.md                    # Library homepage
+├── assets/                      # Logos, CSS, images
+├── images/                      # Documentation images
+├── EditorControls/              # ~25 component docs
+├── DataControls/                # ~10 component docs
+├── ValidationControls/          # ~8 component docs
+├── NavigationControls/          # ~5 component docs
+├── LoginControls/               # ~7 component docs
+├── UtilityFeatures/             # ~8 feature docs
+└── Migration/                   # User-facing migration guides ONLY
+    ├── readme.md                # Getting started
+    ├── AutomatedMigration.md    # How to use migration toolkit
+    ├── Strategies.md            # Migration strategies
+    ├── Custom-Controls.md
+    ├── DeferredControls.md
+    ├── MasterPages.md
+    ├── NET-Standard.md
+    ├── ThemesAndSkins.md
+    ├── User-Controls.md
+    └── migration_readiness.md
+```
+
+**Remove from docs/:**
+- `Migration/Run9-WingtipToys-Benchmark.md` → move
+- `Migration/Run10-WingtipToys-Benchmark.md` → move
+- `Migration/Run11-WingtipToys-Benchmark.md` → move
+- `Migration/WebformsHtml/` → move
+- `migration-tests/` folder → move
+- `samples/` folder → move or delete
+
+### 2. `dev-docs/` — New Developer Documentation Folder (Not Published)
+
+Create a new top-level folder for all internal/contributor documentation:
+
+```
+dev-docs/
+├── README.md                    # Index for contributors
+├── benchmarks/                  # WingtipToys benchmark reports
+│   ├── Run9-WingtipToys-Benchmark.md
+│   ├── Run10-WingtipToys-Benchmark.md
+│   └── Run11-WingtipToys-Benchmark.md
+├── migration-tests/             # Move from docs/
+│   ├── README.md
+│   ├── wingtiptoys-2026-03-04/
+│   ├── wingtiptoys-run2-2026-03-04/
+│   └── ... (all run folders)
+├── html-samples/                # HTML capture reference
+│   └── (content from docs/Migration/WebformsHtml/)
+└── screenshots/                 # Visual comparison screenshots
+    └── (content from planning-docs/screenshots/)
+```
+
+### 3. `planning-docs/` — Keep as Project Planning (Not Published)
+
+Already well-structured. Add proposals folder:
+
+```
+planning-docs/
+├── README.md
+├── SUMMARY.md
+├── analysis/                    # Cross-cutting analysis
+├── components/                  # Per-control audits
+├── milestones/                  # Milestone plans
+├── reports/                     # Executive reports
+└── proposals/                   # NEW: Architecture proposals like this one
+```
+
+### 4. `samples/` — Reference Samples Only (Clean Up)
+
+Keep the demonstration samples, move test runs elsewhere:
+
+```
+samples/
+├── readme.md
+├── AfterBlazorClientSide/       # Blazor WASM demo
+├── AfterBlazorServerSide/       # Blazor Server demo  
+├── AfterBlazorServerSide.Tests/ # Sample tests
+├── BeforeWebForms/              # Original Web Forms reference
+├── SharedSampleObjects/         # Shared models
+├── WingtipToys/                 # Primary migration target
+├── FreshWingtipToys/            # Clean slate migration
+└── AfterWingtipToys/            # Completed migration reference
+```
+
+**Move from samples/:**
+- `Run7WingtipToys/` through `Run12WingtipToys/` → `dev-docs/migration-runs/`
+
+### 5. `dev-docs/migration-runs/` — Intermediate Test Outputs
+
+New home for all test run artifacts:
+
+```
+dev-docs/migration-runs/
+├── README.md                    # Index explaining run progression
+├── Run7WingtipToys/
+├── Run8WingtipToys/
+├── Run9WingtipToys/
+├── Run10WingtipToys/
+├── Run11WingtipToys/
+└── Run12WingtipToys/
+```
+
+## Migration Plan
+
+### Phase 1: Create dev-docs/ structure
+
+1. Create `dev-docs/` folder
+2. Create `dev-docs/README.md` with contributor index
+3. Create subfolders: `benchmarks/`, `migration-tests/`, `migration-runs/`, `html-samples/`, `screenshots/`
+
+### Phase 2: Move content
+
+| Source | Destination |
+|--------|-------------|
+| `docs/Migration/Run*-WingtipToys-Benchmark.md` | `dev-docs/benchmarks/` |
+| `docs/migration-tests/` | `dev-docs/migration-tests/` |
+| `docs/Migration/WebformsHtml/` | `dev-docs/html-samples/` |
+| `docs/samples/` | Delete (appears unused) |
+| `samples/Run*WingtipToys/` | `dev-docs/migration-runs/` |
+| `planning-docs/screenshots/` | `dev-docs/screenshots/` |
+
+### Phase 3: Update mkdocs.yml
+
+Remove from nav:
+- `Migration Tests` section entirely
+- Individual benchmark report links under Migration
+
+Keep in nav:
+- All component docs
+- User-facing migration guides
+- Utility features
+
+## mkdocs.yml Changes
+
+**Remove:**
+```yaml
+  - Migration Tests:
+      - Overview: migration-tests/README.md
+      - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md
+```
+
+**Remove from Migration section:**
+```yaml
+      - Run 9 WingtipToys Benchmark: Migration/Run9-WingtipToys-Benchmark.md
+      - Run 10 WingtipToys Benchmark: Migration/Run10-WingtipToys-Benchmark.md
+      - Run 11 WingtipToys Benchmark: Migration/Run11-WingtipToys-Benchmark.md
+```
+
+**Final Migration nav section:**
+```yaml
+  - Migration:
+      - Getting started: Migration/readme.md
+      - Automated Migration Guide: Migration/AutomatedMigration.md
+      - Migration Strategies: Migration/Strategies.md
+      - Custom Controls: Migration/Custom-Controls.md
+      - Deferred Controls: Migration/DeferredControls.md
+      - Master Pages: Migration/MasterPages.md
+      - .NET Standard to the Rescue: Migration/NET-Standard.md
+      - Themes and Skins: Migration/ThemesAndSkins.md
+      - User Controls: Migration/User-Controls.md
+      - Web Forms Application Migration Readiness: Migration/migration_readiness.md
+```
+
+## Summary
+
+| Folder | Audience | Published? |
+|--------|----------|------------|
+| `docs/` | Library users | ✅ Yes (MkDocs) |
+| `dev-docs/` | Contributors | ❌ No |
+| `planning-docs/` | Project team | ❌ No |
+| `samples/` | Developers (demo) | ❌ No (but referenced in docs) |
+| `migration-toolkit/` | Migration users | ❌ No (standalone toolkit) |
+
+**Decision Requested:** Approve this reorganization proposal so Beast and team can execute the file moves and mkdocs.yml updates.
+
