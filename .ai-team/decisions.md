@@ -5563,7 +5563,6 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 **What:** Migration test runs with screenshots and measurements go in `docs/migration-tests/` with a subfolder per run containing a markdown report and supporting images. This is the standard location for all migration benchmarking.
 **Why:** User request — establishes a repeatable pattern for tracking migration test results over time.
 
-
 ### 2026-03-04: migration-toolkit/ is the canonical home for all deliverable migration assets (consolidated)
 **By:** Jeffrey T. Fritz, Forge
 **Status:** Implemented
@@ -5705,7 +5704,6 @@ This would reduce the manual item count from 18 to ~14, pushing Layer 1 coverage
 
 Should Cyclops implement these two regexes in `bwfc-migrate.ps1`? The changes are ~10 lines of code in the `ConvertFrom-Expressions` function, with well-defined test cases from WingtipToys source files.
 
-
 ### 2026-03-04: Master Page Transforms and Expression Regex Enhancements
 
 **By:** Cyclops
@@ -5742,13 +5740,11 @@ Completed Run 4 of the WingtipToys migration benchmark using the enhanced `bwfc-
 
 Run 4 validates that the enhanced script is ready for inclusion in the migration toolkit. The 3 new features (master page conversion, App/Routes scaffold, format-string regexes) collectively reduce manual Layer 2 work by approximately 30-40 minutes per migration.
 
-
 ### 2026-03-05: GetRouteUrl RouteValueDictionary overloads completed
 
 **By:** Cyclops
 **What:** Completed the two stubbed `RouteValueDictionary` overloads in `GetRouteUrlHelper.cs` that previously returned `null`. They now delegate to `LinkGenerator.GetPathByRouteValues` identically to the `object` overloads. All 4 overloads match the Web Forms `Control.GetRouteUrl` API surface.
 **Why:** The Run 4 report flagged `GetRouteUrl` as needing completion. While WingtipToys only uses anonymous-object overloads (which already worked), the `RouteValueDictionary` overloads are part of the Web Forms API surface and should work correctly for any migrated code that uses them. Returning `null` was a silent failure that could confuse developers during migration.
-
 
 ### 2026-03-04: Migration report image paths must use 3-level relative traversal
 
@@ -5756,14 +5752,10 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
 **Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
 
-
 ### 2026-03-04: User directive — exclude FreshWingtipToys and feasibility doc
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** FreshWingtipToys sample site (samples/FreshWingtipToys/) and the ASPX middleware feasibility doc (planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md) should NOT be committed to the repo. They are scratch artifacts from the migration benchmarking work.
 **Why:** User request — captured for team memory
-
-
-
 
 ### 2026-03-04: Run 5 Migration Patterns
 
@@ -5785,8 +5777,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 3. When ASP.NET Identity is used in the Web Forms project, prefer ASP.NET Core Identity in the Blazor migration
 4. Event handler migration should leverage BWFC component event parameters (OnClick, OnCommand, OnSelectedIndexChanged, etc.) which already have similar names to Web Forms originals
 **Why:** User request — establishing canonical migration standards based on Run 5 learnings. These should be reflected in migration scripts, documentation, and skills.
-
-
 
 ### 2026-03-05: Migration Toolkit Run 6  BWFC-first migration standards and 8 script enhancements (consolidated)
 
@@ -5822,8 +5812,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 **Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
 
-
-
 ### 2026-03-04: @rendermode InteractiveServer belongs in App.razor, not _Imports.razor (consolidated)
 
 **By:** Forge, Cyclops, Jeffrey T. Fritz
@@ -5842,12 +5830,10 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
 **Why:** These patterns should be considered validated for external migration guidance.
 
-
 ### 2026-03-04: User directive
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Entity Framework Core migrations should always use the latest .NET 10 version of the package, currently 10.0.3. Use `Microsoft.EntityFrameworkCore` version 10.0.3 (and related packages like `.SqlServer`, `.Tools`, `.Design` at the same version).
 **Why:** User request — captured for team memory. Ensures migrated projects use current stable EF Core matching the net10.0 TFM.
-
 
 ### 2026-03-04: WebFormsPageBase  Page base class for converted ASPX pages (consolidated)
 
@@ -5931,7 +5917,6 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 - `dev-docs/bwfc-audit-2026-03-06.md` — New audit report
 - `.ai-team/agents/forge/history.md` — Updated with audit findings
 
-
 ### 2026-03-06: Skills cross-reference review — LoginView is native, not a shim
 **By:** Beast (Technical Writer)
 **Requested by:** Jeffrey T. Fritz
@@ -5953,3 +5938,13 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 
 **Why:** Skills are the primary interface between the BWFC library and migration developers (both human and AI). Inaccurate skills cause incorrect migrations. This review ensures every feature reference is accurate and no BWFC features are missing.
 
+### 2026-03-06: Run 8 migration report enhanced for executive audience
+
+**By:** Beast
+**What:** Updated `dev-docs/migration-tests/wingtiptoys-run8-2026-03-06/REPORT.md` with executive-focused content: prominent timing section (ASCII timeline + phase table), screenshot gallery (9 PNGs in 4 functional groups), and 4 before/after code comparisons (Default, Site.Master→MainLayout, ProductList, Login). Existing technical sections preserved below the new executive content.
+**Why:** Migration reports need to serve two audiences — executives who want proof the automation works ("under 2 hours, 14/14 tests") and engineers who want technical details. The report now leads with executive content and keeps technical depth below the fold. This pattern should carry forward to future migration test reports.
+
+### 2026-03-06: User directive — documentation scope
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.
+**Why:** User request — captured for team memory

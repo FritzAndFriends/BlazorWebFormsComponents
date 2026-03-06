@@ -167,3 +167,7 @@ Team updates: GetRouteUrl overloads (Cyclops), migration standards formalized (J
 3. Created `.ai-team/decisions/inbox/forge-bwfc-audit.md` — decision document for team
 
 � Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast
+
+ Team update (2026-03-06): Migration reports should lead with executive content (timing, screenshots, before/after code), technical details below the fold. Pattern established in Run 8 report.  decided by Beast
+
+ Team update (2026-03-06): Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.  decided by Jeffrey T. Fritz

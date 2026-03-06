@@ -146,3 +146,14 @@
 - **Pattern observed:** Internal `.ai-team/skills/` files drift behind `migration-toolkit/skills/` files because team updates primarily target the external-facing toolkit.
 
  Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge
+
+### Run 8 Migration Report Enhancement (2026-03-06)
+
+- **Report updated:** `dev-docs/migration-tests/wingtiptoys-run8-2026-03-06/REPORT.md` — enhanced with executive-focused content: timing timeline, screenshot gallery, and 4 before/after code comparisons.
+- **Executive report pattern:** Lead with a blockquote "bottom line" sentence, then timeline visualization (ASCII art), then screenshot gallery in markdown tables, then before/after code blocks with green-check callouts. Technical sections preserved below the fold.
+- **Before/after comparison technique:** Show 3–4 key pages with stacked code blocks (Before/After) and a callout summarizing what changed and what stayed the same. Best pairs: simple pages (Default), layout/master page, data-bound lists (ProductList), and forms (Login). Executives care most about "the markup is recognizable."
+- **Screenshot gallery layout:** Use 2-column markdown tables with `![alt](path)` in cells and bold captions below. Group by functional area (Navigation, Catalog, Cart, Auth). Relative paths from report location: `screenshots/blazor-*.png`.
+- **Timing data matters for executives:** The ASCII timeline diagram + phase breakdown table + category percentages (automated <1%, manual 23%, testing 70%) tell the story faster than prose. The "under 2 hours" headline is the money number.
+- **Key file paths:** Report at `dev-docs/migration-tests/wingtiptoys-run8-2026-03-06/REPORT.md`, screenshots in `screenshots/` subfolder, Web Forms source at `samples/WingtipToys/WingtipToys/`, Blazor output at `samples/AfterWingtipToys/`.
+
+ Team update (2026-03-06): Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.  decided by Jeffrey T. Fritz
