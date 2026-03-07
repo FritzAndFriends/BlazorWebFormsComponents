@@ -1,26 +1,56 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WingtipToys.Models
-{
-    public class Order
-    {
-        public int OrderId { get; set; }
-        public DateTime OrderDate { get; set; }
-        public string Username { get; set; } = "";
-        [DataType(DataType.Currency)]
-        public decimal Total { get; set; }
-        public string FirstName { get; set; } = "";
-        public string LastName { get; set; } = "";
-        public string Address { get; set; } = "";
-        public string City { get; set; } = "";
-        public string State { get; set; } = "";
-        public string PostalCode { get; set; } = "";
-        public string Country { get; set; } = "";
-        public string Phone { get; set; } = "";
-        [DataType(DataType.EmailAddress)]
-        public string Email { get; set; } = "";
-        public string? PaymentTransactionId { get; set; }
+namespace WingtipToys.Models;
 
-        public List<OrderDetail> OrderDetails { get; set; } = new();
-    }
+public class Order
+{
+    public int OrderId { get; set; }
+    public DateTime OrderDate { get; set; }
+    public string Username { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "First Name is required")]
+    [StringLength(160)]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Last Name is required")]
+    [StringLength(160)]
+    public string LastName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Address is required")]
+    [StringLength(70)]
+    public string Address { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "City is required")]
+    [StringLength(40)]
+    public string City { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "State is required")]
+    [StringLength(40)]
+    public string State { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Postal Code is required")]
+    [StringLength(10)]
+    public string PostalCode { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Country is required")]
+    [StringLength(40)]
+    public string Country { get; set; } = string.Empty;
+
+    [StringLength(24)]
+    public string? Phone { get; set; }
+
+    [Required(ErrorMessage = "Email Address is required")]
+    [DataType(DataType.EmailAddress)]
+    public string Email { get; set; } = string.Empty;
+
+    [ScaffoldColumn(false)]
+    public decimal Total { get; set; }
+
+    [ScaffoldColumn(false)]
+    public string? PaymentTransactionId { get; set; }
+
+    [ScaffoldColumn(false)]
+    public bool HasBeenShipped { get; set; }
+
+    public List<OrderDetail> OrderDetails { get; set; } = new();
 }

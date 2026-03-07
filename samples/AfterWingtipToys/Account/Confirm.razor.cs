@@ -1,8 +1,1 @@
-using Microsoft.AspNetCore.Components;
-
-namespace WingtipToys.Account
-{
-    public partial class Confirm : ComponentBase
-    {
-    }
-}
+// Stub  not yet migrated to Blazor

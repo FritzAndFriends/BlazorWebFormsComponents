@@ -1,8 +1,1 @@
-using Microsoft.AspNetCore.Components;
-
-namespace WingtipToys
-{
-    public partial class ViewSwitcher : ComponentBase
-    {
-    }
-}
+// Stub  not yet migrated to Blazor

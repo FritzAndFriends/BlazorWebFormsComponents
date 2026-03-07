@@ -2,6 +2,7 @@ using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Data;
+using WingtipToys.Models;
 using WingtipToys.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,45 +10,41 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddBlazorWebFormsComponents();
 
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
-builder.Services.AddScoped<CartStateService>();
-builder.Services.AddScoped<CheckoutStateService>();
-builder.Services.AddScoped<IPayPalService, MockPayPalService>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
-    options.Password.RequireDigit = true;
+    options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = false;
 })
-.AddEntityFrameworkStores<ProductContext>()
-.AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<ProductContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/Login";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<CartStateService>();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-// Ensure database is created and seeded
-using (var scope = app.Services.CreateScope())
+// Seed the database
 {
-    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
-    using var context = factory.CreateDbContext();
-    ProductDatabaseInitializer.Seed(context);
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    await IdentityDataSeeder.SeedAsync(roleManager, userManager);
+    var factory = app.Services.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using var db = factory.CreateDbContext();
+    db.Database.EnsureCreated();
+    ProductDatabaseInitializer.Seed(db);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -62,52 +59,77 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapRazorComponents<WingtipToys.Components.App>()
-    .AddInteractiveServerRenderMode();
-
-// HTTP endpoint for login — SignInManager requires an active HTTP response to set cookies,
-// which is not available inside a SignalR circuit (InteractiveServer mode).
-app.MapGet("/Account/PerformLogin", async (
-    string email,
-    string password,
-    SignInManager<IdentityUser> signInManager) =>
+// Auth endpoints — plain HTML forms post here
+app.MapPost("/account/register-handler", async (HttpContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) =>
 {
-    var result = await signInManager.PasswordSignInAsync(email, password,
-        isPersistent: false, lockoutOnFailure: false);
+    var form = await context.Request.ReadFormAsync();
+    var email = form["Email"].ToString();
+    var password = form["Password"].ToString();
+    var confirmPassword = form["ConfirmPassword"].ToString();
 
-    if (result.Succeeded)
-        return Results.Redirect("/");
-    if (result.IsLockedOut)
-        return Results.Redirect("/Account/Lockout");
-
-    return Results.Redirect("/Account/Login?error=" + Uri.EscapeDataString("Invalid login attempt."));
-});
-
-// HTTP endpoint for registration — creates user then redirects to login
-app.MapGet("/Account/PerformRegister", async (
-    string email,
-    string password,
-    UserManager<IdentityUser> userManager) =>
-{
-    var user = new IdentityUser { UserName = email, Email = email };
-    var createResult = await userManager.CreateAsync(user, password);
-
-    if (createResult.Succeeded)
+    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
     {
-        return Results.Redirect("/Account/Login");
+        return Results.Redirect("/Account/Register?error=Email+and+password+are+required");
+    }
+    if (password != confirmPassword)
+    {
+        return Results.Redirect("/Account/Register?error=Passwords+do+not+match");
     }
 
-    var errors = string.Join(" ", createResult.Errors.Select(e => e.Description));
-    return Results.Redirect("/Account/Register?error=" + Uri.EscapeDataString(errors));
+    var user = new IdentityUser { UserName = email, Email = email };
+    var result = await userManager.CreateAsync(user, password);
+    if (result.Succeeded)
+    {
+        await signInManager.SignInAsync(user, isPersistent: false);
+        return Results.Redirect(form["ReturnUrl"].ToString() is { Length: > 0 } returnUrl ? returnUrl : "/");
+    }
+
+    var errors = string.Join("+", result.Errors.Select(e => e.Description));
+    return Results.Redirect($"/Account/Register?error={Uri.EscapeDataString(errors)}");
 });
 
-// HTTP endpoint for logout — requires an active HTTP response to clear auth cookies
-app.MapPost("/Account/PerformLogout", async (
-    SignInManager<IdentityUser> signInManager) =>
+app.MapPost("/account/login-handler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["Email"].ToString();
+    var password = form["Password"].ToString();
+    var rememberMe = form["RememberMe"].ToString() == "true";
+
+    var result = await signInManager.PasswordSignInAsync(email, password, rememberMe, lockoutOnFailure: false);
+    if (result.Succeeded)
+    {
+        return Results.Redirect(form["ReturnUrl"].ToString() is { Length: > 0 } returnUrl ? returnUrl : "/");
+    }
+
+    return Results.Redirect("/Account/Login?error=Invalid+login+attempt");
+});
+
+app.MapPost("/account/logout-handler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
     return Results.Redirect("/");
 });
+
+app.MapGet("/AddToCart", async (int? productID, CartStateService cartService) =>
+{
+    if (productID.HasValue && productID > 0)
+    {
+        await cartService.AddToCartAsync(productID.Value);
+    }
+    return Results.Redirect("/ShoppingCart");
+});
+
+app.MapGet("/RemoveFromCart", async (string? itemId, CartStateService cartService) =>
+{
+    if (!string.IsNullOrEmpty(itemId))
+    {
+        await cartService.RemoveItemAsync(itemId);
+    }
+    return Results.Redirect("/ShoppingCart");
+});
+
+app.MapRazorComponents<WingtipToys.Components.App>()
+    .AddInteractiveServerRenderMode();
 
 app.Run();
 

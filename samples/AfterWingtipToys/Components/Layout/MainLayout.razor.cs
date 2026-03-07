@@ -1,21 +1,27 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
 using WingtipToys.Models;
 
-namespace WingtipToys.Components.Layout
+namespace WingtipToys.Components.Layout;
+
+public partial class MainLayout : LayoutComponentBase
 {
-    public partial class MainLayout : LayoutComponentBase
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private List<Category>? _categories;
+    private string? _userName;
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject]
-        private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+        using var db = await DbFactory.CreateDbContextAsync();
+        _categories = await db.Categories.OrderBy(c => c.CategoryName).ToListAsync();
 
-        public List<Category> Categories { get; set; } = new();
-
-        protected override async Task OnInitializedAsync()
+        if (AuthStateTask != null)
         {
-            using var context = DbFactory.CreateDbContext();
-            Categories = await context.Categories.OrderBy(c => c.CategoryID).ToListAsync();
+            var authState = await AuthStateTask;
+            _userName = authState.User.Identity?.Name;
         }
     }
 }

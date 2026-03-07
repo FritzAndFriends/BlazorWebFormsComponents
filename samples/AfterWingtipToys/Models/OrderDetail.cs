@@ -1,14 +1,11 @@
-namespace WingtipToys.Models
-{
-    public class OrderDetail
-    {
-        public int OrderDetailId { get; set; }
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
+namespace WingtipToys.Models;
 
-        public Order? Order { get; set; }
-        public Product? Product { get; set; }
-    }
+public class OrderDetail
+{
+    public int OrderDetailId { get; set; }
+    public int OrderId { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public int ProductId { get; set; }
+    public int Quantity { get; set; }
+    public decimal? UnitPrice { get; set; }
 }

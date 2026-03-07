@@ -1,30 +1,32 @@
 @page "/Account/Register"
 
 <h2>Register.</h2>
-@if (!string.IsNullOrEmpty(Error))
+
+@if (!string.IsNullOrEmpty(_error))
 {
-    <p class="text-danger">@Error</p>
+    <p class="text-danger">@_error</p>
 }
-<form action="/Account/PerformRegister" method="get" data-enhance="false">
-    <div class="form-horizontal">
-        <h4>Create a new account.</h4>
-        <hr />
+
+<div class="form-horizontal">
+    <h4>Create a new account</h4>
+    <hr />
+    <form method="post" action="/account/register-handler" data-enhance="false">
         <div class="form-group">
-            <label for="email" class="col-md-2 control-label">Email</label>
+            <label class="col-md-2 control-label">Email</label>
             <div class="col-md-10">
-                <input type="email" id="email" name="email" class="form-control" />
+                <input type="email" name="Email" class="form-control" required />
             </div>
         </div>
         <div class="form-group">
-            <label for="password" class="col-md-2 control-label">Password</label>
+            <label class="col-md-2 control-label">Password</label>
             <div class="col-md-10">
-                <input type="password" id="password" name="password" class="form-control" />
+                <input type="password" name="Password" class="form-control" required />
             </div>
         </div>
         <div class="form-group">
-            <label for="confirmPassword" class="col-md-2 control-label">Confirm password</label>
+            <label class="col-md-2 control-label">Confirm password</label>
             <div class="col-md-10">
-                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" />
+                <input type="password" name="ConfirmPassword" class="form-control" required />
             </div>
         </div>
         <div class="form-group">
@@ -32,5 +34,15 @@
                 <button type="submit" class="btn btn-default">Register</button>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")] public string? _error { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Page.Title = "Register";
+    }
+}
+

@@ -1,9 +1,1 @@
-using Microsoft.AspNetCore.Components;
-
-namespace WingtipToys
-{
-    public partial class Contact : ComponentBase
-    {
-        protected string Title = "Contact";
-    }
-}
+// Contact page — no code-behind logic needed

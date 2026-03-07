@@ -1,20 +1,13 @@
 @page "/Account/Manage"
-@rendermode InteractiveServer
-@attribute [Authorize]
 
 <h2>Manage Account.</h2>
-<p class="text-success">@statusMessage</p>
-<div>
+
+<div class="form-horizontal">
     <h4>Change your account settings</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>Password:</dt>
-        <dd><a href="/Account/ManagePassword">Change</a></dd>
-        <dt>External Logins:</dt>
-        <dd><a href="/Account/ManageLogins">Manage</a></dd>
-        <dt>Phone Number:</dt>
-        <dd><a href="/Account/AddPhoneNumber">Add</a></dd>
-        <dt>Two-Factor Authentication:</dt>
-        <dd><p>There are no two-factor authentication providers configured.</p></dd>
-    </dl>
+    <p>Account management features are not yet available in this migration.</p>
 </div>
+
+@code {
+    protected override void OnInitialized() { Page.Title = "Manage Account"; }
+}

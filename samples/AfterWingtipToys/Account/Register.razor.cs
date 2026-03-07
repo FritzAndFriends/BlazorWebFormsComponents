@@ -1,10 +1,2 @@
-using Microsoft.AspNetCore.Components;
-
-namespace WingtipToys.Account
-{
-    public partial class Register : ComponentBase
-    {
-        [SupplyParameterFromQuery(Name = "error")]
-        public string? Error { get; set; }
-    }
-}
+// Register page uses plain HTML form posting to /account/register-handler endpoint.
+// No code-behind logic needed — all handled by minimal API in Program.cs.

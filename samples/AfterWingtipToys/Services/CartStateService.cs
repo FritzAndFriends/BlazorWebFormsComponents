@@ -1,113 +1,102 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
 using WingtipToys.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace WingtipToys.Services
+namespace WingtipToys.Services;
+
+public class CartStateService
 {
-    public class CartStateService
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDbContextFactory<ProductContext> _dbFactory;
+    private const string CartCookieKey = "WingtipToys_CartId";
+
+    public CartStateService(IHttpContextAccessor httpContextAccessor, IDbContextFactory<ProductContext> dbFactory)
     {
-        private readonly IDbContextFactory<ProductContext> _contextFactory;
-        private readonly string _cartId;
+        _httpContextAccessor = httpContextAccessor;
+        _dbFactory = dbFactory;
+    }
 
-        public CartStateService(IDbContextFactory<ProductContext> contextFactory, IHttpContextAccessor httpContextAccessor)
+    public string GetCartId()
+    {
+        var context = _httpContextAccessor.HttpContext;
+        if (context == null) return Guid.NewGuid().ToString();
+
+        var cartId = context.Request.Cookies[CartCookieKey];
+        if (string.IsNullOrEmpty(cartId))
         {
-            _contextFactory = contextFactory;
-            // Use a cookie to persist cart ID across page navigations
-            var httpContext = httpContextAccessor.HttpContext;
-            var cookieCartId = httpContext?.Request.Cookies["WingtipCartId"];
-            if (string.IsNullOrEmpty(cookieCartId))
+            cartId = Guid.NewGuid().ToString();
+            context.Response.Cookies.Append(CartCookieKey, cartId, new CookieOptions
             {
-                cookieCartId = Guid.NewGuid().ToString();
-                httpContext?.Response.Cookies.Append("WingtipCartId", cookieCartId, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-            }
-            _cartId = cookieCartId;
+                HttpOnly = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                SameSite = SameSiteMode.Lax,
+                IsEssential = true,
+            });
         }
+        return cartId;
+    }
 
-        public string GetCartId() => _cartId;
-
-        public async Task AddToCartAsync(int productId)
+    public async Task AddToCartAsync(int productId)
+    {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var cartId = GetCartId();
+        var existing = await db.ShoppingCartItems
+            .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == productId);
+        if (existing != null)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var existingItem = await context.CartItems
-                .FirstOrDefaultAsync(c => c.CartId == _cartId && c.ProductId == productId);
-
-            if (existingItem != null)
+            existing.Quantity++;
+        }
+        else
+        {
+            db.ShoppingCartItems.Add(new CartItem
             {
-                existingItem.Quantity++;
-            }
-            else
-            {
-                context.CartItems.Add(new CartItem
-                {
-                    ItemId = Guid.NewGuid().ToString(),
-                    CartId = _cartId,
-                    ProductId = productId,
-                    Quantity = 1,
-                    DateCreated = DateTime.UtcNow
-                });
-            }
-
-            await context.SaveChangesAsync();
+                ItemId = Guid.NewGuid().ToString(),
+                CartId = cartId,
+                ProductId = productId,
+                Quantity = 1,
+                DateCreated = DateTime.UtcNow
+            });
         }
+        await db.SaveChangesAsync();
+    }
 
-        public async Task<List<CartItem>> GetCartItemsAsync()
+    public async Task<List<CartItem>> GetCartItemsAsync()
+    {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var cartId = GetCartId();
+        return await db.ShoppingCartItems
+            .Include(c => c.Product)
+            .Where(c => c.CartId == cartId)
+            .ToListAsync();
+    }
+
+    public async Task UpdateQuantityAsync(string itemId, int quantity)
+    {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var item = await db.ShoppingCartItems.FindAsync(itemId);
+        if (item != null)
         {
-            using var context = _contextFactory.CreateDbContext();
-            return await context.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.CartId == _cartId)
-                .ToListAsync();
+            item.Quantity = quantity;
+            await db.SaveChangesAsync();
         }
+    }
 
-        public async Task UpdateCartItemAsync(string cartItemId, int quantity)
+    public async Task RemoveItemAsync(string itemId)
+    {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var item = await db.ShoppingCartItems.FindAsync(itemId);
+        if (item != null)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var item = await context.CartItems
-                .FirstOrDefaultAsync(c => c.ItemId == cartItemId && c.CartId == _cartId);
-
-            if (item != null)
-            {
-                item.Quantity = quantity;
-                await context.SaveChangesAsync();
-            }
+            db.ShoppingCartItems.Remove(item);
+            await db.SaveChangesAsync();
         }
+    }
 
-        public async Task RemoveCartItemAsync(string cartItemId)
-        {
-            using var context = _contextFactory.CreateDbContext();
-            var item = await context.CartItems
-                .FirstOrDefaultAsync(c => c.ItemId == cartItemId && c.CartId == _cartId);
-
-            if (item != null)
-            {
-                context.CartItems.Remove(item);
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<decimal> GetTotalAsync()
-        {
-            using var context = _contextFactory.CreateDbContext();
-            return await context.CartItems
-                .Where(c => c.CartId == _cartId)
-                .Include(c => c.Product)
-                .SumAsync(c => c.Quantity * (c.Product!.UnitPrice ?? 0));
-        }
-
-        public async Task EmptyCartAsync()
-        {
-            using var context = _contextFactory.CreateDbContext();
-            var items = await context.CartItems
-                .Where(c => c.CartId == _cartId)
-                .ToListAsync();
-
-            context.CartItems.RemoveRange(items);
-            await context.SaveChangesAsync();
-        }
+    public async Task<int> GetCountAsync()
+    {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var cartId = GetCartId();
+        return await db.ShoppingCartItems
+            .Where(c => c.CartId == cartId)
+            .SumAsync(c => c.Quantity);
     }
 }

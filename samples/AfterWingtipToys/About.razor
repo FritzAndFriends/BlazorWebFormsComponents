@@ -1,5 +1,10 @@
 @page "/About"
-<h2>@(Title).</h2>
-    <h3>Your application description page.</h3>
-    <p>Use this area to provide additional information.</p>
+
+<h2>About.</h2>
+<h3>Your application description page.</h3>
+<p>Use this area to provide additional information.</p>
+
+@code {
+    protected override void OnInitialized() { Page.Title = "About"; }
+}
 
