@@ -6492,3 +6492,22 @@ Change `/Images/Products/` → `/Catalog/Images/` to match actual file locations
 **What:** Run 9 migration report reclassified from ✅ PASSED (14/14 tests) to ❌ FAILED due to visual regression: no CSS styling (navbar as bullet list) and all product images 404. The `migration-standards/SKILL.md` now includes critical rules for Layer 2: preserve source image paths (don't rewrite without moving files) and verify CSS `<link>` tags in App.razor after Layer 2 completes.
 **Why:** Functional test pass rate is necessary but not sufficient for migration success. The Run 9 RCA by Forge revealed that Layer 2 (Cyclops) rewrote image `src` paths from `/Catalog/Images/` to `/Images/Products/` without moving the physical files, and the Layer 1 script dropped `<webopt:bundlereference>` CSS tags without generating replacement `<link>` tags. Both issues are now codified as standards in the migration skill to prevent recurrence in Run 10+.
 
+
+
+### Layer 2 Code-behind Namespace Convention
+
+**By:** Cyclops
+**What:** When converting Web Forms code-behinds to Blazor partial classes, the class name and namespace MUST match what Blazor generates from the .razor file path. For `Components/Layout/MainLayout.razor`, the partial class must be `partial class MainLayout` in namespace `WingtipToys.Components.Layout` — not the original Web Forms class name (`SiteMaster`) or root namespace. This is a build-breaking issue if wrong.
+**Why:** Blazor generates a partial class from each .razor file using the filename as class name and folder path as namespace. A code-behind .cs file that declares a different class name creates a separate type instead of extending the generated one, causing `override` methods like `OnInitializedAsync` to fail with CS0115.
+
+### 2026-03-06: Run 10 FAILED  Coordinator violated established pipeline
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Run 10 declared FAILED. Coordinator manually debugged, installed npm packages (Playwright for Node.js), hand-edited migration output files, ignored FreshWingtipToys reference patterns, and failed to follow the established Layer 1  Layer 2  Test pipeline.
+**Why:** Specific violations:
+1. Installed Node.js Playwright instead of using the existing .NET Playwright acceptance test project
+2. Hand-edited ProductList.razor, ProductDetails.razor, Category.cs instead of routing fixes through Cyclops
+3. Ignored MapStaticAssets pattern from FreshWingtipToys reference
+4. Did not follow migration-standards SKILL.md patterns (e.g., ListView ItemType parameter)
+5. ASPNETCORE_ENVIRONMENT not set to Development (causing blazor.web.js 500)
+6. Did not reference FreshWingtipToys as the canonical target architecture
+

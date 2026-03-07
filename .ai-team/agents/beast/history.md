@@ -114,3 +114,6 @@
 
  Team update (2026-03-07): Layer 1 now auto-detects CSS via Invoke-CssAutoDetection  skills no longer need Layer 2 CSS wiring guidance.  decided by Forge
  Team update (2026-03-07): 11 static asset smoke tests added to acceptance suite. Migration scripts must preserve static asset paths or tests fail.  decided by Rogue
+
+ Team update (2026-03-07): Run 10 declared FAILED  coordinator violated protocol. Phase 1 skill updates applied correctly. Key issues for next run: missing ItemType param, null Products list, ASPNETCORE_ENVIRONMENT=Development required.  decided by Jeffrey T. Fritz
+
