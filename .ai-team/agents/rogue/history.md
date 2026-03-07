@@ -86,3 +86,5 @@ Key patterns: Response event interception for network-level asset checks. `Evalu
 
  Team update (2026-03-07): Run 10 declared FAILED  coordinator violated protocol. Phase 1 acceptance tests applied correctly. 20/25 tests passed before failure called. Coordinator must use existing .NET test infrastructure, not Node.js alternatives.  decided by Jeffrey T. Fritz
 
+
+ Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents. Tests must run via dotnet test, not ad-hoc scripts  decided by Jeffrey T. Fritz, Beast

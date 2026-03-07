@@ -292,3 +292,122 @@ public partial class ProductList : WebFormsPageBase { }
 // ALSO RIGHT — for non-page components
 public partial class MyComponent : ComponentBase { }
 ```
+
+## Static Asset Migration Checklist
+
+Copy ALL of these from the Web Forms source to `wwwroot/` in the Blazor project:
+
+| Source Folder | Destination | Contains |
+|--------------|-------------|----------|
+| `Content/` | `wwwroot/Content/` | CSS files (bootstrap, Site.css, etc.) |
+| `Scripts/` | `wwwroot/Scripts/` | JavaScript (jQuery, Bootstrap JS, app scripts) |
+| `Images/` | `wwwroot/Images/` | Site images, logos |
+| `Catalog/` (or similar) | `wwwroot/Catalog/` | Product/content images |
+| `fonts/` | `wwwroot/fonts/` | Web fonts |
+| `favicon.ico` | `wwwroot/favicon.ico` | Favicon |
+
+**Verification checklist:**
+- [ ] All `<link>` CSS references in App.razor have matching physical files in wwwroot
+- [ ] All `<script>` JS references in App.razor have matching physical files in wwwroot
+- [ ] All `<img>` src paths in pages have matching physical files in wwwroot
+- [ ] Logo image path works
+- [ ] Product/catalog images load at correct paths
+- [ ] Fonts load (check browser dev tools for 404s)
+
+**Common miss:** The `Scripts/` folder is easy to forget because CSS is more visually
+obvious when missing. Always verify JS files are present — jQuery and Bootstrap JS are
+needed for interactive Bootstrap features (dropdowns, modals, collapse).
+
+## ListView Template Placeholder Conversion
+
+### The Problem
+
+In ASP.NET Web Forms, LayoutTemplate and GroupTemplate use **placeholder elements** —
+HTML elements with specific IDs that the runtime replaces with rendered content:
+
+```aspx
+<asp:ListView ...>
+    <LayoutTemplate>
+        <table>
+            <tr id="groupPlaceholder"></tr>  ← Runtime replaces this with groups
+        </table>
+    </LayoutTemplate>
+    <GroupTemplate>
+        <tr>
+            <td id="itemPlaceholder"></td>  ← Runtime replaces this with items
+        </tr>
+    </GroupTemplate>
+</asp:ListView>
+```
+
+### The Blazor Equivalent
+
+In BWFC Blazor, `LayoutTemplate` and `GroupTemplate` are `RenderFragment<RenderFragment>`
+parameters. The child content is passed as `@context` — you must explicitly render it:
+
+```razor
+<ListView Items="@Products" GroupItemCount="4" TItem="Product">
+    <LayoutTemplate>
+        <table>
+            @context   @* ← This IS the rendered groups *@
+        </table>
+    </LayoutTemplate>
+    <GroupTemplate>
+        <tr>
+            @context   @* ← This IS the rendered items *@
+        </tr>
+    </GroupTemplate>
+    <ItemTemplate>
+        <td>@context.ProductName</td>
+    </ItemTemplate>
+</ListView>
+```
+
+### Migration Rule
+
+**Replace any element with an ID containing "Placeholder" inside a *Template block
+with `@context`.** The placeholder element is just a marker — `@context` is the
+actual rendered content.
+
+| Web Forms Pattern | Blazor Pattern |
+|------------------|----------------|
+| `<tr id="groupPlaceholder"></tr>` | `@context` |
+| `<td id="itemPlaceholder"></td>` | `@context` |
+| `<div id="groupPlaceholder" />` | `@context` |
+
+### Without GroupItemCount
+
+If the ListView doesn't use GroupItemCount, LayoutTemplate still needs `@context`:
+
+```razor
+<ListView Items="@Items" TItem="MyItem">
+    <LayoutTemplate>
+        <ul>
+            @context   @* Items render here *@
+        </ul>
+    </LayoutTemplate>
+    <ItemTemplate>
+        <li>@context.Name</li>
+    </ItemTemplate>
+</ListView>
+```
+
+### Diagnostic
+
+If a ListView renders its LayoutTemplate structure but shows no items, the most
+likely cause is a missing `@context` in LayoutTemplate or GroupTemplate.
+
+## Preserving Action Links in Detail Pages
+
+When migrating detail pages (ProductDetails, FormView, etc.), ensure action links
+are preserved. The script converts `<asp:HyperLink>` but may lose context about
+the link's purpose.
+
+**Common action links to verify after migration:**
+- "Add to Cart" → `<a href="/AddToCart?productID=@context.ProductID">Add To Cart</a>`
+- "Edit" → `<a href="/Edit?id=@context.ID">Edit</a>`
+- "Delete" → button or link with confirmation
+
+**Verify:** After Layer 1 (script) conversion, check that all action links from the
+original page survive in the converted output. If any are missing, add them manually
+in Layer 2 using the `@context.PropertyName` syntax for data-bound values.

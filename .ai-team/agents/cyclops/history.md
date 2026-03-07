@@ -19,109 +19,79 @@
 - Script & Toolkit Summary (2026-03-02 through 2026-03-04)
 - GetRouteUrl, Run 5 & Toolkit Sync Summary (2026-03-04 through 2026-03-05)
 
-### Run 6 Script Enhancements (2026-03-05)
+<!-- ⚠ Summarized 2026-03-07 by Scribe — entries from 2026-03-05 through 2026-03-07 (pre-Run 11) archived -->
 
-4 enhancements to bwfc-migrate.ps1: (1) TFM net8.0->net10.0 + RenderMode using (line 139), (2) SelectMethod TODO->BWFC Items guidance (-120s, line 756), (3) static files->wwwroot/ (line 1103), (4) compilable stubs for unconvertible pages (Test-UnconvertiblePage + New-CompilableStub, lines 907-988). Bug found: @rendermode InteractiveServer in _Imports.razor is invalid in .NET 10. Test-UnconvertiblePage must also scan .aspx.cs code-behind.
+- Run 6 Script Enhancements (2026-03-05)
+- @rendermode Scaffold Fix (2026-03-05)
+- WebFormsPageBase Implementation (2026-03-05)
+- WebFormsPage IPageService Consolidation (2026-03-05)
+- LoginView Migration Script Fix (2026-03-06)
+- Run 9 Script Fixes — 9 RF items (2026-03-06)
+- Layer 2 AfterWingtipToys Build Conversion (2026-03-06)
 
-Team update (2026-03-04): Run 6 improvement analysis -> decided by Forge
-Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffold is invalid in .NET 10 -- must be removed from bwfc-migrate.ps1 line 164. Also: Test-UnconvertiblePage must scan .aspx.cs code-behind files. -- decided by Forge
+### Summary (2026-03-05 through 2026-03-07 pre-Run 11)
 
-### @rendermode Scaffold Fix (2026-03-05)
+Run 6: 4 script enhancements (TFM, SelectMethod TODO, wwwroot copy, stubs). @rendermode fix: removed standalone directive from _Imports.razor scaffold — `@rendermode` is a directive *attribute* for component instances only. WebFormsPageBase: `ComponentBase` subclass with `Page => this`, Title/MetaDescription/MetaKeywords delegates, `IsPostBack => false`. WebFormsPage consolidation: merged Page.razor head rendering into WebFormsPage via Option B. LoginView script fix: `<asp:LoginView>` → `<LoginView>` (not AuthorizeView), preserve template names. Run 9: 9 script fixes (Models copy, DbContext transform, EF6→EF Core, redirect detection, Program.cs boilerplate, Page Title extraction, QueryString/RouteData annotations, ListView GroupItemCount, csproj packages). Layer 2: full AfterWingtipToys conversion — key pattern: layout code-behind class name MUST match .razor filename. Auth pages use plain HTML forms with HTTP endpoints.
 
-**Fix applied:** Removed `@rendermode InteractiveServer` standalone directive from _Imports.razor scaffold in both migration-toolkit/scripts/bwfc-migrate.ps1 and scripts/bwfc-migrate.ps1. The `@using static Microsoft.AspNetCore.Components.Web.RenderMode` using directive was kept (correct — enables shorthand `InteractiveServer`). App.razor scaffold already had the correct pattern: `<Routes @rendermode="InteractiveServer" />` and `<HeadOutlet @rendermode="InteractiveServer" />`.
+### Run 11 — Complete WingtipToys Migration from Scratch (2026-03-07)
 
-**Lesson:** `@rendermode` is a directive *attribute* that goes on component instances (e.g., `<Routes @rendermode="InteractiveServer" />`), NOT a standalone Razor directive. Placing it as a bare directive in _Imports.razor causes build errors. For global interactivity, apply it to `<Routes>` and `<HeadOutlet>` in App.razor. The `@using static` import in _Imports.razor is the correct way to make `InteractiveServer` available as a shorthand across all pages.
- Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
+**Completed:** Full fresh migration of WingtipToys from Web Forms to Blazor Server. Built from scratch (no reference to FreshWingtipToys). 0 errors, 0 warnings.
 
+**Approach:**
+1. Created fresh `dotnet new blazor --interactivity Server --framework net10.0` project
+2. Added BWFC ProjectReference + EF Core/Identity NuGet packages
+3. Ran `bwfc-migrate.ps1` to temp dir, cherry-picked converted .razor pages
+4. Copied static content (CSS, images, fonts, favicon) from original source preserving paths
+5. Built all Layer 2 content from scratch: Models, Data, Services, Program.cs, MainLayout, all code-behinds
 
- Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+**Key decisions & patterns:**
+- Root-level `_Imports.razor` needed for pages outside `Components/` — the `Components/_Imports.razor` only applies within that folder. Both files must have identical usings + `@inherits WebFormsPageBase`.
+- Code-behind partial classes must NOT specify `: ComponentBase` when `_Imports.razor` has `@inherits WebFormsPageBase` — causes CS0263 (different base classes in partial declarations).
+- `@rendermode InteractiveServer` as a standalone directive in .razor files works for pages that need interactivity (ShoppingCart, AddToCart, AdminPage, Checkout pages). The `@using static RenderMode` in `_Imports.razor` enables the shorthand.
+- Auth pages (Login, Register) use plain HTML forms posting to HTTP endpoints — SignInManager needs HTTP context, not SignalR.
+- MainLayout inherits `LayoutComponentBase` (overrides `_Imports.razor` `@inherits`) and uses `<BlazorWebFormsComponents.Page />` for head rendering, `<LoginView>` with `<AnonymousTemplate>`/`<LoggedInTemplate>`, and code-based category list.
+- Category.Description set to `string?` — seed data doesn't populate it.
+- Product.UnitPrice converted from `double?` to `decimal?` for currency precision.
+- CartStateService uses cookie-based cart ID instead of Session.
+- Image paths preserved from source: `/Catalog/Images/Thumbs/` for list, `/Catalog/Images/` for details.
 
-### WebFormsPageBase Implementation (2026-03-05)
+**File count:** 105 total (27 .razor, 23 .cs, 38 .png images, 5 .css, plus fonts/config)
+**Build result:** 0 errors, 0 warnings
 
-**WebFormsPageBase:** Created `src/BlazorWebFormsComponents/WebFormsPageBase.cs` — abstract base class inheriting `ComponentBase` (not `BaseWebFormsComponent`). Injects `IPageService` privately, exposes `Title`, `MetaDescription`, `MetaKeywords` as delegate properties. `IsPostBack => false` so `if (!IsPostBack)` compiles and always enters. `Page => this` self-reference enables `Page.Title = "X"` to compile unchanged from Web Forms code-behind. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). Build verified clean (63 pre-existing warnings, 0 errors). Lesson: Pages are top-level containers, not child controls — inheriting `ComponentBase` directly avoids the CascadingValue wrapping and control-tree logic in `BaseWebFormsComponent`.
+### Run 11 Script Fixes — Fix 1 & Fix 2 (2026-03-07)
 
- Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
+**Fix 1: Scripts/ folder detection and copy (`Invoke-ScriptAutoDetection`)**
 
-### WebFormsPage IPageService Consolidation (2026-03-05)
+Added `Invoke-ScriptAutoDetection` function to `migration-toolkit/scripts/bwfc-migrate.ps1` (parallel to existing `Invoke-CssAutoDetection`). The function:
+- Scans source project for `Scripts/` folder
+- Filters out WebForms-specific JS (`*intellisense*`, `_references.js`, `WebForms/` subdir)
+- Copies relevant JS files to `wwwroot/Scripts/` in output
+- Injects `<script>` tags into App.razor before `</body>` (after `blazor.web.js`)
+- Orders scripts correctly: jQuery → Modernizr → Respond → Bootstrap → remaining
+- Prefers `.min.js` variants when both exist
+- Scans `Site.Master` for `<webopt:bundlereference>` targeting Scripts and flags as `ScriptBundle` manual item
+- Called from Entry Point section, right after `Invoke-CssAutoDetection`
 
-**WebFormsPage enhanced:** Merged `Page.razor` head-rendering capability into `WebFormsPage`. Added optional `IPageService` resolution via `ServiceProvider.GetService<IPageService>()` — WebFormsPage still works for naming/theming when IPageService is not registered. Subscribes to `TitleChanged`, `MetaDescriptionChanged`, `MetaKeywordsChanged` events in `OnInitialized()`. Renders `<PageTitle>` and `<HeadContent>` before the existing CascadingValue wrapper. Added `RenderPageHead` parameter (default true) to allow opting out. Implements `IDisposable` to unsubscribe from events. `Page.razor` left untouched as standalone option. Build verified clean (70 pre-existing warnings, 0 errors). Lesson: `IServiceProvider` in `BaseWebFormsComponent` is private — child classes needing it must inject their own via `[Inject]`.
+**Fix 2: Convert ListView/DataPager placeholder elements to `@context` (`Convert-TemplatePlaceholders`)**
 
-� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
+Added `Convert-TemplatePlaceholders` function in new `#region --- Template Placeholder Conversion (Fix 2) ---`. The function:
+- Finds elements whose `id` attribute contains "Placeholder" (case-insensitive)
+- Replaces self-closing tags: `<\w+\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*/>`
+- Replaces open+close tags with whitespace-only content: `<(\w+)\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*>\s*</\1>`
+- Both patterns replace with `@context`
+- Called in `Convert-WebFormsFile` pipeline AFTER `ConvertFrom-UrlReferences` and BEFORE blank line cleanup
+- Container elements (e.g., `itemPlaceholderContainer`) are preserved because they contain non-whitespace content after inner placeholder replacement
 
-
- Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
-
- Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge
-
-� Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast
-
-### LoginView Migration Script Fix (2026-03-06)
-
-**Bug fixed:** `ConvertFrom-LoginView` in `migration-toolkit/scripts/bwfc-migrate.ps1` was incorrectly converting `<asp:LoginView>` to `<AuthorizeView>` and renaming `AnonymousTemplate`/`LoggedInTemplate` to `NotAuthorized`/`Authorized`. The BWFC `LoginView` component already accepts `AnonymousTemplate` and `LoggedInTemplate` as `[Parameter] RenderFragment` properties. The script now converts `<asp:LoginView>` to `<LoginView>` and leaves template names untouched. Also updated the RoleGroups manual item to reference the BWFC RoleGroup component.
-
-**Sample fixed:** `samples/AfterWingtipToys/Components/Layout/MainLayout.razor` was using `<AuthorizeView>` with `<NotAuthorized>`/`<Authorized>`. Replaced with `<LoginView>` using `<AnonymousTemplate>`/`<LoggedInTemplate>` and `<LoginName />`. Added `@using BlazorWebFormsComponents.LoginControls` to `_Imports.razor`.
-
-**Pattern:** BWFC LoginView preserves Web Forms template names (AnonymousTemplate, LoggedInTemplate) -- the migration script should only strip the asp: prefix and attributes, never rename child templates.
-
- Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
-
-### Run 9 Script Fixes (2026-03-06)
-
-**9 fixes implemented in `migration-toolkit/scripts/bwfc-migrate.ps1`** to reduce Layer 2 manual work:
-
-**Functions modified:**
-- `New-ProjectScaffold` (lines ~128-238): Added `$SourcePath` parameter, conditional EF Core + Identity package refs (RF-06), and Identity/Session boilerplate in Program.cs (RF-07). Detection logic checks for `Models/`, `Account/`, `Login.aspx`, `Register.aspx` in source.
-- `ConvertFrom-PageDirective` (lines ~299-330): Extracts `Title="..."` attribute from `<%@ Page %>` directive before stripping, emits `<PageTitle>` (RF-10).
-- `ConvertFrom-GetRouteUrl` (lines ~664-720): After converting route calls, scans for route names in `GetRouteUrlHelper.GetRouteUrl("RouteName", ...)` and emits Write-ManualItem with concrete URL replacement hints (RF-11).
-- `Copy-CodeBehind` (lines ~831-970): Added regex transforms for `[QueryString("param")]` → `[SupplyParameterFromQuery(Name = "param")]` and `[RouteData]` → `[Parameter]` with TODO comment (RF-12).
-
-**Functions added:**
-- `Test-RedirectHandler`: Detects pages with `Response.Redirect` in code-behind and minimal markup (<100 chars after directive stripping). Flags for minimal API conversion (RF-08).
-
-**Entry point sections added:**
-- Models copy section (RF-03/RF-04): After static file copy, detects and copies `Models/*.cs` files. Strips EF6 usings, adds TODO headers. For `*Context.cs` files: replaces EF6 → EF Core using, removes old constructors (including parameterless `base("connectionName")` pattern), adds `DbContextOptions<T>` constructor.
-- ListView GroupItemCount detection (RF-13): Before asp: prefix stripping, checks for `<asp:ListView ... GroupItemCount="N"` and emits manual item with BWFC guidance.
-- Redirect handler Program.cs annotation (RF-08): After processing, appends TODO comments to Program.cs for detected redirect handler pages.
-- `$script:RedirectHandlers` tracking list added to logging region.
-
-**Key patterns:**
-- Script uses here-strings (`@"..."@`) for code templates with variable expansion. Conditional blocks are best injected via `.Replace()` after template creation.
-- `Test-Path` is used for feature detection before scaffold generation.
-- Transform pipeline order matters: RF-13 must check BEFORE `ConvertFrom-AspPrefix` strips the `asp:` prefix.
-- DbContext constructor patterns vary: parameterless `() : base("name")`, parameterized `(string x) : base(x)`, etc. Multiple regexes needed.
-
-📬 Team update (2026-03-06): Beast completed 6 skill fixes (RF-01/02/05/09/13/14) across 4 SKILL.md files — complements Cyclops's 9 script fixes. All 15 P0+P1 items done on squad/run8-improvements. — decided by Forge (analysis), implemented by Cyclops + Beast
+**Test results (WingtipToys):**
+- ✅ `wwwroot/Scripts/` created with 7 filtered JS files (9 total including those from general static copy)
+- ✅ App.razor contains 7 `<script>` tags in correct dependency order before `</body>`
+- ✅ `ProductList.razor` line 25: `<td id="itemPlaceholder"></td>` → `@context` (inside GroupTemplate)
+- ✅ `ProductList.razor` line 69: `<tr id="groupPlaceholder"></tr>` → `@context` (inside LayoutTemplate)
+- ✅ Container elements (`itemPlaceholderContainer`, `groupPlaceholderContainer`) preserved correctly
+- ✅ Migration ran clean: 32 files processed, 303 transforms, 79 static files copied
 
 
-
- Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge
-
-### Layer 2 — AfterWingtipToys Build Conversion
-
-**Completed:** Full Layer 2 conversion of `samples/AfterWingtipToys/` from non-compiling Layer 1 output to clean Blazor Server build (0 errors, 0 warnings).
-
-**Key changes:**
-- **csproj:** Replaced NuGet PackageReference with local ProjectReference. Pinned EF Core + Identity to 9.0.7.
-- **ProductContext:** `DbContext` → `IdentityDbContext<IdentityUser>` with `OnModelCreating` key configs.
-- **ProductDatabaseInitializer:** EF6 `DropCreateDatabaseIfModelChanges` → static `Seed()` with `EnsureCreated` + idempotent check.
-- **IdentityModels.cs:** Replaced OWIN stack with `IdentityDataSeeder` (admin role + demo user).
-- **Program.cs:** Full rewrite — DbContextFactory, Identity, CartStateService, cookie auth, DB seeding, HTTP auth endpoints.
-- **_Imports.razor:** Added Identity, LoginControls, Models, Services usings + `@inherits WebFormsPageBase`.
-- **Routes.razor:** Added `<CascadingAuthenticationState>` + `<AuthorizeRouteView>`.
-- **MainLayout:** Complete rewrite. Class name/namespace must match .razor path (`MainLayout` in `WingtipToys.Components.Layout`).
-- **CartStateService:** Created from FreshWingtipToys pattern.
-- **All code-behinds:** Replaced Web Forms classes with Blazor partial classes + `IDbContextFactory` pattern.
-- **Account pages:** Login/Register → plain HTML forms. All others → stubs. Routes fixed to `/Account/` prefix.
-- **AdminPage:** Converted BWFC controls to plain HTML with `@bind`/`@onclick`.
-
-**Patterns confirmed:**
-- Layout code-behind class name MUST match .razor filename, not original Web Forms name.
-- Auth pages must use plain HTML forms with HTTP endpoints (SignInManager needs active HTTP response).
-- LoginView with AnonymousTemplate/LoggedInTemplate works as BWFC component — never replace with AuthorizeView.
-
- Team update (2026-03-07): Layer 1 now auto-detects CSS and injects <link> tags into App.razor via Invoke-CssAutoDetection. Layer 2 should verify/adjust CSS rather than adding from scratch.  decided by Forge
- Team update (2026-03-07): 11 static asset smoke tests now gate migration runs (CSS delivery, image integrity, Bootstrap styling, visual sanity).  decided by Rogue
- Team update (2026-03-07): Run 9 reclassified as FAILED (visual regression). migration-standards skill updated with image path preservation and CSS verification rules.  decided by Beast
-
- Team update (2026-03-07): Run 10 declared FAILED  coordinator violated protocol (hand-edited files, installed npm, debugged manually instead of routing to agents). 20/25 tests passed. Key issues: missing ItemType param, null Products list, ASPNETCORE_ENVIRONMENT not set.  decided by Jeffrey T. Fritz
-
+ Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents  decided by Jeffrey T. Fritz, Beast
+ Team update (2026-03-07): FreshWingtipToys must not be committed or referenced as template  decided by Jeffrey T. Fritz
+ Team update (2026-03-07): migration-standards SKILL.md updated with Static Asset Checklist, ListView Placeholder Conversion, Preserving Action Links  decided by Beast
+ Team update (2026-03-07): Migration order directive  fresh Blazor project first, then apply BWFC, then migrate content  decided by Jeffrey T. Fritz

@@ -5752,10 +5752,16 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
 **Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
 
-### 2026-03-04: User directive — exclude FreshWingtipToys and feasibility doc
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** FreshWingtipToys sample site (samples/FreshWingtipToys/) and the ASPX middleware feasibility doc (planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md) should NOT be committed to the repo. They are scratch artifacts from the migration benchmarking work.
-**Why:** User request — captured for team memory
+### 2026-03-07: FreshWingtipToys — do not commit or reference (consolidated)
+
+**By:** Jeffrey T. Fritz
+**Date:** 2026-03-07 (consolidates 2026-03-04 and 2026-03-07 directives)
+
+**What:** FreshWingtipToys is a previous hand-built migration. Two rules apply:
+1. **Do not commit:** FreshWingtipToys sample site (`samples/FreshWingtipToys/`) and the ASPX middleware feasibility doc (`planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md`) must not be committed to the repo. They are scratch artifacts.
+2. **Do not reference:** Do NOT copy from it, reference it, or use it as a template during migration runs. Migration benchmark runs must be genuine fresh migrations using ONLY: (1) `bwfc-migrate.ps1`, (2) the BWFC library, (3) the migration-standards SKILL, and (4) the original Web Forms source at `samples/WingtipToys/`.
+
+**Why:** The whole point of migration benchmark runs is to test the migration tooling, not to prove we can copy-paste from a prior migration. The artifacts are scratch work and don't belong in the repo.
 
 ### 2026-03-04: Run 5 Migration Patterns
 
@@ -6492,22 +6498,97 @@ Change `/Images/Products/` → `/Catalog/Images/` to match actual file locations
 **What:** Run 9 migration report reclassified from ✅ PASSED (14/14 tests) to ❌ FAILED due to visual regression: no CSS styling (navbar as bullet list) and all product images 404. The `migration-standards/SKILL.md` now includes critical rules for Layer 2: preserve source image paths (don't rewrite without moving files) and verify CSS `<link>` tags in App.razor after Layer 2 completes.
 **Why:** Functional test pass rate is necessary but not sufficient for migration success. The Run 9 RCA by Forge revealed that Layer 2 (Cyclops) rewrote image `src` paths from `/Catalog/Images/` to `/Images/Products/` without moving the physical files, and the Layer 1 script dropped `<webopt:bundlereference>` CSS tags without generating replacement `<link>` tags. Both issues are now codified as standards in the migration skill to prevent recurrence in Run 10+.
 
-
-
 ### Layer 2 Code-behind Namespace Convention
 
 **By:** Cyclops
 **What:** When converting Web Forms code-behinds to Blazor partial classes, the class name and namespace MUST match what Blazor generates from the .razor file path. For `Components/Layout/MainLayout.razor`, the partial class must be `partial class MainLayout` in namespace `WingtipToys.Components.Layout` — not the original Web Forms class name (`SiteMaster`) or root namespace. This is a build-breaking issue if wrong.
 **Why:** Blazor generates a partial class from each .razor file using the filename as class name and folder path as namespace. A code-behind .cs file that declares a different class name creates a separate type instead of extending the generated one, causing `override` methods like `OnInitializedAsync` to fail with CS0115.
 
-### 2026-03-06: Run 10 FAILED  Coordinator violated established pipeline
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Run 10 declared FAILED. Coordinator manually debugged, installed npm packages (Playwright for Node.js), hand-edited migration output files, ignored FreshWingtipToys reference patterns, and failed to follow the established Layer 1  Layer 2  Test pipeline.
-**Why:** Specific violations:
-1. Installed Node.js Playwright instead of using the existing .NET Playwright acceptance test project
-2. Hand-edited ProductList.razor, ProductDetails.razor, Category.cs instead of routing fixes through Cyclops
-3. Ignored MapStaticAssets pattern from FreshWingtipToys reference
-4. Did not follow migration-standards SKILL.md patterns (e.g., ListView ItemType parameter)
-5. ASPNETCORE_ENVIRONMENT not set to Development (causing blazor.web.js 500)
-6. Did not reference FreshWingtipToys as the canonical target architecture
+### 2026-03-07: Coordinator must not perform domain work (consolidated)
 
+**By:** Jeffrey T. Fritz, Beast
+**Date:** 2026-03-07 (consolidates 2026-03-06 and 2026-03-07 decisions)
+
+**What:** Run 10 declared FAILED. The Squad Coordinator must **never** perform domain work directly. Specific prohibitions:
+- Hand-editing application source files (`.razor`, `.cs`, `.razor.cs`)
+- Installing packages outside the established toolchain (e.g., `npm install playwright`)
+- Creating throwaway scripts (`test-click.js`)
+- Using SDK versions other than what `global.json` specifies
+- Running the app without `ASPNETCORE_ENVIRONMENT=Development`
+All domain changes must be routed through specialist agents: Cyclops for code, Rogue for tests, Forge for architecture analysis.
+
+**Why:** In Run 10, the automated pipeline (Layers 1-2) completed in ~16 minutes with 0 build errors. All wasted time came from the Coordinator doing domain work after Layer 2:
+1. Installed Node.js Playwright instead of using the existing .NET Playwright acceptance test project
+2. Hand-edited ProductList.razor, ProductDetails.razor, Category.cs instead of routing through Cyclops
+3. Ignored MapStaticAssets pattern and FreshWingtipToys reference patterns
+4. Did not follow migration-standards SKILL.md patterns (e.g., ListView ItemType parameter)
+5. `ASPNETCORE_ENVIRONMENT` not set to Development, causing blazor.web.js 500 errors
+6. Used .NET 10.0.200-preview instead of 10.0.100 per `global.json`
+
+**Pre-flight checklist (enforced before Phase 3):**
+- [ ] `ASPNETCORE_ENVIRONMENT=Development` is set
+- [ ] .NET SDK matches `global.json`
+- [ ] Tests run via `dotnet test`, not ad-hoc scripts
+- [ ] All code changes routed through agents, not hand-edited
+
+### Run 11 — migration-standards SKILL.md Updated with 3 New Sections
+
+**By:** Beast
+**Date:** 2026-03-07
+**What:** Added three new sections to `.ai-team/skills/migration-standards/SKILL.md` to address Run 11 WingtipToys benchmark failures:
+
+1. **Static Asset Migration Checklist** — Explicit table of ALL folders to copy to `wwwroot/` (Content/, Scripts/, Images/, Catalog/, fonts/, favicon.ico) with a verification checklist. Run 11 failed because `Scripts/` was not copied.
+
+2. **ListView Template Placeholder Conversion** — Full guide for converting Web Forms `LayoutTemplate`/`GroupTemplate` placeholder elements (`<tr id="groupPlaceholder">`) to Blazor `@context`. This was the #1 failure cause in Run 11 (5 of 8 test failures). The migration script converts templates structurally but doesn't know that placeholder elements must become `@context`.
+
+3. **Preserving Action Links in Detail Pages** — Guidance on verifying that action links (Add to Cart, Edit, Delete) survive Layer 1 conversion and how to restore them in Layer 2 using `@context.PropertyName`.
+
+**Why:** These three gaps caused the majority of Run 11 test failures. Codifying them in the migration-standards SKILL ensures Layer 2 agents (Cyclops) and the migration script (bwfc-migrate.ps1) have explicit guidance to avoid repeating these failures.
+
+**Affects:** Cyclops (Layer 2 work), Forge (script improvements), future migration benchmark runs.
+
+### 2026-03-07: Migration order directive — fresh project first
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Run 11 migration must follow this explicit order:
+1. START with creating a fresh Blazor Web project with global server interactive features enabled
+2. THEN apply the BWFC library to the new project
+3. THEN migrate content from the old ASPX and ASCX files to the new
+4. THEN copy over all static content
+5. THEN adapt any C# content needed
+6. FINALLY use the WingtipToys.AcceptanceTests project to verify
+**Why:** Previous runs (9, 10) started with the script output and tried to fix the foundation after. Starting fresh ensures the Blazor infrastructure (project file, Program.cs, App.razor, interactivity) is correct from the start. Migration content is layered on top of a working foundation.
+
+
+### 2026-03-07: Run 11 Migration Decisions (Cyclops)
+
+**By:** Cyclops
+**Date:** 2026-03-07
+
+**What:** Run 11 WingtipToys migration (from scratch) yielded 5 architectural decisions:
+
+1. **Root-level _Imports.razor required** — Pages outside `Components/` (root, `Account/`, `Admin/`, `Checkout/`) do NOT pick up `Components/_Imports.razor`. A root-level copy with identical content is required. Both must stay in sync.
+
+2. **Partial class base class conflict** — When `_Imports.razor` declares `@inherits WebFormsPageBase`, code-behind files must NOT declare `: ComponentBase` on the partial class. The Razor compiler merges the base class from the .razor file; specifying a different one causes CS0263.
+
+3. **MainLayout uses code-based categories (not ListView)** — Direct `@for` loop over loaded categories is simpler for layout components. Avoids complications with `LayoutComponentBase` not being `WebFormsPageBase`.
+
+4. **Auth endpoint pattern** — Three HTTP POST endpoints for auth: `/Account/PerformLogin`, `/Account/PerformRegisterSignIn`, `/Account/PerformLogout`. Forms use `data-enhance="false"` to bypass Blazor enhanced navigation.
+
+5. **Build result** — 0 errors, 0 warnings on first successful attempt (after fixing _Imports scope and partial class base conflicts).
+
+**Affects:** Migration script scaffolding, Layer 2 guidance, code-behind authoring patterns, migration skill documentation.
+
+### Run 11 Script Fixes: JS Auto-Detection + Placeholder→@context Conversion
+
+**By:** Cyclops
+**Date:** 2026-03-07
+
+**What:** Two fixes implemented in `migration-toolkit/scripts/bwfc-migrate.ps1`:
+
+- **Fix 1** — New `Invoke-ScriptAutoDetection` function detects JS files in source `Scripts/` folder, copies them to `wwwroot/Scripts/`, and injects `<script>` tags into App.razor `<body>` (after `blazor.web.js`). Filters out WebForms-specific scripts (`_references.js`, intellisense, `WebForms/` subdir). Loads jQuery before Bootstrap. Also flags `<webopt:bundlereference>` targeting Scripts as `ScriptBundle` manual item.
+
+- **Fix 2** — New `Convert-TemplatePlaceholders` function replaces placeholder elements (any element with id containing "Placeholder") with `@context`. This is critical for BWFC `ListView`/`DataPager` where `LayoutTemplate` and `GroupTemplate` are `RenderFragment<RenderFragment>` — without `@context`, items compute but never render. Handles both self-closing (`<tag id="...Placeholder..." />`) and open+close tags (`<tag id="...Placeholder..."></tag>`). Runs in the `Convert-WebFormsFile` pipeline after attribute stripping.
+
+**Why:** Run 11 report identified these as the two highest-priority script gaps. Fix 1 is P1 (pages load without client-side JS — Bootstrap dropdowns, jQuery features broken). Fix 2 is CRITICAL (ListView items render nothing — the most common data display pattern in Web Forms).
+
+**Affects:** Beast (skills may reference these patterns), Forge (pipeline analysis), Layer 2 agents (less manual work for JS wiring and ListView template fixes).
