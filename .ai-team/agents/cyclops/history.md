@@ -95,3 +95,7 @@ Team update (2026-03-04): @rendermode InteractiveServer in _Imports.razor scaffo
 
 
  Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge
+
+ Team update (2026-03-07): Layer 1 now auto-detects CSS and injects <link> tags into App.razor via Invoke-CssAutoDetection. Layer 2 should verify/adjust CSS rather than adding from scratch.  decided by Forge
+ Team update (2026-03-07): 11 static asset smoke tests now gate migration runs (CSS delivery, image integrity, Bootstrap styling, visual sanity).  decided by Rogue
+ Team update (2026-03-07): Run 9 reclassified as FAILED (visual regression). migration-standards skill updated with image path preservation and CSS verification rules.  decided by Beast

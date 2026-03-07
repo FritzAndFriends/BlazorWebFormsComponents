@@ -139,8 +139,33 @@ The script should preserve the attribute and annotate the signature change neede
 - All static files → `wwwroot/`
 - CSS bundles (`BundleConfig.cs`) → explicit `<link>` tags in `App.razor`
 - JS bundles → explicit `<script>` tags in `App.razor`
-- Image paths update: `~/Images/` → `/Images/`
+- Image paths update: `~/Images/` → `/Images/` (only for tilde-prefixed paths; see **Static Asset Path Preservation** below)
 - Font paths: same pattern
+
+### Static Asset Path Preservation
+
+**CRITICAL RULE:** When rewriting code-behind files during Layer 2, PRESERVE the source image/asset path structure. 
+
+- The Layer 1 script copies static files preserving their original relative directory structure into `wwwroot/`.
+- If the source uses `/Catalog/Images/{name}.png`, keep `/Catalog/Images/{name}.png` in Blazor templates.
+- Do NOT change paths to match FreshWingtipToys or any other reference implementation convention unless you ALSO move the physical files.
+- The physical files in `wwwroot/` are the source of truth. Check what paths exist BEFORE rewriting `src` attributes.
+
+**Example of what NOT to do:**
+- Source markup: `<img src="/Catalog/Images/Thumbs/car.png">`
+- Physical files at: `wwwroot/Catalog/Images/Thumbs/car.png` ✅
+- Layer 2 rewrites to: `<img src="/Images/Products/car.png">` ❌ (files don't exist there!)
+
+**Correct approach:**
+- Check `wwwroot/` for actual file locations
+- Preserve source paths that match physical file locations
+- Only change paths if you also create/move the files
+
+### CSS Reference Verification
+
+After Layer 2 completes, verify that App.razor's `<head>` section contains `<link>` tags for CSS files. The Layer 1 script should auto-detect CSS files in `wwwroot/Content/` and inject references, but verify this happened. If CSS links are missing, add them manually.
+
+Bootstrap CSS is REQUIRED for proper navbar and layout styling. Missing CSS is a P0 failure.
 
 ### Page Lifecycle Mapping
 

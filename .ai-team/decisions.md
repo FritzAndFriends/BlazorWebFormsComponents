@@ -6437,36 +6437,15 @@ Both runs have the same wwwroot content. The CSS files and image files are ident
 
 ## Proposed Fixes
 
-### Fix 1: Script — Extract CSS from bundle references and add to App.razor (P0)
-**File:** `migration-toolkit/scripts/bwfc-migrate.ps1`
+### 2026-03-07: CSS Auto-Detection in bwfc-migrate.ps1 (consolidated)
 
-**1a.** In `ConvertFrom-MasterPage` (after line 554), add extraction for `<webopt:bundlereference>`:
-```powershell
-# Extract webopt:bundlereference paths
-foreach ($m in ([regex]'<webopt:bundlereference[^>]*path\s*=\s*"([^"]*)"[^>]*>').Matches($headInner)) {
-    $bundlePath = $m.Groups[1].Value -replace '^~/', '/'
-    $extractedTags.Add("    <!-- TODO: Bundle '$bundlePath' — add explicit <link> tags for CSS files -->")
-    Write-ManualItem -File $RelPath -Category 'CSSBundle' -Detail "CSS bundle reference '$bundlePath' needs manual conversion to <link> tags"
-}
-```
-
-**1b.** In `New-AppRazorScaffold` (line 309–326), add CSS auto-detection after static file copy. OR better: add a new post-processing step that scans `wwwroot/Content/` for `.css` files and injects `<link>` tags into App.razor's `<head>`:
-```powershell
-# After static file copy (after line 1284)
-$cssFiles = Get-ChildItem -Path (Join-Path $Output 'wwwroot' 'Content') -Filter '*.css' -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match '\.min\.css$' -or $_.Name -eq 'Site.css' }
-if ($cssFiles) {
-    $appRazorPath = Join-Path $Output 'Components' 'App.razor'
-    if (Test-Path $appRazorPath) {
-        $appContent = Get-Content $appRazorPath -Raw
-        $cssLinks = ($cssFiles | ForEach-Object {
-            "    <link rel=`"stylesheet`" href=`"/Content/$($_.Name)`" />"
-        }) -join "`n"
-        $appContent = $appContent.Replace('<HeadOutlet', "$cssLinks`n    <HeadOutlet")
-        Set-Content -Path $appRazorPath -Value $appContent -Encoding UTF8
-    }
-}
-```
+**By:** Forge
+**What:** Two fixes implemented in `bwfc-migrate.ps1` to eliminate unstyled HTML output:
+- **Fix 1a** — `ConvertFrom-MasterPage` now extracts `<webopt:bundlereference>` tags, flags as `[CSSBundle]` manual review, injects TODO comments for Layer 2 visibility. Also preserves CDN `<link>`/`<script>` tags (Bootstrap, jQuery).
+- **Fix 1b** — New `Invoke-CssAutoDetection` post-processing step scans `wwwroot/Content/`, `wwwroot/css/`, and `wwwroot/` root for `.css` files, scans source `Site.Master` for CDN references, and injects `<link>` tags into App.razor `<head>` before `<HeadOutlet>`.
+**Why:** Run 9 RCA (RC-1) revealed `ConvertFrom-MasterPage` silently dropped `<webopt:bundlereference>` tags and `New-AppRazorScaffold` generated App.razor with zero CSS references. Layer 1 output now includes CSS from the start — Layer 2 no longer responsible for basic CSS wiring.
+**Status:** Implemented (2026-03-06). New `CSSBundle` manual review category appears in migration summaries.
+**Affects:** Cyclops (Layer 2 sees CSS pre-wired), Beast (skills updated — no Layer 2 CSS wiring guidance needed).
 
 ### Fix 2: Layer 2 skill — Preserve source image paths (P0)
 **File:** `migration-toolkit/skills/migration-standards.md` (and `.ai-team/skills/migration-standards.md`)
@@ -6480,24 +6459,13 @@ Add explicit guidance:
 - The Layer 1 script copies static files preserving their relative directory structure into wwwroot/
 ```
 
-### Fix 3: Add visual smoke test (P1)
-**File:** `src/WingtipToys.AcceptanceTests/NavigationTests.cs`
+### 2026-03-07: Static Asset Smoke Tests in Acceptance Suite (consolidated)
 
-Add a basic visual verification test:
-```csharp
-[Fact]
-public async Task StaticAssets_AreServed()
-{
-    var page = await _fixture.NewPageAsync();
-    var cssResponse = await page.APIRequest.GetAsync(TestConfiguration.BaseUrl + "/Content/bootstrap.min.css");
-    Assert.True(cssResponse.Ok, "Bootstrap CSS should be served");
-
-    await page.GotoAsync(TestConfiguration.BaseUrl + "/ProductList");
-    var brokenImages = await page.EvalOnSelectorAllAsync<int>("img", 
-        "imgs => imgs.filter(i => !i.complete || i.naturalWidth === 0).length");
-    Assert.Equal(0, brokenImages);
-}
-```
+**By:** Forge (RCA proposal), Rogue (implementation)
+**What:** Added `StaticAssetTests.cs` to `src/WingtipToys.AcceptanceTests/` with 11 tests: CSS delivery (HTTP 200 for all CSS files), image integrity (`naturalWidth > 0` on ProductList), Bootstrap styling (`.navbar` height ≥ 30px), visual sanity screenshots (Homepage/ProductList/ProductDetails with byte-size thresholds), and catch-all static asset 4xx/5xx check.
+**Why:** Run 9 passed all 14 functional tests but was visually broken (no CSS, images 404). Functional tests alone provide false confidence. These smoke tests gate future migration runs — CSS or image path breakage will fail acceptance before manual review.
+**Status:** Implemented (2026-03-06). No pixel-perfect comparison (would require stored baselines); coarse "not obviously broken" verification.
+**Affects:** Forge/Beast (migration scripts must preserve static asset paths or these tests fail).
 
 ### Fix 4: Fix current AfterWingtipToys image paths (P0 — immediate)
 **Files:** `samples/AfterWingtipToys/ProductList.razor`, `samples/AfterWingtipToys/ProductDetails.razor`
@@ -6516,3 +6484,11 @@ Change `/Images/Products/` → `/Catalog/Images/` to match actual file locations
 3. **Fix 1a** (script) — Handle `<webopt:bundlereference>` in master page conversion
 4. **Fix 2** (skill) — Add image path preservation guidance to Layer 2 skills
 5. **Fix 3** (tests) — Add visual smoke test to acceptance suite
+
+### Run 9 Reclassified as FAILED — Visual Regression
+
+**By:** Beast
+**Date:** 2026-03-07
+**What:** Run 9 migration report reclassified from ✅ PASSED (14/14 tests) to ❌ FAILED due to visual regression: no CSS styling (navbar as bullet list) and all product images 404. The `migration-standards/SKILL.md` now includes critical rules for Layer 2: preserve source image paths (don't rewrite without moving files) and verify CSS `<link>` tags in App.razor after Layer 2 completes.
+**Why:** Functional test pass rate is necessary but not sufficient for migration success. The Run 9 RCA by Forge revealed that Layer 2 (Cyclops) rewrote image `src` paths from `/Catalog/Images/` to `/Images/Products/` without moving the physical files, and the Layer 1 script dropped `<webopt:bundlereference>` CSS tags without generating replacement `<link>` tags. Both issues are now codified as standards in the migration skill to prevent recurrence in Run 10+.
+

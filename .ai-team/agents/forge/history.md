@@ -144,3 +144,6 @@ Page Consolidation: Option B — merged Page.razor head rendering into WebFormsP
 2. CSS files auto-detected and `<link>` tags injected into App.razor ✅
 3. CDN references (Bootstrap CSS, jQuery JS) preserved in App.razor `<head>` ✅
 
+
+ Team update (2026-03-07): 11 static asset smoke tests now gate migration runs  CSS delivery, image integrity, Bootstrap styling, visual sanity. Scripts must preserve static asset paths.  decided by Rogue
+ Team update (2026-03-07): Run 9 reclassified as FAILED (visual regression). migration-standards skill updated with image path preservation and CSS verification rules.  decided by Beast

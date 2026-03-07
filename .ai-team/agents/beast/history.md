@@ -102,3 +102,15 @@
 
 
  Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge
+
+### Run 9 RCA Documentation Updates (2026-03-07)
+
+- **migration-standards/SKILL.md updated:** Added two new sections after "Static Asset Relocation":
+  - **Static Asset Path Preservation** — CRITICAL RULE: Layer 2 must preserve source image/asset path structure. `wwwroot/` files are the source of truth. Never rewrite `src` attributes to paths where files don't exist. Includes concrete bad/good example from Run 9 (Catalog/Images → Images/Products rewrite that caused 404s).
+  - **CSS Reference Verification** — After Layer 2, verify App.razor `<head>` has `<link>` tags for CSS files. Bootstrap CSS is required for navbar/layout. Missing CSS is P0.
+  - Updated the existing image path guidance to clarify it applies only to tilde-prefixed (`~/`) paths.
+- **Run 9 REPORT.md updated to FAILED status:** Changed result from ✅ 14/14 to ❌ FAILED. Added failure banner explaining CSS + image regression causes. Rewrote executive summary bottom line to acknowledge visual regression despite functional test pass. Updated conclusion verdict.
+- **Learning:** Functional acceptance tests passing does NOT mean a migration is successful. Visual regression (no CSS, broken images) is a ship-blocking failure even when all Playwright tests are green. Future runs need visual regression checks in addition to functional tests.
+
+ Team update (2026-03-07): Layer 1 now auto-detects CSS via Invoke-CssAutoDetection  skills no longer need Layer 2 CSS wiring guidance.  decided by Forge
+ Team update (2026-03-07): 11 static asset smoke tests added to acceptance suite. Migration scripts must preserve static asset paths or tests fail.  decided by Rogue
