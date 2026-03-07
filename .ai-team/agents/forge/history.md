@@ -123,3 +123,24 @@ Page Consolidation: Option B — merged Page.razor head rendering into WebFormsP
 
 **Decision document:** `.ai-team/decisions/inbox/forge-run9-css-failure-rca.md`
 
+### Fix 1a + Fix 1b Implementation — Run 9 RCA Remediation (2026-03-06)
+
+**Scope:** Two surgical fixes to `migration-toolkit/scripts/bwfc-migrate.ps1` addressing RC-1 from the Run 9 CSS/Image Failure RCA.
+
+**Fix 1a: `<webopt:bundlereference>` extraction in ConvertFrom-MasterPage**
+- Added regex extraction for `<webopt:bundlereference>` tags in the head section extraction loop (after `<link>` extraction)
+- For each match: extracts `path` attribute, writes a `Write-ManualItem` with category `CSSBundle`, and injects a `@* TODO *@` comment into the `<HeadContent>` block
+- Also added CDN link/script preservation — any `<link>` or `<script>` tags referencing CDN domains (bootstrapcdn, googleapis, jsdelivr, unpkg, cdnjs, cloudflare) are now captured from `<head>` and preserved
+
+**Fix 1b: CSS auto-detection via `Invoke-CssAutoDetection` function**
+- New function added to the Project Scaffolding region
+- After static files are copied, scans `wwwroot/Content/` for `.css` files (with `wwwroot/css/` fallback), plus root-level `wwwroot/*.css`
+- Scans source `Site.Master` for CDN `<link>` and `<script>` tags
+- Injects all found CSS `<link>` tags and CDN references into `App.razor` `<head>` before `<HeadOutlet>`
+- Guarded by `-not $WhatIfPreference -and -not $SkipProjectScaffold`
+
+**Verification:** Tested with mock Web Forms project containing `<webopt:bundlereference>`, CDN Bootstrap/jQuery links, and two CSS files in Content/. All three verification criteria passed:
+1. Bundle reference flagged as `[CSSBundle]` manual review item ✅
+2. CSS files auto-detected and `<link>` tags injected into App.razor ✅
+3. CDN references (Bootstrap CSS, jQuery JS) preserved in App.razor `<head>` ✅
+

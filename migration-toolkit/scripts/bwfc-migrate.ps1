@@ -353,6 +353,110 @@ function New-AppRazorScaffold {
     }
 }
 
+function Invoke-CssAutoDetection {
+    <#
+    .SYNOPSIS
+        Fix 1b: Scans wwwroot for CSS files and injects <link> tags into App.razor's <head>.
+    #>
+    param(
+        [string]$OutputRoot,
+        [string]$SourcePath
+    )
+
+    $appRazorPath = Join-Path $OutputRoot "Components" "App.razor"
+    if (-not (Test-Path $appRazorPath)) {
+        Write-Verbose "Invoke-CssAutoDetection: App.razor not found at $appRazorPath — skipping"
+        return
+    }
+
+    $wwwroot = Join-Path $OutputRoot "wwwroot"
+    if (-not (Test-Path $wwwroot -PathType Container)) {
+        Write-Verbose "Invoke-CssAutoDetection: wwwroot not found — skipping"
+        return
+    }
+
+    $cssLinks = [System.Collections.Generic.List[string]]::new()
+
+    # Scan wwwroot/Content/ for CSS files
+    $contentDir = Join-Path $wwwroot "Content"
+    if (Test-Path $contentDir -PathType Container) {
+        $cssFiles = Get-ChildItem -Path $contentDir -Filter '*.css' -Recurse -File
+        foreach ($cf in $cssFiles) {
+            $relCss = $cf.FullName.Substring($wwwroot.Length).TrimStart('\', '/') -replace '\\', '/'
+            $cssLinks.Add("    <link rel=""stylesheet"" href=""/$relCss"" />")
+        }
+    }
+
+    # Fallback: scan wwwroot/css/ if Content/ had nothing
+    if ($cssLinks.Count -eq 0) {
+        $cssDir = Join-Path $wwwroot "css"
+        if (Test-Path $cssDir -PathType Container) {
+            $cssFiles = Get-ChildItem -Path $cssDir -Filter '*.css' -Recurse -File
+            foreach ($cf in $cssFiles) {
+                $relCss = $cf.FullName.Substring($wwwroot.Length).TrimStart('\', '/') -replace '\\', '/'
+                $cssLinks.Add("    <link rel=""stylesheet"" href=""/$relCss"" />")
+            }
+        }
+    }
+
+    # Also scan for Site.css or other root-level CSS in wwwroot
+    $rootCssFiles = Get-ChildItem -Path $wwwroot -Filter '*.css' -File -ErrorAction SilentlyContinue
+    foreach ($cf in $rootCssFiles) {
+        $relCss = $cf.Name
+        $linkTag = "    <link rel=""stylesheet"" href=""/$relCss"" />"
+        if ($cssLinks -notcontains $linkTag) {
+            $cssLinks.Add($linkTag)
+        }
+    }
+
+    # Check source Site.Master for CDN references (Bootstrap, jQuery)
+    $cdnLinks = [System.Collections.Generic.List[string]]::new()
+    $masterFile = Get-ChildItem -Path $SourcePath -Filter 'Site.Master' -Recurse -File | Select-Object -First 1
+    if ($masterFile) {
+        $masterContent = Get-Content -Path $masterFile.FullName -Raw
+        # Extract CDN <link> tags (stylesheets from CDNs)
+        $cdnLinkRegex = [regex]'<link\s[^>]*href\s*=\s*"(https?://[^"]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^"]*)"[^>]*>'
+        foreach ($m in $cdnLinkRegex.Matches($masterContent)) {
+            $cdnLinks.Add("    " + $m.Value.Trim())
+        }
+        # Extract CDN <script> tags (jQuery, Bootstrap JS)
+        $cdnScriptRegex = [regex]'<script\s[^>]*src\s*=\s*"(https?://[^"]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs|jquery)[^"]*)"[^>]*>\s*</script>'
+        foreach ($m in $cdnScriptRegex.Matches($masterContent)) {
+            $cdnLinks.Add("    " + $m.Value.Trim())
+        }
+    }
+
+    if ($cssLinks.Count -eq 0 -and $cdnLinks.Count -eq 0) {
+        Write-Verbose "Invoke-CssAutoDetection: No CSS files or CDN links found — skipping"
+        return
+    }
+
+    # Build injection block
+    $injectionLines = [System.Collections.Generic.List[string]]::new()
+    if ($cdnLinks.Count -gt 0) {
+        $injectionLines.Add("    @* CDN references preserved from Site.Master *@")
+        foreach ($cdn in $cdnLinks) { $injectionLines.Add($cdn) }
+    }
+    if ($cssLinks.Count -gt 0) {
+        $injectionLines.Add("    @* Auto-detected CSS files from wwwroot *@")
+        foreach ($css in $cssLinks) { $injectionLines.Add($css) }
+    }
+    $injectionBlock = ($injectionLines -join "`n") + "`n"
+
+    # Inject into App.razor before <HeadOutlet>
+    $appContent = Get-Content -Path $appRazorPath -Raw
+    if ($appContent -match '<HeadOutlet') {
+        $appContent = $appContent -replace '(\s*<HeadOutlet)', "`n$injectionBlock`$1"
+        Set-Content -Path $appRazorPath -Value $appContent -Encoding UTF8
+        $totalInjected = $cssLinks.Count + $cdnLinks.Count
+        Write-Host "  Injected $totalInjected CSS/CDN reference(s) into App.razor <head>" -ForegroundColor Green
+        Write-TransformLog -File 'Components/App.razor' -Transform 'CSSAutoDetect' -Detail "Injected $($cssLinks.Count) CSS link(s) and $($cdnLinks.Count) CDN reference(s)"
+    }
+    else {
+        Write-Host "  WARNING: Could not find <HeadOutlet> in App.razor — CSS links not injected" -ForegroundColor Yellow
+    }
+}
+
 #endregion
 
 #region --- Directive Transforms ---
@@ -553,6 +657,33 @@ function ConvertFrom-MasterPage {
         }
         foreach ($m in ([regex]'<link\s[^>]*>').Matches($headInner)) {
             $extractedTags.Add("    " + $m.Value.Trim())
+        }
+
+        # Fix 1a: Extract <webopt:bundlereference> tags and flag for manual review
+        $bundleRefRegex = [regex]'(?i)<webopt:bundlereference[^>]*>'
+        foreach ($m in $bundleRefRegex.Matches($headInner)) {
+            $bundlePath = ''
+            if ($m.Value -match 'path\s*=\s*"([^"]*)"') {
+                $bundlePath = $Matches[1]
+            }
+            if ($bundlePath) {
+                Write-ManualItem -File $RelPath -Category 'CSSBundle' -Detail "CSS bundle reference '$bundlePath' needs manual conversion to <link> tags"
+                $extractedTags.Add("    @* TODO: CSS bundle reference '$bundlePath' — convert to explicit <link> tags for each CSS file *@")
+            } else {
+                Write-ManualItem -File $RelPath -Category 'CSSBundle' -Detail 'webopt:bundlereference tag found without path — needs manual review'
+                $extractedTags.Add("    @* TODO: webopt:bundlereference found — convert to explicit <link> tags *@")
+            }
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Flagged <webopt:bundlereference> for manual CSS conversion"
+        }
+
+        # Fix 1a: Preserve CDN references (Bootstrap, jQuery) from <head>
+        $cdnLinkRegex = [regex]'<(?:link|script)\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>'
+        foreach ($m in $cdnLinkRegex.Matches($headInner)) {
+            $tag = $m.Value.Trim()
+            # Skip if already captured as a <link> tag
+            if ($tag -match '^<link' -and $extractedTags -contains ("    " + $tag)) { continue }
+            $extractedTags.Add("    " + $tag)
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN reference: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
         }
 
         if ($extractedTags.Count -gt 0) {
@@ -1282,6 +1413,11 @@ if ($staticCount -gt 0) {
         }
     }
     Write-Host ''
+}
+
+# Fix 1b: Auto-detect CSS files and inject <link> tags into App.razor
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
+    Invoke-CssAutoDetection -OutputRoot $Output -SourcePath $Path
 }
 
 #endregion
