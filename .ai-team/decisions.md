@@ -6305,10 +6305,6 @@ Each fix addresses manual work identified in Run 8 post-mortem. Verified with fu
 
 Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements. All minimal API endpoints receiving form POSTs from Blazor pages must call `.DisableAntiforgery()` or the request fails with 400 Bad Request.
 
-### Enhanced navigation must be bypassed for non-Blazor endpoints
-
-Blazor's enhanced navigation intercepts `<a href>` clicks. Links to minimal API endpoints must use `<form method="post">` or `data-enhance-nav="false"` to ensure the request reaches the server.
-
 ### 2026-03-06: Run 9 CSS/Image Failure — Root Cause Analysis
 **By:** Forge
 **What:** Root cause analysis of why Run 9 has no CSS styling or product images
@@ -6759,3 +6755,30 @@ Long-term, we could add `[StreamRendering]` support to data-bound components for
 | Migration complexity | ✅ Fewer workarounds | ❌ 3/5 fixes were mode-related |
 
 **Recommendation: SSR default + InteractiveServer opt-in. This eliminates the entire class of HttpContext/cookie/session problems that caused 60% of Run 12's post-migration fixes, while preserving the ability to use interactive components where truly needed.**
+
+### Run 13: Logout Must Not Use `<button>` in Navbar
+
+**By:** Cyclops
+**What:** The logout control in MainLayout must use an `<a>` link (not a `<form>` with `<button>`) when positioned in the navbar alongside other page buttons. Using `<button>` causes Playwright's `getByRole(AriaRole.Button).First` to find the Log off button instead of the intended page button (e.g., Login, Register).
+
+**Why:** The `RegisterAndLogin_EndToEnd` test failed because `page.GetByRole(AriaRole.Button).First` found the navbar's "Log off" button before the Login form's submit button, causing an unintended logout.
+
+### Run 13: Middleware Order — Auth Before Antiforgery
+
+**By:** Cyclops
+**What:** Middleware must be ordered: `UseAuthentication()` → `UseAuthorization()` → `UseAntiforgery()`. The antiforgery middleware must come AFTER authentication/authorization.
+
+**Why:** The migration script generates `UseAntiforgery()` before auth middleware. This must be corrected in Layer 2.
+
+### 2026-03-08: Enhanced navigation must be bypassed for minimal API endpoints (consolidated)
+
+**By:** Cyclops
+**What:** Links pointing to minimal API endpoints (e.g., /AddToCart, /RemoveFromCart) MUST have data-enhance-nav="false" attribute. Without it, Blazor enhanced navigation intercepts the click, fetches the URL via AJAX, and fails to follow the 302 redirect. Auth forms should use data-enhance="false" to force full HTTP POST.
+**Why:** Initially identified as a general pattern. Confirmed and refined during Run 13: the AddItemToCart_AppearsInCart test failed because enhanced navigation intercepted the AddToCart link. Adding data-enhance-nav="false" forces a full browser navigation that follows the redirect.
+
+### 2026-03-08: DbContext registration  AddDbContextFactory only (consolidated)
+
+**By:** Cyclops
+**What:** Use AddDbContextFactory<ProductContext> only in Program.cs. Do NOT also register AddDbContext<ProductContext>. Identity works correctly with the factory pattern when using AddIdentity (not AddDefaultIdentity).
+**Why:** Run 12 used dual registration (AddDbContextFactory + AddDbContext). Run 13 confirmed single factory registration works, simplifying DI setup. Evolution: Run 12 assumed Identity required scoped DbContext  Run 13 proved factory-only suffices.
+
