@@ -4,13 +4,15 @@
 **Branch:** `squad/run8-improvements`  
 **Source:** `samples/WingtipToys/WingtipToys/` (ASP.NET Web Forms 4.5)  
 **Output:** `samples/AfterWingtipToys/` (Blazor Server .NET 10)  
-**Result:** ✅ **14/14 acceptance tests passed**
+**Result:** ❌ **FAILED — Visual regression: no CSS styling, broken product images**
+
+> ⚠️ **RUN 9 STATUS: FAILED** — While all 14 functional acceptance tests passed, the migrated app had NO CSS styling (navbar rendered as bullet list) and ALL product images were broken (404). This was caused by: (1) the migration script dropping `<webopt:bundlereference>` CSS tags, and (2) Layer 2 rewriting image paths without moving files. See Run 10 for the corrected migration.
 
 ---
 
 ## Executive Summary
 
-> **Bottom line:** We migrated a real-world ASP.NET Web Forms e-commerce application to Blazor Server in **~47 minutes** — a **59% improvement** over Run 8's 1h 55m — while maintaining the same 14/14 acceptance test pass rate. The Layer 1 script produced cleaner output (34 manual items vs 46), and Layer 2 completed in a single Cyclops agent run instead of iterative manual fixes.
+> **Bottom line:** We migrated a real-world ASP.NET Web Forms e-commerce application to Blazor Server in **~47 minutes** — a **59% improvement** over Run 8's 1h 55m — and all 14 functional acceptance tests passed. **However, the migrated app is visually broken:** Bootstrap CSS was not loaded (navbar renders as a bullet list) and all product images return 404 errors. These visual regressions make this run a **FAILURE** despite the functional test pass rate. The root causes are: (1) the Layer 1 script dropped `<webopt:bundlereference>` CSS bundle references without generating replacement `<link>` tags, and (2) Layer 2 (Cyclops) rewrote image `src` paths from `/Catalog/Images/` to `/Images/Products/` without moving the actual files in `wwwroot/`.
 
 Run 9 validates that the improvements committed after Run 8 — the 15 P0+P1 script fixes from Forge analysis, updated Beast/Cyclops skills, and the LoginView.razor fix — deliver a dramatically faster and more reliable migration pipeline. The automated Layer 1 script completed 297 transforms across 32 files in ~10 seconds; Cyclops resolved all 280 build errors in one pass (~19 min); and 5 targeted test-fix rounds completed in ~19 minutes.
 
@@ -409,4 +411,4 @@ Run 9 demonstrates that the post-Run 8 improvements **deliver on their promise**
 
 The remaining challenges are primarily in the **test infrastructure** (Blazor hydration races, DOM-order-sensitive selectors) rather than the migration pipeline itself. Addressing the P0 items — particularly the RF-12 regex bug and hydration-safe test patterns — will further stabilize the pipeline for Run 10.
 
-> **Run 9 verdict:** ✅ **Production-quality migration pipeline.** 47 minutes from Web Forms to passing Blazor app.
+> **Run 9 verdict:** ❌ **FAILED — Visual regression.** While all 14 functional tests passed in 47 minutes, the app had no CSS styling and all product images were broken (404). Speed improvements are real, but the migration output is not production-quality until CSS and image path issues are resolved. See Run 10.
