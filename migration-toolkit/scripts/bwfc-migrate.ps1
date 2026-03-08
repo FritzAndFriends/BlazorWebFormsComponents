@@ -184,6 +184,7 @@ function New-ProjectScaffold {
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.LoginControls
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
 "@
@@ -454,6 +455,126 @@ function Invoke-CssAutoDetection {
     }
     else {
         Write-Host "  WARNING: Could not find <HeadOutlet> in App.razor — CSS links not injected" -ForegroundColor Yellow
+    }
+}
+
+function Invoke-ScriptAutoDetection {
+    <#
+    .SYNOPSIS
+        Scans source project for Scripts/ folder, copies JS files to wwwroot/Scripts/,
+        and injects <script> tags into App.razor before closing </body>.
+    .DESCRIPTION
+        Web Forms apps commonly have a Scripts/ folder with jQuery, Bootstrap JS, etc.,
+        referenced via <asp:ScriptManager> or <webopt:bundlereference>. This function
+        detects those JS files, copies them, and wires them into App.razor so the
+        migrated app loads the same client-side scripts.
+    #>
+    param(
+        [string]$OutputRoot,
+        [string]$SourcePath
+    )
+
+    $appRazorPath = Join-Path $OutputRoot "Components" "App.razor"
+    if (-not (Test-Path $appRazorPath)) {
+        Write-Verbose "Invoke-ScriptAutoDetection: App.razor not found at $appRazorPath — skipping"
+        return
+    }
+
+    # Check for Scripts/ folder in the source project
+    $sourceScriptsDir = Join-Path $SourcePath "Scripts"
+    if (-not (Test-Path $sourceScriptsDir -PathType Container)) {
+        Write-Verbose "Invoke-ScriptAutoDetection: No Scripts/ folder in source — skipping"
+        return
+    }
+
+    # Get all .js files (exclude WebForms-specific scripts and IntelliSense files)
+    $jsFiles = Get-ChildItem -Path $sourceScriptsDir -Filter '*.js' -File | Where-Object {
+        $_.Name -notlike '*intellisense*' -and
+        $_.Name -ne '_references.js' -and
+        $_.DirectoryName -notlike '*\WebForms*' -and
+        $_.DirectoryName -notlike '*\WebForms'
+    }
+
+    if ($jsFiles.Count -eq 0) {
+        Write-Verbose "Invoke-ScriptAutoDetection: No relevant JS files found in Scripts/ — skipping"
+        return
+    }
+
+    # Copy JS files to wwwroot/Scripts/
+    $destScriptsDir = Join-Path $OutputRoot "wwwroot" "Scripts"
+    if (-not (Test-Path $destScriptsDir)) {
+        New-Item -ItemType Directory -Path $destScriptsDir -Force | Out-Null
+    }
+
+    $copiedFiles = [System.Collections.Generic.List[string]]::new()
+    foreach ($jsFile in $jsFiles) {
+        $destFile = Join-Path $destScriptsDir $jsFile.Name
+        Copy-Item -Path $jsFile.FullName -Destination $destFile -Force
+        $copiedFiles.Add($jsFile.Name)
+    }
+    Write-Host "  Copied $($copiedFiles.Count) JS file(s) to wwwroot/Scripts/" -ForegroundColor Green
+    Write-TransformLog -File 'wwwroot/Scripts/' -Transform 'ScriptAutoDetect' -Detail "Copied $($copiedFiles.Count) JS file(s) from source Scripts/"
+
+    # Build <script> tags — prioritize common libraries in correct load order
+    $scriptTags = [System.Collections.Generic.List[string]]::new()
+
+    # Common JS load order: jQuery first, then Modernizr/Respond, then Bootstrap
+    $jqueryFile = $copiedFiles | Where-Object { $_ -match '^jquery.*\.min\.js$' } | Select-Object -First 1
+    if (-not $jqueryFile) {
+        $jqueryFile = $copiedFiles | Where-Object { $_ -match '^jquery-[\d.]+\.js$' } | Select-Object -First 1
+    }
+    $modernizrFile = $copiedFiles | Where-Object { $_ -match '^modernizr.*\.js$' } | Select-Object -First 1
+    $respondFile = $copiedFiles | Where-Object { $_ -match '^respond.*\.min\.js$' } | Select-Object -First 1
+    if (-not $respondFile) {
+        $respondFile = $copiedFiles | Where-Object { $_ -match '^respond.*\.js$' } | Select-Object -First 1
+    }
+    $bootstrapFile = $copiedFiles | Where-Object { $_ -match '^bootstrap.*\.min\.js$' } | Select-Object -First 1
+    if (-not $bootstrapFile) {
+        $bootstrapFile = $copiedFiles | Where-Object { $_ -match '^bootstrap.*\.js$' } | Select-Object -First 1
+    }
+
+    # Add in correct dependency order
+    if ($jqueryFile) { $scriptTags.Add("    <script src=""/Scripts/$jqueryFile""></script>") }
+    if ($modernizrFile) { $scriptTags.Add("    <script src=""/Scripts/$modernizrFile""></script>") }
+    if ($respondFile) { $scriptTags.Add("    <script src=""/Scripts/$respondFile""></script>") }
+    if ($bootstrapFile) { $scriptTags.Add("    <script src=""/Scripts/$bootstrapFile""></script>") }
+
+    # Add any remaining JS files not already included
+    $knownFiles = @($jqueryFile, $modernizrFile, $respondFile, $bootstrapFile) | Where-Object { $_ }
+    foreach ($f in $copiedFiles) {
+        if ($f -notin $knownFiles) {
+            $scriptTags.Add("    <script src=""/Scripts/$f""></script>")
+        }
+    }
+
+    if ($scriptTags.Count -eq 0) {
+        return
+    }
+
+    # Inject <script> tags into App.razor before closing </body> (after blazor.web.js)
+    $appContent = Get-Content -Path $appRazorPath -Raw
+    $injectionBlock = "    @* Auto-detected JS files from Scripts/ *@`n" + ($scriptTags -join "`n") + "`n"
+    if ($appContent -match '</body>') {
+        $appContent = $appContent -replace '(\s*</body>)', "`n$injectionBlock`$1"
+        Set-Content -Path $appRazorPath -Value $appContent -Encoding UTF8
+        Write-Host "  Injected $($scriptTags.Count) <script> tag(s) into App.razor <body>" -ForegroundColor Green
+        Write-TransformLog -File 'Components/App.razor' -Transform 'ScriptAutoDetect' -Detail "Injected $($scriptTags.Count) script tag(s) for JS files from Scripts/"
+    }
+    else {
+        Write-Host "  WARNING: Could not find </body> in App.razor — script tags not injected" -ForegroundColor Yellow
+    }
+
+    # Also check Site.Master for <webopt:bundlereference> targeting Scripts and flag
+    $masterFile = Get-ChildItem -Path $SourcePath -Filter 'Site.Master' -Recurse -File | Select-Object -First 1
+    if ($masterFile) {
+        $masterContent = Get-Content -Path $masterFile.FullName -Raw
+        $scriptBundleRegex = [regex]'(?i)<webopt:bundlereference[^>]*path\s*=\s*"[^"]*[Ss]cripts[^"]*"[^>]*>'
+        foreach ($m in $scriptBundleRegex.Matches($masterContent)) {
+            $bundlePath = ''
+            if ($m.Value -match 'path\s*=\s*"([^"]*)"') { $bundlePath = $Matches[1] }
+            Write-ManualItem -File 'Site.Master' -Category 'ScriptBundle' -Detail "Script bundle reference '$bundlePath' — JS files auto-copied to wwwroot/Scripts/ and wired into App.razor"
+            Write-TransformLog -File 'Site.Master' -Transform 'ScriptAutoDetect' -Detail "Flagged <webopt:bundlereference> for scripts: $bundlePath"
+        }
     }
 }
 
@@ -1173,6 +1294,56 @@ function New-CompilableStub {
 
 #endregion
 
+#region --- Template Placeholder Conversion (Fix 2) ---
+
+function Convert-TemplatePlaceholders {
+    <#
+    .SYNOPSIS
+        Converts placeholder elements inside *Template blocks to @context.
+    .DESCRIPTION
+        In ASP.NET Web Forms, elements like <tr id="groupPlaceholder"> inside LayoutTemplate
+        and <td id="itemPlaceholder"> inside GroupTemplate are runtime placeholders — the server
+        replaces them with rendered content. In BWFC Blazor, LayoutTemplate and GroupTemplate are
+        RenderFragment<RenderFragment>, so @context must be used to render children.
+
+        This function finds any element whose id contains "Placeholder" (case-insensitive)
+        and replaces it with @context. Handles both self-closing tags and open+close tags
+        with optional whitespace content.
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $replacementsMade = 0
+
+    # Pattern 1: Self-closing tags with placeholder ID
+    # e.g., <td id="itemPlaceholder" /> or <tr id="groupPlaceholder"/>
+    $selfClosingPattern = [regex]'<\w+\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*/>'
+    $selfClosingMatches = $selfClosingPattern.Matches($Content)
+    if ($selfClosingMatches.Count -gt 0) {
+        $Content = $selfClosingPattern.Replace($Content, '@context')
+        $replacementsMade += $selfClosingMatches.Count
+    }
+
+    # Pattern 2: Open+close tags with placeholder ID (with optional whitespace/empty content)
+    # e.g., <tr id="groupPlaceholder"></tr> or <td id="itemPlaceholder" runat="server">  </td>
+    $openClosePattern = [regex]'<(\w+)\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*>\s*</\1>'
+    $openCloseMatches = $openClosePattern.Matches($Content)
+    if ($openCloseMatches.Count -gt 0) {
+        $Content = $openClosePattern.Replace($Content, '@context')
+        $replacementsMade += $openCloseMatches.Count
+    }
+
+    if ($replacementsMade -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'PlaceholderToContext' -Detail "Replaced $replacementsMade placeholder element(s) with @context"
+    }
+
+    return $Content
+}
+
+#endregion
+
 #region --- Main File Transform Pipeline ---
 
 function Convert-WebFormsFile {
@@ -1274,6 +1445,9 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
     $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath
+
+    # Fix 2: Convert placeholder elements inside *Template blocks to @context
+    $content = Convert-TemplatePlaceholders -Content $content -RelPath $relativePath
 
     # Clean up leftover blank lines from removed directives (collapse 3+ consecutive blank lines to 2)
     $content = $content -replace '(\r?\n){3,}', "`n`n"
@@ -1418,6 +1592,11 @@ if ($staticCount -gt 0) {
 # Fix 1b: Auto-detect CSS files and inject <link> tags into App.razor
 if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
     Invoke-CssAutoDetection -OutputRoot $Output -SourcePath $Path
+}
+
+# Fix 1 (Run 11): Auto-detect JS files in Scripts/ and inject <script> tags into App.razor
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
+    Invoke-ScriptAutoDetection -OutputRoot $Output -SourcePath $Path
 }
 
 #endregion
