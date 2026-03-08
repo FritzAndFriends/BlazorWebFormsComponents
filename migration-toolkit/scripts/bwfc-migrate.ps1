@@ -148,13 +148,13 @@ function New-ProjectScaffold {
     # RF-06: Build conditional package references
     $additionalPackages = ''
     if ($hasModels) {
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Sqlite`" Version=`"10.0.0-*`" />"
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0-*`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Sqlite`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0`" />"
     }
     if ($hasIdentity) {
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.EntityFrameworkCore`" Version=`"10.0.0-*`" />"
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.UI`" Version=`"10.0.0-*`" />"
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0-*`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.EntityFrameworkCore`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.UI`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0`" />"
     }
 
     # .csproj
@@ -223,8 +223,8 @@ app.Run();
     if ($hasIdentity) {
         $identityServiceBlock = @"
 
-// TODO: Configure database connection
-// builder.Services.AddDbContext<ProductContext>(options => options.UseSqlite("Data Source=app.db"));
+// TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
+// builder.Services.AddDbContextFactory<ProductContext>(options => options.UseSqlite("Data Source=app.db"));
 
 // TODO: Configure Identity
 // builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -315,11 +315,12 @@ function New-AppRazorScaffold {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet />
 </head>
 
+@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes />
     <script src="_framework/blazor.web.js"></script>
 </body>
 
