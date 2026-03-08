@@ -35,7 +35,7 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Data loading moved to `OnInitializedAsync`
 - [ ] Template `Context="Item"` variables added to all templates
 - [ ] Event handlers converted to Blazor signatures (remove `sender`, `EventArgs`)
-- [ ] `Page_Load` → `OnInitializedAsync`, `IsPostBack` checks removed
+- [ ] `Page_Load` → `OnInitializedAsync`; `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` (optionally simplify)
 - [ ] Navigation calls converted (`Response.Redirect` → `NavigationManager.NavigateTo`)
 - [ ] `<form runat="server">` removed (or converted to `<EditForm>` if validators present)
 - [ ] `Session["key"]` references identified and marked for Layer 3

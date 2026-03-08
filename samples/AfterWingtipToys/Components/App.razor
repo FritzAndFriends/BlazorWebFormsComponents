@@ -5,14 +5,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <link href="/Content/bootstrap.css" rel="stylesheet" />
-    <link href="/Content/Site.css" rel="stylesheet" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="/Content/Site.css" />
+
+    <HeadOutlet />
 </head>
 
+@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script src="/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
 </body>
 
 </html>
+
+

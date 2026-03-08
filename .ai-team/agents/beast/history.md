@@ -9,124 +9,59 @@
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->
 
-### Core Context (2026-02-10 through 2026-02-27)
+<!-- ⚠ Summarized 2026-03-06 by Scribe — older entries archived -->
 
-**Doc structure:** title → intro (MS docs link) → Features Supported → NOT Supported → Web Forms syntax → Blazor syntax → HTML Output → Migration Notes (Before/After) → Examples → See Also. Admonitions for gotchas. mkdocs.yml nav alphabetical within categories. Migration section: "Getting started" and "Migration Strategies" at top.
+### Archived Sessions
 
-**Key patterns:** Style migration: TableItemStyle → CSS class string parameters. DeferredControls.md has dual role (fully deferred + partially implemented). Chart screenshots at `docs/images/{component}/chart-{type}.png`. Shared sub-component docs linked from parents. PagerSettings is first shared sub-component with own doc page. Structural components (no HTML output) lead with "renders no HTML" callout. Audit reports at `planning-docs/AUDIT-REPORT-M{N}.md` with historical snapshot headers. Branch naming: `copilot/create-*`.
+- Core Context (2026-02-10 through 2026-02-27)
+- Doc Work Summary (2026-02-27 through 2026-03-03)
+- Key Team Updates (2026-02-27 through 2026-03-03)
+- Migration Report Conventions (2026-03-04)
+- Run 5 Benchmark Report (2026-03-05)
+- Run 6 Benchmark Report (2026-03-04)
+- Render Mode Placement Correction (2026-03-05)
 
-**Doc work completed:** M1–M3 docs (PasswordRecovery 3-step wizard, DetailsView generic component). Chart doc (JS interop "HTML Output Exception" pattern, Chart Type Gallery, child component doc pattern). M8 release-readiness polish (Substitution/Xml deferred in status.md, Chart Phase 1 hedging removed, README link fixes). M9 Doc Gap Audit (FormView, DetailsView, DataGrid, ChangePassword, PagerSettings.md created). ToolTip universality in Migration/readme.md. ThemesAndSkins.md updated for M10 PoC. NamingContainer.md created with IDRendering.md cross-refs. M9 Consolidated Audit Report (29 findings → M10 issues).
+<!-- ⚠ Summarized 2026-03-07 by Scribe — entries from 2026-03-05 through 2026-03-07 (pre-Run 11) archived -->
 
-**Pending doc needs:** ClientIDMode property documentation (M16). Menu dual rendering modes. ListView CRUD events. Menu styles (IMenuStyleContainer). Post-M15 verification badges if new exact matches achieved. Login+Identity deferred — do not schedule docs.
+- WebFormsPageBase & Page System Docs (2026-03-05)
+- Skills Cross-Reference Review — 7 files, 16+ fixes (2026-03-06)
+- Run 8 Report Enhancement — executive pattern established (2026-03-06)
+- Run 9 Skill Fixes — 6 RF items across 4 skill files (2026-03-07)
+- Run 9 RCA Documentation — path preservation + CSS verification rules (2026-03-07)
 
-<!-- ⚠ Summarized 2026-03-04 by Scribe — covers M17 docs through migration toolkit -->
+### Summary (2026-03-05 through 2026-03-07 pre-Run 11)
 
-### Doc Work Summary (2026-02-27 through 2026-03-03)
+WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross-reference review found `.ai-team/skills/` drifting behind `migration-toolkit/skills/` — both must be updated together. LoginView is a native BWFC component, never replace with AuthorizeView. Executive report pattern established in Run 8: blockquote bottom line → timeline → screenshots → before/after code. Run 9 skill fixes: cookie auth under Interactive Server, minimal API endpoint templates, enhanced navigation guidance, DisableAntiforgery, ListView GroupItemCount. Run 9 RCA: added Static Asset Path Preservation and CSS Reference Verification rules to migration-standards. Key learning: functional tests passing ≠ migration success — visual regression is ship-blocking.
 
-**M17 AJAX docs (6 pages):** Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution. New "AJAX Controls" nav section in mkdocs.yml. Migration stub doc pattern established (warning admonition + ignored props + include→remove lifecycle). Substitution moved from deferred to implemented.
+### Run 10 Failure Report (2026-03-07)
 
-**Issue #359 doc updates (5 pages):** ChangePassword and PagerSettings verified complete. FormView got CRUD events + NOT Supported section. DetailsView got full style sub-component elements. DataGrid paging section enhanced. Pattern: DataGrid is the only pageable control without PagerSettings.
+- **Report location:** `dev-docs/migration-tests/wingtiptoys-run10-2026-03-07/REPORT.md`
+- **Status:** ❌ FAILED — Coordinator Process Violation
+- **Branch:** `squad/run8-improvements` (same as Run 9)
+- **What happened:** Phases 1 and 2 completed successfully (Layer 1 in 4.6s, Layer 2 in ~15 min with 0 build errors). The Coordinator then violated Squad protocol by hand-editing Razor files, installing `npm playwright`, creating throwaway Node.js scripts, using wrong .NET SDK (10.0.200-preview vs 10.0.100), and not setting `ASPNETCORE_ENVIRONMENT=Development`. ~30 minutes wasted on ad-hoc debugging.
+- **Test results:** 20/25 passed (14 functional + 11 visual integrity). 5 failed: 3 cart timeouts, 1 auth E2E, 1 blazor.web.js 500.
+- **Root causes:** RC-1 Coordinator did domain work instead of routing to agents; RC-2 Layer 2 output had null collections and missing ItemType params; RC-3 Environment not configured for Development mode.
+- **Key learning:** The Squad system works when agents do domain work and the Coordinator coordinates. When the Coordinator performs domain work directly, quality controls are bypassed and time is wasted. Process discipline is the #1 priority for Run 11.
+- **Pattern across runs:** Run 8 ✅, Run 9 ❌ (visual regression), Run 10 ❌ (process violation). Automated pipeline (Layers 1-2) is improving each run; Phase 3 execution remains the weak link.
+- **Decision filed:** `.ai-team/decisions/inbox/beast-run10-failure.md` — Coordinator must never hand-edit application source files.
 
-**M10 Skins & Themes Guide:** Created `docs/Migration/SkinsAndThemes.md` — practical guide coexisting with `ThemesAndSkins.md` (strategy). Convention: separate "Guide" vs "Strategy" docs with clear nav labels.
+ Team update (2026-03-07): Run 10 declared FAILED  coordinator violated protocol. Phase 1 skill updates applied correctly. Key issues for next run: missing ItemType param, null Products list, ASPNETCORE_ENVIRONMENT=Development required.  decided by Jeffrey T. Fritz
 
-**Executive Report:** `planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md` — 96.6% coverage, 55-70% time savings, 18-26 hour estimate.
+### Run 11 Skill Fixes — migration-standards SKILL.md (2026-03-07)
 
-**Migration Toolkit (6 docs):** README, QUICKSTART, CONTROL-COVERAGE (58 components, 6 categories), METHODOLOGY, CHECKLIST, copilot-instructions-template. Key: no content duplication, copilot-instructions-template is self-contained for external projects.
-
-**Distributable BWFC Migration Skill:** Single self-contained SKILL.md (~750 lines) with 10 architecture decision templates, three-layer methodology, per-page checklist. NuGet-first, no internal repo references.
-
-**Toolkit fixes:** Component count 52→58, internal references→distributed paths, AzimoLabs→FritzAndFriends. Key learning: toolkit coverage tables must be updated when new components are added.
-
-**Migration test report structure:** `docs/migration-tests/` standard location. Per-run subfolder `{app}-{YYYY-MM-DD}` with `report.md` + `images/`. README.md index. Added "Migration Tests" nav section to mkdocs.yml.
-
-**Pending doc needs:** ClientIDMode property. Menu dual rendering modes. ListView CRUD events. Menu styles (IMenuStyleContainer). Post-M15 verification badges.
-
-### Key Team Updates (2026-02-27 through 2026-03-03)
-
-- Branching: feature PRs from personal fork to upstream dev (Jeff)
-- Issues closed via PR references only (Jeff)
-- CascadedTheme (not Theme) is cascading parameter name (Cyclops)
-- Theming sample page uses 6-section progressive layout (Jubilee)
-- Unified release.yml — single workflow, version.json 3-segment SemVer (PR #408)
-- Skins & Themes roadmap: 3 waves, 15 work items (Forge)
-- Project reframed as migration acceleration system (Jeff)
-- Themes (#369) implementation last — ListView CRUD first, WingtipToys second (Jeff)
-- ListView EventArgs now include IOrderedDictionary properties (Cyclops)
-- Migration toolkit restructured into self-contained migration-toolkit/ package (Jeff, Forge)
-
-
- Team update (2026-03-04): PRs must target upstream FritzAndFriends/BlazorWebFormsComponents, not the fork  decided by Jeffrey T. Fritz
- Team update (2026-03-04): Migration test reports go in docs/migration-tests/{subfolder}/  decided by Jeffrey T. Fritz
- Team update (2026-03-04): Layer 1 benchmark baseline established  data at docs/migration-tests/wingtiptoys-2026-03-04/  decided by Cyclops
- Team update (2026-03-04): Migration Run 2  11/11 features pass, toolkit ready for customer-facing documentation  decided by Forge
-
-### Migration Report Conventions (2026-03-04)
-
-- **Image path depth**: Reports in `docs/migration-tests/{app}-{run}/report.md` are 3 levels deep from repo root. Relative paths to `planning-docs/` must use `../../../planning-docs/`, not `../../planning-docs/`. This is a common off-by-one error to watch for.
-- **Executive summary pattern**: Migration reports should open with a concise paragraph summarizing enhancements tested, pass/fail, and key deltas from prior runs, followed by a quick-reference metrics table (8–10 rows). Executives should grasp the full picture in ≤10 seconds.
-- **Run 4 report location**: `docs/migration-tests/wingtiptoys-run4-2026-03-04/report.md` with local `images/` subfolder for Blazor screenshots and cross-references to `planning-docs/screenshots/` for original Web Forms screenshots.
-
- Team update (2026-03-05): GetRouteUrl RouteValueDictionary overloads now functional  all 4 overloads match Web Forms API  decided by Cyclops
-
-### Run 5 Benchmark Report (2026-03-05)
-
-- **Report written:** `docs/migration-tests/wingtiptoys-run5-2026-03-04/report.md` — comprehensive 9-section report with executive summary, metrics comparison table, what-works/what-doesn't breakdown, enhancement impact analysis, Layer 2 fixes summary, build results, gap analysis, and recommendations.
-- **Key convention reinforced:** When manual review item counts increase between runs, explain *why* in the report (granular flagging vs regression). Jeff needs to see that higher counts can mean better output quality.
-- **Report structure evolution:** Run 5 report adds "What Works" and "What Doesn't Work" sections (Jeff's request) plus categorization of manual items by difficulty ("mechanical but tedious" vs "requires architectural decisions"). This pattern should carry forward to future runs.
-- **Enhancement impact table pattern:** Per-enhancement rows with Fired/Count/Run4-impact/Run5-status/Net-impact columns. Effective for showing ROI of individual script improvements.
-
- Team update (2026-03-04): Run 5 migration complete  309 transforms, clean build (0 errors, 0 warnings, 4.56s). Benchmark report pending. Key artifacts at docs/migration-tests/wingtiptoys-run5-2026-03-04/  decided by Cyclops
-
- Team update (2026-03-04): Migration standards formalized  EF Core, .NET 10, ASP.NET Core Identity, BWFC event handler preservation. Documentation priorities: document single-item FormView usage, document ListView Items parameter in migration context. migration-toolkit/ is canonical home.  decided by Jeffrey T. Fritz, Forge
-
-📋 Team update (2026-03-04): Run 6 improvement analysis  decided by Forge
-
-### Run 6 Benchmark Report (2026-03-04)
-
-- **Report written:** `docs/migration-tests/wingtiptoys-run6-2026-03-04/report.md` — comprehensive 9-section report matching Run 5 format with executive summary, Run 5 vs Run 6 metrics comparison, what-works/what-doesn't breakdown, enhancement impact analysis, Layer 2 fixes summary, build results (4 rounds), gap analysis (2 script bugs), and recommendations.
-- **Key data:** 55% total time reduction (Run 5 ~10 min → Run 6 ~4.5 min). Layer 2 manual time dropped 53% (440s → 205s). 4 enhancements all fired. 269 transforms, 79 static files to wwwroot/, 6 auto-stubs.
-- **Format evolution:** Run 6 report adds explicit "Script Bugs Found" table in Gaps section (separate from "Patterns That Could Be Enhanced"). This distinguishes regressions/bugs from enhancement opportunities — important for prioritizing Run 7 fixes.
-- **Transform count can decrease:** Run 6 had fewer transforms than Run 5 (269 vs 309) because auto-stubbing replaces full transforms for unconvertible pages. Reports should explain count decreases as quality improvements, not regressions.
-- **Build rounds can increase without regression:** Run 6 had 4 build rounds vs Run 5's 2, but for entirely different root causes (NuGet auth, @rendermode bug). Reports should contextualize build round counts with root cause analysis.
-- **Highest-impact enhancement pattern:** SelectMethod BWFC-aware guidance changed the migration *approach* (preserve components vs replace with HTML), not just the speed. Enhancement impact sections should capture qualitative shifts, not just time savings.
-
- Team update (2026-03-04): Run 6 benchmark validates all migration-standards SKILL.md patterns. 32 Web Forms files  clean Blazor build in ~4.5 min (55% reduction from Run 5). 2 script bugs identified: @rendermode in _Imports.razor, stub detection misses code-behind.  decided by Forge
-
-### Render Mode Placement Correction (2026-03-05)
-
-- **Key learning:** `@rendermode` is a directive *attribute* (goes on component instances like `<Routes @rendermode="InteractiveServer" />`), NOT a standalone directive. Placing `@rendermode InteractiveServer` in `_Imports.razor` causes build errors (RZ10003, CS0103, RZ10024).
-- **Correct pattern:** `_Imports.razor` gets `@using static Microsoft.AspNetCore.Components.Web.RenderMode` (enables shorthand). `App.razor` gets `@rendermode="InteractiveServer"` on both `<Routes>` and `<HeadOutlet>`.
-- **Files updated:** `migration-toolkit/skills/migration-standards/SKILL.md` (new "Render Mode Placement" subsection under Target Architecture), `migration-toolkit/skills/bwfc-migration/SKILL.md` (Step 2 expanded with `@using static` + new Step 2b for App.razor), `migration-toolkit/METHODOLOGY.md` (scaffold table includes App.razor).
-- **Reference:** https://learn.microsoft.com/aspnet/core/blazor/components/render-modes
-- **Source:** Jeff confirmed correct pattern; Microsoft Learn docs verified.
+- **Scope:** 3 new sections added to `.ai-team/skills/migration-standards/SKILL.md` based on Run 11 WingtipToys benchmark failures.
+- **Fix 3 — Static Asset Migration Checklist:** Added comprehensive table of ALL common folders (Content/, Scripts/, Images/, Catalog/, fonts/, favicon.ico) that must be copied to `wwwroot/`. Includes verification checklist for CSS, JS, images, logos, fonts. Documents the common miss: `Scripts/` folder is easy to forget because CSS breakage is more visually obvious.
+- **Fix 4 — ListView Template Placeholder Conversion:** Added full conversion guide for LayoutTemplate/GroupTemplate placeholder elements → `@context`. This was the #1 failure cause in Run 11 (5 of 8 test failures). Documents the Web Forms placeholder pattern (`<tr id="groupPlaceholder">`), the Blazor `RenderFragment<RenderFragment>` equivalent, migration rule table, with/without GroupItemCount examples, and diagnostic tip.
+- **Fix 5 — Preserving Action Links in Detail Pages:** Added section on verifying action links (Add to Cart, Edit, Delete) survive Layer 1 conversion. Documents the `@context.PropertyName` pattern for data-bound link values.
+- **Why needed:** Run 11 exposed gaps where the migration script converts template structure but doesn't handle placeholder-to-@context conversion, and static asset copying was incomplete (Scripts/ folder missed).
 
 
- Team update (2026-03-04): @rendermode InteractiveServer belongs in App.razor, not _Imports.razor  consolidated from Forge, Cyclops, Jeffrey T. Fritz (PR #419)
+ Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents  decided by Jeffrey T. Fritz, Beast
+ Team update (2026-03-07): Run 11 script fixes: Invoke-ScriptAutoDetection (JS files) and Convert-TemplatePlaceholders (placeholder@context) added to bwfc-migrate.ps1  decided by Cyclops
+ Team update (2026-03-07): Run 11 migration decisions: root-level _Imports.razor required, partial class base class conflict pattern, auth endpoint pattern  decided by Cyclops
 
+ Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
 
- Team update (2026-03-04): EF Core must use 10.0.3 (latest .NET 10)  directed by Jeff
+ Team update (2026-03-08): @using BlazorWebFormsComponents.LoginControls must be in every generated _Imports.razor  decided by Cyclops
 
-### WebFormsPageBase Documentation (2026-03-05)
-
-- **Architecture decision documented:** `WebFormsPageBase` inherits from `ComponentBase` and provides `Title`, `MetaDescription`, `MetaKeywords`, `IsPostBack`, and `Page` (self-reference) for converted ASPX pages. Eliminates per-page `@inject IPageService` boilerplate.
-- **bwfc-migration SKILL.md updated:** Step 2 (`_Imports.razor`) now includes `@inherits BlazorWebFormsComponents.WebFormsPageBase`. Step 3 expanded to include `<BlazorWebFormsComponents.Page />` in layout. Lifecycle methods table updated for `IsPostBack` (works AS-IS) and `if (IsPostBack)` (dead code — flag for review). "No PostBack" gotcha rewritten. New "Page Base Class" row added to control translation table.
-- **migration-standards SKILL.md updated:** Target Architecture table updated (`WebFormsPageBase` for pages, `ComponentBase` for non-page components). New "Page Base Class" section added with one-time setup, properties table, and guidance on when `@inject IPageService` is still needed. Page Lifecycle Mapping updated for `IsPostBack` and `Page.Title`. Anti-pattern section corrected to show `WebFormsPageBase` as the right base class.
-- **METHODOLOGY.md updated:** Layer 1 scaffold section now documents that `_Imports.razor` includes `@inherits WebFormsPageBase` and layout includes `<BlazorWebFormsComponents.Page />`.
-- **Key nuance preserved:** `@inject IPageService` remains valid and documented for non-page components. `<BlazorWebFormsComponents.Page />` render component is still required in the layout — `WebFormsPageBase` provides the code-behind API, `<Page />` does the rendering. `Page.Request`, `Page.Response`, `Page.Session` are deliberately omitted to force proper Blazor migration.
-- **Source:** Architecture decision at `.ai-team/decisions/inbox/forge-page-base-class.md`, requested by Jeffrey T. Fritz.
-
- Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
-
-### Page System Documentation Rewrite (2026-03-05)
-
-- **PageService.md rewritten as "Page System" doc:** Restructured from single-approach `@inject IPageService` doc to comprehensive three-piece architecture guide. Leads with `WebFormsPageBase` as primary approach for converted pages, keeps `@inject IPageService` as secondary approach for non-page components.
-- **New sections added:** Architecture diagram (ASCII art showing WebFormsPageBase → IPageService → Page.razor flow), One-Time Setup, Properties Available/NOT Available tables, `if (IsPostBack)` dead code warning admonition.
-- **Key Differences table expanded:** Now has three columns (Web Forms / WebFormsPageBase / inject IPageService) and includes `IsPostBack`, inheritance, and `Page.Request`/`Page.Response` rows showing deliberate omissions.
-- **Migration Path updated:** Before/After now shows `WebFormsPageBase` inheritance approach with `if (!IsPostBack)` preserved, instead of the previous `@inject` approach.
-- **mkdocs.yml nav renamed:** `PageService` → `Page System` to reflect broader scope.
-- **README.md updated:** Utility Features entry now references "Page System" and mentions WebFormsPageBase, IPageService, and Page renderer.
-- **Key distinction preserved:** `WebFormsPage` (NamingContainer + ThemeProvider) is a completely different component — added explicit cross-reference in See Also to avoid confusion.
-- **Learning:** When a utility feature grows from "one service" to "multi-piece system," the doc title and nav label should reflect the system, not the individual service. This prevents readers from thinking the doc only covers one piece.
-
-� Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
-
+ Team update (2026-03-08): Run 12 migration patterns: auth via plain HTML forms with data-enhance=false, dual DbContext, LoginView _userName from cascading auth state  decided by Cyclops

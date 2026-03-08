@@ -20,7 +20,7 @@ namespace BlazorWebFormsComponents.LoginControls
 		private RenderFragment GetView()
 		{
 
-			if (!(_user.Identity?.IsAuthenticated ?? false))
+			if (_user == null || !(_user.Identity?.IsAuthenticated ?? false))
 			{
 
 				return AnonymousTemplate;

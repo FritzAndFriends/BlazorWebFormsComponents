@@ -148,6 +148,10 @@ The script should preserve the attribute and annotate the signature change neede
 - Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
 - Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID
 
+### Blazor Enhanced Navigation
+
+When linking to minimal API endpoints from Blazor pages, use `<form method="post">` or add `data-enhance-nav="false"` to prevent Blazor's enhanced navigation from intercepting the request. Enhanced navigation handles `<a href>` clicks as client-side SPA navigation, which breaks links to server endpoints (the request never reaches the server). This applies to all auth endpoints, cart operations, file downloads, and any other minimal API routes.
+
 ### Static Asset Relocation
 
 - All static files → `wwwroot/`
@@ -172,7 +176,7 @@ The script should preserve the attribute and annotate the signature change neede
 **Script handles (Layer 1):**
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
-- LoginView → AuthorizeView
+- LoginView → **preserve as BWFC LoginView** — do NOT rewrite as AuthorizeView. The BWFC `LoginView` injects `AuthenticationStateProvider` natively and uses the same template names (`AnonymousTemplate`, `LoggedInTemplate`). The migration script handles this automatically.
 - Master page → MainLayout.razor
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging

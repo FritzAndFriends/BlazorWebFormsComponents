@@ -16,7 +16,7 @@ public class Product
     public string? ImagePath { get; set; }
 
     [Display(Name = "Price")]
-    public double? UnitPrice { get; set; }
+    public decimal? UnitPrice { get; set; }
 
     public int? CategoryID { get; set; }
 

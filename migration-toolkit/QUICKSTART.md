@@ -8,7 +8,7 @@ This guide walks you through the linear steps. It doesn't explain *why* each ste
 
 ## Before You Start
 
-- [ ] .NET 8+ SDK installed (`dotnet --version`)
+- [ ] .NET 10+ SDK installed (`dotnet --version`)
 - [ ] PowerShell 7+ installed (`pwsh --version`)
 - [ ] Your Web Forms project compiles and runs on .NET Framework
 - [ ] Git initialized in your project (you'll want to track changes)
@@ -82,16 +82,27 @@ The migration script handles the mechanical work: stripping `asp:` prefixes, rem
 
 After the migration script runs, verify these are in place (the script scaffolds them, but check):
 
-**`_Imports.razor`** — add BWFC namespaces:
+**`_Imports.razor`** — add BWFC namespaces and page base class:
 ```razor
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.Enums
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 ```
+
+The `@inherits` line makes every page inherit from `WebFormsPageBase`, which provides `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` — so Web Forms code-behind compiles unchanged.
 
 **`Program.cs`** — register BWFC services:
 ```csharp
 builder.Services.AddBlazorWebFormsComponents();
 ```
+
+**Layout (`MainLayout.razor`)** — add the Page render component:
+```razor
+<BlazorWebFormsComponents.Page />
+```
+
+This renders `<PageTitle>` and `<meta>` tags. `WebFormsPageBase` provides the code-behind API, `<Page />` does the rendering — both are required.
 
 **`App.razor`** (or layout head) — add BWFC JavaScript:
 ```html
@@ -127,7 +138,7 @@ Open each migrated `.razor` file and work through the structural transforms that
 | `SelectMethod` → `Items` | Replace `SelectMethod="GetProducts"` with `Items="products"`, load data in `OnInitializedAsync` |
 | `ItemType` → `TItem` | Already done by Layer 1, but verify generic type parameter is correct |
 | Template context | Add `Context="Item"` to `<ItemTemplate>`, `<EditItemTemplate>`, etc. |
-| Code-behind lifecycle | Convert `Page_Load` → `OnInitializedAsync`, remove `IsPostBack` checks |
+| Code-behind lifecycle | Convert `Page_Load` → `OnInitializedAsync`; `IsPostBack` works AS-IS via `WebFormsPageBase` |
 | Event handlers | Convert `void Btn_Click(object sender, EventArgs e)` → `void Btn_Click()` |
 | Navigation | Replace `Response.Redirect("~/path")` → `NavigationManager.NavigateTo("/path")` |
 | Form wrappers | Remove `<form runat="server">`, use `<EditForm>` where validation is needed |

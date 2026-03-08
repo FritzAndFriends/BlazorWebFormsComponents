@@ -9,62 +9,13 @@
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
 
-### Core Context (2026-02-10 through 2026-02-27)
+<!-- ⚠ Summarized 2026-03-06 by Scribe — older entries archived -->
 
-**M1M3 QA:** Triaged PR #333 Calendar. 71 bUnit tests for Sprint 3 (42 DetailsView + 29 PasswordRecovery). DetailsView is generic DataBoundComponent<ItemType>, PasswordRecovery needs NavigationManager mock.
+### Archived Sessions
 
-**M4 Chart QA:** 152 bUnit tests (BunitContext with JSInterop.Mode=Loose). ChartConfigBuilder most testable (pure static). GetPaletteColors internal  tested indirectly. ChartSeriesDataBindingHelper documents binding contract.
-
-**M6 P0 QA:** 44 tests for base class changes (AccessKey, ToolTip, ImageStyle, LabelStyle, StyleInheritance, ValidatorDisplay, SetFocusOnError). Fixed DataList duplicate AccessKey bug. WebColor "LightGray""LightGrey" via ColorTranslator.
-
-**M7 QA:** 24 GridView tests (Selection 7, StyleSubComponents 8, DisplayProperties 9). 41 P2 tests (ListView CRUD 12, DataGrid Styles 11 + Events 3, Menu LevelStyles 7, Panel BackImageUrl 3, Login Orientation 5).
-
-**M9 QA:** 24 tests (ToolTip 20 across 9 controls, CommaSplit 4). Validation messages stored as `Text,ErrorMessage\x1F ValidationGroup`. ToolTip renders as title on outermost element.
-
-**M16 QA:** 18 LoginView/PasswordRecovery OuterStyle tests. 12 ClientIDMode tests (Static 3, Predictable 3, AutoID 2, Inherit 2, Edge Cases 2). Found UseCtl00Prefix regression  fixed via NamingContainer auto-AutoID.
-
-**Post-Bug-Fix Capture Pipeline (2026-02-26):** Re-ran full HTML capture after 14 bug fixes. 132131 divergences, 01 exact match (Literal-3). 11 targeted controls show improvements. Primary blocker: sample data parity, not component bugs.
-
-### Key Test Patterns
-
-- **Validator Display:** EditForm + InputText + RequiredFieldValidator. Static  visibility:hidden, Dynamic  display:none, None  always display:none. SetFocusOnError uses JSInterop.SetupVoid/VerifyInvoke.
-- **BaseListControl:** GetItems() applies DataTextFormatString to both static and data-bound items. AppendDataBoundItems=false replaces static items.
-- **Menu:** FindAll("li a") to exclude skip-link. JSInterop.Mode = Loose. `Orientation ori = Orientation.Horizontal;` variable pattern avoids Razor collision.
-- **Login controls:** AuthenticationStateProvider + NavigationManager mocks. LoginView uses fully-qualified type to avoid ambiguity.
-- **GridView styles:** Named RenderFragments (`<RowStyleContent>` etc.) with GridViewRowStyle. AlternatingRowStyle always initialized. AutoGenerateColumns=false renders in two passes.
-- **DataGrid styles:** WebColor values must be variables, not string literals.
-- **ListView:** HandleCommand via cut.InvokeAsync() for Blazor Dispatcher context.
-- **PasswordRecovery:** outer table always includes border-collapse:collapse  use ShouldContain.
-- **ClientIDMode:** Button as test component. `@using BlazorWebFormsComponents.Enums` required.
-- **Pipeline:** normalize-html.mjs --compare uses RAW files. Normalize both sides first. Sample data alignment is prerequisite for accurate comparison.
-
- Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
-
- Team update (2026-02-27): Issues must be closed via PR references using 'Closes #N' syntax, no manual closures  decided by Jeffrey T. Fritz
-
-
- Team update (2026-02-27): M17 AJAX controls implemented  ScriptManager/Proxy are no-op stubs, Timer shadows Enabled, UpdatePanel uses ChildContent, UpdateProgress renders hidden, Substitution uses Func callback, new AJAX/Migration Helper categories  decided by Cyclops
-
-
- Team update (2026-02-27): M17 sample pages created for Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution. Default.razor filenames. ComponentCatalog already populated  decided by Jubilee
-
-<!-- Summarized 2026-03-02 by Scribe -- covers M17 + Issue #379 -->
-
-### M17 and Issue #379 Test Summary (2026-02-27 through 2026-02-28)
-
-**M17 AJAX tests (47 tests):** 6 test files -- Timer (9), ScriptManager (9), ScriptManagerProxy (4), UpdatePanel (10), UpdateProgress (9), Substitution (6). Fixed Timer duplicate [Parameter] Enabled bug (shadowed base class). Timer tests use C# API Render<Timer>(p => p.Add(...)). No-op stubs tested via cut.Markup.Trim().ShouldBeEmpty(). ScriptReference properties tested as plain C# instantiation.
-
-**M17 Audit fix tests (9 tests):** Covered all 5 fixes -- EnablePartialRendering default true, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties. UpdateProgress CssClass uses conditional null pattern. All 29 ScriptManager/UpdateProgress tests pass.
-
-**LinkButton CssClass tests (8 tests, Issue #379):** Dedicated CssClass.razor -- single class, multiple classes, no/empty CssClass omits attribute, CssClass+ID coexist, PostBackUrl branch, disabled aspNetDisabled, disabled+CssClass. Two render branches tested (PostBackUrl null vs non-null). Edge case: GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhiteSpace.
-
-Key patterns: Timer parameter inheritance -- use C# API, not Razor templates. No-op stubs -- test defaults + no-throw. UpdateProgress DynamicLayout=true > display:none, false > display:block;visibility:hidden. UpdatePanel Block > div, Inline > span. LinkButton has two render paths both sharing GetCssClassOrNull().
-
- Team update (2026-02-27): M17 audit fixes resolved -- 5 fidelity issues fixed. 9 new tests, 1367 total. PR #402 -- decided by Forge, Cyclops
-
- Team update (2026-02-28): Cyclops fixed MenuItemStyle Font- attributes (SetFontsFromAttributes call in OnInitialized) and CheckBox bare input missing id attribute  may warrant additional test coverage. Issue #379 confirmed already fixed in M15.
-
-<!-- Summarized 2026-03-02 by Scribe -- covers M20 theming + FontInfo tests -->
+- Core Context (2026-02-10 through 2026-02-27)
+- Key Test Patterns
+- M17 and Issue #379 Test Summary (2026-02-27 through 2026-02-28)
 
 ### M20 Theming & FontInfo Test Summary (2026-03-01 through 2026-03-02)
 
@@ -115,3 +66,31 @@ Key patterns: `FindComponent<PageTitle>()` and `FindComponent<HeadContent>()` fo
 
 � Team update (2026-03-05): WebFormsPage now includes IPageService head rendering (title + meta tags), merging Page.razor capability per Option B consolidation. Layout simplified to single <WebFormsPage> component. Page.razor remains standalone.  decided by Forge, implemented by Cyclops
 
+
+ Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
+
+ Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge
+
+� Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast
+
+ Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
+
+
+ Team update (2026-03-06): Run 9 CSS/image failure RCA  script drops bundle refs, Layer 2 changed image paths without moving files. 5 fixes proposed.  decided by Forge
+
+### StaticAssetTests Acceptance Tests (2026-03-06)
+
+**12 Playwright acceptance tests for static asset / visual integrity (StaticAssetTests.cs):** Catches the Run 9 class of failures — missing CSS causing navbar bullet-list rendering, and image 404s on product pages. Tests: (1) HomePage_LoadsAtLeastOneCssFile — intercepts Playwright Response events for .css URLs, asserts count > 0. (2) CssFiles_ReturnHttp200 — collects non-200 CSS responses, fails with URL list. (3) ProductList_AllImagesLoad — iterates all <img> elements, checks src non-empty + naturalWidth > 0 via JS eval. (4) ProductList_ImageRequests_ReturnHttp200 — Response event listener for image extensions, collects failures. (5) Navbar_HasBootstrapClasses — asserts `.navbar` element exists. (6) Navbar_HasReasonableHeight — BoundingBoxAsync height ≥ 30px. (7) HomePage_HasStyledMainContent — checks .jumbotron/.carousel/main/.container exists with width > 100 + height > 50. (8) HomePage_Screenshot_VerifyLayout — full-page screenshot byte length > 5000. (9) ProductList_Screenshot_VerifyImagesAndLayout — image dimensions + screenshot size. (10) ProductDetails_Screenshot_VerifyImageAndStyling — navigates to first product detail, checks image naturalWidth + bounding box + screenshot. (11) HomePage_NoFailed_StaticAssetRequests — catch-all for any 4xx/5xx on .css/.js/.png/.jpg/.gif/.webp/.svg/.woff/.woff2/.ico.
+
+Key patterns: Response event interception for network-level asset checks. `EvaluateAsync<int>("el => el.naturalWidth")` for broken image detection. `BoundingBoxAsync()` for CSS-applied dimension checks. Screenshot byte-size as a coarse visual sanity proxy. All follow existing Playwright collection pattern (no [Trait] used, matching other test classes).
+
+ Team update (2026-03-07): Run 10 declared FAILED  coordinator violated protocol. Phase 1 acceptance tests applied correctly. 20/25 tests passed before failure called. Coordinator must use existing .NET test infrastructure, not Node.js alternatives.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents. Tests must run via dotnet test, not ad-hoc scripts  decided by Jeffrey T. Fritz, Beast
+
+ Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+
+ Team update (2026-03-08): @using BlazorWebFormsComponents.LoginControls must be in every generated _Imports.razor  decided by Cyclops
+
+ Team update (2026-03-08): Run 12 migration patterns: auth via plain HTML forms with data-enhance=false, dual DbContext, LoginView _userName from cascading auth state  decided by Cyclops

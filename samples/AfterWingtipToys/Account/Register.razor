@@ -1,5 +1,42 @@
 @page "/Account/Register"
-<h3>Register  not yet migrated</h3>
-@* TODO: Implement using ASP.NET Core Identity scaffolding *@
-@code {
+<PageTitle>Register</PageTitle>
+
+<h2>Register</h2>
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <p class="text-danger">@_error</p>
 }
+
+<form method="post" action="/account/register-handler" data-enhance="false">
+    <h4>Create a new account</h4>
+    <hr />
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="Email">Email</label>
+        <div class="col-md-10">
+            <input type="email" id="Email" name="Email" class="form-control" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="Password">Password</label>
+        <div class="col-md-10">
+            <input type="password" id="Password" name="Password" class="form-control" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="ConfirmPassword">Confirm password</label>
+        <div class="col-md-10">
+            <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-default">Register</button>
+        </div>
+    </div>
+</form>
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")] public string? _error { get; set; }
+}
+

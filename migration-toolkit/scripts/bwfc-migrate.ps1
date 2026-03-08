@@ -86,6 +86,7 @@ $StripAttributes = @(
 
 $script:TransformLog = [System.Collections.Generic.List[PSCustomObject]]::new()
 $script:ManualItems = [System.Collections.Generic.List[PSCustomObject]]::new()
+$script:RedirectHandlers = [System.Collections.Generic.List[string]]::new()
 $script:FilesProcessed = 0
 $script:TransformsApplied = 0
 
@@ -128,8 +129,33 @@ function Write-ManualItem {
 function New-ProjectScaffold {
     param(
         [string]$OutputRoot,
-        [string]$ProjectName
+        [string]$ProjectName,
+        [string]$SourcePath
     )
+
+    # RF-06: Detect features that need additional packages
+    $hasModels = $false
+    $hasIdentity = $false
+    if ($SourcePath) {
+        $modelsDir = Join-Path $SourcePath 'Models'
+        $hasModels = Test-Path $modelsDir -PathType Container
+        $accountDir = Join-Path $SourcePath 'Account'
+        $hasIdentity = (Test-Path $accountDir -PathType Container) -or
+                       (Test-Path (Join-Path $SourcePath 'Login.aspx')) -or
+                       (Test-Path (Join-Path $SourcePath 'Register.aspx'))
+    }
+
+    # RF-06: Build conditional package references
+    $additionalPackages = ''
+    if ($hasModels) {
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Sqlite`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0`" />"
+    }
+    if ($hasIdentity) {
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.EntityFrameworkCore`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Identity.UI`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0`" />"
+    }
 
     # .csproj
     $csprojContent = @"
@@ -142,7 +168,7 @@ function New-ProjectScaffold {
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />
+    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />${additionalPackages}
   </ItemGroup>
 
 </Project>
@@ -158,6 +184,7 @@ function New-ProjectScaffold {
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.LoginControls
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
 "@
@@ -191,6 +218,41 @@ app.MapRazorComponents<$ProjectName.Components.App>()
 
 app.Run();
 "@
+
+    # RF-07: Add Identity/Session boilerplate when detected
+    if ($hasIdentity) {
+        $identityServiceBlock = @"
+
+// TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
+// builder.Services.AddDbContextFactory<ProductContext>(options => options.UseSqlite("Data Source=app.db"));
+
+// TODO: Configure Identity
+// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+//     .AddEntityFrameworkStores<ProductContext>();
+
+// TODO: Configure session for cart/state management
+// builder.Services.AddDistributedMemoryCache();
+// builder.Services.AddSession();
+// builder.Services.AddHttpContextAccessor();
+// builder.Services.AddCascadingAuthenticationState();
+"@
+        $programContent = $programContent.Replace(
+            'builder.Services.AddBlazorWebFormsComponents();',
+            "builder.Services.AddBlazorWebFormsComponents();`n$identityServiceBlock"
+        )
+
+        $identityMiddlewareBlock = @"
+
+// TODO: Add middleware in the pipeline
+// app.UseSession();
+// app.UseAuthentication();
+// app.UseAuthorization();
+"@
+        $programContent = $programContent.Replace(
+            'app.UseAntiforgery();',
+            "app.UseAntiforgery();`n$identityMiddlewareBlock"
+        )
+    }
 
     # Properties/launchSettings.json
     $launchSettingsContent = @"
@@ -253,11 +315,12 @@ function New-AppRazorScaffold {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet />
 </head>
 
+@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes />
     <script src="_framework/blazor.web.js"></script>
 </body>
 
@@ -292,6 +355,230 @@ function New-AppRazorScaffold {
     }
 }
 
+function Invoke-CssAutoDetection {
+    <#
+    .SYNOPSIS
+        Fix 1b: Scans wwwroot for CSS files and injects <link> tags into App.razor's <head>.
+    #>
+    param(
+        [string]$OutputRoot,
+        [string]$SourcePath
+    )
+
+    $appRazorPath = Join-Path $OutputRoot "Components" "App.razor"
+    if (-not (Test-Path $appRazorPath)) {
+        Write-Verbose "Invoke-CssAutoDetection: App.razor not found at $appRazorPath — skipping"
+        return
+    }
+
+    $wwwroot = Join-Path $OutputRoot "wwwroot"
+    if (-not (Test-Path $wwwroot -PathType Container)) {
+        Write-Verbose "Invoke-CssAutoDetection: wwwroot not found — skipping"
+        return
+    }
+
+    $cssLinks = [System.Collections.Generic.List[string]]::new()
+
+    # Scan wwwroot/Content/ for CSS files
+    $contentDir = Join-Path $wwwroot "Content"
+    if (Test-Path $contentDir -PathType Container) {
+        $cssFiles = Get-ChildItem -Path $contentDir -Filter '*.css' -Recurse -File
+        foreach ($cf in $cssFiles) {
+            $relCss = $cf.FullName.Substring($wwwroot.Length).TrimStart('\', '/') -replace '\\', '/'
+            $cssLinks.Add("    <link rel=""stylesheet"" href=""/$relCss"" />")
+        }
+    }
+
+    # Fallback: scan wwwroot/css/ if Content/ had nothing
+    if ($cssLinks.Count -eq 0) {
+        $cssDir = Join-Path $wwwroot "css"
+        if (Test-Path $cssDir -PathType Container) {
+            $cssFiles = Get-ChildItem -Path $cssDir -Filter '*.css' -Recurse -File
+            foreach ($cf in $cssFiles) {
+                $relCss = $cf.FullName.Substring($wwwroot.Length).TrimStart('\', '/') -replace '\\', '/'
+                $cssLinks.Add("    <link rel=""stylesheet"" href=""/$relCss"" />")
+            }
+        }
+    }
+
+    # Also scan for Site.css or other root-level CSS in wwwroot
+    $rootCssFiles = Get-ChildItem -Path $wwwroot -Filter '*.css' -File -ErrorAction SilentlyContinue
+    foreach ($cf in $rootCssFiles) {
+        $relCss = $cf.Name
+        $linkTag = "    <link rel=""stylesheet"" href=""/$relCss"" />"
+        if ($cssLinks -notcontains $linkTag) {
+            $cssLinks.Add($linkTag)
+        }
+    }
+
+    # Check source Site.Master for CDN references (Bootstrap, jQuery)
+    $cdnLinks = [System.Collections.Generic.List[string]]::new()
+    $masterFile = Get-ChildItem -Path $SourcePath -Filter 'Site.Master' -Recurse -File | Select-Object -First 1
+    if ($masterFile) {
+        $masterContent = Get-Content -Path $masterFile.FullName -Raw
+        # Extract CDN <link> tags (stylesheets from CDNs)
+        $cdnLinkRegex = [regex]'<link\s[^>]*href\s*=\s*"(https?://[^"]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^"]*)"[^>]*>'
+        foreach ($m in $cdnLinkRegex.Matches($masterContent)) {
+            $cdnLinks.Add("    " + $m.Value.Trim())
+        }
+        # Extract CDN <script> tags (jQuery, Bootstrap JS)
+        $cdnScriptRegex = [regex]'<script\s[^>]*src\s*=\s*"(https?://[^"]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs|jquery)[^"]*)"[^>]*>\s*</script>'
+        foreach ($m in $cdnScriptRegex.Matches($masterContent)) {
+            $cdnLinks.Add("    " + $m.Value.Trim())
+        }
+    }
+
+    if ($cssLinks.Count -eq 0 -and $cdnLinks.Count -eq 0) {
+        Write-Verbose "Invoke-CssAutoDetection: No CSS files or CDN links found — skipping"
+        return
+    }
+
+    # Build injection block
+    $injectionLines = [System.Collections.Generic.List[string]]::new()
+    if ($cdnLinks.Count -gt 0) {
+        $injectionLines.Add("    @* CDN references preserved from Site.Master *@")
+        foreach ($cdn in $cdnLinks) { $injectionLines.Add($cdn) }
+    }
+    if ($cssLinks.Count -gt 0) {
+        $injectionLines.Add("    @* Auto-detected CSS files from wwwroot *@")
+        foreach ($css in $cssLinks) { $injectionLines.Add($css) }
+    }
+    $injectionBlock = ($injectionLines -join "`n") + "`n"
+
+    # Inject into App.razor before <HeadOutlet>
+    $appContent = Get-Content -Path $appRazorPath -Raw
+    if ($appContent -match '<HeadOutlet') {
+        $appContent = $appContent -replace '(\s*<HeadOutlet)', "`n$injectionBlock`$1"
+        Set-Content -Path $appRazorPath -Value $appContent -Encoding UTF8
+        $totalInjected = $cssLinks.Count + $cdnLinks.Count
+        Write-Host "  Injected $totalInjected CSS/CDN reference(s) into App.razor <head>" -ForegroundColor Green
+        Write-TransformLog -File 'Components/App.razor' -Transform 'CSSAutoDetect' -Detail "Injected $($cssLinks.Count) CSS link(s) and $($cdnLinks.Count) CDN reference(s)"
+    }
+    else {
+        Write-Host "  WARNING: Could not find <HeadOutlet> in App.razor — CSS links not injected" -ForegroundColor Yellow
+    }
+}
+
+function Invoke-ScriptAutoDetection {
+    <#
+    .SYNOPSIS
+        Scans source project for Scripts/ folder, copies JS files to wwwroot/Scripts/,
+        and injects <script> tags into App.razor before closing </body>.
+    .DESCRIPTION
+        Web Forms apps commonly have a Scripts/ folder with jQuery, Bootstrap JS, etc.,
+        referenced via <asp:ScriptManager> or <webopt:bundlereference>. This function
+        detects those JS files, copies them, and wires them into App.razor so the
+        migrated app loads the same client-side scripts.
+    #>
+    param(
+        [string]$OutputRoot,
+        [string]$SourcePath
+    )
+
+    $appRazorPath = Join-Path $OutputRoot "Components" "App.razor"
+    if (-not (Test-Path $appRazorPath)) {
+        Write-Verbose "Invoke-ScriptAutoDetection: App.razor not found at $appRazorPath — skipping"
+        return
+    }
+
+    # Check for Scripts/ folder in the source project
+    $sourceScriptsDir = Join-Path $SourcePath "Scripts"
+    if (-not (Test-Path $sourceScriptsDir -PathType Container)) {
+        Write-Verbose "Invoke-ScriptAutoDetection: No Scripts/ folder in source — skipping"
+        return
+    }
+
+    # Get all .js files (exclude WebForms-specific scripts and IntelliSense files)
+    $jsFiles = Get-ChildItem -Path $sourceScriptsDir -Filter '*.js' -File | Where-Object {
+        $_.Name -notlike '*intellisense*' -and
+        $_.Name -ne '_references.js' -and
+        $_.DirectoryName -notlike '*\WebForms*' -and
+        $_.DirectoryName -notlike '*\WebForms'
+    }
+
+    if ($jsFiles.Count -eq 0) {
+        Write-Verbose "Invoke-ScriptAutoDetection: No relevant JS files found in Scripts/ — skipping"
+        return
+    }
+
+    # Copy JS files to wwwroot/Scripts/
+    $destScriptsDir = Join-Path $OutputRoot "wwwroot" "Scripts"
+    if (-not (Test-Path $destScriptsDir)) {
+        New-Item -ItemType Directory -Path $destScriptsDir -Force | Out-Null
+    }
+
+    $copiedFiles = [System.Collections.Generic.List[string]]::new()
+    foreach ($jsFile in $jsFiles) {
+        $destFile = Join-Path $destScriptsDir $jsFile.Name
+        Copy-Item -Path $jsFile.FullName -Destination $destFile -Force
+        $copiedFiles.Add($jsFile.Name)
+    }
+    Write-Host "  Copied $($copiedFiles.Count) JS file(s) to wwwroot/Scripts/" -ForegroundColor Green
+    Write-TransformLog -File 'wwwroot/Scripts/' -Transform 'ScriptAutoDetect' -Detail "Copied $($copiedFiles.Count) JS file(s) from source Scripts/"
+
+    # Build <script> tags — prioritize common libraries in correct load order
+    $scriptTags = [System.Collections.Generic.List[string]]::new()
+
+    # Common JS load order: jQuery first, then Modernizr/Respond, then Bootstrap
+    $jqueryFile = $copiedFiles | Where-Object { $_ -match '^jquery.*\.min\.js$' } | Select-Object -First 1
+    if (-not $jqueryFile) {
+        $jqueryFile = $copiedFiles | Where-Object { $_ -match '^jquery-[\d.]+\.js$' } | Select-Object -First 1
+    }
+    $modernizrFile = $copiedFiles | Where-Object { $_ -match '^modernizr.*\.js$' } | Select-Object -First 1
+    $respondFile = $copiedFiles | Where-Object { $_ -match '^respond.*\.min\.js$' } | Select-Object -First 1
+    if (-not $respondFile) {
+        $respondFile = $copiedFiles | Where-Object { $_ -match '^respond.*\.js$' } | Select-Object -First 1
+    }
+    $bootstrapFile = $copiedFiles | Where-Object { $_ -match '^bootstrap.*\.min\.js$' } | Select-Object -First 1
+    if (-not $bootstrapFile) {
+        $bootstrapFile = $copiedFiles | Where-Object { $_ -match '^bootstrap.*\.js$' } | Select-Object -First 1
+    }
+
+    # Add in correct dependency order
+    if ($jqueryFile) { $scriptTags.Add("    <script src=""/Scripts/$jqueryFile""></script>") }
+    if ($modernizrFile) { $scriptTags.Add("    <script src=""/Scripts/$modernizrFile""></script>") }
+    if ($respondFile) { $scriptTags.Add("    <script src=""/Scripts/$respondFile""></script>") }
+    if ($bootstrapFile) { $scriptTags.Add("    <script src=""/Scripts/$bootstrapFile""></script>") }
+
+    # Add any remaining JS files not already included
+    $knownFiles = @($jqueryFile, $modernizrFile, $respondFile, $bootstrapFile) | Where-Object { $_ }
+    foreach ($f in $copiedFiles) {
+        if ($f -notin $knownFiles) {
+            $scriptTags.Add("    <script src=""/Scripts/$f""></script>")
+        }
+    }
+
+    if ($scriptTags.Count -eq 0) {
+        return
+    }
+
+    # Inject <script> tags into App.razor before closing </body> (after blazor.web.js)
+    $appContent = Get-Content -Path $appRazorPath -Raw
+    $injectionBlock = "    @* Auto-detected JS files from Scripts/ *@`n" + ($scriptTags -join "`n") + "`n"
+    if ($appContent -match '</body>') {
+        $appContent = $appContent -replace '(\s*</body>)', "`n$injectionBlock`$1"
+        Set-Content -Path $appRazorPath -Value $appContent -Encoding UTF8
+        Write-Host "  Injected $($scriptTags.Count) <script> tag(s) into App.razor <body>" -ForegroundColor Green
+        Write-TransformLog -File 'Components/App.razor' -Transform 'ScriptAutoDetect' -Detail "Injected $($scriptTags.Count) script tag(s) for JS files from Scripts/"
+    }
+    else {
+        Write-Host "  WARNING: Could not find </body> in App.razor — script tags not injected" -ForegroundColor Yellow
+    }
+
+    # Also check Site.Master for <webopt:bundlereference> targeting Scripts and flag
+    $masterFile = Get-ChildItem -Path $SourcePath -Filter 'Site.Master' -Recurse -File | Select-Object -First 1
+    if ($masterFile) {
+        $masterContent = Get-Content -Path $masterFile.FullName -Raw
+        $scriptBundleRegex = [regex]'(?i)<webopt:bundlereference[^>]*path\s*=\s*"[^"]*[Ss]cripts[^"]*"[^>]*>'
+        foreach ($m in $scriptBundleRegex.Matches($masterContent)) {
+            $bundlePath = ''
+            if ($m.Value -match 'path\s*=\s*"([^"]*)"') { $bundlePath = $Matches[1] }
+            Write-ManualItem -File 'Site.Master' -Category 'ScriptBundle' -Detail "Script bundle reference '$bundlePath' — JS files auto-copied to wwwroot/Scripts/ and wired into App.razor"
+            Write-TransformLog -File 'Site.Master' -Transform 'ScriptAutoDetect' -Detail "Flagged <webopt:bundlereference> for scripts: $bundlePath"
+        }
+    }
+}
+
 #endregion
 
 #region --- Directive Transforms ---
@@ -306,8 +593,22 @@ function ConvertFrom-PageDirective {
     }
 
     if ($Content -match '<%@\s*Page[^%]*%>') {
+        # RF-10: Extract Title attribute before stripping the directive
+        $pageTitle = $null
+        if ($Content -match '<%@\s*Page[^%]*Title\s*=\s*"([^"]*)"') {
+            $pageTitle = $Matches[1]
+        }
+
         $Content = $Content -replace '<%@\s*Page[^%]*%>\s*\r?\n?', ''
-        $Content = "@page `"$route`"`n" + $Content
+        $pageHeader = "@page `"$route`"`n"
+
+        # RF-10: Add <PageTitle> if title was extracted
+        if ($pageTitle) {
+            $pageHeader += "<PageTitle>$pageTitle</PageTitle>`n"
+            Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Extracted Title=`"$pageTitle`" → <PageTitle>"
+        }
+
+        $Content = $pageHeader + $Content
         Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "<%@ Page %> → @page `"$route`""
     }
     return $Content
@@ -480,6 +781,33 @@ function ConvertFrom-MasterPage {
             $extractedTags.Add("    " + $m.Value.Trim())
         }
 
+        # Fix 1a: Extract <webopt:bundlereference> tags and flag for manual review
+        $bundleRefRegex = [regex]'(?i)<webopt:bundlereference[^>]*>'
+        foreach ($m in $bundleRefRegex.Matches($headInner)) {
+            $bundlePath = ''
+            if ($m.Value -match 'path\s*=\s*"([^"]*)"') {
+                $bundlePath = $Matches[1]
+            }
+            if ($bundlePath) {
+                Write-ManualItem -File $RelPath -Category 'CSSBundle' -Detail "CSS bundle reference '$bundlePath' needs manual conversion to <link> tags"
+                $extractedTags.Add("    @* TODO: CSS bundle reference '$bundlePath' — convert to explicit <link> tags for each CSS file *@")
+            } else {
+                Write-ManualItem -File $RelPath -Category 'CSSBundle' -Detail 'webopt:bundlereference tag found without path — needs manual review'
+                $extractedTags.Add("    @* TODO: webopt:bundlereference found — convert to explicit <link> tags *@")
+            }
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Flagged <webopt:bundlereference> for manual CSS conversion"
+        }
+
+        # Fix 1a: Preserve CDN references (Bootstrap, jQuery) from <head>
+        $cdnLinkRegex = [regex]'<(?:link|script)\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>'
+        foreach ($m in $cdnLinkRegex.Matches($headInner)) {
+            $tag = $m.Value.Trim()
+            # Skip if already captured as a <link> tag
+            if ($tag -match '^<link' -and $extractedTags -contains ("    " + $tag)) { continue }
+            $extractedTags.Add("    " + $tag)
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN reference: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
+        }
+
         if ($extractedTags.Count -gt 0) {
             $headContentBlock = "<HeadContent>`n" + ($extractedTags -join "`n") + "`n</HeadContent>"
             Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Extracted $($extractedTags.Count) head element(s) into <HeadContent>"
@@ -630,58 +958,29 @@ function ConvertFrom-Expressions {
 function ConvertFrom-LoginView {
     param([string]$Content, [string]$RelPath)
 
-    # Flag <RoleGroups> as manual — too complex for regex
+    # Flag <RoleGroups> as manual — use BWFC RoleGroup component
     if ($Content -match '<RoleGroups>') {
-        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
+        Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> should use the BWFC RoleGroup child component inside <LoginView>'
     }
 
-    # <asp:LoginView ...> → <AuthorizeView> (strip all attributes)
+    # <asp:LoginView ...> → <LoginView> (strip asp: prefix and all attributes)
     $openRegex = [regex]'(?i)<asp:LoginView\b[^>]*>'
     $openMatches = $openRegex.Matches($Content)
     if ($openMatches.Count -gt 0) {
-        $Content = $openRegex.Replace($Content, '<AuthorizeView>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <AuthorizeView>"
+        $Content = $openRegex.Replace($Content, '<LoginView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($openMatches.Count) <asp:LoginView> to <LoginView>"
     }
 
-    # </asp:LoginView> → </AuthorizeView>
+    # </asp:LoginView> → </LoginView>
     $closeRegex = [regex]'(?i)</asp:LoginView\s*>'
     $closeMatches = $closeRegex.Matches($Content)
     if ($closeMatches.Count -gt 0) {
-        $Content = $closeRegex.Replace($Content, '</AuthorizeView>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($closeMatches.Count) </asp:LoginView> to </AuthorizeView>"
+        $Content = $closeRegex.Replace($Content, '</LoginView>')
+        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($closeMatches.Count) </asp:LoginView> to </LoginView>"
     }
 
-    # <AnonymousTemplate> → <NotAuthorized>
-    $anonOpenRegex = [regex]'(?i)<AnonymousTemplate\s*>'
-    $anonOpenMatches = $anonOpenRegex.Matches($Content)
-    if ($anonOpenMatches.Count -gt 0) {
-        $Content = $anonOpenRegex.Replace($Content, '<NotAuthorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonOpenMatches.Count) <AnonymousTemplate> to <NotAuthorized>"
-    }
-
-    # </AnonymousTemplate> → </NotAuthorized>
-    $anonCloseRegex = [regex]'(?i)</AnonymousTemplate\s*>'
-    $anonCloseMatches = $anonCloseRegex.Matches($Content)
-    if ($anonCloseMatches.Count -gt 0) {
-        $Content = $anonCloseRegex.Replace($Content, '</NotAuthorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($anonCloseMatches.Count) </AnonymousTemplate> to </NotAuthorized>"
-    }
-
-    # <LoggedInTemplate> → <Authorized>
-    $loggedOpenRegex = [regex]'(?i)<LoggedInTemplate\s*>'
-    $loggedOpenMatches = $loggedOpenRegex.Matches($Content)
-    if ($loggedOpenMatches.Count -gt 0) {
-        $Content = $loggedOpenRegex.Replace($Content, '<Authorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedOpenMatches.Count) <LoggedInTemplate> to <Authorized>"
-    }
-
-    # </LoggedInTemplate> → </Authorized>
-    $loggedCloseRegex = [regex]'(?i)</LoggedInTemplate\s*>'
-    $loggedCloseMatches = $loggedCloseRegex.Matches($Content)
-    if ($loggedCloseMatches.Count -gt 0) {
-        $Content = $loggedCloseRegex.Replace($Content, '</Authorized>')
-        Write-TransformLog -File $RelPath -Transform 'LoginView' -Detail "Converted $($loggedCloseMatches.Count) </LoggedInTemplate> to </Authorized>"
-    }
+    # AnonymousTemplate and LoggedInTemplate are already the correct
+    # BWFC LoginView parameter names — no conversion needed.
 
     return $Content
 }
@@ -729,6 +1028,14 @@ function ConvertFrom-GetRouteUrl {
     # Note the required @inject directive
     if ($transformed) {
         Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'Add @inject GetRouteUrlHelper GetRouteUrlHelper at the top of the file'
+    }
+
+    # RF-11: Flag GetRouteUrl patterns with concrete replacement hints
+    $routeNameRegex = [regex]'GetRouteUrlHelper\.GetRouteUrl\s*\(\s*"([^"]+)"'
+    $routeNameMatches = $routeNameRegex.Matches($Content)
+    foreach ($m in $routeNameMatches) {
+        $routeName = $m.Groups[1].Value
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail "Replace route name '$routeName' with direct URL pattern, e.g., /ProductDetails?ProductID=@Item.ProductID"
     }
 
     return $Content
@@ -888,6 +1195,21 @@ function Copy-CodeBehind {
 
         $annotatedContent = $todoHeader + $content
 
+        # RF-12: Convert [QueryString] and [RouteData] parameter attributes
+        $qsRegex = [regex]'\[QueryString\("([^"]+)"\)\]'
+        $qsMatches = $qsRegex.Matches($annotatedContent)
+        if ($qsMatches.Count -gt 0) {
+            $annotatedContent = $qsRegex.Replace($annotatedContent, '[SupplyParameterFromQuery(Name = "$1")]')
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
+        }
+
+        $rdRegex = [regex]'\[RouteData\]'
+        $rdMatches = $rdRegex.Matches($annotatedContent)
+        if ($rdMatches.Count -gt 0) {
+            $annotatedContent = $rdRegex.Replace($annotatedContent, "[Parameter] // TODO: Verify RouteData → [Parameter] conversion — ensure @page route template has matching {parameter}")
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
+        }
+
         $outputDir = Split-Path $OutputFile -Parent
         if (-not (Test-Path $outputDir)) {
             New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
@@ -924,6 +1246,22 @@ function Test-UnconvertiblePage {
     return $false
 }
 
+function Test-RedirectHandler {
+    param(
+        [string]$MarkupContent,
+        [string]$CodeBehindPath
+    )
+
+    if (-not (Test-Path $CodeBehindPath)) { return $false }
+    $cbContent = Get-Content -Path $CodeBehindPath -Raw -Encoding UTF8
+    if ($cbContent -notmatch 'Response\.Redirect') { return $false }
+
+    # Check if markup is minimal (strip directives, check remaining content)
+    $stripped = $MarkupContent -replace '<%@\s*\w+[^%]*%>\s*', ''
+    $stripped = $stripped.Trim()
+    return ($stripped.Length -lt 100)
+}
+
 function New-CompilableStub {
     param(
         [string]$Route,
@@ -953,6 +1291,56 @@ function New-CompilableStub {
 
     Write-TransformLog -File $RelPath -Transform 'Stub' -Detail "Generated compilable stub (unconvertible page)"
     Write-ManualItem -File $RelPath -Category 'UnconvertibleStub' -Detail "Page contains Identity/Auth/Payment code — stubbed for clean build"
+}
+
+#endregion
+
+#region --- Template Placeholder Conversion (Fix 2) ---
+
+function Convert-TemplatePlaceholders {
+    <#
+    .SYNOPSIS
+        Converts placeholder elements inside *Template blocks to @context.
+    .DESCRIPTION
+        In ASP.NET Web Forms, elements like <tr id="groupPlaceholder"> inside LayoutTemplate
+        and <td id="itemPlaceholder"> inside GroupTemplate are runtime placeholders — the server
+        replaces them with rendered content. In BWFC Blazor, LayoutTemplate and GroupTemplate are
+        RenderFragment<RenderFragment>, so @context must be used to render children.
+
+        This function finds any element whose id contains "Placeholder" (case-insensitive)
+        and replaces it with @context. Handles both self-closing tags and open+close tags
+        with optional whitespace content.
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $replacementsMade = 0
+
+    # Pattern 1: Self-closing tags with placeholder ID
+    # e.g., <td id="itemPlaceholder" /> or <tr id="groupPlaceholder"/>
+    $selfClosingPattern = [regex]'<\w+\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*/>'
+    $selfClosingMatches = $selfClosingPattern.Matches($Content)
+    if ($selfClosingMatches.Count -gt 0) {
+        $Content = $selfClosingPattern.Replace($Content, '@context')
+        $replacementsMade += $selfClosingMatches.Count
+    }
+
+    # Pattern 2: Open+close tags with placeholder ID (with optional whitespace/empty content)
+    # e.g., <tr id="groupPlaceholder"></tr> or <td id="itemPlaceholder" runat="server">  </td>
+    $openClosePattern = [regex]'<(\w+)\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*>\s*</\1>'
+    $openCloseMatches = $openClosePattern.Matches($Content)
+    if ($openCloseMatches.Count -gt 0) {
+        $Content = $openClosePattern.Replace($Content, '@context')
+        $replacementsMade += $openCloseMatches.Count
+    }
+
+    if ($replacementsMade -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'PlaceholderToContext' -Detail "Replaced $replacementsMade placeholder element(s) with @context"
+    }
+
+    return $Content
 }
 
 #endregion
@@ -1001,6 +1389,17 @@ function Convert-WebFormsFile {
 
     $script:FilesProcessed++
 
+    # RF-08: Check for redirect-only pages
+    if ($extension -eq '.aspx') {
+        $cbPath = $SourceFile + '.cs'
+        if (Test-RedirectHandler -MarkupContent $content -CodeBehindPath $cbPath) {
+            $pageName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+            $script:RedirectHandlers.Add($pageName)
+            Write-ManualItem -File $relativePath -Category 'RedirectHandler' -Detail "$pageName was a redirect handler (Response.Redirect in code-behind) — convert to minimal API endpoint"
+            Write-TransformLog -File $relativePath -Transform 'RedirectHandler' -Detail "Detected redirect handler — flagged for minimal API conversion"
+        }
+    }
+
     # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
     if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content)) {
         $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
@@ -1035,9 +1434,21 @@ function Convert-WebFormsFile {
     $content = ConvertFrom-Expressions -Content $content -RelPath $relativePath
     $content = ConvertFrom-LoginView -Content $content -RelPath $relativePath
     $content = ConvertFrom-SelectMethod -Content $content -RelPath $relativePath
+
+    # RF-13: Detect ListView GroupItemCount before asp: prefix is stripped
+    $lvGroupRegex = [regex]'(?i)<asp:ListView[^>]*GroupItemCount\s*=\s*"(\d+)"'
+    $lvGroupMatches = $lvGroupRegex.Matches($content)
+    foreach ($m in $lvGroupMatches) {
+        $groupCount = $m.Groups[1].Value
+        Write-ManualItem -File $relativePath -Category 'ListView-GroupItemCount' -Detail "ListView with GroupItemCount=$groupCount — use BWFC <ListView GroupItemCount='$groupCount' Items='...' TItem='...'> with GroupTemplate and ItemTemplate"
+    }
+
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
     $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath
+
+    # Fix 2: Convert placeholder elements inside *Template blocks to @context
+    $content = Convert-TemplatePlaceholders -Content $content -RelPath $relativePath
 
     # Clean up leftover blank lines from removed directives (collapse 3+ consecutive blank lines to 2)
     $content = $content -replace '(\r?\n){3,}', "`n`n"
@@ -1125,7 +1536,7 @@ if (-not $WhatIfPreference) {
 if (-not $SkipProjectScaffold) {
     Write-Host 'Generating project scaffold...' -ForegroundColor Green
     if (-not $WhatIfPreference) {
-        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName
+        New-ProjectScaffold -OutputRoot $Output -ProjectName $projectName -SourcePath $Path
         New-AppRazorScaffold -OutputRoot $Output -ProjectName $projectName
     }
     else {
@@ -1179,6 +1590,116 @@ if ($staticCount -gt 0) {
     Write-Host ''
 }
 
+# Fix 1b: Auto-detect CSS files and inject <link> tags into App.razor
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
+    Invoke-CssAutoDetection -OutputRoot $Output -SourcePath $Path
+}
+
+# Fix 1 (Run 11): Auto-detect JS files in Scripts/ and inject <script> tags into App.razor
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
+    Invoke-ScriptAutoDetection -OutputRoot $Output -SourcePath $Path
+}
+
+#endregion
+
+#region --- Models Copy & DbContext Transform (RF-03 / RF-04) ---
+
+$modelsDir = Join-Path $Path 'Models'
+$modelsCopied = 0
+if (Test-Path $modelsDir -PathType Container) {
+    $modelFiles = Get-ChildItem -Path $modelsDir -Filter '*.cs' -File
+    if ($modelFiles.Count -gt 0) {
+        Write-Host "Copying $($modelFiles.Count) model file(s) from Models/..." -ForegroundColor Green
+        $modelsOutDir = Join-Path $Output 'Models'
+
+        foreach ($mf in $modelFiles) {
+            $destFile = Join-Path $modelsOutDir $mf.Name
+            $relPath = "Models/$($mf.Name)"
+
+            if ($PSCmdlet.ShouldProcess($destFile, "Copy model file")) {
+                if (-not (Test-Path $modelsOutDir)) {
+                    New-Item -ItemType Directory -Path $modelsOutDir -Force | Out-Null
+                }
+
+                $csContent = Get-Content -Path $mf.FullName -Raw -Encoding UTF8
+
+                # RF-04: Check if this is a DbContext file
+                $isDbContext = $mf.Name -like '*Context.cs'
+
+                if ($isDbContext) {
+                    # RF-04: Transform DbContext for EF Core
+                    $csContent = $csContent -replace 'using System\.Data\.Entity;', 'using Microsoft.EntityFrameworkCore; // TODO: Verify EF Core using directive'
+                    $csContent = $csContent -replace 'using System\.Data\.Entity\.ModelConfiguration\.Conventions;\s*\r?\n?', ''
+
+                    # Extract class name
+                    $ctxClassName = $null
+                    if ($csContent -match 'class\s+(\w+)') {
+                        $ctxClassName = $Matches[1]
+                    }
+
+                    # Remove constructors with string connectionName parameter
+                    $ctorRegex = [regex]'(?s)\s*public\s+\w+\s*\(\s*string\s+\w+\s*\)\s*:\s*base\s*\([^)]*\)\s*\{[^}]*\}'
+                    $csContent = $ctorRegex.Replace($csContent, '')
+
+                    # Also remove simpler string constructors without base call
+                    $simpleCtorRegex = [regex]'(?s)\s*public\s+\w+\s*\(\s*string\s+\w+\s*\)\s*\{[^}]*\}'
+                    $csContent = $simpleCtorRegex.Replace($csContent, '')
+
+                    # Remove parameterless constructors that pass connection name to base
+                    $paramlessCtorRegex = [regex]'(?s)\s*public\s+\w+\s*\(\s*\)\s*:\s*base\s*\("[^"]*"\)\s*\{[^}]*\}'
+                    $csContent = $paramlessCtorRegex.Replace($csContent, '')
+
+                    # Add EF Core constructor after class opening brace
+                    if ($ctxClassName) {
+                        $classOpenRegex = [regex]('(class\s+' + [regex]::Escape($ctxClassName) + '[^{]*\{)')
+                        $newCtor = "`n    // TODO: EF Core constructor — auto-generated by migration script`n    public ${ctxClassName}(DbContextOptions<${ctxClassName}> options) : base(options) { }`n"
+                        $csContent = $classOpenRegex.Replace($csContent, "`$1$newCtor", 1)
+                    }
+
+                    $todoHeader = "// TODO: Review — auto-copied and transformed DbContext from Web Forms source`n// TODO: Verify EF Core configuration and connection string setup`n`n"
+                    $csContent = $todoHeader + $csContent
+
+                    Write-TransformLog -File $relPath -Transform 'DbContext' -Detail "Transformed DbContext for EF Core: $($mf.Name)"
+                    Write-ManualItem -File $relPath -Category 'DbContext' -Detail 'DbContext auto-transformed — verify EF Core configuration'
+                }
+                else {
+                    # RF-03: Standard model file — strip EF6 usings and add header
+                    $csContent = $csContent -replace 'using System\.Data\.Entity;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using System\.Data\.Entity\.ModelConfiguration\.Conventions;\s*\r?\n?', ''
+                    $csContent = "// TODO: Review — auto-copied from Web Forms source`n`n" + $csContent
+                }
+
+                Set-Content -Path $destFile -Value $csContent -Encoding UTF8
+                Write-TransformLog -File $relPath -Transform 'ModelCopy' -Detail "Copied model file → $destFile"
+                $modelsCopied++
+            }
+            else {
+                Write-Host "[WhatIf] Would copy model: $relPath"
+            }
+        }
+        Write-Host ''
+    }
+}
+
+#endregion
+
+#region --- Redirect Handler Program.cs Annotations (RF-08) ---
+
+if ($script:RedirectHandlers.Count -gt 0 -and -not $WhatIfPreference) {
+    $programPath = Join-Path $Output 'Program.cs'
+    if (Test-Path $programPath) {
+        $programContent = Get-Content -Path $programPath -Raw -Encoding UTF8
+        $redirectComments = "`n// --- Redirect Handler Pages (convert to minimal API endpoints) ---"
+        foreach ($handler in $script:RedirectHandlers) {
+            $redirectComments += "`n// TODO: $handler was a redirect handler — convert to minimal API endpoint"
+        }
+        $redirectComments += "`n"
+        $programContent = $programContent.Replace('app.Run();', "${redirectComments}`napp.Run();")
+        Set-Content -Path $programPath -Value $programContent -Encoding UTF8
+        Write-TransformLog -File 'Program.cs' -Transform 'RedirectHandler' -Detail "Added $($script:RedirectHandlers.Count) redirect handler TODO(s) to Program.cs"
+    }
+}
+
 #endregion
 
 #region --- Summary ---
@@ -1189,6 +1710,7 @@ Write-Host '============================================================' -Foreg
 Write-Host "  Files processed:       $($script:FilesProcessed)"
 Write-Host "  Transforms applied:    $($script:TransformsApplied)"
 Write-Host "  Static files copied:   $staticCount"
+Write-Host "  Model files copied:    $modelsCopied"
 Write-Host "  Items needing review:  $($script:ManualItems.Count)"
 Write-Host ''
 

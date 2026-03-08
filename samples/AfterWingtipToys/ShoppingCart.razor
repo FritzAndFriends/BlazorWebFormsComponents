@@ -1,39 +1,65 @@
 @page "/ShoppingCart"
-
 <PageTitle>Shopping Cart</PageTitle>
 
 <h1>Shopping Cart</h1>
 
-@if (_cart.Items.Any())
+@if (_cartItems != null && _cartItems.Count > 0)
 {
-    <table class="table">
+    <table>
         <thead>
             <tr>
-                <th>Product</th>
+                <th></th>
+                <th>Product Name</th>
                 <th>Price</th>
                 <th>Quantity</th>
-                <th>Subtotal</th>
+                <th>Item Total</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in _cart.Items)
+            @foreach (var item in _cartItems)
             {
                 <tr>
-                    <td>@item.Product?.ProductName</td>
-                    <td>@($"{item.Product?.UnitPrice:c}")</td>
-                    <td>@item.Quantity</td>
-                    <td>@($"{(item.Product?.UnitPrice ?? 0) * item.Quantity:c}")</td>
+                    <td></td>
+                    <td>@item.Product.ProductName</td>
+                    <td>@($"{item.Product.UnitPrice:c}")</td>
+                    <td>
+                        <input type="number" value="@item.Quantity" style="width:60px" />
+                    </td>
+                    <td>@($"{(item.Product.UnitPrice ?? 0) * item.Quantity:c}")</td>
+                    <td>
+                        <a href="/RemoveFromCart?itemId=@item.ItemId" data-enhance-nav="false">Remove</a>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
-    <p><b>Total: @($"{_cart.GetTotal():c}")</b></p>
+    <p><b>Order Total: @($"{_orderTotal:c}")</b></p>
 }
 else
 {
-    <p>Your shopping cart is empty.</p>
+    <p>Your cart is empty.</p>
 }
 
 @code {
-    [Inject] private CartStateService _cart { get; set; } = default!;
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private List<CartItem>? _cartItems;
+    private decimal _orderTotal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cartId = HttpContextAccessor.HttpContext?.Request.Cookies["WingtipToysCartId"];
+        if (!string.IsNullOrEmpty(cartId))
+        {
+            using var db = DbFactory.CreateDbContext();
+            _cartItems = await db.ShoppingCartItems
+                .Where(c => c.CartId == cartId)
+                .Include(c => c.Product)
+                .ToListAsync();
+            _orderTotal = _cartItems.Sum(i => (i.Product.UnitPrice ?? 0) * i.Quantity);
+        }
+        _cartItems ??= new List<CartItem>();
+    }
 }

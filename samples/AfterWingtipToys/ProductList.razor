@@ -1,15 +1,12 @@
 @page "/ProductList"
-
 <PageTitle>Products</PageTitle>
-
 <section>
     <div>
         <hgroup>
             <h2>Products</h2>
         </hgroup>
 
-        <ListView Items="@_products" TItem="Product"
-            DataKeyNames="ProductID" GroupItemCount="4">
+        <ListView Items="@_products" GroupItemCount="4" TItem="Product">
             <EmptyDataTemplate>
                 <table>
                     <tr>
@@ -18,11 +15,11 @@
                 </table>
             </EmptyDataTemplate>
             <EmptyItemTemplate>
-                <td/>
+                <td />
             </EmptyItemTemplate>
             <GroupTemplate>
                 <tr id="itemPlaceholderContainer">
-                    <td id="itemPlaceholder"></td>
+                    @context
                 </tr>
             </GroupTemplate>
             <ItemTemplate>
@@ -32,7 +29,7 @@
                             <td>
                                 <a href="/ProductDetails?productID=@context.ProductID">
                                     <img src="/Catalog/Images/Thumbs/@context.ImagePath"
-                                        width="100" height="75" style="border:1px solid" />
+                                        width="100" height="75" border="1" />
                                 </a>
                             </td>
                         </tr>
@@ -46,7 +43,7 @@
                                     <b>Price: </b>@($"{context.UnitPrice:c}")
                                 </span>
                                 <br />
-                                <a href="/AddToCart?productID=@context.ProductID">
+                                <a href="/AddToCart?productId=@context.ProductID" data-enhance-nav="false">
                                     <span class="ProductListItem">
                                         <b>Add To Cart</b>
                                     </span>
@@ -65,18 +62,33 @@
                         <tr>
                             <td>
                                 <table id="groupPlaceholderContainer" style="width:100%">
-                                    <tr id="groupPlaceholder"></tr>
+                                    @context
                                 </table>
                             </td>
                         </tr>
-                        <tr>
-                            <td></td>
-                        </tr>
-                        <tr></tr>
                     </tbody>
                 </table>
             </LayoutTemplate>
         </ListView>
     </div>
 </section>
+
+@code {
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
+
+    [SupplyParameterFromQuery(Name = "catId")] public int? CatId { get; set; }
+
+    private List<Product>? _products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+        IQueryable<Product> query = db.Products.Include(p => p.Category);
+        if (CatId.HasValue)
+        {
+            query = query.Where(p => p.CategoryID == CatId.Value);
+        }
+        _products = await query.ToListAsync();
+    }
+}
 
