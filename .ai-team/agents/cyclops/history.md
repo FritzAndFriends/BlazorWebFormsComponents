@@ -143,3 +143,7 @@ Added `Convert-TemplatePlaceholders` function in new `#region --- Template Place
 2. `migration-toolkit/scripts/bwfc-migrate.ps1` — added `@using BlazorWebFormsComponents.LoginControls` to `$importsContent` template (line 187)
 
 **Result:** AfterWingtipToys warnings dropped from 73 → 70 (3 RZ10012s eliminated). BWFC test project unaffected.
+
+ Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+
+ Team update (2026-03-08): Run 12 migration patterns: auth via plain HTML forms with data-enhance=false, dual DbContext, LoginView _userName from cascading auth state  decided by Cyclops

@@ -88,3 +88,9 @@ Key patterns: Response event interception for network-level asset checks. `Evalu
 
 
  Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents. Tests must run via dotnet test, not ad-hoc scripts  decided by Jeffrey T. Fritz, Beast
+
+ Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+
+ Team update (2026-03-08): @using BlazorWebFormsComponents.LoginControls must be in every generated _Imports.razor  decided by Cyclops
+
+ Team update (2026-03-08): Run 12 migration patterns: auth via plain HTML forms with data-enhance=false, dual DbContext, LoginView _userName from cascading auth state  decided by Cyclops

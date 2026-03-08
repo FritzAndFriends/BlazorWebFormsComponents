@@ -59,3 +59,9 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
  Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents  decided by Jeffrey T. Fritz, Beast
  Team update (2026-03-07): Run 11 script fixes: Invoke-ScriptAutoDetection (JS files) and Convert-TemplatePlaceholders (placeholder@context) added to bwfc-migrate.ps1  decided by Cyclops
  Team update (2026-03-07): Run 11 migration decisions: root-level _Imports.razor required, partial class base class conflict pattern, auth endpoint pattern  decided by Cyclops
+
+ Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+
+ Team update (2026-03-08): @using BlazorWebFormsComponents.LoginControls must be in every generated _Imports.razor  decided by Cyclops
+
+ Team update (2026-03-08): Run 12 migration patterns: auth via plain HTML forms with data-enhance=false, dual DbContext, LoginView _userName from cascading auth state  decided by Cyclops

@@ -4,6 +4,7 @@
 
 <!-- Decisions are appended below by the Scribe after merging from .ai-team/decisions/inbox/ -->
 
+
 ### 2026-02-10: Sample pages use Components/Pages path
 
 **By:** Jubilee
@@ -552,10 +553,10 @@ Suggested timeline:
 **What:** Login, ChangePassword, and CreateUserWizard were identified as missing outer-level WebControl style properties (BackColor, CssClass, ForeColor, Width, Height) because they inherited `BaseWebFormsComponent` instead of `BaseStyledComponent`. Resolution: all three changed to inherit `BaseStyledComponent` (Option A — base class change). Outer `<table>` elements now render CssClass and computed IStyle inline styles alongside `border-collapse:collapse;`. `[Parameter]` style properties do NOT conflict with `[CascadingParameter]` sub-styles (TitleTextStyle, LabelStyle, etc.) — completely independent mechanisms. LoginView still inherits `BaseWebFormsComponent`. LoginName and LoginStatus already had full style support. PasswordRecovery should follow the same pattern when ready.
 **Why:** Migrating pages that set CssClass on Login controls would break. `BaseStyledComponent` extends `BaseWebFormsComponent` — no functionality lost.
 
-### 2026-02-12: ChangePassword and CreateUserWizard sample pages require LoginControls using directive
-**By:** Colossus
-**What:** Added `@using BlazorWebFormsComponents.LoginControls` to `ChangePassword/Index.razor` and `CreateUserWizard/Index.razor`. Without this, the components render as raw HTML custom elements instead of Blazor components — silently failing with no error.
-**Why:** The root `@using BlazorWebFormsComponents` in `_Imports.razor` does not cover sub-namespaces like `LoginControls`. Any future sample page using Login Controls must include this directive. PasswordRecovery already had it; these two were missed during Sprint 2.
+### 2026-03-07: LoginControls namespace must be in default _Imports.razor usings (consolidated)
+**By:** Colossus, Cyclops
+**What:** `@using BlazorWebFormsComponents.LoginControls` must be included in every generated `_Imports.razor`. LoginView, AnonymousTemplate, LoggedInTemplate, ChangePassword, CreateUserWizard, and other login controls live in the `BlazorWebFormsComponents.LoginControls` sub-namespace. Without this using directive, the Razor compiler treats these components as raw HTML elements, producing RZ10012 warnings and broken auth UI. This applies to both sample pages and migration-generated projects.
+**Why:** The root `@using BlazorWebFormsComponents` namespace alone is insufficient for sub-namespace components. Originally discovered for sample pages (ChangePassword, CreateUserWizard), then generalized to the migration script's `_Imports.razor` template after Run 12 revealed the same issue for LoginView.
 
 ### 2026-02-12: External placeholder URLs replaced with local SVG images
 **By:** Colossus
@@ -5818,12 +5819,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 
 **Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
 
-### 2026-03-04: @rendermode InteractiveServer belongs in App.razor, not _Imports.razor (consolidated)
-
-**By:** Forge, Cyclops, Jeffrey T. Fritz
-**What:** `@rendermode InteractiveServer` must not appear as a standalone directive in `_Imports.razor`. It is a directive attribute, not a standalone Razor directive. The correct pattern for global server interactivity is to apply `@rendermode="InteractiveServer"` on component instances (`<Routes>` and `<HeadOutlet>`) in App.razor. The `@using static Microsoft.AspNetCore.Components.Web.RenderMode` import in `_Imports.razor` is correct and should be kept — it enables the shorthand `InteractiveServer` without the `RenderMode.` prefix. Cyclops removed the invalid line from `bwfc-migrate.ps1` scaffold. Beast updated migration-standards, bwfc-migration, and METHODOLOGY skill docs with the correct pattern. Supersedes the `@rendermode InteractiveServer` addition from the Run 6 Script Enhancements decision.
-**Why:** Placing `@rendermode InteractiveServer` bare in `_Imports.razor` caused 8 build errors in Run 6 benchmarks (RZ10003, CS0103 × 2, RZ10024). User directive from Jeffrey T. Fritz confirmed the correct placement. Per Microsoft Learn documentation, `@rendermode` is applied as a directive attribute on component instances. All changes shipped in PR #419.
-
 ### 2026-03-04: Scan code-behind files for unconvertible patterns
 
 **By:** Forge
@@ -5957,9 +5952,9 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 
 ### 2026-03-06: LoginView must be preserved as BWFC component, not converted to AuthorizeView (consolidated)
 **By:** Jeffrey T. Fritz (directive), Cyclops (implementation)
-**Status:** Implemented
-**What:** STOP rewriting `asp:LoginView` as `AuthorizeView`. The migration script (`ConvertFrom-LoginView` in `bwfc-migrate.ps1`) was converting `<asp:LoginView>` → `<AuthorizeView>` and renaming `AnonymousTemplate`/`LoggedInTemplate` → `NotAuthorized`/`Authorized`. Fixed to: convert `<asp:LoginView>` → `<LoginView>` (BWFC), leave `<AnonymousTemplate>` and `<LoggedInTemplate>` as-is, reference BWFC `RoleGroup` for `<RoleGroups>`. All migration scripts and skills must preserve the BWFC LoginView — not bypass it with native AuthorizeView.
-**Why:** The BWFC `LoginView` component exposes templates with the same names as Web Forms (AnonymousTemplate, LoggedInTemplate), injects `AuthenticationStateProvider`, and routes to AuthorizeView internally. Converting directly to AuthorizeView breaks the component, forces template rewrites, and defeats the purpose of the BWFC library. User directive from Jeff — captured for team memory.
+**Status:** Implemented and reinforced
+**What:** STOP rewriting `asp:LoginView` as `AuthorizeView`. The migration script (`ConvertFrom-LoginView` in `bwfc-migrate.ps1`) must convert `<asp:LoginView>` to `<LoginView>` (the BWFC component), preserving `<AnonymousTemplate>` and `<LoggedInTemplate>` as-is. BWFC's LoginView component handles authentication state natively via `CascadingParameter Task<AuthenticationState>`. This decision was reinforced after Run 8 showed the pattern was still being violated. Prominent callouts now exist in both the identity and standards skill files.
+**Why:** AuthorizeView requires different template syntax. The conversion is lossy, breaks existing CSS/JS, and defeats the purpose of BWFC. The BWFC LoginView already provides full auth-state-aware rendering.
 
 ### 2026-03-06: Run 9 preparation — post-mortem analysis of Run 8
 **By:** Forge
@@ -6306,12 +6301,6 @@ Each fix addresses manual work identified in Run 8 post-mortem. Verified with fu
 
 ## Decisions
 
-### Interactive Server Mode requires minimal API endpoints for auth and session operations
-
-All 4 migration skill files now document that `HttpContext` is NULL during WebSocket circuits when using `<Routes @rendermode="InteractiveServer" />`. Cookie auth (login/register/logout) and session-dependent operations (cart, preferences) MUST use `<form method="post">` submissions to minimal API endpoints — they cannot be done via Blazor event handlers.
-
-**Applies to:** Any migration where the target app uses global Interactive Server render mode (which is our standard).
-
 ### DisableAntiforgery() is required on all Blazor → minimal API form POSTs
 
 Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements. All minimal API endpoints receiving form POSTs from Blazor pages must call `.DisableAntiforgery()` or the request fails with 400 Bad Request.
@@ -6319,10 +6308,6 @@ Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements
 ### Enhanced navigation must be bypassed for non-Blazor endpoints
 
 Blazor's enhanced navigation intercepts `<a href>` clicks. Links to minimal API endpoints must use `<form method="post">` or `data-enhance-nav="false"` to ensure the request reaches the server.
-
-### LoginView must NEVER be replaced with AuthorizeView (reinforced)
-
-This was already a team decision but was reinforced with prominent callouts in both the identity and standards skill files after Run 8 showed it was still being attempted.
 
 ### 2026-03-06: Run 9 CSS/Image Failure — Root Cause Analysis
 **By:** Forge
@@ -6558,7 +6543,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 6. FINALLY use the WingtipToys.AcceptanceTests project to verify
 **Why:** Previous runs (9, 10) started with the script output and tried to fix the foundation after. Starting fresh ensures the Blazor infrastructure (project file, Program.cs, App.razor, interactivity) is correct from the start. Migration content is layered on top of a working foundation.
 
-
 ### 2026-03-07: Run 11 Migration Decisions (Cyclops)
 
 **By:** Cyclops
@@ -6592,3 +6576,186 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 **Why:** Run 11 report identified these as the two highest-priority script gaps. Fix 1 is P1 (pages load without client-side JS — Bootstrap dropdowns, jQuery features broken). Fix 2 is CRITICAL (ListView items render nothing — the most common data display pattern in Web Forms).
 
 **Affects:** Beast (skills may reference these patterns), Forge (pipeline analysis), Layer 2 agents (less manual work for JS wiring and ListView template fixes).
+
+### 2026-03-07: Run 12 migration decisions
+**By:** Cyclops
+**What:** Established Run 12 Layer 2 patterns for WingtipToys migration. Key decisions:
+1. Auth pages use plain HTML forms with `data-enhance="false"` posting to minimal API endpoints — not BWFC components. This ensures full page reload after auth state changes so the Blazor circuit picks up the new cookie.
+2. Dual DbContext registration: `AddDbContextFactory<ProductContext>` for component queries + `AddDbContext<ProductContext>` for Identity's scoped requirements.
+3. LoginView LoggedInTemplate uses `_userName` from `CascadingParameter Task<AuthenticationState>` rather than `@context` (LoggedInTemplate is `RenderFragment`, not `RenderFragment<T>`).
+4. BWFC data controls use `ItemType` (not `TItem`) for ListView/GridView/FormView. DropDownList uses `TItem`.
+5. CartStateService uses `IDbContextFactory` + cookie-based cart ID for Blazor Server compatibility.
+6. App.razor CSS/JS deduplication: keep only `.min.` variants when both min and non-min exist.
+**Why:** These patterns resolve the Run 11 failures (17/25) — particularly RC-8 (sparse homepage), RC-10 (missing Add to Cart link), and RC-11 (auth state not syncing after login). The `data-enhance="false"` + HTTP POST pattern is the critical fix for auth flow.
+
+### 2026-03-08: Migration render mode - SSR default with InteractiveServer opt-in (consolidated)
+**By:** Forge, Cyclops, Jeffrey T. Fritz
+**What:** Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in. Remove global `@rendermode="InteractiveServer"` from App.razor (supersedes prior decision that rendermode belongs in App.razor, not _Imports.razor - now removed entirely for SSR default). Keep `AddInteractiveServerComponents()` and `AddInteractiveServerRenderMode()` in Program.cs for hybrid opt-in. `HttpContext` is NULL in InteractiveServer WebSocket circuits, requiring minimal API workarounds for auth/cookies - SSR eliminates this entire problem class.
+**Why:** SSR is architecturally closer to Web Forms (request/response model), eliminates the top 3 post-migration pain points from Run 12 (HttpContext null, cookie auth breaks, enhanced navigation link interception), and aligns with .NET 8+ hybrid rendering. Full analysis below.
+
+---
+
+## 1. Web Forms Fidelity
+
+**Winner: SSR — decisively.**
+
+Web Forms is a request/response framework. The page lifecycle is: browser sends HTTP request → server runs page lifecycle → server renders HTML → browser displays it. Postbacks are `<form>` POSTs. ViewState is a hidden `<input>`. Session and cookies flow on every HTTP request.
+
+SSR matches this model almost exactly. Each page render is an HTTP request. Form submissions are HTTP POSTs. The server renders HTML and sends it down. There is no persistent WebSocket connection.
+
+InteractiveServer creates a WebSocket (SignalR circuit) that stays open for the page lifetime. UI events fire over the WebSocket. This is fundamentally a different architecture — closer to a desktop app than a Web Forms page. It's the reason Run 12 needed 3 out of 5 post-migration fixes.
+
+## 2. HttpContext Availability
+
+**Winner: SSR — this is the #1 reason to switch.**
+
+| Capability | SSR | InteractiveServer |
+|-----------|-----|-------------------|
+| `HttpContext.Request` | ✅ Full access | ❌ Null (no HTTP request in WebSocket) |
+| `HttpContext.Response.Cookies` | ✅ Read/write | ❌ Null |
+| `HttpContext.Session` | ✅ Full access | ❌ Null |
+| `HttpContext.User` | ✅ Current request | ⚠️ Captured at circuit start, stale after |
+| Cookie-based cart (WingtipToys) | ✅ Direct | ❌ Required minimal API workaround |
+
+Run 12's biggest headache was `HttpContext` being null in InteractiveServer. The cart system used cookies. Auth used cookies. Both broke. The workaround was to create parallel minimal API endpoints (`/AddToCart`, `/RemoveFromCart`) just to have an HTTP request context. This is a **tax on every migration** that uses cookies or session — which is most Web Forms apps.
+
+SSR eliminates this entire category of problems. `HttpContext` is always available because every render is an HTTP request.
+
+## 3. Postback Emulation
+
+**Winner: SSR — natural fit.**
+
+Web Forms postbacks are `<form>` POSTs with `__EVENTTARGET` and `__EVENTARGUMENT` hidden fields. The server processes the form data, runs event handlers, and re-renders.
+
+SSR postback equivalent: Blazor's `<EditForm>` (or plain `<form method="post">`) submits a POST request. The server processes it, runs `OnValidSubmit`, and re-renders the page. This is almost identical to Web Forms postbacks.
+
+InteractiveServer postback equivalent: `@onclick` handlers fire over SignalR. There is no form submission. The server diffs the render tree and sends DOM patches over the WebSocket. This works, but it's a fundamentally different model that introduces the HttpContext problems above.
+
+**Critical finding:** BWFC Login controls (Login, ChangePassword, CreateUserWizard, PasswordRecovery) already use `<EditForm>` with `@bind-Value` on `InputText` components. `EditForm` works in SSR because it renders a standard `<form>` with `<input>` elements that have `name` and `value` attributes. The form POST sends the data back, and Blazor's form handling processes it server-side. **These login controls are already SSR-compatible.**
+
+## 4. BWFC Component Compatibility
+
+This is where it gets nuanced. I audited every component in `src/BlazorWebFormsComponents/`:
+
+### Already SSR-compatible (no changes needed)
+- **All Login controls** — Login, ChangePassword, CreateUserWizard, PasswordRecovery — all use `EditForm`/`OnValidSubmit`
+- **Display-only controls** — Label, Literal, Image, Panel, PlaceHolder, HyperLink, BulletedList, Table, TableRow, TableCell, AdRotator, Xml
+- **Layout controls** — ContentPlaceHolder, Content, MultiView, View, Localize, LoginView, LoginName
+- **HiddenField** — pure `<input type="hidden">`
+
+### Require InteractiveServer (use @onclick, @onchange, JS interop)
+- **Button, LinkButton, ImageButton** — use `@onclick`. Could be converted to `<button type="submit">` inside forms, but standalone click handlers need interactivity
+- **TextBox** — uses `@oninput`/`@onchange` for real-time binding
+- **CheckBox, RadioButton** — use `@onchange`
+- **DropDownList, ListBox, CheckBoxList, RadioButtonList** — use `@onchange`
+- **Calendar** — uses `@onclick` for day/month selection
+- **TreeView/TreeNode** — uses `@onclick`/`@onkeydown` for expand/collapse
+- **Menu/MenuItem** — uses `@onclick` for navigation
+- **GridView** — uses `@onclick` for column sorting
+- **DataPager** — uses `@onclick` for page navigation
+- **DetailsView** — uses events for mode switching
+- **FormView** — uses `EditForm` (SSR-compatible for form mode), but mode switching needs interactivity
+- **ImageMap** — uses `@onclick` for hotspot clicks
+- **LoginStatus** — uses `@onclick` for login/logout
+- **FileUpload** — uses `InputFile` which requires interactivity
+- **BlazorWebFormsScripts** — uses `IJSRuntime`
+
+### Verdict
+Roughly half the library is display/layout (SSR-ready). The other half uses event handlers. However, **many of the interactive components can work in SSR when used inside forms**. A Button inside an `EditForm` doesn't need `@onclick` — the form submission handles it. DropDownList inside a form sends its value on POST.
+
+The components that truly, irreducibly need InteractiveServer are:
+- **Calendar** (client-side date picking)
+- **TreeView** (expand/collapse without page reload)
+- **Menu** (dynamic hover/click behavior)
+- **FileUpload** (InputFile requires interactivity)
+- **BlazorWebFormsScripts** (JS interop)
+
+Everything else can work in SSR within a form context, or can be refactored to do so.
+
+## 5. Enhanced Navigation
+
+**Winner: SSR — simpler model.**
+
+InteractiveServer + enhanced navigation caused Run 12's `<a>` tag problem. Blazor's enhanced navigation intercepts link clicks for SPA-like behavior, but this breaks server-side redirects (302s). The workaround was a JavaScript `onclick` handler — ironic for a server-side framework.
+
+SSR with enhanced navigation: Links work as normal HTTP navigations by default. Enhanced navigation can be opted into with `data-enhance-nav="true"` per-link for progressive enhancement. The default behavior is the one Web Forms developers expect — click a link, get a full page load.
+
+SSR without enhanced navigation: Standard HTTP. Every link click is a full request. Exactly like Web Forms.
+
+**Recommendation:** Leave enhanced navigation enabled (it's the .NET 8+ default) but don't fight it. SSR's default behavior for links is already correct for Web Forms migration.
+
+## 6. Migration Script Impact
+
+Changes to `bwfc-migrate.ps1`:
+
+| Location | Current (InteractiveServer) | New (SSR default) |
+|----------|---------------------------|-------------------|
+| Program.cs | `.AddInteractiveServerComponents()` | Remove (or keep for hybrid) |
+| Program.cs | `.AddInteractiveServerRenderMode()` | Remove (or keep for hybrid) |
+| App.razor HeadOutlet | `@rendermode="InteractiveServer"` | Remove attribute |
+| App.razor Routes | `@rendermode="InteractiveServer"` | Remove attribute |
+| _Imports.razor | `@using static Microsoft.AspNetCore.Components.Web.RenderMode` | Keep (needed for per-component opt-in) |
+
+For the **hybrid approach** (recommended), keep the `AddInteractiveServerComponents()` and `AddInteractiveServerRenderMode()` registrations in Program.cs but remove the global `@rendermode` from App.razor. This makes the app SSR by default, but allows individual pages or components to opt into InteractiveServer.
+
+The script should also add a comment in App.razor explaining the choice:
+```html
+@* SSR by default — add @rendermode="InteractiveServer" to individual pages that need interactivity *@
+```
+
+## 7. Hybrid Approach — The Recommendation
+
+**Default SSR + per-page InteractiveServer opt-in.** This is what .NET 8+ was designed for.
+
+### How it works
+
+1. **App.razor**: No `@rendermode` on `<HeadOutlet>` or `<Routes>`. The entire app renders via SSR by default.
+
+2. **Program.cs**: Keep `AddInteractiveServerComponents()` and `AddInteractiveServerRenderMode()` registered so components CAN opt in.
+
+3. **Per-page opt-in**: Pages that need interactivity add `@rendermode InteractiveServer` at the page level:
+   ```razor
+   @page "/Shop/Cart"
+   @rendermode InteractiveServer
+   ```
+
+4. **Per-component opt-in**: Interactive BWFC components (Calendar, TreeView, etc.) can declare their own render mode:
+   ```razor
+   <Calendar @rendermode="InteractiveServer" ... />
+   ```
+
+### What this means for WingtipToys Run 12
+
+| Page | Render Mode | Why |
+|------|------------|-----|
+| Default.aspx (homepage) | SSR | Display only — ListView, Image, labels |
+| ProductList.aspx | SSR | Display only — ListView with links |
+| ProductDetails.aspx | SSR + form POST | Add-to-cart is a form submission, not @onclick |
+| ShoppingCart.aspx | SSR + form POST | Cart operations via form POST — HttpContext available for cookies |
+| Login/Register pages | SSR | EditForm already works in SSR |
+| Checkout.aspx | SSR | Form-based flow |
+
+**Zero pages in WingtipToys would need InteractiveServer.** The cart cookie problem vanishes because HttpContext is always available. The enhanced navigation link problem vanishes because SSR handles links normally. The auth state problem vanishes because each request carries the current cookie.
+
+### What this means for BWFC library
+
+No immediate changes to the component library source code. Components that use `@onclick` will simply not fire those handlers in SSR mode — which is the correct behavior when those components are inside `<EditForm>` (the form submission handles it instead). Components used outside forms on InteractiveServer pages will work as they do today.
+
+Long-term, we could add `[StreamRendering]` support to data-bound components for progressive loading, but that's a future enhancement.
+
+---
+
+## Summary
+
+| Factor | SSR | InteractiveServer |
+|--------|-----|-------------------|
+| Web Forms fidelity | ✅ Request/response match | ❌ WebSocket model |
+| HttpContext | ✅ Always available | ❌ Null (SignalR) |
+| Cookies/Session | ✅ Native | ❌ Workarounds needed |
+| Form submissions | ✅ Natural POST | ⚠️ SignalR events |
+| Link behavior | ✅ Standard HTTP | ⚠️ Enhanced nav intercept |
+| Real-time UI | ❌ Full page reload | ✅ Instant DOM updates |
+| Calendar/TreeView | ❌ Needs opt-in | ✅ Native |
+| Migration complexity | ✅ Fewer workarounds | ❌ 3/5 fixes were mode-related |
+
+**Recommendation: SSR default + InteractiveServer opt-in. This eliminates the entire class of HttpContext/cookie/session problems that caused 60% of Run 12's post-migration fixes, while preserving the ability to use interactive components where truly needed.**
