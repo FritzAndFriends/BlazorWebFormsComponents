@@ -8,17 +8,17 @@
     <link rel="stylesheet" href="/Content/bootstrap.min.css" />
     <link rel="stylesheet" href="/Content/Site.css" />
 
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet />
 </head>
 
+@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes />
     <script src="_framework/blazor.web.js"></script>
     <script src="/Scripts/jquery-1.10.2.min.js"></script>
     <script src="/Scripts/bootstrap.min.js"></script>
-    <script src="/Scripts/modernizr-2.6.2.js"></script>
-    <script src="/Scripts/respond.min.js"></script>
-
 </body>
 
 </html>
+
+

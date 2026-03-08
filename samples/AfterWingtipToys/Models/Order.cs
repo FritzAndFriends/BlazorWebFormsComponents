@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace WingtipToys.Models;
@@ -5,14 +6,18 @@ namespace WingtipToys.Models;
 public class Order
 {
     public int OrderId { get; set; }
+
     public DateTime OrderDate { get; set; }
-    public string Username { get; set; } = string.Empty;
+
+    public string? Username { get; set; }
 
     [Required(ErrorMessage = "First Name is required")]
+    [DisplayName("First Name")]
     [StringLength(160)]
     public string FirstName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Last Name is required")]
+    [DisplayName("Last Name")]
     [StringLength(160)]
     public string LastName { get; set; } = string.Empty;
 
@@ -29,6 +34,7 @@ public class Order
     public string State { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Postal Code is required")]
+    [DisplayName("Postal Code")]
     [StringLength(10)]
     public string PostalCode { get; set; } = string.Empty;
 
@@ -40,6 +46,9 @@ public class Order
     public string? Phone { get; set; }
 
     [Required(ErrorMessage = "Email Address is required")]
+    [DisplayName("Email Address")]
+    [RegularExpression(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",
+        ErrorMessage = "Email is is not valid.")]
     [DataType(DataType.EmailAddress)]
     public string Email { get; set; } = string.Empty;
 

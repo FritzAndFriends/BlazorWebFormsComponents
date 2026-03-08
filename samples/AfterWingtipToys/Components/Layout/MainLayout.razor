@@ -18,7 +18,7 @@
                 <li><a href="/About">About</a></li>
                 <li><a href="/Contact">Contact</a></li>
                 <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart">Cart</a></li>
+                <li><a href="/ShoppingCart">Shopping Cart</a></li>
             </ul>
             <LoginView>
                 <AnonymousTemplate>
@@ -29,11 +29,9 @@
                 </AnonymousTemplate>
                 <LoggedInTemplate>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/Account/Manage" title="Manage your account">Hello, @_userName !</a></li>
+                        <li><a href="/Account/Manage" title="Manage your account">Hello, @_userName!</a></li>
                         <li>
-                            <form method="post" action="/account/logout-handler" data-enhance="false">
-                                <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>
-                            </form>
+                            <a href="/account/logout-handler" class="navbar-link" data-enhance-nav="false">Log off</a>
                         </li>
                     </ul>
                 </LoggedInTemplate>
@@ -43,7 +41,7 @@
 </div>
 <div id="TitleContent" style="text-align: center">
     <a href="/">
-        <img src="/Images/logo.jpg" style="border:none" alt="Wingtip Toys Logo" />
+        <img src="/Images/logo.jpg" border="0" alt="Wingtip Toys" />
     </a>
     <br />
 </div>
@@ -52,14 +50,13 @@
     {
         @for (int i = 0; i < _categories.Count; i++)
         {
-            if (i > 0)
-            {
-                <text>  |  </text>
-            }
-            var cat = _categories[i];
             <b style="font-size: large; font-style: normal">
-                <a href="/ProductList?id=@cat.CategoryID">@cat.CategoryName</a>
+                <a href="/ProductList?catId=@_categories[i].CategoryID">@_categories[i].CategoryName</a>
             </b>
+            @if (i < _categories.Count - 1)
+            {
+                <text> | </text>
+            }
         }
     }
 </div>
@@ -67,6 +64,7 @@
     @Body
     <hr />
     <footer>
-        <p>&copy; @DateTime.Now.Year - Wingtip Toys</p>
+        <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
     </footer>
 </main>
+    

@@ -1,4 +1,5 @@
 @page "/ProductDetails"
+<PageTitle>Product Details</PageTitle>
 
 @if (_product != null)
 {
@@ -9,7 +10,7 @@
     <table>
         <tr>
             <td>
-                <img src="/Catalog/Images/@_product.ImagePath" style="border:solid; height:300px" alt="@_product.ProductName"/>
+                <img src="/Catalog/Images/@_product.ImagePath" style="border:solid; height:300px" alt="@_product.ProductName" />
             </td>
             <td>&nbsp;</td>
             <td style="vertical-align: top; text-align:left;">
@@ -20,32 +21,25 @@
                 <span><b>Product Number:</b>&nbsp;@_product.ProductID</span>
                 <br />
                 <br />
-                <a href="/AddToCart?productID=@_product.ProductID" data-enhance-nav="false"
-                   onclick="window.location.href=this.href;return false;">
-                    <b>Add To Cart</b>
-                </a>
+                <a href="/AddToCart?productId=@_product.ProductID" data-enhance-nav="false">Add To Cart</a>
             </td>
         </tr>
     </table>
 }
-else
-{
-    <p>Product not found.</p>
-}
 
 @code {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
-    [SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
+
+    [SupplyParameterFromQuery(Name = "productID")] public int? ProductID { get; set; }
 
     private Product? _product;
 
     protected override async Task OnInitializedAsync()
     {
-        Page.Title = "Product Details";
-        if (ProductId.HasValue)
+        if (ProductID.HasValue)
         {
-            using var db = await DbFactory.CreateDbContextAsync();
-            _product = await db.Products.FirstOrDefaultAsync(p => p.ProductID == ProductId.Value);
+            using var db = DbFactory.CreateDbContext();
+            _product = await db.Products.FindAsync(ProductID.Value);
         }
     }
 }

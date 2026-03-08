@@ -5,7 +5,7 @@ namespace WingtipToys.Models;
 public class CartItem
 {
     [Key]
-    public string ItemId { get; set; } = Guid.NewGuid().ToString();
+    public string ItemId { get; set; } = string.Empty;
 
     public string CartId { get; set; } = string.Empty;
 
@@ -15,5 +15,5 @@ public class CartItem
 
     public int ProductId { get; set; }
 
-    public virtual Product? Product { get; set; }
+    public virtual Product Product { get; set; } = null!;
 }

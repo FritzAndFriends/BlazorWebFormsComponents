@@ -13,7 +13,7 @@ public class Product
     [Required, StringLength(10000), Display(Name = "Product Description"), DataType(DataType.MultilineText)]
     public string Description { get; set; } = string.Empty;
 
-    public string ImagePath { get; set; } = string.Empty;
+    public string? ImagePath { get; set; }
 
     [Display(Name = "Price")]
     public decimal? UnitPrice { get; set; }

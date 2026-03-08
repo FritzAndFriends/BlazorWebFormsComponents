@@ -1,88 +1,65 @@
 @page "/ShoppingCart"
-@rendermode InteractiveServer
+<PageTitle>Shopping Cart</PageTitle>
 
-<div class="ContentHead"><h1>Shopping Cart</h1></div>
+<h1>Shopping Cart</h1>
 
-@if (_cartItems != null && _cartItems.Any())
+@if (_cartItems != null && _cartItems.Count > 0)
 {
-    <table class="table table-striped table-bordered">
+    <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price (each)</th>
+                <th></th>
+                <th>Product Name</th>
+                <th>Price</th>
                 <th>Quantity</th>
                 <th>Item Total</th>
-                <th>Remove Item</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in _cartItems)
             {
                 <tr>
-                    <td>@item.ProductId</td>
-                    <td>@item.Product?.ProductName</td>
-                    <td>@($"{item.Product?.UnitPrice:c}")</td>
+                    <td></td>
+                    <td>@item.Product.ProductName</td>
+                    <td>@($"{item.Product.UnitPrice:c}")</td>
                     <td>
-                        <input type="number" style="width:60px" value="@item.Quantity"
-                               @onchange="async (e) => await UpdateQuantity(item.ItemId, e)" />
+                        <input type="number" value="@item.Quantity" style="width:60px" />
                     </td>
-                    <td>@($"{(item.Quantity * (item.Product?.UnitPrice ?? 0)):c}")</td>
+                    <td>@($"{(item.Product.UnitPrice ?? 0) * item.Quantity:c}")</td>
                     <td>
-                        <a href="/RemoveFromCart?itemId=@item.ItemId" data-enhance-nav="false" class="btn btn-danger btn-sm">Remove</a>
+                        <a href="/RemoveFromCart?itemId=@item.ItemId" data-enhance-nav="false">Remove</a>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-    <div>
-        <p></p>
-        <strong>
-            Order Total: @($"{_cartItems.Sum(i => i.Quantity * (i.Product?.UnitPrice ?? 0)):c}")
-        </strong>
-    </div>
-    <br />
-    <table>
-        <tr>
-            <td>
-                <button class="btn btn-default" @onclick="RefreshCart">Update</button>
-            </td>
-        </tr>
-    </table>
+    <p><b>Order Total: @($"{_orderTotal:c}")</b></p>
 }
 else
 {
-    <p>Your shopping cart is empty.</p>
+    <p>Your cart is empty.</p>
 }
 
 @code {
-    [Inject] private CartStateService CartService { get; set; } = default!;
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
 
     private List<CartItem>? _cartItems;
+    private decimal _orderTotal;
 
     protected override async Task OnInitializedAsync()
     {
-        Page.Title = "Shopping Cart";
-        _cartItems = await CartService.GetCartItemsAsync();
-    }
-
-    private async Task UpdateQuantity(string itemId, ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out int qty) && qty > 0)
+        var cartId = HttpContextAccessor.HttpContext?.Request.Cookies["WingtipToysCartId"];
+        if (!string.IsNullOrEmpty(cartId))
         {
-            await CartService.UpdateQuantityAsync(itemId, qty);
-            _cartItems = await CartService.GetCartItemsAsync();
+            using var db = DbFactory.CreateDbContext();
+            _cartItems = await db.ShoppingCartItems
+                .Where(c => c.CartId == cartId)
+                .Include(c => c.Product)
+                .ToListAsync();
+            _orderTotal = _cartItems.Sum(i => (i.Product.UnitPrice ?? 0) * i.Quantity);
         }
-    }
-
-    private async Task RemoveItem(string itemId)
-    {
-        await CartService.RemoveItemAsync(itemId);
-        _cartItems = await CartService.GetCartItemsAsync();
-    }
-
-    private async Task RefreshCart()
-    {
-        _cartItems = await CartService.GetCartItemsAsync();
+        _cartItems ??= new List<CartItem>();
     }
 }

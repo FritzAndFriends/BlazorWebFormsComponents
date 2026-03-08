@@ -1,40 +1,10 @@
 @page "/"
-
-<div class="container" role="main" style="min-height:200px;padding-bottom:40px;">
-    <h1>Welcome.</h1>
+<PageTitle>Welcome</PageTitle>
+<div role="main" style="min-height: 200px;">
+    <h1>Welcome to Wingtip Toys</h1>
     <h2>Wingtip Toys can help you find the perfect gift.</h2>
-    <p class="lead">We're all about transportation toys. You can order 
-            any of our toys today. Each toy listing has detailed 
+    <p class="lead">We're all about transportation toys. You can order
+            any of our toys today. Each toy listing has detailed
             information to help you choose the right toy.</p>
-    <div class="row">
-        @if (_products != null)
-        {
-            @foreach (var product in _products)
-            {
-                <div class="col-sm-3" style="padding:10px;">
-                    <a href="/ProductDetails?ProductID=@product.ProductID">
-                        <img src="/Catalog/Images/Thumbs/@product.ImagePath" width="100" height="75" alt="@product.ProductName" />
-                    </a>
-                    <br />
-                    <a href="/ProductDetails?ProductID=@product.ProductID">@product.ProductName</a>
-                    <br />
-                    <span><b>Price: </b>@($"{product.UnitPrice:c}")</span>
-                </div>
-            }
-        }
-    </div>
 </div>
-
-@code {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
-
-    private List<Product>? _products;
-
-    protected override async Task OnInitializedAsync()
-    {
-        Page.Title = "Welcome";
-        using var db = await DbFactory.CreateDbContextAsync();
-        _products = await db.Products.Take(8).ToListAsync();
-    }
-}
 
