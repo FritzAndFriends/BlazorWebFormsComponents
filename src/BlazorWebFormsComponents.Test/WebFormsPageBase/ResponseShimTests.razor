@@ -88,13 +88,11 @@
 	}
 
 	[Fact]
-	public void Redirect_NullUrl_ThrowsNullReferenceException()
+	public void Redirect_NullUrl_ThrowsArgumentNullException()
 	{
-		// BUG: ResponseShim.Redirect does not null-check the url parameter.
-		// url.StartsWith("~/") throws NullReferenceException when url is null.
 		var (cut, nav) = RenderWithMockNav();
 
-		Should.Throw<NullReferenceException>(() =>
+		Should.Throw<ArgumentNullException>(() =>
 			cut.Instance.ExposedResponse.Redirect(null));
 	}
 

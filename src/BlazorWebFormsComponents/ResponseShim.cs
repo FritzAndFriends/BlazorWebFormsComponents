@@ -25,6 +25,7 @@ public class ResponseShim
 	/// </param>
 	public void Redirect(string url, bool endResponse = true)
 	{
+		ArgumentNullException.ThrowIfNull(url);
 		if (url.StartsWith("~/")) url = url[1..]; // ~/path → /path
 		if (url.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
 			url = url[..^5]; // /path.aspx → /path

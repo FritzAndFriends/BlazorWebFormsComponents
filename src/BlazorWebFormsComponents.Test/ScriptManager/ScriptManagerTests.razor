@@ -34,7 +34,7 @@
 	{
 		var cut = Render(@<ScriptManager />);
 		var sm = cut.FindComponent<ScriptManager>();
-		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Auto);
+		sm.Instance.ScriptMode.Value.ShouldBe(ScriptMode.Auto);
 	}
 
 	[Fact]
@@ -88,7 +88,7 @@
 
 		var sm = cut.FindComponent<ScriptManager>();
 		sm.Instance.EnablePartialRendering.ShouldBeTrue();
-		sm.Instance.ScriptMode.ShouldBe(ScriptMode.Release);
+		sm.Instance.ScriptMode.Value.ShouldBe(ScriptMode.Release);
 		sm.Instance.AsyncPostBackTimeout.ShouldBe(120);
 	}
 
