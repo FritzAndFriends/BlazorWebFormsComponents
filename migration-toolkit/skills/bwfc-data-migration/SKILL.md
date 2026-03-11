@@ -16,7 +16,7 @@ This skill covers migrating Web Forms data access patterns and application archi
 ## When to Use This Skill
 
 Use this skill when you need to:
-- Replace `SelectMethod`/`DataSource` controls with service injection
+- Convert `SelectMethod` string to `SelectHandler` delegate, replace `DataSource` controls with service injection
 - Migrate Entity Framework 6 to EF Core
 - Convert `Session`/`ViewState`/`Application` state to Blazor patterns
 - Migrate `Global.asax` to `Program.cs`
@@ -96,7 +96,7 @@ public class CartService(IDbContextFactory<ProductContext> factory)
 
 ## 1. Entity Framework 6 → EF Core
 
-**Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod`.
+**Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod` string binding.
 **Blazor:** EF Core **10.0.3** (latest .NET 10) with `IDbContextFactory` registered in DI.
 
 > **Always use the latest .NET 10 EF Core packages** (currently 10.0.3): `Microsoft.EntityFrameworkCore`, `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`.
@@ -186,7 +186,7 @@ Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with inject
 @* Blazor — service injection *@
 @inject IProductService ProductService
 
-<GridView Items="products" TItem="Product" AutoGenerateColumns="true" />
+<GridView Items="products" ItemType="Product" AutoGenerateColumns="true" />
 
 @code {
     private List<Product> products = new();
@@ -209,12 +209,28 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 ```
 
-### SelectMethod → Service Method Mapping
+### SelectMethod String → SelectHandler Delegate Conversion
+
+BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` — a delegate with signature `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`. When set, `OnAfterRenderAsync` automatically calls it to populate `Items`. This is the **native BWFC data-binding pattern** that mirrors how Web Forms did it.
+
+**Option A — Preserve SelectMethod as delegate (recommended):**
+
+| Web Forms SelectMethod | BWFC SelectMethod Delegate |
+|----------------------|---------------------|
+| `SelectMethod="GetProducts"` | `SelectMethod="@productService.GetProducts"` (if signature matches `SelectHandler<T>`) |
+| `SelectMethod="GetProduct"` | `SelectMethod="@productService.GetProduct"` (or use `DataItem` for single-record controls) |
+
+**Option B — Replace with Items + OnInitializedAsync:**
 
 | Web Forms SelectMethod | Blazor Service Call |
 |----------------------|---------------------|
-| `SelectMethod="GetProducts"` | `products = await ProductService.GetProductsAsync();` |
-| `SelectMethod="GetProduct"` | `product = await ProductService.GetProductAsync(id);` |
+| `SelectMethod="GetProducts"` | `products = await ProductService.GetProductsAsync();` then `Items="@products"` |
+| `SelectMethod="GetProduct"` | `product = await ProductService.GetProductAsync(id);` then `DataItem="@product"` |
+
+**CRUD methods** (no BWFC parameter equivalent — wire to service calls in event handlers):
+
+| Web Forms Method | Blazor Service Call |
+|----------------------|---------------------|
 | `InsertMethod="InsertProduct"` | `await ProductService.InsertAsync(product);` |
 | `UpdateMethod="UpdateProduct"` | `await ProductService.UpdateAsync(product);` |
 | `DeleteMethod="DeleteProduct"` | `await ProductService.DeleteAsync(id);` |
@@ -513,7 +529,7 @@ public class PayPalService(IHttpClientFactory factory)
 | `_Imports.razor` | Global usings | `Web.config` `<namespaces>` |
 | `Components/Layout/MainLayout.razor` | Application layout | `Site.Master` |
 | `Components/Pages/*.razor` | Pages | `*.aspx` files |
-| `Services/*.cs` | Data access services | `SelectMethod`s, DataSource controls, code-behind queries |
+| `Services/*.cs` | Data access services | `SelectMethod` delegates, DataSource controls, code-behind queries |
 | `Models/*.cs` | Domain models | Copy from Web Forms project |
 
 ---

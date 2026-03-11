@@ -842,22 +842,22 @@ function ConvertFrom-MasterPage {
     # Other ContentPlaceHolders → TODO comment
     $otherCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*>.*?</asp:ContentPlaceHolder>'
     foreach ($m in $otherCphRegex.Matches($Content)) {
-        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion"
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "BWFC provides <ContentPlaceHolder> component — use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body"
     }
-    $Content = $otherCphRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+    $Content = $otherCphRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — BWFC provides <ContentPlaceHolder> component, use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body *@" })
     # Self-closing other ContentPlaceHolders
     $otherCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*/>'
     foreach ($m in $otherCphSelfRegex.Matches($Content)) {
-        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion (self-closing)"
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "BWFC provides <ContentPlaceHolder> component — use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body (self-closing)"
     }
-    $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+    $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — BWFC provides <ContentPlaceHolder> component, use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body *@" })
 
     # 5. Flag items needing Layer 2 attention
     if ($Content -match '<RoleGroups>') {
         Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
     }
     if ($Content -match 'SelectMethod\s*=') {
-        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod detected — will be auto-converted to TODO annotation by ConvertFrom-SelectMethod'
+        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod preserved — needs delegate conversion in L2 (BWFC DataBoundComponent supports SelectMethod natively)'
     }
 
     # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
@@ -1027,7 +1027,7 @@ function ConvertFrom-GetRouteUrl {
 
     # Note the required @inject directive
     if ($transformed) {
-        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'Add @inject GetRouteUrlHelper GetRouteUrlHelper at the top of the file'
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'BWFC provides GetRouteUrlHelper — add @inject GetRouteUrlHelper GetRouteUrlHelper and use GetRouteUrlHelper.GetRouteUrl()'
     }
 
     # RF-11: Flag GetRouteUrl patterns with concrete replacement hints
@@ -1035,7 +1035,7 @@ function ConvertFrom-GetRouteUrl {
     $routeNameMatches = $routeNameRegex.Matches($Content)
     foreach ($m in $routeNameMatches) {
         $routeName = $m.Groups[1].Value
-        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail "Replace route name '$routeName' with direct URL pattern, e.g., /ProductDetails?ProductID=@Item.ProductID"
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail "BWFC GetRouteUrlHelper supports route name '$routeName' — verify route is registered, or replace with direct URL pattern, e.g., /ProductDetails?ProductID=@Item.ProductID"
     }
 
     return $Content
@@ -1048,22 +1048,20 @@ function ConvertFrom-GetRouteUrl {
 function ConvertFrom-SelectMethod {
     param([string]$Content, [string]$RelPath)
 
-    # Match SelectMethod="MethodName" in any tag, capture the method name and insert a TODO after the tag
-    $selectMethodRegex = [regex]'(?si)(<[^>]*?)\s+SelectMethod\s*=\s*"([^"]+)"([^>]*>)'
+    # Preserve SelectMethod="MethodName" in markup (BWFC DataBoundComponent supports it natively)
+    # Add a TODO comment after the tag noting the string needs delegate conversion in L2
+    $selectMethodRegex = [regex]'(?si)(<[^>]*?\s+SelectMethod\s*=\s*"([^"]+)"[^>]*>)'
     $selectMethodMatches = $selectMethodRegex.Matches($Content)
     if ($selectMethodMatches.Count -gt 0) {
         $Content = $selectMethodRegex.Replace($Content, {
             param($m)
-            $tagBeforeAttr = $m.Groups[1].Value
+            $fullTag = $m.Groups[1].Value
             $methodName = $m.Groups[2].Value
-            $tagAfterAttr = $m.Groups[3].Value
-            $serviceName = 'I' + $methodName.TrimStart('Get') + 'Service'
-            $varName = ($methodName.TrimStart('Get')).Substring(0,1).ToLower() + ($methodName.TrimStart('Get')).Substring(1) + 'Service'
-            "${tagBeforeAttr}${tagAfterAttr}`n@* TODO: Replace SelectMethod=""${methodName}"" with Items=""@_data"" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@"
+            "${fullTag}`n@* TODO: SelectMethod=""${methodName}"" preserved — convert to delegate: SelectMethod=""@((maxRows, startRow, sort, out total) => YourService.${methodName}(maxRows, startRow, sort, out total))"" *@"
         })
-        Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Converted $($selectMethodMatches.Count) SelectMethod attribute(s) to TODO annotations"
+        Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Preserved $($selectMethodMatches.Count) SelectMethod attribute(s) with TODO for delegate conversion"
         foreach ($m in $selectMethodMatches) {
-            Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail "SelectMethod='$($m.Groups[2].Value)' removed — needs service injection and OnInitializedAsync data loading"
+            Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail "SelectMethod='$($m.Groups[2].Value)' preserved — needs delegate conversion in L2"
         }
     }
 
@@ -1203,10 +1201,13 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
         }
 
-        $rdRegex = [regex]'\[RouteData\]'
+        $rdRegex = [regex]'([ \t]*)\[RouteData\]'
         $rdMatches = $rdRegex.Matches($annotatedContent)
         if ($rdMatches.Count -gt 0) {
-            $annotatedContent = $rdRegex.Replace($annotatedContent, "[Parameter] // TODO: Verify RouteData → [Parameter] conversion — ensure @page route template has matching {parameter}")
+            # P0-2: Put TODO on a separate line ABOVE [Parameter] so it doesn't
+            # swallow the rest of the line (property type/name) into a comment.
+            $rdReplacement = '${1}// TODO: Verify RouteData → [Parameter] conversion — ensure @page route has matching {parameter}' + "`n" + '${1}[Parameter]'
+            $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
         }
 
@@ -1233,27 +1234,9 @@ function Test-UnconvertiblePage {
         [string]$RelativePath = ''
     )
 
-    # Path-based stubs: pages under Checkout/ folder need manual payment/auth work
-    if ($RelativePath -match '^Checkout[/\\]') {
-        return $true
-    }
-
-    # Content patterns that indicate pages requiring manual reimplementation.
-    # NOTE: Match Identity/auth API calls only — NOT image URLs or button text.
-    # PayPal and Checkout detection is path-based (above), not content-based,
-    # because markup often references these in UI elements (images, alt text)
-    # without implying the page itself is unconvertible.
-    $unconvertiblePatterns = @(
-        'SignInManager',
-        'UserManager',
-        'FormsAuthentication',
-        'Session\['
-    )
-    foreach ($pat in $unconvertiblePatterns) {
-        if ($Content -match $pat) {
-            return $true
-        }
-    }
+    # P0-1: Eliminated all stubbing. Pages are ALWAYS converted with BWFC components.
+    # If a page has concerns (Identity, Checkout, PayPal), TODO comments are injected
+    # at the call site instead of replacing the entire page with a stub.
     return $false
 }
 
@@ -1411,16 +1394,25 @@ function Convert-WebFormsFile {
         }
     }
 
-    # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
-    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content -RelativePath $relativePath)) {
-        $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
-        if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
-            $route = '/'
+    # P0-1: Pages are ALWAYS converted — no more stubbing. For pages that need
+    # manual attention (Checkout flow, Identity/Auth patterns), inject a TODO
+    # comment at the top so developers know to review them post-migration.
+    if ($extension -eq '.aspx') {
+        $needsTodo = $false
+        $todoReason = ''
+        if ($relativePath -match '^Checkout[/\\]') {
+            $needsTodo = $true
+            $todoReason = 'Checkout flow page — requires payment/auth code review after migration'
         }
-        # Use relative path for a more descriptive route (e.g., /Account/Login)
-        $pathRoute = '/' + ($relativePath -replace '\\', '/' -replace '\.aspx$', '')
-        New-CompilableStub -Route $pathRoute -RelPath $relativePath -OutputFile $outputFile -OutputDir $outputDir
-        return
+        elseif ($content -match 'SignInManager|UserManager|FormsAuthentication|Session\[') {
+            $needsTodo = $true
+            $todoReason = 'Contains Identity/Auth API calls — verify authentication logic after migration'
+        }
+        if ($needsTodo) {
+            $content = "@* TODO: $todoReason *@`n" + $content
+            Write-ManualItem -File $relativePath -Category 'NeedsReview' -Detail $todoReason
+            Write-TransformLog -File $relativePath -Transform 'TodoAnnotation' -Detail "Injected review TODO — $todoReason"
+        }
     }
 
     # Apply transform pipeline in order

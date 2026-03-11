@@ -143,7 +143,7 @@ The migration pipeline has **two mandatory layers** that run in strict sequence:
 
 Layer 2 is where Copilot applies structural transforms to every generated `.razor` and `.razor.cs` file. Work through each file and apply ALL of the following:
 
-- Convert `SelectMethod="GetX"` → `Items="@_x"` (load data in `OnInitializedAsync`)
+- Preserve `SelectMethod` — convert string method name to `SelectHandler<ItemType>` delegate (e.g., `SelectMethod="@productService.GetProducts"` if signature matches, or `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"` for explicit wiring). BWFC's `DataBoundComponent.OnAfterRenderAsync` automatically calls the delegate to populate `Items`.
 - Preserve `ItemType` attribute — BWFC data controls use `ItemType` (matches Web Forms `DataBoundControl.ItemType`). Do NOT change to `TItem` or any other name.
 - Add `Context="Item"` to `<ItemTemplate>` elements
 - Migrate code-behind: `Page_Load` → `OnInitializedAsync`
@@ -220,8 +220,10 @@ This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the relate
 |-----------|--------|
 | `href="~/Products"` | `href="/Products"` |
 | `NavigateUrl="~/Products/<%: Item.ID %>"` | `NavigateUrl="@($"/Products/{context.ID}")"` |
-| `<%: GetRouteUrl("ProductRoute", new { id = Item.ID }) %>` | `@($"/Products/{context.ID}")` |
+| `<%: GetRouteUrl("ProductRoute", new { id = Item.ID }) %>` | `@($"/Products/{context.ID}")` or use BWFC's `GetRouteUrlHelper` extension (see below) |
 | `Response.Redirect("~/Products")` | `NavigationManager.NavigateTo("/Products")` |
+
+> **BWFC GetRouteUrlHelper:** BWFC provides a `GetRouteUrlHelper` extension method on `BaseWebFormsComponent` that wraps ASP.NET Core's `LinkGenerator`. Inside any BWFC component, you can call `this.GetRouteUrl("RouteName", new { id = item.ID })` directly — no manual URL construction needed. Register routes via ASP.NET Core's routing system and the helper maps them automatically.
 
 ### Content/Layout Conversion
 
@@ -301,7 +303,7 @@ This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the relate
 
 ```razor
 <!-- Blazor with BWFC -->
-<GridView Items="products" ItemType="Product"
+<GridView SelectMethod="@productService.GetProducts" ItemType="Product"
     AutoGenerateColumns="false"
     AllowPaging="true" PageSize="10">
     <Columns>
@@ -313,7 +315,7 @@ This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the relate
 </GridView>
 ```
 
-**Key changes:** `ItemType` preserved as-is, `SelectMethod` → `Items`, add `Context="Item"` to templates.
+**Key changes:** `ItemType` preserved as-is, `SelectMethod` preserved — convert string method name to `SelectHandler<ItemType>` delegate, add `Context="Item"` to templates.
 
 #### ListView
 
@@ -333,7 +335,7 @@ This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the relate
 
 ```razor
 <!-- Blazor with BWFC -->
-<ListView Items="products" ItemType="Product">
+<ListView SelectMethod="@productService.GetProducts" ItemType="Product">
     <ItemTemplate Context="Item">
         <div class="product">
             <h3>@Item.ProductName</h3>
@@ -373,7 +375,7 @@ Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 p
 
 ```razor
 @* Blazor — BWFC ListView preserves GroupItemCount and templates *@
-<ListView Items="products" ItemType="Product" GroupItemCount="4">
+<ListView SelectMethod="@productService.GetProducts" ItemType="Product" GroupItemCount="4">
     <LayoutTemplate>@context</LayoutTemplate>
     <GroupTemplate>@context</GroupTemplate>
     <ItemTemplate>
@@ -403,7 +405,7 @@ Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 p
 </FormView>
 ```
 
-**Key changes:** `SelectMethod` → `DataItem` for single records, `Items` for collections.
+**Key changes:** `SelectMethod` preserved as delegate for both single records and collections. For `FormView` with a single record, alternatively use `DataItem="product"` with data loaded in `OnInitializedAsync`.
 
 ### Navigation Controls
 
@@ -517,10 +519,12 @@ For GridView, ListView, Repeater, DataList, DataGrid:
 
 | Web Forms Pattern | BWFC Pattern |
 |-------------------|-------------|
-| `SelectMethod="GetProducts"` | `Items="products"` (load in `OnInitializedAsync`) |
+| `SelectMethod="GetProducts"` | `SelectMethod="@productService.GetProducts"` (convert string to `SelectHandler<ItemType>` delegate — BWFC auto-populates `Items`) |
 | `ItemType="Namespace.Product"` | `ItemType="Product"` (strip namespace only) |
 | `DataSource=<%# GetItems() %>` + `DataBind()` | `Items="items"` |
 | `DataKeyNames="ProductID"` | `DataKeyNames="ProductID"` (preserved) |
+
+> **How SelectMethod works in BWFC:** `DataBoundComponent<ItemType>` has a `SelectMethod` parameter of type `SelectHandler<ItemType>` — a delegate with signature `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`. When set, `OnAfterRenderAsync` automatically calls the delegate to populate `Items`. This mirrors how Web Forms `SelectMethod` worked.
 
 ### Single-Record Controls
 
@@ -528,7 +532,7 @@ For FormView, DetailsView:
 
 | Web Forms Pattern | BWFC Pattern |
 |-------------------|-------------|
-| `SelectMethod="GetProduct"` | `DataItem="product"` (load in `OnInitializedAsync`) |
+| `SelectMethod="GetProduct"` | `SelectMethod="@productService.GetProduct"` (convert string to delegate) or `DataItem="product"` (load in `OnInitializedAsync`) |
 | `ItemType="Namespace.Product"` | `ItemType="Product"` (strip namespace only) |
 
 ### Template Binding
@@ -662,7 +666,7 @@ Include during migration to prevent errors, remove when stable.
 - [ ] <form runat="server"> removed
 
 ### Layer 2 — Structural
-- [ ] SelectMethod → Items/DataItem
+- [ ] SelectMethod string → SelectHandler delegate
 - [ ] ItemType preserved (strip namespace prefix only)
 - [ ] Data loading in OnInitializedAsync
 - [ ] Event handlers converted

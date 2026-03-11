@@ -139,7 +139,7 @@ The script should preserve the attribute and annotate the signature change neede
 | `<asp:DetailsView>` | `<DetailsView Items="@data">` with fields | Manual field rendering |
 | `<asp:DataList>` | `<DataList Items="@data">` with `ItemTemplate` | `@foreach` + grid HTML |
 
-**SelectMethod → Items:** Replace `SelectMethod="GetProducts"` with `Items="@_products"` where `_products` is populated in `OnInitializedAsync` via an injected service or DbContext.
+**SelectMethod PRESERVED:** BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` (delegate signature: `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`). Convert the Web Forms string method name to a delegate reference: `SelectMethod="@productService.GetProducts"` (if the service method signature matches) or use explicit lambda wiring: `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"`. When `SelectMethod` is set, `DataBoundComponent.OnAfterRenderAsync` automatically calls it to populate `Items`. Alternatively, bypass `SelectMethod` and set `Items` directly with data loaded in `OnInitializedAsync`.
 
 ### Session State → Scoped Services
 
@@ -197,7 +197,7 @@ Script handles:
 - Session → scoped services
 - Business logic (checkout, payment, admin CRUD)
 - Complex data-binding with arithmetic/method chains
-- Data loading patterns (`SelectMethod` → `Items`, `OnInitializedAsync`)
+- Data loading patterns (`SelectMethod` string → `SelectHandler` delegate, or `Items` via `OnInitializedAsync`)
 - Template context wiring (`Context="Item"`)
 - Navigation conversions (`Response.Redirect` → `NavigationManager.NavigateTo`)
 
@@ -216,7 +216,20 @@ Script handles:
     </ItemTemplate>
 </asp:ListView>
 
-@* After migration (BWFC preserved) *@
+@* After migration — Option A: SelectMethod preserved as delegate (BWFC native) *@
+<ListView SelectMethod="@productService.GetProducts" GroupItemCount="4">
+    <ItemTemplate>
+        <td>@context.ProductName</td>
+    </ItemTemplate>
+</ListView>
+
+@code {
+    [Inject] private ProductService productService { get; set; }
+}
+```
+
+```razor
+@* After migration — Option B: Items loaded in OnInitializedAsync *@
 <ListView Items="@_products" GroupItemCount="4">
     <ItemTemplate>
         <td>@context.ProductName</td>

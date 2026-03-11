@@ -48,7 +48,7 @@ Layer 2 performed semantic transforms that require understanding of application 
 **Key transforms applied:**
 
 - **Code-behind lifecycle:** `Page_Load` → `OnInitializedAsync` across all pages
-- **Data binding:** `SelectMethod` attributes → `IDbContextFactory<ProductContext>` with `OnInitializedAsync` data loading
+- **Data binding:** `SelectMethod` string attributes → `SelectHandler<ItemType>` delegate conversion (BWFC's native data-binding pattern)
 - **Navigation:** `Response.Redirect` → `NavigationManager.NavigateTo`
 - **Dependency injection:** `@inject` directives added for all required services
 - **Template context:** `Context="context"` added on `<ItemTemplate>` elements for proper Blazor rendering
@@ -85,7 +85,6 @@ All four warnings are **NuGet NU1510 dependency-pruning diagnostics** originatin
 ## Items Needing Attention
 
 - **42 review items from L1** — These are expected annotations for patterns that require developer judgment. See the [Appendix](#appendix-l1-review-items-breakdown) for the full breakdown by category.
-- **Validator components** — `RequiredFieldValidator`, `CompareValidator`, `RegularExpressionValidator`, and `ModelErrorMessage` are not yet implemented in the BWFC library. Migrated pages contain TODO annotations where these controls appear.
 - **Account/Identity pages** — Pages heavily dependent on ASP.NET Identity (`SignInManager`, `UserManager`, `FormsAuthentication`) were converted to skeleton Razor files with TODO annotations. These require manual implementation using ASP.NET Core Identity.
 - **Checkout flow** — Payment processing (PayPal integration) was left as an informational page per user directive. The checkout pages contain descriptive content rather than functional payment logic.
 - **ListView GroupItemCount** — Complex grid layouts using `GroupItemCount` for multi-column item rendering need manual completion. The markup is preserved but the layout logic requires hand-tuning.
@@ -139,6 +138,6 @@ Layer 1 flagged **42 items** across the converted files that require developer r
 | **NeedsReview** | 5 | General-purpose flags for markup patterns that don't fit a specific category but warrant manual inspection. |
 | **RedirectHandler** | 1 | An HTTP redirect handler that needs conversion to Blazor middleware or `NavigationManager` logic. |
 | **RegisterDirective** | 4 | `<%@ Register %>` directives referencing user controls or tag prefixes. These need mapping to Blazor `@using` statements or component references. |
-| **SelectMethod** | 9 | `SelectMethod` data-binding attributes that need conversion to `IDbContextFactory`-based async data loading in `OnInitializedAsync`. |
+| **SelectMethod** | 9 | `SelectMethod` string attributes that need conversion to `SelectHandler<ItemType>` delegate references. BWFC's `DataBoundComponent` natively supports `SelectMethod` as a delegate parameter. |
 
 **Total: 42 review items**
