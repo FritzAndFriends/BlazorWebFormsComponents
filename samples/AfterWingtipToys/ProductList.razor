@@ -1,83 +1,94 @@
 @page "/ProductList"
 <PageTitle>Products</PageTitle>
-	<section>
-        <div>
-            <hgroup>
-                <h2>@(Page.Title)</h2>
-            </hgroup>
+<section>
+    <div>
+        <hgroup>
+            <h2>Products</h2>
+        </hgroup>
 
-            <ListView ID="productList" 
-                DataKeyNames="ProductID" GroupItemCount="4"
-                TItem="Product">
-@* TODO: Replace SelectMethod="GetProducts" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
-                <EmptyDataTemplate>
-                    <table >
+        <ListView Items="@_products" GroupItemCount="4" TItem="Product">
+            <EmptyDataTemplate>
+                <table>
+                    <tr>
+                        <td>No data was returned.</td>
+                    </tr>
+                </table>
+            </EmptyDataTemplate>
+            <EmptyItemTemplate>
+                <td />
+            </EmptyItemTemplate>
+            <GroupTemplate>
+                <tr id="itemPlaceholderContainer">
+                    @context
+                </tr>
+            </GroupTemplate>
+            <ItemTemplate>
+                <td>
+                    <table>
                         <tr>
-                            <td>No data was returned.</td>
+                            <td>
+                                <a href="/ProductDetails?productID=@context.ProductID">
+                                    <img src="/Catalog/Images/Thumbs/@context.ImagePath"
+                                        width="100" height="75" border="1" />
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="/ProductDetails?productID=@context.ProductID">
+                                    @context.ProductName
+                                </a>
+                                <br />
+                                <span>
+                                    <b>Price: </b>@($"{context.UnitPrice:c}")
+                                </span>
+                                <br />
+                                <a href="/AddToCart?productId=@context.ProductID" data-enhance-nav="false">
+                                    <span class="ProductListItem">
+                                        <b>Add To Cart</b>
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
                         </tr>
                     </table>
-                </EmptyDataTemplate>
-                <EmptyItemTemplate>
-                    <td/>
-                </EmptyItemTemplate>
-                <GroupTemplate>
-                    <tr id="itemPlaceholderContainer">
-                        @context
-                    </tr>
-                </GroupTemplate>
-                <ItemTemplate>
-                    <td>
-                        <table>
-                            <tr>
-                                <td>
-                                  <a href="<%#: GetRouteUrlHelper.GetRouteUrl("ProductByNameRoute", new {productName = Item.ProductName}) %>">
-                                    <image src='/Catalog/Images/Thumbs/@context.ImagePath'
-                                      width="100" height="75" border="1" />
-                                  </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="<%#: GetRouteUrlHelper.GetRouteUrl("ProductByNameRoute", new {productName = Item.ProductName}) %>">
-                                      @context.ProductName
-                                    </a>
-                                    <br />
-                                    <span>
-                                        <b>Price: </b>@($"{context.UnitPrice:c}")
-                                    </span>
-                                    <br />
-                                    <a href="/AddToCart.aspx?productID=@context.ProductID">               
-                                        <span class="ProductListItem">
-                                            <b>Add To Cart<b>
-                                        </span>           
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
-                        </table>
-                        </p>
-                    </td>
-                </ItemTemplate>
-                <LayoutTemplate>
-                    <table style="width:100%;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table id="groupPlaceholderContainer" style="width:100%">
-                                        @context
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                            </tr>
-                            <tr></tr>
-                        </tbody>
-                    </table>
-                </LayoutTemplate>
-            </ListView>
-        </div>
-    </section>
+                </td>
+            </ItemTemplate>
+            <LayoutTemplate>
+                <table style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table id="groupPlaceholderContainer" style="width:100%">
+                                    @context
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </LayoutTemplate>
+        </ListView>
+    </div>
+</section>
+
+@code {
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
+
+    [SupplyParameterFromQuery(Name = "catId")] public int? CatId { get; set; }
+
+    private List<Product>? _products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+        IQueryable<Product> query = db.Products.Include(p => p.Category);
+        if (CatId.HasValue)
+        {
+            query = query.Where(p => p.CategoryID == CatId.Value);
+        }
+        _products = await query.ToListAsync();
+    }
+}
 
