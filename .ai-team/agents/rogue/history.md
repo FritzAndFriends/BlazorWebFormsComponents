@@ -116,3 +116,19 @@ Key patterns: Response event interception for network-level asset checks. `Evalu
 
  Team update (2026-03-11): WebFormsPageBase now has Response.Redirect shim, ViewState dict, GetRouteUrl, and Unit implicit string conversion. L2 skills should note these patterns compile unchanged on @inherits WebFormsPageBase pages.  decided by Cyclops
 
+### L2 Automation Shim Tests (OPP-2,3,5,6) (2026-03-11)
+
+**43 new tests for L2 automation shims (all pass):**
+
+**OPP-2 Unit implicit string conversion (17 tests):** `UnitImplicitConversionTests.cs` — pure C# tests. Covers: "125px"/"%"/"em"/bare integer implicit assignment, empty/null → Unit.Empty, invalid → FormatException, roundtrip for px/%, all 6 non-pixel UnitTypes via Theory, implicit matches explicit Parse, implicit equals Pixel factory.
+
+**OPP-3 ResponseShim (9 tests):** `WebFormsPageBase/ResponseShimTests.razor` — bUnit tests using MockNavigationManager registered as NavigationManager singleton. Covers: ~/X.aspx strips both (→ /X), absolute path passthrough, ~/X strips tilde only, X.aspx strips extension only, case-insensitive ASPX, empty string passthrough, null → NullReferenceException (**BUG documented**), endResponse ignored, deep path ~/A/B/C.aspx. TestPage exposes protected `Response` as `ExposedResponse`.
+
+**OPP-5 ViewState (10 tests):** `WebFormsPageBase/ViewStateTests.razor` — bUnit tests. Covers: set/get string, complex object, integer, KeyNotFoundException on missing key, overwrite, initially empty, multiple keys, ContainsKey true/false, [Obsolete] attribute via reflection. Uses `#pragma warning disable CS0618` for Obsolete access.
+
+**OPP-6 GetRouteUrl (7 tests):** `WebFormsPageBase/GetRouteUrlTests.razor` — bUnit tests with custom `CapturingLinkGenerator` (concrete LinkGenerator subclass using reflection to capture RouteName from generic TAddress). Covers: .aspx stripping, passthrough without .aspx, return value from LinkGenerator, null routeName, case-insensitive ASPX, null parameters default, mixed-case Aspx.
+
+**Bug found:** ResponseShim.Redirect throws NullReferenceException on null URL — `url.StartsWith("~/")` has no null guard. Filed in decisions/inbox.
+
+Key patterns: MockNavigationManager.LastUri for ResponseShim navigation assertions. CapturingLinkGenerator with reflection on TAddress for GetRouteUrl route name verification. bUnit singleton service override (`Services.AddSingleton`) before Render to inject test doubles.
+
