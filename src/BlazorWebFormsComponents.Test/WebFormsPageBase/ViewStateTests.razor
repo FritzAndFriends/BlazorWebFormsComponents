@@ -1,0 +1,133 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@using System.Collections.Generic
+
+@code {
+
+	/// <summary>
+	/// Tests for OPP-5: ViewState on WebFormsPageBase.
+	/// Verifies the in-memory dictionary behaves like Web Forms ViewState
+	/// and carries the [Obsolete] warning attribute.
+	/// </summary>
+	private class TestPage : WebFormsPageBase
+	{
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenElement(0, "div");
+			builder.AddContent(1, "TestPage");
+			builder.CloseElement();
+		}
+	}
+
+	private IRenderedComponent<TestPage> RenderTestPage()
+	{
+		Services.AddScoped<IPageService, PageService>();
+		return Render<TestPage>();
+	}
+
+#pragma warning disable CS0618 // ViewState is [Obsolete] by design
+
+	[Fact]
+	public void ViewState_SetAndGet_StringValue()
+	{
+		var cut = RenderTestPage();
+
+		cut.Instance.ViewState["name"] = "Wingtip Toys";
+
+		cut.Instance.ViewState["name"].ShouldBe("Wingtip Toys");
+	}
+
+	[Fact]
+	public void ViewState_SetAndGet_ComplexObject()
+	{
+		var cut = RenderTestPage();
+		var widget = new { Name = "Sprocket", Price = 14.99 };
+
+		cut.Instance.ViewState["item"] = widget;
+
+		cut.Instance.ViewState["item"].ShouldBe(widget);
+	}
+
+	[Fact]
+	public void ViewState_SetAndGet_IntegerValue()
+	{
+		var cut = RenderTestPage();
+
+		cut.Instance.ViewState["count"] = 42;
+
+		cut.Instance.ViewState["count"].ShouldBe(42);
+	}
+
+	[Fact]
+	public void ViewState_NonExistentKey_ThrowsKeyNotFoundException()
+	{
+		var cut = RenderTestPage();
+
+		Should.Throw<KeyNotFoundException>(() =>
+		{
+			var _ = cut.Instance.ViewState["nonexistent"];
+		});
+	}
+
+	[Fact]
+	public void ViewState_OverwriteValue_ReturnsLatest()
+	{
+		var cut = RenderTestPage();
+
+		cut.Instance.ViewState["key"] = "first";
+		cut.Instance.ViewState["key"] = "second";
+
+		cut.Instance.ViewState["key"].ShouldBe("second");
+	}
+
+	[Fact]
+	public void ViewState_InitiallyEmpty()
+	{
+		var cut = RenderTestPage();
+
+		cut.Instance.ViewState.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ViewState_MultipleKeys_AllRetrievable()
+	{
+		var cut = RenderTestPage();
+
+		cut.Instance.ViewState["a"] = 1;
+		cut.Instance.ViewState["b"] = "two";
+		cut.Instance.ViewState["c"] = true;
+
+		cut.Instance.ViewState.Count.ShouldBe(3);
+		cut.Instance.ViewState["a"].ShouldBe(1);
+		cut.Instance.ViewState["b"].ShouldBe("two");
+		cut.Instance.ViewState["c"].ShouldBe(true);
+	}
+
+	[Fact]
+	public void ViewState_ContainsKey_ReturnsFalseForMissing()
+	{
+		var cut = RenderTestPage();
+
+		cut.Instance.ViewState.ContainsKey("missing").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ViewState_ContainsKey_ReturnsTrueForExisting()
+	{
+		var cut = RenderTestPage();
+		cut.Instance.ViewState["exists"] = "yes";
+
+		cut.Instance.ViewState.ContainsKey("exists").ShouldBeTrue();
+	}
+
+#pragma warning restore CS0618
+
+	[Fact]
+	public void ViewState_HasObsoleteAttribute()
+	{
+		var prop = typeof(WebFormsPageBase).GetProperty("ViewState");
+
+		prop.ShouldNotBeNull();
+		var attrs = prop.GetCustomAttributes(typeof(System.ObsoleteAttribute), false);
+		attrs.Length.ShouldBe(1);
+	}
+}
