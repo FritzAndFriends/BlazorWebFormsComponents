@@ -1,0 +1,103 @@
+﻿*{box-sizing:border-box;	
+}
+
+body{margin: 0;
+	 padding:0;	 
+}
+
+h1{color:#E4E8EC;
+	position:relative;
+	left:5%;
+	top:-6px;
+	
+}
+
+h1 a{text-decoration:none;	 
+	 font-variant: small-caps;
+	 font-size:60px;
+	 color:#8fc6d8;
+	 text-shadow: 1px 0px #2A8BDE;
+	 font-family:Sylfaen;
+	
+}
+
+h1 a:hover{color:#E4E8EC;
+	       transition: 1s;
+	       text-shadow:none;	       
+}
+
+
+#navUp {
+    width: 100%;
+    height: 70px;   
+    background-image: url('../Images/sky.jpg');
+    background-repeat: no-repeat;
+    margin-top: 25px;
+    box-shadow: 11px 10px 30px -7px rgb(106, 182, 203);
+}
+
+@media screen and (max-width: 700px)
+{
+  h1 a{font-size: 30px;
+  	   text-shadow: 1px 0px #7FB3ED;
+  	   
+  }
+
+  h1{position:relative;
+  	 top:17px;
+  	  
+  }
+}
+
+@media screen and (max-width: 342px)
+{
+  
+  h1{position:relative;
+  	 top:-7px;
+  	 transition: 0s;
+
+  }
+}
+
+#navBar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;  
+    background-image: url('../Images/space.jpg');
+    overflow: hidden;
+    width: 100%;
+    margin-top: 10px;
+    /*box-shadow: 11px 10px 31px 0px rgba(127,177,184,1);*/
+}
+
+#navBar ul li{float:left;
+	          position: relative;
+	          left:10%;
+	          border-right:2px solid #88bcd8;
+
+}
+
+#navBar ul li:last-child {border:none;      
+	          
+}
+
+#navBar ul li a{ text-decoration: none;
+	             background-color:#d8e9ff;
+	             padding:10px 50px 10px 50px;
+	             display: block;
+	             font-size: 20px;
+	             font-family:Avant Garde;
+	             font-weight: bold;
+	             letter-spacing: 2px;
+	             color:#90b6d2;
+	             text-shadow: 0.2px 0.2px #8fc8ff;
+
+}
+
+#navBar ul li a:hover{background-color:#86b2ce;
+                      color:#f7f7f7;
+                      transition:0.4s;
+                      text-shadow: none;
+                      
+
+}

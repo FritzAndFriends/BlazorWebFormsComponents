@@ -1,0 +1,24 @@
+﻿.active {background-color:#131414;
+}
+
+body {background-image: url('../Images/space-4.jpg');   
+      color:#a8c9d9;
+      text-shadow:3px 3px 5px 5px #131423;
+}
+
+.grv {margin:auto;
+      position:relative;
+      top:-15px;       
+}
+
+#grv {
+    border: 1px solid white;
+    width: 50%;
+    text-align: center;
+    overflow: auto;
+    background-image: url('../Images/outer-space-wallpaper-pictures.jpg');
+    margin:auto;
+    position:relative;
+    top:100px;
+    box-shadow:-1px -1px 15px 10px #a8c9d9;
+}
