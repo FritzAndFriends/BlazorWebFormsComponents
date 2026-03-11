@@ -11,7 +11,7 @@
 		};
 
 		// Act
-		var cut = Render(@<DropDownList TItem="object" StaticItems="items" Enabled="false" />);
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" Enabled="false" />);
 
 		// Assert
 		var select = cut.Find("select");
@@ -28,7 +28,7 @@
 		};
 
 		// Act
-		var cut = Render(@<DropDownList TItem="object" StaticItems="items" Enabled="true" />);
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" Enabled="true" />);
 
 		// Assert
 		var select = cut.Find("select");

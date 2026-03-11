@@ -20,7 +20,7 @@
 
 		// Act
 		var cut = Render(
-			@<CheckBoxList TItem="Category"
+			@<CheckBoxList ItemType="Category"
 						  Items="data"
 						  DataTextField="Name"
 						  DataValueField="Id" />
@@ -46,7 +46,7 @@
 		var data = new List<string> { "Apple", "Banana", "Cherry" };
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="string" Items="data" />);
+		var cut = Render(@<CheckBoxList ItemType="string" Items="data" />);
 
 		// Assert
 		var checkboxes = cut.FindAll("input[type='checkbox']");
@@ -77,7 +77,7 @@
 
 		// Act
 		var cut = Render(
-			@<CheckBoxList TItem="Category"
+			@<CheckBoxList ItemType="Category"
 						  StaticItems="staticItems"
 						  Items="data"
 						  AppendDataBoundItems="true"

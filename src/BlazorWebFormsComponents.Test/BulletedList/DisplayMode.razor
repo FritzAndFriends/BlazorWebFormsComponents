@@ -14,7 +14,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.Text" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.Text" />);
 
 		// Assert
 		var listItems = cut.FindAll("li");
@@ -42,7 +42,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" />);
 
 		// Assert
 		var links = cut.FindAll("a");
@@ -63,7 +63,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" />);
 
 		// Assert
 		var link = cut.Find("a");
@@ -81,7 +81,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.LinkButton" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.LinkButton" />);
 
 		// Assert
 		var links = cut.FindAll("a");
@@ -101,7 +101,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" />);
 
 		// Assert
 		var links = cut.FindAll("a");
@@ -127,7 +127,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.LinkButton" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.LinkButton" />);
 
 		// Assert
 		var links = cut.FindAll("a");
@@ -152,7 +152,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" Enabled="false" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" DisplayMode="BulletedListDisplayMode.HyperLink" Enabled="false" />);
 
 		// Assert
 		var links = cut.FindAll("a");

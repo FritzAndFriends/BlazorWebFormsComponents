@@ -20,7 +20,7 @@
 
 		// Act
 		var cut = Render(
-			@<BulletedList TItem="Product"
+			@<BulletedList ItemType="Product"
 						  Items="products"
 						  DataTextField="Name"
 						  DataValueField="Url"
@@ -45,7 +45,7 @@
 
 		// Act
 		var cut = Render(
-			@<BulletedList TItem="object"
+			@<BulletedList ItemType="object"
 						  StaticItems="items"
 						  DataTextFormatString="#{0}" />
 		);
@@ -67,7 +67,7 @@
 
 		// Act
 		var cut = Render(
-			@<BulletedList TItem="object"
+			@<BulletedList ItemType="object"
 						  StaticItems="items"
 						  DataTextFormatString="" />
 		);

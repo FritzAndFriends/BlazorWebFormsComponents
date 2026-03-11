@@ -14,7 +14,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" ID="MyList" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" ID="MyList" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -36,7 +36,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" ID="MyList" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" ID="MyList" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -58,7 +58,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -88,7 +88,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" ID="Colors" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" ID="Colors" StaticItems="items" />);
 
 		// Assert
 		var labels = cut.FindAll("label");
@@ -109,7 +109,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object" ID="FlowList" StaticItems="items"
+			@<RadioButtonList ItemType="object" ID="FlowList" StaticItems="items"
 							  RepeatLayout="RepeatLayout.Flow" />
 		);
 
@@ -146,7 +146,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object" ID="UlList" StaticItems="items"
+			@<RadioButtonList ItemType="object" ID="UlList" StaticItems="items"
 							  RepeatLayout="RepeatLayout.UnorderedList" />
 		);
 

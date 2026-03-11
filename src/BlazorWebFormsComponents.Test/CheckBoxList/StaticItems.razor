@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -39,7 +39,7 @@
 		var items = new ListItemCollection();
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -59,7 +59,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var checkbox = cut.Find("input[type='checkbox']");

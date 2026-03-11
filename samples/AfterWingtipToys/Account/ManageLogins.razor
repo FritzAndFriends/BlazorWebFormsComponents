@@ -7,7 +7,7 @@
         <section id="externalLoginsForm">
 
             <ListView
-                TItem="UserLoginInfo"
+                ItemType="UserLoginInfo"
                 SelectMethod="@GetLogins" DeleteMethod="RemoveLogin" DataKeyNames="LoginProvider,ProviderKey">
 @* TODO: SelectMethod="GetLogins" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.GetLogins(maxRows, startRow, sort, out total))" *@
 

@@ -4,18 +4,18 @@
 
 <h2>Basic DropDownList with Static Items</h2>
 <div data-audit-control="DropDownList-1">
-    <DropDownList TItem="object" StaticItems="staticItems" @bind-SelectedValue="selectedStatic" />
+    <DropDownList ItemType="object" StaticItems="staticItems" @bind-SelectedValue="selectedStatic" />
 </div>
 <p>Selected Value: <strong>@selectedStatic</strong></p>
 
 <h2>With Pre-selected Value</h2>
 <div data-audit-control="DropDownList-2">
-    <DropDownList TItem="object" StaticItems="preselectedItems" SelectedValue="banana" />
+    <DropDownList ItemType="object" StaticItems="preselectedItems" SelectedValue="banana" />
 </div>
 
 <h2>Data-bound DropDownList</h2>
 <div data-audit-control="DropDownList-3">
-    <DropDownList TItem="DataItem"
+    <DropDownList ItemType="DataItem"
               Items="dataBoundItems"
               DataTextField="Name"
               DataValueField="Id"
@@ -25,17 +25,17 @@
 
 <h2>Disabled DropDownList</h2>
 <div data-audit-control="DropDownList-4">
-    <DropDownList TItem="object" StaticItems="disabledItems" Enabled="false" SelectedValue="1" />
+    <DropDownList ItemType="object" StaticItems="disabledItems" Enabled="false" SelectedValue="1" />
 </div>
 
 <h2>With CSS Class</h2>
 <div data-audit-control="DropDownList-5">
-    <DropDownList TItem="object" StaticItems="styledItems" CssClass="form-select" />
+    <DropDownList ItemType="object" StaticItems="styledItems" CssClass="form-select" />
 </div>
 
 <h2>With Inline Styles</h2>
 <div data-audit-control="DropDownList-6">
-    <DropDownList TItem="object"
+    <DropDownList ItemType="object"
               StaticItems="colorItems"
               BackColor="new WebColor(System.Drawing.Color.LightYellow)"
               ForeColor="new WebColor(System.Drawing.Color.Navy)"
@@ -43,7 +43,7 @@
 </div>
 
 <h2>With Change Event</h2>
-<DropDownList TItem="object"
+<DropDownList ItemType="object"
               StaticItems="eventItems"
               @bind-SelectedValue="eventSelection"
               OnSelectedIndexChanged="HandleSelectionChanged" />
@@ -119,8 +119,8 @@
 
 <p>Code:</p>
 <code>
-&lt;DropDownList TItem="object" StaticItems="staticItems" @@bind-SelectedValue="selectedValue" /&gt;<br />
-&lt;DropDownList TItem="DataItem" Items="dataBoundItems" DataTextField="Name" DataValueField="Id" @@bind-SelectedValue="selectedDataBound" /&gt;<br />
-&lt;DropDownList TItem="object" StaticItems="disabledItems" Enabled="false" SelectedValue="1" /&gt;<br />
-&lt;DropDownList TItem="object" StaticItems="styledItems" CssClass="form-select" /&gt;
+&lt;DropDownList ItemType="object" StaticItems="staticItems" @@bind-SelectedValue="selectedValue" /&gt;<br />
+&lt;DropDownList ItemType="DataItem" Items="dataBoundItems" DataTextField="Name" DataValueField="Id" @@bind-SelectedValue="selectedDataBound" /&gt;<br />
+&lt;DropDownList ItemType="object" StaticItems="disabledItems" Enabled="false" SelectedValue="1" /&gt;<br />
+&lt;DropDownList ItemType="object" StaticItems="styledItems" CssClass="form-select" /&gt;
 </code>

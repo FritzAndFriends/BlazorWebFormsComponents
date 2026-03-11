@@ -7,10 +7,10 @@
 
 <h3>Single Selection ListBox</h3>
 <div data-audit-control="ListBox-1">
-    <ListBox TItem="object" StaticItems="colorItems" @bind-SelectedValue="selectedColor" Rows="4" />
+    <ListBox ItemType="object" StaticItems="colorItems" @bind-SelectedValue="selectedColor" Rows="4" />
 </div>
 <p>Selected: <strong>@selectedColor</strong></p>
-<pre><code>&lt;ListBox TItem="object" StaticItems="colorItems" @@bind-SelectedValue="selectedColor" Rows="4" /&gt;
+<pre><code>&lt;ListBox ItemType="object" StaticItems="colorItems" @@bind-SelectedValue="selectedColor" Rows="4" /&gt;
 
 @@code {
     private string selectedColor = "";
@@ -25,14 +25,14 @@
 
 <h3>Multiple Selection ListBox</h3>
 <div data-audit-control="ListBox-2">
-    <ListBox TItem="object"
+    <ListBox ItemType="object"
              StaticItems="sizeItems"
              SelectionMode="ListSelectionMode.Multiple"
              Rows="4"
              @bind-SelectedValues="selectedSizes" />
 </div>
 <p>Selected: <strong>@string.Join(", ", selectedSizes)</strong></p>
-<pre><code>&lt;ListBox TItem="object"
+<pre><code>&lt;ListBox ItemType="object"
          StaticItems="sizeItems"
          SelectionMode="ListSelectionMode.Multiple"
          Rows="4"

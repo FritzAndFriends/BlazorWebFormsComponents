@@ -15,7 +15,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -36,7 +36,7 @@
 		var items = new ListItemCollection();
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -56,7 +56,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" ID="myList" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" ID="myList" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -73,7 +73,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" Visible="false" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" Visible="false" />);
 
 		// Assert
 		cut.Markup.ShouldBeEmpty();
@@ -89,7 +89,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var li = cut.Find("li");

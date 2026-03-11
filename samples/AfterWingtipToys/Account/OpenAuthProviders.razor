@@ -1,7 +1,7 @@
 <div id="socialLoginList">
     <h4>Use another service to log in.</h4>
     <hr />
-    <ListView ID="providerDetails" TItem="String"
+    <ListView ID="providerDetails" ItemType="String"
         SelectMethod="@GetProviderNames">
 @* TODO: SelectMethod="GetProviderNames" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.GetProviderNames(maxRows, startRow, sort, out total))" *@
         <ItemTemplate>

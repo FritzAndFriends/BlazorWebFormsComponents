@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" CssClass="my-custom-class" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" CssClass="my-custom-class" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -30,7 +30,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BackColor="WebColor.Red" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" BackColor="WebColor.Red" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -48,7 +48,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" ForeColor="WebColor.Blue" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" ForeColor="WebColor.Blue" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -66,7 +66,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BorderStyle="BorderStyle.Solid" BorderWidth="Unit.Pixel(1)" BorderColor="WebColor.Black" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" BorderStyle="BorderStyle.Solid" BorderWidth="Unit.Pixel(1)" BorderColor="WebColor.Black" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -84,7 +84,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" Width="Unit.Pixel(200)" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" Width="Unit.Pixel(200)" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -103,7 +103,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" Height="Unit.Pixel(100)" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" Height="Unit.Pixel(100)" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -122,7 +122,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" CssClass="styled-list" />);
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" BulletStyle="BulletStyleEnum.Numbered" CssClass="styled-list" />);
 
 		// Assert
 		var ol = cut.Find("ol");

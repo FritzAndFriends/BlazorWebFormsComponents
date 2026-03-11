@@ -20,7 +20,7 @@
 
 		// Act
 		var cut = Render(
-			@<ListBox TItem="Product"
+			@<ListBox ItemType="Product"
 					  Items="data"
 					  DataTextField="Name"
 					  DataValueField="Id" />
@@ -42,7 +42,7 @@
 		var data = new List<string> { "Apple", "Banana", "Cherry" };
 
 		// Act
-		var cut = Render(@<ListBox TItem="string" Items="data" />);
+		var cut = Render(@<ListBox ItemType="string" Items="data" />);
 
 		// Assert
 		var options = cut.FindAll("option");

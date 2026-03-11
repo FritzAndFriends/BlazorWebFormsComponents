@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" SelectedValue="b" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" SelectedValue="b" />);
 
 		// Assert
 		var options = cut.FindAll("option");
@@ -36,7 +36,7 @@
 
 		// Act
 		var cut = Render(
-			@<ListBox TItem="object"
+			@<ListBox ItemType="object"
 					  StaticItems="items"
 					  @bind-SelectedValue="selectedValue" />
 		);
@@ -67,7 +67,7 @@
 
 		// Act
 		var cut = Render(
-			@<ListBox TItem="object"
+			@<ListBox ItemType="object"
 					  StaticItems="items"
 					  OnSelectedIndexChanged="HandleChange" />
 		);
@@ -93,7 +93,7 @@
 
 		// Act
 		var cut = Render(
-			@<ListBox TItem="object"
+			@<ListBox ItemType="object"
 					  StaticItems="items"
 					  @bind-SelectedIndex="selectedIndex" />
 		);
