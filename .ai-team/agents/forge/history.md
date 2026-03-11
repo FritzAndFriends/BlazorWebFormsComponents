@@ -71,3 +71,8 @@ Library audit: 153 Razor components + 197 C# classes (CONTROL-COVERAGE.md was li
  Team update (2026-03-08): DbContext registration simplified  `AddDbContextFactory` only, no dual registration (supersedes Run 12 dual pattern)  decided by Cyclops
  Team update (2026-03-08): Middleware order: UseAuthentication  UseAuthorization  UseAntiforgery  decided by Cyclops
  Team update (2026-03-08): Logout must use `<a>` link not `<button>` in navbar  decided by Cyclops
+
+
+ Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. All sample Program.cs files updated.  decided by Cyclops
+ Team update (2026-03-11): Migration tests reorganized  `dev-docs/migration-tests/` now uses `wingtiptoys/runNN/` and `contosouniversity/runNN/` structure.  decided by Beast
+ Team update (2026-03-11): Executive summary created at `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md`  35 runs, 65 tests, performance data.  decided by Beast

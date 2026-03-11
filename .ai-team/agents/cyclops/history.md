@@ -194,3 +194,24 @@ Added `Convert-TemplatePlaceholders` function in new `#region --- Template Place
 📌 Team update (2026-03-08): DbContext registration simplified — `AddDbContextFactory` only, no dual registration needed (supersedes Run 12 pattern) — decided by Cyclops
 📌 Team update (2026-03-08): Middleware order confirmed: UseAuthentication → UseAuthorization → UseAntiforgery — decided by Cyclops
 📌 Team update (2026-03-08): Logout must use `<a>` link not `<button>` in navbar to avoid Playwright button ordering conflicts — decided by Cyclops
+
+### ServiceCollectionExtensions Enhancement (2026-03-11)
+
+**Completed:** Enhanced `AddBlazorWebFormsComponents()` with auto-registered services, options pattern, and middleware pipeline.
+
+**Changes:**
+1. **`AddHttpContextAccessor()`** now auto-registered — `BaseWebFormsComponent` line 57 injects `IHttpContextAccessor`, so every consumer needed this. It's idempotent, safe to call multiple times.
+2. **`BlazorWebFormsComponentsOptions`** class added — configurable behavior via `Action<BlazorWebFormsComponentsOptions>` overload. Currently supports `EnableAspxUrlRewriting` (default: true).
+3. **`UseBlazorWebFormsComponents()`** middleware extension on `IApplicationBuilder` — reads options from DI, conditionally enables `.aspx` URL rewriting.
+4. **`AspxRewriteMiddleware`** — intercepts `.aspx` requests, issues 301 permanent redirects to clean URLs. `Default.aspx` → `/`, `Students.aspx` → `/Students`, preserves query strings.
+5. **FrameworkReference** added to csproj (`Microsoft.AspNetCore.App`) — needed for `AddHttpContextAccessor()` and middleware APIs.
+6. **All 3 sample Program.cs files updated** — removed manual `AddHttpContextAccessor()`, added `app.UseBlazorWebFormsComponents()`.
+
+**Suggested future enhancements for AddBlazorWebFormsComponents/UseBlazorWebFormsComponents:**
+- Custom error page middleware (map Web Forms `customErrors` in web.config to Blazor error pages)
+- ViewState cleanup middleware (strip `__VIEWSTATE` and `__EVENTVALIDATION` from POST bodies during migration)
+- Legacy URL pattern handling beyond `.aspx` (e.g., `.ashx` handlers, `WebResource.axd`)
+- Static file convention mapping (e.g., `~/App_Themes/` → `wwwroot/themes/`)
+- Auto-registration of `CascadingAuthenticationState` for projects using BWFC `LoginView` components
+
+📌 Team update (2026-03-11): Migration tests reorganized — `dev-docs/migration-tests/` now uses `wingtiptoys/runNN/` and `contosouniversity/runNN/` structure. Future run reports must follow this convention. — decided by Beast

@@ -75,3 +75,13 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
 - **Duplicate screenshots:** 5 root-level `contoso-*.png` files were byte-identical to `contoso-run11-2026-03-10/` screenshots (now run13). Removed duplicates via `git rm`.
 - **README.md:** Completely rewritten with all 18 Contoso runs documented (was only 2), updated all links to new paths, added renumbering details table, and updated Report Archive section.
 - **Cross-project docs:** `component-coverage.md` and `css-architecture-analysis.md` remain at migration-tests root.
+
+### Executive Summary Document (2026-03-11)
+
+- **Scope:** Created `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md` — a polished, data-driven executive summary showcasing migration toolkit progress and capabilities.
+- **Key data points used:** 35 benchmark runs (17 WT + 18 CU), 65 acceptance tests (25 + 40), 6 consecutive 100% WT runs, 8 perfect CU runs, L1 times 1.81s (WT) and 0.59s (CU), 45% and 61% performance improvements.
+- **Screenshot paths verified and referenced:** `wingtiptoys/run01/images/comparison-*.png` (3 side-by-side comparisons), `wingtiptoys/run15/*.png` (5 latest screenshots), `contosouniversity/run15/*.png` (5 latest screenshots).
+- **Sections:** Executive Overview, Drop-In Replacement Strategy, Results at a Glance, Performance Progression (with ASCII charts), Visual Fidelity screenshots, Key Milestones timeline, Two-Layer Pipeline Architecture, Test Project Coverage, What's Next.
+- **Document location:** `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md`
+
+📌 Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Consumers no longer need manual `AddHttpContextAccessor()`. All sample Program.cs files updated. — decided by Cyclops

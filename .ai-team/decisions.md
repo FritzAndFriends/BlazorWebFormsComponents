@@ -6782,3 +6782,21 @@ Long-term, we could add `[StreamRendering]` support to data-bound components for
 **What:** Use AddDbContextFactory<ProductContext> only in Program.cs. Do NOT also register AddDbContext<ProductContext>. Identity works correctly with the factory pattern when using AddIdentity (not AddDefaultIdentity).
 **Why:** Run 12 used dual registration (AddDbContextFactory + AddDbContext). Run 13 confirmed single factory registration works, simplifying DI setup. Evolution: Run 12 assumed Identity required scoped DbContext  Run 13 proved factory-only suffices.
 
+
+### 2026-03-11: Executive summary document created
+**By:** Beast
+**What:** Created `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md` — a comprehensive, data-driven executive summary of the BWFC migration toolkit's progress across 35 benchmark runs, 65 acceptance tests, and two test projects. Includes performance progression charts, visual fidelity screenshots, milestone timeline, and pipeline architecture overview. Emphasizes the drop-in replacement strategy as a unique differentiator.
+**Why:** Jeff requested a promotional document for stakeholders showcasing the toolkit's capabilities and results. The document aggregates data from all run reports into a single scannable summary with verified screenshot references and accurate metrics.
+
+
+### 2026-03-11: Migration tests folder reorganization
+**By:** Beast
+**What:** Reorganized `dev-docs/migration-tests/` from a flat directory with mixed naming conventions (`contoso-*`, `contosouniversity-*`, `ContosoUniversity-*`, `wingtiptoys-*`) into a clean hierarchical structure: `wingtiptoys/runNN/` and `contosouniversity/runNN/`. Resolved two Contoso numbering collisions (runs 11 and 12 existed for both March 9 and March 10) by keeping the earlier March 9 batch at their original numbers (07–12) and renumbering the later March 10–11 runs to 13–18. All run reports are now consistently named `REPORT.md` inside their `runNN/` folder.
+**Why:** The flat directory with 100+ files and inconsistent naming was unnavigable. Contributors had to guess which prefix to use (`contoso-` vs `contosouniversity-` vs `ContosoUniversity-`). The README only documented 2 of 18 Contoso runs. The new structure makes it easy to find any run, the consistent `runNN/REPORT.md` convention eliminates naming debates, and the updated README serves as a complete index of all migration test data.
+
+
+### 2026-03-11: ServiceCollectionExtensions enhancement
+**By:** Cyclops
+**What:** Enhanced `AddBlazorWebFormsComponents()` to auto-register `HttpContextAccessor`, added `BlazorWebFormsComponentsOptions` for configurable behavior, created `UseBlazorWebFormsComponents()` middleware with `.aspx` URL rewriting, and updated all sample Program.cs files. Added `FrameworkReference` to `Microsoft.AspNetCore.App` in the library csproj.
+**Why:** Every BWFC consumer had to manually call `AddHttpContextAccessor()` because `BaseWebFormsComponent` injects `IHttpContextAccessor`. The options pattern and middleware extension provide a single integration point for migration-related pipeline configuration. The `.aspx` rewrite middleware handles the most common legacy URL pattern, issuing 301 redirects to preserve SEO and prevent broken bookmarks during migration.
+

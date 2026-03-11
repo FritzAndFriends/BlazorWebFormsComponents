@@ -108,3 +108,6 @@
 
 
  Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+
+
+ Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Sample Program.cs files updated  no longer need manual `AddHttpContextAccessor()`.  decided by Cyclops
