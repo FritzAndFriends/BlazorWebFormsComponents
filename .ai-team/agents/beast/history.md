@@ -125,3 +125,6 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
 
 
  Team update (2026-03-11): Database provider guidance reframed  lead with 'detect and match original provider' instead of 'NEVER substitute'. L1 auto-detection connects to L2 verification.  decided by Beast (requested by Jeffrey T. Fritz)
+
+
+ Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. Skill file guidance leads with 'detect and match'.  decided by Jeffrey T. Fritz, Beast, Cyclops

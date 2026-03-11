@@ -96,3 +96,6 @@ Added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` that parses Web.con
 - Provider mapping: SqlClient→SqlServer, SQLite→Sqlite, Npgsql→PostgreSQL, MySqlClient→MySQL
 
 **Key learning:** PowerShell `Set-StrictMode -Version Latest` throws on missing XML element properties. Use `$element.GetAttribute('attrName')` (returns '' if missing) instead of `$element.attrName` for optional XML attributes.
+
+
+ Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. L1 script now auto-detects provider from Web.config.  decided by Jeffrey T. Fritz, Beast, Cyclops
