@@ -30,7 +30,7 @@ namespace BlazorWebFormsComponents
 		public string Text { get; set; }
 
 		[Parameter]
-		public TextAlign TextAlign { get; set; } = TextAlign.Right;
+		public EnumParameter<TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		[Parameter]
 		public EventCallback<ChangeEventArgs> OnCheckedChanged { get; set; }

@@ -29,8 +29,8 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		#region Layout
 
-		[Parameter] public Orientation Orientation { get; set; } = Orientation.Vertical;
-		[Parameter] public LoginTextLayout TextLayout { get; set; } = LoginTextLayout.TextOnLeft;
+		[Parameter] public EnumParameter<Orientation> Orientation { get; set; } = Enums.Orientation.Vertical;
+		[Parameter] public EnumParameter<LoginTextLayout> TextLayout { get; set; } = LoginTextLayout.TextOnLeft;
 
 		#endregion
 

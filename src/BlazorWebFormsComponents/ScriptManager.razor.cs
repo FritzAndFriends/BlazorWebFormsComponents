@@ -17,7 +17,7 @@ namespace BlazorWebFormsComponents
 		public bool EnablePageMethods { get; set; }
 
 		[Parameter]
-		public ScriptMode ScriptMode { get; set; } = ScriptMode.Auto;
+		public EnumParameter<ScriptMode> ScriptMode { get; set; } = Enums.ScriptMode.Auto;
 
 		[Parameter]
 		public int AsyncPostBackTimeout { get; set; } = 90;

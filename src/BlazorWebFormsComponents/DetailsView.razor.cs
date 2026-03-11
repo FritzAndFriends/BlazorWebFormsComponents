@@ -35,7 +35,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the default mode of the DetailsView control.
 		/// </summary>
 		[Parameter]
-		public DetailsViewMode DefaultMode { get; set; } = DetailsViewMode.ReadOnly;
+		public EnumParameter<DetailsViewMode> DefaultMode { get; set; } = DetailsViewMode.ReadOnly;
 
 		/// <summary>
 		/// Gets or sets whether paging is enabled.
@@ -65,7 +65,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the gridlines style for the table.
 		/// </summary>
 		[Parameter]
-		public GridLines GridLines { get; set; } = GridLines.Both;
+		public EnumParameter<GridLines> GridLines { get; set; } = Enums.GridLines.Both;
 
 		/// <summary>
 		/// Gets or sets the cell padding for the table.
@@ -113,7 +113,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the horizontal or vertical position of the caption element.
 		/// </summary>
 		[Parameter]
-		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
+		public EnumParameter<TableCaptionAlign> CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
 		/// <summary>
 		/// Gets the total number of pages (one item per page in DetailsView).
@@ -360,18 +360,18 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets the gridlines attribute value for the table element.
 		/// </summary>
-		protected string GridLinesAttribute => GridLines switch
+		protected string GridLinesAttribute => GridLines.Value switch
 		{
-			GridLines.Both => "all",
-			GridLines.Horizontal => "rows",
-			GridLines.Vertical => "cols",
+			Enums.GridLines.Both => "all",
+			Enums.GridLines.Horizontal => "rows",
+			Enums.GridLines.Vertical => "cols",
 			_ => "none"
 		};
 
 		/// <summary>
 		/// Gets the border attribute value for the table element.
 		/// </summary>
-		protected string BorderAttribute => GridLines != GridLines.None ? "1" : "0";
+		protected string BorderAttribute => GridLines.Value != Enums.GridLines.None ? "1" : "0";
 
 		/// <summary>
 		/// Gets the combined style string.
@@ -394,7 +394,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		protected string GetCaptionStyle()
 		{
-			return CaptionAlign switch
+			return CaptionAlign.Value switch
 			{
 				TableCaptionAlign.Top => "caption-side:top",
 				TableCaptionAlign.Bottom => "caption-side:bottom",

@@ -12,7 +12,7 @@ namespace BlazorWebFormsComponents
 		protected PagerSettings theSettings { get; set; }
 
 		[Parameter]
-		public PagerButtons Mode { get; set; } = PagerButtons.Numeric;
+		public EnumParameter<PagerButtons> Mode { get; set; } = PagerButtons.Numeric;
 
 		[Parameter]
 		public int PageButtonCount { get; set; } = 10;
@@ -42,7 +42,7 @@ namespace BlazorWebFormsComponents
 		public string PreviousPageImageUrl { get; set; }
 
 		[Parameter]
-		public PagerPosition Position { get; set; } = PagerPosition.Bottom;
+		public EnumParameter<PagerPosition> Position { get; set; } = PagerPosition.Bottom;
 
 		[Parameter]
 		public bool Visible { get; set; } = true;

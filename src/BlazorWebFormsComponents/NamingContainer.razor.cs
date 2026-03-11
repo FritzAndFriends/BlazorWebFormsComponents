@@ -27,9 +27,9 @@ public partial class NamingContainer : BaseWebFormsComponent
 		base.OnParametersSet();
 
 		// UseCtl00Prefix implies AutoID mode so children inherit ctl00 behavior
-		if (UseCtl00Prefix && ClientIDMode == ClientIDMode.Inherit)
+		if (UseCtl00Prefix && ClientIDMode.Value == Enums.ClientIDMode.Inherit)
 		{
-			ClientIDMode = ClientIDMode.AutoID;
+			ClientIDMode = Enums.ClientIDMode.AutoID;
 		}
 	}
 }

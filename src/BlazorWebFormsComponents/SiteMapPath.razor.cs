@@ -36,7 +36,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the direction of path rendering.
 		/// </summary>
 		[Parameter]
-		public PathDirection PathDirection { get; set; } = PathDirection.RootToCurrent;
+		public EnumParameter<PathDirection> PathDirection { get; set; } = Enums.PathDirection.RootToCurrent;
 
 		/// <summary>
 		/// Gets or sets whether the current node is rendered as a hyperlink.
@@ -192,7 +192,7 @@ namespace BlazorWebFormsComponents
 			}
 
 			// Apply path direction
-			if (PathDirection == PathDirection.CurrentToRoot)
+			if (PathDirection.Value == Enums.PathDirection.CurrentToRoot)
 			{
 				fullPath.Reverse();
 			}
@@ -208,7 +208,7 @@ namespace BlazorWebFormsComponents
 			if (NavigationPath.Count == 0)
 				return false;
 
-			var lastNode = PathDirection == PathDirection.RootToCurrent
+			var lastNode = PathDirection.Value == Enums.PathDirection.RootToCurrent
 				? NavigationPath.Last()
 				: NavigationPath.First();
 
@@ -223,7 +223,7 @@ namespace BlazorWebFormsComponents
 			if (NavigationPath.Count == 0)
 				return false;
 
-			var firstNode = PathDirection == PathDirection.RootToCurrent
+			var firstNode = PathDirection.Value == Enums.PathDirection.RootToCurrent
 				? NavigationPath.First()
 				: NavigationPath.Last();
 

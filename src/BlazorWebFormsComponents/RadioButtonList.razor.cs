@@ -40,7 +40,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the alignment of the text label with respect to the radio button.
 		/// </summary>
 		[Parameter]
-		public TextAlign TextAlign { get; set; } = TextAlign.Right;
+		public EnumParameter<TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		/// <summary>
 		/// Gets or sets the selected value.

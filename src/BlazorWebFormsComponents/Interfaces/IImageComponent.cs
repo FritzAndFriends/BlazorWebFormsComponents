@@ -12,7 +12,7 @@ namespace BlazorWebFormsComponents.Interfaces
 		string DescriptionUrl { get; set; }
 
 		[Parameter]
-		ImageAlign ImageAlign { get; set; }
+		EnumParameter<ImageAlign> ImageAlign { get; set; }
 
 		[Parameter]
 		string ImageUrl { get; set; }

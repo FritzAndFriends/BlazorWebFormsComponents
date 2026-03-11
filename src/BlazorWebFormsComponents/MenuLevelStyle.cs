@@ -11,7 +11,7 @@ namespace BlazorWebFormsComponents
 	{
 		public WebColor BackColor { get; set; }
 		public WebColor BorderColor { get; set; }
-		public BorderStyle BorderStyle { get; set; }
+		public EnumParameter<BorderStyle> BorderStyle { get; set; }
 		public Unit BorderWidth { get; set; }
 		public string CssClass { get; set; }
 		public FontInfo Font { get; set; } = new FontInfo();
