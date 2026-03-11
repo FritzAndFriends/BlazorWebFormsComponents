@@ -258,3 +258,11 @@ Added `Convert-TemplatePlaceholders` function in new `#region --- Template Place
 - Layer 1 timing: 1.51s
 - Build: same 6 pre-existing errors in ProductDetails/ProductList code-behinds (not ShoppingCart)
 - Key learning: content-based unconvertible detection must avoid matching URLs, image paths, alt text  use code-behind analysis or path-based detection for payment/checkout patterns
+
+
+📌 Team update (2026-03-11): Run 18 improvement recommendations prioritized by Forge — see decisions.md
+
+
+
+📌 Team update (2026-03-11): User directives from Jeff  eliminate Test-UnconvertiblePage, standardize on ItemType, P0-2 approved  see decisions.md
+

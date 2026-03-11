@@ -100,3 +100,11 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
   - `dev-docs/migration-tests/images/generate-charts.py` — regeneration script
 - **EXECUTIVE-SUMMARY.md updated:** Two ASCII code-block charts replaced with three `![…](images/…)` image references.
 - **Key learning:** The `generate-charts.py` script is designed for easy data updates — just append new run numbers/times to the arrays at the top of the file and re-run.
+
+
+📌 Team update (2026-03-11): Run 18 improvement recommendations prioritized by Forge — see decisions.md
+
+
+
+📌 Team update (2026-03-11): User directives from Jeff  eliminate Test-UnconvertiblePage, standardize on ItemType, P0-2 approved  see decisions.md
+
