@@ -138,3 +138,29 @@ Team updates (2026-03-07 through 2026-03-08): Coordinator must not perform domai
  Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz
 
  Team update (2026-03-11): P0 script fixes  Test-UnconvertiblePage eliminated (always convert), [Parameter] annotation bug fixed.  decided by Jeffrey T. Fritz
+
+### Layer 2 Structural Transform - AfterWingtipToys (2026-03-11)
+
+**Completed:** Applied L2 structural transforms to ~60 files in `samples/AfterWingtipToys/`.
+
+**Build result:** 0 errors, 58 warnings (all RZ10012 for not-yet-implemented validators: RequiredFieldValidator, CompareValidator, ModelErrorMessage, RegularExpressionValidator).
+
+**Key transforms applied:**
+1. **Infrastructure:** Program.cs (AddDbContextFactory SQLite, seed, middleware), _Imports.razor (@inherits WebFormsPageBase, EF Core usings), App.razor (@rendermode InteractiveServer)
+2. **Models:** ProductDatabaseInitializer static Seed(), IdentityModels ASP.NET Core Identity stubs, cleaned TODO headers
+3. **Core pages:** All code-behinds to partial classes with OnInitializedAsync, IDbContextFactory, [SupplyParameterFromQuery]
+4. **Data binding:** SelectMethod to Items, TItem/TItemType to ItemType, GetRouteUrl to query string hrefs, <%# to @context.Property
+5. **Layout:** MainLayout with category nav, cart count, LoginView (_userName from CascadingParameter AuthenticationState)
+6. **Enum values:** TextMode/GridLines/BackColor/BorderStyle/BorderColor all prefixed with @EnumType.Value or @("...")
+7. **Admin/Checkout/Account:** All code-behinds converted; PayPal/Identity logic wrapped in TODO comments
+
+**L2 gotchas discovered:**
+- _Imports.razor @inherits applies to ALL components - non-page components MUST NOT specify : ComponentBase
+- Code-behind class name MUST match .razor filename (Forgot.razor = class Forgot, NOT ForgotPassword)
+- Method name cannot match enclosing class name (CS0542) - rename e.g. Forgot() to Forgot_Click()
+- @inject in .razor and [Inject] in .razor.cs are duplicates - use only one
+- BWFC enum/WebColor params interpreted as C# expressions - must use @EnumType.Value syntax
+- LoggedInTemplate is RenderFragment (not typed) - no context; use CascadingParameter Task<AuthenticationState>
+- #hexcolor in attribute values parsed as preprocessor directive - wrap in @("...")
+- <%# ... %> data-binding expressions must be converted to @context.Property or @(expression)
+- int properties bound to Text parameter need .ToString()
