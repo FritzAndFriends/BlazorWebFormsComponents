@@ -102,6 +102,14 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
 
  Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
 
+### Database Provider Detection Framing (2025-07-24)
+
+- **Scope:** Reframed database guidance in all three migration skill files from reactive ("don't use SQLite") to proactive ("detect and match the original provider").
+- **migration-standards/SKILL.md:** Replaced "NEVER substitute database providers" bullet with "Detect and match the original database provider" — leads with the `Web.config` `<connectionStrings>` detection workflow and references L1's `[DatabaseProvider]` review item. NEVER-substitute guardrail retained at end.
+- **bwfc-data-migration/SKILL.md:** Prepended "Step 1: Detect the provider" blockquote above existing CRITICAL/NEVER warnings. References L1's `Find-DatabaseProvider` function and `[DatabaseProvider]` review item. Existing warnings preserved unchanged.
+- **bwfc-migration/SKILL.md:** Added "Database provider" bullet to L2 checklist directing agents to verify L1-detected provider from `[DatabaseProvider]` review item.
+- **Key learning:** Skill file tone matters for agent behavior. "Detect and match X" (positive/proactive) is more effective than "NEVER use Y" (negative/reactive) because agents prioritize affirmative instructions over prohibitions.
+
 ### SelectMethod & SQLite Enforcement in Skill Files (2025-07-24)
 
 - **Scope:** Hardened all three migration skill files to prevent two recurring agent mistakes.
