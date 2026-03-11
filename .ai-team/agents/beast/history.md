@@ -143,3 +143,15 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
 - **What's Next section:** Marked SelectMethod core as ✅ done, added CU SelectMethod re-run and acceptance test validation items.
 - **Charts:** Added WT Run 20 (1.70s), WT Run 21 (1.79s), CU Run 19 (0.62s) to `generate-charts.py` and regenerated all 3 PNGs.
 - **Key data points:** WT Run 21: 1.79s L1, 348 transforms, 0 errors, SelectHandler<ItemType> delegates on 3 core pages. CU Run 19: 0.62s L1, 72 transforms, 0 errors, SQL Server LocalDB preserved, 229 output files, 5 BLL classes.
+
+
+ Team update (2026-03-11): L2 automation shims (OPP-2, 3, 5, 6) implemented by Cyclops on WebFormsPageBase  Unit implicit string, Response.Redirect shim, ViewState, GetRouteUrl. OPP-1/OPP-4 deferred.  decided by Forge (analysis), Cyclops (implementation)
+
+
+
+ Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
+
+
+
+ Team update (2026-03-11): WebFormsPageBase now has Response.Redirect shim, ViewState dict, GetRouteUrl, and Unit implicit string conversion. L2 skills should note these patterns compile unchanged on @inherits WebFormsPageBase pages.  decided by Cyclops
+

@@ -6689,3 +6689,37 @@ Jeff's Run 20 review identified four bugs in the migration pipeline:
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** The first 3 paragraphs of EXECUTIVE-SUMMARY.md have too much description. Get to the successes faster. The opening should lead with wins and hard numbers, not explanatory prose about what the toolkit does.
 **Why:** User request — the document is meant to demonstrate results and earn a promotion. Description can come later; the opening must punch.
+
+### 2026-03-11: L2 automation -- 6 BWFC library enhancements to eliminate recurring manual fixes
+
+**By:** Forge
+**What:** Analysis of Runs 17-21 (WT + CU) identified 6 recurring L2 manual fix patterns accounting for ~25 min/run. The core insight: Blazor Razor compiler is stricter than Web Forms markup -- BWFC can absorb this gap with implicit conversions. Prioritized opportunities:
+- **OPP-1** (P0/M): EnumParameter<T> wrapper struct with implicit string conversion -- eliminates @(GridLines.None) wrapping on ~20 components
+- **OPP-2** (P0/S): Unit implicit string operator -- Width=125px just works (replace broken explicit operator with implicit delegating to Unit.Parse)
+- **OPP-3** (P1/S): Response.Redirect shim on WebFormsPageBase -- ResponseShim class delegates to NavigationManager, strips ~/ and .aspx
+- **OPP-4** (P1/M): Session state scoped dictionary (InMemorySessionState) -- Session[key] compiles unchanged, scoped to circuit
+- **OPP-5** (P2/S): ViewState on WebFormsPageBase -- BaseWebFormsComponent already has ViewState dict, just needs page base exposure
+- **OPP-6** (P2/S): GetRouteUrl on WebFormsPageBase -- helper exists in Extensions/ but not accessible from pages, add via LinkGenerator
+
+Implementation order: OPP-2, OPP-3, OPP-5, OPP-6 (first batch, Cyclops implementing). OPP-1 deferred pending Jeff sign-off on public API change. OPP-4 deferred (most complex).
+NOT automated: EF6 to EF Core, Identity, payment integration, Page_Load to OnInitializedAsync (semantic transforms stay as L2).
+**Why:** L2 currently takes ~25 min of Copilot-assisted transforms per run. These 6 patterns are mechanical and repetitive. BWFC library can absorb the gap the same way Unit and WebColor already do for type parsing. Eliminates the most frequent build errors across every migration run.
+
+### 2026-03-11: ItemType renames must cover all consumers (tests, samples, docs)
+
+**By:** Cyclops
+**What:** When renaming a generic type parameter on a component (e.g., `TItem` → `ItemType`), the rename must be applied to all consumer files — test `.razor` files, sample pages, and documentation code blocks — not just the component source. CI may only report the first few errors, masking the full scope.
+**Why:** The `ItemType` standardization renamed the generic on 13+ components but missed 43 consumer files. This broke CI on PR #425 with `RZ10001` and `CS0411` errors across RadioButtonList, BulletedList, CheckBoxList, DropDownList, ListBox tests and all related sample pages.
+
+
+### 2026-03-11: WebFormsPageBase L2 automation shims implemented (OPP-2, OPP-3, OPP-5, OPP-6)
+
+**By:** Cyclops
+**What:** WebFormsPageBase now injects NavigationManager, LinkGenerator, and IHttpContextAccessor to support L2 automation shims. Four changes:
+- **Response.Redirect shim (OPP-3):** ResponseShim delegates to NavigationManager. Response.Redirect works unchanged on WebFormsPageBase pages.
+- **ViewState on page base (OPP-5):** Dictionary ViewState property added with Obsolete warning (in-memory only).
+- **GetRouteUrl on page base (OPP-6):** Uses LinkGenerator + IHttpContextAccessor, same pattern as BaseWebFormsComponent.
+- **Unit implicit string conversion (OPP-2):** Replaced explicit operator with implicit. Width=125px works in Razor markup without Unit.Parse wrapping.
+
+L2 no longer needs to inject NavigationManager on pages using Response.Redirect. ViewState, GetRouteUrl, and bare unit strings compile unchanged.
+**Why:** These 4 shims eliminate the most frequent mechanical L2 fixes per Forge analysis. Migration skills should be updated to note these patterns now just work on WebFormsPageBase pages.

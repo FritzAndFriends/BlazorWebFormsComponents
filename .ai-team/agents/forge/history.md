@@ -127,3 +127,7 @@ Library audit: 153 Razor components + 197 C# classes (CONTROL-COVERAGE.md was li
 5. **L2 still needed for semantic transforms** — Page_Load→OnInitializedAsync, EF6→EF Core, Identity migration, payment integration. These require application-level understanding and should stay as Copilot-assisted work.
 
 6. **Full analysis written to `.ai-team/decisions/inbox/forge-l2-automation-analysis.md`** — 6 OPPs prioritized with code sketches and risk assessment. Awaiting Jeff's decision on EnumParameter<T> public API change.
+
+
+ Team update (2026-03-11): WebFormsPageBase now has Response.Redirect shim, ViewState dict, GetRouteUrl, and Unit implicit string conversion. L2 skills should note these patterns compile unchanged on @inherits WebFormsPageBase pages.  decided by Cyclops
+

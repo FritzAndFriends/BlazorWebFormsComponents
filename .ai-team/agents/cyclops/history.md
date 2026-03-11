@@ -128,3 +128,7 @@ Implemented 4 OPPs from Forge's L2 automation analysis to eliminate recurring ma
 - `Unit.Parse()` already handles all CSS unit formats via the `Unit(string, CultureInfo, UnitType)` constructor — no new parsing needed.
 - `WebFormsPageBase` did NOT have `NavigationManager`, `LinkGenerator`, or `IHttpContextAccessor` injections prior to this change. Added all three.
 - The explicit string-to-Unit operator was effectively dead code — no tests or consuming code used the `(Unit)"string"` cast syntax.
+
+
+ Team update (2026-03-11): L2 automation shims (OPP-2, 3, 5, 6) implemented by Cyclops on WebFormsPageBase  Unit implicit string, Response.Redirect shim, ViewState, GetRouteUrl. OPP-1/OPP-4 deferred.  decided by Forge (analysis), Cyclops (implementation)
+
