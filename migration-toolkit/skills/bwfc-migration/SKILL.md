@@ -143,6 +143,8 @@ The migration pipeline has **two mandatory layers** that run in strict sequence:
 
 Layer 2 is where Copilot applies structural transforms to every generated `.razor` and `.razor.cs` file. Work through each file and apply ALL of the following:
 
+> **⚠️ MANDATORY: SelectMethod MUST be preserved as a delegate.** When the original Web Forms markup has `SelectMethod="MethodName"`, the migrated Blazor markup MUST have `SelectMethod="@service.MethodName"` (or explicit lambda). Do NOT convert to `Items=` binding — this is the #1 recurring migration error.
+
 - Preserve `SelectMethod` — convert string method name to `SelectHandler<ItemType>` delegate (e.g., `SelectMethod="@productService.GetProducts"` if signature matches, or `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"` for explicit wiring). BWFC's `DataBoundComponent.OnAfterRenderAsync` automatically calls the delegate to populate `Items`.
 - Preserve `ItemType` attribute — BWFC data controls use `ItemType` (matches Web Forms `DataBoundControl.ItemType`). Do NOT change to `TItem` or any other name.
 - Add `Context="Item"` to `<ItemTemplate>` elements
@@ -150,7 +152,8 @@ Layer 2 is where Copilot applies structural transforms to every generated `.razo
 - Convert `Response.Redirect` → `NavigationManager.NavigateTo`
 - Wire `EditForm` where form validation is needed
 - Convert Master Page → Blazor Layout
-- Ensure null-safe collection access (e.g., `Items="@(_products ?? new())"`)
+- Ensure null-safe collection access when using `Items` (for `DataSource`-originating data only): `Items="@(_products ?? new())"`
+- When `SelectMethod` is set, `Items` is auto-populated by the BWFC framework — do NOT also set `Items`
 - Add `@inject` directives for required services (NavigationManager, DbContext, etc.)
 - Convert `Session["key"]` → scoped DI service patterns
 

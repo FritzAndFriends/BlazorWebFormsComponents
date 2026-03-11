@@ -89,8 +89,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 ### Database Migration
 
 - **Always** migrate EF6 → EF Core using the **latest .NET 10 packages** (currently **10.0.3**)
-- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`
-- Prefer SQLite for local dev / demos; SQL Server for production
+- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` (or provider matching original app), `.Tools`, `.Design`
+- **⚠️ CRITICAL: NEVER substitute database providers.** Use the SAME provider as the original Web Forms application. If the original used SQL Server (LocalDB or otherwise), use `Microsoft.EntityFrameworkCore.SqlServer`. Do NOT default to SQLite unless the original application specifically used SQLite. Examine `Web.config` connection strings to determine the correct provider.
 - Replace `DropCreateDatabaseIfModelChanges` with `EnsureCreated` + idempotent seed
 - Use `IDbContextFactory<T>` or scoped `DbContext` injection
 - Models: nullable reference types, file-scoped namespaces, modern init patterns
@@ -139,7 +139,9 @@ The script should preserve the attribute and annotate the signature change neede
 | `<asp:DetailsView>` | `<DetailsView Items="@data">` with fields | Manual field rendering |
 | `<asp:DataList>` | `<DataList Items="@data">` with `ItemTemplate` | `@foreach` + grid HTML |
 
-**SelectMethod PRESERVED:** BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` (delegate signature: `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`). Convert the Web Forms string method name to a delegate reference: `SelectMethod="@productService.GetProducts"` (if the service method signature matches) or use explicit lambda wiring: `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"`. When `SelectMethod` is set, `DataBoundComponent.OnAfterRenderAsync` automatically calls it to populate `Items`. Alternatively, bypass `SelectMethod` and set `Items` directly with data loaded in `OnInitializedAsync`.
+**SelectMethod PRESERVED:** BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` (delegate signature: `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`). Convert the Web Forms string method name to a delegate reference: `SelectMethod="@productService.GetProducts"` (if the service method signature matches) or use explicit lambda wiring: `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"`. When `SelectMethod` is set, `DataBoundComponent.OnAfterRenderAsync` automatically calls it to populate `Items`.
+
+> **⚠️ DO NOT convert SelectMethod to Items= binding.** When the original Web Forms markup uses `SelectMethod`, the migrated Blazor markup MUST preserve `SelectMethod` as a delegate reference. Converting to `Items=` loses the native BWFC data-binding pattern and defeats the purpose of drop-in replacement. The ONLY acceptable alternative is when the original Web Forms markup used `DataSource` (not `SelectMethod`), in which case `Items=` is correct.
 
 ### Session State → Scoped Services
 
