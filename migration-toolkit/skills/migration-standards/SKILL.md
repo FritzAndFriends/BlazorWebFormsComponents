@@ -171,9 +171,18 @@ When linking to minimal API endpoints from Blazor pages, use `<form method="post
 | `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
-### Layer 1 (Script) vs Layer 2 (Manual) Boundary
+### Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary
 
-**Script handles (Layer 1):**
+> ⚠️ **CRITICAL: Layer 1 and Layer 2 MUST both run in sequence. Do NOT make any manual code fixes between Layer 1 and Layer 2.** Manual fixes between layers corrupt pipeline quality measurement. If Layer 1 output has issues, fix the script — not the output.
+
+**Layer 1 — Automated Script** (`migration-toolkit/scripts/bwfc-migrate.ps1`):
+
+Run via:
+```powershell
+.\migration-toolkit\scripts\bwfc-migrate.ps1 -Path "<source-webforms-project>" -Output "<blazor-output-dir>"
+```
+
+Script handles:
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
 - LoginView → **preserve as BWFC LoginView** — do NOT rewrite as AuthorizeView. The BWFC `LoginView` injects `AuthenticationStateProvider` natively and uses the same template names (`AnonymousTemplate`, `LoggedInTemplate`). The migration script handles this automatically.
@@ -182,12 +191,15 @@ When linking to minimal API endpoints from Blazor pages, use `<form method="post
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
 
-**Always manual (Layer 2):**
+**Layer 2 — Copilot-Assisted** (NOT manual — guided by the `bwfc-migration` skill):
 - EF6 → EF Core (models, DbContext, seed)
 - Identity/Auth subsystem
 - Session → scoped services
 - Business logic (checkout, payment, admin CRUD)
 - Complex data-binding with arithmetic/method chains
+- Data loading patterns (`SelectMethod` → `Items`, `OnInitializedAsync`)
+- Template context wiring (`Context="Item"`)
+- Navigation conversions (`Response.Redirect` → `NavigationManager.NavigateTo`)
 
 ## Examples
 

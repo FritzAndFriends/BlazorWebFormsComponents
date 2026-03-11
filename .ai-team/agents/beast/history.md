@@ -108,3 +108,19 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
 
 📌 Team update (2026-03-11): User directives from Jeff  eliminate Test-UnconvertiblePage, standardize on ItemType, P0-2 approved  see decisions.md
 
+### Migration Pipeline Enforcement in Skill Docs (2026-03-11)
+
+- **Scope:** Updated `migration-toolkit/skills/bwfc-migration/SKILL.md` and `migration-toolkit/skills/migration-standards/SKILL.md` per Jeff Fritz directive.
+- **bwfc-migration SKILL.md changes:**
+  - Added prominent "Migration Pipeline — MANDATORY" section near the top (after Installation, before existing Migration Workflow) with critical warning admonition, pipeline step table, Layer 1 invocation command, Layer 2 Copilot transform checklist, and pipeline rules.
+  - Fixed all `TItem` references → `ItemType` throughout the file (lines 262, 274, 294, 334, 355, 479, 490, 624). BWFC standardized on `ItemType` to match Web Forms `DataBoundControl.ItemType`.
+  - Updated Layer 2 checklist: "ItemType → TItem" → "ItemType preserved (strip namespace prefix only)".
+  - Updated GridView Key changes note: removed incorrect "ItemType → TItem" guidance.
+- **migration-standards SKILL.md changes:**
+  - Renamed "Layer 1 (Script) vs Layer 2 (Manual) Boundary" → "Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary".
+  - Added critical warning admonition about no manual fixes between layers.
+  - Added `bwfc-migrate.ps1` invocation command.
+  - Expanded Layer 2 description: "Always manual" → "Copilot-Assisted" with additional transform items (data loading, template context, navigation).
+- **Key convention:** `ItemType` is the canonical attribute name for BWFC data controls. Never use `TItem`, `TItemType`, or other variants.
+- **Key convention:** Layer 1 = automated script, Layer 2 = Copilot-assisted. No manual fixes between layers. This is a measurement integrity requirement.
+
