@@ -164,3 +164,25 @@ Team updates (2026-03-07 through 2026-03-08): Coordinator must not perform domai
 - #hexcolor in attribute values parsed as preprocessor directive - wrap in @("...")
 - <%# ... %> data-binding expressions must be converted to @context.Property or @(expression)
 - int properties bound to Text parameter need .ToString()
+
+### Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
+
+**BUG 1 FIX — SelectMethod preservation (CRITICAL):**
+- `ConvertFrom-SelectMethod` (line 1048-1068) was STRIPPING `SelectMethod="MethodName"` from markup and replacing with Items TODO
+- BWFC `DataBoundComponent.cs` line 16 has `SelectHandler<ItemType> SelectMethod { get; set; }` — it's a real working parameter
+- Fixed: regex now captures the FULL tag including SelectMethod attribute, preserves it in output, appends TODO comment after the tag noting delegate conversion needed in L2
+- Manual item text updated from "removed" to "preserved — needs delegate conversion in L2"
+- Line 860 early-detection manual item also updated to reflect preservation
+
+**BUG 2 FIX — ContentPlaceHolder review items:**
+- Lines 844-853: manual items said "needs manual conversion" — misleading because BWFC provides `<ContentPlaceHolder>` component
+- Updated both manual item text and TODO comments to: "BWFC provides `<ContentPlaceHolder>` component — use `<ContentPlaceHolder ID="..." />` or convert to @Body"
+
+**BUG 3 FIX — GetRouteUrl review items:**
+- Line 1030: changed from generic "Add @inject" to "BWFC provides GetRouteUrlHelper — add @inject ... and use GetRouteUrlHelper.GetRouteUrl()"
+- Line 1038: changed from "Replace route name with direct URL" to "BWFC GetRouteUrlHelper supports route name — verify route is registered, or replace with direct URL"
+
+**Key learning:** L1 script must not strip attributes that BWFC components actually support. SelectMethod is a real parameter on DataBoundComponent — preserve it and let L2 handle delegate conversion.
+
+
+ Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.

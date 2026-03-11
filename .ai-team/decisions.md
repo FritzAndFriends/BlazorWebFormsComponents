@@ -6635,3 +6635,25 @@ Layer 1 output vs. manually-fixed final version — every delta represents a mis
 **What:** Two P0 fixes in `migration-toolkit/scripts/bwfc-migrate.ps1`: (1) Eliminated `Test-UnconvertiblePage` stubbing per Jeff directive — the function now always returns `$false`, call site replaced with TODO-annotation injection so pages are fully converted through the BWFC pipeline instead of replaced with stubs. The PayPal ImageButton in ShoppingCart.aspx is just an image button, not PayPal SDK code. (2) Fixed `[RouteData]` → `[Parameter]` regex replacement — the inline `// TODO:` comment was swallowing the property declaration. TODO now goes on a separate line above `[Parameter]`.
 **Why:** (1) Stubs destroy markup that took effort to convert. Pages should ALWAYS be converted with BWFC components; concerns flagged with TODO comments. (2) The inline comment caused 6 build errors (CS1031, CS1001, CS1026) per project with RouteData parameters.
 
+
+### 2026-03-11: SelectMethod, ContentPlaceHolder, GetRouteUrl, and Validators  L1 script and skill corrections (consolidated)
+**By:** Jeffrey T. Fritz, Beast, Cyclops
+**What:**
+Jeff's Run 20 review identified four bugs in the migration pipeline:
+
+1. **SelectMethod stripped instead of preserved**  `ConvertFrom-SelectMethod` in `bwfc-migrate.ps1` was removing `SelectMethod="MethodName"` from markup. But BWFC's `DataBoundComponent<ItemType>` has a real `SelectHandler<ItemType> SelectMethod` parameter. The L1 script now preserves SelectMethod in markup with a TODO comment noting delegate conversion needed in L2. All three skill files (`bwfc-migration`, `migration-standards`, `bwfc-data-migration`) corrected  15 SelectMethod references updated to stop saying "convert SelectMethod to Items." The correct L2 transform is to convert the string method name to a delegate reference (`SelectMethod="@service.GetProducts"`).
+
+2. **ContentPlaceHolder flagged unnecessarily**  L1 manual review items said "needs manual conversion" without noting BWFC provides real `<ContentPlaceHolder>`, `<Content>`, and `<MasterPage>` components. Fixed in script and skills.
+
+3. **GetRouteUrl flagged without BWFC context**  L1 flagged route URLs as unknown. BWFC provides `GetRouteUrlHelper` utility. Review items now reference it.
+
+4. **Validators falsely reported as missing**  Run 20 report claimed RequiredFieldValidator, CompareValidator, RegularExpressionValidator, ModelErrorMessage are "not yet implemented." All exist in `src/BlazorWebFormsComponents/Validations/`. Report corrected.
+
+**Why:** The L1 script must never strip attributes that BWFC components support. SelectMethod is a working parameter  stripping it creates unnecessary L2 work. Review items must reference available BWFC utilities. Reports must not claim components are missing when they exist.
+
+**Files changed:**
+- `migration-toolkit/scripts/bwfc-migrate.ps1`  SelectMethod preservation, ContentPlaceHolder and GetRouteUrl review items
+- `migration-toolkit/skills/bwfc-migration/SKILL.md`  8 SelectMethod references
+- `migration-toolkit/skills/migration-standards/SKILL.md`  3 SelectMethod references
+- `migration-toolkit/skills/bwfc-data-migration/SKILL.md`  4 SelectMethod references + TItem to ItemType fix
+- `dev-docs/migration-tests/wingtiptoys/run20/REPORT.md`  validator false claim removed, SelectMethod guidance corrected

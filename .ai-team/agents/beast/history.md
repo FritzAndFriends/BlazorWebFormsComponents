@@ -110,3 +110,18 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
  Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz
 
  Team update (2026-03-11): P0 script fixes  Test-UnconvertiblePage eliminated (always convert), [Parameter] annotation bug fixed.  decided by Jeffrey T. Fritz
+
+### SelectMethod Skills Fix + Run 20 Report Corrections (2025-07-24)
+
+- **Scope:** Fixed incorrect SelectMethod guidance across all three migration skill files and corrected factual errors in Run 20 report.
+- **FIX 1 — SelectMethod guidance (all 3 skill files):**
+  - `bwfc-migration/SKILL.md`: Updated 8 locations — Layer 2 bullet, GridView/ListView/FormView examples, Data Binding Migration tables, and per-page checklist. All "SelectMethod → Items" guidance changed to "SelectMethod PRESERVED — convert string to SelectHandler<ItemType> delegate."
+  - `migration-standards/SKILL.md`: Updated 3 locations — main SelectMethod guidance paragraph, Layer 2 description, and ListView before/after example (now shows both SelectMethod delegate and Items options).
+  - `bwfc-data-migration/SKILL.md`: Updated 4 locations — When to Use description, EF6 context, SelectMethod mapping table (now shows delegate conversion + alternative Items approach), and Files table. Also fixed stray `TItem` → `ItemType`.
+- **FIX 2 — Run 20 Report validator claim:** Removed false bullet stating RequiredFieldValidator, CompareValidator, RegularExpressionValidator, and ModelErrorMessage are "not yet implemented." All exist in `src/BlazorWebFormsComponents/Validations/`.
+- **FIX 3 — Run 20 Report SelectMethod:** Updated L2 data binding description and L1 review items appendix to reflect SelectMethod delegate conversion instead of IDbContextFactory replacement.
+- **FIX 4 — GetRouteUrlHelper and ContentPlaceHolder:** Added GetRouteUrlHelper documentation to bwfc-migration route URL section. ContentPlaceHolder/Content/MasterPage already well-documented at lines 593, 709-711.
+- **Key learning:** `DataBoundComponent<ItemType>.SelectMethod` is a `SelectHandler<ItemType>` delegate parameter, not a string. BWFC's `OnAfterRenderAsync` auto-populates `Items` when `SelectMethod` is set. This is the native BWFC data-binding path that mirrors Web Forms behavior.
+
+
+ Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
