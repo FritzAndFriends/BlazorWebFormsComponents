@@ -99,6 +99,8 @@ public class CartService(IDbContextFactory<ProductContext> factory)
 **Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod` string binding.
 **Blazor:** EF Core **10.0.3** (latest .NET 10) with `IDbContextFactory` registered in DI.
 
+> **Step 1: Detect the provider.** The L1 script's `Find-DatabaseProvider` function reads `Web.config` `<connectionStrings>` and scaffolds the correct EF Core package. Check the L1 output's `[DatabaseProvider]` review item for the detected provider and connection string. Use these values in your `Program.cs` configuration — do not guess or substitute.
+>
 > **CRITICAL: Preserve the original database provider.** Examine the Web Forms project's `Web.config` connection strings and EF configuration to identify the database provider (SQL Server, PostgreSQL, MySQL, SQLite, Oracle, etc.). The migrated Blazor application MUST use the **same database provider** — do NOT switch providers unless explicitly requested by the user.
 >
 > **⚠️ NEVER default to SQLite.** The most common Web Forms database is SQL Server (often LocalDB for dev). If you see `System.Data.SqlClient` or `(LocalDB)` in connection strings, use `Microsoft.EntityFrameworkCore.SqlServer` — NOT `Microsoft.EntityFrameworkCore.Sqlite`. SQLite is ONLY appropriate if the original application specifically used `System.Data.SQLite`.

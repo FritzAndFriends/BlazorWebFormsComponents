@@ -154,6 +154,7 @@ Layer 2 is where Copilot applies structural transforms to every generated `.razo
 - Convert Master Page → Blazor Layout
 - Ensure null-safe collection access when using `Items` (for `DataSource`-originating data only): `Items="@(_products ?? new())"`
 - When `SelectMethod` is set, `Items` is auto-populated by the BWFC framework — do NOT also set `Items`
+- **Database provider:** Verify the L1-detected provider from the `[DatabaseProvider]` review item. Use the detected EF Core package and connection string. Do NOT substitute providers (e.g., do not use SQLite when the original used SQL Server).
 - Add `@inject` directives for required services (NavigationManager, DbContext, etc.)
 - Convert `Session["key"]` → scoped DI service patterns
 

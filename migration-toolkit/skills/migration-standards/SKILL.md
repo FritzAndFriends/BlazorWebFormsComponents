@@ -90,7 +90,7 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 
 - **Always** migrate EF6 → EF Core using the **latest .NET 10 packages** (currently **10.0.3**)
 - Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` (or provider matching original app), `.Tools`, `.Design`
-- **⚠️ CRITICAL: NEVER substitute database providers.** Use the SAME provider as the original Web Forms application. If the original used SQL Server (LocalDB or otherwise), use `Microsoft.EntityFrameworkCore.SqlServer`. Do NOT default to SQLite unless the original application specifically used SQLite. Examine `Web.config` connection strings to determine the correct provider.
+- **⚠️ CRITICAL: Detect and match the original database provider.** Examine the source project's `Web.config` `<connectionStrings>` to identify the database provider (`System.Data.SqlClient` → SqlServer, `System.Data.SQLite` → Sqlite, `Npgsql` → PostgreSQL). Install the matching EF Core provider package (`Microsoft.EntityFrameworkCore.SqlServer`, `.Sqlite`, `Npgsql.EntityFrameworkCore.PostgreSQL`, etc.). The L1 script auto-detects this — verify its detection in the [DatabaseProvider] review item. NEVER substitute a different provider than what the original application used.
 - Replace `DropCreateDatabaseIfModelChanges` with `EnsureCreated` + idempotent seed
 - Use `IDbContextFactory<T>` or scoped `DbContext` injection
 - Models: nullable reference types, file-scoped namespaces, modern init patterns
