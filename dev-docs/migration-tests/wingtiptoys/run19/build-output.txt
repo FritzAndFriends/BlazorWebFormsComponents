@@ -1,0 +1,1801 @@
+C:\Program Files\dotnet\sdk\10.0.200-preview.0.26103.119\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.RuntimeIdentifierInference.targets(383,5): message NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Components will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Components.Web will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Components.Authorization will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Routing will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ServiceCollectionExtensions.cs(29,139): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataList.razor.cs(20,19): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Button.razor.cs(13,26): warning CS0809: Obsolete member 'Button.PostBackUrl' overrides non-obsolete member 'ButtonBaseComponent.PostBackUrl' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataList.razor.cs(13,58): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\IPageService.cs(35,31): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\IPageService.cs(40,31): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\IPageService.cs(45,31): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(32,45): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(46,55): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(59,52): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(17,19): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(18,19): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(19,19): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\HelperComponents\BlazorWebFormsScripts.razor(7,31): warning CS8669: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. Auto-generated code requires an explicit '#nullable' directive in source. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\PageService.cs(71,38): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\PageService.cs(76,38): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\PageService.cs(81,38): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\FontUnit.cs(7,16): warning CS0659: 'FontUnit' overrides Object.Equals(object o) but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Bl
+lazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\FontUnit.cs(7,16): warning CS0661: 'FontUnit' defines operator 
+ == or operator != but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\B
+BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Unit.cs(10,16): warning CS0659: 'Unit' overrides Object.Equals(
+(object o) but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWeb
+bFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Unit.cs(10,16): warning CS0661: 'Unit' defines operator == or o
+operator != but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(62,42): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(76,52): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(89,49): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(37,22): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(39,16): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(40,16): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(41,16): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\HelperComponents\Eval.razor(21,10): warning CS0618: 'DataBinder
+r' is obsolete: '≡ƒÜ¿ Do not use the DataBinder long-term in your projects.  See LINK for documentation about how to migr
+rate from the DataBinder ≡ƒÜ¿' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataList.razor.cs(13,109): warning CS8632: The annotation for n
+nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponen
+nts\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(35,49): warning CS0618: 'Calendar.SelectorStyleC
+Css' is obsolete: 'Use <CalendarSelectorStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComp
+ponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(42,57): warning CS0618: 'Calendar.TitleStyleCss'
+' is obsolete: 'Use <CalendarTitleStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents
+s\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(47,104): warning CS0618: 'Calendar.NextPrevStyle
+eCss' is obsolete: 'Use <CalendarNextPrevStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsCom
+mponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(54,104): warning CS0618: 'Calendar.NextPrevStyle
+eCss' is obsolete: 'Use <CalendarNextPrevStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsCom
+mponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(68,49): warning CS0618: 'Calendar.SelectorStyleC
+Css' is obsolete: 'Use <CalendarSelectorStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComp
+ponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(72,50): warning CS0618: 'Calendar.DayHeaderStyle
+eCss' is obsolete: 'Use <CalendarDayHeaderStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsCo
+omponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(83,49): warning CS0618: 'Calendar.SelectorStyleC
+Css' is obsolete: 'Use <CalendarSelectorStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComp
+ponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ColorTranslator.cs(10,6): warning CS1589: Unable to include XML
+L fragment 'docs/doc[@for="ColorTranslator"]/*' of file 'doc\ColorTranslator.uex' -- File not found. [D:\BlazorWebFormsCo
+omponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ColorTranslator.cs(25,7): warning CS1589: Unable to include XML
+L fragment 'docs/doc[@for="ColorTranslator.FromHtml"]/*' of file 'doc\ColorTranslator.uex' -- File not found. [D:\BlazorW
+WebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ColorTranslator.cs(92,7): warning CS1589: Unable to include XML
+L fragment 'docs/doc[@for="ColorTranslator.ToHtml"]/*' of file 'doc\ColorTranslator.uex' -- File not found. [D:\BlazorWeb
+bFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BoundField.razor.cs(20,26): warning BL0007: Component parameter
+r 'BlazorWebFormsComponents.BoundField<ItemType>.SortExpression' should be auto property [D:\BlazorWebFormsComponents\src
+c\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(136,24): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(140,26): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(145,26): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(150,26): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(156,27): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataGridColumnGenerator.cs(41,6): warning BL0005: Component par
+rameter 'DataField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents
+s\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataGridColumnGenerator.cs(43,6): warning BL0005: Component par
+rameter 'HeaderText' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponent
+ts\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataBinding\DataBoundComponent.cs(19,32): warning BL0007: Compo
+onent parameter 'BlazorWebFormsComponents.DataBinding.DataBoundComponent<ItemType>.Items' should be auto property [D:\Bla
+azorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataBinding\DataBoundComponent.cs(28,26): warning BL0007: Compo
+onent parameter 'BlazorWebFormsComponents.DataBinding.DataBoundComponent<ItemType>.DataSource' should be auto property [D
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor.cs(47,19): warning BL0007: Component parameter '
+'BlazorWebFormsComponents.Calendar.VisibleDate' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebFormsCo
+omponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\GridViewColumnGenerator.cs(41,6): warning BL0005: Component par
+rameter 'DataField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents
+s\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\GridViewColumnGenerator.cs(43,6): warning BL0005: Component par
+rameter 'HeaderText' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponent
+ts\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(9,10): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.AlternateText' should be auto property [D:\BlazorWebForms
+sComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(12,10): warning BL0007: Component
+t parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.DescriptionUrl' should be auto property [D:\BlazorWebFor
+rmsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(15,14): warning BL0007: Component
+t parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.ImageAlign' should be auto property [D:\BlazorWebFormsCo
+omponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(18,10): warning BL0007: Component
+t parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.ImageUrl' should be auto property [D:\BlazorWebFormsComp
+ponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\MultiView.razor.cs(18,14): warning BL0007: Component parameter 
+ 'BlazorWebFormsComponents.MultiView.ActiveViewIndex' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebF
+FormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(431,5): warning BL0005: Component parameter 'Data
+aMember' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebF
+FormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(432,5): warning BL0005: Component parameter 'Tool
+lTipField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(433,5): warning BL0005: Component parameter 'Navi
+igateUrlField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Blaz
+zorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(434,5): warning BL0005: Component parameter 'Text
+tField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFo
+ormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(386,39): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(391,29): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(396,28): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(399,29): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(404,29): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(165,5): warning BL0005: Component parameter '
+'Selected' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(168,4): warning BL0005: Component parameter '
+'Selected' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(392,4): warning BL0005: Component parameter '
+'DataMember' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Blazor
+rWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(352,39): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(355,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(357,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(359,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(361,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(364,28): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(367,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(372,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeNode.razor.cs(24,15): warning BL0007: Component parameter '
+'BlazorWebFormsComponents.TreeNode.Expanded' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebFormsCompo
+onents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeNode.razor.cs(39,17): warning BL0007: Component parameter '
+'BlazorWebFormsComponents.TreeNode.ImageUrl' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebFormsCompo
+onents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(21,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.UserName' should be auto property [D:\Blaz
+zorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(24,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Password' should be auto property [D:\Blaz
+zorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(33,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Email' should be auto property [D:\BlazorW
+WebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(38,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Question' should be auto property [D:\Blaz
+zorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(41,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Answer' should be auto property [D:\Blazor
+rWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\Login.razor.cs(41,29): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.LoginControls.Login.Password' should be auto property [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\Login.razor.cs(47,27): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.LoginControls.Login.RememberMeSet' should be auto property [D:\BlazorWebFormsCompone
+ents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\Login.razor.cs(50,29): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.LoginControls.Login.UserName' should be auto property [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\ChangePassword.razor.cs(61,29): warning BL0007: C
+Component parameter 'BlazorWebFormsComponents.LoginControls.ChangePassword.UserName' should be auto property [D:\BlazorWe
+ebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+  BlazorWebFormsComponents -> D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\bin\Debug\net10.0\BlazorWebFormsC
+Components.dll
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor(16,17): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor(20,29): warning RZ10012: Found markup element 
+ with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its nam
+mespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor(20,29): warning RZ10012: Found markup element w
+with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its name
+espace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor(28,29): warning RZ10012: Found markup element w
+with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its name
+espace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor(58,25): error RZ9980: Unclosed tag '%' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor(64,25): error RZ9980: Unclosed tag '%' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor(71,25): error RZ9980: Unclosed tag '%' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(19,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(22,29): warning RZ10012: Found markup 
+ element with unexpected name 'ModelErrorMessage'. If this is intended to be a component, add a @using directive for its 
+ namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(31,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(34,29): warning RZ10012: Found markup 
+ element with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(57,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(66,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(75,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(78,29): warning RZ10012: Found markup 
+ element with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(16,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(24,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(32,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(34,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its namespa
+ace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor(19,21): warning RZ10012: Found 
+ markup element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using direct
+tive for its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor(21,21): warning RZ10012: Found 
+ markup element with unexpected name 'ModelErrorMessage'. If this is intended to be a component, add a @using directive f
+for its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(16,17): warning RZ10012: Found markup e
+element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for 
+ its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(24,17): warning RZ10012: Found markup e
+element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for 
+ its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(32,17): warning RZ10012: Found markup e
+element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for 
+ its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(34,17): warning RZ10012: Found markup e
+element with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor(11,13): error RZ10001: 
+ The type of component 'DropDownList' cannot be inferred based on the values provided. Consider specifying the type argum
+ments directly using the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipT
+Toys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor(16,17): warning RZ10012: Found mark
+kup element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive 
+ for its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(9,17): error RZ10001: The type of component '
+'DropDownList' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the
+e following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(20,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(27,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(34,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(35,17): warning RZ10012: Found markup element
+t with unexpected name 'RegularExpressionValidator'. If this is intended to be a component, add a @using directive for it
+ts namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(42,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(55,17): error RZ10001: The type of component 
+ 'DropDownList' cannot be inferred based on the values provided. Consider specifying the type arguments directly using th
+he following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(6,5): error RZ10001: The type of comp
+ponent 'GridView' cannot be inferred based on the values provided. Consider specifying the type arguments directly using 
+ the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(8,13): error RZ10001: The type of com
+mponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly usi
+ing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]      
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(9,13): error RZ10001: The type of com
+mponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly usi
+ing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]      
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(10,13): error RZ10001: The type of co
+omponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly us
+sing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]     
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(11,13): error RZ10001: The type of co
+omponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly us
+sing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]     
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(14,5): error RZ10001: The type of com
+mponent 'DetailsView' cannot be inferred based on the values provided. Consider specifying the type arguments directly us
+sing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]     
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(33,13): error RZ9996: Unrecognized ch
+hild content inside component 'TemplateField'. The component 'TemplateField' accepts child content through the following 
+ top-level items: 'ItemTemplate', 'EditItemTemplate', 'ChildComponents'. [D:\BlazorWebFormsComponents\samples\AfterWingti
+ipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(51,45): error RZ9980: Unclosed tag 'b' with no ma
+atching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(51,59): error RZ9980: Unclosed tag 'b' with no ma
+atching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(60,25): error RZ9981: Unexpected closing tag 'p' 
+ with no matching start tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(63,17): warning RZ10012: Found markup element wit
+th unexpected name 'LayoutTemplate'. If this is intended to be a component, add a @using directive for its namespace. [D:
+:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(63,17): error RZ9996: Unrecognized child content 
+ inside component 'ListView'. The component 'ListView' accepts child content through the following top-level items: 'Empt
+tyDataTemplate', 'ItemTemplate', 'AlternatingItemTemplate', 'ItemSeparatorTemplate', 'GroupSeparatorTemplate', 'GroupTemp
+plate', 'ItemPlaceHolder', 'EditItemTemplate', 'InsertItemTemplate', 'EmptyItemTemplate', 'LayoutTemplate', 'ChildContent
+t', 'ChildComponents'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(3,5): error RZ10001: The type of component 'Grid
+dView' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the followi
+ing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(8,9): error RZ10001: The type of component 'Boun
+ndField' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the follo
+owing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(9,9): error RZ10001: The type of component 'Boun
+ndField' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the follo
+owing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(10,9): error RZ10001: The type of component 'Bou
+undField' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the foll
+lowing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(18,21): error RZ9980: Unclosed tag '%#:' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\About.razor.cs(20,18): error CS0234: The type or namespace name 'UI
+I' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\sam
+mples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\About.razor.cs(21,18): error CS0234: The type or namespace name 'UI
+I' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\sam
+mples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(22,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(23,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(18,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(19,17): error CS0234: The type or namespac
+ce name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsC
+Components\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(20,17): error CS0234: The type or namespac
+ce name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsC
+Components\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(21,7): error CS0246: The type or namespace
+e name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(18,18): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(19,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(20,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(21,7): error CS0246: The type or namespace 
+ name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponent
+ts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Lockout.razor.cs(20,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Lockout.razor.cs(21,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(18,18): error CS0234: The type or namespace 
+ name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(19,17): error CS0234: The type or namespace 
+ name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(20,17): error CS0234: The type or namespace 
+ name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(21,7): error CS0246: The type or namespace n
+name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(21,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(22,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(23,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(24,17): error CS0234: The type or namespace
+e name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(25,7): error CS0246: The type or namespace 
+ name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponent
+ts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(20,18): error CS0234: The type or nam
+mespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(21,18): error CS0234: The type or nam
+mespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(22,17): error CS0234: The type or nam
+mespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(23,17): error CS0234: The type or nam
+mespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(22,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(23,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\OpenAuthProviders.razor.cs(21,17): error CS0234: The type o
+or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\OpenAuthProviders.razor.cs(22,17): error CS0234: The type o
+or namespace name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorW
+WebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(19,18): error CS0234: The type or namespa
+ace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(20,17): error CS0234: The type or namespa
+ace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebForms
+sComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(21,17): error CS0234: The type or namespa
+ace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebForms
+sComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(22,7): error CS0246: The type or namespac
+ce name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(18,17): error CS0234: The ty
+ype or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\B
+BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(19,17): error CS0234: The ty
+ype or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\B
+BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(20,17): error CS0234: The ty
+ype or namespace name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(21,7): error CS0246: The typ
+pe or namespace name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(19,18): error CS0234: The type or na
+amespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFor
+rmsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(20,17): error CS0234: The type or na
+amespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWeb
+bFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(21,17): error CS0234: The type or na
+amespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWeb
+bFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(22,7): error CS0246: The type or nam
+mespace name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPasswordConfirmation.razor.cs(16,18): error CS0234: Th
+he type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\
+\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(21,18): error CS0234
+4: The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(22,18): error CS0234
+4: The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(23,17): error CS0234
+4: The type or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference
+e?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(24,17): error CS0234
+4: The type or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference
+e?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(20,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(21,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(22,17): error CS0234: The type o
+or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(23,17): error CS0234: The type o
+or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(20,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(21,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(23,19): error CS0234: The type or namespace name
+e 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(20,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(21,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(23,19): error CS0234: The type or namespac
+ce name 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebForms
+sComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutCancel.razor.cs(20,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutCancel.razor.cs(21,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutComplete.razor.cs(20,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutComplete.razor.cs(21,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutError.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutError.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor.cs(20,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor.cs(21,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutStart.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutStart.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(21,18): error CS0234: The typ
+pe or namespace name 'Security' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:
+:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(22,18): error CS0234: The typ
+pe or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(23,18): error CS0234: The typ
+pe or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(26,19): error CS0234: The typ
+pe or namespace name 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\B
+BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\Site.MobileLayout.razor.cs(20,18): error CS0234: 
+ The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\Site.MobileLayout.razor.cs(21,18): error CS0234: 
+ The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Contact.razor.cs(20,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Contact.razor.cs(21,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Default.razor.cs(20,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Default.razor.cs(21,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(20,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(21,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(22,19): error CS0234: The type or namespace name
+e 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(7,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(8,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(9,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(10,17): error CS0234: The type or namespac
+ce name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(20,18): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(21,18): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(23,18): error CS0234: The type or namespace
+e name 'ModelBinding' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWeb
+bFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(20,18): error CS0234: The type or namespace na
+ame 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(21,18): error CS0234: The type or namespace na
+ame 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(23,18): error CS0234: The type or namespace na
+ame 'ModelBinding' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFor
+rmsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(24,18): error CS0234: The type or namespace na
+ame 'Routing' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(20,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(21,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(23,19): error CS0234: The type or namespace n
+name 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(26,18): error CS0234: The type or namespace n
+name 'ModelBinding' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(20,18): error CS0234: The type or namespace n
+name 'Routing' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(21,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(22,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(23,17): error CS0234: The type or namespace n
+name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\Site.MobileLayout.razor.cs(25,51): error CS0234: 
+ The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(26,47): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(27,47): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(28,49): error CS0234: The type or namespace na
+ame 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(27,47): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(27,52): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(27,52): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(30,50): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Contact.razor.cs(25,34): error CS0246: The type or namespace name '
+'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents\samp
+ples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\About.razor.cs(25,32): error CS0246: The type or namespace name 'Pa
+age' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents\sample
+es\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Default.razor.cs(25,35): error CS0246: The type or namespace name '
+'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents\samp
+ples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(30,39): error CS0246: The typ
+pe or namespace name 'MasterPage' could not be found (are you missing a using directive or an assembly reference?) [D:\Bl
+lazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(16,36): error CS0246: The type or namespac
+ce name 'IdentityUser' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(54,35): error CS0246: The type or namespac
+ce name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(18,52): error CS0246: The type or namespac
+ce name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\ProductDatabaseInitializer.cs(6,45): error CS0246: The type 
+ or namespace name 'DropCreateDatabaseIfModelChanges<>' could not be found (are you missing a using directive or an assem
+mbly reference?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(111,58): error CS0246: The ty
+ype or namespace name 'LoginCancelEventArgs' could not be found (are you missing a using directive or an assembly referen
+nce?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(32,41): error CS0246: The type or namespac
+ce name 'IdentityDbContext<>' could not be found (are you missing a using directive or an assembly reference?) [D:\Blazor
+rWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(88,48): error CS0246: The type or namespace n
+name 'GridViewRow' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutCancel.razor.cs(25,52): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutComplete.razor.cs(26,54): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutError.razor.cs(25,51): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor.cs(26,52): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutStart.razor.cs(25,51): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(36,26): error CS0246: The type or namespace na
+ame 'SupplyParameterFromQueryAttribute' could not be found (are you missing a using directive or an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(36,26): error CS0246: The type or namespace na
+ame 'SupplyParameterFromQuery' could not be found (are you missing a using directive or an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(35,26): error CS0246: The type or namespace
+e name 'SupplyParameterFromQueryAttribute' could not be found (are you missing a using directive or an assembly reference
+e?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(35,26): error CS0246: The type or namespace
+e name 'SupplyParameterFromQuery' could not be found (are you missing a using directive or an assembly reference?) [D:\Bl
+lazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(26,63): error CS0246: The type or namespac
+ce name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(107,53): error CS0246: The type or namespace 
+ name 'ImageClickEventArgs' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(38,26): error CS0246: The type or namespace na
+ame 'ParameterAttribute' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(38,26): error CS0246: The type or namespace na
+ame 'Parameter' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(37,26): error CS0246: The type or namespace
+e name 'ParameterAttribute' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(37,26): error CS0246: The type or namespace
+e name 'Parameter' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\OpenAuthProviders.razor.cs(26,57): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Lockout.razor.cs(25,47): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(29,54): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(26,61): error CS0234: The ty
+ype or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\Blaz
+zorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(30,46): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(27,54): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(27,52): error CS0234: The type or nam
+mespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(29,69): error CS0234
+4: The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(27,57): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(26,43): error CS0246: The type or namespace
+e name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(26,36): error CS0246: The type or namespac
+ce name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(27,42): error CS0246: The type or na
+amespace name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsC
+Components\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(27,37): error CS0246: The type or namespa
+ace name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(26,34): error CS0246: The type or namespace 
+ name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponent
+ts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPasswordConfirmation.razor.cs(20,54): error CS0246: Th
+he type or namespace name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(35,34): error CS0246: The type or n
+namespace name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(38,34): error CS0246: The type or namespace
+e name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Blaz
+zorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(40,34): error CS0246: The type or nam
+mespace name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(135,32): error CS0246: The t
+type or namespace name 'IdentityResult' could not be found (are you missing a using directive or an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(31,17): error CS0246
+6: The type or namespace name 'ApplicationSignInManager' could not be found (are you missing a using directive or an asse
+embly reference?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(104,32): error CS0246: The type or 
+ namespace name 'IdentityResult' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(99,32): error CS0246: The type or namespace
+e name 'IdentityResult' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFor
+rmsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(32,17): error CS0246
+6: The type or namespace name 'ApplicationUserManager' could not be found (are you missing a using directive or an assemb
+bly reference?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(54,28): error CS0246: The type or nam
+mespace name 'UserLoginInfo' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorW
+WebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+
+Build FAILED.
+
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageRefere
+ence Microsoft.AspNetCore.Components will not be pruned. Consider removing this package from your dependencies, as it is 
+ likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageRefere
+ence Microsoft.AspNetCore.Components.Web will not be pruned. Consider removing this package from your dependencies, as it
+t is likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageRefere
+ence Microsoft.AspNetCore.Components.Authorization will not be pruned. Consider removing this package from your dependenc
+cies, as it is likely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageRefere
+ence Microsoft.AspNetCore.Routing will not be pruned. Consider removing this package from your dependencies, as it is lik
+kely unnecessary.
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ServiceCollectionExtensions.cs(29,139): warning CS8632: The ann
+notation for nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWeb
+bFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataList.razor.cs(20,19): warning CS8632: The annotation for nu
+ullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponent
+ts\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Button.razor.cs(13,26): warning CS0809: Obsolete member 'Button
+n.PostBackUrl' overrides non-obsolete member 'ButtonBaseComponent.PostBackUrl' [D:\BlazorWebFormsComponents\src\BlazorWeb
+bFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataList.razor.cs(13,58): warning CS8632: The annotation for nu
+ullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponent
+ts\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\IPageService.cs(35,31): warning CS8632: The annotation for null
+lable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\
+\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\IPageService.cs(40,31): warning CS8632: The annotation for null
+lable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\
+\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\IPageService.cs(45,31): warning CS8632: The annotation for null
+lable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\
+\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(32,45): warning CS8632: The annotation for nullab
+ble reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\sr
+rc\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(46,55): warning CS8632: The annotation for nullab
+ble reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\sr
+rc\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(59,52): warning CS8632: The annotation for nullab
+ble reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\sr
+rc\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(17,19): warning CS8632: The annotation for nullab
+ble reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\sr
+rc\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(18,19): warning CS8632: The annotation for nullab
+ble reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\sr
+rc\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Page.razor.cs(19,19): warning CS8632: The annotation for nullab
+ble reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\sr
+rc\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\HelperComponents\BlazorWebFormsScripts.razor(7,31): warning CS8
+8669: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. A
+Auto-generated code requires an explicit '#nullable' directive in source. [D:\BlazorWebFormsComponents\src\BlazorWebForms
+sComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\PageService.cs(71,38): warning CS8632: The annotation for nulla
+able reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\PageService.cs(76,38): warning CS8632: The annotation for nulla
+able reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\PageService.cs(81,38): warning CS8632: The annotation for nulla
+able reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\FontUnit.cs(7,16): warning CS0659: 'FontUnit' overrides Object.
+.Equals(object o) but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Bl
+lazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\FontUnit.cs(7,16): warning CS0661: 'FontUnit' defines operator 
+ == or operator != but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\B
+BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Unit.cs(10,16): warning CS0659: 'Unit' overrides Object.Equals(
+(object o) but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWeb
+bFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Unit.cs(10,16): warning CS0661: 'Unit' defines operator == or o
+operator != but does not override Object.GetHashCode() [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(62,42): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(76,52): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(89,49): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(37,22): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(39,16): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(40,16): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\WebFormsPage.razor.cs(41,16): warning CS8632: The annotation fo
+or nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsCompo
+onents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\HelperComponents\Eval.razor(21,10): warning CS0618: 'DataBinder
+r' is obsolete: '≡ƒÜ¿ Do not use the DataBinder long-term in your projects.  See LINK for documentation about how to migr
+rate from the DataBinder ≡ƒÜ¿' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataList.razor.cs(13,109): warning CS8632: The annotation for n
+nullable reference types should only be used in code within a '#nullable' annotations context. [D:\BlazorWebFormsComponen
+nts\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(35,49): warning CS0618: 'Calendar.SelectorStyleC
+Css' is obsolete: 'Use <CalendarSelectorStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComp
+ponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(42,57): warning CS0618: 'Calendar.TitleStyleCss'
+' is obsolete: 'Use <CalendarTitleStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents
+s\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(47,104): warning CS0618: 'Calendar.NextPrevStyle
+eCss' is obsolete: 'Use <CalendarNextPrevStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsCom
+mponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(54,104): warning CS0618: 'Calendar.NextPrevStyle
+eCss' is obsolete: 'Use <CalendarNextPrevStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsCom
+mponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(68,49): warning CS0618: 'Calendar.SelectorStyleC
+Css' is obsolete: 'Use <CalendarSelectorStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComp
+ponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(72,50): warning CS0618: 'Calendar.DayHeaderStyle
+eCss' is obsolete: 'Use <CalendarDayHeaderStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsCo
+omponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor(83,49): warning CS0618: 'Calendar.SelectorStyleC
+Css' is obsolete: 'Use <CalendarSelectorStyle> sub-component instead' [D:\BlazorWebFormsComponents\src\BlazorWebFormsComp
+ponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ColorTranslator.cs(10,6): warning CS1589: Unable to include XML
+L fragment 'docs/doc[@for="ColorTranslator"]/*' of file 'doc\ColorTranslator.uex' -- File not found. [D:\BlazorWebFormsCo
+omponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ColorTranslator.cs(25,7): warning CS1589: Unable to include XML
+L fragment 'docs/doc[@for="ColorTranslator.FromHtml"]/*' of file 'doc\ColorTranslator.uex' -- File not found. [D:\BlazorW
+WebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\ColorTranslator.cs(92,7): warning CS1589: Unable to include XML
+L fragment 'docs/doc[@for="ColorTranslator.ToHtml"]/*' of file 'doc\ColorTranslator.uex' -- File not found. [D:\BlazorWeb
+bFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BoundField.razor.cs(20,26): warning BL0007: Component parameter
+r 'BlazorWebFormsComponents.BoundField<ItemType>.SortExpression' should be auto property [D:\BlazorWebFormsComponents\src
+c\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(136,24): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(140,26): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(145,26): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(150,26): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\CustomControls\CompositeControl.cs(156,27): warning ASP0006: 's
+sequence++' should not be used as a sequence number. Instead, use an integer literal representing source code order. (htt
+tps://aka.ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataGridColumnGenerator.cs(41,6): warning BL0005: Component par
+rameter 'DataField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents
+s\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataGridColumnGenerator.cs(43,6): warning BL0005: Component par
+rameter 'HeaderText' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponent
+ts\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataBinding\DataBoundComponent.cs(19,32): warning BL0007: Compo
+onent parameter 'BlazorWebFormsComponents.DataBinding.DataBoundComponent<ItemType>.Items' should be auto property [D:\Bla
+azorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\DataBinding\DataBoundComponent.cs(28,26): warning BL0007: Compo
+onent parameter 'BlazorWebFormsComponents.DataBinding.DataBoundComponent<ItemType>.DataSource' should be auto property [D
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Calendar.razor.cs(47,19): warning BL0007: Component parameter '
+'BlazorWebFormsComponents.Calendar.VisibleDate' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebFormsCo
+omponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\GridViewColumnGenerator.cs(41,6): warning BL0005: Component par
+rameter 'DataField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents
+s\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\GridViewColumnGenerator.cs(43,6): warning BL0005: Component par
+rameter 'HeaderText' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponent
+ts\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(9,10): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.AlternateText' should be auto property [D:\BlazorWebForms
+sComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(12,10): warning BL0007: Component
+t parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.DescriptionUrl' should be auto property [D:\BlazorWebFor
+rmsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(15,14): warning BL0007: Component
+t parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.ImageAlign' should be auto property [D:\BlazorWebFormsCo
+omponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Interfaces\IImageComponent.cs(18,10): warning BL0007: Component
+t parameter 'BlazorWebFormsComponents.Interfaces.IImageComponent.ImageUrl' should be auto property [D:\BlazorWebFormsComp
+ponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\MultiView.razor.cs(18,14): warning BL0007: Component parameter 
+ 'BlazorWebFormsComponents.MultiView.ActiveViewIndex' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebF
+FormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(431,5): warning BL0005: Component parameter 'Data
+aMember' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebF
+FormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(432,5): warning BL0005: Component parameter 'Tool
+lTipField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(433,5): warning BL0005: Component parameter 'Navi
+igateUrlField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Blaz
+zorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(434,5): warning BL0005: Component parameter 'Text
+tField' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFo
+ormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(386,39): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(391,29): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(396,28): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(399,29): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Menu.razor.cs(404,29): warning ASP0006: 'menuItemCounter++' sho
+ould not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.ms/as
+spnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(165,5): warning BL0005: Component parameter '
+'Selected' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(168,4): warning BL0005: Component parameter '
+'Selected' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWe
+ebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(392,4): warning BL0005: Component parameter '
+'DataMember' should not be set outside of its component. [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\Blazor
+rWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(352,39): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(355,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(357,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(359,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(361,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(364,28): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(367,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeView.razor.cs(372,29): warning ASP0006: 'treeNodeCounter++'
+' should not be used as a sequence number. Instead, use an integer literal representing source code order. (https://aka.m
+ms/aspnet/analyzers) [D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeNode.razor.cs(24,15): warning BL0007: Component parameter '
+'BlazorWebFormsComponents.TreeNode.Expanded' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebFormsCompo
+onents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\TreeNode.razor.cs(39,17): warning BL0007: Component parameter '
+'BlazorWebFormsComponents.TreeNode.ImageUrl' should be auto property [D:\BlazorWebFormsComponents\src\BlazorWebFormsCompo
+onents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(21,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.UserName' should be auto property [D:\Blaz
+zorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(24,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Password' should be auto property [D:\Blaz
+zorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(33,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Email' should be auto property [D:\BlazorW
+WebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(38,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Question' should be auto property [D:\Blaz
+zorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\CreateUserWizard.razor.cs(41,29): warning BL0007:
+: Component parameter 'BlazorWebFormsComponents.LoginControls.CreateUserWizard.Answer' should be auto property [D:\Blazor
+rWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\Login.razor.cs(41,29): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.LoginControls.Login.Password' should be auto property [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\Login.razor.cs(47,27): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.LoginControls.Login.RememberMeSet' should be auto property [D:\BlazorWebFormsCompone
+ents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\Login.razor.cs(50,29): warning BL0007: Component 
+ parameter 'BlazorWebFormsComponents.LoginControls.Login.UserName' should be auto property [D:\BlazorWebFormsComponents\s
+src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\LoginControls\ChangePassword.razor.cs(61,29): warning BL0007: C
+Component parameter 'BlazorWebFormsComponents.LoginControls.ChangePassword.UserName' should be auto property [D:\BlazorWe
+ebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor(16,17): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor(20,29): warning RZ10012: Found markup element 
+ with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its nam
+mespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor(20,29): warning RZ10012: Found markup element w
+with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its name
+espace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor(28,29): warning RZ10012: Found markup element w
+with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its name
+espace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(19,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(22,29): warning RZ10012: Found markup 
+ element with unexpected name 'ModelErrorMessage'. If this is intended to be a component, add a @using directive for its 
+ namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(31,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(34,29): warning RZ10012: Found markup 
+ element with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(57,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(66,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(75,29): warning RZ10012: Found markup 
+ element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for
+r its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor(78,29): warning RZ10012: Found markup 
+ element with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(16,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(24,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(32,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its n
+namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor(34,17): warning RZ10012: Found markup elemen
+nt with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its namespa
+ace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor(19,21): warning RZ10012: Found 
+ markup element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using direct
+tive for its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor(21,21): warning RZ10012: Found 
+ markup element with unexpected name 'ModelErrorMessage'. If this is intended to be a component, add a @using directive f
+for its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(16,17): warning RZ10012: Found markup e
+element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for 
+ its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(24,17): warning RZ10012: Found markup e
+element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for 
+ its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(32,17): warning RZ10012: Found markup e
+element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for 
+ its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor(34,17): warning RZ10012: Found markup e
+element with unexpected name 'CompareValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor(16,17): warning RZ10012: Found mark
+kup element with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive 
+ for its namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(20,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(27,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(34,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(35,17): warning RZ10012: Found markup element
+t with unexpected name 'RegularExpressionValidator'. If this is intended to be a component, add a @using directive for it
+ts namespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(42,17): warning RZ10012: Found markup element
+t with unexpected name 'RequiredFieldValidator'. If this is intended to be a component, add a @using directive for its na
+amespace. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(63,17): warning RZ10012: Found markup element wit
+th unexpected name 'LayoutTemplate'. If this is intended to be a component, add a @using directive for its namespace. [D:
+:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor(58,25): error RZ9980: Unclosed tag '%' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor(64,25): error RZ9980: Unclosed tag '%' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor(71,25): error RZ9980: Unclosed tag '%' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor(11,13): error RZ10001: 
+ The type of component 'DropDownList' cannot be inferred based on the values provided. Consider specifying the type argum
+ments directly using the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipT
+Toys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(9,17): error RZ10001: The type of component '
+'DropDownList' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the
+e following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor(55,17): error RZ10001: The type of component 
+ 'DropDownList' cannot be inferred based on the values provided. Consider specifying the type arguments directly using th
+he following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(6,5): error RZ10001: The type of comp
+ponent 'GridView' cannot be inferred based on the values provided. Consider specifying the type arguments directly using 
+ the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(8,13): error RZ10001: The type of com
+mponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly usi
+ing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]      
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(9,13): error RZ10001: The type of com
+mponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly usi
+ing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]      
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(10,13): error RZ10001: The type of co
+omponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly us
+sing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]     
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(11,13): error RZ10001: The type of co
+omponent 'BoundField' cannot be inferred based on the values provided. Consider specifying the type arguments directly us
+sing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]     
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(14,5): error RZ10001: The type of com
+mponent 'DetailsView' cannot be inferred based on the values provided. Consider specifying the type arguments directly us
+sing the following attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]     
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor(33,13): error RZ9996: Unrecognized ch
+hild content inside component 'TemplateField'. The component 'TemplateField' accepts child content through the following 
+ top-level items: 'ItemTemplate', 'EditItemTemplate', 'ChildComponents'. [D:\BlazorWebFormsComponents\samples\AfterWingti
+ipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(51,45): error RZ9980: Unclosed tag 'b' with no ma
+atching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(51,59): error RZ9980: Unclosed tag 'b' with no ma
+atching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(60,25): error RZ9981: Unexpected closing tag 'p' 
+ with no matching start tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor(63,17): error RZ9996: Unrecognized child content 
+ inside component 'ListView'. The component 'ListView' accepts child content through the following top-level items: 'Empt
+tyDataTemplate', 'ItemTemplate', 'AlternatingItemTemplate', 'ItemSeparatorTemplate', 'GroupSeparatorTemplate', 'GroupTemp
+plate', 'ItemPlaceHolder', 'EditItemTemplate', 'InsertItemTemplate', 'EmptyItemTemplate', 'LayoutTemplate', 'ChildContent
+t', 'ChildComponents'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(3,5): error RZ10001: The type of component 'Grid
+dView' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the followi
+ing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(8,9): error RZ10001: The type of component 'Boun
+ndField' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the follo
+owing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(9,9): error RZ10001: The type of component 'Boun
+ndField' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the follo
+owing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(10,9): error RZ10001: The type of component 'Bou
+undField' cannot be inferred based on the values provided. Consider specifying the type arguments directly using the foll
+lowing attributes: 'ItemType'. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor(18,21): error RZ9980: Unclosed tag '%#:' with no
+o matching end tag. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\About.razor.cs(20,18): error CS0234: The type or namespace name 'UI
+I' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\sam
+mples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\About.razor.cs(21,18): error CS0234: The type or namespace name 'UI
+I' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\sam
+mples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(22,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(23,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(18,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(19,17): error CS0234: The type or namespac
+ce name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsC
+Components\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(20,17): error CS0234: The type or namespac
+ce name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsC
+Components\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(21,7): error CS0246: The type or namespace
+e name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(18,18): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(19,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(20,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(21,7): error CS0246: The type or namespace 
+ name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponent
+ts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Lockout.razor.cs(20,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Lockout.razor.cs(21,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(18,18): error CS0234: The type or namespace 
+ name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(19,17): error CS0234: The type or namespace 
+ name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(20,17): error CS0234: The type or namespace 
+ name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(21,7): error CS0246: The type or namespace n
+name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(21,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(22,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(23,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(24,17): error CS0234: The type or namespace
+e name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(25,7): error CS0246: The type or namespace 
+ name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponent
+ts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(20,18): error CS0234: The type or nam
+mespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(21,18): error CS0234: The type or nam
+mespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(22,17): error CS0234: The type or nam
+mespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(23,17): error CS0234: The type or nam
+mespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(22,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(23,17): error CS0234: The type or n
+namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\OpenAuthProviders.razor.cs(21,17): error CS0234: The type o
+or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\OpenAuthProviders.razor.cs(22,17): error CS0234: The type o
+or namespace name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorW
+WebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(19,18): error CS0234: The type or namespa
+ace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(20,17): error CS0234: The type or namespa
+ace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebForms
+sComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(21,17): error CS0234: The type or namespa
+ace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebForms
+sComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(22,7): error CS0246: The type or namespac
+ce name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(18,17): error CS0234: The ty
+ype or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\B
+BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(19,17): error CS0234: The ty
+ype or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\B
+BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(20,17): error CS0234: The ty
+ype or namespace name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(21,7): error CS0246: The typ
+pe or namespace name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(19,18): error CS0234: The type or na
+amespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFor
+rmsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(20,17): error CS0234: The type or na
+amespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWeb
+bFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(21,17): error CS0234: The type or na
+amespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWeb
+bFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(22,7): error CS0246: The type or nam
+mespace name 'Owin' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPasswordConfirmation.razor.cs(16,18): error CS0234: Th
+he type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\
+\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(21,18): error CS0234
+4: The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(22,18): error CS0234
+4: The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(23,17): error CS0234
+4: The type or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference
+e?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(24,17): error CS0234
+4: The type or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference
+e?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(20,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(21,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(22,17): error CS0234: The type o
+or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(23,17): error CS0234: The type o
+or namespace name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(20,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(21,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(23,19): error CS0234: The type or namespace name
+e 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(20,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(21,18): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(23,19): error CS0234: The type or namespac
+ce name 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebForms
+sComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutCancel.razor.cs(20,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutCancel.razor.cs(21,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutComplete.razor.cs(20,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutComplete.razor.cs(21,18): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutError.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutError.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor.cs(20,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor.cs(21,18): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutStart.razor.cs(20,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutStart.razor.cs(21,18): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(21,18): error CS0234: The typ
+pe or namespace name 'Security' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:
+:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(22,18): error CS0234: The typ
+pe or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(23,18): error CS0234: The typ
+pe or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(26,19): error CS0234: The typ
+pe or namespace name 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\B
+BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\Site.MobileLayout.razor.cs(20,18): error CS0234: 
+ The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\Site.MobileLayout.razor.cs(21,18): error CS0234: 
+ The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Contact.razor.cs(20,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Contact.razor.cs(21,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Default.razor.cs(20,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Default.razor.cs(21,18): error CS0234: The type or namespace name '
+'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents\s
+samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(20,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(21,18): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(22,19): error CS0234: The type or namespace name
+e 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(7,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(8,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(9,17): error CS0234: The type or namespace
+e name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(10,17): error CS0234: The type or namespac
+ce name 'Owin' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(20,18): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(21,18): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(23,18): error CS0234: The type or namespace
+e name 'ModelBinding' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWeb
+bFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(20,18): error CS0234: The type or namespace na
+ame 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(21,18): error CS0234: The type or namespace na
+ame 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(23,18): error CS0234: The type or namespace na
+ame 'ModelBinding' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFor
+rmsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(24,18): error CS0234: The type or namespace na
+ame 'Routing' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(20,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(21,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(23,19): error CS0234: The type or namespace n
+name 'Logic' does not exist in the namespace 'WingtipToys' (are you missing an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(26,18): error CS0234: The type or namespace n
+name 'ModelBinding' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(20,18): error CS0234: The type or namespace n
+name 'Routing' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCo
+omponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(21,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(22,18): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(23,17): error CS0234: The type or namespace n
+name 'AspNet' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\Site.MobileLayout.razor.cs(25,51): error CS0234: 
+ The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ErrorPage.razor.cs(26,47): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\AddToCart.razor.cs(27,47): error CS0234: The type or namespace name
+e 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponents
+s\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(28,49): error CS0234: The type or namespace na
+ame 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Admin\AdminPage.razor.cs(27,47): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(27,52): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ViewSwitcher.razor.cs(27,52): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(30,50): error CS0234: The type or namespace n
+name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Contact.razor.cs(25,34): error CS0246: The type or namespace name '
+'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents\samp
+ples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\About.razor.cs(25,32): error CS0246: The type or namespace name 'Pa
+age' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents\sample
+es\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Default.razor.cs(25,35): error CS0246: The type or namespace name '
+'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponents\samp
+ples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(30,39): error CS0246: The typ
+pe or namespace name 'MasterPage' could not be found (are you missing a using directive or an assembly reference?) [D:\Bl
+lazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(16,36): error CS0246: The type or namespac
+ce name 'IdentityUser' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(54,35): error CS0246: The type or namespac
+ce name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(18,52): error CS0246: The type or namespac
+ce name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\ProductDatabaseInitializer.cs(6,45): error CS0246: The type 
+ or namespace name 'DropCreateDatabaseIfModelChanges<>' could not be found (are you missing a using directive or an assem
+mbly reference?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Components\Layout\MainLayout.razor.cs(111,58): error CS0246: The ty
+ype or namespace name 'LoginCancelEventArgs' could not be found (are you missing a using directive or an assembly referen
+nce?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(32,41): error CS0246: The type or namespac
+ce name 'IdentityDbContext<>' could not be found (are you missing a using directive or an assembly reference?) [D:\Blazor
+rWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(88,48): error CS0246: The type or namespace n
+name 'GridViewRow' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutCancel.razor.cs(25,52): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutComplete.razor.cs(26,54): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutError.razor.cs(25,51): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutReview.razor.cs(26,52): error CS0234: The type or 
+ namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebF
+FormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Checkout\CheckoutStart.razor.cs(25,51): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(36,26): error CS0246: The type or namespace na
+ame 'SupplyParameterFromQueryAttribute' could not be found (are you missing a using directive or an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(36,26): error CS0246: The type or namespace na
+ame 'SupplyParameterFromQuery' could not be found (are you missing a using directive or an assembly reference?) [D:\Blazo
+orWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(35,26): error CS0246: The type or namespace
+e name 'SupplyParameterFromQueryAttribute' could not be found (are you missing a using directive or an assembly reference
+e?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(35,26): error CS0246: The type or namespace
+e name 'SupplyParameterFromQuery' could not be found (are you missing a using directive or an assembly reference?) [D:\Bl
+lazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Models\IdentityModels.cs(26,63): error CS0246: The type or namespac
+ce name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ShoppingCart.razor.cs(107,53): error CS0246: The type or namespace 
+ name 'ImageClickEventArgs' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(38,26): error CS0246: The type or namespace na
+ame 'ParameterAttribute' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductList.razor.cs(38,26): error CS0246: The type or namespace na
+ame 'Parameter' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(37,26): error CS0246: The type or namespace
+e name 'ParameterAttribute' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\ProductDetails.razor.cs(37,26): error CS0246: The type or namespace
+e name 'Parameter' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCom
+mponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\OpenAuthProviders.razor.cs(26,57): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Lockout.razor.cs(25,47): error CS0234: The type or namespac
+ce name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsComp
+ponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\AddPhoneNumber.razor.cs(29,54): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(26,61): error CS0234: The ty
+ype or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\Blaz
+zorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(30,46): error CS0234: The type or namespace
+e name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFormsCompo
+onents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(27,54): error CS0234: The type or n
+namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebFo
+ormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(27,52): error CS0234: The type or nam
+mespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWebForm
+msComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(29,69): error CS0234
+4: The type or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\VerifyPhoneNumber.razor.cs(27,57): error CS0234: The type o
+or namespace name 'UI' does not exist in the namespace 'System.Web' (are you missing an assembly reference?) [D:\BlazorWe
+ebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Forgot.razor.cs(26,43): error CS0246: The type or namespace
+e name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponen
+nts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Confirm.razor.cs(26,36): error CS0246: The type or namespac
+ce name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompone
+ents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPassword.razor.cs(27,42): error CS0246: The type or na
+amespace name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsC
+Components\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Register.razor.cs(27,37): error CS0246: The type or namespa
+ace name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsCompon
+nents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Login.razor.cs(26,34): error CS0246: The type or namespace 
+ name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFormsComponent
+ts\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ResetPasswordConfirmation.razor.cs(20,54): error CS0246: Th
+he type or namespace name 'Page' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(35,34): error CS0246: The type or n
+namespace name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(38,34): error CS0246: The type or namespace
+e name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D:\Blaz
+zorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(40,34): error CS0246: The type or nam
+mespace name 'ApplicationUserManager' could not be found (are you missing a using directive or an assembly reference?) [D
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\RegisterExternalLogin.razor.cs(135,32): error CS0246: The t
+type or namespace name 'IdentityResult' could not be found (are you missing a using directive or an assembly reference?) 
+ [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(31,17): error CS0246
+6: The type or namespace name 'ApplicationSignInManager' could not be found (are you missing a using directive or an asse
+embly reference?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManagePassword.razor.cs(104,32): error CS0246: The type or 
+ namespace name 'IdentityResult' could not be found (are you missing a using directive or an assembly reference?) [D:\Bla
+azorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\Manage.razor.cs(99,32): error CS0246: The type or namespace
+e name 'IdentityResult' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorWebFor
+rmsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\TwoFactorAuthenticationSignIn.razor.cs(32,17): error CS0246
+6: The type or namespace name 'ApplicationUserManager' could not be found (are you missing a using directive or an assemb
+bly reference?) [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\samples\AfterWingtipToys\Account\ManageLogins.razor.cs(54,28): error CS0246: The type or nam
+mespace name 'UserLoginInfo' could not be found (are you missing a using directive or an assembly reference?) [D:\BlazorW
+WebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+    122 Warning(s)
+    184 Error(s)
+
+Time Elapsed 00:00:06.12
+
+___BEGIN___COMMAND_DONE_MARKER___1
+PS D:\BlazorWebFormsComponents>
