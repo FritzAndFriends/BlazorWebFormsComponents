@@ -3,28 +3,26 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
-namespace WingtipToys.Components.Layout;
-
-public partial class MainLayout : LayoutComponentBase
+namespace WingtipToys.Components.Layout
 {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
-
-    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
-
-    private List<Category>? _categories;
-    private string? _userName;
-
-    protected override async Task OnInitializedAsync()
+    public partial class MainLayout
     {
-        using var db = DbFactory.CreateDbContext();
-        _categories = await db.Categories.OrderBy(c => c.CategoryID).ToListAsync();
+        [CascadingParameter] private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-        if (AuthState != null)
+        private List<Category>? _categories;
+        private int _cartCount;
+        private string _userName = string.Empty;
+
+        protected override async Task OnInitializedAsync()
         {
-            var auth = await AuthState;
-            if (auth.User.Identity?.IsAuthenticated == true)
+            using var db = DbFactory.CreateDbContext();
+            _categories = await db.Categories.ToListAsync();
+            _cartCount = await db.ShoppingCartItems.CountAsync();
+
+            if (AuthStateTask is not null)
             {
-                _userName = auth.User.Identity.Name;
+                var authState = await AuthStateTask;
+                _userName = authState.User.Identity?.Name ?? string.Empty;
             }
         }
     }

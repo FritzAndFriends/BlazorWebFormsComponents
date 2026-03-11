@@ -1,11 +1,9 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace WingtipToys.Models;
-
-public class ProductContext : IdentityDbContext<IdentityUser>
+namespace WingtipToys.Models
 {
+  public class ProductContext : DbContext
+  {
     public ProductContext(DbContextOptions<ProductContext> options) : base(options) { }
 
     public DbSet<Category> Categories { get; set; }
@@ -13,4 +11,5 @@ public class ProductContext : IdentityDbContext<IdentityUser>
     public DbSet<CartItem> ShoppingCartItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDetail> OrderDetails { get; set; }
+  }
 }

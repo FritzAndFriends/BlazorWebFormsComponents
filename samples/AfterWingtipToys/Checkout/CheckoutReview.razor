@@ -1,5 +1,37 @@
-@page "/Checkout/CheckoutReview"
-<PageTitle>Checkout Review</PageTitle>
-<h2>Checkout Review</h2>
-<p>This page is under construction.</p>
+@page "/CheckoutReview"
+@* TODO: Checkout flow page — requires PayPal NVPAPICaller integration *@
+<h1>Order Review</h1>
+    <p></p>
+    <h3 style="padding-left: 33px">Products:</h3>
+    <GridView ID="OrderItemList" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500" BorderColor="@("#efeeef")" BorderWidth="33"
+        ItemType="CartItem" Items="@_orderItems">              
+        <Columns>
+            <BoundField DataField="ProductId" HeaderText=" Product ID" />        
+            <BoundField DataField="Product.ProductName" HeaderText=" Product Name" />        
+            <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+            <BoundField DataField="Quantity" HeaderText="Quantity" />        
+        </Columns>    
+    </GridView>
+    @if (_orderInfo != null)
+    {
+    <div style="padding: 10px;">
+        <h3>Shipping Address:</h3>
+        <br />
+        <Label ID="FirstName" Text="@_orderInfo.FirstName"></Label>  
+        <Label ID="LastName" Text="@_orderInfo.LastName"></Label>
+        <br />
+        <Label ID="Address" Text="@_orderInfo.Address"></Label>
+        <br />
+        <Label ID="City" Text="@_orderInfo.City"></Label>
+        <Label ID="State" Text="@_orderInfo.State"></Label>
+        <Label ID="PostalCode" Text="@_orderInfo.PostalCode"></Label>
+        <p></p>
+        <h3>Order Total:</h3>
+        <br />
+        <Label ID="Total" Text='@_orderInfo.Total.ToString("C")'></Label>
+    </div>
+    }
+    <p></p>
+    <hr />
+    <Button ID="CheckoutConfirm" Text="Complete Order" OnClick="CheckoutConfirm_Click" />
 

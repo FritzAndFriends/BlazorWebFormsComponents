@@ -1,5 +1,40 @@
-@page "/Account/ManageLogins"
-<PageTitle>Manage Logins</PageTitle>
-<h2>Manage Logins</h2>
-<p>This page is under construction.</p>
+@page "/ManageLogins"
+<h2>Manage your external logins.</h2>
+    <PlaceHolder ID="successMessage" Visible="false">
+            <p class="text-success">@(SuccessMessage)</p>
+        </PlaceHolder>
+    <div>
+        <section id="externalLoginsForm">
+
+            <ListView ID="ExternalLoginsList"
+                ItemType="string">
+@* TODO: Replace SelectMethod="GetLogins" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
+
+                <LayoutTemplate>
+                    <h4>Registered Logins</h4>
+                    <table class="table">
+                        <tbody>
+                            @context
+                        </tbody>
+                    </table>
+
+                </LayoutTemplate>
+                <ItemTemplate>
+                    @* TODO: Restore when ASP.NET Core Identity ExternalLoginInfo is available
+                    <tr>
+                        <td>@context</td>
+                        <td>
+                            <Button Text="Remove" CommandName="Delete" CausesValidation="false"
+                                CssClass="btn btn-default" />
+                        </td>
+                    </tr>
+                    *@
+                </ItemTemplate>
+            </ListView>
+
+        </section>
+    </div>
+    <div>
+        <OpenAuthProviders ReturnUrl="~/Account/ManageLogins" />
+    </div>
 
