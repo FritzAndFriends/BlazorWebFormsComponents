@@ -128,3 +128,18 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
 
 
  Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. Skill file guidance leads with 'detect and match'.  decided by Jeffrey T. Fritz, Beast, Cyclops
+
+### Executive Summary Update — Runs 19-21 (2026-03-12)
+
+- **Scope:** Updated `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md` with data from WT Run 20, WT Run 21, and CU Run 19.
+- **Run count:** 38 → 40 benchmark runs (WT=21, CU=19).
+- **Results at a Glance table:** Updated benchmark runs, control usages (420+), added L1 Provider Detection row, updated CU SelectMethod status to "Items= binding", updated key takeaway.
+- **Performance table:** Added "Latest Run" column showing WT Run 21 (1.79s) and CU Run 19 (0.62s). Explained marginal L1 time increase due to richer transforms.
+- **Milestones table:** Added CU Run 19 (SQL Server preservation), WT Run 20 (zero-error pipeline), WT Run 21 (SelectMethod delegates).
+- **Two-Layer Pipeline section:** Added `Find-DatabaseProvider` feature description with `[DatabaseProvider]` review item.
+- **L1 Performance line:** Added Run 20 (1.70s) and CU Run 19 (0.62s) data points.
+- **CU screenshots section:** Clarified Run 15 as visual reference, added Run 19 context (SQL Server preservation, 0 errors, 229 output files).
+- **Test Project Coverage table:** Updated benchmark runs (WT=21, CU=19), CU best result mentions SQL Server preservation.
+- **What's Next section:** Marked SelectMethod core as ✅ done, added CU SelectMethod re-run and acceptance test validation items.
+- **Charts:** Added WT Run 20 (1.70s), WT Run 21 (1.79s), CU Run 19 (0.62s) to `generate-charts.py` and regenerated all 3 PNGs.
+- **Key data points:** WT Run 21: 1.79s L1, 348 transforms, 0 errors, SelectHandler<ItemType> delegates on 3 core pages. CU Run 19: 0.62s L1, 72 transforms, 0 errors, SQL Server LocalDB preserved, 229 output files, 5 BLL classes.

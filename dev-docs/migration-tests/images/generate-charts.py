@@ -3,8 +3,8 @@
 Generate performance charts for the BWFC Migration Toolkit Executive Summary.
 
 Data sources:
-  - dev-docs/migration-tests/wingtiptoys/run01–run17 REPORT.md files
-  - dev-docs/migration-tests/contosouniversity/run01–run18 REPORT.md files
+  - dev-docs/migration-tests/wingtiptoys/run01–run21 REPORT.md files
+  - dev-docs/migration-tests/contosouniversity/run01–run19 REPORT.md files
 
 Output:
   - wingtiptoys-layer1-perf.png
@@ -51,13 +51,13 @@ OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 # ── Data (extracted from REPORT.md files) ───────────────────────────────────
 
 # WingtipToys Layer 1 times (seconds) — from run report tables
-wt_runs   = [1,    4,    5,    6,    8,   11,   12,   13,   14,   15,   16,   17,   18]
-wt_times  = [3.30, 3.30, 3.00, 4.58, 3.30, 3.30, 3.00, 3.00, 3.20, 2.83, 2.50, 1.81, 1.51]
+wt_runs   = [1,    4,    5,    6,    8,   11,   12,   13,   14,   15,   16,   17,   18,   20,   21]
+wt_times  = [3.30, 3.30, 3.00, 4.58, 3.30, 3.30, 3.00, 3.00, 3.20, 2.83, 2.50, 1.81, 1.51, 1.70, 1.79]
 wt_best_idx = wt_times.index(min(wt_times))
 
 # ContosoUniversity Layer 1 times (seconds) — from run report tables
-cu_runs   = [1,    2,    4,    6,    8,    9,   12,   15,   16,   17]
-cu_times  = [1.50, 0.63, 1.00, 1.43, 1.00, 2.30, 1.00, 0.75, 1.00, 0.59]
+cu_runs   = [1,    2,    4,    6,    8,    9,   12,   15,   16,   17,   19]
+cu_times  = [1.50, 0.63, 1.00, 1.43, 1.00, 2.30, 1.00, 0.75, 1.00, 0.59, 0.62]
 cu_best_idx = cu_times.index(min(cu_times))
 
 
