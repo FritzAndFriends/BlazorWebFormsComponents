@@ -119,3 +119,48 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 - Razor `@inherits WebFormsPageBase` from _Imports.razor applies to all pages AND non-page components — ViewSwitcher couldn't specify a different base class in .cs without conflicting
 - `TextBox Text` parameter expects `string`, not `int` — use `.ToString()` for numeric values
 - `TemplateField` in DetailsView needs `ItemType` attribute when inside a generic parent component
+
+### Layer 2 Structural Transform — AfterContosoUniversity (2026-03-12)
+
+**Build result:** 0 errors. SQLite with `Microsoft.EntityFrameworkCore.Sqlite` 9.0.*.
+
+**Transforms applied (12 areas):**
+
+1. **MainLayout.razor** — Fixed .aspx links → Blazor routes (/Home, /About, etc.), added `@Body`, closed `</script>` tag. Deleted empty MainLayout.razor.cs code-behind.
+
+2. **Models (5+1 files)** — Upgraded all EDMX-generated classes to EF Core: removed `virtual`, added `[Table]`/`[Key]`/`[ForeignKey]` attributes, nullable reference types, file-scoped namespaces. Created `ContosoUniversityContext.cs` (DbContext with 5 DbSets). Deleted EDMX artifacts (Model1.cs, Model1.Designer.cs, Model1.Context.cs).
+
+3. **BLL/ folder (5 files)** — Created from scratch with `IDbContextFactory<ContosoUniversityContext>` pattern:
+   - `StudentsListLogic.cs` — CRUD + GetJoinedTableData (returns `List<StudentViewModel>`), GetCourseNames
+   - `Courses_Logic.cs` — GetCourses by department, GetCourse by name, GetDepartmentNames
+   - `Instructors_Logic.cs` — GetInstructors, GetSortedInstructors (raw SQL → EF Core LINQ OrderBy switch expression)
+   - `Enrollmet_Logic.cs` — Get_Enrollment_ByDate (GroupBy → Dictionary)
+   - `StudentViewModel.cs` — Typed view model replacing anonymous objects
+
+4. **csproj** — `Microsoft.EntityFrameworkCore.Sqlite` 9.0.* (switched from SqlServer for .NET 10 compat).
+
+5. **Program.cs** — `AddDbContextFactory` with SQLite, 4 scoped BLL service registrations, `EnsureCreated` on startup.
+
+6. **About.razor + .cs** — Converted SelectMethod → `Items="@_enrollmentData"`, injected `Enrollmet_Logic`, `OnInitialized` loads data. GridView uses `ItemType="KeyValuePair<string, int>"`. Hex colors wrapped with `@("...")`.
+
+7. **Students.razor + .cs** — Removed ScriptManager/UpdatePanel. TextBox bindings via `Text="@_field" TextChanged="@((s) => _field = s)"`. DropDownList with Items/SelectedValue. AutoCompleteExtender removed → simple text search + button. DetailsView conditional rendering with `@if`. CommandFields removed (BWFC handles differently).
+
+8. **Courses.razor + .cs** — Already well-converted by L1; verified correct DropDownList/GridView/DetailsView with Items pattern.
+
+9. **Instructors.razor + .cs** — ViewState["SortDirection"] → private `_sortDirection` field. `OnSorting` → `Sorting="HandleSorting"` with `GridViewSortEventArgs`. Raw SQL sort → EF Core LINQ switch expression.
+
+10. **_Imports.razor** — Added `@using BlazorWebFormsComponents.Enums`, `@using ContosoUniversity.Models`, `@using ContosoUniversity.BLL`.
+
+11. **Home.razor** — Deleted empty Home.razor.cs code-behind.
+
+**Key gotchas (ContosoUniversity-specific):**
+- BWFC GridView sorting parameter is `Sorting` (EventCallback), not `OnSorting`
+- Code-behind `.cs` files do NOT inherit _Imports.razor — need explicit `using ContosoUniversity.BLL;` etc.
+- `#hexcolor` in Razor must be `@("#hexcolor")` to avoid directive parsing
+- `GridLines="None"` → `GridLines="@GridLines.None"`, `BorderStyle="Solid"` → `BorderStyle="@BorderStyle.Solid"`
+- `Unit` parameters (`Height`, `Width`, etc.) must be bare integers — `336px` causes Razor parse error, use `336`
+- BWFC style sub-components: `<RowStyleContent><GridViewRowStyle .../></RowStyleContent>`, NOT `<RowStyle BackColor="...">`
+- `SortedAscendingCellStyle`, `SortedDescendingCellStyle`, etc. do NOT exist in BWFC — remove them
+- `CommandField` does NOT exist in BWFC — use `ButtonField` with `CommandName` instead
+- Original BLL used `new ContosoUniversityEntities()` everywhere (EF6 pattern) → converted to `IDbContextFactory` with `using var context = _dbFactory.CreateDbContext()`
+- Keep BLL classes in single namespace (BLL/) — avoid duplicate class names across Models/ and BLL/ namespaces

@@ -1,7 +1,7 @@
-// TODO: Review and adjust this generated Program.cs for your application needs.
 using BlazorWebFormsComponents;
-using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.Models;
+using ContosoUniversity.BLL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,17 +10,22 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazorWebFormsComponents();
 
-// Register the DbContext with SQL Server LocalDB
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "ContosoUniversity.mdf");
-var connectionString = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={dbPath};Integrated Security=True;Connect Timeout=30";
+builder.Services.AddDbContextFactory<ContosoUniversityContext>(options =>
+    options.UseSqlite("Data Source=contoso.db"));
 
-// Set connection string for BLL classes that use new ContosoUniversityEntities()
-ContosoUniversityEntities.SetConnectionString(connectionString);
-
-builder.Services.AddDbContext<ContosoUniversityEntities>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddScoped<StudentsListLogic>();
+builder.Services.AddScoped<Courses_Logic>();
+builder.Services.AddScoped<Instructors_Logic>();
+builder.Services.AddScoped<Enrollmet_Logic>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ContosoUniversityContext>>();
+    using var context = factory.CreateDbContext();
+    context.Database.EnsureCreated();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -30,7 +35,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
-app.UseBlazorWebFormsComponents();
 app.UseAntiforgery();
 
 app.MapRazorComponents<ContosoUniversity.Components.App>()

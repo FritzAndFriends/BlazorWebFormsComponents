@@ -1,67 +1,35 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
+using Microsoft.AspNetCore.Components;
 
 namespace ContosoUniversity;
 
 public partial class Courses : ComponentBase
 {
-    [Inject]
-    public ContosoUniversityEntities? Db { get; set; }
+    [Inject] private Courses_Logic CourseLogic { get; set; } = default!;
 
-    private Courses_Logic? coursLogic;
+    private List<string> _departmentNames = new();
+    private string _selectedDepartment = string.Empty;
+    private List<Cours> _courses = new();
+    private List<Cours> _searchResults = new();
+    private string _searchText = string.Empty;
 
-    public List<Department> Departments { get; set; } = new();
-    public List<Cours> CoursesByDepartment { get; set; } = new();
-    public List<Cours> CoursesByName { get; set; } = new();
-    public string SelectedDepartment { get; set; } = string.Empty;
-    public string CourseSearchText { get; set; } = string.Empty;
-    private Cours? SelectedCourse { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        coursLogic = new Courses_Logic();
-
-        if (Db != null)
-        {
-            Departments = await Db.Departments.ToListAsync();
-        }
+        _departmentNames = CourseLogic.GetDepartmentNames();
+        if (_departmentNames.Count > 0)
+            _selectedDepartment = _departmentNames[0];
     }
 
-    public async Task<List<string>> GetCourseAutocomplete(string prefixText)
+    private void HandleSearchByDepartment(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
-        if (Db == null) return new List<string>();
-
-        return await Db.Courses
-            .Where(c => c.CourseName != null && c.CourseName.StartsWith(prefixText))
-            .Select(c => c.CourseName!)
-            .ToListAsync();
+        _courses = CourseLogic.GetCourses(_selectedDepartment);
     }
 
-    public void SearchCoursesByDepartment()
+    private void HandleSearchByName(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
-        if (coursLogic != null && !string.IsNullOrEmpty(SelectedDepartment))
-        {
-            CoursesByDepartment = coursLogic.GetCourses(SelectedDepartment).ToList();
-        }
+        _searchResults = CourseLogic.GetCourse(_searchText);
+        _searchText = string.Empty;
     }
-
-    public void SearchCoursesByName()
-    {
-        if (coursLogic != null && !string.IsNullOrEmpty(CourseSearchText))
-        {
-            CoursesByName = coursLogic.GetCourse(CourseSearchText).ToList();
-            CourseSearchText = string.Empty;
-        }
-    }
-
-    public void OnPageIndexChanging(int newPageIndex)
-    {
-        // Page index handling for GridView - implement pagination logic here
-        SearchCoursesByDepartment();
-    }
-
-    private void btnSearchCourse_Click() { SearchCoursesByDepartment(); }
-    private void search_Click() { SearchCoursesByName(); }
 }
+

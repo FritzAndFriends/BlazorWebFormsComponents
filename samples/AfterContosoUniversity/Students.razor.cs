@@ -1,104 +1,60 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
-using ContosoUniversity.Bll;
+using Microsoft.AspNetCore.Components;
 
 namespace ContosoUniversity;
 
 public partial class Students : ComponentBase
 {
-    [Inject]
-    public ContosoUniversityEntities? Db { get; set; }
+    [Inject] private StudentsListLogic StudentLogic { get; set; } = default!;
 
-    private StudentsListLogic? studLogic;
+    private List<StudentViewModel> _studentData = new();
+    private List<string> _courseNames = new();
+    private List<Student> _searchResults = new();
 
-    // Form fields (converted from control references)
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string BirthDate { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string SelectedCourse { get; set; } = string.Empty;
-    public string SearchText { get; set; } = string.Empty;
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+    private string _birthDate = string.Empty;
+    private string _email = string.Empty;
+    private string _selectedCourse = string.Empty;
+    private string _searchText = string.Empty;
 
-    // Data collections
-    public List<Cours> CoursesList { get; set; } = new();
-    public List<object> EnrollmentData { get; set; } = new();
-    public List<object> StudentSearchResults { get; set; } = new();
-    private List<Student> StudentsList { get; set; } = new();
-    private Student? SelectedStudent { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        studLogic = new StudentsListLogic();
-
-        if (Db != null)
-        {
-            CoursesList = await Db.Courses.ToListAsync();
-        }
-
-        EnrollmentData = GetEnrollmentData();
+        _courseNames = StudentLogic.GetCourseNames();
+        if (_courseNames.Count > 0)
+            _selectedCourse = _courseNames[0];
+        LoadStudentData();
     }
 
-    public List<object> GetEnrollmentData()
+    private void LoadStudentData()
     {
-        if (studLogic == null) return new List<object>();
-        return studLogic.GetJoinedTableData().ToList();
+        _studentData = StudentLogic.GetJoinedTableData();
     }
 
-    public async Task<List<string>> GetStudentAutocomplete(string prefixText)
+    private void HandleInsert(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
-        if (Db == null) return new List<string>();
+        if (!DateTime.TryParse(_birthDate, out var birth))
+            return;
 
-        return await Db.Students
-            .Where(s => s.FirstName != null && s.FirstName.StartsWith(prefixText))
-            .Select(s => $"{s.FirstName} {s.LastName}")
-            .ToListAsync();
+        StudentLogic.InsertNewEntry(_firstName, _lastName, birth, _selectedCourse, _email);
+        HandleClear(args);
+        LoadStudentData();
     }
 
-    public void UpdateStudent(int id, string name, string email)
+    private void HandleClear(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
-        studLogic?.UpdateStudentData(id, name, email);
-        EnrollmentData = GetEnrollmentData();
+        _firstName = string.Empty;
+        _lastName = string.Empty;
+        _birthDate = string.Empty;
+        _email = string.Empty;
     }
 
-    public void DeleteStudent(int id)
+    private void HandleSearch(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
-        studLogic?.DeleteStudent(id);
-        EnrollmentData = GetEnrollmentData();
-    }
-
-    public void InsertStudent()
-    {
-        if (!DateTime.TryParse(BirthDate, out DateTime birth))
-        {
-            throw new FormatException("Wrong Date Format!");
-        }
-
-        studLogic?.InsertNewEntry(FirstName, LastName, birth, SelectedCourse, Email);
-        ClearForm();
-        EnrollmentData = GetEnrollmentData();
-    }
-
-    public void ClearForm()
-    {
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        BirthDate = string.Empty;
-        Email = string.Empty;
-        SelectedCourse = string.Empty;
-    }
-
-    private void btnInsert_Click() { InsertStudent(); }
-    private void btnClear_Click() { ClearForm(); }
-    private void btnSearch_Click() { SearchStudents(); }
-
-    public void SearchStudents()
-    {
-        if (studLogic != null && !string.IsNullOrEmpty(SearchText))
-        {
-            StudentSearchResults = studLogic.GetStudents(SearchText).ToList();
-            SearchText = string.Empty;
-        }
+        _searchResults = StudentLogic.GetStudents(_searchText);
+        _searchText = string.Empty;
     }
 }
+
 
