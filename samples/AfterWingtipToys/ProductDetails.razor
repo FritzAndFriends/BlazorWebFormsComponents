@@ -1,46 +1,27 @@
 @page "/ProductDetails"
 <PageTitle>Product Details</PageTitle>
-
-@if (_product != null)
-{
-    <div>
-        <h1>@_product.ProductName</h1>
-    </div>
-    <br />
-    <table>
-        <tr>
-            <td>
-                <img src="/Catalog/Images/@_product.ImagePath" style="border:solid; height:300px" alt="@_product.ProductName" />
-            </td>
-            <td>&nbsp;</td>
-            <td style="vertical-align: top; text-align:left;">
-                <b>Description:</b><br />@_product.Description
-                <br />
-                <span><b>Price:</b>&nbsp;@($"{_product.UnitPrice:c}")</span>
-                <br />
-                <span><b>Product Number:</b>&nbsp;@_product.ProductID</span>
-                <br />
-                <br />
-                <a href="/AddToCart?productId=@_product.ProductID" data-enhance-nav="false">Add To Cart</a>
-            </td>
-        </tr>
-    </table>
-}
-
-@code {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
-
-    [SupplyParameterFromQuery(Name = "productID")] public int? ProductID { get; set; }
-
-    private Product? _product;
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (ProductID.HasValue)
-        {
-            using var db = DbFactory.CreateDbContext();
-            _product = await db.Products.FindAsync(ProductID.Value);
-        }
-    }
-}
+<FormView ID="productDetail" ItemType="Product" SelectMethod="@GetProduct" RenderOuterTable="false">
+        <ItemTemplate Context="context">
+            <div>
+                <h1>@context.ProductName</h1>
+            </div>
+            <br />
+            <table>
+                <tr>
+                    <td>
+                        <img src="/Catalog/Images/@context.ImagePath" style="border:solid; height:300px" alt="@context.ProductName"/>
+                    </td>
+                    <td>&nbsp;</td>  
+                    <td style="vertical-align: top; text-align:left;">
+                        <b>Description:</b><br />@context.Description
+                        <br />
+                        <span><b>Price:</b>&nbsp;@($"{context.UnitPrice:c}")</span>
+                        <br />
+                        <span><b>Product Number:</b>&nbsp;@context.ProductID</span>
+                        <br />
+                    </td>
+                </tr>
+            </table>
+        </ItemTemplate>
+    </FormView>
 

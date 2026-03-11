@@ -1,52 +1,62 @@
-@page "/Account/Login"
+@page "/Login"
 <PageTitle>Log in</PageTitle>
+<h2>@(Title).</h2>
 
-<h2>Log in</h2>
-
-<div class="row">
-    <div class="col-md-8">
-        <section id="loginForm">
-            <form method="post" action="/account/login-handler" data-enhance="false">
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                @if (!string.IsNullOrEmpty(_error))
-                {
-                    <p class="text-danger">@_error</p>
-                }
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="Email">Email</label>
-                    <div class="col-md-10">
-                        <input type="email" id="Email" name="Email" class="form-control" required />
+    <div class="row">
+        <div class="col-md-8">
+            <section id="loginForm">
+                <div class="form-horizontal">
+                    <h4>Use a local account to log in.</h4>
+                    <hr />
+                    <PlaceHolder ID="ErrorMessage" Visible="false">
+                        <p class="text-danger">
+                            <Literal ID="FailureText" />
+                        </p>
+                    </PlaceHolder>
+                    <div class="form-group">
+                        <Label AssociatedControlID="Email" CssClass="col-md-2 control-label">Email</Label>
+                        <div class="col-md-10">
+                            <TextBox ID="Email" CssClass="form-control" TextMode="TextBoxMode.Email" />
+                            <RequiredFieldValidator ControlToValidate="Email"
+                                CssClass="text-danger" ErrorMessage="The email field is required." />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="Password">Password</label>
-                    <div class="col-md-10">
-                        <input type="password" id="Password" name="Password" class="form-control" required />
+                    <div class="form-group">
+                        <Label AssociatedControlID="Password" CssClass="col-md-2 control-label">Password</Label>
+                        <div class="col-md-10">
+                            <TextBox ID="Password" TextMode="TextBoxMode.Password" CssClass="form-control" />
+                            <RequiredFieldValidator ControlToValidate="Password" CssClass="text-danger" ErrorMessage="The password field is required." />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <div class="checkbox">
-                            <input type="checkbox" id="RememberMe" name="RememberMe" />
-                            <label for="RememberMe">Remember me?</label>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <div class="checkbox">
+                                <CheckBox ID="RememberMe" />
+                                <Label AssociatedControlID="RememberMe">Remember me?</Label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <Button OnClick="LogIn" Text="Log in" CssClass="btn btn-default" />
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-default">Log in</button>
-                    </div>
-                </div>
-            </form>
-            <p>
-                <a href="/Account/Register">Register as a new user</a>
-            </p>
-        </section>
-    </div>
-</div>
+                <p>
+                    <HyperLink ID="RegisterHyperLink">Register as a new user</HyperLink>
+                </p>
+                <p>
+                    @* Enable this once you have account confirmation enabled for password reset functionality
+                    <HyperLink ID="ForgotPasswordHyperLink">Forgot your password?</HyperLink>
+                    *@
+                </p>
+            </section>
+        </div>
 
-@code {
-    [SupplyParameterFromQuery(Name = "error")] public string? _error { get; set; }
-}
+        <div class="col-md-4">
+            <section id="socialLoginForm">
+                <OpenAuthProviders ID="OpenAuthLogin" />
+            </section>
+        </div>
+    </div>
 

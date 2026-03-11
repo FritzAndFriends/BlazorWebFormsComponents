@@ -16,7 +16,7 @@ This skill covers migrating Web Forms data access patterns and application archi
 ## When to Use This Skill
 
 Use this skill when you need to:
-- Replace `SelectMethod`/`DataSource` controls with service injection
+- Convert `SelectMethod` string to `SelectHandler` delegate, replace `DataSource` controls with service injection
 - Migrate Entity Framework 6 to EF Core
 - Convert `Session`/`ViewState`/`Application` state to Blazor patterns
 - Migrate `Global.asax` to `Program.cs`
@@ -96,10 +96,57 @@ public class CartService(IDbContextFactory<ProductContext> factory)
 
 ## 1. Entity Framework 6 → EF Core
 
-**Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod`.
+**Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod` string binding.
 **Blazor:** EF Core **10.0.3** (latest .NET 10) with `IDbContextFactory` registered in DI.
 
-> **Always use the latest .NET 10 EF Core packages** (currently 10.0.3): `Microsoft.EntityFrameworkCore`, `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`.
+> **Step 1: Detect the provider.** The L1 script's `Find-DatabaseProvider` function reads `Web.config` `<connectionStrings>` and scaffolds the correct EF Core package. Check the L1 output's `[DatabaseProvider]` review item for the detected provider and connection string. Use these values in your `Program.cs` configuration — do not guess or substitute.
+>
+> **CRITICAL: Preserve the original database provider.** Examine the Web Forms project's `Web.config` connection strings and EF configuration to identify the database provider (SQL Server, PostgreSQL, MySQL, SQLite, Oracle, etc.). The migrated Blazor application MUST use the **same database provider** — do NOT switch providers unless explicitly requested by the user.
+>
+> **⚠️ NEVER default to SQLite.** The most common Web Forms database is SQL Server (often LocalDB for dev). If you see `System.Data.SqlClient` or `(LocalDB)` in connection strings, use `Microsoft.EntityFrameworkCore.SqlServer` — NOT `Microsoft.EntityFrameworkCore.Sqlite`. SQLite is ONLY appropriate if the original application specifically used `System.Data.SQLite`.
+
+### Database Provider Detection & Migration
+
+**Step 1: Identify the original provider** from the Web Forms project:
+
+| Web.config Indicator | Original Provider | EF Core Package |
+|---------------------|------------------|-----------------|
+| `providerName="System.Data.SqlClient"` | SQL Server | `Microsoft.EntityFrameworkCore.SqlServer` |
+| `providerName="System.Data.SQLite"` | SQLite | `Microsoft.EntityFrameworkCore.Sqlite` |
+| `providerName="Npgsql"` or `Server=...;Port=5432` | PostgreSQL | `Npgsql.EntityFrameworkCore.PostgreSQL` |
+| `providerName="MySql.Data.MySqlClient"` | MySQL | `Pomelo.EntityFrameworkCore.MySql` or `MySql.EntityFrameworkCore` |
+| `providerName="Oracle.ManagedDataAccess.Client"` | Oracle | `Oracle.EntityFrameworkCore` |
+
+**Step 2: Install the matching EF Core provider package** in the Blazor project:
+
+```bash
+# Example for SQL Server
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.3
+
+# Example for PostgreSQL
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 10.0.3
+
+# Example for MySQL (Pomelo)
+dotnet add package Pomelo.EntityFrameworkCore.MySql --version 10.0.3
+```
+
+**Step 3: Configure the matching provider** in `Program.cs`:
+
+```csharp
+// SQL Server — matches System.Data.SqlClient
+options.UseSqlServer(connectionString)
+
+// PostgreSQL — matches Npgsql
+options.UseNpgsql(connectionString)
+
+// MySQL — matches MySql.Data.MySqlClient
+options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+
+// SQLite — matches System.Data.SQLite
+options.UseSqlite(connectionString)
+```
+
+> Install matching EF Core packages for .NET 10: `Microsoft.EntityFrameworkCore`, the provider-specific package (see table above), `.Tools`, and `.Design`.
 
 ```csharp
 // Web Forms — direct DbContext in code-behind
@@ -111,9 +158,10 @@ public IQueryable<Product> GetProducts()
 ```
 
 ```csharp
-// Blazor — Program.cs
+// Blazor — Program.cs (use the provider that matches the original Web Forms database)
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // ↑ Replace with UseNpgsql(), UseMySql(), UseSqlite(), etc. to match original provider
 ```
 
 ```csharp
@@ -186,7 +234,7 @@ Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with inject
 @* Blazor — service injection *@
 @inject IProductService ProductService
 
-<GridView Items="products" TItem="Product" AutoGenerateColumns="true" />
+<GridView Items="products" ItemType="Product" AutoGenerateColumns="true" />
 
 @code {
     private List<Product> products = new();
@@ -201,20 +249,40 @@ Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with inject
 ### Service Registration Pattern
 
 ```csharp
-// Program.cs
+// Program.cs — use the provider that matches the original Web Forms database
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // ↑ Match the original provider: UseNpgsql(), UseMySql(), UseSqlite(), etc.
+
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 ```
 
-### SelectMethod → Service Method Mapping
+### SelectMethod String → SelectHandler Delegate Conversion
+
+BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` — a delegate with signature `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`. When set, `OnAfterRenderAsync` automatically calls it to populate `Items`. This is the **native BWFC data-binding pattern** that mirrors how Web Forms did it.
+
+**Option A — Preserve SelectMethod as delegate (recommended):**
+
+| Web Forms SelectMethod | BWFC SelectMethod Delegate |
+|----------------------|---------------------|
+| `SelectMethod="GetProducts"` | `SelectMethod="@productService.GetProducts"` (if signature matches `SelectHandler<T>`) |
+| `SelectMethod="GetProduct"` | `SelectMethod="@productService.GetProduct"` (or use `DataItem` for single-record controls) |
+
+**Option B — Items binding (ONLY when original used DataSource, NOT SelectMethod):**
+
+> ⚠️ Use Option B ONLY when the original Web Forms markup used `DataSource`/`DataBind()`, NOT when it used `SelectMethod`. If the original had `SelectMethod="GetProducts"`, you MUST use Option A above.
 
 | Web Forms SelectMethod | Blazor Service Call |
 |----------------------|---------------------|
-| `SelectMethod="GetProducts"` | `products = await ProductService.GetProductsAsync();` |
-| `SelectMethod="GetProduct"` | `product = await ProductService.GetProductAsync(id);` |
+| `SelectMethod="GetProducts"` | `products = await ProductService.GetProductsAsync();` then `Items="@products"` |
+| `SelectMethod="GetProduct"` | `product = await ProductService.GetProductAsync(id);` then `DataItem="@product"` |
+
+**CRUD methods** (no BWFC parameter equivalent — wire to service calls in event handlers):
+
+| Web Forms Method | Blazor Service Call |
+|----------------------|---------------------|
 | `InsertMethod="InsertProduct"` | `await ProductService.InsertAsync(product);` |
 | `UpdateMethod="UpdateProduct"` | `await ProductService.UpdateAsync(product);` |
 | `DeleteMethod="DeleteProduct"` | `await ProductService.DeleteAsync(id);` |
@@ -315,7 +383,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Services (replaces Application_Start registrations)
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddBlazorWebFormsComponents();
-builder.Services.AddDbContextFactory<ProductContext>(options => ...);
+builder.Services.AddDbContextFactory<ProductContext>(options =>
+    /* Use provider matching original: UseSqlServer, UseNpgsql, UseMySql, etc. */ ...);
 builder.Services.AddScoped<CartService>(); // replaces Session_Start
 
 var app = builder.Build();
@@ -513,7 +582,7 @@ public class PayPalService(IHttpClientFactory factory)
 | `_Imports.razor` | Global usings | `Web.config` `<namespaces>` |
 | `Components/Layout/MainLayout.razor` | Application layout | `Site.Master` |
 | `Components/Pages/*.razor` | Pages | `*.aspx` files |
-| `Services/*.cs` | Data access services | `SelectMethod`s, DataSource controls, code-behind queries |
+| `Services/*.cs` | Data access services | `SelectMethod` delegates, DataSource controls, code-behind queries |
 | `Models/*.cs` | Domain models | Copy from Web Forms project |
 
 ---

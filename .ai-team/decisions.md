@@ -10,151 +10,126 @@
 **By:** Jubilee
 **What:** All new sample pages should be created in `Components/Pages/ControlSamples/{ComponentName}/Index.razor`. The older `Pages/ControlSamples/` path should not be used for new components.
 **Why:** The sample app has two page directories — the newer .NET 8+ `Components/Pages/` layout is the standard for new work.
-
 ### 2026-02-10: PR merge readiness ratings
 
 **By:** Forge
 **What:** PR review ratings established: #333 Calendar (Needs Work — SelectionMode enum), #335 FileUpload (Needs Work — broken data flow), #337 ImageMap (Needs Work — wrong base class), #327 PageService (Ready with minor fixes), #328 ASCX CLI (Risky — conflicts, no tests), #309 VS Snippets (Risky — conflicts).
 **Why:** Systematic review of all open PRs to establish sprint priorities and identify blockers.
-
 ### 2026-02-10: CalendarSelectionMode must be an enum, not a string (consolidated)
 
 **By:** Forge, Cyclops
 **What:** Created `CalendarSelectionMode` enum in `Enums/CalendarSelectionMode.cs` with values None (0), Day (1), DayWeek (2), DayWeekMonth (3). Refactored `Calendar.SelectionMode` from string to enum. Also added `Caption`, `CaptionAlign`, `UseAccessibleHeader` properties. Fixed blocking `.GetAwaiter().GetResult()` call.
 **Why:** Web Forms uses `CalendarSelectionMode` as an enum. Project convention requires every Web Forms enum to have a corresponding C# enum in `Enums/`. String-based modes are fragile. Blocking async calls risk deadlocks in Blazor's sync context.
-
 ### 2026-02-10: FileUpload must use Blazor InputFile internally (consolidated)
 
 **By:** Forge, Cyclops
 **What:** The `@onchange` binding on `<input type="file">` uses `ChangeEventArgs` which does not provide file data in Blazor. FileUpload MUST use Blazor's `<InputFile>` component internally instead of a raw `<input type="file">`. `InputFile` provides proper `InputFileChangeEventArgs` with `IBrowserFile` objects that enable all file operations. Without this, `HasFile` always returns false and `FileBytes`, `FileContent`, `PostedFile`, `SaveAs()` are all broken.
 **Why:** Ship-blocking bug — the component cannot function without actual file data access. `InputFile` renders as `<input type="file">` in the DOM so existing tests still pass. Requires `@using Microsoft.AspNetCore.Components.Forms` in the `.razor` file. Any future component needing browser file access must use `InputFile`.
-
 ### 2026-02-10: ImageMap base class must be BaseStyledComponent
 
 **By:** Forge
 **What:** ImageMap should inherit `BaseStyledComponent`, not `BaseWebFormsComponent`. Web Forms `ImageMap` inherits from `Image` → `WebControl` which has style properties.
 **Why:** `BaseWebFormsComponent` is insufficient for controls that need CssClass, Style, and other style properties.
-
 ### 2026-02-10: ImageMap categorized under Navigation Controls
 
 **By:** Beast
 **What:** ImageMap is categorized under Navigation Controls in the documentation nav, alongside HyperLink, Menu, SiteMapPath, and TreeView.
 **Why:** ImageMap's primary purpose is clickable regions for navigation — it aligns with navigation-oriented controls rather than editor/display controls.
-
 ### 2026-02-10: Shelve ASCX CLI and VS Snippets indefinitely
 
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** PR #328 (ASCX CLI, issue #18) and PR #309 (VS Snippets, issue #11) removed from sprint plan and shelved indefinitely.
 **Why:** Both PRs have merge conflicts and are considered risky. Not worth the effort right now.
-
 ### 2026-02-10: Docs and samples must ship with components
 
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Documentation (Beast) and sample pages (Jubilee) must be delivered in the same sprint as the component they cover — never deferred to a later sprint.
 **Why:** Components aren't complete without docs and samples.
-
 ### 2026-02-10: Sprint plan — 3-sprint roadmap
 
 **By:** Forge
 **What:** Sprint 1: Land & Stabilize current PRs (Calendar enum fix, FileUpload data flow, ImageMap base class, PageService merge). Sprint 2: Editor & Login Controls (MultiView, Localize, ChangePassword, CreateUserWizard). Sprint 3: Data Controls + Tooling + Polish (DetailsView, PasswordRecovery, migration guide, sample updates).
 **Why:** Prioritizes getting current PRs mergeable first, then fills biggest control gaps, then invests in tooling and documentation.
-
 ### 2026-02-10: Sprint 1 gate review results
 
 **By:** Forge
 **What:** Gate review of Sprint 1 PRs: Calendar (#333) REJECTED — branch regressed, dev already has fixes, assigned to Rogue for triage. FileUpload (#335) REJECTED — `PostedFileWrapper.SaveAs()` missing path sanitization, assigned to Jubilee. ImageMap (#337) APPROVED — ready to merge. PageService (#327) APPROVED — ready to merge.
 **Why:** Formal gate review to determine merge readiness. Lockout protocol enforced: Cyclops locked out of Calendar and FileUpload revisions.
-
 ### 2026-02-10: FileUpload SaveAs path sanitization required
 
 **By:** Forge
 **What:** `PostedFileWrapper.SaveAs()` must sanitize file paths to prevent path traversal attacks. `Path.Combine` silently drops earlier arguments if a later argument is rooted. Must use `Path.GetFileName()` and validate resolved paths.
 **Why:** Security defect blocking merge of FileUpload (#335).
-
 ### 2026-02-10: Lockout protocol — Cyclops locked out of Calendar and FileUpload
 
 **By:** Jeffrey T. Fritz
 **What:** Cyclops is locked out of revising Calendar (#333) and FileUpload (#335). Calendar triage assigned to Rogue. FileUpload fix assigned to Jubilee.
 **Why:** Lockout protocol enforcement after gate review rejection.
-
 ### 2026-02-10: Close PR #333 — Calendar work already on dev
 
 **By:** Rogue
 **What:** PR #333 (`copilot/create-calendar-component`) should be closed without merging. All Calendar work including enum fix, Caption/CaptionAlign/UseAccessibleHeader, and non-blocking OnDayRender is already on `dev` (commit `d33e156`). The PR branch has 0 unique commits — merging would be a no-op or actively harmful. Issue #332 is resolved on `dev`.
 **Why:** Cyclops committed Calendar fixes directly to `dev` instead of the feature branch, leaving the PR branch behind with old broken code. Rebasing would produce an empty diff. Process note: future PR review fixes should go to the feature branch, not the target branch.
-
 ### 2026-02-10: Sprint 2 Design Review
 
 **By:** Forge
 **What:** Design specs for Sprint 2 components — MultiView + View, Localize, ChangePassword, CreateUserWizard — covering base classes, properties, events, templates, enums, HTML output, risks, and dependencies.
 **Why:** Sprint 2 scope involves 4 new components touching shared systems (LoginControls, Enums, base classes). A design review before implementation prevents rework, ensures Web Forms fidelity, and establishes contracts between Cyclops (implementation), Rogue (tests), Beast (docs), and Jubilee (samples).
-
 ### 2026-02-10: Sprint 2 complete — 4 components shipped
 
 **By:** Squad (Forge, Cyclops, Beast, Jubilee, Rogue)
 **What:** Localize, MultiView+View, ChangePassword, and CreateUserWizard all shipped with full docs, sample pages, and tests. Build passes with 0 errors, 709 tests. status.md updated to 41/53 components (77%).
 **Why:** Sprint 2 milestone — all planned components delivered with docs and samples per team policy.
-
 ### Integration test audit — full coverage achieved
 
 **By:** Colossus
 **What:** Audited all 74 sample page routes against existing smoke tests. Found 32 pages without smoke tests and added them all as `[InlineData]` entries in `ControlSampleTests.cs`. Added 4 new interaction tests in `InteractiveComponentTests.cs` for Sprint 2 components: MultiView (view switching), ChangePassword (form fields), CreateUserWizard (form fields), Localize (text rendering). Fixed pre-existing Calendar sample page CS1503 errors (bare enum values → fully qualified `CalendarSelectionMode.X`).
 **Why:** Every sample page is a promise to developers. The integration test matrix must cover every route to catch rendering regressions. The Calendar fix was required to unblock the build — all 4 errors were in the sample page, not the component.
-
 ### 2026-02-10: Sprint 3 Scope and Plan
 
 **By:** Forge
 **What:** Sprint 3 scope finalized — DetailsView and PasswordRecovery are the two buildable components. Chart, Substitution, and Xml deferred indefinitely.
 **Why:** With 48/53 components complete (91%), we have exactly 5 remaining. Three of them (Chart, Substitution, Xml) are poor candidates: Chart requires an entire charting library, Substitution is a cache-control mechanism that has no Blazor equivalent, and Xml/XSLT transforms are a dead-end technology with near-zero migration demand. DetailsView and PasswordRecovery are the only two that provide real migration value and are feasible to build.
-
 ### 2026-02-10: Colossus added — dedicated integration test engineer
 
 **By:** Jeffrey T. Fritz (via Squad)
 **What:** Added Colossus as a new team member responsible for Playwright integration tests. Colossus owns `samples/AfterBlazorServerSide.Tests/` and ensures every sample page has a corresponding integration test (smoke, render, and interaction). Rogue retains ownership of bUnit unit tests. Integration testing split from Rogue's QA role.
 **Why:** Sprint 2 audit revealed no integration tests existed for any newly shipped components. Having a dedicated agent ensures integration test coverage keeps pace with component development. Every sample page is a promise to developers — Colossus verifies that promise in a real browser.
-
 ### 2026-02-11: Deferred controls documentation pattern established
 
 **By:** Beast
 **What:** Created `docs/Migration/DeferredControls.md` to document the three permanently deferred controls (Chart, Substitution, Xml). Each control gets its own section with: what it did in Web Forms, why it's not implemented, and the recommended Blazor alternative with before/after migration examples. Added to mkdocs.yml nav under Migration.
 **Why:** Components without documentation don't exist for the developer trying to migrate. Even controls we *don't* implement need a clear "here's what to do instead" — otherwise developers hit a dead end with no guidance. This pattern can be reused if additional controls are deferred in the future.
-
 ### 2026-02-11: DetailsView and PasswordRecovery documentation shipped
 
 **By:** Beast
 **What:** Created `docs/DataControls/DetailsView.md` and `docs/LoginControls/PasswordRecovery.md`. Both added to `mkdocs.yml` nav in alphabetical order. README.md updated with documentation links for both components.
 **Why:** Sprint 3 requires docs to ship with components per team policy. Both docs follow the established convention: title → MS docs link → Features Supported → NOT Supported → Web Forms syntax → Blazor syntax → HTML output → Migration Notes (Before/After) → Examples → See Also. PasswordRecovery follows the ChangePassword.md pattern for login controls; DetailsView follows the data control patterns from FormView/GridView.
-
 ### 2026-02-11: DetailsView inherits DataBoundComponent, not BaseStyledComponent
 
 **By:** Cyclops
 **What:** DetailsView inherits `DataBoundComponent<ItemType>` (same as GridView and FormView) rather than `BaseStyledComponent`. The `CssClass` property is declared directly on the component. Event args use separate DetailsView-specific types (`DetailsViewCommandEventArgs`, `DetailsViewModeEventArgs`, etc.) rather than reusing FormView's event args.
 **Why:** Web Forms DetailsView inherits from `CompositeDataBoundControl`, which is a data-bound control. GridView and FormView already follow this pattern in the codebase via `DataBoundComponent<T>`. Using separate event args (not FormView's) matches Web Forms where `DetailsViewInsertEventArgs` and `FormViewInsertEventArgs` are distinct types. The `DetailsViewMode` enum is also separate from `FormViewMode` even though they have identical values — Web Forms treats them as distinct types.
-
 ### 2026-02-11: PasswordRecovery component — inherits BaseWebFormsComponent, 3-step flow
 
 **By:** Cyclops
 **What:** Built PasswordRecovery component in `LoginControls/` with 3-step password reset flow (UserName → Question → Success). Inherits `BaseWebFormsComponent` following existing login control patterns. Created `SuccessTextStyle` sub-component, `MailMessageEventArgs`, and `SendMailErrorEventArgs` event args. Each step has its own `EditForm`. Styles cascade via existing sub-components (`TitleTextStyle`, `LabelStyle`, `TextBoxStyle`, etc.) plus new `SuccessTextStyle`. The `SubmitButtonStyle` property maps to `LoginButtonStyle` cascading name to reuse existing sub-component. Templates (`UserNameTemplate`, `QuestionTemplate`, `SuccessTemplate`) allow full customization of each step.
 **Why:** Sprint 3 deliverable. Followed ChangePassword/CreateUserWizard patterns for consistency. Used `BaseWebFormsComponent` instead of spec-suggested `BaseStyledComponent` because all existing login controls use this base class and manage styles through CascadingParameters. Per-step `EditForm` prevents validation interference between steps.
-
 ### 2026-02-11: Sprint 3 gate review — DetailsView and PasswordRecovery APPROVED
 
 **By:** Forge
 **What:** Both Sprint 3 components passed gate review. DetailsView: correct `DataBoundComponent<ItemType>` inheritance, all 10 events with proper EventArgs, table-based HTML matching Web Forms, `DetailsViewMode` enum. 3 minor non-blocking issues (CellPadding/CellSpacing logic, docs DataSource→Items). PasswordRecovery: correct `BaseWebFormsComponent` inheritance, 3-step wizard flow, all 6 events, table-based nested HTML. 3 minor non-blocking issues (RenderOuterTable unused, SubmitButtonType unused, sample uses Sender casting vs @ref). Build: 0 errors, 797 tests. Status: 50/53 (94%).
 **Why:** Formal gate review — both components meet Web Forms fidelity standards. No blocking issues. Minor issues tracked but do not prevent shipping.
-
 ### 2026-02-11: DetailsView sample uses Items parameter with inline data
 
 **By:** Jubilee
 **What:** DetailsView sample page uses the `Items` parameter with an inline `List<Customer>` rather than `SelectMethod` for data binding. This matches the GridView RowSelection sample pattern and is the clearest way to demonstrate paging and mode-switching without requiring a static query method.
 **Why:** The `SelectMethod` approach (used in GridView Default) requires a specific method signature with `out totalRowCount` that adds complexity. For a single-record-at-a-time control like DetailsView, the `Items` parameter is more natural and easier for migrating developers to understand. Both patterns work; `Items` is preferred for sample clarity.
-
 ### 2026-02-12: Sprint 3 bUnit tests shipped — DetailsView + PasswordRecovery
 
 **By:** Rogue
 **What:** 71 new bUnit tests added for Sprint 3 components: 42 for DetailsView (5 test files: Rendering, HeaderFooter, CommandRow, Events, Paging) and 29 for PasswordRecovery (2 test files: Step1UserName, BasicFlow). Total test count now 797, all passing.
 **Why:** QA gate for Sprint 3 — both components needed comprehensive unit test coverage before merge. Tests verify rendering fidelity (table structure, property names/values, empty data, header/footer), interactive behavior (mode switching, paging, event firing), and edge cases (null items, single item paging, cancel flows, failure text display).
-
 ### 2026-02-12: Chart component JS library evaluation
 
 **By:** Forge
@@ -439,17 +414,14 @@ Suggested timeline:
 - **Sprint 4 planning:** Design review for Chart component architecture, JS interop patterns, build/packaging changes
 - **Sprint 4 execution:** Implement Chart with Phase 1 types, docs, samples, integration tests
 - **Post-Sprint 4:** Evaluate demand for Phase 2 chart types
-
 ### 2026-02-12: Milestone 4 — Chart component with Chart.js
 **By:** Forge (architecture), Squad (planning)
 **What:** Milestone 4 will implement the Chart component using Chart.js (~60KB, MIT) via Blazor JS interop. Phase 1: 8 chart types (Column, Bar, Line, Pie, Area, Doughnut, Scatter, StackedColumn). HTML output exception: `<canvas>` instead of `<img>` (justified — API fidelity is the migration value, not HTML fidelity). 8 work items across 5 waves. Target: 51/53 components (96%).
 **Why:** Chart is the highest-value remaining deferred component. Chart.js provides the best balance of bundle size, chart type coverage, and Blazor ecosystem support. D3 rejected (wrong abstraction), Plotly rejected (3-4MB bundle). Design review required before implementation (auto-triggered ceremony).
-
 ### 2026-02-12: User directive — use "milestones" not "sprints" (consolidated)
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Going forward, use "milestones" instead of "sprints" for naming work batches. All future planning uses "milestone" terminology.
 **Why:** User preference — captured for team memory. Applies retroactively to planning references where practical.
-
 ### 2026-02-23: AccessKey must be added to BaseStyledComponent
 
 **By:** Beast, Cyclops
@@ -457,25 +429,21 @@ Suggested timeline:
 **Recommendation:** Add `[Parameter] public string AccessKey { get; set; }` to `BaseStyledComponent`.
 **Why:** Universal gap confirmed by two independent audits across 28 controls. Base-class fix is the highest-leverage single change available.
 **Status:** AccessKey added in Milestone 6. ToolTip consolidated into 2026-02-25 entry below.
-
 ### 2026-02-23: Label should inherit BaseStyledComponent
 
 **By:** Beast
 **What:** `Label` currently inherits `BaseWebFormsComponent` but Web Forms `Label` inherits from `WebControl`. This means Label is missing all 9 style properties (CssClass, BackColor, ForeColor, Font, etc.). Also consider `AssociatedControlID` to render `<label for="...">` instead of `<span>`.
 **Why:** Label is one of the most commonly used controls. Missing style properties break migration for any page that styles its Labels.
-
 ### 2026-02-25: Substitution and Xml permanently deferred (consolidated)
 
 **By:** Beast
 **What:** Both controls are tightly coupled to server-side ASP.NET infrastructure: Substitution depends on the output caching pipeline; Xml depends on XSLT transformation. Neither maps to Blazor's component model. Both are formally marked as deferred in status.md and README.md. DeferredControls.md contains migration guidance: Substitution -> Blazor component lifecycle; Xml -> convert XML to C# objects and use Blazor templates.
 **Why:** Architecturally incompatible with Blazor. Marking as deferred (not "Not Started") accurately communicates they will not be implemented.
-
 ### 2026-02-23: Chart Type Gallery documentation convention
 
 **By:** Beast
 **What:** Added a "Chart Type Gallery" section to `docs/DataControls/Chart.md` showing screenshots of all 8 Phase 1 chart types. Each entry includes an H3 heading, MkDocs image (`![alt](../images/chart/chart-{type}.png)`), `SeriesChartType` enum value, and usage description. Pie and Doughnut include `!!! warning "Palette Limitation"` admonitions for the Phase 1 single-color-per-series issue.
 **Why:** Visual documentation helps migrating developers choose the correct chart type. Image path convention: `docs/images/{component}/` with `chart-{type}.png` naming.
-
 ### 2026-02-23: Feature audit findings — Editor Controls A–I
 
 **By:** Cyclops
@@ -484,7 +452,6 @@ Suggested timeline:
 2. **HyperLink.NavigateUrl vs NavigationUrl.** Blazor uses `NavigationUrl` but Web Forms uses `NavigateUrl`. Migration-breaking name difference.
 3. **List controls share common gaps.** BulletedList, CheckBoxList, and DropDownList all lack `DataTextFormatString`, `AppendDataBoundItems`, `CausesValidation`, and `ValidationGroup` from Web Forms `ListControl` base.
 **Why:** Prioritized work items for closing API gaps. Image base class fix is a single targeted change with high impact.
-
 ### 2026-02-23: Chart component implementation architecture (consolidated)
 
 **By:** Cyclops, Forge
@@ -500,74 +467,62 @@ Suggested timeline:
 9. **Task.Yield() before first chart creation.** Gives child components time to register before JS interop fires.
 10. **Enums: 4 new files.** `SeriesChartType` (35), `ChartPalette` (13), `Docking` (4), `ChartDashStyle` (6) in `Enums/` per project convention.
 **Why:** Consolidates architecture decisions from design review and implementation to provide a single reference for chart component patterns.
-
 ### 2026-02-23: BaseDataBoundComponent inherits BaseStyledComponent (consolidated)
 
 **By:** Forge (gap identification), Cyclops (implementation)
 **What:** Controls inheriting `DataBoundComponent<T>` lacked all WebControl-level style properties because the chain `DataBoundComponent<T>` → `BaseDataBoundComponent` → `BaseWebFormsComponent` skipped `BaseStyledComponent`. Changed inheritance to insert `BaseStyledComponent`: `DataBoundComponent<T>` → `BaseDataBoundComponent` → `BaseStyledComponent` → `BaseWebFormsComponent`. This gives all data-bound controls the full IStyle property set (BackColor, BorderColor, BorderStyle, BorderWidth, CssClass, ForeColor, Font, Height, Width). Removed duplicate IStyle declarations from 11 controls (GridView, DetailsView, DataGrid, DataList, TreeView, AdRotator, BulletedList, CheckBoxList, DropDownList, ListBox, RadioButtonList). 949/949 tests pass — zero regressions.
 **Why:** Affects 5+ of 9 data controls. Identified independently in data controls audit and chart design review. Single base-class fix closing ~70 style property gaps across the library.
-
 ### 2026-02-23: GridView is highest-priority data control gap
 
 **By:** Forge
 **What:** GridView is the most commonly used data control in Web Forms and has the weakest coverage: no paging, sorting, editing, selection, no style properties, 14 of 22 events missing. Currently read-only table rendering only.
 **Recommendation:** GridView enhancement should be a near-term priority, potentially as a Milestone 5 workstream.
 **Why:** Developers migrating from Web Forms will expect GridView to be functional.
-
 ### 2026-02-23: DetailsView branch should be merged forward
 
 **By:** Forge
 **What:** DetailsView has strong implementation (27 props, 16 events with cancellation) but only exists on `sprint3/detailsview-passwordrecovery`. It is not on the current working branch.
 **Why:** APPROVED in Milestone 3 gate review. Should be available on the main development branches.
-
 ### 2026-02-23: Themes and Skins — CascadingValue ThemeProvider recommended
 
 **By:** Forge
 **What:** Evaluated 5 approaches for Web Forms Themes/Skins migration. Recommended CascadingValue ThemeProvider — the only approach that faithfully models both `Theme` (override) and `StyleSheetTheme` (default) semantics. CSS-only approaches cannot set non-CSS properties. DI approach cannot scope to subtrees. SkinID must be corrected from `bool` to `string` on `BaseWebFormsComponent` first. Implementation is opt-in via `<ThemeProvider>` wrapper — zero breaking changes. Strategy is exploratory; README exclusion of themes/skins still stands.
 **Why:** Jeff requested exploration. CascadingValue aligns with existing library patterns (TableItemStyle already cascades) and is incrementally adoptable.
-
 ### 2026-02-23: PasswordRecovery component missing from current branch
 
 **By:** Rogue
 **What:** `PasswordRecovery.razor` and `.razor.cs` do not exist in `src/BlazorWebFormsComponents/LoginControls/` despite history.md referencing Sprint 3 delivery with 29 bUnit tests. Component exists on `sprint3/detailsview-passwordrecovery` branch.
 **Recommendation:** Merge the sprint3 branch forward or cherry-pick the PasswordRecovery files.
 **Why:** Confirmed by audit. Related to DetailsView branch merge-forward decision.
-
 ### 2026-02-23: Validation Display property gap — migration-blocking
 
 **By:** Rogue
 **What:** ALL six validation controls are missing the `Display` property (`ValidatorDisplay` enum: None, Static, Dynamic). Current Blazor implementation always uses Dynamic behavior (hidden when valid). `Static` reserves space even when valid — pages relying on this for layout stability will break.
 **Recommendation:** Add `Display` parameter to `BaseValidator<T>`.
 **Why:** Migration-blocking for pages using `Display="Static"`.
-
 ### 2026-02-23: ValidationSummary functional gaps
 
 **By:** Rogue
 **What:** `AspNetValidationSummary` is missing `HeaderText`, `ShowMessageBox`, `ShowSummary`, `ShowValidationErrors`, and `ValidationGroup`. Prioritize `HeaderText` and `ValidationGroup` (common in multi-form pages).
 **Why:** Missing properties affect multi-form page migration.
 **Status:** Comma-split bug fixed in M9 (2026-02-25) — see consolidated entry below.
-
 ### 2026-02-23: Login controls outer style properties (consolidated)
 
 **By:** Rogue, Cyclops
 **What:** Login, ChangePassword, and CreateUserWizard were identified as missing outer-level WebControl style properties (BackColor, CssClass, ForeColor, Width, Height) because they inherited `BaseWebFormsComponent` instead of `BaseStyledComponent`. Resolution: all three changed to inherit `BaseStyledComponent` (Option A — base class change). Outer `<table>` elements now render CssClass and computed IStyle inline styles alongside `border-collapse:collapse;`. `[Parameter]` style properties do NOT conflict with `[CascadingParameter]` sub-styles (TitleTextStyle, LabelStyle, etc.) — completely independent mechanisms. LoginView still inherits `BaseWebFormsComponent`. LoginName and LoginStatus already had full style support. PasswordRecovery should follow the same pattern when ready.
 **Why:** Migrating pages that set CssClass on Login controls would break. `BaseStyledComponent` extends `BaseWebFormsComponent` — no functionality lost.
-
 ### 2026-03-07: LoginControls namespace must be in default _Imports.razor usings (consolidated)
 **By:** Colossus, Cyclops
 **What:** `@using BlazorWebFormsComponents.LoginControls` must be included in every generated `_Imports.razor`. LoginView, AnonymousTemplate, LoggedInTemplate, ChangePassword, CreateUserWizard, and other login controls live in the `BlazorWebFormsComponents.LoginControls` sub-namespace. Without this using directive, the Razor compiler treats these components as raw HTML elements, producing RZ10012 warnings and broken auth UI. This applies to both sample pages and migration-generated projects.
 **Why:** The root `@using BlazorWebFormsComponents` namespace alone is insufficient for sub-namespace components. Originally discovered for sample pages (ChangePassword, CreateUserWizard), then generalized to the migration script's `_Imports.razor` template after Run 12 revealed the same issue for LoginView.
-
 ### 2026-02-12: External placeholder URLs replaced with local SVG images
 **By:** Colossus
 **What:** Replaced all `https://via.placeholder.com/...` URLs in Image and ImageMap sample pages with local SVG placeholder images in `wwwroot/img/`. Created 8 SVG files matching the sizes used in the samples.
 **Why:** External URLs are unreachable in CI/test environments, causing integration test failures. Local SVGs are always available and test-safe. Future sample pages must never use external image URLs.
-
 ### 2026-02-12: ASP.NET Core structured log messages filtered in integration tests
 **By:** Colossus
 **What:** Added a regex filter in `VerifyPageLoadsWithoutErrors` to exclude browser console messages matching `^\[\d{4}-\d{2}-\d{2}T` (ISO 8601 timestamp prefix). These are ASP.NET Core ILogger messages forwarded to the browser console by Blazor Server, not actual page errors.
 **Why:** Without this filter, any page that triggers framework-level logging (e.g., Calendar with many interactive elements) produces false positive test failures.
-
 ### 2026-02-12: Milestone exit criteria — samples and integration tests mandatory
 
 **By:** Jeffrey T. Fritz
@@ -576,7 +531,6 @@ Suggested timeline:
 2. **Integration tests for every sample** — Every sample page added must have at least one Playwright integration test verifying its interactive behavior
 3. **All integration tests pass** — 100% of integration tests (both new and pre-existing) must pass before the sprint is submitted
 **Why:** Sprint 3 exposed gaps where components shipped without full sample coverage and integration tests. This gate ensures no sprint is declared complete until the full chain — component → sample → integration test → green — is verified. This is a permanent policy for all future sprints.
-
 ### DetailsView auto-generated fields render inputs in Edit/Insert mode
 
 **By:** Cyclops
@@ -617,13 +571,11 @@ Chart.js uses JS interop and renders to `<canvas>`, so traditional DOM assertion
 - Use `LocatorWaitForOptions { State = WaitForSelectorState.Visible }` instead of `Expect()` since `InteractiveComponentTests` doesn't inherit from Playwright's `PageTest` class.
 - Use `WaitUntilState.NetworkIdle` for tests that need Chart.js fully initialized (library verification, dataset verification).
 - Use `WaitUntilState.DOMContentLoaded` for basic canvas presence tests.
-
 ### 2026-02-12: ChartSeries data binding extracts points via reflection
 
 **By:** Cyclops
 **What:** Fixed `ChartSeries.ToConfig()` to support data binding via `Items`, `XValueMember`, and `YValueMembers` parameters. When `Items` is provided with a non-empty `YValueMembers`, the method extracts `DataPoint` objects using reflection. The `YValueMembers` property supports comma-separated field names for multi-value charts. Type conversion handles `double`, `float`, `int`, `long`, `decimal`, `short`, `byte`, and falls back to `Convert.ToDouble()`. The manual `Points` collection is used as a fallback when `Items` is null/empty or `YValueMembers` is not specified.
 **Why:** Data-bound charts were rendering empty because `ToConfig()` only used the manual `Points` collection. Web Forms Chart supports data binding via `XValueMember`/`YValueMembers` properties, and this fix restores that capability for Blazor migration scenarios.
-
 ### 2026-02-13: Chart component Phase 1 gate review — CONDITIONAL APPROVAL
 
 **By:** Forge
@@ -662,7 +614,6 @@ Created 4 new Chart sample pages demonstrating advanced features:
 4. **ChartAreas.razor** — Axis configuration (Title, Min/Max, Interval, IsLogarithmic)
 
 ## Sample Patterns Established
-
 ### Data Binding Pattern
 Use records for clean business object definitions:
 ```csharp
@@ -675,14 +626,12 @@ Then bind with:
 ```razor
 <ChartSeries Items="@salesData" XValueMember="Month" YValueMembers="Amount" ... />
 ```
-
 ### WebColor Usage
 Use static fields, NOT `FromName()`:
 ```razor
 Color="WebColor.DodgerBlue"  // ✓ Correct
 Color="@(WebColor.FromName("DodgerBlue"))"  // ✗ Wrong - method doesn't exist
 ```
-
 ### Nav Ordering
 Chart sub-samples are alphabetically ordered in NavMenu.razor (Area, Bar, ChartAreas, Column, DataBinding, etc.).
 
@@ -745,28 +694,23 @@ Cyclops is fixing the `ChartSeries.ToConfig()` bug where data binding is not imp
 ## Total Test Count
 
 152 Chart tests (140 original + 12 new data binding tests). All passing.
-
 ### 2026-02-14: User directive — Sample website UI overhaul
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Improve the UI of the samples/AfterBlazorServerSide website with a modern layout that demos each sample, feature, and component cleanly. Add a search feature. Update integration tests with this overhaul.
 **Why:** User request — captured for team memory
-
 ### 2026-02-23: Label AssociatedControlID switches rendered element
 **By:** Cyclops
 **What:** Label renders `<label for="{AssociatedControlID}">` when AssociatedControlID is set, `<span>` when not. All style/id/accesskey attributes apply to whichever element renders.
 **Why:** Matches Web Forms behavior exactly. Important for accessibility — screen readers use `<label for>` to associate labels with inputs. No breaking change — default behavior (no AssociatedControlID) still renders `<span>`.
-
 ### 2026-02-23: BaseListControl<TItem> introduced as shared base for all list controls
 
 **By:** Cyclops
 **What:** Created `DataBinding/BaseListControl.cs` inheriting `DataBoundComponent<TItem>`, consolidating `StaticItems`, `DataTextField`, `DataValueField`, `GetItems()`, and `GetPropertyValue()` from BulletedList, CheckBoxList, DropDownList, ListBox, and RadioButtonList. Added `DataTextFormatString` (WI-47) and `AppendDataBoundItems` (WI-48) parameters to this base class. All 5 list controls now inherit `BaseListControl<TItem>` instead of `DataBoundComponent<TItem>`.
 **Why:** Web Forms has `ListControl` as the shared base for these controls. The 5 Blazor list controls had identical duplicated code for item retrieval and property extraction. Consolidating into a base class eliminates ~150 lines of duplication and provides a single place to add shared ListControl features (DataTextFormatString, AppendDataBoundItems, and future properties like CausesValidation/ValidationGroup). The `AppendDataBoundItems=false` semantics mean static items are skipped when data-bound items exist — matching Web Forms behavior where `DataBind()` clears the Items collection by default.
-
 ### 2026-02-23: CausesValidation on non-button controls follows ButtonBaseComponent pattern
 **By:** Cyclops
 **What:** CheckBox, RadioButton, and TextBox now have `CausesValidation`, `ValidationGroup`, and `ValidationGroupCoordinator` cascading parameter — same 3-property pattern used by ButtonBaseComponent. Validation fires in existing `HandleChange` methods for CheckBox/RadioButton. TextBox has the parameters but no trigger wiring because it lacks an `@onchange` binding.
 **Why:** Web Forms exposes CausesValidation/ValidationGroup on all postback-capable controls. Following the exact ButtonBaseComponent pattern (same property names, same cascading parameter name, same coordinator call) ensures consistency and lets the existing ValidationGroupProvider work with these controls without modification.
-
 ### 2026-02-23: Menu Orientation uses CSS class approach, not inline styles
 **By:** Cyclops
 **What:** Menu horizontal layout is achieved by adding a `horizontal` CSS class to the top-level `<ul>` and a scoped CSS rule `ul.horizontal > li { display: inline-block; }`. The `Orientation` enum lives at `Enums/Orientation.cs` (Horizontal=0, Vertical=1). Default is Vertical.
@@ -781,7 +725,6 @@ Cyclops is fixing the `ChartSeries.ToConfig()` bug where data binding is not imp
 **What**
 
 Milestone 6 work plan with 54 work items across 3 priority tiers, targeting ~345 feature gaps identified in the 53-control audit (SUMMARY.md). Full plan at `planning-docs/MILESTONE6-PLAN.md`.
-
 ### P0 — Base Class Fixes (18 WIs, ~180 gaps)
 Seven base class changes that sweep across many controls:
 1. `AccessKey` on `BaseWebFormsComponent` (~40 gaps)
@@ -791,7 +734,6 @@ Seven base class changes that sweep across many controls:
 5. `SetFocusOnError` on `BaseValidator` (6 gaps)
 6. `Image` → `BaseStyledComponent` (11 gaps)
 7. `Label` → `BaseStyledComponent` (11 gaps)
-
 ### P1 — Individual Control Improvements (28 WIs, ~120 gaps)
 - GridView overhaul: paging, sorting, inline row editing (most-used data control, currently 20.7% health)
 - Calendar: string styles → TableItemStyle sub-components + enum conversion
@@ -800,7 +742,6 @@ Seven base class changes that sweep across many controls:
 - ValidationSummary: HeaderText, ShowSummary, ValidationGroup
 - PasswordRecovery audit doc re-run (was 0% due to pre-merge timing)
 - Docs + integration tests for all changed controls
-
 ### P2 — Nice-to-Have (8 WIs, ~45 gaps)
 ListControl format strings, Menu Orientation, Label AssociatedControlID, Login controls outer styles, CausesValidation on CheckBox/RadioButton/TextBox.
 
@@ -826,7 +767,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 ---
 
 ## 1. Current State Analysis
-
 ### Layout Structure
 - **MainLayout.razor:** Classic sidebar + main content layout
   - Fixed 250px sidebar (purple gradient background, sticky)
@@ -836,24 +776,20 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
   - Categories: Home → Utility Features → Editor → Data → Validation → Navigation → Login → Migration Guides
   - No search functionality
   - TreeView is nested 3-4 levels deep — complex to navigate
-
 ### CSS Framework
 - **Bootstrap 4.3.1** (2019 vintage — two major versions behind)
 - Custom `site.css` (~200 lines) for layout, sidebar theming, validation states
 - Open Iconic icon font (Bootstrap 4 era icons)
 - No utility-first CSS — all custom classes
-
 ### Sample Page Organization
 - **34 top-level component folders** in `Components/Pages/ControlSamples/`
 - Pattern: Each component folder contains `Index.razor` + variant pages + `Nav.razor` for sub-navigation
 - No consistent structure — some have 1 page, some have 6+
 - `ComponentList.razor` on homepage shows flat list by category — **manually maintained, out of sync** (missing DetailsView, PasswordRecovery links)
-
 ### Static Assets
 - `wwwroot/css/` — Bootstrap + site.css
 - `wwwroot/img/` — Sample images for AdRotator, Chart
 - No favicon customization, no branding assets
-
 ### Integration Tests
 - **4 test files:** `ControlSampleTests.cs`, `InteractiveComponentTests.cs`, `HomePageTests.cs`, `PlaywrightFixture.cs`
 - Tests use **semantic selectors** (element types, attributes) not CSS class selectors
@@ -863,7 +799,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 ---
 
 ## 2. Proposed Design Direction
-
 ### 2.1 Layout Structure
 
 **Recommendation: Modern sidebar + card-based demo area**
@@ -903,7 +838,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 2. **Collapsible sidebar** with category grouping (current TreeView → simple `<details>` or Blazor Accordion)
 3. **Card-based demo pages** — description card, live demo card, code example card
 4. **Sub-page tabs** — replace current `Nav.razor` pattern with horizontal tabs
-
 ### 2.2 CSS Approach
 
 **Recommendation: Bootstrap 5.3 (latest stable)**
@@ -922,7 +856,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 - `form-group` → `mb-3` (form layout)
 - `.close` → `.btn-close` (close buttons)
 - No jQuery dependency (already not using it)
-
 ### 2.3 Component Organization
 
 **Current:** Flat navigation duplicated in TreeView (NavMenu) + ComponentList + manual sample pages
@@ -945,7 +878,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 2. **Auto-generate NavMenu** from catalog
 3. **Auto-generate ComponentList** from catalog
 4. **Template-driven sample pages** — reduce boilerplate
-
 ### 2.4 Search Implementation
 
 **Recommendation: Client-side search with Fuse.js or similar**
@@ -981,7 +913,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 | UI-10 | Add dark mode toggle | Jubilee | S | UI-1 | Bootstrap 5 color modes, localStorage persistence |
 | UI-11 | Update branding/favicon | Beast | S | — | BlazorWebFormsComponents logo, favicon.ico |
 | UI-12 | Documentation for new layout | Beast | S | UI-6 | Update any docs referencing sample site |
-
 ### Dependency Graph
 
 ```
@@ -1027,7 +958,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
          │(Col) │
          └──────┘
 ```
-
 ### Parallel Execution Plan
 
 **Phase 1 (parallel):**
@@ -1055,7 +985,6 @@ All 6 agents involved: Cyclops (implementation), Rogue (bUnit tests), Jubilee (s
 ---
 
 ## 4. Risk Assessment
-
 ### 4.1 Integration Test Breakage Risk: **LOW**
 
 Current tests use:
@@ -1067,7 +996,6 @@ Current tests use:
 **No layout CSS class selectors found in tests.** Tests target component output, not page structure.
 
 **Mitigation:** UI-9 (Colossus) runs full test suite after each major phase. Fix any breakage immediately.
-
 ### 4.2 Hardcoded Selectors: **MEDIUM**
 
 Found hardcoded patterns:
@@ -1076,7 +1004,6 @@ Found hardcoded patterns:
 - `site.css` references `.sidebar`, `.page`, `.main`, `.top-row`
 
 **Mitigation:** UI-3 (MainLayout) and UI-4 (NavMenu) will replace these classes. Grep for all Bootstrap 4 class usages before Phase 2.
-
 ### 4.3 Search Implementation: **MEDIUM**
 
 Client-side search requires:
@@ -1088,7 +1015,6 @@ Client-side search requires:
 - Use existing JS interop patterns from Chart component
 - Start with manual index; automate later if needed
 - Keep scope to basic dropdown; no fancy UX
-
 ### 4.4 Large Migration Scope: **HIGH**
 
 UI-6 touches ~80 files across 34 component folders. Risk of:
@@ -1101,7 +1027,6 @@ UI-6 touches ~80 files across 34 component folders. Risk of:
 - Migrate 2-3 components as pilot (Button, GridView, Calendar)
 - Review pilot with Jeff before proceeding
 - Use checklist to track progress
-
 ### 4.5 Bootstrap 4→5 Breaking Changes: **LOW**
 
 Most changes are utility class renames. No jQuery dependency to remove.
@@ -1201,7 +1126,6 @@ Team should be aware that Login/ChangePassword/CreateUserWizard BaseStyledCompon
 Milestone 7 added 9 new sample pages across GridView, TreeView, Menu, DetailsView, and FormView. Each page needed smoke tests (page loads without errors) and, where applicable, interaction tests (behaviors work).
 
 **What** Was Added
-
 ### Smoke Tests (ControlSampleTests.cs)
 
 Added `[InlineData]` entries to existing `[Theory]` methods:
@@ -1220,7 +1144,6 @@ Added `[InlineData]` entries to existing `[Theory]` methods:
 
 - **MenuControl_Loads_AndRendersContent:**
   - `/ControlSamples/Menu/Selection`
-
 ### Interaction Tests (InteractiveComponentTests.cs)
 
 Added 9 new `[Fact]` tests:
@@ -1285,7 +1208,6 @@ var header = page.Locator("td").Filter(new() { HasTextString = "Widget Catalog" 
 - Existing tests using bare `text=` locators for value extraction should be migrated.
 - New tests must follow this pattern from the start.
 - WaitForSelectorAsync calls should use specific selectors (e.g., `button:has-text('Edit')`) not generic element type selectors.
-
 ### 2026-02-24: User directive ΓÇö M8 scope excludes version bump and release
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Start on Forge's recommended Milestone 8 next steps EXCEPT the version bump to 1.0 and release. Focus on: Menu JS fix, Calendar fix, Menu auto-ID, formally defer Substitution/Xml, PagerSettings shared sub-component, doc polish.
@@ -1361,33 +1283,26 @@ Consistency with existing GridView style pattern ensures predictable API. DataGr
 **Component:** GridView
 
 **Decisions**
-
 ### 1. ShowHeaderWhenEmpty defaults to false (breaking behavior change)
 
 Previously, GridView always rendered `<thead>` when columns existed, regardless of data. Now `ShouldRenderHeader = ShowHeader && (HasData || ShowHeaderWhenEmpty)`. With `ShowHeaderWhenEmpty=false` (default), the header is hidden when the data source is empty. This matches Web Forms behavior where `ShowHeaderWhenEmpty` was added in .NET 4.5 with default `false`.
 
 **Impact:** Existing GridViews with empty data will stop showing headers unless `ShowHeaderWhenEmpty="true"` is added. One test (`EmptyDataText.razor`) was updated accordingly.
-
 ### 2. UseAccessibleHeader adds scope="col" to existing th elements
 
 The current GridView already renders `<th>` in the header (not `<td>`). Rather than changing the default to `<td>` (which would be a larger breaking change), `UseAccessibleHeader=true` adds `scope="col"` to the existing `<th>` elements for accessibility compliance. When false (default), `<th>` renders without scope ΓÇö preserving existing HTML output.
-
 ### 3. GridLines.None suppresses the rules attribute entirely
 
 When `GridLines=None` (default), `GetGridLinesRules()` returns `null`, so Blazor omits the `rules` attribute from the `<table>` element. This matches Web Forms behavior where `GridLines.None` means no `rules` attribute is rendered.
-
 ### 4. CellPadding/CellSpacing use -1 sentinel for "don't render"
 
 Following Web Forms convention, `-1` means the attribute is not rendered. Any value `>= 0` renders the corresponding `cellpadding`/`cellspacing` attribute on the `<table>`.
-
 ### 5. ShowFooter and paging share a single tfoot
 
 When both `ShowFooter=true` and `AllowPaging` with multiple pages, both the footer row and pager row render inside the same `<tfoot>` element. The footer row renders first, followed by the pager row. Footer row gets `FooterStyle` applied.
-
 ### 6. EmptyDataTemplate takes precedence over EmptyDataText
 
 When both `EmptyDataTemplate` (RenderFragment) and `EmptyDataText` (string) are set, the template wins. This matches Web Forms behavior.
-
 ### GridView Selection Support ΓÇö Pattern Decisions
 
 **By:** Cyclops  
@@ -1486,7 +1401,6 @@ Any component that uses JS interop via element IDs should consider auto-generati
 Menu component needed three improvements: base class upgrade for styling, selection tracking with events, and missing core properties.
 
 **Decisions**
-
 ### WI-19: Menu inherits BaseStyledComponent
 
 - Changed `Menu : BaseWebFormsComponent` ΓåÆ `Menu : BaseStyledComponent`
@@ -1495,7 +1409,6 @@ Menu component needed three improvements: base class upgrade for styling, select
 - `GetMenuCssClass()` helper returns null when CssClass is empty (same pattern as Label)
 - Existing sub-component styles (DynamicHoverStyle, StaticMenuItemStyle, etc.) remain unchanged ΓÇö they are non-parameter properties set by child sub-components, completely independent from `[Parameter]` base class styles
 - MenuItem.razor still inherits BaseWebFormsComponent (no styling needed on individual items)
-
 ### WI-21: Selection tracking and events
 
 - `SelectedItem` (MenuItem, read-only) ΓÇö set internally when a menu item is clicked
@@ -1505,7 +1418,6 @@ Menu component needed three improvements: base class upgrade for styling, select
 - Created `MenuEventArgs` class with `Item` property (follows TreeNodeEventArgs pattern)
 - MenuItem calls `ParentMenu.NotifyItemClicked(this)` via `@onclick` handler
 - `@onclick:preventDefault` only applies when `NavigateUrl` is empty (preserves navigation for link items)
-
 ### WI-23: Core missing properties
 
 - `MaximumDynamicDisplayLevels` (int, default 3) ΓÇö limits depth of dynamic flyout menus
@@ -1536,39 +1448,32 @@ Menu component needed three improvements: base class upgrade for styling, select
 **WIs:** WI-47, WI-48, WI-49
 
 ## WI-47 ΓÇö Menu Level Styles
-
 ### Decision
 Created `MenuLevelStyle` as a standalone class (not a ComponentBase sub-component) with public constructor implementing `IStyle`. Level style collections are `List<MenuLevelStyle>` parameters on Menu, not `RenderFragment` sub-components.
-
 ### Rationale
 - Level styles are positional (index-based), unlike named sub-components (StaticMenuItemStyle, DynamicMenuItemStyle)
 - A `List<T>` parameter is the natural API for ordered collections
 - `MenuLevelStyle` needed a public constructor (unlike `Style`/`TableItemStyle` which have `internal` constructors) so users can instantiate them in code
 - Follows the same `IStyle` contract so `ToStyle()` extension works for CSS generation
-
 ### Style Resolution Order
 MenuItem applies styles in this priority:
 1. LevelSelectedStyles (if item is selected and entry exists at depth index)
 2. LevelMenuItemStyles (if entry exists at depth index)
 3. Falls back to static/dynamic CSS class styles from `<style>` block
-
 ### Files Changed
 - `MenuLevelStyle.cs` (new)
 - `Menu.razor.cs` ΓÇö added 3 List parameters + 3 internal getter helpers
 - `MenuItem.razor` ΓÇö added `GetItemStyle()`, `GetItemCssClass()`, `GetSubMenuStyle()` methods
 
 ## WI-48 ΓÇö Panel BackImageUrl
-
 ### Razor Naming Collision
 The parameter `Orientation` has the same name as the enum type `Orientation`. In Razor, this causes ambiguity. Resolution: helper properties `IsVertical`/`IsCpVertical` use `Enums.Orientation.Vertical` (namespace-qualified) to disambiguate. This follows the known M6 pattern documented by Jubilee.
-
 ### Layout Approach
 - Vertical (default): fields in separate `<tr>` rows (original behavior)
 - Horizontal: fields in `<td>` columns within same `<tr>`
 - TextOnLeft (default): label beside input (original behavior)
 - TextOnTop: label in separate row above input
 - Dynamic `colspan` adjusts full-width rows (title, instructions, failure text, buttons)
-
 ### PagerSettings follows settings-not-style pattern
 
 **By:** Cyclops
@@ -1587,49 +1492,39 @@ The parameter `Orientation` has the same name as the enum type `Orientation`. In
 TreeView needed three enhancements implemented together since they all touch the same component: node-level styling, selection support, and expand/collapse programmatic control.
 
 **Decisions**
-
 ### 1. TreeNodeStyle extends Style (not TableItemStyle)
 
 Web Forms `TreeNodeStyle` inherits from `Style`, not `TableItemStyle`. It adds tree-specific properties (`ChildNodesPadding`, `HorizontalPadding`, `ImageUrl`, `NodeSpacing`, `VerticalPadding`) but NOT `HorizontalAlign`/`VerticalAlign`/`Wrap` from `TableItemStyle`. Followed the same inheritance as Web Forms.
-
 ### 2. Sub-component pattern mirrors GridView exactly
 
 Created `ITreeViewStyleContainer` + `UiTreeNodeStyle` + 6 sub-component pairs (`.razor` + `.razor.cs`), following the identical pattern used by `IGridViewStyleContainer` + `UiTableItemStyle` + GridView*Style sub-components. This keeps the codebase consistent.
-
 ### 3. Style resolution priority
 
 `GetNodeStyle(node)` resolves: **SelectedNodeStyle** (if selected) > **type-specific style** (RootNodeStyle/ParentNodeStyle/LeafNodeStyle) > **NodeStyle** (fallback). This matches Web Forms behavior.
-
 ### 4. Selection via @onclick on text anchor
 
 Rather than wrapping the entire row in a clickable element, selection is wired to the existing text `<a>` element via `@onclick="HandleNodeSelect"`. When `NavigateUrl` is empty, `@onclick:preventDefault` suppresses navigation. This preserves the existing HTML structure.
-
 ### 5. ExpandDepth applied in OnInitializedAsync
 
 `ExpandDepth` controls initial expansion only. Applied during `TreeNode.OnInitializedAsync()` ΓÇö if `Depth >= ExpandDepth` and no user override exists, the node starts collapsed. User clicks override via `_UserExpanded`.
-
 ### 6. FindNode uses Value with Text fallback
 
 `FindNode(valuePath)` splits on `PathSeparator` and matches each segment against `node.Value ?? node.Text`. This matches Web Forms behavior where Value defaults to Text if not explicitly set.
-
 ### 2026-02-26: WebFormsPage unified wrapper component (consolidated)
 
 **By:** Jeffrey T. Fritz (via Copilot), Forge
 **What:** Merge NamingContainer and the Skins/Themes wrapper into a single unified wrapper component named `WebFormsPage`. The name mirrors `System.Web.UI.Page` from ASP.NET Web Forms. Implementation: inherits `NamingContainer` (not `BaseWebFormsComponent`), adds `Theme` (ThemeConfiguration) parameter, wraps `ChildContent` in `CascadingValue<ThemeConfiguration>`. Parameters: `ID`, `UseCtl00Prefix`, `Theme`, `Visible`, `ChildContent` — no new parameters invented. Placement: `MainLayout.razor` wrapping `@Body`. ViewState already handled via inherited `BaseWebFormsComponent` dictionary. Rejected name alternatives: WebFormsSupport (too generic), WebFormsHost (implies hosting), LegacyPage (pejorative). One component instead of multiple separate wrappers.
 **Why:** User directive to simplify the migration story — developers add one wrapper and get NamingContainer + Skins/Themes support together. Forge's design ensures backward compatibility: existing `NamingContainer` and `ThemeProvider` standalone usage is unaffected.
-
 ### 2026-02-26: SharedSampleObjects for sample data parity
 
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Use `samples/SharedSampleObjects/` to deliver identical data to both Blazor and WebForms samples. Product model and sample data centralized in SharedSampleObjects. Both sides must consume identical model data from this shared library.
 **Why:** The #1 blocker for HTML match rates is different sample data between WebForms and Blazor. SharedSampleObjects already exists and is shared by both projects.
-
 ### 2026-02-26: Defer Login+Identity to future milestone
 
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Login controls + Blazor Identity integration (D-09) deferred to a future milestone. Do not schedule implementation work for Login, LoginName, LoginStatus, LoginView, ChangePassword, CreateUserWizard, or PasswordRecovery Identity integration now. Analysis preserved at `planning-docs/LOGIN-IDENTITY-ANALYSIS.md`.
 **Why:** User request — wants to delay this work and focus on other priorities first.
-
 ### 7. NodeIndent replaces hardcoded 20px
 
 The previously hardcoded `width:20px` in indent `<div>` elements now uses `IndentWidth` (from `TreeView.NodeIndent` parameter, default 20). No visual change for existing usage.
@@ -1694,13 +1589,11 @@ The remaining gaps are in the "long tail" ΓÇö style sub-components, complex e
 ## Decision
 
 Milestone 7 targets ~138 gap closures across 51 work items, organized as:
-
 ### P0 ΓÇö Re-Audit + GridView Completion (10 WIs, ~23 gaps)
 - **Re-audit all 53 controls** (mandatory, opens milestone)
 - **GridView selection**: SelectedIndex, SelectedRow, SelectedRowStyle, AutoGenerateSelectButton, events
 - **GridView style sub-components**: AlternatingRowStyle, RowStyle, HeaderStyle, FooterStyle, etc.
 - **GridView display properties**: ShowHeader/ShowFooter, Caption, EmptyDataTemplate, GridLines
-
 ### P1 ΓÇö Navigation + Data Control Depth (30 WIs, ~67 gaps)
 - **TreeView**: Node-level styles (TreeNodeStyle), selection, ExpandAll/CollapseAll, ExpandDepth
 - **Menu**: Base class ΓåÆ BaseStyledComponent, selection+events, core missing props
@@ -1708,7 +1601,6 @@ Milestone 7 targets ~138 gap closures across 51 work items, organized as:
 - **FormView**: Remaining events (ModeChanged, ItemCommand, paging), style sub-components, PagerSettings
 - **Validators**: ControlToValidate string ID support (migration-critical)
 - **Integration tests** for all updated controls
-
 ### P2 ΓÇö Nice-to-Have (11 WIs, ~48 gaps)
 - **ListView CRUD events** (large effort, ~22 gaps)
 - **DataGrid style sub-components + events** (~18 gaps)
@@ -1757,66 +1649,55 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 - `dotnet build samples/AfterBlazorClientSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet build samples/AfterBlazorServerSide/ --configuration Release` ΓÇö Γ£à passes
 - `dotnet test src/BlazorWebFormsComponents.Test/ --no-restore` ΓÇö Γ£à passes
-
 ### 2026-02-25: Deployment pipeline patterns for Docker versioning, secret-gating, and NuGet publishing (consolidated)
 **By:** Forge
 **What:** Established three CI/CD patterns: (1) Compute version with nbgv outside Docker build and inject via build-arg, since .dockerignore excludes .git. (2) Gate optional deployment steps on repository secrets using env var indirection — declare the secret in `env:`, check `env.VAR_NAME` in step-level `if:`, reference `env.VAR_NAME` in `run:`. Direct `secrets.*` references in step-level `if:` conditions are invalid and cause GitHub Actions validation failures. Applied to both `nuget.yml` and `deploy-server-side.yml` (PR #372). (3) Dual NuGet publishing — always push to GitHub Packages, conditionally push to nuget.org.
 **Why:** The .dockerignore excluding .git is a structural constraint that won't change (it's correct for build performance). Secret-gating via env var indirection ensures workflows work in forks and PRs where secrets aren't available. The original `if: ${{ secrets.SECRET_NAME != '' }}` pattern was incorrect — GitHub Actions rejects it at validation time for step-level conditions. Dual NuGet publishing gives us private (GitHub) and public (nuget.org) distribution without duplicating the pack step. These patterns should be followed for any future workflow additions.
-
 ### 2026-02-25: Milestone 9 Plan  Migration Fidelity & Hardening
 
 **By:** Forge
 **What:** Milestone 9 ratified: 12 WIs, ~30 gap closures. P0: ToolTip  BaseStyledComponent (4 WIs, ~28 gaps). P1: ValidationSummary comma-split fix, SkinID boolstring fix (3 WIs). P2: Branch cleanup, doc audit, planning-docs headers, integration test review, nav audit (5 WIs). 7 of 8 prior audit gaps already fixed; 1 confirmed open + 2 newly identified.
 **Why:** ToolTip base class fix has highest blast radius (~28 controls). ValidationSummary is data corruption risk. SkinID type mismatch breaks compiled migration code. Full plan at `planning-docs/MILESTONE9-PLAN.md`.
-
 ### 2026-02-25: ToolTip belongs on BaseStyledComponent (consolidated)
 
 **By:** Beast, Cyclops (original audit: 2026-02-23), Cyclops (implementation: 2026-02-25)
 **What:** `[Parameter] public string ToolTip { get; set; }` added to `BaseStyledComponent`. Removed 8 duplicate declarations (Button, Calendar, DataList, FileUpload, HyperLink, Image, ImageButton, ImageMap). 32 templates updated with `title="@ToolTip"`. Sub-component types (ChartSeries, DataPoint, MenuItem, TreeNode) keep their own ToolTip (item-level semantics). All 28+ styled controls now inherit ToolTip automatically.
 **Why:** Web Forms `WebControl.ToolTip` is defined at base class level. Two independent audits (Beast LX, Cyclops AI) confirmed universal gap. Base-class fix is highest-leverage single change.
-
 ### 2026-02-25: ValidationSummary comma-split fixed (consolidated)
 
 **By:** Rogue (bug identification: 2026-02-23), Cyclops (fix: 2026-02-25)
 **What:** `AspNetValidationSummary.ValidationMessages` now uses `IndexOf(',')` + `Substring()` instead of `Split(',')[1]` to extract error messages. The field identifier is always before the first comma; everything after is the message.
 **Why:** Error messages containing commas were silently truncated  data corruption bug. Original audit by Rogue identified the issue; Cyclops implemented the fix.
-
 ### 2026-02-25: SkinID is a string, not a bool
 
 **By:** Cyclops
 **What:** `BaseWebFormsComponent.SkinID` type changed from `bool` to `string`. `[Obsolete]` attribute preserved.
 **Why:** Web Forms `Control.SkinID` is a string containing the skin name. Boolean type breaks any migration code setting `SkinID="MySkin"`.
-
 ### 2026-02-25: Documentation gap audit  M6-M8 features (WI-09)
 
 **By:** Beast
 **What:** Audited docs against M6-M8 features. Fully documented: GridView, TreeView, Menu, Validators, Login. Gaps found: FormView (ItemCommand, styles, PagerSettings not in Blazor sections), DetailsView (Caption missing, styles/PagerSettings possibly stale), DataGrid (paging status unclear), ChangePassword (Orientation/TextLayout undocumented), PagerSettings (no dedicated doc page).
 **Why:** Ensures documentation accuracy before 1.0. Gaps prioritized P1-P3.
-
 ### 2026-02-25: Planning-docs marked as historical snapshots (WI-10)
 
 **By:** Beast
 **What:** Added historical snapshot headers to all 54 per-control audit files and SUMMARY.md in `planning-docs/`. Excluded README.md and MILESTONE*-PLAN.md (still current).
 **Why:** Prevents future contributors from treating pre-M6 gap data as current.
-
 ### 2026-02-25: Integration test coverage audit (WI-11)
 
 **By:** Colossus
 **What:** 100 of 105 sample page routes covered by smoke tests. 5 gaps: ListView CrudOperations (M7, P0), Label, Panel/BackImageUrl, LoginControls/Orientation, DataGrid/Styles (all pre-M7, P1). 9 of 10 M7 features have full coverage (smoke + interaction). 57 interaction tests exist.
 **Why:** Read-only audit to identify test coverage gaps before 1.0.
-
 ### 2026-02-25: Sample site navigation audit (WI-12)
 
 **By:** Jubilee
 **What:** 4 components missing entirely from ComponentCatalog.cs (Menu, DataBinder, PasswordRecovery, ViewState). 15 SubPages missing across GridView (5), TreeView (2), FormView (3), DetailsView (2), ListView (1), DataGrid (1), Panel (1). DataList "Flow" SubPage name mismatch. All 10 M7/M8 feature pages exist on disk but none linked in sidebar.
 **Why:** Users cannot discover sample pages that aren't in the sidebar navigation.
-
 ### 2026-02-25: Consolidated audit reports use `planning-docs/AUDIT-REPORT-M{N}.md`
 
 **By:** Beast
 **What:** When multiple audits are conducted in a milestone, their findings should be consolidated into a single report at `planning-docs/AUDIT-REPORT-M{N}.md`. The report follows the planning-docs historical snapshot header convention and includes: summary table, per-audit sections (findings + resolution status), additional findings section, and a complete issue tracker appendix. Each finding is mapped to its resolving GitHub Issue with assigned agent.
 **Why:** M9 produced three separate audits (doc gaps, test coverage, sample navigation) with findings scattered across agent history files. A consolidated report makes it easy for Jeff and the team to see all findings in one place, track resolution against M10 issues, and verify coverage. This pattern should be reused for future milestone audits.
-
 ### 2026-02-25: TreeView NodeImage must check ShowExpandCollapse independently of ShowLines
 
 **By:** Cyclops
@@ -1824,7 +1705,6 @@ Removed the `@rendermode InteractiveServer` directive. No other sample page in t
 **Issue:** #361
 **What:** The `NodeImage` property in `TreeNode.razor.cs` now explicitly checks `ShowExpandCollapse` in the non-`ShowLines` code paths, rather than relying on `ImageSet.Collapse` being non-empty. A new `ExpandCollapseImage(bool)` helper provides the ImageSet filename with a guaranteed fallback to `Default_Collapse.gif` / `Default_Expand.gif`.
 **Why:** The previous code had a fragile assumption: it used `string.IsNullOrEmpty(ImageSet.Collapse)` as a proxy for "should I show expand/collapse images." The fix makes the intent explicit  `ShowExpandCollapse` controls whether expand/collapse images are used, and the ImageSet only controls *which* images. All 51 TreeView tests pass.
-
 ### 2026-02-25: Migration Analysis Tool PoC architecture
 **By:** Forge
 **What:** Milestone 12 introduces a Migration Analysis Tool as a CLI (`bwfc-migrate`) in the same repo at `src/BlazorWebFormsComponents.MigrationAnalysis/`. The PoC uses regex-based ASPX parsing (not Roslyn) to extract `<asp:*>` controls, maps them against a registry of all 53 planned BWFC components + ~15 known unsupported controls, analyzes code-behind patterns via regex, scores page complexity (Green/Yellow/Red), and produces Markdown + JSON reports. Packaged as a `dotnet tool`. Three-phase roadmap: M12 = analysis + CLI, Phase 2 = Roslyn + scaffolding, Phase 3 = Copilot agent. 13 work items total.
@@ -1865,7 +1745,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 
 - PR #372 should now show only the 2 CI fix commits
 - No code was lost -- all previously merged work exists in upstream/dev
-
 ### 2026-02-25: Strip NBGV from Docker build to fix version stamping
 
 **By:** Forge
@@ -1873,7 +1752,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Added `sed` command in `samples/AfterBlazorServerSide/Dockerfile` (after `COPY . .`, before `dotnet build`) to remove the `Nerdbank.GitVersioning` PackageReference from `Directory.Build.props` inside the Docker build context. This allows the SDK's default assembly attribute generation to use the externally-passed `-p:Version=$VERSION -p:InformationalVersion=$VERSION` properties without NBGV interference.
 
 **Why:** NBGV's MSBuild targets unconditionally override version properties during build execution via task `<Output>` elements, which bypass MSBuild global property (`-p:`) precedence. Inside Docker (where `.git` is excluded by `.dockerignore`), NBGV falls back to `version.json` and stamps assemblies with a stale/inaccurate version instead of the precise version computed by `nbgv get-version` in the workflow. No combination of `-p:` properties can reliably prevent this because NBGV: (1) suppresses SDK attribute generation, (2) overwrites `AssemblyInformationalVersion` during execution, and (3) generates its own attribute source file. The only reliable fix is to remove NBGV entirely from the Docker build, which is safe because all projects only depend on NBGV transitively through `Directory.Build.props` — none reference NBGV properties directly.
-
 ### 2026-02-25: Fix 19 unreachable sample pages in ComponentCatalog.cs (#350)
 
 **By:** Jubilee
@@ -1881,7 +1759,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Updated `ComponentCatalog.cs` to link all 19 previously unreachable sample pages. Added 5 new component entries (DataBinder, ViewState, DetailsView, Menu, PasswordRecovery) and 15 new SubPage entries across GridView, TreeView, FormView, ListView, DataGrid, and Panel. Fixed DataList SubPage name from "Flow" to "SimpleFlow".
 
 **Why:** Sample pages existed on disk but were unreachable from the catalog navigation. DetailsView had zero catalog presence despite having 3 sample pages. SubPages are alphabetically sorted to match existing convention.
-
 ### 2026-02-25: PagerSettings gets a dedicated doc page (#359)
 
 **By:** Beast
@@ -1889,7 +1766,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Created `docs/DataControls/PagerSettings.md` as a standalone documentation page for the shared PagerSettings sub-component. Added to mkdocs.yml nav under Data Controls. PagerSettings is used by FormView, DetailsView, and GridView. Future shared sub-components of similar complexity should follow this pattern.
 
 **Why:** Rather than duplicating the PagerSettings property reference in each parent control's doc, a single dedicated page is linked from all three.
-
 ### 2026-02-25: Stale "NOT Supported" doc entries corrected (#359)
 
 **By:** Beast
@@ -1897,7 +1773,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Removed PagerSettings and row styles from DetailsView's "NOT Supported" list. Removed Paging, Sorting, Selection, and Editing from DataGrid's "NOT Supported" list. All were implemented in M6-M8 but docs were never updated.
 
 **Why:** Stale "NOT Supported" entries mislead migrators into thinking features are missing when they actually work. Future milestone work should include a doc review pass to catch similar drift.
-
 ### 2026-02-25: LoginView and PasswordRecovery migrated to BaseStyledComponent (#352, #354)
 
 **By:** Cyclops
@@ -1905,7 +1780,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** LoginView and PasswordRecovery now inherit from `BaseStyledComponent` instead of `BaseWebFormsComponent`, matching Login, ChangePassword, and CreateUserWizard. PasswordRecovery renders CssClass/Style/ToolTip on all three step tables. LoginView has no wrapper element (template-switching component) so styled properties are available but not rendered.
 
 **Why:** All login controls should consistently inherit from BaseStyledComponent. No breaking changes — all 1200+ tests pass.
-
 ### 2026-02-25: ListView CRUD events — full event parity (#356)
 
 **By:** Cyclops
@@ -1913,7 +1787,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** ListView now has full event parity for CRUD operations. 7 remaining events implemented: Sorting, Sorted, PagePropertiesChanging, PagePropertiesChanged, SelectedIndexChanging, SelectedIndexChanged, LayoutCreated. Sort/Select commands route through HandleCommand; paging uses dedicated SetPageProperties() method. LayoutCreated converted from EventHandler to EventCallback<EventArgs>. SortDirection toggle matches GridView behavior. 3 new EventArgs classes, 12 new tests.
 
 **Why:** ListView needs full event parity with Web Forms to support migration scenarios where applications rely on these events for sorting, paging, and selection behavior.
-
 ### 2026-02-25: Menu styles use MenuItemStyle pattern, not UiTableItemStyle (#360)
 
 **By:** Cyclops
@@ -1921,7 +1794,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Menu style sub-components (DynamicMenuStyle, StaticMenuStyle, DynamicMenuItemStyle, StaticMenuItemStyle) inherit `MenuItemStyle` (which inherits `ComponentBase, IStyle`), NOT `UiTableItemStyle`. The `IMenuStyleContainer` interface exposes these as `MenuItemStyle` properties. When adding RenderFragment parameters to a component that already has `ChildContent`, tests mixing named RenderFragments with bare content must wrap the bare content in `<ChildContent>` tags. CascadingValue for `ParentMenu` now has `IsFixed="true"` for performance.
 
 **Why:** Menu styles produce CSS text rendered into an inline `<style>` block via `ToStyle()`. This is fundamentally different from GridView/Calendar styles which use `TableItemStyle` objects applied as HTML element attributes. Forcing Menu styles into the `UiTableItemStyle` hierarchy would require restructuring the entire Menu CSS rendering approach with no benefit.
-
 ### 2026-02-25: All 5 missing smoke tests added (#358)
 
 **By:** Colossus
@@ -1929,7 +1801,6 @@ Used --force-with-lease for the force-push to origin (not --force), which ensure
 **What:** Added 5 InlineData entries to existing Theory smoke tests in `ControlSampleTests.cs`: ListView CrudOperations, Label, Panel BackImageUrl, LoginControls Orientation, DataGrid Styles. All fit cleanly as InlineData on existing Theory methods — no new Fact tests needed. Panel/BackImageUrl uses external placeholder URLs; smoke test works due to existing "Failed to load resource" filter, but the page should be updated to use local images per team convention.
 
 **Why:** M9 audit identified 5 sample pages without smoke tests. Every sample page is a promise to developers — all must have corresponding smoke tests.
-
 ### 2026-02-25: Feature branch workflow required
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** All new work MUST be done on feature branches, pushed to origin, with a PR to upstream/dev. Never commit directly to the dev branch.
@@ -2059,7 +1930,6 @@ Jeff is right to not be confident. I found **7 issues** — 1 P0 (broken behavio
 ---
 
 ## Issues
-
 ### 1. P0 — External `SelectedDate` parameter changes are not synced to visual selection
 
 **Web Forms does:** When `SelectedDate` is set programmatically, the `SelectedDates` collection is updated to contain that date, and the calendar re-renders showing that date as selected.
@@ -2089,7 +1959,6 @@ protected override void OnParametersSet()
 Need care to avoid clearing multi-date selections (week/month) on re-render — track whether the last selection was internal (click) vs. external (parameter change).
 
 ---
-
 ### 2. P1 — `SelectWeekText` default value is wrong
 
 **Web Forms does:** `SelectWeekText` defaults to `"&gt;"` (single `>` character).
@@ -2106,7 +1975,6 @@ public string SelectWeekText { get; set; } = "&gt;";
 ```
 
 ---
-
 ### 3. P1 — `SelectedDates` collection is not sorted in ascending order
 
 **Web Forms does:** `SelectedDates` is a `SelectedDatesCollection` that stores dates *"sorted in ascending order by date"* ([MSDN](https://learn.microsoft.com/dotnet/api/system.web.ui.webcontrols.calendar.selecteddates?view=netframework-4.8.1)). Code iterating `SelectedDates` can rely on chronological order. `SelectedDates[0]` is always the earliest date.
@@ -2123,7 +1991,6 @@ public IReadOnlyCollection<DateTime> SelectedDates =>
 Or switch `_selectedDays` to a `SortedSet<DateTime>` for O(log n) insert with maintained order.
 
 ---
-
 ### 4. P1 — `SelectedDates` is read-only; Web Forms allows programmatic manipulation
 
 **Web Forms does:** `SelectedDates` is a `SelectedDatesCollection` with `Add()`, `Remove()`, `Clear()`, `SelectRange(DateTime, DateTime)`, and indexer `[int]` methods. Developers programmatically add/remove dates: `Calendar1.SelectedDates.Add(someDate)`, `Calendar1.SelectedDates.SelectRange(start, end)`.
@@ -2135,7 +2002,6 @@ Or switch `_selectedDays` to a `SortedSet<DateTime>` for O(log n) insert with ma
 **Fix:** Create a `SelectedDatesCollection` class that wraps `_selectedDays` and exposes `Add`, `Remove`, `Clear`, `SelectRange`, `Contains`, and indexer. The collection should sync back to `SelectedDate` (first item) when modified. This is a larger effort but critical for API fidelity.
 
 ---
-
 ### 5. P1 — Day cell styles are exclusive, not layered/merged
 
 **Web Forms does:** Day cell styles are **merged** — `DayStyle` is the base, then `WeekendDayStyle`, `OtherMonthDayStyle`, `TodayDayStyle`, and `SelectedDayStyle` are layered on top. Each layer overrides only the properties it defines; unset properties inherit from lower layers. A selected weekend day gets `DayStyle` font + `WeekendDayStyle` color + `SelectedDayStyle` background.
@@ -2147,7 +2013,6 @@ Or switch `_selectedDays` to a `SortedSet<DateTime>` for O(log n) insert with ma
 **Fix:** Refactor `GetDayCellCss()` and `GetDayCellStyle()` to merge styles. For inline styles, concatenate non-conflicting properties. For CSS classes, combine all applicable classes (space-separated). This is a deeper architectural fix that may benefit from a `TableItemStyle.MergeWith()` helper.
 
 ---
-
 ### 6. P2 — No test coverage for week or month selection
 
 **Web Forms does:** N/A (test coverage concern).
@@ -2171,7 +2036,6 @@ Or switch `_selectedDays` to a `SortedSet<DateTime>` for O(log n) insert with ma
 **Fix:** Add comprehensive selection tests to `Selection.razor`. Priority: week selection and month selection end-to-end.
 
 ---
-
 ### 7. P2 — `SelectedDates` creates a new collection on every access
 
 **Web Forms does:** `SelectedDates` returns the same `SelectedDatesCollection` instance across accesses. `Calendar1.SelectedDates == Calendar1.SelectedDates` is `true`.
@@ -2243,7 +2107,6 @@ For the record, these aspects are correctly implemented:
 | 7 | P2 | SelectedDates allocation per access | Small — caching |
 
 **Recommendation:** Fix #1 (P0) and #2 (P1, trivial) immediately. #3 and #6 in the next sprint. #4 and #5 are architectural and should be work items. #7 is nice-to-have.
-
 ### 2026-02-26: HTML Audit Strategy and Divergence Registry (consolidated)
 
 **By:** Forge
@@ -2272,27 +2135,22 @@ For the record, these aspects are correctly implemented:
 - **Prioritize Tier 1 controls** for pipeline validation: Button, TextBox, HyperLink, DropDownList, Repeater, DataList.
 - Coordinator agent scope should be narrow: track captures, comparisons, and divergences only.
 - **Screenshot comparison is low-value** — defer to a later phase.
-
 ### 2026-02-25: User directive — HTML audit milestones take priority
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** The HTML fidelity audit (BeforeWebForms IIS Express + Playwright capture + Blazor comparison) should be planned as milestones starting at M11. The existing M11 and M12 work (including Migration Analysis Tool PoC) should be delayed until after the audit milestones complete.
 **Why:** User request — HTML output fidelity is the foundation that the rest of the project depends on. Audit first, then build tools on top of verified components.
-
 ### 2026-02-25: HTML audit milestone plan (M11-M13)
 **By:** Forge
 **What:** Created a three-milestone plan (M11–M13) for comprehensive HTML fidelity audit comparing Web Forms gold-standard output against Blazor component output. M11: audit infrastructure + Tier 1 (simple controls) capture. M12: Tier 2 (data controls) with normalization pipeline. M13: Tier 3 (JS-coupled) + remaining controls + master audit report. The existing M12 (Migration Analysis Tool PoC) has been renumbered to M14. The previously planned M11 (Skins & Themes Implementation) is deferred to M15+.
 **Why:** Jeff directed that HTML output fidelity verification is the foundation the rest of the project depends on. At 51/53 components, we've never systematically verified that Blazor output matches Web Forms output. The audit must complete before building migration tooling (M14) so that tool can reference verified HTML fidelity data. The three-tier phasing (simple → data → JS-coupled) minimizes risk by proving infrastructure on easy controls first.
-
 ### 2026-02-26: IIS Express setup script for BeforeWebForms HTML audit
 **By:** Cyclops
 **What:** Created `scripts/Setup-IISExpress.ps1`  automates BeforeWebForms sample app setup for IIS Express with dynamic compilation. Key design: CodeBehind-to-CodeFile conversion is temporary (reverted via `-Revert` switch using git checkout), NuGet packages restored to `src/packages/`, Roslyn compilers copied to `bin/roslyn/`, nuget.exe downloaded on demand, fully idempotent.
 **Why:** The HTML audit requires running the BeforeWebForms sample app under IIS Express to capture gold-standard Web Forms HTML output. Manual setup was error-prone and undocumented.
-
 ### 2026-02-26: Intentional divergence registry (D-01 through D-10)
 **By:** Forge
 **What:** Created `planning-docs/DIVERGENCE-REGISTRY.md` with 10 documented intentional divergences covering ID mangling, PostBack mechanisms, ViewState, WebResource.axd, Chart rendering, Menu table mode, TreeView JS, Calendar selection, Login infrastructure, and Validator scripts. Each entry documents affected controls, divergence description, category, reason, CSS/JS impact, and normalization rules.
 **Why:** Without a pre-defined registry, auditors would repeatedly investigate platform-level differences that can never be replicated in Blazor. The registry provides normalization rules for the audit pipeline and classification guidance for audit reports.
-
 ### 2026-02-26: Decision: NamingContainer inherits BaseWebFormsComponent, not BaseStyledComponent
 
 **By:** Cyclops
@@ -2314,7 +2172,6 @@ For the record, these aspects are correctly implemented:
 1. **Separate CascadingValue in razor template** — Unnecessary since BaseWebFormsComponent already cascades.
 2. **Internal parent component for ctl00** — Over-engineered; modifying ComponentIdGenerator is simpler.
 3. **Override ID property getter** — Would break the component's own ID, causing confusion.
-
 ### 2026-02-26: D-06: Menu RenderingMode=Table — Whitespace in Table Elements
 
 **Decision by:** Cyclops  
@@ -2345,7 +2202,6 @@ AngleSharp (used by bUnit for DOM assertions) foster-parents `<td>` elements out
 - No impact on existing List mode rendering (zero changes to that path).
 - 4 new tests validate both rendering modes and both orientations.
 - All 1257+ tests pass with 0 regressions.
-
 ### 2026-02-26: Decision: Login Controls + Blazor Identity Integration Strategy (D-09)
 
 **Date:** 2026-02-27
@@ -2367,23 +2223,18 @@ The project has 7 login-related Web Forms controls implemented as Blazor compone
 4. **All 7 controls use an event-only pattern** where the developer handles all logic in callbacks. This works but provides no built-in functionality.
 
 **Decisions**
-
 ### 1. Create a separate `BlazorWebFormsComponents.Identity` NuGet package
 
 The core package must NOT depend on `Microsoft.AspNetCore.Identity`. The Identity package provides pre-built handler implementations and server endpoints.
-
 ### 2. Use handler delegate pattern in core package
 
 Each control gets optional `Func<>` handler delegate parameters (e.g., `AuthenticateHandler`, `ChangePasswordHandler`). When set, the component calls the handler instead of relying on event-only patterns. When not set, existing behavior is preserved. **Zero breaking changes.**
-
 ### 3. Priority order: LoginName → LoginView → LoginStatus → Login → ChangePassword → CreateUserWizard → PasswordRecovery
 
 The first three are Small complexity (1-2 days each). Login and ChangePassword are Medium (3-5 days). CreateUserWizard and PasswordRecovery are Large (5-10 days).
-
 ### 4. Auth state re-render fix is cross-cutting
 
 LoginName, LoginView, LoginStatus, and Login all need to subscribe to `AuthenticationStateChanged` or accept `[CascadingParameter] Task<AuthenticationState>`. This should be done as a single foundational change before individual control work.
-
 ### 5. Redirect-based flows for cookie operations
 
 Login and LoginStatus should get `LoginActionUrl` and `LogoutActionUrl` parameters for redirect-based sign-in/sign-out. The Identity package provides the corresponding server endpoints.
@@ -2399,13 +2250,11 @@ Login and LoginStatus should get `LoginActionUrl` and `LogoutActionUrl` paramete
 The M13 audit captured WebForms and Blazor HTML for 4 data controls showing 389 total line differences (DataList 110, GridView 33, ListView 182, Repeater 64). A line-by-line analysis was performed to classify each divergence.
 
 ## Decision
-
 ### 1. Sample Parity is the dominant cause of divergences
 
 The majority of differences (estimated 90%+) are caused by the Blazor sample pages using different templates, styles, columns, and data formats than the corresponding Web Forms samples. The Blazor samples must be rewritten to match the Web Forms samples before meaningful fidelity comparison is possible.
 
 **Implication:** Items 6–10 in the action plan (Jubilee tasks) are prerequisites for accurate audit results.
-
 ### 2. Five genuine component bugs identified
 
 | Bug | Control | Description | Priority |
@@ -2415,11 +2264,9 @@ The majority of differences (estimated 90%+) are caused by the Blazor sample pag
 | BUG-GV-1 | GridView | Default GridLines may not match WF default (Both) | P1 |
 | BUG-GV-2 | GridView | Missing default `border-collapse:collapse` | P1 |
 | BUG-GV-3 | GridView | Empty `<th>` instead of `&nbsp;` for blank headers | P2 |
-
 ### 3. ListView and Repeater have zero component bugs
 
 All differences in these two controls are entirely sample parity issues. The components render templates correctly.
-
 ### 4. Normalization pipeline gaps
 
 - Blazor output for data controls has not been normalized (directories missing under `audit-output/normalized/blazor/`)
@@ -2434,7 +2281,6 @@ See `planning-docs/DATA-CONTROL-ANALYSIS.md` for the complete line-by-line break
 - 3 P1 bugs need Cyclops fixes before M13 completion
 - 4 sample rewrites needed (Jubilee) before re-capture
 - Normalization pipeline update needed (Colossus)
-
 ### 2026-02-26: Decision: Post-Bug-Fix Capture Results — Sample Parity is the Primary Blocker
 
 **Date:** 2026-02-26
@@ -2459,7 +2305,6 @@ Re-ran the full HTML capture pipeline after 14 bug fixes across 10 controls (But
 **The #1 blocker for achieving meaningful match rates is sample data parity, not component bugs.**
 
 Nearly every remaining divergence is caused by the WebForms and Blazor samples using completely different text, data, IDs, styling, and configuration. Examples: Label shows "Hello World" vs "Hello, World!", Button shows "Blue Button" vs "Click me!", HyperLink links to bing.com vs github.com.
-
 ### Recommended priority order:
 1. **P0:** Align Blazor sample data to match WebForms samples (could convert 20+ divergences to exact matches)
 2. **P1:** Add audit markers to 64 missing Blazor sample pages
@@ -2474,7 +2319,6 @@ Without sample alignment, the pipeline cannot distinguish between "component ren
 
 Full analysis: `planning-docs/POST-FIX-CAPTURE-RESULTS.md`
 Diff report: `audit-output/diff-report-post-fix.md`
-
 ### LoginView uses `<div>` wrapper for BaseStyledComponent styles
 
 **By:** Cyclops
@@ -2509,7 +2353,6 @@ WebForms audit HTML shows these are the exact patterns used by .NET Framework. M
 ---
 
 ## 1. Current State Assessment
-
 ### Where We Stand
 
 After PR #377, we have the most complete picture of HTML fidelity this project has ever produced. The numbers tell a clear story:
@@ -2525,7 +2368,6 @@ After PR #377, we have the most complete picture of HTML fidelity this project h
 | Data control investigations needed | 4 controls | Unknown severity |
 
 **The "1 exact match" number is misleading.** The vast majority of divergences are caused by **different sample data** between WebForms and Blazor, not by component bugs. If we align the sample data, I estimate **15–20 controls** would achieve exact or near-exact match immediately. The actual HTML structure is correct for most Tier 1 controls — DropDownList, HyperLink, HiddenField, Image (minus `longdesc`), ImageMap, Label, Literal, Panel, PlaceHolder, and AdRotator all render correct tag structure with only content differences.
-
 ### Controls by Distance from Pixel-Perfect
 
 **Near-perfect (correct structure, needs sample data alignment only):** ~12 controls
@@ -2546,7 +2388,6 @@ After PR #377, we have the most complete picture of HTML fidelity this project h
 ---
 
 ## 2. Remaining Divergence Analysis
-
 ### Category A — Fixable Structural Bugs (5 controls, ~8–14 hours)
 
 These are genuine HTML structure differences where the Blazor component renders wrong elements or missing attributes. All fixable.
@@ -2560,7 +2401,6 @@ These are genuine HTML structure differences where the Blazor component renders 
 | **FileUpload** | Stray GUID fragment leaks as HTML attribute (CSS isolation scope artifact) | 1 hr | 1 |
 
 **Status of PR #377 fixes:** Button (`<input type="submit">`), BulletedList `<span>` removal, LinkButton `href`, Calendar border/`<tbody>`, CheckBox wrapper removal, Image `longdesc`, DataList border-collapse, GridView `rules`/`border`, and TreeView compression were all **fixed and verified** in the post-fix capture. However, BulletedList `<ol>` rendering and `list-style-type` mapping were NOT addressed. LinkButton `class` was NOT addressed. CheckBox may still have issues depending on capture state vs. code state.
-
 ### Category B — Sample Parity Issues (NOT component bugs, ~22 entries)
 
 The single highest-value action for improving match rates. These controls render correct HTML structure but use completely different data/text/URLs between WebForms and Blazor samples:
@@ -2582,7 +2422,6 @@ The single highest-value action for improving match rates. These controls render
 | PlaceHolder | Different placeholder text |
 
 **Fix approach:** Update Blazor sample pages to mirror exact WebForms content. This is a Jubilee task — mechanical but tedious. Estimated effort: 4–6 hours. Impact: potentially **20+ controls move to exact match** in one sprint.
-
 ### Category C — Intentional/Unfixable Divergences (D-01 through D-10)
 
 These are permanent architectural differences. The normalizer already handles them. No action needed.
@@ -2608,7 +2447,6 @@ These are permanent architectural differences. The normalizer already handles th
 | **D-12** | Boolean attribute format: `selected=""` (HTML5) vs `selected="selected"` (XHTML) | **Register as intentional.** Both are valid HTML. Blazor uses HTML5-style; Web Forms uses XHTML-style. Add normalizer rule to treat as equivalent. |
 | **D-13** | Calendar previous-month day padding (WF shows Jan 25–31; Blazor starts at Feb 1) | **Fix.** Web Forms Calendar pads the first week with previous month's days. Our Blazor Calendar should do the same — it's visible structural content. |
 | **D-14** | Calendar style property pass-through (WF applies inline styles for ForeColor, Font, etc.; Blazor doesn't) | **Fix progressively.** Calendar style application is incomplete — the `<table>` and cell-level styles from `TitleStyle`, `DayStyle`, `OtherMonthDayStyle`, `WeekendDayStyle`, `TodayDayStyle` etc. are not being applied. This is a significant fidelity gap for Calendar specifically. |
-
 ### Category D — Normalizer Artifacts (3 items)
 
 | Issue | Impact | Fix |
@@ -2622,7 +2460,6 @@ These are permanent architectural differences. The normalizer already handles th
 ## 3. Prioritized Next Steps — What M15 Should Focus On
 
 Ranked by **impact per unit of effort**:
-
 ### 🔴 Tier 1 Priority: Sample Data Alignment (Impact: MASSIVE, Effort: MEDIUM)
 
 **This is the single highest-leverage action.** One sprint of sample alignment work could move us from 1 exact match to 15–20+ exact matches. Every other effort is wasted if the samples don't match — we can't tell what's a bug vs. what's different data.
@@ -2632,7 +2469,6 @@ Ranked by **impact per unit of effort**:
 - Owner: Jubilee
 - Effort: 4–6 hours
 - Impact: ~22 false-positive divergences eliminated; true structural bugs surface cleanly
-
 ### 🔴 Tier 2 Priority: Fix Remaining Structural Bugs (Impact: HIGH, Effort: LOW-MEDIUM)
 
 Ship the remaining P1–P3 bug fixes that were identified but not addressed in PR #377:
@@ -2649,7 +2485,6 @@ Ship the remaining P1–P3 bug fixes that were identified but not addressed in P
 Owner: Cyclops
 Total effort: 6–9 hours
 Impact: 14+ variants improved, 6+ potentially exact match
-
 ### 🟡 Tier 3 Priority: Close Blazor Capture Gaps (Impact: HIGH, Effort: MEDIUM)
 
 64 variants have no Blazor capture. Prioritize by ROI:
@@ -2667,7 +2502,6 @@ Impact: 14+ variants improved, 6+ potentially exact match
 - Impact: ~42 more comparisons
 
 Owner: Jubilee (samples), Colossus (captures)
-
 ### 🟢 Tier 4 Priority: Normalizer Enhancements (Impact: MEDIUM, Effort: LOW)
 
 | Enhancement | Effort | Impact |
@@ -2679,7 +2513,6 @@ Owner: Jubilee (samples), Colossus (captures)
 
 Owner: Cyclops
 Total effort: 2–3 hours
-
 ### 🟢 Tier 5 Priority: Data Control Deep Investigation (Impact: UNKNOWN, Effort: MEDIUM)
 
 DataList (110 lines), GridView (33 lines), ListView (182 lines), Repeater (64 lines) — all have both captures but show significant divergences. Need line-by-line classification.
@@ -2692,7 +2525,6 @@ DataList (110 lines), GridView (33 lines), ListView (182 lines), Repeater (64 li
 
 Owner: Forge (classification), Cyclops (fixes)
 Effort: 4–8 hours investigation, unknown fix effort
-
 ### 🔵 Tier 6 Priority: Calendar Deep Fix (Impact: HIGH for one control, Effort: HIGH)
 
 Calendar is the most complex control and the closest to pixel-perfect among complex controls (73% similarity on best variant). Remaining gaps:
@@ -2713,7 +2545,6 @@ Impact: Could push Calendar from 73% to 90%+ similarity
 ## 4. Pixel-Perfect Realism
 
 Let me be blunt about what "pixel-perfect" means for this project.
-
 ### Controls That CAN Achieve Exact Normalized Match
 
 With sample alignment + remaining bug fixes, these controls should achieve **100% normalized HTML match**:
@@ -2735,7 +2566,6 @@ With sample alignment + remaining bug fixes, these controls should achieve **100
 | Button | Sample alignment only (already fixed to `<input>`) | 85% |
 
 **Realistic target: 13–15 exact matches after M15 (up from 1 today).**
-
 ### Controls That Can Achieve Near-Match (>90% normalized similarity)
 
 | Control | Gap | Realistic Ceiling |
@@ -2745,7 +2575,6 @@ With sample alignment + remaining bug fixes, these controls should achieve **100
 | RadioButtonList | Stable IDs | 90% with ID fix |
 | FileUpload | GUID attribute removal | 95% |
 | GridView | Sample alignment + investigation | 85–95% TBD |
-
 ### Controls That Will ALWAYS Have Structural Differences
 
 Be honest. These controls have fundamental architectural gaps that make exact HTML match impossible or impractical:
@@ -2775,13 +2604,11 @@ Under this definition, **I believe 20–25 controls can achieve "pixel-perfect" 
 ---
 
 ## 5. Recommended M15 Scope
-
 ### Milestone 15: HTML Fidelity Closure
 
 **Branch:** `milestone15/html-fidelity-closure`
 **Duration estimate:** 2–3 weeks
 **Theme:** Close the gap between audit findings and actual HTML fidelity. Move from 1 exact match to 15+ exact matches.
-
 ### Work Items
 
 | # | Work Item | Description | Owner | Size | Priority |
@@ -2798,7 +2625,6 @@ Under this definition, **I believe 20–25 controls can achieve "pixel-perfect" 
 | M15-10 | **Data control deep investigation** | Line-by-line classification of DataList (110 lines), GridView (33 lines), ListView (182 lines), Repeater (64 lines) divergences. Separate genuine bugs from sample parity and D-01/D-02. File issues for genuine bugs. | Forge | M | 🟢 P3 |
 | M15-11 | **Re-run full audit pipeline** | After all fixes and sample alignment, re-run the complete capture + normalize + diff pipeline. Target: ≥15 exact matches. Produce updated diff report. | Colossus | M | 🟢 P3 |
 | M15-12 | **Update divergence registry** | Add D-11 through D-14 as appropriate. Document any new divergences discovered during M15 investigation. Update `DIVERGENCE-REGISTRY.md`. | Forge | S | 🟢 P3 |
-
 ### Agent Assignments
 
 | Agent | Work Items | Role |
@@ -2809,7 +2635,6 @@ Under this definition, **I believe 20–25 controls can achieve "pixel-perfect" 
 | **Colossus** | M15-11 | Full pipeline re-run |
 | **Rogue** | — | Test updates for any HTML fixes Cyclops makes |
 | **Beast** | — | Doc updates post-M15 if new exact matches warrant verification badges |
-
 ### Dependencies
 
 ```
@@ -2820,7 +2645,6 @@ M15-08 ──→ M15-11  (new markers before re-run)
 M15-10 ──→ M15-12  (investigation informs registry)
 M15-11 ──→ M15-12  (re-run results inform final registry)
 ```
-
 ### Exit Criteria
 
 1. ≥15 controls achieve exact normalized HTML match (up from 1)
@@ -2831,7 +2655,6 @@ M15-11 ──→ M15-12  (re-run results inform final registry)
 6. Normalizer enhanced with boolean attribute, case-insensitive matching, and GUID ID handling
 7. Updated diff report showing improved match rates
 8. Divergence registry updated to D-14
-
 ### Risk Assessment
 
 | Risk | Likelihood | Impact | Mitigation |
@@ -2862,7 +2685,6 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **Decision:** M15 scope as defined above is recommended. Forge endorses this plan.
 
 — Forge, Lead / Web Forms Reviewer
-
 ### 2026-02-26: ClientIDMode implementation and testing (consolidated)
 
 **By:** Cyclops, Rogue
@@ -2870,7 +2692,6 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 **What:** Implemented `ClientIDMode` enum (Static, Predictable, AutoID, Inherit) and property on `BaseWebFormsComponent`. Updated `ComponentIdGenerator` to respect all four modes: Inherit resolves by walking parents (defaults to Predictable), AutoID preserves ctl00 prefix behavior, Static returns raw ID with no parent walking, Predictable walks parents but skips ctl00 prefixes. `UseCtl00Prefix` on NamingContainer now only applies in AutoID mode. Rogue wrote 12 bUnit tests: Static (3), Predictable (3), AutoID (2), Inherit (2), Edge Cases (2)  all pass. Discovered P1 regression: existing `UseCtl00Prefix_PrependsCtl00ToClientID` test failed because Inherit->Predictable doesn't include ctl00 prefixes. Fix applied: NamingContainer auto-sets ClientIDMode to AutoID when `UseCtl00Prefix="true"`, preserving backward compatibility.
 
 **Why:** Web Forms `System.Web.UI.Control.ClientIDMode` is a core property controlling client-side element ID generation. Migration fidelity requires all four modes so existing JavaScript, CSS selectors, and jQuery targeting Web Forms ClientIDs continue working after migration. Default Inherit->Predictable preserves backward compatibility with all existing components.
-
 ### 2026-02-26: Data control divergence analysis and investigation (consolidated)
 
 **By:** Forge, Rogue
@@ -2884,58 +2705,47 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 5. **Normalization gaps:** Blazor output not normalized for data controls; `<!--!-->` markers need stripping.
 
 **Why:** Cannot distinguish component bugs from sample differences without aligned samples. Sample alignment is prerequisite for accurate audit. Bug fixes are secondary until samples match. Full analyses: `planning-docs/DATA-CONTROL-ANALYSIS.md`, `planning-docs/M15-DATA-CONTROL-ANALYSIS.md`, `planning-docs/POST-FIX-CAPTURE-RESULTS.md`.
-
 ### 2026-02-27: User directive — branching workflow
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** All new feature PRs to dev should come from the personal repository (csharpfritz/BlazorWebFormsComponents) and target the shared upstream (FritzAndFriends/BlazorWebFormsComponents) dev branch. The only merges into upstream/main should come from the upstream dev branch.
 **Why:** User request — captured for team memory
-
 ### 2026-02-27: Issues must be closed via PR references
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** All issues being addressed should be listed in the PR body using GitHub's "Closes #N" syntax so that GitHub automatically closes them when the PR is merged. Do not close issues manually — let the PR lifecycle handle it.
 **Why:** User request — ensures traceability between code changes and issue resolution. Every closed issue should have a linked PR.
-
 ### 2026-02-26: AJAX Controls get their own nav category
 **By:** Beast
 **What:** Created a new "AJAX Controls" section in mkdocs.yml and README.md for Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, and Substitution. Doc files live in docs/EditorControls/ but nav groups them separately.
 **Why:** These 6 controls are conceptually related (Web Forms AJAX/partial-rendering infrastructure). Grouping helps developers migrating AJAX-heavy pages.
-
 ### 2026-02-26: Migration stub doc pattern established
 **By:** Beast
 **What:** ScriptManager and ScriptManagerProxy docs use a warning admonition "Migration Stub Only", document all accepted-but-ignored properties, and include explicit "include during migration, remove when stable" guidance.
 **Why:** Future no-op migration compatibility components should follow this pattern so developers understand the component renders nothing and is temporary scaffolding.
-
 ### 2026-02-26: Substitution moved from deferred to implemented
 **By:** Beast
 **What:** Updated DeferredControls.md to mark Substitution as Complete (was Deferred). Created full documentation at docs/EditorControls/Substitution.md.
 **Why:** Substitution is now implemented as a component that renders callback output directly.
-
 ### 2026-02-26: UpdateProgress migration pattern  explicit state over automatic association
 **By:** Beast
 **What:** UpdateProgress docs recommend wrapping in @if (isLoading) with explicit boolean state management rather than relying on automatic UpdatePanel association.
 **Why:** This is the fundamental architectural difference developers need to understand for Blazor migration.
-
 ### 2026-02-28: M17 AJAX and Migration Helper Component Patterns
 **By:** Cyclops
 **What:** Six new components (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution). Key decisions: ScriptManager/ScriptManagerProxy are no-op stubs; Timer shadows base Enabled with new keyword; UpdatePanel uses ChildContent not ContentTemplate; UpdateProgress renders initially hidden; Substitution uses Func<HttpContext, string> callback; new categories "AJAX" and "Migration Helpers" in ComponentCatalog.
 **Why:** These controls appear frequently in Web Forms applications. Even as stubs, they prevent compilation errors during migration and allow incremental removal of AJAX infrastructure.
-
 ### 2026-02-27: M17 Sample pages for AJAX/Migration controls
 **By:** Jubilee
 **What:** Created 5 sample pages for M17 controls (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution). ScriptManagerProxy skipped (too similar to ScriptManager). Sample filenames use Default.razor per task spec. ComponentCatalog.cs already had entries. Timer uses 2-second demo interval; Substitution uses Func<HttpContext?, string> callbacks.
 **Why:** Samples must ship with components per project convention.
-
 ### 2026-02-28: M17 AJAX Controls Gate Review  APPROVE WITH NOTES
 **By:** Forge
 **What:** Reviewed all 6 M17 controls (Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution) for Web Forms fidelity against .NET Framework 4.8 API. Verdict: **APPROVE WITH NOTES**  ready to PR with 4 minor follow-up items. ✅ All 4 follow-up items resolved — see consolidated block below.
 
 **Why:** None of these block migration. All follow-up items addressed by Cyclops and verified by Rogue in the same PR cycle.
-
 ### 2026-02-27: M17 AJAX Control Test Patterns + Timer Bug Fix
 **By:** Rogue
 **What:** Timer.razor.cs had duplicate `[Parameter]` on `Enabled` (shadowed base class). Fixed by removing duplicate declaration. 47 new tests across 6 M17 controls. Timer tests use C# API (`Render<Timer>(p => ...)`) instead of Razor templates due to inherited parameter. All other M17 tests use standard Razor template patterns.
 **Why:** Establishes test patterns for AJAX/migration stub components and documents the Timer parameter inheritance fix.
-
 ### 2026-02-27: M17 audit fixes resolved (consolidated)
 **By:** Forge, Cyclops
 **What:** Forge audited all 6 M17 AJAX controls against .NET Framework 4.8.1 API docs and found 5 fidelity issues. Cyclops fixed all 5:
@@ -2945,90 +2755,73 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 4. UpdateProgress non-dynamic mode uses `display:block;visibility:hidden;` matching Web Forms.
 5. ScriptReference expanded with `ScriptMode`, `NotifyScriptLoaded`, `ResourceUICultures` for markup migration compatibility.
 **Why:** Items 1–2 fixed wrong defaults on no-op stubs (migrating code got wrong property values). Items 3–4 were HTML fidelity bugs (CssClass silently dropped, style incomplete). Item 5 prevents compilation errors when migrating markup with ScriptReference attributes. All verified by 9 new bUnit tests (Rogue).
-
 ### 2026-02-27: No-op stub property coverage is intentionally limited
 **By:** Forge
 **What:** ScriptManager at 41% and ScriptManagerProxy at 50% of Web Forms properties is acceptable. The missing properties are deep AJAX infrastructure (history, composite scripts, authentication service, etc.) with no Blazor equivalent. Only properties commonly found in declarative markup are included.
 **Why:** Diminishing returns  covering every infrastructure property would bloat the stubs without helping real migrations.
-
 ### 2026-02-27: UpdatePanel Triggers collection deliberately omitted
 **By:** Forge
 **What:** Web Forms' Triggers collection for specifying which controls trigger partial updates is deliberately omitted. Blazor's rendering model makes this unnecessary  all Blazor rendering is already partial.
 **Why:** Architectural decision, not a gap. Including Triggers would create false expectations about partial-rendering behavior that doesn't exist in Blazor.
-
 ### M17 Audit Fix Test Coverage
 
 **By:** Rogue
 **What:** Added 9 bUnit tests covering all 5 M17 audit fixes (EnablePartialRendering default, Scripts collection, CssClass rendering, display:block;visibility:hidden, ScriptReference properties). Updated 2 existing tests to match new behavior. All 29 ScriptManager/UpdateProgress tests pass.
 **Why:** Audit fixes change observable behavior — tests must be updated to assert the corrected defaults and new properties. ScriptReference defaults tested via plain C# instantiation (no render needed). UpdateProgress CssClass tested both with and without value to ensure no spurious `class=""` attribute.
-
 ### 2026-02-27: M6-M8 doc pages updated for #359
 **By:** Beast
 **What:** Updated 3 of 5 doc pages for Issue #359. ChangePassword and PagerSettings were already complete from prior work. FormView gained explicit CRUD event docs and a "NOT Supported" section. DetailsView Web Forms syntax block now includes Caption/CaptionAlign attributes and all style sub-component/PagerSettings child elements. DataGrid paging docs refreshed  stale caveat removed, property table and PagerSettings comparison admonition added.
 **Why:** The M9 audit identified these 5 pages as having gaps relative to M6-M8 feature additions. Key finding: DataGrid is the only pageable data control that does NOT support the <PagerSettings> sub-component.
-
 ### 2026-02-27: Issue #358  5 interaction tests close audit gap
 **By:** Colossus
 **What:** Added 5 interaction tests in InteractiveComponentTests.cs for pages identified by M9 audit: ListView CrudOperations (2 tests  Edit mode, Delete row), Label (AssociatedControlID rendering), DataGrid Styles (caption/header/data rows/GridLines), LoginControls Orientation (4 layout variants). Panel/BackImageUrl skipped  static display only, smoke test sufficient.
 **Why:** M9 audit identified 5 sample pages without interaction test coverage. Smoke tests were already added in a prior session. All 5 gap pages now have both smoke AND interaction test coverage (except Panel/BackImageUrl which only warrants a smoke test).
-
 ### 2026-02-27: Issue #379  LinkButton CssClass verified as already fixed
 **By:** Cyclops
 **What:** Issue #379 (LinkButton CssClass not passed to rendered class attribute) was already fixed during M15 (commit 65aedc0). LinkButton.razor already contains class="@GetCssClassOrNull()" on both <a> elements. Six bUnit tests in LinkButton/Format.razor cover all CssClass scenarios. All 25 LinkButton tests pass.
 **Why:** No code change needed. Issue #379 can be closed as already resolved.
-
 ### 2026-02-27: MenuItemStyle sub-components must call SetFontsFromAttributes for Font- attributes
 **By:** Cyclops
 **What:** Added 	his.SetFontsFromAttributes(OtherAttributes) in MenuItemStyle.OnInitialized() after SetPropertiesFromUnknownAttributes(). This ensures Font-Bold, Font-Italic, Font-Size, etc. attributes declared on style sub-components (like <StaticMenuItemStyle Font-Bold="true" />) are properly applied to the FontInfo sub-object.
 **Why:** The SetPropertiesFromUnknownAttributes() method uses reflection to map attribute names to properties, but Font-Bold maps to Font.Bold (a sub-property), not a direct property. Without the explicit SetFontsFromAttributes call, all Font- attributes were silently ignored on menu style sub-components, causing CSS like ont-weight:bold to never appear in rendered output.
-
 ### 2026-02-27: CheckBox must always render id attribute on input element
 **By:** Cyclops
 **What:** CheckBox.razor's bare (no-text) <input> element was missing the id="@_inputId" attribute. Added it to match the behavior of the text-present code paths. Web Forms always renders an id on CheckBox inputs regardless of whether Text is set.
 **Why:** Consistency with Web Forms HTML output and with the text-present code paths in the same component. The bare input path renders class, style, and 	itle but was missing id, which would break JavaScript targeting and CSS selectors that rely on the control's ID.
-
 ### 2026-02-28: LinkButton CssClass test coverage strategy
 **By:** Rogue
 **What:** Created dedicated CssClass.razor test file (8 tests) for LinkButton, separate from Format.razor which already had some CssClass tests. Both files coexist  Format.razor tests are integration-style (MarkupMatches), CssClass.razor tests are targeted attribute assertions covering edge cases and both render paths (PostBackUrl null vs non-null).
 **Why:** Edge case noted: GetCssClassOrNull() uses string.IsNullOrEmpty() not string.IsNullOrWhiteSpace(). Whitespace-only CssClass renders class=" " instead of being omitted. Low priority future cleanup. When testing any component CssClass, verify both "no class" case and disabled state (spNetDisabled appended).
-
 ### 2026-02-28: Skins & Themes dual documentation pages
 **By:** Beast
 **What:** The Skins & Themes feature now has two documentation pages in the Migration section: (1) `docs/Migration/SkinsAndThemes.md`  practical developer guide following the Utility Feature Documentation Template, and (2) `docs/Migration/ThemesAndSkins.md`  architecture comparison evaluating 5 approaches with comparison matrix. Both cross-reference each other in "See Also" sections.
 **Why:** The existing ThemesAndSkins.md is valuable as architectural record but too dense for developers trying to migrate .skin files. A focused guide using the standard template structure makes the feature approachable. Both pages coexist to serve different audiences.
-
 ### 2026-03-01: SkinBuilder uses expression trees for nested property access
 **By:** Cyclops
 **What:** The `SkinBuilder.Set<TValue>()` method uses `System.Linq.Expressions` to parse lambda expressions and set properties on `ControlSkin`. For nested properties like `s => s.Font.Bold`, it recursively navigates the expression tree, auto-creating intermediate objects (e.g. `FontInfo`) if null. Alternative approaches (separate methods per property, string-based names) were rejected for type safety and API consistency.
 **Why:** The fluent API spec requires `skin.Set(s => s.Font.Bold, true)` syntax. Expression tree parsing is the only way to support both direct and nested property setting with a single generic method. Future properties added to ControlSkin are automatically supported. Reflection-based, so slightly slower than direct assignment, but theme configuration happens once at startup.
-
 ### 2026-03-01: Normalizer pipeline order and compare case-insensitivity
 **By:** Cyclops
 **What:** The HTML normalizer pipeline in `scripts/normalize-html.mjs` runs transforms in a fixed order: regex rules -> style normalization -> empty style strip -> boolean attrs -> GUID IDs -> attribute sort -> artifact cleanup -> whitespace. Compare mode uses case-insensitive file pairing (lowercase key maps) so that folder casing differences (e.g., HyperLink vs Hyperlink) don't produce false divergences. Boolean attributes are collapsed to bare form, GUIDs in IDs are replaced with `GUID` placeholder, and empty `style=""` attributes are stripped.
 **Why:** These 4 enhancements (issue #387) eliminate the main sources of false-positive divergences in the HTML fidelity audit. The pipeline ordering matters because later steps depend on earlier cleanup (e.g., empty style stripping must happen after style normalization).
-
 ### 2026-02-28: Divergence Registry D-11 through D-14
 **By:** Forge
 **What:** Four new divergence patterns formally registered: D-11 (GUID-based IDs  fix, don't register as permanent), D-12 (boolean attribute format  intentional, no fix), D-13 (Calendar previous-month day padding  fix recommended), D-14 (Calendar style property pass-through  fix progressively). D-11 registered temporarily while fix is pending; D-12 is intentional platform difference; D-13 and D-14 are tracked for resolution.
 **Why:** The divergence registry is the authoritative reference for classifying audit findings. Without these entries, auditors would repeatedly investigate these patterns as potential bugs. Issue #388.
-
 ### 2026-03-01: CascadedTheme property name on BaseWebFormsComponent
 **By:** Cyclops
 **What:** The cascading ThemeConfiguration parameter on `BaseWebFormsComponent` is named `CascadedTheme`, not `Theme`. This avoids a Blazor "declares more than one parameter" error caused by `_Imports.razor @inherits BaseWebFormsComponent` — every `.razor` file inherits BaseWebFormsComponent, so any `.razor` component with its own `[Parameter] Theme` (like ThemeProvider and WebFormsPage) would conflict.
 **Why:** Blazor parameter matching is case-insensitive and prohibits two parameters with the same name on a single component. Since `_Imports.razor` forces all `.razor` files to inherit from `BaseWebFormsComponent`, the property name must differ from any `Theme` parameters in individual components. `CascadedTheme` communicates intent (received via cascade) and avoids the collision.
 **Impact:** Any future code that reads the cascading theme from `BaseWebFormsComponent` should use `CascadedTheme`, not `Theme`. Components that accept theme explicitly (like WebFormsPage) keep their own `[Parameter] Theme`.
-
 ### 2026-03-02: FontInfo Name/Names auto-sync (consolidated)
 **By:** Cyclops, Rogue
 **What:** `FontInfo.Name` and `FontInfo.Names` were independent auto-properties. Rogue identified the gap: `ApplyThemeSkin` sets `Font.Name` but the style builder reads `Font.Names` for `font-family`, causing theme fonts to silently not render. Cyclops fixed it by converting both properties to backing-field properties with bidirectional auto-sync matching ASP.NET Web Forms behavior: setting `Name` → `Names` gets same value; setting `Names` → `Name` gets first comma-separated entry (trimmed); setting either to null/empty clears both. `ApplyThemeSkin` now also guards against overriding explicitly set `Names`. Rogue verified the fix with 9 unit tests (`FontInfoSyncTests.cs`) and 2 pipeline tests (`ThemingPipelineTests.razor`) proving end-to-end: ThemeConfiguration → ApplyThemeSkin(Font.Name) → auto-sync → Font.Names → style builder → `font-family` in rendered HTML.
 **Why:** Web Forms `FontInfo.Name` and `FontInfo.Names` are bidirectionally synced. Without this, theme font-family was silently lost at the property boundary between ApplyThemeSkin and the style builder. All 1437 tests pass.
 **Impact:** Any code setting `Font.Name` (themes, skins, direct assignment) now automatically has `Font.Names` populated and vice versa. The style builder correctly renders `font-family`. No additional changes needed elsewhere.
-
 ### 2026-03-01: Theming sample page patterns
 **By:** Jubilee
 **What:** The Theming sample page at `ControlSamples/Theming/Index.razor` demonstrates 6 scenarios in a single page (not split into sub-pages): 1. Default skins → 2. Named skins → 3. Explicit overrides → 4. Opt-out → 5. Nesting → 6. Unthemed baseline. Future theming samples should add sections to this page or create sub-pages if complexity warrants it. The `BorderStyle` enum requires fully qualified name (`BlazorWebFormsComponents.Enums.BorderStyle`) in Theming sample code due to conflict with `ControlSkin.BorderStyle` property.
 **Why:** Theming is a cross-cutting concern best understood as a progression. Single page avoids repeating ThemeConfiguration setup. ComponentList.razor link under Utility Features, ComponentCatalog has "Theming" category.
-
 ### 2026-03-02: Build/Version/Release Process Audit and Proposal
 **By:** Forge
 **What:** Comprehensive audit of all 7 CI/CD workflows, NBGV version management, and release coordination — with a concrete proposal for a unified release process.
@@ -3037,7 +2830,6 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 ---
 
 ## 1. Current State Inventory
-
 ### 1.1 Workflows
 
 | # | Workflow | File | Trigger | Version Source | Publishes |
@@ -3049,7 +2841,6 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 | 5 | **docs** | `docs.yml` | Push to main/v* branch OR v* tag (path-filtered) | Tag stripping (`${GITHUB_REF#refs/tags/v}`) — but uses deprecated `::set-output` | GitHub Pages |
 | 6 | **Build Demo Sites** | `demo.yml` | Push to main/v* (path-filtered) OR after Integration Tests pass | None | Build artifacts only |
 | 7 | **CodeQL** | `codeql.yml` | Push/PR to main/dev/v* + weekly schedule | N/A | Security scan results |
-
 ### 1.2 Version Infrastructure
 
 | Component | Current Value | Notes |
@@ -3060,7 +2851,6 @@ The honest bottom line: **This library will never achieve 100% exact HTML match 
 | NBGV package | `3.9.50` | Via `Directory.Build.props` |
 | NuGet PackageId | `Fritz.BlazorWebFormsComponents` | In `.csproj` |
 | Docker image | `ghcr.io/fritzandfriends/blazorwebformscomponents/serversidesamples` | Tagged with NBGV version + SHA + latest |
-
 ### 1.3 How NBGV Computes Versions
 
 NBGV reads `version.json` for the major.minor base, then appends a patch number based on git height (commit count since the version was set). So with `version.json` at `0.15` on main:
@@ -3072,7 +2862,6 @@ NBGV reads `version.json` for the major.minor base, then appends a patch number 
 This means:
 - `nuget.yml` (triggered by `v0.16` tag) runs `dotnet build` which uses NBGV, which reads `version.json` = `0.15`, which computes something like `0.15.47` — **not** `0.16.0`
 - The NuGet package published for tag `v0.16` will have version `0.15.X`, not `0.16.anything`
-
 ### 1.4 Dockerfile Version Injection
 
 The Dockerfile (`samples/AfterBlazorServerSide/Dockerfile`):
@@ -3085,7 +2874,6 @@ The `deploy-server-side.yml` computes VERSION via `nbgv get-version -v NuGetPack
 ---
 
 ## 2. Problem Analysis
-
 ### P1: version.json ↔ Tag Mismatch (CRITICAL)
 
 **State:** `version.json` on main says `0.15`. Tag `v0.16` exists. NBGV will compute `0.15.X` for all builds on main.
@@ -3093,7 +2881,6 @@ The `deploy-server-side.yml` computes VERSION via `nbgv get-version -v NuGetPack
 **Impact:** Every artifact built from main gets a version starting with `0.15`, regardless of what tag was pushed. The NuGet package for the `v0.16` release is **not** version `0.16.0` — it's `0.15.something`.
 
 **Root cause:** version.json must be bumped **before** the tag is created, not after. The current process has no enforcement of this.
-
 ### P2: Independent Triggers = Independent Versions (CRITICAL)
 
 Each workflow fires on different events:
@@ -3105,31 +2892,24 @@ Each workflow fires on different events:
 | PR merge to main | ❌ no | ✅ fires (if paths match) | ✅ fires (if docs paths) | ✅ fires |
 
 Result: A tag push publishes NuGet but doesn't deploy Docker or demos. A main push deploys Docker/demos but not NuGet. Docs may or may not deploy depending on whether doc files changed. There is **no single event** that triggers all release artifacts.
-
 ### P3: No GitHub Release Automation (HIGH)
 
 Tag `v0.16` was created with `gh release create` manually. There is no workflow that creates a GitHub Release. The release notes, changelog, and asset attachment are all manual. Releases exist for some tags but not others (gaps: v0.3.0, v0.4.0, v0.6.0, v0.7.0, v0.15, v0.15.2, v0.16).
-
 ### P4: docs.yml Uses Deprecated `::set-output` (MEDIUM)
 
 Line 44: `echo ::set-output name=release::${RELEASE}` — this was deprecated by GitHub in October 2022 and will eventually stop working. Should use `>> $GITHUB_OUTPUT`.
-
 ### P5: docs.yml Release Detection is Broken for This Project's Tag Format (MEDIUM)
 
 The regex `^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$` requires 3-segment versions (e.g., `0.16.0`). But this project uses 2-segment tags (`v0.16`, `v0.15`). So the `RELEASE` variable is **always** `false` for every tag this project has ever pushed. The deploy guard `steps.prepare.outputs.release == 'true'` never fires on tag events — docs only deploy on main pushes.
-
 ### P6: Docker Deploy Has Path Filter Race Condition (LOW-MEDIUM)
 
 `deploy-server-side.yml` triggers on `push to main` with paths filtered to `src/BlazorWebFormsComponents/**`, `samples/AfterBlazorServerSide/**`, etc. If a release only changes docs or tests, the Docker image won't rebuild — so the "latest" Docker image stays at whatever version it was before, even though a new NuGet package was released.
-
 ### P7: Demo Build Has No Version (LOW)
 
 `demo.yml` builds and uploads artifacts but doesn't version them. The artifacts are named `demo-server-side` and `demo-client-side` — no version in the name, no way to know which version they correspond to.
-
 ### P8: No Version Embedding in Docs (LOW)
 
 MkDocs config has no version variable. There's no way for a user reading the docs to know which version of the library the docs correspond to.
-
 ### P9: Tag History is Inconsistent (COSMETIC)
 
 Tags jump from `v0.8.2` to `v0.13.0`, mixing 2-segment and 3-segment formats. Some tags use `.0` suffix, some don't. This doesn't break anything but signals manual process drift.
@@ -3137,7 +2917,6 @@ Tags jump from `v0.8.2` to `v0.13.0`, mixing 2-segment and 3-segment formats. So
 ---
 
 ## 3. Proposed Solution
-
 ### 3.0 Philosophy
 
 Stop fighting NBGV. NBGV is designed for a specific workflow: you set a version in `version.json`, it auto-increments the patch based on git height, and you bump the minor/major when you want a new version line. The problems here aren't NBGV's fault — they're from not following NBGV's intended workflow and from layering manual tags on top.
@@ -3147,7 +2926,6 @@ Stop fighting NBGV. NBGV is designed for a specific workflow: you set a version 
 - NBGV handles NuGet SemVer compliance
 - NBGV handles assembly version, file version, informational version consistently
 - The alternative (manual version management) is even more error-prone at this scale
-
 ### 3.1 Unified Release Workflow
 
 **Replace** the independent deployment triggers with a single coordinated release workflow triggered by **GitHub Release publication**.
@@ -3180,7 +2958,6 @@ This single workflow:
 7. Attaches NuGet package + demo artifacts to the GitHub Release
 
 All artifacts get the **same version** because they all derive it from the same release tag in the same workflow run.
-
 ### 3.2 Version Management with NBGV
 
 #### The Correct NBGV Workflow
@@ -3197,7 +2974,6 @@ All artifacts get the **same version** because they all derive it from the same 
 #### Automating the Bump
 
 Add a step to the release workflow (or a separate post-release workflow) that opens a PR to dev bumping `version.json` to the next minor. This prevents forgetting.
-
 ### 3.3 What Happens to Existing Workflows
 
 | Workflow | Action | Rationale |
@@ -3209,7 +2985,6 @@ Add a step to the release workflow (or a separate post-release workflow) that op
 | `docs.yml` | **MODIFY** — keep PR preview builds, move production deploy into `release.yml`. Fix deprecated `::set-output`. | Docs deploy with every release, guaranteed. PRs still get preview builds. |
 | `demo.yml` | **MODIFY** — keep PR/push builds for CI. Add version to artifact names. Attach release artifacts in `release.yml`. | Demo artifacts become part of the release. |
 | `codeql.yml` | **KEEP AS-IS** | Security scanning. Not relevant to release. |
-
 ### 3.4 The Developer Workflow (Step by Step)
 
 When Jeff wants to release version 0.17:
@@ -3231,7 +3006,6 @@ When Jeff wants to release version 0.17:
 If something goes wrong:
 - Fix on dev, merge to main, create `v0.17.1` release. The release workflow handles everything.
 - For emergency Docker redeployment without a full release, use `workflow_dispatch` on the standalone deploy workflow.
-
 ### 3.5 Version Number Format Decision
 
 **Recommendation: Use 3-segment SemVer tags going forward.**
@@ -3249,7 +3023,6 @@ Update `version.json` to use 3-segment:
 ```
 
 This makes NBGV compute `0.17.0` for the first commit, `0.17.1` for the next, etc. Tags should match: `v0.17.0`.
-
 ### 3.6 Docker Version Alignment
 
 The Dockerfile's `VERSION` build-arg approach is correct — NBGV can't run in Docker (no `.git`). But the version must come from the release tag, not from `nbgv get-version` on the runner (which reads version.json and computes git-height-based version).
@@ -3265,7 +3038,6 @@ build-args: VERSION=${{ steps.version.outputs.version }}
 ```
 
 This guarantees the Docker image version matches the tag exactly.
-
 ### 3.7 Docs Version Embedding
 
 Add a version variable to `mkdocs.yml`:
@@ -3289,7 +3061,6 @@ Then in docs templates: `{{ config.extra.version }}`.
 ## 4. Implementation Plan
 
 Ordered by priority. Each item is a concrete file change.
-
 ### Phase 1: Fix the Broken State (Do First)
 
 | # | Task | File(s) | Detail |
@@ -3297,7 +3068,6 @@ Ordered by priority. Each item is a concrete file change.
 | 1.1 | Sync version.json to match current reality | `version.json` | Change `"version": "0.17"` to `"version": "0.17.0"` on dev. After merge to main, it should read `0.17.0`. |
 | 1.2 | Fix deprecated `::set-output` in docs.yml | `.github/workflows/docs.yml` | Replace `echo ::set-output name=release::${RELEASE}` with `echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"` |
 | 1.3 | Fix release detection regex in docs.yml | `.github/workflows/docs.yml` | Change regex to also accept 2-segment versions, OR standardize on 3-segment tags (per §3.5) |
-
 ### Phase 2: Create Unified Release Workflow
 
 | # | Task | File(s) | Detail |
@@ -3306,7 +3076,6 @@ Ordered by priority. Each item is a concrete file change.
 | 2.2 | Add version injection to Docker step | `.github/workflows/release.yml` | Use extracted tag version as Docker `VERSION` build-arg. |
 | 2.3 | Add NuGet version override | `.github/workflows/release.yml` | Pass `-p:Version=$VERSION` to `dotnet pack` to override NBGV-computed version with the exact tag version. This is the belt-and-suspenders guarantee. |
 | 2.4 | Add GitHub Release asset attachment | `.github/workflows/release.yml` | Use `gh release upload` to attach `.nupkg` and demo artifacts to the release. |
-
 ### Phase 3: Retire / Modify Existing Workflows
 
 | # | Task | File(s) | Detail |
@@ -3315,7 +3084,6 @@ Ordered by priority. Each item is a concrete file change.
 | 3.2 | Remove main-push trigger from deploy-server-side.yml | `.github/workflows/deploy-server-side.yml` | Keep only `workflow_dispatch` trigger. All release-path deployments go through `release.yml`. |
 | 3.3 | Modify docs.yml | `.github/workflows/docs.yml` | Remove production deploy logic. Keep PR preview builds only. Production deploy moves to `release.yml`. |
 | 3.4 | Add version to demo artifact names | `.github/workflows/demo.yml` | Read version from NBGV or pass through. Name artifacts `demo-server-side-0.17.0`. |
-
 ### Phase 4: Automation Polish
 
 | # | Task | File(s) | Detail |
@@ -3346,7 +3114,6 @@ But we're not greenfielding. NBGV is already wired into `Directory.Build.props`,
 8. **Embed version in docs** — users should know what version the docs describe.
 
 This gets Jeff a workflow where "publish a GitHub Release" is the single action that ships everything — NuGet, Docker, docs, demos — all with the same version number. No more manual coordination, no more version drift.
-
 ### 2026-03-02: Unified Release Process Implementation
 **By:** Cyclops
 **Status:** Implemented on branch `ci/unified-release-process`
@@ -3384,7 +3151,6 @@ Implemented the unified release process as designed by Forge and approved by Jef
 - **Emergency Docker deploy:** Use `workflow_dispatch` on deploy-server-side.yml.
 - **Emergency NuGet publish:** Use `workflow_dispatch` on nuget.yml with explicit version input.
 - **After each release:** Bump `version.json` on dev to the next minor (e.g., `0.18.0`).
-
 ### 2026-02-28: Full Skins & Themes Implementation Roadmap (#369)
 **By:** Forge
 **What:** Prioritized roadmap for full theming implementation, broken into waves
@@ -3452,7 +3218,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 **Goal:** Make theming actually useful for real Web Forms migrations. A developer with a GridView-heavy .skin file can reproduce their theme in Blazor.
 
 **Estimated total effort:** 5–7 work items, M-sized milestone
-
 ### WI-1: StyleSheetTheme vs Theme Priority Mode
 **Size:** M (Medium)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3469,7 +3234,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
   - Accept that Theme mode simply always overwrites — matching Web Forms behavior where Theme beats page declarations
 
 **Open question for Jeff:** Should Theme mode always override (true Web Forms behavior), or should we provide a way to mark specific properties as "locked"? My recommendation: always override. That's what Web Forms does, and migration fidelity is the goal.
-
 ### WI-2: Sub-Component Style Theming
 **Size:** L (Large)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3492,7 +3256,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 | DataList | HeaderStyle, FooterStyle, AlternatingRowStyle (+ others via UiStyle) | 3+ |
 
 **Total: ~41 sub-style slots across 6 controls.** This is the biggest work item. Recommend splitting: WI-2a (GridView + DetailsView — most common), WI-2b (FormView + Calendar), WI-2c (DataGrid + DataList).
-
 ### WI-3: Container-Level EnableTheming Propagation
 **Size:** S (Small)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3503,7 +3266,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - Web Forms behavior: if a parent has `EnableTheming=false`, ALL descendants skip theming, even if they set `EnableTheming=true`
 
 **Design note:** The existing `Parent` cascading parameter (`BaseWebFormsComponent.Parent`) already cascades. We can walk the parent chain to check `EnableTheming`, but that's O(n) per component. Better: cascade a dedicated `bool _themingDisabledByAncestor` value.
-
 ### WI-4: Runtime Theme Switching
 **Size:** M (Medium)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3517,7 +3279,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - Sample page demonstrating runtime theme switching with a dropdown
 
 **Risk:** Cascading value change detection. Blazor's `CascadingValue` re-renders children when the value reference changes, but NOT when properties of the same object change. This means theme switching must assign a new `ThemeConfiguration`, not mutate the existing one.
-
 ### WI-5: Wave 1 Tests
 **Size:** M (Medium)
 **Agent:** Rogue
@@ -3528,7 +3289,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - Tests for container-level EnableTheming propagation (Panel with EnableTheming=false → child Button gets no theme)
 - Tests for runtime theme switching (change ThemeProvider.Theme, verify child re-renders with new skin)
 - Negative tests: missing sub-style gracefully ignored, theme mode transitions
-
 ### WI-6: Wave 1 Documentation
 **Size:** M (Medium)
 **Agent:** Beast
@@ -3541,7 +3301,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - API reference for ThemeConfiguration, ControlSkin, ThemeProvider
 - Update existing theming sample page with sub-component styles and theme switching
 - Add to MkDocs nav under a new "Theming" section
-
 ### WI-7: Wave 1 Sample Page Updates
 **Size:** S (Small)
 **Agent:** Jubilee
@@ -3560,7 +3319,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 **Goal:** Reduce manual conversion effort. Developers can use their existing .skin files directly or via JSON.
 
 **Estimated total effort:** 3–4 work items, M-sized milestone
-
 ### WI-8: .skin File Parser
 **Size:** L (Large)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3582,7 +3340,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - **Recommendation:** Build-time source generator that converts .skin files to C# `ThemeConfiguration` factory methods. This works in all hosting models and has zero runtime cost.
 
 **Open question for Jeff:** Source generator vs runtime parser? Source generators are more complex to build but produce better results. Runtime parsers are simpler but hosting-model dependent.
-
 ### WI-9: JSON Theme Format
 **Size:** M (Medium)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3614,7 +3371,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - `ThemeConfiguration.FromJsonFile(string path)` for file loading
 - JSON schema file for IDE IntelliSense (publish as `.schema.json`)
 - This is complementary to C# config — developers choose whichever format they prefer
-
 ### WI-10: CSS File Bundling from Theme Folders
 **Size:** S (Small)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3627,7 +3383,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - For JSON format (WI-9): `"cssFiles": ["themes/CoolTheme/theme.css"]` property
 
 **Note:** This is intentionally simple — explicit file list, no directory scanning at runtime. The .skin parser or JSON config specifies which CSS files to include.
-
 ### WI-11: Wave 2 Tests
 **Size:** M (Medium)
 **Agent:** Rogue
@@ -3636,7 +3391,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - JSON deserialization tests: round-trip, WebColor/Unit/FontInfo parsing, sub-styles, mode setting
 - CSS bundling tests: ThemeProvider renders `<link>` elements, empty list renders nothing
 - Integration: .skin file → ThemeConfiguration → ThemeProvider → themed GridView
-
 ### WI-12: Wave 2 Documentation
 **Size:** S (Small)
 **Agent:** Beast
@@ -3653,7 +3407,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 **Goal:** Integrate with the broader migration tooling story and polish rough edges.
 
 **Estimated total effort:** 2–3 work items, S-sized milestone
-
 ### WI-13: Migration Tooling Integration
 **Size:** M (Medium)
 **Agent:** Cyclops (implementation), Forge (review)
@@ -3666,7 +3419,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
   - Flag incompatible skin properties (behavioral properties that can't be themed)
   - Produce a migration score for theme complexity
 - This depends on WI-8 (.skin parser) being complete
-
 ### WI-14: Theme Validation & Diagnostics
 **Size:** S (Small)
 **Agent:** Cyclops
@@ -3676,7 +3428,6 @@ I ranked by **"how many migrating developers hit this wall?"**:
 - Add diagnostic logging: which skins were applied to which components, which were skipped
 - `ThemeConfiguration.Validate()` method that returns a list of warnings
 - Optional: Blazor dev-tools integration (browser console warnings in development mode)
-
 ### WI-15: Wave 3 Documentation & Samples
 **Size:** S (Small)
 **Agent:** Beast (docs), Jubilee (samples)
@@ -3777,13 +3528,11 @@ Wave 3 (after Wave 2):
 
 *— Forge, Lead / Web Forms Reviewer*
 *"Sub-component styles are the whole game. Without HeaderStyle on GridView, theming is a toy demo."*
-
 ### ListView EditItemTemplate rendering fix (Issue #406)
 **By:** Cyclops
 **What:** Added `@key="dataItemIndex"` to the `<CascadingValue>` elements wrapping each item's template in `ListView.razor` — both in the non-grouped path (line 60) and the grouped path (line 105). This ensures Blazor's diff algorithm tracks each item by its data index, forcing correct re-evaluation of template selection when `EditIndex` changes.
 **Why:** Without `@key`, Blazor uses positional diffing in the `foreach` loop. When `EditIndex` changes (e.g., from -1 to 1), the template selection at line 57 switches from `ItemTemplate` to `EditItemTemplate` for one row. However, since the items themselves don't change (same list, same count), Blazor's positional diff may not detect that a specific row's template changed — the `CascadingValue` at that position looks structurally similar. Adding `@key="dataItemIndex"` forces Blazor to identify each row by index, ensuring template swaps are always detected and re-rendered.
 **Impact:** All 1443 tests pass including all 6 EditTemplate tests. No changes to sample pages or ListView.razor.cs. Minimal two-line change in ListView.razor.
-
 ### 2026-03-02: M22 — Copilot-Led Migration Showcase plan
 **By:** Forge
 **What:** Comprehensive plan for M22 focusing on demonstrating BlazorWebFormsComponents value through Copilot-guided migration
@@ -3832,17 +3581,14 @@ Jeff can perform a live 30-minute migration demo from running Web Forms to runni
 #### Full Plan
 
 See `planning-docs/MILESTONE22-COPILOT-MIGRATION-SHOWCASE.md` for complete 12-work-item plan with timeline, agent assignments, risk assessment, and control translation table.
-
 ### 2026-03-01: ListView EditItemTemplate TDD tests use CSS class selectors for template identification
 **By:** Rogue
 **What:** Created `EditTemplateTests.razor` with 6 tests for Issue #406. Tests use `span.display` and `span.edit` CSS classes to identify which template (ItemTemplate vs EditItemTemplate) rendered for each row. 4 tests intentionally fail pre-fix (TDD), 2 pass for negative/null edge cases.
 **Why:** Previous CrudEvents.razor tests only verified `EditIndex` property values, not the actual rendered DOM. The new tests verify the **visual template swap** — which is the actual user-facing bug. CSS class selectors are stable, readable, and clearly communicate which template owns each row. Cyclops should ensure the fix makes all 6 tests pass.
-
 ### 2026-03-02: User directive — Use WingTip Toys as M22 demo app
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Do NOT build a custom "Contoso Widgets" demo app. Use the official Microsoft WingTip Toys Web Forms sample application as the M22 migration demo source. Jeff will provide a copy.
 **Why:** User request — WingTip Toys is a well-known, realistic Web Forms demo that the community recognizes. More credible than a purpose-built sample.
-
 ### 2026-03-02: WingtipToys Migration Analysis and Plan
 **By:** Forge
 **What:** Comprehensive analysis of WingtipToys Web Forms demo for migration to Blazor Server Side
@@ -3853,7 +3599,6 @@ See `planning-docs/MILESTONE22-COPILOT-MIGRATION-SHOWCASE.md` for complete 12-wo
 ## 1. Control Coverage Audit
 
 For each Web Forms control used in WingtipToys, here's whether our Blazor component library covers it and which specific features are exercised.
-
 ### 1.1 Controls with FULL Coverage (No Gaps)
 
 | # | Web Forms Control | Used In | BWFC Status | Feature Notes |
@@ -3869,7 +3614,6 @@ For each Web Forms control used in WingtipToys, here's whether our Blazor compon
 | 9 | `asp:ContentPlaceHolder` / `asp:Content` | Site.Master + all pages | ✅ Ready | Standard layout system. Maps to Blazor `@Body` / layout. |
 | 10 | `asp:ScriptManager` | Site.Master | ✅ Ready (no-op stub) | Renders nothing in Blazor — correct behavior. |
 | 11 | `asp:PlaceHolder` | Site.Master (head scripts) | ✅ Ready | Conditional rendering container. |
-
 ### 1.2 Controls with PARTIAL Coverage (Gaps Identified)
 
 | # | Web Forms Control | Used In | BWFC Status | Gap Details |
@@ -3881,7 +3625,6 @@ For each Web Forms control used in WingtipToys, here's whether our Blazor compon
 | 16 | `asp:DropDownList` | Admin (category, product selection) | ⚠️ Partial | **DataTextField, DataValueField** — supported ✅ (via BaseListControl). **AppendDataBoundItems="true"** — supported ✅. **SelectMethod** — NOT supported ❌ (use `Items`). **ItemType** — NOT a parameter ❌ (use generic). **SelectedValue** — supported ✅. |
 | 17 | `asp:FileUpload` | Admin (product image) | ⚠️ Partial | **HasFile** — supported ✅. **FileName** — supported ✅. **PostedFile.SaveAs()** — supported ✅ (with path sanitization). In Blazor Server, file saving works differently (IBrowserFile → Stream), so the code-behind will need significant rewriting. |
 | 18 | `asp:Panel` | ErrorPage (DetailedErrorPanel) | ✅ Ready | Visible property for conditional rendering. |
-
 ### 1.3 Controls MISSING from Library — Used in WingtipToys
 
 | # | Web Forms Control | Used In | BWFC Status | Impact |
@@ -3898,7 +3641,6 @@ For each Web Forms control used in WingtipToys, here's whether our Blazor compon
 ## 2. Missing Component Analysis (REVISED — Feature Gaps, Not Missing Controls)
 
 Since all 22 controls used by WingtipToys exist in our library, the real analysis is about **feature gaps** in existing controls.
-
 ### 2.1 FormView — RenderOuterTable="false" (BLOCKING)
 
 **What WingtipToys does:** `ProductDetails.aspx` sets `RenderOuterTable="false"` so the FormView renders only the ItemTemplate content without a wrapping `<table>`.
@@ -3908,15 +3650,15 @@ Since all 22 controls used by WingtipToys exist in our library, the real analysi
 **Impact:** HIGH — ProductDetails will render with an unwanted wrapping table, breaking CSS layout.
 
 **Fix complexity:** LOW-MEDIUM. Add `[Parameter] public bool RenderOuterTable { get; set; } = true;` and wrap the `<table>` element in `@if (RenderOuterTable)`. When false, render just the template content directly. Similar pattern already exists on ChangePassword, CreateUserWizard, and PasswordRecovery (which have `RenderOuterTable` but don't use it yet).
+### 2.2 SelectMethod Pattern ~~(DESIGN — Not a Bug)~~ SUPERSEDED
 
-### 2.2 SelectMethod Pattern (DESIGN — Not a Bug)
+> ⚠️ **SUPERSEDED (2026-03-11):** BWFC now natively supports `SelectMethod` as a `SelectHandler<ItemType>` parameter. SelectMethod MUST be preserved as delegates, NOT converted to Items= binding. See "2026-03-11: NEVER default to SQLite — database provider and SelectMethod enforcement (consolidated)".
 
 **What WingtipToys does:** Every data-bound control uses `SelectMethod="GetProducts"` with `ItemType="WingtipToys.Models.Product"` — the Web Forms model-binding pattern.
 
-**Current BWFC approach:** Our controls use `Items` parameter with `TItem` generic type: `<GridView TItem="Product" Items="@products">`.
+~~**Current BWFC approach:** Our controls use `Items` parameter with `TItem` generic type: `<GridView TItem="Product" Items="@products">`.~~
 
-**Impact:** MEDIUM — Every page needs this pattern change during migration. This is a deliberate design decision (Blazor doesn't have model binding), but it means markup can't be 1:1 migrated. The Copilot instructions should explain this pattern.
-
+~~**Impact:** MEDIUM — Every page needs this pattern change during migration. This is a deliberate design decision (Blazor doesn't have model binding), but it means markup can't be 1:1 migrated. The Copilot instructions should explain this pattern.~~
 ### 2.3 Data-Binding Expression Syntax
 
 **What WingtipToys does:** `<%#: Item.ProductName %>`, `<%#: String.Format("{0:c}", Item.UnitPrice) %>`, `<%#: Eval("FirstName") %>`
@@ -3924,16 +3666,13 @@ Since all 22 controls used by WingtipToys exist in our library, the real analysi
 **Blazor equivalent:** `@context.ProductName`, `@($"{context.UnitPrice:c}")`, `@context.FirstName`
 
 **Impact:** LOW — Mechanical find/replace. Copilot should handle this well.
-
 ### 2.4 GridView ShowFooter with TemplateField Footer
 
 WingtipToys ShoppingCart sets `ShowFooter="True"` but doesn't define FooterTemplate content in the TemplateFields. Web Forms renders empty footer cells. Need to verify our GridView renders footer row when `ShowFooter="True"` even without explicit footer templates. Likely works already.
-
 ### 2.5 LoginView / LoginStatus Integration
 
 **LoginView** uses `AuthenticationStateProvider` — ✅ works with ASP.NET Core Identity.
 **LoginStatus** has `OnLoggingOut` event and `LogoutAction="Redirect"`, `LogoutPageUrl="~/"` — all parameters exist. However, the **actual sign-out logic** (`Context.GetOwinContext().Authentication.SignOut()`) must be handled by the app's auth infrastructure, not the component. The component fires events but can't do HTTP-level sign-out in Blazor Server. This is an **architectural concern**, not a component gap.
-
 ### 2.6 DropDownList — No Issues
 
 BaseListControl provides `DataTextField`, `DataValueField`, `AppendDataBoundItems` — all used in WingtipToys Admin. No gaps.
@@ -3941,7 +3680,6 @@ BaseListControl provides `DataTextField`, `DataValueField`, `AppendDataBoundItem
 ---
 
 ## 3. Migration Architecture
-
 ### 3.1 Master Page → Blazor Layout
 
 **Web Forms:** `Site.Master` → `<asp:ContentPlaceHolder ID="MainContent">`
@@ -3992,7 +3730,6 @@ The WingtipToys Site.Master structure:
     <footer>...</footer>
 </div>
 ```
-
 ### 3.2 Routing
 
 **Web Forms routes:**
@@ -4027,7 +3764,6 @@ The WingtipToys Site.Master structure:
 ```
 
 Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8+, or manual `NavigationManager.Uri` parsing.
-
 ### 3.3 Data Access (EF → EF Core)
 
 **Web Forms:** `ProductContext : DbContext` using EF6 with `System.Data.Entity`. Database initializer seeds data. `new ProductContext()` instantiated inline everywhere.
@@ -4042,7 +3778,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 - `Product`, `Category`, `CartItem`, `Order`, `OrderDetail` — mostly unchanged
 - `Product.UnitPrice` is `double?` — consider converting to `decimal?` (EF Core handles this fine)
 - Navigation properties (`virtual`) remain the same but remove `virtual` keyword (EF Core proxies are opt-in)
-
 ### 3.4 Session/State Management
 
 **Web Forms uses Session for:**
@@ -4057,7 +3792,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 - **Shopping cart state**: Use a scoped `CartStateService` injected via DI. Blazor circuits are per-connection, so scoped services approximate session behavior. For persistence across reconnects, store cart ID in `ProtectedSessionStorage` or a cookie.
 - **PayPal checkout state**: Use a scoped service or `ProtectedSessionStorage` to hold token/payerID/amount across the checkout flow.
 - **Pattern**: Create `CheckoutStateService` (scoped) to hold all checkout flow data.
-
 ### 3.5 Identity/Auth
 
 **Web Forms:** ASP.NET Identity 2.x with OWIN, `ApplicationUser : IdentityUser`, `ApplicationUserManager`, cookie-based auth, role-based authorization (`User.IsInRole("canEdit")`).
@@ -4073,7 +3807,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 - **Account pages**: ASP.NET Core Identity UI scaffolding (`dotnet aspnet-codegenerator identity`) provides Login, Register, Manage, ForgotPassword, etc. as Razor Pages. These work alongside Blazor Server in the same app.
 
 **Scope decision needed:** The 14 Account/* pages are heavily Identity-specific. Recommend using ASP.NET Core Identity UI scaffolding (Razor Pages) rather than converting to Blazor. This is standard practice and Jeff can address it in the demo narration.
-
 ### 3.6 PayPal Integration
 
 **Web Forms:** `NVPAPICaller` uses `HttpWebRequest` to call PayPal NVP API. Hardcoded sandbox URLs. Redirect flow: Cart → CheckoutStart (API call, redirect to PayPal) → PayPal → CheckoutReview (return URL, get details) → CheckoutComplete (do payment).
@@ -4089,7 +3822,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 ---
 
 ## 4. Page-by-Page Migration Plan
-
 ### Complexity Rating: 🟢 Trivial | 🟡 Medium | 🔴 Complex
 
 | Page | Complexity | Controls | Migration Notes |
@@ -4115,7 +3847,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 ---
 
 ## 5. Prioritized Work Items
-
 ### Phase 1: Core Infrastructure (Project Setup, Layout, Data Layer, Routing)
 
 | # | Work Item | Estimate | Dependencies |
@@ -4128,7 +3859,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 | 1.6 | Add BWFC NuGet reference | S | 1.1 |
 | 1.7 | Create `CartStateService` (scoped) replacing HttpContext.Session cart logic | M | 1.2 |
 | 1.8 | Port static content CSS/images from WingtipToys Content/Images | S | 1.1 |
-
 ### Phase 2: Product Browsing (Home, Product List, Product Details)
 
 | # | Work Item | Estimate | Dependencies |
@@ -4141,7 +3871,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 | 2.6 | ProductDetails.razor — FormView with RenderOuterTable=false | M | 1.3, 2.4 |
 | 2.7 | Category navigation in MainLayout (ListView with categories) | M | 1.3, 1.4 |
 | 2.8 | ErrorPage.razor — error display | S | 1.4 |
-
 ### Phase 3: Shopping Cart & Checkout
 
 | # | Work Item | Estimate | Dependencies |
@@ -4155,7 +3884,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 | 3.7 | CheckoutComplete.razor — PayPal confirmation + cart clear | M | 3.3, 3.4 |
 | 3.8 | CheckoutCancel.razor — static page | S | 1.4 |
 | 3.9 | CheckoutError.razor — query string error display | S | 1.4 |
-
 ### Phase 4: Admin
 
 | # | Work Item | Estimate | Dependencies |
@@ -4165,7 +3893,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 | 4.3 | AdminPage — Remove product form with DropDownList | M | 4.1 |
 | 4.4 | File upload handling (IBrowserFile → save to wwwroot) | M | 4.1 |
 | 4.5 | Admin route authorization (`[Authorize(Roles = "canEdit")]`) | S | 5.1 |
-
 ### Phase 5: Authentication (SCOPING DECISION NEEDED)
 
 | # | Work Item | Estimate | Dependencies |
@@ -4182,7 +3909,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 ---
 
 ## 6. Component Library Gaps — Specific Blockers for WingtipToys
-
 ### 6.1 BLOCKING: FormView RenderOuterTable (Priority: HIGH)
 
 **Issue:** FormView always renders a wrapping `<table>`. ProductDetails.aspx requires `RenderOuterTable="false"`.
@@ -4190,31 +3916,28 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 **Fix:** Add `[Parameter] public bool RenderOuterTable { get; set; } = true;` to `FormView.razor.cs`. In `FormView.razor`, conditionally wrap content in `<table>` only when `RenderOuterTable` is true. When false, render style sub-components + template content directly.
 
 **Estimate:** 2-4 hours. Low risk — additive change, defaults to current behavior.
+### 6.2 ~~NON-BLOCKING: SelectMethod/ItemType Pattern Difference~~ SUPERSEDED
 
-### 6.2 NON-BLOCKING: SelectMethod/ItemType Pattern Difference
+> ⚠️ **SUPERSEDED (2026-03-11):** BWFC now natively supports `SelectMethod` as a `SelectHandler<ItemType>` parameter. This is no longer a "pattern difference" — SelectMethod must be preserved. See "2026-03-11: NEVER default to SQLite — database provider and SelectMethod enforcement (consolidated)".
 
-**Issue:** Web Forms uses `SelectMethod="GetProducts" ItemType="Product"`. BWFC uses `Items="@products" TItem="Product"`. This is a deliberate design decision.
+~~**Issue:** Web Forms uses `SelectMethod="GetProducts" ItemType="Product"`. BWFC uses `Items="@products" TItem="Product"`. This is a deliberate design decision.~~
 
-**Mitigation:** Document in migration instructions. Copilot can handle this pattern change mechanically.
-
+~~**Mitigation:** Document in migration instructions. Copilot can handle this pattern change mechanically.~~
 ### 6.3 NON-BLOCKING: GridView Row Value Extraction
 
 **Issue:** ShoppingCart.aspx code-behind iterates `CartList.Rows` and calls `FindControl("Remove")` and `FindControl("PurchaseQuantity")` to extract values. This imperative DOM-walking pattern doesn't exist in Blazor.
 
 **Mitigation:** In Blazor, bind TextBox values and CheckBox states to the data model directly using `@bind`. The update logic reads from the bound model, not the UI controls. This is a **code-behind architecture change**, not a component gap.
-
 ### 6.4 NON-BLOCKING: GetRouteUrl() Helper
 
 **Issue:** WingtipToys uses `GetRouteUrl("ProductsByCategoryRoute", new {categoryName = Item.CategoryName})` in data-binding expressions.
 
 **Mitigation:** Replace with simple string interpolation: `@($"/Category/{context.CategoryName}")`. No component change needed.
-
 ### 6.5 LOW PRIORITY: GridView BorderColor/BorderWidth on CheckoutReview
 
 **Issue:** CheckoutReview GridView uses `BorderColor="#efeeef" BorderWidth="33"`. These are table-level style attributes. Our GridView renders `CssClass` and `style` but may not map `BorderColor`/`BorderWidth` to individual HTML attributes.
 
 **Mitigation:** Use `CssClass` with a CSS rule, or `style="border-color:#efeeef; border-width:33px"` on the component.
-
 ### 6.6 LOW PRIORITY: DetailsView CommandRowStyle-BorderStyle
 
 **Issue:** CheckoutReview uses `CommandRowStyle-BorderStyle="None"` — a sub-property syntax that sets the border style on the command row.
@@ -4224,7 +3947,6 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 ---
 
 ## 7. Summary and Recommendations
-
 ### Total Effort Estimate
 
 | Phase | Work Items | Estimate |
@@ -4235,13 +3957,11 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 | Phase 4: Admin | 5 | 3-5 days |
 | Phase 5: Auth | 6 | 2-3 days |
 | **Total** | **36** | **16-26 days** |
-
 ### Critical Path
 1. **FormView RenderOuterTable fix** — must land before ProductDetails migration
 2. **CartStateService** — needed by ShoppingCart, Checkout, and MainLayout (cart count)
 3. **EF Core migration** — everything depends on data access
 4. **Auth infrastructure** — needed by LoginView/LoginStatus in layout and Admin authorization
-
 ### Key Architecture Decisions Needed
 1. **EF Core database**: SQLite for demo simplicity, or SQL Server for production fidelity?
 2. **Account pages**: Scaffold Identity UI (Razor Pages) or convert to Blazor? **Recommendation: Scaffold.**
@@ -4259,7 +3979,6 @@ The WingtipToys migration demonstrates:
 - **File upload** (Admin product images)
 
 All 22 Web Forms controls used in WingtipToys exist in our library. The migration is entirely about **pattern translation** (SelectMethod→Items, data-binding→Razor, Session→DI services, EF6→EF Core) plus one component fix (FormView RenderOuterTable).
-
 ### 2026-03-02: WingtipToys migration architecture decisions (defaults)
 **By:** Squad (Coordinator)
 **What:** Default architecture decisions for WingtipToys Blazor migration, made while Jeff was unavailable. Jeff can override any of these.
@@ -4272,17 +3991,14 @@ All 22 Web Forms controls used in WingtipToys exist in our library. The migratio
 4. **Render mode: Full InteractiveServer** — Simplest migration path. Every page is interactive via Blazor Server circuits. No SSR complexity.
 
 All decisions are overridable by Jeff. These are reasonable defaults, not mandates.
-
 ### 2026-03-02: User directive — Repository's final product is a migration tool/skill/agent
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** The final product of this repository is NOT just a component library — it's a tool/skill/agent plan that uses BlazorWebFormsComponents to enable FAST migration of WebForms ASPX/ASCX projects to Blazor and .NET 10. WingtipToys is the proof-of-concept, not the deliverable. The deliverable is reusable migration automation.
 **Why:** User request — reframes the entire project goal. All work should orient toward making ASPX/ASCX migration as easy as possible.
-
 ### 2026-03-02: FormView RenderOuterTable implementation
 **By:** Cyclops
 **What:** Added `RenderOuterTable` bool parameter (default `true`) to FormView. When `false`, the wrapping `<table cellspacing="0" style="border-collapse:collapse;">` element is suppressed and only the template content is rendered directly — matching Web Forms behavior for `<asp:FormView RenderOuterTable="false">`. Header/footer rows and pager are also suppressed in this mode since they are table rows.
 **Why:** WingtipToys `ProductDetails.aspx` uses `RenderOuterTable="false"` and this was the only blocking gap for the migration. Default `true` preserves backward compatibility for all existing consumers. The same pattern could be applied to DetailsView if needed in the future.
-
 ### 2026-03-02: ASPX/ASCX Migration Tooling Strategy
 **By:** Forge
 **What:** Comprehensive analysis of ASPX/ASCX syntax patterns and migration tooling design
@@ -4291,11 +4007,9 @@ All decisions are overridable by Jeff. These are reasonable defaults, not mandat
 ---
 
 ## 1. ASPX/ASCX Syntax Patterns → Blazor Transformations
-
 ### Exhaustive catalog based on WingtipToys corpus (31 ASPX/ASCX files, ~1100 lines of markup, 15+ code-behind files)
 
 ---
-
 ### 1.1 Page/Control/Master Directives
 
 | # | Web Forms Pattern | Blazor Transformation | Example (WingtipToys) | Difficulty |
@@ -4327,7 +4041,6 @@ RULE D-7: <%@ Register Src="~/X.ascx" TagPrefix="tp" TagName="Y" %>
 ```
 
 ---
-
 ### 1.2 Content/ContentPlaceHolder System
 
 | # | Web Forms Pattern | Blazor Transformation | Example | Difficulty |
@@ -4352,7 +4065,6 @@ RULE C-3: <asp:Content ID="X" ContentPlaceHolderID="MainContent" runat="server">
 ```
 
 ---
-
 ### 1.3 Server Controls → BWFC Components
 
 | # | Web Forms Control | BWFC Component | Occurrences in WingtipToys | Key Attributes Used | Difficulty |
@@ -4400,7 +4112,6 @@ RULE S-UNIVERSAL:
 ```
 
 ---
-
 ### 1.4 Data-Binding Expressions
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4432,7 +4143,6 @@ REGEX for B-1 through B-5:
 ```
 
 ---
-
 ### 1.5 Code Render Expressions
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4466,7 +4176,6 @@ RULE E-10: <%: Scripts.Render(...) %>, <webopt:bundlereference ...>
 ```
 
 ---
-
 ### 1.6 Route Expressions
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4487,7 +4196,6 @@ RULE R-3: href="X.aspx?key=<%#:Item.Prop%>"
 ```
 
 ---
-
 ### 1.7 runat="server" on HTML Elements
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4512,7 +4220,6 @@ RULE H-UNIVERSAL: <element runat="server" ...>
 ```
 
 ---
-
 ### 1.8 Event Handlers
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4540,7 +4247,6 @@ RULE EV-4: SelectMethod="GetX" + ItemType="NS.Model"
 ```
 
 ---
-
 ### 1.9 Model Binding Attributes
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4556,7 +4262,6 @@ RULE EV-4: SelectMethod="GetX" + ItemType="NS.Model"
 | MB-9 | `[RouteData] string categoryName` (in SelectMethod params) | `[Parameter] string CategoryName` (from @page route) | ProductList.aspx.cs, ProductDetails.aspx.cs | Structural |
 
 ---
-
 ### 1.10 Server-Side Comments
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4565,7 +4270,6 @@ RULE EV-4: SelectMethod="GetX" + ItemType="NS.Model"
 | CM-2 | `<%-- ... --%>` multi-line with commented-out code | `@* ... *@` | Manage.aspx (phone/2FA sections) | Mechanical |
 
 ---
-
 ### 1.11 Code Block Expressions (Inline C#)
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4574,7 +4278,6 @@ RULE EV-4: SelectMethod="GetX" + ItemType="NS.Model"
 | CB-2 | `<% if (X) { %> ... <% } else { %> ... <% } %>` | `@if (X) { ... } else { ... }` | Manage.aspx | Structural |
 
 ---
-
 ### 1.12 Visibility Patterns
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4599,7 +4302,6 @@ RULE V-UNIVERSAL: Visible="false" on a server control
 ```
 
 ---
-
 ### 1.13 Special Controls & Patterns
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4614,7 +4316,6 @@ RULE V-UNIVERSAL: Visible="false" on a server control
 | SP-8 | `<uc:OpenAuthProviders runat="server" ReturnUrl="~/Account/ManageLogins" />` | `<OpenAuthProviders ReturnUrl="/Account/ManageLogins" />` | ManageLogins.aspx | Mechanical |
 
 ---
-
 ### 1.14 Code-Behind Patterns → @code Block
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4641,7 +4342,6 @@ RULE V-UNIVERSAL: Visible="false" on a server control
 | CO-20 | `Context.GetOwinContext().Authentication.SignOut()` | `SignInManager.SignOutAsync()` (ASP.NET Core Identity) | Site.Master.cs | Semantic |
 
 ---
-
 ### 1.15 Template Patterns in Data Controls
 
 | # | Web Forms Pattern | Blazor Transformation | Occurrences | Difficulty |
@@ -4661,7 +4361,6 @@ RULE V-UNIVERSAL: Visible="false" on a server control
 ---
 
 ## 2. Migration Difficulty Classification
-
 ### 2.1 Mechanical (100% Automatable — Regex/Script)
 
 These require no understanding of application logic. A script can handle them with 100% accuracy:
@@ -4686,7 +4385,6 @@ These require no understanding of application logic. A script can handle them wi
 | MB-3..MB-7 | Most data attributes pass through unchanged | Identity transform |
 
 **Estimated coverage: ~40% of all transformations**
-
 ### 2.2 Structural (Semi-Automatable — Deterministic Rules)
 
 These follow deterministic rules but require understanding of page structure:
@@ -4714,7 +4412,6 @@ These follow deterministic rules but require understanding of page structure:
 | R-1,R-2 | GetRouteUrl → string interpolation | Requires route table input; mechanical with config |
 
 **Estimated coverage: ~45% of all transformations**
-
 ### 2.3 Semantic (Requires Judgment — Agent/Human)
 
 These require understanding of application logic and cannot be fully automated:
@@ -4740,7 +4437,6 @@ These require understanding of application logic and cannot be fully automated:
 ---
 
 ## 3. Copilot Agent/Skill Design
-
 ### 3.1 Architecture: Three-Layer Migration Pipeline
 
 ```
@@ -4779,7 +4475,6 @@ These require understanding of application logic and cannot be fully automated:
 │  ~15% of transforms but ~50% of effort.                      │
 └─────────────────────────────────────────────────────────────┘
 ```
-
 ### 3.2 Layer 1: Mechanical Migration Script (`bwfc-migrate`)
 
 **Implementation: PowerShell script (cross-platform via pwsh)**
@@ -4825,7 +4520,6 @@ These require understanding of application logic and cannot be fully automated:
 ⚠️  ProductList.aspx → ProductList.razor (4 mechanical + 3 structural flagged)
 ❌  ShoppingCart.aspx → ShoppingCart.razor (2 mechanical + 5 semantic flagged)
 ```
-
 ### 3.3 Layer 2: Copilot Migration Skill File
 
 **File: `.github/copilot-instructions-migration.md` or `.copilot/skills/webforms-migration.md`**
@@ -4852,7 +4546,6 @@ Copilot (with skill loaded):
 5. Proposes concrete implementation for each flagged item
 6. User approves/modifies
 ```
-
 ### 3.4 Layer 3: Interactive Migration Agent
 
 **File: `.github/agents/migration.agent.md`**
@@ -4900,7 +4593,6 @@ Phase 5: VERIFY (automated)
   → Route reachability test
   → Side-by-side comparison guide
 ```
-
 ### 3.5 Recommended File Layout
 
 ```
@@ -4933,7 +4625,6 @@ docs/
 ---
 
 ## 4. Component Library Coverage Map
-
 ### Complete mapping for all controls found in WingtipToys:
 
 #### 4.1 Data Controls
@@ -5148,7 +4839,6 @@ The only gap is `<asp:ModelErrorMessage>`, which is an ASP.NET 4.5+ Identity sca
 ---
 
 ## 5. Recommended Deliverables
-
 ### Priority-ordered list of what the team should build:
 
 #### 5.1 MUST HAVE (Core Deliverables)
@@ -5176,14 +4866,12 @@ The only gap is `<asp:ModelErrorMessage>`, which is an ASP.NET 4.5+ Identity sca
 | 9 | **`docs/Migration/ManualPatterns.md`** | Beast | Reference doc for semantic patterns (Session → DI, Identity migration, EF6 → EF Core, etc.) | M |
 | 10 | **`scripts/bwfc-migrate.config.json` schema** | Cyclops | JSON schema for the config file, enabling route table, layout mapping, namespace configuration. | S |
 | 11 | **Integration test: migrated vs. original** | Colossus | Side-by-side Playwright tests comparing WingtipToys original output to migrated Blazor output. | L |
-
 ### 5.4 What NOT to Build
 
 - ❌ **A standalone CLI tool** (`bwfc-migrate` as a .NET tool) — overkill for now. PowerShell scripts are sufficient and more portable.
 - ❌ **A VS Code extension** — Copilot skills/agents serve this purpose better.
 - ❌ **A Roslyn analyzer** — code-behind transforms are better handled by Copilot's AI than static analysis.
 - ❌ **Full ASP.NET parser** — We're targeting practical migration, not 100% parsing coverage. Regex + Copilot handles 95%+ of real-world patterns.
-
 ### 5.5 Migration Flow (End-to-End User Experience)
 
 ```
@@ -5243,7 +4931,6 @@ Step 5: VERIFY
 | Recommended deliverables | 11 (4 must-have, 4 should-have, 3 nice-to-have) |
 | Blocking component gap | 1 (FormView RenderOuterTable) |
 | Missing control | 1 (ModelErrorMessage — use Blazor's ValidationMessage) |
-
 ### Observed usage in WingtipToys
 
 ```aspx
@@ -5259,7 +4946,6 @@ Step 5: VERIFY
     ModelStateKey="email"
     CssClass="text-error" />
 ```
-
 ### Web Forms rendered HTML
 
 When `ModelState["NewPassword"]` has an error:
@@ -5277,7 +4963,6 @@ Key point: unlike validators, ModelErrorMessage defaults to rendering nothing wh
 ---
 
 ## 2. Component Design
-
 ### File location
 
 ```
@@ -5286,7 +4971,6 @@ src/BlazorWebFormsComponents/Validations/ModelErrorMessage.razor.cs
 ```
 
 Rationale: although ModelErrorMessage is not a validator, it lives in `System.Web.UI.WebControls` alongside validators in Web Forms, and conceptually belongs with validation infrastructure. Placing it in `Validations/` keeps it discoverable alongside `RequiredFieldValidator`, `CompareValidator`, and `AspNetValidationSummary`.
-
 ### Base class
 
 **`BaseStyledComponent`** — NOT `BaseValidator<T>`.
@@ -5297,7 +4981,6 @@ Justification:
 - `BaseValidator<T>` requires an abstract `Validate(string)` method, a `ControlToValidate` parameter, and hooks into `EditContext.OnValidationRequested` — none of which apply.
 - `BaseStyledComponent` provides exactly what's needed: `CssClass`, `Style`, `Visible`, `Enabled`, `ToolTip`, `ID`, font properties, and `AdditionalAttributes`.
 - Precedent: `AspNetValidationSummary` also inherits `BaseStyledComponent` (not `BaseValidator<T>`) because it displays errors without performing validation.
-
 ### Parameters
 
 | Parameter | Type | Default | Web Forms Equivalent | Notes |
@@ -5317,7 +5000,6 @@ Parameters inherited from `BaseStyledComponent` (BackColor, ForeColor, BorderCol
 - `Text` — In Web Forms, `ModelErrorMessage.Text` is the fallback display text when there's no error key match (inherited from Label). In practice it's never set in any sample. The component gets its display text from the error message in ModelState. Omitted to keep the component focused. Can be added later if a migration scenario requires it.
 - `Display` (ValidatorDisplay enum) — Web Forms ModelErrorMessage doesn't have a `Display` property. It simply renders nothing when there's no error.
 - `ValidationGroup` — ModelErrorMessage is not a validator and doesn't participate in validation groups. It reads from the full model state.
-
 ### Blazor-side error source: `EditContext` (Option A — recommended)
 
 **Decision: Use `[CascadingParameter] EditContext` to read validation messages.**
@@ -5386,7 +5068,6 @@ Zero markup changes beyond removing `asp:` and `runat="server"`.
 ---
 
 ## 3. Rendered HTML
-
 ### When error exists for ModelStateKey
 
 ```html
@@ -5402,11 +5083,9 @@ With multiple errors for the same key, concatenate with `<br>` (Web Forms render
 ```html
 <span class="text-danger">Password too short.<br>Password must contain a number.</span>
 ```
-
 ### When no error exists
 
 Nothing is rendered (the component returns `null` / empty fragment). This matches Web Forms behavior where ModelErrorMessage does not reserve DOM space.
-
 ### With style properties set
 
 ```html
@@ -5416,7 +5095,6 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 ---
 
 ## 4. Component Implementation Sketch
-
 ### bUnit tests (Rogue)
 1. **No error state** — renders nothing when EditContext has no messages for key.
 2. **Single error** — renders `<span>` with CssClass and message text.
@@ -5430,13 +5108,10 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 10. **BWFC validator metadata stripping** — messages with `\x1F` encoding display correctly.
 11. **Visible="false"** — renders nothing.
 12. **EditContext changes** — properly detaches/reattaches listener.
-
 ### Integration test (Colossus)
 - Sample page with `EditForm` + `TextBox` + `ModelErrorMessage`, triggers error via button click, verifies span appears/disappears.
-
 ### Sample page (Jubilee)
 - `Components/Pages/ControlSamples/ModelErrorMessage/Default.razor` — demonstrates password validation with model error display.
-
 ### Documentation (Beast)
 - `docs/Validations/ModelErrorMessage.md` — Web Forms syntax, Blazor syntax, migration before/after, HTML output.
 
@@ -5449,60 +5124,50 @@ Nothing is rendered (the component returns `null` / empty fragment). This matche
 2. **`Display` property (Static/Dynamic/None)**: Web Forms ModelErrorMessage does not have this property (it's on validators only), but some developers might expect it since it's adjacent to validators in markup. **Recommendation:** omit — keep to the original control's API surface.
 
 3. **Namespace placement**: The component lives in `Validations/` alongside validators. Should we add a `@using BlazorWebFormsComponents.Validations` to `_Imports.razor` if it's not already there? **Recommendation:** verify — if validators are already importable by tag name, this will be too.
-
 ### 2026-03-02: ModelErrorMessage component specification (consolidated)
 **By:** Forge, Cyclops
 **Date:** 2026-03-02
 **What:** Component spec and implementation for ModelErrorMessage — the last missing BWFC control (29/29 WingtipToys coverage). Inherits BaseStyledComponent (not BaseValidator). Uses [CascadingParameter] EditContext to read validation messages by string key (ModelStateKey). Parameters: ModelStateKey (required), AssociatedControlID, SetFocusOnError, CssClass. Renders <span> with error messages joined by <br>, or nothing when no errors. 13 bUnit tests. Committed at 91422c6.
 **Why:** Jeff's directive: the migration promise ("remove asp: and it works") requires this control. WingtipToys migration analysis identified ModelErrorMessage as the sole control without a BWFC equivalent. Appears in ManagePassword.aspx and RegisterExternalLogin.aspx. Uses EditContext (not custom abstractions) for consistency with existing BWFC validators.
-
 ### ModelErrorMessage documentation shipped
 
 **By:** Beast
 **Date:** 2026-03-02
 **What:** Created `docs/ValidationControls/ModelErrorMessage.md` for the new ModelErrorMessage validation component. Added to `mkdocs.yml` nav (alphabetical within Validation Controls). Updated `status.md` — Validation Controls count from 7→8, total from 51→52.
 **Why:** M21 wrap-up deliverable. ModelErrorMessage is a new validation component that displays model state errors for a specific key, matching `<asp:ModelErrorMessage>`. Documentation covers: features (ModelStateKey, AssociatedControlID, SetFocusOnError, CssClass), Web Forms→Blazor syntax comparison, EditContext/ValidationMessageStore code-behind migration pattern, and HTML output. Follows established validation control documentation pattern.
-
 ### ModelErrorMessage integration test coverage added
 
 **By:** Colossus
 **What:** Added 1 smoke test `[InlineData]` and 3 interactive tests for the ModelErrorMessage sample page (`/ControlSamples/ModelErrorMessage`). Smoke test added to `ValidationControl_Loads_WithoutErrors` Theory group. Interactive tests cover: submit-shows-errors, valid-submit-no-errors, and clear-button-removes-errors.
 **Why:** Every sample page gets an integration test — no exceptions. The ModelErrorMessage component is a validation control that conditionally renders `<span class="text-danger">` elements, so tests verify both the error-present and error-absent states via DOM element counting. The Clear button test exercises the EditContext reset path, which is unique to this sample page.
-
 ### 2026-03-04: PRs always target upstream/dev (consolidated)
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** NEVER create a PR to the origin repo (csharpfritz fork). Pull requests should ALWAYS be created to the upstream repository (FritzAndFriends/BlazorWebFormsComponents) targeting the dev branch. Use cross-fork PR format: head = csharpfritz:{branch}, base = dev on FritzAndFriends. Use `gh pr create --repo FritzAndFriends/BlazorWebFormsComponents` or equivalent.
 **Why:** User request — captured for team memory. The fork is for pushing branches; PRs belong on the org repo. This is a workflow rule for the project. (Consolidated from directives on 2026-03-02, 2026-03-03, and 2026-03-04.)
-
 ### 2026-03-02: WingtipToys Migration Analysis Results
 **By:** Forge
 **What:** Comprehensive page-by-page comparison of all 33 WingtipToys source files (.aspx/.ascx/.master) against their migrated Blazor equivalents (.razor). Layer 1 (bwfc-migrate.ps1) successfully handled ~70% of markup transforms: 147+ tag prefix removals, 165+ runat="server" removals, Content wrapper stripping, @page directive generation, ~35 expression conversions, ItemType→TItem conversion, comment syntax, and URL prefix conversion. 18 data-binding expressions remain unconverted (<%#: syntax), 8 SelectMethod attributes need Items/DataItem replacement, 3 GetRouteUrl calls need route interpolation, 3 user-control tag prefixes (uc:, friendlyUrls:) need stripping. BWFC has 100% control coverage for WingtipToys (28/29 controls exist; ContentPlaceHolder maps to @Body). 4 pages are fully ready, 21 need Layer 2 skill work, 8 need Layer 3 architecture (Identity, EF, Session, PayPal). Estimated total migration effort: 18-26 hours across all three layers.
 **Why:** Jeff needs to understand the effectiveness of the three-layer migration pipeline (Script → Skill → Agent) before the M22 Copilot-Led Migration Showcase. This analysis validates that Layer 1 handles high-volume mechanical transforms effectively, Layer 2 covers structural patterns via the Copilot Skill, and Layer 3 architectural decisions are limited to auth/data/session/integrations. The pipeline is proven: a developer using all three layers could migrate WingtipToys to a running Blazor app in under a day. Key actionable findings: (1) Layer 1 should add regex for <%#: Item.X %> → @context.X conversion, (2) Layer 1 should strip user-control tag prefixes during Register directive removal, (3) Account pages should use scaffolded Identity UI rather than migrating OWIN code-behind, (4) SelectMethod→Items is the #1 most common Layer 2 transform.
-
 ### 2026-03-02: Original WingtipToys Build & Run Configuration
 **By:** Cyclops
 **Date:** 2026-03-02
 **What:** Documented how to build and run the original WingtipToys ASP.NET Web Forms app locally. Connection strings changed from `(LocalDb)\v11.0` to `(LocalDb)\MSSQLLocalDB`. Created empty `samples/WingtipToys/Directory.Build.props` to block NBGV inheritance. Use `nuget install` for packages.config restore. IIS Express on port 5200.
 **Why:** Machine-specific config needed for any dev running the original app for comparison screenshots. Changes confined to samples/WingtipToys/.
-
 ### 2026-03-02: WingtipToys CSS Fidelity  7 Visual Differences Identified
 **By:** Forge
 **Date:** 2026-03-02
 **What:** Side-by-side comparison found 7 CSS/visual differences: (1) Wrong Bootstrap theme  stock BS3 instead of Bootswatch Cerulean, (2) Single-column product grid instead of 4-column, (3) Missing Trucks category, (4) Site.css not referenced, (5) BoundField DataFormatString bug  premature .ToString() loses numeric formatting, (6) bootstrap-theme.min.css adding unwanted gradients, (7) Cart prices missing dollar sign (symptom of #5). Fixes: replace CDN with local Cerulean CSS, add GroupItemCount/templates to ListView, add Trucks category, fix BoundField.razor.cs line 48.
 **Why:** Migration showcase screenshots must visually match the original. The BoundField bug is a library-level defect affecting all DataFormatString consumers.
-
 ### 2026-03-03: ListView CRUD events — correctness fixes for ItemCreated and ItemCommand
 
 **By:** Cyclops
 **What:** Fixed two Web Forms lifecycle deviations in ListView: (1) `ItemCreated` changed from `EventCallback` firing once on first render to `EventCallback<ListViewItemEventArgs>` firing per-item before `ItemDataBound` in both grouped and non-grouped paths; (2) `ItemCommand` now fires for ALL commands before routing to specific handlers (Edit, Delete, Update, etc.), not just for unknown commands.
 **Why:** Web Forms fires `ItemCommand` first for every command, then the specific event. `ItemCreated` fires per-item during data binding. These are documented lifecycle behaviors that migration code depends on. The IOrderedDictionary properties (Keys, Values, NewValues, OldValues) from Web Forms EventArgs are deliberately omitted — they're tied to the DataSource control paradigm that doesn't exist in Blazor.
-
 ### 2026-03-03: Migration toolkit delivery format and distributable skill (consolidated)
 **By:** Forge, Jeffrey T. Fritz, Beast
 **What:** Forge designed a migration toolkit package with 9 documents in `/migration-toolkit/` (README, QUICKSTART, METHODOLOGY, ARCHITECTURE-GUIDE, CONTROL-COVERAGE, CASE-STUDY, FAQ, CHECKLIST, copilot-instructions-template). Full design: `planning-docs/MIGRATION-TOOLKIT-DESIGN.md`. Jeff then directed a pivot: instead of 9 separate docs, deliver a single SKILL.md in GitHub Copilot skill format. Beast implemented this as `.github/skills/bwfc-migration/SKILL.md` — a distributable, self-contained skill file designed to be copied into any project's `.github/skills/` folder. Key design decisions: (1) Single file, not 9 documents — Jeff explicitly changed direction to skill format. (2) Self-contained / NuGet-first — zero internal repo path references, works when dropped into any project. (3) Copilot-optimized — tables over prose, exact code transforms, literal before/after examples. (4) Preserves existing internal `webforms-migration/SKILL.md` for internal use. (5) Includes 10 architecture decision templates (Session→DI, Identity→Blazor Identity, EF6→EF Core, etc.). (6) Honest about BWFC limitations (DataSource controls, Wizard, Web Parts, AJAX Toolkit extenders).
 **Why:** The component library, scripts, skills, and agent lacked a unified entry point. Forge's design addressed this with a comprehensive document set. Jeff refined the format to a single portable skill file — more portable, discoverable, and Copilot-native than a folder of markdown documents. The skill is the primary user-facing deliverable; `migration-toolkit/` documents are now secondary artifacts.
 **Impact:** Forge/Cyclops must update `bwfc-migration` skill if components are added/removed or APIs change. Jubilee: no sample page changes needed.
-
 ### 2026-03-03: Migration Toolkit Content Structure
 
 # Decision: Migration Toolkit Content Structure
@@ -5538,38 +5203,31 @@ Jeff reframed the project as a "migration acceleration system." The toolkit is t
 - **Cyclops/Forge:** If scripts (`bwfc-scan.ps1`, `bwfc-migrate.ps1`) or skill (`SKILL.md`) change parameters or behavior, toolkit docs may need updates (especially QUICKSTART.md and copilot-instructions-template.md).
 - **Jubilee:** The QUICKSTART references `samples/AfterWingtipToys/` as reference implementation.
 - **All:** Three remaining docs (ARCHITECTURE-GUIDE.md, FAQ.md, CASE-STUDY.md) can be authored when prioritized.
-
 ### 2026-03-02: User directive  Themes implementation last
 **By:** Jeff Fritz (via Copilot)
 **What:** Themes (#369, M11 Full Skins & Themes) should come LAST in priority. ListView CRUD events first, then WingtipToys remaining features, then themes.
 **Why:** User request  captured for team memory
-
 ### 2026-03-04: ListView EventArgs use IOrderedDictionary for Web Forms parity
 **By:** Cyclops
 **What:** Added IOrderedDictionary properties to ListViewInsertEventArgs (Values), ListViewUpdateEventArgs (Keys, OldValues, NewValues), and ListViewDeleteEventArgs (Keys, Values), initialized to empty OrderedDictionary in constructors. Matches FormViewUpdateEventArgs/FormViewDeleteEventArgs pattern. Also added TotalRowCount to ListViewPagePropertiesChangingEventArgs.
 **Why:** ListView CRUD EventArgs were missing dictionary-based properties (Keys, Values, OldValues, NewValues) that Web Forms originals expose. Consumers can now populate these in event handlers, matching the Web Forms programming model. No breaking changes  all new properties are additive. This supersedes the earlier M7 decision to avoid OrderedDictionary on ListView; full parity is now required.
-
 ### 2026-03-02: ListView CRUD Event Test Conventions
 **By:** Rogue
 **What:** 43 bUnit tests for all 16 ListView CRUD events. Conventions: (1) event ordering via List<string> with ShouldBe assertions, (2) cancellation tests set Cancel=true and assert -ed handler stays null, (3) DataBound/ItemDataBound use ShouldBeGreaterThanOrEqualTo for bUnit double-render, (4) ItemCreated needs async test with InvokeAsync, (5) CancelMode detection: InsertItemPosition!=None && EditIndex<0 = CancelingInsert.
 **Why:** Proactive tests written ahead of implementation for immediate CI validation. Patterns should be followed for any future ListView event tests.
-
 ### 2026-03-03: WingtipToys remaining feature schedule
 **By:** Forge
 **What:** 7-phase prioritized schedule for WingtipToys migration: (1) Data Foundation  EF Core, models, CartStateService, BoundField fix; (2) Product Browsing  ProductList/Details data binding; (3) Shopping Cart  AddToCart, ShoppingCart wiring; (4) Checkout Flow  CheckoutStateService, mock PayPal, checkout pages; (5) Admin  add/remove product, FileUpload, validation; (6) Identity & Auth  ASP.NET Core Identity, login/register, authorization; (7) Polish  CSS verification, smoke test. 26 work items total (10S + 13M + 2L). Critical path: Phase 1  2  3  4  7. Max parallelism after Phase 1.
 **Why:** Jeff requested prioritization of remaining WingtipToys features. Gap is almost entirely code-behind logic  markup/BWFC migration is done. ~10-14 working days with parallel execution.
-
 ### 2026-03-04: User directive — migration test reports location
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Migration test runs with screenshots and measurements go in `docs/migration-tests/` with a subfolder per run containing a markdown report and supporting images. This is the standard location for all migration benchmarking.
 **Why:** User request — establishes a repeatable pattern for tracking migration test results over time.
-
 ### 2026-03-04: migration-toolkit/ is the canonical home for all deliverable migration assets (consolidated)
 **By:** Jeffrey T. Fritz, Forge
 **Status:** Implemented
 **What:** All tools, scripts, and skills used for migration tests and delivered to users must live in `migration-toolkit/` as a self-contained distribution package: `migration-toolkit/skills/` (Copilot skill files), `migration-toolkit/scripts/` (bwfc-scan.ps1, bwfc-migrate.ps1). This is the canonical location — not `scripts/`, not `.ai-team/skills/`, not `.github/skills/`. `.github/skills/` retains only internal project skills. Scripts are copied (not moved) because `scripts/` originals are still used internally.
 **Why:** User directive — establishing single source of truth for deliverable migration assets. The toolkit is a product to distribute, not internal project configuration. Eliminates confusion about which skills are for end-users vs internal. README.md updated with usage instructions and NuGet link.
-
 ### 2026-03-04: Layer 1 Benchmark Baseline Established
 
 **By:** Cyclops
@@ -5598,7 +5256,6 @@ Ran bwfc-scan.ps1 and bwfc-migrate.ps1 against WingtipToys to establish Layer 1 
 - Beast: benchmark data is ready at `docs/migration-tests/wingtiptoys-2026-03-04/layer1-results.md`
 - Forge: the 14 unconverted expressions + 4 Register directives define Layer 2 scope for markup
 - All: `samples/FreshWingtipToys/` is the new fresh migration target — do NOT touch `samples/AfterWingtipToys/`
-
 ### 2026-03-04: Layer 2+3 Benchmark Approach
 
 **Author:** Cyclops  
@@ -5627,7 +5284,6 @@ Layer 1 scripts produced FreshWingtipToys with 33 .razor files and 338 build err
 - 81 files changed, 1540 insertions, 2807 deletions
 - Clean build: 0 errors, 0 warnings
 - The migration skills (bwfc-migration, bwfc-data-migration) provided accurate translation rules for every pattern encountered
-
 ### 2026-03-04: Migration Benchmark Run 2 Results
 
 **Date:** 2026-03-04
@@ -5653,7 +5309,6 @@ Executed a complete fresh migration benchmark of WingtipToys (32 files, 230 cont
 - The migration toolkit is ready for customer-facing documentation
 - PR #418 should be merged before any public demos
 - Bootstrap JS error (jQuery dependency) is cosmetic only — CSS-only styling works fine
-
 ### 2026-03-04: Enhance bwfc-migrate.ps1 with Eval Format-String and Simple String.Format Regexes
 
 # Decision: Enhance bwfc-migrate.ps1 with Eval Format-String and Simple String.Format Regexes
@@ -5669,14 +5324,12 @@ The Run 2 and Run 3 migration reports listed `<%#: Eval("Total", "{0:C}") %>` as
 Additionally, simple `<%#: String.Format("{0:c}", Item.Property) %>` patterns are mechanically convertible.
 
 ## Recommendation: Add 2 regex transforms to `ConvertFrom-Expressions`
-
 ### Transform 1: Eval with format string
 ```
 Pattern:  <%#:\s*Eval\("(\w+)",\s*"\{0:([^}]+)\}"\)\s*%>
 Replace:  @context.$1.ToString("$2")
 Example:  <%#: Eval("Total", "{0:C}") %>  →  @context.Total.ToString("C")
 ```
-
 ### Transform 2: Simple String.Format with Item.Property
 ```
 Pattern:  <%#:\s*String\.Format\("\{0:([^}]+)\}",\s*Item\.(\w+)\)\s*%>
@@ -5704,7 +5357,6 @@ This would reduce the manual item count from 18 to ~14, pushing Layer 1 coverage
 ## Decision needed
 
 Should Cyclops implement these two regexes in `bwfc-migrate.ps1`? The changes are ~10 lines of code in the `ConvertFrom-Expressions` function, with well-defined test cases from WingtipToys source files.
-
 ### 2026-03-04: Master Page Transforms and Expression Regex Enhancements
 
 **By:** Cyclops
@@ -5740,19 +5392,16 @@ Completed Run 4 of the WingtipToys migration benchmark using the enhanced `bwfc-
 ## Impact
 
 Run 4 validates that the enhanced script is ready for inclusion in the migration toolkit. The 3 new features (master page conversion, App/Routes scaffold, format-string regexes) collectively reduce manual Layer 2 work by approximately 30-40 minutes per migration.
-
 ### 2026-03-05: GetRouteUrl RouteValueDictionary overloads completed
 
 **By:** Cyclops
 **What:** Completed the two stubbed `RouteValueDictionary` overloads in `GetRouteUrlHelper.cs` that previously returned `null`. They now delegate to `LinkGenerator.GetPathByRouteValues` identically to the `object` overloads. All 4 overloads match the Web Forms `Control.GetRouteUrl` API surface.
 **Why:** The Run 4 report flagged `GetRouteUrl` as needing completion. While WingtipToys only uses anonymous-object overloads (which already worked), the `RouteValueDictionary` overloads are part of the Web Forms API surface and should work correctly for any migrated code that uses them. Returning `null` was a silent failure that could confuse developers during migration.
-
 ### 2026-03-04: Migration report image paths must use 3-level relative traversal
 
 **By:** Beast
 **What:** Reports at `docs/migration-tests/{app}-{run}/report.md` are 3 directories deep from the repo root. Any cross-references to repo-root assets (e.g., `planning-docs/screenshots/`) must use `../../../` (3 levels up), not `../../` (2 levels). The Blazor screenshots use a local `images/` subfolder that needs no traversal.
 **Why:** Run 4 report shipped with broken Original Web Forms screenshot links (`../../planning-docs/` instead of `../../../planning-docs/`). This off-by-one error is easy to repeat in future run reports. All team members generating migration test reports should count directory depth carefully.
-
 ### 2026-03-07: FreshWingtipToys — do not commit or reference (consolidated)
 
 **By:** Jeffrey T. Fritz
@@ -5763,19 +5412,16 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 2. **Do not reference:** Do NOT copy from it, reference it, or use it as a template during migration runs. Migration benchmark runs must be genuine fresh migrations using ONLY: (1) `bwfc-migrate.ps1`, (2) the BWFC library, (3) the migration-standards SKILL, and (4) the original Web Forms source at `samples/WingtipToys/`.
 
 **Why:** The whole point of migration benchmark runs is to test the migration tooling, not to prove we can copy-paste from a prior migration. The artifacts are scratch work and don't belong in the repo.
-
 ### 2026-03-04: Run 5 Migration Patterns
 
 **By:** Cyclops
 **What:** Run 5 of WingtipToys full migration tested 6 new script enhancements. 309 transforms total (up from 276 in Run 4). LoginViewAuthorizeView, GetRouteUrl injection hints, SelectMethod TODO annotations, Register directive cleanup, ContentPlaceHolder@Body, and String.Format conversions all fired correctly. Account/Checkout pages need full stubbing. Static assets should copy to wwwroot/ not project root. csproj scaffold TFM should be parameterized (default net10.0).
 **Why:** Documents migration patterns and script improvement recommendations from Run 5 validation. Establishes that all 6 new enhancements work correctly and identifies remaining gaps (static asset relocation, TFM parameterization, stub generation).
-
 ### 2026-03-05: Run 5 Report Structure with Works/Doesn't-Work Sections
 
 **By:** Beast
 **What:** Run 5 benchmark report introduces two new structural sections: (1) "What Works  Automated (Layer 1)"  complete inventory of all automated transforms with counts and examples, and (2) "What Doesn't Work  Still Manual (Layer 2)"  categorized by difficulty (mechanical-tedious vs requires-architectural-decisions). Replaces implicit "unconverted patterns" section with explicit, scannable breakdown. Pattern carries forward to Run 6+.
 **Why:** Self-contained report for stakeholders who haven't followed run history. Difficulty categorization helps project managers estimate effort. Forward-compatible for diffing against future runs.
-
 ### 2026-03-04: Migration standards for Web Forms → Blazor projects
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:**
@@ -5784,7 +5430,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 3. When ASP.NET Identity is used in the Web Forms project, prefer ASP.NET Core Identity in the Blazor migration
 4. Event handler migration should leverage BWFC component event parameters (OnClick, OnCommand, OnSelectedIndexChanged, etc.) which already have similar names to Web Forms originals
 **Why:** User request — establishing canonical migration standards based on Run 5 learnings. These should be reflected in migration scripts, documentation, and skills.
-
 ### 2026-03-05: Migration Toolkit Run 6  BWFC-first migration standards and 8 script enhancements (consolidated)
 
 **By:** Forge, Cyclops
@@ -5806,7 +5451,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 8. BundleConfig  link/script tags in App.razor. *45 min, -30s.*
 
 **Why:** Run 5 Layer 2 spent ~180s on page fixes, ~120s unnecessarily rewriting data controls to raw HTML. Combined enhancements project ~55% total time reduction (from ~10 min to ~4.5 min). The remaining ~4 min is inherently manual architectural work (EF Core, Identity, SessionDI). These standards formalize that BWFC event handlers have matching names and should be preserved.
-
 ### 2026-03-05: Run 6 Script Enhancements (4 changes to bwfc-migrate.ps1)
 
 **By:** Cyclops
@@ -5818,24 +5462,20 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 4. **Compilable stubs** → Pages containing Identity/Auth/Payment patterns (SignInManager, UserManager, FormsAuthentication, Session[, PayPal, Checkout) get minimal compilable `@page`/`@code{}` stubs instead of broken partial conversions.
 
 **Why:** These 4 changes eliminate ~205 seconds of manual fix time per migration run. Enhancement 2 (SelectMethod) is highest impact at -120s. Enhancement 4 ensures clean builds without manual stubbing. All changes are surgical — no restructuring.
-
 ### 2026-03-04: Scan code-behind files for unconvertible patterns
 
 **By:** Forge
 **What:** `Test-UnconvertiblePage` must also check the corresponding `.aspx.cs` code-behind file content for unconvertible patterns (SignInManager, UserManager, etc.), not just `.aspx` markup. 15 Account pages were not auto-stubbed because their Identity references were only in code-behind.
 **Why:** Manual stubbing took ~15s per run. Every migration with Identity pages will hit this gap.
-
 ### 2026-03-04: Run 6 validates migration-standards SKILL.md patterns
 
 **By:** Forge
 **What:** Run 6 benchmark validated all migration-standards skill patterns: EF Core with SQLite, `IDbContextFactory<T>`, `EnsureCreated` + idempotent seed, BWFC data controls preserved (ListView, FormView) with `Items=@data`, `ComponentBase` base class, `LayoutComponentBase` for layout. 32 Web Forms files → clean Blazor build in ~4.5 min (55% reduction from Run 5).
 **Why:** These patterns should be considered validated for external migration guidance.
-
 ### 2026-03-04: User directive
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Entity Framework Core migrations should always use the latest .NET 10 version of the package, currently 10.0.3. Use `Microsoft.EntityFrameworkCore` version 10.0.3 (and related packages like `.SqlServer`, `.Tools`, `.Design` at the same version).
 **Why:** User request — captured for team memory. Ensures migrated projects use current stable EF Core matching the net10.0 TFM.
-
 ### 2026-03-04: WebFormsPageBase  Page base class for converted ASPX pages (consolidated)
 
 **By:** Forge, Cyclops
@@ -5845,7 +5485,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Created `WebFormsPageBase : ComponentBase` as a separate page base class for converted Web Forms pages. Inherits `ComponentBase` directly (not `BaseWebFormsComponent`) because pages are top-level containers, not child controls. Provides: `Title`, `MetaDescription`, `MetaKeywords` (delegating to `IPageService`), `IsPostBack => false`, and `protected WebFormsPageBase Page => this` self-reference. `[Inject] private IPageService` is auto-injected, eliminating per-page `@inject IPageService Page` boilerplate. Converted pages use `@inherits WebFormsPageBase` (one line in `_Imports.razor`). `Page.Title = "X"` and `if (!IsPostBack)` compile with zero changes from Web Forms code-behind. `Page.Request`, `Page.Response`, `Page.Session` deliberately omitted to force proper Blazor migration. Uses tabs for indentation matching existing project style.
 
 **Why:** Jeff asked if converted ASPX pages could inherit from a BWFC Page component to dramatically improve migration. Analysis of `System.Web.UI.Page` surface area showed Title and IsPostBack are the most common patterns (27 pages, 12+ IsPostBack occurrences in WingtipToys). Option C (base class + Page self-reference shim) was selected over adding properties to `BaseWebFormsComponent` (would pollute all controls) or a base class without Page property (wouldn't support `Page.Title` syntax). Conservative estimate: saves 15-25 minutes of manual work for WingtipToys, eliminates 100% of IsPostBack compiler errors. 8 bUnit tests written and passing (1472 total). 3 migration docs updated (bwfc-migration SKILL, migration-standards SKILL, METHODOLOGY).
-
 ### 2026-03-05: WebFormsPage IPageService head rendering consolidation (consolidated)
 
 **By:** Forge, Cyclops
@@ -5855,7 +5494,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **What:** Merged Page.razor's head-rendering capability into WebFormsPage (Option B from Forge's consolidation analysis). WebFormsPage now injects IServiceProvider, optionally resolves IPageService, subscribes to title/meta change events, and renders <PageTitle> + <HeadContent> alongside its existing <CascadingValue> wrapper. New [Parameter] bool RenderPageHead (default: 	rue) allows opting out. IPageService resolution is optional  WebFormsPage works for naming/theming even without AddBlazorWebFormsComponents(). Layout simplifies from 2 components (<Page /> + <WebFormsPage>) to 1 (<WebFormsPage> only). Page.razor remains as standalone option for apps not using WebFormsPage. NamingContainer and ThemeProvider unchanged. Forge analyzed 4 options: A (WebFormsPageBase renders  rejected, breaks SSR), B (merge into WebFormsPage  recommended and implemented), C (JSInterop  rejected, breaks SSR), D (status quo  acceptable fallback). WebFormsPageBase inheritance unchanged (stays as ComponentBase, not NamingContainer). 7 new tests, 1479 total passing.
 
 **Why:** Jeff asked to consolidate the 5-piece page system into fewer entry points. Option B is the only approach that works with Blazor's render model (<PageTitle> and <HeadContent> must appear in markup, not a base class). Result: two-line setup (one @inherits in _Imports.razor, one <WebFormsPage> in MainLayout.razor) delivers naming, theming, and head rendering. Migration scripts generate one component instead of two.
-
 ### 2026-03-06: CRITICAL  Git branching workflow (consolidated)
 
 **By:** Jeff Fritz  HIGHEST PRIORITY DIRECTIVE
@@ -5879,7 +5517,6 @@ Run 4 validates that the enhanced script is ready for inclusion in the migration
 **Context:** Issued after Copilot incorrectly merged PR #421 into upstream main without authorization. Branch `squad/run8-improvements` was recreated from `dev` (was incorrectly based on `main`).
 
 **Why:** Production safety. `main` is the production release branch. `dev` is where integration happens. Jeff is the sole gatekeeper for upstream main.
-
 ### 2026-03-06: BWFC Library Audit — CONTROL-COVERAGE.md Major Update
 
 **By:** Forge
@@ -5917,7 +5554,6 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 - `migration-toolkit/CONTROL-COVERAGE.md` — Major update
 - `dev-docs/bwfc-audit-2026-03-06.md` — New audit report
 - `.ai-team/agents/forge/history.md` — Updated with audit findings
-
 ### 2026-03-06: Skills cross-reference review — LoginView is native, not a shim
 **By:** Beast (Technical Writer)
 **Requested by:** Jeffrey T. Fritz
@@ -5938,24 +5574,20 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 **Report:** `dev-docs/skills-review-2026-03-06.md`
 
 **Why:** Skills are the primary interface between the BWFC library and migration developers (both human and AI). Inaccurate skills cause incorrect migrations. This review ensures every feature reference is accurate and no BWFC features are missing.
-
 ### 2026-03-06: Run 8 migration report enhanced for executive audience
 
 **By:** Beast
 **What:** Updated `dev-docs/migration-tests/wingtiptoys-run8-2026-03-06/REPORT.md` with executive-focused content: prominent timing section (ASCII timeline + phase table), screenshot gallery (9 PNGs in 4 functional groups), and 4 before/after code comparisons (Default, Site.Master→MainLayout, ProductList, Login). Existing technical sections preserved below the new executive content.
 **Why:** Migration reports need to serve two audiences — executives who want proof the automation works ("under 2 hours, 14/14 tests") and engineers who want technical details. The report now leads with executive content and keeps technical depth below the fold. This pattern should carry forward to future migration test reports.
-
 ### 2026-03-06: User directive — documentation scope
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.
 **Why:** User request — captured for team memory
-
 ### 2026-03-06: LoginView must be preserved as BWFC component, not converted to AuthorizeView (consolidated)
 **By:** Jeffrey T. Fritz (directive), Cyclops (implementation)
 **Status:** Implemented and reinforced
 **What:** STOP rewriting `asp:LoginView` as `AuthorizeView`. The migration script (`ConvertFrom-LoginView` in `bwfc-migrate.ps1`) must convert `<asp:LoginView>` to `<LoginView>` (the BWFC component), preserving `<AnonymousTemplate>` and `<LoggedInTemplate>` as-is. BWFC's LoginView component handles authentication state natively via `CascadingParameter Task<AuthenticationState>`. This decision was reinforced after Run 8 showed the pattern was still being violated. Prominent callouts now exist in both the identity and standards skill files.
 **Why:** AuthorizeView requires different template syntax. The conversion is lossy, breaks existing CSS/JS, and defeats the purpose of BWFC. The BWFC LoginView already provides full auth-state-aware rendering.
-
 ### 2026-03-06: Run 9 preparation — post-mortem analysis of Run 8
 **By:** Forge
 **What:** Analyzed Run 8 migration results and identified 22 improvements for Run 9
@@ -5964,11 +5596,9 @@ Migration developers using CONTROL-COVERAGE.md as their reference were getting a
 ---
 
 ## Run 8 Post-Mortem Analysis
-
 ### Summary
 
 Run 8 achieved 14/14 acceptance tests in 1h 55m. Layer 1 (script) completed 366 transforms in 3.3s. Layer 2 (manual) took ~26 minutes plus ~1h 20m of test-fix iteration. The biggest time sink was the HTTP session / Interactive Server incompatibility requiring 6 minimal API endpoints and the onclick workaround — architectural issues the skills didn't warn about. The second biggest time sink was creating Models, Data, and Services from scratch when the original source has perfectly good models that could be auto-copied.
-
 ### Methodology
 
 Compared every file in `samples/WingtipToys/WingtipToys/` against its equivalent in `samples/AfterWingtipToys/`. Read the full Run 8 REPORT.md including all phases, build issues, test iteration rounds, architecture decisions, and known limitations. Inspected the migration script (`bwfc-migrate.ps1`) transform pipeline and all 4 migration skill files for gaps.
@@ -5976,7 +5606,6 @@ Compared every file in `samples/WingtipToys/WingtipToys/` against its equivalent
 ---
 
 ## Prioritized Fix List
-
 ### P0 — Blocks Migration / Major Architectural Gap
 
 ---
@@ -6016,7 +5645,6 @@ Compared every file in `samples/WingtipToys/WingtipToys/` against its equivalent
 - `migration-toolkit/scripts/bwfc-migrate.ps1` (add Models directory copy logic after static files copy, ~line 1127)
 
 ---
-
 ### P1 — Significant Manual Work Reduction
 
 ---
@@ -6134,7 +5762,6 @@ Compared every file in `samples/WingtipToys/WingtipToys/` against its equivalent
 - `migration-toolkit/skills/bwfc-data-migration/SKILL.md` (add note on DisableAntiforgery)
 
 ---
-
 ### P2 — Nice to Have / Polish
 
 ---
@@ -6245,14 +5872,12 @@ Compared every file in `samples/WingtipToys/WingtipToys/` against its equivalent
 | RF-20 | Script | P2 | Detect Logic/ directory for services | S |
 | RF-21 | Script | P2 | Handle webopt:bundlereference removal | S |
 | RF-22 | Doc | P2 | Update component count in skill | S |
-
 ### Estimated Impact
 
 If all P0 + P1 fixes (14 items) are implemented, the projected Run 9 improvement:
 - **Phase 2 (manual):** ~26 min → ~10 min (Models auto-copied, Program.cs pre-scaffolded, packages pre-added, page titles preserved)
 - **Phase 3 (test/fix):** ~1h 20m → ~30 min (session/auth patterns documented upfront, minimal API templates available, enhanced nav workaround known)
 - **Projected total:** ~1h 55m → ~50-60 min
-
 ### Category Breakdown
 
 | Category | Count | Priority Split |
@@ -6300,11 +5925,9 @@ Each fix addresses manual work identified in Run 8 post-mortem. Verified with fu
 **Requested by:** Jeffrey T. Fritz (via Forge post-mortem)
 
 ## Decisions
-
 ### DisableAntiforgery() is required on all Blazor → minimal API form POSTs
 
 Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements. All minimal API endpoints receiving form POSTs from Blazor pages must call `.DisableAntiforgery()` or the request fails with 400 Bad Request.
-
 ### 2026-03-06: Run 9 CSS/Image Failure — Root Cause Analysis
 **By:** Forge
 **What:** Root cause analysis of why Run 9 has no CSS styling or product images
@@ -6313,7 +5936,6 @@ Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements
 ## Root Cause
 
 **Three independent failures conspired to produce a visually broken app that passes all functional tests.**
-
 ### RC-1: Script drops CSS bundle references from master page `<head>` (P0 — Layer 1)
 
 The source `Site.Master` uses ASP.NET Web Optimization bundle syntax for CSS:
@@ -6342,7 +5964,6 @@ Additionally, the `New-AppRazorScaffold` function (line 301–354) generates an 
 **Result:** Layer 1 output has NO CSS references anywhere — not in App.razor, not in MainLayout.razor's `<HeadContent>`. The CSS files ARE correctly copied to `wwwroot/Content/`, but nothing in the generated Blazor app references them. Layer 2 must discover and wire up CSS entirely on its own.
 
 **Why Run 8 worked:** Run 8's Layer 2 agent manually added CSS links to App.razor early in its process, before screenshots. Run 9's Layer 2 added CSS links AFTER screenshots were captured (the committed code has them, but the screenshots don't).
-
 ### RC-2: Layer 2 changed product image paths without moving files (P0 — Layer 2)
 
 | | Source (Web Forms) | Run 8 (Layer 2) | Run 9 (Layer 2) | FreshWingtipToys |
@@ -6360,7 +5981,6 @@ Run 9's Layer 2 rewrote image paths to `/Images/Products/` (the FreshWingtipToys
 - `GET /Images/Products/carconvert.png` → **404 Not Found**
 - `GET /Catalog/Images/carconvert.png` → **200 OK**
 - `GET /Images/logo.jpg` → **200 OK** (logo is separate, at correct path)
-
 ### RC-3: Acceptance tests don't verify visual output (P1 — Test Infrastructure)
 
 All 14 acceptance tests in `src/WingtipToys.AcceptanceTests/` check:
@@ -6376,7 +5996,6 @@ All 14 acceptance tests in `src/WingtipToys.AcceptanceTests/` check:
 - Any visual comparison
 
 This allows a completely unstyled app with all-404 images to score 14/14.
-
 ### RC-4: Run 9 report mischaracterizes screenshots (P2 — Documentation)
 
 The Run 9 `REPORT.md` describes screenshots as:
@@ -6386,7 +6005,6 @@ The Run 9 `REPORT.md` describes screenshots as:
 The report was auto-generated without visual validation, creating a false positive.
 
 ## Evidence
-
 ### CSS Failure Evidence
 1. **Script App.razor scaffold** (line 309–326): No `<link>` tags for CSS
 2. **Site.Master line 14**: `<webopt:bundlereference runat="server" path="~/Content/css" />` — not matched by script's `<link>` regex
@@ -6394,7 +6012,6 @@ The report was auto-generated without visual validation, creating a false positi
 4. **Run 8 homepage.png**: Dark blue navbar with white text — Bootstrap 3 `.navbar-inverse` correctly styled
 5. **Current committed App.razor** (Run 9): HAS CSS links (`<link rel="stylesheet" href="/Content/bootstrap.min.css" />`) — added by Layer 2 AFTER screenshots
 6. **Runtime verification**: `GET /Content/bootstrap.min.css` returns 200 OK, 114273 bytes, Content-Type: text/css — confirming static file serving works; the issue is purely missing `<link>` tags at screenshot time
-
 ### Image Failure Evidence
 1. **Run 9 ProductList.razor line 46**: `<img src="/Images/Products/@context.ImagePath"` — references non-existent path
 2. **Run 8 ProductList.razor**: `<img src="/Catalog/Images/Thumbs/@p.ImagePath"` — correct path matching file location
@@ -6404,7 +6021,6 @@ The report was auto-generated without visual validation, creating a false positi
 6. **Runtime verification**: `/Images/Products/carconvert.png` → 404; `/Catalog/Images/carconvert.png` → 200
 7. **Run 9 productlist.png**: All 16 products show broken image icon
 8. **Run 8 productlist.png**: All 16 products show correct images
-
 ### wwwroot diff Run 8 → Run 9
 ```
 git diff ba1ab77d bfec0c69 -- samples/AfterWingtipToys/wwwroot/
@@ -6423,7 +6039,6 @@ Both runs have the same wwwroot content. The CSS files and image files are ident
 | Run 9 `REPORT.md` screenshot descriptions | Mischaracterize broken screenshots as working | P2 |
 
 ## Proposed Fixes
-
 ### 2026-03-07: CSS Auto-Detection in bwfc-migrate.ps1 (consolidated)
 
 **By:** Forge
@@ -6433,7 +6048,6 @@ Both runs have the same wwwroot content. The CSS files and image files are ident
 **Why:** Run 9 RCA (RC-1) revealed `ConvertFrom-MasterPage` silently dropped `<webopt:bundlereference>` tags and `New-AppRazorScaffold` generated App.razor with zero CSS references. Layer 1 output now includes CSS from the start — Layer 2 no longer responsible for basic CSS wiring.
 **Status:** Implemented (2026-03-06). New `CSSBundle` manual review category appears in migration summaries.
 **Affects:** Cyclops (Layer 2 sees CSS pre-wired), Beast (skills updated — no Layer 2 CSS wiring guidance needed).
-
 ### Fix 2: Layer 2 skill — Preserve source image paths (P0)
 **File:** `migration-toolkit/skills/migration-standards.md` (and `.ai-team/skills/migration-standards.md`)
 
@@ -6445,7 +6059,6 @@ Add explicit guidance:
 - Do NOT change to FreshWingtipToys convention (`/Images/Products/`) unless you also move the files
 - The Layer 1 script copies static files preserving their relative directory structure into wwwroot/
 ```
-
 ### 2026-03-07: Static Asset Smoke Tests in Acceptance Suite (consolidated)
 
 **By:** Forge (RCA proposal), Rogue (implementation)
@@ -6453,7 +6066,6 @@ Add explicit guidance:
 **Why:** Run 9 passed all 14 functional tests but was visually broken (no CSS, images 404). Functional tests alone provide false confidence. These smoke tests gate future migration runs — CSS or image path breakage will fail acceptance before manual review.
 **Status:** Implemented (2026-03-06). No pixel-perfect comparison (would require stored baselines); coarse "not obviously broken" verification.
 **Affects:** Forge/Beast (migration scripts must preserve static asset paths or these tests fail).
-
 ### Fix 4: Fix current AfterWingtipToys image paths (P0 — immediate)
 **Files:** `samples/AfterWingtipToys/ProductList.razor`, `samples/AfterWingtipToys/ProductDetails.razor`
 
@@ -6464,27 +6076,23 @@ Change `/Images/Products/` → `/Catalog/Images/` to match actual file locations
 ## Priority
 
 **P0 — Critical** — This is a pipeline regression that produces visually broken output on every migration run. The combination of RC-1 (no CSS) and RC-2 (no images) means every Run 9+ output looks completely unprofessional despite passing all tests. The acceptance tests provide a false sense of security (RC-3). Fix 1 and Fix 2 should be implemented before Run 10.
-
 ### Fix Priority Order
 1. **Fix 4** (immediate) — Repair AfterWingtipToys image paths in committed code
 2. **Fix 1b** (script) — Auto-detect CSS files and inject into App.razor
 3. **Fix 1a** (script) — Handle `<webopt:bundlereference>` in master page conversion
 4. **Fix 2** (skill) — Add image path preservation guidance to Layer 2 skills
 5. **Fix 3** (tests) — Add visual smoke test to acceptance suite
-
 ### Run 9 Reclassified as FAILED — Visual Regression
 
 **By:** Beast
 **Date:** 2026-03-07
 **What:** Run 9 migration report reclassified from ✅ PASSED (14/14 tests) to ❌ FAILED due to visual regression: no CSS styling (navbar as bullet list) and all product images 404. The `migration-standards/SKILL.md` now includes critical rules for Layer 2: preserve source image paths (don't rewrite without moving files) and verify CSS `<link>` tags in App.razor after Layer 2 completes.
 **Why:** Functional test pass rate is necessary but not sufficient for migration success. The Run 9 RCA by Forge revealed that Layer 2 (Cyclops) rewrote image `src` paths from `/Catalog/Images/` to `/Images/Products/` without moving the physical files, and the Layer 1 script dropped `<webopt:bundlereference>` CSS tags without generating replacement `<link>` tags. Both issues are now codified as standards in the migration skill to prevent recurrence in Run 10+.
-
 ### Layer 2 Code-behind Namespace Convention
 
 **By:** Cyclops
 **What:** When converting Web Forms code-behinds to Blazor partial classes, the class name and namespace MUST match what Blazor generates from the .razor file path. For `Components/Layout/MainLayout.razor`, the partial class must be `partial class MainLayout` in namespace `WingtipToys.Components.Layout` — not the original Web Forms class name (`SiteMaster`) or root namespace. This is a build-breaking issue if wrong.
 **Why:** Blazor generates a partial class from each .razor file using the filename as class name and folder path as namespace. A code-behind .cs file that declares a different class name creates a separate type instead of extending the generated one, causing `override` methods like `OnInitializedAsync` to fail with CS0115.
-
 ### 2026-03-07: Coordinator must not perform domain work (consolidated)
 
 **By:** Jeffrey T. Fritz, Beast
@@ -6511,7 +6119,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 - [ ] .NET SDK matches `global.json`
 - [ ] Tests run via `dotnet test`, not ad-hoc scripts
 - [ ] All code changes routed through agents, not hand-edited
-
 ### Run 11 — migration-standards SKILL.md Updated with 3 New Sections
 
 **By:** Beast
@@ -6527,7 +6134,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 **Why:** These three gaps caused the majority of Run 11 test failures. Codifying them in the migration-standards SKILL ensures Layer 2 agents (Cyclops) and the migration script (bwfc-migrate.ps1) have explicit guidance to avoid repeating these failures.
 
 **Affects:** Cyclops (Layer 2 work), Forge (script improvements), future migration benchmark runs.
-
 ### 2026-03-07: Migration order directive — fresh project first
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Run 11 migration must follow this explicit order:
@@ -6538,7 +6144,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 5. THEN adapt any C# content needed
 6. FINALLY use the WingtipToys.AcceptanceTests project to verify
 **Why:** Previous runs (9, 10) started with the script output and tried to fix the foundation after. Starting fresh ensures the Blazor infrastructure (project file, Program.cs, App.razor, interactivity) is correct from the start. Migration content is layered on top of a working foundation.
-
 ### 2026-03-07: Run 11 Migration Decisions (Cyclops)
 
 **By:** Cyclops
@@ -6557,7 +6162,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 5. **Build result** — 0 errors, 0 warnings on first successful attempt (after fixing _Imports scope and partial class base conflicts).
 
 **Affects:** Migration script scaffolding, Layer 2 guidance, code-behind authoring patterns, migration skill documentation.
-
 ### Run 11 Script Fixes: JS Auto-Detection + Placeholder→@context Conversion
 
 **By:** Cyclops
@@ -6572,7 +6176,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 **Why:** Run 11 report identified these as the two highest-priority script gaps. Fix 1 is P1 (pages load without client-side JS — Bootstrap dropdowns, jQuery features broken). Fix 2 is CRITICAL (ListView items render nothing — the most common data display pattern in Web Forms).
 
 **Affects:** Beast (skills may reference these patterns), Forge (pipeline analysis), Layer 2 agents (less manual work for JS wiring and ListView template fixes).
-
 ### 2026-03-07: Run 12 migration decisions
 **By:** Cyclops
 **What:** Established Run 12 Layer 2 patterns for WingtipToys migration. Key decisions:
@@ -6583,7 +6186,6 @@ All domain changes must be routed through specialist agents: Cyclops for code, R
 5. CartStateService uses `IDbContextFactory` + cookie-based cart ID for Blazor Server compatibility.
 6. App.razor CSS/JS deduplication: keep only `.min.` variants when both min and non-min exist.
 **Why:** These patterns resolve the Run 11 failures (17/25) — particularly RC-8 (sparse homepage), RC-10 (missing Add to Cart link), and RC-11 (auth state not syncing after login). The `data-enhance="false"` + HTTP POST pattern is the critical fix for auth flow.
-
 ### 2026-03-08: Migration render mode - SSR default with InteractiveServer opt-in (consolidated)
 **By:** Forge, Cyclops, Jeffrey T. Fritz
 **What:** Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in. Remove global `@rendermode="InteractiveServer"` from App.razor (supersedes prior decision that rendermode belongs in App.razor, not _Imports.razor - now removed entirely for SSR default). Keep `AddInteractiveServerComponents()` and `AddInteractiveServerRenderMode()` in Program.cs for hybrid opt-in. `HttpContext` is NULL in InteractiveServer WebSocket circuits, requiring minimal API workarounds for auth/cookies - SSR eliminates this entire problem class.
@@ -6632,13 +6234,11 @@ InteractiveServer postback equivalent: `@onclick` handlers fire over SignalR. Th
 ## 4. BWFC Component Compatibility
 
 This is where it gets nuanced. I audited every component in `src/BlazorWebFormsComponents/`:
-
 ### Already SSR-compatible (no changes needed)
 - **All Login controls** — Login, ChangePassword, CreateUserWizard, PasswordRecovery — all use `EditForm`/`OnValidSubmit`
 - **Display-only controls** — Label, Literal, Image, Panel, PlaceHolder, HyperLink, BulletedList, Table, TableRow, TableCell, AdRotator, Xml
 - **Layout controls** — ContentPlaceHolder, Content, MultiView, View, Localize, LoginView, LoginName
 - **HiddenField** — pure `<input type="hidden">`
-
 ### Require InteractiveServer (use @onclick, @onchange, JS interop)
 - **Button, LinkButton, ImageButton** — use `@onclick`. Could be converted to `<button type="submit">` inside forms, but standalone click handlers need interactivity
 - **TextBox** — uses `@oninput`/`@onchange` for real-time binding
@@ -6655,7 +6255,6 @@ This is where it gets nuanced. I audited every component in `src/BlazorWebFormsC
 - **LoginStatus** — uses `@onclick` for login/logout
 - **FileUpload** — uses `InputFile` which requires interactivity
 - **BlazorWebFormsScripts** — uses `IJSRuntime`
-
 ### Verdict
 Roughly half the library is display/layout (SSR-ready). The other half uses event handlers. However, **many of the interactive components can work in SSR when used inside forms**. A Button inside an `EditForm` doesn't need `@onclick` — the form submission handles it. DropDownList inside a form sends its value on POST.
 
@@ -6702,7 +6301,6 @@ The script should also add a comment in App.razor explaining the choice:
 ## 7. Hybrid Approach — The Recommendation
 
 **Default SSR + per-page InteractiveServer opt-in.** This is what .NET 8+ was designed for.
-
 ### How it works
 
 1. **App.razor**: No `@rendermode` on `<HeadOutlet>` or `<Routes>`. The entire app renders via SSR by default.
@@ -6719,7 +6317,6 @@ The script should also add a comment in App.razor explaining the choice:
    ```razor
    <Calendar @rendermode="InteractiveServer" ... />
    ```
-
 ### What this means for WingtipToys Run 12
 
 | Page | Render Mode | Why |
@@ -6732,7 +6329,6 @@ The script should also add a comment in App.razor explaining the choice:
 | Checkout.aspx | SSR | Form-based flow |
 
 **Zero pages in WingtipToys would need InteractiveServer.** The cart cookie problem vanishes because HttpContext is always available. The enhanced navigation link problem vanishes because SSR handles links normally. The auth state problem vanishes because each request carries the current cookie.
-
 ### What this means for BWFC library
 
 No immediate changes to the component library source code. Components that use `@onclick` will simply not fire those handlers in SSR mode — which is the correct behavior when those components are inside `<EditForm>` (the form submission handles it instead). Components used outside forms on InteractiveServer pages will work as they do today.
@@ -6755,30 +6351,341 @@ Long-term, we could add `[StreamRendering]` support to data-bound components for
 | Migration complexity | ✅ Fewer workarounds | ❌ 3/5 fixes were mode-related |
 
 **Recommendation: SSR default + InteractiveServer opt-in. This eliminates the entire class of HttpContext/cookie/session problems that caused 60% of Run 12's post-migration fixes, while preserving the ability to use interactive components where truly needed.**
-
 ### Run 13: Logout Must Not Use `<button>` in Navbar
 
 **By:** Cyclops
 **What:** The logout control in MainLayout must use an `<a>` link (not a `<form>` with `<button>`) when positioned in the navbar alongside other page buttons. Using `<button>` causes Playwright's `getByRole(AriaRole.Button).First` to find the Log off button instead of the intended page button (e.g., Login, Register).
 
 **Why:** The `RegisterAndLogin_EndToEnd` test failed because `page.GetByRole(AriaRole.Button).First` found the navbar's "Log off" button before the Login form's submit button, causing an unintended logout.
-
 ### Run 13: Middleware Order — Auth Before Antiforgery
 
 **By:** Cyclops
 **What:** Middleware must be ordered: `UseAuthentication()` → `UseAuthorization()` → `UseAntiforgery()`. The antiforgery middleware must come AFTER authentication/authorization.
 
 **Why:** The migration script generates `UseAntiforgery()` before auth middleware. This must be corrected in Layer 2.
-
 ### 2026-03-08: Enhanced navigation must be bypassed for minimal API endpoints (consolidated)
 
 **By:** Cyclops
 **What:** Links pointing to minimal API endpoints (e.g., /AddToCart, /RemoveFromCart) MUST have data-enhance-nav="false" attribute. Without it, Blazor enhanced navigation intercepts the click, fetches the URL via AJAX, and fails to follow the 302 redirect. Auth forms should use data-enhance="false" to force full HTTP POST.
 **Why:** Initially identified as a general pattern. Confirmed and refined during Run 13: the AddItemToCart_AppearsInCart test failed because enhanced navigation intercepted the AddToCart link. Adding data-enhance-nav="false" forces a full browser navigation that follows the redirect.
-
 ### 2026-03-08: DbContext registration  AddDbContextFactory only (consolidated)
 
 **By:** Cyclops
 **What:** Use AddDbContextFactory<ProductContext> only in Program.cs. Do NOT also register AddDbContext<ProductContext>. Identity works correctly with the factory pattern when using AddIdentity (not AddDefaultIdentity).
 **Why:** Run 12 used dual registration (AddDbContextFactory + AddDbContext). Run 13 confirmed single factory registration works, simplifying DI setup. Evolution: Run 12 assumed Identity required scoped DbContext  Run 13 proved factory-only suffices.
+### 2026-03-11: Executive summary document created
+**By:** Beast
+**What:** Created `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md` — a comprehensive, data-driven executive summary of the BWFC migration toolkit's progress across 35 benchmark runs, 65 acceptance tests, and two test projects. Includes performance progression charts, visual fidelity screenshots, milestone timeline, and pipeline architecture overview. Emphasizes the drop-in replacement strategy as a unique differentiator.
+**Why:** Jeff requested a promotional document for stakeholders showcasing the toolkit's capabilities and results. The document aggregates data from all run reports into a single scannable summary with verified screenshot references and accurate metrics.
+### 2026-03-11: Migration tests folder reorganization
+**By:** Beast
+**What:** Reorganized `dev-docs/migration-tests/` from a flat directory with mixed naming conventions (`contoso-*`, `contosouniversity-*`, `ContosoUniversity-*`, `wingtiptoys-*`) into a clean hierarchical structure: `wingtiptoys/runNN/` and `contosouniversity/runNN/`. Resolved two Contoso numbering collisions (runs 11 and 12 existed for both March 9 and March 10) by keeping the earlier March 9 batch at their original numbers (07–12) and renumbering the later March 10–11 runs to 13–18. All run reports are now consistently named `REPORT.md` inside their `runNN/` folder.
+**Why:** The flat directory with 100+ files and inconsistent naming was unnavigable. Contributors had to guess which prefix to use (`contoso-` vs `contosouniversity-` vs `ContosoUniversity-`). The README only documented 2 of 18 Contoso runs. The new structure makes it easy to find any run, the consistent `runNN/REPORT.md` convention eliminates naming debates, and the updated README serves as a complete index of all migration test data.
+### 2026-03-11: ServiceCollectionExtensions enhancement
+**By:** Cyclops
+**What:** Enhanced `AddBlazorWebFormsComponents()` to auto-register `HttpContextAccessor`, added `BlazorWebFormsComponentsOptions` for configurable behavior, created `UseBlazorWebFormsComponents()` middleware with `.aspx` URL rewriting, and updated all sample Program.cs files. Added `FrameworkReference` to `Microsoft.AspNetCore.App` in the library csproj.
+**Why:** Every BWFC consumer had to manually call `AddHttpContextAccessor()` because `BaseWebFormsComponent` injects `IHttpContextAccessor`. The options pattern and middleware extension provide a single integration point for migration-related pipeline configuration. The `.aspx` rewrite middleware handles the most common legacy URL pattern, issuing 301 redirects to preserve SEO and prevent broken bookmarks during migration.
+### 2026-03-11: Chart Images Replace ASCII Art in Executive Summary
+**By:** Beast
+**Status:** Implemented
 
+## What
+
+The `EXECUTIVE-SUMMARY.md` performance charts are now PNG images (not ASCII art). Three chart files live in `dev-docs/migration-tests/images/` and are referenced via standard Markdown image syntax. A Python script (`generate-charts.py`) in the same directory regenerates them.
+
+## Why
+
+ASCII art charts are hard to maintain, don't render well in all Markdown viewers, and aren't presentation-ready. Real chart images with trend lines, annotations, and professional styling communicate the performance story more effectively to stakeholders.
+
+## Impact on Other Agents
+
+- **When new benchmark runs are added:** Update the data arrays at the top of `generate-charts.py` and re-run `python generate-charts.py` to regenerate all three charts.
+- **Prerequisite:** `pip install matplotlib` (one-time install).
+- **File paths to know:**
+  - `dev-docs/migration-tests/images/wingtiptoys-layer1-perf.png`
+  - `dev-docs/migration-tests/images/contosouniversity-layer1-perf.png`
+  - `dev-docs/migration-tests/images/combined-improvement.png`
+  - `dev-docs/migration-tests/images/generate-charts.py`
+### 2026-03-11: Test-UnconvertiblePage false-positive fixes — Run 18a/18b/18c (consolidated)
+**By:** Cyclops
+**Status:** RESOLVED ✓
+
+**What:** Fixed two false-positive patterns in `Test-UnconvertiblePage` that caused ShoppingCart.aspx to be incorrectly stubbed instead of converted with BWFC components:
+
+1. **Run 18b fix:** Removed `'Checkout'` from content patterns; replaced with path-based `'^Checkout[/\\]'`. The original pattern matched UI element names (`CheckoutImageBtn`, `CheckoutBtn_Click`) in markup, not actual checkout logic.
+2. **Run 18c fix:** Removed `'PayPal'` from content patterns entirely. The pattern matched `ImageUrl="https://www.paypal.com/..."` and `AlternateText="Check out with PayPal"` — UI references, not PayPal SDK code. ShoppingCart.aspx.cs has zero PayPal references.
+
+**Result:**
+- ShoppingCart.razor now contains full `<GridView>` with `<BoundField>` and `<TemplateField>` markup
+- Stub count: 5 (Checkout/ folder only) — correct, down from 6
+- Transforms: 314 (up from 303)
+- Remaining content patterns (`SignInManager`, `UserManager`, `FormsAuthentication`, `Session[`) are precise enough — no further changes needed for WingtipToys
+
+**Why:** A single false positive in `Test-UnconvertiblePage` stubs an entire page, deleting all BWFC component markup. The `'Checkout'` and `'PayPal'` patterns were matching UI element names and image URLs rather than actual unconvertible code. Path-based detection and code-behind analysis are more precise than content-matching for these patterns.
+### 2026-03-11: Run 18 improvement recommendations
+**By:** Forge
+**What:** Prioritized list of improvements to migration toolkit and BWFC library based on Run 18 findings
+**Why:** Run 18 revealed several systemic issues — false-positive stubbing, code-behind annotation bugs, missing Layer 2 automation, and library-level friction — that need addressing before the toolkit can be considered production-ready
+
+---
+
+## Executive Assessment
+
+Run 18 achieved the GridView ShoppingCart breakthrough, proving BWFC's data controls work end-to-end. But the _path to get there_ exposed systemic weaknesses in both the migration script and the library. Three iterations (18a/18b/18c) were needed to fix false-positive stubbing, the `[Parameter]` annotation bug remains unfixed (6 build errors), and the manually-fixed ShoppingCart.razor required 6 separate Layer 2 interventions that should be automatable.
+
+The issues cluster into four categories. I'm ranking them P0/P1/P2 based on: does this cause incorrect output (P0), does this block clean builds (P0), does this require recurring manual work (P1), or does this improve DX/robustness (P2)?
+
+---
+
+## P0 — Must Fix (Blocks Correct Output or Clean Builds)
+### P0-1: `Test-UnconvertiblePage` Architecture Overhaul
+
+**File:** `migration-toolkit/scripts/bwfc-migrate.ps1`, lines 1230–1258
+**Problem:** The function matches patterns against markup content (`$Content`), which causes false positives when UI elements (image URLs, button IDs, alt text) happen to contain keywords like "Checkout" or "PayPal." Run 18 required two separate iterations to fix these — a whack-a-mole approach that will fail on every new project.
+**Evidence:** Run 18a stubbed ShoppingCart due to `CheckoutImageBtn` matching `'Checkout'`. Run 18b fixed that but `'PayPal'` in an image URL triggered the same issue. Each false positive nukes an entire page.
+
+**Systemic Fix — Two-pass architecture:**
+
+1. **Separate markup patterns from code-behind patterns.** The current function receives `$Content` (markup only) and `$RelativePath`. It should ALSO receive the code-behind content. Payment/auth patterns (`Session\[`, `SignInManager`, `UserManager`, `FormsAuthentication`) are code-behind concerns — they should be checked against `.aspx.cs`, not `.aspx`. Markup patterns should be limited to structural features that genuinely can't be migrated (e.g., `<asp:CreateUserWizard>`).
+
+2. **Replace content-matching with a severity system.** Instead of binary stub/convert, return a confidence score:
+   - `code-behind match` → high confidence unconvertible (stub)
+   - `markup-only match` → low confidence (convert with TODO warning, don't stub)
+   - `path-based match` → unconditional stub (Checkout/ folder)
+   
+   This eliminates the false-positive class entirely. A page with `PayPal` in image alt text gets a TODO comment, not a stub.
+
+3. **Add a whitelist parameter** (`-ForceConvert @('ShoppingCart.aspx')`) so operators can override stubbing for known-good pages without editing the script.
+
+**Concrete change at line 1415:**
+```powershell
+# Current — markup only
+if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content -RelativePath $relativePath)) {
+
+# Proposed — markup + code-behind
+$cbPath = $SourceFile + '.cs'
+$cbContent = if (Test-Path $cbPath) { Get-Content -Path $cbPath -Raw -Encoding UTF8 } else { '' }
+if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -MarkupContent $content -CodeBehindContent $cbContent -RelativePath $relativePath -ForceConvert $ForceConvert)) {
+```
+
+**Priority rationale:** A single false positive stubs an entire page, deleting all BWFC component markup. This is data loss. P0.
+
+---
+### P0-2: `[Parameter]` RouteData TODO Annotation Bug
+
+**File:** `migration-toolkit/scripts/bwfc-migrate.ps1`, line 1209
+**Problem:** The regex replace appends a long TODO comment that swallows the rest of the line (the parameter type and name), producing broken C#.
+
+**Current code (line 1209):**
+```powershell
+$annotatedContent = $rdRegex.Replace($annotatedContent, "[Parameter] // TODO: Verify RouteData → [Parameter] conversion — ensure @page route template has matching {parameter}")
+```
+
+**What it produces:**
+```csharp
+[Parameter] // TODO: Verify RouteData → [Parameter] conversion — ensure @page route template has matching {parameter} string productName)
+```
+The `string productName)` is consumed into the comment. CS1031/CS1001/CS1026 errors result.
+
+**Fix — use line-aware replacement:**
+```powershell
+# Replace [RouteData] with [Parameter] and append TODO on the NEXT line
+$rdLineRegex = [regex]'(?m)(\s*)\[RouteData\](.*)'
+$annotatedContent = $rdLineRegex.Replace($annotatedContent, '$1[Parameter]$2`n$1// TODO: Verify RouteData → [Parameter] conversion — ensure @page route has matching {parameter}')
+```
+
+This preserves whatever follows `[RouteData]` on the same line and puts the TODO on a new line below. The method signature remains intact.
+
+**Impact:** 6 build errors in Run 18 (ProductDetails.razor.cs:36, ProductList.razor.cs:37). Every project with RouteData parameters hits this. P0.
+
+---
+
+## P1 — Should Fix (Recurring Manual Work or Pattern Quality)
+### P1-1: Layer 2 Boolean Normalization
+
+**File:** New automation target (Layer 2 or Layer 1 enhancement)
+**Problem:** Layer 1 preserves Web Forms attribute values verbatim: `AutoGenerateColumns="False"`, `ShowFooter="True"`. But Blazor/C# requires lowercase: `false`, `true`. Every migrated page with boolean attributes needs manual case correction.
+**Evidence:** ShoppingCart.razor fix #1 — `AutoGenerateColumns="false"` (lowercase). The Layer 1 output had `"False"`.
+
+**Two possible fixes:**
+1. **Layer 1 (preferred):** In `Remove-WebFormsAttributes` or a new `Normalize-BooleanAttributes` function, regex-replace `="True"` → `="true"` and `="False"` → `="false"` for known boolean attribute names (AutoGenerateColumns, ShowFooter, ShowHeader, Visible, Enabled, ReadOnly, AllowPaging, AllowSorting, AutoPostBack, etc.).
+2. **Library-level:** Make BWFC components accept both `"True"` and `"true"` (see P2-1 below). This is defense-in-depth but doesn't fix the general case.
+
+**Priority rationale:** Affects every page with boolean attributes. Easy regex fix. P1.
+
+---
+### P1-2: Layer 2 `ItemType` → `TItem` for Child Components
+
+**File:** `migration-toolkit/scripts/bwfc-migrate.ps1`, lines 1132–1137
+**Problem:** Layer 1 correctly converts `ItemType="Namespace.Class"` → `TItem="Class"` on parent data controls (GridView, ListView). But Web Forms' `ItemType` on child elements like `<BoundField>` is a pass-through — the BWFC `BoundField<ItemType>` generic needs `TItem` to be inferred from the parent `GridView<ItemType>`. The current script converts `ItemType` to `TItem` globally, which puts `TItem="CartItem"` on BoundFields where it's unnecessary (but harmless) AND misses the parent-child type inference gap.
+**Evidence:** ShoppingCart.razor fix #2 — `ItemType="CartItem"` had to be manually changed to work. The fixed file shows `ItemType="CartItem"` on BoundField elements (line 11-13 of AfterWingtipToys/ShoppingCart.razor).
+
+**Observation:** Looking at the BWFC library code, `GridView<ItemType>` uses `ItemType` as the generic parameter name, NOT `TItem`. The script converts `ItemType="CartItem"` → `TItem="CartItem"` but the component's generic parameter is literally named `ItemType`. This means:
+- `<GridView TItem="CartItem">` works (Blazor generic type inference)
+- `<GridView ItemType="CartItem">` would also work if Blazor can infer it... but it's the generic type parameter name itself
+
+The real issue: The library uses inconsistent naming. Some components use `ItemType` (GridView, DataGrid, ListView, DataList, Repeater, FormView, DetailsView), some use `TItem` (BulletedList, CheckBoxList, DropDownList, RadioButtonList, ListBox), and the base class `DataBoundComponent` uses `TItemType`. This inconsistency means the migration script has to know which name each component uses.
+
+**Fix:** See P2-2 for library-level standardization. For the script, the immediate fix is to NOT convert `ItemType` attributes on components that already use `ItemType` as their generic parameter name. The current conversion at line 1132 is actually _breaking_ the correct attribute name for these components.
+
+---
+### P1-3: Layer 2 GridLines Enum Conversion
+
+**Problem:** Web Forms uses string attribute `GridLines="Vertical"`. Blazor requires C# enum syntax: `GridLines="@GridLines.Vertical"`. Layer 1 preserves the string verbatim.
+**Evidence:** ShoppingCart.razor fix #3.
+
+**Fix:** Add a known-enum-attributes map to Layer 1:
+```powershell
+$enumAttributes = @{
+    'GridLines' = 'GridLines'
+    'RepeatDirection' = 'RepeatDirection'
+    'RepeatLayout' = 'RepeatLayout'
+    'BorderStyle' = 'BorderStyle'
+    'HorizontalAlign' = 'HorizontalAlign'
+    'VerticalAlign' = 'VerticalAlign'
+}
+```
+For each, convert `AttributeName="Value"` → `AttributeName="@AttributeName.Value"`.
+
+---
+### P1-4: Layer 2 Code-Behind DI Pattern (Pattern A)
+
+**Problem:** Web Forms code-behinds use `new DbContext()` or `Page.GetDataItem()`. Blazor requires `@inject` / `[Inject]` + `IDbContextFactory<T>`. This is a recurring manual fix.
+**Evidence:** ShoppingCart.razor fix #5 — `IDbContextFactory<ProductContext>` pattern.
+
+**Fix:** Layer 2 should detect common DI targets in code-behinds:
+1. `new XxxContext()` → `[Inject] private IDbContextFactory<XxxContext> DbFactory { get; set; }` + `using var db = DbFactory.CreateDbContext();`
+2. `ConfigurationManager.AppSettings["X"]` → `[Inject] private IConfiguration Config { get; set; }` + `Config["X"]`
+3. `HttpContext.Current.Session["X"]` → flag as needs-manual-review (SSR doesn't support traditional sessions)
+
+---
+### P1-5: Layer 2 Auth Form Rewiring (Pattern B)
+
+**Problem:** Web Forms Login.aspx uses `FormsAuthentication.SetAuthCookie()`. Blazor needs plain HTML forms with `data-enhance="false"` posting to a minimal API endpoint. This is a known pattern from Run 12 but not automated.
+**Evidence:** 5 Checkout/ stubs in Run 18 all need this pattern.
+
+**Fix:** Generate a template for auth pages that includes:
+- HTML form with `data-enhance="false"`
+- Minimal API endpoint scaffold
+- Cookie authentication pattern
+- Antiforgery token inclusion
+
+---
+
+## P2 — Nice to Have (DX Improvements, Defense-in-Depth)
+### P2-1: BWFC Case-Insensitive Boolean Parsing
+
+**Problem:** Blazor's default parameter binding is case-sensitive for strings passed as attribute values. `AutoGenerateColumns="False"` (capital F) works in Web Forms but may cause issues in Blazor depending on how the parameter is bound.
+**Evidence:** ShoppingCart.razor needed lowercase booleans.
+
+**Assessment:** For `bool` parameters, Blazor actually handles `"True"`/`"False"` correctly because `bool.Parse` is case-insensitive. The real issue is when values are passed as strings and compared. Since BWFC's `[Parameter] public bool AutoGenerateColumns` is a bool type, this is actually a non-issue at the library level — Blazor handles it. **Downgrade to P2 informational — the Layer 1 boolean normalization (P1-1) is the right fix.**
+### P2-3: `ServiceCollectionExtensions` Enhancements
+
+**File:** `src/BlazorWebFormsComponents/ServiceCollectionExtensions.cs`
+**Current state:** Registers HttpContextAccessor, BlazorWebFormsJsInterop, IPageService, and options. `UseBlazorWebFormsComponents()` adds .aspx URL rewriting middleware.
+
+**Potential enhancements:**
+1. **Add `IDbContextFactory` registration helper** — `options.AddDbContext<TContext>(connectionString)` to reduce boilerplate in migrated apps
+2. **Add session state bridge** — `options.EnableSessionBridge()` that provides a `ISessionStateService` wrapping cookies/cache for `Session["key"]` patterns. This would make the `Session\[` unconvertible pattern unnecessary.
+3. **Auto-register WebFormsPageBase** as the default base class — `options.UseWebFormsPageBase()` that adds `@inherits` to `_Imports.razor`
+
+**Priority rationale:** Nice to have. Current extensions work fine. P2.
+### P2-4: `Session\[` Pattern Needs Code-Behind-Only Matching
+
+**File:** `migration-toolkit/scripts/bwfc-migrate.ps1`, line 1250
+**Problem:** The `Session\[` pattern is checked against markup content, but `Session["key"]` only appears in code-behind files (`.aspx.cs`). If someone puts `Session[` in an inline code block in markup, it's rare but would be caught. The bigger risk is false negatives — missing `Session[` in code-behinds because we only check markup.
+**Evidence:** ShoppingCart.aspx.cs _does_ have `Session[` calls (for cart ID), but the markup doesn't. The page got stubbed for other reasons (Checkout/PayPal patterns), so this wasn't directly visible.
+
+**Fix:** This is covered by P0-1's two-pass architecture. When `Test-UnconvertiblePage` checks both markup AND code-behind, `Session\[` will correctly match against code-behind content.
+
+---
+
+## Recommended Sprint Plan
+
+| Sprint | Items | Effort |
+|--------|-------|--------|
+| **Immediate** | P0-1 (Test-UnconvertiblePage overhaul), P0-2 ([Parameter] fix) | 2-3 hours |
+| **This week** | P1-1 (boolean normalization), P1-3 (enum conversion), P1-2 (ItemType clarification) | 3-4 hours |
+| **Next sprint** | P1-4 (DI pattern), P1-5 (auth pattern), P2-3 (ServiceCollection) | 1-2 days |
+| **Future** | P2-2 (generic parameter standardization) | Major version work |
+
+---
+
+## Appendix: ShoppingCart.razor Gap Analysis
+
+Layer 1 output vs. manually-fixed final version — every delta represents a missing automation:
+
+| # | Layer 1 Output | Manual Fix Applied | Automation Target |
+|---|---|---|---|
+| 1 | `AutoGenerateColumns="False"` | `AutoGenerateColumns="false"` | P1-1: Boolean normalization |
+| 2 | `ItemType="CartItem"` via TItem conversion | `ItemType="CartItem"` (actually correct for GridView) | P1-2: Don't convert ItemType on GridView |
+| 3 | `GridLines="Vertical"` (string) | `GridLines="@GridLines.Vertical"` (enum) | P1-3: Enum conversion |
+| 4 | `Text="@context.Quantity"` (int) | `Text="@context.Quantity.ToString()"` | Hard to automate — type-aware |
+| 5 | `SelectMethod="GetShoppingCartItems"` TODO | `IDbContextFactory` + `OnInitializedAsync` | P1-4: DI pattern |
+| 6 | No cookie-based cart ID | `GetCartId()` from `IHttpContextAccessor` | Project-specific — not generalizable |
+
+### 2026-03-11: Mandatory L1→2 migration pipeline — no fixes between layers (consolidated)
+**By:** Jeffrey T. Fritz, Beast
+**What:** When Copilot runs the migration skill, BOTH Layer 1 AND Layer 2 MUST be run. Copilot is NOT to do ANY code fixes between Layer 1 and Layer 2. The pipeline must flow L1 → L2 without manual intervention. Beast updated `migration-toolkit/skills/bwfc-migration/SKILL.md` and `migration-toolkit/skills/migration-standards/SKILL.md` to codify this: added "Migration Pipeline — MANDATORY" section with critical warning, exact `bwfc-migrate.ps1` invocation, Layer 2 checklist, and explicit pipeline rules. Renamed "Layer 2 (Manual)" to "Layer 2 (Copilot-Assisted)" in migration-standards.
+**Why:** Manual fixes between layers corrupt the signal on whether the L1 script needs improvement. Pipeline quality measurement depends on clean L1 → L2 flow.
+
+### 2026-03-11: Standardize all generic type params to ItemType (consolidated)
+**By:** Jeffrey T. Fritz, Cyclops
+**What:** All BWFC data-bound components now use `ItemType` as the generic type parameter, matching the original Web Forms `DataBoundControl.ItemType` attribute name. Renamed `TItemType` (DataBoundComponent, SelectHandler) and `TItem` (BaseListControl, BulletedList, CheckBoxList, DropDownList, ListBox, RadioButtonList) to `ItemType`. All Group 3 components already used `ItemType`. Zero remaining `TItemType`/`TItem` in library source. Build: 0 errors. Supersedes earlier P2-2 analysis that proposed standardizing to `TItem` — Jeff directed `ItemType` instead to honor the Web Forms original.
+**Why:** BWFC's core promise is same names, same attributes. `ItemType` is the Web Forms original. `TItem` is a .NET convention but breaks migration fidelity.
+
+### 2026-03-11: P0 migration script fixes — Test-UnconvertiblePage + [Parameter] annotation (consolidated)
+**By:** Jeffrey T. Fritz, Cyclops
+**What:** Two P0 fixes in `migration-toolkit/scripts/bwfc-migrate.ps1`: (1) Eliminated `Test-UnconvertiblePage` stubbing per Jeff directive — the function now always returns `$false`, call site replaced with TODO-annotation injection so pages are fully converted through the BWFC pipeline instead of replaced with stubs. The PayPal ImageButton in ShoppingCart.aspx is just an image button, not PayPal SDK code. (2) Fixed `[RouteData]` → `[Parameter]` regex replacement — the inline `// TODO:` comment was swallowing the property declaration. TODO now goes on a separate line above `[Parameter]`.
+**Why:** (1) Stubs destroy markup that took effort to convert. Pages should ALWAYS be converted with BWFC components; concerns flagged with TODO comments. (2) The inline comment caused 6 build errors (CS1031, CS1001, CS1026) per project with RouteData parameters.
+
+
+### 2026-03-11: SelectMethod, ContentPlaceHolder, GetRouteUrl, and Validators  L1 script and skill corrections (consolidated)
+**By:** Jeffrey T. Fritz, Beast, Cyclops
+**What:**
+Jeff's Run 20 review identified four bugs in the migration pipeline:
+
+1. **SelectMethod stripped instead of preserved**  `ConvertFrom-SelectMethod` in `bwfc-migrate.ps1` was removing `SelectMethod="MethodName"` from markup. But BWFC's `DataBoundComponent<ItemType>` has a real `SelectHandler<ItemType> SelectMethod` parameter. The L1 script now preserves SelectMethod in markup with a TODO comment noting delegate conversion needed in L2. All three skill files (`bwfc-migration`, `migration-standards`, `bwfc-data-migration`) corrected  15 SelectMethod references updated to stop saying "convert SelectMethod to Items." The correct L2 transform is to convert the string method name to a delegate reference (`SelectMethod="@service.GetProducts"`).
+
+2. **ContentPlaceHolder flagged unnecessarily**  L1 manual review items said "needs manual conversion" without noting BWFC provides real `<ContentPlaceHolder>`, `<Content>`, and `<MasterPage>` components. Fixed in script and skills.
+
+3. **GetRouteUrl flagged without BWFC context**  L1 flagged route URLs as unknown. BWFC provides `GetRouteUrlHelper` utility. Review items now reference it.
+
+4. **Validators falsely reported as missing**  Run 20 report claimed RequiredFieldValidator, CompareValidator, RegularExpressionValidator, ModelErrorMessage are "not yet implemented." All exist in `src/BlazorWebFormsComponents/Validations/`. Report corrected.
+
+**Why:** The L1 script must never strip attributes that BWFC components support. SelectMethod is a working parameter  stripping it creates unnecessary L2 work. Review items must reference available BWFC utilities. Reports must not claim components are missing when they exist.
+
+**Files changed:**
+- `migration-toolkit/scripts/bwfc-migrate.ps1`  SelectMethod preservation, ContentPlaceHolder and GetRouteUrl review items
+- `migration-toolkit/skills/bwfc-migration/SKILL.md`  8 SelectMethod references
+- `migration-toolkit/skills/migration-standards/SKILL.md`  3 SelectMethod references
+- `migration-toolkit/skills/bwfc-data-migration/SKILL.md`  4 SelectMethod references + TItem to ItemType fix
+- `dev-docs/migration-tests/wingtiptoys/run20/REPORT.md`  validator false claim removed, SelectMethod guidance corrected
+
+
+### 2026-03-11: NEVER default to SQLite  database provider and SelectMethod enforcement (consolidated)
+**By:** Jeffrey T. Fritz, Beast, Cyclops
+**What:**
+1. **Database provider enforcement:** SQLite is NEVER an acceptable default for any migration. Agents MUST use the SAME database provider as the original Web Forms app. ContosoUniversity = SQL Server LocalDB. WingtipToys = SQL Server LocalDB. The L1 script (wfc-migrate.ps1) now scaffolds Microsoft.EntityFrameworkCore.SqlServer with UseSqlServer and a LocalDB connection string instead of SQLite. All three migration skill files (wfc-migration, migration-standards, wfc-data-migration) had "Prefer SQLite" guidance removed and NEVER-default-to-SQLite warnings added.
+2. **SelectMethod preservation is MANDATORY:** SelectMethod must be preserved as SelectHandler<ItemType> delegates during L2 transforms  NEVER converted to Items= binding. The "Alternatively bypass SelectMethod" escape hatch was removed from all skill files. Items= binding is restricted to DataSource-originating patterns only.
+**Why:** ContosoUniversity migration repeatedly regressed to SQLite despite explicit SQL Server instructions. SelectMethod kept being converted to Items= despite BWFC supporting it natively. Root cause was permissive skill file wording that gave agents escape paths. Skill files are the primary instruction source for migration agents; ambiguous phrasing causes systematic regression across every run. The L1 script was also seeding SQLite by default, causing L2 agents to follow suit.
+**Supersedes:** "2.2 SelectMethod Pattern (DESIGN  Not a Bug)" and "6.2 NON-BLOCKING: SelectMethod/ItemType Pattern Difference"  those older analyses incorrectly stated SelectMethodItems was a deliberate design decision. BWFC now natively supports SelectMethod as a SelectHandler<ItemType> parameter.
+### 2026-03-11: ContosoUniversity L2 uses SQL Server LocalDB exclusively (consolidated)
+**By:** Cyclops
+**What:** ContosoUniversity Layer 2 structural transform uses SQL Server LocalDB exclusively. Package: Microsoft.EntityFrameworkCore.SqlServer. Connection: Server=(localdb)\mssqllocaldb;Database=ContosoUniversity;Trusted_Connection=True;MultipleActiveResultSets=true. No EnsureCreated()  the database exists from the .mdf file. All BLL classes use IDbContextFactory<ContosoUniversityContext>. An earlier L2 attempt used SQLite and Items= binding  both approaches were rejected and corrected.
+**Why:** The original app used SQL Server with a pre-populated .mdf file. Previous successful test runs (Run 5, Run 17  both 40/40 acceptance tests) validated the LocalDB approach. SQLite would require data migration and breaks provider fidelity. Items= binding was replaced with proper SelectMethod delegate references per team directive.
+### 2026-03-12: Auto-detect and match original database provider (consolidated)
+**By:** Jeffrey T. Fritz, Beast, Cyclops
+**What:** The migration pipeline now auto-detects the original database provider from Web.config and scaffolds the matching EF Core package end-to-end. (1) Jeff directive: detect the original provider from Web.config connection strings — not just "avoid SQLite" but actively preserve the original database. (2) Cyclops added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` with three-pass detection: explicit `providerName` → connection string content patterns → EntityClient inner provider → SqlServer fallback. Scaffolds correct EF Core package, `Program.cs` provider method, and `[DatabaseProvider]` review item for L2 agents. (3) Beast reframed all three migration skill files to lead with "detect and match original provider" as the affirmative instruction, with NEVER-substitute guardrails retained as backstops. L2 checklist directs agents to verify the L1-detected provider.
+**Why:** Drop-in replacement means nothing changes unnecessarily, including the database. The L1 script previously hardcoded SqlServer — now it auto-detects. Agents prioritize affirmative instructions over prohibitions, so "detect and match" gives a clear workflow. Tested against ContosoUniversity and WingtipToys (both correctly detect SQL Server LocalDB).
+
+
+### 2026-03-12: Executive Summary updated to 40 runs with Run 19-21 data
+**By:** Beast
+**What:** Updated EXECUTIVE-SUMMARY.md from 38 → 40 benchmark runs. Added WT Run 20 (zero-error pipeline), WT Run 21 (SelectMethod preservation), and CU Run 19 (SQL Server auto-detection). Regenerated all 3 performance chart PNGs with new data points. CU Run 19 used Items= binding for SelectMethod (skills were fixed after that run) — flagged in What's Next for re-run with corrected skills.
+**Why:** The executive summary is the public-facing proof point for the migration toolkit. Keeping it current with every batch of runs ensures Jeff has accurate, promotion-worthy numbers for stakeholder conversations. The CU Run 19 Items= binding caveat is important context — it's not a failure, but it means a CU re-run with SelectMethod delegates is a near-term priority.
+
+### 2026-03-11: Executive summary — lead with successes, trim description
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The first 3 paragraphs of EXECUTIVE-SUMMARY.md have too much description. Get to the successes faster. The opening should lead with wins and hard numbers, not explanatory prose about what the toolkit does.
+**Why:** User request — the document is meant to demonstrate results and earn a promotion. Description can come later; the opening must punch.

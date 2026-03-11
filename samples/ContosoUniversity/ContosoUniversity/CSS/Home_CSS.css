@@ -1,0 +1,30 @@
+﻿body {background-color:#131414;
+}
+
+#welcomeHeader{width:100%;
+               height:300px;               
+               margin-top:130px;
+               text-align:center;
+              
+}
+
+#welcomeHeader h1 {font-family:'Lucida Sans Unicode';
+                   font-size:50px;
+                   font-weight:bolder;
+                   text-align:center;
+                   width:100%;                    
+                   position:relative;
+                   left:-1px;
+                   margin-bottom:-20px;
+                   color:#131414;              
+}
+
+#welcomeHeader h1 #com {font-size:20px;
+                        color:#131414; 
+}
+
+footer {color:white;
+        position:fixed;
+        bottom:3%;
+       
+}

@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace WingtipToys.Models;
 
-public class ProductContext : IdentityDbContext<IdentityUser>
+public class ProductContext : DbContext
 {
     public ProductContext(DbContextOptions<ProductContext> options) : base(options) { }
 

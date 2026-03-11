@@ -20,7 +20,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="Size"
+			@<RadioButtonList ItemType="Size"
 							  Items="data"
 							  DataTextField="Name"
 							  DataValueField="Code" />
@@ -46,7 +46,7 @@
 		var data = new List<string> { "Red", "Green", "Blue" };
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="string" Items="data" />);
+		var cut = Render(@<RadioButtonList ItemType="string" Items="data" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -77,7 +77,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="Size"
+			@<RadioButtonList ItemType="Size"
 							  StaticItems="staticItems"
 							  Items="data"
 							  AppendDataBoundItems="true"

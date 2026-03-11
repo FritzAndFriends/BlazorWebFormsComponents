@@ -7,8 +7,8 @@ namespace BlazorWebFormsComponents.DataBinding;
 /// Base class for list controls that display a collection of items (DropDownList, CheckBoxList, RadioButtonList, ListBox, BulletedList).
 /// Emulates the ASP.NET Web Forms ListControl base class.
 /// </summary>
-/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-public class BaseListControl<TItem> : DataBoundComponent<TItem>
+/// <typeparam name="ItemType">The type of items in the data source.</typeparam>
+public class BaseListControl<ItemType> : DataBoundComponent<ItemType>
 {
 	/// <summary>
 	/// Gets or sets the collection of static list items.
@@ -74,12 +74,12 @@ public class BaseListControl<TItem> : DataBoundComponent<TItem>
 	/// <summary>
 	/// Gets the value of a property from a data item by property name.
 	/// </summary>
-	protected string GetPropertyValue(TItem item, string propertyName)
+	protected string GetPropertyValue(ItemType item, string propertyName)
 	{
 		if (string.IsNullOrEmpty(propertyName))
 			return item?.ToString() ?? string.Empty;
 
-		var prop = typeof(TItem).GetProperty(propertyName);
+		var prop = typeof(ItemType).GetProperty(propertyName);
 		return prop?.GetValue(item)?.ToString() ?? string.Empty;
 	}
 

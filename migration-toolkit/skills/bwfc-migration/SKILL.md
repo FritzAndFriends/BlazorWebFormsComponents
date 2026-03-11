@@ -96,19 +96,34 @@ In `App.razor` or the host page `<head>`:
 
 ---
 
-## Migration Workflow
+## Migration Pipeline — MANDATORY
 
-This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the related skills for Layer 3.
+> ⚠️ **CRITICAL: The migration pipeline is a two-layer automated sequence. Both layers MUST run. Do NOT make any manual code fixes between Layer 1 and Layer 2.**
+> The migration pipeline measures script quality. Manual fixes between layers corrupt the measurement. If Layer 1 output has issues, those issues should be fixed in the script, not patched by hand.
 
-| Layer | What It Handles | Skill |
-|-------|----------------|-------|
-| **Layer 1: Mechanical** | Tag prefixes, `runat`, expressions, URLs, file renaming | ✅ This skill |
-| **Layer 2: Structural** | Data binding, code-behind lifecycle, templates, layouts | ✅ This skill |
-| **Layer 3: Architecture** | State management, data access, auth, middleware | `/bwfc-data-migration`, `/bwfc-identity-migration` |
+The migration pipeline has **two mandatory layers** that run in strict sequence:
 
-### Layer 1 — Mechanical Transforms
+| Step | Layer | Executor | Description |
+|------|-------|----------|-------------|
+| 1 | **Layer 1: Mechanical** | **Automated script** (`bwfc-migrate.ps1`) | Tag transforms, expression conversion, file renaming, scaffolding |
+| 2 | **Layer 2: Structural** | **Copilot-assisted** (this skill) | Data binding, lifecycle, templates, layouts |
+| 3 | Build & verify | Copilot | `dotnet build`, fix any remaining compile errors |
+| 4 | Report | Copilot | Document results |
 
-These are 100% mechanical — apply to every file:
+### Layer 1 — Run the Migration Script
+
+**You MUST run Layer 1 as a PowerShell script. Do NOT apply Layer 1 transforms manually.**
+
+```powershell
+.\migration-toolkit\scripts\bwfc-migrate.ps1 -Path "<source-webforms-project>" -Output "<blazor-output-dir>"
+```
+
+- `-Path` — path to the source Web Forms project directory (containing `.aspx`, `.ascx`, `.master` files)
+- `-Output` — path to the target Blazor project directory (will be created if it doesn't exist)
+- Layer 1 typically completes in 1–2 seconds and processes 30+ files
+- The script performs ALL mechanical transforms: `asp:` prefix removal, `runat="server"` removal, expression conversion, URL rewriting, file renaming, scaffold generation (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`, etc.)
+
+**What Layer 1 handles:**
 
 - Remove all `asp:` tag prefixes
 - Remove all `runat="server"` attributes
@@ -118,16 +133,47 @@ These are 100% mechanical — apply to every file:
 - Remove `<asp:Content>` wrappers
 - Convert `<%@ Page %>` directives to `@page "/route"`
 - Remove `<form runat="server">` wrapper
+- LoginView preservation (keeps BWFC LoginView, does NOT rewrite as AuthorizeView)
+- Master page → MainLayout.razor conversion
+- Scaffold generation (csproj, Program.cs, _Imports.razor, App.razor)
 
-### Layer 2 — Structural Transforms
+### Layer 2 — Copilot Transforms
 
-- Convert `SelectMethod="GetX"` → `Items="x"` (load in `OnInitializedAsync`)
-- Convert `ItemType="Namespace.Type"` → `TItem="Type"`
+**After Layer 1 completes, immediately proceed to Layer 2. Do NOT fix, edit, or clean up any Layer 1 output first.**
+
+Layer 2 is where Copilot applies structural transforms to every generated `.razor` and `.razor.cs` file. Work through each file and apply ALL of the following:
+
+> **⚠️ MANDATORY: SelectMethod MUST be preserved as a delegate.** When the original Web Forms markup has `SelectMethod="MethodName"`, the migrated Blazor markup MUST have `SelectMethod="@service.MethodName"` (or explicit lambda). Do NOT convert to `Items=` binding — this is the #1 recurring migration error.
+
+- Preserve `SelectMethod` — convert string method name to `SelectHandler<ItemType>` delegate (e.g., `SelectMethod="@productService.GetProducts"` if signature matches, or `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"` for explicit wiring). BWFC's `DataBoundComponent.OnAfterRenderAsync` automatically calls the delegate to populate `Items`.
+- Preserve `ItemType` attribute — BWFC data controls use `ItemType` (matches Web Forms `DataBoundControl.ItemType`). Do NOT change to `TItem` or any other name.
 - Add `Context="Item"` to `<ItemTemplate>` elements
 - Migrate code-behind: `Page_Load` → `OnInitializedAsync`
 - Convert `Response.Redirect` → `NavigationManager.NavigateTo`
 - Wire `EditForm` where form validation is needed
 - Convert Master Page → Blazor Layout
+- Ensure null-safe collection access when using `Items` (for `DataSource`-originating data only): `Items="@(_products ?? new())"`
+- When `SelectMethod` is set, `Items` is auto-populated by the BWFC framework — do NOT also set `Items`
+- **Database provider:** Verify the L1-detected provider from the `[DatabaseProvider]` review item. Use the detected EF Core package and connection string. Do NOT substitute providers (e.g., do not use SQLite when the original used SQL Server).
+- Add `@inject` directives for required services (NavigationManager, DbContext, etc.)
+- Convert `Session["key"]` → scoped DI service patterns
+
+### Pipeline Rules
+
+1. **Run Layer 1 first** — always via the script, never manually
+2. **Run Layer 2 immediately after** — no fixes between layers
+3. **Build** — run `dotnet build` and fix compile errors
+4. **Report** — document what was migrated and any issues
+
+## Migration Workflow
+
+This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the related skills for Layer 3.
+
+| Layer | What It Handles | Skill |
+|-------|----------------|-------|
+| **Layer 1: Mechanical** | Tag prefixes, `runat`, expressions, URLs, file renaming | ✅ This skill (automated via `bwfc-migrate.ps1`) |
+| **Layer 2: Structural** | Data binding, code-behind lifecycle, templates, layouts | ✅ This skill (Copilot-assisted) |
+| **Layer 3: Architecture** | State management, data access, auth, middleware | `/bwfc-data-migration`, `/bwfc-identity-migration` |
 
 ---
 
@@ -178,8 +224,10 @@ These are 100% mechanical — apply to every file:
 |-----------|--------|
 | `href="~/Products"` | `href="/Products"` |
 | `NavigateUrl="~/Products/<%: Item.ID %>"` | `NavigateUrl="@($"/Products/{context.ID}")"` |
-| `<%: GetRouteUrl("ProductRoute", new { id = Item.ID }) %>` | `@($"/Products/{context.ID}")` |
+| `<%: GetRouteUrl("ProductRoute", new { id = Item.ID }) %>` | `@($"/Products/{context.ID}")` or use BWFC's `GetRouteUrlHelper` extension (see below) |
 | `Response.Redirect("~/Products")` | `NavigationManager.NavigateTo("/Products")` |
+
+> **BWFC GetRouteUrlHelper:** BWFC provides a `GetRouteUrlHelper` extension method on `BaseWebFormsComponent` that wraps ASP.NET Core's `LinkGenerator`. Inside any BWFC component, you can call `this.GetRouteUrl("RouteName", new { id = item.ID })` directly — no manual URL construction needed. Register routes via ASP.NET Core's routing system and the helper maps them automatically.
 
 ### Content/Layout Conversion
 
@@ -259,7 +307,7 @@ These are 100% mechanical — apply to every file:
 
 ```razor
 <!-- Blazor with BWFC -->
-<GridView Items="products" TItem="Product"
+<GridView SelectMethod="@productService.GetProducts" ItemType="Product"
     AutoGenerateColumns="false"
     AllowPaging="true" PageSize="10">
     <Columns>
@@ -271,7 +319,7 @@ These are 100% mechanical — apply to every file:
 </GridView>
 ```
 
-**Key changes:** `ItemType` → `TItem`, `SelectMethod` → `Items`, add `Context="Item"` to templates.
+**Key changes:** `ItemType` preserved as-is, `SelectMethod` preserved — convert string method name to `SelectHandler<ItemType>` delegate, add `Context="Item"` to templates.
 
 #### ListView
 
@@ -291,7 +339,7 @@ These are 100% mechanical — apply to every file:
 
 ```razor
 <!-- Blazor with BWFC -->
-<ListView Items="products" TItem="Product">
+<ListView SelectMethod="@productService.GetProducts" ItemType="Product">
     <ItemTemplate Context="Item">
         <div class="product">
             <h3>@Item.ProductName</h3>
@@ -331,7 +379,7 @@ Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 p
 
 ```razor
 @* Blazor — BWFC ListView preserves GroupItemCount and templates *@
-<ListView Items="products" TItem="Product" GroupItemCount="4">
+<ListView SelectMethod="@productService.GetProducts" ItemType="Product" GroupItemCount="4">
     <LayoutTemplate>@context</LayoutTemplate>
     <GroupTemplate>@context</GroupTemplate>
     <ItemTemplate>
@@ -352,7 +400,7 @@ Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 p
 
 ```razor
 <!-- Blazor with BWFC -->
-<FormView DataItem="product" TItem="Product" RenderOuterTable="false">
+<FormView DataItem="product" ItemType="Product" RenderOuterTable="false">
     <ItemTemplate Context="Item">
         <h2>@Item.ProductName</h2>
         <p>@Item.Description</p>
@@ -361,7 +409,7 @@ Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 p
 </FormView>
 ```
 
-**Key changes:** `SelectMethod` → `DataItem` for single records, `Items` for collections.
+**Key changes:** `SelectMethod` preserved as delegate for both single records and collections. For `FormView` with a single record, alternatively use `DataItem="product"` with data loaded in `OnInitializedAsync`.
 
 ### Navigation Controls
 
@@ -475,10 +523,12 @@ For GridView, ListView, Repeater, DataList, DataGrid:
 
 | Web Forms Pattern | BWFC Pattern |
 |-------------------|-------------|
-| `SelectMethod="GetProducts"` | `Items="products"` (load in `OnInitializedAsync`) |
-| `ItemType="Namespace.Product"` | `TItem="Product"` |
+| `SelectMethod="GetProducts"` | `SelectMethod="@productService.GetProducts"` (convert string to `SelectHandler<ItemType>` delegate — BWFC auto-populates `Items`) |
+| `ItemType="Namespace.Product"` | `ItemType="Product"` (strip namespace only) |
 | `DataSource=<%# GetItems() %>` + `DataBind()` | `Items="items"` |
 | `DataKeyNames="ProductID"` | `DataKeyNames="ProductID"` (preserved) |
+
+> **How SelectMethod works in BWFC:** `DataBoundComponent<ItemType>` has a `SelectMethod` parameter of type `SelectHandler<ItemType>` — a delegate with signature `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`. When set, `OnAfterRenderAsync` automatically calls the delegate to populate `Items`. This mirrors how Web Forms `SelectMethod` worked.
 
 ### Single-Record Controls
 
@@ -486,8 +536,8 @@ For FormView, DetailsView:
 
 | Web Forms Pattern | BWFC Pattern |
 |-------------------|-------------|
-| `SelectMethod="GetProduct"` | `DataItem="product"` (load in `OnInitializedAsync`) |
-| `ItemType="Namespace.Product"` | `TItem="Product"` |
+| `SelectMethod="GetProduct"` | `SelectMethod="@productService.GetProduct"` (convert string to delegate) or `DataItem="product"` (load in `OnInitializedAsync`) |
+| `ItemType="Namespace.Product"` | `ItemType="Product"` (strip namespace only) |
 
 ### Template Binding
 
@@ -620,8 +670,8 @@ Include during migration to prevent errors, remove when stable.
 - [ ] <form runat="server"> removed
 
 ### Layer 2 — Structural
-- [ ] SelectMethod → Items/DataItem
-- [ ] ItemType → TItem
+- [ ] SelectMethod string → SelectHandler delegate
+- [ ] ItemType preserved (strip namespace prefix only)
 - [ ] Data loading in OnInitializedAsync
 - [ ] Event handlers converted
 - [ ] Template Context="Item" added

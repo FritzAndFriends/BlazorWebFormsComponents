@@ -2,69 +2,71 @@
 
 <BlazorWebFormsComponents.Page />
 
+<HeadContent>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</HeadContent>
+
 <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Wingtip Toys</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
-                <li><a href="/About">About</a></li>
-                <li><a href="/Contact">Contact</a></li>
-                <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart">Shopping Cart</a></li>
-            </ul>
-            <LoginView>
-                <AnonymousTemplate>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/Account/Register">Register</a></li>
-                        <li><a href="/Account/Login">Log in</a></li>
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">Wingtip Toys</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/About">About</a></li>
+                        <li><a href="/Contact">Contact</a></li>
+                        <li><a href="/ProductList">Products</a></li>
+                        <li><a href="/ShoppingCart" ID="cartCount">&nbsp;</a></li>
                     </ul>
-                </AnonymousTemplate>
-                <LoggedInTemplate>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/Account/Manage" title="Manage your account">Hello, @_userName!</a></li>
-                        <li>
-                            <a href="/account/logout-handler" class="navbar-link" data-enhance-nav="false">Log off</a>
-                        </li>
-                    </ul>
-                </LoggedInTemplate>
-            </LoginView>
+                    <LoginView>
+                        <AnonymousTemplate>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="/Account/Register">Register</a></li>
+                                <li><a href="/Account/Login">Log in</a></li>
+                            </ul>
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="/Account/Manage" title="Manage your account">Hello!</a></li>
+                                <li><a href="/" data-enhance-nav="false">Log off</a></li>
+                            </ul>
+                        </LoggedInTemplate>
+                    </LoginView>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<div id="TitleContent" style="text-align: center">
-    <a href="/">
-        <img src="/Images/logo.jpg" border="0" alt="Wingtip Toys" />
-    </a>
-    <br />
-</div>
-<div id="CategoryMenu" style="text-align: center">
-    @if (_categories != null)
-    {
-        @for (int i = 0; i < _categories.Count; i++)
-        {
-            <b style="font-size: large; font-style: normal">
-                <a href="/ProductList?catId=@_categories[i].CategoryID">@_categories[i].CategoryName</a>
-            </b>
-            @if (i < _categories.Count - 1)
-            {
-                <text> | </text>
-            }
-        }
-    }
-</div>
-<main class="container body-content">
-    @Body
-    <hr />
-    <footer>
-        <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
-    </footer>
-</main>
-    
+        <div id="TitleContent" style="text-align: center">
+            <a href="/">
+                <Image ID="Image1" ImageUrl="/Images/logo.jpg" BorderStyle="@BorderStyle.None" />
+            </a>  
+            <br />  
+        </div>
+        <div id="CategoryMenu" style="text-align: center">       
+            <ListView ID="categoryList"  
+                ItemType="Category"
+                Items="@_categories">
+                <ItemTemplate Context="context">
+                    <b style="font-size: large; font-style: normal">
+                    <a href="/ProductList?id=@context.CategoryID">
+                        @context.CategoryName
+                    </a>
+                    </b>
+                </ItemTemplate>
+                <ItemSeparatorTemplate>  |  </ItemSeparatorTemplate>
+            </ListView>
+        </div>
+        <div class="container body-content">
+            @Body
+            <hr />
+            <footer>
+                <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
+            </footer>
+        </div>

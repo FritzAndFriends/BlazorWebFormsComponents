@@ -9,6 +9,9 @@
 	  <None Remove="Ads4.xml" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="bunit" Version="2.5.3" />

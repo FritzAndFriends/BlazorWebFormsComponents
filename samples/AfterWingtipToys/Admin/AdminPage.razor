@@ -1,5 +1,65 @@
 @page "/Admin/AdminPage"
-<PageTitle>Admin</PageTitle>
-<h2>Admin</h2>
-<p>This page is under construction.</p>
+<h1>Administration</h1>
+    <hr />
+    <h3>Add Product:</h3>
+    <table>
+        <tr>
+            <td><Label ID="LabelAddCategory">Category:</Label></td>
+            <td>
+                <DropDownList ID="DropDownAddCategory" 
+                    ItemType="Category" 
+                    Items="@_categories" DataTextField="CategoryName" 
+                    DataValueField="CategoryID" >
+                </DropDownList>
+            </td>
+        </tr>
+        <tr>
+            <td><Label ID="LabelAddName">Name:</Label></td>
+            <td>
+                <TextBox ID="AddProductName"></TextBox>
+                <RequiredFieldValidator ID="RequiredFieldValidator1" Text="* Product name required." ControlToValidate="AddProductName" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+            </td>
+        </tr>
+        <tr>
+            <td><Label ID="LabelAddDescription">Description:</Label></td>
+            <td>
+                <TextBox ID="AddProductDescription"></TextBox>
+                <RequiredFieldValidator ID="RequiredFieldValidator2" Text="* Description required." ControlToValidate="AddProductDescription" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+            </td>
+        </tr>
+        <tr>
+            <td><Label ID="LabelAddPrice">Price:</Label></td>
+            <td>
+                <TextBox ID="AddProductPrice"></TextBox>
+                <RequiredFieldValidator ID="RequiredFieldValidator3" Text="* Price required." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                <RegularExpressionValidator ID="RegularExpressionValidator1" Text="* Must be a valid price without $." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic" ValidationExpression="^[0-9]*(\.)?[0-9]?[0-9]?$"></RegularExpressionValidator>
+            </td>
+        </tr>
+        <tr>
+            <td><Label ID="LabelAddImageFile">Image File:</Label></td>
+            <td>
+                <FileUpload ID="ProductImage" />
+                <RequiredFieldValidator ID="RequiredFieldValidator4" Text="* Image path required." ControlToValidate="ProductImage" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+            </td>
+        </tr>
+    </table>
+    <p></p>
+    <p></p>
+    <Button ID="AddProductButton" Text="Add Product" OnClick="@AddProductButton_Click" CausesValidation="true"/>
+    <Label ID="LabelAddStatus" Text="@_addStatus"></Label>
+    <p></p>
+    <h3>Remove Product:</h3>
+    <table>
+        <tr>
+            <td><Label ID="LabelRemoveProduct">Product:</Label></td>
+            <td><DropDownList ID="DropDownRemoveProduct" ItemType="Product" 
+                    Items="@_products" AppendDataBoundItems="true" 
+                    DataTextField="ProductName" DataValueField="ProductID" >
+                </DropDownList>
+            </td>
+        </tr>
+    </table>
+    <p></p>
+    <Button ID="RemoveProductButton" Text="Remove Product" OnClick="@RemoveProductButton_Click" CausesValidation="false"/>
+    <Label ID="LabelRemoveStatus" Text="@_removeStatus"></Label>
 

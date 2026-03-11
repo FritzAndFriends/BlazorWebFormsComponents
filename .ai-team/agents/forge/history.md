@@ -71,3 +71,43 @@ Library audit: 153 Razor components + 197 C# classes (CONTROL-COVERAGE.md was li
  Team update (2026-03-08): DbContext registration simplified  `AddDbContextFactory` only, no dual registration (supersedes Run 12 dual pattern)  decided by Cyclops
  Team update (2026-03-08): Middleware order: UseAuthentication  UseAuthorization  UseAntiforgery  decided by Cyclops
  Team update (2026-03-08): Logout must use `<a>` link not `<button>` in navbar  decided by Cyclops
+
+
+ Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. All sample Program.cs files updated.  decided by Cyclops
+ Team update (2026-03-11): Migration tests reorganized  `dev-docs/migration-tests/` now uses `wingtiptoys/runNN/` and `contosouniversity/runNN/` structure.  decided by Beast
+ Team update (2026-03-11): Executive summary created at `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md`  35 runs, 65 tests, performance data.  decided by Beast
+
+### Run 18 Analysis & Improvement Recommendations (2026-03-11)
+
+**Key findings from Run 18 report analysis:**
+
+1. **`Test-UnconvertiblePage` is architecturally flawed** — it matches patterns against markup only, causing false positives on UI references (PayPal image URLs, Checkout button IDs). Needs two-pass architecture: check code-behind for auth/session/payment patterns, markup only for structural features. This is the #1 script reliability issue. (P0)
+
+2. **`[Parameter]` RouteData annotation bug is a line-swallowing regex issue** — line 1209 of bwfc-migrate.ps1 replaces `[RouteData]` with a `[Parameter] // TODO...` string that consumes the rest of the line (parameter type + name). Causes 6 build errors in every project with route parameters. Fix: use line-aware regex that preserves same-line content and puts TODO on next line. (P0)
+
+3. **BWFC generic type parameter naming is inconsistent** — GridView/DataGrid/ListView use `ItemType`, BulletedList/DropDownList use `TItem`, DataBoundComponent uses `TItemType`. The migration script at line 1132 converts `ItemType` → `TItem` which is WRONG for GridView (whose generic param IS named `ItemType`). Major version standardization needed. (P2 — works today, just confusing)
+
+4. **Layer 2 doesn't exist as automation** — No `bwfc-migrate-layer2.ps1` file. All Layer 2 work (boolean normalization, enum conversion, DI patterns, auth rewiring) is manual. ShoppingCart.razor required 6 manual fixes that are generalizable patterns.
+
+5. **`Session\[` pattern checks markup, not code-behind** — Web Forms `Session["key"]` appears in `.aspx.cs` files, not in markup. The current check against markup content misses actual session usage and could false-positive on inline code blocks.
+
+**Decisions made:**
+- Recommended two-pass `Test-UnconvertiblePage` with code-behind analysis + severity scoring (P0-1)
+- Recommended immediate fix for `[Parameter]` line-swallowing bug (P0-2)
+- Boolean normalization should be Layer 1 (P1-1), not library-level — Blazor's `bool.Parse` is already case-insensitive
+- Enum attribute conversion map needed for GridLines, RepeatDirection, etc. (P1-3)
+- Full recommendations written to `.ai-team/decisions/inbox/forge-run18-improvements.md`
+
+
+📌 Team update (2026-03-11): Run 18 improvement recommendations prioritized by Forge — see decisions.md
+
+
+ Team update (2026-03-11): Mandatory L1L2 migration pipeline  no code fixes between layers. Both layers must run in sequence.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz
+
+
+ Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
+
+
+ Team update (2026-03-11): SelectMethod is now natively supported by BWFC. Old WingtipToys analysis sections 2.2 and 6.2 (SelectMethod as 'deliberate design decision') are SUPERSEDED. SelectMethod must be preserved as delegates.  decided by Jeffrey T. Fritz, Beast, Cyclops

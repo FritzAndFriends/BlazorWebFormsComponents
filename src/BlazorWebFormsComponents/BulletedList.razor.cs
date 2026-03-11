@@ -13,8 +13,8 @@ namespace BlazorWebFormsComponents
 /// Represents a list control that displays items as a bulleted or numbered list.
 /// Emulates the ASP.NET Web Forms BulletedList control.
 /// </summary>
-/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-public partial class BulletedList<TItem> : BaseListControl<TItem>
+/// <typeparam name="ItemType">The type of items in the data source.</typeparam>
+public partial class BulletedList<ItemType> : BaseListControl<ItemType>
 {
 private readonly string _baseId = Guid.NewGuid().ToString("N").Substring(0, 8);
 

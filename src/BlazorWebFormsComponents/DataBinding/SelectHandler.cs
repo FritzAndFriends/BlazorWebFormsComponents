@@ -2,5 +2,5 @@
 
 namespace BlazorWebFormsComponents.DataBinding
 {
-	public delegate IQueryable<TItemType> SelectHandler<TItemType>(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount);
+	public delegate IQueryable<ItemType> SelectHandler<ItemType>(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount);
 }

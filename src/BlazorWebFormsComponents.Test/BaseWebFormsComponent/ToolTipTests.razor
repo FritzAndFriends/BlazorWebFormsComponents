@@ -196,7 +196,7 @@
 	public void DropDownList_WithToolTip_RendersTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<DropDownList TItem="object" StaticItems="items" ToolTip="DropDownList tooltip" />);
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" ToolTip="DropDownList tooltip" />);
 		var select = cut.Find("select");
 		select.HasAttribute("title").ShouldBeTrue();
 		select.GetAttribute("title").ShouldBe("DropDownList tooltip");
@@ -206,7 +206,7 @@
 	public void DropDownList_WithoutToolTip_DoesNotRenderTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<DropDownList TItem="object" StaticItems="items" />);
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" />);
 		cut.Find("select").HasAttribute("title").ShouldBeFalse();
 	}
 
@@ -214,7 +214,7 @@
 	public void ListBox_WithToolTip_RendersTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" ToolTip="ListBox tooltip" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" ToolTip="ListBox tooltip" />);
 		var select = cut.Find("select");
 		select.HasAttribute("title").ShouldBeTrue();
 		select.GetAttribute("title").ShouldBe("ListBox tooltip");
@@ -224,7 +224,7 @@
 	public void ListBox_WithoutToolTip_DoesNotRenderTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" />);
 		cut.Find("select").HasAttribute("title").ShouldBeFalse();
 	}
 

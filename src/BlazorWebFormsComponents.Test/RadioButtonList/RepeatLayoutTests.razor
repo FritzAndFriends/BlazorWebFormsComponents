@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.Table" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" RepeatLayout="RepeatLayout.Table" />);
 
 		// Assert
 		cut.Find("table").ShouldNotBeNull();
@@ -32,7 +32,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.Flow" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" RepeatLayout="RepeatLayout.Flow" />);
 
 		// Assert
 		cut.Find("span").ShouldNotBeNull();
@@ -50,7 +50,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.OrderedList" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" RepeatLayout="RepeatLayout.OrderedList" />);
 
 		// Assert
 		cut.Find("ol").ShouldNotBeNull();
@@ -68,7 +68,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" RepeatLayout="RepeatLayout.UnorderedList" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" RepeatLayout="RepeatLayout.UnorderedList" />);
 
 		// Assert
 		cut.Find("ul").ShouldNotBeNull();
@@ -88,7 +88,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object"
+			@<RadioButtonList ItemType="object"
 							  StaticItems="items"
 							  RepeatLayout="RepeatLayout.Table"
 							  RepeatDirection="DataListEnum.Vertical" />
@@ -112,7 +112,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object"
+			@<RadioButtonList ItemType="object"
 							  StaticItems="items"
 							  RepeatLayout="RepeatLayout.Table"
 							  RepeatDirection="DataListEnum.Horizontal" />
@@ -138,7 +138,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object"
+			@<RadioButtonList ItemType="object"
 							  StaticItems="items"
 							  RepeatLayout="RepeatLayout.Flow"
 							  RepeatDirection="DataListEnum.Vertical" />

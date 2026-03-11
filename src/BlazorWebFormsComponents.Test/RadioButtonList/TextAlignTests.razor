@@ -12,7 +12,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" TextAlign="TextAlign.Right" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" TextAlign="TextAlign.Right" />);
 
 		// Assert
 		var td = cut.Find("td");
@@ -33,7 +33,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" TextAlign="TextAlign.Left" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" TextAlign="TextAlign.Left" />);
 
 		// Assert
 		var td = cut.Find("td");
@@ -54,7 +54,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var input = cut.Find("input[type='radio']");
@@ -79,7 +79,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var inputs = cut.FindAll("input[type='radio']");

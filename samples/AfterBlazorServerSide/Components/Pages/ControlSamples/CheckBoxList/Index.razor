@@ -7,10 +7,10 @@
 
 <h3>Basic CheckBoxList with Static Items</h3>
 <div data-audit-control="CheckBoxList-1">
-    <CheckBoxList TItem="object" StaticItems="colorItems" @bind-SelectedValues="selectedColors" />
+    <CheckBoxList ItemType="object" StaticItems="colorItems" @bind-SelectedValues="selectedColors" />
 </div>
 <p>Selected: <strong>@string.Join(", ", selectedColors)</strong></p>
-<pre><code>&lt;CheckBoxList TItem="object" StaticItems="colorItems" @@bind-SelectedValues="selectedColors" /&gt;
+<pre><code>&lt;CheckBoxList ItemType="object" StaticItems="colorItems" @@bind-SelectedValues="selectedColors" /&gt;
 
 @@code {
     private List&lt;string&gt; selectedColors = new();
@@ -25,14 +25,14 @@
 
 <h3>With RepeatDirection and RepeatLayout Settings</h3>
 <div data-audit-control="CheckBoxList-2">
-    <CheckBoxList TItem="object"
+    <CheckBoxList ItemType="object"
                   StaticItems="sizeItems"
                   RepeatDirection="Horizontal"
                   RepeatLayout="RepeatLayout.Flow"
                   @bind-SelectedValues="selectedSizes" />
 </div>
 <p>Selected: <strong>@string.Join(", ", selectedSizes)</strong></p>
-<pre><code>&lt;CheckBoxList TItem="object"
+<pre><code>&lt;CheckBoxList ItemType="object"
               StaticItems="sizeItems"
               RepeatDirection="Horizontal"
               RepeatLayout="RepeatLayout.Flow"

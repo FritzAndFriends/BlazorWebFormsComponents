@@ -89,8 +89,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 ### Database Migration
 
 - **Always** migrate EF6 → EF Core using the **latest .NET 10 packages** (currently **10.0.3**)
-- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`
-- Prefer SQLite for local dev / demos; SQL Server for production
+- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` (or provider matching original app), `.Tools`, `.Design`
+- **⚠️ CRITICAL: Detect and match the original database provider.** Examine the source project's `Web.config` `<connectionStrings>` to identify the database provider (`System.Data.SqlClient` → SqlServer, `System.Data.SQLite` → Sqlite, `Npgsql` → PostgreSQL). Install the matching EF Core provider package (`Microsoft.EntityFrameworkCore.SqlServer`, `.Sqlite`, `Npgsql.EntityFrameworkCore.PostgreSQL`, etc.). The L1 script auto-detects this — verify its detection in the [DatabaseProvider] review item. NEVER substitute a different provider than what the original application used.
 - Replace `DropCreateDatabaseIfModelChanges` with `EnsureCreated` + idempotent seed
 - Use `IDbContextFactory<T>` or scoped `DbContext` injection
 - Models: nullable reference types, file-scoped namespaces, modern init patterns
@@ -139,7 +139,9 @@ The script should preserve the attribute and annotate the signature change neede
 | `<asp:DetailsView>` | `<DetailsView Items="@data">` with fields | Manual field rendering |
 | `<asp:DataList>` | `<DataList Items="@data">` with `ItemTemplate` | `@foreach` + grid HTML |
 
-**SelectMethod → Items:** Replace `SelectMethod="GetProducts"` with `Items="@_products"` where `_products` is populated in `OnInitializedAsync` via an injected service or DbContext.
+**SelectMethod PRESERVED:** BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` (delegate signature: `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`). Convert the Web Forms string method name to a delegate reference: `SelectMethod="@productService.GetProducts"` (if the service method signature matches) or use explicit lambda wiring: `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"`. When `SelectMethod` is set, `DataBoundComponent.OnAfterRenderAsync` automatically calls it to populate `Items`.
+
+> **⚠️ DO NOT convert SelectMethod to Items= binding.** When the original Web Forms markup uses `SelectMethod`, the migrated Blazor markup MUST preserve `SelectMethod` as a delegate reference. Converting to `Items=` loses the native BWFC data-binding pattern and defeats the purpose of drop-in replacement. The ONLY acceptable alternative is when the original Web Forms markup used `DataSource` (not `SelectMethod`), in which case `Items=` is correct.
 
 ### Session State → Scoped Services
 
@@ -171,9 +173,18 @@ When linking to minimal API endpoints from Blazor pages, use `<form method="post
 | `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
-### Layer 1 (Script) vs Layer 2 (Manual) Boundary
+### Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary
 
-**Script handles (Layer 1):**
+> ⚠️ **CRITICAL: Layer 1 and Layer 2 MUST both run in sequence. Do NOT make any manual code fixes between Layer 1 and Layer 2.** Manual fixes between layers corrupt pipeline quality measurement. If Layer 1 output has issues, fix the script — not the output.
+
+**Layer 1 — Automated Script** (`migration-toolkit/scripts/bwfc-migrate.ps1`):
+
+Run via:
+```powershell
+.\migration-toolkit\scripts\bwfc-migrate.ps1 -Path "<source-webforms-project>" -Output "<blazor-output-dir>"
+```
+
+Script handles:
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
 - LoginView → **preserve as BWFC LoginView** — do NOT rewrite as AuthorizeView. The BWFC `LoginView` injects `AuthenticationStateProvider` natively and uses the same template names (`AnonymousTemplate`, `LoggedInTemplate`). The migration script handles this automatically.
@@ -182,12 +193,15 @@ When linking to minimal API endpoints from Blazor pages, use `<form method="post
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
 
-**Always manual (Layer 2):**
+**Layer 2 — Copilot-Assisted** (NOT manual — guided by the `bwfc-migration` skill):
 - EF6 → EF Core (models, DbContext, seed)
 - Identity/Auth subsystem
 - Session → scoped services
 - Business logic (checkout, payment, admin CRUD)
 - Complex data-binding with arithmetic/method chains
+- Data loading patterns (`SelectMethod` string → `SelectHandler` delegate, or `Items` via `OnInitializedAsync`)
+- Template context wiring (`Context="Item"`)
+- Navigation conversions (`Response.Redirect` → `NavigationManager.NavigateTo`)
 
 ## Examples
 
@@ -204,7 +218,20 @@ When linking to minimal API endpoints from Blazor pages, use `<form method="post
     </ItemTemplate>
 </asp:ListView>
 
-@* After migration (BWFC preserved) *@
+@* After migration — Option A: SelectMethod preserved as delegate (BWFC native) *@
+<ListView SelectMethod="@productService.GetProducts" GroupItemCount="4">
+    <ItemTemplate>
+        <td>@context.ProductName</td>
+    </ItemTemplate>
+</ListView>
+
+@code {
+    [Inject] private ProductService productService { get; set; }
+}
+```
+
+```razor
+@* After migration — Option B: Items loaded in OnInitializedAsync *@
 <ListView Items="@_products" GroupItemCount="4">
     <ItemTemplate>
         <td>@context.ProductName</td>

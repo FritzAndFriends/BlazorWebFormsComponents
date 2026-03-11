@@ -21,7 +21,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="Product" Items="products" DataTextField="Name" DataValueField="Url" />);
+		var cut = Render(@<BulletedList ItemType="Product" Items="products" DataTextField="Name" DataValueField="Url" />);
 
 		// Assert
 		var listItems = cut.FindAll("li");
@@ -43,7 +43,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="Product" Items="products" DataTextField="Name" DataValueField="Url" DisplayMode="BulletedListDisplayMode.HyperLink" />);
+		var cut = Render(@<BulletedList ItemType="Product" Items="products" DataTextField="Name" DataValueField="Url" DisplayMode="BulletedListDisplayMode.HyperLink" />);
 
 		// Assert
 		var links = cut.FindAll("a");
@@ -71,7 +71,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="Product" StaticItems="staticItems" Items="products" AppendDataBoundItems="true" DataTextField="Name" DataValueField="Url" />);
+		var cut = Render(@<BulletedList ItemType="Product" StaticItems="staticItems" Items="products" AppendDataBoundItems="true" DataTextField="Name" DataValueField="Url" />);
 
 		// Assert
 		var listItems = cut.FindAll("li");
@@ -90,7 +90,7 @@
 		var products = new List<Product>();
 
 		// Act
-		var cut = Render(@<BulletedList TItem="Product" Items="products" DataTextField="Name" DataValueField="Url" />);
+		var cut = Render(@<BulletedList ItemType="Product" Items="products" DataTextField="Name" DataValueField="Url" />);
 
 		// Assert
 		var ul = cut.Find("ul");
@@ -110,7 +110,7 @@
 		};
 
 		// Act
-		var cut = Render(@<BulletedList TItem="Product" StaticItems="staticItems" Items="null" DataTextField="Name" DataValueField="Url" />);
+		var cut = Render(@<BulletedList ItemType="Product" StaticItems="staticItems" Items="null" DataTextField="Name" DataValueField="Url" />);
 
 		// Assert
 		var listItems = cut.FindAll("li");

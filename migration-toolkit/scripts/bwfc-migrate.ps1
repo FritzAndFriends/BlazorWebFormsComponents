@@ -124,6 +124,118 @@ function Write-ManualItem {
 
 #endregion
 
+#region --- Database Provider Detection ---
+
+function Find-DatabaseProvider {
+    param(
+        [string]$SourcePath
+    )
+
+    $default = @{
+        PackageName      = 'Microsoft.EntityFrameworkCore.SqlServer'
+        ProviderMethod   = 'UseSqlServer'
+        DetectedFrom     = 'Default — no Web.config connectionStrings found'
+        ConnectionString = ''
+    }
+
+    if (-not $SourcePath) { return $default }
+
+    # Look for Web.config in source path and parent directory
+    $candidates = @(
+        (Join-Path $SourcePath 'Web.config'),
+        (Join-Path (Split-Path $SourcePath -Parent) 'Web.config')
+    )
+    $webConfigPath = $null
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) {
+            $webConfigPath = $candidate
+            break
+        }
+    }
+    if (-not $webConfigPath) { return $default }
+
+    try {
+        [xml]$webConfig = Get-Content -Path $webConfigPath -Raw -Encoding UTF8
+    }
+    catch {
+        return $default
+    }
+
+    $connStrings = $webConfig.configuration.connectionStrings
+    if (-not $connStrings -or -not $connStrings.add) { return $default }
+
+    # Provider mapping: Web.config providerName → EF Core package
+    $providerMap = @{
+        'System.Data.SqlClient'  = @{ PackageName = 'Microsoft.EntityFrameworkCore.SqlServer'; ProviderMethod = 'UseSqlServer' }
+        'System.Data.SQLite'     = @{ PackageName = 'Microsoft.EntityFrameworkCore.Sqlite'; ProviderMethod = 'UseSqlite' }
+        'Npgsql'                 = @{ PackageName = 'Npgsql.EntityFrameworkCore.PostgreSQL'; ProviderMethod = 'UseNpgsql' }
+        'MySql.Data.MySqlClient' = @{ PackageName = 'Pomelo.EntityFrameworkCore.MySql'; ProviderMethod = 'UseMySql' }
+    }
+
+    $adds = @($connStrings.add)
+
+    # Pass 1: Non-EntityClient entries with explicit providerName
+    # Use GetAttribute() for StrictMode safety — returns '' if attribute missing
+    foreach ($entry in $adds) {
+        $providerName = $entry.GetAttribute('providerName')
+        if (-not $providerName -or $providerName -eq 'System.Data.EntityClient') { continue }
+        if ($providerMap.ContainsKey($providerName)) {
+            $mapped = $providerMap[$providerName]
+            return @{
+                PackageName      = $mapped.PackageName
+                ProviderMethod   = $mapped.ProviderMethod
+                DetectedFrom     = "Web.config providerName=$providerName"
+                ConnectionString = $entry.GetAttribute('connectionString')
+            }
+        }
+    }
+
+    # Pass 2: Entries without providerName — detect from connection string content
+    foreach ($entry in $adds) {
+        $connString = $entry.GetAttribute('connectionString')
+        if (-not $connString -or $connString -match '^metadata=') { continue }
+        if ($entry.GetAttribute('providerName')) { continue }
+        if ($connString -match '(?i)\(LocalDB\)|Server=') {
+            return @{
+                PackageName      = 'Microsoft.EntityFrameworkCore.SqlServer'
+                ProviderMethod   = 'UseSqlServer'
+                DetectedFrom     = 'Web.config connection string pattern (SQL Server)'
+                ConnectionString = $connString
+            }
+        }
+        if ($connString -match '(?i)Data Source=.*\.db') {
+            return @{
+                PackageName      = 'Microsoft.EntityFrameworkCore.Sqlite'
+                ProviderMethod   = 'UseSqlite'
+                DetectedFrom     = 'Web.config connection string pattern (SQLite)'
+                ConnectionString = $connString
+            }
+        }
+    }
+
+    # Pass 3: EntityClient entries — extract inner provider (EF6 pattern)
+    foreach ($entry in $adds) {
+        if ($entry.GetAttribute('providerName') -ne 'System.Data.EntityClient') { continue }
+        $connString = $entry.GetAttribute('connectionString')
+        if ($connString -match 'provider=([^;"]+)') {
+            $innerProvider = $matches[1].Trim()
+            if ($providerMap.ContainsKey($innerProvider)) {
+                $mapped = $providerMap[$innerProvider]
+                return @{
+                    PackageName      = $mapped.PackageName
+                    ProviderMethod   = $mapped.ProviderMethod
+                    DetectedFrom     = "Web.config EntityClient provider=$innerProvider"
+                    ConnectionString = ''
+                }
+            }
+        }
+    }
+
+    return $default
+}
+
+#endregion
+
 #region --- Project Scaffolding ---
 
 function New-ProjectScaffold {
@@ -145,10 +257,27 @@ function New-ProjectScaffold {
                        (Test-Path (Join-Path $SourcePath 'Register.aspx'))
     }
 
+    # Detect database provider from Web.config
+    $dbProvider = Find-DatabaseProvider -SourcePath $SourcePath
+    if ($hasModels -and $dbProvider.DetectedFrom -notlike 'Default*') {
+        switch ($dbProvider.ProviderMethod) {
+            'UseSqlServer' { $friendlyName = 'SQL Server' }
+            'UseSqlite'    { $friendlyName = 'SQLite' }
+            'UseNpgsql'    { $friendlyName = 'PostgreSQL' }
+            'UseMySql'     { $friendlyName = 'MySQL' }
+            default        { $friendlyName = $dbProvider.ProviderMethod }
+        }
+        $providerDetail = "Detected $friendlyName provider — use $($dbProvider.PackageName)"
+        if ($dbProvider.ConnectionString) {
+            $providerDetail += " with connection string: $($dbProvider.ConnectionString)"
+        }
+        Write-ManualItem -File 'Web.config' -Category 'DatabaseProvider' -Detail $providerDetail
+    }
+
     # RF-06: Build conditional package references
     $additionalPackages = ''
     if ($hasModels) {
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Sqlite`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"$($dbProvider.PackageName)`" Version=`"10.0.0`" />"
         $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0`" />"
     }
     if ($hasIdentity) {
@@ -219,12 +348,20 @@ app.MapRazorComponents<$ProjectName.Components.App>()
 app.Run();
 "@
 
+    # Build dynamic DbContext line for Program.cs scaffold using detected provider
+    if ($dbProvider.ConnectionString) {
+        $escapedConnStr = $dbProvider.ConnectionString -replace '\\', '\\'
+        $dbContextLine = "// builder.Services.AddDbContextFactory<YourDbContext>(options => options.$($dbProvider.ProviderMethod)(`"$escapedConnStr`"));"
+    } else {
+        $dbContextLine = "// builder.Services.AddDbContextFactory<YourDbContext>(options => options.$($dbProvider.ProviderMethod)(`"your-connection-string`"));"
+    }
+
     # RF-07: Add Identity/Session boilerplate when detected
     if ($hasIdentity) {
         $identityServiceBlock = @"
 
 // TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-// builder.Services.AddDbContextFactory<ProductContext>(options => options.UseSqlite("Data Source=app.db"));
+$dbContextLine
 
 // TODO: Configure Identity
 // builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -251,6 +388,18 @@ app.Run();
         $programContent = $programContent.Replace(
             'app.UseAntiforgery();',
             "app.UseAntiforgery();`n$identityMiddlewareBlock"
+        )
+    }
+    elseif ($hasModels) {
+        # Add DbContext comment when Models/ detected but no Identity
+        $modelsServiceBlock = @"
+
+// TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
+$dbContextLine
+"@
+        $programContent = $programContent.Replace(
+            'builder.Services.AddBlazorWebFormsComponents();',
+            "builder.Services.AddBlazorWebFormsComponents();`n$modelsServiceBlock"
         )
     }
 
@@ -695,7 +844,7 @@ function ConvertFrom-ContentWrappers {
         $headContentCount = ([regex]'<HeadContent>').Matches($Content).Count
         if ($headContentCount -gt 0) {
             # Replace first N closing tags with </HeadContent>, remove the rest
-            $replaced = 0
+            $script:replaced_count = 0
             $Content = $closeRegex.Replace($Content, {
                 param($m)
                 $script:replaced_count++
@@ -842,22 +991,22 @@ function ConvertFrom-MasterPage {
     # Other ContentPlaceHolders → TODO comment
     $otherCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*>.*?</asp:ContentPlaceHolder>'
     foreach ($m in $otherCphRegex.Matches($Content)) {
-        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion"
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "BWFC provides <ContentPlaceHolder> component — use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body"
     }
-    $Content = $otherCphRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+    $Content = $otherCphRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — BWFC provides <ContentPlaceHolder> component, use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body *@" })
     # Self-closing other ContentPlaceHolders
     $otherCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"([^"]+)"[^>]*/>'
     foreach ($m in $otherCphSelfRegex.Matches($Content)) {
-        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "Non-MainContent ContentPlaceHolder ID='$($m.Groups[1].Value)' needs manual conversion (self-closing)"
+        Write-ManualItem -File $RelPath -Category 'ContentPlaceHolder' -Detail "BWFC provides <ContentPlaceHolder> component — use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body (self-closing)"
     }
-    $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — convert to a section or nested layout *@" })
+    $Content = $otherCphSelfRegex.Replace($Content, { param($m) "@* TODO: ContentPlaceHolder '$($m.Groups[1].Value)' — BWFC provides <ContentPlaceHolder> component, use <ContentPlaceHolder ID=""$($m.Groups[1].Value)"" /> or convert to @Body *@" })
 
     # 5. Flag items needing Layer 2 attention
     if ($Content -match '<RoleGroups>') {
         Write-ManualItem -File $RelPath -Category 'LoginView-RoleGroups' -Detail 'LoginView <RoleGroups> requires manual conversion to @attribute [Authorize(Roles="...")]'
     }
     if ($Content -match 'SelectMethod\s*=') {
-        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod detected — will be auto-converted to TODO annotation by ConvertFrom-SelectMethod'
+        Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod preserved — needs delegate conversion in L2 (BWFC DataBoundComponent supports SelectMethod natively)'
     }
 
     # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
@@ -1027,7 +1176,7 @@ function ConvertFrom-GetRouteUrl {
 
     # Note the required @inject directive
     if ($transformed) {
-        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'Add @inject GetRouteUrlHelper GetRouteUrlHelper at the top of the file'
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail 'BWFC provides GetRouteUrlHelper — add @inject GetRouteUrlHelper GetRouteUrlHelper and use GetRouteUrlHelper.GetRouteUrl()'
     }
 
     # RF-11: Flag GetRouteUrl patterns with concrete replacement hints
@@ -1035,7 +1184,7 @@ function ConvertFrom-GetRouteUrl {
     $routeNameMatches = $routeNameRegex.Matches($Content)
     foreach ($m in $routeNameMatches) {
         $routeName = $m.Groups[1].Value
-        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail "Replace route name '$routeName' with direct URL pattern, e.g., /ProductDetails?ProductID=@Item.ProductID"
+        Write-ManualItem -File $RelPath -Category 'GetRouteUrl' -Detail "BWFC GetRouteUrlHelper supports route name '$routeName' — verify route is registered, or replace with direct URL pattern, e.g., /ProductDetails?ProductID=@Item.ProductID"
     }
 
     return $Content
@@ -1048,22 +1197,20 @@ function ConvertFrom-GetRouteUrl {
 function ConvertFrom-SelectMethod {
     param([string]$Content, [string]$RelPath)
 
-    # Match SelectMethod="MethodName" in any tag, capture the method name and insert a TODO after the tag
-    $selectMethodRegex = [regex]'(?si)(<[^>]*?)\s+SelectMethod\s*=\s*"([^"]+)"([^>]*>)'
+    # Preserve SelectMethod="MethodName" in markup (BWFC DataBoundComponent supports it natively)
+    # Add a TODO comment after the tag noting the string needs delegate conversion in L2
+    $selectMethodRegex = [regex]'(?si)(<[^>]*?\s+SelectMethod\s*=\s*"([^"]+)"[^>]*>)'
     $selectMethodMatches = $selectMethodRegex.Matches($Content)
     if ($selectMethodMatches.Count -gt 0) {
         $Content = $selectMethodRegex.Replace($Content, {
             param($m)
-            $tagBeforeAttr = $m.Groups[1].Value
+            $fullTag = $m.Groups[1].Value
             $methodName = $m.Groups[2].Value
-            $tagAfterAttr = $m.Groups[3].Value
-            $serviceName = 'I' + $methodName.TrimStart('Get') + 'Service'
-            $varName = ($methodName.TrimStart('Get')).Substring(0,1).ToLower() + ($methodName.TrimStart('Get')).Substring(1) + 'Service'
-            "${tagBeforeAttr}${tagAfterAttr}`n@* TODO: Replace SelectMethod=""${methodName}"" with Items=""@_data"" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@"
+            "${fullTag}`n@* TODO: SelectMethod=""${methodName}"" preserved — convert to delegate: SelectMethod=""@((maxRows, startRow, sort, out total) => YourService.${methodName}(maxRows, startRow, sort, out total))"" *@"
         })
-        Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Converted $($selectMethodMatches.Count) SelectMethod attribute(s) to TODO annotations"
+        Write-TransformLog -File $RelPath -Transform 'SelectMethod' -Detail "Preserved $($selectMethodMatches.Count) SelectMethod attribute(s) with TODO for delegate conversion"
         foreach ($m in $selectMethodMatches) {
-            Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail "SelectMethod='$($m.Groups[2].Value)' removed — needs service injection and OnInitializedAsync data loading"
+            Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail "SelectMethod='$($m.Groups[2].Value)' preserved — needs delegate conversion in L2"
         }
     }
 
@@ -1203,10 +1350,13 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
         }
 
-        $rdRegex = [regex]'\[RouteData\]'
+        $rdRegex = [regex]'([ \t]*)\[RouteData\]'
         $rdMatches = $rdRegex.Matches($annotatedContent)
         if ($rdMatches.Count -gt 0) {
-            $annotatedContent = $rdRegex.Replace($annotatedContent, "[Parameter] // TODO: Verify RouteData → [Parameter] conversion — ensure @page route template has matching {parameter}")
+            # P0-2: Put TODO on a separate line ABOVE [Parameter] so it doesn't
+            # swallow the rest of the line (property type/name) into a comment.
+            $rdReplacement = '${1}// TODO: Verify RouteData → [Parameter] conversion — ensure @page route has matching {parameter}' + "`n" + '${1}[Parameter]'
+            $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
         }
 
@@ -1228,21 +1378,14 @@ function Copy-CodeBehind {
 #region --- Unconvertible Page Stubs ---
 
 function Test-UnconvertiblePage {
-    param([string]$Content)
-
-    $unconvertiblePatterns = @(
-        'SignInManager',
-        'UserManager',
-        'FormsAuthentication',
-        'Session\[',
-        'PayPal',
-        'Checkout'
+    param(
+        [string]$Content,
+        [string]$RelativePath = ''
     )
-    foreach ($pat in $unconvertiblePatterns) {
-        if ($Content -match $pat) {
-            return $true
-        }
-    }
+
+    # P0-1: Eliminated all stubbing. Pages are ALWAYS converted with BWFC components.
+    # If a page has concerns (Identity, Checkout, PayPal), TODO comments are injected
+    # at the call site instead of replacing the entire page with a stub.
     return $false
 }
 
@@ -1400,16 +1543,25 @@ function Convert-WebFormsFile {
         }
     }
 
-    # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
-    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content)) {
-        $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
-        if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
-            $route = '/'
+    # P0-1: Pages are ALWAYS converted — no more stubbing. For pages that need
+    # manual attention (Checkout flow, Identity/Auth patterns), inject a TODO
+    # comment at the top so developers know to review them post-migration.
+    if ($extension -eq '.aspx') {
+        $needsTodo = $false
+        $todoReason = ''
+        if ($relativePath -match '^Checkout[/\\]') {
+            $needsTodo = $true
+            $todoReason = 'Checkout flow page — requires payment/auth code review after migration'
         }
-        # Use relative path for a more descriptive route (e.g., /Account/Login)
-        $pathRoute = '/' + ($relativePath -replace '\\', '/' -replace '\.aspx$', '')
-        New-CompilableStub -Route $pathRoute -RelPath $relativePath -OutputFile $outputFile -OutputDir $outputDir
-        return
+        elseif ($content -match 'SignInManager|UserManager|FormsAuthentication|Session\[') {
+            $needsTodo = $true
+            $todoReason = 'Contains Identity/Auth API calls — verify authentication logic after migration'
+        }
+        if ($needsTodo) {
+            $content = "@* TODO: $todoReason *@`n" + $content
+            Write-ManualItem -File $relativePath -Category 'NeedsReview' -Detail $todoReason
+            Write-TransformLog -File $relativePath -Transform 'TodoAnnotation' -Detail "Injected review TODO — $todoReason"
+        }
     }
 
     # Apply transform pipeline in order

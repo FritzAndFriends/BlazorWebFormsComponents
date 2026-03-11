@@ -11,7 +11,7 @@
 		};
 
 		// Act
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" CssClass="form-select" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" CssClass="form-select" />);
 
 		// Assert
 		var select = cut.Find("select");
@@ -29,7 +29,7 @@
 
 		// Act
 		var cut = Render(
-			@<ListBox TItem="object"
+			@<ListBox ItemType="object"
 					  StaticItems="items"
 					  BackColor="new WebColor(System.Drawing.Color.LightYellow)" />
 		);

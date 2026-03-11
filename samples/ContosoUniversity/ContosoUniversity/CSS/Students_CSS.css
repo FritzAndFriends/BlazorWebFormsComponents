@@ -1,0 +1,72 @@
+﻿.active {background-color:#131414;
+}
+
+body {background-image: url('../Images/space-4.jpg');
+      background-size:100% 100%;
+}
+
+#grvStudentsData {
+    margin-top: 100px;
+    width: 100%;    
+    padding-left: 60%;
+}
+
+.grv { opacity:0.95;     
+}
+
+#addStud {
+    border: 1px solid #171414;
+    border-radius: 6px;
+    width: 35%;
+    min-width: 35%;
+    display: inline-block;
+    position: relative;
+    top: -530px;
+    left: 2%;
+    margin: auto;
+    overflow: hidden;
+    background-image: url('../Images/outer-space-wallpaper-pictures.jpg');
+    box-shadow:-1px -1px 10px 10px #131423;
+}
+
+#ajax {border:1px solid black;
+       width:12%;
+       height:320px;
+       position:relative;
+       top:-811px;
+       left:43%;
+       text-align:center;
+       overflow:auto;
+       box-shadow:-1px -1px 10px 10px #131423;
+       border-radius:5px;
+}
+
+.detailsView {margin:auto;
+              position:relative;
+              top:10px;
+}
+
+.btnInfo {position:relative;
+          top:5px;
+}
+
+#searchStud {color:#d7e2f5;
+             text-decoration:underline;
+             text-shadow:-1px -1px 3px 3px black;
+             position:relative;
+             left:-1px;
+}
+
+#addStudent {font-size:50px;
+             text-shadow:-1px -1px 3px 3px #577aa0;
+             letter-spacing:3px;
+             font-family:Garamond;
+             font-weight:bolder;
+
+}
+
+.tabAddStud {position:relative;
+             left:10%;
+             top:-15px;
+}
+

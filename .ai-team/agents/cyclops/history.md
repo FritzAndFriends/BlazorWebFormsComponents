@@ -33,164 +33,81 @@
 
 Run 6: 4 script enhancements (TFM, SelectMethod TODO, wwwroot copy, stubs). @rendermode fix: removed standalone directive from _Imports.razor scaffold — `@rendermode` is a directive *attribute* for component instances only. WebFormsPageBase: `ComponentBase` subclass with `Page => this`, Title/MetaDescription/MetaKeywords delegates, `IsPostBack => false`. WebFormsPage consolidation: merged Page.razor head rendering into WebFormsPage via Option B. LoginView script fix: `<asp:LoginView>` → `<LoginView>` (not AuthorizeView), preserve template names. Run 9: 9 script fixes (Models copy, DbContext transform, EF6→EF Core, redirect detection, Program.cs boilerplate, Page Title extraction, QueryString/RouteData annotations, ListView GroupItemCount, csproj packages). Layer 2: full AfterWingtipToys conversion — key pattern: layout code-behind class name MUST match .razor filename. Auth pages use plain HTML forms with HTTP endpoints.
 
-### Run 11 — Complete WingtipToys Migration from Scratch (2026-03-07)
+<!-- summarized 2026-03-11 by Scribe -- entries from 2026-03-07 through 2026-03-08 (Runs 11-13, script fixes) archived -->
 
-**Completed:** Full fresh migration of WingtipToys from Web Forms to Blazor Server. Built from scratch (no reference to FreshWingtipToys). 0 errors, 0 warnings.
+- Run 11 -- Complete WingtipToys Migration from Scratch (2026-03-07)
+- Run 11 Script Fixes -- Fix 1 (Invoke-ScriptAutoDetection) & Fix 2 (Convert-TemplatePlaceholders) (2026-03-07)
+- Run 12 -- Complete WingtipToys Migration from Scratch (2026-03-07)
+- LoginView Namespace Fix (2026-03-07)
+- Run 13 -- Full WingtipToys Migration Pipeline, 25/25 tests (2026-03-08)
 
-**Approach:**
-1. Created fresh `dotnet new blazor --interactivity Server --framework net10.0` project
-2. Added BWFC ProjectReference + EF Core/Identity NuGet packages
-3. Ran `bwfc-migrate.ps1` to temp dir, cherry-picked converted .razor pages
-4. Copied static content (CSS, images, fonts, favicon) from original source preserving paths
-5. Built all Layer 2 content from scratch: Models, Data, Services, Program.cs, MainLayout, all code-behinds
+### Summary (2026-03-07 through 2026-03-08)
 
-**Key decisions & patterns:**
-- Root-level `_Imports.razor` needed for pages outside `Components/` — the `Components/_Imports.razor` only applies within that folder. Both files must have identical usings + `@inherits WebFormsPageBase`.
-- Code-behind partial classes must NOT specify `: ComponentBase` when `_Imports.razor` has `@inherits WebFormsPageBase` — causes CS0263 (different base classes in partial declarations).
-- `@rendermode InteractiveServer` as a standalone directive in .razor files works for pages that need interactivity (ShoppingCart, AddToCart, AdminPage, Checkout pages). The `@using static RenderMode` in `_Imports.razor` enables the shorthand.
-- Auth pages (Login, Register) use plain HTML forms posting to HTTP endpoints — SignInManager needs HTTP context, not SignalR.
-- MainLayout inherits `LayoutComponentBase` (overrides `_Imports.razor` `@inherits`) and uses `<BlazorWebFormsComponents.Page />` for head rendering, `<LoginView>` with `<AnonymousTemplate>`/`<LoggedInTemplate>`, and code-based category list.
-- Category.Description set to `string?` — seed data doesn't populate it.
-- Product.UnitPrice converted from `double?` to `decimal?` for currency precision.
-- CartStateService uses cookie-based cart ID instead of Session.
-- Image paths preserved from source: `/Catalog/Images/Thumbs/` for list, `/Catalog/Images/` for details.
+Run 11: Fresh WingtipToys migration from scratch (105 files, 0 errors). Key patterns: root-level `_Imports.razor` for pages outside `Components/`, partial classes must NOT specify `: ComponentBase` with `@inherits WebFormsPageBase`, auth pages use plain HTML forms to HTTP endpoints. Run 11 script fixes: `Invoke-ScriptAutoDetection` (JS files to wwwroot/Scripts/ with correct dependency order) and `Convert-TemplatePlaceholders` (placeholder elements to `@context`). Run 12: Full pipeline with Layer 2, established dual DbContext pattern (later superseded by factory-only in Run 13). LoginView namespace fix: `@using BlazorWebFormsComponents.LoginControls` required in `_Imports.razor` -- added to script template. Run 13: 25/25 tests passed (100%). Confirmed patterns: SSR default, `data-enhance-nav="false"` for minimal API links, `data-enhance="false"` for auth forms, `AddDbContextFactory` only (no dual registration), middleware order `UseAuthentication -> UseAuthorization -> UseAntiforgery`, logout must use `<a>` not `<button>`.
 
-**File count:** 105 total (27 .razor, 23 .cs, 38 .png images, 5 .css, plus fonts/config)
-**Build result:** 0 errors, 0 warnings
+Team updates (2026-03-07 through 2026-03-08): Coordinator must not perform domain work; FreshWingtipToys must not be committed; migration-standards updated with Static Asset Checklist/ListView Placeholder/Action Links; migration order: fresh project first; SSR default with InteractiveServer opt-in; enhanced nav bypass for minimal API; DbContext factory-only; middleware order confirmed; logout uses link not button.
 
-### Run 11 Script Fixes — Fix 1 & Fix 2 (2026-03-07)
+<!-- ⚠ Summarized 2026-03-11 by Scribe — entries from 2026-03-11 (ServiceCollectionExtensions through L2 structural transform) archived -->
 
-**Fix 1: Scripts/ folder detection and copy (`Invoke-ScriptAutoDetection`)**
+- ServiceCollectionExtensions Enhancement (2026-03-11)
+- Run 18a/18b/18c — Test-UnconvertiblePage False-Positive Investigation (2026-03-11)
+- P0 Migration Script Fixes (2026-03-11)
+- Standardize Generic Type Params to ItemType (2026-03-11)
+- Layer 2 Structural Transform - AfterWingtipToys (2026-03-11)
 
-Added `Invoke-ScriptAutoDetection` function to `migration-toolkit/scripts/bwfc-migrate.ps1` (parallel to existing `Invoke-CssAutoDetection`). The function:
-- Scans source project for `Scripts/` folder
-- Filters out WebForms-specific JS (`*intellisense*`, `_references.js`, `WebForms/` subdir)
-- Copies relevant JS files to `wwwroot/Scripts/` in output
-- Injects `<script>` tags into App.razor before `</body>` (after `blazor.web.js`)
-- Orders scripts correctly: jQuery → Modernizr → Respond → Bootstrap → remaining
-- Prefers `.min.js` variants when both exist
-- Scans `Site.Master` for `<webopt:bundlereference>` targeting Scripts and flags as `ScriptBundle` manual item
-- Called from Entry Point section, right after `Invoke-CssAutoDetection`
+### Summary (2026-03-11 pre-Run 20)
 
-**Fix 2: Convert ListView/DataPager placeholder elements to `@context` (`Convert-TemplatePlaceholders`)**
+ServiceCollectionExtensions: Added `AddHttpContextAccessor()` auto-registration, `BlazorWebFormsComponentsOptions` with `EnableAspxUrlRewriting`, `UseBlazorWebFormsComponents()` middleware, `AspxRewriteMiddleware` for `.aspx` → clean URL 301 redirects. Run 18: Fixed `Test-UnconvertiblePage` false positives — 'Checkout' matched button IDs, 'PayPal' matched image URLs. Both now path-based. ShoppingCart.razor restored to full GridView markup. P0 fixes: (1) Eliminated `Test-UnconvertiblePage` — always returns `$false`, pages get TODO annotations instead of stubs. (2) `[Parameter]` regex fix — TODO on separate line, eliminates 6 CS errors. ItemType standardization: renamed all `TItemType`/`TItem` → `ItemType` across 13 files, 0 build errors. L2 AfterWingtipToys: ~60 files transformed, 0 errors, 58 RZ10012 warnings. Key gotchas: class name must match .razor filename, `@inject`/`[Inject]` duplication, `#hexcolor` → `@("...")`, `LoggedInTemplate` has no typed context.
 
-Added `Convert-TemplatePlaceholders` function in new `#region --- Template Placeholder Conversion (Fix 2) ---`. The function:
-- Finds elements whose `id` attribute contains "Placeholder" (case-insensitive)
-- Replaces self-closing tags: `<\w+\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*/>`
-- Replaces open+close tags with whitespace-only content: `<(\w+)\s+[^>]*?id\s*=\s*"[^"]*[Pp]laceholder[^"]*"[^>]*>\s*</\1>`
-- Both patterns replace with `@context`
-- Called in `Convert-WebFormsFile` pipeline AFTER `ConvertFrom-UrlReferences` and BEFORE blank line cleanup
-- Container elements (e.g., `itemPlaceholderContainer`) are preserved because they contain non-whitespace content after inner placeholder replacement
+Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mandatory L1→L2 pipeline with no fixes between layers. All generics standardized to `ItemType`. Test-UnconvertiblePage eliminated. Run 18 improvements prioritized by Forge.
 
-**Test results (WingtipToys):**
-- ✅ `wwwroot/Scripts/` created with 7 filtered JS files (9 total including those from general static copy)
-- ✅ App.razor contains 7 `<script>` tags in correct dependency order before `</body>`
-- ✅ `ProductList.razor` line 25: `<td id="itemPlaceholder"></td>` → `@context` (inside GroupTemplate)
-- ✅ `ProductList.razor` line 69: `<tr id="groupPlaceholder"></tr>` → `@context` (inside LayoutTemplate)
-- ✅ Container elements (`itemPlaceholderContainer`, `groupPlaceholderContainer`) preserved correctly
-- ✅ Migration ran clean: 32 files processed, 303 transforms, 79 static files copied
+<!-- ⚠ Summarized 2026-03-12 by Scribe — Run 20 fixes, Run 21, CU L2, L1 SQLite fix archived -->
+
+- Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
+- Run 21 — Layer 2 Structural Transform AfterWingtipToys (2026-03-11)
+- Layer 2 Structural Transform — AfterContosoUniversity (2026-03-12)
+- L1 Script SQLite → SQL Server Fix (2026-03-12)
+
+### Summary (2026-03-11 through 2026-03-12)
+
+Run 20 L1 fixes: `ConvertFrom-SelectMethod` was stripping SelectMethod from markup — fixed to preserve it with TODO for L2 delegate conversion. ContentPlaceHolder and GetRouteUrl review items updated to reference BWFC components. Run 21 WingtipToys L2: 44 files, 0 errors. SelectMethod delegate conversion on 4 data pages (`SelectMethod="@GetProducts"` etc.), all code-behinds to async lifecycle, enum/type Razor escaping (`@GridLines.Vertical`), account pages stubbed for Identity migration. CU L2: 0 errors, 5 models to EF Core, 5 BLL classes with IDbContextFactory, EDMX artifacts deleted, raw SQL → LINQ. L1 script: SQLite package/example replaced with SqlServer/LocalDB.
+
+**Key gotchas (combined):** Code-behind class name MUST match .razor filename. Code-behind files need explicit usings (don't inherit _Imports.razor). Don't duplicate `@inject`/`[Inject]`. `#hexcolor` → `@("#hexcolor")`. `Unit` params are bare integers. BWFC uses `Sorting` EventCallback (not `OnSorting`). `CommandField` doesn't exist — use `ButtonField`. `TextBox Text` expects `string`. `TemplateField` in DetailsView needs `ItemType`. Style sub-components: `<RowStyleContent><GridViewRowStyle .../></RowStyleContent>`. `SortedAscendingCellStyle` not in BWFC. L1 must not strip attributes BWFC supports.
 
 
-### Run 12 — Complete WingtipToys Migration from Scratch (2026-03-07)
+ Team update (2026-03-11): NEVER default to SQLite; SelectMethod MUST be preserved as SelectHandler<ItemType> delegates. All skill files hardened, L1 script now scaffolds SQL Server.  decided by Jeffrey T. Fritz, Beast, Cyclops
 
-**Completed:** Full migration of WingtipToys using bwfc-migrate.ps1 + Layer 2 manual fixes. Build: 0 errors, 0 warnings.
 
-**Migration script output:**
-- 32 files processed, 303 transforms, 79 static files, 8 model files copied
-- Script correctly handled: JS files → wwwroot/Scripts/, CSS auto-detection, placeholder→@context conversion
+ Team update (2026-03-11): ContosoUniversity L2 confirmed SQL Server LocalDB exclusively. Earlier SQLite attempt was rejected. IDbContextFactory pattern with SqlServer provider is canonical.  decided by Cyclops
 
-**Layer 2 fixes applied:**
-1. **csproj:** Changed BWFC from NuGet PackageReference to ProjectReference (`..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj`); removed Identity.UI package (not needed with manual auth)
-2. **_Imports.razor:** Added `@inherits WebFormsPageBase`, model/data/services usings, `BlazorWebFormsComponents.Enums`
-3. **Models:** Product.UnitPrice `double?`→`decimal?`, OrderDetail.UnitPrice same, ProductContext→`IdentityDbContext<IdentityUser>`, nullable reference types, file-scoped namespaces
-4. **ProductDatabaseInitializer:** Rewrote as static `Seed(ProductContext)` method — EF Core pattern (check `if (context.Categories.Any()) return;`)
-5. **IdentityModels.cs:** Gutted — using `IdentityUser` directly, no custom ApplicationUser
-6. **Program.cs:** Full pipeline — `AddDbContextFactory<ProductContext>` + `AddDbContext` (dual registration for DI factory + scoped), `AddIdentity<IdentityUser, IdentityRole>`, `ConfigureApplicationCookie`, `AddCascadingAuthenticationState`, `MapPost` endpoints for register/login/logout handlers
-7. **App.razor:** Deduplicated CSS (kept only `.min.css` variants), removed non-min JS duplicates
-8. **MainLayout:** Rewrote entirely — categories via `IDbContextFactory`, `LoginView` with `AnonymousTemplate`/`LoggedInTemplate`, plain HTML logout form, `_userName` from `CascadingParameter Task<AuthenticationState>`, plain `<img>` instead of BWFC `<Image>` for logo
-9. **Default.razor (RC-8):** Added featured products grid with `IDbContextFactory`, `role="main"` container, product images/links/prices — ensures >100px height
-10. **ProductList.razor:** Changed `TItem` to `ItemType`, fixed GetRouteUrl links to `/ProductDetails?ProductID=@context.ProductID`, fixed AddToCart links from `.aspx` to `/AddToCart?productID=`, wired up `IDbContextFactory` data loading with category filter via `[SupplyParameterFromQuery]`
-11. **ProductDetails.razor (RC-10):** Rewrote as direct data binding (not FormView), added "Add To Cart" link (`/AddToCart?productID=@_product.ProductID`), `IDbContextFactory` data loading
-12. **ShoppingCart.razor:** Implemented full GridView equivalent with HTML table, `@rendermode InteractiveServer`, quantity update via `@onchange`, remove button, order total calculation, `CartStateService` integration
-13. **AddToCart.razor:** Cart service integration — adds item and redirects to ShoppingCart via `NavigationManager`
-14. **Register/Login (RC-11):** Plain HTML `<form method="post" action="/account/*-handler" data-enhance="false">` for full page reloads. No BWFC components. Error display via `[SupplyParameterFromQuery]`.
-15. **All remaining Account/Admin/Checkout pages:** Stubbed as simple HTML placeholders to avoid build errors from old WebForms code-behinds
-16. **All code-behinds:** Replaced old WebForms `System.Web.UI` code with stubs (pages use inline `@code` blocks)
 
-**Key patterns established:**
-- Dual DbContext registration: `AddDbContextFactory` for `IDbContextFactory<T>` (short-lived queries in components) + `AddDbContext` for Identity (which needs scoped)
-- Auth forms use `data-enhance="false"` to force full HTTP POST + page reload — this ensures the Blazor circuit picks up the new cookie auth state
-- `CascadingParameter Task<AuthenticationState>` in MainLayout for username display
-- `LoginView` templates are `RenderFragment` (not generic) — no `@context` inside them; use cascading auth state instead
-- `CartStateService` with `IDbContextFactory` and cookie-based cart ID — avoids Session dependency
-- `[SupplyParameterFromQuery]` on page components for query string parameters (replaces WebForms Request.QueryString)
+ Team update (2026-03-11): Database provider guidance reframed  lead with 'detect and match original provider' instead of 'NEVER substitute'. L1 auto-detection connects to L2 verification.  decided by Beast (requested by Jeffrey T. Fritz)
 
-**File count:** 35 .razor, 42 .cs, 79 static assets
+### L1 Script — Web.config Database Provider Auto-Detection (2026-03-12)
 
- Team update (2026-03-07): Coordinator must not perform domain work  all code changes must route through specialist agents  decided by Jeffrey T. Fritz, Beast
- Team update (2026-03-07): FreshWingtipToys must not be committed or referenced as template  decided by Jeffrey T. Fritz
- Team update (2026-03-07): migration-standards SKILL.md updated with Static Asset Checklist, ListView Placeholder Conversion, Preserving Action Links  decided by Beast
- Team update (2026-03-07): Migration order directive  fresh Blazor project first, then apply BWFC, then migrate content  decided by Jeffrey T. Fritz
+Added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` that parses Web.config `<connectionStrings>` to detect the actual database provider. Three-pass detection: (1) explicit `providerName` attribute, (2) connection string content patterns like `(LocalDB)` or `Server=`, (3) EntityClient inner `provider=` extraction for EF6 EDMX connections. Returns matching EF Core package name and provider method. Falls back to SQL Server when no Web.config or no connectionStrings found.
 
-### LoginView Namespace Fix (2026-03-07)
+**Changes:**
+- `Find-DatabaseProvider` function added between Logging and Project Scaffolding regions
+- Uses `GetAttribute()` for XML attribute access (StrictMode-safe — `$entry.providerName` throws under `Set-StrictMode -Version Latest`)
+- Package reference in csproj scaffold now uses detected package instead of hardcoded SqlServer
+- Program.cs scaffold includes detected connection string in commented-out `AddDbContextFactory` line (both identity and models-only paths)
+- `[DatabaseProvider]` review item added to migration summary when provider detected from Web.config
+- Provider mapping: SqlClient→SqlServer, SQLite→Sqlite, Npgsql→PostgreSQL, MySqlClient→MySQL
 
-**Problem:** AfterWingtipToys had 3 RZ10012 warnings — Razor compiler didn't recognize `<LoginView>`, `<AnonymousTemplate>`, or `<LoggedInTemplate>` as components.
+**Key learning:** PowerShell `Set-StrictMode -Version Latest` throws on missing XML element properties. Use `$element.GetAttribute('attrName')` (returns '' if missing) instead of `$element.attrName` for optional XML attributes.
 
-**Root cause:** `LoginView` lives in `BlazorWebFormsComponents.LoginControls` namespace. The sample's `_Imports.razor` had `@using BlazorWebFormsComponents` but was missing `@using BlazorWebFormsComponents.LoginControls`. The migration script (`bwfc-migrate.ps1`) also omitted this using from its generated `_Imports.razor` template.
 
-**Fixes applied:**
-1. `samples/AfterWingtipToys/_Imports.razor` — added `@using BlazorWebFormsComponents.LoginControls` (line 10)
-2. `migration-toolkit/scripts/bwfc-migrate.ps1` — added `@using BlazorWebFormsComponents.LoginControls` to `$importsContent` template (line 187)
+ Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. L1 script now auto-detects provider from Web.config.  decided by Jeffrey T. Fritz, Beast, Cyclops
 
-**Result:** AfterWingtipToys warnings dropped from 73 → 70 (3 RZ10012s eliminated). BWFC test project unaffected.
+### Fix: TItem → ItemType in Tests and Samples (2026-03-12)
 
- Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+The `ItemType` standardization (renaming `TItem`/`TItemType` → `ItemType` across 13 component files) was not applied to test files or sample pages. This caused CI failures on PR #425 with `RZ10001` (type cannot be inferred) and `CS0411` (type arguments cannot be inferred) errors for `RadioButtonList` and `BulletedList` — but the problem was actually much wider.
 
- Team update (2026-03-08): Run 12 migration patterns: auth via plain HTML forms with data-enhance=false, dual DbContext, LoginView _userName from cascading auth state  decided by Cyclops
+**Root cause:** Components declare `@typeparam ItemType` but tests and samples still referenced `TItem=`. The Razor compiler couldn't match the generic parameter name.
 
-### Run 13 — Full WingtipToys Migration Pipeline (2026-03-08)
+**Fix:** Renamed `TItem=` → `ItemType=` across 43 files:
+- 36 test files: RadioButtonList (7), BulletedList (7), CheckBoxList (6), DropDownList (7), ListBox (8), ToolTipTests (1)
+- 7 sample files: ControlSamples pages for all 5 list controls, plus AfterWingtipToys account pages
 
-**Completed:** Full migration pipeline — script + Layer 2 + build + test. **25/25 acceptance tests passed.**
-
-**Pipeline timing:**
-- Migration script (Step 1): 3 seconds — 32 files, 303 transforms, 79 static files, 8 models
-- Layer 2 fixes: ~10 minutes
-- Build iterations: 3 (first had 3 errors, second clean, third after test fixes)
-- Test iterations: 3 (first 23/25, second 23/25, third 25/25)
-- Total pipeline: ~22 minutes
-
-**Migration script output:** Unchanged from Run 12 — script correctly produces Layer 1 scaffolding.
-
-**Layer 2 fixes applied (11):**
-1. **csproj:** BWFC NuGet → ProjectReference; removed Identity.UI; packages at 10.0.0
-2. **_Imports.razor:** Added `@inherits WebFormsPageBase`, `@using Microsoft.EntityFrameworkCore`, `@using WingtipToys.Models`, `@using BlazorWebFormsComponents.Enums`
-3. **Models (6 files):** EF6→EF Core, nullable refs, file-scoped namespaces, `decimal` for prices, `IdentityDbContext<IdentityUser>`
-4. **ProductDatabaseInitializer:** Static `Seed(ProductContext)` method with `if (Any()) return` guard
-5. **Program.cs:** Full pipeline — `AddDbContextFactory` (factory only, no dual registration), `AddIdentity`, `ConfigureApplicationCookie`, `AddCascadingAuthenticationState`, cookie auth, DB seeding, `/AddToCart` + `/RemoveFromCart` GET endpoints, `/account/register-handler` + `/account/login-handler` POST endpoints, `/account/logout-handler` GET endpoint
-6. **App.razor:** Deduplicated CSS/JS (min only), SSR comment, no `@rendermode` on HeadOutlet/Routes
-7. **MainLayout.razor + .cs:** Complete rewrite — categories from `IDbContextFactory`, `LoginView` with `AnonymousTemplate`/`LoggedInTemplate`, `_userName` from `CascadingParameter Task<AuthenticationState>`, `<main>` element, `container-fluid`
-8. **Default.razor:** `role="main"` container with `min-height: 200px`
-9. **ProductList.razor:** `ListView Items="@_products"`, `IDbContextFactory`, category filter via `[SupplyParameterFromQuery]`, `data-enhance-nav="false"` on AddToCart links
-10. **ProductDetails.razor:** Direct data binding (not FormView), AddToCart link with `data-enhance-nav="false"`
-11. **ShoppingCart.razor:** HTML table with cart items, editable quantity, Remove links with `data-enhance-nav="false"`
-12. **Login.razor + Register.razor:** Plain HTML forms with `data-enhance="false"`, POST to minimal API endpoints
-13. **All remaining pages:** Stubbed as simple HTML placeholders
-14. **Removed:** IdentityModels.cs, all old code-behinds, AddToCart.razor, ViewSwitcher, Site.MobileLayout
-
-**Key patterns established/confirmed:**
-- **SSR default works** — no `@rendermode` on HeadOutlet/Routes; cart and auth use plain HTTP endpoints with cookies
-- **`data-enhance-nav="false"` required** on links to minimal API endpoints (AddToCart, RemoveFromCart) — without this, Blazor enhanced navigation intercepts the click and doesn't follow the 302 redirect properly
-- **`data-enhance="false"` on auth forms** — forces full HTTP POST, bypasses Blazor form handling
-- **Logout must NOT use `<button>`** — when user is authenticated, a `<button>` in the navbar for logout is found first by `page.GetByRole(AriaRole.Button).First`, breaking tests that look for the Login button. Use `<a>` link instead.
-- **`AddDbContextFactory` only** — no dual registration needed; Identity works fine with factory-created DbContext
-- **Middleware order:** `UseAuthentication()` → `UseAuthorization()` → `UseAntiforgery()` (not the other way around)
-- **Quantity input must be editable** (no `readonly`) for cart update tests to work
-
-**Build result:** 0 errors, 0 warnings
-**Test result:** 25/25 passed (100%)
-**Manual post-migration fixes needed:** 0
-
-📌 Team update (2026-03-08): Enhanced navigation must be bypassed for minimal API endpoints — `data-enhance-nav="false"` required on links to non-Blazor endpoints (consolidated from Run 13 findings) — decided by Cyclops
-📌 Team update (2026-03-08): DbContext registration simplified — `AddDbContextFactory` only, no dual registration needed (supersedes Run 12 pattern) — decided by Cyclops
-📌 Team update (2026-03-08): Middleware order confirmed: UseAuthentication → UseAuthorization → UseAntiforgery — decided by Cyclops
-📌 Team update (2026-03-08): Logout must use `<a>` link not `<button>` in navbar to avoid Playwright button ordering conflicts — decided by Cyclops
+**Key learning:** When standardizing generic type parameter names on components, the rename must also cover all test files, sample pages, and documentation code blocks — not just the component source. CI may only surface the first few errors, hiding the full scope.

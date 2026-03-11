@@ -1,0 +1,38 @@
+﻿.active {background-color:#131414;
+}
+
+body {background-image: url('../Images/space-4.jpg');     
+}
+
+#grv {margin-top:10px;    
+      text-align:center;    
+}
+
+.grid {opacity:0.15;
+       margin:auto;      
+}
+
+#header h1 {text-align:center;
+            font-size:50px;
+            text-decoration:underline;
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            color:#ececec;                                       
+            width:50%;
+            opacity:1;
+
+}
+
+#header {margin-top:100px;        
+         width:100%;
+         padding-left:28%;
+              
+}
+
+@media screen and (max-width:500px) {
+
+    #header {
+        padding-left: 10%;
+    }
+}
+
+

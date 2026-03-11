@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WingtipToys.Models;
 
 public class OrderDetail
@@ -12,5 +14,5 @@ public class OrderDetail
 
     public int Quantity { get; set; }
 
-    public decimal? UnitPrice { get; set; }
+    public double? UnitPrice { get; set; }
 }
