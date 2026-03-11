@@ -1,5 +1,27 @@
-@page "/Account/VerifyPhoneNumber"
+@page "/VerifyPhoneNumber"
 <PageTitle>Verify Phone Number</PageTitle>
-<h2>Verify Phone Number</h2>
-<p>This page is under construction.</p>
+<h2>@(Title).</h2>
+    <p class="text-danger">
+        <Literal ID="ErrorMessage" />
+    </p>
+    <div class="form-horizontal">
+        <h4>Enter verification code</h4>
+        <hr />
+        <HiddenField ID="PhoneNumber" />
+        <ValidationSummary CssClass="text-danger" />
+        <div class="form-group">
+            <Label AssociatedControlID="Code" CssClass="col-md-2 control-label">Code</Label>
+            <div class="col-md-10">
+                <TextBox ID="Code" CssClass="form-control" />
+                <RequiredFieldValidator ControlToValidate="Code"
+                    CssClass="text-danger" ErrorMessage="The Code field is required." />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <Button OnClick="Code_Click"
+                    Text="Submit" CssClass="btn btn-default" />
+            </div>
+        </div>
+    </div>
 

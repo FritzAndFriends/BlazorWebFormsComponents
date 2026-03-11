@@ -215,3 +215,37 @@ Added `Convert-TemplatePlaceholders` function in new `#region --- Template Place
 - Auto-registration of `CascadingAuthenticationState` for projects using BWFC `LoginView` components
 
 📌 Team update (2026-03-11): Migration tests reorganized — `dev-docs/migration-tests/` now uses `wingtiptoys/runNN/` and `contosouniversity/runNN/` structure. Future run reports must follow this convention. — decided by Beast
+
+### Run 18 — WingtipToys Migration Reset & Re-run (2026-03-11)
+
+**Completed:** Full reset and re-run of Layer 1 migration pipeline. **ShoppingCart GridView: ❌ FAIL.**
+
+**Key findings:**
+- Layer 1 script runs clean: 32 files, 303 transforms, 79 static, 8 models in 1.86s
+- **ShoppingCart.aspx incorrectly stubbed** — `Test-UnconvertiblePage` function matches `'Checkout'` pattern against `CheckoutImageBtn`/`CheckoutBtn_Click` in markup, false-positive stubs the page
+- ShoppingCart.razor output is a placeholder stub, NOT a `<GridView>` conversion
+- Build: 6 errors (malformed `[Parameter]` TODO annotation in code-behinds swallows parameter declarations), 8 NU1510 warnings from BWFC csproj
+- Layer 2 script (`bwfc-migrate-layer2.ps1`) does not exist — Layer 2 is manual
+- csproj required manual fix: NuGet PackageReference → ProjectReference for local builds
+
+**Root cause of ShoppingCart stub:** `Test-UnconvertiblePage` (line 1230) uses overly broad regex patterns. The pattern `'Checkout'` matches any markup containing "Checkout" as a substring — including button IDs like `CheckoutImageBtn`. Fix requires narrowing the pattern (path-based detection, word boundaries, or code-behind-only analysis).
+
+**Script bug: RouteData [Parameter] TODO annotation** — The TODO comment placed after `[Parameter]` consumes the following `string paramName)` tokens, breaking method signatures in ProductDetails.razor.cs and ProductList.razor.cs.
+
+📌 Team update (2026-03-11): ShoppingCart.aspx stubbed by Layer 1 script due to overly broad 'Checkout' pattern in Test-UnconvertiblePage — P0 script fix needed — discovered by Cyclops
+
+### Run 18b — Re-run After Checkout Pattern Fix (2026-03-11)
+
+**Completed:** Re-ran Layer 1 migration after `Test-UnconvertiblePage` script fix (path-based Checkout detection). **ShoppingCart GridView: ❌ STILL FAIL.**
+
+**Key findings:**
+- Checkout pattern fix works: `'^Checkout[/\\]'` path-based detection correctly stubs only Checkout/ folder pages
+- **ShoppingCart.aspx STILL stubbed** — new root cause: `'PayPal'` pattern matches `ImageUrl="https://www.paypal.com/..."` and `AlternateText="Check out with PayPal"` in markup (UI references, not SDK code)
+- ShoppingCart.aspx.cs has zero PayPal SDK references — the match is a false positive on image URL/alt text
+- UnconvertibleStub count: still 6 (was expected to drop to 5)
+- Build: same 6 errors, 8 warnings as Run 18a (unchanged)
+- Layer 1 timing: 1.58s (slightly faster than 18a's 1.86s)
+
+**Second script fix needed:** Narrow `'PayPal'` pattern to match only PayPal SDK usage (e.g., `'PayPal\.'`), or move to code-behind-only analysis, or use path-based detection like the Checkout fix.
+
+📌 Team update (2026-03-11): ShoppingCart.aspx still stubbed after Checkout fix — `'PayPal'` pattern in Test-UnconvertiblePage matches image URL/alt text, second false positive — P0 fix needed — discovered by Cyclops
