@@ -82,3 +82,17 @@ Run 20 L1 fixes: `ConvertFrom-SelectMethod` was stripping SelectMethod from mark
 
 
  Team update (2026-03-11): Database provider guidance reframed  lead with 'detect and match original provider' instead of 'NEVER substitute'. L1 auto-detection connects to L2 verification.  decided by Beast (requested by Jeffrey T. Fritz)
+
+### L1 Script — Web.config Database Provider Auto-Detection (2026-03-12)
+
+Added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` that parses Web.config `<connectionStrings>` to detect the actual database provider. Three-pass detection: (1) explicit `providerName` attribute, (2) connection string content patterns like `(LocalDB)` or `Server=`, (3) EntityClient inner `provider=` extraction for EF6 EDMX connections. Returns matching EF Core package name and provider method. Falls back to SQL Server when no Web.config or no connectionStrings found.
+
+**Changes:**
+- `Find-DatabaseProvider` function added between Logging and Project Scaffolding regions
+- Uses `GetAttribute()` for XML attribute access (StrictMode-safe — `$entry.providerName` throws under `Set-StrictMode -Version Latest`)
+- Package reference in csproj scaffold now uses detected package instead of hardcoded SqlServer
+- Program.cs scaffold includes detected connection string in commented-out `AddDbContextFactory` line (both identity and models-only paths)
+- `[DatabaseProvider]` review item added to migration summary when provider detected from Web.config
+- Provider mapping: SqlClient→SqlServer, SQLite→Sqlite, Npgsql→PostgreSQL, MySqlClient→MySQL
+
+**Key learning:** PowerShell `Set-StrictMode -Version Latest` throws on missing XML element properties. Use `$element.GetAttribute('attrName')` (returns '' if missing) instead of `$element.attrName` for optional XML attributes.

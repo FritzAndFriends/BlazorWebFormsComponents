@@ -124,6 +124,118 @@ function Write-ManualItem {
 
 #endregion
 
+#region --- Database Provider Detection ---
+
+function Find-DatabaseProvider {
+    param(
+        [string]$SourcePath
+    )
+
+    $default = @{
+        PackageName      = 'Microsoft.EntityFrameworkCore.SqlServer'
+        ProviderMethod   = 'UseSqlServer'
+        DetectedFrom     = 'Default — no Web.config connectionStrings found'
+        ConnectionString = ''
+    }
+
+    if (-not $SourcePath) { return $default }
+
+    # Look for Web.config in source path and parent directory
+    $candidates = @(
+        (Join-Path $SourcePath 'Web.config'),
+        (Join-Path (Split-Path $SourcePath -Parent) 'Web.config')
+    )
+    $webConfigPath = $null
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) {
+            $webConfigPath = $candidate
+            break
+        }
+    }
+    if (-not $webConfigPath) { return $default }
+
+    try {
+        [xml]$webConfig = Get-Content -Path $webConfigPath -Raw -Encoding UTF8
+    }
+    catch {
+        return $default
+    }
+
+    $connStrings = $webConfig.configuration.connectionStrings
+    if (-not $connStrings -or -not $connStrings.add) { return $default }
+
+    # Provider mapping: Web.config providerName → EF Core package
+    $providerMap = @{
+        'System.Data.SqlClient'  = @{ PackageName = 'Microsoft.EntityFrameworkCore.SqlServer'; ProviderMethod = 'UseSqlServer' }
+        'System.Data.SQLite'     = @{ PackageName = 'Microsoft.EntityFrameworkCore.Sqlite'; ProviderMethod = 'UseSqlite' }
+        'Npgsql'                 = @{ PackageName = 'Npgsql.EntityFrameworkCore.PostgreSQL'; ProviderMethod = 'UseNpgsql' }
+        'MySql.Data.MySqlClient' = @{ PackageName = 'Pomelo.EntityFrameworkCore.MySql'; ProviderMethod = 'UseMySql' }
+    }
+
+    $adds = @($connStrings.add)
+
+    # Pass 1: Non-EntityClient entries with explicit providerName
+    # Use GetAttribute() for StrictMode safety — returns '' if attribute missing
+    foreach ($entry in $adds) {
+        $providerName = $entry.GetAttribute('providerName')
+        if (-not $providerName -or $providerName -eq 'System.Data.EntityClient') { continue }
+        if ($providerMap.ContainsKey($providerName)) {
+            $mapped = $providerMap[$providerName]
+            return @{
+                PackageName      = $mapped.PackageName
+                ProviderMethod   = $mapped.ProviderMethod
+                DetectedFrom     = "Web.config providerName=$providerName"
+                ConnectionString = $entry.GetAttribute('connectionString')
+            }
+        }
+    }
+
+    # Pass 2: Entries without providerName — detect from connection string content
+    foreach ($entry in $adds) {
+        $connString = $entry.GetAttribute('connectionString')
+        if (-not $connString -or $connString -match '^metadata=') { continue }
+        if ($entry.GetAttribute('providerName')) { continue }
+        if ($connString -match '(?i)\(LocalDB\)|Server=') {
+            return @{
+                PackageName      = 'Microsoft.EntityFrameworkCore.SqlServer'
+                ProviderMethod   = 'UseSqlServer'
+                DetectedFrom     = 'Web.config connection string pattern (SQL Server)'
+                ConnectionString = $connString
+            }
+        }
+        if ($connString -match '(?i)Data Source=.*\.db') {
+            return @{
+                PackageName      = 'Microsoft.EntityFrameworkCore.Sqlite'
+                ProviderMethod   = 'UseSqlite'
+                DetectedFrom     = 'Web.config connection string pattern (SQLite)'
+                ConnectionString = $connString
+            }
+        }
+    }
+
+    # Pass 3: EntityClient entries — extract inner provider (EF6 pattern)
+    foreach ($entry in $adds) {
+        if ($entry.GetAttribute('providerName') -ne 'System.Data.EntityClient') { continue }
+        $connString = $entry.GetAttribute('connectionString')
+        if ($connString -match 'provider=([^;"]+)') {
+            $innerProvider = $matches[1].Trim()
+            if ($providerMap.ContainsKey($innerProvider)) {
+                $mapped = $providerMap[$innerProvider]
+                return @{
+                    PackageName      = $mapped.PackageName
+                    ProviderMethod   = $mapped.ProviderMethod
+                    DetectedFrom     = "Web.config EntityClient provider=$innerProvider"
+                    ConnectionString = ''
+                }
+            }
+        }
+    }
+
+    return $default
+}
+
+#endregion
+
 #region --- Project Scaffolding ---
 
 function New-ProjectScaffold {
@@ -145,10 +257,27 @@ function New-ProjectScaffold {
                        (Test-Path (Join-Path $SourcePath 'Register.aspx'))
     }
 
+    # Detect database provider from Web.config
+    $dbProvider = Find-DatabaseProvider -SourcePath $SourcePath
+    if ($hasModels -and $dbProvider.DetectedFrom -notlike 'Default*') {
+        switch ($dbProvider.ProviderMethod) {
+            'UseSqlServer' { $friendlyName = 'SQL Server' }
+            'UseSqlite'    { $friendlyName = 'SQLite' }
+            'UseNpgsql'    { $friendlyName = 'PostgreSQL' }
+            'UseMySql'     { $friendlyName = 'MySQL' }
+            default        { $friendlyName = $dbProvider.ProviderMethod }
+        }
+        $providerDetail = "Detected $friendlyName provider — use $($dbProvider.PackageName)"
+        if ($dbProvider.ConnectionString) {
+            $providerDetail += " with connection string: $($dbProvider.ConnectionString)"
+        }
+        Write-ManualItem -File 'Web.config' -Category 'DatabaseProvider' -Detail $providerDetail
+    }
+
     # RF-06: Build conditional package references
     $additionalPackages = ''
     if ($hasModels) {
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.SqlServer`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"$($dbProvider.PackageName)`" Version=`"10.0.0`" />"
         $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0`" />"
     }
     if ($hasIdentity) {
@@ -219,12 +348,20 @@ app.MapRazorComponents<$ProjectName.Components.App>()
 app.Run();
 "@
 
+    # Build dynamic DbContext line for Program.cs scaffold using detected provider
+    if ($dbProvider.ConnectionString) {
+        $escapedConnStr = $dbProvider.ConnectionString -replace '\\', '\\'
+        $dbContextLine = "// builder.Services.AddDbContextFactory<YourDbContext>(options => options.$($dbProvider.ProviderMethod)(`"$escapedConnStr`"));"
+    } else {
+        $dbContextLine = "// builder.Services.AddDbContextFactory<YourDbContext>(options => options.$($dbProvider.ProviderMethod)(`"your-connection-string`"));"
+    }
+
     # RF-07: Add Identity/Session boilerplate when detected
     if ($hasIdentity) {
         $identityServiceBlock = @"
 
 // TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-// builder.Services.AddDbContextFactory<YourDbContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=YourDatabase;Trusted_Connection=True;"));
+$dbContextLine
 
 // TODO: Configure Identity
 // builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -251,6 +388,18 @@ app.Run();
         $programContent = $programContent.Replace(
             'app.UseAntiforgery();',
             "app.UseAntiforgery();`n$identityMiddlewareBlock"
+        )
+    }
+    elseif ($hasModels) {
+        # Add DbContext comment when Models/ detected but no Identity
+        $modelsServiceBlock = @"
+
+// TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
+$dbContextLine
+"@
+        $programContent = $programContent.Replace(
+            'builder.Services.AddBlazorWebFormsComponents();',
+            "builder.Services.AddBlazorWebFormsComponents();`n$modelsServiceBlock"
         )
     }
 
