@@ -1,8 +1,9 @@
 <div id="socialLoginList">
     <h4>Use another service to log in.</h4>
     <hr />
-    <ListView ID="providerDetails" ItemType="string">
-@* TODO: Replace SelectMethod="GetProviderNames" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
+    <ListView ID="providerDetails" TItem="String"
+        SelectMethod="@GetProviderNames">
+@* TODO: SelectMethod="GetProviderNames" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.GetProviderNames(maxRows, startRow, sort, out total))" *@
         <ItemTemplate>
             <p>
                 <button type="submit" class="btn btn-default" name="provider" value="@context"
