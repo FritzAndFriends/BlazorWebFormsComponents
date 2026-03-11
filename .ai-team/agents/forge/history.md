@@ -108,3 +108,6 @@ Library audit: 153 Razor components + 197 C# classes (CONTROL-COVERAGE.md was li
 
 
  Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
+
+
+ Team update (2026-03-11): SelectMethod is now natively supported by BWFC. Old WingtipToys analysis sections 2.2 and 6.2 (SelectMethod as 'deliberate design decision') are SUPERSEDED. SelectMethod must be preserved as delegates.  decided by Jeffrey T. Fritz, Beast, Cyclops

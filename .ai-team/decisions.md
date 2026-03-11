@@ -3650,13 +3650,15 @@ Since all 22 controls used by WingtipToys exist in our library, the real analysi
 **Impact:** HIGH — ProductDetails will render with an unwanted wrapping table, breaking CSS layout.
 
 **Fix complexity:** LOW-MEDIUM. Add `[Parameter] public bool RenderOuterTable { get; set; } = true;` and wrap the `<table>` element in `@if (RenderOuterTable)`. When false, render just the template content directly. Similar pattern already exists on ChangePassword, CreateUserWizard, and PasswordRecovery (which have `RenderOuterTable` but don't use it yet).
-### 2.2 SelectMethod Pattern (DESIGN — Not a Bug)
+### 2.2 SelectMethod Pattern ~~(DESIGN — Not a Bug)~~ SUPERSEDED
+
+> ⚠️ **SUPERSEDED (2026-03-11):** BWFC now natively supports `SelectMethod` as a `SelectHandler<ItemType>` parameter. SelectMethod MUST be preserved as delegates, NOT converted to Items= binding. See "2026-03-11: NEVER default to SQLite — database provider and SelectMethod enforcement (consolidated)".
 
 **What WingtipToys does:** Every data-bound control uses `SelectMethod="GetProducts"` with `ItemType="WingtipToys.Models.Product"` — the Web Forms model-binding pattern.
 
-**Current BWFC approach:** Our controls use `Items` parameter with `TItem` generic type: `<GridView TItem="Product" Items="@products">`.
+~~**Current BWFC approach:** Our controls use `Items` parameter with `TItem` generic type: `<GridView TItem="Product" Items="@products">`.~~
 
-**Impact:** MEDIUM — Every page needs this pattern change during migration. This is a deliberate design decision (Blazor doesn't have model binding), but it means markup can't be 1:1 migrated. The Copilot instructions should explain this pattern.
+~~**Impact:** MEDIUM — Every page needs this pattern change during migration. This is a deliberate design decision (Blazor doesn't have model binding), but it means markup can't be 1:1 migrated. The Copilot instructions should explain this pattern.~~
 ### 2.3 Data-Binding Expression Syntax
 
 **What WingtipToys does:** `<%#: Item.ProductName %>`, `<%#: String.Format("{0:c}", Item.UnitPrice) %>`, `<%#: Eval("FirstName") %>`
@@ -3914,11 +3916,13 @@ Query string parameters map to `[SupplyParameterFromQuery]` attributes in .NET 8
 **Fix:** Add `[Parameter] public bool RenderOuterTable { get; set; } = true;` to `FormView.razor.cs`. In `FormView.razor`, conditionally wrap content in `<table>` only when `RenderOuterTable` is true. When false, render style sub-components + template content directly.
 
 **Estimate:** 2-4 hours. Low risk — additive change, defaults to current behavior.
-### 6.2 NON-BLOCKING: SelectMethod/ItemType Pattern Difference
+### 6.2 ~~NON-BLOCKING: SelectMethod/ItemType Pattern Difference~~ SUPERSEDED
 
-**Issue:** Web Forms uses `SelectMethod="GetProducts" ItemType="Product"`. BWFC uses `Items="@products" TItem="Product"`. This is a deliberate design decision.
+> ⚠️ **SUPERSEDED (2026-03-11):** BWFC now natively supports `SelectMethod` as a `SelectHandler<ItemType>` parameter. This is no longer a "pattern difference" — SelectMethod must be preserved. See "2026-03-11: NEVER default to SQLite — database provider and SelectMethod enforcement (consolidated)".
 
-**Mitigation:** Document in migration instructions. Copilot can handle this pattern change mechanically.
+~~**Issue:** Web Forms uses `SelectMethod="GetProducts" ItemType="Product"`. BWFC uses `Items="@products" TItem="Product"`. This is a deliberate design decision.~~
+
+~~**Mitigation:** Document in migration instructions. Copilot can handle this pattern change mechanically.~~
 ### 6.3 NON-BLOCKING: GridView Row Value Extraction
 
 **Issue:** ShoppingCart.aspx code-behind iterates `CartList.Rows` and calls `FindControl("Remove")` and `FindControl("PurchaseQuantity")` to extract values. This imperative DOM-walking pattern doesn't exist in Blazor.
@@ -6657,3 +6661,24 @@ Jeff's Run 20 review identified four bugs in the migration pipeline:
 - `migration-toolkit/skills/migration-standards/SKILL.md`  3 SelectMethod references
 - `migration-toolkit/skills/bwfc-data-migration/SKILL.md`  4 SelectMethod references + TItem to ItemType fix
 - `dev-docs/migration-tests/wingtiptoys/run20/REPORT.md`  validator false claim removed, SelectMethod guidance corrected
+
+
+### 2026-03-11: NEVER default to SQLite  database provider and SelectMethod enforcement (consolidated)
+**By:** Jeffrey T. Fritz, Beast, Cyclops
+**What:**
+1. **Database provider enforcement:** SQLite is NEVER an acceptable default for any migration. Agents MUST use the SAME database provider as the original Web Forms app. ContosoUniversity = SQL Server LocalDB. WingtipToys = SQL Server LocalDB. The L1 script (wfc-migrate.ps1) now scaffolds Microsoft.EntityFrameworkCore.SqlServer with UseSqlServer and a LocalDB connection string instead of SQLite. All three migration skill files (wfc-migration, migration-standards, wfc-data-migration) had "Prefer SQLite" guidance removed and NEVER-default-to-SQLite warnings added.
+2. **SelectMethod preservation is MANDATORY:** SelectMethod must be preserved as SelectHandler<ItemType> delegates during L2 transforms  NEVER converted to Items= binding. The "Alternatively bypass SelectMethod" escape hatch was removed from all skill files. Items= binding is restricted to DataSource-originating patterns only.
+**Why:** ContosoUniversity migration repeatedly regressed to SQLite despite explicit SQL Server instructions. SelectMethod kept being converted to Items= despite BWFC supporting it natively. Root cause was permissive skill file wording that gave agents escape paths. Skill files are the primary instruction source for migration agents; ambiguous phrasing causes systematic regression across every run. The L1 script was also seeding SQLite by default, causing L2 agents to follow suit.
+**Supersedes:** "2.2 SelectMethod Pattern (DESIGN  Not a Bug)" and "6.2 NON-BLOCKING: SelectMethod/ItemType Pattern Difference"  those older analyses incorrectly stated SelectMethodItems was a deliberate design decision. BWFC now natively supports SelectMethod as a SelectHandler<ItemType> parameter.
+### 2026-03-11: ContosoUniversity L2 uses SQL Server LocalDB exclusively (consolidated)
+**By:** Cyclops
+**What:** ContosoUniversity Layer 2 structural transform uses SQL Server LocalDB exclusively. Package: Microsoft.EntityFrameworkCore.SqlServer. Connection: Server=(localdb)\mssqllocaldb;Database=ContosoUniversity;Trusted_Connection=True;MultipleActiveResultSets=true. No EnsureCreated()  the database exists from the .mdf file. All BLL classes use IDbContextFactory<ContosoUniversityContext>. An earlier L2 attempt used SQLite and Items= binding  both approaches were rejected and corrected.
+**Why:** The original app used SQL Server with a pre-populated .mdf file. Previous successful test runs (Run 5, Run 17  both 40/40 acceptance tests) validated the LocalDB approach. SQLite would require data migration and breaks provider fidelity. Items= binding was replaced with proper SelectMethod delegate references per team directive.
+### 2026-03-11: Database provider must match source system
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The migration must detect the original database provider from Web.config connection strings and bring in the MATCHING EF Core provider package. The goal is to continue using the SAME database  not just 'avoid SQLite', but actively detect and preserve the original provider. L1 should scaffold the correct provider package, not hardcode SqlServer.
+**Why:** User directive  the whole point of drop-in replacement is that nothing changes unnecessarily, including the database.
+### 2026-03-11: Reframe database guidance  detect and match original provider
+**By:** Beast (requested by Jeffrey T. Fritz)
+**What:** Reframed all database provider guidance in the three migration skill files to lead with the positive action: detect the original database provider from Web.config connectionStrings and install the matching EF Core package. Provider mapping examples added. The NEVER-substitute language is retained as a guardrail but is no longer the lead message. L2 checklist now directs agents to verify the L1-detected provider. Connects to L1 script's auto-detection output ([DatabaseProvider] review item).
+**Why:** Agents prioritize affirmative instructions over prohibitions. 'Detect and match' gives a clear workflow. Existing NEVER/MUST guardrails preserved as backstops.

@@ -119,3 +119,9 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
   1. Agents read "Prefer SQLite for local dev" and interpreted it as a default, ignoring the original app's SQL Server connection strings.
   2. Agents read "Alternatively... set Items directly" and chose the simpler path, converting SelectMethod to Items= and losing the native BWFC data-binding pattern.
 - **Key learning:** Skill file wording must be prescriptive with explicit NEVER/MUST admonitions. "Alternatively" or "prefer X" phrasing gives agents permission to deviate. Warnings must be impossible to miss.
+
+
+ Team update (2026-03-11): NEVER default to SQLite; SelectMethod MUST be preserved as SelectHandler<ItemType> delegates. All skill files hardened, L1 script now scaffolds SQL Server.  decided by Jeffrey T. Fritz, Beast, Cyclops
+
+
+ Team update (2026-03-11): Database provider guidance reframed  lead with 'detect and match original provider' instead of 'NEVER substitute'. L1 auto-detection connects to L2 verification.  decided by Beast (requested by Jeffrey T. Fritz)
