@@ -148,7 +148,7 @@ function New-ProjectScaffold {
     # RF-06: Build conditional package references
     $additionalPackages = ''
     if ($hasModels) {
-        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Sqlite`" Version=`"10.0.0`" />"
+        $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.SqlServer`" Version=`"10.0.0`" />"
         $additionalPackages += "`n    <PackageReference Include=`"Microsoft.EntityFrameworkCore.Tools`" Version=`"10.0.0`" />"
     }
     if ($hasIdentity) {
@@ -224,7 +224,7 @@ app.Run();
         $identityServiceBlock = @"
 
 // TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-// builder.Services.AddDbContextFactory<ProductContext>(options => options.UseSqlite("Data Source=app.db"));
+// builder.Services.AddDbContextFactory<YourDbContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=YourDatabase;Trusted_Connection=True;"));
 
 // TODO: Configure Identity
 // builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
