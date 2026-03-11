@@ -1,0 +1,110 @@
+@page "/Students"
+<HeadContent>
+    <link href="CSS/Students_CSS.css" rel="stylesheet" />
+    <script src="JQuery/JQuery_Students.js"></script>
+</HeadContent>
+<ScriptManager ID="ScriptManager2"></ScriptManager>       
+    <UpdatePanel>
+        <ContentTemplate>
+            <div id="grvStudentsData">
+                <GridView ID="grv"
+                    ItemType="Student"
+                    Items="@StudentsList"
+                    CssClass="grv"
+                    AutoGenerateColumns="false"
+                    EmptyDataText="There are no records to display" UpdateMethod="grv_UpdateItem"
+                    DeleteMethod="grv_DeleteItem" DataKeyNames="ID" OnRowUpdating="grv_RowUpdating"
+                    BackColor=@("White") BorderColor=@("#3366CC") BorderStyle="@BorderStyle.None" BorderWidth="Unit.Pixel(1)"
+                    CellPadding="4" Height="Unit.Pixel(336)" Width="Unit.Pixel(416)">
+@* TODO: Replace SelectMethod="grv_GetData" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
+                    <Columns>
+                        <CommandField HeaderText="Delete Student" ShowDeleteButton="True" ButtonType="Button" />
+                        <BoundField DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                        <BoundField DataField="FullName" HeaderText="Student Name" />
+                        <BoundField DataField="Email" HeaderText="Email" />
+                        <BoundField DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                        <BoundField DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                        <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="True" />
+                    </Columns>
+                </GridView>
+            </div>
+            <div id="addStud">
+                <h1 id="addStudent">Add Student</h1>
+                <Table ID="tabAddStud"
+                    CssClass="tabAddStud" BorderColor=@("#0033CC") Font-Bold="true" Font-Italic="false"
+                    Font-Underline="false" ForeColor=@("White")
+                    Font-Overline="false">
+                    <TableRow>
+                        <TableCell>First Name</TableCell>
+                        <TableCell>
+                            <TextBox ID="txtFirstName" placeholder="Type Your First Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Last Name</TableCell><TableCell>
+                            <TextBox ID="txtLastName" placeholder="Type Your Last Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Birth Date</TableCell><TableCell>
+                            <TextBox ID="txtBirthDate" placeholder="dd.mm.year" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Email</TableCell><TableCell>
+                            <TextBox ID="txtEmail" placeholder="Email is Optional..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Course Name</TableCell><TableCell>
+                            <DropDownList TItem="string" ID="dropListCourses" Items="@(CoursesList.Select(c => c.CourseName ?? string.Empty))">
+                            </DropDownList>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>               
+                        </TableCell><TableCell>
+                            <Button CssClass="insert" ID="btnInsert" Text="New Enrollment" OnClick="btnInsert_Click" />
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     <Button ID="btnClear" Text="Clear" OnClick="btnClear_Click" />
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </div>
+            <div id="ajax">
+                <h1 id="searchStud">Search Student</h1>
+                <TextBox CssClass="txtSearch" ID="txtSearch" placeholder="Type Student Name..." />
+                <ajaxToolkit:AutoCompleteExtender
+                    ID="AutoCompleteExtender1"
+                    TargetControlID="txtSearch"
+                    ServiceMethod="GetCompletionList"
+                    MinimumPrefixLength="1"
+                    CompletionInterval="100"
+                    EnableCaching="true"
+                    CompletionSetCount="20"
+                    ShowOnlyCurrentWordInCompletionListItem="true">
+                </ajaxToolkit:AutoCompleteExtender>
+                <Button ID="btnSearch" Text="Show Student Info" OnClick="btnSearch_Click" CssClass="btnInfo" />
+                <DetailsView
+                    ID="studentData"
+                    ItemType="Student"
+                    DataItem="@SelectedStudent"
+                    Width="Unit.Pixel(125)"
+                    Height="Unit.Pixel(50)"
+                    AutoGenerateRows="false"
+                    CssClass="detailsView" BorderColor=@("Black") ForeColor=@("Black")>
+                    <Fields>
+                        <BoundField ItemType="Student"
+                            DataField="FirstName"
+                            HeaderText="First Name" />
+                        <BoundField ItemType="Student" DataField="LastName" HeaderText="Last Name" />
+                        <BoundField ItemType="Student" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="Student" DataField="BirthDate" HeaderText="Birth Date" />
+                        <BoundField ItemType="Student" DataField="StudentID" HeaderText="id" />
+                    </Fields>
+                </DetailsView>
+            </div>
+        </ContentTemplate>
+    </UpdatePanel>         
+     
+

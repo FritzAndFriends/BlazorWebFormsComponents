@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Components;
 
-namespace ContosoUniversity.Components.Layout
+namespace ContosoUniversity;
+
+public partial class MainLayout : LayoutComponentBase
 {
-    public partial class MainLayout : LayoutComponentBase
+    protected override Task OnInitializedAsync()
     {
-        // MainLayout is a layout component - no data access required
+        return Task.CompletedTask;
     }
 }
-

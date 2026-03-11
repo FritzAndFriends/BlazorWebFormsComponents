@@ -695,7 +695,7 @@ function ConvertFrom-ContentWrappers {
         $headContentCount = ([regex]'<HeadContent>').Matches($Content).Count
         if ($headContentCount -gt 0) {
             # Replace first N closing tags with </HeadContent>, remove the rest
-            $replaced = 0
+            $script:replaced_count = 0
             $Content = $closeRegex.Replace($Content, {
                 param($m)
                 $script:replaced_count++
@@ -1228,15 +1228,26 @@ function Copy-CodeBehind {
 #region --- Unconvertible Page Stubs ---
 
 function Test-UnconvertiblePage {
-    param([string]$Content)
+    param(
+        [string]$Content,
+        [string]$RelativePath = ''
+    )
 
+    # Path-based stubs: pages under Checkout/ folder need manual payment/auth work
+    if ($RelativePath -match '^Checkout[/\\]') {
+        return $true
+    }
+
+    # Content patterns that indicate pages requiring manual reimplementation.
+    # NOTE: Match Identity/auth API calls only — NOT image URLs or button text.
+    # PayPal and Checkout detection is path-based (above), not content-based,
+    # because markup often references these in UI elements (images, alt text)
+    # without implying the page itself is unconvertible.
     $unconvertiblePatterns = @(
         'SignInManager',
         'UserManager',
         'FormsAuthentication',
-        'Session\[',
-        'PayPal',
-        'Checkout'
+        'Session\['
     )
     foreach ($pat in $unconvertiblePatterns) {
         if ($Content -match $pat) {
@@ -1401,7 +1412,7 @@ function Convert-WebFormsFile {
     }
 
     # Check for unconvertible pages (Identity/Auth/Payment) and emit stubs instead
-    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content)) {
+    if ($extension -eq '.aspx' -and (Test-UnconvertiblePage -Content $content -RelativePath $relativePath)) {
         $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($fileName)
         if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
             $route = '/'

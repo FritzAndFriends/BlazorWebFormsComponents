@@ -7,6 +7,53 @@
 
 ---
 
+## Run 18 — Final Result: ✅ SUCCESS
+
+Run 18 achieved the **GridView ShoppingCart breakthrough** — the last remaining stubbed page in WingtipToys now renders using BWFC `<GridView>` with proper column headers, editable quantities, remove checkboxes, and computed totals.
+
+### Key Metrics
+
+| Metric | Value |
+|--------|-------|
+| **Layer 1 Time** | 1.51s |
+| **Transforms** | 314 (up from 303) |
+| **Stubs** | 5 (down from 6) |
+| **Build** | ✅ 0 errors, 8 warnings |
+| **App Running** | ✅ All pages functional |
+| **GridView Rendering** | ✅ Full column layout with data |
+
+### Screenshots
+
+| Page | Screenshot |
+|------|------------|
+| **Home** | ![Home](images/01-home.png) |
+| **Products** | ![Products](images/02-products.png) |
+| **Shopping Cart (GridView)** | ![Shopping Cart with GridView](images/03-shopping-cart-gridview.png) |
+| **Product Details** | ![Product Details](images/04-product-details.png) |
+
+> The Shopping Cart screenshot shows 3 items (Convertible Car, Ace Plane, Rocket) rendered by BWFC's `<GridView>` with `<BoundField>` columns for ID/Name/Price, `<TemplateField>` with `<TextBox>` for Quantity, computed Item Total, and `<CheckBox>` for Remove — plus Order Total ($262.95) and PayPal Express Checkout button.
+
+### Script Fixes Applied (3 iterations)
+
+| Iteration | Fix | Result |
+|-----------|-----|--------|
+| Run 18a | Initial run | ShoppingCart stubbed — `'Checkout'` pattern false positive |
+| Run 18b | Removed `'Checkout'` content pattern, added path-based `'^Checkout[/\\]'` | ShoppingCart still stubbed — `'PayPal'` pattern false positive |
+| Run 18c | Removed `'PayPal'` content pattern | ✅ ShoppingCart has full GridView markup |
+
+### Layer 2 Fixes Applied (to make app buildable)
+
+After Layer 1 produced the correct GridView markup, the following Layer 2 fixes were applied to ShoppingCart.razor:
+
+1. `AutoGenerateColumns="false"` — lowercase boolean (C# requirement)
+2. `ItemType="CartItem"` — string attribute instead of `TItem`
+3. `GridLines="@GridLines.Vertical"` — C# enum reference with `@` prefix
+4. `Text="@context.Quantity.ToString()"` — string conversion for int values
+5. `IDbContextFactory<ProductContext>` — DI-based data access pattern
+6. Cookie-based `GetCartId()` — reads `WingtipToysCartId` cookie from `IHttpContextAccessor`
+
+---
+
 ## Run 18c — After PayPal Fix
 
 **Date:** 2026-03-11

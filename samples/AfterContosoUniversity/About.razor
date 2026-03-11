@@ -1,0 +1,23 @@
+@page "/About"
+<HeadContent>
+     <link href="CSS/CSS_About.css" rel="stylesheet" />
+     <script src="JQuery/JQuery_About.js"></script>
+</HeadContent>
+<div id="header">
+        <h1> Students Body Statistics </h1>
+    </div>
+     <div id="grv">
+        <GridView CssClass="grid" 
+            ID="EnrollmentsStat" 
+            ItemType="KeyValuePair<string, int>"
+            Items="@EnrollmentStats"
+            AutoGenerateColumns="false" EmptyDataText="There are no records to display"
+             CellPadding="4" ForeColor=@("#333333") GridLines="@GridLines.None">
+@* TODO: Replace SelectMethod="EnrollmentsStat_GetData" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@
+            <Columns>
+                <BoundField DataField="Key" HeaderText="Enrollment Date" ReadOnly="true" />
+                <BoundField DataField="Value" HeaderText="Students" ReadOnly="true" />
+            </Columns>
+        </GridView>
+    </div>
+

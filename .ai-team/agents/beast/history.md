@@ -85,3 +85,18 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
 - **Document location:** `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md`
 
 📌 Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Consumers no longer need manual `AddHttpContextAccessor()`. All sample Program.cs files updated. — decided by Cyclops
+
+### Chart Image Generation for Executive Summary (2026-03-11)
+
+- **Scope:** Replaced ASCII art performance charts in `EXECUTIVE-SUMMARY.md` with real PNG chart images generated via Python + matplotlib.
+- **Chart generation approach:** Created `generate-charts.py` script using matplotlib with a professional white-background style (no default gray), dashed grid lines, trend lines via linear regression, best-time star markers, and area fills. All three charts are 800×400px at 150 DPI.
+- **Data sources:** Layer 1 execution times extracted from REPORT.md files across all run folders:
+  - WingtipToys: 12 data points from runs 1, 4, 5, 6, 8, 11–17 (range: 1.81s–4.58s)
+  - ContosoUniversity: 10 data points from runs 1, 2, 4, 6, 8, 9, 12, 15–17 (range: 0.59s–2.30s)
+- **Files generated:**
+  - `dev-docs/migration-tests/images/wingtiptoys-layer1-perf.png` — line chart with trend
+  - `dev-docs/migration-tests/images/contosouniversity-layer1-perf.png` — line chart with trend
+  - `dev-docs/migration-tests/images/combined-improvement.png` — grouped bar chart (45% WT, 61% CU improvement)
+  - `dev-docs/migration-tests/images/generate-charts.py` — regeneration script
+- **EXECUTIVE-SUMMARY.md updated:** Two ASCII code-block charts replaced with three `![…](images/…)` image references.
+- **Key learning:** The `generate-charts.py` script is designed for easy data updates — just append new run numbers/times to the arrays at the top of the file and re-run.

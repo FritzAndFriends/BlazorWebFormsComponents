@@ -1,0 +1,48 @@
+@page "/Courses"
+<HeadContent>
+    <link href="CSS/CSS_Courses.css" rel="stylesheet" />
+    <script src="JQuery/JQuery_Courses.js"></script>
+</HeadContent>
+<ScriptManager></ScriptManager>
+    <UpdatePanel>
+        <ContentTemplate>
+            <div id="dropList">
+                <h1 id="hdrCourse">Select Course</h1>
+                <DropDownList TItem="string" ID="drpDepartments" Items="@(Departments.Select(d => d.DepartmentName ?? string.Empty))"></DropDownList>
+                <Button ID="btnSearchCourse" Text="Search Courses" OnClick="btnSearchCourse_Click"></Button>
+                <br />
+                <br />
+                <GridView ID="grvCourses" ItemType="Cours" Items="@CoursesByDepartment" AllowPaging="true" DataKeyNames="CourseID"
+                    PageSize="1" AutoGenerateColumns="false"
+                    OnPageIndexChanging="grvCourses_PageIndexChanging"
+                    EmptyDataText = "Chose Department To Display Courses">
+                    <Columns>
+                        <BoundField DataField="CourseID" HeaderText="ID" />
+                        <BoundField DataField="CourseName" HeaderText="Course Name" />
+                        <BoundField DataField="StudentsMax" HeaderText="Max Capacity" />
+                    </Columns>
+                </GridView>
+            </div>
+            <div id="autoComplete">
+                <h1 id="crsByName">Courses By Name</h1>
+                <TextBox ID="txtCourse" placeholder="Search Course..."></TextBox>
+                <Button ID="search" Text="Search" OnClick="search_Click"></Button>
+                <br />
+                <br />
+                <ajaxToolkit:AutoCompleteExtender
+                    ID="AutoCompleteExtender1"
+                    TargetControlID="txtCourse"
+                    ServiceMethod="GetList"
+                    MinimumPrefixLength="1"
+                    CompletionInterval="100"
+                    EnableCaching="true"
+                    CompletionSetCount="20"
+                    ShowOnlyCurrentWordInCompletionListItem="true">
+                </ajaxToolkit:AutoCompleteExtender>
+                <DetailsView ID="dtlCourses" ItemType="Cours" DataItem="@SelectedCourse" Width="Unit.Pixel(125)" Height="Unit.Pixel(50)" CssClass="details">
+                </DetailsView>
+            </div>
+        </ContentTemplate>         
+    </UpdatePanel>
+
+

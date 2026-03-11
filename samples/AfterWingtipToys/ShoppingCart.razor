@@ -1,5 +1,83 @@
 @page "/ShoppingCart"
-<h3>ShoppingCart — not yet migrated</h3>
-@* TODO: Implement using ASP.NET Core Identity scaffolding *@
+@using WingtipToys.Models
+@using Microsoft.EntityFrameworkCore
+@inject IHttpContextAccessor HttpContextAccessor
+
+<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+    <GridView ID="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+        ItemType="CartItem" Items="@_cartItems"
+        CssClass="table table-striped table-bordered" >
+        <Columns>
+        <BoundField ItemType="CartItem" DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField   HeaderText="Quantity">            
+                <ItemTemplate>
+                    <TextBox ID="PurchaseQuantity" Width="40" Text="@context.Quantity.ToString()"></TextBox> 
+                </ItemTemplate>        
+        </TemplateField>    
+        <TemplateField HeaderText="Item Total">            
+                <ItemTemplate>
+                    @($"{(Convert.ToDouble(context.Quantity) * Convert.ToDouble(context.Product.UnitPrice)):c}")
+                </ItemTemplate>        
+        </TemplateField> 
+        <TemplateField HeaderText="Remove Item">            
+                <ItemTemplate>
+                    <CheckBox id="Remove"></CheckBox>
+                </ItemTemplate>        
+        </TemplateField>    
+        </Columns>    
+    </GridView>
+    <div>
+        <p></p>
+        <strong>
+            <Label ID="LabelTotalText" Text="Order Total: "></Label>
+            <Label ID="lblTotal" Text="@($"{_orderTotal:c}")"></Label>
+        </strong> 
+    </div>
+    <br />
+    <table> 
+    <tr>
+      <td>
+        <Button ID="UpdateBtn" Text="Update" OnClick="UpdateBtn_Click" />
+      </td>
+      <td>
+        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
+             width="145" alt="Check out with PayPal"
+             style="cursor:pointer; background-color:transparent; border:0;" 
+             @onclick="CheckoutBtn_Click" />
+      </td>
+    </tr>
+    </table>
+
 @code {
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = null!;
+
+    private IList<CartItem> _cartItems = new List<CartItem>();
+    private decimal _orderTotal = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+        _cartItems = db.ShoppingCartItems
+            .Include(c => c.Product)
+            .Where(c => c.CartId == GetCartId())
+            .ToList();
+        _orderTotal = _cartItems.Sum(c => (c.Product?.UnitPrice ?? 0) * c.Quantity);
+    }
+
+    private string GetCartId()
+    {
+        return HttpContextAccessor.HttpContext?.Request.Cookies["WingtipToysCartId"] ?? string.Empty;
+    }
+
+    private void UpdateBtn_Click()
+    {
+        // TODO: Implement cart quantity update
+    }
+
+    private void CheckoutBtn_Click()
+    {
+        // TODO: Implement checkout redirect
+    }
 }

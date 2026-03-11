@@ -1,36 +1,24 @@
-// ============================================================================
-// TODO: Generate EF Core models from your database using:
-// dotnet ef dbcontext scaffold "Server=(localdb)\mssqllocaldb;Database=ContosoUniversityEntities;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer --output-dir Models --context ContosoUniversityEntities --namespace "ContosoUniversityModel" --force
-// See scaffold-command.txt for full details and options.
-// ============================================================================
-
-// Layer2-transformed
+// TODO: Review and adjust this generated Program.cs for your application needs.
 using BlazorWebFormsComponents;
-using Microsoft.AspNetCore.Rewrite;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpContextAccessor();  // Required for BWFC GridView/DetailsView
 builder.Services.AddBlazorWebFormsComponents();
 
-// Database
-builder.Services.AddDbContextFactory<SchoolContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Register the DbContext with SQL Server LocalDB
+var dbPath = Path.Combine(builder.Environment.ContentRootPath, "ContosoUniversity.mdf");
+var connectionString = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={dbPath};Integrated Security=True;Connect Timeout=30";
 
-// Session
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-builder.Services.AddHttpContextAccessor();
+// Set connection string for BLL classes that use new ContosoUniversityEntities()
+ContosoUniversityEntities.SetConnectionString(connectionString);
+
+builder.Services.AddDbContext<ContosoUniversityEntities>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
@@ -41,20 +29,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// ASPX URL backward compatibility ΓÇö redirect .aspx URLs to Blazor routes
-var rewriteOptions = new RewriteOptions()
-    .AddRedirect(@"^Default\.aspx$", "/", statusCode: 301)
-    .AddRedirect(@"^(.+)\.aspx$", "$1", statusCode: 301);
-app.UseRewriter(rewriteOptions);
-
 app.MapStaticAssets();
-app.UseSession();
+app.UseBlazorWebFormsComponents();
 app.UseAntiforgery();
 
 app.MapRazorComponents<ContosoUniversity.Components.App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
-
-

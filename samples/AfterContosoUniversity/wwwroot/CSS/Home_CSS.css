@@ -9,20 +9,18 @@
 }
 
 #welcomeHeader h1 {font-family:'Lucida Sans Unicode';
-                   font-size:80px;
+                   font-size:50px;
                    font-weight:bolder;
                    text-align:center;
                    width:100%;                    
                    position:relative;
                    left:-1px;
                    margin-bottom:-20px;
-                   color:#e3e6ea;
-                   transition: 8s;              
+                   color:#131414;              
 }
 
 #welcomeHeader h1 #com {font-size:20px;
-                        color:#e3e6ea;
-                        transition: 8s; 
+                        color:#131414; 
 }
 
 footer {color:white;
