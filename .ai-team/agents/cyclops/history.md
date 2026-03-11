@@ -47,123 +47,19 @@ Run 11: Fresh WingtipToys migration from scratch (105 files, 0 errors). Key patt
 
 Team updates (2026-03-07 through 2026-03-08): Coordinator must not perform domain work; FreshWingtipToys must not be committed; migration-standards updated with Static Asset Checklist/ListView Placeholder/Action Links; migration order: fresh project first; SSR default with InteractiveServer opt-in; enhanced nav bypass for minimal API; DbContext factory-only; middleware order confirmed; logout uses link not button.
 
-### ServiceCollectionExtensions Enhancement (2026-03-11)
+<!-- ⚠ Summarized 2026-03-11 by Scribe — entries from 2026-03-11 (ServiceCollectionExtensions through L2 structural transform) archived -->
 
-**Completed:** Enhanced `AddBlazorWebFormsComponents()` with auto-registered services, options pattern, and middleware pipeline.
+- ServiceCollectionExtensions Enhancement (2026-03-11)
+- Run 18a/18b/18c — Test-UnconvertiblePage False-Positive Investigation (2026-03-11)
+- P0 Migration Script Fixes (2026-03-11)
+- Standardize Generic Type Params to ItemType (2026-03-11)
+- Layer 2 Structural Transform - AfterWingtipToys (2026-03-11)
 
-**Changes:**
-1. **`AddHttpContextAccessor()`** now auto-registered — `BaseWebFormsComponent` line 57 injects `IHttpContextAccessor`, so every consumer needed this. It's idempotent, safe to call multiple times.
-2. **`BlazorWebFormsComponentsOptions`** class added — configurable behavior via `Action<BlazorWebFormsComponentsOptions>` overload. Currently supports `EnableAspxUrlRewriting` (default: true).
-3. **`UseBlazorWebFormsComponents()`** middleware extension on `IApplicationBuilder` — reads options from DI, conditionally enables `.aspx` URL rewriting.
-4. **`AspxRewriteMiddleware`** — intercepts `.aspx` requests, issues 301 permanent redirects to clean URLs. `Default.aspx` → `/`, `Students.aspx` → `/Students`, preserves query strings.
-5. **FrameworkReference** added to csproj (`Microsoft.AspNetCore.App`) — needed for `AddHttpContextAccessor()` and middleware APIs.
-6. **All 3 sample Program.cs files updated** — removed manual `AddHttpContextAccessor()`, added `app.UseBlazorWebFormsComponents()`.
+### Summary (2026-03-11 pre-Run 20)
 
-**Suggested future enhancements:** Custom error page middleware, ViewState cleanup, `.ashx`/`WebResource.axd` handling, `~/App_Themes/` mapping, auto-register `CascadingAuthenticationState` for LoginView.
+ServiceCollectionExtensions: Added `AddHttpContextAccessor()` auto-registration, `BlazorWebFormsComponentsOptions` with `EnableAspxUrlRewriting`, `UseBlazorWebFormsComponents()` middleware, `AspxRewriteMiddleware` for `.aspx` → clean URL 301 redirects. Run 18: Fixed `Test-UnconvertiblePage` false positives — 'Checkout' matched button IDs, 'PayPal' matched image URLs. Both now path-based. ShoppingCart.razor restored to full GridView markup. P0 fixes: (1) Eliminated `Test-UnconvertiblePage` — always returns `$false`, pages get TODO annotations instead of stubs. (2) `[Parameter]` regex fix — TODO on separate line, eliminates 6 CS errors. ItemType standardization: renamed all `TItemType`/`TItem` → `ItemType` across 13 files, 0 build errors. L2 AfterWingtipToys: ~60 files transformed, 0 errors, 58 RZ10012 warnings. Key gotchas: class name must match .razor filename, `@inject`/`[Inject]` duplication, `#hexcolor` → `@("...")`, `LoggedInTemplate` has no typed context.
 
-📌 Team update (2026-03-11): Migration tests reorganized — `dev-docs/migration-tests/` now uses `wingtiptoys/runNN/` and `contosouniversity/runNN/` structure. Future run reports must follow this convention. — decided by Beast
-
-### Run 18a/18b/18c — Test-UnconvertiblePage False-Positive Investigation (2026-03-11)
-
-**Run 18a:** ShoppingCart.aspx incorrectly stubbed — `'Checkout'` pattern matched `CheckoutImageBtn` button ID. 6 build errors from `[Parameter]` TODO annotation swallowing property declarations. **Run 18b:** Checkout pattern fixed (path-based `'^Checkout[/\\]'`), but `'PayPal'` pattern still matched image URL/alt text — second false positive. **Run 18c:** ✅ Both patterns fixed. ShoppingCart.razor now contains full GridView markup. Stubs: 5 (Checkout/ only), transforms: 314, timing: 1.51s. Key learning: content-based unconvertible detection must avoid matching URLs/image paths/alt text.
-
- Run 18c (2026-03-11): ShoppingCart.aspx GridView fix CONFIRMED 
-- Both false-positive patterns now fixed: 'Checkout' (Run 18b) and 'PayPal' (Run 18c)
-- ShoppingCart.razor now contains full GridView with BoundField/TemplateField markup  NOT a stub
-- UnconvertibleStub count: 5 (Checkout/ folder only)  down from 6
-- Transforms increased: 303  314 (ShoppingCart now fully processed)
-- Layer 1 timing: 1.51s
-- Build: same 6 pre-existing errors in ProductDetails/ProductList code-behinds (not ShoppingCart)
-- Key learning: content-based unconvertible detection must avoid matching URLs, image paths, alt text  use code-behind analysis or path-based detection for payment/checkout patterns
-
-
-📌 Team update (2026-03-11): Run 18 improvement recommendations prioritized by Forge — see decisions.md
-
-
-
-📌 Team update (2026-03-11): User directives from Jeff  eliminate Test-UnconvertiblePage, standardize on ItemType, P0-2 approved  see decisions.md
-
-### P0 Migration Script Fixes (2026-03-11)
-
-**FIX 1 — P0-1: Eliminated Test-UnconvertiblePage stubbing**
-- Gutted `Test-UnconvertiblePage` (line 1233) to always return `$false` — no page is ever stubbed now
-- Replaced the call site (formerly line 1397–1406) with a TODO-injection block: Checkout/ pages and Identity/Auth pattern pages get a `@* TODO: ... *@` Razor comment at the top + ManualItem entry, but are ALWAYS fully converted through the BWFC transform pipeline
-- PayPal ImageButton in ShoppingCart.aspx now converts normally as a BWFC component
-- `New-CompilableStub` function (line 1261) is now dead code but retained for reference
-
-**FIX 2 — P0-2: [Parameter] RouteData TODO annotation bug**
-- Changed regex (line 1206) from `\[RouteData\]` to `([ \t]*)\[RouteData\]` to capture leading whitespace
-- Replacement now puts TODO comment on a SEPARATE LINE above `[Parameter]`, preserving indentation via `${1}` backreference
-- Before: `[Parameter] // TODO: ... {parameter} public string productName)` — the `//` comment swallowed the property declaration
-- After: TODO on its own line, then `[Parameter]` on the next line, property type/name preserved
-- Eliminates 6 build errors (CS1031, CS1001, CS1026) per project with RouteData parameters
-
-**Patterns observed:**
-- PowerShell `[regex]::Replace` with `//` in replacement text is dangerous when the match is on the same line as subsequent code — always put `//` comments on their own line in replacement strings
-- Page stubbing destroys converted markup; TODO annotation preserves it while flagging concerns
-
-### Standardize Generic Type Params to ItemType (2026-03-11)
-
-**Completed:** Renamed all remaining `TItemType` and `TItem` generic type parameters to `ItemType` across the BWFC library source.
-
-**Files changed (Group 1 — base classes):**
-- `src/BlazorWebFormsComponents/DataBinding/DataBoundComponent.cs` — `TItemType` → `ItemType` (class declaration + 10 internal references)
-- `src/BlazorWebFormsComponents/DataBinding/SelectHandler.cs` — `TItemType` → `ItemType` (delegate declaration)
-- InsertHandler.cs, UpdateHandler.cs, DeleteHandler.cs — confirmed these files do not exist
-
-**Files changed (Group 2 — list controls):**
-- `src/BlazorWebFormsComponents/DataBinding/BaseListControl.cs` — `TItem` → `ItemType` (class declaration, typeparam doc, 2 method usages)
-- `src/BlazorWebFormsComponents/BulletedList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
-- `src/BlazorWebFormsComponents/BulletedList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
-- `src/BlazorWebFormsComponents/CheckBoxList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
-- `src/BlazorWebFormsComponents/CheckBoxList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
-- `src/BlazorWebFormsComponents/DropDownList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
-- `src/BlazorWebFormsComponents/DropDownList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
-- `src/BlazorWebFormsComponents/ListBox.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
-- `src/BlazorWebFormsComponents/ListBox.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
-- `src/BlazorWebFormsComponents/RadioButtonList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
-- `src/BlazorWebFormsComponents/RadioButtonList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
-
-**Group 3 verification (already correct):**
-- GridView, DataGrid, DataList, Repeater, ListView, DetailsView, FormView — all already use `ItemType`
-- BaseColumn, BoundField, ButtonField, TemplateField, HyperLinkField — all already use `ItemType`
-- BaseRow, DataGridRow, GridViewRow, GroupTemplate — all already use `ItemType`
-
-**Final grep:** Zero remaining `TItemType` or `TItem` references in library source.
-**Build result:** 0 errors (93 pre-existing warnings, all unrelated to this change)
-
-
- Team update (2026-03-11): Mandatory L1L2 migration pipeline  no code fixes between layers. Both layers must run in sequence.  decided by Jeffrey T. Fritz
-
- Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz
-
- Team update (2026-03-11): P0 script fixes  Test-UnconvertiblePage eliminated (always convert), [Parameter] annotation bug fixed.  decided by Jeffrey T. Fritz
-
-### Layer 2 Structural Transform - AfterWingtipToys (2026-03-11)
-
-**Completed:** Applied L2 structural transforms to ~60 files in `samples/AfterWingtipToys/`.
-
-**Build result:** 0 errors, 58 warnings (all RZ10012 for not-yet-implemented validators: RequiredFieldValidator, CompareValidator, ModelErrorMessage, RegularExpressionValidator).
-
-**Key transforms applied:**
-1. **Infrastructure:** Program.cs (AddDbContextFactory SQLite, seed, middleware), _Imports.razor (@inherits WebFormsPageBase, EF Core usings), App.razor (@rendermode InteractiveServer)
-2. **Models:** ProductDatabaseInitializer static Seed(), IdentityModels ASP.NET Core Identity stubs, cleaned TODO headers
-3. **Core pages:** All code-behinds to partial classes with OnInitializedAsync, IDbContextFactory, [SupplyParameterFromQuery]
-4. **Data binding:** SelectMethod to Items, TItem/TItemType to ItemType, GetRouteUrl to query string hrefs, <%# to @context.Property
-5. **Layout:** MainLayout with category nav, cart count, LoginView (_userName from CascadingParameter AuthenticationState)
-6. **Enum values:** TextMode/GridLines/BackColor/BorderStyle/BorderColor all prefixed with @EnumType.Value or @("...")
-7. **Admin/Checkout/Account:** All code-behinds converted; PayPal/Identity logic wrapped in TODO comments
-
-**L2 gotchas discovered:**
-- _Imports.razor @inherits applies to ALL components - non-page components MUST NOT specify : ComponentBase
-- Code-behind class name MUST match .razor filename (Forgot.razor = class Forgot, NOT ForgotPassword)
-- Method name cannot match enclosing class name (CS0542) - rename e.g. Forgot() to Forgot_Click()
-- @inject in .razor and [Inject] in .razor.cs are duplicates - use only one
-- BWFC enum/WebColor params interpreted as C# expressions - must use @EnumType.Value syntax
-- LoggedInTemplate is RenderFragment (not typed) - no context; use CascadingParameter Task<AuthenticationState>
-- #hexcolor in attribute values parsed as preprocessor directive - wrap in @("...")
-- <%# ... %> data-binding expressions must be converted to @context.Property or @(expression)
-- int properties bound to Text parameter need .ToString()
+Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mandatory L1→L2 pipeline with no fixes between layers. All generics standardized to `ItemType`. Test-UnconvertiblePage eliminated. Run 18 improvements prioritized by Forge.
 
 ### Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
 
