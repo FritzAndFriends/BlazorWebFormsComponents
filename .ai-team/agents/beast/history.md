@@ -101,3 +101,13 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
 
 
  Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
+
+### SelectMethod & SQLite Enforcement in Skill Files (2025-07-24)
+
+- **Scope:** Hardened all three migration skill files to prevent two recurring agent mistakes.
+- **Fix 1 — SQLite contamination:** Removed "Prefer SQLite for local dev / demos" from `migration-standards/SKILL.md` (line 93). This single sentence was the root cause of agents defaulting to SQLite instead of preserving the original SQL Server LocalDB provider. Added "NEVER default to SQLite" warnings in both `migration-standards` and `bwfc-data-migration` SKILL files.
+- **Fix 2 — SelectMethod→Items regression:** Removed the "Alternatively, bypass SelectMethod and set Items directly" sentence from `migration-standards/SKILL.md`. Replaced with a WARNING admonition making SelectMethod preservation mandatory. In `bwfc-data-migration/SKILL.md`, restricted Option B (Items= binding) to DataSource-originating patterns only. In `bwfc-migration/SKILL.md`, added MANDATORY warning before the SelectMethod bullet and clarified that Items should not be set when SelectMethod is active.
+- **Patterns that caused regression:**
+  1. Agents read "Prefer SQLite for local dev" and interpreted it as a default, ignoring the original app's SQL Server connection strings.
+  2. Agents read "Alternatively... set Items directly" and chose the simpler path, converting SelectMethod to Items= and losing the native BWFC data-binding pattern.
+- **Key learning:** Skill file wording must be prescriptive with explicit NEVER/MUST admonitions. "Alternatively" or "prefer X" phrasing gives agents permission to deviate. Warnings must be impossible to miss.
