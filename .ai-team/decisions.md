@@ -6575,21 +6575,6 @@ For each, convert `AttributeName="Value"` → `AttributeName="@AttributeName.Val
 **Evidence:** ShoppingCart.razor needed lowercase booleans.
 
 **Assessment:** For `bool` parameters, Blazor actually handles `"True"`/`"False"` correctly because `bool.Parse` is case-insensitive. The real issue is when values are passed as strings and compared. Since BWFC's `[Parameter] public bool AutoGenerateColumns` is a bool type, this is actually a non-issue at the library level — Blazor handles it. **Downgrade to P2 informational — the Layer 1 boolean normalization (P1-1) is the right fix.**
-### P2-2: Standardize Generic Type Parameter Names in BWFC
-
-**Problem:** The library uses three different names for the same concept:
-- `ItemType` — GridView, DataGrid, ListView, DataList, Repeater, FormView, DetailsView, BoundField, TemplateField, etc.
-- `TItem` — BulletedList, CheckBoxList, DropDownList, RadioButtonList, ListBox, BaseListControl
-- `TItemType` — DataBoundComponent (base class)
-
-**Impact:** The migration script has to know which name each component uses. New developers are confused. The .NET naming convention for generic parameters is `T` prefix (`TItem`).
-
-**Fix:** Standardize all generic type parameters to `TItem`. This is a breaking change that needs a major version bump. Consider:
-1. Adding `[Obsolete]` aliases in the interim
-2. Using C# type forwarding patterns
-3. Shipping in the next major version (M3?)
-
-**Priority rationale:** Major version breaking change. Works fine as-is with the script knowing the names. P2.
 ### P2-3: `ServiceCollectionExtensions` Enhancements
 
 **File:** `src/BlazorWebFormsComponents/ServiceCollectionExtensions.cs`
@@ -6635,18 +6620,18 @@ Layer 1 output vs. manually-fixed final version — every delta represents a mis
 | 5 | `SelectMethod="GetShoppingCartItems"` TODO | `IDbContextFactory` + `OnInitializedAsync` | P1-4: DI pattern |
 | 6 | No cookie-based cart ID | `GetCartId()` from `IHttpContextAccessor` | Project-specific — not generalizable |
 
-### 2026-03-11: User directive — eliminate Test-UnconvertiblePage
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Try to eliminate Test-UnconvertiblePage entirely. The PayPal detection is too aggressive — the PayPal Express Checkout button should stay inline with the original WingtipToys demo, not trigger stubbing. Pages should convert with TODO warnings instead of being replaced with stubs.
-**Why:** User request — captured for team memory
+### 2026-03-11: Mandatory L1→2 migration pipeline — no fixes between layers (consolidated)
+**By:** Jeffrey T. Fritz, Beast
+**What:** When Copilot runs the migration skill, BOTH Layer 1 AND Layer 2 MUST be run. Copilot is NOT to do ANY code fixes between Layer 1 and Layer 2. The pipeline must flow L1 → L2 without manual intervention. Beast updated `migration-toolkit/skills/bwfc-migration/SKILL.md` and `migration-toolkit/skills/migration-standards/SKILL.md` to codify this: added "Migration Pipeline — MANDATORY" section with critical warning, exact `bwfc-migrate.ps1` invocation, Layer 2 checklist, and explicit pipeline rules. Renamed "Layer 2 (Manual)" to "Layer 2 (Copilot-Assisted)" in migration-standards.
+**Why:** Manual fixes between layers corrupt the signal on whether the L1 script needs improvement. Pipeline quality measurement depends on clean L1 → L2 flow.
 
-### 2026-03-11: User directive — standardize on ItemType (not TItem)
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Align generic type parameter naming on `ItemType` across all BWFC components because that is the name used in the original Web Forms controls. This aligns with the "drop-in replacement" philosophy. Upgrade from P2 to higher priority.
-**Why:** User request — ItemType is the Web Forms original, and BWFC's core promise is same names, same attributes. TItem is a .NET convention but breaks migration fidelity.
+### 2026-03-11: Standardize all generic type params to ItemType (consolidated)
+**By:** Jeffrey T. Fritz, Cyclops
+**What:** All BWFC data-bound components now use `ItemType` as the generic type parameter, matching the original Web Forms `DataBoundControl.ItemType` attribute name. Renamed `TItemType` (DataBoundComponent, SelectHandler) and `TItem` (BaseListControl, BulletedList, CheckBoxList, DropDownList, ListBox, RadioButtonList) to `ItemType`. All Group 3 components already used `ItemType`. Zero remaining `TItemType`/`TItem` in library source. Build: 0 errors. Supersedes earlier P2-2 analysis that proposed standardizing to `TItem` — Jeff directed `ItemType` instead to honor the Web Forms original.
+**Why:** BWFC's core promise is same names, same attributes. `ItemType` is the Web Forms original. `TItem` is a .NET convention but breaks migration fidelity.
 
-### 2026-03-11: User directive — P0-2 [Parameter] annotation bug approved
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Fix the [Parameter] RouteData TODO annotation bug that swallows parameter declarations in code-behinds. Approved as P0.
-**Why:** User request — 6 build errors in every project with RouteData parameters
+### 2026-03-11: P0 migration script fixes — Test-UnconvertiblePage + [Parameter] annotation (consolidated)
+**By:** Jeffrey T. Fritz, Cyclops
+**What:** Two P0 fixes in `migration-toolkit/scripts/bwfc-migrate.ps1`: (1) Eliminated `Test-UnconvertiblePage` stubbing per Jeff directive — the function now always returns `$false`, call site replaced with TODO-annotation injection so pages are fully converted through the BWFC pipeline instead of replaced with stubs. The PayPal ImageButton in ShoppingCart.aspx is just an image button, not PayPal SDK code. (2) Fixed `[RouteData]` → `[Parameter]` regex replacement — the inline `// TODO:` comment was swallowing the property declaration. TODO now goes on a separate line above `[Parameter]`.
+**Why:** (1) Stubs destroy markup that took effort to convert. Pages should ALWAYS be converted with BWFC components; concerns flagged with TODO comments. (2) The inline comment caused 6 build errors (CS1031, CS1001, CS1026) per project with RouteData parameters.
 

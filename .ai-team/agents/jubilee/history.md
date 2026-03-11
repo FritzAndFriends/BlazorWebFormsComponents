@@ -111,3 +111,5 @@
 
 
  Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Sample Program.cs files updated  no longer need manual `AddHttpContextAccessor()`.  decided by Cyclops
+
+ Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz

@@ -76,30 +76,10 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
 - **README.md:** Completely rewritten with all 18 Contoso runs documented (was only 2), updated all links to new paths, added renumbering details table, and updated Report Archive section.
 - **Cross-project docs:** `component-coverage.md` and `css-architecture-analysis.md` remain at migration-tests root.
 
-### Executive Summary Document (2026-03-11)
+### Executive Summary & Chart Images (2026-03-11)
 
-- **Scope:** Created `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md` — a polished, data-driven executive summary showcasing migration toolkit progress and capabilities.
-- **Key data points used:** 35 benchmark runs (17 WT + 18 CU), 65 acceptance tests (25 + 40), 6 consecutive 100% WT runs, 8 perfect CU runs, L1 times 1.81s (WT) and 0.59s (CU), 45% and 61% performance improvements.
-- **Screenshot paths verified and referenced:** `wingtiptoys/run01/images/comparison-*.png` (3 side-by-side comparisons), `wingtiptoys/run15/*.png` (5 latest screenshots), `contosouniversity/run15/*.png` (5 latest screenshots).
-- **Sections:** Executive Overview, Drop-In Replacement Strategy, Results at a Glance, Performance Progression (with ASCII charts), Visual Fidelity screenshots, Key Milestones timeline, Two-Layer Pipeline Architecture, Test Project Coverage, What's Next.
-- **Document location:** `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md`
-
-📌 Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Consumers no longer need manual `AddHttpContextAccessor()`. All sample Program.cs files updated. — decided by Cyclops
-
-### Chart Image Generation for Executive Summary (2026-03-11)
-
-- **Scope:** Replaced ASCII art performance charts in `EXECUTIVE-SUMMARY.md` with real PNG chart images generated via Python + matplotlib.
-- **Chart generation approach:** Created `generate-charts.py` script using matplotlib with a professional white-background style (no default gray), dashed grid lines, trend lines via linear regression, best-time star markers, and area fills. All three charts are 800×400px at 150 DPI.
-- **Data sources:** Layer 1 execution times extracted from REPORT.md files across all run folders:
-  - WingtipToys: 12 data points from runs 1, 4, 5, 6, 8, 11–17 (range: 1.81s–4.58s)
-  - ContosoUniversity: 10 data points from runs 1, 2, 4, 6, 8, 9, 12, 15–17 (range: 0.59s–2.30s)
-- **Files generated:**
-  - `dev-docs/migration-tests/images/wingtiptoys-layer1-perf.png` — line chart with trend
-  - `dev-docs/migration-tests/images/contosouniversity-layer1-perf.png` — line chart with trend
-  - `dev-docs/migration-tests/images/combined-improvement.png` — grouped bar chart (45% WT, 61% CU improvement)
-  - `dev-docs/migration-tests/images/generate-charts.py` — regeneration script
-- **EXECUTIVE-SUMMARY.md updated:** Two ASCII code-block charts replaced with three `![…](images/…)` image references.
-- **Key learning:** The `generate-charts.py` script is designed for easy data updates — just append new run numbers/times to the arrays at the top of the file and re-run.
+- Created `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md` — data-driven summary: 35 benchmark runs, 65 acceptance tests, 45%/61% L1 performance improvements.
+- Replaced ASCII charts with PNG images via `generate-charts.py` (matplotlib, 800×400px, 150 DPI). Three charts: WT L1 perf, CU L1 perf, combined improvement bar chart. Script at `dev-docs/migration-tests/images/generate-charts.py` — append new data points and re-run.
 
 
 📌 Team update (2026-03-11): Run 18 improvement recommendations prioritized by Forge — see decisions.md
@@ -124,3 +104,9 @@ WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross
 - **Key convention:** `ItemType` is the canonical attribute name for BWFC data controls. Never use `TItem`, `TItemType`, or other variants.
 - **Key convention:** Layer 1 = automated script, Layer 2 = Copilot-assisted. No manual fixes between layers. This is a measurement integrity requirement.
 
+
+ Team update (2026-03-11): Mandatory L1L2 migration pipeline  no code fixes between layers. Both layers must run in sequence.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz
+
+ Team update (2026-03-11): P0 script fixes  Test-UnconvertiblePage eliminated (always convert), [Parameter] annotation bug fixed.  decided by Jeffrey T. Fritz
