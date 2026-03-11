@@ -7,22 +7,22 @@ using System;
 
 namespace BlazorWebFormsComponents.DataBinding
 {
-	public class DataBoundComponent<TItemType> : BaseDataBoundComponent
+	public class DataBoundComponent<ItemType> : BaseDataBoundComponent
 	{
 		[Parameter]
 		public string DataMember { get; set; }
 
 		[Parameter]
-		public SelectHandler<TItemType> SelectMethod { get; set; }
+		public SelectHandler<ItemType> SelectMethod { get; set; }
 
 		[Parameter]
-		public IEnumerable<TItemType> Items
+		public IEnumerable<ItemType> Items
 		{
 			get { return ItemsList; }
 			set { ItemsList = value?.ToList(); }
 		}
 
-		protected List<TItemType> ItemsList { get; set; }
+		protected List<ItemType> ItemsList { get; set; }
 
 		[Parameter]
 		public override object DataSource
@@ -35,9 +35,9 @@ namespace BlazorWebFormsComponents.DataBinding
 			}
 		}
 
-		private IEnumerable<TItemType> GetDataSource(object dataSource)
+		private IEnumerable<ItemType> GetDataSource(object dataSource)
 		{
-			if (dataSource is IEnumerable<TItemType> enumerableOfItemType)
+			if (dataSource is IEnumerable<ItemType> enumerableOfItemType)
 			{
 				// If data source is already the right type, return it
 				return enumerableOfItemType;
@@ -49,12 +49,12 @@ namespace BlazorWebFormsComponents.DataBinding
 				return GetListSourceData(listSource);
 			}
 
-			throw new InvalidOperationException($"The DataSource must implement IEnumerable<{typeof(TItemType).FullName}> (such as most list types) or IListSource (such as DataSet or DataTable).");
+			throw new InvalidOperationException($"The DataSource must implement IEnumerable<{typeof(ItemType).FullName}> (such as most list types) or IListSource (such as DataSet or DataTable).");
 		}
 
-		private IEnumerable<TItemType> GetListSourceData(IListSource listSource)
+		private IEnumerable<ItemType> GetListSourceData(IListSource listSource)
 		{
-			if (typeof(TItemType) != typeof(object))
+			if (typeof(ItemType) != typeof(object))
 			{
 				throw new InvalidOperationException("Binding to an IListSource (such as DataSet or DataTable) requires that 'ItemType' be set to 'object'.");
 			}
@@ -68,7 +68,7 @@ namespace BlazorWebFormsComponents.DataBinding
 			if (!listSource.ContainsListCollection)
 			{
 				// If this is the actual list, get it, and return it
-				return list.OfType<object>() as IEnumerable<TItemType>;
+				return list.OfType<object>() as IEnumerable<ItemType>;
 			}
 			else
 			{
@@ -90,7 +90,7 @@ namespace BlazorWebFormsComponents.DataBinding
 
 						if ((innerList != null) && (innerList is IEnumerable innerListEnumerable))
 						{
-							return innerListEnumerable.OfType<object>() as IEnumerable<TItemType>;
+							return innerListEnumerable.OfType<object>() as IEnumerable<ItemType>;
 						}
 					}
 

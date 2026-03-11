@@ -12,8 +12,8 @@ namespace BlazorWebFormsComponents
 /// <summary>
 /// Represents a drop-down list control that allows the user to select a single item from a list.
 /// </summary>
-/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-public partial class DropDownList<TItem> : BaseListControl<TItem>
+/// <typeparam name="ItemType">The type of items in the data source.</typeparam>
+public partial class DropDownList<ItemType> : BaseListControl<ItemType>
 {
 /// <summary>
 /// Gets or sets the selected value.

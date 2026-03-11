@@ -266,3 +266,52 @@ Added `Convert-TemplatePlaceholders` function in new `#region --- Template Place
 
 📌 Team update (2026-03-11): User directives from Jeff  eliminate Test-UnconvertiblePage, standardize on ItemType, P0-2 approved  see decisions.md
 
+### P0 Migration Script Fixes (2026-03-11)
+
+**FIX 1 — P0-1: Eliminated Test-UnconvertiblePage stubbing**
+- Gutted `Test-UnconvertiblePage` (line 1233) to always return `$false` — no page is ever stubbed now
+- Replaced the call site (formerly line 1397–1406) with a TODO-injection block: Checkout/ pages and Identity/Auth pattern pages get a `@* TODO: ... *@` Razor comment at the top + ManualItem entry, but are ALWAYS fully converted through the BWFC transform pipeline
+- PayPal ImageButton in ShoppingCart.aspx now converts normally as a BWFC component
+- `New-CompilableStub` function (line 1261) is now dead code but retained for reference
+
+**FIX 2 — P0-2: [Parameter] RouteData TODO annotation bug**
+- Changed regex (line 1206) from `\[RouteData\]` to `([ \t]*)\[RouteData\]` to capture leading whitespace
+- Replacement now puts TODO comment on a SEPARATE LINE above `[Parameter]`, preserving indentation via `${1}` backreference
+- Before: `[Parameter] // TODO: ... {parameter} public string productName)` — the `//` comment swallowed the property declaration
+- After: TODO on its own line, then `[Parameter]` on the next line, property type/name preserved
+- Eliminates 6 build errors (CS1031, CS1001, CS1026) per project with RouteData parameters
+
+**Patterns observed:**
+- PowerShell `[regex]::Replace` with `//` in replacement text is dangerous when the match is on the same line as subsequent code — always put `//` comments on their own line in replacement strings
+- Page stubbing destroys converted markup; TODO annotation preserves it while flagging concerns
+
+### Standardize Generic Type Params to ItemType (2026-03-11)
+
+**Completed:** Renamed all remaining `TItemType` and `TItem` generic type parameters to `ItemType` across the BWFC library source.
+
+**Files changed (Group 1 — base classes):**
+- `src/BlazorWebFormsComponents/DataBinding/DataBoundComponent.cs` — `TItemType` → `ItemType` (class declaration + 10 internal references)
+- `src/BlazorWebFormsComponents/DataBinding/SelectHandler.cs` — `TItemType` → `ItemType` (delegate declaration)
+- InsertHandler.cs, UpdateHandler.cs, DeleteHandler.cs — confirmed these files do not exist
+
+**Files changed (Group 2 — list controls):**
+- `src/BlazorWebFormsComponents/DataBinding/BaseListControl.cs` — `TItem` → `ItemType` (class declaration, typeparam doc, 2 method usages)
+- `src/BlazorWebFormsComponents/BulletedList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
+- `src/BlazorWebFormsComponents/BulletedList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
+- `src/BlazorWebFormsComponents/CheckBoxList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
+- `src/BlazorWebFormsComponents/CheckBoxList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
+- `src/BlazorWebFormsComponents/DropDownList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
+- `src/BlazorWebFormsComponents/DropDownList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
+- `src/BlazorWebFormsComponents/ListBox.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
+- `src/BlazorWebFormsComponents/ListBox.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
+- `src/BlazorWebFormsComponents/RadioButtonList.razor` — `@typeparam TItem` → `@typeparam ItemType`, `@inherits` updated
+- `src/BlazorWebFormsComponents/RadioButtonList.razor.cs` — `TItem` → `ItemType` (class declaration + typeparam doc)
+
+**Group 3 verification (already correct):**
+- GridView, DataGrid, DataList, Repeater, ListView, DetailsView, FormView — all already use `ItemType`
+- BaseColumn, BoundField, ButtonField, TemplateField, HyperLinkField — all already use `ItemType`
+- BaseRow, DataGridRow, GridViewRow, GroupTemplate — all already use `ItemType`
+
+**Final grep:** Zero remaining `TItemType` or `TItem` references in library source.
+**Build result:** 0 errors (93 pre-existing warnings, all unrelated to this change)
+

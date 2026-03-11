@@ -12,8 +12,8 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Represents a list box control that allows the user to select one or more items from a list.
 	/// </summary>
-	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-	public partial class ListBox<TItem> : BaseListControl<TItem>
+	/// <typeparam name="ItemType">The type of items in the data source.</typeparam>
+	public partial class ListBox<ItemType> : BaseListControl<ItemType>
 	{
 		/// <summary>
 		/// Gets or sets the selected value.
