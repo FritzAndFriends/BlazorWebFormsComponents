@@ -3,7 +3,9 @@
     <p></p>
     <Label ID="FriendlyErrorMsg" Text="@_friendlyErrorMsg" Font-Size="Large" style="color: red"></Label>
 
-    <Panel ID="DetailedErrorPanel" Visible="@_showDetailedError">
+    @if (_showDetails)
+    {
+    <Panel ID="DetailedErrorPanel">
         <p>&nbsp;</p>
         <h4>Detailed Error:</h4>
         <p>
@@ -12,7 +14,7 @@
 
         <h4>Error Handler:</h4>
         <p>
-            <Label ID="ErrorHandler" Text="@_errorHandler" Font-Size="Small" /><br />
+            <Label ID="ErrorHandlerLabel" Text="@_errorHandler" Font-Size="Small" /><br />
         </p>
 
         <h4>Detailed Error Message:</h4>
@@ -23,4 +25,5 @@
             <Label ID="InnerTrace" Text="@_innerTrace" />
         </p>
     </Panel>
+    }
 

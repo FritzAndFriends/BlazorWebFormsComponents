@@ -1,26 +1,24 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
-namespace WingtipToys.Checkout
+namespace WingtipToys.Checkout;
+
+public partial class CheckoutComplete
 {
-  public partial class CheckoutComplete
-  {
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
     private string _transactionId = "";
 
     protected override async Task OnInitializedAsync()
     {
-      Page.Title = "Checkout Complete";
-      // TODO: Integrate with PayPal DoCheckoutPayment
-      // Original code uses Session["token"], Session["payerId"], Session["payment_amt"]
-      // and calls payPalCaller.DoCheckoutPayment to finalize payment
-      _transactionId = "TODO: PayPal integration required";
+        // TODO: Implement PayPal DoCheckoutPayment confirmation
+        // Original used Session["token"], Session["payerId"], Session["payment_amt"]
+        // and NVPAPICaller.DoCheckoutPayment() to finalize order
+        _transactionId = "TODO: PayPal checkout not yet migrated";
+        await Task.CompletedTask;
     }
 
-    private void Continue_Click(MouseEventArgs e)
+    private void Continue_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
     {
-      NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/");
     }
-  }
 }

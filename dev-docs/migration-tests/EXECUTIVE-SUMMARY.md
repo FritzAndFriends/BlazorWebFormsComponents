@@ -6,11 +6,11 @@
 
 ## Executive Overview
 
-The BlazorWebFormsComponents (BWFC) Migration Toolkit transforms ASP.NET Web Forms applications into modern Blazor applications through an automated, two-layer pipeline. Over **36 benchmark runs** across two production-representative test projects, the toolkit has achieved **100% acceptance test pass rates** — with **65 tests** covering functional correctness, visual fidelity, and data integrity. Layer 1 mechanical transforms execute in under **2 seconds**, and the latest runs require **zero manual intervention** at the markup level.
+The BlazorWebFormsComponents (BWFC) Migration Toolkit transforms ASP.NET Web Forms applications into modern Blazor applications through an automated, two-layer pipeline. Over **38 benchmark runs** across two production-representative test projects, the toolkit has achieved **100% acceptance test pass rates** — with **65 tests** covering functional correctness, visual fidelity, and data integrity. Layer 1 mechanical transforms execute in under **2 seconds**, and the latest runs produce **zero-error builds** with zero manual markup intervention.
 
 These results represent a breakthrough in enterprise migration tooling. Where traditional approaches require months of manual rewriting, BWFC's drop-in replacement strategy preserves existing CSS, JavaScript, and visual designs while automating the mechanical work of converting Web Forms markup to Blazor components. The toolkit has been validated against **two architecturally distinct applications** — an e-commerce platform with full shopping cart functionality and a database-first academic application with AJAX controls — proving it handles the diversity of real-world Web Forms codebases.
 
-The data tells a clear story: from Run 1's first benchmark to Run 18's GridView-powered shopping cart, every iteration has been measured, tested, and documented. **6 consecutive 100% runs** on WingtipToys, **8 perfect runs** on ContosoUniversity, and a **fully functional GridView-based shopping cart** demonstrate not just capability, but production readiness.
+The data tells a clear story: from Run 1's first benchmark to Run 21's SelectMethod-powered delegate conversion, every iteration has been measured, tested, and documented. **8 consecutive 100% runs** on WingtipToys, **8 perfect runs** on ContosoUniversity, a **fully functional GridView-based shopping cart**, and **native SelectMethod preservation** demonstrate not just capability, but production readiness.
 
 ---
 
@@ -36,16 +36,18 @@ The result is a migration path that is faster, cheaper, and safer than any alter
 
 | Metric | WingtipToys | ContosoUniversity | **Combined** |
 |--------|:-----------:|:-----------------:|:------------:|
-| **Benchmark Runs** | 18 | 18 | **36** |
+| **Benchmark Runs** | 20 | 18 | **38** |
 | **Acceptance Tests** | 25 | 40 | **65** |
-| **Perfect Runs (100%)** | 6 consecutive | 8 total | **14** |
+| **Perfect Runs (100%)** | 8 consecutive | 8 total | **16** |
 | **Best Layer 1 Time** | **1.51s** | **0.59s** | — |
-| **Layer 1 Manual Fixes** | 0 (6 consecutive) | 0 (latest) | **0** |
+| **Layer 1 Manual Fixes** | 0 (8 consecutive) | 0 (latest) | **0** |
 | **Layer 2 Fixes (stable)** | 3 | ~3 | **~6** |
-| **Render Mode** | SSR | InteractiveServer | — |
-| **Control Usages Migrated** | 314 across 31 types | 40+ across 8 types | **354+** |
+| **Render Mode** | SSR | SSR | — |
+| **Control Usages Migrated** | 348 across 31 types | 40+ across 8 types | **388+** |
+| **SelectMethod Preserved** | ✅ Native delegates | N/A | — |
+| **Build Errors (latest)** | 0 | 0 | **0** |
 
-> **Key takeaway:** Zero Layer 1 manual fixes for 6 consecutive WingtipToys runs. Run 18 achieved full GridView migration of the ShoppingCart page — the last remaining stubbed page — with 314 transforms in 1.51s.
+> **Key takeaway:** Zero Layer 1 manual fixes for 8 consecutive WingtipToys runs. Run 21 validated SelectMethod preservation — L1 keeps the attribute, L2 converts to typed delegates — eliminating an entire class of manual rewiring. Build succeeds with 0 errors.
 
 ---
 
@@ -129,11 +131,13 @@ Run 18 represents the culmination of the WingtipToys migration: the **ShoppingCa
 | **WT Run 16** | 2026-03-08 | **Layer 2 automation begins** | Program.cs auto-generated; automation crosses into semantic territory |
 | **WT Run 17** | 2026-03-09 | Genericized toolkit validated | L1 at 1.81s (28% faster); toolkit works across projects without modification |
 | **WT Run 18** | 2026-03-11 | **GridView ShoppingCart breakthrough** | ShoppingCart now uses `<GridView>` with BoundField/TemplateField — last stubbed page resolved. 314 transforms, 1.51s L1 |
+| **WT Run 20** | 2026-03-11 | **Zero-error build, L1+L2 pipeline** | Full pipeline (L1 → L2) produces 0-error build. 348 transforms, 0 stubs, 1.70s L1, ~25 min L2 |
+| **WT Run 21** | 2026-03-11 | **SelectMethod preservation validated** | L1 preserves SelectMethod → L2 converts to typed delegates. 0 errors, 44 files transformed, ~28 min total |
 | **CU Run 1** | 2026-03-08 | ContosoUniversity benchmark begins | Database-first EF6 + AJAX patterns validated; 31/40 on first attempt |
 | **CU Run 5** | 2026-03-09 | **First Contoso perfect score (40/40)** | SQL Server LocalDB + InteractiveServer per-page opt-in |
 | **CU Run 17** | 2026-03-10 | Best Contoso run: 0.59s L1, 40/40 | LocalDB wait/retry feature; git restore workflow for code-behind |
 
-> From first benchmark to sixth consecutive perfect score in **5 days**. Each run produced actionable data that directly improved the next.
+> From first benchmark to eighth consecutive perfect score in **8 days**. Each run produced actionable data that directly improved the next.
 
 ---
 
@@ -152,7 +156,7 @@ The migration toolkit separates concerns into two distinct layers, each optimize
 - Converts template placeholders to Blazor `RenderFragment` patterns
 - Auto-detects and preserves `<script>` references
 
-**Performance:** 1.51s for 314 transforms (WingtipToys Run 18) · 0.59s for 78 transforms (ContosoUniversity)
+**Performance:** 1.51s for 314 transforms (WingtipToys Run 18) · 1.79s for 348 transforms (Run 21, with SelectMethod preservation) · 0.59s for 78 transforms (ContosoUniversity)
 
 ### Layer 2 — Semantic Transformation
 
@@ -179,7 +183,7 @@ The toolkit has been validated against two architecturally distinct Web Forms ap
 |--------|:-----------:|:-----------------:|
 | **Application Type** | E-commerce platform | Academic management |
 | **Pages** | ~15 pages (32 markup files) | 5 pages + 1 master page |
-| **Control Usages** | 230+ across 31 types | 40+ across 8 types |
+| **Control Usages** | 348 across 31 types | 40+ across 8 types |
 | **Data Access** | Code-First EF6 | Database-First EF6 (.edmx) |
 | **AJAX Controls** | None | UpdatePanel, ScriptManager, AutoCompleteExtender |
 | **Authentication** | ASP.NET Identity (login, register, cart) | None |
@@ -188,7 +192,7 @@ The toolkit has been validated against two architecturally distinct Web Forms ap
 | **Benchmark Runs** | 18 | 18 |
 | **Best Result** | 25/25, 1.51s L1, GridView ShoppingCart | 40/40, 0.59s L1, 8 perfect runs |
 
-**WingtipToys** exercises the full complexity of a production e-commerce application: product catalogs, a **GridView-powered shopping cart** with cookie-based state and editable quantities, user authentication with ASP.NET Identity, category filtering, and complex ListView/GridView/FormView patterns. Run 18 achieved the breakthrough of migrating the ShoppingCart page from a stubbed HTML table to a fully functional `<GridView>` with `<BoundField>`, `<TemplateField>`, `<TextBox>`, and `<CheckBox>` — proving that even the most complex data-bound controls survive the migration intact.
+**WingtipToys** exercises the full complexity of a production e-commerce application: product catalogs, a **GridView-powered shopping cart** with cookie-based state and editable quantities, user authentication with ASP.NET Identity, category filtering, and complex ListView/GridView/FormView patterns. Run 18 achieved the breakthrough of migrating the ShoppingCart page from a stubbed HTML table to a fully functional `<GridView>`. Run 21 then validated **SelectMethod preservation** — L1 keeps the attribute in markup, L2 converts it to a typed `SelectHandler<ItemType>` delegate — proving that BWFC's data-binding model works end-to-end with zero-error builds.
 
 **ContosoUniversity** validates a fundamentally different architecture: database-first Entity Framework with `.edmx` models, UpdatePanel-based AJAX interactions, and server-side data operations. It proves the toolkit generalizes beyond a single application pattern.
 
@@ -197,9 +201,10 @@ The toolkit has been validated against two architecturally distinct Web Forms ap
 ## What's Next
 
 - **Layer 2 Full Automation:** Complete Pattern A (code-behind conversion) and Pattern B (auth form rewiring) to achieve end-to-end zero-touch migration for both test projects
+- **SelectMethod Ecosystem:** Expand delegate conversion to handle InsertMethod, UpdateMethod, and DeleteMethod with the same preserve-then-convert pattern
 - **Additional Test Projects:** Expand validation to applications with Web API integration, SignalR hubs, and third-party control libraries to broaden coverage
 - **Migration Time Target:** Drive total end-to-end migration (L1 + L2 + build + test) under 5 minutes for medium-complexity applications
 
 ---
 
-<sub>Generated from 36 benchmark runs across WingtipToys (18 runs) and ContosoUniversity (18 runs). All data sourced from individual run reports in `dev-docs/migration-tests/`. Last updated: 2026-03-11.</sub>
+<sub>Generated from 38 benchmark runs across WingtipToys (20 runs) and ContosoUniversity (18 runs). All data sourced from individual run reports in `dev-docs/migration-tests/`. Last updated: 2026-03-11.</sub>

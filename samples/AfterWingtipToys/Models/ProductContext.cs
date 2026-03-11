@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace WingtipToys.Models
+namespace WingtipToys.Models;
+
+public class ProductContext : DbContext
 {
-  public class ProductContext : DbContext
-  {
     public ProductContext(DbContextOptions<ProductContext> options) : base(options) { }
 
     public DbSet<Category> Categories { get; set; }
@@ -11,5 +11,4 @@ namespace WingtipToys.Models
     public DbSet<CartItem> ShoppingCartItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDetail> OrderDetails { get; set; }
-  }
 }

@@ -1,4 +1,4 @@
-@page "/AdminPage"
+@page "/Admin/AdminPage"
 <h1>Administration</h1>
     <hr />
     <h3>Add Product:</h3>
@@ -7,7 +7,8 @@
             <td><Label ID="LabelAddCategory">Category:</Label></td>
             <td>
                 <DropDownList ID="DropDownAddCategory" 
-                    ItemType="Category" Items="@_categories" DataTextField="CategoryName" 
+                    ItemType="Category" 
+                    Items="@_categories" DataTextField="CategoryName" 
                     DataValueField="CategoryID" >
                 </DropDownList>
             </td>
@@ -44,20 +45,21 @@
     </table>
     <p></p>
     <p></p>
-    <Button ID="AddProductButton" Text="Add Product" OnClick="AddProductButton_Click"  CausesValidation="true"/>
+    <Button ID="AddProductButton" Text="Add Product" OnClick="@AddProductButton_Click" CausesValidation="true"/>
     <Label ID="LabelAddStatus" Text="@_addStatus"></Label>
     <p></p>
     <h3>Remove Product:</h3>
     <table>
         <tr>
             <td><Label ID="LabelRemoveProduct">Product:</Label></td>
-            <td><DropDownList ID="DropDownRemoveProduct" ItemType="Product" Items="@_products" AppendDataBoundItems="true" 
+            <td><DropDownList ID="DropDownRemoveProduct" ItemType="Product" 
+                    Items="@_products" AppendDataBoundItems="true" 
                     DataTextField="ProductName" DataValueField="ProductID" >
                 </DropDownList>
             </td>
         </tr>
     </table>
     <p></p>
-    <Button ID="RemoveProductButton" Text="Remove Product" OnClick="RemoveProductButton_Click" CausesValidation="false"/>
+    <Button ID="RemoveProductButton" Text="Remove Product" OnClick="@RemoveProductButton_Click" CausesValidation="false"/>
     <Label ID="LabelRemoveStatus" Text="@_removeStatus"></Label>
 

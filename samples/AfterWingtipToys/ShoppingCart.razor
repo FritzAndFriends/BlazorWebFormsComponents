@@ -1,13 +1,13 @@
 @page "/ShoppingCart"
 <div id="ShoppingCartTitle" class="ContentHead"><h1>@_cartTitle</h1></div>
     <GridView ID="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
-        ItemType="CartItem" Items="@_cartItems"
+        ItemType="CartItem" SelectMethod="@GetShoppingCartItems" 
         CssClass="table table-striped table-bordered" >
         <Columns>
-        <BoundField DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />        
         <BoundField DataField="Product.ProductName" HeaderText="Name" />        
         <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
-        <TemplateField   HeaderText="Quantity">            
+        <TemplateField HeaderText="Quantity">            
                 <ItemTemplate Context="context">
                     <TextBox ID="PurchaseQuantity" Width="40" Text="@context.Quantity.ToString()"></TextBox> 
                 </ItemTemplate>        
@@ -15,10 +15,10 @@
         <TemplateField HeaderText="Item Total">            
                 <ItemTemplate Context="context">
                     @($"{(Convert.ToDouble(context.Quantity) * Convert.ToDouble(context.Product?.UnitPrice ?? 0)):c}")
-                </ItemTemplate>        
+                </ItemTemplate>
         </TemplateField> 
         <TemplateField HeaderText="Remove Item">            
-                <ItemTemplate Context="context">
+                <ItemTemplate>
                     <CheckBox id="Remove"></CheckBox>
                 </ItemTemplate>        
         </TemplateField>    
@@ -27,8 +27,8 @@
     <div>
         <p></p>
         <strong>
-            <Label ID="LabelTotalText" Text="@_totalText"></Label>
-            <Label ID="lblTotal" Text="@_totalDisplay"></Label>
+            <Label ID="LabelTotalText" Text="@_totalLabelText"></Label>
+            <Label ID="lblTotal" Text="@_cartTotal"></Label>
         </strong> 
     </div>
     <br />
@@ -37,14 +37,14 @@
     <table> 
     <tr>
       <td>
-        <Button ID="UpdateBtn" Text="Update" OnClick="UpdateBtn_Click" />
+        <Button ID="UpdateBtn" Text="Update" OnClick="@UpdateBtn_Click" />
       </td>
       <td>
         <ImageButton ID="CheckoutImageBtn" 
                       ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
                       Width="145" AlternateText="Check out with PayPal" 
-                      OnClick="CheckoutBtn_Click" 
-                      BackColor="@WebColor.Transparent" BorderWidth="0" />
+                      OnClick="@CheckoutBtn_Click" 
+                      BorderWidth="0" />
       </td>
     </tr>
     </table>

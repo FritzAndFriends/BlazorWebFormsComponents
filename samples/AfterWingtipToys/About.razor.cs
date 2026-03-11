@@ -1,12 +1,10 @@
-using Microsoft.AspNetCore.Components;
+namespace WingtipToys;
 
-namespace WingtipToys
+public partial class About
 {
-  public partial class About
-  {
     protected override async Task OnInitializedAsync()
     {
-      Page.Title = "About";
+        Page.Title = "About";
+        await Task.CompletedTask;
     }
-  }
 }

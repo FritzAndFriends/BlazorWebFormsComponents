@@ -8,7 +8,7 @@
 
             <ListView ID="productList" 
                 DataKeyNames="ProductID" GroupItemCount="4"
-                ItemType="Product" Items="@_products">
+                ItemType="Product" SelectMethod="@GetProducts">
                 <EmptyDataTemplate>
                     <table >
                         <tr>
@@ -29,7 +29,7 @@
                         <table>
                             <tr>
                                 <td>
-                                  <a href="/ProductDetails?productName=@(Uri.EscapeDataString(context.ProductName))">
+                                    <a href="/ProductDetails?ProductID=@context.ProductID">
                                     <image src='/Catalog/Images/Thumbs/@context.ImagePath'
                                       width="100" height="75" border="1" />
                                   </a>
@@ -37,7 +37,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?productName=@(Uri.EscapeDataString(context.ProductName))">
+                                    <a href="/ProductDetails?ProductID=@context.ProductID">
                                       @context.ProductName
                                     </a>
                                     <br />
@@ -45,7 +45,7 @@
                                         <b>Price: </b>@($"{context.UnitPrice:c}")
                                     </span>
                                     <br />
-                                    <a href="/AddToCart?productID=@context.ProductID">               
+                                    <a href="/AddToCart?productID=@context.ProductID" data-enhance-nav="false">               
                                         <span class="ProductListItem">
                                             <b>Add To Cart</b>
                                         </span>           

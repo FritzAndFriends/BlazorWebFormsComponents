@@ -12,23 +12,20 @@ builder.Services.AddBlazorWebFormsComponents();
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlite("Data Source=wingtiptoys.db"));
 
-// TODO: Configure ASP.NET Core Identity (requires full Identity subsystem migration)
-// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-//     .AddRoles<IdentityRole>()
-//     .AddEntityFrameworkStores<ApplicationDbContext>();
-
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddCascadingAuthenticationState();
+
+// TODO: Configure ASP.NET Core Identity when Account pages are fully migrated
+// builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+//     .AddEntityFrameworkStores<ApplicationDbContext>();
+// builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-// Ensure database is created and seeded
+// Seed the database
 using (var scope = app.Services.CreateScope())
 {
-    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
-    using var db = factory.CreateDbContext();
-    db.Database.EnsureCreated();
-    ProductDatabaseInitializer.Seed(db);
+    var context = scope.ServiceProvider.GetRequiredService<ProductContext>();
+    ProductDatabaseInitializer.Seed(context);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -39,12 +36,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseAntiforgery();
+
+// TODO: Enable when Identity is configured
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
-

@@ -55,18 +55,8 @@
                             There are no two-factor authentication providers configured. See <a href="http://go.microsoft.com/fwlink/?LinkId=313242">this article</a>
                             for details on setting up this ASP.NET application to support two-factor authentication.
                         </p>
-                        @* TODO: Two-factor authentication toggle requires ASP.NET Core Identity migration
-                        @if (TwoFactorEnabled)
-                        {
-                            <text>Enabled</text>
-                            <LinkButton Text="[Disable]" CommandArgument="false" OnClick="TwoFactorDisable_Click" />
-                        }
-                        else
-                        {
-                            <text>Disabled</text>
-                            <LinkButton Text="[Enable]" CommandArgument="true" OnClick="TwoFactorEnable_Click" />
-                        }
-                        *@
+                        @* TODO: Two-factor enable/disable requires ASP.NET Core Identity migration *@
+                        @* Two-factor authentication status placeholder *@
                     </dd>
                 </dl>
             </div>

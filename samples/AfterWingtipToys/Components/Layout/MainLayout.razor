@@ -1,6 +1,4 @@
 @inherits LayoutComponentBase
-@inject IDbContextFactory<ProductContext> DbFactory
-@inject NavigationManager NavigationManager
 
 <BlazorWebFormsComponents.Page />
 
@@ -8,8 +6,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    <link rel="stylesheet" href="/Content/bootstrap.min.css" />
-    <link rel="stylesheet" href="/Content/Site.css" />
 </HeadContent>
 
 <div class="navbar navbar-inverse navbar-fixed-top">
@@ -28,7 +24,7 @@
                         <li><a href="/About">About</a></li>
                         <li><a href="/Contact">Contact</a></li>
                         <li><a href="/ProductList">Products</a></li>
-                        <li><a href="/ShoppingCart" ID="cartCount">Cart (@_cartCount)</a></li>
+                        <li><a href="/ShoppingCart" ID="cartCount">&nbsp;</a></li>
                     </ul>
                     <LoginView>
                         <AnonymousTemplate>
@@ -39,10 +35,8 @@
                         </AnonymousTemplate>
                         <LoggedInTemplate>
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a href="/Account/Manage" title="Manage your account">Hello, @_userName !</a></li>
-                                <li>
-                                    <a href="/Account/Login?action=logout" data-enhance-nav="false">Log off</a>
-                                </li>
+                                <li><a href="/Account/Manage" title="Manage your account">Hello!</a></li>
+                                <li><a href="/" data-enhance-nav="false">Log off</a></li>
                             </ul>
                         </LoggedInTemplate>
                     </LoginView>
@@ -51,16 +45,17 @@
         </div>
         <div id="TitleContent" style="text-align: center">
             <a href="/">
-                <Image  ID="Image1" ImageUrl="/Images/logo.jpg" BorderStyle="@BorderStyle.None" />
+                <Image ID="Image1" ImageUrl="/Images/logo.jpg" BorderStyle="@BorderStyle.None" />
             </a>  
             <br />  
         </div>
         <div id="CategoryMenu" style="text-align: center">       
             <ListView ID="categoryList"  
-                ItemType="Category" Items="@_categories">
+                ItemType="Category"
+                Items="@_categories">
                 <ItemTemplate Context="context">
                     <b style="font-size: large; font-style: normal">
-                    <a href="/ProductList?categoryName=@(Uri.EscapeDataString(context.CategoryName))">
+                    <a href="/ProductList?id=@context.CategoryID">
                         @context.CategoryName
                     </a>
                     </b>
@@ -75,4 +70,3 @@
                 <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
             </footer>
         </div>
-    

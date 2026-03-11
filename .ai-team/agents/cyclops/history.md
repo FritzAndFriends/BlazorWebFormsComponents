@@ -82,3 +82,40 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 
 
  Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
+
+### Run 21 — Layer 2 Structural Transform AfterWingtipToys (2026-03-11)
+
+**Timing:** Start 14:51, End 15:17 (~26 min)
+**Files modified:** 44 (431 insertions, 560 deletions)
+**Build result:** 0 errors, 0 WingtipToys warnings (4 warnings from BWFC lib NU1510 — unrelated)
+
+**Key transforms applied:**
+
+1. **Models (7 files):** ProductContext cleaned for EF Core SQLite, ProductDatabaseInitializer converted to static `Seed()` with `EnsureCreated` + idempotent check, IdentityModels converted to ASP.NET Core Identity stubs, all models upgraded to nullable reference types and file-scoped namespaces.
+
+2. **Infrastructure (3 files):** Program.cs activated `AddDbContextFactory<ProductContext>` with SQLite, `AddHttpContextAccessor`, database seeding on startup. App.razor added `@rendermode="InteractiveServer"` to HeadOutlet and Routes, deduplicated CSS/JS refs. _Imports.razor added `@using BlazorWebFormsComponents.Enums`, `@using WingtipToys.Models`, `@inherits WebFormsPageBase`.
+
+3. **SelectMethod delegate conversion (4 data pages):** ProductList `SelectMethod="@GetProducts"` with SelectHandler signature, ProductDetails `SelectMethod="@GetProduct"`, ShoppingCart `SelectMethod="@GetShoppingCartItems"`. All use `IDbContextFactory<ProductContext>` pattern. MainLayout category list switched to `Items="@_categories"` loaded in OnInitializedAsync.
+
+4. **Code-behind lifecycle (all .razor.cs):** `Page_Load` → `OnInitializedAsync`, removed all `System.Web.*` usings, removed `: Page`/`: MasterPage` inheritance, made all classes `partial`.
+
+5. **Navigation (3 files):** `Response.Redirect` → `NavigationManager.NavigateTo` in ShoppingCart, CheckoutStart, CheckoutComplete.
+
+6. **Template context (5 files):** Added `Context="context"` to ItemTemplate elements in ProductList, ProductDetails, ShoppingCart, CheckoutReview.
+
+7. **Enum/type fixes:** `GridLines="Vertical"` → `GridLines="@GridLines.Vertical"`, `BorderStyle="None"` → `BorderStyle="@BorderStyle.None"`, `BorderColor="#hex"` → `BorderColor="@("#hex")"`, `AutoGenerateColumns="False"` → `false`.
+
+8. **Checkout flow (5 files):** All checkout code-behinds converted to Blazor partials with TODO annotations for PayPal integration. CheckoutError uses `[SupplyParameterFromQuery]` instead of `Request.QueryString`.
+
+9. **Account pages (15 files):** All code-behinds converted to stub partials with TODO for ASP.NET Core Identity migration. Residual Web Forms `<% %>` syntax removed from Manage.razor and ManageLogins.razor.
+
+10. **Misc:** ViewSwitcher converted to no-op stub (FriendlyUrls not applicable), MobileLayout cleaned up, AddToCart converted to functional cart-add page using cookie-based cart ID.
+
+**Key gotchas (Run 21 specific):**
+- Code-behind class name MUST match .razor filename exactly: `Default.razor` → `public partial class Default` (NOT `_Default`)
+- Code-behind files need explicit `using Microsoft.AspNetCore.Components;` and `using WingtipToys.Models;` — they don't inherit from _Imports.razor
+- Layout code-behind: don't use BOTH `@inject` in .razor AND `[Inject]` in .cs — causes duplicate definition error
+- `private var` is NOT valid C# syntax — `var` is only for local variables, not fields
+- Razor `@inherits WebFormsPageBase` from _Imports.razor applies to all pages AND non-page components — ViewSwitcher couldn't specify a different base class in .cs without conflicting
+- `TextBox Text` parameter expects `string`, not `int` — use `.ToString()` for numeric values
+- `TemplateField` in DetailsView needs `ItemType` attribute when inside a generic parent component

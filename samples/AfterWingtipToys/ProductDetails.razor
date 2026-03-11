@@ -1,6 +1,6 @@
 @page "/ProductDetails"
 <PageTitle>Product Details</PageTitle>
-<FormView ID="productDetail" ItemType="Product" RenderOuterTable="false" Items="@_product">
+<FormView ID="productDetail" ItemType="Product" SelectMethod="@GetProduct" RenderOuterTable="false">
         <ItemTemplate Context="context">
             <div>
                 <h1>@context.ProductName</h1>

@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Components;
 
-namespace WingtipToys.Checkout
+namespace WingtipToys.Checkout;
+
+public partial class CheckoutStart
 {
-  public partial class CheckoutStart
-  {
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-      Page.Title = "Checkout";
-      // TODO: Integrate with PayPal ShortcutExpressCheckout
-      // Original code reads Session["payment_amt"], calls NVPAPICaller.ShortcutExpressCheckout,
-      // stores token in Session, and redirects to PayPal URL
-      NavigationManager.NavigateTo("/CheckoutError?ErrorCode=NotImplemented&Desc=PayPal+integration+required");
+        // TODO: Implement PayPal Express Checkout integration
+        // Original used Session["payment_amt"], NVPAPICaller.ShortcutExpressCheckout()
+        // For now, redirect to error page indicating checkout not yet implemented
+        NavigationManager.NavigateTo("/CheckoutError?ErrorCode=NotImplemented&Desc=PayPal+checkout+not+yet+migrated");
+        await Task.CompletedTask;
     }
-  }
 }

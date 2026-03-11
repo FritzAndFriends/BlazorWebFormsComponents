@@ -1,6 +1,6 @@
-namespace WingtipToys.Account
+namespace WingtipToys.Account;
+
+// TODO: Requires ASP.NET Core Identity migration — account lockout page
+public partial class Lockout
 {
-    public partial class Lockout
-    {
-    }
 }

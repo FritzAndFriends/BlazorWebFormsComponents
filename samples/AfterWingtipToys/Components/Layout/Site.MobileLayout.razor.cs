@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Components;
+namespace WingtipToys.Components.Layout;
 
-namespace WingtipToys.Components.Layout
+public partial class Site_MobileLayout
 {
-    public partial class Site_MobileLayout
-    {
-    }
 }
