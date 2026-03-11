@@ -1,0 +1,38 @@
+@page "/ContosoUniversity/About"
+@page "/About"
+@rendermode InteractiveServer
+@* CSS link converted from HeadContent *@
+<link href="CSS/CSS_About.css" rel="stylesheet" />
+
+<div id="header">
+        <h1> Students Body Statistics </h1>
+    </div>
+     <div id="grv">
+        <GridView ItemType="KeyValuePair<string, int>" CssClass="grid" 
+            ID="EnrollmentsStat" Items="@EnrollmentStats"
+            AutoGenerateColumns="false" EmptyDataText="There are no records to display"
+             CellPadding="4" ForeColor=@("#333333") GridLines="GridLines.None">
+            <AlternatingRowStyleContent><GridViewAlternatingRowStyle BackColor=@("White")  /></AlternatingRowStyleContent>
+            <Columns>
+                <BoundField DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
+                <HeaderStyle BackColor=@("Black") BorderColor=@("White") BorderStyle="BorderStyle.Solid" Font-Bold="true" Font-Size=@("30px") />
+                <ItemStyle BorderColor=@("White") BorderStyle="BorderStyle.Solid" Font-Size=@("20px") HorizontalAlign="HorizontalAlign.Center" />
+                </BoundField>
+                <BoundField DataField="Value" HeaderText="Students" ReadOnly="true">
+                <FooterStyle BorderStyle="BorderStyle.Solid" />
+                <HeaderStyle BackColor=@("Black") BorderColor=@("White") BorderStyle="BorderStyle.Solid" Font-Bold="true" Font-Size=@("30px") />
+                <ItemStyle BorderColor=@("White") BorderStyle="BorderStyle.Solid" Font-Size=@("20px") HorizontalAlign="HorizontalAlign.Center" />
+                </BoundField>
+            </Columns>
+            <EditRowStyleContent><GridViewEditRowStyle BackColor=@("#2461BF")  /></EditRowStyleContent>
+            <FooterStyleContent><GridViewFooterStyle BackColor=@("#507CD1") Font-Bold="true" ForeColor=@("White")  /></FooterStyleContent>
+            <HeaderStyleContent><GridViewHeaderStyle BackColor=@("#507CD1") Font-Bold="true" ForeColor=@("White")  /></HeaderStyleContent>
+            <PagerStyleContent><GridViewPagerStyle BackColor=@("#2461BF") ForeColor=@("White") HorizontalAlign="HorizontalAlign.Center"  /></PagerStyleContent>
+            <RowStyleContent><GridViewRowStyle BackColor=@("#EFF3FB")  /></RowStyleContent>
+            <SelectedRowStyleContent><GridViewSelectedRowStyle BackColor=@("#D1DDF1") Font-Bold="true" ForeColor=@("#333333")  /></SelectedRowStyleContent>
+            @* TODO: <SortedAscendingCellStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedAscendingCellStyle BackColor=@("#F5F7FB") /> *@
+            @* TODO: <SortedAscendingHeaderStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedAscendingHeaderStyle BackColor=@("#6D95E1") /> *@
+            @* TODO: <SortedDescendingCellStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedDescendingCellStyle BackColor=@("#E9EBEF") /> *@
+            @* TODO: <SortedDescendingHeaderStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedDescendingHeaderStyle BackColor=@("#4870BE") /> *@
+        </GridView>
+    </div>

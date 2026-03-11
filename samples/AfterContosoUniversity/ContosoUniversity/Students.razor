@@ -1,0 +1,95 @@
+@page "/ContosoUniversity/Students"
+@page "/Students"
+@rendermode InteractiveServer
+@* CSS link converted from HeadContent *@
+<link href="CSS/Students_CSS.css" rel="stylesheet" />
+
+@* BWFC ScriptManager and UpdatePanel are no-ops in Blazor; removed *@
+            <div id="grvStudentsData">
+                <GridView ItemType="StudentEnrollmentViewModel" ID="grv" Items="@StudentEnrollments"
+                    CssClass="grv"
+                    AutoGenerateColumns="false"
+                    EmptyDataText="There are no records to display"
+                    DataKeyNames="ID"
+                    BackColor=@("White") BorderColor=@("#3366CC") BorderStyle="BorderStyle.None" BorderWidth="Unit.Pixel(1)"
+                    CellPadding="4" Height="Unit.Pixel(336)" Width="Unit.Pixel(416)">
+                    <Columns>
+                        @* TODO: CommandField needs proper BWFC implementation *@
+                        @* <CommandField HeaderText="Delete Student" ShowDeleteButton="true" ButtonType="Button" /> *@
+                        <BoundField DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                        <BoundField DataField="FullName" HeaderText="Student Name" />
+                        <BoundField DataField="Email" HeaderText="Email" />
+                        <BoundField DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                        <BoundField DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                        @* <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="true" /> *@
+                    </Columns>
+                    <FooterStyleContent><GridViewFooterStyle BackColor=@("#99CCCC") ForeColor=@("#003399")  /></FooterStyleContent>
+                    <HeaderStyleContent><GridViewHeaderStyle BackColor=@("#003399") Font-Bold="true" ForeColor=@("#CCCCFF")  /></HeaderStyleContent>
+                    <PagerStyleContent><GridViewPagerStyle BackColor=@("#99CCCC") ForeColor=@("#003399") HorizontalAlign="HorizontalAlign.Left"  /></PagerStyleContent>
+                    <RowStyleContent><GridViewRowStyle BackColor=@("White") ForeColor=@("#003399")  /></RowStyleContent>
+                    <SelectedRowStyleContent><GridViewSelectedRowStyle BackColor=@("#009999") Font-Bold="true" ForeColor=@("#CCFF99")  /></SelectedRowStyleContent>
+                    @* TODO: <SortedAscendingCellStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedAscendingCellStyle BackColor=@("#EDF6F6") /> *@
+                    @* TODO: <SortedAscendingHeaderStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedAscendingHeaderStyle BackColor=@("#0D4AC4") /> *@
+                    @* TODO: <SortedDescendingCellStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedDescendingCellStyle BackColor=@("#D6DFDF") /> *@
+                    @* TODO: <SortedDescendingHeaderStyle> is not supported by BWFC ΓÇö apply via CSS. <SortedDescendingHeaderStyle BackColor=@("#002876") /> *@
+                </GridView>
+            </div>
+            <div id="addStud">
+                <h1 id="addStudent">Add Student</h1>
+                <Table ID="tabAddStud"
+                    CssClass="tabAddStud" BorderColor=@("#0033CC") Font-Bold="true" Font-Italic="false"
+                    Font-Underline="false" ForeColor=@("White")
+                    Font-Overline="false">
+                    <TableRow>
+                        <TableCell>First Name</TableCell>
+                        <TableCell>
+                            <TextBox ID="txtFirstName" placeholder="Type Your First Name..." @bind-Text="@FirstName" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Last Name</TableCell><TableCell>
+                            <TextBox ID="txtLastName" placeholder="Type Your Last Name..." @bind-Text="@LastName" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Birth Date</TableCell><TableCell>
+                            <TextBox ID="txtBirthDate" placeholder="dd.mm.year" @bind-Text="@BirthDate" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Email</TableCell><TableCell>
+                            <TextBox ID="txtEmail" placeholder="Email is Optional..." @bind-Text="@Email" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Course Name</TableCell><TableCell>
+                            <DropDownList TItem="string" ID="dropListCourses" Items="@CourseNames" @bind-SelectedValue="@SelectedCourse">
+                            </DropDownList>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>               
+                        </TableCell><TableCell>
+                            <Button CssClass="insert" ID="btnInsert" Text="New Enrollment" OnClick="@OnInsertClick" />
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     <Button ID="btnClear" Text="Clear" OnClick="@OnClearClick" />
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </div>
+            <div id="ajax">
+                <h1 id="searchStud">Search Student</h1>
+                <TextBox CssClass="txtSearch" ID="txtSearch" placeholder="Type Student Name..." @bind-Text="@SearchName" />
+                @* TODO: AutoCompleteExtender is not supported by BWFC - implement as custom component or use HTML5 datalist *@
+                <Button ID="btnSearch" Text="Show Student Info" CssClass="btnInfo" OnClick="@OnSearchClick" />
+                <DetailsView ItemType="StudentDetailViewModel" Items="@SearchResults"
+                    ID="studentData"
+                    Width="Unit.Pixel(125)"
+                    Height="Unit.Pixel(50)"
+                    AutoGenerateRows="true"
+                    CssClass="detailsView" BorderColor=@("Black") ForeColor=@("Black")>
+                    @* BoundField not supported by DetailsView - using AutoGenerateRows instead *@
+                    <RowStyleContent><DetailsViewRowStyle BackColor=@("White")  /></RowStyleContent>
+                </DetailsView>
+            </div>
+@* End of UpdatePanel content *@

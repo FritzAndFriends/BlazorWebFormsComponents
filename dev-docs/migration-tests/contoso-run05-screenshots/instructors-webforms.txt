@@ -1,0 +1,9 @@
+WebForms Screenshot Placeholder
+===============================
+The original ASP.NET Web Forms ContosoUniversity application 
+requires IIS Express or Visual Studio to run.
+
+This is a .NET Framework 4.x Web Forms application that cannot
+be easily started from the command line without IIS Express.
+
+The Blazor equivalent screenshot is available for comparison.
