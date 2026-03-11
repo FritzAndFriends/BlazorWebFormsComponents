@@ -7,6 +7,151 @@
 
 ---
 
+## Run 18c — After PayPal Fix
+
+**Date:** 2026-03-11
+**Trigger:** Re-run after removing `'PayPal'` from `Test-UnconvertiblePage` content patterns (second false-positive fix)
+
+### Script Fixes Applied (Cumulative)
+
+Two false-positive patterns in `Test-UnconvertiblePage` have been fixed:
+
+1. **Run 18b fix — `'Checkout'` pattern removed:** Replaced with path-based `'^Checkout[/\\]'` detection.
+   ShoppingCart.aspx references like `CheckoutImageBtn` and `CheckoutBtn_Click` no longer trigger stubs.
+
+2. **Run 18c fix — `'PayPal'` pattern removed:** The content pattern matched image URLs
+   (`https://www.paypal.com/...`) and alt text (`"Check out with PayPal"`) in markup — not
+   actual PayPal SDK code. ShoppingCart.aspx.cs has zero PayPal SDK references.
+
+```powershell
+# BEFORE (Run 18a):
+$unconvertiblePatterns = @(
+    'SignInManager', 'UserManager', 'FormsAuthentication',
+    'Session\[', 'PayPal', 'Checkout'
+)
+
+# AFTER (Run 18c):
+# Path-based stubs for Checkout/ folder
+if ($RelativePath -match '^Checkout[/\\]') { return $true }
+# Content patterns — only real auth/session code
+$unconvertiblePatterns = @(
+    'SignInManager', 'UserManager', 'FormsAuthentication',
+    'Session\['
+)
+```
+
+### ShoppingCart GridView Status: ✅ PASS
+
+ShoppingCart.razor now contains full `<GridView>` with BoundField/TemplateField markup — no longer stubbed.
+
+**Full ShoppingCart.razor contents:**
+```razor
+@page "/ShoppingCart"
+<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+    <GridView ID="CartList" AutoGenerateColumns="False" ShowFooter="True" GridLines="Vertical" CellPadding="4"
+        TItem="CartItem" 
+        CssClass="table table-striped table-bordered" >
+@* TODO: Replace SelectMethod="GetShoppingCartItems" with Items="@_data" parameter on this BWFC data control. Load _data in OnInitializedAsync: _data = await yourDbContext.YourEntities.ToListAsync(); *@   
+        <Columns>
+        <BoundField DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField   HeaderText="Quantity">
+                <ItemTemplate>
+                    <TextBox ID="PurchaseQuantity" Width="40" Text="@context.Quantity"></TextBox> 
+                </ItemTemplate>        
+        </TemplateField>    
+        <TemplateField HeaderText="Item Total">
+                <ItemTemplate>
+                    <%#: String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) *  Convert.ToDouble(Item.Product.UnitPrice)))%>
+                </ItemTemplate>        
+        </TemplateField> 
+        <TemplateField HeaderText="Remove Item">
+                <ItemTemplate>
+                    <CheckBox id="Remove"></CheckBox>
+                </ItemTemplate>        
+        </TemplateField>    
+        </Columns>    
+    </GridView>
+    <div>
+        <p></p>
+        <strong>
+            <Label ID="LabelTotalText" Text="Order Total: "></Label>
+            <Label ID="lblTotal"></Label>
+        </strong> 
+    </div>
+    <br />
+    <table> 
+    <tr>
+      <td>
+        <Button ID="UpdateBtn" Text="Update" OnClick="UpdateBtn_Click" />
+      </td>
+      <td>
+        <ImageButton ID="CheckoutImageBtn" 
+                      ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
+                      Width="145" AlternateText="Check out with PayPal" 
+                      OnClick="CheckoutBtn_Click" 
+                      BackColor="Transparent" BorderWidth="0" />
+      </td>
+    </tr>
+    </table>
+```
+
+### UnconvertibleStub Count: ✅ 5 (down from 6)
+
+| Page | Stub Reason | Correct? |
+|------|-------------|----------|
+| Checkout\CheckoutCancel.aspx | Path: `Checkout/` folder | ✅ |
+| Checkout\CheckoutComplete.aspx | Path: `Checkout/` folder | ✅ |
+| Checkout\CheckoutError.aspx | Path: `Checkout/` folder | ✅ |
+| Checkout\CheckoutReview.aspx | Path: `Checkout/` folder | ✅ |
+| Checkout\CheckoutStart.aspx | Path: `Checkout/` folder | ✅ |
+
+ShoppingCart.aspx is no longer stubbed — all 5 remaining stubs are legitimate.
+
+### Layer 1 Timing (Run 18c)
+
+| Phase | Duration |
+|-------|----------|
+| Layer 1 (bwfc-migrate.ps1) | **1.51 seconds** |
+
+### Build Result (Run 18c)
+
+**Status:** ❌ FAIL (pre-existing errors, not related to ShoppingCart fix)
+**Errors:** 6 (3 unique × 2 files — ProductDetails.razor.cs, ProductList.razor.cs)
+**Warnings:** 8 (NU1510 from BWFC csproj)
+
+```
+ProductDetails.razor.cs(36,36): error CS1031: Type expected
+ProductDetails.razor.cs(36,36): error CS1001: Identifier expected
+ProductDetails.razor.cs(36,36): error CS1026: ) expected
+ProductList.razor.cs(37,36): error CS1031: Type expected
+ProductList.razor.cs(37,36): error CS1001: Identifier expected
+ProductList.razor.cs(37,36): error CS1026: ) expected
+```
+
+Same `[Parameter]` TODO annotation bug from Run 18a/18b — unchanged. These are in
+ProductDetails/ProductList code-behinds, not ShoppingCart.
+
+### Migration Summary (Run 18c)
+
+```
+Files processed:       32
+Transforms applied:    314
+Static files copied:   79
+Model files copied:    8
+Items needing review:  36
+UnconvertibleStub:     5 (Checkout/ only)
+```
+
+### Key Improvement: Transforms increased from 303 → 314
+
+ShoppingCart.aspx now receives full transform processing (+11 transforms) instead of being
+stubbed. The extra transforms include: asp: prefix removal, GridView/BoundField/TemplateField
+conversion, data-binding `@context` conversion, TItem inference, and SelectMethod TODO annotation.
+
+---
+
 ## Run 18b — After Script Fix
 
 **Date:** 2026-03-11
