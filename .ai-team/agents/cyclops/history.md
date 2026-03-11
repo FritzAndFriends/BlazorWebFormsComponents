@@ -111,3 +111,20 @@ The `ItemType` standardization (renaming `TItem`/`TItemType` → `ItemType` acro
 - 7 sample files: ControlSamples pages for all 5 list controls, plus AfterWingtipToys account pages
 
 **Key learning:** When standardizing generic type parameter names on components, the rename must also cover all test files, sample pages, and documentation code blocks — not just the component source. CI may only surface the first few errors, hiding the full scope.
+
+### L2 Automation Shims — 4 S-sized Library Enhancements (2026-07-25)
+
+Implemented 4 OPPs from Forge's L2 automation analysis to eliminate recurring manual L2 fixes:
+
+**OPP-2 (Unit implicit string conversion):** Replaced `explicit operator Unit(string)` (which only handled bare integers) with `implicit operator Unit(string s) => Unit.Parse(s)`. Now `Width="125px"` just works in Razor markup — no `@(Unit.Parse(...))` wrapper needed. `Unit.Parse` already handled all CSS unit formats (px, em, %, pt, etc.).
+
+**OPP-3 (ResponseShim):** Created `ResponseShim.cs` wrapping `NavigationManager`. Strips `~/` prefix and `.aspx` extension from URLs. Exposed as `protected ResponseShim Response` on `WebFormsPageBase`. Now `Response.Redirect("~/Products.aspx")` compiles and navigates correctly.
+
+**OPP-5 (ViewState on WebFormsPageBase):** Added `Dictionary<string, object> ViewState` with `[Obsolete]` warning. Page code-behind using `ViewState["key"]` compiles unchanged. `BaseWebFormsComponent` already had this (line ~145); now page base does too.
+
+**OPP-6 (GetRouteUrl on WebFormsPageBase):** Added `GetRouteUrl(string routeName, object routeParameters)` using injected `LinkGenerator` + `IHttpContextAccessor` — same pattern as `GetRouteUrlHelper` extension on `BaseWebFormsComponent`. Strips `.aspx` from route names.
+
+**Key learnings:**
+- `Unit.Parse()` already handles all CSS unit formats via the `Unit(string, CultureInfo, UnitType)` constructor — no new parsing needed.
+- `WebFormsPageBase` did NOT have `NavigationManager`, `LinkGenerator`, or `IHttpContextAccessor` injections prior to this change. Added all three.
+- The explicit string-to-Unit operator was effectively dead code — no tests or consuming code used the `(Unit)"string"` cast syntax.

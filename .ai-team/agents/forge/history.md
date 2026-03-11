@@ -111,3 +111,19 @@ Library audit: 153 Razor components + 197 C# classes (CONTROL-COVERAGE.md was li
 
 
  Team update (2026-03-11): SelectMethod is now natively supported by BWFC. Old WingtipToys analysis sections 2.2 and 6.2 (SelectMethod as 'deliberate design decision') are SUPERSEDED. SelectMethod must be preserved as delegates.  decided by Jeffrey T. Fritz, Beast, Cyclops
+
+### L2 Automation Analysis (2025-07-25)
+
+**Key findings from L2 pattern analysis across Runs 17–21 (WT + CU):**
+
+1. **Top L2 time sink is enum/bool/unit string normalization** — Blazor's Razor compiler rejects `GridLines="None"` and `Width="125px"` that Web Forms accepted. These cause build errors on every run. The BWFC library can absorb this gap with implicit string conversions, same as `Unit(int)` and `WebColor(string)` already do.
+
+2. **6 automation opportunities identified** — OPP-1 (EnumParameter<T> wrapper struct with implicit string conversion, P0/M), OPP-2 (Unit implicit string operator, P0/S), OPP-3 (Response.Redirect shim on WebFormsPageBase, P1/S), OPP-4 (Session state scoped dictionary, P1/M), OPP-5 (ViewState on WebFormsPageBase — already exists on BaseWebFormsComponent, just needs page base, P2/S), OPP-6 (GetRouteUrl on WebFormsPageBase — helper exists in Extensions/ but not accessible from pages, P2/S).
+
+3. **Unit.cs has a broken explicit string operator** — Line 443 only handles integer strings, throws on "125px". Should be replaced with implicit conversion delegating to `Unit.Parse()` which already handles all CSS unit strings correctly.
+
+4. **BaseWebFormsComponent.ViewState exists (line 145) but WebFormsPageBase doesn't expose it** — L2 unnecessarily converts ViewState to fields. Adding ViewState to WebFormsPageBase eliminates this entire fix category.
+
+5. **L2 still needed for semantic transforms** — Page_Load→OnInitializedAsync, EF6→EF Core, Identity migration, payment integration. These require application-level understanding and should stay as Copilot-assisted work.
+
+6. **Full analysis written to `.ai-team/decisions/inbox/forge-l2-automation-analysis.md`** — 6 OPPs prioritized with code sketches and risk assessment. Awaiting Jeff's decision on EnumParameter<T> public API change.
