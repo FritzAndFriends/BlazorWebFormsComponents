@@ -99,3 +99,15 @@ Added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` that parses Web.con
 
 
  Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. L1 script now auto-detects provider from Web.config.  decided by Jeffrey T. Fritz, Beast, Cyclops
+
+### Fix: TItem → ItemType in Tests and Samples (2026-03-12)
+
+The `ItemType` standardization (renaming `TItem`/`TItemType` → `ItemType` across 13 component files) was not applied to test files or sample pages. This caused CI failures on PR #425 with `RZ10001` (type cannot be inferred) and `CS0411` (type arguments cannot be inferred) errors for `RadioButtonList` and `BulletedList` — but the problem was actually much wider.
+
+**Root cause:** Components declare `@typeparam ItemType` but tests and samples still referenced `TItem=`. The Razor compiler couldn't match the generic parameter name.
+
+**Fix:** Renamed `TItem=` → `ItemType=` across 43 files:
+- 36 test files: RadioButtonList (7), BulletedList (7), CheckBoxList (6), DropDownList (7), ListBox (8), ToolTipTests (1)
+- 7 sample files: ControlSamples pages for all 5 list controls, plus AfterWingtipToys account pages
+
+**Key learning:** When standardizing generic type parameter names on components, the rename must also cover all test files, sample pages, and documentation code blocks — not just the component source. CI may only surface the first few errors, hiding the full scope.
