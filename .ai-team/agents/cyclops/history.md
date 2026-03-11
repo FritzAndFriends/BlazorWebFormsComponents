@@ -132,3 +132,34 @@ Implemented 4 OPPs from Forge's L2 automation analysis to eliminate recurring ma
 
  Team update (2026-03-11): L2 automation shims (OPP-2, 3, 5, 6) implemented by Cyclops on WebFormsPageBase  Unit implicit string, Response.Redirect shim, ViewState, GetRouteUrl. OPP-1/OPP-4 deferred.  decided by Forge (analysis), Cyclops (implementation)
 
+### OPP-1: EnumParameter<T> Wrapper Struct (2026-07-25)
+
+Implemented `EnumParameter<T>` — a `readonly struct` enabling Blazor component enum parameters to accept both enum values and bare string values. This is the #1 L2 fix by volume: every migrated enum attribute like `GridLines="None"` previously required `@(GridLines.None)` Razor expression syntax.
+
+**New file:** `src/BlazorWebFormsComponents/Enums/EnumParameter.cs`
+- Implicit conversions: `T → EnumParameter<T>`, `string → EnumParameter<T>` (case-insensitive parse), `EnumParameter<T> → T`
+- Equality operators for `EnumParameter<T>` vs `T` and `T` vs `EnumParameter<T>`
+- Implements `IEquatable<EnumParameter<T>>` and `IEquatable<T>`
+
+**55 files changed** across 46 components/interfaces/style classes:
+- BaseStyledComponent, BaseWebFormsComponent, BulletedList, Calendar, Chart, ChartSeries, CheckBox, CheckBoxList, DataPager, DetailsView, FormView, GridView, Image, ImageButton, ImageMap, ListBox, ListView, Literal, Login, ChangePassword, Menu, MenuItemStyle, MenuLevelStyle, NamingContainer, Panel, RadioButton, RadioButtonList, ScriptManager, SiteMapPath, Table, TableCell, TableFooterRow, TableHeaderCell, TableHeaderRow, TableRow, TextBox, TreeNode, TreeView, UiPagerSettings, UiStyle, UiTableItemStyle, UpdatePanel, BaseValidator, Style, TableItemStyle
+- Interfaces: IImageComponent, IHasLayoutStyle, IHasLayoutTableItemStyle
+
+**Skipped (abstract class hierarchies, not enums):** DataListEnum, RepeatLayout, ButtonType, TreeViewImageSet, ValidationSummaryDisplayMode
+
+**Skipped (nullable):** `Docking?` on ChartLegend/ChartTitle — wrapping nullable enum params in `EnumParameter<T>?` requires separate handling.
+
+**Key learnings / gotchas:**
+1. **Switch expressions break.** C# pattern matching does NOT use user-defined implicit conversions. Every `switch (Property)` or `Property switch { EnumVal => ... }` must become `Property.Value switch { ... }`. This was the biggest source of internal code changes (~15 switch expressions updated).
+2. **Shouldly `.ShouldBe()` breaks.** Extension methods like `ShouldBe` can't resolve through implicit conversions on structs. Tests need `property.Value.ShouldBe(EnumVal)`. Affected: ListView/SortingEvents, ScriptManager/ScriptManagerTests, UpdatePanel/UpdatePanelTests, Localize/InheritsLiteral.
+3. **"Color Color" rule still works.** When property name matches enum type name (e.g., `GridLines` property of type `EnumParameter<GridLines>`), C# still resolves `GridLines.None` in case labels to the enum type via the "Color Color" disambiguation rule.
+4. **Default values work unchanged.** `= GridLines.None` compiles because the implicit `T → EnumParameter<T>` conversion handles the assignment.
+5. **`ToString()` is transparent.** The struct's `ToString()` delegates to `Value.ToString()`, so existing `property.ToString().ToLowerInvariant()` patterns work unchanged.
+6. **Equality comparisons are safe.** The `==` and `!=` operators between `EnumParameter<T>` and `T` handle `if (Property == EnumVal)` without needing `.Value`.
+
+**Test files needing updates (for Rogue):**
+- `ListView/SortingEvents.razor` — `SortDirection.ShouldBe()` → `.Value.ShouldBe()`
+- `ScriptManager/ScriptManagerTests.razor` — `ScriptMode.ShouldBe()` → `.Value.ShouldBe()`
+- `UpdatePanel/UpdatePanelTests.razor` — `RenderMode/UpdateMode.ShouldBe()` → `.Value.ShouldBe()`
+- `Localize/InheritsLiteral.razor` — overload resolution failure on `ShouldBe`
+
