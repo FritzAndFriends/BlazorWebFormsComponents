@@ -1,4 +1,0 @@
-### 2026-03-12: Executive Summary updated to 40 runs with Run 19-21 data
-**By:** Beast
-**What:** Updated EXECUTIVE-SUMMARY.md from 38 → 40 benchmark runs. Added WT Run 20 (zero-error pipeline), WT Run 21 (SelectMethod preservation), and CU Run 19 (SQL Server auto-detection). Regenerated all 3 performance chart PNGs with new data points. CU Run 19 used Items= binding for SelectMethod (skills were fixed after that run) — flagged in What's Next for re-run with corrected skills.
-**Why:** The executive summary is the public-facing proof point for the migration toolkit. Keeping it current with every batch of runs ensures Jeff has accurate, promotion-worthy numbers for stakeholder conversations. The CU Run 19 Items= binding caveat is important context — it's not a failure, but it means a CU re-run with SelectMethod delegates is a near-term priority.

@@ -6679,3 +6679,13 @@ Jeff's Run 20 review identified four bugs in the migration pipeline:
 **What:** The migration pipeline now auto-detects the original database provider from Web.config and scaffolds the matching EF Core package end-to-end. (1) Jeff directive: detect the original provider from Web.config connection strings — not just "avoid SQLite" but actively preserve the original database. (2) Cyclops added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` with three-pass detection: explicit `providerName` → connection string content patterns → EntityClient inner provider → SqlServer fallback. Scaffolds correct EF Core package, `Program.cs` provider method, and `[DatabaseProvider]` review item for L2 agents. (3) Beast reframed all three migration skill files to lead with "detect and match original provider" as the affirmative instruction, with NEVER-substitute guardrails retained as backstops. L2 checklist directs agents to verify the L1-detected provider.
 **Why:** Drop-in replacement means nothing changes unnecessarily, including the database. The L1 script previously hardcoded SqlServer — now it auto-detects. Agents prioritize affirmative instructions over prohibitions, so "detect and match" gives a clear workflow. Tested against ContosoUniversity and WingtipToys (both correctly detect SQL Server LocalDB).
 
+
+### 2026-03-12: Executive Summary updated to 40 runs with Run 19-21 data
+**By:** Beast
+**What:** Updated EXECUTIVE-SUMMARY.md from 38 → 40 benchmark runs. Added WT Run 20 (zero-error pipeline), WT Run 21 (SelectMethod preservation), and CU Run 19 (SQL Server auto-detection). Regenerated all 3 performance chart PNGs with new data points. CU Run 19 used Items= binding for SelectMethod (skills were fixed after that run) — flagged in What's Next for re-run with corrected skills.
+**Why:** The executive summary is the public-facing proof point for the migration toolkit. Keeping it current with every batch of runs ensures Jeff has accurate, promotion-worthy numbers for stakeholder conversations. The CU Run 19 Items= binding caveat is important context — it's not a failure, but it means a CU re-run with SelectMethod delegates is a near-term priority.
+
+### 2026-03-11: Executive summary — lead with successes, trim description
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The first 3 paragraphs of EXECUTIVE-SUMMARY.md have too much description. Get to the successes faster. The opening should lead with wins and hard numbers, not explanatory prose about what the toolkit does.
+**Why:** User request — the document is meant to demonstrate results and earn a promotion. Description can come later; the opening must punch.
