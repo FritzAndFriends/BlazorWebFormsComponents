@@ -3,109 +3,115 @@
     <link href="CSS/Students_CSS.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Students.js"></script>
 </HeadContent>
-<div id="grvStudentsData">
-    <GridView ItemType="StudentViewModel" ID="grv"
-        CssClass="grv"
-        AutoGenerateColumns="false"
-        EmptyDataText="There are no records to display"
-        Items="@_studentData"
-        DataKeyNames="ID"
-        BackColor="WebColor.White" BorderColor="@("#3366CC")" BorderStyle="@BorderStyle.None" BorderWidth="1"
-        CellPadding="4" Height="336" Width="416">
-        <Columns>
-            <BoundField ItemType="StudentViewModel" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
-            <BoundField ItemType="StudentViewModel" DataField="FullName" HeaderText="Student Name" />
-            <BoundField ItemType="StudentViewModel" DataField="Email" HeaderText="Email" />
-            <BoundField ItemType="StudentViewModel" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
-            <BoundField ItemType="StudentViewModel" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
-        </Columns>
-        <FooterStyleContent>
-            <GridViewFooterStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" />
-        </FooterStyleContent>
-        <HeaderStyleContent>
-            <GridViewHeaderStyle BackColor="@("#003399")" Font-Bold="true" ForeColor="@("#CCCCFF")" />
-        </HeaderStyleContent>
-        <PagerStyleContent>
-            <GridViewPagerStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" HorizontalAlign="@HorizontalAlign.Left" />
-        </PagerStyleContent>
-        <RowStyleContent>
-            <GridViewRowStyle BackColor="WebColor.White" ForeColor="@("#003399")" />
-        </RowStyleContent>
-        <SelectedRowStyleContent>
-            <GridViewSelectedRowStyle BackColor="@("#009999")" Font-Bold="true" ForeColor="@("#CCFF99")" />
-        </SelectedRowStyleContent>
-    </GridView>
-</div>
-<div id="addStud">
-    <h1 id="addStudent">Add Student</h1>
-    <Table ID="tabAddStud"
-        CssClass="tabAddStud" BorderColor="@("#0033CC")" Font-Bold="true" Font-Italic="false"
-        Font-Underline="false" ForeColor="WebColor.White"
-        Font-Overline="false">
-        <TableRow>
-            <TableCell>First Name</TableCell>
-            <TableCell>
-                <TextBox ID="txtFirstName" placeholder="Type Your First Name..." Text="@_firstName" TextChanged="@((s) => _firstName = s)" />
-            </TableCell>
-        </TableRow>
-        <TableRow>
-            <TableCell>Last Name</TableCell>
-            <TableCell>
-                <TextBox ID="txtLastName" placeholder="Type Your Last Name..." Text="@_lastName" TextChanged="@((s) => _lastName = s)" />
-            </TableCell>
-        </TableRow>
-        <TableRow>
-            <TableCell>Birth Date</TableCell>
-            <TableCell>
-                <TextBox ID="txtBirthDate" placeholder="dd.mm.year" Text="@_birthDate" TextChanged="@((s) => _birthDate = s)" />
-            </TableCell>
-        </TableRow>
-        <TableRow>
-            <TableCell>Email</TableCell>
-            <TableCell>
-                <TextBox ID="txtEmail" placeholder="Email is Optional..." Text="@_email" TextChanged="@((s) => _email = s)" />
-            </TableCell>
-        </TableRow>
-        <TableRow>
-            <TableCell>Course Name</TableCell>
-            <TableCell>
-                <DropDownList ItemType="string" ID="dropListCourses"
-                    Items="@_courseNames"
-                    SelectedValue="@_selectedCourse"
-                    SelectedValueChanged="@((v) => _selectedCourse = v)">
-                </DropDownList>
-            </TableCell>
-        </TableRow>
-        <TableRow>
-            <TableCell></TableCell>
-            <TableCell>
-                <Button CssClass="insert" ID="btnInsert" Text="New Enrollment" OnClick="HandleInsert" />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <Button ID="btnClear" Text="Clear" OnClick="HandleClear" />
-            </TableCell>
-        </TableRow>
-    </Table>
-</div>
-<div id="ajax">
-    <h1 id="searchStud">Search Student</h1>
-    <TextBox CssClass="txtSearch" ID="txtSearch" placeholder="Type Student Name..." Text="@_searchText" TextChanged="@((s) => _searchText = s)" />
-    <Button ID="btnSearch" Text="Show Student Info" OnClick="HandleSearch" CssClass="btnInfo" />
-    <DetailsView ItemType="Student"
-        ID="studentData"
-        Width="125"
-        Height="50"
-        AutoGenerateRows="false"
-        Items="@_searchResults"
-        CssClass="detailsView" BorderColor="WebColor.Black" ForeColor="WebColor.Black">
-        <Fields>
-            <BoundField ItemType="Student" DataField="FirstName" HeaderText="First Name" />
-            <BoundField ItemType="Student" DataField="LastName" HeaderText="Last Name" />
-            <BoundField ItemType="Student" DataField="Email" HeaderText="Email" />
-            <BoundField ItemType="Student" DataField="BirthDate" HeaderText="Birth Date" />
-            <BoundField ItemType="Student" DataField="StudentID" HeaderText="id" />
-        </Fields>
-        <RowStyleContent>
-            <DetailsViewRowStyle BackColor="WebColor.White" />
-        </RowStyleContent>
-    </DetailsView>
-</div>
+<ScriptManager ID="ScriptManager2"></ScriptManager>       
+    <UpdatePanel>
+        <ContentTemplate>
+            <div id="grvStudentsData">
+                <GridView ID="grv"
+                    CssClass="grv"
+                    AutoGenerateColumns="False"
+                    EmptyDataText="There are no records to display"
+                    SelectMethod="grv_GetData" UpdateMethod="grv_UpdateItem"
+                    DeleteMethod="grv_DeleteItem" DataKeyNames="ID" OnRowUpdating="grv_RowUpdating"
+                    BackColor="White" BorderColor="#3366CC" BorderStyle="None" BorderWidth="1px"
+                    CellPadding="4" Height="336px" Width="416px">
+@* TODO: SelectMethod="grv_GetData" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.grv_GetData(maxRows, startRow, sort, out total))" *@
+                    <Columns>
+                        <CommandField HeaderText="Delete Student" ShowDeleteButton="True" ButtonType="Button" />
+                        <BoundField DataField="ID" HeaderText="Student ID" ReadOnly="True" />
+                        <BoundField DataField="FullName" HeaderText="Student Name" />
+                        <BoundField DataField="Email" HeaderText="Email" />
+                        <BoundField DataField="Date" HeaderText="Enrollment Date" ReadOnly="True" />
+                        <BoundField DataField="Count" HeaderText="Number of Courses" ReadOnly="True" />
+                        <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="True" />
+                    </Columns>
+                    <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+                    <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+                    <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+                    <RowStyle BackColor="White" ForeColor="#003399" />
+                    <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+                    <SortedAscendingCellStyle BackColor="#EDF6F6" />
+                    <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+                    <SortedDescendingCellStyle BackColor="#D6DFDF" />
+                    <SortedDescendingHeaderStyle BackColor="#002876" />
+                </GridView>
+            </div>
+            <div id="addStud">
+                <h1 id="addStudent">Add Student</h1>
+                <Table ID="tabAddStud"
+                    CssClass="tabAddStud" BorderColor="#0033CC" Font-Bold="True" Font-Italic="False"
+                    Font-Underline="False" ForeColor="White"
+                    Font-Overline="False">
+                    <TableRow>
+                        <TableCell>First Name</TableCell>
+                        <TableCell>
+                            <TextBox ID="txtFirstName" placeholder="Type Your First Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Last Name</TableCell><TableCell>
+                            <TextBox ID="txtLastName" placeholder="Type Your Last Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Birth Date</TableCell><TableCell>
+                            <TextBox ID="txtBirthDate" placeholder="dd.mm.year" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Email</TableCell><TableCell>
+                            <TextBox ID="txtEmail" placeholder="Email is Optional..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Course Name</TableCell><TableCell>
+                            <DropDownList ID="dropListCourses">
+                            </DropDownList>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>               
+                        </TableCell><TableCell>
+                            <Button CssClass="insert" ID="btnInsert" Text="New Enrollment" OnClick="btnInsert_Click" />
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     <Button ID="btnClear" Text="Clear" OnClick="btnClear_Click" />
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </div>
+            <div id="ajax">
+                <h1 id="searchStud">Search Student</h1>
+                <TextBox CssClass="txtSearch" ID="txtSearch" placeholder="Type Student Name..." />
+                <ajaxToolkit:AutoCompleteExtender
+                    ID="AutoCompleteExtender1"
+                    TargetControlID="txtSearch"
+                    ServiceMethod="GetCompletionList"
+                    MinimumPrefixLength="1"
+                    CompletionInterval="100"
+                    EnableCaching="true"
+                    CompletionSetCount="20"
+                    ShowOnlyCurrentWordInCompletionListItem="true">
+                </ajaxToolkit:AutoCompleteExtender>
+                <Button ID="btnSearch" Text="Show Student Info" OnClick="btnSearch_Click" CssClass="btnInfo" />
+                <DetailsView
+                    ID="studentData"
+                    Width="125px"
+                    Height="50px"
+                    AutoGenerateRows="False"
+                    CssClass="detailsView" BorderColor="Black" ForeColor="Black">
+                    <Fields>
+                        <BoundField
+                            DataField="FirstName"
+                            HeaderText="First Name" />
+                        <BoundField DataField="LastName" HeaderText="Last Name" />
+                        <BoundField DataField="Email" HeaderText="Email" />
+                        <BoundField DataField="BirthDate" HeaderText="Birth Date" />
+                        <BoundField DataField="StudentID" HeaderText="id" />
+                    </Fields>
+                    <RowStyle BackColor="White" />
+                </DetailsView>
+            </div>
+        </ContentTemplate>
+    </UpdatePanel>         
+     
+
