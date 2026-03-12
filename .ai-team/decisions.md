@@ -5,6 +5,7 @@
 <!-- Decisions are appended below by the Scribe after merging from .ai-team/decisions/inbox/ -->
 
 
+
 ### 2026-02-10: Sample pages use Components/Pages path
 
 **By:** Jubilee
@@ -6623,23 +6624,18 @@ Layer 1 output vs. manually-fixed final version — every delta represents a mis
 | 4 | `Text="@context.Quantity"` (int) | `Text="@context.Quantity.ToString()"` | Hard to automate — type-aware |
 | 5 | `SelectMethod="GetShoppingCartItems"` TODO | `IDbContextFactory` + `OnInitializedAsync` | P1-4: DI pattern |
 | 6 | No cookie-based cart ID | `GetCartId()` from `IHttpContextAccessor` | Project-specific — not generalizable |
-
 ### 2026-03-11: Mandatory L1→2 migration pipeline — no fixes between layers (consolidated)
 **By:** Jeffrey T. Fritz, Beast
 **What:** When Copilot runs the migration skill, BOTH Layer 1 AND Layer 2 MUST be run. Copilot is NOT to do ANY code fixes between Layer 1 and Layer 2. The pipeline must flow L1 → L2 without manual intervention. Beast updated `migration-toolkit/skills/bwfc-migration/SKILL.md` and `migration-toolkit/skills/migration-standards/SKILL.md` to codify this: added "Migration Pipeline — MANDATORY" section with critical warning, exact `bwfc-migrate.ps1` invocation, Layer 2 checklist, and explicit pipeline rules. Renamed "Layer 2 (Manual)" to "Layer 2 (Copilot-Assisted)" in migration-standards.
 **Why:** Manual fixes between layers corrupt the signal on whether the L1 script needs improvement. Pipeline quality measurement depends on clean L1 → L2 flow.
-
 ### 2026-03-11: Standardize all generic type params to ItemType (consolidated)
 **By:** Jeffrey T. Fritz, Cyclops
 **What:** All BWFC data-bound components now use `ItemType` as the generic type parameter, matching the original Web Forms `DataBoundControl.ItemType` attribute name. Renamed `TItemType` (DataBoundComponent, SelectHandler) and `TItem` (BaseListControl, BulletedList, CheckBoxList, DropDownList, ListBox, RadioButtonList) to `ItemType`. All Group 3 components already used `ItemType`. Zero remaining `TItemType`/`TItem` in library source. Build: 0 errors. Supersedes earlier P2-2 analysis that proposed standardizing to `TItem` — Jeff directed `ItemType` instead to honor the Web Forms original.
 **Why:** BWFC's core promise is same names, same attributes. `ItemType` is the Web Forms original. `TItem` is a .NET convention but breaks migration fidelity.
-
 ### 2026-03-11: P0 migration script fixes — Test-UnconvertiblePage + [Parameter] annotation (consolidated)
 **By:** Jeffrey T. Fritz, Cyclops
 **What:** Two P0 fixes in `migration-toolkit/scripts/bwfc-migrate.ps1`: (1) Eliminated `Test-UnconvertiblePage` stubbing per Jeff directive — the function now always returns `$false`, call site replaced with TODO-annotation injection so pages are fully converted through the BWFC pipeline instead of replaced with stubs. The PayPal ImageButton in ShoppingCart.aspx is just an image button, not PayPal SDK code. (2) Fixed `[RouteData]` → `[Parameter]` regex replacement — the inline `// TODO:` comment was swallowing the property declaration. TODO now goes on a separate line above `[Parameter]`.
 **Why:** (1) Stubs destroy markup that took effort to convert. Pages should ALWAYS be converted with BWFC components; concerns flagged with TODO comments. (2) The inline comment caused 6 build errors (CS1031, CS1001, CS1026) per project with RouteData parameters.
-
-
 ### 2026-03-11: SelectMethod, ContentPlaceHolder, GetRouteUrl, and Validators  L1 script and skill corrections (consolidated)
 **By:** Jeffrey T. Fritz, Beast, Cyclops
 **What:**
@@ -6661,8 +6657,6 @@ Jeff's Run 20 review identified four bugs in the migration pipeline:
 - `migration-toolkit/skills/migration-standards/SKILL.md`  3 SelectMethod references
 - `migration-toolkit/skills/bwfc-data-migration/SKILL.md`  4 SelectMethod references + TItem to ItemType fix
 - `dev-docs/migration-tests/wingtiptoys/run20/REPORT.md`  validator false claim removed, SelectMethod guidance corrected
-
-
 ### 2026-03-11: NEVER default to SQLite  database provider and SelectMethod enforcement (consolidated)
 **By:** Jeffrey T. Fritz, Beast, Cyclops
 **What:**
@@ -6678,48 +6672,33 @@ Jeff's Run 20 review identified four bugs in the migration pipeline:
 **By:** Jeffrey T. Fritz, Beast, Cyclops
 **What:** The migration pipeline now auto-detects the original database provider from Web.config and scaffolds the matching EF Core package end-to-end. (1) Jeff directive: detect the original provider from Web.config connection strings — not just "avoid SQLite" but actively preserve the original database. (2) Cyclops added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` with three-pass detection: explicit `providerName` → connection string content patterns → EntityClient inner provider → SqlServer fallback. Scaffolds correct EF Core package, `Program.cs` provider method, and `[DatabaseProvider]` review item for L2 agents. (3) Beast reframed all three migration skill files to lead with "detect and match original provider" as the affirmative instruction, with NEVER-substitute guardrails retained as backstops. L2 checklist directs agents to verify the L1-detected provider.
 **Why:** Drop-in replacement means nothing changes unnecessarily, including the database. The L1 script previously hardcoded SqlServer — now it auto-detects. Agents prioritize affirmative instructions over prohibitions, so "detect and match" gives a clear workflow. Tested against ContosoUniversity and WingtipToys (both correctly detect SQL Server LocalDB).
-
-
 ### 2026-03-12: Executive Summary updated to 40 runs with Run 19-21 data
 **By:** Beast
 **What:** Updated EXECUTIVE-SUMMARY.md from 38 → 40 benchmark runs. Added WT Run 20 (zero-error pipeline), WT Run 21 (SelectMethod preservation), and CU Run 19 (SQL Server auto-detection). Regenerated all 3 performance chart PNGs with new data points. CU Run 19 used Items= binding for SelectMethod (skills were fixed after that run) — flagged in What's Next for re-run with corrected skills.
 **Why:** The executive summary is the public-facing proof point for the migration toolkit. Keeping it current with every batch of runs ensures Jeff has accurate, promotion-worthy numbers for stakeholder conversations. The CU Run 19 Items= binding caveat is important context — it's not a failure, but it means a CU re-run with SelectMethod delegates is a near-term priority.
-
 ### 2026-03-11: Executive summary — lead with successes, trim description
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** The first 3 paragraphs of EXECUTIVE-SUMMARY.md have too much description. Get to the successes faster. The opening should lead with wins and hard numbers, not explanatory prose about what the toolkit does.
 **Why:** User request — the document is meant to demonstrate results and earn a promotion. Description can come later; the opening must punch.
+### 2026-03-12: L2 automation — EnumParameter<T> + WebFormsPageBase shims (consolidated)
 
-### 2026-03-11: L2 automation -- 6 BWFC library enhancements to eliminate recurring manual fixes
-
-**By:** Forge
-**What:** Analysis of Runs 17-21 (WT + CU) identified 6 recurring L2 manual fix patterns accounting for ~25 min/run. The core insight: Blazor Razor compiler is stricter than Web Forms markup -- BWFC can absorb this gap with implicit conversions. Prioritized opportunities:
-- **OPP-1** (P0/M): EnumParameter<T> wrapper struct with implicit string conversion -- eliminates @(GridLines.None) wrapping on ~20 components
-- **OPP-2** (P0/S): Unit implicit string operator -- Width=125px just works (replace broken explicit operator with implicit delegating to Unit.Parse)
-- **OPP-3** (P1/S): Response.Redirect shim on WebFormsPageBase -- ResponseShim class delegates to NavigationManager, strips ~/ and .aspx
-- **OPP-4** (P1/M): Session state scoped dictionary (InMemorySessionState) -- Session[key] compiles unchanged, scoped to circuit
-- **OPP-5** (P2/S): ViewState on WebFormsPageBase -- BaseWebFormsComponent already has ViewState dict, just needs page base exposure
-- **OPP-6** (P2/S): GetRouteUrl on WebFormsPageBase -- helper exists in Extensions/ but not accessible from pages, add via LinkGenerator
-
-Implementation order: OPP-2, OPP-3, OPP-5, OPP-6 (first batch, Cyclops implementing). OPP-1 deferred pending Jeff sign-off on public API change. OPP-4 deferred (most complex).
-NOT automated: EF6 to EF Core, Identity, payment integration, Page_Load to OnInitializedAsync (semantic transforms stay as L2).
-**Why:** L2 currently takes ~25 min of Copilot-assisted transforms per run. These 6 patterns are mechanical and repetitive. BWFC library can absorb the gap the same way Unit and WebColor already do for type parsing. Eliminates the most frequent build errors across every migration run.
-
+**By:** Forge (analysis), Cyclops (implementation)
+**What:** Forge analyzed Runs 17–21 and identified 6 recurring L2 manual fix patterns (~25 min/run). All 6 OPPs now resolved:
+- **OPP-1** (P0/M): `EnumParameter<T>` wrapper struct — 55 files, 46 components. Bare string values (`GridLines="None"`) now work in Razor markup. Gotchas: switch expressions and Shouldly need `.Value`.
+- **OPP-2** (P0/S): `Unit` implicit string operator — `Width="125px"` works without `Unit.Parse()` wrapping.
+- **OPP-3** (P1/S): `ResponseShim` on WebFormsPageBase — `Response.Redirect("~/Products.aspx")` compiles and navigates correctly.
+- **OPP-4** (P1/M): Session state — deferred (most complex, not yet implemented).
+- **OPP-5** (P2/S): `ViewState` dictionary on WebFormsPageBase — `ViewState["key"]` compiles unchanged with `[Obsolete]` warning.
+- **OPP-6** (P2/S): `GetRouteUrl` on WebFormsPageBase — uses `LinkGenerator` + `IHttpContextAccessor`.
+NOT automated (stays L2): EF6→EF Core, Identity, payment integration, Page_Load→OnInitializedAsync.
+**Why:** These shims eliminate the most frequent mechanical L2 fixes. Blazor Razor compiler is stricter than Web Forms markup — BWFC absorbs the gap with implicit conversions. OPP-1 alone eliminates the #1 L2 fix by volume. Abstract class hierarchies (DataListEnum, RepeatLayout, ButtonType, TreeViewImageSet, ValidationSummaryDisplayMode) and nullable enum params were NOT converted.
 ### 2026-03-11: ItemType renames must cover all consumers (tests, samples, docs)
 
 **By:** Cyclops
 **What:** When renaming a generic type parameter on a component (e.g., `TItem` → `ItemType`), the rename must be applied to all consumer files — test `.razor` files, sample pages, and documentation code blocks — not just the component source. CI may only report the first few errors, masking the full scope.
 **Why:** The `ItemType` standardization renamed the generic on 13+ components but missed 43 consumer files. This broke CI on PR #425 with `RZ10001` and `CS0411` errors across RadioButtonList, BulletedList, CheckBoxList, DropDownList, ListBox tests and all related sample pages.
+### 2026-03-11: ResponseShim.Redirect null URL bug (bug report)
 
-
-### 2026-03-11: WebFormsPageBase L2 automation shims implemented (OPP-2, OPP-3, OPP-5, OPP-6)
-
-**By:** Cyclops
-**What:** WebFormsPageBase now injects NavigationManager, LinkGenerator, and IHttpContextAccessor to support L2 automation shims. Four changes:
-- **Response.Redirect shim (OPP-3):** ResponseShim delegates to NavigationManager. Response.Redirect works unchanged on WebFormsPageBase pages.
-- **ViewState on page base (OPP-5):** Dictionary ViewState property added with Obsolete warning (in-memory only).
-- **GetRouteUrl on page base (OPP-6):** Uses LinkGenerator + IHttpContextAccessor, same pattern as BaseWebFormsComponent.
-- **Unit implicit string conversion (OPP-2):** Replaced explicit operator with implicit. Width=125px works in Razor markup without Unit.Parse wrapping.
-
-L2 no longer needs to inject NavigationManager on pages using Response.Redirect. ViewState, GetRouteUrl, and bare unit strings compile unchanged.
-**Why:** These 4 shims eliminate the most frequent mechanical L2 fixes per Forge analysis. Migration skills should be updated to note these patterns now just work on WebFormsPageBase pages.
+**By:** Rogue (QA)
+**What:** `ResponseShim.Redirect(string url)` throws `NullReferenceException` when `url` is null (line 28: `url.StartsWith("~/")`). Web Forms throws `ArgumentNullException` with a meaningful message. Recommendation: add `ArgumentNullException.ThrowIfNull(url)` guard.
+**Why:** Raw NullReferenceException is confusing during migration debugging. Test `Redirect_NullUrl_ThrowsNullReferenceException` in ResponseShimTests.razor documents the current behavior.

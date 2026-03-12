@@ -132,3 +132,6 @@ Key patterns: Response event interception for network-level asset checks. `Evalu
 
 Key patterns: MockNavigationManager.LastUri for ResponseShim navigation assertions. CapturingLinkGenerator with reflection on TAddress for GetRouteUrl route name verification. bUnit singleton service override (`Services.AddSingleton`) before Render to inject test doubles.
 
+
+
+ Team update (2026-03-12): L2 automation consolidated  EnumParameter<T> (OPP-1) + WebFormsPageBase shims (OPP-2,3,5,6) all implemented. Rogue: 4 test files need .Value.ShouldBe() fix. Beast: L2 scripts can emit bare enum strings.  decided by Forge (analysis), Cyclops (implementation)

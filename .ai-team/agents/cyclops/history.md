@@ -163,3 +163,6 @@ Implemented `EnumParameter<T>` — a `readonly struct` enabling Blazor component
 - `UpdatePanel/UpdatePanelTests.razor` — `RenderMode/UpdateMode.ShouldBe()` → `.Value.ShouldBe()`
 - `Localize/InheritsLiteral.razor` — overload resolution failure on `ShouldBe`
 
+
+
+ Team update (2026-03-12): ResponseShim.Redirect null URL bug reported by Rogue — throws NullReferenceException instead of ArgumentNullException. Add null guard.  reported by Rogue (QA)
