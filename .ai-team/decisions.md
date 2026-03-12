@@ -6730,3 +6730,10 @@ NOT automated (stays L2): EF6→EF Core, Identity, payment integration, Page_Loa
 **By:** Forge
 **What:** WebFormsPageBase gets IsHttpContextAvailable (bool) and RequireHttpContext() (throws InvalidOperationException with render mode diagnostics). HttpContext != null is the guard condition, not RendererInfo.IsInteractive. RendererInfo.Name used only for diagnostic messages. GetRouteUrl, Session throw when HttpContext is null. Response.Redirect works everywhere (uses NavigationManager). Request.Url and QueryString degrade gracefully via NavigationManager fallback. Cookie behavior: see separate cookie directive (Pattern B+ no-op).
 **Why:** InteractiveServer WebSocket circuits lose HttpContext after prerendering. Current GetRouteUrl throws raw NullReferenceException with no diagnostics. RendererInfo is available in .NET 9+ (project targets net10.0) for enriching error messages.
+
+### 2026-03-12: PageTitle deduplication — L1 suppresses when code-behind has Page.Title (Option A)
+
+**By:** Forge
+**Status:** Analysis complete — recommended approach presented, awaiting final confirmation
+**What:** L1 migration extracts `Title` from `<%@ Page Title="..." %>` and emits `<PageTitle>`. L2 migration separately converts `Page.Title = "..."` from code-behind. Neither layer knows about the other, causing 4 exact duplicates and 1 value conflict ("Welcome" vs "Home Page") across AfterWingtipToys. Recommended fix (Option A): In `ConvertFrom-PageDirective`, before emitting `<PageTitle>`, check if the companion `.aspx.cs` file contains `Page.Title\s*=`. If found, skip `<PageTitle>` emission — L2 handles title via code-behind. If not found, emit `<PageTitle>` as normal. L1 already peeks at code-behind for redirect detection (line 1538 of bwfc-migrate.ps1), so this follows the same pattern.
+**Why:** Deterministic regex check in PowerShell fixes the root cause by preventing duplicates at creation time. Option B (L2 removes) is less reliable with AI-driven L2. Option C (always suppress) breaks 12 Account pages with no code-behind title. Option D (marker + strip) adds complexity — fallback if Option A proves insufficient.
