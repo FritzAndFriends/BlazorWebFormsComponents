@@ -90,3 +90,86 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 Team updates: Migration report 3-level traversal (Beast). Run 5 reports need Works/Doesn't-Work sections (Beast). Migration standards formalized -- EF Core, .NET 10, ASP.NET Core Identity, BWFC data controls preferred, migration-toolkit/ canonical (Jeff/Forge).
 
 <!-- Summarized 2026-03-04 by Scribe -- covers Run 6 script enhancements -->
+
+
+## Archived 2026-03-12 (entries from 2026-03-12 through 2025-07-25)
+
+### L1 Script — Web.config Database Provider Auto-Detection (2026-03-12)
+
+Added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` that parses Web.config `<connectionStrings>` to detect the actual database provider. Three-pass detection: (1) explicit `providerName` attribute, (2) connection string content patterns like `(LocalDB)` or `Server=`, (3) EntityClient inner `provider=` extraction for EF6 EDMX connections. Returns matching EF Core package name and provider method. Falls back to SQL Server when no Web.config or no connectionStrings found.
+
+**Changes:**
+- `Find-DatabaseProvider` function added between Logging and Project Scaffolding regions
+- Uses `GetAttribute()` for XML attribute access (StrictMode-safe — `$entry.providerName` throws under `Set-StrictMode -Version Latest`)
+- Package reference in csproj scaffold now uses detected package instead of hardcoded SqlServer
+- Program.cs scaffold includes detected connection string in commented-out `AddDbContextFactory` line (both identity and models-only paths)
+- `[DatabaseProvider]` review item added to migration summary when provider detected from Web.config
+- Provider mapping: SqlClient→SqlServer, SQLite→Sqlite, Npgsql→PostgreSQL, MySqlClient→MySQL
+
+**Key learning:** PowerShell `Set-StrictMode -Version Latest` throws on missing XML element properties. Use `$element.GetAttribute('attrName')` (returns '' if missing) instead of `$element.attrName` for optional XML attributes.
+
+
+ Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. L1 script now auto-detects provider from Web.config.  decided by Jeffrey T. Fritz, Beast, Cyclops
+
+### Fix: TItem → ItemType in Tests and Samples (2026-03-12)
+
+The `ItemType` standardization (renaming `TItem`/`TItemType` → `ItemType` across 13 component files) was not applied to test files or sample pages. This caused CI failures on PR #425 with `RZ10001` (type cannot be inferred) and `CS0411` (type arguments cannot be inferred) errors for `RadioButtonList` and `BulletedList` — but the problem was actually much wider.
+
+**Root cause:** Components declare `@typeparam ItemType` but tests and samples still referenced `TItem=`. The Razor compiler couldn't match the generic parameter name.
+
+**Fix:** Renamed `TItem=` → `ItemType=` across 43 files:
+- 36 test files: RadioButtonList (7), BulletedList (7), CheckBoxList (6), DropDownList (7), ListBox (8), ToolTipTests (1)
+- 7 sample files: ControlSamples pages for all 5 list controls, plus AfterWingtipToys account pages
+
+**Key learning:** When standardizing generic type parameter names on components, the rename must also cover all test files, sample pages, and documentation code blocks — not just the component source. CI may only surface the first few errors, hiding the full scope.
+
+### L2 Automation Shims — 4 S-sized Library Enhancements (2026-07-25)
+
+Implemented 4 OPPs from Forge's L2 automation analysis to eliminate recurring manual L2 fixes:
+
+**OPP-2 (Unit implicit string conversion):** Replaced `explicit operator Unit(string)` (which only handled bare integers) with `implicit operator Unit(string s) => Unit.Parse(s)`. Now `Width="125px"` just works in Razor markup — no `@(Unit.Parse(...))` wrapper needed. `Unit.Parse` already handled all CSS unit formats (px, em, %, pt, etc.).
+
+**OPP-3 (ResponseShim):** Created `ResponseShim.cs` wrapping `NavigationManager`. Strips `~/` prefix and `.aspx` extension from URLs. Exposed as `protected ResponseShim Response` on `WebFormsPageBase`. Now `Response.Redirect("~/Products.aspx")` compiles and navigates correctly.
+
+**OPP-5 (ViewState on WebFormsPageBase):** Added `Dictionary<string, object> ViewState` with `[Obsolete]` warning. Page code-behind using `ViewState["key"]` compiles unchanged. `BaseWebFormsComponent` already had this (line ~145); now page base does too.
+
+**OPP-6 (GetRouteUrl on WebFormsPageBase):** Added `GetRouteUrl(string routeName, object routeParameters)` using injected `LinkGenerator` + `IHttpContextAccessor` — same pattern as `GetRouteUrlHelper` extension on `BaseWebFormsComponent`. Strips `.aspx` from route names.
+
+**Key learnings:**
+- `Unit.Parse()` already handles all CSS unit formats via the `Unit(string, CultureInfo, UnitType)` constructor — no new parsing needed.
+- `WebFormsPageBase` did NOT have `NavigationManager`, `LinkGenerator`, or `IHttpContextAccessor` injections prior to this change. Added all three.
+- The explicit string-to-Unit operator was effectively dead code — no tests or consuming code used the `(Unit)"string"` cast syntax.
+
+
+ Team update (2026-03-11): L2 automation shims (OPP-2, 3, 5, 6) implemented by Cyclops on WebFormsPageBase  Unit implicit string, Response.Redirect shim, ViewState, GetRouteUrl. OPP-1/OPP-4 deferred.  decided by Forge (analysis), Cyclops (implementation)
+
+### OPP-1: EnumParameter<T> Wrapper Struct (2026-07-25)
+
+Implemented `EnumParameter<T>` — a `readonly struct` enabling Blazor component enum parameters to accept both enum values and bare string values. This is the #1 L2 fix by volume: every migrated enum attribute like `GridLines="None"` previously required `@(GridLines.None)` Razor expression syntax.
+
+**New file:** `src/BlazorWebFormsComponents/Enums/EnumParameter.cs`
+- Implicit conversions: `T → EnumParameter<T>`, `string → EnumParameter<T>` (case-insensitive parse), `EnumParameter<T> → T`
+- Equality operators for `EnumParameter<T>` vs `T` and `T` vs `EnumParameter<T>`
+- Implements `IEquatable<EnumParameter<T>>` and `IEquatable<T>`
+
+**55 files changed** across 46 components/interfaces/style classes:
+- BaseStyledComponent, BaseWebFormsComponent, BulletedList, Calendar, Chart, ChartSeries, CheckBox, CheckBoxList, DataPager, DetailsView, FormView, GridView, Image, ImageButton, ImageMap, ListBox, ListView, Literal, Login, ChangePassword, Menu, MenuItemStyle, MenuLevelStyle, NamingContainer, Panel, RadioButton, RadioButtonList, ScriptManager, SiteMapPath, Table, TableCell, TableFooterRow, TableHeaderCell, TableHeaderRow, TableRow, TextBox, TreeNode, TreeView, UiPagerSettings, UiStyle, UiTableItemStyle, UpdatePanel, BaseValidator, Style, TableItemStyle
+- Interfaces: IImageComponent, IHasLayoutStyle, IHasLayoutTableItemStyle
+
+**Skipped (abstract class hierarchies, not enums):** DataListEnum, RepeatLayout, ButtonType, TreeViewImageSet, ValidationSummaryDisplayMode
+
+**Skipped (nullable):** `Docking?` on ChartLegend/ChartTitle — wrapping nullable enum params in `EnumParameter<T>?` requires separate handling.
+
+**Key learnings / gotchas:**
+1. **Switch expressions break.** C# pattern matching does NOT use user-defined implicit conversions. Every `switch (Property)` or `Property switch { EnumVal => ... }` must become `Property.Value switch { ... }`. This was the biggest source of internal code changes (~15 switch expressions updated).
+2. **Shouldly `.ShouldBe()` breaks.** Extension methods like `ShouldBe` can't resolve through implicit conversions on structs. Tests need `property.Value.ShouldBe(EnumVal)`. Affected: ListView/SortingEvents, ScriptManager/ScriptManagerTests, UpdatePanel/UpdatePanelTests, Localize/InheritsLiteral.
+3. **"Color Color" rule still works.** When property name matches enum type name (e.g., `GridLines` property of type `EnumParameter<GridLines>`), C# still resolves `GridLines.None` in case labels to the enum type via the "Color Color" disambiguation rule.
+4. **Default values work unchanged.** `= GridLines.None` compiles because the implicit `T → EnumParameter<T>` conversion handles the assignment.
+5. **`ToString()` is transparent.** The struct's `ToString()` delegates to `Value.ToString()`, so existing `property.ToString().ToLowerInvariant()` patterns work unchanged.
+6. **Equality comparisons are safe.** The `==` and `!=` operators between `EnumParameter<T>` and `T` handle `if (Property == EnumVal)` without needing `.Value`.
+
+**Test files needing updates (for Rogue):**
+- `ListView/SortingEvents.razor` — `SortDirection.ShouldBe()` → `.Value.ShouldBe()`
+- `ScriptManager/ScriptManagerTests.razor` — `ScriptMode.ShouldBe()` → `.Value.ShouldBe()`
+- `UpdatePanel/UpdatePanelTests.razor` — `RenderMode/UpdateMode.ShouldBe()` → `.Value.ShouldBe()`
+- `Localize/InheritsLiteral.razor` — overload resolution failure on `ShouldBe`

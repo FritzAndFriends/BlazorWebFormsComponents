@@ -6702,16 +6702,29 @@ NOT automated (stays L2): EF6→EF Core, Identity, payment integration, Page_Loa
 **By:** Rogue (QA)
 **What:** `ResponseShim.Redirect(string url)` throws `NullReferenceException` when `url` is null (line 28: `url.StartsWith("~/")`). Web Forms throws `ArgumentNullException` with a meaningful message. Recommendation: add `ArgumentNullException.ThrowIfNull(url)` guard.
 **Why:** Raw NullReferenceException is confusing during migration debugging. Test `Redirect_NullUrl_ThrowsNullReferenceException` in ResponseShimTests.razor documents the current behavior.
-### 2026-03-12: Cookie shims use graceful degradation, not exceptions
+### 2026-03-12: Pattern B+ — Graceful Cookie Degradation (consolidated)
 
-**By:** Jeffrey T. Fritz (via Copilot)
-**What:** Response.Cookies and Request.Cookies must NOT throw when HttpContext is unavailable. Use Forge's Pattern B+ (Honest No-Op with Runtime Diagnostics): NullResponseCookies (no-op writes + ILogger warning), EmptyRequestCookieCollection (null reads + ILogger warning), CookiesAvailable bool escape hatch. Same philosophy as ViewState  compile, don't crash, be honest.
-**Why:** User directive  Jeff explicitly rejected throwing for cookies. The warning log is the middle ground between throw and silent swallow.
-### 2026-03-12: PageTitle deduplication  Page.Title is single source of truth
+**By:** Jeffrey T. Fritz, Forge
+**Status:** APPROVED (Jeff directive)
+
+**What:** Cookie shims on WebFormsPageBase adopt Pattern B+ (Honest No-Op with Runtime Diagnostics) when HttpContext is null.
+- Response.Cookies: NullResponseCookies — Append/Delete silently no-op, ILogger.LogWarning on first access per-request.
+- Request.Cookies: EmptyRequestCookies — empty/null for all lookups, Count=0, ILogger.LogWarning on first access per-request.
+- CookiesAvailable bool escape hatch for code that needs to check before accessing.
+- GetRouteUrl/Session still throw (silent failure would produce incorrect URLs or data loss).
+- Response.Redirect, ViewState need no guard (NavigationManager / in-memory).
+- Request.QueryString/Url degrade gracefully via NavigationManager URI parsing.
+- Guard method: `_httpContextAccessor.HttpContext is not null` (NOT RendererInfo.IsInteractive).
+- Both null implementations use `bool _warned` flag to log only once per instance.
+
+**Why:** Cookie operations in interactive mode are inherently impossible (no HTTP request/response). Jeff explicitly rejected throwing for cookies. The warning log is the middle ground between throw and silent swallow. Same philosophy as ViewState — compile, don't crash, be honest. Logging ensures developers can diagnose missing cookie behavior via standard logging.
+
+### 2026-03-12: PageTitle deduplication — Page.Title is single source of truth
 
 **By:** Forge
-**What:** In BWFC-migrated pages, Page.Title via IPageService is the single source of truth for both browser tab title and markup references like @(Title). Inline <PageTitle> must NOT coexist with Page.Title  it creates a competing title source. L1 emits <PageTitle> as temporary placeholder; L2 must replace it with Page.Title and remove the inline <PageTitle>. Default.razor has an L2 hallucination: "Home Page" instead of "Welcome". Fix: L1 injects BWFC-MIGRATE marker in code-behind, L2 consumes it, never invents values.
-**Why:** Five AfterWingtipToys pages had both <PageTitle> and Page.Title. Default.razor showed "Welcome" in browser tab but "Home Page" in body  split-brain bug from L2 inventing a title value. Page.Title  IPageService  WebFormsPage  <PageTitle> chain is the correct single-source-of-truth model. Inline <PageTitle> bypasses IPageService entirely.
+**What:** In BWFC-migrated pages, Page.Title via IPageService is the single source of truth for both browser tab title and markup references like @(Title). Inline <PageTitle> must NOT coexist with Page.Title — it creates a competing title source. L1 emits <PageTitle> as temporary placeholder; L2 must replace it with Page.Title and remove the inline <PageTitle>. Default.razor has an L2 hallucination: "Home Page" instead of "Welcome". Fix: L1 injects BWFC-MIGRATE marker in code-behind, L2 consumes it, never invents values.
+**Why:** Five AfterWingtipToys pages had both <PageTitle> and Page.Title. Default.razor showed "Welcome" in browser tab but "Home Page" in body — split-brain bug from L2 inventing a title value. Page.Title → IPageService → WebFormsPage → <PageTitle> chain is the correct single-source-of-truth model. Inline <PageTitle> bypasses IPageService entirely.
+
 ### 2026-03-12: Render mode guards for HttpContext-dependent members
 
 **By:** Forge
