@@ -166,3 +166,7 @@ Implemented `EnumParameter<T>` — a `readonly struct` enabling Blazor component
 
 
  Team update (2026-03-12): ResponseShim.Redirect null URL bug reported by Rogue — throws NullReferenceException instead of ArgumentNullException. Add null guard.  reported by Rogue (QA)
+
+ Team update (2026-03-12): Cookie shims must use graceful degradation (Pattern B+), not exceptions. NullResponseCookies for no-op writes, EmptyRequestCookieCollection for null reads, both with ILogger warnings. CookiesAvailable bool escape hatch.  decided by Jeffrey T. Fritz
+ Team update (2026-03-12): PageTitle deduplication  Page.Title via IPageService is single source of truth. Remove inline <PageTitle> from 5 AfterWingtipToys files. Fix Default.razor.cs "Home Page"  "Welcome". L1 script: inject BWFC-MIGRATE marker. L2: consume marker, never invent values.  decided by Forge (analysis), approved by Jeffrey T. Fritz
+ Team update (2026-03-12): Render mode guards  add IsHttpContextAvailable and RequireHttpContext() to WebFormsPageBase. Guard GetRouteUrl. HttpContext != null is the guard, RendererInfo for diagnostics only.  decided by Forge

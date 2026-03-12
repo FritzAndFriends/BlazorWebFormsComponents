@@ -131,6 +131,18 @@ Library audit: 153 Razor components + 197 C# classes (CONTROL-COVERAGE.md was li
 
  Team update (2026-03-11): WebFormsPageBase now has Response.Redirect shim, ViewState dict, GetRouteUrl, and Unit implicit string conversion. L2 skills should note these patterns compile unchanged on @inherits WebFormsPageBase pages.  decided by Cyclops
 
+### Render Mode Guard Analysis (2026-03-12)
+
+- **Blazor render mode detection APIs (available on net10.0 / .NET 9+):** `ComponentBase.RendererInfo` has `.Name` (`"Static"`, `"Server"`, `"WebAssembly"`, `"WebView"`) and `.IsInteractive` (bool). `ComponentBase.AssignedRenderMode` returns null for SSR or the specific `IComponentRenderMode`. These are available on WebFormsPageBase because it inherits ComponentBase.
+- **Critical nuance:** `RendererInfo.IsInteractive` is NOT the right guard for HttpContext availability. During InteractiveServer prerender, `IsInteractive == false` but HttpContext IS present. After circuit activation, `IsInteractive == true` but HttpContext is null. The ground truth is `_httpContextAccessor.HttpContext != null`. RendererInfo is for diagnostic error messages only.
+- **Recommended pattern:** `RequireHttpContext([CallerMemberName])` helper on WebFormsPageBase that throws `InvalidOperationException` with render mode details. `IsHttpContextAvailable` bool property as escape hatch. Each shim also guards its own HttpContext-dependent members.
+- **Throw, not degrade:** GetRouteUrl, Response.Cookies, Request.Cookies, Session must throw. Response.Redirect (NavigationManager) and Request.QueryString/Url (NavigationManager fallback) can degrade gracefully. ViewState is unaffected.
+- **Don't cache HttpContext:** Always access live via `_httpContextAccessor.HttpContext`. HttpContext exists during prerender, then disappears when the WebSocket circuit starts.
+- **Key files:** `src/BlazorWebFormsComponents/WebFormsPageBase.cs`, `src/BlazorWebFormsComponents/ResponseShim.cs`, `src/BlazorWebFormsComponents/Extensions/GetRouteUrlHelper.cs` (also vulnerable, P2 follow-up)
+- **Full decision written to:** `.ai-team/decisions/inbox/forge-render-mode-guards.md`
 
 
  Team update (2026-03-12): L2 automation consolidated  EnumParameter<T> (OPP-1) + WebFormsPageBase shims (OPP-2,3,5,6) all implemented. Rogue: 4 test files need .Value.ShouldBe() fix. Beast: L2 scripts can emit bare enum strings.  decided by Forge (analysis), Cyclops (implementation)
+
+ Team update (2026-03-12): Jeff approved Pattern B+ (Honest No-Op with Runtime Diagnostics) for cookie graceful degradation. Cookies must NOT throw  overrides render-mode-guards 4 for cookie members.  decided by Jeffrey T. Fritz
+ Team update (2026-03-12): PageTitle dedup analysis delivered and accepted. Page.Title is single source of truth. Implementation assigned to Cyclops (P0: Default.razor fix, P1: pipeline fix).  decided by Forge, approved by Jeffrey T. Fritz

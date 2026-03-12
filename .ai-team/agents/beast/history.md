@@ -158,3 +158,7 @@ Run 10: ❌ FAILED — Coordinator violated protocol (hand-editing files, wrong 
 
 
  Team update (2026-03-12): L2 automation consolidated  EnumParameter<T> (OPP-1) + WebFormsPageBase shims (OPP-2,3,5,6) all implemented. Rogue: 4 test files need .Value.ShouldBe() fix. Beast: L2 scripts can emit bare enum strings.  decided by Forge (analysis), Cyclops (implementation)
+
+ Team update (2026-03-12): Cookie shims use graceful degradation (Pattern B+), not exceptions  Jeff directive. Document no-op behavior for cookies when HttpContext unavailable.  decided by Jeffrey T. Fritz
+ Team update (2026-03-12): PageTitle deduplication  L2 skill must add Page.Title and remove inline <PageTitle>. Never invent title values. Consume BWFC-MIGRATE marker from L1.  decided by Forge (analysis), approved by Jeffrey T. Fritz
+ Team update (2026-03-12): Render mode guards on WebFormsPageBase. Document IsHttpContextAvailable escape hatch and render mode behavior for Request/Response/Session shims.  decided by Forge
