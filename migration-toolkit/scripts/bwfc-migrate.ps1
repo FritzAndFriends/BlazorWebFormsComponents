@@ -733,7 +733,7 @@ function Invoke-ScriptAutoDetection {
 #region --- Directive Transforms ---
 
 function ConvertFrom-PageDirective {
-    param([string]$Content, [string]$FileName, [string]$RelPath)
+    param([string]$Content, [string]$FileName, [string]$RelPath, [string]$SourceFile = '')
 
     # <%@ Page ... %> → @page "/route"
     $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($FileName)
@@ -751,10 +751,25 @@ function ConvertFrom-PageDirective {
         $Content = $Content -replace '<%@\s*Page[^%]*%>\s*\r?\n?', ''
         $pageHeader = "@page `"$route`"`n"
 
-        # RF-10: Add <PageTitle> if title was extracted
+        # RF-10: Add <PageTitle> if title was extracted — but skip if code-behind
+        # sets Page.Title (L2 will emit that assignment, so emitting <PageTitle>
+        # here would create a duplicate)
         if ($pageTitle) {
-            $pageHeader += "<PageTitle>$pageTitle</PageTitle>`n"
-            Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Extracted Title=`"$pageTitle`" → <PageTitle>"
+            $codeBehindSetsTitle = $false
+            $cbPath = if ($SourceFile) { $SourceFile + '.cs' } else { '' }
+            if ($cbPath -and (Test-Path $cbPath)) {
+                $cbContent = Get-Content -Path $cbPath -Raw -Encoding UTF8
+                if ($cbContent -match 'Page\.Title\s*=') {
+                    $codeBehindSetsTitle = $true
+                }
+            }
+
+            if ($codeBehindSetsTitle) {
+                Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Suppressed <PageTitle> for Title=`"$pageTitle`" — code-behind sets Page.Title (L2 handles)"
+            } else {
+                $pageHeader += "<PageTitle>$pageTitle</PageTitle>`n"
+                Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Extracted Title=`"$pageTitle`" → <PageTitle>"
+            }
         }
 
         $Content = $pageHeader + $Content
@@ -1567,7 +1582,7 @@ function Convert-WebFormsFile {
     # Apply transform pipeline in order
     switch ($extension) {
         '.aspx' {
-            $content = ConvertFrom-PageDirective -Content $content -FileName $fileName -RelPath $relativePath
+            $content = ConvertFrom-PageDirective -Content $content -FileName $fileName -RelPath $relativePath -SourceFile $SourceFile
         }
         '.master' {
             $content = ConvertFrom-MasterDirective -Content $content -RelPath $relativePath

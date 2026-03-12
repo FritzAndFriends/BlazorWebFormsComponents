@@ -5,10 +5,10 @@ namespace BlazorWebFormsComponents.Test
 	public class MockNavigationManager : NavigationManager
 	{
 
-		public MockNavigationManager()
+		public MockNavigationManager(string baseUri = "http://localhost/", string initialUri = null)
 		{
 
-			Initialize("http://localhost/", "http://localhost/");
+			Initialize(baseUri, initialUri ?? baseUri);
 
 		}
 
