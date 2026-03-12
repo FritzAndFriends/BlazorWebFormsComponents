@@ -316,6 +316,7 @@ function New-ProjectScaffold {
 @using BlazorWebFormsComponents.LoginControls
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 "@
 
     # Program.cs
@@ -990,17 +991,19 @@ function ConvertFrom-MasterPage {
     $Content = $Content -replace '</body>\s*\r?\n?', ''
     Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Stripped document wrapper (DOCTYPE, html, body)'
 
-    # 4. Replace <asp:ContentPlaceHolder ID="MainContent"> → @Body
-    $mainCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*>.*?</asp:ContentPlaceHolder>'
+    # 4. Replace <asp:ContentPlaceHolder ID="MainContent|ContentPlaceHolder1|BodyContent"> → @Body
+    $mainCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"(MainContent|ContentPlaceHolder1|BodyContent)"[^>]*>.*?</asp:ContentPlaceHolder>'
     if ($mainCphRegex.IsMatch($Content)) {
+        $matchedId = $mainCphRegex.Match($Content).Groups[1].Value
         $Content = $mainCphRegex.Replace($Content, '@Body')
-        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body'
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "ContentPlaceHolder $matchedId → @Body"
     }
-    # Self-closing MainContent
-    $mainCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*/>'
+    # Self-closing MainContent/ContentPlaceHolder1/BodyContent
+    $mainCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"(MainContent|ContentPlaceHolder1|BodyContent)"[^>]*/>'
     if ($mainCphSelfRegex.IsMatch($Content)) {
+        $matchedId = $mainCphSelfRegex.Match($Content).Groups[1].Value
         $Content = $mainCphSelfRegex.Replace($Content, '@Body')
-        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body (self-closing)'
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "ContentPlaceHolder $matchedId → @Body (self-closing)"
     }
 
     # Other ContentPlaceHolders → TODO comment
@@ -1024,8 +1027,8 @@ function ConvertFrom-MasterPage {
         Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod preserved — needs delegate conversion in L2 (BWFC DataBoundComponent supports SelectMethod natively)'
     }
 
-    # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
-    $header = "@inherits LayoutComponentBase`n"
+    # 6. Inject @inherits LayoutComponentBase, <Page /> component, and HeadContent at the top
+    $header = "@inherits LayoutComponentBase`n`n<BlazorWebFormsComponents.Page />`n"
     if ($headContentBlock) {
         $header += "`n" + $headContentBlock + "`n"
     }
