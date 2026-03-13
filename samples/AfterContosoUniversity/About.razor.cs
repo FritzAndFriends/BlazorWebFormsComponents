@@ -1,23 +1,18 @@
-using ContosoUniversity.Models;
-using ContosoUniversity.Bll;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.BLL;
+using ContosoUniversity.Models;
 
-namespace ContosoUniversity;
-
-public partial class About
+namespace ContosoUniversity
 {
-    [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; } = default!;
-
-    private List<object> _enrollmentStats = new();
-
-    protected override async Task OnInitializedAsync()
+    public partial class About
     {
-        await using var db = await DbFactory.CreateDbContextAsync();
-        var logic = new Enrollmet_Logic(db);
-        var stats = logic.Get_Enrollment_ByDate();
-        _enrollmentStats = stats.Select(kvp => (object)new { Key = kvp.Key, Value = kvp.Value }).ToList();
-    }
+        [Inject] private EnrollmentLogic EnrollmentLogic { get; set; } = default!;
 
-    // TODO: Wire _enrollmentStats to GridView Items parameter once SelectMethod delegate is implemented
+        public IQueryable<EnrollmentStat> GetEnrollmentData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+        {
+            var data = EnrollmentLogic.GetEnrollmentsByDate();
+            totalRowCount = data.Count;
+            return data.AsQueryable();
+        }
+    }
 }

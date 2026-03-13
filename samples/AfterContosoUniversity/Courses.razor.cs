@@ -1,47 +1,49 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity;
-
-public partial class Courses
+namespace ContosoUniversity
 {
-    [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; } = default!;
-
-    private Courses_Logic? coursLogic;
-    private List<string> _departmentNames = new();
-    private List<object> _courses = new();
-    private List<object> _courseDetail = new();
-    private string _selectedDepartment = "";
-    private string _courseSearchText = "";
-
-    protected override async Task OnInitializedAsync()
+    public partial class Courses
     {
-        await using var db = await DbFactory.CreateDbContextAsync();
-        coursLogic = new Courses_Logic(db);
+        [Inject] private CoursesLogic CoursesLogic { get; set; } = default!;
 
-        _departmentNames = db.Departments.Select(d => d.DepartmentName).ToList();
-    }
+        private List<string> departments = new();
+        private string selectedDepartment = string.Empty;
+        private List<Cours> filteredCourses = new();
+        private string courseSearchText = string.Empty;
+        private Cours? selectedCourseDetail;
 
-    private void HandleSearchCourse()
-    {
-        if (coursLogic != null)
+        protected override void OnInitialized()
         {
-            _courses = coursLogic.GetCourses(_selectedDepartment).Cast<object>().ToList();
+            departments = CoursesLogic.GetDepartmentNames();
+        }
+
+        private void SearchCourses(MouseEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(selectedDepartment))
+            {
+                filteredCourses = CoursesLogic.GetCourses(selectedDepartment);
+            }
+        }
+
+        private void SearchByName(MouseEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(courseSearchText))
+            {
+                var courses = CoursesLogic.GetCourse(courseSearchText);
+                selectedCourseDetail = courses.FirstOrDefault();
+                courseSearchText = string.Empty;
+            }
+        }
+
+        public IQueryable<Cours> GetCourseData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+        {
+            totalRowCount = filteredCourses.Count;
+            if (maxRows > 0)
+                return filteredCourses.AsQueryable().Skip(startRowIndex).Take(maxRows);
+            return filteredCourses.AsQueryable();
         }
     }
-
-    private void HandleCourseByName()
-    {
-        if (coursLogic != null && !string.IsNullOrEmpty(_courseSearchText))
-        {
-            _courseDetail = coursLogic.GetCourse(_courseSearchText).Cast<object>().ToList();
-            _courseSearchText = string.Empty;
-        }
-    }
-
-    // TODO: Wire _courses and _courseDetail to GridView/DetailsView Items parameters
-    // TODO: AutoComplete search was a Web Service (ASMX WebMethod) — convert to component-local search
-    // TODO: Paging via GridView PageIndexChanging event
 }

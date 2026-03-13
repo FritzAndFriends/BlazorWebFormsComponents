@@ -1,6 +1,6 @@
-namespace ContosoUniversity;
-
-public partial class Home
+namespace ContosoUniversity
 {
-    // Original Web Forms Page_Load was empty — no initialization needed
+    public partial class Home
+    {
+    }
 }

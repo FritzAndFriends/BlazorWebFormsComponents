@@ -1,26 +1,32 @@
-using ContosoUniversity.Models;
-using ContosoUniversity.BLL;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+using BlazorWebFormsComponents;
+using ContosoUniversity.BLL;
+using ContosoUniversity.Models;
 
-namespace ContosoUniversity;
-
-public partial class Instructors
+namespace ContosoUniversity
 {
-    [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; } = default!;
-
-    private Instructors_Logic? instructorsLogic;
-    private List<object> _instructors = new();
-    private string _sortDirection = "desc";
-
-    protected override async Task OnInitializedAsync()
+    public partial class Instructors
     {
-        await using var db = await DbFactory.CreateDbContextAsync();
-        instructorsLogic = new Instructors_Logic(db);
-        _instructors = instructorsLogic.getInstructors().Cast<object>().ToList();
-    }
+        [Inject] private InstructorsLogic InstructorsLogic { get; set; } = default!;
 
-    // TODO: Wire _instructors to GridView Items parameter
-    // TODO: Implement sorting — BWFC GridView Sorting parameter is EventCallback<GridViewSortEventArgs>
-    //   private void HandleSorting(GridViewSortEventArgs e) { ... }
+        private List<Instructor> instructors = new();
+        private string sortDirection = "desc";
+
+        protected override void OnInitialized()
+        {
+            instructors = InstructorsLogic.GetInstructors();
+        }
+
+        private void HandleSorting(GridViewSortEventArgs e)
+        {
+            instructors = InstructorsLogic.GetSortedInstructors(e.SortExpression, sortDirection);
+            sortDirection = sortDirection == "asc" ? "desc" : "asc";
+        }
+
+        public IQueryable<Instructor> GetInstructorData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+        {
+            totalRowCount = instructors.Count;
+            return instructors.AsQueryable();
+        }
+    }
 }

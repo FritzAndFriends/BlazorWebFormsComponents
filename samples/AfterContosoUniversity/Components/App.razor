@@ -5,9 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    @* CDN references preserved from Site.Master *@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    @* Auto-detected CSS files from wwwroot *@
     <link rel="stylesheet" href="/CSS/CSS_About.css" />
     <link rel="stylesheet" href="/CSS/CSS_Courses.css" />
     <link rel="stylesheet" href="/CSS/Home_CSS.css" />
@@ -15,12 +13,11 @@
     <link rel="stylesheet" href="/CSS/Master_CSS.css" />
     <link rel="stylesheet" href="/CSS/Students_CSS.css" />
 
-    <HeadOutlet />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
 <body>
-    <Routes />
+    <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
 </body>
 

@@ -1,76 +1,60 @@
-using ContosoUniversity.Models;
-using ContosoUniversity.Bll;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Web;
+using ContosoUniversity.BLL;
+using ContosoUniversity.Models;
 
-namespace ContosoUniversity;
-
-public partial class Students
+namespace ContosoUniversity
 {
-    [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; } = default!;
-
-    private StudentsListLogic? studLogic;
-    private List<object> _students = new();
-    private List<object> _studentDetail = new();
-    private List<string> _courseNames = new();
-    private string _searchText = "";
-
-    // Form fields
-    private string _firstName = "";
-    private string _lastName = "";
-    private string _birthDate = "";
-    private string _email = "";
-    private string _selectedCourse = "";
-
-    protected override async Task OnInitializedAsync()
+    public partial class Students
     {
-        await using var db = await DbFactory.CreateDbContextAsync();
-        studLogic = new StudentsListLogic(db);
-        _students = studLogic.GetJoinedTableData();
-        _courseNames = db.Courses.Select(c => c.CourseName).ToList();
-    }
+        [Inject] private StudentsLogic StudentsLogic { get; set; } = default!;
 
-    private void HandleInsert()
-    {
-        if (studLogic == null) return;
+        private List<StudentListItem> studentData = new();
+        private List<string> courseNames = new();
+        private List<StudentInfo>? searchResults;
+        private string firstName = string.Empty;
+        private string lastName = string.Empty;
+        private string birthDate = string.Empty;
+        private string email = string.Empty;
+        private string selectedCourse = string.Empty;
+        private string searchText = string.Empty;
 
-        if (!DateTime.TryParse(_birthDate, out var birth))
+        protected override void OnInitialized()
         {
-            // TODO: Show validation error to user
-            return;
+            courseNames = StudentsLogic.GetCourseNames();
+            studentData = StudentsLogic.GetJoinedTableData();
         }
 
-        studLogic.InsertNewEntry(_firstName, _lastName, birth, _selectedCourse, 
-            string.IsNullOrEmpty(_email) ? "Has not specified" : _email);
-        _students = studLogic.GetJoinedTableData();
-        HandleClear();
-    }
-
-    private void HandleClear()
-    {
-        _firstName = "";
-        _lastName = "";
-        _birthDate = "";
-        _email = "";
-    }
-
-    private void HandleSearch()
-    {
-        if (studLogic != null && !string.IsNullOrEmpty(_searchText))
+        public IQueryable<StudentListItem> GetStudentData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
         {
-            _studentDetail = studLogic.GetStudents(_searchText);
-            _searchText = "";
+            totalRowCount = studentData.Count;
+            return studentData.AsQueryable();
+        }
+
+        private void InsertStudent(MouseEventArgs e)
+        {
+            if (DateTime.TryParse(birthDate, out var birth))
+            {
+                StudentsLogic.InsertNewEntry(firstName, lastName, birth, selectedCourse,
+                    string.IsNullOrEmpty(email) ? "Has not specified" : email);
+                studentData = StudentsLogic.GetJoinedTableData();
+                ClearForm(e);
+            }
+        }
+
+        private void ClearForm(MouseEventArgs e)
+        {
+            firstName = string.Empty;
+            lastName = string.Empty;
+            birthDate = string.Empty;
+            email = string.Empty;
+            selectedCourse = courseNames.FirstOrDefault() ?? string.Empty;
+        }
+
+        private void SearchStudent(MouseEventArgs e)
+        {
+            searchResults = StudentsLogic.GetStudentsByName(searchText);
+            searchText = string.Empty;
         }
     }
-
-    private void HandleDelete(int id)
-    {
-        studLogic?.DeleteStudent(id);
-        if (studLogic != null) _students = studLogic.GetJoinedTableData();
-    }
-
-    // TODO: Wire _students to GridView Items, _studentDetail to DetailsView Items
-    // TODO: Implement row update (grv_UpdateItem / grv_RowUpdating) 
-    // TODO: AutoComplete search was a Web Service (ASMX WebMethod) — convert to component-local search
 }
-

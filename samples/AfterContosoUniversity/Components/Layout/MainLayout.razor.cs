@@ -1,6 +1,6 @@
-namespace ContosoUniversity;
-
-public partial class MainLayout
+namespace ContosoUniversity.Components.Layout
 {
-    // Original Web Forms Site.Master Page_Load was empty — no initialization needed
+    public partial class MainLayout
+    {
+    }
 }

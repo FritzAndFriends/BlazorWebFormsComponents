@@ -1,28 +1,27 @@
 @page "/About"
 <HeadContent>
      <link href="CSS/CSS_About.css" rel="stylesheet" />
-     <script src="JQuery/JQuery_About.js"></script>
 </HeadContent>
 <div id="header">
-        <h1> Students Body Statistics </h1>
-    </div>
-     <div id="grv">
-        <GridView ItemType="object" CssClass="grid"
-            ID="EnrollmentsStat"
-            AutoGenerateColumns="false" EmptyDataText="There are no records to display"
-            CellPadding="4" ForeColor="@("#333333")" GridLines="GridLines.None">
-            <AlternatingRowStyleContent><GridViewAlternatingRowStyle BackColor="WebColor.White" /></AlternatingRowStyleContent>
-            <Columns>
-                <BoundField ItemType="object" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true" />
-                <BoundField ItemType="object" DataField="Value" HeaderText="Students" ReadOnly="true" />
-            </Columns>
-            <EditRowStyleContent><GridViewEditRowStyle BackColor="@("#2461BF")" /></EditRowStyleContent>
-            <FooterStyleContent><GridViewFooterStyle BackColor="@("#507CD1")" Font_Bold="true" ForeColor="WebColor.White" /></FooterStyleContent>
-            <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#507CD1")" Font_Bold="true" ForeColor="WebColor.White" /></HeaderStyleContent>
-            <PagerStyleContent><GridViewPagerStyle BackColor="@("#2461BF")" ForeColor="WebColor.White" HorizontalAlign="HorizontalAlign.Center" /></PagerStyleContent>
-            <RowStyleContent><GridViewRowStyle BackColor="@("#EFF3FB")" /></RowStyleContent>
-            <SelectedRowStyleContent><GridViewSelectedRowStyle BackColor="@("#D1DDF1")" Font_Bold="true" ForeColor="@("#333333")" /></SelectedRowStyleContent>
-            @* TODO: SortedAscendingCellStyle, SortedAscendingHeaderStyle, SortedDescendingCellStyle, SortedDescendingHeaderStyle
-                      blocked on BWFC library component creation (scheduled) *@
-        </GridView>
-    </div>
+    <h1> Students Body Statistics </h1>
+</div>
+<div id="grv">
+    <GridView ItemType="EnrollmentStat" CssClass="grid"
+        SelectMethod="@GetEnrollmentData"
+        AutoGenerateColumns="false" EmptyDataText="There are no records to display"
+        CellPadding="4" GridLines="@("None")">
+        <Columns>
+            <BoundField ItemType="EnrollmentStat" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true" />
+            <BoundField ItemType="EnrollmentStat" DataField="Value" HeaderText="Students" ReadOnly="true" />
+        </Columns>
+        <HeaderStyleContent>
+            <GridViewHeaderStyle BackColor="WebColor.SteelBlue" Font_Bold="true" ForeColor="WebColor.White" />
+        </HeaderStyleContent>
+        <RowStyleContent>
+            <GridViewRowStyle BackColor="WebColor.WhiteSmoke" />
+        </RowStyleContent>
+        <AlternatingRowStyleContent>
+            <GridViewAlternatingRowStyle BackColor="WebColor.White" />
+        </AlternatingRowStyleContent>
+    </GridView>
+</div>

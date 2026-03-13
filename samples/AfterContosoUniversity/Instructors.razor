@@ -1,19 +1,19 @@
 @page "/Instructors"
 <HeadContent>
     <link href="CSS/Instructors_CSS.css" rel="stylesheet" />
-    <script src="JQuery/JQuery_Instructors.js"></script>
 </HeadContent>
-            <div id="grv">
-                <h1 id="hdr">Our Instructors</h1>
-                <GridView ItemType="object" ID="grvInstructors" AutoGenerateColumns="false"
-                    CssClass="grv" BorderWidth="2"
-                    AllowSorting="true"
-                    EmptyDataText="There are no records to display">
-                    <Columns>
-                        <BoundField ItemType="object" DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
-                        <BoundField ItemType="object" DataField="FirstName" HeaderText="First Name" SortExpression="FirstName" />
-                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name" SortExpression="LastName" />
-                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
-                    </Columns>
-                </GridView>
-            </div>
+<div id="grv">
+    <h1 id="hdr">Our Instructors</h1>
+    <GridView ItemType="Instructor" AutoGenerateColumns="false"
+        CssClass="grv" BorderWidth="2" Font-Size="30px"
+        AllowSorting="true" Sorting="@HandleSorting"
+        SelectMethod="@GetInstructorData"
+        EmptyDataText="There are no records to display">
+        <Columns>
+            <BoundField DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
+            <BoundField DataField="FirstName" HeaderText="First Name" SortExpression="FirstName" />
+            <BoundField DataField="LastName" HeaderText="Last Name" SortExpression="LastName" />
+            <BoundField DataField="Email" HeaderText="Email" />
+        </Columns>
+    </GridView>
+</div>
