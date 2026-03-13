@@ -43,6 +43,7 @@ var app = builder.Build();
 app.UseExceptionHandler("/Error"); // replaces Application_Error
 app.UseStaticFiles();
 app.UseRouting();
+app.UseBlazorWebFormsComponents(); // ⚠️ REQUIRED — .aspx URL rewriting (301 redirects). BEFORE MapRazorComponents.
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();

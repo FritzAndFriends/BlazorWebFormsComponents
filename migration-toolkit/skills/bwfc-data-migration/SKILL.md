@@ -250,6 +250,8 @@ Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with inject
 
 ```csharp
 // Program.cs — use the provider that matches the original Web Forms database
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddBlazorWebFormsComponents(); // ⚠️ REQUIRED — registers BWFC services
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
     // ↑ Match the original provider: UseNpgsql(), UseMySql(), UseSqlite(), etc.
@@ -257,6 +259,10 @@ builder.Services.AddDbContextFactory<ProductContext>(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+// ... after builder.Build() ...
+app.UseBlazorWebFormsComponents(); // ⚠️ REQUIRED — .aspx URL rewriting middleware. BEFORE MapRazorComponents.
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 ```
 
 ### SelectMethod String → SelectHandler Delegate Conversion
