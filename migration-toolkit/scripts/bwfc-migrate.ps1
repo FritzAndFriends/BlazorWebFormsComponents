@@ -898,15 +898,25 @@ function ConvertFrom-ContentWrappers {
 function ConvertFrom-FormWrapper {
     param([string]$Content, [string]$RelPath)
 
-    # Remove <form ... runat="server" ...> and its closing </form> — but only the server form
-    $formOpenRegex = [regex]'<form\s+[^>]*runat\s*=\s*"server"[^>]*>\s*\r?\n?'
-    if ($Content -match $formOpenRegex) {
-        $Content = $formOpenRegex.Replace($Content, '', 1)
-        # Remove the corresponding closing </form> (the last one, or the first one after removal)
-        # Simple approach: remove one </form> tag
-        $formCloseRegex = [regex]'</form>\s*\r?\n?'
-        $Content = $formCloseRegex.Replace($Content, '', 1)
-        Write-TransformLog -File $RelPath -Transform 'Form' -Detail 'Removed <form runat="server"> and </form>'
+    # Replace <form ... runat="server" ...> with <div> to preserve block formatting context.
+    # CSS often depends on the form wrapper for positioning calculations (margin collapse,
+    # containing block for position:relative, width inheritance). Stripping the form entirely
+    # breaks layouts. Preserve the id attribute if present so existing CSS/JS continues to work.
+    $formOpenRegex = [regex]'<form\s+([^>]*)runat\s*=\s*"server"([^>]*)>'
+    $formMatch = $formOpenRegex.Match($Content)
+    if ($formMatch.Success) {
+        # Extract id attribute if present
+        $fullAttrs = $formMatch.Groups[1].Value + $formMatch.Groups[2].Value
+        $idAttr = ''
+        if ($fullAttrs -match 'id\s*=\s*"([^"]*)"') {
+            $idAttr = " id=""$($Matches[1])"""
+        }
+        # Replace opening <form> with <div>, preserving id
+        $Content = $formOpenRegex.Replace($Content, "<div$idAttr>", 1)
+        # Replace corresponding </form> with </div>
+        $formCloseRegex = [regex]'</form>'
+        $Content = $formCloseRegex.Replace($Content, '</div>', 1)
+        Write-TransformLog -File $RelPath -Transform 'Form' -Detail "Replaced <form runat=""server""> with <div$idAttr> (preserves CSS block context)"
     }
     return $Content
 }
@@ -946,7 +956,18 @@ function ConvertFrom-MasterPage {
             $extractedTags.Add("    " + $titleContent)
         }
         foreach ($m in ([regex]'<link\s[^>]*>').Matches($headInner)) {
-            $extractedTags.Add("    " + $m.Value.Trim())
+            $tag = $m.Value.Trim()
+            # Fix relative CSS paths to absolute — in Blazor, <HeadContent> renders into <head>
+            # and the browser resolves relative paths from the page URL, not the component.
+            # e.g. href="CSS/Master_CSS.css" on /Students resolves to /Students/CSS/Master_CSS.css (404)
+            if ($tag -match 'href\s*=\s*"([^"]*)"') {
+                $href = $Matches[1]
+                if ($href -and -not $href.StartsWith('/') -and -not $href.StartsWith('http') -and -not $href.StartsWith('~')) {
+                    $absHref = '/' + $href
+                    $tag = $tag -replace [regex]::Escape("href=""$href"""), "href=""$absHref"""
+                }
+            }
+            $extractedTags.Add("    " + $tag)
         }
 
         # Fix 1a: Extract <webopt:bundlereference> tags and flag for manual review
