@@ -6737,3 +6737,53 @@ NOT automated (stays L2): EF6→EF Core, Identity, payment integration, Page_Loa
 **Status:** Analysis complete — recommended approach presented, awaiting final confirmation
 **What:** L1 migration extracts `Title` from `<%@ Page Title="..." %>` and emits `<PageTitle>`. L2 migration separately converts `Page.Title = "..."` from code-behind. Neither layer knows about the other, causing 4 exact duplicates and 1 value conflict ("Welcome" vs "Home Page") across AfterWingtipToys. Recommended fix (Option A): In `ConvertFrom-PageDirective`, before emitting `<PageTitle>`, check if the companion `.aspx.cs` file contains `Page.Title\s*=`. If found, skip `<PageTitle>` emission — L2 handles title via code-behind. If not found, emit `<PageTitle>` as normal. L1 already peeks at code-behind for redirect detection (line 1538 of bwfc-migrate.ps1), so this follows the same pattern.
 **Why:** Deterministic regex check in PowerShell fixes the root cause by preventing duplicates at creation time. Option B (L2 removes) is less reliable with AI-driven L2. Option C (always suppress) breaks 12 Account pages with no code-behind title. Option D (marker + strip) adds complexity — fallback if Option A proves insufficient.
+
+### 2026-03-13: User directive  Preserve .aspx links
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** NEVER convert .aspx links in the L1 migration script. The AspxRewriteMiddleware handles .aspxclean URL redirects at runtime. Navigation links like href="Home.aspx" are correct and should be preserved.
+**Why:** User request  captured for team memory. This has been stated multiple times.
+
+### 2026-03-13: User directive  Sorted*Style components
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** The 4 GridView Sorted*Style children (SortedAscendingCellStyle, SortedAscendingHeaderStyle, SortedDescendingCellStyle, SortedDescendingHeaderStyle) should be created as real BWFC components, NOT stripped by the L1 script. Schedule as future component work.
+**Why:** User request  these are legitimate Web Forms features that should be emulated.
+
+## Cyclops  ContosoUniversity Run 20 Decisions
+
+**Date:** 2026-03-13
+**Author:** Cyclops
+**Context:** L2 + Phase 3 build validation of ContosoUniversity migration
+
+### Decision: Style Content Wrapper Pattern is Mandatory
+GridView/DetailsView inline style elements (\<HeaderStyle>\, \<RowStyle>\, etc.) MUST be wrapped in their \*Content\ counterparts with specific inner components. This is NOT documented in the L1 script output  L2 agents must always convert these.
+
+**Pattern:** \<HeaderStyleContent><GridViewHeaderStyle BackColor="WebColor.X" /></HeaderStyleContent>\
+
+**Inner component naming:** \{ParentControl}{StyleName}Style\ (e.g., \GridViewHeaderStyle\, \DetailsViewRowStyle\)
+
+### Decision: BoundField Always Needs Explicit ItemType
+Even inside a typed \GridView<T>\ or \DetailsView<T>\, each \<BoundField>\ requires its own \ItemType="T"\ attribute. CascadingTypeParameter does NOT auto-infer for BoundField children.
+
+### Decision: Anonymous Objects  Typed DTOs for BWFC Data Binding
+BWFC data controls (GridView, DetailsView) require typed models for BoundField DataField resolution. Anonymous objects from LINQ projections don't work. Create explicit DTO classes (e.g., \StudentListItem\, \EnrollmentStat\).
+
+### Decision: WebColor for Color Attributes
+All BWFC WebControl color attributes (BackColor, ForeColor, BorderColor) use the \WebColor\ type. Named colors: \WebColor.White\, \WebColor.DarkBlue\, etc. Hex colors need \@("#RRGGBB")\ string escaping. Enum parameters (GridLines, BorderStyle) need \@("Value")\ string pass-through.
+
+### 2026-03-13: ContosoUniversity Run 20  Phase 4 Acceptance Test Results
+**By:** Colossus (Integration Test Engineer)
+
+**What:** 40 acceptance tests executed against migrated ContosoUniversity Blazor app. 11 passed, 29 failed.
+
+**Key Finding  L2 Transform Gap:**
+\Program.cs\ calls \AddBlazorWebFormsComponents()\ but is missing \pp.UseBlazorWebFormsComponents()\ middleware. This means \.aspx\ URL rewriting is not active. All 6 test classes navigate to \.aspx\ URLs (e.g., \/Home.aspx\, \/Students.aspx\) which return 404. This single fix would likely resolve 20+ of the 29 failures.
+
+**Secondary Finding  Database Infrastructure:**
+3 tests fail with HTTP 500 on \/Students\, \/Courses\, \/Instructors\ due to missing LocalDB \ContosoUniversity\ database. Not a migration defect  needs EF Core migration/seed or in-memory fallback for test runs.
+
+**Recommendation for Phase 2/3 team (Cyclops):**
+1. L2 script must emit \pp.UseBlazorWebFormsComponents();\ in the middleware pipeline (before \MapRazorComponents\)
+2. Consider adding \@page "/"\ redirect to Home for root URL support
+3. For CI acceptance testing, provide an in-memory DB option or EF migration seed
+
+**Impact:** With middleware fix alone, expect 20+ tests to move from fail  pass. Remaining ~6 depend on DB availability.

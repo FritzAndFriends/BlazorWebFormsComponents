@@ -109,3 +109,33 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
 
+### ContosoUniversity Acceptance Tests — Run 20 Phase 4 Results (2026-03-13)
+
+**Summary:** 40 tests total — 11 passed, 29 failed, 0 skipped (33.5s duration)
+
+**Breakdown by test class:**
+
+| Class | Total | Passed | Failed | Root Cause |
+|---|---|---|---|---|
+| NavigationTests | 11 | 2 | 9 | .aspx URLs → 404; `/` → 404; DB pages → 500 |
+| HomePageTests | 4 | 0 | 4 | `/Home.aspx` → 404 (missing middleware) |
+| AboutPageTests | 5 | 0 | 5 | `/About.aspx` → 404 (missing middleware) |
+| StudentsPageTests | 9 | 4 | 5 | `/Students.aspx` → 404; DB → 500 |
+| CoursesPageTests | 6 | 4 | 2 | `/Courses.aspx` → 404; DB → 500 |
+| InstructorsPageTests | 5 | 1 | 4 | `/Instructors.aspx` → 404; DB → 500 |
+
+**⚠ 4 of 11 "passed" tests are vacuously true** — guard clauses (`if element.Count > 0`) skip assertions when page is 404.
+
+**Three root causes identified:**
+
+1. **Missing `app.UseBlazorWebFormsComponents()` middleware** (affects 20+ tests): Program.cs calls `AddBlazorWebFormsComponents()` for DI but never calls `UseBlazorWebFormsComponents()` in the middleware pipeline. Without this, `.aspx` URL rewriting is absent — all test navigations to `/Home.aspx`, `/About.aspx`, etc. return 404. This is a **Phase 2/3 (L2 transform) gap**.
+
+2. **SQL Server LocalDB unavailable** (affects 3 `AllPages_ReturnHttp200` tests + cascading): `/Students`, `/Courses`, `/Instructors` return HTTP 500 because the `ContosoUniversity` database doesn't exist or the connection string targets `(localdb)\mssqllocaldb`. This is an **infrastructure/seed-data gap** — not a migration defect.
+
+3. **No root route `/`** (affects 6 `NavLink_NavigatesToCorrectPage` tests): Tests start at `BaseUrl + "/"` which returns 404 — no `@page "/"` route exists. Navigation link tests can't find any elements.
+
+**Infrastructure notes:**
+- `--no-launch-profile` required to honor `ASPNETCORE_URLS`; launchSettings.json overrides to ports 5000/5001
+- Playwright Chromium installed successfully; browser automation works
+- App starts in ~2s, Production mode by default with `--no-launch-profile`
+

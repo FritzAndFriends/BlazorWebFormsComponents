@@ -103,3 +103,33 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
  Team update (2026-03-12): Cookie shims must use graceful degradation (Pattern B+), not exceptions. NullResponseCookies for no-op writes, EmptyRequestCookieCollection for null reads, both with ILogger warnings. CookiesAvailable bool escape hatch.  decided by Jeffrey T. Fritz
  Team update (2026-03-12): PageTitle deduplication  Page.Title via IPageService is single source of truth. Remove inline <PageTitle> from 5 AfterWingtipToys files. Fix Default.razor.cs "Home Page"  "Welcome". L1 script: inject BWFC-MIGRATE marker. L2: consume marker, never invent values.  decided by Forge (analysis), approved by Jeffrey T. Fritz
  Team update (2026-03-12): Render mode guards  add IsHttpContextAvailable and RequireHttpContext() to WebFormsPageBase. Guard GetRouteUrl. HttpContext != null is the guard, RendererInfo for diagnostics only.  decided by Forge
+
+### Run 20 — ContosoUniversity L2 + Phase 3 Build Validation (2026-07-25)
+
+**Scope:** Full Layer 2 structural transform + build validation of ContosoUniversity sample from raw L1 output to 0-error Blazor Server app.
+
+**Build iterations:** 4 (NuGet auth → ProjectReference, style content wrappers, BoundField ItemType, color/enum types → 0 errors)
+
+**Key transforms (39 files touched):**
+- 5 EF6 model classes cleaned (removed SuppressMessage, auto-generated comments, added nullable annotations)
+- EF Core DbContext rewritten (removed DbModelBuilder, EF6 imports, cleaned to pure EF Core)
+- 4 BLL classes fully rewritten with IDbContextFactory<ContosoUniversityEntities> DI pattern, raw SQL replaced with LINQ
+- 3 new DTO model classes created (EnrollmentStat, StudentListItem, StudentInfo) — anonymous objects don't work with BWFC data binding
+- Program.cs: full DI registration (DbContextFactory + 4 BLL services), SQL Server LocalDB connection
+- _Imports.razor: added ContosoUniversity.Models + ContosoUniversity.BLL usings
+- App.razor: added @rendermode="InteractiveServer" to HeadOutlet and Routes
+- MainLayout.razor: fixed .aspx links → Blazor routes, removed duplicate jQuery CDN ref
+- 5 page code-behinds: Page_Load → OnInitialized, injected BLL services via [Inject], SelectMethod delegates matching SelectHandler<ItemType> signature
+- 5 page razor files: removed ScriptManager/UpdatePanel wrappers, removed ajaxToolkit, replaced CommandField mentions, fixed all data binding
+
+**Deleted:** Model1.cs, Model1.Designer.cs, Models/Enrollmet_Logic.cs (duplicate), BLL/Students_Logic.cs (duplicate), old BLL classes (4)
+
+**Key gotchas confirmed:**
+- GridView/DetailsView style elements MUST use `*Content` wrappers: `<HeaderStyleContent><GridViewHeaderStyle .../></HeaderStyleContent>`. Direct `<HeaderStyle>` is invalid.
+- Inner style component names follow pattern: `GridView{StyleName}Style` / `DetailsView{StyleName}Style`
+- Colors on WebControl attributes (BackColor, ForeColor, BorderColor) are `WebColor` type — use `WebColor.White`, `WebColor.Black` etc.
+- Enum attributes (GridLines, BorderStyle, HorizontalAlign) wrapped in `EnumParameter<T>` — pass as `@("None")` or use static member
+- BoundField inside GridView/DetailsView needs EXPLICIT `ItemType="..."` — CascadingTypeParameter doesn't auto-infer for BoundField
+- PackageReference to Fritz.BlazorWebFormsComponents fails without GitHub Packages auth — use ProjectReference in dev
+- BLL namespace must be consistent: standardized to `ContosoUniversity.BLL` (uppercase matching folder name)
+- Anonymous objects from LINQ projections don't work with BWFC data binding — create typed DTOs instead
