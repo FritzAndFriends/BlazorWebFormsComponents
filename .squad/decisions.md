@@ -4,7 +4,21 @@
 
 <!-- Decisions are appended below by the Scribe after merging from .ai-team/decisions/inbox/ -->
 
+### 2026-07-25: EDMX→EF Core — Standalone parser script (Option 1 execution)
 
+**By:** Cyclops (Component Dev)
+
+**What:** Created `migration-toolkit/scripts/Convert-EdmxToEfCore.ps1` as a standalone PowerShell script that parses EF6 EDMX files and generates EF Core entity classes + DbContext. Integrated into `bwfc-migrate.ps1` Models section with EDMX detection, artifact skipping, and generated-file tracking.
+
+**Technical approach:**
+- Parse 3 EDMX XML sections: C-S Mapping first (entity→table names), then CSDL (entities, properties, associations, navigation), SSDL for cross-reference
+- Generate entity .cs files with `[Key]`, `[DatabaseGenerated(Identity)]`, `[Required]`, `[MaxLength]`, `[Table]`, `[Column]` annotations
+- Generate DbContext with `DbContextOptions<T>` constructor, `DbSet<T>` properties, and `OnModelCreating()` with `.HasOne()/.WithMany()/.HasForeignKey()/.OnDelete()` fluent chains
+- L1 integration: EDMX detected → generate files → skip artifacts (`*.Designer.cs`, T4 bootstrap) → normal .cs copy continues for user models
+
+**Validated:** ContosoUniversity Model1.edmx → 5 entities, 4 FK relationships, 4 cascade deletes, all correct. Skip-existing behavior verified on re-run.
+
+**Why this matters for the team:** L1 script now handles EDMX-based projects end-to-end. No manual EF Core conversion needed for the most common EF6 pattern (Database First with EDMX). This directly supports the Run 22 target of 40/40 acceptance tests.
 
 ### 2026-02-10: Sample pages use Components/Pages path
 

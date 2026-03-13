@@ -133,3 +133,21 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
 - PackageReference to Fritz.BlazorWebFormsComponents fails without GitHub Packages auth — use ProjectReference in dev
 - BLL namespace must be consistent: standardized to `ContosoUniversity.BLL` (uppercase matching folder name)
 - Anonymous objects from LINQ projections don't work with BWFC data binding — create typed DTOs instead
+
+### EDMX→EF Core Parser Script (2026-07-25)
+
+**Scope:** New standalone `Convert-EdmxToEfCore.ps1` script + integration into `bwfc-migrate.ps1` Models section.
+
+**What was built:**
+- `Convert-EdmxToEfCore.ps1` — parses EDMX XML (SSDL/CSDL/C-S Mapping) and generates EF Core entity .cs files with full data annotations + DbContext with `OnModelCreating()` FK relationships and cascade deletes
+- Integrated into `bwfc-migrate.ps1` at the Models Copy section: detects `.edmx` files, generates EF Core code, skips EDMX artifacts (`*.Designer.cs`, T4 bootstrap), then proceeds with normal `.cs` copy for any user-added models
+
+**Tested against:** ContosoUniversity `Model1.edmx` (357 lines, 5 entities, 4 associations, all cascade delete). Output: 5 entity files + `ContosoUniversityEntities.cs` DbContext. All annotations correct: `[Key]`, `[DatabaseGenerated(Identity)]`, `[Required]`, `[MaxLength]`, `[Table("Courses")]` for Cours→Courses mismatch, navigation properties (virtual single refs + ICollection).
+
+**Key implementation details:**
+- XML parsing uses `XmlNamespaceManager` with `SelectNodes()`/`SelectSingleNode()` — EDMX has 6+ XML namespaces
+- `annotation:StoreGeneratedPattern` attribute requires namespace-qualified `GetAttribute()` call
+- C-S Mapping is the key to entity→table name mismatches (e.g., `Cours`→`Courses`)
+- Entity files skip generation when target .cs already exists (idempotent)
+- DbContext groups FK relationships by dependent entity for clean `modelBuilder.Entity<T>()` blocks
+- L1 integration uses `$edmxGeneratedFiles` tracking array to prevent the existing .cs copy loop from overwriting generated files
