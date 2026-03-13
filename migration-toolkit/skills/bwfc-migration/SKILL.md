@@ -132,8 +132,8 @@ The migration pipeline has **two mandatory layers** that run in strict sequence:
 - Rename files: `.aspx` → `.razor`, `.ascx` → `.razor`, `.master` → `.razor`
 - Remove `<asp:Content>` wrappers
 - Convert `<%@ Page %>` directives to `@page "/route"`
-- Remove `<form runat="server">` wrapper
-- LoginView preservation (keeps BWFC LoginView, does NOT rewrite as AuthorizeView)
+- Replace `<form runat="server">` with `<div>` (preserves CSS block formatting context)
+- LoginView preservation(keeps BWFC LoginView, does NOT rewrite as AuthorizeView)
 - Master page → MainLayout.razor conversion
 - Scaffold generation (csproj, Program.cs, _Imports.razor, App.razor)
 
@@ -239,7 +239,7 @@ This skill covers **Layers 1 and 2** of the three-layer pipeline. Use the relate
 
 ### Form Wrapper
 
-- **Remove the `<form runat="server">` wrapper** entirely
+- **Replace the `<form runat="server">` wrapper with `<div>`** (preserves the `id` attribute and CSS block formatting context — many Web Forms stylesheets use `position: relative` offsets that depend on this wrapper as the containing block)
 - For forms that need validation, use `<EditForm Model="@model">` instead
 
 
@@ -304,7 +304,7 @@ Include during migration to prevent errors, remove when stable.
 - [ ] Expressions converted
 - [ ] URLs converted (~/ → /)
 - [ ] <asp:Content> wrappers removed
-- [ ] <form runat="server"> removed
+- [ ] <form runat="server"> replaced with <div>
 
 ### Layer 2 — Structural
 - [ ] SelectMethod string → SelectHandler delegate

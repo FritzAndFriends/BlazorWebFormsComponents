@@ -167,10 +167,10 @@ For FormView, DetailsView:
 
 **Key changes:**
 - `<%@ Master %>` → `@inherits LayoutComponentBase`
-- `<form runat="server">` → removed
+- `<form runat="server">` → replaced with `<div>` (preserves `id` attribute and CSS block formatting context)
 - `<asp:ContentPlaceHolder ID="MainContent">` → `@Body`
 - `<asp:ScriptManager>` → `<ScriptManager />` (renders nothing)
-- CSS `<link>` elements from master page `<head>` → `App.razor` `<head>` section
+- CSS `<link>` elements from master page `<head>` → `App.razor` `<head>` section (relative `href` paths must be rewritten to absolute, e.g., `CSS/style.css` → `/CSS/style.css`, because `<HeadContent>` resolves from the page URL)
 - `<head runat="server">` content → `<HeadContent>` in layout or `App.razor`
 
 > **Alternative:** For a more gradual migration, BWFC provides `<MasterPage>`, `<Content>`, and `<ContentPlaceHolder>` components that preserve Web Forms-style markup. Use these as a stepping stone, then refactor to native Blazor layouts when ready.
