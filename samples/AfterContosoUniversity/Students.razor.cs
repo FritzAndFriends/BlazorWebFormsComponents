@@ -1,60 +1,115 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
+using ContosoUniversity.Bll;
+using Microsoft.EntityFrameworkCore;
+using BlazorWebFormsComponents;
 
 namespace ContosoUniversity
 {
     public partial class Students
     {
-        [Inject] private StudentsLogic StudentsLogic { get; set; } = default!;
+        [Inject] private StudentsListLogic StudLogic { get; set; }
+        [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; }
 
-        private List<StudentListItem> studentData = new();
-        private List<string> courseNames = new();
-        private List<StudentInfo>? searchResults;
-        private string firstName = string.Empty;
-        private string lastName = string.Empty;
-        private string birthDate = string.Empty;
-        private string email = string.Empty;
-        private string selectedCourse = string.Empty;
-        private string searchText = string.Empty;
+        private List<object> _studentData;
+        private List<string> _courseNames;
+        private List<object> _searchResults;
 
-        protected override void OnInitialized()
+        private string _firstName = "";
+        private string _lastName = "";
+        private string _birthDate = "";
+        private string _email = "";
+        private string _searchText = "";
+        private string _selectedCourse = "";
+
+        protected override async Task OnInitializedAsync()
         {
-            courseNames = StudentsLogic.GetCourseNames();
-            studentData = StudentsLogic.GetJoinedTableData();
+            LoadStudentData();
+            LoadCourseNames();
         }
 
-        public IQueryable<StudentListItem> GetStudentData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+        private void LoadStudentData()
         {
-            totalRowCount = studentData.Count;
-            return studentData.AsQueryable();
+            _studentData = StudLogic.GetJoinedTableData();
         }
 
-        private void InsertStudent(MouseEventArgs e)
+        private void LoadCourseNames()
         {
-            if (DateTime.TryParse(birthDate, out var birth))
+            using var context = DbFactory.CreateDbContext();
+            _courseNames = context.Courses.Select(c => c.CourseName).ToList();
+        }
+
+        private void HandleInsert()
+        {
+            DateTime birth;
+            try
             {
-                StudentsLogic.InsertNewEntry(firstName, lastName, birth, selectedCourse,
-                    string.IsNullOrEmpty(email) ? "Has not specified" : email);
-                studentData = StudentsLogic.GetJoinedTableData();
-                ClearForm(e);
+                birth = DateTime.Parse(_birthDate);
+            }
+            catch
+            {
+                return;
+            }
+
+            var selectedCourse = !string.IsNullOrEmpty(_selectedCourse) ? _selectedCourse : (_courseNames?.FirstOrDefault() ?? "");
+            StudLogic.InsertNewEntry(_firstName, _lastName, birth, selectedCourse, 
+                string.IsNullOrEmpty(_email) ? "Has not specified" : _email);
+            LoadStudentData();
+        }
+
+        private void HandleClear()
+        {
+            _firstName = "";
+            _lastName = "";
+            _birthDate = "";
+            _email = "";
+        }
+
+        private void HandleSearch()
+        {
+            _searchResults = StudLogic.GetStudents(_searchText);
+            _searchText = "";
+        }
+
+        private void HandleDelete(GridViewDeleteEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < _studentData.Count)
+            {
+                var row = _studentData[e.RowIndex];
+                var idProp = row.GetType().GetProperty("ID");
+                if (idProp != null)
+                {
+                    var id = (int)idProp.GetValue(row);
+                    StudLogic.DeleteStudent(id);
+                    LoadStudentData();
+                }
             }
         }
 
-        private void ClearForm(MouseEventArgs e)
+        private void HandleEdit(GridViewEditEventArgs e)
         {
-            firstName = string.Empty;
-            lastName = string.Empty;
-            birthDate = string.Empty;
-            email = string.Empty;
-            selectedCourse = courseNames.FirstOrDefault() ?? string.Empty;
+            // GridView handles edit mode
         }
 
-        private void SearchStudent(MouseEventArgs e)
+        private void HandleUpdate(GridViewUpdateEventArgs e)
         {
-            searchResults = StudentsLogic.GetStudentsByName(searchText);
-            searchText = string.Empty;
+            if (e.RowIndex >= 0 && e.RowIndex < _studentData.Count)
+            {
+                var row = _studentData[e.RowIndex];
+                var idProp = row.GetType().GetProperty("ID");
+                if (idProp != null)
+                {
+                    var id = (int)idProp.GetValue(row);
+                    // GridView inline editing not fully supported yet — reload data
+                    LoadStudentData();
+                }
+            }
+        }
+
+        private void HandleCancelEdit(GridViewCancelEditEventArgs e)
+        {
+            // GridView handles cancel
         }
     }
 }
+

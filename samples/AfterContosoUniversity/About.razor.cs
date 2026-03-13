@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Components;
-using ContosoUniversity.BLL;
-using ContosoUniversity.Models;
+using ContosoUniversity.Bll;
 
 namespace ContosoUniversity
 {
     public partial class About
     {
-        [Inject] private EnrollmentLogic EnrollmentLogic { get; set; } = default!;
+        [Inject] private Enrollmet_Logic EnrollmentLogic { get; set; }
 
-        public IQueryable<EnrollmentStat> GetEnrollmentData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+        private List<KeyValuePair<string, int>> _enrollmentData;
+
+        protected override async Task OnInitializedAsync()
         {
-            var data = EnrollmentLogic.GetEnrollmentsByDate();
-            totalRowCount = data.Count;
-            return data.AsQueryable();
+            var data = EnrollmentLogic.Get_Enrollment_ByDate();
+            _enrollmentData = data.Select(kvp => new KeyValuePair<string, int>(kvp.Key, kvp.Value)).ToList();
         }
     }
 }

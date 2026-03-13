@@ -1,19 +1,20 @@
 @page "/Instructors"
 <HeadContent>
-    <link href="CSS/Instructors_CSS.css" rel="stylesheet" />
+    <link href="/CSS/Instructors_CSS.css" rel="stylesheet" />
 </HeadContent>
-<div id="grv">
-    <h1 id="hdr">Our Instructors</h1>
-    <GridView ItemType="Instructor" AutoGenerateColumns="false"
-        CssClass="grv" BorderWidth="2" Font-Size="30px"
-        AllowSorting="true" Sorting="@HandleSorting"
-        SelectMethod="@GetInstructorData"
-        EmptyDataText="There are no records to display">
-        <Columns>
-            <BoundField DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
-            <BoundField DataField="FirstName" HeaderText="First Name" SortExpression="FirstName" />
-            <BoundField DataField="LastName" HeaderText="Last Name" SortExpression="LastName" />
-            <BoundField DataField="Email" HeaderText="Email" />
-        </Columns>
-    </GridView>
-</div>
+            <div id="grv">
+                <h1 id="hdr">Our Instructors</h1>
+                <GridView ItemType="ContosoUniversity.Models.Instructor" ID="grvInstructors" AutoGenerateColumns="false"
+                    CssClass="grv" BorderWidth="2" Font-Size="30"                 
+                    AllowSorting="true" Sorting="HandleSorting"
+                    Items="@(_instructors ?? new())"
+                    EmptyDataText="There are no records to display" >
+                    <Columns>
+                        <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
+                        <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="FirstName" HeaderText="First Name" SortExpression="FirstName"/>
+                        <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="LastName" HeaderText="Last Name" SortExpression="LastName"/>
+                        <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="Email" HeaderText="Email" />
+                    </Columns>
+                </GridView>
+            </div>
+

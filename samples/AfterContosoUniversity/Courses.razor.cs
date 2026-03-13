@@ -1,49 +1,43 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
+using ContosoUniversity.BLL;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity
 {
     public partial class Courses
     {
-        [Inject] private CoursesLogic CoursesLogic { get; set; } = default!;
+        [Inject] private Courses_Logic CoursesLogic { get; set; }
+        [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; }
 
-        private List<string> departments = new();
-        private string selectedDepartment = string.Empty;
-        private List<Cours> filteredCourses = new();
-        private string courseSearchText = string.Empty;
-        private Cours? selectedCourseDetail;
+        private List<string> _departments;
+        private List<Cours> _courses;
+        private List<Cours> _courseDetails;
+        private string _selectedDepartment = "";
+        private string _searchCourseName = "";
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            departments = CoursesLogic.GetDepartmentNames();
+            using var context = DbFactory.CreateDbContext();
+            _departments = context.Departments.Select(d => d.DepartmentName).ToList();
         }
 
-        private void SearchCourses(MouseEventArgs e)
+        private void HandleSearchCourse()
         {
-            if (!string.IsNullOrEmpty(selectedDepartment))
+            if (!string.IsNullOrEmpty(_selectedDepartment))
             {
-                filteredCourses = CoursesLogic.GetCourses(selectedDepartment);
+                _courses = CoursesLogic.GetCourses(_selectedDepartment);
             }
         }
 
-        private void SearchByName(MouseEventArgs e)
+        private void HandleSearchByName()
         {
-            if (!string.IsNullOrEmpty(courseSearchText))
+            if (!string.IsNullOrEmpty(_searchCourseName))
             {
-                var courses = CoursesLogic.GetCourse(courseSearchText);
-                selectedCourseDetail = courses.FirstOrDefault();
-                courseSearchText = string.Empty;
+                _courseDetails = CoursesLogic.GetCourse(_searchCourseName);
             }
-        }
-
-        public IQueryable<Cours> GetCourseData(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-        {
-            totalRowCount = filteredCourses.Count;
-            if (maxRows > 0)
-                return filteredCourses.AsQueryable().Skip(startRowIndex).Take(maxRows);
-            return filteredCourses.AsQueryable();
+            _searchCourseName = "";
         }
     }
 }
+
