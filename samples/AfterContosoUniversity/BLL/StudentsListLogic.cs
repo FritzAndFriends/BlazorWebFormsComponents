@@ -1,42 +1,34 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Bll
 {
     public class StudentsListLogic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _dbFactory;
+        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
 
-        public StudentsListLogic(IDbContextFactory<ContosoUniversityEntities> dbFactory)
+        public StudentsListLogic(IDbContextFactory<ContosoUniversityEntities> factory)
         {
-            _dbFactory = dbFactory;
+            _factory = factory;
         }
 
         public List<object> GetJoinedTableData()
         {
-            using var context = _dbFactory.CreateDbContext();
-            var joinedTab = context.Students
-                .Include(s => s.Enrollments)
-                .SelectMany(s => s.Enrollments, (stud, enr) => new { stud, enr });
-
-            var groupedTab = joinedTab
-                .GroupBy(x => new { x.enr.Date, x.stud.LastName, x.stud.FirstName, x.stud.Email, x.stud.StudentID })
-                .Select(g => new
-                {
-                    ID = g.Key.StudentID,
-                    Date = g.Key.Date,
-                    FirstName = g.Key.FirstName,
-                    LastName = g.Key.LastName,
-                    Email = g.Key.Email,
-                    Count = g.Count()
-                })
-                .ToList();
-
+            using var db = _factory.CreateDbContext();
             var newTab = new List<object>();
-            foreach (var entry in groupedTab)
+
+            var joinedTab = db.Students
+                .Include(s => s.Enrollments)
+                .SelectMany(s => s.Enrollments.Select(e => new { Student = s, Enrollment = e }));
+
+            var groupedTab = from tab in joinedTab
+                             group tab by new { tab.Enrollment.Date, tab.Student.LastName, tab.Student.FirstName, tab.Student.Email, tab.Student.StudentID } into grpTab
+                             select new { ID = grpTab.Key.StudentID, Date = grpTab.Key.Date, FirstName = grpTab.Key.FirstName, LastName = grpTab.Key.LastName, Email = grpTab.Key.Email, Count = grpTab.Count() };
+
+            foreach (var entry in groupedTab.ToList())
             {
                 newTab.Add(new
                 {
@@ -53,8 +45,8 @@ namespace ContosoUniversity.Bll
 
         public void UpdateStudentData(int id, string name, string email = null)
         {
-            using var context = _dbFactory.CreateDbContext();
-            var student = context.Students.First(stud => stud.StudentID == id);
+            using var db = _factory.CreateDbContext();
+            var student = db.Students.First(stud => stud.StudentID == id);
 
             if (name != null)
             {
@@ -64,30 +56,26 @@ namespace ContosoUniversity.Bll
                     student.FirstName = arr[0];
                     student.LastName = arr[1];
                     student.Email = email;
-                    context.SaveChanges();
+                    db.SaveChanges();
                 }
             }
         }
 
         public void DeleteStudent(int id)
         {
-            using var context = _dbFactory.CreateDbContext();
-            var student = context.Students
-                .Include(s => s.Enrollments)
-                .First(stud => stud.StudentID == id);
-            context.Enrollments.RemoveRange(student.Enrollments);
-            context.Students.Remove(student);
-            context.SaveChanges();
+            using var db = _factory.CreateDbContext();
+            db.Students.Remove(db.Students.First(stud => stud.StudentID == id));
+            db.SaveChanges();
         }
 
         public void InsertNewEntry(string firstName, string lastName, DateTime birthDate, string course, string email = "Has not specified")
         {
-            using var context = _dbFactory.CreateDbContext();
+            using var db = _factory.CreateDbContext();
+            int courseId, studentId = 0;
 
-            var student = context.Students
-                .FirstOrDefault(s => s.FirstName == firstName && s.LastName == lastName && s.BirthDate == birthDate && s.Email == email);
+            var student = db.Students
+                .FirstOrDefault(stud => stud.FirstName == firstName && stud.LastName == lastName && stud.BirthDate == birthDate && stud.Email == email);
 
-            int studentId;
             if (student == null)
             {
                 var newStudent = new Student
@@ -97,8 +85,8 @@ namespace ContosoUniversity.Bll
                     BirthDate = birthDate,
                     Email = email
                 };
-                context.Students.Add(newStudent);
-                context.SaveChanges();
+                db.Students.Add(newStudent);
+                db.SaveChanges();
                 studentId = newStudent.StudentID;
             }
             else
@@ -106,23 +94,24 @@ namespace ContosoUniversity.Bll
                 studentId = student.StudentID;
             }
 
-            var courseEntity = context.Courses.FirstOrDefault(c => c.CourseName == course);
+            var courseEntity = db.Courses.FirstOrDefault(crs => crs.CourseName == course);
             if (courseEntity != null)
             {
+                courseId = courseEntity.CourseID;
                 var newEnrollment = new Enrollment
                 {
-                    CourseID = courseEntity.CourseID,
+                    CourseID = courseId,
                     Date = DateTime.Now,
                     StudentID = studentId
                 };
-                context.Enrollments.Add(newEnrollment);
-                context.SaveChanges();
+                db.Enrollments.Add(newEnrollment);
+                db.SaveChanges();
             }
         }
 
         public List<object> GetStudents(string name)
         {
-            using var context = _dbFactory.CreateDbContext();
+            using var db = _factory.CreateDbContext();
             var studentsInfo = new List<object>();
 
             if (!string.IsNullOrEmpty(name))
@@ -133,8 +122,8 @@ namespace ContosoUniversity.Bll
                     var firstName = arr[0];
                     var lastName = arr[1];
 
-                    var students = context.Students
-                        .Where(s => s.FirstName == firstName && s.LastName == lastName)
+                    var students = db.Students
+                        .Where(stud => stud.FirstName == firstName && stud.LastName == lastName)
                         .ToList();
 
                     foreach (var stud in students)
@@ -153,15 +142,36 @@ namespace ContosoUniversity.Bll
             return studentsInfo;
         }
 
-        public List<string> SearchStudentNames(string prefixText)
+        public List<string> GetCourseNames()
         {
-            using var context = _dbFactory.CreateDbContext();
-            return context.Students
+            using var db = _factory.CreateDbContext();
+            return db.Courses.Select(c => c.CourseName).ToList();
+        }
+
+        public List<string> GetStudentAutoComplete(string prefixText)
+        {
+            using var db = _factory.CreateDbContext();
+            return db.Students
                 .Where(s => s.FirstName.StartsWith(prefixText))
                 .Select(s => s.FirstName + " " + s.LastName)
                 .Take(20)
                 .ToList();
         }
+
+        public List<string> GetDepartmentNames()
+        {
+            using var db = _factory.CreateDbContext();
+            return db.Departments.Select(d => d.DepartmentName).ToList();
+        }
+
+        public List<string> GetCourseAutoComplete(string prefixText)
+        {
+            using var db = _factory.CreateDbContext();
+            return db.Courses
+                .Where(c => c.CourseName.StartsWith(prefixText))
+                .Select(c => c.CourseName)
+                .Take(20)
+                .ToList();
+        }
     }
 }
-

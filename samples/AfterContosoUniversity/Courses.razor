@@ -1,33 +1,45 @@
 @page "/Courses"
 <HeadContent>
     <link href="/CSS/CSS_Courses.css" rel="stylesheet" />
+    <script src="/JQuery/JQuery_Courses.js"></script>
 </HeadContent>
+<ScriptManager></ScriptManager>
+    <UpdatePanel>
+        <ContentTemplate>
             <div id="dropList">
                 <h1 id="hdrCourse">Select Course</h1>
-                <DropDownList ItemType="string" ID="drpDepartments" Items="@(_departments ?? new())" @bind-SelectedValue="_selectedDepartment" />
-                <Button ID="btnSearchCourse" Text="Search Courses" OnClick="HandleSearchCourse" />
+                <select @bind="_selectedDepartment">
+                    <option value="">-- Select Department --</option>
+                    @foreach (var dept in _departments)
+                    {
+                        <option value="@dept">@dept</option>
+                    }
+                </select>
+                <Button Text="Search Courses" OnClick="btnSearchCourse_Click"></Button>
                 <br />
                 <br />
-                <GridView ItemType="ContosoUniversity.Models.Cours" ID="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
+                <GridView Items="@_courses" ItemType="Cours" AllowPaging="true" DataKeyNames="CourseID"
                     PageSize="1" AutoGenerateColumns="false"
-                    Items="@(_courses ?? new())"
-                    EmptyDataText="Chose Department To Display Courses">
+                    EmptyDataText = "Chose Department To Display Courses">
                     <Columns>
-                        <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="CourseID" HeaderText="ID" />
-                        <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="CourseName" HeaderText="Course Name" />
-                        <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="StudentsMax" HeaderText="Max Capacity" />
+                        <BoundField DataField="CourseID" HeaderText="ID" />
+                        <BoundField DataField="CourseName" HeaderText="Course Name" />
+                        <BoundField DataField="StudentsMax" HeaderText="Max Capacity" />
                     </Columns>
                 </GridView>
             </div>
             <div id="autoComplete">
                 <h1 id="crsByName">Courses By Name</h1>
-                <TextBox ID="txtCourse" @bind-Text="_searchCourseName" placeholder="Search Course..." />
-                <Button ID="search" Text="Search" OnClick="HandleSearchByName" />
+                <TextBox @bind-Text="_courseSearchText" placeholder="Search Course..."></TextBox>
+                <Button Text="Search" OnClick="search_Click"></Button>
                 <br />
                 <br />
-                <DetailsView ItemType="ContosoUniversity.Models.Cours" ID="dtlCourses" Width="125" Height="50" CssClass="details"
-                    Items="@(_courseDetails ?? new())" AutoGenerateRows="true">
+                <DetailsView Items="@_courseDetails" ItemType="Cours"
+                    Width="125" Height="50" CssClass="details"
+                    AutoGenerateRows="true">
                 </DetailsView>
             </div>
+        </ContentTemplate>         
+    </UpdatePanel>
 
 

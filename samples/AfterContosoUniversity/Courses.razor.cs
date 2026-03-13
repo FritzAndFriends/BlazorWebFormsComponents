@@ -1,43 +1,44 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Components;
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
-using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.Bll;
 
 namespace ContosoUniversity
 {
     public partial class Courses
     {
-        [Inject] private Courses_Logic CoursesLogic { get; set; }
-        [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; }
+        [Inject] private Courses_Logic coursLogic { get; set; } = default!;
+        [Inject] private StudentsListLogic studLogic { get; set; } = default!;
 
-        private List<string> _departments;
-        private List<Cours> _courses;
-        private List<Cours> _courseDetails;
+        private List<string> _departments = new();
         private string _selectedDepartment = "";
-        private string _searchCourseName = "";
+        private List<Cours> _courses = new();
+        private string _courseSearchText = "";
+        private List<Cours> _courseDetails = new();
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            using var context = DbFactory.CreateDbContext();
-            _departments = context.Departments.Select(d => d.DepartmentName).ToList();
+            _departments = studLogic.GetDepartmentNames();
         }
 
-        private void HandleSearchCourse()
+        private void btnSearchCourse_Click()
         {
             if (!string.IsNullOrEmpty(_selectedDepartment))
             {
-                _courses = CoursesLogic.GetCourses(_selectedDepartment);
+                _courses = coursLogic.GetCourses(_selectedDepartment);
             }
         }
 
-        private void HandleSearchByName()
+        private void search_Click()
         {
-            if (!string.IsNullOrEmpty(_searchCourseName))
+            if (!string.IsNullOrEmpty(_courseSearchText))
             {
-                _courseDetails = CoursesLogic.GetCourse(_searchCourseName);
+                _courseDetails = coursLogic.GetCourse(_courseSearchText);
+                _courseSearchText = "";
             }
-            _searchCourseName = "";
         }
     }
 }
-

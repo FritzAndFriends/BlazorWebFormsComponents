@@ -1,23 +1,32 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ContosoUniversity.Models
 {
-    using System;
-    using System.Collections.Generic;
-
-    public partial class Instructor
+    [Table("Instructors")]
+    public class Instructor
     {
-        public Instructor()
-        {
-            this.Courses = new HashSet<Cours>();
-        }
-
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int InstructorID { get; set; }
+
+        [Required]
+        [MaxLength(20)]
         public string FirstName { get; set; }
+
+        [Required]
+        [MaxLength(20)]
         public string LastName { get; set; }
-        public System.DateTime BirthDate { get; set; }
+
+        public DateTime BirthDate { get; set; }
+
+        [MaxLength(50)]
         public string Email { get; set; }
 
         public virtual ICollection<Cours> Courses { get; set; }
+
     }
 }
-
 

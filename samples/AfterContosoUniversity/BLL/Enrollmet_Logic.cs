@@ -1,30 +1,30 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Bll
 {
     public class Enrollmet_Logic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _dbFactory;
+        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
 
-        public Enrollmet_Logic(IDbContextFactory<ContosoUniversityEntities> dbFactory)
+        public Enrollmet_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
         {
-            _dbFactory = dbFactory;
+            _factory = factory;
         }
 
         public Dictionary<string, int> Get_Enrollment_ByDate()
         {
-            using var context = _dbFactory.CreateDbContext();
-            var enrollments = context.Enrollments
-                .GroupBy(e => e.Date)
-                .Select(g => new { Date = g.Key, Count = g.Count() })
-                .ToList();
+            using var db = _factory.CreateDbContext();
+            var enrollments = from enrl in db.Enrollments
+                              group enrl by enrl.Date into d
+                              select new { Date = d.Key, Count = d.Count() };
 
             var entries = new Dictionary<string, int>();
-            foreach (var entry in enrollments)
+
+            foreach (var entry in enrollments.ToList())
             {
                 entries.Add(entry.Date.ToShortDateString(), entry.Count);
             }
@@ -33,4 +33,3 @@ namespace ContosoUniversity.Bll
         }
     }
 }
-

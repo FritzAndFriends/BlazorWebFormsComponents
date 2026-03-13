@@ -1,39 +1,34 @@
 @page "/About"
 <HeadContent>
      <link href="/CSS/CSS_About.css" rel="stylesheet" />
+     <script src="/JQuery/JQuery_About.js"></script>
 </HeadContent>
 <div id="header">
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
-        <GridView ItemType="KeyValuePair<string, int>" CssClass="grid" 
-            ID="EnrollmentsStat" Items="@(_enrollmentData ?? new())"
+        <GridView Items="@_enrollmentStats" ItemType="KeyValuePair<string, int>"
+            CssClass="grid"
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
              CellPadding="4" ForeColor="@("#333333")" GridLines="GridLines.None">
-            <AlternatingRowStyleContent>
-                <GridViewAlternatingRowStyle BackColor="WebColor.White" />
-            </AlternatingRowStyleContent>
+            <AlternatingRowStyleContent><GridViewRowStyle BackColor="WebColor.White" /></AlternatingRowStyleContent>
             <Columns>
-                <BoundField ItemType="KeyValuePair<string, int>" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true" />
-                <BoundField ItemType="KeyValuePair<string, int>" DataField="Value" HeaderText="Students" ReadOnly="true" />
+                <BoundField DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
+                <HeaderStyle BackColor="WebColor.Black" BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Bold="true" Font-Size="30" />
+                <ItemStyle BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Size="20" HorizontalAlign="HorizontalAlign.Center" />
+                </BoundField>
+                <BoundField DataField="Value" HeaderText="Students" ReadOnly="true">
+                <FooterStyle BorderStyle="BorderStyle.Solid" />
+                <HeaderStyle BackColor="WebColor.Black" BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Bold="true" Font-Size="30" />
+                <ItemStyle BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Size="20" HorizontalAlign="HorizontalAlign.Center" />
+                </BoundField>
             </Columns>
-            <EditRowStyleContent>
-                <GridViewEditRowStyle BackColor="@("#2461BF")" />
-            </EditRowStyleContent>
-            <FooterStyleContent>
-                <GridViewFooterStyle BackColor="@("#507CD1")" Font-Bold="true" ForeColor="WebColor.White" />
-            </FooterStyleContent>
-            <HeaderStyleContent>
-                <GridViewHeaderStyle BackColor="@("#507CD1")" Font-Bold="true" ForeColor="WebColor.White" />
-            </HeaderStyleContent>
-            <PagerStyleContent>
-                <GridViewPagerStyle BackColor="@("#2461BF")" ForeColor="WebColor.White" HorizontalAlign="HorizontalAlign.Center" />
-            </PagerStyleContent>
-            <RowStyleContent>
-                <GridViewRowStyle BackColor="@("#EFF3FB")" />
-            </RowStyleContent>
-            <SelectedRowStyleContent>
-                <GridViewSelectedRowStyle BackColor="@("#D1DDF1")" Font-Bold="true" ForeColor="@("#333333")" />
-            </SelectedRowStyleContent>
+            <EditRowStyleContent><GridViewRowStyle BackColor="@("#2461BF")" /></EditRowStyleContent>
+            <FooterStyleContent><GridViewRowStyle BackColor="@("#507CD1")" Font-Bold="true" ForeColor="WebColor.White" /></FooterStyleContent>
+            <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#507CD1")" Font-Bold="true" ForeColor="WebColor.White" /></HeaderStyleContent>
+            <PagerStyleContent><GridViewRowStyle BackColor="@("#2461BF")" ForeColor="WebColor.White" HorizontalAlign="HorizontalAlign.Center" /></PagerStyleContent>
+            <RowStyleContent><GridViewRowStyle BackColor="@("#EFF3FB")" /></RowStyleContent>
+            <SelectedRowStyleContent><GridViewRowStyle BackColor="@("#D1DDF1")" Font-Bold="true" ForeColor="@("#333333")" /></SelectedRowStyleContent>
         </GridView>
     </div>
+

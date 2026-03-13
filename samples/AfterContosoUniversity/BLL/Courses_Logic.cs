@@ -1,24 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.Models;
 
 namespace ContosoUniversity.BLL
 {
     public class Courses_Logic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _dbFactory;
+        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
 
-        public Courses_Logic(IDbContextFactory<ContosoUniversityEntities> dbFactory)
+        public Courses_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
         {
-            _dbFactory = dbFactory;
+            _factory = factory;
         }
 
         public List<Cours> GetCourses(string department)
         {
-            using var context = _dbFactory.CreateDbContext();
-            return context.Courses
+            using var db = _factory.CreateDbContext();
+            return db.Courses
                 .Include(c => c.Department)
                 .Where(c => c.Department.DepartmentName == department)
                 .ToList();
@@ -26,11 +26,10 @@ namespace ContosoUniversity.BLL
 
         public List<Cours> GetCourse(string courseName)
         {
-            using var context = _dbFactory.CreateDbContext();
-            return context.Courses
+            using var db = _factory.CreateDbContext();
+            return db.Courses
                 .Where(c => c.CourseName == courseName)
                 .ToList();
         }
     }
 }
-

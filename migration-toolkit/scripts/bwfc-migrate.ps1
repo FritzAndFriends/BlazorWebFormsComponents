@@ -1837,7 +1837,7 @@ if (Test-Path $modelsDir -PathType Container) {
     $modelsOutDir = Join-Path $Output 'Models'
 
     # --- EDMX Detection & EF Core Generation ---
-    $edmxFiles = Get-ChildItem -Path $modelsDir -Filter '*.edmx' -File
+    $edmxFiles = @(Get-ChildItem -Path $modelsDir -Filter '*.edmx' -File)
     $edmxGeneratedFiles = @()
     $edmxSkipNames = @()
 

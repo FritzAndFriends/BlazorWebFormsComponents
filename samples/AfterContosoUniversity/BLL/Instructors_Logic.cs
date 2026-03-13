@@ -1,30 +1,30 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
+using ContosoUniversity.Models;
 
 namespace ContosoUniversity.BLL
 {
     public class Instructors_Logic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _dbFactory;
+        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
 
-        public Instructors_Logic(IDbContextFactory<ContosoUniversityEntities> dbFactory)
+        public Instructors_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
         {
-            _dbFactory = dbFactory;
+            _factory = factory;
         }
 
         public List<Instructor> getInstructors()
         {
-            using var context = _dbFactory.CreateDbContext();
-            return context.Instructors.ToList();
+            using var db = _factory.CreateDbContext();
+            return db.Instructors.ToList();
         }
 
         public List<Instructor> GetSortedInstrucors(string expression, string direction)
         {
-            using var context = _dbFactory.CreateDbContext();
-            IQueryable<Instructor> query = context.Instructors;
+            using var db = _factory.CreateDbContext();
+            IQueryable<Instructor> query = db.Instructors;
 
             if (!string.IsNullOrEmpty(expression))
             {
@@ -33,7 +33,7 @@ namespace ContosoUniversity.BLL
                     "InstructorID" => direction == "asc" ? query.OrderBy(i => i.InstructorID) : query.OrderByDescending(i => i.InstructorID),
                     "FirstName" => direction == "asc" ? query.OrderBy(i => i.FirstName) : query.OrderByDescending(i => i.FirstName),
                     "LastName" => direction == "asc" ? query.OrderBy(i => i.LastName) : query.OrderByDescending(i => i.LastName),
-                    _ => query.OrderBy(i => i.InstructorID)
+                    _ => query
                 };
             }
 
@@ -41,4 +41,3 @@ namespace ContosoUniversity.BLL
         }
     }
 }
-

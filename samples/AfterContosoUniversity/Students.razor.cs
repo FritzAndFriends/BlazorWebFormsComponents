@@ -1,45 +1,45 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Components;
+using BlazorWebFormsComponents;
 using ContosoUniversity.Models;
 using ContosoUniversity.Bll;
-using Microsoft.EntityFrameworkCore;
-using BlazorWebFormsComponents;
 
 namespace ContosoUniversity
 {
     public partial class Students
     {
-        [Inject] private StudentsListLogic StudLogic { get; set; }
-        [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; }
+        [Inject] private StudentsListLogic studLogic { get; set; } = default!;
 
-        private List<object> _studentData;
-        private List<string> _courseNames;
-        private List<object> _searchResults;
-
+        private List<object> _students = new();
+        private List<string> _courseNames = new();
+        private string _selectedCourse = "";
         private string _firstName = "";
         private string _lastName = "";
         private string _birthDate = "";
         private string _email = "";
         private string _searchText = "";
-        private string _selectedCourse = "";
+        private List<object> _studentDetails = new();
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            LoadStudentData();
-            LoadCourseNames();
+            _students = studLogic.GetJoinedTableData();
+            _courseNames = studLogic.GetCourseNames();
         }
 
-        private void LoadStudentData()
+        private void grv_DeleteItem(int id)
         {
-            _studentData = StudLogic.GetJoinedTableData();
+            studLogic.DeleteStudent(id);
+            _students = studLogic.GetJoinedTableData();
         }
 
-        private void LoadCourseNames()
+        private void grv_RowUpdating(GridViewUpdateEventArgs e)
         {
-            using var context = DbFactory.CreateDbContext();
-            _courseNames = context.Courses.Select(c => c.CourseName).ToList();
+            // BWFC GridViewUpdateEventArgs has RowIndex only — full edit support requires manual implementation
         }
 
-        private void HandleInsert()
+        private void btnInsert_Click()
         {
             DateTime birth;
             try
@@ -51,65 +51,27 @@ namespace ContosoUniversity
                 return;
             }
 
-            var selectedCourse = !string.IsNullOrEmpty(_selectedCourse) ? _selectedCourse : (_courseNames?.FirstOrDefault() ?? "");
-            StudLogic.InsertNewEntry(_firstName, _lastName, birth, selectedCourse, 
-                string.IsNullOrEmpty(_email) ? "Has not specified" : _email);
-            LoadStudentData();
+            studLogic.InsertNewEntry(_firstName, _lastName, birth, _selectedCourse, string.IsNullOrEmpty(_email) ? "Has not specified" : _email);
+            _students = studLogic.GetJoinedTableData();
+            btnClear_Click();
         }
 
-        private void HandleClear()
+        private void btnClear_Click()
         {
             _firstName = "";
             _lastName = "";
             _birthDate = "";
             _email = "";
+            _selectedCourse = "";
         }
 
-        private void HandleSearch()
+        private void btnSearch_Click()
         {
-            _searchResults = StudLogic.GetStudents(_searchText);
-            _searchText = "";
-        }
-
-        private void HandleDelete(GridViewDeleteEventArgs e)
-        {
-            if (e.RowIndex >= 0 && e.RowIndex < _studentData.Count)
+            if (!string.IsNullOrEmpty(_searchText))
             {
-                var row = _studentData[e.RowIndex];
-                var idProp = row.GetType().GetProperty("ID");
-                if (idProp != null)
-                {
-                    var id = (int)idProp.GetValue(row);
-                    StudLogic.DeleteStudent(id);
-                    LoadStudentData();
-                }
+                _studentDetails = studLogic.GetStudents(_searchText);
+                _searchText = "";
             }
-        }
-
-        private void HandleEdit(GridViewEditEventArgs e)
-        {
-            // GridView handles edit mode
-        }
-
-        private void HandleUpdate(GridViewUpdateEventArgs e)
-        {
-            if (e.RowIndex >= 0 && e.RowIndex < _studentData.Count)
-            {
-                var row = _studentData[e.RowIndex];
-                var idProp = row.GetType().GetProperty("ID");
-                if (idProp != null)
-                {
-                    var id = (int)idProp.GetValue(row);
-                    // GridView inline editing not fully supported yet — reload data
-                    LoadStudentData();
-                }
-            }
-        }
-
-        private void HandleCancelEdit(GridViewCancelEditEventArgs e)
-        {
-            // GridView handles cancel
         }
     }
 }
-
