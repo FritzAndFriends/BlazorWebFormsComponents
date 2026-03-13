@@ -3,45 +3,29 @@
     <link href="CSS/CSS_Courses.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Courses.js"></script>
 </HeadContent>
-<ScriptManager></ScriptManager>
-    <UpdatePanel>
-        <ContentTemplate>
             <div id="dropList">
                 <h1 id="hdrCourse">Select Course</h1>
-                <DropDownList ID="drpDepartments"></DropDownList>
-                <Button ID="btnSearchCourse" Text="Search Courses" OnClick="btnSearchCourse_Click"></Button>
+                <DropDownList ItemType="object" ID="drpDepartments"></DropDownList>
+                <Button ID="btnSearchCourse" Text="Search Courses" OnClick="@HandleSearchCourse"></Button>
                 <br />
                 <br />
-                <GridView ID="grvCourses" AllowPaging="True" DataKeyNames="CourseID"
-                    PageSize="1" AutoGenerateColumns="False"
-                    OnPageIndexChanging="grvCourses_PageIndexChanging"
-                    EmptyDataText = "Chose Department To Display Courses">
+                <GridView ItemType="object" ID="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
+                    PageSize="1" AutoGenerateColumns="false"
+                    EmptyDataText="Chose Department To Display Courses">
                     <Columns>
-                        <BoundField DataField="CourseID" HeaderText="ID" />
-                        <BoundField DataField="CourseName" HeaderText="Course Name" />
-                        <BoundField DataField="StudentsMax" HeaderText="Max Capacity" />
+                        <BoundField ItemType="object" DataField="CourseID" HeaderText="ID" />
+                        <BoundField ItemType="object" DataField="CourseName" HeaderText="Course Name" />
+                        <BoundField ItemType="object" DataField="StudentsMax" HeaderText="Max Capacity" />
                     </Columns>
                 </GridView>
             </div>
             <div id="autoComplete">
                 <h1 id="crsByName">Courses By Name</h1>
                 <TextBox ID="txtCourse" placeholder="Search Course..."></TextBox>
-                <Button ID="search" Text="Search" OnClick="search_Click"></Button>
+                <Button ID="search" Text="Search" OnClick="@HandleCourseByName"></Button>
                 <br />
                 <br />
-                <ajaxToolkit:AutoCompleteExtender
-                    ID="AutoCompleteExtender1"
-                    TargetControlID="txtCourse"
-                    ServiceMethod="GetList"
-                    MinimumPrefixLength="1"
-                    CompletionInterval="100"
-                    EnableCaching="true"
-                    CompletionSetCount="20"
-                    ShowOnlyCurrentWordInCompletionListItem="true">
-                </ajaxToolkit:AutoCompleteExtender>
-                <DetailsView ID="dtlCourses" Width="125px" Height="50px" CssClass="details">
+                @* TODO: ajaxToolkit:AutoCompleteExtender removed  implement client-side autocomplete *@
+                <DetailsView ItemType="object" ID="dtlCourses" Width="125" Height="50" CssClass="details">
                 </DetailsView>
-        </ContentTemplate>         
-    </UpdatePanel>
-
-
+            </div>

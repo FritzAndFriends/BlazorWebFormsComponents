@@ -3,45 +3,37 @@
     <link href="CSS/Students_CSS.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Students.js"></script>
 </HeadContent>
-<ScriptManager ID="ScriptManager2"></ScriptManager>       
-    <UpdatePanel>
-        <ContentTemplate>
             <div id="grvStudentsData">
-                <GridView ID="grv"
+                <GridView ItemType="object" ID="grv"
                     CssClass="grv"
-                    AutoGenerateColumns="False"
+                    AutoGenerateColumns="false"
                     EmptyDataText="There are no records to display"
-                    SelectMethod="grv_GetData" UpdateMethod="grv_UpdateItem"
-                    DeleteMethod="grv_DeleteItem" DataKeyNames="ID" OnRowUpdating="grv_RowUpdating"
-                    BackColor="White" BorderColor="#3366CC" BorderStyle="None" BorderWidth="1px"
-                    CellPadding="4" Height="336px" Width="416px">
-@* TODO: SelectMethod="grv_GetData" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.grv_GetData(maxRows, startRow, sort, out total))" *@
+                    DataKeyNames="ID"
+                    BackColor="WebColor.White" BorderColor="@("#3366CC")" BorderWidth="1"
+                    CellPadding="4" Height="336" Width="416">
                     <Columns>
-                        <CommandField HeaderText="Delete Student" ShowDeleteButton="True" ButtonType="Button" />
-                        <BoundField DataField="ID" HeaderText="Student ID" ReadOnly="True" />
-                        <BoundField DataField="FullName" HeaderText="Student Name" />
-                        <BoundField DataField="Email" HeaderText="Email" />
-                        <BoundField DataField="Date" HeaderText="Enrollment Date" ReadOnly="True" />
-                        <BoundField DataField="Count" HeaderText="Number of Courses" ReadOnly="True" />
-                        <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="True" />
+                        @* TODO: CommandField not yet supported in BWFC  implement delete via custom template *@
+                        <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                        <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                        <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                        @* TODO: CommandField for Edit not yet supported  implement via custom template *@
                     </Columns>
-                    <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
-                    <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
-                    <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
-                    <RowStyle BackColor="White" ForeColor="#003399" />
-                    <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
-                    <SortedAscendingCellStyle BackColor="#EDF6F6" />
-                    <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
-                    <SortedDescendingCellStyle BackColor="#D6DFDF" />
-                    <SortedDescendingHeaderStyle BackColor="#002876" />
+                    <FooterStyleContent><GridViewFooterStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" /></FooterStyleContent>
+                    <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#003399")" Font_Bold="true" ForeColor="@("#CCCCFF")" /></HeaderStyleContent>
+                    <PagerStyleContent><GridViewPagerStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" HorizontalAlign="HorizontalAlign.Left" /></PagerStyleContent>
+                    <RowStyleContent><GridViewRowStyle BackColor="WebColor.White" ForeColor="@("#003399")" /></RowStyleContent>
+                    <SelectedRowStyleContent><GridViewSelectedRowStyle BackColor="@("#009999")" Font_Bold="true" ForeColor="@("#CCFF99")" /></SelectedRowStyleContent>
+                    @* TODO: SortedAscendingCellStyle, SortedAscendingHeaderStyle, SortedDescendingCellStyle, SortedDescendingHeaderStyle
+                              blocked on BWFC library component creation (scheduled) *@
                 </GridView>
             </div>
             <div id="addStud">
                 <h1 id="addStudent">Add Student</h1>
                 <Table ID="tabAddStud"
-                    CssClass="tabAddStud" BorderColor="#0033CC" Font-Bold="True" Font-Italic="False"
-                    Font-Underline="False" ForeColor="White"
-                    Font-Overline="False">
+                    CssClass="tabAddStud" BorderColor="@("#0033CC")" Font_Bold="true"
+                    ForeColor="WebColor.White">
                     <TableRow>
                         <TableCell>First Name</TableCell>
                         <TableCell>
@@ -65,16 +57,16 @@
                     </TableRow>
                     <TableRow>
                         <TableCell>Course Name</TableCell><TableCell>
-                            <DropDownList ID="dropListCourses">
+                            <DropDownList ItemType="object" ID="dropListCourses">
                             </DropDownList>
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>               
+                        <TableCell>
                         </TableCell><TableCell>
-                            <Button CssClass="insert" ID="btnInsert" Text="New Enrollment" OnClick="btnInsert_Click" />
+                            <Button CssClass="insert" ID="btnInsert" Text="New Enrollment" OnClick="@HandleInsert" />
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                     <Button ID="btnClear" Text="Clear" OnClick="btnClear_Click" />
+                     <Button ID="btnClear" Text="Clear" OnClick="@HandleClear" />
                         </TableCell>
                     </TableRow>
                 </Table>
@@ -82,36 +74,23 @@
             <div id="ajax">
                 <h1 id="searchStud">Search Student</h1>
                 <TextBox CssClass="txtSearch" ID="txtSearch" placeholder="Type Student Name..." />
-                <ajaxToolkit:AutoCompleteExtender
-                    ID="AutoCompleteExtender1"
-                    TargetControlID="txtSearch"
-                    ServiceMethod="GetCompletionList"
-                    MinimumPrefixLength="1"
-                    CompletionInterval="100"
-                    EnableCaching="true"
-                    CompletionSetCount="20"
-                    ShowOnlyCurrentWordInCompletionListItem="true">
-                </ajaxToolkit:AutoCompleteExtender>
-                <Button ID="btnSearch" Text="Show Student Info" OnClick="btnSearch_Click" CssClass="btnInfo" />
-                <DetailsView
+                @* TODO: ajaxToolkit:AutoCompleteExtender removed  implement client-side autocomplete *@
+                <Button ID="btnSearch" Text="Show Student Info" OnClick="@HandleSearch" CssClass="btnInfo" />
+                <DetailsView ItemType="object"
                     ID="studentData"
-                    Width="125px"
-                    Height="50px"
-                    AutoGenerateRows="False"
-                    CssClass="detailsView" BorderColor="Black" ForeColor="Black">
+                    Width="125"
+                    Height="50"
+                    AutoGenerateRows="false"
+                    CssClass="detailsView" BorderColor="WebColor.Black" ForeColor="WebColor.Black">
                     <Fields>
-                        <BoundField
+                        <BoundField ItemType="object"
                             DataField="FirstName"
                             HeaderText="First Name" />
-                        <BoundField DataField="LastName" HeaderText="Last Name" />
-                        <BoundField DataField="Email" HeaderText="Email" />
-                        <BoundField DataField="BirthDate" HeaderText="Birth Date" />
-                        <BoundField DataField="StudentID" HeaderText="id" />
+                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name" />
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="object" DataField="BirthDate" HeaderText="Birth Date" />
+                        <BoundField ItemType="object" DataField="StudentID" HeaderText="id" />
                     </Fields>
-                    <RowStyle BackColor="White" />
+                    <RowStyleContent><GridViewRowStyle BackColor="WebColor.White" /></RowStyleContent>
                 </DetailsView>
             </div>
-        </ContentTemplate>
-    </UpdatePanel>         
-     
-

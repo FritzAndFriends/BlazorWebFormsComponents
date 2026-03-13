@@ -1,5 +1,6 @@
-// TODO: Review and adjust this generated Program.cs for your application needs.
 using BlazorWebFormsComponents;
+using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +9,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazorWebFormsComponents();
 
-// TODO: Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-// builder.Services.AddDbContextFactory<YourDbContext>(options => options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ContosoUniversity;Integrated Security=True"));
+builder.Services.AddDbContextFactory<ContosoUniversityEntities>(options =>
+    options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ContosoUniversity;Integrated Security=True"));
 
 var app = builder.Build();
 

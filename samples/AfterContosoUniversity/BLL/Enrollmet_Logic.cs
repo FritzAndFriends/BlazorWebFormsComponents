@@ -1,21 +1,25 @@
-// TODO: Review — auto-copied from Web Forms source
+// Business logic — migrated from Web Forms to use injected DbContext
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.Models
+namespace ContosoUniversity.Bll
 {
     public class Enrollmet_Logic
     {
+        private readonly ContosoUniversityEntities _db;
+        public Enrollmet_Logic(ContosoUniversityEntities db) { _db = db; }
+
         public Dictionary<string, int> Get_Enrollment_ByDate()
         {
-            var enrollments = from enrl in new ContosoUniversityEntities().Enrollments
+            var enrollments = from enrl in _db.Enrollments
                               group enrl by enrl.Date into d
                               select new { Date = d.Key, Count = d.Select(enrl => enrl.EnrollmentID).Count() };
 
-            Dictionary<string, int> entries = new Dictionary<string, int>();
+            var entries = new Dictionary<string, int>();
 
             foreach (var entry in enrollments)
             {
@@ -23,7 +27,6 @@ namespace ContosoUniversity.Models
             }
 
             return entries;
-
         }
     }
 }

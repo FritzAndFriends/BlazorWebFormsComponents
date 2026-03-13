@@ -1,47 +1,23 @@
-// =============================================================================
-// TODO: This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   - Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   - Page_PreRender → OnAfterRenderAsync
-//   - IsPostBack checks → remove or convert to state logic
-//   - ViewState usage → component [Parameter] or private fields
-//   - Session/Cache access → inject IHttpContextAccessor or use DI
-//   - Response.Redirect → NavigationManager.NavigateTo
-//   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - UpdatePanel / ScriptManager references → remove (Blazor handles updates)
-//   - User controls → Blazor component references
-// =============================================================================
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-
 using ContosoUniversity.Models;
 using ContosoUniversity.Bll;
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 
+namespace ContosoUniversity;
 
-namespace ContosoUniversity
+public partial class About
 {
-    public partial class About : System.Web.UI.Page
-    {
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            
-        }
+    [Inject] private IDbContextFactory<ContosoUniversityEntities> DbFactory { get; set; } = default!;
 
-        // The return type can be changed to IEnumerable, however to support
-        // paging and sorting, the following parameters must be added:
-        //     int maximumRows
-        //     int startRowIndex
-        //     out int totalRowCount
-        //     string sortByExpression
-        public Dictionary<string, int> EnrollmentsStat_GetData()
-        {
-            return new Enrollmet_Logic().Get_Enrollment_ByDate();
-        }
+    private List<object> _enrollmentStats = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var logic = new Enrollmet_Logic(db);
+        var stats = logic.Get_Enrollment_ByDate();
+        _enrollmentStats = stats.Select(kvp => (object)new { Key = kvp.Key, Value = kvp.Value }).ToList();
     }
+
+    // TODO: Wire _enrollmentStats to GridView Items parameter once SelectMethod delegate is implemented
 }

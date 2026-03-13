@@ -7,33 +7,22 @@
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
-        <GridView CssClass="grid" 
-            ID="EnrollmentsStat" SelectMethod="EnrollmentsStat_GetData" 
-            AutoGenerateColumns="False" EmptyDataText="There are no records to display"
-             CellPadding="4" ForeColor="#333333" GridLines="None">
-@* TODO: SelectMethod="EnrollmentsStat_GetData" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.EnrollmentsStat_GetData(maxRows, startRow, sort, out total))" *@
-            <AlternatingRowStyle BackColor="White" />
+        <GridView ItemType="object" CssClass="grid"
+            ID="EnrollmentsStat"
+            AutoGenerateColumns="false" EmptyDataText="There are no records to display"
+            CellPadding="4" ForeColor="@("#333333")" GridLines="GridLines.None">
+            <AlternatingRowStyleContent><GridViewAlternatingRowStyle BackColor="WebColor.White" /></AlternatingRowStyleContent>
             <Columns>
-                <BoundField DataField="Key" HeaderText="Enrollment Date" ReadOnly="True">
-                <HeaderStyle BackColor="Black" BorderColor="White" BorderStyle="Solid" Font-Bold="True" Font-Size="30px" />
-                <ItemStyle BorderColor="White" BorderStyle="Solid" Font-Size="20px" HorizontalAlign="Center" />
-                </BoundField>
-                <BoundField DataField="Value" HeaderText="Students" ReadOnly="True">
-                <FooterStyle BorderStyle="Solid" />
-                <HeaderStyle BackColor="Black" BorderColor="White" BorderStyle="Solid" Font-Bold="True" Font-Size="30px" />
-                <ItemStyle BorderColor="White" BorderStyle="Solid" Font-Size="20px" HorizontalAlign="Center" />
-                </BoundField>
+                <BoundField ItemType="object" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true" />
+                <BoundField ItemType="object" DataField="Value" HeaderText="Students" ReadOnly="true" />
             </Columns>
-            <EditRowStyle BackColor="#2461BF" />
-            <FooterStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
-            <HeaderStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
-            <PagerStyle BackColor="#2461BF" ForeColor="White" HorizontalAlign="Center" />
-            <RowStyle BackColor="#EFF3FB" />
-            <SelectedRowStyle BackColor="#D1DDF1" Font-Bold="True" ForeColor="#333333" />
-            <SortedAscendingCellStyle BackColor="#F5F7FB" />
-            <SortedAscendingHeaderStyle BackColor="#6D95E1" />
-            <SortedDescendingCellStyle BackColor="#E9EBEF" />
-            <SortedDescendingHeaderStyle BackColor="#4870BE" />
+            <EditRowStyleContent><GridViewEditRowStyle BackColor="@("#2461BF")" /></EditRowStyleContent>
+            <FooterStyleContent><GridViewFooterStyle BackColor="@("#507CD1")" Font_Bold="true" ForeColor="WebColor.White" /></FooterStyleContent>
+            <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#507CD1")" Font_Bold="true" ForeColor="WebColor.White" /></HeaderStyleContent>
+            <PagerStyleContent><GridViewPagerStyle BackColor="@("#2461BF")" ForeColor="WebColor.White" HorizontalAlign="HorizontalAlign.Center" /></PagerStyleContent>
+            <RowStyleContent><GridViewRowStyle BackColor="@("#EFF3FB")" /></RowStyleContent>
+            <SelectedRowStyleContent><GridViewSelectedRowStyle BackColor="@("#D1DDF1")" Font_Bold="true" ForeColor="@("#333333")" /></SelectedRowStyleContent>
+            @* TODO: SortedAscendingCellStyle, SortedAscendingHeaderStyle, SortedDescendingCellStyle, SortedDescendingHeaderStyle
+                      blocked on BWFC library component creation (scheduled) *@
         </GridView>
     </div>
-
