@@ -1312,6 +1312,24 @@ function Remove-WebFormsAttributes {
         Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($itemTypeMatches.Count) ItemType to TItem"
     }
 
+    # Add ItemType="object" fallback to generic BWFC components that lack an explicit ItemType
+    $genericComponents = @('GridView', 'DetailsView', 'DropDownList', 'BoundField', 'BulletedList',
+        'Repeater', 'ListView', 'FormView', 'RadioButtonList', 'CheckBoxList', 'ListBox',
+        'HyperLinkField', 'ButtonField', 'TemplateField', 'DataList', 'DataGrid')
+    $addedCount = 0
+    foreach ($comp in $genericComponents) {
+        # Match opening tags for this component that do NOT already have ItemType
+        $tagRegex = [regex]"(<${comp}\s)(?![^>]*ItemType=)([^/>]*)(>|/>)"
+        $tagMatches = $tagRegex.Matches($Content)
+        if ($tagMatches.Count -gt 0) {
+            $Content = $tagRegex.Replace($Content, '${1}ItemType="object" ${2}${3}')
+            $addedCount += $tagMatches.Count
+        }
+    }
+    if ($addedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Added ItemType=`"object`" fallback to $addedCount generic component tag(s)"
+    }
+
     return $Content
 }
 
