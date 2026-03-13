@@ -940,7 +940,10 @@ function ConvertFrom-MasterPage {
             $extractedTags.Add("    " + $m.Value.Trim())
         }
         foreach ($m in ([regex]'(?s)<title>.*?</title>').Matches($headInner)) {
-            $extractedTags.Add("    " + $m.Value.Trim())
+            $titleContent = $m.Value.Trim()
+            # Skip empty <title></title> tags — <Page /> component handles title
+            if ($titleContent -match '(?s)^<title>\s*</title>$') { continue }
+            $extractedTags.Add("    " + $titleContent)
         }
         foreach ($m in ([regex]'<link\s[^>]*>').Matches($headInner)) {
             $extractedTags.Add("    " + $m.Value.Trim())
@@ -964,13 +967,20 @@ function ConvertFrom-MasterPage {
         }
 
         # Fix 1a: Preserve CDN references (Bootstrap, jQuery) from <head>
-        $cdnLinkRegex = [regex]'<(?:link|script)\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>'
+        # Match both self-closing and full <script src="...cdn..."></script> tags
+        $cdnScriptFullRegex = [regex]'(?s)<script\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>.*?</script>'
+        foreach ($m in $cdnScriptFullRegex.Matches($headInner)) {
+            $tag = $m.Value.Trim()
+            $extractedTags.Add("    " + $tag)
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN script: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
+        }
+        $cdnLinkRegex = [regex]'<link\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>'
         foreach ($m in $cdnLinkRegex.Matches($headInner)) {
             $tag = $m.Value.Trim()
             # Skip if already captured as a <link> tag
-            if ($tag -match '^<link' -and $extractedTags -contains ("    " + $tag)) { continue }
+            if ($extractedTags -contains ("    " + $tag)) { continue }
             $extractedTags.Add("    " + $tag)
-            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN reference: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN link: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
         }
 
         if ($extractedTags.Count -gt 0) {
@@ -1359,6 +1369,14 @@ function Copy-CodeBehind {
 "@
 
         $annotatedContent = $todoHeader + $content
+
+        # Strip System.Web.* usings — these are Web Forms namespaces with no Blazor equivalent
+        $webUsingsRegex = [regex]'using\s+System\.Web(\.\w+)*;\s*\r?\n?'
+        $webUsingMatches = $webUsingsRegex.Matches($annotatedContent)
+        if ($webUsingMatches.Count -gt 0) {
+            $annotatedContent = $webUsingsRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webUsingMatches.Count) System.Web.* using(s)"
+        }
 
         # RF-12: Convert [QueryString] and [RouteData] parameter attributes
         $qsRegex = [regex]'\[QueryString\("([^"]+)"\)\]'
@@ -1853,6 +1871,43 @@ if (Test-Path $modelsDir -PathType Container) {
 
 #endregion
 
+#region --- Business Logic Directory Copy (BLL, Logic, etc.) ---
+
+$bllDirNames = @('BLL', 'BusinessLogic', 'Logic', 'Services')
+$bllCopied = 0
+foreach ($dirName in $bllDirNames) {
+    $bllDir = Join-Path $Path $dirName
+    if (Test-Path $bllDir -PathType Container) {
+        $bllFiles = Get-ChildItem -Path $bllDir -Filter '*.cs' -File -Recurse
+        if ($bllFiles.Count -gt 0) {
+            Write-Host "Copying $($bllFiles.Count) business logic file(s) from $dirName/..." -ForegroundColor Green
+            foreach ($bf in $bllFiles) {
+                $relBllPath = $bf.FullName.Substring($bllDir.Length).TrimStart('\', '/')
+                $destFile = Join-Path (Join-Path $Output $dirName) $relBllPath
+
+                if ($PSCmdlet.ShouldProcess($destFile, "Copy business logic file")) {
+                    $destDir = Split-Path $destFile -Parent
+                    if (-not (Test-Path $destDir)) {
+                        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+                    }
+                    $csContent = Get-Content -Path $bf.FullName -Raw -Encoding UTF8
+                    $csContent = $csContent -replace 'using System\.Web(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = "// TODO: Review — auto-copied business logic from Web Forms source`n`n" + $csContent
+                    Set-Content -Path $destFile -Value $csContent -Encoding UTF8
+                    Write-TransformLog -File "$dirName/$relBllPath" -Transform 'BLLCopy' -Detail "Copied business logic file → $destFile"
+                    $bllCopied++
+                }
+                else {
+                    Write-Host "[WhatIf] Would copy business logic: $dirName/$relBllPath"
+                }
+            }
+            Write-Host ''
+        }
+    }
+}
+
+#endregion
+
 #region --- Redirect Handler Program.cs Annotations (RF-08) ---
 
 if ($script:RedirectHandlers.Count -gt 0 -and -not $WhatIfPreference) {
@@ -1881,6 +1936,7 @@ Write-Host "  Files processed:       $($script:FilesProcessed)"
 Write-Host "  Transforms applied:    $($script:TransformsApplied)"
 Write-Host "  Static files copied:   $staticCount"
 Write-Host "  Model files copied:    $modelsCopied"
+Write-Host "  BLL files copied:      $bllCopied"
 Write-Host "  Items needing review:  $($script:ManualItems.Count)"
 Write-Host ''
 
