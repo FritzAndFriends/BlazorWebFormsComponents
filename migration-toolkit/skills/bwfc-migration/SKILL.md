@@ -141,6 +141,11 @@ The migration pipeline has **two mandatory layers** that run in strict sequence:
 
 **After Layer 1 completes, immediately proceed to Layer 2. Do NOT fix, edit, or clean up any Layer 1 output first.**
 
+> ⚠️ **MANDATORY — READ BEFORE STARTING LAYER 2:** Open and read **both** child documents in this skill's directory. They contain the detailed patterns, examples, and control translation tables needed for every transform below. Without them you will miss critical migration details.
+>
+> - **`CODE-TRANSFORMS.md`** — Code-behind lifecycle mapping (`Page_Load` → `OnInitializedAsync`, `Page_PreRender` → `OnParametersSetAsync`), event handler conversion, navigation patterns, data binding migration (SelectMethod delegates, template binding with `Context="Item"`), query string / route parameter conversion, and Master Page → Layout conversion with complete before/after examples.
+> - **`CONTROL-REFERENCE.md`** — Control translation tables for all 58 BWFC components across 6 categories (Simple, Form, Validation, Data, Navigation, AJAX), structural/infrastructure components (`WebFormsPage`, `Page`, `NamingContainer`, `MasterPage`, `Content`, `ContentPlaceHolder`, `EmptyLayout`), `DataBinder.Eval` compatibility shim, theming infrastructure, and custom control base classes (`WebControl`, `CompositeControl`, `HtmlTextWriter`).
+
 Layer 2 is where Copilot applies structural transforms to every generated `.razor` and `.razor.cs` file. Work through each file and apply ALL of the following:
 
 > **⚠️ MANDATORY: SelectMethod MUST be preserved as a delegate.** When the original Web Forms markup has `SelectMethod="MethodName"`, the migrated Blazor markup MUST have `SelectMethod="@service.MethodName"` (or explicit lambda). Do NOT convert to `Items=` binding — this is the #1 recurring migration error.
