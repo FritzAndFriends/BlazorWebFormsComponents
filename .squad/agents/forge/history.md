@@ -101,3 +101,50 @@ Run 18 analysis: Test-UnconvertiblePage architecturally flawed (P0), [Parameter]
 
  Team update (2026-03-12): Jeff approved Pattern B+ (Honest No-Op with Runtime Diagnostics) for cookie graceful degradation. Cookies must NOT throw  overrides render-mode-guards 4 for cookie members.  decided by Jeffrey T. Fritz
  Team update (2026-03-12): PageTitle dedup analysis delivered and accepted. Page.Title is single source of truth. Implementation assigned to Cyclops (P0: Default.razor fix, P1: pipeline fix).  decided by Forge, approved by Jeffrey T. Fritz
+
+
+### EDMXEF Core Architecture Analysis (2026-03-13)
+
+**Question:** Should EDMXEF Core conversion be an L1 script enhancement or a BWFC library adapter/code generator?
+
+**Context:** Run 21 ContosoUniversity migration (35/40 tests, 87.5%) revealed EDMX metadata is completely lost during migration:
+- Primary keys: `Cours` entity with `CourseID` property doesn't match EF Core convention  caused 500 errors until manual `[Key]` fix
+- 4 cascade delete rules missing from generated DbContext
+- FK relationships with multiplicity missing (no `HasOne`/`HasMany` config)
+- Column constraints (MaxLength, Required) missing
+- Identity columns missing `ValueGeneratedOnAdd`
+- Table name mappings missing (entity `Cours`  table `Courses`)
+
+The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scripts or skills.
+
+**Recommendation:** **Option 1  L1 Script Enhancement (PowerShell XML Parser)**
+
+**Why:**
+1. **Single point of execution:** Migration is a one-time operation. Customers run the script once  get complete DbContext  done. Option 2 (separate tool) adds friction: discover tool  install  run  fix conflicts.
+2. **Migration-time concern:** EDMX doesn't exist in EF Core. It's a legacy artifact that must be converted to C# code at migration time, not build-time or runtime.
+3. **L1 already transforms models:** Lines 1832-1895 of bwfc-migrate.ps1 already copy Models/*.cs, detect *Context.cs, transform EF6EF Core usings, inject EF Core constructor. Extending it to parse EDMX is natural expansion, not new paradigm. Option 2 creates two competing pipelines.
+4. **PowerShell XML parsing is trivial:** EDMX is well-defined XML (SSDL, CSDL, C-S Mapping). PowerShell has native XML support. ~200-300 lines of PowerShell vs full .NET tool with Roslyn/MSBuild/NuGet/versioning. Complexity ratio is 10:1 in favor of L1.
+5. **EDMX is rare and static:** Target audience is niche within niche (migrating from Web Forms AND using EF6 EDMX). Option 2 adds permanent maintenance burden for temporary legacy problem. Option 1 is one-time implementation (EDMX frozen at EF6).
+6. **Precedent:** L1 script already parses Web.config XML, generates .csproj with conditional packages, generates Program.cs with Identity/Session boilerplate, scans wwwroot for CSS, parses Site.Master for CDN refs. It's already a sophisticated migration engine.
+
+**Technical approach:**
+- New function `Convert-EdmxToEfCore` in bwfc-migrate.ps1 (after line 1831)
+- Parse SSDL (storage schema), CSDL (conceptual model), C-S Mapping (entitytable)
+- Generate entity classes with `[Key]`, `[MaxLength]`, `[Required]`, `[DatabaseGenerated]` from EDMX metadata
+- Generate DbContext with EF Core constructor + `OnModelCreating()` with FK relationships, cascade deletes, table mappings
+- Skip copying .edmx, .edmx.diagram, .tt, .Designer.cs files (useless in EF Core)
+
+**Example:** Entity `Cours` with `CourseID` property  generate `[Key]` attribute (EF Core expects `CoursId`). Cascade delete `<OnDelete Action="Cascade" />`  `OnDelete(DeleteBehavior.Cascade)`.
+
+**Success criteria:**
+- Run 22 (ContosoUniversity): 40/40 tests pass (up from 35/40)
+- Zero manual fixes for keys, FK relationships, cascade deletes, column constraints
+- L1 script time: <2 seconds (current 0.93s; XML parsing adds <0.5s)
+
+**Customer impact:**
+- Option 1: Run script  complete DbContext  build  done
+- Option 2: Run script  skeleton  install tool  run tool  fix conflicts  build  done
+
+**Decision written to:** `.squad/decisions/inbox/forge-edmx-architecture.md`
+
+---

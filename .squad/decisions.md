@@ -6787,3 +6787,28 @@ All BWFC WebControl color attributes (BackColor, ForeColor, BorderColor) use the
 3. For CI acceptance testing, provide an in-memory DB option or EF migration seed
 
 **Impact:** With middleware fix alone, expect 20+ tests to move from fail  pass. Remaining ~6 depend on DB availability.
+
+### 2026-03-13: EDMX→EF Core — L1 script enhancement (Option 1)
+
+**By:** Forge (Lead)
+
+**What:** Decision to enhance `bwfc-migrate.ps1` with native EDMX parsing and EF Core code generation rather than building a separate NuGet package/tool.
+
+**Why:**
+- **Single point of execution:** Migration is one-time; customers should run the L1 script once and get complete DbContext + entity models—no additional tool installation.
+- **Migration-time concern:** EDMX is a legacy artifact that must convert to C# at migration time, not build-time or runtime.
+- **L1 script already transforms models:** Existing code (lines 1832–1895) already handles Model/*.cs and DbContext transformations. Extending to EDMX is natural architectural progression.
+- **PowerShell XML parsing is trivial:** EDMX is well-defined XML (SSDL, CSDL, C-S Mapping). Native PowerShell XML support + ~200–300 lines of code solves it; building .NET tooling would require Roslyn, MSBuild, NuGet packaging—10:1 complexity ratio.
+- **EDMX files are rare and static:** Legacy pattern, frozen at EF6. No ongoing maintenance burden in L1 script; separate tool adds permanent infrastructure cost.
+- **Precedent:** L1 script already parses Web.config, generates Program.cs, scans wwwroot, parses Site.Master—it's a sophisticated migration engine.
+
+**Technical Approach:**
+- Add `Convert-EdmxToEfCore` function to `bwfc-migrate.ps1` (after line 1831)
+- Parse SSDL, CSDL, C-S Mapping to generate entity classes with proper annotations + DbContext with OnModelCreating()
+- Integrate at line 1836 in `Copy-ModelsDirectory`
+
+**Customer Impact:** Customers with EDMX run `bwfc-migrate.ps1` and get complete, working DbContext with all metadata—no manual fixups.
+
+**Success Criteria:** Run 22: 40/40 tests pass (up from 35/40); zero manual fixes for keys, FK relationships, cascade deletes; L1 script completion <2 seconds.
+
+**Next Steps:** Create `Convert-EdmxToEfCore` function, parse SSDL/CSDL/C-S Mapping, generate entities and DbContext, test on ContosoUniversity Run 22.
