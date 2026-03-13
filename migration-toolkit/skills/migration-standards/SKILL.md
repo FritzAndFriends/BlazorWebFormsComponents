@@ -1,6 +1,6 @@
 ---
 name: "migration-standards"
-description: "Canonical standards for migrating ASP.NET Web Forms applications to Blazor using BWFC"
+description: "Enforce canonical migration standards for ASP.NET Web Forms to Blazor using BWFC. Covers target architecture (.NET 10, Server Interactive), database provider detection, event handler preservation, SelectMethod patterns, and page lifecycle mapping. WHEN: \"migration standards\", \"target architecture\", \"render mode placement\", \"page base class\", \"Layer 1 vs Layer 2\"."
 domain: "migration"
 confidence: "medium"
 source: "earned"

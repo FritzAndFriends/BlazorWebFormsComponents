@@ -1,6 +1,6 @@
 ---
 name: bwfc-data-migration
-description: "Migrate Web Forms data access and application architecture to Blazor Server. Covers Entity Framework 6 to EF Core, DataSource controls to service injection, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json, routing, HTTP handlers to middleware, and third-party integrations. Use for Layer 3 architecture decisions during Web Forms migration."
+description: "Migrate Web Forms data access and application architecture to Blazor Server. Covers EF6 to EF Core, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json, and HTTP handlers to middleware. WHEN: \"migrate EF6\", \"session state to services\", \"Global.asax to Program.cs\", \"Web.config to appsettings\", \"data access migration\"."
 ---
 
 # Web Forms Data Access & Architecture Migration

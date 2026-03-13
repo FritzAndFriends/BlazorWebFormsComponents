@@ -1,6 +1,6 @@
 ---
 name: bwfc-migration
-description: "Migrate ASP.NET Web Forms .aspx/.ascx/.master markup to Blazor Server using BlazorWebFormsComponents (BWFC). Covers project setup, NuGet installation, control translation, expression conversion, data binding, code-behind lifecycle, and Master Page to Layout conversion. For Identity/auth migration use /bwfc-identity-migration. For data access and architecture decisions use /bwfc-data-migration."
+description: "Migrate ASP.NET Web Forms .aspx/.ascx/.master markup to Blazor Server using BlazorWebFormsComponents (BWFC). Covers control translation, expression conversion, data binding, code-behind lifecycle, and Master Page to Layout conversion. WHEN: \"migrate aspx\", \"convert web forms markup\", \"master page to layout\", \"asp prefix removal\", \"data binding expressions\". FOR SINGLE OPERATIONS: use /bwfc-identity-migration for auth, /bwfc-data-migration for EF/architecture."
 ---
 
 # Web Forms → Blazor Markup Migration with BWFC
