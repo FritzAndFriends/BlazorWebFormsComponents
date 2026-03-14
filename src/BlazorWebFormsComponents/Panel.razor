@@ -4,14 +4,14 @@
 {
 	@if (!string.IsNullOrEmpty(GroupingText))
 	{
-		<fieldset id="@ClientID" class="@CssClass" style="@ComputedStyle" dir="@DirectionAttr" title="@ToolTip">
+		<fieldset id="@ClientID" class="@CssClass" style="@ComputedStyle" dir="@DirectionAttr" title="@ToolTip" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)">
 			<legend>@GroupingText</legend>
 			@ChildContent
 		</fieldset>
 	}
 	else
 	{
-		<div id="@ClientID" class="@CssClass" style="@ComputedStyle" dir="@DirectionAttr" title="@ToolTip">
+		<div id="@ClientID" class="@CssClass" style="@ComputedStyle" dir="@DirectionAttr" title="@ToolTip" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)">
 			@ChildContent
 		</div>
 	}

@@ -1,6 +1,12 @@
 
 @code {
 
+	// =================================================================
+	// Issue #15 — AccessKey renders as accesskey="X" on various controls
+	// =================================================================
+
+	// --- Button AccessKey ---
+
 	[Fact]
 	public void Button_WithAccessKey_RendersAccessKeyAttribute()
 	{
@@ -11,18 +17,6 @@
 		var button = cut.Find("input[type=submit]");
 		button.HasAttribute("accesskey").ShouldBeTrue();
 		button.GetAttribute("accesskey").ShouldBe("B");
-	}
-
-	[Fact]
-	public void Label_WithAccessKey_RendersAccessKeyAttribute()
-	{
-		// Arrange & Act
-		var cut = Render(@<Label Text="Hello" AccessKey="L" />);
-
-		// Assert
-		var span = cut.Find("span");
-		span.HasAttribute("accesskey").ShouldBeTrue();
-		span.GetAttribute("accesskey").ShouldBe("L");
 	}
 
 	[Fact]
@@ -43,6 +37,143 @@
 
 		// Assert
 		cut.Find("input[type=submit]").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	// --- Label AccessKey ---
+
+	[Fact]
+	public void Label_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(@<Label Text="Hello" AccessKey="L" />);
+
+		// Assert
+		var span = cut.Find("span");
+		span.HasAttribute("accesskey").ShouldBeTrue();
+		span.GetAttribute("accesskey").ShouldBe("L");
+	}
+
+	[Fact]
+	public void Label_WithEmptyAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<Label Text="Hello" AccessKey="" />);
+		cut.Find("span").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Label_WithAssociatedControl_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		var cut = Render(@<Label Text="Username" AssociatedControlID="txtUser" AccessKey="U" />);
+		var label = cut.Find("label");
+		label.HasAttribute("accesskey").ShouldBeTrue();
+		label.GetAttribute("accesskey").ShouldBe("U");
+	}
+
+	// --- TextBox AccessKey ---
+
+	[Fact]
+	public void TextBox_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		var cut = Render(@<TextBox Text="value" AccessKey="T" />);
+		var input = cut.Find("input");
+		input.HasAttribute("accesskey").ShouldBeTrue();
+		input.GetAttribute("accesskey").ShouldBe("T");
+	}
+
+	[Fact]
+	public void TextBox_WithEmptyAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<TextBox Text="value" AccessKey="" />);
+		cut.Find("input").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TextBox_WithNullAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<TextBox Text="value" />);
+		cut.Find("input").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	// --- Image AccessKey ---
+
+	[Fact]
+	public void Image_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" AccessKey="I" />);
+		var img = cut.Find("img");
+		img.HasAttribute("accesskey").ShouldBeTrue();
+		img.GetAttribute("accesskey").ShouldBe("I");
+	}
+
+	[Fact]
+	public void Image_WithoutAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" />);
+		cut.Find("img").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	// --- Panel AccessKey ---
+
+	[Fact]
+	public void Panel_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		var cut = Render(@<Panel AccessKey="P"><p>Content</p></Panel>);
+		var div = cut.Find("div");
+		div.HasAttribute("accesskey").ShouldBeTrue();
+		div.GetAttribute("accesskey").ShouldBe("P");
+	}
+
+	[Fact]
+	public void Panel_WithoutAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<Panel><p>Content</p></Panel>);
+		cut.Find("div").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	// --- HyperLink AccessKey ---
+
+	[Fact]
+	public void HyperLink_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		var cut = Render(@<HyperLink Text="Link" NavigateUrl="https://example.com" AccessKey="H" />);
+		var a = cut.Find("a");
+		a.HasAttribute("accesskey").ShouldBeTrue();
+		a.GetAttribute("accesskey").ShouldBe("H");
+	}
+
+	[Fact]
+	public void HyperLink_WithoutAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<HyperLink Text="Link" NavigateUrl="https://example.com" />);
+		cut.Find("a").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	// --- CheckBox AccessKey ---
+
+	[Fact]
+	public void CheckBox_WithAccessKey_RendersAccessKeyAttribute()
+	{
+		var cut = Render(@<CheckBox Text="Accept" AccessKey="A" />);
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("accesskey").ShouldBeTrue();
+		input.GetAttribute("accesskey").ShouldBe("A");
+	}
+
+	[Fact]
+	public void CheckBox_WithoutAccessKey_DoesNotRenderAccessKeyAttribute()
+	{
+		var cut = Render(@<CheckBox Text="Accept" />);
+		cut.Find("input[type='checkbox']").HasAttribute("accesskey").ShouldBeFalse();
+	}
+
+	// --- Single character AccessKey renders correctly ---
+
+	[Fact]
+	public void AccessKey_SingleCharacter_RendersCorrectly()
+	{
+		// AccessKey should be a single character per HTML spec
+		var cut = Render(@<Button Text="Test" AccessKey="X" />);
+		cut.Find("input[type=submit]").GetAttribute("accesskey").ShouldBe("X");
 	}
 
 }

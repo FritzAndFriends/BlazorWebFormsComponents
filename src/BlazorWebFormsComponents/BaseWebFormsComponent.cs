@@ -139,6 +139,13 @@ namespace BlazorWebFormsComponents
 		public string AccessKey { get; set; }
 
 		/// <summary>
+		/// Gets or sets the text displayed when the mouse pointer hovers over the Web server control.
+		/// Renders as the HTML title attribute.
+		/// </summary>
+		[Parameter]
+		public string ToolTip { get; set; }
+
+		/// <summary>
 		/// ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
 		/// </summary>
 		/// <value></value>
