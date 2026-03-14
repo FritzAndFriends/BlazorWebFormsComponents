@@ -120,3 +120,30 @@
 
  Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
 
+### UpdatePanel Sample Page Enhancement (2026-03-11)
+
+- **Enhanced `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/UpdatePanel/Default.razor`** with comprehensive demonstrations of new ContentTemplate functionality and BaseStyledComponent inheritance.
+- **Six sample scenarios created:**
+  1. Simple ChildContent (Blazor-native syntax) — direct wrapping without ContentTemplate
+  2. Web Forms ContentTemplate syntax — migration-compatible pattern that eliminates RZ10012 warnings
+  3. Block Mode (default) — explicit demonstration of div rendering
+  4. Inline Mode — span rendering for inline content flows
+  5. Styled UpdatePanel (NEW) — showcasing BackColor, BorderStyle, BorderWidth, BorderColor, CssClass now available via BaseStyledComponent inheritance
+  6. UpdateMode properties — Conditional/Always with ChildrenAsTriggers for migration compatibility
+- **Migration guide section** with Web Forms before/after comparison and step-by-step migration instructions.
+- **All examples use `data-audit-control` markers** (UpdatePanel-1 through UpdatePanel-6) following established audit conventions.
+- **ComponentList.razor updated** — added new AJAX Controls section with ScriptManager, Substitution, Timer, UpdatePanel, UpdateProgress in alphabetical order.
+- **Pattern followed:** Examined Panel/Index.razor and Label/Index.razor to match structure: PageTitle, component description, numbered sections with audit markers, code examples with `<pre><code>` blocks, migration guidance.
+- **Key insight:** UpdatePanel now renders `ContentTemplate ?? ChildContent` — both syntaxes work, enabling gradual L1→L2 migration (L1 keeps ContentTemplate, L2 can switch to ChildContent).
+- **Styling capability:** UpdatePanel inheriting from BaseStyledComponent is a significant enhancement — Web Forms UpdatePanel didn't support direct styling, but BWFC version does, enabling better visual integration.
+
+### UpdatePanel Sample Page Enhancement (2026-03-13)
+
+**Summary:** Enhanced UpdatePanel sample page with 6 usage patterns: ChildContent, ContentTemplate, Block mode, Inline mode, Styled UpdatePanel, UpdateMode properties. Added migration guide section. Applied data-audit-control markers (UpdatePanel-1 through UpdatePanel-6).
+
+**ComponentList.razor update:** Added "AJAX Controls" section with links to ScriptManager, Substitution, Timer, UpdatePanel, UpdateProgress. Mirrors ComponentCatalog.cs organization for consistency.
+
+**Patterns:** Examined Panel/Index.razor and Label/Index.razor as templates. PageTitle, description, numbered sections, code examples with `<pre><code>` blocks, migration guidance.
+
+📌 Team update (2026-03-13): UpdatePanel sample page complete — 6 scenarios + migration guide + audit markers. ComponentList.razor updated with AJAX Controls section. Both changes verified to build clean.
+

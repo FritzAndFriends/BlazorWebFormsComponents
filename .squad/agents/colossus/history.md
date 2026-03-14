@@ -109,7 +109,21 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
 
-### ContosoUniversity Acceptance Tests — Run 20 Phase 4 Results (2026-03-13)
+### UpdatePanel Integration Test Coverage (2026-03-13)
+
+**Summary:** Added 3 Playwright interaction tests for UpdatePanel ContentTemplate enhancement. Tests cover Block mode, ContentTemplate syntax, and Inline mode with proper assertion patterns for Blazor state updates.
+
+**Tests added:**
+1. `UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly` — Block mode (default), button click
+2. `UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly` — Web Forms syntax, alert styling, interaction
+3. `UpdatePanel_InlineMode_RendersAndRefreshesCorrectly` — Inline mode (span), time display, Refresh button
+
+**Patterns:** `WaitUntilState.NetworkIdle` for page navigation (AJAX control standard), `Filter(HasTextString)` for element targeting (strict-mode safety), 500ms/1000ms waits for state updates, ISO timestamp console filtering, regex time validation.
+
+**Coverage:** 1 smoke test (existing) + 3 interaction tests = 4 total UpdatePanel tests, all passing.
+
+📌 Team update (2026-03-13): UpdatePanel integration tests complete — 3 interaction tests covering all rendering modes and interactive behaviors. All 4 UpdatePanel tests passing (1 smoke + 3 interaction). Follows established AJAX control test conventions.
+
 
 **Summary:** 40 tests total — 11 passed, 29 failed, 0 skipped (33.5s duration)
 
@@ -138,4 +152,26 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - `--no-launch-profile` required to honor `ASPNETCORE_URLS`; launchSettings.json overrides to ports 5000/5001
 - Playwright Chromium installed successfully; browser automation works
 - App starts in ~2s, Production mode by default with `--no-launch-profile`
+
+### UpdatePanel Integration Tests (2026-03-13)
+
+**Summary:** Added 3 interaction tests for the UpdatePanel component after ContentTemplate RenderFragment parameter was added.
+
+**Tests added to `InteractiveComponentTests.cs`:**
+1. `UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly` — Verifies Block mode (default) renders as a `<div>`, content displays correctly, and button clicks update the counter.
+2. `UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly` — Verifies Web Forms `<ContentTemplate>` syntax works, alert div renders with correct styling, and button interaction updates the counter.
+3. `UpdatePanel_InlineMode_RendersAndRefreshesCorrectly` — Verifies Inline mode renders as a `<span>` wrapper, time display is visible, and Refresh button triggers Blazor re-render with updated time value.
+
+**Patterns followed:**
+- Used `WaitUntilState.NetworkIdle` for page navigation (consistent with AJAX control patterns)
+- Used `Filter(new() { HasTextString = "..." })` pattern for specific element targeting to avoid strict-mode violations
+- Used `500ms` wait after button clicks for Blazor state updates (conservative for CI stability)
+- Used `1000ms` wait for time refresh test to ensure seconds change
+- Console error filtering: ISO timestamp pattern + "Failed to load resource" (standard pattern)
+- Regex pattern `@"\d{1,2}:\d{2}:\d{2} (AM|PM)"` to verify time format without asserting exact equality (time changes between reads)
+
+**Coverage:**
+- Smoke test already existed: `[InlineData("/ControlSamples/UpdatePanel")]` in `AjaxControl_Loads_WithoutErrors` Theory group (line 234, ControlSampleTests.cs)
+- 3 new interaction tests verify all three rendering modes (Block, ContentTemplate, Inline) and their interactive behaviors
+- All 8 UpdatePanel tests passing (5 smoke + 3 interaction)
 

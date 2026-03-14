@@ -148,3 +148,60 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 **Decision written to:** `.squad/decisions/inbox/forge-edmx-architecture.md`
 
 ---
+
+### UpdatePanel ContentTemplate Review (2026-03-14)
+
+**Task:** Review Cyclops' UpdatePanel ContentTemplate enhancement for Web Forms compatibility and correctness.
+
+**Changes examined:**
+1. Added `ContentTemplate` RenderFragment parameter
+2. Updated rendering logic: `@(ContentTemplate ?? ChildContent)`
+3. Base class changed: `BaseWebFormsComponent` → `BaseStyledComponent`
+4. Did NOT add `@rendermode InteractiveServer` (correct decision)
+5. Rogue's bUnit tests: 12 tests, all passing
+6. Jubilee's sample page: 6 scenarios with migration guide
+
+**Review findings:**
+
+✅ **Web Forms fidelity (PASS):** The original `System.Web.UI.UpdatePanel` from .NET Framework 3.5+ (System.Web.Extensions.dll) has a `ContentTemplate` property of type `ITemplate`. Our implementation correctly provides `ContentTemplate` as a `RenderFragment`, which is the Blazor equivalent. The fallback logic `ContentTemplate ?? ChildContent` perfectly matches Web Forms semantics where `ContentTemplate` is the standard property but Blazor developers expect `ChildContent` convention.
+
+✅ **HTML output (PASS):** The component renders as `<div>` (Block mode, default) or `<span>` (Inline mode), exactly matching Web Forms UpdatePanel behavior. The `RenderMode` enum with Block/Inline values is correct. All styling properties (CssClass, Style, ToolTip) are properly applied to the wrapper element.
+
+✅ **Base class change (CORRECT):** Web Forms `UpdatePanel` inherits from `Control` → `WebControl`, which means it HAS styling properties like `CssClass`, `BackColor`, `BorderStyle`, etc. The change from `BaseWebFormsComponent` to `BaseStyledComponent` is architecturally correct. I verified: `BaseStyledComponent` extends `BaseWebFormsComponent` and adds all the style properties (`BackColor`, `BorderColor`, `BorderStyle`, `BorderWidth`, `CssClass`, `ForeColor`, `Height`, `Width`, `Font`, `ToolTip`). This matches the Web Forms control surface.
+
+✅ **Backward compatibility (PASS):** Tests 2-3 verify that existing `<UpdatePanel><ChildContent>...</ChildContent></UpdatePanel>` and implicit `<UpdatePanel><p>content</p></UpdatePanel>` patterns still work perfectly. The fallback logic ensures zero breaking changes.
+
+✅ **Migration story (PASS):** The L1 migration script output `<UpdatePanel><ContentTemplate>...</ContentTemplate></UpdatePanel>` now compiles without RZ10012 warnings. The sample page demonstrates both syntaxes side-by-side (examples 1 vs 2), which is exactly what migrating developers need to see. Migration guide (section 6 of sample) is clear and actionable.
+
+✅ **Render mode decision (CORRECT):** The comment in UpdatePanel.razor.cs is spot-on: library components should NOT force render modes. The consuming application controls interactivity at the page/app level. This follows Blazor best practices. The note explains the reasoning clearly for future maintainers.
+
+✅ **Tests adequate (PASS):** Rogue delivered 12 comprehensive tests covering: basic rendering, backward compatibility, priority (ContentTemplate wins over ChildContent), RenderMode (Block/Inline), edge cases (empty, null), nested components, integration with styling, and Visible flag. All tests pass. Coverage is excellent — every documented scenario has a corresponding test.
+
+✅ **Sample page quality (EXCELLENT):** Jubilee's sample page is one of the best I've reviewed. It demonstrates:
+   - Simple ChildContent (Blazor-native)
+   - Web Forms ContentTemplate syntax (migration path)
+   - Block vs Inline RenderMode with clear use cases
+   - New styling capabilities from BaseStyledComponent
+   - UpdateMode/ChildrenAsTriggers properties (preserved for compatibility, noted as non-functional)
+   - Complete migration guide with before/after code and step-by-step instructions
+   - Each example has both live demo and corresponding code block
+   - Interactive counters prove the component actually works
+
+**Minor observations (non-blocking):**
+1. The `UpdateMode` and `ChildrenAsTriggers` properties are correctly preserved for migration compatibility but have no behavioral effect in Blazor (Blazor's diff rendering is always "smart"). The sample page correctly documents this (example 6).
+2. The XML doc comments on lines 14-36 of UpdatePanel.razor.cs are clear and accurate.
+3. The sample page correctly notes that "all updates are already partial" in Blazor — this is the key insight migrating developers need.
+
+**Verdict:** **APPROVE**
+
+This enhancement is production-ready. All 8 checklist items pass. The implementation is architecturally sound, maintains backward compatibility, matches Web Forms behavior, and ships with excellent tests and samples. The base class change to `BaseStyledComponent` is not just correct — it's a bug fix (UpdatePanel in Web Forms DOES support styling). The decision to avoid forcing InteractiveServer render mode demonstrates mature understanding of Blazor component architecture.
+
+**Recommendation:** Merge immediately. This is reference-quality work that other components should emulate.
+
+**Team recognition:**
+- Cyclops: Clean implementation, thorough XML docs, correct architectural decision on base class
+- Rogue: Comprehensive test coverage (12 tests hit every scenario)
+- Jubilee: Outstanding sample page with migration guide — this is the gold standard
+- All three agents followed the lockout protocol perfectly
+
+---

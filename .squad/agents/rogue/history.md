@@ -91,3 +91,37 @@ StaticAssetTests: 12 Playwright acceptance tests for static asset/visual integri
 
 
  Team update (2026-03-12): L2 automation consolidated  EnumParameter<T> (OPP-1) + WebFormsPageBase shims (OPP-2,3,5,6) all implemented. Rogue: 4 test files need .Value.ShouldBe() fix. Beast: L2 scripts can emit bare enum strings.  decided by Forge (analysis), Cyclops (implementation)
+
+### UpdatePanel ContentTemplate Tests (2026-03-12)
+
+**12 TDD bUnit tests for UpdatePanel ContentTemplate enhancement** (ContentTemplateTests.razor). Tests verify ContentTemplate RenderFragment parameter behavior (to be implemented) plus backward compatibility with existing ChildContent parameter.
+
+**Test categories:**
+1. **ContentTemplate rendering** (4 tests) — ContentTemplate renders correctly, takes priority over ChildContent, works with Block/Inline RenderMode
+2. **Backward compatibility** (2 tests) — ChildContent (explicit and implicit) still works — PASS NOW
+3. **Edge cases** (2 tests) — Empty ContentTemplate, no template provided — don't crash
+4. **Nested components** (1 test) — Blazor components inside ContentTemplate render correctly
+5. **Integration** (3 tests) — ContentTemplate with CssClass, Visible=false, multiple elements
+
+**Current baseline (before ContentTemplate parameter exists):** 10 of 12 tests PASS. The 2 failures are expected:
+- `ContentTemplate_WithNestedComponents_RendersCorrectly` — fails because `<ContentTemplate>` without a RenderFragment parameter is treated as HTML, not a component container, so nested Blazor components don't render
+- `ContentTemplate_WithCssClass_RendersOnWrapper` — markup assertion issue (Shouldly.ShouldContain failure)
+
+**Key test patterns followed:**
+- Razor test files (`.razor`) inheriting `BlazorWebFormsTestContext` — standard pattern for this project
+- `cut.Find()` for element selection, `ShouldNotBeNull()`, `ShouldContain()` for assertions
+- CSS class selectors for template identification (pattern from ListView/FormView tests)
+- Section headers with `// ===` separators for organization
+- RenderMode enum tests using variable: `UpdatePanelRenderMode mode = UpdatePanelRenderMode.Inline;`
+
+**Implementation requirement:** Once ContentTemplate parameter is added to UpdatePanel.razor.cs:
+```csharp
+[Parameter] public RenderFragment ContentTemplate { get; set; }
+```
+And UpdatePanel.razor is updated to render:
+```razor
+@(ContentTemplate ?? ChildContent)
+```
+Then all 12 tests should pass.
+
+Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.razor` (12 tests, 280 lines)

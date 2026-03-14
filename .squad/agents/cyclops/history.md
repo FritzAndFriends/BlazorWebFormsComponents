@@ -61,7 +61,14 @@ ServiceCollectionExtensions: Added `AddHttpContextAccessor()` auto-registration,
 
 Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mandatory L1→L2 pipeline with no fixes between layers. All generics standardized to `ItemType`. Test-UnconvertiblePage eliminated. Run 18 improvements prioritized by Forge.
 
-<!-- ⚠ Summarized 2026-03-12 by Scribe — Run 20 fixes, Run 21, CU L2, L1 SQLite fix archived -->
+### UpdatePanel ContentTemplate Enhancement (2026-03-13)
+
+**Summary:** ContentTemplate RenderFragment parameter added to UpdatePanel; base class changed to BaseStyledComponent; dual syntax support (Web Forms + Blazor); all 24 tests pass.
+
+**Impact:** Eliminates RZ10012 warnings during migration. UpdatePanel now supports full styling capabilities. No breaking changes.
+
+📌 Team update (2026-03-13): UpdatePanel enhancement complete — ContentTemplate parameter + BaseStyledComponent base class + dual syntax support. Cyclops (component), Rogue (12 tests, 10 pass now), Jubilee (sample page + ComponentList update), Colossus (3 interaction tests). All 4 UpdatePanel integration tests passing. Decisions merged to decisions.md.
+
 
 - Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
 - Run 21 — Layer 2 Structural Transform AfterWingtipToys (2026-03-11)
@@ -151,3 +158,42 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
 - Entity files skip generation when target .cs already exists (idempotent)
 - DbContext groups FK relationships by dependent entity for clean `modelBuilder.Entity<T>()` blocks
 - L1 integration uses `$edmxGeneratedFiles` tracking array to prevent the existing .cs copy loop from overwriting generated files
+
+### UpdatePanel ContentTemplate Enhancement (2026-MM-DD)
+
+**Task:** Add `ContentTemplate` RenderFragment parameter to UpdatePanel and verify InteractiveServer render mode approach.
+
+**Changes made:**
+1. **Added ContentTemplate parameter** to `UpdatePanel.razor.cs`:
+   - `[Parameter] public RenderFragment ContentTemplate { get; set; }`
+   - Updated XML doc comments to clarify ContentTemplate is Web Forms equivalent
+   - ChildContent remains for Blazor-style syntax
+
+2. **Updated UpdatePanel.razor** to render `ContentTemplate ?? ChildContent`:
+   - Both `<ContentTemplate>` and `<ChildContent>` syntaxes now work
+   - Eliminates RZ10012 warnings during L1 migration
+
+3. **Changed base class** from `BaseWebFormsComponent` to `BaseStyledComponent`:
+   - Web Forms UpdatePanel in .NET 4.0+ supports `class` attribute via Attributes["class"]
+   - This gives UpdatePanel access to CssClass, Style, ToolTip, and other styling properties
+   - Matches Web Forms behavior more accurately
+
+4. **Added CSS/Style attributes** to rendered markup:
+   - Both div and span variants now render `class="@CssClass" style="@Style" title="@ToolTip"`
+
+5. **Render mode decision**: Did NOT add `@attribute [RenderModeInteractiveServer]`
+   - Added code comment explaining why: library components should not force render modes
+   - Consuming apps control render mode at App.razor or page level
+   - While UpdatePanel's purpose was interactivity in Web Forms, in Blazor this is an app-level concern
+
+6. **Updated sample page** (`samples/AfterBlazorServerSide/Components/Pages/ControlSamples/UpdatePanel/Default.razor`):
+   - Added "Web Forms ContentTemplate Syntax" section demonstrating `<ContentTemplate>` usage
+   - Shows both syntaxes work (ChildContent and ContentTemplate)
+   - Added interactive counter for ContentTemplate example
+
+7. **All 24 tests pass** including new TDD tests for ContentTemplate functionality
+
+**Key learnings:**
+- UpdatePanel should inherit from BaseStyledComponent, not BaseWebFormsComponent, because .NET 4.0+ Web Forms UpdatePanel supports CSS class attributes
+- RenderFragment parameters with `??` fallback pattern enable dual syntax support (Web Forms and Blazor idioms)
+- Library components should not force render modes - that's an app-level architectural decision
