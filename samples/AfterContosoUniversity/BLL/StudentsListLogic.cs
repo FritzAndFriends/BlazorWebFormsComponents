@@ -20,23 +20,21 @@ namespace ContosoUniversity.Bll
             using var db = _factory.CreateDbContext();
             var newTab = new List<object>();
 
-            var joinedTab = db.Students
+            var students = db.Students
                 .Include(s => s.Enrollments)
-                .SelectMany(s => s.Enrollments.Select(e => new { Student = s, Enrollment = e }));
+                .ToList();
 
-            var groupedTab = from tab in joinedTab
-                             group tab by new { tab.Enrollment.Date, tab.Student.LastName, tab.Student.FirstName, tab.Student.Email, tab.Student.StudentID } into grpTab
-                             select new { ID = grpTab.Key.StudentID, Date = grpTab.Key.Date, FirstName = grpTab.Key.FirstName, LastName = grpTab.Key.LastName, Email = grpTab.Key.Email, Count = grpTab.Count() };
-
-            foreach (var entry in groupedTab.ToList())
+            foreach (var s in students)
             {
                 newTab.Add(new
                 {
-                    ID = entry.ID,
-                    Date = entry.Date.ToShortDateString(),
-                    FullName = string.Format("{0} {1}", entry.FirstName, entry.LastName),
-                    Email = entry.Email,
-                    Count = entry.Count,
+                    ID = s.StudentID,
+                    Date = s.Enrollments.Any()
+                        ? s.Enrollments.Min(e => e.Date).ToShortDateString()
+                        : DateTime.Today.ToShortDateString(),
+                    FullName = string.Format("{0} {1}", s.FirstName, s.LastName),
+                    Email = s.Email,
+                    Count = s.Enrollments.Count,
                 });
             }
 
