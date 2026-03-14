@@ -1,0 +1,122 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Http
+@using Moq
+
+@code {
+
+	/// <summary>
+	/// Tests for RequestShim: Cookies, QueryString, and Url properties
+	/// with graceful degradation when HttpContext is unavailable.
+	/// </summary>
+	private class TestPage : WebFormsPageBase
+	{
+		public RequestShim ExposedRequest => Request;
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenElement(0, "div");
+			builder.AddContent(1, "TestPage");
+			builder.CloseElement();
+		}
+	}
+
+	private IRenderedComponent<TestPage> RenderWithMockNav(string uri = null)
+	{
+		var nav = new MockNavigationManager(initialUri: uri ?? "http://localhost/");
+		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(nav);
+		var mockAccessor = new Mock<IHttpContextAccessor>();
+		mockAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
+		Services.AddSingleton<IHttpContextAccessor>(mockAccessor.Object);
+		Services.AddScoped<IPageService, PageService>();
+		return Render<TestPage>();
+	}
+
+	[Fact]
+	public void Cookies_WithoutHttpContext_ReturnsEmptyCollection()
+	{
+		var cut = RenderWithMockNav();
+
+		var cookies = cut.Instance.ExposedRequest.Cookies;
+
+		cookies.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Cookies_WithoutHttpContext_TryGetValue_ReturnsFalse()
+	{
+		var cut = RenderWithMockNav();
+
+		var cookies = cut.Instance.ExposedRequest.Cookies;
+		cookies.TryGetValue("session", out var value).ShouldBeFalse();
+		value.ShouldBeNull();
+	}
+
+	[Fact]
+	public void Cookies_WithoutHttpContext_Indexer_ReturnsNull()
+	{
+		var cut = RenderWithMockNav();
+
+		var cookies = cut.Instance.ExposedRequest.Cookies;
+		cookies["anything"].ShouldBeNull();
+	}
+
+	[Fact]
+	public void QueryString_WithoutHttpContext_FallsBackToNavigationManager()
+	{
+		var cut = RenderWithMockNav("http://localhost/products?id=5&name=widget");
+
+		var qs = cut.Instance.ExposedRequest.QueryString;
+
+		qs["id"].ToString().ShouldBe("5");
+		qs["name"].ToString().ShouldBe("widget");
+	}
+
+	[Fact]
+	public void QueryString_WithoutHttpContext_NoParams_ReturnsEmpty()
+	{
+		var cut = RenderWithMockNav("http://localhost/products");
+
+		var qs = cut.Instance.ExposedRequest.QueryString;
+
+		qs.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Url_WithoutHttpContext_FallsBackToNavigationManager()
+	{
+		var cut = RenderWithMockNav("http://localhost/products?id=5");
+
+		var url = cut.Instance.ExposedRequest.Url;
+
+		url.AbsoluteUri.ShouldBe("http://localhost/products?id=5");
+	}
+
+	[Fact]
+	public void Url_WithoutHttpContext_PathOnly_ReturnsCorrectUri()
+	{
+		var cut = RenderWithMockNav("http://localhost/admin/settings");
+
+		var url = cut.Instance.ExposedRequest.Url;
+
+		url.AbsolutePath.ShouldBe("/admin/settings");
+	}
+
+	[Fact]
+	public void Cookies_WithHttpContext_ReturnsRealCookies()
+	{
+		// Set up a real HttpContext with cookies
+		var httpContext = new DefaultHttpContext();
+		httpContext.Request.Headers["Cookie"] = "session=abc123";
+		var mockAccessor = new Mock<IHttpContextAccessor>();
+		mockAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+		Services.AddSingleton<IHttpContextAccessor>(mockAccessor.Object);
+		var nav = new MockNavigationManager();
+		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(nav);
+		Services.AddScoped<IPageService, PageService>();
+
+		var cut = Render<TestPage>();
+
+		var cookies = cut.Instance.ExposedRequest.Cookies;
+		cookies["session"].ShouldBe("abc123");
+	}
+}

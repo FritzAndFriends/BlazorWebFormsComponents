@@ -61,7 +61,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the selection mode of the ListBox control.
 		/// </summary>
 		[Parameter]
-		public ListSelectionMode SelectionMode { get; set; } = ListSelectionMode.Single;
+		public EnumParameter<ListSelectionMode> SelectionMode { get; set; } = ListSelectionMode.Single;
 
 		/// <summary>
 		/// Gets or sets the event callback that is invoked when the selected index changes.

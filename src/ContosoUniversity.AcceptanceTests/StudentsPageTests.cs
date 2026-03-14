@@ -185,6 +185,13 @@ public class StudentsPageTests
         await birthDateBox.FillAsync("01/01/2000");
         await emailBox.FillAsync($"{testFirstName.ToLower()}@test.edu");
 
+        // BWFC TextBox fires @onchange (TextChanged) on blur, not on input.
+        // Playwright's FillAsync triggers 'input' events but the 'change' event
+        // only fires when focus leaves the element. Blur the last field explicitly
+        // so Blazor Server receives the change event before the button click.
+        await emailBox.BlurAsync();
+        await page.WaitForTimeoutAsync(200); // Allow Blazor to process the change event
+
         // Select a course if dropdown is available
         var courseDropdown = page.Locator("select[id*='dropListCourses']");
         if (await courseDropdown.CountAsync() > 0)
@@ -202,13 +209,25 @@ public class StudentsPageTests
         }
 
         await insertButton.ClickAsync();
-        // Blazor SignalR async operation - wait for server round-trip and UI update
+        // Blazor Server round-trip: SignalR → server event handler → DB insert →
+        // DB query → re-render → SignalR → DOM update. Allow generous time.
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        await page.WaitForTimeoutAsync(500); // Allow Blazor UI to re-render after async operation
+        await page.WaitForTimeoutAsync(1000);
 
-        // Verify the new student appears — either row count increased or name is in page
+        // Retry loop: Blazor Server async rendering can delay the DOM update.
+        // Poll for up to 3 seconds for the row count to change or the name to appear.
         var rowsAfter = await CountGridViewDataRows(page);
         var pageContent = await page.ContentAsync();
+        var deadline = DateTime.UtcNow.AddSeconds(3);
+
+        while (DateTime.UtcNow < deadline &&
+               rowsAfter <= rowsBefore &&
+               !pageContent.Contains(testFirstName, StringComparison.OrdinalIgnoreCase))
+        {
+            await page.WaitForTimeoutAsync(300);
+            rowsAfter = await CountGridViewDataRows(page);
+            pageContent = await page.ContentAsync();
+        }
 
         Assert.True(
             rowsAfter > rowsBefore ||

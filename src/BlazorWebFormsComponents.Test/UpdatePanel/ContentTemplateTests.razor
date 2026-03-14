@@ -1,0 +1,280 @@
+@inherits BlazorWebFormsTestContext
+@using BlazorWebFormsComponents.Enums
+
+@*
+	TDD Tests for UpdatePanel ContentTemplate Enhancement
+	
+	These tests are written BEFORE the ContentTemplate parameter is added to UpdatePanel.
+	
+	EXPECTED BASELINE:
+	- Tests using <ContentTemplate> tag will FAIL TO COMPILE until ContentTemplate parameter is added
+	- Tests 2-3 (ChildContent backward compatibility) should PASS immediately
+	- All other tests require the ContentTemplate parameter to be implemented first
+	
+	Once Cyclops (or another dev) adds:
+		[Parameter] public RenderFragment ContentTemplate { get; set; }
+	And updates UpdatePanel.razor to render:
+		@(ContentTemplate ?? ChildContent)
+	Then all tests should pass.
+*@
+
+@code {
+
+	// ============================================================================
+	// CONTENTTEMPLATE TESTS - Require ContentTemplate parameter implementation
+	// ============================================================================
+
+	[Fact]
+	public void ContentTemplate_RendersCorrectly()
+	{
+		// When ContentTemplate is provided, its content should render inside the UpdatePanel's wrapper
+		var cut = Render(
+			@<UpdatePanel ID="upTest">
+				<ContentTemplate>
+					<p>From ContentTemplate</p>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		var div = cut.Find("div#upTest");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("<p>From ContentTemplate</p>");
+		cut.Markup.ShouldContain("From ContentTemplate");
+	}
+
+	// ============================================================================
+	// BACKWARD COMPATIBILITY TESTS - Should pass immediately
+	// ============================================================================
+
+	[Fact]
+	public void ChildContent_StillWorks_BackwardCompatibility()
+	{
+		// Backward compatibility: ChildContent (or implicit child content) still renders correctly
+		var cut = Render(
+			@<UpdatePanel ID="upChild">
+				<ChildContent>
+					<p>From ChildContent</p>
+				</ChildContent>
+			</UpdatePanel>
+		);
+
+		var div = cut.Find("div#upChild");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("<p>From ChildContent</p>");
+		cut.Markup.ShouldContain("From ChildContent");
+	}
+
+	[Fact]
+	public void ChildContent_Implicit_StillWorks()
+	{
+		// Implicit child content (no explicit ChildContent tag) should still work
+		var cut = Render(
+			@<UpdatePanel ID="upImplicit">
+				<p>Implicit content</p>
+			</UpdatePanel>
+		);
+
+		var div = cut.Find("div#upImplicit");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("<p>Implicit content</p>");
+		cut.Markup.ShouldContain("Implicit content");
+	}
+
+	// ============================================================================
+	// PRIORITY TESTS - Require ContentTemplate parameter implementation
+	// ============================================================================
+
+	[Fact]
+	public void ContentTemplate_TakesPriority_OverChildContent()
+	{
+		// When BOTH ContentTemplate and ChildContent are provided, ContentTemplate should win
+		var cut = Render(
+			@<UpdatePanel ID="upBoth">
+				<ContentTemplate>
+					<span class="content-template">From ContentTemplate</span>
+				</ContentTemplate>
+				<ChildContent>
+					<span class="child-content">From ChildContent</span>
+				</ChildContent>
+			</UpdatePanel>
+		);
+
+		// ContentTemplate content should be present
+		cut.Markup.ShouldContain("From ContentTemplate");
+		cut.FindAll("span.content-template").Count.ShouldBe(1);
+
+		// ChildContent should NOT render
+		cut.Markup.ShouldNotContain("From ChildContent");
+		cut.FindAll("span.child-content").Count.ShouldBe(0);
+	}
+
+	// ============================================================================
+	// RENDERMODE TESTS - Require ContentTemplate parameter implementation
+	// ============================================================================
+
+	[Fact]
+	public void ContentTemplate_BlockRenderMode_RendersAsDiv()
+	{
+		// Default/Block RenderMode: ContentTemplate should render inside a <div>
+		var cut = Render(
+			@<UpdatePanel ID="upBlock" RenderMode="UpdatePanelRenderMode.Block">
+				<ContentTemplate>
+					<p>Block content</p>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		var div = cut.Find("div#upBlock");
+		div.ShouldNotBeNull();
+		div.InnerHtml.ShouldContain("<p>Block content</p>");
+	}
+
+	[Fact]
+	public void ContentTemplate_InlineRenderMode_RendersAsSpan()
+	{
+		// Inline RenderMode: ContentTemplate should render inside a <span>
+		UpdatePanelRenderMode mode = UpdatePanelRenderMode.Inline;
+
+		var cut = Render(
+			@<UpdatePanel ID="upInline" RenderMode="mode">
+				<ContentTemplate>
+					<em>Inline content</em>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		var span = cut.Find("span#upInline");
+		span.ShouldNotBeNull();
+		span.InnerHtml.ShouldContain("<em>Inline content</em>");
+	}
+
+	// ============================================================================
+	// EDGE CASE TESTS - Require ContentTemplate parameter implementation
+	// ============================================================================
+
+	[Fact]
+	public void ContentTemplate_Empty_DoesNotCrash()
+	{
+		// When ContentTemplate is null/empty, should not crash
+		var cut = Render(
+			@<UpdatePanel ID="upEmpty">
+				<ContentTemplate>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		var div = cut.Find("div#upEmpty");
+		div.ShouldNotBeNull();
+		// Div should exist but be empty (or nearly empty, allowing for whitespace)
+		div.InnerHtml.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void ContentTemplate_NoTemplateProvided_DoesNotCrash()
+	{
+		// When neither ContentTemplate nor ChildContent is provided, should not crash
+		var cut = Render(@<UpdatePanel ID="upNull" />);
+
+		var div = cut.Find("div#upNull");
+		div.ShouldNotBeNull();
+		div.InnerHtml.Trim().ShouldBeEmpty();
+	}
+
+	// ============================================================================
+	// NESTED COMPONENT TESTS - Require ContentTemplate parameter implementation
+	// ============================================================================
+
+	[Fact]
+	public void ContentTemplate_WithNestedComponents_RendersCorrectly()
+	{
+		// Verify HTML elements render correctly inside ContentTemplate
+		var cut = Render(
+			@<UpdatePanel ID="upNested">
+				<ContentTemplate>
+					<h2 id="nested-title">Title</h2>
+					<p class="nested-paragraph">Paragraph content</p>
+					<span id="nested-span">Span content</span>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		// UpdatePanel div should exist
+		var div = cut.Find("div#upNested");
+		div.ShouldNotBeNull();
+		
+		// Nested HTML elements should render
+		var heading = cut.Find("h2#nested-title");
+		heading.TextContent.ShouldBe("Title");
+		
+		var paragraph = cut.Find("p.nested-paragraph");
+		paragraph.TextContent.ShouldBe("Paragraph content");
+		
+		var span = cut.Find("span#nested-span");
+		span.TextContent.ShouldBe("Span content");
+	}
+
+	[Fact]
+	public void ContentTemplate_WithMultipleElements_RendersAll()
+	{
+		// ContentTemplate with multiple child elements should render all of them
+		var cut = Render(
+			@<UpdatePanel ID="upMulti">
+				<ContentTemplate>
+					<h2>Title</h2>
+					<p>Paragraph 1</p>
+					<p>Paragraph 2</p>
+					<span>Footer</span>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		cut.Find("h2").TextContent.ShouldBe("Title");
+		var paragraphs = cut.FindAll("p");
+		paragraphs.Count.ShouldBe(2);
+		paragraphs[0].TextContent.ShouldBe("Paragraph 1");
+		paragraphs[1].TextContent.ShouldBe("Paragraph 2");
+		cut.Find("span").TextContent.ShouldBe("Footer");
+	}
+
+	// ============================================================================
+	// INTEGRATION TESTS - Require ContentTemplate parameter implementation
+	// ============================================================================
+
+	[Fact]
+	public void ContentTemplate_WithCssClass_RendersOnWrapper()
+	{
+		// CssClass attribute should still apply to the wrapper element when using ContentTemplate
+		var cut = Render(
+			@<UpdatePanel ID="upStyled" CssClass="my-panel">
+				<ContentTemplate>
+					<p>Styled content</p>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		var div = cut.Find("div#upStyled");
+		div.ShouldNotBeNull();
+		div.GetAttribute("class").ShouldContain("my-panel");
+		div.InnerHtml.ShouldContain("<p>Styled content</p>");
+	}
+
+	[Fact]
+	public void ContentTemplate_WithVisibleFalse_DoesNotRender()
+	{
+		// When Visible=false, UpdatePanel should not render at all, regardless of ContentTemplate
+		var cut = Render(
+			@<UpdatePanel ID="upHidden" Visible="false">
+				<ContentTemplate>
+					<p>Should not render</p>
+				</ContentTemplate>
+			</UpdatePanel>
+		);
+
+		// No div should be rendered
+		var divs = cut.FindAll("div#upHidden");
+		divs.Count.ShouldBe(0);
+
+		// Content should not be present in markup
+		cut.Markup.ShouldNotContain("Should not render");
+	}
+}

@@ -61,7 +61,7 @@ namespace BlazorWebFormsComponents
 
 		// TODO: Implement
 		[Parameter]
-		public TreeNodeSelectAction SelectAction { get; set; }
+		public EnumParameter<TreeNodeSelectAction> SelectAction { get; set; }
 
 		[Parameter]
 		public bool Selected { get; set; }

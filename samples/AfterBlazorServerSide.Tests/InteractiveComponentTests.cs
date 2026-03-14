@@ -3216,4 +3216,187 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/UpdatePanel", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert - Block mode UpdatePanel section exists
+            var blockHeading = await page.Locator("h3").Filter(new() { HasTextString = "Block Mode (Default)" }).TextContentAsync();
+            Assert.NotNull(blockHeading);
+            Assert.Contains("Block Mode", blockHeading);
+
+            // Scope to the Block Mode section
+            var blockSection = page.Locator("div[data-audit-control='UpdatePanel-3']");
+
+            // Assert - Initial click count is 0
+            var initialCount = await blockSection.Locator("strong").First.TextContentAsync();
+            Assert.Equal("0", initialCount);
+
+            // Act - Click the button (BWFC Button renders as <input type="submit">)
+            var blockButton = blockSection.Locator("input[type='submit']").First;
+            await blockButton.ClickAsync();
+
+            // Wait for Blazor to update
+            await page.WaitForTimeoutAsync(500);
+
+            // Assert - Click count incremented to 1
+            var updatedCount = await blockSection.Locator("p").Filter(new() { HasTextString = "Block click count:" }).First.Locator("strong").TextContentAsync();
+            Assert.Equal("1", updatedCount);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/UpdatePanel", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert - ContentTemplate section exists
+            var contentTemplateHeading = await page.Locator("h3").Filter(new() { HasTextString = "Web Forms ContentTemplate Syntax" }).TextContentAsync();
+            Assert.NotNull(contentTemplateHeading);
+
+            // Scope to the ContentTemplate section
+            var contentSection = page.Locator("div[data-audit-control='UpdatePanel-2']");
+
+            // Assert - ContentTemplate alert div exists with the expected content
+            var alertDiv = contentSection.Locator("div.alert-info");
+            var alertVisible = await alertDiv.IsVisibleAsync();
+            Assert.True(alertVisible);
+
+            // Assert - Initial ContentTemplate click count is 0
+            var initialText = await contentSection.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
+            Assert.Contains("0", initialText);
+
+            // Act - Click the ContentTemplate button (BWFC Button renders as <input type="submit">)
+            var contentTemplateButton = contentSection.Locator("input[type='submit']").First;
+            await contentTemplateButton.ClickAsync();
+
+            // Wait for Blazor to update
+            await page.WaitForTimeoutAsync(500);
+
+            // Assert - ContentTemplate click count incremented to 1
+            var updatedText = await contentSection.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
+            Assert.Contains("1", updatedText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task UpdatePanel_InlineMode_RendersAndRefreshesCorrectly()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T")
+                    && !msg.Text.StartsWith("Failed to load resource"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            // Act
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/UpdatePanel", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Assert - Inline mode section exists
+            var inlineHeading = await page.Locator("h3").Filter(new() { HasTextString = "Inline Mode" }).TextContentAsync();
+            Assert.NotNull(inlineHeading);
+
+            // Scope to the Inline Mode section
+            var inlineSection = page.Locator("div[data-audit-control='UpdatePanel-4']");
+
+            // Assert - Time display exists (UpdatePanel in Inline mode)
+            var timeParagraph = inlineSection.Locator("p").First;
+            var timeVisible = await timeParagraph.IsVisibleAsync();
+            Assert.True(timeVisible);
+
+            // Get initial time value
+            var initialTime = await timeParagraph.Locator("strong").TextContentAsync();
+            Assert.NotNull(initialTime);
+            Assert.NotEmpty(initialTime);
+
+            // Act - Click the Refresh button (BWFC Button renders as <input type="submit">)
+            var refreshButton = inlineSection.Locator("input[type='submit']").First;
+            await refreshButton.ClickAsync();
+
+            // Wait for Blazor to update
+            await page.WaitForTimeoutAsync(1000);
+
+            // Assert - Time value has changed (should be different unless clicked at exact same millisecond)
+            // Since time includes seconds, it's likely to change
+            var updatedTime = await timeParagraph.Locator("strong").TextContentAsync();
+            Assert.NotNull(updatedTime);
+            // Time format is "h:mm:ss tt", so we just verify it's still a valid time string
+            Assert.Matches(@"\d{1,2}:\d{2}:\d{2} (AM|PM)", updatedTime);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }

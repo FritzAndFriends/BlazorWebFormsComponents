@@ -15,13 +15,13 @@
     <link rel="stylesheet" href="/CSS/Master_CSS.css" />
     <link rel="stylesheet" href="/CSS/Students_CSS.css" />
 
-    <HeadOutlet />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
 <body>
-    <Routes />
+    <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
+    <script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
 </body>
 
 </html>

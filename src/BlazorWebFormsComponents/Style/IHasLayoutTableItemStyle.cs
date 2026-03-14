@@ -4,9 +4,9 @@ namespace BlazorWebFormsComponents
 {
 	public interface IHasLayoutTableItemStyle : IHasLayoutStyle
 	{
-		HorizontalAlign HorizontalAlign { get; set; }
+		EnumParameter<HorizontalAlign> HorizontalAlign { get; set; }
 
-		VerticalAlign VerticalAlign { get; set; }
+		EnumParameter<VerticalAlign> VerticalAlign { get; set; }
 
 		bool Wrap { get; set; }
 	}

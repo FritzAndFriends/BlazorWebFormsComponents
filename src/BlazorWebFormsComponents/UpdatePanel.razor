@@ -1,14 +1,14 @@
 @using BlazorWebFormsComponents.Enums
-@inherits BaseWebFormsComponent
+@inherits BaseStyledComponent
 
 @if (Visible)
 {
 	@if (RenderMode == UpdatePanelRenderMode.Inline)
 	{
-		<span id="@ClientID">@ChildContent</span>
+		<span id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip">@(ContentTemplate ?? ChildContent)</span>
 	}
 	else
 	{
-		<div id="@ClientID">@ChildContent</div>
+		<div id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip">@(ContentTemplate ?? ChildContent)</div>
 	}
 }

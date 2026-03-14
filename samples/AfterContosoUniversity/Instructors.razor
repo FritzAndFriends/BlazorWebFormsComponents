@@ -1,22 +1,25 @@
 @page "/Instructors"
 <HeadContent>
-    <link href="CSS/Instructors_CSS.css" rel="stylesheet" />
-    <script src="JQuery/JQuery_Instructors.js"></script>
+    <link href="/CSS/Instructors_CSS.css" rel="stylesheet" />
+    <script src="/JQuery/JQuery_Instructors.js"></script>
 </HeadContent>
-<div id="grv">
-    <h1 id="hdr">Our Instructors</h1>
-    <GridView ItemType="Instructor" ID="grvInstructors" AutoGenerateColumns="false"
-        CssClass="grv" BorderWidth="2" Font-Size="30"
-        AllowSorting="true" Sorting="HandleSorting"
-        Items="@_instructors"
-        EmptyDataText="There are no records to display">
-        <Columns>
-            <BoundField ItemType="Instructor" DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
-            <BoundField ItemType="Instructor" DataField="FirstName" HeaderText="First Name" SortExpression="FirstName" />
-            <BoundField ItemType="Instructor" DataField="LastName" HeaderText="Last Name" SortExpression="LastName" />
-            <BoundField ItemType="Instructor" DataField="Email" HeaderText="Email" />
-        </Columns>
-    </GridView>
-</div>
-
+<ScriptManager></ScriptManager>
+    <UpdatePanel>
+        <ContentTemplate>
+            <div id="grv">
+                <h1 id="hdr">Our Instructors</h1>
+                <GridView Items="@_instructors" ItemType="Instructor" AutoGenerateColumns="false"
+                    CssClass="grv" BorderWidth="2" Font-Size="30"
+                    AllowSorting="true" Sorting="grvInstructors_Sorting"
+                    EmptyDataText = "There are no records to display" >
+                    <Columns>
+                        <BoundField DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
+                        <BoundField DataField="FirstName" HeaderText="First Name" SortExpression="FirstName"/>
+                        <BoundField DataField="LastName" HeaderText="Last Name" SortExpression="LastName"/>
+                        <BoundField DataField="Email" HeaderText="Email" />
+                    </Columns>
+                </GridView>
+            </div>
+        </ContentTemplate>
+        </UpdatePanel>
 

@@ -22,7 +22,7 @@ private readonly string _baseId = Guid.NewGuid().ToString("N").Substring(0, 8);
 /// Gets or sets the bullet style of the list.
 /// </summary>
 [Parameter]
-public BulletStyle BulletStyle { get; set; } = BulletStyle.NotSet;
+public EnumParameter<BulletStyle> BulletStyle { get; set; } = Enums.BulletStyle.NotSet;
 
 /// <summary>
 /// Gets or sets the URL of the custom bullet image.
@@ -35,7 +35,7 @@ public string BulletImageUrl { get; set; }
 /// Gets or sets the display mode of the list items.
 /// </summary>
 [Parameter]
-public BulletedListDisplayMode DisplayMode { get; set; } = BulletedListDisplayMode.Text;
+public EnumParameter<BulletedListDisplayMode> DisplayMode { get; set; } = BulletedListDisplayMode.Text;
 
 /// <summary>
 /// Gets or sets the starting number for a numbered list.
@@ -58,30 +58,30 @@ public EventCallback<BulletedListEventArgs> OnClick { get; set; }
 /// <summary>
 /// Gets a value indicating whether the bullet style renders as an ordered list.
 /// </summary>
-protected bool IsOrderedList => BulletStyle switch
+protected bool IsOrderedList => BulletStyle.Value switch
 {
-BulletStyle.Numbered => true,
-BulletStyle.LowerAlpha => true,
-BulletStyle.UpperAlpha => true,
-BulletStyle.LowerRoman => true,
-BulletStyle.UpperRoman => true,
+Enums.BulletStyle.Numbered => true,
+Enums.BulletStyle.LowerAlpha => true,
+Enums.BulletStyle.UpperAlpha => true,
+Enums.BulletStyle.LowerRoman => true,
+Enums.BulletStyle.UpperRoman => true,
 _ => false
 };
 
 /// <summary>
 /// Gets the HTML list-style-type value for the current bullet style.
 /// </summary>
-protected string ListStyleType => BulletStyle switch
+protected string ListStyleType => BulletStyle.Value switch
 {
-BulletStyle.Disc => "disc",
-BulletStyle.Circle => "circle",
-BulletStyle.Square => "square",
-BulletStyle.Numbered => "decimal",
-BulletStyle.LowerAlpha => "lower-alpha",
-BulletStyle.UpperAlpha => "upper-alpha",
-BulletStyle.LowerRoman => "lower-roman",
-BulletStyle.UpperRoman => "upper-roman",
-BulletStyle.CustomImage => null,
+Enums.BulletStyle.Disc => "disc",
+Enums.BulletStyle.Circle => "circle",
+Enums.BulletStyle.Square => "square",
+Enums.BulletStyle.Numbered => "decimal",
+Enums.BulletStyle.LowerAlpha => "lower-alpha",
+Enums.BulletStyle.UpperAlpha => "upper-alpha",
+Enums.BulletStyle.LowerRoman => "lower-roman",
+Enums.BulletStyle.UpperRoman => "upper-roman",
+Enums.BulletStyle.CustomImage => null,
 _ => null
 };
 
@@ -101,7 +101,7 @@ get
 {
 var baseStyle = Style ?? string.Empty;
 
-if (BulletStyle == BulletStyle.CustomImage && !string.IsNullOrEmpty(BulletImageUrl))
+if (BulletStyle.Value == Enums.BulletStyle.CustomImage && !string.IsNullOrEmpty(BulletImageUrl))
 {
 var imageStyle = $"list-style-image: url('{BulletImageUrl}');";
 return string.IsNullOrEmpty(baseStyle) ? imageStyle : $"{baseStyle} {imageStyle}";

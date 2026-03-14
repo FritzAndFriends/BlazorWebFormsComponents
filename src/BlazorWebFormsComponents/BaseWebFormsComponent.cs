@@ -110,7 +110,7 @@ namespace BlazorWebFormsComponents
 		/// Default is Inherit, which resolves to Predictable if no parent specifies a mode.
 		/// </summary>
 		[Parameter]
-		public ClientIDMode ClientIDMode { get; set; } = ClientIDMode.Inherit;
+		public EnumParameter<ClientIDMode> ClientIDMode { get; set; } = Enums.ClientIDMode.Inherit;
 
 		#endregion
 

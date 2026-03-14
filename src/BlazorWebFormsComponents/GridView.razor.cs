@@ -222,7 +222,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets or sets the grid line style for the table (renders the rules attribute).
 		/// </summary>
-		[Parameter] public GridLines GridLines { get; set; } = GridLines.Both;
+		[Parameter] public EnumParameter<GridLines> GridLines { get; set; } = Enums.GridLines.Both;
 
 		/// <summary>
 		/// Gets or sets whether header cells render with th scope="col" for accessibility.
@@ -250,7 +250,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// The current sort direction
 		/// </summary>
-		[Parameter] public SortDirection SortDirection { get; set; } = SortDirection.Ascending;
+		[Parameter] public EnumParameter<SortDirection> SortDirection { get; set; } = Enums.SortDirection.Ascending;
 
 		/// <summary>
 		/// The current sort expression (column name)
@@ -384,9 +384,9 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task Sort(string sortExpression)
 		{
-			var newDirection = (sortExpression == SortExpression && SortDirection == SortDirection.Ascending)
-				? SortDirection.Descending
-				: SortDirection.Ascending;
+			var newDirection = (sortExpression == SortExpression && SortDirection.Value == Enums.SortDirection.Ascending)
+				? Enums.SortDirection.Descending
+				: Enums.SortDirection.Ascending;
 
 			var args = new GridViewSortEventArgs(sortExpression, newDirection);
 			await Sorting.InvokeAsync(args);
@@ -481,11 +481,11 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal string GetGridLinesRules()
 		{
-			return GridLines switch
+			return GridLines.Value switch
 			{
-				GridLines.Horizontal => "rows",
-				GridLines.Vertical => "cols",
-				GridLines.Both => "all",
+				Enums.GridLines.Horizontal => "rows",
+				Enums.GridLines.Vertical => "cols",
+				Enums.GridLines.Both => "all",
 				_ => null
 			};
 		}
@@ -495,7 +495,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal string GetGridLinesBorder()
 		{
-			return GridLines != GridLines.None ? "1" : null;
+			return GridLines.Value != Enums.GridLines.None ? "1" : null;
 		}
 
 		/// <summary>

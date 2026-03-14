@@ -7,10 +7,10 @@ namespace BlazorWebFormsComponents
 	{
 
 		[Parameter]
-		public HorizontalAlign HorizontalAlign { get; set; }
+		public EnumParameter<HorizontalAlign> HorizontalAlign { get; set; }
 
 		[Parameter]
-		public VerticalAlign VerticalAlign { get; set; }
+		public EnumParameter<VerticalAlign> VerticalAlign { get; set; }
 
 		[Parameter]
 		public bool Wrap { get; set; } = true;

@@ -35,10 +35,12 @@ public abstract class BlazorWebFormsTestContext : BunitContext
         Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
         Services.AddSingleton<IHttpContextAccessor>(new Mock<IHttpContextAccessor>().Object);
 
-        // Add xUnit logger if output helper is provided
-        if (outputHelper != null)
+        // Always register logging so ILogger<T> is resolvable.
+        // Add xUnit output sink when a test output helper is provided.
+        Services.AddLogging(builder =>
         {
-            Services.AddLogging(builder => builder.AddXUnit(outputHelper));
-        }
+            if (outputHelper != null)
+                builder.AddXUnit(outputHelper);
+        });
     }
 }

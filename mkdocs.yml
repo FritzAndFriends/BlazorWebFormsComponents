@@ -129,10 +129,13 @@ nav:
     - UpdateProgress: EditorControls/UpdateProgress.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
+    - EnumParameter: UtilityFeatures/EnumParameter.md
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - L2 Automation Shims: UtilityFeatures/L2AutomationShims.md
     - NamingContainer: UtilityFeatures/NamingContainer.md
     - Page System: UtilityFeatures/PageService.md
+    - Response.Redirect: UtilityFeatures/ResponseRedirect.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:

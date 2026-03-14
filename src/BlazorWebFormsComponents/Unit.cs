@@ -437,19 +437,11 @@ namespace BlazorWebFormsComponents
 		}
 
 		/// <devdoc>
-		/// <para>Implicitly creates a <see cref='System.Web.UI.WebControls.Unit'/> of type <see langword='Pixel'/> from a string that looks like a specified 32-bit unsigned integer.</para>
+		/// <para>Implicitly creates a <see cref='System.Web.UI.WebControls.Unit'/> from a string
+		/// such as "125px", "10em", "50%", or a bare integer like "100".
+		/// Delegates to <see cref="Unit.Parse(string)"/> to handle all CSS unit formats.</para>
 		/// </devdoc>
-		public static explicit operator Unit(string n)
-		{
-
-			if (int.TryParse(n, out var intValue))
-			{
-				return Unit.Pixel(intValue);
-			}
-
-			throw new ArgumentException("Unit attempted to set a non-numeric type");
-
-		}
+		public static implicit operator Unit(string s) => Unit.Parse(s);
 
 	}
 }

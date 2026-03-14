@@ -12,7 +12,7 @@ public void Localize_IsSubclassOfLiteral()
 public void Localize_DefaultModeIsEncode()
 {
 	var localize = new Localize();
-	Assert.Equal(LiteralMode.Encode, localize.Mode);
+	Assert.Equal(LiteralMode.Encode, localize.Mode.Value);
 }
 
 [Fact]

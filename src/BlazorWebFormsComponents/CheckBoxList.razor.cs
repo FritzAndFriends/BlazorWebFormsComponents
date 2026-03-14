@@ -40,7 +40,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the text alignment of the label relative to the checkbox (Left or Right).
 		/// </summary>
 		[Parameter]
-		public TextAlign TextAlign { get; set; } = TextAlign.Right;
+		public EnumParameter<TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		/// <summary>
 		/// Gets or sets the list of selected values.
