@@ -124,6 +124,14 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 📌 Team update (2026-03-13): UpdatePanel integration tests complete — 3 interaction tests covering all rendering modes and interactive behaviors. All 4 UpdatePanel tests passing (1 smoke + 3 interaction). Follows established AJAX control test conventions.
 
+### Students GridView LEFT JOIN Fix + Test Timing Verification (2026-03-14)
+
+**Summary:** Verified Playwright test timing fixes already in place. `StudentsPageTests.cs` contains all required improvements: BlurAsync on last field, 1000ms post-click wait, 3-second retry loop.
+
+**Verification:** No new changes needed. Test infrastructure already stable and meets requirements.
+
+📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
+
 
 **Summary:** 40 tests total — 11 passed, 29 failed, 0 skipped (33.5s duration)
 

@@ -69,6 +69,14 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 
 📌 Team update (2026-03-13): UpdatePanel enhancement complete — ContentTemplate parameter + BaseStyledComponent base class + dual syntax support. Cyclops (component), Rogue (12 tests, 10 pass now), Jubilee (sample page + ComponentList update), Colossus (3 interaction tests). All 4 UpdatePanel integration tests passing. Decisions merged to decisions.md.
 
+### Students GridView LEFT JOIN Fix + Test Timing (2026-03-14)
+
+**Summary:** Fixed data-loss bug in `GetJoinedTableData()` by replacing INNER JOIN with LEFT JOIN. Verified Playwright test timing already correct.
+
+**Impact:** Students without enrollments now visible in GridView. Blazor Server form submission timing stable.
+
+📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
+
 
 - Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
 - Run 21 — Layer 2 Structural Transform AfterWingtipToys (2026-03-11)
