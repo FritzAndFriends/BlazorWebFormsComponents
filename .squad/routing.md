@@ -13,6 +13,7 @@ How to decide who handles what.
 | Sample apps & demos | Jubilee | Sample pages, usage examples, demo scenarios, AfterBlazorServerSide samples |
 | Testing & QA | Rogue | bUnit tests, edge cases, validation, quality |
 | Integration testing | Colossus | Playwright integration tests, sample page verification, end-to-end testing |
+| JS interop / browser APIs | Gambit | IJSRuntime wrappers, JS/TS modules, CSS animations, DOM manipulation, focus trapping |
 | Code review | Forge | Review PRs, check quality, verify Web Forms compatibility |
 | Session logging | Scribe | Automatic — never needs routing |
 

@@ -18,6 +18,7 @@
 | Jubilee | Sample Writer | `.ai-team/agents/jubilee/charter.md` | ✅ Active |
 | Rogue | QA Analyst | `.ai-team/agents/rogue/charter.md` | ✅ Active |
 | Colossus | Integration Test Engineer | `.ai-team/agents/colossus/charter.md` | ✅ Active |
+| Gambit | JS Interop Engineer | `.squad/agents/gambit/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 
