@@ -1,0 +1,118 @@
+@using Microsoft.AspNetCore.Components.Rendering
+
+@code {
+
+	/// <summary>
+	/// Tests for OPP-3: ResponseShim.
+	/// Verifies that Response.Redirect("~/Products.aspx") correctly
+	/// strips the ~/ prefix and .aspx extension before calling NavigateTo.
+	/// </summary>
+	private class TestPage : WebFormsPageBase
+	{
+		public ResponseShim ExposedResponse => Response;
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenElement(0, "div");
+			builder.AddContent(1, "TestPage");
+			builder.CloseElement();
+		}
+	}
+
+	private (IRenderedComponent<TestPage> cut, MockNavigationManager nav) RenderWithMockNav()
+	{
+		var mockNav = new MockNavigationManager();
+		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(mockNav);
+		Services.AddScoped<IPageService, PageService>();
+		return (Render<TestPage>(), mockNav);
+	}
+
+	[Fact]
+	public void Redirect_TildeAspx_StripsBothPrefixAndExtension()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("~/Products.aspx");
+
+		nav.LastUri.ShouldBe("/Products");
+	}
+
+	[Fact]
+	public void Redirect_AbsolutePath_PassesThrough()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("/Products");
+
+		nav.LastUri.ShouldBe("/Products");
+	}
+
+	[Fact]
+	public void Redirect_TildeOnly_StripsTildeKeepsPath()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("~/Products");
+
+		nav.LastUri.ShouldBe("/Products");
+	}
+
+	[Fact]
+	public void Redirect_AspxOnly_StripsExtension()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("Products.aspx");
+
+		nav.LastUri.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void Redirect_CaseInsensitiveAspx_StripsExtension()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("~/Products.ASPX");
+
+		nav.LastUri.ShouldBe("/Products");
+	}
+
+	[Fact]
+	public void Redirect_EmptyString_PassesThrough()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("");
+
+		nav.LastUri.ShouldBe("");
+	}
+
+	[Fact]
+	public void Redirect_NullUrl_ThrowsArgumentNullException()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		Should.Throw<ArgumentNullException>(() =>
+			cut.Instance.ExposedResponse.Redirect(null));
+	}
+
+	[Fact]
+	public void Redirect_EndResponseParam_HasNoEffect()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("~/Products.aspx", false);
+
+		nav.LastUri.ShouldBe("/Products");
+	}
+
+	[Fact]
+	public void Redirect_DeepPath_StripsCorrectly()
+	{
+		var (cut, nav) = RenderWithMockNav();
+
+		cut.Instance.ExposedResponse.Redirect("~/Admin/Settings/Users.aspx");
+
+		nav.LastUri.ShouldBe("/Admin/Settings/Users");
+	}
+}

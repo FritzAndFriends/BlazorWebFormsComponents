@@ -1,4 +1,4 @@
-﻿@inherits ComponentBase
+@inherits ComponentBase
 @{
 	string nodeText = Expanded ? $"Collapse {Text}" : $"Expand {Text}";
 	string ariaExpanded = ParentTreeView.UseAccessibilityFeatures && ChildContent != null ? (Expanded ? "true" : "false") : null;
@@ -73,12 +73,12 @@
 
 		<td style="white-space: nowrap; @nodeStyle" class="@nodeCssClass">
 
-			@if (ParentTreeView.ShowCheckBoxes != Enums.TreeNodeTypes.None)
+			@if (ParentTreeView.ShowCheckBoxes.Value != Enums.TreeNodeTypes.None)
 			{
 
-				var isRoot = (ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Root) && Depth == 0);
-				var isParent = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Parent) && (Depth > 0 && !(ChildContent is null));
-				var isLeaf = ParentTreeView.ShowCheckBoxes.HasFlag(Enums.TreeNodeTypes.Leaf) && (ChildContent is null);
+				var isRoot = (ParentTreeView.ShowCheckBoxes.Value.HasFlag(Enums.TreeNodeTypes.Root) && Depth == 0);
+				var isParent = ParentTreeView.ShowCheckBoxes.Value.HasFlag(Enums.TreeNodeTypes.Parent) && (Depth > 0 && !(ChildContent is null));
+				var isLeaf = ParentTreeView.ShowCheckBoxes.Value.HasFlag(Enums.TreeNodeTypes.Leaf) && (ChildContent is null);
 
 				@if (ShowCheckBox && (isRoot || isParent || isLeaf))
 				{

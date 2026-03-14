@@ -41,7 +41,7 @@ public partial class Chart : BaseStyledComponent
 	/// Gets or sets the color palette for the chart.
 	/// </summary>
 	[Parameter]
-	public ChartPalette Palette { get; set; } = ChartPalette.BrightPastel;
+	public EnumParameter<ChartPalette> Palette { get; set; } = ChartPalette.BrightPastel;
 
 	/// <summary>
 	/// Gets or sets the image type. For API compatibility only; not functional.

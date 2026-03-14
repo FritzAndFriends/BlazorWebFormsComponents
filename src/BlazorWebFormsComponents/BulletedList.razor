@@ -31,7 +31,7 @@
 			var isEnabled = Enabled && item.Enabled;
 			
 			<li>
-				@switch (DisplayMode)
+				@switch (DisplayMode.Value)
 				{
 					case BulletedListDisplayMode.Text:
 						@item.Text

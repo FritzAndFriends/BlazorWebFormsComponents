@@ -1,0 +1,125 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Routing
+@using Moq
+
+@code {
+
+	/// <summary>
+	/// Tests for render mode guards: IsHttpContextAvailable, RequireHttpContext,
+	/// and GetRouteUrl behavior when HttpContext is unavailable.
+	/// </summary>
+	private class TestPage : WebFormsPageBase
+	{
+		public bool ExposedIsHttpContextAvailable => IsHttpContextAvailable;
+
+		public string ExposedGetRouteUrl(string routeName, object routeParameters = null)
+			=> GetRouteUrl(routeName, routeParameters);
+
+		public RequestShim ExposedRequest => Request;
+		public ResponseShim ExposedResponse => Response;
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenElement(0, "div");
+			builder.AddContent(1, "TestPage");
+			builder.CloseElement();
+		}
+	}
+
+	private IRenderedComponent<TestPage> RenderWithHttpContext()
+	{
+		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
+		mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddScoped<IPageService, PageService>();
+		return Render<TestPage>();
+	}
+
+	private IRenderedComponent<TestPage> RenderWithoutHttpContext()
+	{
+		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
+		mockHttpAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
+		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
+		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddScoped<IPageService, PageService>();
+		return Render<TestPage>();
+	}
+
+	[Fact]
+	public void IsHttpContextAvailable_WithHttpContext_ReturnsTrue()
+	{
+		var cut = RenderWithHttpContext();
+
+		cut.Instance.ExposedIsHttpContextAvailable.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void IsHttpContextAvailable_WithoutHttpContext_ReturnsFalse()
+	{
+		var cut = RenderWithoutHttpContext();
+
+		cut.Instance.ExposedIsHttpContextAvailable.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void GetRouteUrl_WithoutHttpContext_ThrowsInvalidOperationException()
+	{
+		var cut = RenderWithoutHttpContext();
+
+		var ex = Should.Throw<InvalidOperationException>(() =>
+			cut.Instance.ExposedGetRouteUrl("Products"));
+
+		ex.Message.ShouldContain("GetRouteUrl");
+		ex.Message.ShouldContain("HttpContext");
+	}
+
+	[Fact]
+	public void GetRouteUrl_WithHttpContext_DoesNotThrow()
+	{
+		var cut = RenderWithHttpContext();
+
+		// Should not throw — LinkGenerator mock returns null, but no exception
+		var result = cut.Instance.ExposedGetRouteUrl("Products");
+	}
+
+	[Fact]
+	public void Request_WithoutHttpContext_DoesNotThrow()
+	{
+		var cut = RenderWithoutHttpContext();
+
+		var request = cut.Instance.ExposedRequest;
+		request.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void Response_WithoutHttpContext_DoesNotThrow()
+	{
+		var cut = RenderWithoutHttpContext();
+
+		var response = cut.Instance.ExposedResponse;
+		response.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ResponseCookies_WithoutHttpContext_DoesNotThrow()
+	{
+		var cut = RenderWithoutHttpContext();
+
+		// Should return NullResponseCookies and not throw
+		var cookies = cut.Instance.ExposedResponse.Cookies;
+		cookies.ShouldNotBeNull();
+		cookies.Append("test", "value"); // no-op, should not throw
+	}
+
+	[Fact]
+	public void RequestCookies_WithoutHttpContext_ReturnsEmptyCollection()
+	{
+		var cut = RenderWithoutHttpContext();
+
+		var cookies = cut.Instance.ExposedRequest.Cookies;
+		cookies.ShouldNotBeNull();
+		cookies.Count.ShouldBe(0);
+	}
+}

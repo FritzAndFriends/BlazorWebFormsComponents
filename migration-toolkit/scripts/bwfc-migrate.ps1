@@ -316,6 +316,7 @@ function New-ProjectScaffold {
 @using BlazorWebFormsComponents.LoginControls
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 "@
 
     # Program.cs
@@ -733,12 +734,18 @@ function Invoke-ScriptAutoDetection {
 #region --- Directive Transforms ---
 
 function ConvertFrom-PageDirective {
-    param([string]$Content, [string]$FileName, [string]$RelPath)
+    param([string]$Content, [string]$FileName, [string]$RelPath, [string]$SourceFile = '')
 
     # <%@ Page ... %> → @page "/route"
     $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($FileName)
+    $isHomePage = $false
     if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
         $route = '/'
+        $isHomePage = $true
+    }
+    # FIX 2: Also detect home page names for dual-route generation
+    if ($FileName -match '^(Home|home)\.aspx$') {
+        $isHomePage = $true
     }
 
     if ($Content -match '<%@\s*Page[^%]*%>') {
@@ -751,10 +758,37 @@ function ConvertFrom-PageDirective {
         $Content = $Content -replace '<%@\s*Page[^%]*%>\s*\r?\n?', ''
         $pageHeader = "@page `"$route`"`n"
 
-        # RF-10: Add <PageTitle> if title was extracted
+        # FIX 2: Add root route for home pages
+        if ($isHomePage -and $route -ne '/') {
+            $pageHeader += "@page `"/`"`n"
+            Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Added @page `"/`" root route for home page"
+        }
+
+        # FIX 3: Use title from asp:Content TitleContent if available
+        if (-not $pageTitle -and $script:ExtractedTitleFromContent) {
+            $pageTitle = $script:ExtractedTitleFromContent
+            $script:ExtractedTitleFromContent = $null  # Clear for next file
+        }
+
+        # RF-10: Add <PageTitle> if title was extracted — but skip if code-behind
+        # sets Page.Title (L2 will emit that assignment, so emitting <PageTitle>
+        # here would create a duplicate)
         if ($pageTitle) {
-            $pageHeader += "<PageTitle>$pageTitle</PageTitle>`n"
-            Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Extracted Title=`"$pageTitle`" → <PageTitle>"
+            $codeBehindSetsTitle = $false
+            $cbPath = if ($SourceFile) { $SourceFile + '.cs' } else { '' }
+            if ($cbPath -and (Test-Path $cbPath)) {
+                $cbContent = Get-Content -Path $cbPath -Raw -Encoding UTF8
+                if ($cbContent -match 'Page\.Title\s*=') {
+                    $codeBehindSetsTitle = $true
+                }
+            }
+
+            if ($codeBehindSetsTitle) {
+                Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Suppressed <PageTitle> for Title=`"$pageTitle`" — code-behind sets Page.Title (L2 handles)"
+            } else {
+                $pageHeader += "<PageTitle>$pageTitle</PageTitle>`n"
+                Write-TransformLog -File $RelPath -Transform 'PageTitle' -Detail "Extracted Title=`"$pageTitle`" → <PageTitle>"
+            }
         }
 
         $Content = $pageHeader + $Content
@@ -819,6 +853,14 @@ function ConvertFrom-ImportDirective {
 function ConvertFrom-ContentWrappers {
     param([string]$Content, [string]$RelPath)
 
+    # FIX 3: Extract title from TitleContent asp:Content placeholder
+    $titleContentRegex = [regex]'(?si)<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"[^"]*Title[^"]*"[^>]*>\s*([^<]+?)\s*</asp:Content>'
+    $titleFromContent = $null
+    if ($titleContentRegex.IsMatch($Content)) {
+        $titleMatch = $titleContentRegex.Match($Content)
+        $titleFromContent = $titleMatch.Groups[1].Value.Trim()
+    }
+
     # HeadContent placeholder → <HeadContent> / </HeadContent>
     $headOpenRegex = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"HeadContent"[^>]*>'
     $headOpenRegex2 = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"head"[^>]*>'
@@ -876,21 +918,34 @@ function ConvertFrom-ContentWrappers {
         Write-TransformLog -File $RelPath -Transform 'Content' -Detail "Removed $closeCount </asp:Content> closing tag(s)"
     }
 
+    # FIX 3: Return the extracted title so ConvertFrom-PageDirective can use it
+    $script:ExtractedTitleFromContent = $titleFromContent
+
     return $Content
 }
 
 function ConvertFrom-FormWrapper {
     param([string]$Content, [string]$RelPath)
 
-    # Remove <form ... runat="server" ...> and its closing </form> — but only the server form
-    $formOpenRegex = [regex]'<form\s+[^>]*runat\s*=\s*"server"[^>]*>\s*\r?\n?'
-    if ($Content -match $formOpenRegex) {
-        $Content = $formOpenRegex.Replace($Content, '', 1)
-        # Remove the corresponding closing </form> (the last one, or the first one after removal)
-        # Simple approach: remove one </form> tag
-        $formCloseRegex = [regex]'</form>\s*\r?\n?'
-        $Content = $formCloseRegex.Replace($Content, '', 1)
-        Write-TransformLog -File $RelPath -Transform 'Form' -Detail 'Removed <form runat="server"> and </form>'
+    # Replace <form ... runat="server" ...> with <div> to preserve block formatting context.
+    # CSS often depends on the form wrapper for positioning calculations (margin collapse,
+    # containing block for position:relative, width inheritance). Stripping the form entirely
+    # breaks layouts. Preserve the id attribute if present so existing CSS/JS continues to work.
+    $formOpenRegex = [regex]'<form\s+([^>]*)runat\s*=\s*"server"([^>]*)>'
+    $formMatch = $formOpenRegex.Match($Content)
+    if ($formMatch.Success) {
+        # Extract id attribute if present
+        $fullAttrs = $formMatch.Groups[1].Value + $formMatch.Groups[2].Value
+        $idAttr = ''
+        if ($fullAttrs -match 'id\s*=\s*"([^"]*)"') {
+            $idAttr = " id=""$($Matches[1])"""
+        }
+        # Replace opening <form> with <div>, preserving id
+        $Content = $formOpenRegex.Replace($Content, "<div$idAttr>", 1)
+        # Replace corresponding </form> with </div>
+        $formCloseRegex = [regex]'</form>'
+        $Content = $formCloseRegex.Replace($Content, '</div>', 1)
+        Write-TransformLog -File $RelPath -Transform 'Form' -Detail "Replaced <form runat=""server""> with <div$idAttr> (preserves CSS block context)"
     }
     return $Content
 }
@@ -924,10 +979,24 @@ function ConvertFrom-MasterPage {
             $extractedTags.Add("    " + $m.Value.Trim())
         }
         foreach ($m in ([regex]'(?s)<title>.*?</title>').Matches($headInner)) {
-            $extractedTags.Add("    " + $m.Value.Trim())
+            $titleContent = $m.Value.Trim()
+            # Skip empty <title></title> tags — <Page /> component handles title
+            if ($titleContent -match '(?s)^<title>\s*</title>$') { continue }
+            $extractedTags.Add("    " + $titleContent)
         }
         foreach ($m in ([regex]'<link\s[^>]*>').Matches($headInner)) {
-            $extractedTags.Add("    " + $m.Value.Trim())
+            $tag = $m.Value.Trim()
+            # Fix relative CSS paths to absolute — in Blazor, <HeadContent> renders into <head>
+            # and the browser resolves relative paths from the page URL, not the component.
+            # e.g. href="CSS/Master_CSS.css" on /Students resolves to /Students/CSS/Master_CSS.css (404)
+            if ($tag -match 'href\s*=\s*"([^"]*)"') {
+                $href = $Matches[1]
+                if ($href -and -not $href.StartsWith('/') -and -not $href.StartsWith('http') -and -not $href.StartsWith('~')) {
+                    $absHref = '/' + $href
+                    $tag = $tag -replace [regex]::Escape("href=""$href"""), "href=""$absHref"""
+                }
+            }
+            $extractedTags.Add("    " + $tag)
         }
 
         # Fix 1a: Extract <webopt:bundlereference> tags and flag for manual review
@@ -948,13 +1017,20 @@ function ConvertFrom-MasterPage {
         }
 
         # Fix 1a: Preserve CDN references (Bootstrap, jQuery) from <head>
-        $cdnLinkRegex = [regex]'<(?:link|script)\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>'
+        # Match both self-closing and full <script src="...cdn..."></script> tags
+        $cdnScriptFullRegex = [regex]'(?s)<script\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>.*?</script>'
+        foreach ($m in $cdnScriptFullRegex.Matches($headInner)) {
+            $tag = $m.Value.Trim()
+            $extractedTags.Add("    " + $tag)
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN script: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
+        }
+        $cdnLinkRegex = [regex]'<link\s[^>]*(?:cdn\.|cloudflare|bootstrapcdn|googleapis|jsdelivr|unpkg|cdnjs)[^>]*>'
         foreach ($m in $cdnLinkRegex.Matches($headInner)) {
             $tag = $m.Value.Trim()
             # Skip if already captured as a <link> tag
-            if ($tag -match '^<link' -and $extractedTags -contains ("    " + $tag)) { continue }
+            if ($extractedTags -contains ("    " + $tag)) { continue }
             $extractedTags.Add("    " + $tag)
-            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN reference: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
+            Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "Preserved CDN link: $($tag.Substring(0, [Math]::Min(80, $tag.Length)))"
         }
 
         if ($extractedTags.Count -gt 0) {
@@ -975,17 +1051,19 @@ function ConvertFrom-MasterPage {
     $Content = $Content -replace '</body>\s*\r?\n?', ''
     Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'Stripped document wrapper (DOCTYPE, html, body)'
 
-    # 4. Replace <asp:ContentPlaceHolder ID="MainContent"> → @Body
-    $mainCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*>.*?</asp:ContentPlaceHolder>'
+    # 4. Replace <asp:ContentPlaceHolder ID="MainContent|ContentPlaceHolder1|BodyContent"> → @Body
+    $mainCphRegex = [regex]'(?si)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"(MainContent|ContentPlaceHolder1|BodyContent)"[^>]*>.*?</asp:ContentPlaceHolder>'
     if ($mainCphRegex.IsMatch($Content)) {
+        $matchedId = $mainCphRegex.Match($Content).Groups[1].Value
         $Content = $mainCphRegex.Replace($Content, '@Body')
-        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body'
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "ContentPlaceHolder $matchedId → @Body"
     }
-    # Self-closing MainContent
-    $mainCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"MainContent"[^>]*/>'
+    # Self-closing MainContent/ContentPlaceHolder1/BodyContent
+    $mainCphSelfRegex = [regex]'(?i)<asp:ContentPlaceHolder\s+[^>]*ID\s*=\s*"(MainContent|ContentPlaceHolder1|BodyContent)"[^>]*/>'
     if ($mainCphSelfRegex.IsMatch($Content)) {
+        $matchedId = $mainCphSelfRegex.Match($Content).Groups[1].Value
         $Content = $mainCphSelfRegex.Replace($Content, '@Body')
-        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail 'ContentPlaceHolder MainContent → @Body (self-closing)'
+        Write-TransformLog -File $RelPath -Transform 'MasterPage' -Detail "ContentPlaceHolder $matchedId → @Body (self-closing)"
     }
 
     # Other ContentPlaceHolders → TODO comment
@@ -1009,8 +1087,8 @@ function ConvertFrom-MasterPage {
         Write-ManualItem -File $RelPath -Category 'SelectMethod' -Detail 'SelectMethod preserved — needs delegate conversion in L2 (BWFC DataBoundComponent supports SelectMethod natively)'
     }
 
-    # 6. Inject @inherits LayoutComponentBase and HeadContent at the top
-    $header = "@inherits LayoutComponentBase`n"
+    # 6. Inject @inherits LayoutComponentBase, <Page /> component, and HeadContent at the top
+    $header = "@inherits LayoutComponentBase`n`n<BlazorWebFormsComponents.Page />`n"
     if ($headContentBlock) {
         $header += "`n" + $headContentBlock + "`n"
     }
@@ -1240,6 +1318,15 @@ function ConvertFrom-AspPrefix {
         Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed asp: prefix from $($closeMatches.Count) closing tag(s)"
     }
 
+    # FIX 1: Strip ContentTemplate wrappers (content preserved)
+    # UpdatePanel's ContentTemplate is a Web Forms concept — in Blazor, child content goes directly inside the component
+    $contentTemplateOpenCount = ([regex]'<ContentTemplate>').Matches($Content).Count
+    if ($contentTemplateOpenCount -gt 0) {
+        $Content = $Content -replace '<ContentTemplate>', ''
+        $Content = $Content -replace '</ContentTemplate>', ''
+        Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Stripped $contentTemplateOpenCount ContentTemplate wrapper(s)"
+    }
+
     # Opening tags: <uc1:Control → <Control (handles uc, uc1, uc2, etc.)
     $ucOpenRegex = [regex]'<uc\d*:(\w+)'
     $ucOpenMatches = $ucOpenRegex.Matches($Content)
@@ -1282,6 +1369,33 @@ function Remove-WebFormsAttributes {
     if ($itemTypeMatches.Count -gt 0) {
         $Content = $itemTypeRegex.Replace($Content, 'TItem="$1"')
         Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($itemTypeMatches.Count) ItemType to TItem"
+    }
+
+    # Add ItemType="object" fallback to generic BWFC components that lack an explicit ItemType
+    $genericComponents = @('GridView', 'DetailsView', 'DropDownList', 'BoundField', 'BulletedList',
+        'Repeater', 'ListView', 'FormView', 'RadioButtonList', 'CheckBoxList', 'ListBox',
+        'HyperLinkField', 'ButtonField', 'TemplateField', 'DataList', 'DataGrid')
+    $addedCount = 0
+    foreach ($comp in $genericComponents) {
+        # Match opening tags for this component that do NOT already have ItemType
+        $tagRegex = [regex]"(<${comp}\s)(?![^>]*ItemType=)([^/>]*)(>|/>)"
+        $tagMatches = $tagRegex.Matches($Content)
+        if ($tagMatches.Count -gt 0) {
+            $Content = $tagRegex.Replace($Content, '${1}ItemType="object" ${2}${3}')
+            $addedCount += $tagMatches.Count
+        }
+    }
+    if ($addedCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Added ItemType=`"object`" fallback to $addedCount generic component tag(s)"
+    }
+
+    # FIX 4: Convert Web Forms ID attribute to lowercase id for HTML compatibility
+    # BWFC components accept both ID and id, so broad replacement is safe
+    $idRegex = [regex]'\bID="([^"]*)"'
+    $idMatches = $idRegex.Matches($Content)
+    if ($idMatches.Count -gt 0) {
+        $Content = $idRegex.Replace($Content, 'id="$1"')
+        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($idMatches.Count) ID= to id="
     }
 
     return $Content
@@ -1334,13 +1448,22 @@ function Copy-CodeBehind {
 //   - Response.Redirect → NavigationManager.NavigateTo
 //   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
 //   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - UpdatePanel / ScriptManager references → remove (Blazor handles updates)
+//   - ScriptManager code-behind references → remove (Blazor handles updates)
+//   - UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
 //   - User controls → Blazor component references
 // =============================================================================
 
 "@
 
         $annotatedContent = $todoHeader + $content
+
+        # Strip System.Web.* usings — these are Web Forms namespaces with no Blazor equivalent
+        $webUsingsRegex = [regex]'using\s+System\.Web(\.\w+)*;\s*\r?\n?'
+        $webUsingMatches = $webUsingsRegex.Matches($annotatedContent)
+        if ($webUsingMatches.Count -gt 0) {
+            $annotatedContent = $webUsingsRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webUsingMatches.Count) System.Web.* using(s)"
+        }
 
         # RF-12: Convert [QueryString] and [RouteData] parameter attributes
         $qsRegex = [regex]'\[QueryString\("([^"]+)"\)\]'
@@ -1567,7 +1690,7 @@ function Convert-WebFormsFile {
     # Apply transform pipeline in order
     switch ($extension) {
         '.aspx' {
-            $content = ConvertFrom-PageDirective -Content $content -FileName $fileName -RelPath $relativePath
+            $content = ConvertFrom-PageDirective -Content $content -FileName $fileName -RelPath $relativePath -SourceFile $SourceFile
         }
         '.master' {
             $content = ConvertFrom-MasterDirective -Content $content -RelPath $relativePath
@@ -1759,12 +1882,58 @@ if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
 $modelsDir = Join-Path $Path 'Models'
 $modelsCopied = 0
 if (Test-Path $modelsDir -PathType Container) {
+    $modelsOutDir = Join-Path $Output 'Models'
+
+    # --- EDMX Detection & EF Core Generation ---
+    $edmxFiles = @(Get-ChildItem -Path $modelsDir -Filter '*.edmx' -File)
+    $edmxGeneratedFiles = @()
+    $edmxSkipNames = @()
+
+    if ($edmxFiles.Count -gt 0) {
+        foreach ($edmxFile in $edmxFiles) {
+            Write-Host "Detected EDMX: $($edmxFile.Name) — generating EF Core entities..." -ForegroundColor Cyan
+
+            if (-not (Test-Path $modelsOutDir)) {
+                New-Item -ItemType Directory -Path $modelsOutDir -Force | Out-Null
+            }
+
+            $edmxResult = & "$PSScriptRoot/Convert-EdmxToEfCore.ps1" -EdmxPath $edmxFile.FullName -OutputPath $modelsOutDir -Namespace "$projectName.Models"
+
+            Write-TransformLog -File "Models/$($edmxFile.Name)" -Transform 'EDMX' -Detail "Parsed EDMX and generated $($edmxResult.EntitiesGenerated) EF Core entities + DbContext"
+
+            if ($edmxResult.Warnings.Count -gt 0) {
+                foreach ($w in $edmxResult.Warnings) {
+                    Write-ManualItem -File "Models/$($edmxFile.Name)" -Category 'EDMX' -Detail $w
+                }
+            }
+
+            # Track generated files so the .cs copy loop skips them
+            $edmxGeneratedFiles += Get-ChildItem -Path $modelsOutDir -Filter '*.cs' -File | Select-Object -ExpandProperty Name
+
+            # Build skip list for EDMX artifacts: *.Designer.cs and the T4 bootstrap (EdmxStem.cs)
+            $edmxStem = [System.IO.Path]::GetFileNameWithoutExtension($edmxFile.Name)
+            $edmxSkipNames += "$edmxStem.cs"
+        }
+    }
+
+    # --- Copy .cs files (skip EDMX artifacts and already-generated files) ---
     $modelFiles = Get-ChildItem -Path $modelsDir -Filter '*.cs' -File
     if ($modelFiles.Count -gt 0) {
         Write-Host "Copying $($modelFiles.Count) model file(s) from Models/..." -ForegroundColor Green
-        $modelsOutDir = Join-Path $Output 'Models'
 
         foreach ($mf in $modelFiles) {
+            # Skip EDMX artifacts: *.Designer.cs, T4 bootstrap (e.g., Model1.cs)
+            if ($mf.Name -like '*.Designer.cs' -or $mf.Name -in $edmxSkipNames) {
+                Write-TransformLog -File "Models/$($mf.Name)" -Transform 'EDMXSkip' -Detail "Skipped EDMX artifact: $($mf.Name)"
+                continue
+            }
+
+            # Skip files already generated by the EDMX converter
+            if ($mf.Name -in $edmxGeneratedFiles) {
+                Write-TransformLog -File "Models/$($mf.Name)" -Transform 'EDMXSkip' -Detail "Skipped — replaced by EDMX-generated version: $($mf.Name)"
+                continue
+            }
+
             $destFile = Join-Path $modelsOutDir $mf.Name
             $relPath = "Models/$($mf.Name)"
 
@@ -1835,6 +2004,43 @@ if (Test-Path $modelsDir -PathType Container) {
 
 #endregion
 
+#region --- Business Logic Directory Copy (BLL, Logic, etc.) ---
+
+$bllDirNames = @('BLL', 'BusinessLogic', 'Logic', 'Services')
+$bllCopied = 0
+foreach ($dirName in $bllDirNames) {
+    $bllDir = Join-Path $Path $dirName
+    if (Test-Path $bllDir -PathType Container) {
+        $bllFiles = Get-ChildItem -Path $bllDir -Filter '*.cs' -File -Recurse
+        if ($bllFiles.Count -gt 0) {
+            Write-Host "Copying $($bllFiles.Count) business logic file(s) from $dirName/..." -ForegroundColor Green
+            foreach ($bf in $bllFiles) {
+                $relBllPath = $bf.FullName.Substring($bllDir.Length).TrimStart('\', '/')
+                $destFile = Join-Path (Join-Path $Output $dirName) $relBllPath
+
+                if ($PSCmdlet.ShouldProcess($destFile, "Copy business logic file")) {
+                    $destDir = Split-Path $destFile -Parent
+                    if (-not (Test-Path $destDir)) {
+                        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+                    }
+                    $csContent = Get-Content -Path $bf.FullName -Raw -Encoding UTF8
+                    $csContent = $csContent -replace 'using System\.Web(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = "// TODO: Review — auto-copied business logic from Web Forms source`n`n" + $csContent
+                    Set-Content -Path $destFile -Value $csContent -Encoding UTF8
+                    Write-TransformLog -File "$dirName/$relBllPath" -Transform 'BLLCopy' -Detail "Copied business logic file → $destFile"
+                    $bllCopied++
+                }
+                else {
+                    Write-Host "[WhatIf] Would copy business logic: $dirName/$relBllPath"
+                }
+            }
+            Write-Host ''
+        }
+    }
+}
+
+#endregion
+
 #region --- Redirect Handler Program.cs Annotations (RF-08) ---
 
 if ($script:RedirectHandlers.Count -gt 0 -and -not $WhatIfPreference) {
@@ -1863,6 +2069,7 @@ Write-Host "  Files processed:       $($script:FilesProcessed)"
 Write-Host "  Transforms applied:    $($script:TransformsApplied)"
 Write-Host "  Static files copied:   $staticCount"
 Write-Host "  Model files copied:    $modelsCopied"
+Write-Host "  BLL files copied:      $bllCopied"
 Write-Host "  Items needing review:  $($script:ManualItems.Count)"
 Write-Host ''
 

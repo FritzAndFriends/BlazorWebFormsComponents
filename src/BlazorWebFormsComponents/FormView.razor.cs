@@ -90,7 +90,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the horizontal or vertical position of the caption element.
 		/// </summary>
 		[Parameter]
-		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
+		public EnumParameter<TableCaptionAlign> CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
 		/// <summary>
 		/// Gets or sets whether the FormView renders an outer table element.
@@ -105,7 +105,7 @@ namespace BlazorWebFormsComponents
 		public FormViewMode CurrentMode { get; private set; }
 
 		[Parameter]
-		public FormViewMode DefaultMode { get; set; } = FormViewMode.ReadOnly;
+		public EnumParameter<FormViewMode> DefaultMode { get; set; } = FormViewMode.ReadOnly;
 
 		private int _Position = 1;
 		protected int Position
@@ -123,7 +123,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		protected string GetCaptionStyle()
 		{
-			return CaptionAlign switch
+			return CaptionAlign.Value switch
 			{
 				TableCaptionAlign.Top => "caption-side:top",
 				TableCaptionAlign.Bottom => "caption-side:bottom",

@@ -1,4 +1,4 @@
-﻿@using BlazorWebFormsComponents.DataBinding
+@using BlazorWebFormsComponents.DataBinding
 @using BlazorWebFormsComponents.Enums
 @inherits DataBoundComponent<ItemType>
 @typeparam ItemType
@@ -41,7 +41,7 @@ else
 				{
 					DataBinding(EventArgs.Empty);
 
-					@if (InsertItemPosition != InsertItemPosition.None && InsertItemPosition == InsertItemPosition.FirstItem && InsertItemTemplate != null)
+					@if (InsertItemPosition.Value != Enums.InsertItemPosition.None && InsertItemPosition.Value == Enums.InsertItemPosition.FirstItem && InsertItemTemplate != null)
 					{
 						@InsertItemTemplate(default(ItemType))
 					}
@@ -71,7 +71,7 @@ else
 						displayIndex++;
 					}
 
-					@if (InsertItemPosition != InsertItemPosition.None && InsertItemPosition == InsertItemPosition.LastItem && InsertItemTemplate != null)
+					@if (InsertItemPosition.Value != Enums.InsertItemPosition.None && InsertItemPosition.Value == Enums.InsertItemPosition.LastItem && InsertItemTemplate != null)
 					{
 						@InsertItemTemplate(default(ItemType))
 					}

@@ -1,32 +1,35 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.BLL;
-
-public class Enrollmet_Logic
+namespace ContosoUniversity.Bll
 {
-    private readonly IDbContextFactory<ContosoUniversityContext> _dbFactory;
-
-    public Enrollmet_Logic(IDbContextFactory<ContosoUniversityContext> dbFactory)
+    public class Enrollmet_Logic
     {
-        _dbFactory = dbFactory;
-    }
+        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
 
-    public Dictionary<string, int> Get_Enrollment_ByDate()
-    {
-        using var context = _dbFactory.CreateDbContext();
-
-        var enrollments = context.Enrollments
-            .GroupBy(e => e.Date)
-            .Select(g => new { Date = g.Key, Count = g.Count() })
-            .ToList();
-
-        var entries = new Dictionary<string, int>();
-        foreach (var entry in enrollments)
+        public Enrollmet_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
         {
-            entries.Add(entry.Date.ToShortDateString(), entry.Count);
+            _factory = factory;
         }
 
-        return entries;
+        public Dictionary<string, int> Get_Enrollment_ByDate()
+        {
+            using var db = _factory.CreateDbContext();
+            var enrollments = from enrl in db.Enrollments
+                              group enrl by enrl.Date into d
+                              select new { Date = d.Key, Count = d.Count() };
+
+            var entries = new Dictionary<string, int>();
+
+            foreach (var entry in enrollments.ToList())
+            {
+                entries.Add(entry.Date.ToShortDateString(), entry.Count);
+            }
+
+            return entries;
+        }
     }
 }

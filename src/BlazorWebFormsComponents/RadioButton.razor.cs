@@ -33,7 +33,7 @@ namespace BlazorWebFormsComponents
 		public string GroupName { get; set; }
 
 		[Parameter]
-		public Enums.TextAlign TextAlign { get; set; } = Enums.TextAlign.Right;
+		public EnumParameter<Enums.TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		[Parameter]
 		public EventCallback<ChangeEventArgs> OnCheckedChanged { get; set; }

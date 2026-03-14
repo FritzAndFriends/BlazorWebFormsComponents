@@ -1,6 +1,6 @@
 ---
 name: bwfc-identity-migration
-description: "Migrate ASP.NET Web Forms Identity and Membership authentication to Blazor Server Identity. Covers OWIN to ASP.NET Core auth middleware, login page migration, BWFC login controls, role-based authorization, and AuthorizeView patterns. Use when migrating authentication and authorization from a Web Forms application."
+description: "Migrate ASP.NET Web Forms Identity and Membership authentication to Blazor Server Identity. Covers OWIN to ASP.NET Core middleware, login page migration, BWFC login controls, role-based authorization, and cookie auth under Interactive Server mode. WHEN: \"migrate identity\", \"login page migration\", \"OWIN to core\", \"cookie auth blazor\", \"LoginView migration\"."
 ---
 
 # Web Forms Identity → Blazor Identity Migration

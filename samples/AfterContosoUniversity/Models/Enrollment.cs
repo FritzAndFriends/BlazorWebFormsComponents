@@ -1,22 +1,26 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ContosoUniversity.Models;
-
-[Table("Enrollments")]
-public class Enrollment
+namespace ContosoUniversity.Models
 {
-    [Key]
-    public int EnrollmentID { get; set; }
-    public DateTime Date { get; set; }
-    public int StudentID { get; set; }
-    public int CourseID { get; set; }
+    public class Enrollment
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int EnrollmentID { get; set; }
 
-    [ForeignKey(nameof(CourseID))]
-    public Cours? Cours { get; set; }
+        public DateTime Date { get; set; }
 
-    [ForeignKey(nameof(StudentID))]
-    public Student? Student { get; set; }
+        public int StudentID { get; set; }
+
+        public int CourseID { get; set; }
+
+        public virtual Cours Cours { get; set; }
+
+        public virtual Student Student { get; set; }
+
+    }
 }
-
 

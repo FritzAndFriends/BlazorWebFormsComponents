@@ -23,7 +23,7 @@ public partial class ChartSeries : BaseWebFormsComponent
 	/// Gets or sets the chart type for this series.
 	/// </summary>
 	[Parameter]
-	public SeriesChartType ChartType { get; set; } = SeriesChartType.Column;
+	public EnumParameter<SeriesChartType> ChartType { get; set; } = SeriesChartType.Column;
 
 	/// <summary>
 	/// Gets or sets the name of the chart area this series belongs to.

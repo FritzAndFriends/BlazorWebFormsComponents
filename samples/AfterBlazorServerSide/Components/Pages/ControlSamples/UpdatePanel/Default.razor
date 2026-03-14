@@ -1,83 +1,205 @@
 @page "/ControlSamples/UpdatePanel"
 @using BlazorWebFormsComponents.Enums
 
-<h2>UpdatePanel Component Samples</h2>
+<PageTitle>UpdatePanel Component Samples</PageTitle>
+
+<h2>UpdatePanel Component</h2>
 
 <p>The <code>UpdatePanel</code> component emulates the Web Forms <code>asp:UpdatePanel</code> for migration compatibility. In Web Forms, UpdatePanel enabled partial-page updates via AJAX. In Blazor, <strong>all updates are already partial</strong> — Blazor's diff-based rendering only updates changed DOM elements. The UpdatePanel component renders a <code>&lt;div&gt;</code> (Block mode) or <code>&lt;span&gt;</code> (Inline mode) wrapper around its content.</p>
 
 <hr />
 
-<h3>Block Mode (Default)</h3>
-<p>Renders as a <code>&lt;div&gt;</code> element. This is the default <code>RenderMode</code>.</p>
+<h3>1. Simple ChildContent (Blazor-Native Syntax)</h3>
+<p>The simplest approach — just wrap your content directly inside the UpdatePanel.</p>
 
+<div data-audit-control="UpdatePanel-1">
 <UpdatePanel>
-    <ChildContent>
-        <p>This content is inside an UpdatePanel in <strong>Block</strong> mode (renders as a <code>&lt;div&gt;</code>).</p>
-        <p>Click count: <strong>@blockClickCount</strong></p>
-        <button class="btn btn-primary" @onclick="IncrementBlock">Click Me</button>
-    </ChildContent>
+    <p>This content is inside an UpdatePanel using direct <strong>ChildContent</strong>.</p>
+    <p>Click count: <strong>@simpleClickCount</strong></p>
+    <Button Text="Increment" OnClick="IncrementSimple" CssClass="btn btn-primary" />
 </UpdatePanel>
+</div>
 
 <pre><code>&lt;UpdatePanel&gt;
-    &lt;ChildContent&gt;
-        &lt;p&gt;Content inside Block mode UpdatePanel.&lt;/p&gt;
-        &lt;button @@onclick="IncrementBlock"&gt;Click Me&lt;/button&gt;
-    &lt;/ChildContent&gt;
+    &lt;p&gt;Direct child content&lt;/p&gt;
+    &lt;Button Text="Increment" OnClick="IncrementSimple" /&gt;
 &lt;/UpdatePanel&gt;</code></pre>
 
 <hr />
 
-<h3>Inline Mode</h3>
-<p>Renders as a <code>&lt;span&gt;</code> element, useful for inline content.</p>
+<h3>2. Web Forms ContentTemplate Syntax</h3>
+<p>Supports the Web Forms <code>&lt;ContentTemplate&gt;</code> syntax for migration compatibility. This eliminates RZ10012 warnings during L1 migration and matches the original Web Forms pattern exactly.</p>
 
+<div data-audit-control="UpdatePanel-2">
+<UpdatePanel>
+    <ContentTemplate>
+        <div class="alert alert-info">
+            <p>This uses the Web Forms <code>&lt;ContentTemplate&gt;</code> syntax.</p>
+            <p>ContentTemplate click count: <strong>@contentTemplateClickCount</strong></p>
+            <Button Text="Increment" OnClick="IncrementContentTemplate" CssClass="btn btn-success" />
+        </div>
+    </ContentTemplate>
+</UpdatePanel>
+</div>
+
+<pre><code>&lt;UpdatePanel&gt;
+    &lt;ContentTemplate&gt;
+        &lt;p&gt;Content using ContentTemplate syntax&lt;/p&gt;
+        &lt;Button Text="Increment" OnClick="IncrementContentTemplate" /&gt;
+    &lt;/ContentTemplate&gt;
+&lt;/UpdatePanel&gt;</code></pre>
+
+<hr />
+
+<h3>3. Block Mode (Default)</h3>
+<p>Renders as a <code>&lt;div&gt;</code> element. This is the default <code>RenderMode</code>.</p>
+
+<div data-audit-control="UpdatePanel-3">
+<UpdatePanel RenderMode="UpdatePanelRenderMode.Block">
+    <ContentTemplate>
+        <p>This UpdatePanel explicitly uses <code>RenderMode="Block"</code> (renders as a <code>&lt;div&gt;</code>).</p>
+        <p>Block click count: <strong>@blockClickCount</strong></p>
+        <Button Text="Increment" OnClick="IncrementBlock" CssClass="btn btn-primary" />
+    </ContentTemplate>
+</UpdatePanel>
+</div>
+
+<pre><code>&lt;UpdatePanel RenderMode="UpdatePanelRenderMode.Block"&gt;
+    &lt;ContentTemplate&gt;
+        &lt;p&gt;Block mode content (renders as div)&lt;/p&gt;
+        &lt;Button Text="Increment" OnClick="IncrementBlock" /&gt;
+    &lt;/ContentTemplate&gt;
+&lt;/UpdatePanel&gt;</code></pre>
+
+<hr />
+
+<h3>4. Inline Mode</h3>
+<p>Renders as a <code>&lt;span&gt;</code> element, useful for inline content that should not break the text flow.</p>
+
+<div data-audit-control="UpdatePanel-4">
 <p>
-    The time is:
+    The current time is
     <UpdatePanel RenderMode="UpdatePanelRenderMode.Inline">
-        <ChildContent>
-            <strong>@currentTime</strong>
-        </ChildContent>
+        <ContentTemplate>
+            <strong style="color: #0066cc;">@currentTime</strong>
+        </ContentTemplate>
     </UpdatePanel>
-    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="RefreshTime">Refresh</button>
+    — <Button Text="Refresh" OnClick="RefreshTime" CssClass="btn btn-sm btn-outline-secondary" />
 </p>
+</div>
 
 <pre><code>&lt;p&gt;
-    The time is:
+    The current time is
     &lt;UpdatePanel RenderMode="UpdatePanelRenderMode.Inline"&gt;
-        &lt;ChildContent&gt;
+        &lt;ContentTemplate&gt;
             &lt;strong&gt;@@currentTime&lt;/strong&gt;
-        &lt;/ChildContent&gt;
+        &lt;/ContentTemplate&gt;
     &lt;/UpdatePanel&gt;
 &lt;/p&gt;</code></pre>
 
 <hr />
 
-<h3>UpdatePanel Properties</h3>
-<p>The component also supports <code>UpdateMode</code> and <code>ChildrenAsTriggers</code> properties for migration compatibility, though in Blazor these have no behavioral effect since rendering is always differential.</p>
+<h3>5. Styled UpdatePanel (New in This Version)</h3>
+<p>UpdatePanel now inherits from <code>BaseStyledComponent</code>, so you can apply CSS classes and styling properties directly.</p>
 
-<UpdatePanel UpdateMode="UpdatePanelUpdateMode.Conditional" ChildrenAsTriggers="false">
-    <ChildContent>
-        <div class="alert alert-warning">
-            This UpdatePanel has <code>UpdateMode="Conditional"</code> and <code>ChildrenAsTriggers="false"</code>.
-            In Web Forms these controlled when the panel refreshed. In Blazor, the component simply preserves these properties for migration compatibility.
-        </div>
-    </ChildContent>
+<div data-audit-control="UpdatePanel-5">
+<UpdatePanel BackColor="WebColor.LightYellow" 
+             BorderStyle="BorderStyle.Solid" 
+             BorderWidth="Unit.Pixel(2)" 
+             BorderColor="WebColor.Orange"
+             CssClass="p-3 mb-3">
+    <ContentTemplate>
+        <h4 style="margin-top: 0;">Styled UpdatePanel</h4>
+        <p>This UpdatePanel has <code>BackColor</code>, <code>BorderStyle</code>, <code>BorderWidth</code>, <code>BorderColor</code>, and <code>CssClass</code> applied.</p>
+        <p>Styled click count: <strong>@styledClickCount</strong></p>
+        <Button Text="Increment" OnClick="IncrementStyled" CssClass="btn btn-warning" />
+    </ContentTemplate>
 </UpdatePanel>
+</div>
+
+<pre><code>&lt;UpdatePanel BackColor="WebColor.LightYellow" 
+             BorderStyle="BorderStyle.Solid" 
+             BorderWidth="Unit.Pixel(2)" 
+             BorderColor="WebColor.Orange"
+             CssClass="p-3 mb-3"&gt;
+    &lt;ContentTemplate&gt;
+        &lt;p&gt;Styled content&lt;/p&gt;
+        &lt;Button Text="Increment" OnClick="IncrementStyled" /&gt;
+    &lt;/ContentTemplate&gt;
+&lt;/UpdatePanel&gt;</code></pre>
 
 <hr />
 
-<h3>Web Forms Equivalent</h3>
-<pre><code class="language-aspx">&lt;!-- Web Forms --&gt;
-&lt;asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Always"&gt;
+<h3>6. UpdatePanel with UpdateMode Properties</h3>
+<p>The component also supports <code>UpdateMode</code> and <code>ChildrenAsTriggers</code> properties for migration compatibility. In Web Forms these controlled when the panel refreshed. In Blazor, these properties have no behavioral effect since rendering is always differential.</p>
+
+<div data-audit-control="UpdatePanel-6">
+<UpdatePanel UpdateMode="UpdatePanelUpdateMode.Conditional" 
+             ChildrenAsTriggers="false"
+             CssClass="alert alert-secondary">
+    <ContentTemplate>
+        <p>This UpdatePanel has <code>UpdateMode="Conditional"</code> and <code>ChildrenAsTriggers="false"</code>.</p>
+        <p>In Blazor, the component preserves these properties for migration compatibility but they don't affect rendering behavior.</p>
+    </ContentTemplate>
+</UpdatePanel>
+</div>
+
+<pre><code>&lt;UpdatePanel UpdateMode="UpdatePanelUpdateMode.Conditional" 
+             ChildrenAsTriggers="false"&gt;
     &lt;ContentTemplate&gt;
-        &lt;asp:Label ID="lblMessage" runat="server" /&gt;
-        &lt;asp:Button ID="btnClick" runat="server" Text="Click Me" OnClick="btnClick_Click" /&gt;
+        &lt;p&gt;Content with UpdateMode properties&lt;/p&gt;
+    &lt;/ContentTemplate&gt;
+&lt;/UpdatePanel&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Web Forms to Blazor</h3>
+
+<h4>Web Forms (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Always"&gt;
+    &lt;ContentTemplate&gt;
+        &lt;p&gt;Click count: &lt;asp:Label ID="lblCount" runat="server" Text="0" /&gt;&lt;/p&gt;
+        &lt;asp:Button ID="btnIncrement" runat="server" Text="Increment" OnClick="btnIncrement_Click" /&gt;
     &lt;/ContentTemplate&gt;
 &lt;/asp:UpdatePanel&gt;</code></pre>
 
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;UpdatePanel UpdateMode="UpdatePanelUpdateMode.Always"&gt;
+    &lt;ContentTemplate&gt;
+        &lt;p&gt;Click count: &lt;Label Text="@@count.ToString()" /&gt;&lt;/p&gt;
+        &lt;Button Text="Increment" OnClick="HandleIncrement" /&gt;
+    &lt;/ContentTemplate&gt;
+&lt;/UpdatePanel&gt;
+
+@@code {
+    private int count = 0;
+    
+    private void HandleIncrement()
+    {
+        count++;
+    }
+}</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:</code> prefix and <code>runat="server"</code></li>
+    <li>Remove <code>ID</code> attributes (unless needed for <code>DefaultButton</code> or similar references)</li>
+    <li>Convert event handlers: <code>OnClick="btnIncrement_Click"</code> becomes <code>OnClick="HandleIncrement"</code></li>
+    <li>Replace server-side controls with Blazor components or direct binding (<code>@@count</code>)</li>
+    <li>Move code-behind logic to <code>@@code</code> block</li>
+    <li>Both <code>ContentTemplate</code> and <code>ChildContent</code> syntaxes work — choose based on preference</li>
+</ol>
+
 @code {
+    private int simpleClickCount = 0;
     private int blockClickCount = 0;
+    private int contentTemplateClickCount = 0;
+    private int styledClickCount = 0;
     private string currentTime = DateTime.Now.ToString("h:mm:ss tt");
 
+    private void IncrementSimple() => simpleClickCount++;
     private void IncrementBlock() => blockClickCount++;
+    private void IncrementContentTemplate() => contentTemplateClickCount++;
+    private void IncrementStyled() => styledClickCount++;
     private void RefreshTime() => currentTime = DateTime.Now.ToString("h:mm:ss tt");
 }

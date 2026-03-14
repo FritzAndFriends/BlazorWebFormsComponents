@@ -1,17 +1,22 @@
-using ContosoUniversity.BLL;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Components;
+using ContosoUniversity.Bll;
 
-namespace ContosoUniversity;
-
-public partial class About : ComponentBase
+namespace ContosoUniversity
 {
-    [Inject] private Enrollmet_Logic EnrollmentLogic { get; set; } = default!;
-
-    private List<KeyValuePair<string, int>> _enrollmentData = new();
-
-    protected override void OnInitialized()
+    public partial class About
     {
-        var data = EnrollmentLogic.Get_Enrollment_ByDate();
-        _enrollmentData = data.ToList();
+        [Inject] private Enrollmet_Logic enrollmetLogic { get; set; } = default!;
+
+        private List<KeyValuePair<string, int>> _enrollmentStats = new();
+
+        protected override void OnInitialized()
+        {
+            _enrollmentStats = enrollmetLogic.Get_Enrollment_ByDate()
+                .Select(kvp => new KeyValuePair<string, int>(kvp.Key, kvp.Value))
+                .ToList();
+        }
     }
 }

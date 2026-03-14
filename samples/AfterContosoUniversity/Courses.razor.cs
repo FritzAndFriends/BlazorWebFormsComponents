@@ -1,35 +1,44 @@
-using ContosoUniversity.BLL;
-using ContosoUniversity.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Components;
+using ContosoUniversity.Models;
+using ContosoUniversity.BLL;
+using ContosoUniversity.Bll;
 
-namespace ContosoUniversity;
-
-public partial class Courses : ComponentBase
+namespace ContosoUniversity
 {
-    [Inject] private Courses_Logic CourseLogic { get; set; } = default!;
-
-    private List<string> _departmentNames = new();
-    private string _selectedDepartment = string.Empty;
-    private List<Cours> _courses = new();
-    private List<Cours> _searchResults = new();
-    private string _searchText = string.Empty;
-
-    protected override void OnInitialized()
+    public partial class Courses
     {
-        _departmentNames = CourseLogic.GetDepartmentNames();
-        if (_departmentNames.Count > 0)
-            _selectedDepartment = _departmentNames[0];
-    }
+        [Inject] private Courses_Logic coursLogic { get; set; } = default!;
+        [Inject] private StudentsListLogic studLogic { get; set; } = default!;
 
-    private void HandleSearchByDepartment(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        _courses = CourseLogic.GetCourses(_selectedDepartment);
-    }
+        private List<string> _departments = new();
+        private string _selectedDepartment = "";
+        private List<Cours> _courses = new();
+        private string _courseSearchText = "";
+        private List<Cours> _courseDetails = new();
 
-    private void HandleSearchByName(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        _searchResults = CourseLogic.GetCourse(_searchText);
-        _searchText = string.Empty;
+        protected override void OnInitialized()
+        {
+            _departments = studLogic.GetDepartmentNames();
+        }
+
+        private void btnSearchCourse_Click()
+        {
+            if (!string.IsNullOrEmpty(_selectedDepartment))
+            {
+                _courses = coursLogic.GetCourses(_selectedDepartment);
+            }
+        }
+
+        private void search_Click()
+        {
+            if (!string.IsNullOrEmpty(_courseSearchText))
+            {
+                _courseDetails = coursLogic.GetCourse(_courseSearchText);
+                _courseSearchText = "";
+            }
+        }
     }
 }
-

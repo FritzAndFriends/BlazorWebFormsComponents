@@ -19,7 +19,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public WebColor BorderColor { get; set; }
 		[Parameter]
-		public BorderStyle BorderStyle { get; set; }
+		public EnumParameter<BorderStyle> BorderStyle { get; set; }
 		[Parameter]
 		public Unit BorderWidth { get; set; }
 		[Parameter]

@@ -28,7 +28,7 @@
 		_sortingArgs.SortDirection.ShouldBe(SortDirection.Ascending);
 		_sortedArgs.ShouldNotBeNull();
 		theListView.SortExpression.ShouldBe("Name");
-		theListView.SortDirection.ShouldBe(SortDirection.Ascending);
+		theListView.SortDirection.Value.ShouldBe(SortDirection.Ascending);
 	}
 
 	[Fact]
@@ -50,7 +50,7 @@
 
 		_sortingArgs.ShouldNotBeNull();
 		_sortingArgs.SortDirection.ShouldBe(SortDirection.Descending);
-		theListView.SortDirection.ShouldBe(SortDirection.Descending);
+		theListView.SortDirection.Value.ShouldBe(SortDirection.Descending);
 	}
 
 	[Fact]

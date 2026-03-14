@@ -1,25 +1,33 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ContosoUniversity.Models;
-
-[Table("Courses")]
-public class Cours
+namespace ContosoUniversity.Models
 {
-    [Key]
-    public int CourseID { get; set; }
-    public string CourseName { get; set; } = string.Empty;
-    public int StudentsMax { get; set; }
-    public int DepartmentID { get; set; }
-    public int InstructorID { get; set; }
+    [Table("Courses")]
+    public class Cours
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int CourseID { get; set; }
 
-    [ForeignKey(nameof(DepartmentID))]
-    public Department? Department { get; set; }
+        [Required]
+        [MaxLength(30)]
+        public string CourseName { get; set; }
 
-    [ForeignKey(nameof(InstructorID))]
-    public Instructor? Instructor { get; set; }
+        public int StudentsMax { get; set; }
 
-    public ICollection<Enrollment> Enrollments { get; set; } = new HashSet<Enrollment>();
+        public int DepartmentID { get; set; }
+
+        public int InstructorID { get; set; }
+
+        public virtual Department Department { get; set; }
+
+        public virtual Instructor Instructor { get; set; }
+
+        public virtual ICollection<Enrollment> Enrollments { get; set; }
+
+    }
 }
-
 
