@@ -94,3 +94,11 @@ Pipeline enforcement: Added mandatory L1→L2 pipeline section to bwfc-migration
  Team update (2026-03-12): Cookie shims use graceful degradation (Pattern B+), not exceptions  Jeff directive. Document no-op behavior for cookies when HttpContext unavailable.  decided by Jeffrey T. Fritz
  Team update (2026-03-12): PageTitle deduplication  L2 skill must add Page.Title and remove inline <PageTitle>. Never invent title values. Consume BWFC-MIGRATE marker from L1.  decided by Forge (analysis), approved by Jeffrey T. Fritz
  Team update (2026-03-12): Render mode guards on WebFormsPageBase. Document IsHttpContextAvailable escape hatch and render mode behavior for Request/Response/Session shims.  decided by Forge
+
+### UpdatePanel ContentTemplate Support Documentation (2026-03-12)
+
+- **What:** Updated CONTROL-REFERENCE.md to document UpdatePanel's new `ContentTemplate` RenderFragment support
+- **Why:** L1 migration now converts `<ContentTemplate>` cleanly without RZ10012 warnings. UpdatePanel now inherits `BaseStyledComponent`, supports render modes, and `ContentTemplate` is a recognized child element
+- **Where:** Expanded AJAX Controls section in CONTROL-REFERENCE.md with subsection "UpdatePanel with ContentTemplate"
+- **Details:** Added before/after code examples showing Web Forms `<ContentTemplate>` now migrating to clean Blazor markup. Documented that render mode is set at app level via `App.razor` `@rendermode`, not by UpdatePanel itself
+- **Decision:** Surgical update  no other sections affected

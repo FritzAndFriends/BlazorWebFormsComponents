@@ -187,9 +187,40 @@ Web Forms `ListView` supports `GroupItemCount` for grid-style layouts (e.g., 4 p
 |-----------|------|-------|
 | `<asp:ScriptManager runat="server" />` | `<ScriptManager />` | Renders nothing — migration compatibility |
 | `<asp:ScriptManagerProxy runat="server" />` | `<ScriptManagerProxy />` | Renders nothing |
-| `<asp:UpdatePanel runat="server">` | `<UpdatePanel>` | Passes through children |
+| `<asp:UpdatePanel runat="server">` | `<UpdatePanel>` | Passes through children; supports `<ContentTemplate>` as a render fragment |
 | `<asp:UpdateProgress runat="server">` | `<UpdateProgress>` | Passes through children |
 | `<asp:Timer Interval="5000" runat="server" />` | `<Timer Interval="5000" />` | Fires OnTick events |
+
+#### UpdatePanel with ContentTemplate
+
+Web Forms `<asp:UpdatePanel>` supports `<ContentTemplate>` to wrap content. BWFC now provides a `ContentTemplate` RenderFragment parameter, enabling L1 migration to output clean Blazor markup with no RZ10012 warnings.
+
+```xml
+<!-- Web Forms -->
+<asp:UpdatePanel runat="server">
+    <ContentTemplate>
+        <asp:Button Text="Submit" OnClick="Submit_Click" runat="server" />
+        <asp:Label Text="Result" runat="server" />
+    </ContentTemplate>
+</asp:UpdatePanel>
+```
+
+```razor
+<!-- Blazor with BWFC (L1 output) — now compiles cleanly -->
+<UpdatePanel>
+    <ContentTemplate>
+        <Button Text="Submit" OnClick="Submit_Click" />
+        <Label Text="Result" />
+    </ContentTemplate>
+</UpdatePanel>
+```
+
+**Key points:**
+- `<ContentTemplate>` is now recognized as a BWFC child element — no warnings or errors
+- UpdatePanel inherits `BaseStyledComponent` (supports `BackColor`, `ForeColor`, `CssClass`, `Style`, etc.)
+- UpdatePanel supports `RenderMode` enum values (`Block` for `<div>`, `Inline` for `<span>`) — set at the component level
+- Render mode is determined by the application's global `@rendermode` directive in `App.razor`, not by UpdatePanel — UpdatePanel does NOT force InteractiveServer
+- Both `RenderMode` property and render fragment are optional — use as needed for your migration
 
 ---
 

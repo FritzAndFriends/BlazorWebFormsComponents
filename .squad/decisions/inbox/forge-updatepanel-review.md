@@ -25,7 +25,7 @@ The UpdatePanel ContentTemplate enhancement is production-ready and should be me
 |-----------|--------|---------|
 | **Web Forms fidelity** | ✅ PASS | Original `System.Web.UI.UpdatePanel` has `ContentTemplate` property. Our RenderFragment implementation is correct. |
 | **HTML output** | ✅ PASS | Renders as `<div>` (Block) or `<span>` (Inline), exactly matching Web Forms behavior. |
-| **Base class change** | ✅ CORRECT | Web Forms UpdatePanel inherits from WebControl → has styling properties. BaseStyledComponent is architecturally correct. |
+| **Base class change** | ✅ ACCEPTABLE | Web Forms UpdatePanel inherits from `Control` (not `WebControl`), accepts expando `class` attribute. Our `BaseStyledComponent` is an enhancement (adds full style properties). Acceptable improvement over strict emulation. |
 | **Backward compatibility** | ✅ PASS | Existing `<ChildContent>` and implicit content patterns work perfectly. Zero breaking changes. |
 | **Migration story** | ✅ PASS | L1 script output `<ContentTemplate>` now compiles without RZ10012 warnings. |
 | **Render mode decision** | ✅ CORRECT | Library components should NOT force render modes. Consuming app decides. |
