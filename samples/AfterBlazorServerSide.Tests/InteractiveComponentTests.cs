@@ -3248,19 +3248,22 @@ public class InteractiveComponentTests
             Assert.NotNull(blockHeading);
             Assert.Contains("Block Mode", blockHeading);
 
+            // Scope to the Block Mode section
+            var blockSection = page.Locator("div[data-audit-control='UpdatePanel-3']");
+
             // Assert - Initial click count is 0
-            var initialCount = await page.Locator("strong").Filter(new() { HasTextString = "0" }).First.TextContentAsync();
+            var initialCount = await blockSection.Locator("strong").First.TextContentAsync();
             Assert.Equal("0", initialCount);
 
-            // Act - Click the button in Block mode section
-            var blockButton = page.Locator("button.btn-primary").Filter(new() { HasTextString = "Click Me" }).First;
+            // Act - Click the button (BWFC Button renders as <input type="submit">)
+            var blockButton = blockSection.Locator("input[type='submit']").First;
             await blockButton.ClickAsync();
 
             // Wait for Blazor to update
             await page.WaitForTimeoutAsync(500);
 
             // Assert - Click count incremented to 1
-            var updatedCount = await page.Locator("p").Filter(new() { HasTextString = "Click count:" }).First.Locator("strong").TextContentAsync();
+            var updatedCount = await blockSection.Locator("p").Filter(new() { HasTextString = "Block click count:" }).First.Locator("strong").TextContentAsync();
             Assert.Equal("1", updatedCount);
 
             Assert.Empty(consoleErrors);
@@ -3301,24 +3304,27 @@ public class InteractiveComponentTests
             var contentTemplateHeading = await page.Locator("h3").Filter(new() { HasTextString = "Web Forms ContentTemplate Syntax" }).TextContentAsync();
             Assert.NotNull(contentTemplateHeading);
 
+            // Scope to the ContentTemplate section
+            var contentSection = page.Locator("div[data-audit-control='UpdatePanel-2']");
+
             // Assert - ContentTemplate alert div exists with the expected content
-            var alertDiv = page.Locator("div.alert-info").Filter(new() { HasTextString = "ContentTemplate" });
+            var alertDiv = contentSection.Locator("div.alert-info");
             var alertVisible = await alertDiv.IsVisibleAsync();
             Assert.True(alertVisible);
 
             // Assert - Initial ContentTemplate click count is 0
-            var initialText = await page.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
+            var initialText = await contentSection.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
             Assert.Contains("0", initialText);
 
-            // Act - Click the ContentTemplate button
-            var contentTemplateButton = page.Locator("button.btn-success").Filter(new() { HasTextString = "Click Me" }).First;
+            // Act - Click the ContentTemplate button (BWFC Button renders as <input type="submit">)
+            var contentTemplateButton = contentSection.Locator("input[type='submit']").First;
             await contentTemplateButton.ClickAsync();
 
             // Wait for Blazor to update
             await page.WaitForTimeoutAsync(500);
 
             // Assert - ContentTemplate click count incremented to 1
-            var updatedText = await page.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
+            var updatedText = await contentSection.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
             Assert.Contains("1", updatedText);
 
             Assert.Empty(consoleErrors);
@@ -3359,8 +3365,11 @@ public class InteractiveComponentTests
             var inlineHeading = await page.Locator("h3").Filter(new() { HasTextString = "Inline Mode" }).TextContentAsync();
             Assert.NotNull(inlineHeading);
 
+            // Scope to the Inline Mode section
+            var inlineSection = page.Locator("div[data-audit-control='UpdatePanel-4']");
+
             // Assert - Time display exists (UpdatePanel in Inline mode)
-            var timeParagraph = page.Locator("p").Filter(new() { HasTextString = "The time is:" }).First;
+            var timeParagraph = inlineSection.Locator("p").First;
             var timeVisible = await timeParagraph.IsVisibleAsync();
             Assert.True(timeVisible);
 
@@ -3369,8 +3378,8 @@ public class InteractiveComponentTests
             Assert.NotNull(initialTime);
             Assert.NotEmpty(initialTime);
 
-            // Act - Click the Refresh button
-            var refreshButton = page.Locator("button.btn-outline-secondary").Filter(new() { HasTextString = "Refresh" }).First;
+            // Act - Click the Refresh button (BWFC Button renders as <input type="submit">)
+            var refreshButton = inlineSection.Locator("input[type='submit']").First;
             await refreshButton.ClickAsync();
 
             // Wait for Blazor to update
