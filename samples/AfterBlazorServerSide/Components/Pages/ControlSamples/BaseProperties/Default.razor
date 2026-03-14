@@ -1,0 +1,161 @@
+@page "/ControlSamples/BaseProperties"
+@using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
+
+<PageTitle>Base Property Samples</PageTitle>
+
+<h2>Base Property Samples</h2>
+
+<p>These samples demonstrate base class properties inherited by all Web Forms components:
+   <code>AccessKey</code>, <code>ToolTip</code>, and style properties like
+   <code>BackColor</code>, <code>ForeColor</code>, <code>Width</code>, and <code>Height</code>.</p>
+
+<hr />
+
+<h3>1. AccessKey Property</h3>
+<p>The <code>AccessKey</code> property sets a keyboard shortcut (Alt+key on Windows, Ctrl+Alt+key on Mac)
+   that moves focus to the control. It renders as the HTML <code>accesskey</code> attribute.</p>
+
+<section data-audit-control="BaseProperties-1">
+    <p>
+        <strong>Button</strong> (AccessKey="B"):
+        <Button Text="Click Me" AccessKey="B" CssClass="btn btn-primary" />
+    </p>
+    <p>
+        <strong>TextBox</strong> (AccessKey="T"):
+        <TextBox AccessKey="T" Text="Press Alt+T to focus" />
+    </p>
+    <p>
+        <strong>HyperLink</strong> (AccessKey="H"):
+        <HyperLink Text="Sample Link" NavigateUrl="https://example.com" AccessKey="H" />
+    </p>
+    <p>
+        <strong>CheckBox</strong> (AccessKey="C"):
+        <CheckBox Text="Toggle me" AccessKey="C" />
+    </p>
+    <p>
+        <strong>Panel</strong> (AccessKey="P"):
+        <Panel AccessKey="P" CssClass="border p-2">Panel content (Alt+P)</Panel>
+    </p>
+    <p>
+        <strong>Image</strong> (AccessKey="I"):
+        <Image AccessKey="I" ImageUrl="/images/blazor-logo.png" AlternateText="Blazor Logo" />
+    </p>
+</section>
+
+<pre><code>&lt;Button Text="Click Me" AccessKey="B" /&gt;
+&lt;TextBox AccessKey="T" Text="Press Alt+T to focus" /&gt;
+&lt;HyperLink Text="Sample Link" NavigateUrl="https://example.com" AccessKey="H" /&gt;
+&lt;CheckBox Text="Toggle me" AccessKey="C" /&gt;
+&lt;Panel AccessKey="P"&gt;Panel content&lt;/Panel&gt;
+&lt;Image AccessKey="I" ImageUrl="/images/blazor-logo.png" AlternateText="Blazor Logo" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. ToolTip Property</h3>
+<p>The <code>ToolTip</code> property renders as the HTML <code>title</code> attribute.
+   Hover over each control to see the tooltip text.</p>
+
+<section data-audit-control="BaseProperties-2">
+    <p>
+        <strong>Button:</strong>
+        <Button Text="Hover Me" ToolTip="This is a Button tooltip" CssClass="btn btn-secondary" />
+    </p>
+    <p>
+        <strong>TextBox:</strong>
+        <TextBox ToolTip="Enter your name here" Text="Hover over me" />
+    </p>
+    <p>
+        <strong>Label:</strong>
+        <Label Text="Informational label" ToolTip="This label provides context" />
+    </p>
+    <p>
+        <strong>HyperLink:</strong>
+        <HyperLink Text="Hover for info" NavigateUrl="https://example.com" ToolTip="Navigate to example.com" />
+    </p>
+    <p>
+        <strong>CheckBox:</strong>
+        <CheckBox Text="Agree to terms" ToolTip="Check to accept the terms of service" />
+    </p>
+    <p>
+        <strong>Panel:</strong>
+        <Panel ToolTip="This panel groups related content" CssClass="border p-2">
+            Panel with tooltip — hover the border area
+        </Panel>
+    </p>
+</section>
+
+<pre><code>&lt;Button Text="Hover Me" ToolTip="This is a Button tooltip" /&gt;
+&lt;TextBox ToolTip="Enter your name here" Text="Hover over me" /&gt;
+&lt;Label Text="Informational label" ToolTip="This label provides context" /&gt;
+&lt;HyperLink Text="Hover for info" NavigateUrl="#" ToolTip="Navigate to example.com" /&gt;
+&lt;CheckBox Text="Agree to terms" ToolTip="Check to accept the terms of service" /&gt;
+&lt;Panel ToolTip="This panel groups related content"&gt;Content&lt;/Panel&gt;</code></pre>
+
+<hr />
+
+<h3>3. GridView Style Properties</h3>
+<p>The <code>BackColor</code>, <code>ForeColor</code>, <code>Width</code>, and <code>Height</code>
+   properties render as inline CSS on the GridView's <code>&lt;table&gt;</code> element.</p>
+
+<section data-audit-control="BaseProperties-3">
+    <h4>Styled GridView</h4>
+    <GridView ItemType="Employee"
+              Items="@_employees"
+              AutoGenerateColumns="false"
+              BackColor="@("#f0f8ff")"
+              ForeColor="@("#333366")"
+              Width="Unit.Pixel(600)"
+              Height="Unit.Pixel(200)"
+              GridLines="GridLines.Both"
+              Caption="Styled Employee Table"
+              ToolTip="Employee data with custom styling">
+        <Columns>
+            <BoundField ItemType="Employee" DataField="Id" HeaderText="ID" />
+            <BoundField ItemType="Employee" DataField="Name" HeaderText="Name" />
+            <BoundField ItemType="Employee" DataField="Department" HeaderText="Department" />
+        </Columns>
+    </GridView>
+</section>
+
+<pre><code>&lt;GridView ItemType="Employee"
+          Items="@@_employees"
+          AutoGenerateColumns="false"
+          BackColor="@@("#f0f8ff")"
+          ForeColor="@@("#333366")"
+          Width="Unit.Pixel(600)"
+          Height="Unit.Pixel(200)"
+          GridLines="GridLines.Both"
+          Caption="Styled Employee Table"
+          ToolTip="Employee data with custom styling"&gt;
+    &lt;Columns&gt;
+        &lt;BoundField DataField="Id" HeaderText="ID" /&gt;
+        &lt;BoundField DataField="Name" HeaderText="Name" /&gt;
+        &lt;BoundField DataField="Department" HeaderText="Department" /&gt;
+    &lt;/Columns&gt;
+&lt;/GridView&gt;</code></pre>
+
+<hr />
+
+<h3>4. Combined Usage</h3>
+<p>Properties can be combined on a single control for full customization.</p>
+
+<section data-audit-control="BaseProperties-4">
+    <Button Text="Fully Configured"
+            AccessKey="F"
+            ToolTip="Alt+F to focus, styled with colors"
+            BackColor="WebColor.Navy"
+            ForeColor="WebColor.White"
+            CssClass="btn" />
+</section>
+
+<pre><code>&lt;Button Text="Fully Configured"
+        AccessKey="F"
+        ToolTip="Alt+F to focus, styled with colors"
+        BackColor="WebColor.Navy"
+        ForeColor="WebColor.White"
+        CssClass="btn" /&gt;</code></pre>
+
+@code {
+    private List<Employee> _employees = Employee.GetEmployees();
+}

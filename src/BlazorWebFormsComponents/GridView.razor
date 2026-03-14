@@ -18,7 +18,7 @@
 
 @if (ColumnList.Any())
 {
-	<table class="@CssClass" rules="@GetGridLinesRules()" border="@GetGridLinesBorder()" style="border-collapse:collapse;" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)" title="@ToolTip">
+	<table class="@CssClass" rules="@GetGridLinesRules()" border="@GetGridLinesBorder()" style="@GetCombinedTableStyle()" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : null)" title="@ToolTip">
 		@if (!string.IsNullOrEmpty(Caption))
 		{
 			<caption style="@GetCaptionStyle()">@Caption</caption>

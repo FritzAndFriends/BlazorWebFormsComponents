@@ -143,6 +143,10 @@ public static class ComponentCatalog
         new("Substitution", "Migration Helpers", "/ControlSamples/Substitution", "Post-cache dynamic content substitution",
             Keywords: new[] { "cache", "dynamic", "callback", "substitution" }),
 
+        // Cross-Cutting / Base Properties
+        new("BaseProperties", "Utility", "/ControlSamples/BaseProperties", "AccessKey, ToolTip, BackColor, ForeColor and other base class properties",
+            Keywords: new[] { "accesskey", "tooltip", "backcolor", "forecolor", "style", "base" }),
+
         // Theming
         new("Theming", "Theming", "/ControlSamples/Theming", "Skins and Themes PoC with ThemeProvider and ControlSkin",
             Keywords: new[] { "skin", "theme", "provider", "skinid" }),

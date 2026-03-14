@@ -7,16 +7,16 @@
 		@if (TextAlign == Enums.TextAlign.Left)
 		{
 			<label for="@_inputId">@Text</label>
-			<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" @onchange="HandleChange" />
+			<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)" @onchange="HandleChange" />
 		}
 		else
 		{
-			<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" @onchange="HandleChange" />
+			<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)" @onchange="HandleChange" />
 			<label for="@_inputId">@Text</label>
 		}
 	}
 	else
 	{
-		<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" @onchange="HandleChange" />
+		<input id="@_inputId" type="checkbox" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)" @onchange="HandleChange" />
 	}
 }

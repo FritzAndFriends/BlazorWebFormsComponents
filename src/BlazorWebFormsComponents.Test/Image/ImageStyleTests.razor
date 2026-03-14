@@ -88,4 +88,66 @@
 		cut.Find("img").HasAttribute("class").ShouldBeFalse();
 	}
 
+	// =================================================================
+	// Issue #18 — Image supports all BaseStyledComponent properties
+	// =================================================================
+
+	[Fact]
+	public void Image_WithForeColor_RendersColorInStyle()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" ForeColor="Red" />);
+		var img = cut.Find("img");
+		img.HasAttribute("style").ShouldBeTrue();
+		img.GetAttribute("style").ShouldContain("color:Red");
+	}
+
+	[Fact]
+	public void Image_WithBorder_RendersAllBorderPropertiesInStyle()
+	{
+		// Border requires all three: BorderWidth > 0, BorderStyle != None/NotSet, BorderColor != default
+		BlazorWebFormsComponents.Enums.BorderStyle solid = BlazorWebFormsComponents.Enums.BorderStyle.Solid;
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test"
+			BorderWidth="Unit.Pixel(2)" BorderStyle="solid" BorderColor="Black" />);
+		var img = cut.Find("img");
+		img.HasAttribute("style").ShouldBeTrue();
+		img.GetAttribute("style").ShouldContain("border:");
+		img.GetAttribute("style").ShouldContain("2px");
+		img.GetAttribute("style").ShouldContain("solid");
+	}
+
+	[Fact]
+	public void Image_WithBorderWidthOnly_DoesNotRenderBorderStyle()
+	{
+		// Without BorderStyle and BorderColor, no border CSS should render
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" BorderWidth="Unit.Pixel(2)" />);
+		var img = cut.Find("img");
+		// Should not have style at all (border alone is insufficient)
+		(img.HasAttribute("style") == false ||
+		 !img.GetAttribute("style").Contains("border")).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Image_AllStyleProperties_RenderCorrectly()
+	{
+		BlazorWebFormsComponents.Enums.BorderStyle solid = BlazorWebFormsComponents.Enums.BorderStyle.Solid;
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Full styled image"
+			CssClass="img-styled"
+			BackColor="LightGray"
+			ForeColor="DarkBlue"
+			Width="Unit.Pixel(200)"
+			Height="Unit.Pixel(150)"
+			BorderWidth="Unit.Pixel(1)"
+			BorderColor="Navy"
+			BorderStyle="solid" />);
+
+		var img = cut.Find("img");
+		img.GetAttribute("class").ShouldBe("img-styled");
+		var style = img.GetAttribute("style");
+		style.ShouldContain("background-color:");
+		style.ShouldContain("color:");
+		style.ShouldContain("width:200px");
+		style.ShouldContain("height:150px");
+		style.ShouldContain("border:");
+	}
+
 }

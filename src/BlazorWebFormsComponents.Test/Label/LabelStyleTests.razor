@@ -88,4 +88,77 @@
 		cut.Find("span").HasAttribute("class").ShouldBeFalse();
 	}
 
+	// =================================================================
+	// Issue #18 — Label supports all BaseStyledComponent properties
+	// =================================================================
+
+	[Fact]
+	public void Label_WithHeight_RendersHeightInStyle()
+	{
+		var cut = Render(@<Label Text="Tall Label" Height="Unit.Pixel(50)" />);
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("height:50px");
+	}
+
+	[Fact]
+	public void Label_WithWidth_RendersWidthInStyle()
+	{
+		var cut = Render(@<Label Text="Wide Label" Width="Unit.Pixel(200)" />);
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("width:200px");
+	}
+
+	[Fact]
+	public void Label_WithBorder_RendersAllBorderPropertiesInStyle()
+	{
+		// Border requires all three: BorderWidth > 0, BorderStyle != None/NotSet, BorderColor != default
+		BlazorWebFormsComponents.Enums.BorderStyle dashed = BlazorWebFormsComponents.Enums.BorderStyle.Dashed;
+		var cut = Render(@<Label Text="Bordered" BorderWidth="Unit.Pixel(1)"
+			BorderStyle="dashed" BorderColor="Red" />);
+		var span = cut.Find("span");
+		span.HasAttribute("style").ShouldBeTrue();
+		span.GetAttribute("style").ShouldContain("border:");
+		span.GetAttribute("style").ShouldContain("1px");
+		span.GetAttribute("style").ShouldContain("dashed");
+	}
+
+	[Fact]
+	public void Label_WithBorderWidthOnly_DoesNotRenderBorderStyle()
+	{
+		// Without BorderStyle and BorderColor, no border CSS should render
+		var cut = Render(@<Label Text="Bordered" BorderWidth="Unit.Pixel(1)" />);
+		var span = cut.Find("span");
+		(span.HasAttribute("style") == false ||
+		 !span.GetAttribute("style").Contains("border")).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Label_AllStyleProperties_RenderCorrectly()
+	{
+		BlazorWebFormsComponents.Enums.BorderStyle solid = BlazorWebFormsComponents.Enums.BorderStyle.Solid;
+		var cut = Render(@<Label Text="Full styled label"
+			CssClass="lbl-styled"
+			BackColor="LightYellow"
+			ForeColor="DarkGreen"
+			Width="Unit.Pixel(300)"
+			Height="Unit.Pixel(40)"
+			BorderWidth="Unit.Pixel(2)"
+			BorderColor="Green"
+			BorderStyle="solid"
+			Font="@(new FontInfo { Bold = true, Italic = true })" />);
+
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("lbl-styled");
+		var style = span.GetAttribute("style");
+		style.ShouldContain("background-color:");
+		style.ShouldContain("color:");
+		style.ShouldContain("width:300px");
+		style.ShouldContain("height:40px");
+		style.ShouldContain("border:");
+		style.ShouldContain("font-weight:bold");
+		style.ShouldContain("font-style:italic");
+	}
+
 }

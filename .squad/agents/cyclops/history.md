@@ -246,3 +246,17 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
 - `CONTROL-REFERENCE.md` — already updated with proper ContentTemplate documentation from previous work. Clean.
 
 **One fix made:** Code-behind TODO header (line 1404) said "UpdatePanel / ScriptManager references → remove" — misleading now that UpdatePanel is a real BWFC component. Split into two lines: ScriptManager → remove, UpdatePanel → BWFC preserved (remove only code-behind API calls).
+
+### M20 Base Class Fixes (2026-03-07)
+
+**Issue #16 — ToolTip promoted to BaseWebFormsComponent:**
+- Moved `ToolTip` property from `BaseStyledComponent` to `BaseWebFormsComponent` so all ~40 components get it, not just styled ones.
+- Removed duplicate `ToolTip` declarations from `ChartSeries.razor.cs` and `MenuItem.razor.cs` (they inherit from BaseWebFormsComponent).
+- `DataPoint.cs` and `TreeNode.razor.cs` keep their own `ToolTip` — DataPoint is a plain class, TreeNode inherits ComponentBase directly.
+- `BaseStyledComponent.ApplyThemeSkin` still references `ToolTip` via inheritance — no changes needed there.
+
+**Issues #15, #17, #18 — Already implemented:**
+- AccessKey was already in BaseWebFormsComponent (line 139).
+- BaseDataBoundComponent already inherits BaseStyledComponent (not BaseWebFormsComponent directly).
+- Image and Label already inherit BaseStyledComponent.
+- All 1550 tests pass after changes.

@@ -122,6 +122,9 @@ namespace BlazorWebFormsComponents
 				if (!string.IsNullOrEmpty(ToolTip))
 					attributes["title"] = ToolTip;
 
+				if (!string.IsNullOrEmpty(AccessKey))
+					attributes["accesskey"] = AccessKey;
+
 				if (TextMode == TextBoxMode.MultiLine)
 				{
 					if (Rows > 0)

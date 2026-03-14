@@ -125,3 +125,37 @@ And UpdatePanel.razor is updated to render:
 Then all 12 tests should pass.
 
 Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.razor` (12 tests, 280 lines)
+
+### Base Class Property Tests — Issues #15, #16, #17, #18 (2026-07-25)
+
+**40 new bUnit tests across 5 files** verifying base class changes Cyclops is implementing in parallel. Total suite: 1587 tests (1577 pass, 10 expected failures).
+
+**Issue #15 — AccessKey (20 tests in BaseWebFormsComponent/AccessKeyTests.razor):**
+- Button, Label, TextBox, Image, Panel, HyperLink, CheckBox with AccessKey → should render `accesskey="X"`
+- Empty/null AccessKey → should NOT render attribute
+- Label with AssociatedControlID + AccessKey renders on `<label>` element
+- **5 pass now** (Button, Label — already render accesskey); **5 expected failures** (TextBox, Image, Panel, HyperLink, CheckBox — awaiting Cyclops's render changes)
+
+**Issue #16 — ToolTip special characters (5 tests added to BaseWebFormsComponent/ToolTipTests.razor):**
+- Ampersand, quotes, angle brackets, apostrophes in ToolTip render correctly via title attribute
+- Tests on Button, Label, Image, Panel, TextBox
+- **All 5 pass** — Blazor/AngleSharp handles HTML encoding correctly
+
+**Issue #17 — DataBoundComponent styling (10 tests added to DataBoundComponent/StyleInheritanceTests.razor):**
+- GridView: BackColor, ForeColor, Width, Height, MultipleStyles on `<table>` outer element
+- DataList: ForeColor, Font, MultipleStyles on `<table>`, FlowLayout BackColor on `<span>`
+- **4 DataList tests pass** (DataList already merges BaseStyledComponent styles); **5 GridView tests fail** (GridView hard-codes `style="border-collapse:collapse;"` without merging — awaiting Issue #17 fix)
+
+**Issue #18 — Image and Label full styling (5+5 tests added to Image/ImageStyleTests.razor and Label/LabelStyleTests.razor):**
+- Image: ForeColor, Border (all 3 props together), BorderWidthOnly negative test, AllStyleProperties
+- Label: Height, Width, Border (all 3 props together), BorderWidthOnly negative test, AllStyleProperties
+- **All 10 pass** — Image and Label already inherit BaseStyledComponent and render `style="@Style"`
+
+**Key discovery:** Border CSS is ALL-OR-NOTHING. The style builder requires `BorderWidth > 0 AND BorderStyle != None/NotSet AND BorderColor != default` — all three simultaneously. If any is missing, no border CSS renders. Tests reflect this correctly.
+
+**Test files modified:**
+- `src/BlazorWebFormsComponents.Test/BaseWebFormsComponent/AccessKeyTests.razor` (4→20 tests)
+- `src/BlazorWebFormsComponents.Test/BaseWebFormsComponent/ToolTipTests.razor` (+5 special char tests)
+- `src/BlazorWebFormsComponents.Test/DataBoundComponent/StyleInheritanceTests.razor` (8→18 tests)
+- `src/BlazorWebFormsComponents.Test/Image/ImageStyleTests.razor` (7→12 tests)
+- `src/BlazorWebFormsComponents.Test/Label/LabelStyleTests.razor` (7→12 tests)
