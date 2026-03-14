@@ -219,6 +219,7 @@ public class ControlSampleTests
 
     // Utility Features
     [Theory]
+    [InlineData("/ControlSamples/BaseProperties")]
     [InlineData("/ControlSamples/DataBinder")]
     [InlineData("/ControlSamples/Theming")]
     [InlineData("/ControlSamples/ViewState")]

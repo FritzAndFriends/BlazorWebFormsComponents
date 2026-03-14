@@ -3399,4 +3399,104 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    [Fact]
+    public async Task BaseProperties_AccessKey_RendersOnControls()
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/BaseProperties", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var section = page.Locator("[data-audit-control='BaseProperties-1']");
+            await section.WaitForAsync(new LocatorWaitForOptions { Timeout = 5000 });
+
+            // BWFC Button renders as <input type="submit">
+            var buttonAccessKey = await section.Locator("input[type='submit']").First.GetAttributeAsync("accesskey");
+            Assert.NotNull(buttonAccessKey);
+            Assert.NotEmpty(buttonAccessKey);
+
+            // TextBox renders as <input type="text">
+            var textBoxAccessKey = await section.Locator("input[type='text']").First.GetAttributeAsync("accesskey");
+            Assert.NotNull(textBoxAccessKey);
+            Assert.NotEmpty(textBoxAccessKey);
+
+            // HyperLink renders as <a>
+            var linkAccessKey = await section.Locator("a").First.GetAttributeAsync("accesskey");
+            Assert.NotNull(linkAccessKey);
+            Assert.NotEmpty(linkAccessKey);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task BaseProperties_ToolTip_RendersAsTitleAttribute()
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/BaseProperties", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var section = page.Locator("[data-audit-control='BaseProperties-2']");
+            await section.WaitForAsync(new LocatorWaitForOptions { Timeout = 5000 });
+
+            // Verify at least one control has a title attribute (ToolTip renders as title)
+            var elementsWithTitle = await section.Locator("[title]").AllAsync();
+            Assert.NotEmpty(elementsWithTitle);
+
+            // Verify the title attribute has actual text
+            var firstTitle = await elementsWithTitle[0].GetAttributeAsync("title");
+            Assert.NotNull(firstTitle);
+            Assert.NotEmpty(firstTitle);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task BaseProperties_GridView_RendersStyleProperties()
+    {
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/BaseProperties", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var section = page.Locator("[data-audit-control='BaseProperties-3']");
+            await section.WaitForAsync(new LocatorWaitForOptions { Timeout = 5000 });
+
+            var table = section.Locator("table").First;
+            var style = await table.GetAttributeAsync("style");
+            Assert.NotNull(style);
+
+            // BackColor should render as background-color in the style attribute
+            Assert.Contains("background-color", style);
+
+            // Width should render in the style attribute
+            Assert.Contains("width", style);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
 }
