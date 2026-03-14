@@ -207,6 +207,7 @@ foreach ($entity in $csdlSchema.SelectNodes('edm:EntityType', $nsManager)) {
             MaxLength  = $maxLength
             IsKey      = ($propName -in $keyProps)
             IsIdentity = ($storeGenerated -eq 'Identity')
+            IsComputed = ($storeGenerated -eq 'Computed')
             ColumnName = $columnName
         }
     }
@@ -295,6 +296,10 @@ foreach ($entityName in $entities.Keys) {
         }
         if ($prop.IsIdentity) {
             $annotations += '        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]'
+        }
+        # FIX 5: Add Computed annotation for StoreGeneratedPattern="Computed"
+        if ($prop.IsComputed) {
+            $annotations += '        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]'
         }
         if (-not $prop.IsNullable -and $prop.EdmType -eq 'String') {
             $annotations += '        [Required]'

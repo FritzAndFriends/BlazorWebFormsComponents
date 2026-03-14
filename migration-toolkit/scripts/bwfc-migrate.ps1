@@ -738,8 +738,14 @@ function ConvertFrom-PageDirective {
 
     # <%@ Page ... %> → @page "/route"
     $route = '/' + [System.IO.Path]::GetFileNameWithoutExtension($FileName)
+    $isHomePage = $false
     if ($route -eq '/Default' -or $route -eq '/default' -or $route -eq '/Index' -or $route -eq '/index') {
         $route = '/'
+        $isHomePage = $true
+    }
+    # FIX 2: Also detect home page names for dual-route generation
+    if ($FileName -match '^(Home|home)\.aspx$') {
+        $isHomePage = $true
     }
 
     if ($Content -match '<%@\s*Page[^%]*%>') {
@@ -751,6 +757,18 @@ function ConvertFrom-PageDirective {
 
         $Content = $Content -replace '<%@\s*Page[^%]*%>\s*\r?\n?', ''
         $pageHeader = "@page `"$route`"`n"
+
+        # FIX 2: Add root route for home pages
+        if ($isHomePage -and $route -ne '/') {
+            $pageHeader += "@page `"/`"`n"
+            Write-TransformLog -File $RelPath -Transform 'Directive' -Detail "Added @page `"/`" root route for home page"
+        }
+
+        # FIX 3: Use title from asp:Content TitleContent if available
+        if (-not $pageTitle -and $script:ExtractedTitleFromContent) {
+            $pageTitle = $script:ExtractedTitleFromContent
+            $script:ExtractedTitleFromContent = $null  # Clear for next file
+        }
 
         # RF-10: Add <PageTitle> if title was extracted — but skip if code-behind
         # sets Page.Title (L2 will emit that assignment, so emitting <PageTitle>
@@ -835,6 +853,14 @@ function ConvertFrom-ImportDirective {
 function ConvertFrom-ContentWrappers {
     param([string]$Content, [string]$RelPath)
 
+    # FIX 3: Extract title from TitleContent asp:Content placeholder
+    $titleContentRegex = [regex]'(?si)<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"[^"]*Title[^"]*"[^>]*>\s*([^<]+?)\s*</asp:Content>'
+    $titleFromContent = $null
+    if ($titleContentRegex.IsMatch($Content)) {
+        $titleMatch = $titleContentRegex.Match($Content)
+        $titleFromContent = $titleMatch.Groups[1].Value.Trim()
+    }
+
     # HeadContent placeholder → <HeadContent> / </HeadContent>
     $headOpenRegex = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"HeadContent"[^>]*>'
     $headOpenRegex2 = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"head"[^>]*>'
@@ -891,6 +917,9 @@ function ConvertFrom-ContentWrappers {
         }
         Write-TransformLog -File $RelPath -Transform 'Content' -Detail "Removed $closeCount </asp:Content> closing tag(s)"
     }
+
+    # FIX 3: Return the extracted title so ConvertFrom-PageDirective can use it
+    $script:ExtractedTitleFromContent = $titleFromContent
 
     return $Content
 }
@@ -1289,6 +1318,15 @@ function ConvertFrom-AspPrefix {
         Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Removed asp: prefix from $($closeMatches.Count) closing tag(s)"
     }
 
+    # FIX 1: Strip ContentTemplate wrappers (content preserved)
+    # UpdatePanel's ContentTemplate is a Web Forms concept — in Blazor, child content goes directly inside the component
+    $contentTemplateOpenCount = ([regex]'<ContentTemplate>').Matches($Content).Count
+    if ($contentTemplateOpenCount -gt 0) {
+        $Content = $Content -replace '<ContentTemplate>', ''
+        $Content = $Content -replace '</ContentTemplate>', ''
+        Write-TransformLog -File $RelPath -Transform 'TagPrefix' -Detail "Stripped $contentTemplateOpenCount ContentTemplate wrapper(s)"
+    }
+
     # Opening tags: <uc1:Control → <Control (handles uc, uc1, uc2, etc.)
     $ucOpenRegex = [regex]'<uc\d*:(\w+)'
     $ucOpenMatches = $ucOpenRegex.Matches($Content)
@@ -1349,6 +1387,15 @@ function Remove-WebFormsAttributes {
     }
     if ($addedCount -gt 0) {
         Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Added ItemType=`"object`" fallback to $addedCount generic component tag(s)"
+    }
+
+    # FIX 4: Convert Web Forms ID attribute to lowercase id for HTML compatibility
+    # BWFC components accept both ID and id, so broad replacement is safe
+    $idRegex = [regex]'\bID="([^"]*)"'
+    $idMatches = $idRegex.Matches($Content)
+    if ($idMatches.Count -gt 0) {
+        $Content = $idRegex.Replace($Content, 'id="$1"')
+        Write-TransformLog -File $RelPath -Transform 'Attribute' -Detail "Converted $($idMatches.Count) ID= to id="
     }
 
     return $Content

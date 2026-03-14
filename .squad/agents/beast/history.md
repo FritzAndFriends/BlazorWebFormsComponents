@@ -103,4 +103,20 @@ Pipeline enforcement: Added mandatory L1→L2 pipeline section to bwfc-migration
 
 📌 Team update (2026-03-14): UpdatePanel ContentTemplate enhancement approved and shipped. Forge review: Web Forms fidelity ✅, HTML output ✅, base class change ✅ acceptable, backward compatibility ✅, migration story ✅, render mode decision ✅ correct, tests ✅ adequate, sample page ✅ excellent. All 8 checklist items pass. Production-ready. Merged to decisions.md with consolidated team notes.
 
+### Run 22 Lessons: Migration Standards & Data Migration Doc Enhancements (2026-03-XX)
+
+Captured three critical Run 22 learnings (39/40 tests passing) in migration skill documentation:
+
+**migration-standards/SKILL.md updates:**
+1. **Generated Code Variable Declaration (IDE0007):** Added new subsection documenting that ALL local declarations in generated code MUST use `var`, not explicit types. `.editorconfig` enforces this as a build error. Includes CORRECT/WRONG examples. Applies to both L1-generated scaffolding and L2 Copilot-generated code.
+2. **TextBox Binding Timing for Playwright Tests:** Added new subsection documenting BWFC TextBox uses `@onchange` (blur), not `@oninput` (keystroke). Playwright `FillAsync()` doesn't commit binding until blur. Recommended pattern: `BlurAsync()` or `PressAsync("Tab")` after filling, then small delay before submit. Root cause of Run 22 Students page add-student test failure.
+
+**bwfc-data-migration/SKILL.md updates:**
+3. **Session State Examples:** Enhanced "Session State Under Interactive Server Mode" section with three concrete, copy-pasteable code patterns: **(A) Minimal API endpoints** (ContosoUniversity student add example with HttpClient), **(B) Scoped Service** (CartService with List<CartItem>), **(C) Database-backed** (UserPreferencesService with IDbContextFactory). All examples use `var` (IDE0007 compliant). Root cause: existing section listed options without code, leaving developers guessing.
+
+**Context:** Run 22 required multiple iterations due to explicit type declarations causing build failures, Playwright test timing issues, and developers implementing session patterns without examples. These doc enhancements codify the patterns to reduce future iteration cycles.
+
+**Files:** migration-toolkit/skills/migration-standards/SKILL.md (lines ~165–199), migration-toolkit/skills/bwfc-data-migration/SKILL.md (lines ~29–95)  
+**Decision log:** .squad/decisions/inbox/beast-migration-docs.md
+
 

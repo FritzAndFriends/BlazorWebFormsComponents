@@ -77,6 +77,36 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 
 📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
 
+### Run 22 L1 Script Fixes — 5 Migration Toolkit Improvements (2026-03-14)
+
+**Summary:** Implemented 5 script fixes identified from ContosoUniversity Run 22 (39/40 tests, 97.5% pass rate): (1) Strip ContentTemplate wrappers to eliminate RZ10012 warnings, (2) Add dual `@page` routes for home pages (e.g., `/Home` + `/`), (3) Extract PageTitle from TitleContent placeholders, (4) Convert `ID=` to `id=` for HTML compatibility, (5) Add `[DatabaseGenerated(Computed)]` support to EDMX parser.
+
+**Files Modified:**
+- `migration-toolkit/scripts/bwfc-migrate.ps1` (Fixes 1-4)
+- `migration-toolkit/scripts/Convert-EdmxToEfCore.ps1` (Fix 5)
+
+**Key Implementation Details:**
+- **Fix 1 (ContentTemplate):** Added after asp: prefix removal in `ConvertFrom-AspPrefix` — strips `<ContentTemplate>` wrapper tags while preserving content. UpdatePanel component accepts ContentTemplate as RenderFragment parameter, but L1 output is cleaner without wrapper tags.
+- **Fix 2 (Home Routes):** Added `$isHomePage` detection in `ConvertFrom-PageDirective` for Home.aspx/Default.aspx/Index.aspx — generates both `@page "/Home"` and `@page "/"` directives. Ensures root URL routing works.
+- **Fix 3 (TitleContent):** Added regex in `ConvertFrom-ContentWrappers` to extract title from `<asp:Content ContentPlaceHolderID="TitleContent">` blocks. Stored in `$script:ExtractedTitleFromContent`, consumed by `ConvertFrom-PageDirective` as fallback when `Title` attribute absent. Complements existing Title attribute extraction (Run 9 RF-10).
+- **Fix 4 (ID → id):** Added in `Remove-WebFormsAttributes` after ItemType processing — broad regex replacement of `ID="value"` to `id="value"`. BWFC components accept both, so safe replacement. Ensures CSS/JS selectors work.
+- **Fix 5 (EDMX Computed):** Added `IsComputed` property to entity metadata, generated `[DatabaseGenerated(DatabaseGeneratedOption.Computed)]` annotation in entity files. Mirrors existing `IsIdentity` pattern. Prevents EF Core errors on computed columns.
+
+**Expected Impact:**
+- Eliminates 3 RZ10012 warnings (ContentTemplate)
+- Fixes 3 HomePageTests (root URL routing)
+- Improves browser tab titles (SEO + UX)
+- Fixes selector failures from ID casing
+- Prevents EF Core computed column errors
+
+**Gotchas:**
+- Fix 3 uses script-scoped variable to pass data between functions — must clear `$script:ExtractedTitleFromContent` after use to avoid cross-file pollution
+- Fix 2 checks `$isHomePage -and $route -ne '/'` to avoid duplicate `@page "/"` directives
+- Fix 1 placed after closing tag removal to avoid interfering with asp: prefix stripping
+
+📌 Team update (2026-03-14): Run 22 L1 script fixes implemented by Cyclops — 5 improvements targeting RZ10012 warnings, home page routing, PageTitle extraction, ID normalization, and EDMX computed properties. Decision document written to `.squad/decisions/inbox/cyclops-l1-script-fixes.md`.
+
+
 
 - Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
 - Run 21 — Layer 2 Structural Transform AfterWingtipToys (2026-03-11)

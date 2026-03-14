@@ -177,4 +177,34 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 
 📌 Team update (2026-03-14): UpdatePanel ContentTemplate enhancement approved by Forge — production-ready, all 8 checklist items pass. Web Forms fidelity ✅, HTML output ✅, base class ✅ (justified enhancement), backward compatibility ✅, migration story ✅, render mode ✅, tests ✅, sample page ✅ excellent. Cyclops/Rogue/Jubilee recognized for reference-quality work. Decisions merged.
 
+### Divergence & Feature Gap Issue Plan (2026-03-14)
+
+**Task:** Create comprehensive GitHub issue plan from DIVERGENCE-REGISTRY + known feature gaps.
+
+**Deliverable:** `.squad/decisions/inbox/forge-divergence-issue-plan.md` — 34 actionable issues organized by 4 milestones (M20–M23).
+
+**Key learnings from registry analysis:**
+
+1. **Base class inheritance fixes close 180+ gaps at once:** Adding `AccessKey` + `ToolTip` to `BaseWebFormsComponent`, changing `DataBoundComponent<T>` to inherit `BaseStyledComponent`, and fixing `Image`/`Label` base classes closes ~180 property gaps across 10+ controls. This is the highest-ROI work upfront.
+
+2. **GridView is the critical blocker (20.7% health):** Missing paging (AllowPaging/PageSize/PageIndex), sorting (AllowSorting/SortExpression), and row editing (RowEditing/RowUpdating/RowDeleting). GridView is ~80% of data grid usage in Web Forms — fixing these 3 features moves GridView from 20.7% to 70%+ and unblocks the largest migration class.
+
+3. **Three actionable divergence bugs (D-11, D-13, D-14):** GUID-based ID generation is a bug (should use developer-provided ID + suffixes); Calendar missing previous-month padding in 42-cell grid (visible structural gap); Calendar style properties not fully applied to table cells. These are migration fidelity issues, not intentional divergences.
+
+4. **Validator `Display` property is layout-critical:** Missing `Display` (None/Static/Dynamic) on all 6 validators causes layout differences in migrated pages. `SetFocusOnError` is also missing but lower priority. These should be fixed together.
+
+5. **L1 script automation at 40%, target 60%:** 6 OPPs identified: enum/bool/unit string normalization, Response.Redirect shimming, GetRouteUrl shimming, Session detection, ViewState visibility, DataSourceID warnings. Pushing to 60% unblocks Run 22 milestone.
+
+6. **No L1 script test harness exists:** Need metrics for automation coverage %, build success, test pass rate, HTML divergence vs Web Forms. Baseline measurement enables data-driven improvements.
+
+7. **DetailsView remains unmerged:** On `sprint3/detailsview-passwordrecovery` with 63.2% health (27 matching props, 16 matching events). Merging restores actual shipped count from 49/53 (92%) to 50/53 (94%). This is a DevOps correction, not new work.
+
+8. **Data controls category at 53.2% — fixable to 75%+:** With base class fixes + GridView features + ListView CRUD + Menu orientation, data controls climb from 53.2% to 75%+. This is the most impactful category for migration success.
+
+9. **Issue consolidation strategy:** Don't create 1 issue per property. Consolidate: GridView paging + sorting + editing as 3 large issues; Calendar style fixes as 2 issues (D-13 grid padding, D-14 style properties); validators as 2 issues (Display+SetFocusOnError, HeaderText+ValidationGroup). Keeps issue count manageable (~34 vs 100+).
+
+10. **Prioritization by fidelity impact:** High priority = directly impacts migration fidelity or blocks common patterns (base class fixes, GridView, D-11/D-13/D-14). Medium priority = improves completeness but has workarounds (L1 script, ListView CRUD). Low priority = edge cases or rarely-used features (BackImageUrl, node-level TreeView styles, DataGrid deprecation notice).
+
+**Outcome:** 34 issues planned: 13 High, 10 Medium, 11 Low. M20 (Component Parity) is foundational, fixes 180+ gaps. M21–M23 build on M20 with advanced features, CRUD, and fine-tuning. Expected project health post-all-34 issues: 68.5% → 78-80%.
+
 

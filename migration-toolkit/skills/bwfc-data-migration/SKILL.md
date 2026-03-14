@@ -34,63 +34,98 @@ Use this skill when you need to:
 
 **Options for session-dependent operations (shopping cart, user preferences, etc.):**
 
-### Option A: Minimal API Endpoints (most reliable for HTTP-dependent state)
+### Option A: Minimal API Endpoints (Recommended for form submissions)
 
 Use the same `<form method="post">` → minimal API pattern used for auth. The endpoint has a real `HttpContext` with session access.
 
 ```csharp
-// Program.cs — cart add operation via minimal API
-app.MapPost("/Cart/Add", async (HttpContext context, ShoppingCartService cart) =>
+// Program.cs
+app.MapPost("/api/students/add", async (StudentDto dto, SchoolContext db) =>
 {
-    var form = await context.Request.ReadFormAsync();
-    if (int.TryParse(form["productId"], out var productId))
-        cart.AddToCart(productId);
-    return Results.Redirect("/ShoppingCart");
+    var student = new Student 
+    { 
+        FirstName = dto.FirstName, 
+        LastName = dto.LastName, 
+        EnrollmentDate = dto.EnrollmentDate 
+    };
+    db.Students.Add(student);
+    await db.SaveChangesAsync();
+    return Results.Ok(student.StudentID);
 }).DisableAntiforgery();
 ```
 
 ```razor
-@* Blazor page — form submits via HTTP POST, not a Blazor event *@
-<form method="post" action="/Cart/Add">
-    <input type="hidden" name="productId" value="@product.ProductID" />
-    <button type="submit">Add to Cart</button>
-</form>
-```
+@* In Students.razor *@
+@inject HttpClient Http
 
-> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens. Example: `app.MapPost("/endpoint", handler).DisableAntiforgery();`
-
-### Option B: Scoped Services (in-memory, per-circuit)
-
-Replace `Session["key"]` with a scoped DI service. State lives in server memory for the duration of the SignalR circuit.
-
-```csharp
-// CartService.cs — registered as AddScoped<CartService>()
-public class CartService
-{
-    public ShoppingCart Cart { get; set; } = new();
-    public void AddItem(int productId) { /* ... */ }
-}
-```
-
-**Trade-off:** State is lost if the user refreshes the page or the circuit disconnects. Good for transient UI state, not for durable cart data.
-
-### Option C: Database-Backed State (most durable)
-
-Store state in the database, keyed by user ID or a cookie-based session token. Survives circuit disconnects, page refreshes, and server restarts.
-
-```csharp
-public class CartService(IDbContextFactory<ProductContext> factory)
-{
-    public async Task AddItemAsync(string userId, int productId)
+@code {
+    private async Task AddStudent()
     {
-        using var db = factory.CreateDbContext();
-        db.CartItems.Add(new CartItem { UserId = userId, ProductId = productId });
-        await db.SaveChangesAsync();
+        await Http.PostAsJsonAsync("/api/students/add", newStudent);
+        await RefreshGrid();
     }
 }
 ```
 
-**Recommendation:** For shopping carts and other business-critical state, prefer Option A (minimal API) or Option C (database). Use Option B only for transient UI state that can be safely lost.
+> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens.
+
+### Option B: Scoped Service (For transient UI state)
+
+Replace `Session["key"]` with a scoped DI service. State lives in server memory for the duration of the SignalR circuit.
+
+```csharp
+// CartService.cs
+public class CartService
+{
+    private readonly List<CartItem> _items = new();
+    public void Add(CartItem item) => _items.Add(item);
+    public IReadOnlyList<CartItem> Items => _items.AsReadOnly();
+    public decimal GetTotal() => _items.Sum(i => i.Price * i.Quantity);
+}
+
+// Program.cs
+builder.Services.AddScoped<CartService>();
+
+// Component usage
+@inject CartService CartService
+
+<button @onclick="() => CartService.Add(new CartItem(...))">Add</button>
+```
+
+**Trade-off:** State is lost if the user refreshes the page or the circuit disconnects. Good for transient UI state (form drafts, temporary selections), not for durable cart data.
+
+### Option C: Database-Backed (For persistent state)
+
+Store state in the database, keyed by user ID or a cookie-based session token. Survives circuit disconnects, page refreshes, and server restarts.
+
+```csharp
+// UserPreferencesService.cs  
+public class UserPreferencesService(IDbContextFactory<SchoolContext> factory)
+{
+    public async Task<string?> GetAsync(string userId, string key)
+    {
+        using var db = factory.CreateDbContext();
+        var pref = await db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId && p.Key == key);
+        return pref?.Value;
+    }
+    
+    public async Task SetAsync(string userId, string key, string value)
+    {
+        using var db = factory.CreateDbContext();
+        var pref = await db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId && p.Key == key);
+        if (pref != null)
+            pref.Value = value;
+        else
+            db.UserPreferences.Add(new UserPreference { UserId = userId, Key = key, Value = value });
+        await db.SaveChangesAsync();
+    }
+}
+
+// Program.cs
+builder.Services.AddScoped<UserPreferencesService>();
+```
+
+**Recommendation:** For shopping carts and other business-critical state, prefer Option A (minimal API endpoints) or Option C (database). Use Option B only for transient UI state that can be safely lost on refresh or disconnect.
 
 ---
 

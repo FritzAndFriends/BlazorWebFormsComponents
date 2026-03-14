@@ -154,6 +154,49 @@ The script should preserve the attribute and annotate the signature change neede
 
 When linking to minimal API endpoints from Blazor pages, use `<form method="post">` or add `data-enhance-nav="false"` to prevent Blazor's enhanced navigation from intercepting the request. Enhanced navigation handles `<a href>` clicks as client-side SPA navigation, which breaks links to server endpoints (the request never reaches the server). This applies to all auth endpoints, cart operations, file downloads, and any other minimal API routes.
 
+### TextBox Binding Timing for Playwright Tests
+
+BWFC `TextBox` uses `@onchange` (fires on blur), **not** `@oninput` (fires on keystroke). This affects Playwright test interactions:
+
+- Playwright `FillAsync()` triggers `input` events, but the Blazor binding value is **NOT committed** until the element loses focus
+- The change event fires on blur, updating the bound property
+- Tests that fill fields and immediately submit may fail if the binding hasn't updated yet
+
+**Recommended Playwright pattern for form submissions:**
+
+```csharp
+// Fill the last field
+await lastField.FillAsync("value");
+
+// Trigger blur to commit the binding
+await lastField.BlurAsync();
+
+// Wait for binding propagation
+await Task.Delay(200);
+
+// Now click submit — the value is committed
+await submitButton.ClickAsync();
+```
+
+**Alternative using keyboard navigation:**
+
+```csharp
+// Fill fields
+await field1.FillAsync("value1");
+await field2.FillAsync("value2");
+
+// Press Tab after the last field to trigger blur
+await lastField.PressAsync("Tab");
+
+// Small delay for binding update
+await Task.Delay(200);
+
+// Submit
+await submitButton.ClickAsync();
+```
+
+This is a BWFC-specific behavior that mirrors Web Forms' `TextBox` `TextChanged` event semantics — both fire on blur, not on keystroke.
+
 ### Static Asset Relocation
 
 - All static files → `wwwroot/`
@@ -161,6 +204,24 @@ When linking to minimal API endpoints from Blazor pages, use `<form method="post
 - JS bundles → explicit `<script>` tags in `App.razor`
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
+
+### Generated Code — Variable Declaration Styles
+
+> **CRITICAL:** All local variable declarations in generated Blazor code MUST use `var` (implicit typing), not explicit types. This is enforced by `.editorconfig` as **IDE0007 error**.
+
+```csharp
+// CORRECT — var for all local declarations
+var students = db.Students.ToList();
+var product = await productService.GetProductAsync(id);
+var count = items.Count();
+
+// WRONG — explicit type declarations cause build failures
+List<Student> students = db.Students.ToList();
+Product product = await productService.GetProductAsync(id);
+int count = items.Count();
+```
+
+This applies to **both L1-generated scaffolding and L2 Copilot-generated code**. IDE0007 is enabled as a build error in `/.editorconfig` — explicit types will fail the build immediately.
 
 ### Page Lifecycle Mapping
 
