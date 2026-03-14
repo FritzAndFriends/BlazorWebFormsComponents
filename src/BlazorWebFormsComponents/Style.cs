@@ -31,6 +31,13 @@ namespace BlazorWebFormsComponents
 
 		public override string ToString() => this.ToStyle().NullIfEmpty();
 
+		private static object ParseEnumParameter(Type enumParamType, string value)
+		{
+			var enumType = enumParamType.GetGenericArguments()[0];
+			var enumValue = Enum.Parse(enumType, value, ignoreCase: true);
+			return Activator.CreateInstance(enumParamType, enumValue);
+		}
+
 		public void FromUnknownAttributes(Dictionary<string, object> attributes, string prefix)
 		{
 
@@ -64,10 +71,12 @@ namespace BlazorWebFormsComponents
 					{ Name: nameof(Unit) } => new Unit(itemStyle.Value.ToString()),
 					{ Name: nameof(FontUnit) } => FontUnit.Parse(itemStyle.Value.ToString()),
 					{ IsEnum: true } => Enum.Parse(propInfo.PropertyType, itemStyle.Value.ToString()),
+					var t when t.IsGenericType && t.GetGenericTypeDefinition() == typeof(EnumParameter<>)
+						=> ParseEnumParameter(t, itemStyle.Value.ToString()),
 					_ => itemStyle.Value
 				};
 
-				propInfo.SetValue(this, Convert.ChangeType(outValue, propInfo.PropertyType));
+				propInfo.SetValue(this, outValue);
 
 			}
 		}
