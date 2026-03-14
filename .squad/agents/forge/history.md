@@ -208,3 +208,5 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 **Outcome:** 34 issues planned: 13 High, 10 Medium, 11 Low. M20 (Component Parity) is foundational, fixes 180+ gaps. M21–M23 build on M20 with advanced features, CRUD, and fine-tuning. Expected project health post-all-34 issues: 68.5% → 78-80%.
 
 
+📌 Team update (2026-03-14): M20 Batch 6 orchestration spawn — Forge designing component health dashboard, Cyclops advancing L1 script fixes, Rogue building L1 test harness — decided by Scribe
+
