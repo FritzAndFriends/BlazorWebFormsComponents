@@ -134,6 +134,17 @@ namespace BlazorWebFormsComponents
 		}
 
 		/// <summary>
+		/// Gets the combined table style, merging border-collapse:collapse with base style properties.
+		/// </summary>
+		protected string GetCombinedTableStyle()
+		{
+			var baseStyle = Style;
+			return string.IsNullOrEmpty(baseStyle)
+				? "border-collapse:collapse;"
+				: $"border-collapse:collapse;{baseStyle}";
+		}
+
+		/// <summary>
 		/// Gets the effective row style based on the current mode.
 		/// </summary>
 		protected TableItemStyle GetCurrentRowStyle()

@@ -1,0 +1,149 @@
+
+@code {
+	bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> Name = new ForwardRef<InputBase<string>>();
+
+	private void ResetFlags()
+	{
+		_validSubmit = false;
+		_invalidSubmit = false;
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_DefaultInitialValue_FailsOnEmptyString()
+	{
+		ResetFlags();
+		var model = new TestModel();
+
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				<InputText @ref="Name.Current" @bind-Value="model.Value" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@Name"
+					Text="Required." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("");
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeFalse();
+		_invalidSubmit.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_DefaultInitialValue_PassesOnNonEmptyString()
+	{
+		ResetFlags();
+		var model = new TestModel();
+
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				<InputText @ref="Name.Current" @bind-Value="model.Value" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@Name"
+					Text="Required." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("hello");
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeTrue();
+		_invalidSubmit.ShouldBeFalse();
+
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_CustomInitialValue_FailsWhenValueMatchesInitialValue()
+	{
+		ResetFlags();
+		var model = new TestModel();
+
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				<InputText @ref="Name.Current" @bind-Value="model.Value" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@Name"
+					InitialValue="-- Select --"
+					Text="Please select an option." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("-- Select --");
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeFalse();
+		_invalidSubmit.ShouldBeTrue();
+
+		cut.Find("span").FirstChild.TextContent.ShouldContain("Please select an option.");
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_CustomInitialValue_PassesWhenValueIsDifferent()
+	{
+		ResetFlags();
+		var model = new TestModel();
+
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				<InputText @ref="Name.Current" @bind-Value="model.Value" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@Name"
+					InitialValue="-- Select --"
+					Text="Please select an option." />
+			</EditForm>
+		);
+
+		cut.Find("input").Change("Actual selection");
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeTrue();
+		_invalidSubmit.ShouldBeFalse();
+
+		cut.Find("span").GetAttribute("style").ShouldContain("visibility:hidden");
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_InitialValue_TrimsWhitespaceInComparison()
+	{
+		ResetFlags();
+		var model = new TestModel();
+
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+				<InputText @ref="Name.Current" @bind-Value="model.Value" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@Name"
+					InitialValue="test"
+					Text="Value matches initial." />
+			</EditForm>
+		);
+
+		// Value with surrounding whitespace should match InitialValue "test" after trimming
+		cut.Find("input").Change("  test  ");
+		cut.Find("form").Submit();
+
+		_validSubmit.ShouldBeFalse();
+		_invalidSubmit.ShouldBeTrue();
+
+		cut.Find("span").FirstChild.TextContent.ShouldContain("Value matches initial.");
+	}
+
+	private void HandleValidSubmit()
+	{
+		_validSubmit = true;
+	}
+
+	private void HandleInvalidSubmit()
+	{
+		_invalidSubmit = true;
+	}
+
+	public class TestModel
+	{
+		public string Value { get; set; }
+	}
+}
