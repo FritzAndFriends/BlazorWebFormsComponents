@@ -1401,7 +1401,8 @@ function Copy-CodeBehind {
 //   - Response.Redirect → NavigationManager.NavigateTo
 //   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
 //   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - UpdatePanel / ScriptManager references → remove (Blazor handles updates)
+//   - ScriptManager code-behind references → remove (Blazor handles updates)
+//   - UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
 //   - User controls → Blazor component references
 // =============================================================================
 

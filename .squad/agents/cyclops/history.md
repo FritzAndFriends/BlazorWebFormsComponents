@@ -197,3 +197,14 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
 - UpdatePanel should inherit from BaseStyledComponent, not BaseWebFormsComponent, because .NET 4.0+ Web Forms UpdatePanel supports CSS class attributes
 - RenderFragment parameters with `??` fallback pattern enable dual syntax support (Web Forms and Blazor idioms)
 - Library components should not force render modes - that's an app-level architectural decision
+
+### L1 Script ContentTemplate Audit (2026-07-25)
+
+**Task:** Verify L1 migration script handles UpdatePanel + ContentTemplate correctly after the ContentTemplate RenderFragment enhancement.
+
+**Findings:**
+- L1 script (`bwfc-migrate.ps1`) has **no ContentTemplate stripping logic** — `ContentTemplate` was never an `asp:` prefixed tag, so `ConvertFrom-AspPrefix` never touched it. It passes through L1 untouched. Correct behavior.
+- `CODE-TRANSFORMS.md` and `SKILL.md` — no UpdatePanel/ContentTemplate references, no stripping guidance. Clean.
+- `CONTROL-REFERENCE.md` — already updated with proper ContentTemplate documentation from previous work. Clean.
+
+**One fix made:** Code-behind TODO header (line 1404) said "UpdatePanel / ScriptManager references → remove" — misleading now that UpdatePanel is a real BWFC component. Split into two lines: ScriptManager → remove, UpdatePanel → BWFC preserved (remove only code-behind API calls).
