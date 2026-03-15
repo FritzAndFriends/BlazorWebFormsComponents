@@ -1,0 +1,288 @@
+@page "/ControlSamples/CollapsiblePanelExtender"
+@rendermode InteractiveServer
+
+<PageTitle>CollapsiblePanelExtender Component Samples</PageTitle>
+
+<h2>CollapsiblePanelExtender Component</h2>
+
+<p>The <code>CollapsiblePanelExtender</code> adds collapsible behavior to a target panel, toggling between collapsed and expanded states with smooth CSS transitions. Supports separate collapse/expand triggers and dynamic label text. This emulates the Ajax Control Toolkit <code>CollapsiblePanelExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Collapsible Panel (Toggle)</h3>
+<p>A single button toggles the panel between expanded and collapsed states. Set both <code>CollapseControlID</code> and <code>ExpandControlID</code> to the same element for toggle behavior.</p>
+
+<div data-audit-control="CollapsiblePanelExtender-1">
+    <button id="btnToggle1" class="btn btn-primary mb-2">
+        Toggle Panel
+    </button>
+    <CollapsiblePanelExtender TargetControlID="pnlBasic"
+                              CollapseControlID="btnToggle1"
+                              ExpandControlID="btnToggle1" />
+
+    <div id="pnlBasic" class="collapsible-panel-demo">
+        <h5>Panel Content</h5>
+        <p>This panel collapses and expands when you click the toggle button above. Both <code>CollapseControlID</code> and <code>ExpandControlID</code> point to the same button.</p>
+        <ul>
+            <li>Item A</li>
+            <li>Item B</li>
+            <li>Item C</li>
+        </ul>
+    </div>
+</div>
+
+<pre><code>&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:LinkButton ID="btnToggle" runat="server" Text="Toggle" /&gt;
+&lt;asp:Panel ID="pnlContent" runat="server"&gt;
+    &lt;p&gt;Panel content here&lt;/p&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:CollapsiblePanelExtender ID="cpe1" runat="server"
+    TargetControlID="pnlContent"
+    CollapseControlID="btnToggle"
+    ExpandControlID="btnToggle" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;button id="btnToggle"&gt;Toggle&lt;/button&gt;
+&lt;div id="pnlContent"&gt;
+    &lt;p&gt;Panel content here&lt;/p&gt;
+&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+                          CollapseControlID="btnToggle"
+                          ExpandControlID="btnToggle" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Separate Expand/Collapse Controls</h3>
+<p>Use different elements for expanding and collapsing. One button expands, another collapses.</p>
+
+<div data-audit-control="CollapsiblePanelExtender-2">
+    <div class="d-flex gap-2 mb-2">
+        <button id="btnExpand2" class="btn btn-success">
+            ▼ Expand
+        </button>
+        <button id="btnCollapse2" class="btn btn-danger">
+            ▲ Collapse
+        </button>
+    </div>
+    <CollapsiblePanelExtender TargetControlID="pnlSeparate"
+                              CollapseControlID="btnCollapse2"
+                              ExpandControlID="btnExpand2" />
+
+    <div id="pnlSeparate" class="collapsible-panel-demo">
+        <h5>Separate Controls</h5>
+        <p>This panel uses a dedicated Expand button and a dedicated Collapse button. This pattern is useful when you want clear, labeled actions.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </div>
+</div>
+
+<pre><code>&lt;button id="btnExpand"&gt;Expand&lt;/button&gt;
+&lt;button id="btnCollapse"&gt;Collapse&lt;/button&gt;
+&lt;div id="pnlContent"&gt;Content here&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+                          CollapseControlID="btnCollapse"
+                          ExpandControlID="btnExpand" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Dynamic Label Text (CollapsedText / ExpandedText)</h3>
+<p>A label element automatically updates its text to reflect the panel's state. Use <code>TextLabelID</code>, <code>CollapsedText</code>, and <code>ExpandedText</code> to configure this behavior.</p>
+
+<div data-audit-control="CollapsiblePanelExtender-3">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <button id="btnToggle3" class="btn btn-secondary">
+            Toggle
+        </button>
+        <span id="lblStatus3" class="badge bg-primary">Panel is expanded</span>
+    </div>
+    <CollapsiblePanelExtender TargetControlID="pnlLabel"
+                              CollapseControlID="btnToggle3"
+                              ExpandControlID="btnToggle3"
+                              TextLabelID="lblStatus3"
+                              CollapsedText="Click to show details ▼"
+                              ExpandedText="Click to hide details ▲" />
+
+    <div id="pnlLabel" class="collapsible-panel-demo">
+        <h5>Dynamic Label Demo</h5>
+        <p>Watch the label above change as you toggle. The <code>TextLabelID</code> element updates to show <code>CollapsedText</code> or <code>ExpandedText</code> based on current state.</p>
+    </div>
+</div>
+
+<pre><code>&lt;button id="btnToggle"&gt;Toggle&lt;/button&gt;
+&lt;span id="lblStatus"&gt;&lt;/span&gt;
+&lt;div id="pnlContent"&gt;Details here&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+                          CollapseControlID="btnToggle"
+                          ExpandControlID="btnToggle"
+                          TextLabelID="lblStatus"
+                          CollapsedText="Click to show details"
+                          ExpandedText="Click to hide details" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. Initially Collapsed Panel</h3>
+<p>Set <code>Collapsed="true"</code> to start the panel in its collapsed state. The user must click to expand it.</p>
+
+<div data-audit-control="CollapsiblePanelExtender-4">
+    <button id="btnToggle4" class="btn btn-outline-primary mb-2">
+        Toggle (Initially Collapsed)
+    </button>
+    <CollapsiblePanelExtender TargetControlID="pnlCollapsed"
+                              CollapseControlID="btnToggle4"
+                              ExpandControlID="btnToggle4"
+                              Collapsed="true" />
+
+    <div id="pnlCollapsed" class="collapsible-panel-demo">
+        <h5>Initially Hidden Content</h5>
+        <p>This panel started collapsed. You had to click the button to see this content. Use <code>Collapsed="true"</code> to achieve this behavior.</p>
+        <p>This is useful for FAQ sections, advanced options, or optional details.</p>
+    </div>
+</div>
+
+<pre><code>&lt;button id="btnToggle"&gt;Show More&lt;/button&gt;
+&lt;div id="pnlContent"&gt;Hidden content here&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+                          CollapseControlID="btnToggle"
+                          ExpandControlID="btnToggle"
+                          Collapsed="true" /&gt;</code></pre>
+
+<hr />
+
+<h3>5. Horizontal Expand Direction</h3>
+<p>Set <code>ExpandDirection="ExpandDirection.Horizontal"</code> to collapse/expand along the horizontal axis instead of vertically. Useful for sidebars or navigation panels.</p>
+
+<div data-audit-control="CollapsiblePanelExtender-5">
+    <button id="btnToggle5" class="btn btn-info mb-2">
+        Toggle Horizontal Panel
+    </button>
+    <CollapsiblePanelExtender TargetControlID="pnlHorizontal"
+                              CollapseControlID="btnToggle5"
+                              ExpandControlID="btnToggle5"
+                              ExpandDirection="ExpandDirection.Horizontal"
+                              ExpandedSize="300" />
+
+    <div id="pnlHorizontal" class="collapsible-panel-demo" style="width:300px; overflow:hidden;">
+        <h5>Sidebar Content</h5>
+        <ul>
+            <li>Dashboard</li>
+            <li>Reports</li>
+            <li>Settings</li>
+            <li>Help</li>
+        </ul>
+    </div>
+</div>
+
+<pre><code>&lt;button id="btnToggle"&gt;Toggle Sidebar&lt;/button&gt;
+&lt;div id="pnlSidebar" style="width:300px; overflow:hidden;"&gt;
+    Sidebar content
+&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlSidebar"
+                          CollapseControlID="btnToggle"
+                          ExpandControlID="btnToggle"
+                          ExpandDirection="ExpandDirection.Horizontal"
+                          ExpandedSize="300" /&gt;</code></pre>
+
+<hr />
+
+<h3>6. Auto-Collapse and Auto-Expand</h3>
+<p>Set <code>AutoCollapse="true"</code> to collapse when the mouse leaves the panel, and <code>AutoExpand="true"</code> to expand when the mouse enters. This creates a hover-driven disclosure pattern.</p>
+
+<div data-audit-control="CollapsiblePanelExtender-6">
+    <p class="text-muted">Hover over the panel below to expand it. Move your mouse away to collapse it.</p>
+    <button id="btnToggle6" class="btn btn-outline-success mb-2">
+        Toggle (or hover)
+    </button>
+    <CollapsiblePanelExtender TargetControlID="pnlAuto"
+                              CollapseControlID="btnToggle6"
+                              ExpandControlID="btnToggle6"
+                              Collapsed="true"
+                              AutoCollapse="true"
+                              AutoExpand="true"
+                              TextLabelID="lblAuto"
+                              CollapsedText="Hover to expand ▼"
+                              ExpandedText="Move away to collapse ▲" />
+
+    <span id="lblAuto" class="badge bg-secondary mb-2">Hover to expand ▼</span>
+    <div id="pnlAuto" class="collapsible-panel-demo">
+        <h5>Auto-Expand / Auto-Collapse</h5>
+        <p>This panel responds to mouse hover events. It expands when you hover over it and collapses when you move away. You can still use the toggle button for manual control.</p>
+    </div>
+</div>
+
+<pre><code>&lt;button id="btnToggle"&gt;Toggle&lt;/button&gt;
+&lt;span id="lblStatus"&gt;&lt;/span&gt;
+&lt;div id="pnlContent"&gt;Hover-driven content&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+                          CollapseControlID="btnToggle"
+                          ExpandControlID="btnToggle"
+                          Collapsed="true"
+                          AutoCollapse="true"
+                          AutoExpand="true"
+                          TextLabelID="lblStatus"
+                          CollapsedText="Hover to expand"
+                          ExpandedText="Move away to collapse" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:LinkButton ID="lnkToggle" runat="server" Text="Toggle" /&gt;
+&lt;asp:Label ID="lblStatus" runat="server" /&gt;
+&lt;asp:Panel ID="pnlContent" runat="server"&gt;
+    &lt;p&gt;Collapsible content here&lt;/p&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:CollapsiblePanelExtender ID="CollapsiblePanelExtender1" runat="server"
+    TargetControlID="pnlContent"
+    CollapseControlID="lnkToggle"
+    ExpandControlID="lnkToggle"
+    Collapsed="true"
+    CollapsedText="Show Details"
+    ExpandedText="Hide Details"
+    TextLabelID="lblStatus"
+    ExpandDirection="Vertical"
+    AutoCollapse="false"
+    AutoExpand="false" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;button id="lnkToggle"&gt;Toggle&lt;/button&gt;
+&lt;span id="lblStatus"&gt;&lt;/span&gt;
+&lt;div id="pnlContent"&gt;
+    &lt;p&gt;Collapsible content here&lt;/p&gt;
+&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+                          CollapseControlID="lnkToggle"
+                          ExpandControlID="lnkToggle"
+                          Collapsed="true"
+                          CollapsedText="Show Details"
+                          ExpandedText="Hide Details"
+                          TextLabelID="lblStatus"
+                          ExpandDirection="ExpandDirection.Vertical"
+                          AutoCollapse="false"
+                          AutoExpand="false" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code> (not needed in Blazor)</li>
+    <li>Replace <code>&lt;asp:Panel&gt;</code> with a <code>&lt;div&gt;</code> — keep the same <code>id</code></li>
+    <li>Replace <code>&lt;asp:LinkButton&gt;</code> or <code>&lt;asp:Button&gt;</code> with standard HTML <code>&lt;button&gt;</code></li>
+    <li>Replace <code>&lt;asp:Label&gt;</code> with <code>&lt;span&gt;</code> for the text label element</li>
+    <li>Replace <code>&lt;ajaxToolkit:CollapsiblePanelExtender&gt;</code> with <code>&lt;CollapsiblePanelExtender&gt;</code></li>
+    <li>Prefix <code>ExpandDirection</code> enum values (e.g., <code>Vertical</code> → <code>ExpandDirection.Vertical</code>)</li>
+    <li>All other properties carry over directly: <code>Collapsed</code>, <code>CollapsedText</code>, <code>ExpandedText</code>, <code>AutoCollapse</code>, <code>AutoExpand</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code> (JS interop required)</li>
+</ol>
+
+<style>
+    .collapsible-panel-demo {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        margin-bottom: 10px;
+    }
+</style>

@@ -128,10 +128,14 @@ public static class ComponentCatalog
             Keywords: new[] { "password", "recovery", "reset", "security" }),
 
         // AJAX Controls
+        new("CollapsiblePanelExtender", "AJAX", "/ControlSamples/CollapsiblePanelExtender", "Adds collapsible expand/collapse behavior to a target panel",
+            Keywords: new[] { "collapse", "expand", "panel", "toggle", "extender", "toolkit" }),
         new("ConfirmButtonExtender", "AJAX", "/ControlSamples/ConfirmButtonExtender", "Attaches a confirmation dialog to a target button",
             Keywords: new[] { "confirm", "dialog", "button", "extender", "toolkit" }),
         new("FilteredTextBoxExtender", "AJAX", "/ControlSamples/FilteredTextBoxExtender", "Restricts text box input to specified character sets",
             Keywords: new[] { "filter", "textbox", "input", "restrict", "extender", "toolkit" }),
+        new("ModalPopupExtender", "AJAX", "/ControlSamples/ModalPopupExtender", "Displays a target element as a modal popup with backdrop overlay",
+            Keywords: new[] { "modal", "popup", "dialog", "overlay", "extender", "toolkit" }),
         new("Timer", "AJAX", "/ControlSamples/Timer", "Triggers callbacks at timed intervals",
             Keywords: new[] { "timer", "interval", "tick", "polling" }),
         new("UpdatePanel", "AJAX", "/ControlSamples/UpdatePanel", "Partial page update container",
