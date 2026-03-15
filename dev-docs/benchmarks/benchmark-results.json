@@ -1,0 +1,193 @@
+{
+  "DurationSeconds": 25.6,
+  "Configuration": {
+    "Iterations": 50,
+    "SkipFramework": false
+  },
+  "Results": {
+    "AfterWingtipToys": {
+      "Kind": "Blazor",
+      "Pages": [
+        {
+          "Error": null,
+          "Page": "Home",
+          "ColdStartMs": 62,
+          "Url": "http://localhost:55504/",
+          "MinMs": 2,
+          "ResponseBytes": 5730,
+          "MaxMs": 11,
+          "P95Ms": 3,
+          "AverageMs": 2.4,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "ProductList",
+          "ColdStartMs": 11,
+          "Url": "http://localhost:55504/ProductList",
+          "MinMs": 2,
+          "ResponseBytes": 5505,
+          "MaxMs": 11,
+          "P95Ms": 7,
+          "AverageMs": 3.6,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "About",
+          "ColdStartMs": 5,
+          "Url": "http://localhost:55504/About",
+          "MinMs": 2,
+          "ResponseBytes": 5542,
+          "MaxMs": 28,
+          "P95Ms": 4,
+          "AverageMs": 3.1,
+          "StatusCode": 200
+        }
+      ],
+      "Skipped": false,
+      "Port": 55504,
+      "App": "AfterWingtipToys"
+    },
+    "ContosoUniversity": {
+      "Kind": "Framework",
+      "Pages": [
+        {
+          "Error": null,
+          "Page": "Home",
+          "ColdStartMs": 4,
+          "Url": "http://localhost:55503/Home.aspx",
+          "MinMs": 2,
+          "ResponseBytes": 1744,
+          "MaxMs": 5,
+          "P95Ms": 3,
+          "AverageMs": 2.2,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "Students",
+          "ColdStartMs": 1618,
+          "Url": "http://localhost:55503/Students.aspx",
+          "MinMs": 6,
+          "ResponseBytes": 12850,
+          "MaxMs": 8,
+          "P95Ms": 8,
+          "AverageMs": 6.5,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "About",
+          "ColdStartMs": 21,
+          "Url": "http://localhost:55503/About.aspx",
+          "MinMs": 3,
+          "ResponseBytes": 2917,
+          "MaxMs": 7,
+          "P95Ms": 5,
+          "AverageMs": 3.6,
+          "StatusCode": 200
+        }
+      ],
+      "Skipped": false,
+      "Port": 55503,
+      "App": "ContosoUniversity"
+    },
+    "AfterContosoUniversity": {
+      "Kind": "Blazor",
+      "Pages": [
+        {
+          "Error": null,
+          "Page": "Home",
+          "ColdStartMs": 7,
+          "Url": "http://localhost:55505/",
+          "MinMs": 1,
+          "ResponseBytes": 4711,
+          "MaxMs": 9,
+          "P95Ms": 4,
+          "AverageMs": 1.6,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "Students",
+          "ColdStartMs": 916,
+          "Url": "http://localhost:55505/Students",
+          "MinMs": 4,
+          "ResponseBytes": 7508,
+          "MaxMs": 56,
+          "P95Ms": 14,
+          "AverageMs": 6.3,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "About",
+          "ColdStartMs": 51,
+          "Url": "http://localhost:55505/About",
+          "MinMs": 2,
+          "ResponseBytes": 4973,
+          "MaxMs": 5,
+          "P95Ms": 5,
+          "AverageMs": 2.8,
+          "StatusCode": 200
+        }
+      ],
+      "Skipped": false,
+      "Port": 55505,
+      "App": "AfterContosoUniversity"
+    },
+    "WingtipToys": {
+      "Kind": "Framework",
+      "Pages": [
+        {
+          "Error": null,
+          "Page": "Home",
+          "ColdStartMs": 10,
+          "Url": "http://localhost:55502/",
+          "MinMs": 5,
+          "ResponseBytes": 6113,
+          "MaxMs": 20,
+          "P95Ms": 9,
+          "AverageMs": 6.4,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "ProductList",
+          "ColdStartMs": 39,
+          "Url": "http://localhost:55502/ProductList",
+          "MinMs": 7,
+          "ResponseBytes": 35108,
+          "MaxMs": 11,
+          "P95Ms": 11,
+          "AverageMs": 8.3,
+          "StatusCode": 200
+        },
+        {
+          "Error": null,
+          "Page": "About",
+          "ColdStartMs": 13,
+          "Url": "http://localhost:55502/About",
+          "MinMs": 4,
+          "ResponseBytes": 5938,
+          "MaxMs": 9,
+          "P95Ms": 6,
+          "AverageMs": 4.9,
+          "StatusCode": 200
+        }
+      ],
+      "Skipped": false,
+      "Port": 55502,
+      "App": "WingtipToys"
+    }
+  },
+  "Environment": {
+    "DotNetVersion": "10.0.200-preview.0.26103.119",
+    "Timestamp": "2026-03-15T10:36:36Z",
+    "MachineName": "JFRITZ-4",
+    "PowerShell": "7.4.13",
+    "OS": "Microsoft Windows 10.0.26220",
+    "ProcessorCount": 24
+  }
+}

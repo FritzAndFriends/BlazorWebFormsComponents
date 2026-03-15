@@ -7710,3 +7710,115 @@ These changes do NOT alter the canonical standards — they clarify existing pra
 
 **Next:** Append Run 22 learnings to .squad/agents/beast/history.md under "## Learnings"
 
+
+---
+
+### 2026-03-15: Ajax Toolkit Components — README & L1 Documentation
+**By:** Beast (Technical Writer)
+**What:** 
+1. Added \## Ajax Control Toolkit Components\ section to README.md featuring 14 ACT components, NuGet badge, and migration guidance
+2. Created companion L1 automation doc at \.squad/skills/migration-standards/ajax-toolkit-migration.md\ for agent guidance
+3. Updated \.squad/skills/migration-standards/SKILL.md\ with reference section
+
+**Why:** ACT support (14 components in separate package) was undocumented in README and agents lacked L1 automation guidance. Visibility + automation guidance accelerate migrations and make capability discoverable.
+
+---
+
+### 2026-03-15: Ajax Toolkit Project Structure
+**By:** Cyclops (Component Dev)
+**What:** 
+- Separate project \BlazorAjaxToolkitComponents\ in \src/\ alongside base library
+- ProjectReference to BlazorWebFormsComponents (becomes PackageReference at publish)
+- Package ID: \BlazorAjaxToolkitComponents\ (no Fritz. prefix)
+- \BaseExtenderComponent\ extends ComponentBase, not BaseWebFormsComponent (extenders render zero HTML)
+- Microsoft.JSInterop dependency for client-side behavior
+
+**Why:** ACT is architecturally distinct (behavioral attachments, not visual controls). Separate project + base class clarifies contract: extenders don't render; containers do.
+
+---
+
+### 2026-03-15: Extenders as Pure C# Classes
+**By:** Cyclops (Component Dev)
+**What:** Ajax Toolkit extender components (ConfirmButtonExtender, FilteredTextBoxExtender, etc.) implemented as plain \.cs\ classes inheriting BaseExtenderComponent, not \.razor\ files.
+
+**Why:** Extenders render zero HTML. A .razor file would be empty markup + code-behind (unnecessary compilation overhead). Plain C# class makes "no HTML" contract explicit and cleaner.
+
+**Implication:** All extenders: \SomeExtender.cs\ (not .razor). Standalone ACT controls that render HTML (Accordion, TabContainer) still use .razor.
+
+---
+
+### 2026-03-15: L1 Script ~60% Automation
+**By:** Cyclops (Component Dev)
+**What:** Added 5 transformation categories to bwfc-migrate.ps1:
+- Boolean normalization (true/false → True/False)
+- Enum type-qualifying (18 attributes, e.g., GridLines → @GridLines.Both)
+- Unit px-stripping (Width="100px" → Width="100")
+- Response.Redirect → NavigationManager.NavigateTo (preserves .aspx in URLs; AspxRewriteMiddleware handles rewriting)
+- Session/ViewState detection with structured migration guidance
+- DataSourceID/data source control replacement
+
+Coverage increased from ~40% to ~60%.
+
+**Technical Decision:** Enum values use \@EnumType.Value\ syntax so Razor evaluates C# enum directly (avoids string parsing, catches typos at compile time). Only unambiguous mappings included.
+
+---
+
+### 2026-03-14T23-10-43Z: User Directive — Deprecation Docs Revision
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Deprecation guidance docs (#438) must be revised. Each section covering removed/deprecated Web Forms pattern MUST show how BWFC addresses that pattern, making it simple for developers to continue using familiar API.
+
+**Why:** Current docs just explain what's gone — they miss the library's value proposition. BWFC is about NOT abandoning Web Forms API patterns.
+
+---
+
+### 2026-03-14T17-36Z: User Directive — Component Health Dashboard
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Component health dashboard (#48) should be an interactive Blazor page in \samples/AfterBlazorServerSide/\ using BWFC Chart components, serving as new front page of sample website — NOT a static MkDocs page.
+
+**Why:** Dashboard showcases BWFC's own capabilities (Chart, GridView) while displaying component health metrics. Makes sample app self-documenting.
+
+---
+
+### 2026-03-15: Component Health Dashboard PRD Approved
+**By:** Forge (Lead / Web Forms Reviewer)
+**Date:** Issue #48
+**What:** Component Health Dashboard must follow PRD at \dev-docs/prd-component-health-dashboard.md\ before any implementation. Key binding decisions:
+1. Property counting uses hierarchy-walking with stop-types (DeclaredOnly from leaf upward, stopping at base classes)
+2. RenderFragment parameters excluded from ALL counts
+3. EventCallback parameters in events column ONLY
+4. Reference baselines from .NET Framework 4.8 metadata (not estimates)
+5. Tracked components list is curated, not auto-detected
+6. Generic type names strip arity suffix (\GridView\1\ → \GridView\)
+
+**Why:** First dashboard attempt was reverted after 10 distinct data accuracy bugs cascaded. Every decision prevents a specific actual bug. All implementers MUST read §8 (Known Pitfalls) before coding.
+
+---
+
+### 2026-03-15: Deprecation Guidance Documentation
+**By:** Beast (Technical Writer)
+**What:** Created comprehensive deprecation guidance doc (\docs/Migration/DeprecationGuidance.md\):
+- 23.3 KB, ~400 lines, 10 major sections
+- Tabbed before/after code examples for each pattern
+- Covers: \unat="server"\, ViewState, UpdatePanel, ScriptManager, PostBack, Page lifecycle, IsPostBack, control property manipulation, Page.Title, ItemDataBound, Application/Session state, server-side event timing, migration checklist
+- Added to mkdocs.yml Migration section (positioned after "Automated Migration Guide")
+- Audience: Experienced Web Forms developers learning Blazor — emphasizes concepts they know, maps to Blazor equivalents
+
+**Why:** Migrating developers encounter patterns that don't exist in Blazor and need clear guidance on Blazor-native alternatives. Positioning catches developers early.
+
+---
+
+### 2026-03-15: L1 Test Harness — Baseline Established
+**By:** Rogue (QA Analyst)
+**What:** Created \migration-toolkit/tests/\ with 10 focused test cases and automated test runner (\Run-L1Tests.ps1\) measuring L1 script quality. 
+
+Baseline: **7/10 pass (70%), 94.3% line accuracy**
+
+Three L1 bugs documented:
+1. \<%#: Eval("Name") %>\ partially converted — delimiters survive (TC06)
+2. Content wrapper removal eats first-line indentation (TC09)
+3. \ItemType="object"\ double-added to components with explicit TItem (TC10)
+
+**Why:** Team now has repeatable, automated way to measure L1 quality. Re-running test runner after fixes shows immediate improvement. Trivial to add new test cases.
+
+**Usage:** \cd migration-toolkit/tests && .\Run-L1Tests.ps1\
+

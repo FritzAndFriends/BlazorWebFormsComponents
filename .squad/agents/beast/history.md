@@ -185,6 +185,25 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 
 **Delivered:** Complete documentation suite for ModalPopupExtender and CollapsiblePanelExtender components.
 
+### README.md: Added Ajax Control Toolkit Components Section (Current)
+
+**Task:** Add promotional section to main README.md highlighting the 14 Ajax Control Toolkit extender/container components available in separate NuGet package.
+
+**Delivered:**
+- New top-level `## Ajax Control Toolkit Components` section added after existing "AJAX Controls" subsection
+- NuGet badge for `Fritz.BlazorAjaxToolkitComponents` package (color: blue) with stable + prerelease versions
+- Clear messaging: "Simply remove the `ajaxToolkit:` prefix and you're ready to go!"
+- All 14 components listed with brief descriptions and documentation links
+- Link to full documentation at `docs/AjaxToolkit/index.md`
+- Section positioned between "Blazor Components for Controls" section end and "We will NOT be converting..." paragraph
+
+**File:** README.md (lines 107–132)  
+**Style:** Matches existing component list format and badge pattern  
+**Marketing value:** Shows developers that Ajax Control Toolkit migrations are supported and simple  
+**Next:** Verify links work in final doc site build
+
+
+
 **Content Structure:**
 
 1. **ModalPopupExtender.md** — 15.6 KB: Modal dialog patterns with overlay backdrop, OK/Cancel actions, drag support, focus trapping, Escape key dismissal. Includes 4 progressively complex examples (basic confirmation, settings dialog with drag/drop shadow, JS callbacks, form dialog). Complete properties table, render mode requirements, graceful degradation notes.
@@ -221,5 +240,100 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 - FAQ accordion is the most powerful use case for CollapsiblePanelExtender — lead with that to show power
 - Drag handle examples should show visual distinction (darker background, cursor change) to teach UX best practices
 - Partial visibility pattern (CollapsedSize > 0) is underutilized; showcase it as a way to show "preview" of collapsed content
+
+### Ajax Control Toolkit L1 Migration Skill Document (2026-03-XX)
+
+**Delivered:** L1-specific skill document at `.squad/skills/migration-standards/ajax-toolkit-migration.md` covering automated Layer 1 handling of Ajax Control Toolkit controls.
+
+**Content Structure:**
+1. **Overview** — ACT as a set of extender and container controls identified by `ajaxToolkit:` prefix
+2. **Detection** — Look for Register directive, ToolkitScriptManager, and `<ajaxToolkit:*>` usage
+3. **Supported Controls Table** — All 16 known components plus ToolkitScriptManager
+4. **Layer 1 Script Behavior** — Three transforms:
+   - Remove ToolkitScriptManager entirely
+   - Strip prefix on 16 known controls
+   - Replace unrecognized ACT controls with TODO comments
+5. **Blazor Project Setup** — NuGet package, @using directives, @rendermode, no manual script tags
+6. **Migration Example** — Before/after showing ToolkitScriptManager removal + prefix stripping
+7. **TargetControlID Resolution** — How extenders find target controls via HTML ID
+8. **What's NOT Supported** — Unrecognized controls → manual Layer 2 replacement
+9. **Links to comprehensive docs** — Reference to per-component docs and migration guide
+
+**Parent Doc Update:**
+Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
+- Brief intro to ACT companion doc
+- Lists 4 key topics covered (detection, L1 automation, project setup, supported components)
+- Links to online docs (index.md, migration-guide.md)
+
+**Key Teaching Insights:**
+- Ajax Control Toolkit is a special case: extenders are non-rendering (only attach JS behavior), containers are rendering (hold child content)
+- L1 script handles ACT mechanically: strip prefix like asp: prefix, remove ToolkitScriptManager (Blazor equivalent: native script loading)
+- Render mode is critical — InteractiveServer required for all ACT components
+- TargetControlID pattern is platform-agnostic: find by HTML element ID (works same way in Blazor as Web Forms)
+- Unrecognized ACT controls are flagged with TODO + manual item log — developers know exactly what needs Layer 2 work
+
+**Design Decision:**
+- Placed at `.squad/skills/` (like other skill docs) rather than `docs/` because it's tooling-focused (L1 automation) not user-facing
+- Cross-references the user-facing docs (docs/AjaxToolkit/) for comprehensive per-component details
+- Emphasizes that L1 is purely mechanical (prefix stripping); L2 is where real work happens (validation, testing, JS interop troubleshooting)
+
+**Files:**
+
+### bwfc-migration Skill: AJAX-TOOLKIT.md Child Document (2026-03-15)
+
+**Delivered:** Complete child skill document `migration-toolkit/skills/bwfc-migration/AJAX-TOOLKIT.md` for Ajax Control Toolkit extender migration patterns within the main bwfc-migration skill.
+
+**Content Structure (20.7 KB, 10 sections):**
+
+1. **Overview** — What the Ajax Control Toolkit is (14 supported extender/container components), why BlazorAjaxToolkitComponents package exists, confirmation that ACT is now covered
+2. **Installation** — Four-step setup: NuGet package, @using directives, InteractiveServer render mode, JS auto-loading explanation
+3. **Detection** — How to identify ACT usage: Register directives, ToolkitScriptManager, `<ajaxToolkit:*>` prefixed components
+4. **Control Translation Table** — All 14 supported controls with types (Extender vs. Container) and brief descriptions
+5. **Migration Pattern** — L1 script automation explanation: what the script does (strip prefix, remove ToolkitScriptManager, remove Register directives, preserve properties)
+6. **Before/After Examples** — Three progressively complex examples:
+   - ConfirmButtonExtender (simplest, event handler conversion only)
+   - AutoCompleteExtender (common, requires ServiceMethod callback wiring)
+   - TabContainer with TabPanels (container pattern, nested children)
+7. **Key Concept: TargetControlID and ID Rendering** — How extenders find targets, why ID attributes matter, common gotchas
+8. **Layer 1 Script Automation** — What bwfc-migrate.ps1 does automatically, supported vs. unsupported control handling
+9. **Layer 2 Manual Work** — Five post-L1 tasks: NuGet reference, @using directives, ServiceMethod wiring for AutoComplete, TargetControlID verification, unsupported control replacement strategies
+10. **Common Scenarios** — Three realistic workflows with zero/minimal Layer 2 work required
+11. **Unsupported Controls & Alternatives** — Table showing DragPanelExtender, ResizableControlExtender, etc., with CSS/JS interop alternatives
+12. **Render Mode & JavaScript** — Why InteractiveServer required, recommended pattern, graceful degradation
+13. **Troubleshooting** — Two common issues (extender not activating, target not found) with diagnostic steps and solutions
+
+**Replaces Outdated Reference:** Removed the "AJAX Toolkit Extenders | Blazor interactivity or JS interop |" line from CONTROL-REFERENCE.md "Not Covered" table (line 306). Added new "### Ajax Control Toolkit Extenders" section below AJAX Controls, with table of 14 supported components and cross-reference to AJAX-TOOLKIT.md.
+
+**Updated Parent Skill (SKILL.md):**
+- Layer 2 mandatory read block (lines 144–148): Added AJAX-TOOLKIT.md to three-document reading list with brief description of content
+- Reference Documents section (lines 253–257): Added AJAX-TOOLKIT.md entry with description of L1 automation and L2 manual work
+
+**Files Modified:**
+- Created `migration-toolkit/skills/bwfc-migration/AJAX-TOOLKIT.md` (20.7 KB)
+- Updated `migration-toolkit/skills/bwfc-migration/SKILL.md` — two locations (Layer 2 read block, Reference Documents section)
+- Updated `migration-toolkit/skills/bwfc-migration/CONTROL-REFERENCE.md` — replaced "Not Covered" entry with new "Ajax Control Toolkit Extenders" section
+
+**Design Decisions:**
+- **Format consistency:** Followed existing child doc format (header, parent skill reference, horizontal rule, then sections) to integrate seamlessly with CODE-TRANSFORMS.md and CONTROL-REFERENCE.md
+- **Target audience:** Layer 2 Copilot engineer migrating a real Web Forms app with ACT components. Assumes familiarity with bwfc-migration Layer 1/2 pipeline.
+- **Completeness:** Covered all 14 components (Accordion, AccordionPane, AutoCompleteExtender, CalendarExtender, CollapsiblePanelExtender, ConfirmButtonExtender, FilteredTextBoxExtender, HoverMenuExtender, MaskedEditExtender, ModalPopupExtender, NumericUpDownExtender, PopupControlExtender, SliderExtender, TabContainer, TabPanel, ToggleButtonExtender) with migration mechanics and before/after examples
+- **ServiceMethod wiring:** Highlighted AutoCompleteExtender's special Layer 2 work (moving from `.asmx` web service to Blazor callback method) with complete code example
+- **Error messaging:** Emphasized TargetControlID as a gotcha — most extender bugs trace back to ID mismatches
+- **Unsupported controls:** Listed alternatives with difficulty levels (Easy/Medium) to help developers choose replacement strategies (CSS, JS interop, Blazor components)
+
+**Learnings for future skill docs:**
+- Child docs inherit scope and audience from parent — AJAX-TOOLKIT.md is "for Copilot engineers doing Layer 2 work," not "for users learning ACT"
+- Format consistency (header, parent ref, sections) is critical for skill tooling that cross-references documents
+- Before/After examples should progress from trivial (ConfirmButtonExtender — change one attribute signature) to realistic (AutoCompleteExtender — rewrite entire data fetching mechanism)
+- L1 automation explanation belongs in skill docs (how the script transforms ACT markup), not in user docs (how to use ACT in Blazor)
+- Unsupported control table should include difficulty/complexity guidance to help Copilot choose replacement strategies
+
+**Files:**
+- Created `.squad/skills/migration-standards/ajax-toolkit-migration.md` (12.5 KB)
+- Updated `.squad/skills/migration-standards/SKILL.md` — added "Ajax Control Toolkit Migration" reference section
+
+**Next Steps (for Cyclops/Rogue):**
+- Ensure L1 script uses this skill doc as reference when auditing/enhancing ACT handling
+- L2 agents should consult per-component docs when troubleshooting ACT issues
 
 

@@ -411,3 +411,20 @@ the link's purpose.
 **Verify:** After Layer 1 (script) conversion, check that all action links from the
 original page survive in the converted output. If any are missing, add them manually
 in Layer 2 using the `@context.PropertyName` syntax for data-bound values.
+
+## Ajax Control Toolkit Migration
+
+For applications using the Ajax Control Toolkit (`<ajaxToolkit:*>` controls), see the companion document:
+[Ajax Control Toolkit Migration Standards](ajax-toolkit-migration.md)
+
+This document describes:
+- How to detect Ajax Control Toolkit usage in Web Forms source
+- How the L1 script (`bwfc-migrate.ps1`) handles ACT controls and ToolkitScriptManager
+- Blazor project setup required for ACT components (NuGet package, `@using`, render mode)
+- Which 14 ACT components are supported by BWFC
+- Migration examples and the TargetControlID resolution pattern
+- What to do when unsupported ACT controls are encountered
+
+Link to full component documentation:
+- [Ajax Control Toolkit Overview](../../docs/AjaxToolkit/index.md) — Component reference and troubleshooting
+- [Ajax Control Toolkit Migration Guide](../../docs/AjaxToolkit/migration-guide.md) — Step-by-step walkthrough with per-component examples
