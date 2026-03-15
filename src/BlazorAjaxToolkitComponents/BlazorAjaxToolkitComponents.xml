@@ -59,6 +59,73 @@
         <member name="M:BlazorAjaxToolkitComponents.BaseExtenderComponent.DisposeAsync">
             <inheritdoc />
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.CollapsiblePanelExtender">
+            <summary>
+            Adds collapsible behavior to a target panel, toggling between collapsed and expanded states
+            with smooth CSS transitions. Supports separate collapse/expand triggers and dynamic label text.
+            Emulates the Ajax Control Toolkit CollapsiblePanelExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.CollapseControlID">
+            <summary>
+            The ID of the element that triggers collapse.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandControlID">
+            <summary>
+            The ID of the element that triggers expand. Can be the same as CollapseControlID for toggle behavior.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.Collapsed">
+            <summary>
+            Whether the panel starts in the collapsed state.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.CollapsedSize">
+            <summary>
+            The height (or width for horizontal) in pixels when collapsed. 0 means fully hidden.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandedSize">
+            <summary>
+            The height (or width for horizontal) in pixels when expanded. 0 means auto-size.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.CollapsedText">
+            <summary>
+            Text displayed in the TextLabelID element when the panel is collapsed.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandedText">
+            <summary>
+            Text displayed in the TextLabelID element when the panel is expanded.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.TextLabelID">
+            <summary>
+            The ID of the element whose text content changes to reflect collapsed/expanded state.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandDirection">
+            <summary>
+            The direction of the collapse/expand animation.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.AutoCollapse">
+            <summary>
+            Whether to automatically collapse the panel when the mouse leaves.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.AutoExpand">
+            <summary>
+            Whether to automatically expand the panel when the mouse enters.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ScrollContents">
+            <summary>
+            Whether to enable scrolling within the panel when content overflows.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.ConfirmButtonExtender">
             <summary>
             Attaches a confirmation dialog to a target button.
@@ -81,6 +148,11 @@
             <summary>
             Optional ID of a ModalPopup to display instead of browser confirm().
             Not implemented in v1 — reserved for future use.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.ExpandDirection">
+            <summary>
+            Specifies the direction in which a CollapsiblePanelExtender expands or collapses.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.FilterMode">
@@ -124,6 +196,59 @@
         <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.FilterInterval">
             <summary>
             Milliseconds interval for filtering. Default is 250.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ModalPopupExtender">
+            <summary>
+            Displays a target element as a modal popup with an overlay backdrop.
+            Supports OK/Cancel buttons, focus trapping, drag support, and Escape key dismissal.
+            Emulates the Ajax Control Toolkit ModalPopupExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.PopupControlID">
+            <summary>
+            The ID of the element to display as a modal popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.BackgroundCssClass">
+            <summary>
+            CSS class applied to the overlay backdrop behind the modal.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.OkControlID">
+            <summary>
+            The ID of the control that confirms and closes the modal (OK action).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.CancelControlID">
+            <summary>
+            The ID of the control that cancels and closes the modal.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.OnOkScript">
+            <summary>
+            JavaScript to execute when the modal is dismissed via the OK control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.OnCancelScript">
+            <summary>
+            JavaScript to execute when the modal is dismissed via the Cancel control or Escape key.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.DropShadow">
+            <summary>
+            Whether to add a drop shadow effect to the popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.Drag">
+            <summary>
+            Whether the popup can be dragged by the user.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.PopupDragHandleControlID">
+            <summary>
+            The ID of the element used as a drag handle when Drag is enabled.
+            If not set, the entire popup is draggable.
             </summary>
         </member>
     </members>
