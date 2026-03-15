@@ -797,6 +797,42 @@
             The ID of this extender control for programmatic access.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.ResizableControlExtender">
+            <summary>
+            Allows users to resize an element by dragging its edges or a resize handle.
+            Emulates the Ajax Control Toolkit ResizableControlExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.HandleCssClass">
+            <summary>
+            CSS class for the resize handle element (usually positioned at the bottom-right corner).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.ResizableCssClass">
+            <summary>
+            CSS class applied to the target element while it is being resized.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MinimumWidth">
+            <summary>
+            Minimum width constraint in pixels. Default is 0 (no minimum).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MinimumHeight">
+            <summary>
+            Minimum height constraint in pixels. Default is 0 (no minimum).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MaximumWidth">
+            <summary>
+            Maximum width constraint in pixels. 0 means no maximum.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MaximumHeight">
+            <summary>
+            Maximum height constraint in pixels. 0 means no maximum.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.SliderExtender">
             <summary>
             Attaches range slider behavior to a target input element.
