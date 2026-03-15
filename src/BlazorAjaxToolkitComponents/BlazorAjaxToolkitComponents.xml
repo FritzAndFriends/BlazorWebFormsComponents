@@ -7,17 +7,124 @@
         <member name="T:BlazorAjaxToolkitComponents.BaseExtenderComponent">
             <summary>
             Base class for Ajax Control Toolkit extender components.
-            Extenders attach behavior to a target control identified by <see cref="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.TargetControlID"/>.
-            Full design pending — see Forge's architecture spec.
+            Extenders attach JavaScript behavior to a target control identified by
+            <see cref="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.TargetControlID"/> without rendering any HTML of their own.
+            JS modules are loaded as ES modules and manage behavior lifecycle.
             </summary>
         </member>
         <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.TargetControlID">
             <summary>
             The ID of the control this extender targets.
+            Passed to JavaScript for DOM resolution via document.getElementById().
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.BehaviorID">
+            <summary>
+            Optional behavior identifier for JS-side lookup.
+            Defaults to TargetControlID if not set.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.Enabled">
+            <summary>
+            Whether the extender behavior is active. Default is true.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.JsModulePath">
+            <summary>
+            Relative path to the JS ES module for this extender.
+            Example: "./_content/BlazorAjaxToolkitComponents/js/confirm-button-extender.js"
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.JsCreateFunction">
+            <summary>
+            The exported JS function name that creates the behavior.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.BaseExtenderComponent.GetBehaviorProperties">
+            <summary>
+            Builds the property bag passed to the JS create/update functions.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.ResolvedBehaviorID">
+            <summary>
+            Resolved behavior ID: uses BehaviorID parameter if set, otherwise TargetControlID.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.BaseExtenderComponent.UpdateBehaviorAsync">
+            <summary>
+            Pushes updated properties to the JS behavior.
+            Called by subclasses when parameters change after initial render.
             </summary>
         </member>
         <member name="M:BlazorAjaxToolkitComponents.BaseExtenderComponent.DisposeAsync">
             <inheritdoc />
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ConfirmButtonExtender">
+            <summary>
+            Attaches a confirmation dialog to a target button.
+            When the user clicks the target, a browser confirm() prompt appears.
+            If the user cancels, the click event is suppressed.
+            Emulates the Ajax Control Toolkit ConfirmButtonExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ConfirmButtonExtender.ConfirmText">
+            <summary>
+            The confirmation message displayed to the user.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ConfirmButtonExtender.ConfirmOnFormSubmit">
+            <summary>
+            Whether to confirm on form submit instead of button click.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ConfirmButtonExtender.DisplayModalPopupID">
+            <summary>
+            Optional ID of a ModalPopup to display instead of browser confirm().
+            Not implemented in v1 — reserved for future use.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.FilterMode">
+            <summary>
+            Specifies whether the FilteredTextBoxExtender uses ValidChars or InvalidChars.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.FilterType">
+            <summary>
+            Specifies the types of characters to allow in a FilteredTextBoxExtender.
+            This is a flags enum — values can be combined.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.FilteredTextBoxExtender">
+            <summary>
+            Restricts input in a target TextBox to specified character sets.
+            Filters keystrokes in real-time and strips invalid characters on paste.
+            Emulates the Ajax Control Toolkit FilteredTextBoxExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.FilterType">
+            <summary>
+            The types of characters to allow. Can be combined as flags.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.ValidChars">
+            <summary>
+            Additional valid characters when FilterType includes Custom.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.InvalidChars">
+            <summary>
+            Characters to explicitly block.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.FilterMode">
+            <summary>
+            Whether ValidChars or InvalidChars takes precedence.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.FilterInterval">
+            <summary>
+            Milliseconds interval for filtering. Default is 250.
+            </summary>
         </member>
     </members>
 </doc>
