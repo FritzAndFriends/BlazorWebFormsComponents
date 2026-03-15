@@ -161,3 +161,21 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - `src/BlazorWebFormsComponents.Test/Label/LabelStyleTests.razor` (7→12 tests)
 📌 Team update (2026-03-14): M20 Batch 6 orchestration spawn — Forge designing component health dashboard, Cyclops advancing L1 script fixes, Rogue building L1 test harness — decided by Scribe
 
+### L1 Migration Script Test Harness (2026-07-25)
+
+**10 focused test cases + automated test runner** for `bwfc-migrate.ps1` quality measurement (Issue #29).
+
+**Test harness location:** `migration-toolkit/tests/`
+- `inputs/` — 10 .aspx files, each testing one L1 transform category
+- `expected/` — 10 .razor expected output files
+- `Run-L1Tests.ps1` — automated runner with metrics (pass rate, line accuracy, timing, diffs)
+
+**Baseline metrics:** 7/10 pass (70%), 94.3% line accuracy, 114ms avg per file.
+
+**Three bugs found:**
+1. **TC06 — Eval expression partial conversion:** `<%#: Eval("Name") %>` → `<%#: context.Name %>` instead of `@context.Name`. Root cause: the eval regex replaces `Eval("Name")` with `context.Name` inside the `<%#:...%>` delimiters, but doesn't remove the delimiters. The later encoded expression regex `<%:\s*(.+?)\s*%>` doesn't match `<%#:` (different prefix). Likely fix: process the eval-with-hashbang pattern separately or adjust regex to capture and strip the full delimiters.
+2. **TC09 — Content wrapper indentation loss:** `<asp:Content>` removal regex `\s*\r?\n?` after the closing `>` consumes leading whitespace of the next line. The first content line loses its indent.
+3. **TC10 — ItemType double-add on pre-typed components:** After `ItemType="NS.Class"` → `TItem="Class"` conversion, the auto-add step adds `ItemType="object"` because the negative lookahead `(?![^>]*ItemType=)` no longer finds `ItemType=` (it's now `TItem=`). Fix: also check for `TItem=` in the lookahead.
+
+**Additional discovery:** The script has an uninitialized variable bug — `$script:ExtractedTitleFromContent` accessed in `ConvertFrom-PageDirective` before `ConvertFrom-ContentWrappers` sets it. Manifests with `Set-StrictMode -Version Latest` when processing a standalone .aspx without Title= in the Page directive. All test cases work around this by including `Title="Test"`.
+
