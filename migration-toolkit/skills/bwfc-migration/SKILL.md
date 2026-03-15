@@ -141,10 +141,11 @@ The migration pipeline has **two mandatory layers** that run in strict sequence:
 
 **After Layer 1 completes, immediately proceed to Layer 2. Do NOT fix, edit, or clean up any Layer 1 output first.**
 
-> ⚠️ **MANDATORY — READ BEFORE STARTING LAYER 2:** Open and read **both** child documents in this skill's directory. They contain the detailed patterns, examples, and control translation tables needed for every transform below. Without them you will miss critical migration details.
+> ⚠️ **MANDATORY — READ BEFORE STARTING LAYER 2:** Open and read **all three** child documents in this skill's directory. They contain the detailed patterns, examples, and control translation tables needed for every transform below. Without them you will miss critical migration details.
 >
 > - **`CODE-TRANSFORMS.md`** — Code-behind lifecycle mapping (`Page_Load` → `OnInitializedAsync`, `Page_PreRender` → `OnParametersSetAsync`), event handler conversion, navigation patterns, data binding migration (SelectMethod delegates, template binding with `Context="Item"`), query string / route parameter conversion, and Master Page → Layout conversion with complete before/after examples.
 > - **`CONTROL-REFERENCE.md`** — Control translation tables for all 58 BWFC components across 6 categories (Simple, Form, Validation, Data, Navigation, AJAX), structural/infrastructure components (`WebFormsPage`, `Page`, `NamingContainer`, `MasterPage`, `Content`, `ContentPlaceHolder`, `EmptyLayout`), `DataBinder.Eval` compatibility shim, theming infrastructure, and custom control base classes (`WebControl`, `CompositeControl`, `HtmlTextWriter`).
+> - **`AJAX-TOOLKIT.md`** — Ajax Control Toolkit extender migration (14 supported components), installation, Layer 1 automation, Layer 2 manual work (ServiceMethod wiring for AutoCompleteExtender, TargetControlID verification), before/after examples, and troubleshooting.
 
 Layer 2 is where Copilot applies structural transforms to every generated `.razor` and `.razor.cs` file. Work through each file and apply ALL of the following:
 
@@ -254,6 +255,7 @@ Detailed control mappings and code transformation patterns are in child document
 
 - **[CONTROL-REFERENCE.md](CONTROL-REFERENCE.md)**  Control translation tables (Simple, Form, Validation, Data, Navigation, AJAX controls), component coverage summary (58 components), structural components, theming, and custom control base classes.
 - **[CODE-TRANSFORMS.md](CODE-TRANSFORMS.md)**  Code-behind lifecycle mapping, event handler conversion, navigation patterns, data binding migration (SelectMethod, template binding), and Master Page to Layout conversion.
+- **[AJAX-TOOLKIT.md](AJAX-TOOLKIT.md)**  Ajax Control Toolkit extender migration (14 supported components), installation, Layer 1 automation, and Layer 2 manual work (ServiceMethod wiring, TargetControlID verification).
 
 ---
 

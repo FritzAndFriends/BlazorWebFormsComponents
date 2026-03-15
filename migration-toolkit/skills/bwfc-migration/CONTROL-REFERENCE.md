@@ -303,4 +303,28 @@ For migrating custom Web Forms controls that extend `System.Web.UI.WebControls.W
 | `EntityDataSource` | Injected service + EF Core |
 | `Wizard` | Multi-step form with component state |
 | `Web Parts` | Redesign as Blazor components |
-| `AJAX Toolkit Extenders` | Blazor interactivity or JS interop |
+
+### Ajax Control Toolkit Extenders
+
+**Ajax Control Toolkit extenders are now supported** by the companion **BlazorAjaxToolkitComponents** package. The 14 supported extender and container components are:
+
+| Component | Type |
+|-----------|------|
+| `Accordion` / `AccordionPane` | Container — Collapsible panes |
+| `AutoCompleteExtender` | Extender — Typeahead suggestions |
+| `CalendarExtender` | Extender — Popup date picker |
+| `CollapsiblePanelExtender` | Extender — Collapse/expand animation |
+| `ConfirmButtonExtender` | Extender — Browser confirmation dialog |
+| `FilteredTextBoxExtender` | Extender — Character filtering |
+| `HoverMenuExtender` | Extender — Hover-triggered popup |
+| `MaskedEditExtender` | Extender — Input mask formatting |
+| `ModalPopupExtender` | Extender — Modal dialog with overlay |
+| `NumericUpDownExtender` | Extender — Numeric spinner |
+| `PopupControlExtender` | Extender — Click-triggered popup |
+| `SliderExtender` | Extender — Range slider |
+| `TabContainer` / `TabPanel` | Container — Tabbed panels |
+| `ToggleButtonExtender` | Extender — Image-based checkbox toggle |
+
+**Migration is mechanical:** Strip the `ajaxToolkit:` prefix, remove `runat="server"`, remove `<ajaxToolkit:ToolkitScriptManager>`, and preserve all other properties. For details on installation, Layer 1 automation, and Layer 2 manual work (ServiceMethod wiring for AutoCompleteExtender), see **[AJAX-TOOLKIT.md](AJAX-TOOLKIT.md)**.
+
+Unsupported Ajax Control Toolkit controls (e.g., `DragPanelExtender`, `ResizableControlExtender`) require manual JavaScript interop replacement — see AJAX-TOOLKIT.md for strategies.
