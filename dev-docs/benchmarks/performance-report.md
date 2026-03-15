@@ -8,8 +8,8 @@ This report compares HTTP response-time performance between the original
 .NET Framework Web Forms sample applications and their .NET 10 Blazor
 equivalents in the BlazorWebFormsComponents project.
 
-**Run date:** 03/15/2026 10:07:44  
-**Duration:** 200.9s  
+**Run date:** 03/15/2026 10:36:36  
+**Duration:** 25.6s  
 **Iterations per page:** 50
 
 ## Methodology
@@ -38,36 +38,39 @@ equivalents in the BlazorWebFormsComponents project.
 
 | Page | Platform | Cold (ms) | Avg (ms) | P95 (ms) | Min (ms) | Max (ms) | Size (B) | Status |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Home | .NET Framework | 11 | 6.3 | 8 | 5 | 9 | 6113 | 200 |
-| Home | .NET 10 Blazor | 49 | 3.2 | 7 | 2 | 12 | 5725 | 200 |
-| ProductList | .NET Framework | 49 | 9.7 | 12 | 7 | 23 | 35108 | 200 |
-| ProductList | .NET 10 Blazor | 12 | 2.5 | 3 | 2 | 8 | 5560 | 200 |
-| About | .NET Framework | 17 | 5.9 | 8 | 4 | 8 | 5938 | 200 |
-| About | .NET 10 Blazor | 4 | 2.5 | 3 | 2 | 12 | 5542 | 200 |
+| Home | .NET Framework | 10 | 6.4 | 9 | 5 | 20 | 6113 | 200 |
+| Home | .NET 10 Blazor | 62 | 2.4 | 3 | 2 | 11 | 5730 | 200 |
+| ProductList | .NET Framework | 39 | 8.3 | 11 | 7 | 11 | 35108 | 200 |
+| ProductList | .NET 10 Blazor | 11 | 3.6 | 7 | 2 | 11 | 5505 | 200 |
+| About | .NET Framework | 13 | 4.9 | 6 | 4 | 9 | 5938 | 200 |
+| About | .NET 10 Blazor | 5 | 3.1 | 4 | 2 | 28 | 5542 | 200 |
 
 ### Speedup Analysis
 
 | Page | Framework Avg (ms) | Blazor Avg (ms) | Speedup | Cold Start Δ |
 | --- | ---: | ---: | ---: | --- |
-| Home | 6.3 | 3.2 | 1.97x faster (Blazor) | +38ms (Blazor slower) |
-| ProductList | 9.7 | 2.5 | 3.88x faster (Blazor) | 37ms faster (Blazor) |
-| About | 5.9 | 2.5 | 2.36x faster (Blazor) | 13ms faster (Blazor) |
+| Home | 6.4 | 2.4 | 2.67x faster (Blazor) | +52ms (Blazor slower) |
+| ProductList | 8.3 | 3.6 | 2.31x faster (Blazor) | 28ms faster (Blazor) |
+| About | 4.9 | 3.1 | 1.58x faster (Blazor) | 8ms faster (Blazor) |
 
 ## ContosoUniversity
 
-> ⚠️ .NET Framework results unavailable: IIS Express started but app did not respond within 180s
-    IIS Express stderr:
-Failed to register URL "http://localhost:55503/" for site "Development Web Site" application "/". Error description: Cannot create a file when that file already exists. (0x800700b7)
-
-
 | Page | Platform | Cold (ms) | Avg (ms) | P95 (ms) | Min (ms) | Max (ms) | Size (B) | Status |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Home | .NET Framework | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| Home | .NET 10 Blazor | 7 | 1.8 | 3 | 1 | 10 | 4721 | 200 |
-| Students | .NET Framework | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| Students | .NET 10 Blazor | 962 | 6.3 | 14 | 4 | 51 | 7548 | 200 |
-| About | .NET Framework | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| About | .NET 10 Blazor | 50 | 3.7 | 6 | 3 | 7 | 4968 | 200 |
+| Home | .NET Framework | 4 | 2.2 | 3 | 2 | 5 | 1744 | 200 |
+| Home | .NET 10 Blazor | 7 | 1.6 | 4 | 1 | 9 | 4711 | 200 |
+| Students | .NET Framework | 1618 | 6.5 | 8 | 6 | 8 | 12850 | 200 |
+| Students | .NET 10 Blazor | 916 | 6.3 | 14 | 4 | 56 | 7508 | 200 |
+| About | .NET Framework | 21 | 3.6 | 5 | 3 | 7 | 2917 | 200 |
+| About | .NET 10 Blazor | 51 | 2.8 | 5 | 2 | 5 | 4973 | 200 |
+
+### Speedup Analysis
+
+| Page | Framework Avg (ms) | Blazor Avg (ms) | Speedup | Cold Start Δ |
+| --- | ---: | ---: | ---: | --- |
+| Home | 2.2 | 1.6 | 1.38x faster (Blazor) | +3ms (Blazor slower) |
+| Students | 6.5 | 6.3 | 1.03x faster (Blazor) | 702ms faster (Blazor) |
+| About | 3.6 | 2.8 | 1.29x faster (Blazor) | +30ms (Blazor slower) |
 
 ## Charts
 

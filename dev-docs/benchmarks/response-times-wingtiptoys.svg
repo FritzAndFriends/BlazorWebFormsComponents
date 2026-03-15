@@ -5,28 +5,28 @@
   <line x1="70" y1="270" x2="570" y2="270" stroke="#ddd" stroke-width="1"/>
   <text x="62" y="274" text-anchor="end" font-size="11" fill="#666">0</text>
   <line x1="70" y1="218" x2="570" y2="218" stroke="#ddd" stroke-width="1"/>
-  <text x="62" y="222" text-anchor="end" font-size="11" fill="#666">3</text>
+  <text x="62" y="222" text-anchor="end" font-size="11" fill="#666">2</text>
   <line x1="70" y1="165" x2="570" y2="165" stroke="#ddd" stroke-width="1"/>
-  <text x="62" y="169" text-anchor="end" font-size="11" fill="#666">6</text>
+  <text x="62" y="169" text-anchor="end" font-size="11" fill="#666">5</text>
   <line x1="70" y1="113" x2="570" y2="113" stroke="#ddd" stroke-width="1"/>
-  <text x="62" y="117" text-anchor="end" font-size="11" fill="#666">9</text>
+  <text x="62" y="117" text-anchor="end" font-size="11" fill="#666">8</text>
   <line x1="70" y1="60" x2="570" y2="60" stroke="#ddd" stroke-width="1"/>
-  <text x="62" y="64" text-anchor="end" font-size="11" fill="#666">12</text>
+  <text x="62" y="64" text-anchor="end" font-size="11" fill="#666">10</text>
   <text x="15" y="165" text-anchor="middle" font-size="12" fill="#666" transform="rotate(-90, 15, 165)">Avg Response Time (ms)</text>
-  <rect x="86" y="160" width="49" height="110" fill="#4472C4" rx="2"/>
-  <text x="110" y="156" text-anchor="middle" font-size="10" fill="#4472C4">6.3</text>
-  <rect x="143" y="214" width="49" height="56" fill="#ED7D31" rx="2"/>
-  <text x="167" y="210" text-anchor="middle" font-size="10" fill="#ED7D31">3.2</text>
+  <rect x="86" y="136" width="49" height="134" fill="#4472C4" rx="2"/>
+  <text x="110" y="132" text-anchor="middle" font-size="10" fill="#4472C4">6.4</text>
+  <rect x="143" y="220" width="49" height="50" fill="#ED7D31" rx="2"/>
+  <text x="167" y="216" text-anchor="middle" font-size="10" fill="#ED7D31">2.4</text>
   <text x="143" y="288" text-anchor="middle" font-size="12" fill="#333">Home</text>
-  <rect x="252" y="101" width="49" height="169" fill="#4472C4" rx="2"/>
-  <text x="276" y="97" text-anchor="middle" font-size="10" fill="#4472C4">9.7</text>
-  <rect x="309" y="227" width="49" height="43" fill="#ED7D31" rx="2"/>
-  <text x="333" y="223" text-anchor="middle" font-size="10" fill="#ED7D31">2.5</text>
+  <rect x="252" y="96" width="49" height="174" fill="#4472C4" rx="2"/>
+  <text x="276" y="92" text-anchor="middle" font-size="10" fill="#4472C4">8.3</text>
+  <rect x="309" y="195" width="49" height="75" fill="#ED7D31" rx="2"/>
+  <text x="333" y="191" text-anchor="middle" font-size="10" fill="#ED7D31">3.6</text>
   <text x="309" y="288" text-anchor="middle" font-size="12" fill="#333">ProductList</text>
-  <rect x="418" y="167" width="49" height="103" fill="#4472C4" rx="2"/>
-  <text x="442" y="163" text-anchor="middle" font-size="10" fill="#4472C4">5.9</text>
-  <rect x="475" y="227" width="49" height="43" fill="#ED7D31" rx="2"/>
-  <text x="499" y="223" text-anchor="middle" font-size="10" fill="#ED7D31">2.5</text>
+  <rect x="418" y="168" width="49" height="102" fill="#4472C4" rx="2"/>
+  <text x="442" y="164" text-anchor="middle" font-size="10" fill="#4472C4">4.9</text>
+  <rect x="475" y="205" width="49" height="65" fill="#ED7D31" rx="2"/>
+  <text x="499" y="201" text-anchor="middle" font-size="10" fill="#ED7D31">3.1</text>
   <text x="475" y="288" text-anchor="middle" font-size="12" fill="#333">About</text>
   <rect x="180" y="320" width="14" height="14" fill="#4472C4" rx="2"/>
   <text x="198" y="330" font-size="11" fill="#333">.NET Framework</text>

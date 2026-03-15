@@ -2,7 +2,7 @@
 name: "performance-benchmarks"
 description: "Run and re-run .NET Framework vs .NET 10 performance benchmarks, diagnose failures, generate reports with SVG charts"
 domain: "performance-testing"
-confidence: "medium"
+confidence: "high"
 source: "earned"
 ---
 
@@ -47,29 +47,26 @@ pwsh -File scripts/Generate-BenchmarkReport.ps1 -InputPath dev-docs/benchmarks/b
 
 ## App Matrix
 
-| App | Framework | Port | Launch Method | Known Issues |
-|-----|-----------|------|---------------|--------------|
-| WingtipToys | .NET 4.5.2 | 55502 | IIS Express | ✅ Works — NuGet restore required |
-| AfterWingtipToys | .NET 10 | 55504 | `dotnet run` | ✅ Fixed — added `@using Microsoft.AspNetCore.Identity` to resolve `UserLoginInfo` |
-| ContosoUniversity | .NET 4.5.2 | 55503 | IIS Express | ✅ MSBuild pre-compilation handles JIT timeout. Script auto-starts LocalDB and pre-compiles with MSBuild + `aspnet_compiler.exe` before IIS Express launch. |
-| AfterContosoUniversity | .NET 10 | 55505 | `dotnet run` | ✅ Works — uses EnsureCreated() for SQLite DB. Cold start for Students page is slow (1763ms) due to DB initialization. |
+| App | Framework | Port | Launch Method | Status |
+|-----|-----------|------|---------------|--------|
+| WingtipToys | .NET 4.5.2 | 55502 | IIS Express | ✅ Works — NuGet restore + MSBuild pre-compilation |
+| AfterWingtipToys | .NET 10 | 55504 | `dotnet run` | ✅ Works — fixed `@using Microsoft.AspNetCore.Identity` |
+| ContosoUniversity | .NET 4.5.2 | 55503 | IIS Express | ✅ Works — requires MSBuild pre-compilation, `.aspx` URLs, and EF6 table rename |
+| AfterContosoUniversity | .NET 10 | 55505 | `dotnet run` | ✅ Works — cold start on Students page (~900ms) due to EF Core DB initialization |
 
-## Fixing Known Issues
+## Key Fixes Applied
 
-### AfterWingtipToys build error (FIXED)
+### ContosoUniversity Framework — Three Issues Resolved
 
-The `Account/ManageLogins.razor` page was missing a `@using Microsoft.AspNetCore.Identity` directive. This has been added and the app now builds successfully.
+1. **MSBuild pre-compilation**: VS 2026 Enterprise MSBuild compiles the DLL. Without this, IIS Express tries to JIT-compile everything on first request and times out. VS 2017 BuildTools lack WebApplication targets — need VS 2019+.
 
-### ContosoUniversity IIS Express timeout (MITIGATED)
+2. **URL paths**: ContosoUniversity has no default document at `/` (returns 403). Pages must be accessed as `/Home.aspx`, `/Students.aspx`, `/About.aspx`. The readiness check now uses the first page URL.
 
-ContosoUniversity uses Entity Framework 6 with SQL Server. The `Start-FrameworkApp` function now:
-1. Starts LocalDB automatically via `sqllocaldb start MSSQLLocalDB`
-2. Pre-compiles the project with MSBuild before launching IIS Express
-3. Pre-compiles ASP.NET views with `aspnet_compiler.exe`
-4. Uses a 180s timeout to allow for remaining first-request initialization
-5. Captures IIS Express stderr for diagnostics if the app fails to respond
+3. **EF6/EF Core table conflict**: Both apps share the same LocalDB database. EF6 EDMX expects table `dbo.Enrollment` (singular), EF Core expects `dbo.Enrollments` (plural). The script renames the table before/after the Framework benchmark.
 
-**Remaining issue:** On this machine, IIS Express reports `Failed to register URL "http://localhost:55503/"` with error `0x800700b7` (port already registered). This is a Windows URL reservation conflict, not a JIT timeout. MSBuild pre-compilation also requires VS 2019+ with WebApplication targets — VS 2017 BuildTools lack them.
+### Port Cleanup
+
+Stale IIS Express processes from previous runs can hold benchmark ports open. The script now runs `Clear-BenchmarkPorts` before starting, killing any process listening on ports 55502-55505.
 
 ## Metrics Collected
 
@@ -96,21 +93,23 @@ Per page, per app:
 
 1. **Verify .NET SDK**: `dotnet --version` (should be 10.x)
 2. **Verify IIS Express**: `Test-Path "${env:ProgramFiles(x86)}\IIS Express\iisexpress.exe"`
-3. **Verify MSBuild**: The script auto-discovers MSBuild via VS 2022/2019 or vswhere. Manual check: `& "${env:ProgramFiles}\Microsoft Visual Studio\2022\*\MSBuild\Current\Bin\MSBuild.exe" -version`
-4. **Verify aspnet_compiler.exe**: `Test-Path "$env:windir\Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe"`
-5. **Pre-build Blazor apps**: `dotnet build samples\AfterWingtipToys\WingtipToys.csproj` and `dotnet build samples\AfterContosoUniversity\ContosoUniversity.csproj` — fix any build errors BEFORE running benchmarks
-6. **Check for port conflicts**: Ensure ports 55502-55505 are free
-7. **Check LocalDB** (for ContosoUniversity Framework): `sqllocaldb info MSSQLLocalDB`
+3. **Verify MSBuild**: The script auto-discovers MSBuild via VS 2026/2022/2019 or vswhere. Requires WebApplication targets (VS workload, not just BuildTools).
+4. **Pre-build Blazor apps**: `dotnet build samples\AfterWingtipToys\WingtipToys.csproj` and `dotnet build samples\AfterContosoUniversity\ContosoUniversity.csproj`
+5. **Check for port conflicts**: The script auto-clears ports 55502-55505, but verify manually if issues persist
+6. **Check LocalDB** (for ContosoUniversity): `sqllocaldb info MSSQLLocalDB` — both Framework and Blazor apps share this database
+7. **Verify ContosoUniversity DB exists**: `sqlcmd -S "(localdb)\MSSQLLocalDB" -d ContosoUniversity -Q "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES"`
 
 ### Pre-compilation (Framework apps)
 
-The `Start-FrameworkApp` function performs three pre-compilation steps to avoid JIT timeouts under IIS Express:
+The `Start-FrameworkApp` function performs pre-compilation to avoid JIT timeouts under IIS Express:
 
-1. **MSBuild pre-compilation**: Discovers MSBuild.exe (VS 2022 → VS 2019 → vswhere fallback) and runs `msbuild /p:Configuration=Debug` against the `.csproj`. This compiles C# code and references so IIS Express doesn't need to invoke the Roslyn compiler on first request.
+1. **MSBuild pre-compilation**: Discovers MSBuild.exe (VS 2026 → 2022 → 2019 → 2017 → vswhere) and runs `msbuild /p:Configuration=Debug` against the `.csproj`. This compiles code-behind DLLs so IIS Express doesn't JIT on first request. **Requires WebApplication targets** — VS Enterprise/Professional or Web dev workload.
 
-2. **ASP.NET view pre-compilation**: Uses `aspnet_compiler.exe -v / -p <sitepath> -fixednames` from the .NET Framework directory to pre-compile `.aspx`, `.ascx`, and `.master` view files. This eliminates the per-page compilation delay on first visit.
+2. **ASP.NET view pre-compilation**: Uses `aspnet_compiler.exe -v / -p <sitepath>` to pre-compile ASPX views. Falls back gracefully if it fails.
 
-3. **LocalDB auto-start**: Runs `sqllocaldb start MSSQLLocalDB` so EF6 apps can connect on first request without a connection timeout.
+3. **LocalDB auto-start**: Runs `sqllocaldb start MSSQLLocalDB` for EF6 database connectivity.
+
+4. **EF6/EF Core table rename**: ContosoUniversity Framework needs `dbo.Enrollment` (singular per EDMX), but the shared DB has `dbo.Enrollments` (plural per EF Core). Script renames before/after Framework benchmark.
 
 All three steps are non-fatal — if any tool is missing or fails, the script logs a warning and continues. IIS Express will fall back to on-demand compilation.
 

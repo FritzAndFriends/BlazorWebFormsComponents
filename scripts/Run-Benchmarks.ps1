@@ -90,9 +90,9 @@ $apps = @(
         Port          = 55503
         BaseUrl       = 'http://localhost:55503'
         Pages         = @(
-            @{ Name = 'Home';     Path = '/' }
-            @{ Name = 'Students'; Path = '/Students' }
-            @{ Name = 'About';    Path = '/About' }
+            @{ Name = 'Home';     Path = '/Home.aspx' }
+            @{ Name = 'Students'; Path = '/Students.aspx' }
+            @{ Name = 'About';    Path = '/About.aspx' }
         )
     },
     @{
@@ -117,6 +117,10 @@ function Write-Fail  { param([string]$Msg) Write-Host "  FAIL $Msg" -ForegroundC
 
 # ── MSBuild discovery ────────────────────────────────────────
 function Find-MSBuild {
+    # VS 2026 / VS 18 (any edition, Program Files)
+    $vs2026 = Get-ChildItem "${env:ProgramFiles}\Microsoft Visual Studio\18\*\MSBuild\Current\Bin\MSBuild.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($vs2026) { return $vs2026.FullName }
+
     # VS 2022 (any edition)
     $vs2022 = Get-ChildItem "${env:ProgramFiles}\Microsoft Visual Studio\2022\*\MSBuild\Current\Bin\MSBuild.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($vs2022) { return $vs2022.FullName }
@@ -132,12 +136,7 @@ function Find-MSBuild {
     # vswhere fallback (finds any VS installation with MSBuild)
     $vswhereExe = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path $vswhereExe) {
-        $found = & $vswhereExe -all -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null | Select-Object -First 1
-        if ($found -and (Test-Path $found)) { return $found }
-    }
-    $vswhereCli = Get-Command vswhere -ErrorAction SilentlyContinue
-    if ($vswhereCli) {
-        $found = & vswhere -latest -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null | Select-Object -First 1
+        $found = & $vswhereExe -all -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' -sort 2>$null | Select-Object -First 1
         if ($found -and (Test-Path $found)) { return $found }
     }
 
@@ -176,6 +175,25 @@ function Stop-AllLaunched {
             try { $proc.WaitForExit(5000) } catch { }
         }
     }
+}
+
+# Kill any stale processes on benchmark ports from previous runs
+function Clear-BenchmarkPorts {
+    $benchmarkPorts = $apps | ForEach-Object { $_.Port }
+    foreach ($port in $benchmarkPorts) {
+        $listeners = netstat -ano 2>$null | Select-String "TCP\s+\S+:$port\s+\S+\s+LISTENING\s+(\d+)"
+        foreach ($match in $listeners) {
+            $pid = [int]$match.Matches[0].Groups[1].Value
+            if ($pid -gt 4) {
+                $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+                if ($proc) {
+                    Write-Warn "Killing stale process on port ${port}: $($proc.ProcessName) (PID $pid)"
+                    Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
+    Start-Sleep -Seconds 2
 }
 
 # ── Measurement function ─────────────────────────────────────
@@ -324,7 +342,13 @@ function Start-FrameworkApp {
             -RedirectStandardError $iisStderrLog
         $launchedProcesses.Add($proc)
 
-        $ready = Wait-ForEndpoint -Url $App.BaseUrl -TimeoutSeconds 180
+        # Use the first page URL for readiness check (some Framework apps return 403 on /)
+        $readinessUrl = if ($App.Pages -and $App.Pages.Count -gt 0) {
+            "$($App.BaseUrl)$($App.Pages[0].Path)"
+        } else {
+            $App.BaseUrl
+        }
+        $ready = Wait-ForEndpoint -Url $readinessUrl -TimeoutSeconds 180
         if (-not $ready) {
             # Capture diagnostic info to help debug startup failures
             $reason = 'IIS Express started but app did not respond within 180s'
@@ -398,6 +422,9 @@ try {
         Timestamp      = (Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')
     }
 
+    # ── Clean up stale processes on benchmark ports ─────────
+    Clear-BenchmarkPorts
+
     # ── Run benchmarks per app ───────────────────────────────
     foreach ($app in $apps) {
         Write-Step "Benchmarking: $($app.Name) ($($app.Kind))"
@@ -418,6 +445,17 @@ try {
 
         # Launch the app
         Write-Host "  Launching $($app.Name) on port $($app.Port)..."
+
+        # ContosoUniversity DB compatibility: EF6 expects 'Enrollment', EF Core uses 'Enrollments'
+        $needsTableRename = ($app.Name -eq 'ContosoUniversity' -and $app.Kind -eq 'Framework')
+        if ($needsTableRename) {
+            $sqlcmd = Get-Command sqlcmd -ErrorAction SilentlyContinue
+            if ($sqlcmd) {
+                Write-Host "    Adjusting DB table names for EF6 compatibility..."
+                & sqlcmd -S "(localdb)\MSSQLLocalDB" -d ContosoUniversity -Q "IF OBJECT_ID('dbo.Enrollments') IS NOT NULL EXEC sp_rename 'dbo.Enrollments', 'Enrollment'" 2>&1 | Out-Null
+            }
+        }
+
         $launchResult = if ($app.Kind -eq 'Framework') {
             Start-FrameworkApp -App $app
         } else {
@@ -473,6 +511,15 @@ try {
             Port    = $app.Port
             Skipped = $false
             Pages   = $pageResults
+        }
+
+        # Restore table names after Framework ContosoUniversity benchmark
+        if ($needsTableRename) {
+            $sqlcmd = Get-Command sqlcmd -ErrorAction SilentlyContinue
+            if ($sqlcmd) {
+                Write-Host "    Restoring DB table names for EF Core compatibility..."
+                & sqlcmd -S "(localdb)\MSSQLLocalDB" -d ContosoUniversity -Q "IF OBJECT_ID('dbo.Enrollment') IS NOT NULL EXEC sp_rename 'dbo.Enrollment', 'Enrollments'" 2>&1 | Out-Null
+            }
         }
     }
 
