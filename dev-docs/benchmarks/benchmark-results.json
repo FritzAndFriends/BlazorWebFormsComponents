@@ -1,0 +1,121 @@
+{
+  "Configuration": {
+    "Iterations": 30,
+    "SkipFramework": false
+  },
+  "Results": {
+    "WingtipToys": {
+      "App": "WingtipToys",
+      "Pages": [
+        {
+          "Error": null,
+          "MinMs": 7,
+          "MaxMs": 14,
+          "StatusCode": 200,
+          "P95Ms": 11,
+          "ColdStartMs": 13,
+          "Page": "Home",
+          "Url": "http://localhost:55502/",
+          "AverageMs": 8.7,
+          "ResponseBytes": 6113
+        },
+        {
+          "Error": null,
+          "MinMs": 10,
+          "MaxMs": 28,
+          "StatusCode": 200,
+          "P95Ms": 13,
+          "ColdStartMs": 56,
+          "Page": "ProductList",
+          "Url": "http://localhost:55502/ProductList",
+          "AverageMs": 12.1,
+          "ResponseBytes": 35108
+        },
+        {
+          "Error": null,
+          "MinMs": 6,
+          "MaxMs": 10,
+          "StatusCode": 200,
+          "P95Ms": 9,
+          "ColdStartMs": 16,
+          "Page": "About",
+          "Url": "http://localhost:55502/About",
+          "AverageMs": 7.5,
+          "ResponseBytes": 5938
+        }
+      ],
+      "Skipped": false,
+      "Kind": "Framework",
+      "Port": 55502
+    },
+    "AfterContosoUniversity": {
+      "App": "AfterContosoUniversity",
+      "Pages": [
+        {
+          "Error": null,
+          "MinMs": 2,
+          "MaxMs": 9,
+          "StatusCode": 200,
+          "P95Ms": 8,
+          "ColdStartMs": 7,
+          "Page": "Home",
+          "Url": "http://localhost:55505/",
+          "AverageMs": 2.5,
+          "ResponseBytes": 4721
+        },
+        {
+          "Error": null,
+          "MinMs": 5,
+          "MaxMs": 68,
+          "StatusCode": 200,
+          "P95Ms": 18,
+          "ColdStartMs": 1763,
+          "Page": "Students",
+          "Url": "http://localhost:55505/Students",
+          "AverageMs": 9.6,
+          "ResponseBytes": 7538
+        },
+        {
+          "Error": null,
+          "MinMs": 3,
+          "MaxMs": 8,
+          "StatusCode": 200,
+          "P95Ms": 5,
+          "ColdStartMs": 65,
+          "Page": "About",
+          "Url": "http://localhost:55505/About",
+          "AverageMs": 3.8,
+          "ResponseBytes": 4998
+        }
+      ],
+      "Skipped": false,
+      "Kind": "Blazor",
+      "Port": 55505
+    },
+    "ContosoUniversity": {
+      "Kind": "Framework",
+      "Reason": "IIS Express started but app did not respond within 30s",
+      "App": "ContosoUniversity",
+      "Skipped": true,
+      "Pages": [],
+      "Port": 55503
+    },
+    "AfterWingtipToys": {
+      "Kind": "Blazor",
+      "Reason": "dotnet run started but app did not respond within 120s",
+      "App": "AfterWingtipToys",
+      "Skipped": true,
+      "Pages": [],
+      "Port": 55504
+    }
+  },
+  "Environment": {
+    "OS": "Microsoft Windows 10.0.26220",
+    "ProcessorCount": 24,
+    "MachineName": "JFRITZ-4",
+    "DotNetVersion": "10.0.200-preview.0.26103.119",
+    "PowerShell": "7.4.13",
+    "Timestamp": "2026-03-15T01:48:34Z"
+  },
+  "DurationSeconds": 181.2
+}
