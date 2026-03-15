@@ -516,6 +516,62 @@
             Panes are limited to the Accordion container height but do not expand to fill it.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BoxCorners">
+            <summary>
+            Specifies which corners of a box should be rounded.
+            This is a flags enum — values can be combined.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.None">
+            <summary>
+            No corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.TopLeft">
+            <summary>
+            Top-left corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.TopRight">
+            <summary>
+            Top-right corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.BottomLeft">
+            <summary>
+            Bottom-left corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.BottomRight">
+            <summary>
+            Bottom-right corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Top">
+            <summary>
+            Both top corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Bottom">
+            <summary>
+            Both bottom corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Left">
+            <summary>
+            Both left corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Right">
+            <summary>
+            Both right corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.All">
+            <summary>
+            All four corners are rounded.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.CalendarDefaultView">
             <summary>
             Specifies the default view when the calendar popup opens.
@@ -911,6 +967,28 @@
             Maximum height constraint in pixels. 0 means no maximum.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.RoundedCornersExtender">
+            <summary>
+            Applies rounded corners to an element using CSS border-radius.
+            Emulates the Ajax Control Toolkit RoundedCornersExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.RoundedCornersExtender.Radius">
+            <summary>
+            Corner radius in pixels. Default is 5.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.RoundedCornersExtender.Corners">
+            <summary>
+            Specifies which corners to round. Default is All.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.RoundedCornersExtender.Color">
+            <summary>
+            Background color for the rounded area (e.g., "#FFFFFF").
+            If not specified, the element's existing background is preserved.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.SliderExtender">
             <summary>
             Attaches range slider behavior to a target input element.
@@ -1152,6 +1230,39 @@
         <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.DisabledCheckedImageUrl">
             <summary>
             URL of the image displayed when the checkbox is disabled and checked.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender">
+            <summary>
+            Provides visual feedback animations when content is updating.
+            Emulates the Ajax Control Toolkit UpdatePanelAnimationExtender.
+            Apply CSS classes and fade effects during and after content updates.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.AlwaysFinishOnUpdatingAnimation">
+            <summary>
+            Whether to complete the "updating" animation before starting the "updated" animation.
+            Default is false.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.OnUpdatingCssClass">
+            <summary>
+            CSS class to apply during update/loading state.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.OnUpdatedCssClass">
+            <summary>
+            CSS class to apply after update completes.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.FadeInDuration">
+            <summary>
+            Duration in seconds for the fade-in effect after update completes. Default is 0.3.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.FadeOutDuration">
+            <summary>
+            Duration in seconds for the fade-out effect before update starts. Default is 0.3.
             </summary>
         </member>
     </members>
