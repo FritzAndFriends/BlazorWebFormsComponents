@@ -582,6 +582,16 @@
             Specifies the position of the calendar popup relative to the target control.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.DisplayMoney">
+            <summary>
+            Specifies how currency symbols are displayed in the MaskedEditExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.DisplayPosition">
+            <summary>
+            Specifies the display position of an indicator relative to its target control.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.ExpandDirection">
             <summary>
             Specifies the direction in which a CollapsiblePanelExtender expands or collapses.
@@ -621,6 +631,21 @@
         <member name="T:BlazorAjaxToolkitComponents.Enums.SliderOrientation">
             <summary>
             Specifies the orientation of a SliderExtender control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.StrengthIndicatorType">
+            <summary>
+            Specifies the type of password strength indicator display.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.StrengthIndicatorType.Text">
+            <summary>
+            Displays password strength as text labels.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.StrengthIndicatorType.BarIndicator">
+            <summary>
+            Displays password strength as a visual progress bar.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.VerticalSide">
@@ -766,6 +791,31 @@
             How negative values are displayed for number masks.
             </summary>
         </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.DisplayMoney">
+            <summary>
+            How currency symbols are displayed for number masks.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.OnFocusCssClass">
+            <summary>
+            CSS class applied when the input has focus.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.OnInvalidCssClass">
+            <summary>
+            CSS class applied when the input contains an invalid value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.OnBlurCssNegative">
+            <summary>
+            CSS class applied when the input contains a negative value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.CultureName">
+            <summary>
+            The culture name used for formatting (e.g., "en-US").
+            </summary>
+        </member>
         <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.ErrorTooltipEnabled">
             <summary>
             Whether to show a tooltip with error information when validation fails.
@@ -885,6 +935,95 @@
         <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.Tag">
             <summary>
             An arbitrary string value passed to the web service methods.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.PasswordStrength">
+            <summary>
+            Displays a visual indicator of password strength as the user types in a password TextBox.
+            Evaluates passwords against configurable rules (length, character requirements) and shows feedback.
+            Emulates the Ajax Control Toolkit PasswordStrength extender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.DisplayPosition">
+            <summary>
+            Specifies where to display the strength indicator relative to the password field.
+            Default is RightSide.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.StrengthIndicatorType">
+            <summary>
+            Specifies the type of strength indicator: Text labels or BarIndicator.
+            Default is Text.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.PreferredPasswordLength">
+            <summary>
+            The preferred minimum password length. Default is 10.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumNumericCharacters">
+            <summary>
+            The minimum number of numeric characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumSymbolCharacters">
+            <summary>
+            The minimum number of symbol characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumUpperCaseCharacters">
+            <summary>
+            The minimum number of uppercase characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumLowerCaseCharacters">
+            <summary>
+            The minimum number of lowercase characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.RequiresUpperAndLowerCaseCharacters">
+            <summary>
+            Whether the password must contain both uppercase and lowercase characters.
+            Default is false.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.TextStrengthDescriptions">
+            <summary>
+            Semicolon-delimited strength level descriptions.
+            Example: "Very Poor;Weak;Average;Strong;Excellent"
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.StrengthStyles">
+            <summary>
+            Semicolon-delimited CSS class names for each strength level.
+            Aligns with TextStrengthDescriptions by index.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.BarBorderCssClass">
+            <summary>
+            CSS class for the bar indicator border.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.CalculationWeightings">
+            <summary>
+            Custom calculation weightings for strength scoring (advanced).
+            Format depends on implementation requirements.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.TextCssClass">
+            <summary>
+            CSS class applied to the text display element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.HelpHandleCssClass">
+            <summary>
+            CSS class for the help handle/icon.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.HelpHandlePosition">
+            <summary>
+            Position of the help handle relative to the password field.
+            Default is RightSide.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.PopupControlExtender">
