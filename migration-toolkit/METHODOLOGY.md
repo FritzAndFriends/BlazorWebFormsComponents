@@ -147,6 +147,7 @@ Always review Copilot's changes before committing.
 
 **Tool:** [Data migration skill](skills/bwfc-data-migration/SKILL.md) + your own judgment
 
+
 Layer 3 is the ~15% of migration work that requires understanding your application's architecture. No script or AI can make these decisions for you — but the data migration skill and Copilot can guide you through the options and trade-offs.
 
 ### Common Layer 3 Decisions
@@ -174,12 +175,42 @@ The skill provides decision frameworks for common architecture patterns — see 
 
 ---
 
+## Layer L3-opt: Performance Optimization Pass (Optional)
+
+**Tool:** [L3 performance optimization skill](skills/l3-performance-optimization/SKILL.md)
+
+This is an **optional fourth step** that runs after the app builds and passes verification. It is not part of the core migration pipeline — it is a post-migration polish pass that applies modern .NET 10 performance patterns to already-functional migrated code.
+
+### What L3-opt Handles
+
+| Optimization | Before (typical migration output) | After |
+|---|---|---|
+| Sync lifecycle | `void OnInitialized()` with DB calls | `async Task OnInitializedAsync()` |
+| Sync EF Core | `.ToList()`, `.SaveChanges()` | `await .ToListAsync()`, `await .SaveChangesAsync()` |
+| No-tracking reads | `db.Products.ToListAsync()` | `db.Products.AsNoTracking().ToListAsync()` |
+| `@key` on loops | `@foreach (var p in products)` | `@foreach (...) { <C @key="p.ID" ... />}` |
+| Query string params | Manual `Uri` parsing | `[SupplyParameterFromQuery]` |
+| Code-behind extraction | Inline `@code` blocks > 50 lines | Partial `.razor.cs` class |
+
+### When to Apply
+
+Apply L3-opt after:
+1. ✅ App builds without errors
+2. ✅ App runs and renders pages correctly
+3. ✅ Interactive features (forms, navigation, data) work
+4. ✅ Basic verification checklist is complete
+
+Do **not** apply L3-opt to a broken build. Async patterns surface errors that were previously hidden.
+
+---
+
 ## Why This Ordering Matters
 
 Layers must run in order: 1 → 2 → 3. Each layer assumes the previous one has completed.
 
 - **Layer 1 before Layer 2:** Copilot expects files to already have `asp:` prefixes removed and expressions converted. If Layer 1 hasn't run, Copilot wastes time on mechanical transforms.
 - **Layer 2 before Layer 3:** Architecture decisions are easier when the markup is already in Blazor syntax. You can see what's left to wire up instead of mentally translating Web Forms markup.
+- **Layer 3 before L3-opt:** Performance optimizations assume functional code. Async migrations and `IDbContextFactory` patterns require the service layer to already exist.
 
 Don't skip layers. Don't try to do Layer 3 work in Layer 1. The pipeline is designed so that each layer makes the next layer's job easier.
 
@@ -195,7 +226,8 @@ Based on the [WingtipToys proof-of-concept](../planning-docs/WINGTIPTOYS-MIGRATI
 | Layer 1 (automated) | ~30 seconds | ~30 seconds |
 | Layer 2 (structural) | 8–12 hours | 2–4 hours |
 | Layer 3 (architecture) | 10–14 hours | 8–12 hours |
-| **Total** | **18–26 hours** | **10–16 hours** |
+| **L3-opt (optional)** | **1–2 hours** | **30–60 minutes** |
+| **Total** | **18–28 hours** | **10–17 hours** |
 
 Layer 3 time varies the most because it depends on your application's complexity. A simple CRUD app with no auth may have almost no Layer 3 work. An enterprise app with custom session state, complex auth, and third-party integrations will spend most of its time in Layer 3.
 
