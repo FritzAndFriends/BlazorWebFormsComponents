@@ -127,6 +127,43 @@
         <member name="M:BlazorAjaxToolkitComponents.AccordionPane.Dispose">
             <inheritdoc />
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender">
+            <summary>
+            Keeps a control visible in a fixed position on screen even when the user scrolls.
+            Useful for toolbars, help buttons, or notification areas.
+            Emulates the Ajax Control Toolkit AlwaysVisibleControlExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.HorizontalOffset">
+            <summary>
+            The number of pixels from the horizontal edge.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.VerticalOffset">
+            <summary>
+            The number of pixels from the vertical edge.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.HorizontalSide">
+            <summary>
+            Which horizontal edge to position the control against.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.VerticalSide">
+            <summary>
+            Which vertical edge to position the control against.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.ScrollEffectDuration">
+            <summary>
+            Duration of the position animation in seconds.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.UseAnimation">
+            <summary>
+            Whether to animate position changes.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.AutoCompleteExtender">
             <summary>
             Provides typeahead/autocomplete functionality for a target TextBox.
@@ -423,6 +460,37 @@
             If not set, the entire target panel is draggable.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.DropShadowExtender">
+            <summary>
+            Adds a drop shadow effect to an element, giving it a raised/floating appearance.
+            Emulates the Ajax Control Toolkit DropShadowExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Opacity">
+            <summary>
+            Shadow opacity from 0.0 (fully transparent) to 1.0 (fully opaque). Default is 0.5.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Width">
+            <summary>
+            Shadow width in pixels. Default is 5.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Rounded">
+            <summary>
+            Whether to round the corners of the target element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Radius">
+            <summary>
+            Corner radius in pixels when Rounded is true.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.TrackPosition">
+            <summary>
+            Whether the shadow should track the element's position if it moves.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.AcceptNegative">
             <summary>
             Specifies how negative values are accepted in the MaskedEditExtender.
@@ -474,6 +542,11 @@
             This is a flags enum — values can be combined.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.HorizontalSide">
+            <summary>
+            Specifies the horizontal side for positioning an always-visible control.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.InputDirection">
             <summary>
             Specifies the direction of input for the MaskedEditExtender.
@@ -492,6 +565,11 @@
         <member name="T:BlazorAjaxToolkitComponents.Enums.SliderOrientation">
             <summary>
             Specifies the orientation of a SliderExtender control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.VerticalSide">
+            <summary>
+            Specifies the vertical side for positioning an always-visible control.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.FilteredTextBoxExtender">
