@@ -29,7 +29,33 @@
 - Run 9 Skill Fixes — 6 RF items across 4 skill files (2026-03-07)
 - Run 9 RCA Documentation — path preservation + CSS verification rules (2026-03-07)
 
-### Summary (2026-03-05 through 2026-03-07 pre-Run 11)
+### Issue #438: Deprecation Guidance Docs (Latest)
+
+**Delivered:** Comprehensive deprecation guidance page (`docs/Migration/DeprecationGuidance.md`) covering Web Forms patterns with no Blazor equivalent.
+
+**Content:**
+- `runat="server"` → Blazor native components
+- `ViewState` → Component fields + scoped services  
+- `UpdatePanel` → Blazor's incremental component rendering
+- `ScriptManager` → `IJSRuntime` + `HttpClient`
+- PostBack events → Component lifecycle + event handlers
+- Page lifecycle (`Page_Load`, `Page_Init`) → `OnInitializedAsync`, `OnParametersSetAsync`
+- `IsPostBack` → Removed (use `OnInitializedAsync`)
+- Server-side control properties → Declarative data binding
+- Application/Session state → Singleton/scoped services
+- Data binding events (`ItemDataBound`) → Component templates with `@context`
+
+**Format:** Before/after tabbed code examples, migration checklist table, lifecycle mapping.
+
+**Branch:** `squad/438-deprecation-docs` — pushed to FritzAndFriends upstream. Commit 5b17682b.
+
+**Files:** 
+- Created `docs/Migration/DeprecationGuidance.md` (23.3 KB, ~400 lines)
+- Updated `mkdocs.yml` — added to Migration section navigation
+
+**Design decision:** Placed after "Automated Migration Guide" in nav to catch developers early in their migration journey. Each section pairs Web Forms pattern with clear Blazor alternative, supporting the library's goal of enabling code reuse with minimal markup changes.
+
+**Summary (2026-03-05 through 2026-03-07 pre-Run 11)
 
 WebFormsPageBase docs and Page System rewrite shipped (2026-03-05). Skills cross-reference review found `.ai-team/skills/` drifting behind `migration-toolkit/skills/` — both must be updated together. LoginView is a native BWFC component, never replace with AuthorizeView. Executive report pattern established in Run 8: blockquote bottom line → timeline → screenshots → before/after code. Run 9 skill fixes: cookie auth under Interactive Server, minimal API endpoint templates, enhanced navigation guidance, DisableAntiforgery, ListView GroupItemCount. Run 9 RCA: added Static Asset Path Preservation and CSS Reference Verification rules to migration-standards. Key learning: functional tests passing ≠ migration success — visual regression is ship-blocking.
 
@@ -118,5 +144,82 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 
 **Files:** migration-toolkit/skills/migration-standards/SKILL.md (lines ~165–199), migration-toolkit/skills/bwfc-data-migration/SKILL.md (lines ~29–95)  
 **Decision log:** .squad/decisions/inbox/beast-migration-docs.md
+
+### Ajax Control Toolkit Extender Documentation (2026-03-15)
+
+**Delivered:** Complete documentation suite for first Ajax Control Toolkit extender components in BWFC (ConfirmButtonExtender, FilteredTextBoxExtender).
+
+**Content Structure:**
+1. **AjaxToolkit/index.md** — Extender pattern overview explaining non-rendering, target-based architecture, render mode requirements (InteractiveServer), graceful degradation in SSR/static modes
+2. **ConfirmButtonExtender.md** — 8.8 KB: browser confirmation dialogs on button click/form submit, includes 5 progressively complex usage examples (basic, form submit, multiple buttons, dynamic messages, destructive action pattern), enum documentation, properties table, migration guidance
+3. **FilteredTextBoxExtender.md** — 12.2 KB: character filtering with FilterType flags and FilterMode, covers whitelist/blacklist patterns, includes 7+ realistic examples (phone, currency, SKU, filename blacklist), paste handling behavior, performance tuning, character combination reference table, validation notes
+
+**Key Teaching Insights:**
+- **Extender concept clarity:** Emphasized that extenders produce NO HTML — only attach JavaScript behavior. This is the key differentiator from BWFC components that render HTML.
+- **Migration simplicity messaging:** "You literally just remove the `ajaxToolkit:` prefix — everything else stays the same!" — directly addressing Jeff's directive to show how BWFC enables continued use of familiar APIs
+- **Render mode prominence:** Placed InteractiveServer requirement at top of overview and each component doc to prevent hours of debugging. Included graceful degradation table so developers understand SSR/static behavior.
+- **Realistic examples:** Moved beyond abstract to concrete: phone numbers with format, currency with decimals, filenames with blacklist, demonstrating that FilterType flags combine with C# `|` operator
+- **Paste behavior clarity:** Documented how FilteredTextBoxExtender strips invalid characters on paste (not a blocking error), with example showing "abc123def" → "123" in Numbers mode
+
+**Files:**
+- Created `docs/AjaxToolkit/index.md` (4.8 KB)
+- Created `docs/AjaxToolkit/ConfirmButtonExtender.md` (8.8 KB)
+- Created `docs/AjaxToolkit/FilteredTextBoxExtender.md` (12.2 KB)
+- Updated `mkdocs.yml` — added "Ajax Control Toolkit Extenders" section to navigation
+
+**Branch:** `squad/451-450-confirm-filtered-extenders` — pushed to origin  
+**Commit:** 39bf8876 with co-authored-by trailer
+
+**Design Decisions:**
+- Placed overview page first in nav to catch developers early on the "extenders don't render HTML" concept
+- Character filtering examples use flags table for quick reference (phone, email, currency patterns)
+- Troubleshooting sections focus on render mode (most common issue) before TargetControlID mismatches
+- All code examples use Blazor razor syntax with `@rendermode InteractiveServer` to model correct usage pattern
+
+**Learnings for future extender docs:**
+- Developers unfamiliar with Ajax Control Toolkit will need the "What are extenders?" section; don't skip it
+- FilterType enum documentation should include a reference table of common patterns (phone, email, etc.) to reduce copy-paste
+- Render mode is a higher-priority troubleshooting item than TargetControlID — place it first
+
+### Ajax Control Toolkit Extender Documentation, Phase 2 (2026-03-15)
+
+**Delivered:** Complete documentation suite for ModalPopupExtender and CollapsiblePanelExtender components.
+
+**Content Structure:**
+
+1. **ModalPopupExtender.md** — 15.6 KB: Modal dialog patterns with overlay backdrop, OK/Cancel actions, drag support, focus trapping, Escape key dismissal. Includes 4 progressively complex examples (basic confirmation, settings dialog with drag/drop shadow, JS callbacks, form dialog). Complete properties table, render mode requirements, graceful degradation notes.
+
+2. **CollapsiblePanelExtender.md** — 20.4 KB: Collapse/expand panels with CSS transitions, separate collapse/expand triggers, auto-collapse/expand on hover, vertical/horizontal animations, scrollable content. Includes 6+ realistic examples (simple toggle, separate buttons, auto-hover, horizontal sidebar, FAQ accordion, scrollable logs, partial visibility). ExpandDirection enum documented with usage patterns.
+
+**Key Teaching Insights:**
+- **Modal concept clarity:** Emphasized that modals block interaction with page behind the overlay and require focus management. Different from toast/snackbar notifications.
+- **Escape key behavior:** Documented that Escape key executes `OnCancelScript`, matching standard browser modal behavior expectation.
+- **Drag handle patterns:** Included header drag pattern example showing visual affordance (gray header with "Settings" text) to teach best practices.
+- **FAQ accordion pattern:** Provided complete functional example showing how to generate multiple collapsible panels from a list — a very common real-world use case.
+- **Partial visibility with CollapsedSize:** Documented the distinction between `CollapsedSize="0"` (fully hidden) vs. `CollapsedSize="50"` (shows header/preview), with example showing preview pane.
+- **Horizontal vs. Vertical:** CollapsiblePanelExtender sidebar example demonstrates ExpandDirection usage for horizontal collapse (width instead of height).
+
+**Files:**
+- Created `docs/AjaxToolkit/ModalPopupExtender.md` (15.6 KB)
+- Created `docs/AjaxToolkit/CollapsiblePanelExtender.md` (20.4 KB)
+- Updated `docs/AjaxToolkit/index.md` — added overview descriptions for both components
+- Updated `mkdocs.yml` — added nav entries for both components under Ajax Control Toolkit section
+
+**Branch:** `squad/446-447-modal-collapsible-extenders` — pushed to origin  
+**Commit:** f6fafcdd with co-authored-by trailer
+
+**Design Decisions:**
+- Placed ModalPopupExtender before CollapsiblePanelExtender in nav (modal is simpler concept to start with)
+- Both docs include "Before/After" Web Forms vs. Blazor comparison right after the overview to highlight migration simplicity
+- ModalPopupExtender examples progress from simple yes/no dialog → form with fields → JavaScript callbacks (complexity ramp)
+- CollapsiblePanelExtender examples progress from toggle button → accordion FAQ → sidebar menu (UI pattern ramp)
+- Both docs include "TextLabelID" pattern for updating button text dynamically (e.g., "▶ Show" ↔ "▼ Hide")
+
+**Learnings for future extender docs:**
+- Modal docs need to explain overlay behavior and focus trapping — users coming from no-framework experience may not expect this
+- CollapsiblePanelExtender ScrollContents property is subtle — pair it with ExpandedSize limit in examples to make the behavior obvious
+- FAQ accordion is the most powerful use case for CollapsiblePanelExtender — lead with that to show power
+- Drag handle examples should show visual distinction (darker background, cursor change) to teach UX best practices
+- Partial visibility pattern (CollapsedSize > 0) is underutilized; showcase it as a way to show "preview" of collapsed content
 
 
