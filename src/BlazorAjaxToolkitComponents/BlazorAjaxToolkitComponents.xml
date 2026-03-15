@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BlazorAjaxToolkitComponents</name>
+    </assembly>
+    <members>
+        <member name="T:BlazorAjaxToolkitComponents.BaseExtenderComponent">
+            <summary>
+            Base class for Ajax Control Toolkit extender components.
+            Extenders attach behavior to a target control identified by <see cref="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.TargetControlID"/>.
+            Full design pending — see Forge's architecture spec.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BaseExtenderComponent.TargetControlID">
+            <summary>
+            The ID of the control this extender targets.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.BaseExtenderComponent.DisposeAsync">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

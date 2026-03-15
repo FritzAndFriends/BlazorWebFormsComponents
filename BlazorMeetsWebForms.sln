@@ -42,6 +42,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWebFormsComponents.Analyzers", "src\BlazorWebFormsComponents.Analyzers\BlazorWebFormsComponents.Analyzers.csproj", "{E12935A8-C95C-4D67-A24B-A984A99AFE5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAjaxToolkitComponents", "src\BlazorAjaxToolkitComponents\BlazorAjaxToolkitComponents.csproj", "{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +179,24 @@ Global
 		{E12935A8-C95C-4D67-A24B-A984A99AFE5F}.WebForms|x64.Build.0 = Debug|Any CPU
 		{E12935A8-C95C-4D67-A24B-A984A99AFE5F}.WebForms|x86.ActiveCfg = Debug|Any CPU
 		{E12935A8-C95C-4D67-A24B-A984A99AFE5F}.WebForms|x86.Build.0 = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Debug|x64.Build.0 = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Debug|x86.Build.0 = Debug|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Release|x64.ActiveCfg = Release|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Release|x64.Build.0 = Release|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Release|x86.ActiveCfg = Release|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.Release|x86.Build.0 = Release|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.WebForms|Any CPU.ActiveCfg = WebForms|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.WebForms|Any CPU.Build.0 = WebForms|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.WebForms|x64.ActiveCfg = WebForms|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.WebForms|x64.Build.0 = WebForms|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.WebForms|x86.ActiveCfg = WebForms|Any CPU
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D}.WebForms|x86.Build.0 = WebForms|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +208,7 @@ Global
 		{1669CD22-5CCE-4D96-A02B-31D81B5EFB2B} = {240E45D9-B9FF-42E8-B0C1-332861E02DBF}
 		{CA277C6F-A3DD-4FAF-9B7C-56E7B844CEF7} = {240E45D9-B9FF-42E8-B0C1-332861E02DBF}
 		{E12935A8-C95C-4D67-A24B-A984A99AFE5F} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E288F9FB-039F-4718-8AEB-85F89B29EB4E}
