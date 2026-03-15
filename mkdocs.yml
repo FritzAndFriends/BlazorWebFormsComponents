@@ -127,6 +127,10 @@ nav:
     - Timer: EditorControls/Timer.md
     - UpdatePanel: EditorControls/UpdatePanel.md
     - UpdateProgress: EditorControls/UpdateProgress.md
+  - Ajax Control Toolkit Extenders:
+    - Overview: AjaxToolkit/index.md
+    - ConfirmButtonExtender: AjaxToolkit/ConfirmButtonExtender.md
+    - FilteredTextBoxExtender: AjaxToolkit/FilteredTextBoxExtender.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - EnumParameter: UtilityFeatures/EnumParameter.md
