@@ -242,3 +242,41 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 
 📌 Team update (2026-03-15): Component Health Dashboard scoring spec delivered to decisions inbox. 7 dimensions, weighted formula, reference data for 60+ components. Rogue implements as `scripts/Invoke-ComponentHealthScan.ps1` → `docs/component-health.md`. — decided by Forge
 
+### Ajax Control Toolkit Extender Pattern Design (2026-03-15)
+
+**Task:** Design Blazor-native architecture for Ajax Control Toolkit extenders (#442, M24). This is the gating architecture decision for all 13+ ACT component implementations.
+
+**Deliverable:** `.squad/decisions/inbox/forge-ajax-extender-pattern.md`
+
+**Key design decisions:**
+
+1. **Modified Option 2 — string-based TargetControlID with JS-side resolution:** Extenders accept `TargetControlID` as a string (matching Web Forms), resolve it via BWFC's `FindControl()` → `ClientID` chain, then pass the ClientID to JavaScript's `document.getElementById()`. No `@ref` required on target controls. Migration markup is zero-change: `<CalendarExtender TargetControlID="txtDate" />`.
+
+2. **Two base classes:** `BaseExtenderComponent` (inherits `BaseWebFormsComponent`) for controls that render no HTML and attach JS behavior to a target. `BaseStandaloneToolkitComponent` (inherits `BaseStyledComponent`) for controls like Accordion/TabContainer/Rating that render their own HTML plus JS. Both follow the same JS module lifecycle pattern.
+
+3. **One ES module per component:** Following the Chart.js interop precedent (`ChartJsInterop` + `chart-interop.js`). Lazy-loaded via `import()`. Shared utilities in `_shared/behavior-base.js`. Tree-shaking by usage — only JS for used controls loads.
+
+4. **Separate NuGet package:** `Fritz.BlazorAjaxToolkitComponents` in `src/BlazorAjaxToolkitComponents/`. References core BWFC transitively. Keeps ACT overhead out of core package. Different release cadence.
+
+5. **Component classification:** 10 extenders (CalendarExtender, ModalPopupExtender, CollapsiblePanelExtender, ConfirmButtonExtender, AutoCompleteExtender, MaskedEditExtender, NumericUpDownExtender, FilteredTextBoxExtender, TextBoxWatermarkExtender, ValidatorCalloutExtender) + 3 standalone (Accordion, TabContainer/TabPanel, Rating).
+
+6. **Implementation order:** Phase 1 (foundation + CollapsiblePanel + ConfirmButton), Phase 2 (Calendar + ModalPopup + Accordion), Phase 3 (TextBox extenders), Phase 4 (TabContainer + Rating + AutoComplete + ValidatorCallout). ~8 sprints total.
+
+7. **SSR compatibility:** Extenders silently degrade (try/catch on JS init). Standalone controls render HTML structure visible; JS adds show/hide behavior on hydration. Matches existing SSR-first strategy.
+
+8. **TargetControlID fallback:** If `FindControl()` fails (target is plain HTML or non-BWFC component), extender uses `TargetControlID` as literal DOM ID. JavaScript `getElementById()` handles both cases.
+
+**Learnings:**
+
+- ACT `ExtenderControlBase` renders zero HTML — all behavior is JS. This means extender `.razor` files are one-liners (`@inherits BaseExtenderComponent`). The abstraction lives entirely in the C# code-behind and JS module.
+- BWFC already has 90% of the infrastructure needed: `Parent` cascading, `FindControl()`, `ComponentIdGenerator.GetClientID()`, `IJSRuntime` injection. The extender base just orchestrates the JS lifecycle on top.
+- `TextBoxWatermarkExtender` is functionally identical to HTML5 `placeholder` attribute. Recommend implementing as thin shim that sets `placeholder` — zero JS needed. Mark `[Obsolete]` with migration guidance.
+- `ValidatorCalloutExtender` depends on Validator Display property improvements (separate M20 issue). Should be last in implementation order.
+- The Chart.js interop pattern (`Lazy<Task<IJSObjectReference>>` + ES module import) is the proven template. Every ACT extender JS module exports 3 functions: create, update, dispose.
+
+📌 Team update (2026-03-15): Ajax Toolkit extender pattern designed for #442 (M24). Two base classes (BaseExtenderComponent, BaseStandaloneToolkitComponent), string-based TargetControlID→FindControl→ClientID resolution, one ES module per component, separate NuGet package. 10 extenders + 3 standalone classified. 4-phase implementation plan (~8 sprints). SSR-safe. Decision in inbox for Jeff review. — decided by Forge
+
+
+### Reskill Audit  Charter Optimization (2026-03-15)
+
+Completed full reskill audit of all 7 agent charters per .squad/skills/reskill/SKILL.md. Total current: 21,875 bytes across 7 charters. Identified 18 procedural blocks for extraction into 3 new skills: gent-workflow (shared collaboration boilerplate from all 7 agents), playwright-testing (Colossus's 5 test procedure blocks), scribe-procedures (Scribe's 6 operational procedure blocks). Projected savings: ~13,875 bytes (64%). All charters projected under 1,500 bytes. Biggest wins: Scribe (5,045800, -84%) and Colossus (4,8041,400, -71%). Also flagged .ai-team/  .squad/ path correction needed across all charters. Full analysis with complete slim charter text written to .squad/decisions/inbox/forge-reskill-audit.md for Scribe to merge.
