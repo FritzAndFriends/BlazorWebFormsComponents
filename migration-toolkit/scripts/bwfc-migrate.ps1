@@ -1549,11 +1549,13 @@ function Add-DataSourceIDWarning {
 
     # Replace data source control declarations with TODO comments.
     # asp: prefix is already stripped at this point, so match bare control names.
+    # Use (?s) single-line mode because tags often span multiple lines and may contain
+    # Web Forms expressions like <%$ ... %> whose %> breaks simple [^>]* patterns.
     $dsControls = @('SqlDataSource', 'ObjectDataSource', 'LinqDataSource',
                      'EntityDataSource', 'XmlDataSource', 'SiteMapDataSource', 'AccessDataSource')
     foreach ($ctrl in $dsControls) {
-        # Self-closing: <SqlDataSource ... />
-        $selfCloseRegex = [regex]"<${ctrl}\b[^>]*/>"
+        # Self-closing: <SqlDataSource ... /> (may span lines, may contain %> in expressions)
+        $selfCloseRegex = [regex]"(?s)<${ctrl}\b.*?/>"
         $selfCloseMatches = $selfCloseRegex.Matches($Content)
         if ($selfCloseMatches.Count -gt 0) {
             $Content = $selfCloseRegex.Replace($Content, "@* TODO: <${ctrl}> has no Blazor equivalent — wire data through code-behind service injection and SelectMethod/Items *@")
@@ -1561,7 +1563,7 @@ function Add-DataSourceIDWarning {
             Write-ManualItem -File $RelPath -Category 'DataSourceControl' -Detail "<${ctrl}> removed — wire data through service injection"
         }
         # Open+close: <SqlDataSource ...>...</SqlDataSource>
-        $openCloseRegex = [regex]"(?s)<${ctrl}\b[^>]*>.*?</${ctrl}\s*>"
+        $openCloseRegex = [regex]"(?s)<${ctrl}\b.*?</${ctrl}\s*>"
         $openCloseMatches = $openCloseRegex.Matches($Content)
         if ($openCloseMatches.Count -gt 0) {
             $Content = $openCloseRegex.Replace($Content, "@* TODO: <${ctrl}> has no Blazor equivalent — wire data through code-behind service injection and SelectMethod/Items *@")
@@ -1633,6 +1635,128 @@ function Copy-CodeBehind {
             $rdReplacement = '${1}// TODO: Verify RouteData → [Parameter] conversion — ensure @page route has matching {parameter}' + "`n" + '${1}[Parameter]'
             $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
+        }
+
+        # --- Response.Redirect → NavigationManager.NavigateTo conversion ---
+        # Converts server-side redirects to Blazor navigation. Preserves .aspx in URLs
+        # since AspxRewriteMiddleware handles rewriting at runtime. Strips ~/ prefix.
+        $hasRedirectConversion = $false
+
+        # Pattern 1: Response.Redirect("url", bool) — literal URL with endResponse parameter
+        $redirectLitBoolRegex = [regex]'Response\.Redirect\(\s*"([^"]*)"\s*,\s*(?:true|false)\s*\)'
+        $redirectLitBoolMatches = $redirectLitBoolRegex.Matches($annotatedContent)
+        if ($redirectLitBoolMatches.Count -gt 0) {
+            $annotatedContent = $redirectLitBoolRegex.Replace($annotatedContent, {
+                param($m)
+                $url = $m.Groups[1].Value -replace '^~/', '/'
+                "NavigationManager.NavigateTo(`"$url`")"
+            })
+            $hasRedirectConversion = $true
+            Write-TransformLog -File $RelPath -Transform 'ResponseRedirect' -Detail "Converted $($redirectLitBoolMatches.Count) Response.Redirect(url, bool) → NavigationManager.NavigateTo()"
+        }
+
+        # Pattern 2: Response.Redirect("url") — simple literal URL
+        $redirectLitRegex = [regex]'Response\.Redirect\(\s*"([^"]*)"\s*\)'
+        $redirectLitMatches = $redirectLitRegex.Matches($annotatedContent)
+        if ($redirectLitMatches.Count -gt 0) {
+            $annotatedContent = $redirectLitRegex.Replace($annotatedContent, {
+                param($m)
+                $url = $m.Groups[1].Value -replace '^~/', '/'
+                "NavigationManager.NavigateTo(`"$url`")"
+            })
+            $hasRedirectConversion = $true
+            Write-TransformLog -File $RelPath -Transform 'ResponseRedirect' -Detail "Converted $($redirectLitMatches.Count) Response.Redirect(url) → NavigationManager.NavigateTo()"
+        }
+
+        # Pattern 3: Response.Redirect(expr, bool) — expression URL with endResponse
+        $redirectExprBoolRegex = [regex]'Response\.Redirect\(\s*([^,)]+)\s*,\s*(?:true|false)\s*\)'
+        $redirectExprBoolMatches = $redirectExprBoolRegex.Matches($annotatedContent)
+        if ($redirectExprBoolMatches.Count -gt 0) {
+            $annotatedContent = $redirectExprBoolRegex.Replace($annotatedContent, 'NavigationManager.NavigateTo($1) /* TODO: Verify navigation target */')
+            $hasRedirectConversion = $true
+            Write-TransformLog -File $RelPath -Transform 'ResponseRedirect' -Detail "Converted $($redirectExprBoolMatches.Count) Response.Redirect(expr, bool) → NavigationManager.NavigateTo()"
+        }
+
+        # Pattern 4: Response.Redirect(expr) — remaining expression URLs
+        $redirectExprRegex = [regex]'Response\.Redirect\(\s*([^)]+)\s*\)'
+        $redirectExprMatches = $redirectExprRegex.Matches($annotatedContent)
+        if ($redirectExprMatches.Count -gt 0) {
+            $annotatedContent = $redirectExprRegex.Replace($annotatedContent, 'NavigationManager.NavigateTo($1) /* TODO: Verify navigation target */')
+            $hasRedirectConversion = $true
+            Write-TransformLog -File $RelPath -Transform 'ResponseRedirect' -Detail "Converted $($redirectExprMatches.Count) Response.Redirect(expr) → NavigationManager.NavigateTo()"
+        }
+
+        # Inject [Inject] NavigationManager if any redirect conversions were made
+        if ($hasRedirectConversion) {
+            $classOpenRegex = [regex]'((?:public|internal|private)\s+(?:partial\s+)?class\s+\w+[^{]*\{)'
+            if ($classOpenRegex.IsMatch($annotatedContent)) {
+                $injectLine = "`n    [Inject] private NavigationManager NavigationManager { get; set; } // TODO: Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed`n"
+                $annotatedContent = $classOpenRegex.Replace($annotatedContent, "`$1$injectLine", 1)
+                Write-TransformLog -File $RelPath -Transform 'ResponseRedirect' -Detail "Injected [Inject] NavigationManager into class"
+            }
+            Write-ManualItem -File $RelPath -Category 'ResponseRedirect' -Detail "Response.Redirect converted to NavigationManager.NavigateTo — verify navigation targets"
+        }
+
+        # --- Session["key"] detection ---
+        # Session state has no direct Blazor equivalent. Detect usage and add migration guidance.
+        $sessionKeyRegex = [regex]'Session\["([^"]*)"\]'
+        $sessionMatches = $sessionKeyRegex.Matches($annotatedContent)
+        if ($sessionMatches.Count -gt 0) {
+            $sessionKeys = [System.Collections.Generic.List[string]]::new()
+            foreach ($m in $sessionMatches) {
+                $key = $m.Groups[1].Value
+                if (-not $sessionKeys.Contains($key)) { $sessionKeys.Add($key) }
+            }
+            # Insert guidance block after the existing TODO header
+            $sessionBlock = "// --- Session State Migration ---`n"
+            $sessionBlock += "// Session keys found: $($sessionKeys -join ', ')`n"
+            $sessionBlock += "// Options:`n"
+            $sessionBlock += "//   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits`n"
+            $sessionBlock += "//   (2) Scoped service via DI — lifetime matches user circuit`n"
+            $sessionBlock += "//   (3) Cascading parameter from a root-level state provider`n"
+            $sessionBlock += "// See: https://learn.microsoft.com/aspnet/core/blazor/state-management`n`n"
+            $todoEndMarker = '// ============================================================================='
+            $lastTodoIdx = $annotatedContent.LastIndexOf($todoEndMarker)
+            if ($lastTodoIdx -ge 0) {
+                $insertPos = $lastTodoIdx + $todoEndMarker.Length
+                # Skip past the newlines after the marker
+                while ($insertPos -lt $annotatedContent.Length -and $annotatedContent[$insertPos] -match '[\r\n]') { $insertPos++ }
+                $annotatedContent = $annotatedContent.Substring(0, $insertPos) + "`n" + $sessionBlock + $annotatedContent.Substring($insertPos)
+            }
+            Write-TransformLog -File $RelPath -Transform 'SessionDetect' -Detail "Detected $($sessionMatches.Count) Session[`"key`"] usage(s) — keys: $($sessionKeys -join ', ')"
+            Write-ManualItem -File $RelPath -Category 'SessionState' -Detail "Session keys used: $($sessionKeys -join ', ') — convert to scoped service or ProtectedSessionStorage"
+        }
+
+        # --- ViewState["key"] detection ---
+        # ViewState is in-memory only in Blazor (does not survive navigation).
+        # BaseWebFormsComponent and WebFormsPageBase have [Obsolete] ViewState dictionaries
+        # for compatibility, but proper migration converts to private fields.
+        $viewStateKeyRegex = [regex]'ViewState\["([^"]*)"\]'
+        $vsMatches = $viewStateKeyRegex.Matches($annotatedContent)
+        if ($vsMatches.Count -gt 0) {
+            $vsKeys = [System.Collections.Generic.List[string]]::new()
+            foreach ($m in $vsMatches) {
+                $key = $m.Groups[1].Value
+                if (-not $vsKeys.Contains($key)) { $vsKeys.Add($key) }
+            }
+            # Generate suggested private field declarations
+            $vsBlock = "// --- ViewState Migration ---`n"
+            $vsBlock += "// ViewState is in-memory only in Blazor (does not survive navigation).`n"
+            $vsBlock += "// Convert to private fields or [Parameter] properties:`n"
+            foreach ($key in $vsKeys) {
+                $fieldName = '_' + $key.Substring(0,1).ToLower() + $key.Substring(1)
+                $vsBlock += "//   private object $fieldName; // was ViewState[`"$key`"]`n"
+            }
+            $vsBlock += "// Note: BaseWebFormsComponent.ViewState exists as an [Obsolete] compatibility shim.`n`n"
+            $todoEndMarker2 = '// ============================================================================='
+            $lastTodoIdx2 = $annotatedContent.LastIndexOf($todoEndMarker2)
+            if ($lastTodoIdx2 -ge 0) {
+                $insertPos2 = $lastTodoIdx2 + $todoEndMarker2.Length
+                while ($insertPos2 -lt $annotatedContent.Length -and $annotatedContent[$insertPos2] -match '[\r\n]') { $insertPos2++ }
+                $annotatedContent = $annotatedContent.Substring(0, $insertPos2) + "`n" + $vsBlock + $annotatedContent.Substring($insertPos2)
+            }
+            Write-TransformLog -File $RelPath -Transform 'ViewStateDetect' -Detail "Detected $($vsMatches.Count) ViewState[`"key`"] usage(s) — keys: $($vsKeys -join ', ')"
+            Write-ManualItem -File $RelPath -Category 'ViewState' -Detail "ViewState keys used: $($vsKeys -join ', ') — convert to private fields (see generated suggestions in code-behind)"
         }
 
         $outputDir = Split-Path $OutputFile -Parent
@@ -1876,6 +2000,12 @@ function Convert-WebFormsFile {
 
     # Fix 2: Convert placeholder elements inside *Template blocks to @context
     $content = Convert-TemplatePlaceholders -Content $content -RelPath $relativePath
+
+    # Normalize attribute values: booleans → lowercase, enums → type-qualified, units → strip px
+    $content = Normalize-AttributeValues -Content $content -RelPath $relativePath
+
+    # DataSourceID removal and data source control replacement with TODO comments
+    $content = Add-DataSourceIDWarning -Content $content -RelPath $relativePath
 
     # Clean up leftover blank lines from removed directives (collapse 3+ consecutive blank lines to 2)
     $content = $content -replace '(\r?\n){3,}', "`n`n"

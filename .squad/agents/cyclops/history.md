@@ -262,3 +262,26 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
 - All 1550 tests pass after changes.
 📌 Team update (2026-03-14): M20 Batch 6 orchestration spawn — Forge designing component health dashboard, Cyclops advancing L1 script fixes, Rogue building L1 test harness — decided by Scribe
 
+### L1 Script ~40% → ~60% Automation Coverage (#28)
+
+**Summary:** Added 5 new transformation capabilities to `bwfc-migrate.ps1`, pushing L1 automation coverage from ~40% to ~60%.
+
+**New transforms — Markup (Normalize-AttributeValues + Add-DataSourceIDWarning):**
+1. **Boolean normalization:** `Visible="True"` → `Visible="true"`, `Enabled="False"` → `Enabled="false"`. Excludes text-content attributes (Text, Title, Value, etc.) to avoid false positives.
+2. **Enum type-qualifying:** 18 attribute→enum mappings (GridLines→GridLines, BorderStyle→BorderStyle, TextMode→TextBoxMode, etc.). `GridLines="Both"` → `GridLines="@GridLines.Both"` so Razor evaluates the C# enum directly instead of relying on EnumParameter<T> string parsing.
+3. **Unit normalization:** `Width="100px"` → `Width="100"` for Width, Height, BorderWidth, CellPadding, CellSpacing. Only strips "px" — other units (%, em, pt) preserved since they carry distinct meaning.
+4. **DataSourceID warnings:** Removes `DataSourceID="..."` attributes and replaces data source control declarations (`<SqlDataSource>`, `<ObjectDataSource>`, etc.) with `@* TODO *@` comments. Uses `(?s)` single-line regex to handle multi-line tags containing `<%$ ... %>` expressions.
+
+**New transforms — Code-behind (enhanced Copy-CodeBehind):**
+5. **Response.Redirect → NavigationManager.NavigateTo:** 4 patterns (literal URL, literal+bool, expression, expression+bool). Strips `~/` prefix from literal URLs. Preserves `.aspx` in URLs (AspxRewriteMiddleware handles rewriting). Injects `[Inject] NavigationManager` into the class.
+6. **Session["key"] detection:** Collects unique session keys, inserts migration guidance block (ProtectedSessionStorage, scoped service, cascading parameter options).
+7. **ViewState["key"] detection:** Collects unique ViewState keys, generates suggested private field declarations, notes the [Obsolete] compatibility shim.
+
+**Pipeline placement:** New markup transforms run after Convert-TemplatePlaceholders and before blank-line cleanup. Code-behind transforms run after existing [RouteData]/[QueryString] conversion and before file write.
+
+**Key gotchas:**
+- Data source control regex uses `(?s)` mode because tags span lines and contain `%>` from Web Forms expressions, which breaks `[^>]*` patterns.
+- Boolean exclusion list prevents false positives on attributes like Text="True" or Title="False".
+- Enum map only includes unambiguous attribute→enum mappings; ambiguous ones like SelectionMode (Calendar vs List) and Mode are skipped.
+- Session/ViewState blocks are inserted after the `=====` TODO header marker using LastIndexOf, not prepended, to keep the file well-organized.
+
