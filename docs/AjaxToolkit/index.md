@@ -2,6 +2,9 @@
 
 The **Ajax Control Toolkit** in BWFC provides Blazor components that emulate Ajax Control Toolkit extender components, enabling seamless migration of Ajax-enriched Web Forms pages to Blazor with minimal markup changes.
 
+!!! tip "New to Migration?"
+    See the **[Ajax Toolkit Migration Guide](migration-guide.md)** for a comprehensive, step-by-step walkthrough of converting your Ajax Control Toolkit controls to Blazor — including installation, before/after examples for every control, L1 script automation, and troubleshooting.
+
 ## What are Extenders?
 
 Extenders are special components that **attach JavaScript behavior to existing HTML controls** without rendering any HTML themselves. They enhance a target control's functionality through client-side JavaScript.

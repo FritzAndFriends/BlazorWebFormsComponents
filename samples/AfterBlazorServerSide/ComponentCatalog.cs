@@ -162,6 +162,8 @@ public static class ComponentCatalog
             Keywords: new[] { "popup", "panel", "click", "lightweight", "extender", "toolkit" }),
         new("HoverMenuExtender", "AJAX", "/ControlSamples/HoverMenuExtender", "Displays popup menu on hover over target control",
             Keywords: new[] { "hover", "menu", "popup", "mouse", "extender", "toolkit" }),
+        new("AjaxToolkitShowcase", "AJAX", "/ControlSamples/AjaxToolkitShowcase", "End-to-end migration showcase demonstrating 10 Ajax Toolkit controls on a single page",
+            Keywords: new[] { "showcase", "migration", "demo", "accordion", "tabs", "modal", "autocomplete", "calendar", "mask", "slider", "hover", "toolkit" }),
 
         // Migration Helpers
         new("ScriptManager", "Migration Helpers", "/ControlSamples/ScriptManager", "Migration stub for AJAX script management",

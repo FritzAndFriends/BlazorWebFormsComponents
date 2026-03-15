@@ -129,6 +129,7 @@ nav:
     - UpdateProgress: EditorControls/UpdateProgress.md
   - Ajax Control Toolkit Extenders:
     - Overview: AjaxToolkit/index.md
+    - Migration Guide: AjaxToolkit/migration-guide.md
     - Accordion: AjaxToolkit/Accordion.md
     - AutoCompleteExtender: AjaxToolkit/AutoCompleteExtender.md
     - CalendarExtender: AjaxToolkit/CalendarExtender.md
