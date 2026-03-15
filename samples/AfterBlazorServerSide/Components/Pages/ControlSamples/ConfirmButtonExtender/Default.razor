@@ -1,0 +1,169 @@
+@page "/ControlSamples/ConfirmButtonExtender"
+@rendermode InteractiveServer
+
+<PageTitle>ConfirmButtonExtender Component Samples</PageTitle>
+
+<h2>ConfirmButtonExtender Component</h2>
+
+<p>The <code>ConfirmButtonExtender</code> attaches a browser confirmation dialog to a target button. When the user clicks the button, a <code>confirm()</code> prompt appears. If the user cancels, the click event is suppressed. This emulates the Ajax Control Toolkit <code>ConfirmButtonExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Confirm on Delete</h3>
+<p>A delete button that asks for confirmation before proceeding.</p>
+
+<div data-audit-control="ConfirmButtonExtender-1">
+    <button id="btnDelete" class="btn btn-danger" @onclick="HandleDelete">
+        🗑️ Delete Item
+    </button>
+    <ConfirmButtonExtender TargetControlID="btnDelete"
+                           ConfirmText="Are you sure you want to delete this item?" />
+
+    @if (!string.IsNullOrEmpty(deleteStatus))
+    {
+        <div class="alert alert-warning mt-2">@deleteStatus</div>
+    }
+</div>
+
+<pre><code>&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:Button ID="btnDelete" runat="server" Text="Delete Item" OnClick="btnDelete_Click" /&gt;
+&lt;ajaxToolkit:ConfirmButtonExtender ID="cbe1" runat="server"
+    TargetControlID="btnDelete"
+    ConfirmText="Are you sure you want to delete this item?" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;button id="btnDelete" @@onclick="HandleDelete"&gt;Delete Item&lt;/button&gt;
+&lt;ConfirmButtonExtender TargetControlID="btnDelete"
+                       ConfirmText="Are you sure you want to delete this item?" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Confirm with Custom Messages</h3>
+<p>Different buttons with different confirmation prompts for various actions.</p>
+
+<div data-audit-control="ConfirmButtonExtender-2">
+    <div class="d-flex gap-2 flex-wrap">
+        <button id="btnSubmitOrder" class="btn btn-primary" @onclick="HandleSubmitOrder">
+            📦 Submit Order
+        </button>
+        <ConfirmButtonExtender TargetControlID="btnSubmitOrder"
+                               ConfirmText="Submit this order? This action cannot be undone." />
+
+        <button id="btnResetForm" class="btn btn-secondary" @onclick="HandleResetForm">
+            🔄 Reset Form
+        </button>
+        <ConfirmButtonExtender TargetControlID="btnResetForm"
+                               ConfirmText="Reset all form fields to their default values?" />
+
+        <button id="btnSendEmail" class="btn btn-success" @onclick="HandleSendEmail">
+            ✉️ Send Email
+        </button>
+        <ConfirmButtonExtender TargetControlID="btnSendEmail"
+                               ConfirmText="Send this email to all recipients?" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(actionStatus))
+    {
+        <div class="alert alert-info mt-2">@actionStatus</div>
+    }
+</div>
+
+<pre><code>&lt;button id="btnSubmitOrder" @@onclick="HandleSubmitOrder"&gt;Submit Order&lt;/button&gt;
+&lt;ConfirmButtonExtender TargetControlID="btnSubmitOrder"
+                       ConfirmText="Submit this order? This action cannot be undone." /&gt;
+
+&lt;button id="btnResetForm" @@onclick="HandleResetForm"&gt;Reset Form&lt;/button&gt;
+&lt;ConfirmButtonExtender TargetControlID="btnResetForm"
+                       ConfirmText="Reset all form fields to their default values?" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Confirm with Default Text</h3>
+<p>When no <code>ConfirmText</code> is specified, the default message <em>"Are you sure?"</em> is shown.</p>
+
+<div data-audit-control="ConfirmButtonExtender-3">
+    <button id="btnDefault" class="btn btn-outline-dark" @onclick="HandleDefaultConfirm">
+        Click Me (Default Confirm)
+    </button>
+    <ConfirmButtonExtender TargetControlID="btnDefault" />
+
+    @if (!string.IsNullOrEmpty(defaultStatus))
+    {
+        <div class="alert alert-secondary mt-2">@defaultStatus</div>
+    }
+</div>
+
+<pre><code>&lt;!-- Uses default ConfirmText: "Are you sure?" --&gt;
+&lt;button id="btnDefault" @@onclick="HandleDefaultConfirm"&gt;Click Me&lt;/button&gt;
+&lt;ConfirmButtonExtender TargetControlID="btnDefault" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:Button ID="btnDelete" runat="server" Text="Delete"
+    OnClick="btnDelete_Click" CssClass="btn btn-danger" /&gt;
+&lt;ajaxToolkit:ConfirmButtonExtender ID="ConfirmButtonExtender1" runat="server"
+    TargetControlID="btnDelete"
+    ConfirmText="Are you sure you want to delete this item?" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;button id="btnDelete" class="btn btn-danger" @@onclick="HandleDelete"&gt;Delete&lt;/button&gt;
+&lt;ConfirmButtonExtender TargetControlID="btnDelete"
+                       ConfirmText="Are you sure you want to delete this item?" /&gt;
+
+@@code {
+    private void HandleDelete()
+    {
+        // Action proceeds only if user confirmed
+    }
+}</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code> (not needed in Blazor)</li>
+    <li>Replace <code>&lt;asp:Button&gt;</code> with a standard <code>&lt;button&gt;</code> or BWFC <code>&lt;Button&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:ConfirmButtonExtender&gt;</code> with <code>&lt;ConfirmButtonExtender&gt;</code></li>
+    <li>Keep the same <code>TargetControlID</code> — ensure the target element has a matching <code>id</code></li>
+    <li>Keep the same <code>ConfirmText</code> value</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code> (JS interop required)</li>
+</ol>
+
+@code {
+    private string deleteStatus = "";
+    private string actionStatus = "";
+    private string defaultStatus = "";
+
+    private void HandleDelete()
+    {
+        deleteStatus = $"Item deleted at {DateTime.Now:h:mm:ss tt}";
+    }
+
+    private void HandleSubmitOrder()
+    {
+        actionStatus = $"Order submitted at {DateTime.Now:h:mm:ss tt}";
+    }
+
+    private void HandleResetForm()
+    {
+        actionStatus = $"Form reset at {DateTime.Now:h:mm:ss tt}";
+        deleteStatus = "";
+        defaultStatus = "";
+    }
+
+    private void HandleSendEmail()
+    {
+        actionStatus = $"Email sent at {DateTime.Now:h:mm:ss tt}";
+    }
+
+    private void HandleDefaultConfirm()
+    {
+        defaultStatus = $"Action confirmed at {DateTime.Now:h:mm:ss tt}";
+    }
+}

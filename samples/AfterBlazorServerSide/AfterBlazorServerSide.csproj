@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+    <ProjectReference Include="..\..\src\BlazorAjaxToolkitComponents\BlazorAjaxToolkitComponents.csproj" />
     <ProjectReference Include="..\SharedSampleObjects\SharedSampleObjects.csproj" />
   </ItemGroup>
 
