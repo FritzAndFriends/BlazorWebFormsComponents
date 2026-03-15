@@ -1197,6 +1197,110 @@
             Use {0} as a placeholder for the current value.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.SlideShowExtender">
+            <summary>
+            Turns an Image control into an automatic slideshow that cycles through images.
+            Emulates the Ajax Control Toolkit SlideShowExtender.
+            Supports optional navigation controls and auto-play functionality.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.SlideShowServicePath">
+            <summary>
+            URL path to a service that provides slide data.
+            For Blazor, this is optional - use <see cref="P:BlazorAjaxToolkitComponents.SlideShowExtender.Slides"/> for client-side data.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.SlideShowServiceMethod">
+            <summary>
+            Method name to call on the service.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.ContextKey">
+            <summary>
+            Context key to pass to the service method.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.UseContextKey">
+            <summary>
+            Whether to use the context key when calling the service.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.ImageDescriptionLabelID">
+            <summary>
+            ID of an element to display the current image description.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.NextButtonID">
+            <summary>
+            ID of a button element that navigates to the next slide.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PreviousButtonID">
+            <summary>
+            ID of a button element that navigates to the previous slide.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PlayButtonID">
+            <summary>
+            ID of a button element that toggles play/pause.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PlayButtonText">
+            <summary>
+            Text to show on the play button when slideshow is paused.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.StopButtonText">
+            <summary>
+            Text to show on the play button when slideshow is playing.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PlayInterval">
+            <summary>
+            Interval in milliseconds between automatic slide transitions.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.Loop">
+            <summary>
+            Whether the slideshow loops back to the first slide after the last.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.AutoPlay">
+            <summary>
+            Whether to start playing automatically when loaded.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.ImageTitleLabelID">
+            <summary>
+            ID of an element to display the current image title.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.Slides">
+            <summary>
+            Client-side collection of slides to display.
+            Each slide should have ImageUrl, Title, and Description properties.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.SlideShowSlide">
+            <summary>
+            Represents a single slide in the slideshow.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowSlide.ImageUrl">
+            <summary>
+            URL of the image to display.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowSlide.Title">
+            <summary>
+            Title of the slide (shown in ImageTitleLabelID element).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowSlide.Description">
+            <summary>
+            Description of the slide (shown in ImageDescriptionLabelID element).
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.TabContainer">
             <summary>
             A container component that displays content in tabbed panels.
