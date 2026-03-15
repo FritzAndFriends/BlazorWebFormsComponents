@@ -249,6 +249,75 @@
             The string parameter is the current prefix typed by the user.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.BalloonPopupExtender">
+            <summary>
+            Displays a balloon/tooltip-style popup with a pointer arrow when the user
+            hovers over, clicks, or focuses on a target element. Supports customizable
+            appearance including style, size, shadow, and scrollbar settings.
+            Emulates the Ajax Control Toolkit BalloonPopupExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.BalloonPopupControlID">
+            <summary>
+            The ID of the element to show as the balloon content.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.Position">
+            <summary>
+            The position of the balloon relative to the target control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.BalloonStyle">
+            <summary>
+            The visual style of the balloon popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.BalloonSize">
+            <summary>
+            The size preset for the balloon popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.UseShadow">
+            <summary>
+            Whether to display a drop shadow on the balloon.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.ScrollBars">
+            <summary>
+            The scrollbar behavior for the balloon content.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.DisplayOnMouseOver">
+            <summary>
+            Whether to display the balloon on mouse hover.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.DisplayOnFocus">
+            <summary>
+            Whether to display the balloon when the target receives focus.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.DisplayOnClick">
+            <summary>
+            Whether to display the balloon when the target is clicked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.OffsetX">
+            <summary>
+            Horizontal offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.OffsetY">
+            <summary>
+            Vertical offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.CustomCssUrl">
+            <summary>
+            URL to custom CSS for styling the balloon popup.
+            Only used when BalloonStyle is Custom.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.BaseExtenderComponent">
             <summary>
             Base class for Ajax Control Toolkit extender components.
@@ -516,6 +585,21 @@
             Panes are limited to the Accordion container height but do not expand to fill it.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BalloonPosition">
+            <summary>
+            Specifies the position of the balloon popup relative to its target control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BalloonSize">
+            <summary>
+            Specifies the size preset for the BalloonPopupExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BalloonStyle">
+            <summary>
+            Specifies the visual style of the BalloonPopupExtender.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.BoxCorners">
             <summary>
             Specifies which corners of a box should be rounded.
@@ -628,6 +712,16 @@
             Specifies the position of a popup relative to its target control.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.PromptPosition">
+            <summary>
+            Specifies where the search prompt is displayed relative to the list control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.QueryPattern">
+            <summary>
+            Specifies the pattern used for matching search text against list items.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.SliderOrientation">
             <summary>
             Specifies the orientation of a SliderExtender control.
@@ -725,6 +819,41 @@
         <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverCssClass">
             <summary>
             CSS class applied to the target control while the hover menu is visible.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ListSearchExtender">
+            <summary>
+            Enables search/filter functionality on a ListBox or DropDownList.
+            As the user types in the search field, items that don't match are filtered
+            or the selection jumps to the first matching item.
+            Emulates the Ajax Control Toolkit ListSearchExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.PromptText">
+            <summary>
+            The placeholder text shown in the search input when it is empty.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.PromptCssClass">
+            <summary>
+            CSS class applied to the search prompt text.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.PromptPosition">
+            <summary>
+            Specifies where the search prompt is displayed relative to the list control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.IsSorted">
+            <summary>
+            Indicates whether the list items are sorted.
+            When true, enables optimized binary search for StartsWith pattern.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.QueryPattern">
+            <summary>
+            Specifies how search text matches against list items.
+            Contains matches anywhere in the text; StartsWith matches only from the beginning.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.MaskedEditExtender">
