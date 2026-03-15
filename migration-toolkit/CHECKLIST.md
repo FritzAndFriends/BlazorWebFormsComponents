@@ -63,6 +63,25 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] No JavaScript console errors in browser dev tools
 - [ ] Data displays correctly (correct records, correct formatting)
 - [ ] Form submissions work (validation fires, data saves)
+
+### L3-opt — Performance Optimization Pass (Optional, run after Verification ✅)
+
+> Run after the app is fully functional. Use the [`l3-performance-optimization` skill](skills/l3-performance-optimization/SKILL.md).
+
+- [ ] `OnInitialized` with DB calls → `OnInitializedAsync` (✅ Safe)
+- [ ] Sync EF Core calls → async equivalents (`ToListAsync`, `SaveChangesAsync`, etc.) (✅ Safe)
+- [ ] Read-only queries have `AsNoTracking()` (✅ Safe)
+- [ ] String `Include("Nav")` replaced with lambda `Include(x => x.Nav)` (✅ Safe)
+- [ ] `Task.Result` / `Task.Wait()` anti-patterns removed (✅ Safe)
+- [ ] `@key` added to `@foreach` loops rendering components (✅ Safe)
+- [ ] `[SupplyParameterFromQuery]` replaces manual `NavigationManager.Uri` parsing (✅ Safe)
+- [ ] String concatenation in render logic → `$""` interpolation (✅ Safe)
+- [ ] `[EditorRequired]` added to mandatory component parameters (✅ Safe)
+- [ ] Heavy inline `@code` blocks (>50 lines) extracted to code-behind (✅ Safe)
+- [ ] `AddDbContext` → `AddDbContextFactory` + `using var db = DbFactory.CreateDbContext()` (⚠️ Review)
+- [ ] Multi-collection `Include()` chains evaluated for `AsSplitQuery()` (⚠️ Review)
+- [ ] `[StreamRendering]` considered for pages with async data loads (⚠️ Review)
+- [ ] `ShouldRender()` considered for high-frequency-render leaf components (⚠️ Review)
 ```
 
 ---
