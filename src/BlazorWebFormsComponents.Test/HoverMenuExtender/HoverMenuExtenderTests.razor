@@ -169,13 +169,13 @@
 	// === PopDelay ===
 
 	[Fact]
-	public void PopDelay_Default_IsZero()
+	public void PopDelay_Default_Is100()
 	{
 		SetupLooseJs();
 		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
 
 		cut.FindComponent<HoverMenuExtender>().Instance
-			.PopDelay.ShouldBe(0);
+			.PopDelay.ShouldBe(100);
 	}
 
 	[Fact]

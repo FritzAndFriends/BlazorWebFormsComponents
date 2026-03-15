@@ -1,0 +1,194 @@
+@using BlazorAjaxToolkitComponents
+
+@code {
+
+	private const string MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/drop-shadow-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === Opacity ===
+
+	[Fact]
+	public void Opacity_DefaultIs05()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Opacity.ShouldBe(0.5);
+	}
+
+	[Fact]
+	public void Opacity_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<DropShadowExtender TargetControlID="panel1" Opacity="0.8" />
+		);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Opacity.ShouldBe(0.8);
+	}
+
+	// === Width ===
+
+	[Fact]
+	public void Width_DefaultIs5()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Width.ShouldBe(5);
+	}
+
+	[Fact]
+	public void Width_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<DropShadowExtender TargetControlID="panel1" Width="10" />
+		);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Width.ShouldBe(10);
+	}
+
+	// === Rounded ===
+
+	[Fact]
+	public void Rounded_DefaultIsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Rounded.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Rounded_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<DropShadowExtender TargetControlID="panel1" Rounded="true" />
+		);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Rounded.ShouldBeTrue();
+	}
+
+	// === Radius ===
+
+	[Fact]
+	public void Radius_DefaultIs0()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Radius.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Radius_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<DropShadowExtender TargetControlID="panel1" Radius="8" />
+		);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.Radius.ShouldBe(8);
+	}
+
+	// === TrackPosition ===
+
+	[Fact]
+	public void TrackPosition_DefaultIsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.TrackPosition.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TrackPosition_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<DropShadowExtender TargetControlID="panel1" TrackPosition="true" />
+		);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.TrackPosition.ShouldBeTrue();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<DropShadowExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<DropShadowExtender TargetControlID="panel1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<DropShadowExtender TargetControlID="panel1" />);
+
+		cut.FindComponent<DropShadowExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

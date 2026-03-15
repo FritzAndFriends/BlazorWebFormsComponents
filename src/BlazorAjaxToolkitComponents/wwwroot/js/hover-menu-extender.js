@@ -120,7 +120,7 @@ export function createBehavior(config) {
 
     function scheduleShow() {
         cancelTimers();
-        const delay = properties.popDelay || 0;
+        const delay = properties.hoverDelay || 0;
         if (delay > 0) {
             state.showTimer = setTimeout(showPopup, delay);
         } else {
@@ -134,7 +134,7 @@ export function createBehavior(config) {
             clearTimeout(state.showTimer);
             state.showTimer = null;
         }
-        const delay = properties.hoverDelay || 300;
+        const delay = properties.popDelay || 100;
         state.hideTimer = setTimeout(hidePopup, delay);
     }
 

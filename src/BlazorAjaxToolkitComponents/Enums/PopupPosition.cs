@@ -9,5 +9,9 @@ public enum PopupPosition
 	Right = 1,
 	Top = 2,
 	Bottom = 3,
-	Center = 4
+	Center = 4,
+	TopLeft = 5,
+	TopRight = 6,
+	BottomLeft = 7,
+	BottomRight = 8
 }

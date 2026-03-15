@@ -82,6 +82,36 @@ public class MaskedEditExtender : BaseExtenderComponent
 	public AcceptNegative AcceptNegative { get; set; } = AcceptNegative.None;
 
 	/// <summary>
+	/// How currency symbols are displayed for number masks.
+	/// </summary>
+	[Parameter]
+	public DisplayMoney DisplayMoney { get; set; } = DisplayMoney.None;
+
+	/// <summary>
+	/// CSS class applied when the input has focus.
+	/// </summary>
+	[Parameter]
+	public string OnFocusCssClass { get; set; } = string.Empty;
+
+	/// <summary>
+	/// CSS class applied when the input contains an invalid value.
+	/// </summary>
+	[Parameter]
+	public string OnInvalidCssClass { get; set; } = string.Empty;
+
+	/// <summary>
+	/// CSS class applied when the input contains a negative value.
+	/// </summary>
+	[Parameter]
+	public string OnBlurCssNegative { get; set; } = string.Empty;
+
+	/// <summary>
+	/// The culture name used for formatting (e.g., "en-US").
+	/// </summary>
+	[Parameter]
+	public string CultureName { get; set; } = string.Empty;
+
+	/// <summary>
 	/// Whether to show a tooltip with error information when validation fails.
 	/// </summary>
 	[Parameter]
@@ -110,6 +140,11 @@ public class MaskedEditExtender : BaseExtenderComponent
 		clearTextOnInvalid = ClearTextOnInvalid,
 		acceptAMPM = AcceptAMPM,
 		acceptNegative = (int)AcceptNegative,
+		displayMoney = (int)DisplayMoney,
+		onFocusCssClass = OnFocusCssClass,
+		onInvalidCssClass = OnInvalidCssClass,
+		onBlurCssNegative = OnBlurCssNegative,
+		cultureName = CultureName,
 		errorTooltipEnabled = ErrorTooltipEnabled,
 		errorTooltipCssClass = ErrorTooltipCssClass
 	};

@@ -19,12 +19,17 @@ const NEG_NONE = 0;
 const NEG_LEFT = 1;
 const NEG_RIGHT = 2;
 
-// Mask legend: 9=digit, L=letter, $=digit or space, C=any char, A=letter or digit
+// DisplayMoney (matches C# enum)
+const MONEY_NONE = 0;
+const MONEY_LEFT = 1;
+const MONEY_RIGHT = 2;
+
+// Mask legend: 9=digit, L=letter, $=letter or space, C=any char, A=alphanumeric, N=number or space, ?=any char or space
 function getMaskSlots(mask) {
     const slots = [];
     for (let i = 0; i < mask.length; i++) {
         const ch = mask[i];
-        if (ch === "9" || ch === "L" || ch === "$" || ch === "C" || ch === "A") {
+        if (ch === "9" || ch === "L" || ch === "$" || ch === "C" || ch === "A" || ch === "N" || ch === "?") {
             slots.push({ index: i, type: ch });
         }
     }
@@ -32,12 +37,18 @@ function getMaskSlots(mask) {
 }
 
 function isValidForSlot(ch, slotType, filtered) {
+    // Check if character is in the filtered extra characters
+    if (filtered && filtered.indexOf(ch) >= 0) {
+        return true;
+    }
     switch (slotType) {
         case "9": return /\d/.test(ch);
         case "L": return /[a-zA-Z]/.test(ch);
-        case "$": return /[\d ]/.test(ch);
+        case "$": return /[a-zA-Z ]/.test(ch);
         case "C": return true;
         case "A": return /[a-zA-Z0-9]/.test(ch);
+        case "N": return /[\d ]/.test(ch);
+        case "?": return true;
         default: return false;
     }
 }
@@ -185,6 +196,10 @@ export function createBehavior(config) {
         if (!target.value || target.value.length === 0) {
             target.value = buildDisplayFromMask([]);
         }
+        // Apply focus CSS class
+        if (properties.onFocusCssClass) {
+            target.classList.add(properties.onFocusCssClass);
+        }
         // Position cursor at first empty slot
         const values = getSlotValues();
         for (let i = 0; i < slots.length; i++) {
@@ -196,15 +211,37 @@ export function createBehavior(config) {
     };
 
     state.handlers.blur = function () {
+        // Remove focus CSS class
+        if (properties.onFocusCssClass) {
+            target.classList.remove(properties.onFocusCssClass);
+        }
+        // Remove invalid CSS class initially (will re-add if needed)
+        if (properties.onInvalidCssClass) {
+            target.classList.remove(properties.onInvalidCssClass);
+        }
+
         const values = getSlotValues();
         const hasValue = values.some(v => v !== undefined);
+        const allFilled = values.every(v => v !== undefined);
 
         if (properties.clearTextOnInvalid) {
-            const allFilled = values.every(v => v !== undefined);
             if (!allFilled && hasValue) {
                 target.value = "";
                 target.dispatchEvent(new Event("input", { bubbles: true }));
+                if (properties.onInvalidCssClass) {
+                    target.classList.add(properties.onInvalidCssClass);
+                }
                 return;
+            }
+        }
+
+        // Check for negative value and apply CSS class
+        if (properties.onBlurCssNegative && hasValue) {
+            const rawValue = values.filter(v => v !== undefined).join("");
+            if (rawValue.indexOf("-") >= 0 || (properties.acceptNegative !== NEG_NONE && rawValue.startsWith("-"))) {
+                target.classList.add(properties.onBlurCssNegative);
+            } else {
+                target.classList.remove(properties.onBlurCssNegative);
             }
         }
 

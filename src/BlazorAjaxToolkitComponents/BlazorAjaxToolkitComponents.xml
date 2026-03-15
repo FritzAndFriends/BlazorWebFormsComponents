@@ -127,6 +127,43 @@
         <member name="M:BlazorAjaxToolkitComponents.AccordionPane.Dispose">
             <inheritdoc />
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender">
+            <summary>
+            Keeps a control visible in a fixed position on screen even when the user scrolls.
+            Useful for toolbars, help buttons, or notification areas.
+            Emulates the Ajax Control Toolkit AlwaysVisibleControlExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.HorizontalOffset">
+            <summary>
+            The number of pixels from the horizontal edge.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.VerticalOffset">
+            <summary>
+            The number of pixels from the vertical edge.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.HorizontalSide">
+            <summary>
+            Which horizontal edge to position the control against.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.VerticalSide">
+            <summary>
+            Which vertical edge to position the control against.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.ScrollEffectDuration">
+            <summary>
+            Duration of the position animation in seconds.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AlwaysVisibleControlExtender.UseAnimation">
+            <summary>
+            Whether to animate position changes.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.AutoCompleteExtender">
             <summary>
             Provides typeahead/autocomplete functionality for a target TextBox.
@@ -210,6 +247,75 @@
             <summary>
             Blazor callback for requesting completion data server-side.
             The string parameter is the current prefix typed by the user.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.BalloonPopupExtender">
+            <summary>
+            Displays a balloon/tooltip-style popup with a pointer arrow when the user
+            hovers over, clicks, or focuses on a target element. Supports customizable
+            appearance including style, size, shadow, and scrollbar settings.
+            Emulates the Ajax Control Toolkit BalloonPopupExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.BalloonPopupControlID">
+            <summary>
+            The ID of the element to show as the balloon content.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.Position">
+            <summary>
+            The position of the balloon relative to the target control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.BalloonStyle">
+            <summary>
+            The visual style of the balloon popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.BalloonSize">
+            <summary>
+            The size preset for the balloon popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.UseShadow">
+            <summary>
+            Whether to display a drop shadow on the balloon.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.ScrollBars">
+            <summary>
+            The scrollbar behavior for the balloon content.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.DisplayOnMouseOver">
+            <summary>
+            Whether to display the balloon on mouse hover.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.DisplayOnFocus">
+            <summary>
+            Whether to display the balloon when the target receives focus.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.DisplayOnClick">
+            <summary>
+            Whether to display the balloon when the target is clicked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.OffsetX">
+            <summary>
+            Horizontal offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.OffsetY">
+            <summary>
+            Vertical offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.BalloonPopupExtender.CustomCssUrl">
+            <summary>
+            URL to custom CSS for styling the balloon popup.
+            Only used when BalloonStyle is Custom.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.BaseExtenderComponent">
@@ -410,6 +516,50 @@
             Not implemented in v1 — reserved for future use.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.DragPanelExtender">
+            <summary>
+            Makes a panel or element draggable by its title bar or handle.
+            Users can click and drag the panel to reposition it on the page.
+            Emulates the Ajax Control Toolkit DragPanelExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DragPanelExtender.DragHandleID">
+            <summary>
+            The ID of an optional element that acts as the drag handle.
+            If not set, the entire target panel is draggable.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.DropShadowExtender">
+            <summary>
+            Adds a drop shadow effect to an element, giving it a raised/floating appearance.
+            Emulates the Ajax Control Toolkit DropShadowExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Opacity">
+            <summary>
+            Shadow opacity from 0.0 (fully transparent) to 1.0 (fully opaque). Default is 0.5.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Width">
+            <summary>
+            Shadow width in pixels. Default is 5.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Rounded">
+            <summary>
+            Whether to round the corners of the target element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.Radius">
+            <summary>
+            Corner radius in pixels when Rounded is true.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DropShadowExtender.TrackPosition">
+            <summary>
+            Whether the shadow should track the element's position if it moves.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.AcceptNegative">
             <summary>
             Specifies how negative values are accepted in the MaskedEditExtender.
@@ -435,6 +585,77 @@
             Panes are limited to the Accordion container height but do not expand to fill it.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BalloonPosition">
+            <summary>
+            Specifies the position of the balloon popup relative to its target control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BalloonSize">
+            <summary>
+            Specifies the size preset for the BalloonPopupExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BalloonStyle">
+            <summary>
+            Specifies the visual style of the BalloonPopupExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.BoxCorners">
+            <summary>
+            Specifies which corners of a box should be rounded.
+            This is a flags enum — values can be combined.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.None">
+            <summary>
+            No corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.TopLeft">
+            <summary>
+            Top-left corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.TopRight">
+            <summary>
+            Top-right corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.BottomLeft">
+            <summary>
+            Bottom-left corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.BottomRight">
+            <summary>
+            Bottom-right corner is rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Top">
+            <summary>
+            Both top corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Bottom">
+            <summary>
+            Both bottom corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Left">
+            <summary>
+            Both left corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.Right">
+            <summary>
+            Both right corners are rounded.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.BoxCorners.All">
+            <summary>
+            All four corners are rounded.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.CalendarDefaultView">
             <summary>
             Specifies the default view when the calendar popup opens.
@@ -443,6 +664,16 @@
         <member name="T:BlazorAjaxToolkitComponents.Enums.CalendarPosition">
             <summary>
             Specifies the position of the calendar popup relative to the target control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.DisplayMoney">
+            <summary>
+            Specifies how currency symbols are displayed in the MaskedEditExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.DisplayPosition">
+            <summary>
+            Specifies the display position of an indicator relative to its target control.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.ExpandDirection">
@@ -461,6 +692,11 @@
             This is a flags enum — values can be combined.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.HorizontalSide">
+            <summary>
+            Specifies the horizontal side for positioning an always-visible control.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.InputDirection">
             <summary>
             Specifies the direction of input for the MaskedEditExtender.
@@ -476,9 +712,39 @@
             Specifies the position of a popup relative to its target control.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.PromptPosition">
+            <summary>
+            Specifies where the search prompt is displayed relative to the list control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.QueryPattern">
+            <summary>
+            Specifies the pattern used for matching search text against list items.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.SliderOrientation">
             <summary>
             Specifies the orientation of a SliderExtender control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.StrengthIndicatorType">
+            <summary>
+            Specifies the type of password strength indicator display.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.StrengthIndicatorType.Text">
+            <summary>
+            Displays password strength as text labels.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.StrengthIndicatorType.BarIndicator">
+            <summary>
+            Displays password strength as a visual progress bar.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.VerticalSide">
+            <summary>
+            Specifies the vertical side for positioning an always-visible control.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.FilteredTextBoxExtender">
@@ -540,12 +806,12 @@
             Vertical offset in pixels from the calculated position.
             </summary>
         </member>
-        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopDelay">
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverDelay">
             <summary>
             Delay in milliseconds before showing the popup after mouse enters the target.
             </summary>
         </member>
-        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverDelay">
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopDelay">
             <summary>
             Delay in milliseconds before hiding the popup after mouse leaves the target and popup.
             </summary>
@@ -553,6 +819,41 @@
         <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverCssClass">
             <summary>
             CSS class applied to the target control while the hover menu is visible.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ListSearchExtender">
+            <summary>
+            Enables search/filter functionality on a ListBox or DropDownList.
+            As the user types in the search field, items that don't match are filtered
+            or the selection jumps to the first matching item.
+            Emulates the Ajax Control Toolkit ListSearchExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.PromptText">
+            <summary>
+            The placeholder text shown in the search input when it is empty.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.PromptCssClass">
+            <summary>
+            CSS class applied to the search prompt text.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.PromptPosition">
+            <summary>
+            Specifies where the search prompt is displayed relative to the list control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.IsSorted">
+            <summary>
+            Indicates whether the list items are sorted.
+            When true, enables optimized binary search for StartsWith pattern.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ListSearchExtender.QueryPattern">
+            <summary>
+            Specifies how search text matches against list items.
+            Contains matches anywhere in the text; StartsWith matches only from the beginning.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.MaskedEditExtender">
@@ -617,6 +918,31 @@
         <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.AcceptNegative">
             <summary>
             How negative values are displayed for number masks.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.DisplayMoney">
+            <summary>
+            How currency symbols are displayed for number masks.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.OnFocusCssClass">
+            <summary>
+            CSS class applied when the input has focus.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.OnInvalidCssClass">
+            <summary>
+            CSS class applied when the input contains an invalid value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.OnBlurCssNegative">
+            <summary>
+            CSS class applied when the input contains a negative value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.CultureName">
+            <summary>
+            The culture name used for formatting (e.g., "en-US").
             </summary>
         </member>
         <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.ErrorTooltipEnabled">
@@ -740,6 +1066,95 @@
             An arbitrary string value passed to the web service methods.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.PasswordStrength">
+            <summary>
+            Displays a visual indicator of password strength as the user types in a password TextBox.
+            Evaluates passwords against configurable rules (length, character requirements) and shows feedback.
+            Emulates the Ajax Control Toolkit PasswordStrength extender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.DisplayPosition">
+            <summary>
+            Specifies where to display the strength indicator relative to the password field.
+            Default is RightSide.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.StrengthIndicatorType">
+            <summary>
+            Specifies the type of strength indicator: Text labels or BarIndicator.
+            Default is Text.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.PreferredPasswordLength">
+            <summary>
+            The preferred minimum password length. Default is 10.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumNumericCharacters">
+            <summary>
+            The minimum number of numeric characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumSymbolCharacters">
+            <summary>
+            The minimum number of symbol characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumUpperCaseCharacters">
+            <summary>
+            The minimum number of uppercase characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.MinimumLowerCaseCharacters">
+            <summary>
+            The minimum number of lowercase characters required. Default is 0.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.RequiresUpperAndLowerCaseCharacters">
+            <summary>
+            Whether the password must contain both uppercase and lowercase characters.
+            Default is false.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.TextStrengthDescriptions">
+            <summary>
+            Semicolon-delimited strength level descriptions.
+            Example: "Very Poor;Weak;Average;Strong;Excellent"
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.StrengthStyles">
+            <summary>
+            Semicolon-delimited CSS class names for each strength level.
+            Aligns with TextStrengthDescriptions by index.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.BarBorderCssClass">
+            <summary>
+            CSS class for the bar indicator border.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.CalculationWeightings">
+            <summary>
+            Custom calculation weightings for strength scoring (advanced).
+            Format depends on implementation requirements.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.TextCssClass">
+            <summary>
+            CSS class applied to the text display element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.HelpHandleCssClass">
+            <summary>
+            CSS class for the help handle/icon.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PasswordStrength.HelpHandlePosition">
+            <summary>
+            Position of the help handle relative to the password field.
+            Default is RightSide.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.PopupControlExtender">
             <summary>
             Attaches a popup panel to a target control, displaying it on click.
@@ -782,6 +1197,64 @@
         <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.ExtenderControlID">
             <summary>
             The ID of this extender control for programmatic access.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ResizableControlExtender">
+            <summary>
+            Allows users to resize an element by dragging its edges or a resize handle.
+            Emulates the Ajax Control Toolkit ResizableControlExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.HandleCssClass">
+            <summary>
+            CSS class for the resize handle element (usually positioned at the bottom-right corner).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.ResizableCssClass">
+            <summary>
+            CSS class applied to the target element while it is being resized.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MinimumWidth">
+            <summary>
+            Minimum width constraint in pixels. Default is 0 (no minimum).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MinimumHeight">
+            <summary>
+            Minimum height constraint in pixels. Default is 0 (no minimum).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MaximumWidth">
+            <summary>
+            Maximum width constraint in pixels. 0 means no maximum.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ResizableControlExtender.MaximumHeight">
+            <summary>
+            Maximum height constraint in pixels. 0 means no maximum.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.RoundedCornersExtender">
+            <summary>
+            Applies rounded corners to an element using CSS border-radius.
+            Emulates the Ajax Control Toolkit RoundedCornersExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.RoundedCornersExtender.Radius">
+            <summary>
+            Corner radius in pixels. Default is 5.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.RoundedCornersExtender.Corners">
+            <summary>
+            Specifies which corners to round. Default is All.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.RoundedCornersExtender.Color">
+            <summary>
+            Background color for the rounded area (e.g., "#FFFFFF").
+            If not specified, the element's existing background is preserved.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.SliderExtender">
@@ -851,6 +1324,110 @@
             <summary>
             Tooltip text displayed when hovering over the slider handle.
             Use {0} as a placeholder for the current value.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.SlideShowExtender">
+            <summary>
+            Turns an Image control into an automatic slideshow that cycles through images.
+            Emulates the Ajax Control Toolkit SlideShowExtender.
+            Supports optional navigation controls and auto-play functionality.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.SlideShowServicePath">
+            <summary>
+            URL path to a service that provides slide data.
+            For Blazor, this is optional - use <see cref="P:BlazorAjaxToolkitComponents.SlideShowExtender.Slides"/> for client-side data.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.SlideShowServiceMethod">
+            <summary>
+            Method name to call on the service.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.ContextKey">
+            <summary>
+            Context key to pass to the service method.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.UseContextKey">
+            <summary>
+            Whether to use the context key when calling the service.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.ImageDescriptionLabelID">
+            <summary>
+            ID of an element to display the current image description.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.NextButtonID">
+            <summary>
+            ID of a button element that navigates to the next slide.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PreviousButtonID">
+            <summary>
+            ID of a button element that navigates to the previous slide.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PlayButtonID">
+            <summary>
+            ID of a button element that toggles play/pause.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PlayButtonText">
+            <summary>
+            Text to show on the play button when slideshow is paused.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.StopButtonText">
+            <summary>
+            Text to show on the play button when slideshow is playing.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.PlayInterval">
+            <summary>
+            Interval in milliseconds between automatic slide transitions.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.Loop">
+            <summary>
+            Whether the slideshow loops back to the first slide after the last.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.AutoPlay">
+            <summary>
+            Whether to start playing automatically when loaded.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.ImageTitleLabelID">
+            <summary>
+            ID of an element to display the current image title.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowExtender.Slides">
+            <summary>
+            Client-side collection of slides to display.
+            Each slide should have ImageUrl, Title, and Description properties.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.SlideShowSlide">
+            <summary>
+            Represents a single slide in the slideshow.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowSlide.ImageUrl">
+            <summary>
+            URL of the image to display.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowSlide.Title">
+            <summary>
+            Title of the slide (shown in ImageTitleLabelID element).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SlideShowSlide.Description">
+            <summary>
+            Description of the slide (shown in ImageDescriptionLabelID element).
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.TabContainer">
@@ -951,6 +1528,25 @@
         <member name="M:BlazorAjaxToolkitComponents.TabPanel.Dispose">
             <inheritdoc />
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.TextBoxWatermarkExtender">
+            <summary>
+            Displays placeholder/watermark text in a TextBox when it is empty.
+            The watermark text appears in a different style (via WatermarkCssClass)
+            and disappears when the user focuses the field or types.
+            Emulates the Ajax Control Toolkit TextBoxWatermarkExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TextBoxWatermarkExtender.WatermarkText">
+            <summary>
+            The placeholder/watermark text to display when the TextBox is empty.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TextBoxWatermarkExtender.WatermarkCssClass">
+            <summary>
+            CSS class applied to the TextBox when showing the watermark.
+            Typically used to style the watermark text differently (e.g., gray, italic).
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.ToggleButtonExtender">
             <summary>
             Replaces a target checkbox with a clickable image that toggles between checked and unchecked states.
@@ -1006,6 +1602,78 @@
         <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.DisabledCheckedImageUrl">
             <summary>
             URL of the image displayed when the checkbox is disabled and checked.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender">
+            <summary>
+            Provides visual feedback animations when content is updating.
+            Emulates the Ajax Control Toolkit UpdatePanelAnimationExtender.
+            Apply CSS classes and fade effects during and after content updates.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.AlwaysFinishOnUpdatingAnimation">
+            <summary>
+            Whether to complete the "updating" animation before starting the "updated" animation.
+            Default is false.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.OnUpdatingCssClass">
+            <summary>
+            CSS class to apply during update/loading state.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.OnUpdatedCssClass">
+            <summary>
+            CSS class to apply after update completes.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.FadeInDuration">
+            <summary>
+            Duration in seconds for the fade-in effect after update completes. Default is 0.3.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.FadeOutDuration">
+            <summary>
+            Duration in seconds for the fade-out effect before update starts. Default is 0.3.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ValidatorCalloutExtender">
+            <summary>
+            Enhances ASP.NET validators by showing validation messages in a callout/tooltip 
+            bubble instead of inline text. Attaches to a validator control and displays its 
+            error message in a styled popup near the invalid field.
+            Emulates the Ajax Control Toolkit ValidatorCalloutExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.Width">
+            <summary>
+            Width of the callout in pixels. Default is 250.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.HighlightCssClass">
+            <summary>
+            CSS class to apply to the invalid input field when validation fails.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.WarningIconImageUrl">
+            <summary>
+            URL to the warning icon image displayed in the callout.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.CloseImageUrl">
+            <summary>
+            URL to the close button image. If provided, a close button appears in the callout.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.CssClass">
+            <summary>
+            CSS class for the callout container element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.PopupPosition">
+            <summary>
+            Position of the callout relative to the invalid field.
+            Default is BottomLeft.
             </summary>
         </member>
     </members>

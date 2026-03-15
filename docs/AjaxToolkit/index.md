@@ -101,6 +101,66 @@ Replaces a checkbox with a clickable image that toggles between checked and unch
 
 [View Documentation →](ToggleButtonExtender.md)
 
+### TextBoxWatermarkExtender
+Displays placeholder/watermark text in a TextBox when it is empty. The watermark disappears when the user focuses or types in the field.
+
+[View Documentation →](TextBoxWatermarkExtender.md)
+
+### DragPanelExtender
+Makes a panel or container element draggable. Users can click and drag the panel to reposition it on the page, with optional drag handle support.
+
+[View Documentation →](DragPanelExtender.md)
+
+### ResizableControlExtender
+Allows users to resize an element by dragging its edges or a resize handle. Supports minimum and maximum size constraints.
+
+[View Documentation →](ResizableControlExtender.md)
+
+### DropShadowExtender
+Adds a drop shadow effect to an element, giving it a raised or floating appearance. Supports customizable opacity, width, and corner rounding.
+
+[View Documentation →](DropShadowExtender.md)
+
+### AlwaysVisibleControlExtender
+Keeps a control visible in a fixed position on the screen even when the user scrolls. Useful for sticky toolbars and persistent navigation.
+
+[View Documentation →](AlwaysVisibleControlExtender.md)
+
+### RoundedCornersExtender
+Applies rounded corners to an element using CSS border-radius. Supports selecting which corners to round and optional background color.
+
+[View Documentation →](RoundedCornersExtender.md)
+
+### UpdatePanelAnimationExtender
+Provides visual feedback animations when content is updating. Applies CSS classes and fade effects during and after updates.
+
+[View Documentation →](UpdatePanelAnimationExtender.md)
+
+### PasswordStrength
+Displays a visual indicator of password strength as the user types. Evaluates passwords against configurable character requirements.
+
+[View Documentation →](PasswordStrength.md)
+
+### ValidatorCalloutExtender
+Enhances validators by displaying validation messages in a callout or tooltip bubble instead of inline text.
+
+[View Documentation →](ValidatorCalloutExtender.md)
+
+### SlideShowExtender
+Turns an Image control into an automatic slideshow that cycles through images. Supports auto-play, manual navigation, and image titles/descriptions.
+
+[View Documentation →](SlideShowExtender.md)
+
+### ListSearchExtender
+Enables search and filter functionality on a ListBox or DropDownList. As the user types, items are filtered by the search text.
+
+[View Documentation →](ListSearchExtender.md)
+
+### BalloonPopupExtender
+Displays a balloon or tooltip-style popup with a pointer arrow when the user hovers over, focuses on, or clicks a target element.
+
+[View Documentation →](BalloonPopupExtender.md)
+
 ## Requirements
 
 ### Render Mode
@@ -199,5 +259,17 @@ When extenders are placed in Static (non-interactive) components:
 - [SliderExtender](SliderExtender.md) — Range slider
 - [TabContainer](TabContainer.md) — Tabbed content panels
 - [ToggleButtonExtender](ToggleButtonExtender.md) — Image toggle for checkboxes
+- [TextBoxWatermarkExtender](TextBoxWatermarkExtender.md) — Placeholder watermark text
+- [DragPanelExtender](DragPanelExtender.md) — Draggable panels
+- [ResizableControlExtender](ResizableControlExtender.md) — Resizable elements
+- [DropShadowExtender](DropShadowExtender.md) — Drop shadow effects
+- [AlwaysVisibleControlExtender](AlwaysVisibleControlExtender.md) — Sticky/fixed positioning
+- [RoundedCornersExtender](RoundedCornersExtender.md) — Rounded corners
+- [UpdatePanelAnimationExtender](UpdatePanelAnimationExtender.md) — Update animations
+- [PasswordStrength](PasswordStrength.md) — Password strength indicator
+- [ValidatorCalloutExtender](ValidatorCalloutExtender.md) — Validation callouts
+- [SlideShowExtender](SlideShowExtender.md) — Image slideshows
+- [ListSearchExtender](ListSearchExtender.md) — List filtering/search
+- [BalloonPopupExtender](BalloonPopupExtender.md) — Balloon tooltips
 - [Button Component](../EditorControls/Button.md) — The Button control
 - [TextBox Component](../EditorControls/TextBox.md) — The TextBox control
