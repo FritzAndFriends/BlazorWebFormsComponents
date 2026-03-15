@@ -24,9 +24,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string Title { get; set; }
 
-		[Parameter]
-		public string ToolTip { get; set; }
-
 		/// <summary>
 		/// Gets or sets the value associated with this menu item.
 		/// </summary>

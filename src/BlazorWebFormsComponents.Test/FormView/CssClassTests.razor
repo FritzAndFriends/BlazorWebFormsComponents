@@ -1,0 +1,53 @@
+
+@code {
+
+	[Fact]
+	public void FormView_WithCssClass_RendersClassOnTableElement()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				CssClass="my-custom-class">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		var table = cut.Find("table");
+		table.GetAttribute("class").ShouldBe("my-custom-class");
+	}
+
+	[Fact]
+	public void FormView_WithoutCssClass_RendersTableWithoutClassAttribute()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		var table = cut.Find("table");
+		table.GetAttribute("class").ShouldBeNull();
+	}
+
+	[Fact]
+	public void FormView_WithBackColor_RendersStyleInCombinedTableStyle()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				BackColor="WebColor.Red">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		var table = cut.Find("table");
+		var style = table.GetAttribute("style");
+		style.ShouldNotBeNull();
+		style.ShouldContain("border-collapse:collapse");
+		style.ShouldContain("background-color");
+	}
+}

@@ -34,9 +34,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public FontInfo Font { get; set; } = new FontInfo();
 
-		[Parameter]
-		public string ToolTip { get; set; }
-
 		protected string Style => this.ToStyle().Build().NullIfEmpty();
 
 		/// <summary>

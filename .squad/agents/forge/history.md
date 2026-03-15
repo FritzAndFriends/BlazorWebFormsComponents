@@ -208,3 +208,37 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 **Outcome:** 34 issues planned: 13 High, 10 Medium, 11 Low. M20 (Component Parity) is foundational, fixes 180+ gaps. M21–M23 build on M20 with advanced features, CRUD, and fine-tuning. Expected project health post-all-34 issues: 68.5% → 78-80%.
 
 
+📌 Team update (2026-03-14): M20 Batch 6 orchestration spawn — Forge designing component health dashboard, Cyclops advancing L1 script fixes, Rogue building L1 test harness — decided by Scribe
+
+### Component Health Dashboard Scoring Spec (2026-03-15)
+
+**Task:** Design scoring methodology for Component Health Dashboard (#48) — a public MkDocs page showing migration maturity per component.
+
+**Deliverable:** `.squad/decisions/inbox/forge-health-dashboard-design.md`
+
+**Key design decisions:**
+
+1. **7 scoring dimensions with weights:** Property Parity (30%), HTML Fidelity (15%), bUnit Tests (15%), Integration Tests (5%), Style Support (15%), Sample Page (10%), Event Support (10%). Weights reflect migration impact — property parity is #1 because missing properties directly block markup migration.
+
+2. **Divergence penalty model:** Infrastructure divergences (D-01 through D-04, D-07 through D-10) score 0 penalty — they're intentional platform differences. Only structural (D-13: -25), style (D-14: -15), and ID generation (D-11: -10) bugs penalize. Calendar is the most impacted component at 60% fidelity.
+
+3. **Component inventory:** 60+ components organized into 9 categories (Data, Editor, Display, Button, Navigation, Login, Validation, Infrastructure, Charting). Infrastructure and Charting displayed separately — they're intentionally minimal.
+
+4. **Reference property data:** Documented top 15-20 expected Web Forms properties for every primary component. This is the denominator for parity scoring. Inherited base-class properties (CssClass, Enabled, etc.) tracked via Style Support, not per-component.
+
+5. **Test thresholds by complexity:** Complex data controls need 10 test files for 100%, medium interactive controls need 5, simple display controls need 3. This prevents a Label with 3 tests scoring the same as a GridView with 3 tests.
+
+6. **No Playwright tests exist** — Integration test dimension is 5% placeholder. When Playwright infrastructure arrives, weight increases to 10% (stealing from bUnit).
+
+7. **Login controls have 0 bUnit tests** — biggest gap discovered during scan. 7 components, 0 test files.
+
+8. **Visual indicators:** 🟢 >80% (production-ready), 🟡 50-80% (usable with gaps), 🔴 <50% (migration risk).
+
+**Learnings:**
+- BaseStyledComponent inheritance chain gives most components 90%+ on style support automatically — good design payoff from early base-class investment.
+- GridView estimated at ~72% health (property parity is the drag — AllowPaging/AllowSorting still missing).
+- Label estimated at ~92% health — simple controls score highest because they have less to implement.
+- Sample coverage is excellent (48/60+ components have samples), but 3 Login controls lack individual samples.
+
+📌 Team update (2026-03-15): Component Health Dashboard scoring spec delivered to decisions inbox. 7 dimensions, weighted formula, reference data for 60+ components. Rogue implements as `scripts/Invoke-ComponentHealthScan.ps1` → `docs/component-health.md`. — decided by Forge
+

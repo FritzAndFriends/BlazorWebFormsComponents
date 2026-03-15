@@ -74,12 +74,6 @@ public partial class ChartSeries : BaseWebFormsComponent
 	public string MarkerStyle { get; set; }
 
 	/// <summary>
-	/// Gets or sets the tooltip for the series.
-	/// </summary>
-	[Parameter]
-	public string ToolTip { get; set; }
-
-	/// <summary>
 	/// Gets or sets the rendering order of this series in mixed charts.
 	/// Lower values are drawn last (on top). When null, an automatic order
 	/// is assigned based on chart type (line/area = 0, bar/column = 1).

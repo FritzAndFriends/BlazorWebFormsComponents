@@ -5,11 +5,11 @@
 
 	@if (NavigateUrl == null)
 	{
-		<a id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip">@Text</a>
+		<a id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)">@Text</a>
 	}
 	else
 	{
-		<a id="@ClientID" href="@NavigateUrl" target="@Target" title="@ToolTip" class="@CssClass" style="@Style">@Text</a>
+		<a id="@ClientID" href="@NavigateUrl" target="@Target" title="@ToolTip" class="@CssClass" style="@Style" accesskey="@(string.IsNullOrEmpty(AccessKey) ? null : AccessKey)">@Text</a>
 	}
 
 }

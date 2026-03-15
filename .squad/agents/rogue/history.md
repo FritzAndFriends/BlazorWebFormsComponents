@@ -125,3 +125,57 @@ And UpdatePanel.razor is updated to render:
 Then all 12 tests should pass.
 
 Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.razor` (12 tests, 280 lines)
+
+### Base Class Property Tests — Issues #15, #16, #17, #18 (2026-07-25)
+
+**40 new bUnit tests across 5 files** verifying base class changes Cyclops is implementing in parallel. Total suite: 1587 tests (1577 pass, 10 expected failures).
+
+**Issue #15 — AccessKey (20 tests in BaseWebFormsComponent/AccessKeyTests.razor):**
+- Button, Label, TextBox, Image, Panel, HyperLink, CheckBox with AccessKey → should render `accesskey="X"`
+- Empty/null AccessKey → should NOT render attribute
+- Label with AssociatedControlID + AccessKey renders on `<label>` element
+- **5 pass now** (Button, Label — already render accesskey); **5 expected failures** (TextBox, Image, Panel, HyperLink, CheckBox — awaiting Cyclops's render changes)
+
+**Issue #16 — ToolTip special characters (5 tests added to BaseWebFormsComponent/ToolTipTests.razor):**
+- Ampersand, quotes, angle brackets, apostrophes in ToolTip render correctly via title attribute
+- Tests on Button, Label, Image, Panel, TextBox
+- **All 5 pass** — Blazor/AngleSharp handles HTML encoding correctly
+
+**Issue #17 — DataBoundComponent styling (10 tests added to DataBoundComponent/StyleInheritanceTests.razor):**
+- GridView: BackColor, ForeColor, Width, Height, MultipleStyles on `<table>` outer element
+- DataList: ForeColor, Font, MultipleStyles on `<table>`, FlowLayout BackColor on `<span>`
+- **4 DataList tests pass** (DataList already merges BaseStyledComponent styles); **5 GridView tests fail** (GridView hard-codes `style="border-collapse:collapse;"` without merging — awaiting Issue #17 fix)
+
+**Issue #18 — Image and Label full styling (5+5 tests added to Image/ImageStyleTests.razor and Label/LabelStyleTests.razor):**
+- Image: ForeColor, Border (all 3 props together), BorderWidthOnly negative test, AllStyleProperties
+- Label: Height, Width, Border (all 3 props together), BorderWidthOnly negative test, AllStyleProperties
+- **All 10 pass** — Image and Label already inherit BaseStyledComponent and render `style="@Style"`
+
+**Key discovery:** Border CSS is ALL-OR-NOTHING. The style builder requires `BorderWidth > 0 AND BorderStyle != None/NotSet AND BorderColor != default` — all three simultaneously. If any is missing, no border CSS renders. Tests reflect this correctly.
+
+**Test files modified:**
+- `src/BlazorWebFormsComponents.Test/BaseWebFormsComponent/AccessKeyTests.razor` (4→20 tests)
+- `src/BlazorWebFormsComponents.Test/BaseWebFormsComponent/ToolTipTests.razor` (+5 special char tests)
+- `src/BlazorWebFormsComponents.Test/DataBoundComponent/StyleInheritanceTests.razor` (8→18 tests)
+- `src/BlazorWebFormsComponents.Test/Image/ImageStyleTests.razor` (7→12 tests)
+- `src/BlazorWebFormsComponents.Test/Label/LabelStyleTests.razor` (7→12 tests)
+📌 Team update (2026-03-14): M20 Batch 6 orchestration spawn — Forge designing component health dashboard, Cyclops advancing L1 script fixes, Rogue building L1 test harness — decided by Scribe
+
+### L1 Migration Script Test Harness (2026-07-25)
+
+**10 focused test cases + automated test runner** for `bwfc-migrate.ps1` quality measurement (Issue #29).
+
+**Test harness location:** `migration-toolkit/tests/`
+- `inputs/` — 10 .aspx files, each testing one L1 transform category
+- `expected/` — 10 .razor expected output files
+- `Run-L1Tests.ps1` — automated runner with metrics (pass rate, line accuracy, timing, diffs)
+
+**Baseline metrics:** 7/10 pass (70%), 94.3% line accuracy, 114ms avg per file.
+
+**Three bugs found:**
+1. **TC06 — Eval expression partial conversion:** `<%#: Eval("Name") %>` → `<%#: context.Name %>` instead of `@context.Name`. Root cause: the eval regex replaces `Eval("Name")` with `context.Name` inside the `<%#:...%>` delimiters, but doesn't remove the delimiters. The later encoded expression regex `<%:\s*(.+?)\s*%>` doesn't match `<%#:` (different prefix). Likely fix: process the eval-with-hashbang pattern separately or adjust regex to capture and strip the full delimiters.
+2. **TC09 — Content wrapper indentation loss:** `<asp:Content>` removal regex `\s*\r?\n?` after the closing `>` consumes leading whitespace of the next line. The first content line loses its indent.
+3. **TC10 — ItemType double-add on pre-typed components:** After `ItemType="NS.Class"` → `TItem="Class"` conversion, the auto-add step adds `ItemType="object"` because the negative lookahead `(?![^>]*ItemType=)` no longer finds `ItemType=` (it's now `TItem=`). Fix: also check for `TItem=` in the lookahead.
+
+**Additional discovery:** The script has an uninitialized variable bug — `$script:ExtractedTitleFromContent` accessed in `ConvertFrom-PageDirective` before `ConvertFrom-ContentWrappers` sets it. Manifests with `Set-StrictMode -Version Latest` when processing a standalone .aspx without Title= in the Page directive. All test cases work around this by including `Title="Test"`.
+
