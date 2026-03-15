@@ -41,13 +41,13 @@ public class HoverMenuExtender : BaseExtenderComponent
 	/// Delay in milliseconds before showing the popup after mouse enters the target.
 	/// </summary>
 	[Parameter]
-	public int PopDelay { get; set; }
+	public int HoverDelay { get; set; }
 
 	/// <summary>
 	/// Delay in milliseconds before hiding the popup after mouse leaves the target and popup.
 	/// </summary>
 	[Parameter]
-	public int HoverDelay { get; set; } = 300;
+	public int PopDelay { get; set; } = 100;
 
 	/// <summary>
 	/// CSS class applied to the target control while the hover menu is visible.

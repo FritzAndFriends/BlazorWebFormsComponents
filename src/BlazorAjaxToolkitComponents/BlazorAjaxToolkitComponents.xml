@@ -712,12 +712,12 @@
             Vertical offset in pixels from the calculated position.
             </summary>
         </member>
-        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopDelay">
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverDelay">
             <summary>
             Delay in milliseconds before showing the popup after mouse enters the target.
             </summary>
         </member>
-        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverDelay">
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopDelay">
             <summary>
             Delay in milliseconds before hiding the popup after mouse leaves the target and popup.
             </summary>
@@ -1402,6 +1402,45 @@
         <member name="P:BlazorAjaxToolkitComponents.UpdatePanelAnimationExtender.FadeOutDuration">
             <summary>
             Duration in seconds for the fade-out effect before update starts. Default is 0.3.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ValidatorCalloutExtender">
+            <summary>
+            Enhances ASP.NET validators by showing validation messages in a callout/tooltip 
+            bubble instead of inline text. Attaches to a validator control and displays its 
+            error message in a styled popup near the invalid field.
+            Emulates the Ajax Control Toolkit ValidatorCalloutExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.Width">
+            <summary>
+            Width of the callout in pixels. Default is 250.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.HighlightCssClass">
+            <summary>
+            CSS class to apply to the invalid input field when validation fails.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.WarningIconImageUrl">
+            <summary>
+            URL to the warning icon image displayed in the callout.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.CloseImageUrl">
+            <summary>
+            URL to the close button image. If provided, a close button appears in the callout.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.CssClass">
+            <summary>
+            CSS class for the callout container element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ValidatorCalloutExtender.PopupPosition">
+            <summary>
+            Position of the callout relative to the invalid field.
+            Default is BottomLeft.
             </summary>
         </member>
     </members>
