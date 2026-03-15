@@ -103,6 +103,34 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [UpdatePanel](docs/EditorControls/UpdatePanel.md)
     - [UpdateProgress](docs/EditorControls/UpdateProgress.md)
 
+
+## Ajax Control Toolkit Components
+
+The **Ajax Control Toolkit** extender components are available in a separate NuGet package:
+
+[![Nuget](https://img.shields.io/nuget/v/BlazorAjaxToolkitComponents?color=blue)](https://www.nuget.org/packages/BlazorAjaxToolkitComponents/)  [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/BlazorAjaxToolkitComponents)](https://www.nuget.org/packages/BlazorAjaxToolkitComponents/)
+
+These components enable seamless migration of Ajax Control Toolkit extenders to Blazor with minimal markup changes. Simply remove the `ajaxToolkit:` prefix and you're ready to go!
+
+Supported extender and container components:
+
+- [Accordion](docs/AjaxToolkit/Accordion.md) — Collapsible content panes
+- [AutoCompleteExtender](docs/AjaxToolkit/AutoCompleteExtender.md) — Typeahead suggestions
+- [CalendarExtender](docs/AjaxToolkit/CalendarExtender.md) — Popup date picker
+- [CollapsiblePanelExtender](docs/AjaxToolkit/CollapsiblePanelExtender.md) — Panel collapse/expand
+- [ConfirmButtonExtender](docs/AjaxToolkit/ConfirmButtonExtender.md) — Browser confirmation dialogs
+- [FilteredTextBoxExtender](docs/AjaxToolkit/FilteredTextBoxExtender.md) — Character filtering
+- [HoverMenuExtender](docs/AjaxToolkit/HoverMenuExtender.md) — Hover-triggered popups
+- [MaskedEditExtender](docs/AjaxToolkit/MaskedEditExtender.md) — Input mask formatting
+- [ModalPopupExtender](docs/AjaxToolkit/ModalPopupExtender.md) — Modal popup dialogs
+- [NumericUpDownExtender](docs/AjaxToolkit/NumericUpDownExtender.md) — Numeric spinner
+- [PopupControlExtender](docs/AjaxToolkit/PopupControlExtender.md) — Click-triggered popups
+- [SliderExtender](docs/AjaxToolkit/SliderExtender.md) — Range slider
+- [TabContainer](docs/AjaxToolkit/TabContainer.md) — Tabbed content panels
+- [ToggleButtonExtender](docs/AjaxToolkit/ToggleButtonExtender.md) — Image toggle for checkboxes
+
+See the [full documentation](docs/AjaxToolkit/index.md) for detailed examples, migration guidance, and render mode requirements.
+
 We will NOT be convertingany DataSource objects (SqlDataSource, ObjectDataSource, EntityDataSource, LinqDataSource, XmlDataSource, SiteMapDataSource, AccessDataSource), Wizard components, skins or themes.  Once this first collection of controls is written, we can consider additional features like modern tag formatting.
 
 ## Utility Features
@@ -175,3 +203,4 @@ Quick workflow:
 3. On `main` branch: `./scripts/publish-release.sh`
 
 The NuGet package is automatically published via GitHub Actions when a version tag is pushed.
+
