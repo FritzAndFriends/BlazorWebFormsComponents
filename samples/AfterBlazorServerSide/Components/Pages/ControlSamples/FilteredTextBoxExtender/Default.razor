@@ -1,0 +1,171 @@
+@page "/ControlSamples/FilteredTextBoxExtender"
+@rendermode InteractiveServer
+
+<PageTitle>FilteredTextBoxExtender Component Samples</PageTitle>
+
+<h2>FilteredTextBoxExtender Component</h2>
+
+<p>The <code>FilteredTextBoxExtender</code> restricts input in a target text box to specified character sets. It filters keystrokes in real-time and strips invalid characters on paste. This emulates the Ajax Control Toolkit <code>FilteredTextBoxExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Numbers Only</h3>
+<p>This text box only accepts numeric digits (0–9).</p>
+
+<div data-audit-control="FilteredTextBoxExtender-1">
+    <div class="mb-3">
+        <label for="txtNumbers" class="form-label">Enter a number:</label>
+        <input id="txtNumbers" type="text" class="form-control" style="max-width: 300px;"
+               placeholder="Only digits allowed" />
+        <FilteredTextBoxExtender TargetControlID="txtNumbers"
+                                 FilterType="FilterType.Numbers" />
+    </div>
+</div>
+
+<pre><code>&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:TextBox ID="txtNumbers" runat="server" /&gt;
+&lt;ajaxToolkit:FilteredTextBoxExtender ID="ftbe1" runat="server"
+    TargetControlID="txtNumbers"
+    FilterType="Numbers" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;input id="txtNumbers" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtNumbers"
+                         FilterType="FilterType.Numbers" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Lowercase Letters Only</h3>
+<p>This text box only accepts lowercase letters (a–z).</p>
+
+<div data-audit-control="FilteredTextBoxExtender-2">
+    <div class="mb-3">
+        <label for="txtLowercase" class="form-label">Enter lowercase text:</label>
+        <input id="txtLowercase" type="text" class="form-control" style="max-width: 300px;"
+               placeholder="Only lowercase a-z" />
+        <FilteredTextBoxExtender TargetControlID="txtLowercase"
+                                 FilterType="FilterType.LowercaseLetters" />
+    </div>
+</div>
+
+<pre><code>&lt;input id="txtLowercase" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtLowercase"
+                         FilterType="FilterType.LowercaseLetters" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Custom Valid Characters (Phone Number)</h3>
+<p>This text box accepts digits, dashes, parentheses, spaces, and plus sign — suitable for phone number input.</p>
+
+<div data-audit-control="FilteredTextBoxExtender-3">
+    <div class="mb-3">
+        <label for="txtPhone" class="form-label">Enter a phone number:</label>
+        <input id="txtPhone" type="text" class="form-control" style="max-width: 300px;"
+               placeholder="e.g. (555) 123-4567" />
+        <FilteredTextBoxExtender TargetControlID="txtPhone"
+                                 FilterType="FilterType.Custom"
+                                 ValidChars="0123456789-() +" />
+    </div>
+</div>
+
+<pre><code>&lt;input id="txtPhone" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtPhone"
+                         FilterType="FilterType.Custom"
+                         ValidChars="0123456789-() +" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. Combined Filter Types (Numbers + Lowercase)</h3>
+<p><code>FilterType</code> is a flags enum — combine values for multiple character sets. This field accepts both digits and lowercase letters, useful for hex input or simple codes.</p>
+
+<div data-audit-control="FilteredTextBoxExtender-4">
+    <div class="mb-3">
+        <label for="txtCombined" class="form-label">Enter a code (digits + lowercase):</label>
+        <input id="txtCombined" type="text" class="form-control" style="max-width: 300px;"
+               placeholder="e.g. abc123" />
+        <FilteredTextBoxExtender TargetControlID="txtCombined"
+                                 FilterType="FilterType.Numbers | FilterType.LowercaseLetters" />
+    </div>
+</div>
+
+<pre><code>&lt;!-- Combine FilterType flags with | operator --&gt;
+&lt;input id="txtCombined" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtCombined"
+                         FilterType="FilterType.Numbers | FilterType.LowercaseLetters" /&gt;</code></pre>
+
+<hr />
+
+<h3>5. All Letters with Custom Characters</h3>
+<p>Combine uppercase and lowercase letters with custom characters (period and space) for name entry.</p>
+
+<div data-audit-control="FilteredTextBoxExtender-5">
+    <div class="mb-3">
+        <label for="txtName" class="form-label">Enter a name:</label>
+        <input id="txtName" type="text" class="form-control" style="max-width: 300px;"
+               placeholder="e.g. John Q. Smith" />
+        <FilteredTextBoxExtender TargetControlID="txtName"
+                                 FilterType="FilterType.UppercaseLetters | FilterType.LowercaseLetters | FilterType.Custom"
+                                 ValidChars=". " />
+    </div>
+</div>
+
+<pre><code>&lt;input id="txtName" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtName"
+    FilterType="FilterType.UppercaseLetters | FilterType.LowercaseLetters | FilterType.Custom"
+    ValidChars=". " /&gt;</code></pre>
+
+<hr />
+
+<h3>6. InvalidChars Mode</h3>
+<p>Instead of specifying what's allowed, you can specify what's blocked using <code>FilterMode.InvalidChars</code>.</p>
+
+<div data-audit-control="FilteredTextBoxExtender-6">
+    <div class="mb-3">
+        <label for="txtNoSpecial" class="form-label">Type anything (except &lt; &gt; &amp; characters):</label>
+        <input id="txtNoSpecial" type="text" class="form-control" style="max-width: 300px;"
+               placeholder="HTML special chars blocked" />
+        <FilteredTextBoxExtender TargetControlID="txtNoSpecial"
+                                 FilterType="FilterType.Custom"
+                                 FilterMode="FilterMode.InvalidChars"
+                                 InvalidChars="<>&" />
+    </div>
+</div>
+
+<pre><code>&lt;input id="txtNoSpecial" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtNoSpecial"
+                         FilterType="FilterType.Custom"
+                         FilterMode="FilterMode.InvalidChars"
+                         InvalidChars="&lt;&gt;&amp;" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtZipCode" runat="server" /&gt;
+&lt;ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" runat="server"
+    TargetControlID="txtZipCode"
+    FilterType="Numbers"
+    ValidChars="-" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input id="txtZipCode" type="text" /&gt;
+&lt;FilteredTextBoxExtender TargetControlID="txtZipCode"
+                         FilterType="FilterType.Numbers | FilterType.Custom"
+                         ValidChars="-" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code> (not needed in Blazor)</li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input&gt;</code> or BWFC <code>&lt;TextBox&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:FilteredTextBoxExtender&gt;</code> with <code>&lt;FilteredTextBoxExtender&gt;</code></li>
+    <li>Keep the same <code>TargetControlID</code> — ensure the target element has a matching <code>id</code></li>
+    <li>Prefix enum values with <code>FilterType.</code> (e.g., <code>Numbers</code> → <code>FilterType.Numbers</code>)</li>
+    <li>Combine filter types using <code>|</code> flag operator instead of comma-separated strings</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code> (JS interop required)</li>
+</ol>

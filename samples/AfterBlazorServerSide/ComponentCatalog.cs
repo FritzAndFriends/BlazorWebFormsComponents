@@ -128,6 +128,10 @@ public static class ComponentCatalog
             Keywords: new[] { "password", "recovery", "reset", "security" }),
 
         // AJAX Controls
+        new("ConfirmButtonExtender", "AJAX", "/ControlSamples/ConfirmButtonExtender", "Attaches a confirmation dialog to a target button",
+            Keywords: new[] { "confirm", "dialog", "button", "extender", "toolkit" }),
+        new("FilteredTextBoxExtender", "AJAX", "/ControlSamples/FilteredTextBoxExtender", "Restricts text box input to specified character sets",
+            Keywords: new[] { "filter", "textbox", "input", "restrict", "extender", "toolkit" }),
         new("Timer", "AJAX", "/ControlSamples/Timer", "Triggers callbacks at timed intervals",
             Keywords: new[] { "timer", "interval", "tick", "polling" }),
         new("UpdatePanel", "AJAX", "/ControlSamples/UpdatePanel", "Partial page update container",
