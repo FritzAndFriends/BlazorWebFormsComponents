@@ -410,6 +410,19 @@
             Not implemented in v1 — reserved for future use.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.DragPanelExtender">
+            <summary>
+            Makes a panel or element draggable by its title bar or handle.
+            Users can click and drag the panel to reposition it on the page.
+            Emulates the Ajax Control Toolkit DragPanelExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.DragPanelExtender.DragHandleID">
+            <summary>
+            The ID of an optional element that acts as the drag handle.
+            If not set, the entire target panel is draggable.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.AcceptNegative">
             <summary>
             Specifies how negative values are accepted in the MaskedEditExtender.
