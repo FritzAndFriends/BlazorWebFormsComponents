@@ -41,7 +41,7 @@ public class HoverMenuExtender : BaseExtenderComponent
 	/// Delay in milliseconds before showing the popup after mouse enters the target.
 	/// </summary>
 	[Parameter]
-	public int HoverDelay { get; set; }
+	public int HoverDelay { get; set; } = 300;
 
 	/// <summary>
 	/// Delay in milliseconds before hiding the popup after mouse leaves the target and popup.
