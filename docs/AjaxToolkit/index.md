@@ -28,6 +28,26 @@ Migration from Web Forms is remarkably simple:
 
 ## Available Components
 
+### Accordion
+A container that displays collapsible content panes arranged vertically. Only one pane is expanded at a time. Includes the companion AccordionPane component.
+
+[View Documentation →](Accordion.md)
+
+### AutoCompleteExtender
+Provides typeahead/autocomplete functionality for a TextBox. Fetches suggestions via a service URL or Blazor callback and renders a dropdown with keyboard navigation.
+
+[View Documentation →](AutoCompleteExtender.md)
+
+### CalendarExtender
+Attaches a popup calendar date picker to a TextBox. Supports date formats, navigation views, and date range constraints.
+
+[View Documentation →](CalendarExtender.md)
+
+### CollapsiblePanelExtender
+Adds collapse/expand functionality to a panel with smooth CSS transitions. Supports separate collapse/expand triggers, dynamic label updates, auto-collapse/expand on hover, and vertical/horizontal animations.
+
+[View Documentation →](CollapsiblePanelExtender.md)
+
 ### ConfirmButtonExtender
 Displays a browser confirmation dialog when a button is clicked. If the user cancels, the click is suppressed.
 
@@ -38,15 +58,45 @@ Restricts input in a TextBox to specified character types. Filters keystrokes in
 
 [View Documentation →](FilteredTextBoxExtender.md)
 
+### HoverMenuExtender
+Displays a popup panel when the user hovers over a target control. Supports configurable show/hide delays, positional placement, and hover CSS styling.
+
+[View Documentation →](HoverMenuExtender.md)
+
+### MaskedEditExtender
+Applies an input mask to a TextBox, restricting and formatting user input according to a mask pattern. Supports number, date, time, and custom masks.
+
+[View Documentation →](MaskedEditExtender.md)
+
 ### ModalPopupExtender
 Displays a target element as a modal popup with an overlay backdrop. Supports OK/Cancel actions, focus trapping, drag support, and Escape key dismissal.
 
 [View Documentation →](ModalPopupExtender.md)
 
-### CollapsiblePanelExtender
-Adds collapse/expand functionality to a panel with smooth CSS transitions. Supports separate collapse/expand triggers, dynamic label updates, auto-collapse/expand on hover, and vertical/horizontal animations.
+### NumericUpDownExtender
+Adds numeric up/down spinner buttons to a TextBox. Supports min/max range, step increments, and cycling through a reference value list.
 
-[View Documentation →](CollapsiblePanelExtender.md)
+[View Documentation →](NumericUpDownExtender.md)
+
+### PopupControlExtender
+Attaches a popup panel to a target control, displaying it on click. Lighter than ModalPopupExtender — no overlay, no focus trap.
+
+[View Documentation →](PopupControlExtender.md)
+
+### SliderExtender
+Attaches range slider behavior to a target input. Supports horizontal/vertical orientation, bound control synchronization, and customizable appearance.
+
+[View Documentation →](SliderExtender.md)
+
+### TabContainer
+Displays content in tabbed panels with only the active tab visible. Includes the companion TabPanel component for defining each tab.
+
+[View Documentation →](TabContainer.md)
+
+### ToggleButtonExtender
+Replaces a checkbox with a clickable image that toggles between checked and unchecked states. Supports separate images for checked, unchecked, hover, and disabled states.
+
+[View Documentation →](ToggleButtonExtender.md)
 
 ## Requirements
 
@@ -132,7 +182,19 @@ When extenders are placed in Static (non-interactive) components:
 
 ## See Also
 
+- [Accordion](Accordion.md) — Collapsible content panes
+- [AutoCompleteExtender](AutoCompleteExtender.md) — Typeahead suggestions
+- [CalendarExtender](CalendarExtender.md) — Popup date picker
+- [CollapsiblePanelExtender](CollapsiblePanelExtender.md) — Panel collapse/expand
 - [ConfirmButtonExtender](ConfirmButtonExtender.md) — Browser confirmation dialogs
 - [FilteredTextBoxExtender](FilteredTextBoxExtender.md) — Character filtering for text input
+- [HoverMenuExtender](HoverMenuExtender.md) — Hover-triggered popup
+- [MaskedEditExtender](MaskedEditExtender.md) — Input mask formatting
+- [ModalPopupExtender](ModalPopupExtender.md) — Modal popup dialogs
+- [NumericUpDownExtender](NumericUpDownExtender.md) — Numeric spinner
+- [PopupControlExtender](PopupControlExtender.md) — Click-triggered popup
+- [SliderExtender](SliderExtender.md) — Range slider
+- [TabContainer](TabContainer.md) — Tabbed content panels
+- [ToggleButtonExtender](ToggleButtonExtender.md) — Image toggle for checkboxes
 - [Button Component](../EditorControls/Button.md) — The Button control
 - [TextBox Component](../EditorControls/TextBox.md) — The TextBox control

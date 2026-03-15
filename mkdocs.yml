@@ -129,10 +129,20 @@ nav:
     - UpdateProgress: EditorControls/UpdateProgress.md
   - Ajax Control Toolkit Extenders:
     - Overview: AjaxToolkit/index.md
+    - Accordion: AjaxToolkit/Accordion.md
+    - AutoCompleteExtender: AjaxToolkit/AutoCompleteExtender.md
+    - CalendarExtender: AjaxToolkit/CalendarExtender.md
+    - CollapsiblePanelExtender: AjaxToolkit/CollapsiblePanelExtender.md
     - ConfirmButtonExtender: AjaxToolkit/ConfirmButtonExtender.md
     - FilteredTextBoxExtender: AjaxToolkit/FilteredTextBoxExtender.md
+    - HoverMenuExtender: AjaxToolkit/HoverMenuExtender.md
+    - MaskedEditExtender: AjaxToolkit/MaskedEditExtender.md
     - ModalPopupExtender: AjaxToolkit/ModalPopupExtender.md
-    - CollapsiblePanelExtender: AjaxToolkit/CollapsiblePanelExtender.md
+    - NumericUpDownExtender: AjaxToolkit/NumericUpDownExtender.md
+    - PopupControlExtender: AjaxToolkit/PopupControlExtender.md
+    - SliderExtender: AjaxToolkit/SliderExtender.md
+    - TabContainer: AjaxToolkit/TabContainer.md
+    - ToggleButtonExtender: AjaxToolkit/ToggleButtonExtender.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - EnumParameter: UtilityFeatures/EnumParameter.md

@@ -1,0 +1,366 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string TOGGLE_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/toggle-button-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chkAgree" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.TargetControlID.ShouldBe("chkAgree");
+	}
+
+	// === ImageWidth ===
+
+	[Fact]
+	public void ImageWidth_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.ImageWidth.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ImageWidth_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" ImageWidth="32" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.ImageWidth.ShouldBe(32);
+	}
+
+	// === ImageHeight ===
+
+	[Fact]
+	public void ImageHeight_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.ImageHeight.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ImageHeight_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" ImageHeight="32" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.ImageHeight.ShouldBe(32);
+	}
+
+	// === UncheckedImageUrl ===
+
+	[Fact]
+	public void UncheckedImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.UncheckedImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void UncheckedImageUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" UncheckedImageUrl="/img/off.png" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.UncheckedImageUrl.ShouldBe("/img/off.png");
+	}
+
+	// === CheckedImageUrl ===
+
+	[Fact]
+	public void CheckedImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.CheckedImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CheckedImageUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" CheckedImageUrl="/img/on.png" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.CheckedImageUrl.ShouldBe("/img/on.png");
+	}
+
+	// === Alternate texts ===
+
+	[Fact]
+	public void UncheckedImageAlternateText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.UncheckedImageAlternateText.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void UncheckedImageAlternateText_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" UncheckedImageAlternateText="Unchecked" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.UncheckedImageAlternateText.ShouldBe("Unchecked");
+	}
+
+	[Fact]
+	public void CheckedImageAlternateText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.CheckedImageAlternateText.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CheckedImageAlternateText_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" CheckedImageAlternateText="Checked" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.CheckedImageAlternateText.ShouldBe("Checked");
+	}
+
+	// === Hover images ===
+
+	[Fact]
+	public void CheckedImageOverUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.CheckedImageOverUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CheckedImageOverUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" CheckedImageOverUrl="/img/on-hover.png" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.CheckedImageOverUrl.ShouldBe("/img/on-hover.png");
+	}
+
+	[Fact]
+	public void UncheckedImageOverUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.UncheckedImageOverUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void UncheckedImageOverUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" UncheckedImageOverUrl="/img/off-hover.png" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.UncheckedImageOverUrl.ShouldBe("/img/off-hover.png");
+	}
+
+	// === Disabled images ===
+
+	[Fact]
+	public void DisabledUncheckedImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.DisabledUncheckedImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void DisabledUncheckedImageUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" DisabledUncheckedImageUrl="/img/off-disabled.png" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.DisabledUncheckedImageUrl.ShouldBe("/img/off-disabled.png");
+	}
+
+	[Fact]
+	public void DisabledCheckedImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.DisabledCheckedImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void DisabledCheckedImageUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" DisabledCheckedImageUrl="/img/on-disabled.png" />
+		);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.DisabledCheckedImageUrl.ShouldBe("/img/on-disabled.png");
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender TargetControlID="chk1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(TOGGLE_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<ToggleButtonExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ToggleButtonExtender TargetControlID="chk1" />);
+
+		cut.FindComponent<ToggleButtonExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	// === Full Configuration ===
+
+	[Fact]
+	public void AllParameters_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ToggleButtonExtender
+				TargetControlID="chkActive"
+				ImageWidth="24"
+				ImageHeight="24"
+				UncheckedImageUrl="/img/off.png"
+				CheckedImageUrl="/img/on.png"
+				UncheckedImageAlternateText="Off"
+				CheckedImageAlternateText="On"
+				CheckedImageOverUrl="/img/on-hover.png"
+				UncheckedImageOverUrl="/img/off-hover.png"
+				DisabledUncheckedImageUrl="/img/off-dim.png"
+				DisabledCheckedImageUrl="/img/on-dim.png" />
+		);
+
+		var instance = cut.FindComponent<ToggleButtonExtender>().Instance;
+		instance.TargetControlID.ShouldBe("chkActive");
+		instance.ImageWidth.ShouldBe(24);
+		instance.ImageHeight.ShouldBe(24);
+		instance.UncheckedImageUrl.ShouldBe("/img/off.png");
+		instance.CheckedImageUrl.ShouldBe("/img/on.png");
+		instance.UncheckedImageAlternateText.ShouldBe("Off");
+		instance.CheckedImageAlternateText.ShouldBe("On");
+		instance.CheckedImageOverUrl.ShouldBe("/img/on-hover.png");
+		instance.UncheckedImageOverUrl.ShouldBe("/img/off-hover.png");
+		instance.DisabledUncheckedImageUrl.ShouldBe("/img/off-dim.png");
+		instance.DisabledCheckedImageUrl.ShouldBe("/img/on-dim.png");
+	}
+}

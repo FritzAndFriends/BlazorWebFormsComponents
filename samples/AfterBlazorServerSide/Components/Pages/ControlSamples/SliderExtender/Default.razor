@@ -1,0 +1,163 @@
+@page "/ControlSamples/SliderExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>SliderExtender Component Samples</PageTitle>
+
+<h2>SliderExtender Component</h2>
+
+<p>The <code>SliderExtender</code> converts a target textbox into a graphical slider control. Users drag a handle along a track to select a value. This emulates the Ajax Control Toolkit <code>SliderExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Slider</h3>
+<p>A horizontal slider with default range 0-100.</p>
+
+<div data-audit-control="SliderExtender-1">
+    <label for="txtSliderBasic">Volume:</label>
+    <input type="text" id="txtSliderBasic" class="form-control" style="max-width: 200px;" value="50" />
+    <SliderExtender TargetControlID="txtSliderBasic"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="50"
+                    Length="300"
+                    TooltipText="{0}%" />
+</div>
+
+<pre><code>&lt;input type="text" id="txtSliderBasic" value="50" /&gt;
+&lt;SliderExtender TargetControlID="txtSliderBasic"
+                Minimum="0" Maximum="100" Value="50"
+                Length="300" TooltipText="{0}%" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Vertical Orientation</h3>
+<p>Set <code>Orientation="SliderOrientation.Vertical"</code> for a vertical slider.</p>
+
+<div data-audit-control="SliderExtender-2">
+    <div style="height: 200px; display: flex; align-items: flex-end; gap: 20px;">
+        <div>
+            <label for="txtSliderVertical">Level:</label>
+            <input type="text" id="txtSliderVertical" class="form-control" style="width: 80px;" value="30" />
+            <SliderExtender TargetControlID="txtSliderVertical"
+                            Minimum="0"
+                            Maximum="100"
+                            Value="30"
+                            Length="180"
+                            Orientation="SliderOrientation.Vertical"
+                            TooltipText="Level: {0}" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;SliderExtender TargetControlID="txtSliderVertical"
+                Minimum="0" Maximum="100"
+                Orientation="SliderOrientation.Vertical"
+                Length="180" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Bound Control</h3>
+<p>Use <code>BoundControlID</code> to synchronize the slider value with another element (e.g., a label or textbox that displays the current value).</p>
+
+<div data-audit-control="SliderExtender-3">
+    <label for="txtSliderBound">Brightness:</label>
+    <input type="text" id="txtSliderBound" class="form-control" style="max-width: 200px;" value="75" />
+    <SliderExtender TargetControlID="txtSliderBound"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="75"
+                    Length="300"
+                    BoundControlID="lblBrightness"
+                    Decimals="0" />
+    <span id="lblBrightness" class="badge bg-primary ms-2" style="font-size: 1.1em;">75</span>
+</div>
+
+<pre><code>&lt;input type="text" id="txtSliderBound" value="75" /&gt;
+&lt;SliderExtender TargetControlID="txtSliderBound"
+                Minimum="0" Maximum="100"
+                BoundControlID="lblBrightness" /&gt;
+&lt;span id="lblBrightness"&gt;75&lt;/span&gt;</code></pre>
+
+<hr />
+
+<h3>4. Custom Styling and Steps</h3>
+<p>Apply <code>RailCssClass</code> and <code>HandleCssClass</code> for custom appearance. Use <code>Steps</code> for discrete snap points.</p>
+
+<div data-audit-control="SliderExtender-4">
+    <label for="txtSliderStyled">Priority (Low–High):</label>
+    <input type="text" id="txtSliderStyled" class="form-control" style="max-width: 200px;" value="2" />
+    <SliderExtender TargetControlID="txtSliderStyled"
+                    Minimum="0"
+                    Maximum="4"
+                    Value="2"
+                    Steps="5"
+                    Length="300"
+                    RailCssClass="slider-rail-custom"
+                    HandleCssClass="slider-handle-custom"
+                    TooltipText="Priority: {0}" />
+    <small class="text-muted d-block mt-1">0=None, 1=Low, 2=Medium, 3=High, 4=Critical</small>
+</div>
+
+<pre><code>&lt;SliderExtender TargetControlID="txtSliderStyled"
+                Minimum="0" Maximum="4" Steps="5"
+                RailCssClass="slider-rail-custom"
+                HandleCssClass="slider-handle-custom"
+                TooltipText="Priority: {0}" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtSlider" runat="server" /&gt;
+&lt;ajaxToolkit:SliderExtender ID="Slider1" runat="server"
+    TargetControlID="txtSlider"
+    Minimum="0" Maximum="100" Steps="0"
+    BoundControlID="lblValue"
+    Orientation="Horizontal" /&gt;
+&lt;asp:Label ID="lblValue" runat="server" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="text" id="txtSlider" /&gt;
+&lt;SliderExtender TargetControlID="txtSlider"
+                Minimum="0" Maximum="100"
+                BoundControlID="lblValue"
+                Orientation="SliderOrientation.Horizontal" /&gt;
+&lt;span id="lblValue"&gt;&lt;/span&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input type="text"&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:SliderExtender&gt;</code> with <code>&lt;SliderExtender&gt;</code></li>
+    <li>Keep property names: <code>Minimum</code>, <code>Maximum</code>, <code>Steps</code>, <code>BoundControlID</code></li>
+    <li>Prefix enum values: <code>Orientation="SliderOrientation.Horizontal"</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+}
+
+<style>
+    .slider-rail-custom {
+        background: linear-gradient(to right, #28a745, #ffc107, #dc3545);
+        height: 8px;
+        border-radius: 4px;
+    }
+    .slider-handle-custom {
+        width: 20px;
+        height: 20px;
+        background-color: #0d6efd;
+        border: 2px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+</style>

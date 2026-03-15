@@ -1,0 +1,385 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string SLIDER_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/slider-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="sliderInput" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.TargetControlID.ShouldBe("sliderInput");
+	}
+
+	// === Minimum ===
+
+	[Fact]
+	public void Minimum_Default_Is0()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Minimum.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Minimum_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Minimum="10" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Minimum.ShouldBe(10);
+	}
+
+	// === Maximum ===
+
+	[Fact]
+	public void Maximum_Default_Is100()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Maximum.ShouldBe(100);
+	}
+
+	[Fact]
+	public void Maximum_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Maximum="500" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Maximum.ShouldBe(500);
+	}
+
+	// === Steps ===
+
+	[Fact]
+	public void Steps_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Steps.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Steps_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Steps="10" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Steps.ShouldBe(10);
+	}
+
+	// === Value ===
+
+	[Fact]
+	public void Value_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Value.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Value_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Value="50" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Value.ShouldBe(50);
+	}
+
+	// === BoundControlID ===
+
+	[Fact]
+	public void BoundControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.BoundControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void BoundControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" BoundControlID="lblValue" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.BoundControlID.ShouldBe("lblValue");
+	}
+
+	// === Orientation ===
+
+	[Fact]
+	public void Orientation_Default_IsHorizontal()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Orientation.ShouldBe(SliderOrientation.Horizontal);
+	}
+
+	[Fact]
+	public void Orientation_SetToVertical()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Orientation="SliderOrientation.Vertical" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Orientation.ShouldBe(SliderOrientation.Vertical);
+	}
+
+	// === RailCssClass ===
+
+	[Fact]
+	public void RailCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.RailCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void RailCssClass_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" RailCssClass="rail-track" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.RailCssClass.ShouldBe("rail-track");
+	}
+
+	// === HandleCssClass ===
+
+	[Fact]
+	public void HandleCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.HandleCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void HandleCssClass_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" HandleCssClass="handle-knob" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.HandleCssClass.ShouldBe("handle-knob");
+	}
+
+	// === HandleImageUrl ===
+
+	[Fact]
+	public void HandleImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.HandleImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void HandleImageUrl_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" HandleImageUrl="/images/handle.png" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.HandleImageUrl.ShouldBe("/images/handle.png");
+	}
+
+	// === Length ===
+
+	[Fact]
+	public void Length_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Length.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Length_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Length="300" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Length.ShouldBe(300);
+	}
+
+	// === Decimals ===
+
+	[Fact]
+	public void Decimals_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Decimals.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Decimals_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Decimals="2" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Decimals.ShouldBe(2);
+	}
+
+	// === TooltipText ===
+
+	[Fact]
+	public void TooltipText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.TooltipText.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void TooltipText_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" TooltipText="Value: {0}" />
+		);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.TooltipText.ShouldBe("Value: {0}");
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<SliderExtender TargetControlID="slider1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<SliderExtender TargetControlID="slider1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(SLIDER_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<SliderExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<SliderExtender TargetControlID="slider1" />);
+
+		cut.FindComponent<SliderExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

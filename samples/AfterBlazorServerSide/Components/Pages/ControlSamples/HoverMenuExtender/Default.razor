@@ -1,0 +1,209 @@
+@page "/ControlSamples/HoverMenuExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>HoverMenuExtender Component Samples</PageTitle>
+
+<h2>HoverMenuExtender Component</h2>
+
+<p>The <code>HoverMenuExtender</code> displays a popup menu when the user hovers over a target element. The menu hides when the mouse leaves. This emulates the Ajax Control Toolkit <code>HoverMenuExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Hover Menu</h3>
+<p>Hover over the target element to reveal a context menu.</p>
+
+<div data-audit-control="HoverMenuExtender-1">
+    <div id="hoverTarget1" class="p-3 border rounded bg-light" style="max-width: 300px; cursor: pointer;">
+        🖱️ <strong>Hover over me</strong> to see the menu
+    </div>
+
+    <div id="hoverMenu1" style="display: none; border: 1px solid #ccc; padding: 8px; background: white; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 150px;">
+        <div class="p-1 hover-item">📋 Copy</div>
+        <div class="p-1 hover-item">✂️ Cut</div>
+        <div class="p-1 hover-item">📌 Paste</div>
+        <hr class="my-1" />
+        <div class="p-1 hover-item">🗑️ Delete</div>
+    </div>
+
+    <HoverMenuExtender TargetControlID="hoverTarget1"
+                       PopupControlID="hoverMenu1"
+                       PopupPosition="PopupPosition.Right"
+                       OffsetX="5" />
+</div>
+
+<pre><code>&lt;div id="hoverTarget1"&gt;Hover over me&lt;/div&gt;
+&lt;div id="hoverMenu1" style="display:none;"&gt;
+    &lt;div&gt;Copy&lt;/div&gt;
+    &lt;div&gt;Cut&lt;/div&gt;
+    &lt;div&gt;Paste&lt;/div&gt;
+&lt;/div&gt;
+&lt;HoverMenuExtender TargetControlID="hoverTarget1"
+                   PopupControlID="hoverMenu1"
+                   PopupPosition="PopupPosition.Right" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Delayed Popup</h3>
+<p>Use <code>PopDelay</code> to add a delay (in ms) before the menu appears on hover. Use <code>HoverDelay</code> to control how long before the menu hides after the mouse leaves.</p>
+
+<div data-audit-control="HoverMenuExtender-2">
+    <div id="hoverTarget2" class="p-3 border rounded bg-light" style="max-width: 300px; cursor: pointer;">
+        🕐 <strong>Hover me</strong> (500ms delay before menu appears)
+    </div>
+
+    <div id="hoverMenu2" style="display: none; border: 1px solid #ffc107; padding: 10px; background: #fff3cd; border-radius: 4px;">
+        <p class="mb-0">This menu appeared after a 500ms delay and stays visible for 1000ms after mouse leaves.</p>
+    </div>
+
+    <HoverMenuExtender TargetControlID="hoverTarget2"
+                       PopupControlID="hoverMenu2"
+                       PopupPosition="PopupPosition.Bottom"
+                       PopDelay="500"
+                       HoverDelay="1000"
+                       OffsetY="5" />
+</div>
+
+<pre><code>&lt;HoverMenuExtender TargetControlID="hoverTarget2"
+                   PopupControlID="hoverMenu2"
+                   PopupPosition="PopupPosition.Bottom"
+                   PopDelay="500"
+                   HoverDelay="1000" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Styled Hover with HoverCssClass</h3>
+<p>Use <code>HoverCssClass</code> to apply a CSS class to the target element while the hover menu is visible.</p>
+
+<div data-audit-control="HoverMenuExtender-3">
+    <div id="hoverTarget3" class="p-3 border rounded" style="max-width: 300px; cursor: pointer; transition: all 0.2s;">
+        🎨 <strong>Hover me</strong> — target gets highlighted
+    </div>
+
+    <div id="hoverMenu3" style="display: none; border: 1px solid #0d6efd; padding: 10px; background: #e7f1ff; border-radius: 4px; min-width: 200px;">
+        <div class="p-1">📂 Open</div>
+        <div class="p-1">💾 Save</div>
+        <div class="p-1">🖨️ Print</div>
+    </div>
+
+    <HoverMenuExtender TargetControlID="hoverTarget3"
+                       PopupControlID="hoverMenu3"
+                       PopupPosition="PopupPosition.Right"
+                       HoverCssClass="hover-target-active"
+                       OffsetX="10" />
+</div>
+
+<pre><code>&lt;HoverMenuExtender TargetControlID="hoverTarget3"
+                   PopupControlID="hoverMenu3"
+                   PopupPosition="PopupPosition.Right"
+                   HoverCssClass="hover-target-active" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. Positioned Menu</h3>
+<p>Compare different <code>PopupPosition</code> values to see menu placement options.</p>
+
+<div data-audit-control="HoverMenuExtender-4">
+    <div class="row g-4">
+        <div class="col-auto">
+            <div id="hoverLeft" class="p-2 border rounded bg-light text-center" style="width: 120px; cursor: pointer;">
+                ← Left
+            </div>
+            <div id="menuLeft" style="display: none; border: 1px solid #ccc; padding: 8px; background: white; border-radius: 4px;">Menu (Left)</div>
+            <HoverMenuExtender TargetControlID="hoverLeft" PopupControlID="menuLeft"
+                               PopupPosition="PopupPosition.Left" OffsetX="-5" />
+        </div>
+        <div class="col-auto">
+            <div id="hoverTop" class="p-2 border rounded bg-light text-center" style="width: 120px; cursor: pointer;">
+                ↑ Top
+            </div>
+            <div id="menuTop" style="display: none; border: 1px solid #ccc; padding: 8px; background: white; border-radius: 4px;">Menu (Top)</div>
+            <HoverMenuExtender TargetControlID="hoverTop" PopupControlID="menuTop"
+                               PopupPosition="PopupPosition.Top" OffsetY="-5" />
+        </div>
+        <div class="col-auto">
+            <div id="hoverBottom" class="p-2 border rounded bg-light text-center" style="width: 120px; cursor: pointer;">
+                ↓ Bottom
+            </div>
+            <div id="menuBottom" style="display: none; border: 1px solid #ccc; padding: 8px; background: white; border-radius: 4px;">Menu (Bottom)</div>
+            <HoverMenuExtender TargetControlID="hoverBottom" PopupControlID="menuBottom"
+                               PopupPosition="PopupPosition.Bottom" OffsetY="5" />
+        </div>
+        <div class="col-auto">
+            <div id="hoverRight" class="p-2 border rounded bg-light text-center" style="width: 120px; cursor: pointer;">
+                → Right
+            </div>
+            <div id="menuRight" style="display: none; border: 1px solid #ccc; padding: 8px; background: white; border-radius: 4px;">Menu (Right)</div>
+            <HoverMenuExtender TargetControlID="hoverRight" PopupControlID="menuRight"
+                               PopupPosition="PopupPosition.Right" OffsetX="5" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;HoverMenuExtender TargetControlID="hoverLeft"
+                   PopupControlID="menuLeft"
+                   PopupPosition="PopupPosition.Left" /&gt;
+
+&lt;HoverMenuExtender TargetControlID="hoverBottom"
+                   PopupControlID="menuBottom"
+                   PopupPosition="PopupPosition.Bottom" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:Panel ID="pnlTarget" runat="server"&gt;Hover me&lt;/asp:Panel&gt;
+&lt;asp:Panel ID="pnlMenu" runat="server" Style="display:none;"&gt;
+    &lt;asp:LinkButton ID="lnkEdit" runat="server" Text="Edit" /&gt;
+    &lt;asp:LinkButton ID="lnkDelete" runat="server" Text="Delete" /&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:HoverMenuExtender ID="HoverMenu1" runat="server"
+    TargetControlID="pnlTarget"
+    PopupControlID="pnlMenu"
+    PopupPosition="Right"
+    PopDelay="100"
+    HoverCssClass="hoverHighlight" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;div id="pnlTarget"&gt;Hover me&lt;/div&gt;
+&lt;div id="pnlMenu" style="display:none;"&gt;
+    &lt;a href="#"&gt;Edit&lt;/a&gt;
+    &lt;a href="#"&gt;Delete&lt;/a&gt;
+&lt;/div&gt;
+&lt;HoverMenuExtender TargetControlID="pnlTarget"
+                   PopupControlID="pnlMenu"
+                   PopupPosition="PopupPosition.Right"
+                   PopDelay="100"
+                   HoverCssClass="hoverHighlight" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:Panel&gt;</code> with <code>&lt;div&gt;</code> elements keeping the same <code>id</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:HoverMenuExtender&gt;</code> with <code>&lt;HoverMenuExtender&gt;</code></li>
+    <li>Keep property names: <code>PopupControlID</code>, <code>PopDelay</code>, <code>HoverDelay</code>, <code>HoverCssClass</code></li>
+    <li>Prefix enum values: <code>PopupPosition="PopupPosition.Right"</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+}
+
+<style>
+    .hover-item:hover {
+        background-color: #e9ecef;
+        border-radius: 3px;
+    }
+    .hover-target-active {
+        background-color: #e7f1ff !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+</style>

@@ -1,0 +1,342 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string AUTOCOMPLETE_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/autocomplete-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txtSearch" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.TargetControlID.ShouldBe("txtSearch");
+	}
+
+	// === MinimumPrefixLength ===
+
+	[Fact]
+	public void MinimumPrefixLength_Default_Is3()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.MinimumPrefixLength.ShouldBe(3);
+	}
+
+	[Fact]
+	public void MinimumPrefixLength_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" MinimumPrefixLength="1" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.MinimumPrefixLength.ShouldBe(1);
+	}
+
+	// === CompletionSetCount ===
+
+	[Fact]
+	public void CompletionSetCount_Default_Is10()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionSetCount.ShouldBe(10);
+	}
+
+	[Fact]
+	public void CompletionSetCount_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" CompletionSetCount="20" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionSetCount.ShouldBe(20);
+	}
+
+	// === CompletionInterval ===
+
+	[Fact]
+	public void CompletionInterval_Default_Is1000()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionInterval.ShouldBe(1000);
+	}
+
+	[Fact]
+	public void CompletionInterval_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" CompletionInterval="500" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionInterval.ShouldBe(500);
+	}
+
+	// === CSS classes ===
+
+	[Fact]
+	public void CompletionListCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionListCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CompletionListCssClass_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" CompletionListCssClass="dropdown" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionListCssClass.ShouldBe("dropdown");
+	}
+
+	[Fact]
+	public void CompletionListItemCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionListItemCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CompletionListHighlightedItemCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionListHighlightedItemCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CompletionListHighlightedItemCssClass_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" CompletionListHighlightedItemCssClass="highlight" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.CompletionListHighlightedItemCssClass.ShouldBe("highlight");
+	}
+
+	// === DelimiterCharacters ===
+
+	[Fact]
+	public void DelimiterCharacters_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.DelimiterCharacters.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void DelimiterCharacters_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" DelimiterCharacters=",;" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.DelimiterCharacters.ShouldBe(",;");
+	}
+
+	// === FirstRowSelected ===
+
+	[Fact]
+	public void FirstRowSelected_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.FirstRowSelected.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void FirstRowSelected_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" FirstRowSelected="true" />
+		);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.FirstRowSelected.ShouldBeTrue();
+	}
+
+	// === ShowOnlyCurrentWordInCompletionListItem ===
+
+	[Fact]
+	public void ShowOnlyCurrentWordInCompletionListItem_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.ShowOnlyCurrentWordInCompletionListItem.ShouldBeFalse();
+	}
+
+	// === ServicePath / ServiceMethod ===
+
+	[Fact]
+	public void ServicePath_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.ServicePath.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ServiceMethod_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.ServiceMethod.ShouldBe(string.Empty);
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(AUTOCOMPLETE_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<AutoCompleteExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<AutoCompleteExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<AutoCompleteExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	// === Full Configuration ===
+
+	[Fact]
+	public void AllParameters_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<AutoCompleteExtender
+				TargetControlID="txtSearch"
+				ServicePath="/api/search"
+				ServiceMethod="GetResults"
+				MinimumPrefixLength="2"
+				CompletionSetCount="15"
+				CompletionInterval="300"
+				CompletionListCssClass="list"
+				CompletionListItemCssClass="item"
+				CompletionListHighlightedItemCssClass="hl"
+				DelimiterCharacters=","
+				FirstRowSelected="true" />
+		);
+
+		var instance = cut.FindComponent<AutoCompleteExtender>().Instance;
+		instance.TargetControlID.ShouldBe("txtSearch");
+		instance.ServicePath.ShouldBe("/api/search");
+		instance.ServiceMethod.ShouldBe("GetResults");
+		instance.MinimumPrefixLength.ShouldBe(2);
+		instance.CompletionSetCount.ShouldBe(15);
+		instance.CompletionInterval.ShouldBe(300);
+		instance.CompletionListCssClass.ShouldBe("list");
+		instance.CompletionListItemCssClass.ShouldBe("item");
+		instance.CompletionListHighlightedItemCssClass.ShouldBe("hl");
+		instance.DelimiterCharacters.ShouldBe(",");
+		instance.FirstRowSelected.ShouldBeTrue();
+	}
+}

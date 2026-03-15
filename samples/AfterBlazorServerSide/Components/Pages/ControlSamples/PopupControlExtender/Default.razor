@@ -1,0 +1,165 @@
+@page "/ControlSamples/PopupControlExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>PopupControlExtender Component Samples</PageTitle>
+
+<h2>PopupControlExtender Component</h2>
+
+<p>The <code>PopupControlExtender</code> displays a popup panel when the user clicks a target control. The popup can be positioned relative to the trigger and can commit a value back to the target. This emulates the Ajax Control Toolkit <code>PopupControlExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Popup</h3>
+<p>Click the textbox to show a popup panel with selectable options.</p>
+
+<div data-audit-control="PopupControlExtender-1">
+    <label for="txtPopupBasic">Select a color:</label>
+    <input type="text" id="txtPopupBasic" class="form-control" style="max-width: 250px;" placeholder="Click to choose..." readonly />
+
+    <div id="pnlColorPicker" style="display: none; border: 1px solid #ccc; padding: 10px; background: white; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <p class="mb-2"><strong>Pick a color:</strong></p>
+        <div class="d-flex gap-2">
+            <span style="width:30px; height:30px; background:red; display:inline-block; cursor:pointer; border-radius:4px;" title="Red"></span>
+            <span style="width:30px; height:30px; background:green; display:inline-block; cursor:pointer; border-radius:4px;" title="Green"></span>
+            <span style="width:30px; height:30px; background:blue; display:inline-block; cursor:pointer; border-radius:4px;" title="Blue"></span>
+            <span style="width:30px; height:30px; background:orange; display:inline-block; cursor:pointer; border-radius:4px;" title="Orange"></span>
+        </div>
+    </div>
+
+    <PopupControlExtender TargetControlID="txtPopupBasic"
+                          PopupControlID="pnlColorPicker"
+                          Position="PopupPosition.Bottom" />
+</div>
+
+<pre><code>&lt;input type="text" id="txtPopupBasic" readonly /&gt;
+&lt;div id="pnlColorPicker" style="display:none;"&gt;
+    &lt;!-- Popup content --&gt;
+&lt;/div&gt;
+&lt;PopupControlExtender TargetControlID="txtPopupBasic"
+                      PopupControlID="pnlColorPicker"
+                      Position="PopupPosition.Bottom" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Positioned Popup</h3>
+<p>Use <code>Position</code>, <code>OffsetX</code>, and <code>OffsetY</code> to control popup placement.</p>
+
+<div data-audit-control="PopupControlExtender-2">
+    <div class="row g-3">
+        <div class="col-auto">
+            <button id="btnPopupRight" class="btn btn-outline-primary">Popup Right →</button>
+            <div id="pnlRight" style="display: none; border: 1px solid #0d6efd; padding: 10px; background: #e7f1ff; border-radius: 4px;">
+                <p>Popup positioned to the <strong>Right</strong></p>
+            </div>
+            <PopupControlExtender TargetControlID="btnPopupRight"
+                                  PopupControlID="pnlRight"
+                                  Position="PopupPosition.Right"
+                                  OffsetX="10" />
+        </div>
+        <div class="col-auto">
+            <button id="btnPopupTop" class="btn btn-outline-success">↑ Popup Top</button>
+            <div id="pnlTop" style="display: none; border: 1px solid #198754; padding: 10px; background: #d1e7dd; border-radius: 4px;">
+                <p>Popup positioned <strong>Top</strong></p>
+            </div>
+            <PopupControlExtender TargetControlID="btnPopupTop"
+                                  PopupControlID="pnlTop"
+                                  Position="PopupPosition.Top"
+                                  OffsetY="-5" />
+        </div>
+        <div class="col-auto">
+            <button id="btnPopupCenter" class="btn btn-outline-warning">⊕ Center</button>
+            <div id="pnlCenter" style="display: none; border: 1px solid #ffc107; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                <p>Popup positioned at <strong>Center</strong></p>
+            </div>
+            <PopupControlExtender TargetControlID="btnPopupCenter"
+                                  PopupControlID="pnlCenter"
+                                  Position="PopupPosition.Center" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;PopupControlExtender TargetControlID="btnPopupRight"
+                      PopupControlID="pnlRight"
+                      Position="PopupPosition.Right" OffsetX="10" /&gt;
+
+&lt;PopupControlExtender TargetControlID="btnPopupTop"
+                      PopupControlID="pnlTop"
+                      Position="PopupPosition.Top" OffsetY="-5" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Commit Value</h3>
+<p>Use <code>CommitProperty</code> to specify which property of the target control receives the committed value when the popup closes.</p>
+
+<div data-audit-control="PopupControlExtender-3">
+    <label for="txtCommit">Selected Value:</label>
+    <input type="text" id="txtCommit" class="form-control" style="max-width: 250px;" placeholder="Click to select..." readonly />
+
+    <div id="pnlCommit" style="display: none; border: 1px solid #6c757d; padding: 15px; background: white; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <p><strong>Choose a size:</strong></p>
+        <button class="btn btn-sm btn-outline-secondary me-1">Small</button>
+        <button class="btn btn-sm btn-outline-secondary me-1">Medium</button>
+        <button class="btn btn-sm btn-outline-secondary">Large</button>
+    </div>
+
+    <PopupControlExtender TargetControlID="txtCommit"
+                          PopupControlID="pnlCommit"
+                          Position="PopupPosition.Bottom"
+                          CommitProperty="value"
+                          OffsetY="5" />
+</div>
+
+<pre><code>&lt;input type="text" id="txtCommit" readonly /&gt;
+&lt;div id="pnlCommit" style="display:none;"&gt;
+    &lt;button&gt;Small&lt;/button&gt;
+    &lt;button&gt;Medium&lt;/button&gt;
+&lt;/div&gt;
+&lt;PopupControlExtender TargetControlID="txtCommit"
+                      PopupControlID="pnlCommit"
+                      Position="PopupPosition.Bottom"
+                      CommitProperty="value" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtColor" runat="server" /&gt;
+&lt;asp:Panel ID="pnlPopup" runat="server" Style="display:none;"&gt;
+    &lt;!-- Popup content --&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:PopupControlExtender ID="PopupControl1" runat="server"
+    TargetControlID="txtColor"
+    PopupControlID="pnlPopup"
+    Position="Bottom"
+    CommitProperty="value" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="text" id="txtColor" /&gt;
+&lt;div id="pnlPopup" style="display:none;"&gt;
+    &lt;!-- Popup content --&gt;
+&lt;/div&gt;
+&lt;PopupControlExtender TargetControlID="txtColor"
+                      PopupControlID="pnlPopup"
+                      Position="PopupPosition.Bottom"
+                      CommitProperty="value" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input type="text"&gt;</code></li>
+    <li>Replace <code>&lt;asp:Panel&gt;</code> with <code>&lt;div&gt;</code> keeping the same <code>id</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:PopupControlExtender&gt;</code> with <code>&lt;PopupControlExtender&gt;</code></li>
+    <li>Prefix enum values: <code>Position="PopupPosition.Bottom"</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+}

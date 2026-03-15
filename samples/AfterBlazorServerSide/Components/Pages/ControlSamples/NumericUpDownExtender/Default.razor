@@ -1,0 +1,134 @@
+@page "/ControlSamples/NumericUpDownExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>NumericUpDownExtender Component Samples</PageTitle>
+
+<h2>NumericUpDownExtender Component</h2>
+
+<p>The <code>NumericUpDownExtender</code> adds spinner (up/down) buttons to a target textbox for numeric value adjustment. This emulates the Ajax Control Toolkit <code>NumericUpDownExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Spinner</h3>
+<p>A simple numeric spinner with default step of 1.</p>
+
+<div data-audit-control="NumericUpDownExtender-1">
+    <label for="txtBasicNum">Quantity:</label>
+    <input type="text" id="txtBasicNum" class="form-control" style="max-width: 150px;" value="1" />
+    <NumericUpDownExtender TargetControlID="txtBasicNum" Width="150" Step="1" />
+</div>
+
+<pre><code>&lt;input type="text" id="txtBasicNum" value="1" /&gt;
+&lt;NumericUpDownExtender TargetControlID="txtBasicNum" Width="150" Step="1" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Min/Max Constraints</h3>
+<p>Use <code>Minimum</code> and <code>Maximum</code> to constrain the allowed range. The spinner stops at the boundaries.</p>
+
+<div data-audit-control="NumericUpDownExtender-2">
+    <label for="txtBounded">Rating (1-10):</label>
+    <input type="text" id="txtBounded" class="form-control" style="max-width: 150px;" value="5" />
+    <NumericUpDownExtender TargetControlID="txtBounded"
+                           Width="150"
+                           Minimum="1"
+                           Maximum="10"
+                           Step="1" />
+    <small class="text-muted">Range: 1 to 10</small>
+</div>
+
+<pre><code>&lt;NumericUpDownExtender TargetControlID="txtBounded"
+                       Minimum="1" Maximum="10" Step="1" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Custom Step Values</h3>
+<p>Set <code>Step</code> to increment/decrement by different amounts.</p>
+
+<div data-audit-control="NumericUpDownExtender-3">
+    <div class="row g-3">
+        <div class="col-auto">
+            <label for="txtStep5">Step 5:</label>
+            <input type="text" id="txtStep5" class="form-control" style="width: 150px;" value="0" />
+            <NumericUpDownExtender TargetControlID="txtStep5"
+                                   Width="150"
+                                   Minimum="0"
+                                   Maximum="100"
+                                   Step="5" />
+        </div>
+        <div class="col-auto">
+            <label for="txtStepDecimal">Step 0.25:</label>
+            <input type="text" id="txtStepDecimal" class="form-control" style="width: 150px;" value="0.00" />
+            <NumericUpDownExtender TargetControlID="txtStepDecimal"
+                                   Width="150"
+                                   Minimum="0"
+                                   Maximum="10"
+                                   Step="0.25" />
+        </div>
+        <div class="col-auto">
+            <label for="txtStep100">Step 100:</label>
+            <input type="text" id="txtStep100" class="form-control" style="width: 150px;" value="0" />
+            <NumericUpDownExtender TargetControlID="txtStep100"
+                                   Width="150"
+                                   Minimum="0"
+                                   Maximum="1000"
+                                   Step="100" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;NumericUpDownExtender TargetControlID="txtStep5" Step="5" /&gt;
+&lt;NumericUpDownExtender TargetControlID="txtStepDecimal" Step="0.25" /&gt;
+&lt;NumericUpDownExtender TargetControlID="txtStep100" Step="100" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. RefValues — Cycling Through Named Values</h3>
+<p>Use <code>RefValues</code> with semicolon-separated values to cycle through a list of named items instead of numbers.</p>
+
+<div data-audit-control="NumericUpDownExtender-4">
+    <label for="txtMonths">Month:</label>
+    <input type="text" id="txtMonths" class="form-control" style="max-width: 200px;" value="January" />
+    <NumericUpDownExtender TargetControlID="txtMonths"
+                           Width="200"
+                           RefValues="January;February;March;April;May;June;July;August;September;October;November;December" />
+    <small class="text-muted">Use the spinner to cycle through month names.</small>
+</div>
+
+<pre><code>&lt;input type="text" id="txtMonths" value="January" /&gt;
+&lt;NumericUpDownExtender TargetControlID="txtMonths"
+    RefValues="January;February;March;April;May;June;July;August;September;October;November;December" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtQuantity" runat="server" Text="1" /&gt;
+&lt;ajaxToolkit:NumericUpDownExtender ID="NumericUpDown1" runat="server"
+    TargetControlID="txtQuantity"
+    Width="150" Minimum="1" Maximum="100" Step="1" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="text" id="txtQuantity" value="1" /&gt;
+&lt;NumericUpDownExtender TargetControlID="txtQuantity"
+                       Width="150" Minimum="1" Maximum="100" Step="1" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input type="text"&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:NumericUpDownExtender&gt;</code> with <code>&lt;NumericUpDownExtender&gt;</code></li>
+    <li>Keep all property names: <code>Minimum</code>, <code>Maximum</code>, <code>Step</code>, <code>RefValues</code>, <code>Width</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+}

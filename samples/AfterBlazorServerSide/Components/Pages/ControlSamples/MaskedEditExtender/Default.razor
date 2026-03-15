@@ -1,0 +1,151 @@
+@page "/ControlSamples/MaskedEditExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>MaskedEditExtender Component Samples</PageTitle>
+
+<h2>MaskedEditExtender Component</h2>
+
+<p>The <code>MaskedEditExtender</code> applies an input mask to a target textbox, restricting input to a specific pattern. Mask characters: <code>9</code>=digit, <code>L</code>=letter, <code>$</code>=digit or space, <code>C</code>=any character, <code>A</code>=letter or digit. This emulates the Ajax Control Toolkit <code>MaskedEditExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Phone Number Mask</h3>
+<p>A US phone number mask using <code>999-999-9999</code> pattern. Only digits are accepted in each position.</p>
+
+<div data-audit-control="MaskedEditExtender-1">
+    <label for="txtPhone">Phone Number:</label>
+    <input type="text" id="txtPhone" class="form-control" style="max-width: 250px;" placeholder="___-___-____" />
+    <MaskedEditExtender TargetControlID="txtPhone"
+                        Mask="999-999-9999"
+                        MaskType="MaskType.None"
+                        PromptCharacter="_"
+                        ClearMaskOnLostFocus="true" />
+</div>
+
+<pre><code>&lt;input type="text" id="txtPhone" /&gt;
+&lt;MaskedEditExtender TargetControlID="txtPhone"
+                    Mask="999-999-9999"
+                    MaskType="MaskType.None"
+                    PromptCharacter="_"
+                    ClearMaskOnLostFocus="true" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Social Security Number Mask</h3>
+<p>An SSN mask using <code>999-99-9999</code> pattern.</p>
+
+<div data-audit-control="MaskedEditExtender-2">
+    <label for="txtSSN">SSN:</label>
+    <input type="text" id="txtSSN" class="form-control" style="max-width: 200px;" placeholder="___-__-____" />
+    <MaskedEditExtender TargetControlID="txtSSN"
+                        Mask="999-99-9999"
+                        MaskType="MaskType.None"
+                        PromptCharacter="_"
+                        ClearMaskOnLostFocus="true" />
+</div>
+
+<pre><code>&lt;MaskedEditExtender TargetControlID="txtSSN"
+                    Mask="999-99-9999"
+                    MaskType="MaskType.None"
+                    PromptCharacter="_" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Date Mask</h3>
+<p>A date mask with <code>MaskType="MaskType.Date"</code> for date-specific validation.</p>
+
+<div data-audit-control="MaskedEditExtender-3">
+    <label for="txtDate">Date (MM/DD/YYYY):</label>
+    <input type="text" id="txtDate" class="form-control" style="max-width: 200px;" placeholder="__/__/____" />
+    <MaskedEditExtender TargetControlID="txtDate"
+                        Mask="99/99/9999"
+                        MaskType="MaskType.Date"
+                        PromptCharacter="_"
+                        ClearMaskOnLostFocus="true"
+                        ClearTextOnInvalid="true" />
+</div>
+
+<pre><code>&lt;MaskedEditExtender TargetControlID="txtDate"
+                    Mask="99/99/9999"
+                    MaskType="MaskType.Date"
+                    ClearTextOnInvalid="true" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. Zip Code Mask</h3>
+<p>US Zip+4 code mask using <code>99999-9999</code> pattern.</p>
+
+<div data-audit-control="MaskedEditExtender-4">
+    <label for="txtZip">Zip Code:</label>
+    <input type="text" id="txtZip" class="form-control" style="max-width: 180px;" placeholder="_____-____" />
+    <MaskedEditExtender TargetControlID="txtZip"
+                        Mask="99999-9999"
+                        MaskType="MaskType.None"
+                        PromptCharacter="_"
+                        ClearMaskOnLostFocus="true" />
+</div>
+
+<pre><code>&lt;MaskedEditExtender TargetControlID="txtZip"
+                    Mask="99999-9999"
+                    PromptCharacter="_" /&gt;</code></pre>
+
+<hr />
+
+<h3>5. Custom Alphanumeric Mask</h3>
+<p>A product code mask mixing letters and digits: <code>AA-9999-LL</code> (A=alphanumeric, L=letter).</p>
+
+<div data-audit-control="MaskedEditExtender-5">
+    <label for="txtProduct">Product Code (e.g., A1-2345-XY):</label>
+    <input type="text" id="txtProduct" class="form-control" style="max-width: 220px;" placeholder="__-____-__" />
+    <MaskedEditExtender TargetControlID="txtProduct"
+                        Mask="AA-9999-LL"
+                        MaskType="MaskType.None"
+                        PromptCharacter="_"
+                        ClearMaskOnLostFocus="false" />
+</div>
+
+<pre><code>&lt;MaskedEditExtender TargetControlID="txtProduct"
+                    Mask="AA-9999-LL"
+                    MaskType="MaskType.None"
+                    ClearMaskOnLostFocus="false" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtPhone" runat="server" /&gt;
+&lt;ajaxToolkit:MaskedEditExtender ID="MaskedEdit1" runat="server"
+    TargetControlID="txtPhone"
+    Mask="999-999-9999"
+    MaskType="None"
+    PromptCharacter="_"
+    ClearMaskOnLostFocus="true" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="text" id="txtPhone" /&gt;
+&lt;MaskedEditExtender TargetControlID="txtPhone"
+                    Mask="999-999-9999"
+                    MaskType="MaskType.None"
+                    PromptCharacter="_"
+                    ClearMaskOnLostFocus="true" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input type="text"&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:MaskedEditExtender&gt;</code> with <code>&lt;MaskedEditExtender&gt;</code></li>
+    <li>Keep <code>Mask</code>, <code>PromptCharacter</code>, <code>ClearMaskOnLostFocus</code> properties unchanged</li>
+    <li>Prefix enum values with type name: <code>MaskType="MaskType.None"</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+}
