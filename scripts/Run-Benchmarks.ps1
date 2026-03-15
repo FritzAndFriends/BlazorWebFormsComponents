@@ -257,9 +257,9 @@ function Start-FrameworkApp {
             -PassThru -WindowStyle Hidden
         $launchedProcesses.Add($proc)
 
-        $ready = Wait-ForEndpoint -Url $App.BaseUrl -TimeoutSeconds 60
+        $ready = Wait-ForEndpoint -Url $App.BaseUrl -TimeoutSeconds 180
         if (-not $ready) {
-            return @{ Success = $false; Reason = 'IIS Express started but app did not respond within 60s' }
+            return @{ Success = $false; Reason = 'IIS Express started but app did not respond within 180s' }
         }
         return @{ Success = $true; Process = $proc }
     }

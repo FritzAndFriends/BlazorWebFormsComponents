@@ -8,9 +8,9 @@ This report compares HTTP response-time performance between the original
 .NET Framework Web Forms sample applications and their .NET 10 Blazor
 equivalents in the BlazorWebFormsComponents project.
 
-**Run date:** 03/15/2026 01:48:34  
-**Duration:** 181.2s  
-**Iterations per page:** 30
+**Run date:** 03/15/2026 08:38:47  
+**Duration:** 200s  
+**Iterations per page:** 50
 
 ## Methodology
 
@@ -38,25 +38,33 @@ equivalents in the BlazorWebFormsComponents project.
 
 | Page | Platform | Cold (ms) | Avg (ms) | P95 (ms) | Min (ms) | Max (ms) | Size (B) | Status |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Home | .NET Framework | 13 | 8.7 | 11 | 7 | 14 | 6113 | 200 |
-| Home | .NET 10 Blazor | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| ProductList | .NET Framework | 56 | 12.1 | 13 | 10 | 28 | 35108 | 200 |
-| ProductList | .NET 10 Blazor | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| About | .NET Framework | 16 | 7.5 | 9 | 6 | 10 | 5938 | 200 |
-| About | .NET 10 Blazor | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
+| Home | .NET Framework | 11 | 6 | 7 | 5 | 8 | 6113 | 200 |
+| Home | .NET 10 Blazor | 52 | 3.2 | 4 | 2 | 10 | 5780 | 200 |
+| ProductList | .NET Framework | 53 | 10 | 11 | 8 | 24 | 35108 | 200 |
+| ProductList | .NET 10 Blazor | 12 | 2.4 | 3 | 2 | 8 | 5530 | 200 |
+| About | .NET Framework | 15 | 6.7 | 8 | 5 | 9 | 5938 | 200 |
+| About | .NET 10 Blazor | 5 | 2.8 | 3 | 2 | 19 | 5587 | 200 |
+
+### Speedup Analysis
+
+| Page | Framework Avg (ms) | Blazor Avg (ms) | Speedup | Cold Start Δ |
+| --- | ---: | ---: | ---: | --- |
+| Home | 6 | 3.2 | 1.88x faster (Blazor) | +41ms (Blazor slower) |
+| ProductList | 10 | 2.4 | 4.17x faster (Blazor) | 41ms faster (Blazor) |
+| About | 6.7 | 2.8 | 2.39x faster (Blazor) | 10ms faster (Blazor) |
 
 ## ContosoUniversity
 
-> ⚠️ .NET Framework results unavailable: IIS Express started but app did not respond within 30s
+> ⚠️ .NET Framework results unavailable: IIS Express started but app did not respond within 180s
 
 | Page | Platform | Cold (ms) | Avg (ms) | P95 (ms) | Min (ms) | Max (ms) | Size (B) | Status |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Home | .NET Framework | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| Home | .NET 10 Blazor | 7 | 2.5 | 8 | 2 | 9 | 4721 | 200 |
+| Home | .NET 10 Blazor | 7 | 1.8 | 4 | 1 | 9 | 4706 | 200 |
 | Students | .NET Framework | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| Students | .NET 10 Blazor | 1763 | 9.6 | 18 | 5 | 68 | 7538 | 200 |
+| Students | .NET 10 Blazor | 971 | 7.2 | 15 | 4 | 57 | 7508 | 200 |
 | About | .NET Framework | N/A | N/A | N/A | N/A | N/A | N/A | Skipped |
-| About | .NET 10 Blazor | 65 | 3.8 | 5 | 3 | 8 | 4998 | 200 |
+| About | .NET 10 Blazor | 50 | 3.2 | 4 | 3 | 5 | 4993 | 200 |
 
 ## Charts
 
