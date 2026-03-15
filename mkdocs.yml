@@ -131,6 +131,8 @@ nav:
     - Overview: AjaxToolkit/index.md
     - ConfirmButtonExtender: AjaxToolkit/ConfirmButtonExtender.md
     - FilteredTextBoxExtender: AjaxToolkit/FilteredTextBoxExtender.md
+    - ModalPopupExtender: AjaxToolkit/ModalPopupExtender.md
+    - CollapsiblePanelExtender: AjaxToolkit/CollapsiblePanelExtender.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - EnumParameter: UtilityFeatures/EnumParameter.md

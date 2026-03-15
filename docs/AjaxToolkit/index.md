@@ -38,6 +38,16 @@ Restricts input in a TextBox to specified character types. Filters keystrokes in
 
 [View Documentation →](FilteredTextBoxExtender.md)
 
+### ModalPopupExtender
+Displays a target element as a modal popup with an overlay backdrop. Supports OK/Cancel actions, focus trapping, drag support, and Escape key dismissal.
+
+[View Documentation →](ModalPopupExtender.md)
+
+### CollapsiblePanelExtender
+Adds collapse/expand functionality to a panel with smooth CSS transitions. Supports separate collapse/expand triggers, dynamic label updates, auto-collapse/expand on hover, and vertical/horizontal animations.
+
+[View Documentation →](CollapsiblePanelExtender.md)
+
 ## Requirements
 
 ### Render Mode
