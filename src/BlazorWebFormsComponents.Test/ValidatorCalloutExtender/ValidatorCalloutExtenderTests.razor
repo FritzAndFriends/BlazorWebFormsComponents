@@ -1,0 +1,224 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/validator-callout-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === Width ===
+
+	[Fact]
+	public void Width_DefaultIs250()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.Width.ShouldBe(250);
+	}
+
+	[Fact]
+	public void Width_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" Width="300" />
+		);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.Width.ShouldBe(300);
+	}
+
+	// === PopupPosition ===
+
+	[Fact]
+	public void PopupPosition_DefaultIsBottomLeft()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.BottomLeft);
+	}
+
+	[Fact]
+	public void PopupPosition_SetCorrectly()
+	{
+		PopupPosition pos = PopupPosition.TopRight;
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" PopupPosition="pos" />
+		);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.TopRight);
+	}
+
+	// === HighlightCssClass ===
+
+	[Fact]
+	public void HighlightCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.HighlightCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void HighlightCssClass_SetCorrectly()
+	{
+		string cssClass = "error-highlight";
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" HighlightCssClass="@cssClass" />
+		);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.HighlightCssClass.ShouldBe("error-highlight");
+	}
+
+	// === CssClass ===
+
+	[Fact]
+	public void CssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.CssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CssClass_SetCorrectly()
+	{
+		string cssClass = "callout-container";
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" CssClass="@cssClass" />
+		);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.CssClass.ShouldBe("callout-container");
+	}
+
+	// === WarningIconImageUrl ===
+
+	[Fact]
+	public void WarningIconImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.WarningIconImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void WarningIconImageUrl_SetCorrectly()
+	{
+		string url = "/images/warning.png";
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" WarningIconImageUrl="@url" />
+		);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.WarningIconImageUrl.ShouldBe("/images/warning.png");
+	}
+
+	// === CloseImageUrl ===
+
+	[Fact]
+	public void CloseImageUrl_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.CloseImageUrl.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CloseImageUrl_SetCorrectly()
+	{
+		string url = "/images/close.png";
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" CloseImageUrl="@url" />
+		);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.CloseImageUrl.ShouldBe("/images/close.png");
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<ValidatorCalloutExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ValidatorCalloutExtender TargetControlID="validator1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ValidatorCalloutExtender TargetControlID="validator1" />);
+
+		cut.FindComponent<ValidatorCalloutExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

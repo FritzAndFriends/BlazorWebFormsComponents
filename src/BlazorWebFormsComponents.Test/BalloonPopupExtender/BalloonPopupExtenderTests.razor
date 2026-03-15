@@ -1,0 +1,343 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	private const string MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/balloon-popup-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" BalloonPopupControlID="popup1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === BalloonPopupControlID ===
+
+	[Fact]
+	public void BalloonPopupControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BalloonPopupControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void BalloonPopupControlID_SetCorrectly()
+	{
+		string popupId = "myPopupPanel";
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" BalloonPopupControlID="@popupId" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BalloonPopupControlID.ShouldBe("myPopupPanel");
+	}
+
+	// === Position ===
+
+	[Fact]
+	public void Position_DefaultIsAuto()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.Position.ShouldBe(BalloonPosition.Auto);
+	}
+
+	[Fact]
+	public void Position_SetCorrectly()
+	{
+		BalloonPosition pos = BalloonPosition.TopLeft;
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" Position="pos" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.Position.ShouldBe(BalloonPosition.TopLeft);
+	}
+
+	// === BalloonStyle ===
+
+	[Fact]
+	public void BalloonStyle_DefaultIsRectangle()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BalloonStyle.ShouldBe(BalloonStyle.Rectangle);
+	}
+
+	[Fact]
+	public void BalloonStyle_SetCorrectly()
+	{
+		BalloonStyle style = BalloonStyle.Cloud;
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" BalloonStyle="style" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BalloonStyle.ShouldBe(BalloonStyle.Cloud);
+	}
+
+	// === BalloonSize ===
+
+	[Fact]
+	public void BalloonSize_DefaultIsMedium()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BalloonSize.ShouldBe(BalloonSize.Medium);
+	}
+
+	[Fact]
+	public void BalloonSize_SetCorrectly()
+	{
+		BalloonSize size = BalloonSize.Large;
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" BalloonSize="size" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BalloonSize.ShouldBe(BalloonSize.Large);
+	}
+
+	// === UseShadow ===
+
+	[Fact]
+	public void UseShadow_DefaultIsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.UseShadow.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void UseShadow_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" UseShadow="false" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.UseShadow.ShouldBeFalse();
+	}
+
+	// === ScrollBars ===
+
+	[Fact]
+	public void ScrollBars_DefaultIsAuto()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.ScrollBars.ShouldBe(ScrollBars.Auto);
+	}
+
+	[Fact]
+	public void ScrollBars_SetCorrectly()
+	{
+		ScrollBars scrollBars = ScrollBars.Vertical;
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" ScrollBars="scrollBars" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.ScrollBars.ShouldBe(ScrollBars.Vertical);
+	}
+
+	// === DisplayOnMouseOver ===
+
+	[Fact]
+	public void DisplayOnMouseOver_DefaultIsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.DisplayOnMouseOver.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void DisplayOnMouseOver_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" DisplayOnMouseOver="false" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.DisplayOnMouseOver.ShouldBeFalse();
+	}
+
+	// === DisplayOnFocus ===
+
+	[Fact]
+	public void DisplayOnFocus_DefaultIsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.DisplayOnFocus.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void DisplayOnFocus_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" DisplayOnFocus="true" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.DisplayOnFocus.ShouldBeTrue();
+	}
+
+	// === DisplayOnClick ===
+
+	[Fact]
+	public void DisplayOnClick_DefaultIsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.DisplayOnClick.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void DisplayOnClick_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" DisplayOnClick="true" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.DisplayOnClick.ShouldBeTrue();
+	}
+
+	// === OffsetX / OffsetY ===
+
+	[Fact]
+	public void OffsetX_DefaultIs0()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.OffsetX.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OffsetX_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" OffsetX="10" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.OffsetX.ShouldBe(10);
+	}
+
+	[Fact]
+	public void OffsetY_DefaultIs0()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.OffsetY.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OffsetY_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" OffsetY="15" />
+		);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.OffsetY.ShouldBe(15);
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<BalloonPopupExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<BalloonPopupExtender TargetControlID="btn1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<BalloonPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<BalloonPopupExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

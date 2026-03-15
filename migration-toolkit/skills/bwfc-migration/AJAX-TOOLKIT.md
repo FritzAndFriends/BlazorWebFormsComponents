@@ -588,6 +588,568 @@ This enables InteractiveServer globally. Alternatively, add `@rendermode Interac
 
 ---
 
+---
+
+## Extended Extender Reference
+
+The following extenders require manual implementation or can be implemented using CSS and Blazor interop. Each entry shows the migration pattern.
+
+### TextBoxWatermarkExtender — Placeholder Text
+
+**Purpose:** Display placeholder text that disappears when the user focuses the input.
+
+**Web Forms:**
+```html
+<ajaxToolkit:TextBoxWatermarkExtender ID="twme1" runat="server"
+    TargetControlID="searchBox"
+    WatermarkText="Enter search term..."
+    WatermarkCssClass="watermark-style" />
+```
+
+**Blazor Equivalent (CSS + HTML5):**
+```razor
+<TextBox ID="searchBox" placeholder="Enter search term..." />
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `WatermarkText` | `placeholder` | HTML5 standard |
+| `WatermarkCssClass` | `class` | Apply CSS to TextBox directly |
+
+**Migration Notes:**
+- HTML5 `placeholder` attribute replaces `WatermarkText` — no JavaScript needed
+- For custom styling, use CSS classes on the TextBox or `::placeholder` pseudo-element
+- Modern browsers fully support this; no fallback needed
+
+---
+
+### DragPanelExtender — Makes Panels Draggable
+
+**Purpose:** Enable mouse-drag repositioning of a Panel.
+
+**Web Forms:**
+```html
+<ajaxToolkit:DragPanelExtender ID="dpe1" runat="server"
+    TargetControlID="dragPanel"
+    HandleControlID="dragHandle" />
+
+<asp:Panel ID="dragPanel" runat="server">
+    <div id="dragHandle" style="cursor: move; background: #ccc;">Drag here</div>
+    <p>Draggable content...</p>
+</asp:Panel>
+```
+
+**Blazor Equivalent (CSS + JS Interop):**
+```razor
+<div @ref="dragPanelRef" style="position: absolute; cursor: move; user-select: none;">
+    <div @onmousedown="StartDrag" style="cursor: move; background: #ccc;">Drag here</div>
+    <p>Draggable content...</p>
+</div>
+
+@code {
+    private ElementReference dragPanelRef;
+    private int offsetX = 0, offsetY = 0;
+    
+    private void StartDrag(MouseEventArgs e)
+    {
+        offsetX = (int)e.ClientX - _currentX;
+        offsetY = (int)e.ClientY - _currentY;
+        // Wire onmousemove and onmouseup via JS interop
+    }
+}
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `TargetControlID` | `@ref` | Reference the div element |
+| `HandleControlID` | Event handler on handle | Attach `@onmousedown` to the drag handle |
+
+**Migration Notes:**
+- Requires manual JavaScript interop or a Blazor drag-drop library (e.g., Telerik, DevExpress)
+- Consider third-party libraries to avoid complex JS integration
+- Use CSS `position: absolute` for the draggable element
+
+---
+
+### ResizableControlExtender — Drag-to-Resize
+
+**Purpose:** Enable resizing a control by dragging its corner.
+
+**Web Forms:**
+```html
+<ajaxToolkit:ResizableControlExtender ID="rce1" runat="server"
+    TargetControlID="resizePanel"
+    ResizableCssClass="resize-handle"
+    OnClientResize="OnResize" />
+```
+
+**Blazor Equivalent (CSS Only):**
+```razor
+<div style="position: relative; width: 300px; height: 200px; resize: both; overflow: auto; border: 1px solid #ccc;">
+    Resizable content
+</div>
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `TargetControlID` | Container `div` | Apply CSS `resize: both` |
+| `ResizableCssClass` | CSS `resize` property | Built into modern CSS |
+| `OnClientResize` | CSS-only solution | No callback needed for basic resizing |
+
+**Migration Notes:**
+- CSS3 `resize: both` property eliminates the need for JavaScript
+- Requires `overflow: auto` and explicit `width`/`height`
+- Works in all modern browsers (IE 9+)
+- For advanced resize events, use a library (e.g., Interact.js)
+
+---
+
+### DropShadowExtender — CSS Box-Shadow
+
+**Purpose:** Add a drop shadow to a control.
+
+**Web Forms:**
+```html
+<ajaxToolkit:DropShadowExtender ID="dse1" runat="server"
+    TargetControlID="shadowPanel"
+    Width="5"
+    Opacity="0.5" />
+```
+
+**Blazor Equivalent (CSS):**
+```razor
+<div style="box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5); padding: 10px; background: white;">
+    Panel with shadow
+</div>
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `Width` | `box-shadow` blur radius | Map to CSS blur radius |
+| `Opacity` | `rgba` alpha channel | Use CSS `rgba()` color |
+
+**Migration Notes:**
+- CSS3 `box-shadow` replaces the extender entirely
+- Syntax: `box-shadow: offset-x offset-y blur-radius color`
+- Much simpler than JavaScript; works in all modern browsers
+
+---
+
+### AlwaysVisibleControlExtender — Fixed Positioning
+
+**Purpose:** Keep a control visible (fixed) as the page scrolls.
+
+**Web Forms:**
+```html
+<ajaxToolkit:AlwaysVisibleControlExtender ID="avce1" runat="server"
+    TargetControlID="fixedPanel"
+    VerticalSide="Top"
+    HorizontalSide="Right" />
+```
+
+**Blazor Equivalent (CSS):**
+```razor
+<div style="position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px;">
+    Fixed content
+</div>
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `VerticalSide` | `top` or `bottom` CSS property | Direct CSS mapping |
+| `HorizontalSide` | `left` or `right` CSS property | Direct CSS mapping |
+
+**Migration Notes:**
+- CSS `position: fixed` eliminates the need for JavaScript
+- Pair with `top`, `right`, `bottom`, `left` properties
+- Consider `z-index` for layering with other elements
+- Modern browsers fully support this
+
+---
+
+### RoundedCornersExtender — Border-Radius
+
+**Purpose:** Add rounded corners to a control.
+
+**Web Forms:**
+```html
+<ajaxToolkit:RoundedCornersExtender ID="rce1" runat="server"
+    TargetControlID="roundedPanel"
+    Radius="10" />
+```
+
+**Blazor Equivalent (CSS):**
+```razor
+<div style="border-radius: 10px; overflow: hidden; background: white; border: 1px solid #ccc; padding: 10px;">
+    Rounded corner panel
+</div>
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `Radius` | `border-radius` CSS property | Direct pixel mapping |
+
+**Migration Notes:**
+- CSS3 `border-radius` replaces the extender
+- Pair with `overflow: hidden` to clip content at corners
+- Specify in pixels (e.g., `border-radius: 10px`)
+- Works in all modern browsers (IE 9+)
+
+---
+
+### UpdatePanelAnimationExtender — Loading Animations
+
+**Purpose:** Play animations when an UpdatePanel posts back.
+
+**Web Forms:**
+```html
+<ajaxToolkit:UpdatePanelAnimationExtender ID="upae1" runat="server"
+    TargetControlID="animationPanel">
+    <Animations>
+        <OnUpdating>
+            <FadeOut Duration="0.5" />
+        </OnUpdating>
+        <OnUpdated>
+            <FadeIn Duration="0.5" />
+        </OnUpdated>
+    </Animations>
+</ajaxToolkit:UpdatePanelAnimationExtender>
+```
+
+**Blazor Equivalent (CSS Animations + State):**
+```razor
+<div style="@fadeStyle">
+    Loading panel content...
+</div>
+
+@code {
+    private string fadeStyle = "";
+    
+    private async Task OnPostBack()
+    {
+        fadeStyle = "opacity: 0; transition: opacity 0.5s ease;";
+        await Task.Delay(500);
+        // Update content
+        fadeStyle = "opacity: 1; transition: opacity 0.5s ease;";
+    }
+}
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `OnUpdating` | Before state change | Set style or trigger animation |
+| `OnUpdated` | After state change | Restore style after update |
+| `FadeOut/FadeIn` | CSS `opacity` transition | Use CSS `transition` property |
+
+**Migration Notes:**
+- Blazor's reactivity makes animations simpler — change state, let CSS handle the transition
+- Use CSS `transition` property for smooth effects
+- Consider CSS keyframes for complex animations
+- No JavaScript required for basic fade effects
+
+---
+
+### PasswordStrength — Password Quality Indicator
+
+**Purpose:** Display visual feedback on password strength.
+
+**Web Forms:**
+```html
+<ajaxToolkit:PasswordStrength ID="ps1" runat="server"
+    TargetControlID="passwordBox"
+    StrengthIndicatorType="BarIndicator"
+    PreferredPasswordLength="8" />
+```
+
+**Blazor Equivalent (Blazor Component + CSS):**
+```razor
+<TextBox ID="passwordBox" @onchange="CheckPasswordStrength" Type="password" />
+
+<div style="@GetStrengthStyle()">
+    <div style="width: @strengthPercentage%; height: 10px; background: @strengthColor; transition: width 0.3s;"></div>
+</div>
+<p>Strength: @strengthText</p>
+
+@code {
+    private int strengthPercentage = 0;
+    private string strengthColor = "red";
+    private string strengthText = "Weak";
+    
+    private void CheckPasswordStrength(ChangeEventArgs e)
+    {
+        string password = e.Value?.ToString() ?? "";
+        // Calculate strength...
+        strengthPercentage = CalculateStrength(password);
+        strengthText = GetStrengthText(strengthPercentage);
+    }
+    
+    private int CalculateStrength(string pwd)
+    {
+        int strength = 0;
+        if (pwd.Length >= 8) strength += 25;
+        if (System.Text.RegularExpressions.Regex.IsMatch(pwd, @"[A-Z]")) strength += 25;
+        if (System.Text.RegularExpressions.Regex.IsMatch(pwd, @"[0-9]")) strength += 25;
+        if (System.Text.RegularExpressions.Regex.IsMatch(pwd, @"[!@#$%^&*]")) strength += 25;
+        return strength;
+    }
+}
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `TargetControlID` | `@onchange` event | Wire change handler |
+| `StrengthIndicatorType` | CSS bars or text | Render visually with CSS |
+| `PreferredPasswordLength` | Component logic | Check in C# handler |
+
+**Migration Notes:**
+- Blazor makes this a data-binding exercise instead of JavaScript
+- Validate password strength in `@code` block
+- Update visual indicator with reactive state changes
+- No third-party library needed for basic strength checking
+
+---
+
+### ValidatorCalloutExtender — Validation Callouts
+
+**Purpose:** Display validation errors in a styled callout popup.
+
+**Web Forms:**
+```html
+<asp:TextBox ID="emailBox" runat="server" />
+<asp:RequiredFieldValidator ControlToValidate="emailBox" runat="server" />
+
+<ajaxToolkit:ValidatorCalloutExtender ID="vce1" runat="server"
+    TargetControlID="emailBox"
+    CssClass="validator-callout" />
+```
+
+**Blazor Equivalent (ValidationMessage + CSS):**
+```razor
+<InputText @bind-Value="model.Email" />
+<ValidationMessage For="@(() => model.Email)" />
+
+<style>
+    .field-validation-error {
+        position: absolute;
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 8px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+</style>
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `TargetControlID` | Associated control | Use `@bind` with validator |
+| `CssClass` | `.field-validation-error` | Apply custom CSS styling |
+
+**Migration Notes:**
+- Use Blazor's built-in `ValidationMessage` component
+- Style with CSS for the callout appearance
+- No JavaScript needed — validation is handled by Blazor data annotations
+- Supports async validation with EditContext
+
+---
+
+### SlideShowExtender — Image Carousel
+
+**Purpose:** Display a rotating slideshow of images.
+
+**Web Forms:**
+```html
+<ajaxToolkit:SlideShowExtender ID="sse1" runat="server"
+    TargetControlID="slideShowPanel"
+    Loop="true"
+    AutoPlay="true"
+    PlayInterval="3000" />
+```
+
+**Blazor Equivalent (Component + Timer):**
+```razor
+<div style="width: 400px; height: 300px; position: relative; overflow: hidden;">
+    <img src="@images[currentIndex]" style="width: 100%; height: 100%;" />
+    
+    <button @onclick="PreviousSlide" style="position: absolute; left: 10px; top: 50%;">❮</button>
+    <button @onclick="NextSlide" style="position: absolute; right: 10px; top: 50%;">❯</button>
+</div>
+
+@code {
+    private List<string> images = new() { "img1.jpg", "img2.jpg", "img3.jpg" };
+    private int currentIndex = 0;
+    private System.Timers.Timer autoPlayTimer;
+    
+    protected override void OnInitialized()
+    {
+        autoPlayTimer = new System.Timers.Timer(3000);
+        autoPlayTimer.Elapsed += (s, e) => NextSlide();
+        autoPlayTimer.AutoReset = true;
+        autoPlayTimer.Start();
+    }
+    
+    private void NextSlide()
+    {
+        currentIndex = (currentIndex + 1) % images.Count;
+        StateHasChanged();
+    }
+    
+    private void PreviousSlide()
+    {
+        currentIndex = (currentIndex - 1 + images.Count) % images.Count;
+        StateHasChanged();
+    }
+    
+    public void Dispose() => autoPlayTimer?.Dispose();
+}
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `AutoPlay` | Timer initialization | Set up in `OnInitialized()` |
+| `PlayInterval` | `Timer(interval)` | Pass milliseconds to Timer |
+| `Loop` | Modulo logic | Use `%` operator for wrapping |
+
+**Migration Notes:**
+- Blazor components with state management replace the extender
+- Use `System.Timers.Timer` for auto-play
+- Implement Previous/Next buttons with index logic
+- Consider CSS transitions for smooth image changes
+
+---
+
+### ListSearchExtender — Type-to-Filter Lists
+
+**Purpose:** Filter list items by typing in a search box.
+
+**Web Forms:**
+```html
+<asp:TextBox ID="searchBox" runat="server" />
+<ajaxToolkit:ListSearchExtender ID="lse1" runat="server"
+    TargetControlID="itemList"
+    PromptPosition="Top" />
+
+<asp:ListBox ID="itemList" runat="server">
+    <asp:ListItem>Apple</asp:ListItem>
+    <asp:ListItem>Banana</asp:ListItem>
+    <asp:ListItem>Cherry</asp:ListItem>
+</asp:ListBox>
+```
+
+**Blazor Equivalent (Data Binding + Filtering):**
+```razor
+<input type="text" @oninput="SearchItems" placeholder="Type to search..." />
+
+<ul>
+@foreach (var item in filteredItems)
+{
+    <li>@item</li>
+}
+</ul>
+
+@code {
+    private List<string> allItems = new() { "Apple", "Banana", "Cherry", "Date", "Elderberry" };
+    private List<string> filteredItems;
+    
+    protected override void OnInitialized()
+    {
+        filteredItems = allItems;
+    }
+    
+    private void SearchItems(ChangeEventArgs e)
+    {
+        string searchTerm = e.Value?.ToString() ?? "";
+        filteredItems = allItems
+            .Where(item => item.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+}
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `TargetControlID` | ListBox/dropdown items | Data-bind to filtered list |
+| `PromptPosition` | CSS or HTML placement | Render input above/below list |
+
+**Migration Notes:**
+- Replace with simple C# filtering logic
+- Use `@oninput` event for real-time search
+- Use `string.Contains()` with case-insensitive comparison
+- Consider using `System.Linq` for complex filtering
+
+---
+
+### BalloonPopupExtender — Styled Tooltips
+
+**Purpose:** Display a styled balloon-style tooltip on hover.
+
+**Web Forms:**
+```html
+<asp:Label ID="lblInfo" Text="Hover me" runat="server" />
+
+<ajaxToolkit:BalloonPopupExtender ID="bpe1" runat="server"
+    TargetControlID="lblInfo"
+    BalloonPopupControlID="balloon"
+    Position="TopRight"
+    OffsetX="0"
+    OffsetY="10" />
+
+<asp:Panel ID="balloon" runat="server">
+    This is the tooltip content
+</asp:Panel>
+```
+
+**Blazor Equivalent (CSS + Hover):**
+```razor
+<div style="position: relative; display: inline-block;">
+    <span @onmouseenter="ShowTooltip" @onmouseleave="HideTooltip">Hover me</span>
+    
+    @if (showTooltip)
+    {
+        <div style="@TooltipStyle()">
+            This is the tooltip content
+            <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #333;"></div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool showTooltip = false;
+    
+    private void ShowTooltip() => showTooltip = true;
+    private void HideTooltip() => showTooltip = false;
+    
+    private string TooltipStyle() => "position: absolute; top: -50px; right: 0; background: #333; color: white; padding: 8px; border-radius: 4px; white-space: nowrap; z-index: 1000;";
+}
+```
+
+**Key Property Mappings:**
+| Web Forms | Blazor | Notes |
+|-----------|--------|-------|
+| `BalloonPopupControlID` | Inline div | Render tooltip inline |
+| `Position` | CSS `top`/`right`/`bottom`/`left` | Control positioning |
+| `OffsetX`/`OffsetY` | CSS positioning | Use `top`, `left` properties |
+
+**Migration Notes:**
+- Use `@onmouseenter` and `@onmouseleave` for hover events
+- Style the balloon with CSS (border, background, shadow)
+- Use CSS triangles (border tricks) for arrow/pointer
+- Consider `title` attribute for simpler tooltips without custom styling
+
+---
+
 ## See Also
 
 - **[SKILL.md](SKILL.md)** — Web Forms → Blazor migration overview and two-layer pipeline

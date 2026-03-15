@@ -1,0 +1,199 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/list-search-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === PromptText ===
+
+	[Fact]
+	public void PromptText_DefaultIsTypeToSearch()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.PromptText.ShouldBe("Type to search");
+	}
+
+	[Fact]
+	public void PromptText_SetCorrectly()
+	{
+		string text = "Search items...";
+		SetupLooseJs();
+		var cut = Render(
+			@<ListSearchExtender TargetControlID="listbox1" PromptText="@text" />
+		);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.PromptText.ShouldBe("Search items...");
+	}
+
+	// === PromptCssClass ===
+
+	[Fact]
+	public void PromptCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.PromptCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PromptCssClass_SetCorrectly()
+	{
+		string cssClass = "search-prompt";
+		SetupLooseJs();
+		var cut = Render(
+			@<ListSearchExtender TargetControlID="listbox1" PromptCssClass="@cssClass" />
+		);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.PromptCssClass.ShouldBe("search-prompt");
+	}
+
+	// === PromptPosition ===
+
+	[Fact]
+	public void PromptPosition_DefaultIsTop()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.PromptPosition.ShouldBe(PromptPosition.Top);
+	}
+
+	[Fact]
+	public void PromptPosition_SetCorrectly()
+	{
+		PromptPosition pos = PromptPosition.Bottom;
+		SetupLooseJs();
+		var cut = Render(
+			@<ListSearchExtender TargetControlID="listbox1" PromptPosition="pos" />
+		);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.PromptPosition.ShouldBe(PromptPosition.Bottom);
+	}
+
+	// === QueryPattern ===
+
+	[Fact]
+	public void QueryPattern_DefaultIsContains()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.QueryPattern.ShouldBe(QueryPattern.Contains);
+	}
+
+	[Fact]
+	public void QueryPattern_SetCorrectly()
+	{
+		QueryPattern pattern = QueryPattern.StartsWith;
+		SetupLooseJs();
+		var cut = Render(
+			@<ListSearchExtender TargetControlID="listbox1" QueryPattern="pattern" />
+		);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.QueryPattern.ShouldBe(QueryPattern.StartsWith);
+	}
+
+	// === IsSorted ===
+
+	[Fact]
+	public void IsSorted_DefaultIsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.IsSorted.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void IsSorted_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ListSearchExtender TargetControlID="listbox1" IsSorted="true" />
+		);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.IsSorted.ShouldBeTrue();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<ListSearchExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ListSearchExtender TargetControlID="listbox1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ListSearchExtender TargetControlID="listbox1" />);
+
+		cut.FindComponent<ListSearchExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}
