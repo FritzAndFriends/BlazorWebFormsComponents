@@ -2,8 +2,9 @@
 
 **Author:** Forge (Lead / Web Forms Reviewer)
 **Date:** 2026-07-25
-**Status:** Draft — Pending team review
+**Status:** Approved — Ready for implementation
 **Requested by:** Jeffrey T. Fritz
+**GitHub Issue:** [#439](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/439)
 
 ---
 
