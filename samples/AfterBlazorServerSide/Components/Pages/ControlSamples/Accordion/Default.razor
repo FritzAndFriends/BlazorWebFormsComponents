@@ -1,0 +1,254 @@
+@page "/ControlSamples/Accordion"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>Accordion Component Samples</PageTitle>
+
+<h2>Accordion Component</h2>
+
+<p>The <code>Accordion</code> is a container component that displays collapsible content panes. Only one pane is expanded at a time (like the Ajax Control Toolkit <code>Accordion</code>). Each <code>AccordionPane</code> has a <code>Header</code> and <code>Content</code> render fragment.</p>
+
+<hr />
+
+<h3>1. Basic Accordion</h3>
+<p>A simple accordion with three panes. Click a header to expand that pane.</p>
+
+<div data-audit-control="Accordion-1">
+    <Accordion SelectedIndex="0">
+        <AccordionPane>
+            <Header>Section 1 — Introduction</Header>
+            <Content>
+                <p>Welcome to the Accordion demo. This pane is expanded by default because <code>SelectedIndex="0"</code>.</p>
+            </Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>Section 2 — Features</Header>
+            <Content>
+                <ul>
+                    <li>Collapsible panes with smooth transitions</li>
+                    <li>Only one pane open at a time</li>
+                    <li>Keyboard accessible</li>
+                </ul>
+            </Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>Section 3 — Getting Started</Header>
+            <Content>
+                <p>Add <code>&lt;Accordion&gt;</code> with child <code>&lt;AccordionPane&gt;</code> elements to your Blazor page.</p>
+            </Content>
+        </AccordionPane>
+    </Accordion>
+</div>
+
+<pre><code>&lt;Accordion SelectedIndex="0"&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Section 1&lt;/Header&gt;
+        &lt;Content&gt;&lt;p&gt;First pane content.&lt;/p&gt;&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Section 2&lt;/Header&gt;
+        &lt;Content&gt;&lt;p&gt;Second pane content.&lt;/p&gt;&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+&lt;/Accordion&gt;</code></pre>
+
+<hr />
+
+<h3>2. Styled Headers and Content</h3>
+<p>Use <code>HeaderCssClass</code> and <code>ContentCssClass</code> to apply custom styling to the accordion panes.</p>
+
+<div data-audit-control="Accordion-2">
+    <Accordion SelectedIndex="1"
+               HeaderCssClass="accordion-header-custom"
+               ContentCssClass="accordion-content-custom">
+        <AccordionPane>
+            <Header>🎨 Design</Header>
+            <Content><p>Custom styled header and content areas using CSS classes.</p></Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>⚙️ Settings</Header>
+            <Content><p>This pane opens by default (<code>SelectedIndex="1"</code>).</p></Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>📊 Reports</Header>
+            <Content><p>Additional pane with styled appearance.</p></Content>
+        </AccordionPane>
+    </Accordion>
+</div>
+
+<pre><code>&lt;Accordion SelectedIndex="1"
+           HeaderCssClass="accordion-header-custom"
+           ContentCssClass="accordion-content-custom"&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Design&lt;/Header&gt;
+        &lt;Content&gt;&lt;p&gt;Styled content.&lt;/p&gt;&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+&lt;/Accordion&gt;</code></pre>
+
+<hr />
+
+<h3>3. Fade Transitions</h3>
+<p>Enable <code>FadeTransitions</code> for a fade effect instead of the default slide animation. Adjust <code>TransitionDuration</code> for speed.</p>
+
+<div data-audit-control="Accordion-3">
+    <Accordion SelectedIndex="0" FadeTransitions="true" TransitionDuration="500">
+        <AccordionPane>
+            <Header>Fade Pane A</Header>
+            <Content><p>This accordion uses a 500ms fade transition between panes.</p></Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>Fade Pane B</Header>
+            <Content><p>Switch between panes to see the fade effect.</p></Content>
+        </AccordionPane>
+    </Accordion>
+</div>
+
+<pre><code>&lt;Accordion SelectedIndex="0" FadeTransitions="true" TransitionDuration="500"&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Fade Pane A&lt;/Header&gt;
+        &lt;Content&gt;&lt;p&gt;Uses fade instead of slide.&lt;/p&gt;&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+&lt;/Accordion&gt;</code></pre>
+
+<hr />
+
+<h3>4. Programmatic SelectedIndex</h3>
+<p>Bind <code>SelectedIndex</code> to a variable and use <code>SelectedIndexChanged</code> to react to pane changes.</p>
+
+<div data-audit-control="Accordion-4">
+    <div class="mb-2">
+        <strong>Current Pane:</strong> @currentPaneIndex
+        <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => currentPaneIndex = 0">Go to Pane 0</button>
+        <button class="btn btn-sm btn-outline-primary" @onclick="() => currentPaneIndex = 1">Go to Pane 1</button>
+        <button class="btn btn-sm btn-outline-primary" @onclick="() => currentPaneIndex = 2">Go to Pane 2</button>
+    </div>
+
+    <Accordion SelectedIndex="@currentPaneIndex" SelectedIndexChanged="OnPaneChanged">
+        <AccordionPane>
+            <Header>Pane 0 — Home</Header>
+            <Content><p>Home content. Selected programmatically.</p></Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>Pane 1 — Profile</Header>
+            <Content><p>Profile content.</p></Content>
+        </AccordionPane>
+        <AccordionPane>
+            <Header>Pane 2 — Settings</Header>
+            <Content><p>Settings content.</p></Content>
+        </AccordionPane>
+    </Accordion>
+
+    @if (!string.IsNullOrEmpty(paneChangeMessage))
+    {
+        <div class="alert alert-info mt-2">@paneChangeMessage</div>
+    }
+</div>
+
+<pre><code>&lt;Accordion SelectedIndex="@@currentPaneIndex" SelectedIndexChanged="OnPaneChanged"&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Pane 0&lt;/Header&gt;
+        &lt;Content&gt;&lt;p&gt;Home content.&lt;/p&gt;&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+&lt;/Accordion&gt;
+
+@@code {
+    private int currentPaneIndex = 0;
+    private void OnPaneChanged(int index) { currentPaneIndex = index; }
+}</code></pre>
+
+<hr />
+
+<h3>5. AutoSize Modes</h3>
+<p>The <code>AutoSize</code> property controls how the accordion handles its height: <code>None</code> (default), <code>Fill</code> (stretches to container), or <code>Limit</code> (constrains to tallest pane).</p>
+
+<div data-audit-control="Accordion-5">
+    <div style="height: 200px; border: 1px dashed #ccc; padding: 4px;">
+        <Accordion SelectedIndex="0" AutoSize="AutoSizeMode.Fill">
+            <AccordionPane>
+                <Header>Fill Mode — Short Content</Header>
+                <Content><p>This accordion fills its 200px container.</p></Content>
+            </AccordionPane>
+            <AccordionPane>
+                <Header>Fill Mode — Longer Content</Header>
+                <Content>
+                    <p>Even with more content, the accordion fills the container height.</p>
+                    <p>Additional paragraph of text here.</p>
+                </Content>
+            </AccordionPane>
+        </Accordion>
+    </div>
+</div>
+
+<pre><code>&lt;div style="height: 200px;"&gt;
+    &lt;Accordion SelectedIndex="0" AutoSize="AutoSizeMode.Fill"&gt;
+        &lt;AccordionPane&gt;
+            &lt;Header&gt;Pane&lt;/Header&gt;
+            &lt;Content&gt;&lt;p&gt;Fills container.&lt;/p&gt;&lt;/Content&gt;
+        &lt;/AccordionPane&gt;
+    &lt;/Accordion&gt;
+&lt;/div&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;ajaxToolkit:Accordion ID="Accordion1" runat="server"
+    SelectedIndex="0" FadeTransitions="true" TransitionDuration="300"
+    HeaderCssClass="accordionHeader" ContentCssClass="accordionContent"&gt;
+    &lt;Panes&gt;
+        &lt;ajaxToolkit:AccordionPane&gt;
+            &lt;Header&gt;Section 1&lt;/Header&gt;
+            &lt;Content&gt;Content 1&lt;/Content&gt;
+        &lt;/ajaxToolkit:AccordionPane&gt;
+    &lt;/Panes&gt;
+&lt;/ajaxToolkit:Accordion&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;Accordion SelectedIndex="0" FadeTransitions="true" TransitionDuration="300"
+           HeaderCssClass="accordionHeader" ContentCssClass="accordionContent"&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Section 1&lt;/Header&gt;
+        &lt;Content&gt;Content 1&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+&lt;/Accordion&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code> (not needed in Blazor)</li>
+    <li>Replace <code>&lt;ajaxToolkit:Accordion&gt;</code> with <code>&lt;Accordion&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:AccordionPane&gt;</code> with <code>&lt;AccordionPane&gt;</code></li>
+    <li>Remove the <code>&lt;Panes&gt;</code> wrapper element — panes are direct children in Blazor</li>
+    <li>Keep the same property names: <code>SelectedIndex</code>, <code>FadeTransitions</code>, <code>TransitionDuration</code>, etc.</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+    private int currentPaneIndex = 0;
+    private string paneChangeMessage = "";
+
+    private void OnPaneChanged(int index)
+    {
+        currentPaneIndex = index;
+        paneChangeMessage = $"Switched to pane {index} at {DateTime.Now:h:mm:ss tt}";
+    }
+}
+
+<style>
+    .accordion-header-custom {
+        background-color: #0d6efd;
+        color: white;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 4px;
+        margin-bottom: 2px;
+    }
+    .accordion-content-custom {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 0 0 4px 4px;
+    }
+</style>

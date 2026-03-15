@@ -1,0 +1,241 @@
+@page "/ControlSamples/TabContainer"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>TabContainer Component Samples</PageTitle>
+
+<h2>TabContainer Component</h2>
+
+<p>The <code>TabContainer</code> displays content in a tabbed interface. Each <code>TabPanel</code> child defines a tab with a header and content area. This emulates the Ajax Control Toolkit <code>TabContainer</code> / <code>TabPanel</code> controls.</p>
+
+<hr />
+
+<h3>1. Basic Tabs</h3>
+<p>A simple tab container with three tabs using <code>HeaderText</code> for tab labels.</p>
+
+<div data-audit-control="TabContainer-1">
+    <TabContainer ActiveTabIndex="0">
+        <TabPanel HeaderText="Home">
+            <ContentTemplate>
+                <p>Welcome to the Home tab. This is the default active tab.</p>
+            </ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Products">
+            <ContentTemplate>
+                <ul>
+                    <li>Widget A — $9.99</li>
+                    <li>Widget B — $14.99</li>
+                    <li>Widget C — $19.99</li>
+                </ul>
+            </ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Contact">
+            <ContentTemplate>
+                <p>Email: support&#64;example.com</p>
+                <p>Phone: (555) 123-4567</p>
+            </ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+</div>
+
+<pre><code>&lt;TabContainer ActiveTabIndex="0"&gt;
+    &lt;TabPanel HeaderText="Home"&gt;
+        &lt;ContentTemplate&gt;&lt;p&gt;Home content.&lt;/p&gt;&lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+    &lt;TabPanel HeaderText="Products"&gt;
+        &lt;ContentTemplate&gt;&lt;p&gt;Products list.&lt;/p&gt;&lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+&lt;/TabContainer&gt;</code></pre>
+
+<hr />
+
+<h3>2. Styled Tabs</h3>
+<p>Apply <code>CssClass</code> to the container for custom tab styling.</p>
+
+<div data-audit-control="TabContainer-2">
+    <TabContainer ActiveTabIndex="0" CssClass="styled-tabs">
+        <TabPanel HeaderText="📄 Documents">
+            <ContentTemplate><p>Your documents are listed here.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="📷 Photos">
+            <ContentTemplate><p>Your photo gallery.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="🎵 Music">
+            <ContentTemplate><p>Your music library.</p></ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+</div>
+
+<pre><code>&lt;TabContainer ActiveTabIndex="0" CssClass="styled-tabs"&gt;
+    &lt;TabPanel HeaderText="Documents"&gt;
+        &lt;ContentTemplate&gt;&lt;p&gt;Content.&lt;/p&gt;&lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+&lt;/TabContainer&gt;</code></pre>
+
+<hr />
+
+<h3>3. Disabled Tab</h3>
+<p>Set <code>Enabled="false"</code> on a <code>TabPanel</code> to disable it. The tab header appears but cannot be selected.</p>
+
+<div data-audit-control="TabContainer-3">
+    <TabContainer ActiveTabIndex="0">
+        <TabPanel HeaderText="Active Tab">
+            <ContentTemplate><p>This tab is active and selectable.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Disabled Tab" Enabled="false">
+            <ContentTemplate><p>This content cannot be reached because the tab is disabled.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Another Active Tab">
+            <ContentTemplate><p>This tab is also selectable.</p></ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+</div>
+
+<pre><code>&lt;TabPanel HeaderText="Disabled Tab" Enabled="false"&gt;
+    &lt;ContentTemplate&gt;&lt;p&gt;Cannot reach this.&lt;/p&gt;&lt;/ContentTemplate&gt;
+&lt;/TabPanel&gt;</code></pre>
+
+<hr />
+
+<h3>4. OnActiveTabChanged Event</h3>
+<p>Use <code>OnActiveTabChanged</code> to respond when the user switches tabs.</p>
+
+<div data-audit-control="TabContainer-4">
+    <TabContainer ActiveTabIndex="@activeTab" OnActiveTabChanged="OnTabChanged">
+        <TabPanel HeaderText="Tab A">
+            <ContentTemplate><p>Content of Tab A.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Tab B">
+            <ContentTemplate><p>Content of Tab B.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Tab C">
+            <ContentTemplate><p>Content of Tab C.</p></ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+
+    @if (!string.IsNullOrEmpty(tabMessage))
+    {
+        <div class="alert alert-info mt-2">@tabMessage</div>
+    }
+</div>
+
+<pre><code>&lt;TabContainer ActiveTabIndex="@@activeTab" OnActiveTabChanged="OnTabChanged"&gt;
+    &lt;TabPanel HeaderText="Tab A"&gt;...&lt;/TabPanel&gt;
+    &lt;TabPanel HeaderText="Tab B"&gt;...&lt;/TabPanel&gt;
+&lt;/TabContainer&gt;
+
+@@code {
+    private int activeTab = 0;
+    private void OnTabChanged(int index) { activeTab = index; }
+}</code></pre>
+
+<hr />
+
+<h3>5. HeaderTemplate</h3>
+<p>Use <code>HeaderTemplate</code> instead of <code>HeaderText</code> for rich tab headers with custom markup.</p>
+
+<div data-audit-control="TabContainer-5">
+    <TabContainer ActiveTabIndex="0">
+        <TabPanel>
+            <HeaderTemplate><span style="color: green; font-weight: bold;">✅ Approved</span></HeaderTemplate>
+            <ContentTemplate><p>Items that have been approved.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel>
+            <HeaderTemplate><span style="color: orange; font-weight: bold;">⏳ Pending</span></HeaderTemplate>
+            <ContentTemplate><p>Items awaiting review.</p></ContentTemplate>
+        </TabPanel>
+        <TabPanel>
+            <HeaderTemplate><span style="color: red; font-weight: bold;">❌ Rejected</span></HeaderTemplate>
+            <ContentTemplate><p>Items that were rejected.</p></ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+</div>
+
+<pre><code>&lt;TabPanel&gt;
+    &lt;HeaderTemplate&gt;&lt;span style="color: green;"&gt;✅ Approved&lt;/span&gt;&lt;/HeaderTemplate&gt;
+    &lt;ContentTemplate&gt;&lt;p&gt;Approved items.&lt;/p&gt;&lt;/ContentTemplate&gt;
+&lt;/TabPanel&gt;</code></pre>
+
+<hr />
+
+<h3>6. ScrollBars</h3>
+<p>Set <code>ScrollBars</code> on the container to add scrolling behavior to tab content areas.</p>
+
+<div data-audit-control="TabContainer-6">
+    <TabContainer ActiveTabIndex="0" ScrollBars="ScrollBars.Vertical">
+        <TabPanel HeaderText="Scrollable Content">
+            <ContentTemplate>
+                <div style="height: 150px;">
+                    @for (int i = 1; i <= 20; i++)
+                    {
+                        <p>Line @i of scrollable content.</p>
+                    }
+                </div>
+            </ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="Short Content">
+            <ContentTemplate><p>This tab has short content, no scrolling needed.</p></ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+</div>
+
+<pre><code>&lt;TabContainer ActiveTabIndex="0" ScrollBars="ScrollBars.Vertical"&gt;
+    &lt;TabPanel HeaderText="Scrollable"&gt;
+        &lt;ContentTemplate&gt;...long content...&lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+&lt;/TabContainer&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;ajaxToolkit:TabContainer ID="TabContainer1" runat="server" ActiveTabIndex="0"&gt;
+    &lt;ajaxToolkit:TabPanel ID="TabPanel1" runat="server" HeaderText="Tab 1"&gt;
+        &lt;ContentTemplate&gt;Content 1&lt;/ContentTemplate&gt;
+    &lt;/ajaxToolkit:TabPanel&gt;
+    &lt;ajaxToolkit:TabPanel ID="TabPanel2" runat="server" HeaderText="Tab 2"&gt;
+        &lt;ContentTemplate&gt;Content 2&lt;/ContentTemplate&gt;
+    &lt;/ajaxToolkit:TabPanel&gt;
+&lt;/ajaxToolkit:TabContainer&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;TabContainer ActiveTabIndex="0"&gt;
+    &lt;TabPanel HeaderText="Tab 1"&gt;
+        &lt;ContentTemplate&gt;Content 1&lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+    &lt;TabPanel HeaderText="Tab 2"&gt;
+        &lt;ContentTemplate&gt;Content 2&lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+&lt;/TabContainer&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:TabContainer&gt;</code> with <code>&lt;TabContainer&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:TabPanel&gt;</code> with <code>&lt;TabPanel&gt;</code></li>
+    <li>Remove <code>runat="server"</code> and <code>ID</code> attributes</li>
+    <li>Keep <code>HeaderText</code>, <code>ContentTemplate</code>, <code>ActiveTabIndex</code>, and <code>Enabled</code> properties unchanged</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+    private int activeTab = 0;
+    private string tabMessage = "";
+
+    private void OnTabChanged(int index)
+    {
+        activeTab = index;
+        tabMessage = $"Switched to tab {index} at {DateTime.Now:h:mm:ss tt}";
+    }
+}
+
+<style>
+    .styled-tabs {
+        border: 2px solid #0d6efd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>

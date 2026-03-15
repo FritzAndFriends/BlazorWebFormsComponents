@@ -1,0 +1,332 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string POPUP_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/popup-control-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txtColor" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.TargetControlID.ShouldBe("txtColor");
+	}
+
+	// === PopupControlID ===
+
+	[Fact]
+	public void PopupControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.PopupControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PopupControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" PopupControlID="pnlPopup" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.PopupControlID.ShouldBe("pnlPopup");
+	}
+
+	// === Position ===
+
+	[Fact]
+	public void Position_Default_IsBottom()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.Position.ShouldBe(PopupPosition.Bottom);
+	}
+
+	[Fact]
+	public void Position_SetToLeft()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" Position="PopupPosition.Left" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.Position.ShouldBe(PopupPosition.Left);
+	}
+
+	[Fact]
+	public void Position_SetToRight()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" Position="PopupPosition.Right" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.Position.ShouldBe(PopupPosition.Right);
+	}
+
+	[Fact]
+	public void Position_SetToTop()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" Position="PopupPosition.Top" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.Position.ShouldBe(PopupPosition.Top);
+	}
+
+	[Fact]
+	public void Position_SetToCenter()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" Position="PopupPosition.Center" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.Position.ShouldBe(PopupPosition.Center);
+	}
+
+	// === OffsetX ===
+
+	[Fact]
+	public void OffsetX_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.OffsetX.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OffsetX_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" OffsetX="10" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.OffsetX.ShouldBe(10);
+	}
+
+	// === OffsetY ===
+
+	[Fact]
+	public void OffsetY_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.OffsetY.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OffsetY_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" OffsetY="5" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.OffsetY.ShouldBe(5);
+	}
+
+	// === CommitProperty ===
+
+	[Fact]
+	public void CommitProperty_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.CommitProperty.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CommitProperty_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" CommitProperty="value" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.CommitProperty.ShouldBe("value");
+	}
+
+	// === CommitScript ===
+
+	[Fact]
+	public void CommitScript_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.CommitScript.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CommitScript_SetCorrectly()
+	{
+		string script = "updateColor(value)";
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" CommitScript="@script" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.CommitScript.ShouldBe("updateColor(value)");
+	}
+
+	// === ExtenderControlID ===
+
+	[Fact]
+	public void ExtenderControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.ExtenderControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ExtenderControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" ExtenderControlID="popupExt1" />
+		);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.ExtenderControlID.ShouldBe("popupExt1");
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(POPUP_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<PopupControlExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<PopupControlExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<PopupControlExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	// === Full Configuration ===
+
+	[Fact]
+	public void AllParameters_SetCorrectly()
+	{
+		string script = "onCommit()";
+		SetupLooseJs();
+		var cut = Render(
+			@<PopupControlExtender
+				TargetControlID="txtInput"
+				PopupControlID="pnlPicker"
+				Position="PopupPosition.Right"
+				OffsetX="15"
+				OffsetY="20"
+				CommitProperty="value"
+				CommitScript="@script"
+				ExtenderControlID="ext1" />
+		);
+
+		var instance = cut.FindComponent<PopupControlExtender>().Instance;
+		instance.TargetControlID.ShouldBe("txtInput");
+		instance.PopupControlID.ShouldBe("pnlPicker");
+		instance.Position.ShouldBe(PopupPosition.Right);
+		instance.OffsetX.ShouldBe(15);
+		instance.OffsetY.ShouldBe(20);
+		instance.CommitProperty.ShouldBe("value");
+		instance.CommitScript.ShouldBe("onCommit()");
+		instance.ExtenderControlID.ShouldBe("ext1");
+	}
+}

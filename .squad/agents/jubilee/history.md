@@ -147,3 +147,23 @@
 
 📌 Team update (2026-03-13): UpdatePanel sample page complete — 6 scenarios + migration guide + audit markers. ComponentList.razor updated with AJAX Controls section. Both changes verified to build clean.
 
+### Ajax Toolkit Extender Sample Pages (2026-03-14)
+
+- **Created `ConfirmButtonExtender/Default.razor`** — 3 demo sections: (1) Basic delete button with confirm dialog, (2) Multiple buttons with different custom confirm messages, (3) Default confirm text. Each section includes status messages that update on confirmed action. Before/after migration comparison with Ajax Control Toolkit markup.
+- **Created `FilteredTextBoxExtender/Default.razor`** — 6 demo sections: (1) Numbers only, (2) Lowercase letters only, (3) Custom valid chars (phone number format), (4) Combined flags (Numbers | LowercaseLetters), (5) All letters with custom chars for name input, (6) InvalidChars mode blocking HTML special characters.
+- **Project reference added** — `BlazorAjaxToolkitComponents.csproj` added to `AfterBlazorServerSide.csproj`.
+- **Using directives added** — `@using BlazorAjaxToolkitComponents` in root `_Imports.razor`, `@using BlazorAjaxToolkitComponents.Enums` in ControlSamples `_Imports.razor`.
+- **ComponentCatalog.cs updated** — Added ConfirmButtonExtender and FilteredTextBoxExtender entries in AJAX category (alphabetical before Timer). NavMenu.razor auto-populates from catalog.
+- **Key pattern:** Extender components render no HTML — they attach JS behavior to a target element via `TargetControlID`. Target elements must have an HTML `id` attribute. Pages must use `@rendermode InteractiveServer` for JS interop.
+- **Lesson:** Used standard HTML `<button>` and `<input>` elements as extender targets (not BWFC components) because extenders resolve targets via `document.getElementById()` — this is the most reliable and migration-faithful approach.
+- **Audit markers:** `data-audit-control` attributes applied (ConfirmButtonExtender-1 through -3, FilteredTextBoxExtender-1 through -6).
+
+### ModalPopupExtender & CollapsiblePanelExtender Sample Pages (2026-03-14)
+
+- **Created `ModalPopupExtender/Default.razor`** — 5 demo sections: (1) Basic modal with OK/Cancel buttons, (2) Custom backdrop CSS via BackgroundCssClass, (3) Drag support with PopupDragHandleControlID, (4) DropShadow enabled, (5) Programmatic show/hide via Blazor conditional rendering. Migration guide with before/after and step-by-step instructions.
+- **Created `CollapsiblePanelExtender/Default.razor`** — 6 demo sections: (1) Basic toggle (same CollapseControlID/ExpandControlID), (2) Separate expand/collapse controls, (3) Dynamic label text with TextLabelID/CollapsedText/ExpandedText, (4) Initially collapsed (Collapsed=true), (5) Horizontal ExpandDirection, (6) AutoCollapse/AutoExpand hover behavior. Migration guide included.
+- **ComponentCatalog.cs updated** — Added CollapsiblePanelExtender and ModalPopupExtender entries in AJAX category (alphabetical order). CollapsiblePanelExtender sorts before ConfirmButtonExtender; ModalPopupExtender sorts after FilteredTextBoxExtender.
+- **Pattern:** Followed established extender sample conventions — `@rendermode InteractiveServer`, standard HTML target elements with `id` attributes, `data-audit-control` markers, before/after migration code blocks, migration steps list.
+- **Audit markers:** `data-audit-control` attributes applied (ModalPopupExtender-1 through -5, CollapsiblePanelExtender-1 through -6).
+- **Build verified:** 0 errors, warnings are pre-existing BL0005 from other pages.
+

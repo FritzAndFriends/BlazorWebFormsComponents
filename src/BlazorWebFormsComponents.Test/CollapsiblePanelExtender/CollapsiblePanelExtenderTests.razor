@@ -1,0 +1,447 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string COLLAPSIBLE_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/collapsible-panel-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup. Extender JS behavior
+	/// is out of scope for bUnit — that's Playwright's job.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnlContent" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.TargetControlID.ShouldBe("pnlContent");
+	}
+
+	// === CollapseControlID ===
+
+	[Fact]
+	public void CollapseControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.CollapseControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CollapseControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" CollapseControlID="btnCollapse" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.CollapseControlID.ShouldBe("btnCollapse");
+	}
+
+	// === ExpandControlID ===
+
+	[Fact]
+	public void ExpandControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ExpandControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" ExpandControlID="btnExpand" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandControlID.ShouldBe("btnExpand");
+	}
+
+	// === Collapsed ===
+
+	[Fact]
+	public void Collapsed_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.Collapsed.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Collapsed_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" Collapsed="true" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.Collapsed.ShouldBeTrue();
+	}
+
+	// === CollapsedSize ===
+
+	[Fact]
+	public void CollapsedSize_DefaultIsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.CollapsedSize.ShouldBe(0);
+	}
+
+	[Fact]
+	public void CollapsedSize_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" CollapsedSize="20" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.CollapsedSize.ShouldBe(20);
+	}
+
+	// === ExpandedSize ===
+
+	[Fact]
+	public void ExpandedSize_DefaultIsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandedSize.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ExpandedSize_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" ExpandedSize="300" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandedSize.ShouldBe(300);
+	}
+
+	// === CollapsedText ===
+
+	[Fact]
+	public void CollapsedText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.CollapsedText.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CollapsedText_SetCorrectly()
+	{
+		string text = "Show Details";
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" CollapsedText="@text" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.CollapsedText.ShouldBe("Show Details");
+	}
+
+	// === ExpandedText ===
+
+	[Fact]
+	public void ExpandedText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandedText.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ExpandedText_SetCorrectly()
+	{
+		string text = "Hide Details";
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" ExpandedText="@text" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandedText.ShouldBe("Hide Details");
+	}
+
+	// === TextLabelID ===
+
+	[Fact]
+	public void TextLabelID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.TextLabelID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void TextLabelID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" TextLabelID="lblToggle" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.TextLabelID.ShouldBe("lblToggle");
+	}
+
+	// === ExpandDirection ===
+
+	[Fact]
+	public void ExpandDirection_DefaultIsVertical()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandDirection.ShouldBe(ExpandDirection.Vertical);
+	}
+
+	[Fact]
+	public void ExpandDirection_SetToHorizontal()
+	{
+		ExpandDirection dir = ExpandDirection.Horizontal;
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" ExpandDirection="dir" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ExpandDirection.ShouldBe(ExpandDirection.Horizontal);
+	}
+
+	// === AutoCollapse ===
+
+	[Fact]
+	public void AutoCollapse_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.AutoCollapse.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void AutoCollapse_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" AutoCollapse="true" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.AutoCollapse.ShouldBeTrue();
+	}
+
+	// === AutoExpand ===
+
+	[Fact]
+	public void AutoExpand_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.AutoExpand.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void AutoExpand_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" AutoExpand="true" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.AutoExpand.ShouldBeTrue();
+	}
+
+	// === ScrollContents ===
+
+	[Fact]
+	public void ScrollContents_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ScrollContents.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ScrollContents_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" ScrollContents="true" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.ScrollContents.ShouldBeTrue();
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	[Fact]
+	public void BehaviorID_WhenSet_ReturnsSetValue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender TargetControlID="pnl1" BehaviorID="collapseBehavior1" />
+		);
+
+		cut.FindComponent<CollapsiblePanelExtender>().Instance
+			.BehaviorID.ShouldBe("collapseBehavior1");
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<CollapsiblePanelExtender TargetControlID="pnl1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(COLLAPSIBLE_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<CollapsiblePanelExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === Full Configuration ===
+
+	[Fact]
+	public void AllParameters_SetCorrectly()
+	{
+		string collapsedText = "Show";
+		string expandedText = "Hide";
+		ExpandDirection dir = ExpandDirection.Horizontal;
+		SetupLooseJs();
+		var cut = Render(
+			@<CollapsiblePanelExtender
+				TargetControlID="pnlMain"
+				CollapseControlID="btnHide"
+				ExpandControlID="btnShow"
+				Collapsed="true"
+				CollapsedSize="25"
+				ExpandedSize="400"
+				CollapsedText="@collapsedText"
+				ExpandedText="@expandedText"
+				TextLabelID="lblStatus"
+				ExpandDirection="dir"
+				AutoCollapse="true"
+				AutoExpand="true"
+				ScrollContents="true" />
+		);
+
+		var instance = cut.FindComponent<CollapsiblePanelExtender>().Instance;
+		instance.TargetControlID.ShouldBe("pnlMain");
+		instance.CollapseControlID.ShouldBe("btnHide");
+		instance.ExpandControlID.ShouldBe("btnShow");
+		instance.Collapsed.ShouldBeTrue();
+		instance.CollapsedSize.ShouldBe(25);
+		instance.ExpandedSize.ShouldBe(400);
+		instance.CollapsedText.ShouldBe("Show");
+		instance.ExpandedText.ShouldBe("Hide");
+		instance.TextLabelID.ShouldBe("lblStatus");
+		instance.ExpandDirection.ShouldBe(ExpandDirection.Horizontal);
+		instance.AutoCollapse.ShouldBeTrue();
+		instance.AutoExpand.ShouldBeTrue();
+		instance.ScrollContents.ShouldBeTrue();
+	}
+}

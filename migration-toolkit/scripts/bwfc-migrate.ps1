@@ -93,6 +93,7 @@ $script:ManualItems = [System.Collections.Generic.List[PSCustomObject]]::new()
 $script:RedirectHandlers = [System.Collections.Generic.List[string]]::new()
 $script:FilesProcessed = 0
 $script:TransformsApplied = 0
+$script:HasAjaxToolkitControls = $false
 
 function Write-TransformLog {
     param(
@@ -318,6 +319,7 @@ function New-ProjectScaffold {
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.LoginControls
+@using BlazorAjaxToolkitComponents
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
 @inherits BlazorWebFormsComponents.WebFormsPageBase
@@ -1353,6 +1355,84 @@ function ConvertFrom-AspPrefix {
     return $Content
 }
 
+function ConvertFrom-AjaxToolkitPrefix {
+    param([string]$Content, [string]$RelPath)
+
+    # Known Ajax Control Toolkit components with BWFC equivalents
+    $knownControls = @(
+        'Accordion', 'AccordionPane',
+        'TabContainer', 'TabPanel',
+        'ConfirmButtonExtender', 'FilteredTextBoxExtender',
+        'ModalPopupExtender', 'CollapsiblePanelExtender',
+        'CalendarExtender', 'AutoCompleteExtender',
+        'MaskedEditExtender', 'NumericUpDownExtender',
+        'SliderExtender', 'ToggleButtonExtender',
+        'PopupControlExtender', 'HoverMenuExtender'
+    )
+
+    # 1. Strip ToolkitScriptManager entirely (not needed in Blazor)
+    # Handle block form: <ajaxToolkit:ToolkitScriptManager ...>...</ajaxToolkit:ToolkitScriptManager>
+    $tsmBlockRegex = [regex]'(?s)<ajaxToolkit:ToolkitScriptManager(?:[^>]|(?:%>))*?(?:>.*?</ajaxToolkit:ToolkitScriptManager>)\s*\r?\n?'
+    if ($Content -match '<ajaxToolkit:ToolkitScriptManager') {
+        $tsmBlockBefore = $Content
+        $Content = $tsmBlockRegex.Replace($Content, '')
+        # Handle self-closing form: <ajaxToolkit:ToolkitScriptManager ... />
+        $tsmSelfRegex = [regex]'<ajaxToolkit:ToolkitScriptManager(?:[^>]|(?:%>))*?/>\s*\r?\n?'
+        $Content = $tsmSelfRegex.Replace($Content, '')
+        if ($Content -ne $tsmBlockBefore) {
+            Write-TransformLog -File $RelPath -Transform 'AjaxToolkit' -Detail 'Removed <ajaxToolkit:ToolkitScriptManager> (not needed in Blazor)'
+        }
+    }
+
+    # 2. Convert known ajaxToolkit: controls → Blazor equivalents (strip prefix)
+    $knownPattern = ($knownControls | ForEach-Object { [regex]::Escape($_) }) -join '|'
+
+    # Opening tags: <ajaxToolkit:Accordion → <Accordion
+    $openRegex = [regex]"<ajaxToolkit:($knownPattern)"
+    $openMatches = $openRegex.Matches($Content)
+    if ($openMatches.Count -gt 0) {
+        $Content = $openRegex.Replace($Content, '<$1')
+        Write-TransformLog -File $RelPath -Transform 'AjaxToolkit' -Detail "Converted ajaxToolkit: prefix on $($openMatches.Count) opening tag(s)"
+        $script:HasAjaxToolkitControls = $true
+    }
+
+    # Closing tags: </ajaxToolkit:Accordion> → </Accordion>
+    $closeRegex = [regex]"</ajaxToolkit:($knownPattern)>"
+    $closeMatches = $closeRegex.Matches($Content)
+    if ($closeMatches.Count -gt 0) {
+        $Content = $closeRegex.Replace($Content, '</$1>')
+        Write-TransformLog -File $RelPath -Transform 'AjaxToolkit' -Detail "Converted ajaxToolkit: prefix on $($closeMatches.Count) closing tag(s)"
+        $script:HasAjaxToolkitControls = $true
+    }
+
+    # 3. Graceful fallback: any remaining unrecognized ajaxToolkit: controls → TODO comment
+    # Self-closing tags: <ajaxToolkit:UnknownControl ... />
+    $unknownSelfRegex = [regex]'(?s)<ajaxToolkit:(\w+)(?:[^>]|(?:%>))*?/>'
+    $unknownSelfMatches = $unknownSelfRegex.Matches($Content)
+    if ($unknownSelfMatches.Count -gt 0) {
+        foreach ($m in $unknownSelfMatches) {
+            $controlName = $m.Groups[1].Value
+            Write-ManualItem -File $RelPath -Category 'AjaxToolkit-Unknown' -Detail "Unrecognized ajaxToolkit control: $controlName — no BWFC equivalent available"
+        }
+        $Content = $unknownSelfRegex.Replace($Content, '@* TODO: Convert ajaxToolkit:$1 — no BWFC equivalent yet *@')
+        Write-TransformLog -File $RelPath -Transform 'AjaxToolkit' -Detail "Replaced $($unknownSelfMatches.Count) unrecognized self-closing ajaxToolkit control(s) with TODO"
+    }
+
+    # Block tags: <ajaxToolkit:UnknownControl ...>...</ajaxToolkit:UnknownControl>
+    $unknownBlockRegex = [regex]'(?s)<ajaxToolkit:(\w+)(?:[^>]|(?:%>))*?>.*?</ajaxToolkit:\1>'
+    $unknownBlockMatches = $unknownBlockRegex.Matches($Content)
+    if ($unknownBlockMatches.Count -gt 0) {
+        foreach ($m in $unknownBlockMatches) {
+            $controlName = $m.Groups[1].Value
+            Write-ManualItem -File $RelPath -Category 'AjaxToolkit-Unknown' -Detail "Unrecognized ajaxToolkit control: $controlName — no BWFC equivalent available"
+        }
+        $Content = $unknownBlockRegex.Replace($Content, '@* TODO: Convert ajaxToolkit:$1 — no BWFC equivalent yet *@')
+        Write-TransformLog -File $RelPath -Transform 'AjaxToolkit' -Detail "Replaced $($unknownBlockMatches.Count) unrecognized block ajaxToolkit control(s) with TODO"
+    }
+
+    return $Content
+}
+
 function Remove-WebFormsAttributes {
     param([string]$Content, [string]$RelPath)
 
@@ -1994,6 +2074,7 @@ function Convert-WebFormsFile {
         Write-ManualItem -File $relativePath -Category 'ListView-GroupItemCount' -Detail "ListView with GroupItemCount=$groupCount — use BWFC <ListView GroupItemCount='$groupCount' Items='...' TItem='...'> with GroupTemplate and ItemTemplate"
     }
 
+    $content = ConvertFrom-AjaxToolkitPrefix -Content $content -RelPath $relativePath
     $content = ConvertFrom-AspPrefix -Content $content -RelPath $relativePath
     $content = Remove-WebFormsAttributes -Content $content -RelPath $relativePath
     $content = ConvertFrom-UrlReferences -Content $content -RelPath $relativePath

@@ -1,0 +1,309 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string NUMERICUPDOWN_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/numeric-updown-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txtQty" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.TargetControlID.ShouldBe("txtQty");
+	}
+
+	// === Width ===
+
+	[Fact]
+	public void Width_Default_Is100()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Width.ShouldBe(100);
+	}
+
+	[Fact]
+	public void Width_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" Width="200" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Width.ShouldBe(200);
+	}
+
+	// === Minimum ===
+
+	[Fact]
+	public void Minimum_Default_IsDoubleMinValue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Minimum.ShouldBe(double.MinValue);
+	}
+
+	[Fact]
+	public void Minimum_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" Minimum="0" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Minimum.ShouldBe(0);
+	}
+
+	// === Maximum ===
+
+	[Fact]
+	public void Maximum_Default_IsDoubleMaxValue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Maximum.ShouldBe(double.MaxValue);
+	}
+
+	[Fact]
+	public void Maximum_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" Maximum="100" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Maximum.ShouldBe(100);
+	}
+
+	// === Step ===
+
+	[Fact]
+	public void Step_Default_Is1()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Step.ShouldBe(1);
+	}
+
+	[Fact]
+	public void Step_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" Step="0.5" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Step.ShouldBe(0.5);
+	}
+
+	// === RefValues ===
+
+	[Fact]
+	public void RefValues_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.RefValues.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void RefValues_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" RefValues="Jan;Feb;Mar" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.RefValues.ShouldBe("Jan;Feb;Mar");
+	}
+
+	[Fact]
+	public void RefValues_SemicolonSeparated_ParsesCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" RefValues="Low;Medium;High" />
+		);
+
+		var refValues = cut.FindComponent<NumericUpDownExtender>().Instance.RefValues;
+		refValues.Split(';').Length.ShouldBe(3);
+	}
+
+	// === ServiceUpPath / ServiceDownPath ===
+
+	[Fact]
+	public void ServiceUpPath_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.ServiceUpPath.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ServiceUpPath_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" ServiceUpPath="/api/up" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.ServiceUpPath.ShouldBe("/api/up");
+	}
+
+	[Fact]
+	public void ServiceDownPath_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.ServiceDownPath.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ServiceDownPath_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" ServiceDownPath="/api/down" />
+		);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.ServiceDownPath.ShouldBe("/api/down");
+	}
+
+	// === ServiceUpMethod / ServiceDownMethod ===
+
+	[Fact]
+	public void ServiceUpMethod_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.ServiceUpMethod.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ServiceDownMethod_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.ServiceDownMethod.ShouldBe(string.Empty);
+	}
+
+	// === Tag ===
+
+	[Fact]
+	public void Tag_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Tag.ShouldBe(string.Empty);
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<NumericUpDownExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(NUMERICUPDOWN_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<NumericUpDownExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<NumericUpDownExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<NumericUpDownExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

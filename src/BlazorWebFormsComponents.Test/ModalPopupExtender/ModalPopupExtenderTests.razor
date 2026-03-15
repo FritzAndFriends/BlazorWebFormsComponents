@@ -1,0 +1,369 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string MODAL_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/modal-popup-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup. Extender JS behavior
+	/// is out of scope for bUnit — that's Playwright's job.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btnShow" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.TargetControlID.ShouldBe("btnShow");
+	}
+
+	// === PopupControlID ===
+
+	[Fact]
+	public void PopupControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.PopupControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PopupControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" PopupControlID="pnlModal" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.PopupControlID.ShouldBe("pnlModal");
+	}
+
+	// === BackgroundCssClass ===
+
+	[Fact]
+	public void BackgroundCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.BackgroundCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void BackgroundCssClass_SetCorrectly()
+	{
+		string css = "modal-backdrop";
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" BackgroundCssClass="@css" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.BackgroundCssClass.ShouldBe("modal-backdrop");
+	}
+
+	// === OkControlID ===
+
+	[Fact]
+	public void OkControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.OkControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void OkControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" OkControlID="btnOk" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.OkControlID.ShouldBe("btnOk");
+	}
+
+	// === CancelControlID ===
+
+	[Fact]
+	public void CancelControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.CancelControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CancelControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" CancelControlID="btnCancel" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.CancelControlID.ShouldBe("btnCancel");
+	}
+
+	// === OnOkScript ===
+
+	[Fact]
+	public void OnOkScript_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.OnOkScript.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void OnOkScript_SetCorrectly()
+	{
+		string script = "alert('confirmed')";
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" OnOkScript="@script" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.OnOkScript.ShouldBe("alert('confirmed')");
+	}
+
+	// === OnCancelScript ===
+
+	[Fact]
+	public void OnCancelScript_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.OnCancelScript.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void OnCancelScript_SetCorrectly()
+	{
+		string script = "console.log('cancelled')";
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" OnCancelScript="@script" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.OnCancelScript.ShouldBe("console.log('cancelled')");
+	}
+
+	// === DropShadow ===
+
+	[Fact]
+	public void DropShadow_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.DropShadow.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void DropShadow_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" DropShadow="true" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.DropShadow.ShouldBeTrue();
+	}
+
+	// === Drag ===
+
+	[Fact]
+	public void Drag_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.Drag.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void Drag_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" Drag="true" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.Drag.ShouldBeTrue();
+	}
+
+	// === PopupDragHandleControlID ===
+
+	[Fact]
+	public void PopupDragHandleControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.PopupDragHandleControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PopupDragHandleControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" PopupDragHandleControlID="dragHeader" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.PopupDragHandleControlID.ShouldBe("dragHeader");
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	[Fact]
+	public void BehaviorID_WhenSet_ReturnsSetValue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender TargetControlID="btn1" BehaviorID="modalBehavior1" />
+		);
+
+		cut.FindComponent<ModalPopupExtender>().Instance
+			.BehaviorID.ShouldBe("modalBehavior1");
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<ModalPopupExtender TargetControlID="btn1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MODAL_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<ModalPopupExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === Full Configuration ===
+
+	[Fact]
+	public void AllParameters_SetCorrectly()
+	{
+		string bgCss = "overlay";
+		string okScript = "doOk()";
+		string cancelScript = "doCancel()";
+		SetupLooseJs();
+		var cut = Render(
+			@<ModalPopupExtender
+				TargetControlID="btnOpen"
+				PopupControlID="pnlDialog"
+				BackgroundCssClass="@bgCss"
+				OkControlID="btnConfirm"
+				CancelControlID="btnDismiss"
+				OnOkScript="@okScript"
+				OnCancelScript="@cancelScript"
+				DropShadow="true"
+				Drag="true"
+				PopupDragHandleControlID="titleBar" />
+		);
+
+		var instance = cut.FindComponent<ModalPopupExtender>().Instance;
+		instance.TargetControlID.ShouldBe("btnOpen");
+		instance.PopupControlID.ShouldBe("pnlDialog");
+		instance.BackgroundCssClass.ShouldBe("overlay");
+		instance.OkControlID.ShouldBe("btnConfirm");
+		instance.CancelControlID.ShouldBe("btnDismiss");
+		instance.OnOkScript.ShouldBe("doOk()");
+		instance.OnCancelScript.ShouldBe("doCancel()");
+		instance.DropShadow.ShouldBeTrue();
+		instance.Drag.ShouldBeTrue();
+		instance.PopupDragHandleControlID.ShouldBe("titleBar");
+	}
+}

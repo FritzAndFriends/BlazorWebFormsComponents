@@ -1,0 +1,361 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string MASKED_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/masked-edit-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txtPhone" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.TargetControlID.ShouldBe("txtPhone");
+	}
+
+	// === Mask ===
+
+	[Fact]
+	public void Mask_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.Mask.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void Mask_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" Mask="999-999-9999" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.Mask.ShouldBe("999-999-9999");
+	}
+
+	// === MaskType ===
+
+	[Fact]
+	public void MaskType_Default_IsNone()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.MaskType.ShouldBe(MaskType.None);
+	}
+
+	[Fact]
+	public void MaskType_SetToNumber()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" MaskType="MaskType.Number" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.MaskType.ShouldBe(MaskType.Number);
+	}
+
+	[Fact]
+	public void MaskType_SetToDate()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" MaskType="MaskType.Date" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.MaskType.ShouldBe(MaskType.Date);
+	}
+
+	[Fact]
+	public void MaskType_SetToTime()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" MaskType="MaskType.Time" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.MaskType.ShouldBe(MaskType.Time);
+	}
+
+	[Fact]
+	public void MaskType_SetToDateTime()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" MaskType="MaskType.DateTime" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.MaskType.ShouldBe(MaskType.DateTime);
+	}
+
+	// === InputDirection ===
+
+	[Fact]
+	public void InputDirection_Default_IsLeftToRight()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.InputDirection.ShouldBe(InputDirection.LeftToRight);
+	}
+
+	[Fact]
+	public void InputDirection_SetToRightToLeft()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" InputDirection="InputDirection.RightToLeft" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.InputDirection.ShouldBe(InputDirection.RightToLeft);
+	}
+
+	// === PromptCharacter ===
+
+	[Fact]
+	public void PromptCharacter_Default_IsUnderscore()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.PromptCharacter.ShouldBe("_");
+	}
+
+	[Fact]
+	public void PromptCharacter_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" PromptCharacter="*" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.PromptCharacter.ShouldBe("*");
+	}
+
+	// === ClearMaskOnLostFocus ===
+
+	[Fact]
+	public void ClearMaskOnLostFocus_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.ClearMaskOnLostFocus.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ClearMaskOnLostFocus_SetFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" ClearMaskOnLostFocus="false" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.ClearMaskOnLostFocus.ShouldBeFalse();
+	}
+
+	// === AcceptAMPM ===
+
+	[Fact]
+	public void AcceptAMPM_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.AcceptAMPM.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void AcceptAMPM_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" AcceptAMPM="true" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.AcceptAMPM.ShouldBeTrue();
+	}
+
+	// === AcceptNegative ===
+
+	[Fact]
+	public void AcceptNegative_Default_IsNone()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.AcceptNegative.ShouldBe(AcceptNegative.None);
+	}
+
+	[Fact]
+	public void AcceptNegative_SetToLeft()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" AcceptNegative="AcceptNegative.Left" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.AcceptNegative.ShouldBe(AcceptNegative.Left);
+	}
+
+	[Fact]
+	public void AcceptNegative_SetToRight()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" AcceptNegative="AcceptNegative.Right" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.AcceptNegative.ShouldBe(AcceptNegative.Right);
+	}
+
+	// === ErrorTooltipEnabled ===
+
+	[Fact]
+	public void ErrorTooltipEnabled_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.ErrorTooltipEnabled.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ErrorTooltipEnabled_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" ErrorTooltipEnabled="true" />
+		);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.ErrorTooltipEnabled.ShouldBeTrue();
+	}
+
+	// === ErrorTooltipCssClass ===
+
+	[Fact]
+	public void ErrorTooltipCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.ErrorTooltipCssClass.ShouldBe(string.Empty);
+	}
+
+	// === AutoComplete ===
+
+	[Fact]
+	public void AutoComplete_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.AutoComplete.ShouldBeFalse();
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<MaskedEditExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MASKED_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<MaskedEditExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<MaskedEditExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<MaskedEditExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

@@ -179,3 +179,33 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 **Additional discovery:** The script has an uninitialized variable bug — `$script:ExtractedTitleFromContent` accessed in `ConvertFrom-PageDirective` before `ConvertFrom-ContentWrappers` sets it. Manifests with `Set-StrictMode -Version Latest` when processing a standalone .aspx without Title= in the Page directive. All test cases work around this by including `Title="Test"`.
 
+### Ajax Toolkit Extender Tests — Issues #450, #451 (2026-07-25)
+
+**33 bUnit tests for ConfirmButtonExtender (14) and FilteredTextBoxExtender (19) — all pass.** Total suite: 1,628 tests (0 failures).
+
+**ConfirmButtonExtender tests (14):** RendersNoVisibleHTML, TargetControlID binding, ConfirmText default ("Are you sure?") and custom, ConfirmOnFormSubmit default (false) and true, Enabled default (true), Enabled=false skips JS (verifies no import invocation), BehaviorID default (null) and custom, DisplayModalPopupID default (empty), JsModulePath verified via import invocation args, ThrowsWhenTargetControlIDEmpty (InvalidOperationException).
+
+**FilteredTextBoxExtender tests (19):** RendersNoVisibleHTML, FilterType default (Custom) and single values (Numbers, LowercaseLetters, UppercaseLetters), FilterType flags combos (Numbers|Lowercase, AllLetters, AllFlags=7), ValidChars/InvalidChars defaults (empty) and custom, FilterMode default (ValidChars) and InvalidChars, FilterInterval default (250) and custom (100), JsModulePath verified via import invocation args, ThrowsWhenTargetControlIDEmpty, Enabled=false skips JS, BehaviorID default (null).
+
+**Key patterns for Ajax Toolkit extender testing:**
+- Use `JSInterop.Mode = JSRuntimeMode.Loose` — extender components call `import` + `createBehavior` returning `IJSObjectReference`, and bUnit 2.x blocks `Setup<IJSObjectReference>` on module interops (throws "Use SetupModule instead"). Loose mode is the correct approach for testing parameter binding without JS behavior.
+- Verify JS module path via `JSInterop.Invocations["import"][0].Arguments[0]` — captures the actual import path string.
+- Verify Enabled=false skips JS via `JSInterop.Invocations["import"].ShouldBeEmpty()`.
+- String parameters in Razor test markup need `@variable` syntax (e.g., `ValidChars="@chars"`), not bare variable names — bare names become string literals for `string`-typed parameters.
+- Extenders inherit `ComponentBase` (not `BaseWebFormsComponent`), so `BlazorWebFormsTestContext` works fine as base — extra BWFC services are ignored.
+- `TargetControlID` empty check throws `InvalidOperationException` from `OnAfterRenderAsync` — bUnit propagates this synchronously from `Render()`.
+
+**Test files:** `src/BlazorWebFormsComponents.Test/ConfirmButtonExtender/ConfirmButtonExtenderTests.razor` (14 tests), `src/BlazorWebFormsComponents.Test/FilteredTextBoxExtender/FilteredTextBoxExtenderTests.razor` (19 tests).
+
+### ModalPopupExtender & CollapsiblePanelExtender Tests (2026-07-25)
+
+**60 bUnit tests for ModalPopupExtender (28) and CollapsiblePanelExtender (32) — all pass.** Total suite: 1,688 tests (0 failures).
+
+**ModalPopupExtender tests (28):** RendersNoVisibleHTML, TargetControlID binding, PopupControlID default (empty) and custom, BackgroundCssClass default (empty) and custom, OkControlID default (empty) and custom, CancelControlID default (empty) and custom, OnOkScript default (empty) and custom, OnCancelScript default (empty) and custom, DropShadow default (false) and true, Drag default (false) and true, PopupDragHandleControlID default (empty) and custom, Enabled default (true), Enabled=false skips JS, BehaviorID default (null) and custom, JsModulePath verified via import invocation args, ThrowsWhenTargetControlIDEmpty, AllParameters integration test.
+
+**CollapsiblePanelExtender tests (32):** RendersNoVisibleHTML, TargetControlID binding, CollapseControlID default (empty) and custom, ExpandControlID default (empty) and custom, Collapsed default (false) and true, CollapsedSize default (0) and custom (20), ExpandedSize default (0) and custom (300), CollapsedText default (empty) and custom, ExpandedText default (empty) and custom, TextLabelID default (empty) and custom, ExpandDirection default (Vertical) and Horizontal, AutoCollapse default (false) and true, AutoExpand default (false) and true, ScrollContents default (false) and true, Enabled default (true), Enabled=false skips JS, BehaviorID default (null) and custom, JsModulePath verified, ThrowsWhenTargetControlIDEmpty, AllParameters integration test.
+
+**Same patterns as ConfirmButton/FilteredTextBox extender tests:** JSRuntimeMode.Loose for module interop, string params use @variable syntax, enum params use local variable binding, JS module path verified via `JSInterop.Invocations["import"]`, Enabled=false verifies no import call.
+
+**Test files:** `src/BlazorWebFormsComponents.Test/ModalPopupExtender/ModalPopupExtenderTests.razor` (28 tests), `src/BlazorWebFormsComponents.Test/CollapsiblePanelExtender/CollapsiblePanelExtenderTests.razor` (32 tests).
+

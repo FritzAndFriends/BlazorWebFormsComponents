@@ -285,3 +285,64 @@ L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-p
 - Enum map only includes unambiguous attribute→enum mappings; ambiguous ones like SelectionMode (Calendar vs List) and Mode are skipped.
 - Session/ViewState blocks are inserted after the `=====` TODO header marker using LastIndexOf, not prepended, to keep the file well-organized.
 
+
+### BlazorAjaxToolkitComponents Project Structure (2026-03-14)
+
+**Summary:** Created the BlazorAjaxToolkitComponents class library project at `src/BlazorAjaxToolkitComponents/`. This is the new home for Blazor components emulating ASP.NET Ajax Control Toolkit controls. Project references BlazorWebFormsComponents and includes Microsoft.JSInterop for client-side behaviors.
+
+**Files Created:**
+- `BlazorAjaxToolkitComponents.csproj`  Razor class library, net10.0, NuGet metadata matching existing patterns
+- `BaseExtenderComponent.cs`  Stub base class with TargetControlID + IJSRuntime injection (full design pending Forge)
+- `_Imports.razor`  Common usings
+- `README.md`  Project overview
+
+**Key Decisions:**
+- Package ID is `BlazorAjaxToolkitComponents` (no Fritz. prefix  distinct from the base library)
+- Depends on `BlazorWebFormsComponents` via ProjectReference
+- Uses `Microsoft.JSInterop` (not Microsoft.AspNetCore.Components.Web's JS) since toolkit extenders need direct JS interop
+- BaseExtenderComponent extends ComponentBase directly (not BaseWebFormsComponent)  extenders are behavioral attachments, not visual controls
+
+ Team update: BlazorAjaxToolkitComponents project created by Cyclops. PR #71 targeting dev. Branch `squad/441-ajax-toolkit-project`. Fixes #441 (M24: Ajax Toolkit Components).
+### ConfirmButtonExtender & FilteredTextBoxExtender Implementation (2026-03-15)
+
+**Summary:** Implemented two Ajax Control Toolkit extender components with full JS interop lifecycle. Updated BaseExtenderComponent from minimal stub to production-ready base class. PR #462 targeting upstream dev.
+
+**BaseExtenderComponent changes:**
+- Full JS module lifecycle: abstract JsModulePath, JsCreateFunction, GetBehaviorProperties()
+- OnAfterRenderAsync initializes behavior on firstRender when Enabled=true
+- BehaviorID and Enabled parameters
+- IAsyncDisposable with proper cleanup (disposes behavior, then module)
+- SSR-safe: catches JSException and JSDisconnectedException during all JS calls
+- TargetControlID passed as string to JS for document.getElementById() resolution (pragmatic v1, no BaseWebFormsComponent dependency)
+
+**ConfirmButtonExtender (#451):** Pure C# class (no .razor needed since extenders render no HTML). ConfirmText, ConfirmOnFormSubmit, DisplayModalPopupID parameters. JS intercepts click, shows window.confirm(), prevents event on cancel.
+
+**FilteredTextBoxExtender (#450):** FilterType flags enum (Numbers, LowercaseLetters, UppercaseLetters, Custom), ValidChars, InvalidChars, FilterMode enum, FilterInterval. JS blocks keystrokes on keypress, strips invalid chars on paste with debounced cleanup.
+
+**Key decisions:**
+- Extenders are pure .cs classes, not .razor files (they render zero HTML)
+- Kept ComponentBase inheritance per task spec (not BaseWebFormsComponent) for lightweight v1
+- JS modules use Map-based behavior registry with create/update/dispose exports
+- FilterType is [Flags] enum so filter types can be combined (e.g., Numbers | LowercaseLetters)
+- BlazorAjaxToolkitComponents project does NOT enable nullable context, so no nullable annotations
+
+Team update: ConfirmButtonExtender and FilteredTextBoxExtender implemented by Cyclops. PR #462 targeting upstream dev. Branch squad/451-450-confirm-filtered-extenders. Fixes #451, #450.
+
+### ModalPopupExtender & CollapsiblePanelExtender Implementation (2026-03-16)
+**Summary:** Implemented two more Ajax Control Toolkit extender components following established patterns from ConfirmButton/FilteredTextBox. Both inherit BaseExtenderComponent, use pure .cs classes (no .razor), and follow the JS module lifecycle pattern.
+
+**ModalPopupExtender (#446):** PopupControlID, BackgroundCssClass, OkControlID, CancelControlID, OnOkScript, OnCancelScript, DropShadow, Drag, PopupDragHandleControlID. JS creates overlay backdrop, centers popup with fixed positioning, traps focus within modal, supports Escape key close, and optional mouse-drag repositioning via drag handle.
+
+**CollapsiblePanelExtender (#447):** CollapseControlID, ExpandControlID (same ID = toggle), Collapsed, CollapsedSize, ExpandedSize, CollapsedText, ExpandedText, TextLabelID, ExpandDirection enum (Vertical/Horizontal), AutoCollapse, AutoExpand, ScrollContents. JS uses CSS transitions on height/width with smart initial-state setup (no transition on first paint, then enables animation).
+
+**New enum:** ExpandDirection (Vertical=0, Horizontal=1) in Enums/ folder.
+
+**Key patterns followed:**
+- Same module path convention: ./_content/BlazorAjaxToolkitComponents/js/{kebab-name}.js
+- Same JS exports: createBehavior, updateBehavior, disposeBehavior with Map-based registry
+- OnOkScript/OnCancelScript executed via 
+ew Function(script)() with try/catch safety
+- CollapsiblePanel measures natural size via scrollHeight when ExpandedSize=0 (auto)
+- XML docs file updated with all new members
+
+Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cyclops. Branch squad/446-447-modal-collapsible-extenders. Fixes #446, #447.

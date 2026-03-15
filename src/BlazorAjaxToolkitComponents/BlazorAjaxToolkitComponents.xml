@@ -4,6 +4,214 @@
         <name>BlazorAjaxToolkitComponents</name>
     </assembly>
     <members>
+        <member name="T:BlazorAjaxToolkitComponents.Accordion">
+            <summary>
+            A container component that displays collapsible content panes arranged vertically.
+            Only one pane is expanded at a time (controlled by <see cref="P:BlazorAjaxToolkitComponents.Accordion.SelectedIndex"/>).
+            Emulates the Ajax Control Toolkit Accordion control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.SelectedIndex">
+            <summary>
+            The zero-based index of the currently selected (expanded) pane.
+            Set to -1 when no pane is expanded (only valid when <see cref="P:BlazorAjaxToolkitComponents.Accordion.RequireOpenedPane"/> is false).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.SelectedIndexChanged">
+            <summary>
+            Raised when the selected pane index changes.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.FadeTransitions">
+            <summary>
+            Whether to use fade transitions when switching panes.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.TransitionDuration">
+            <summary>
+            Duration of expand/collapse animations in milliseconds. Default is 300.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.HeaderCssClass">
+            <summary>
+            CSS class applied to each pane header div.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.ContentCssClass">
+            <summary>
+            CSS class applied to each pane content div.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.RequireOpenedPane">
+            <summary>
+            Whether at least one pane must always be open. Default is true.
+            When false, clicking the selected pane header collapses it.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.AutoSize">
+            <summary>
+            Specifies how pane content areas are automatically sized.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.SuppressHeaderPostbacks">
+            <summary>
+            Whether header clicks suppress postback behavior. Default is true.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.CssClass">
+            <summary>
+            CSS class applied to the outer Accordion container div.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.ChildContent">
+            <summary>
+            Child content containing <see cref="T:BlazorAjaxToolkitComponents.AccordionPane"/> components.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.ContainerId">
+            <summary>
+            Gets the unique DOM element ID for this Accordion container.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.Accordion.PaneCount">
+            <summary>
+            Gets the number of registered panes.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.Accordion.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.Accordion.OnAfterRenderAsync(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.Accordion.DisposeAsync">
+            <inheritdoc />
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.AccordionPane">
+            <summary>
+            Represents a single collapsible pane within an <see cref="T:BlazorAjaxToolkitComponents.Accordion"/>.
+            Each pane has a clickable header and a content area that expands or collapses.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AccordionPane.ParentAccordion">
+            <summary>
+            The parent <see cref="T:BlazorAjaxToolkitComponents.Accordion"/> container, provided via CascadingParameter.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AccordionPane.Header">
+            <summary>
+            The header content for this pane. Rendered inside the clickable header div.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AccordionPane.Content">
+            <summary>
+            The body content for this pane. Rendered inside the collapsible content div.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AccordionPane.HeaderId">
+            <summary>
+            Gets the unique DOM element ID for this pane's header.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AccordionPane.ContentId">
+            <summary>
+            Gets the unique DOM element ID for this pane's content area.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.AccordionPane.OnInitialized">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.AccordionPane.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.AccordionPane.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.AutoCompleteExtender">
+            <summary>
+            Provides typeahead/autocomplete functionality for a target TextBox.
+            Fetches suggestions via a Blazor EventCallback and renders a dropdown list
+            with keyboard navigation support.
+            Emulates the Ajax Control Toolkit AutoCompleteExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.ServicePath">
+            <summary>
+            The URL of the web service providing completion data (for JS-based fetching).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.ServiceMethod">
+            <summary>
+            The web service method name to call for completion data.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.MinimumPrefixLength">
+            <summary>
+            Minimum number of characters typed before suggestions are fetched. Default is 3.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.CompletionSetCount">
+            <summary>
+            Maximum number of suggestions to display. Default is 10.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.CompletionInterval">
+            <summary>
+            Time in milliseconds between keystrokes before fetching suggestions.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.CompletionListCssClass">
+            <summary>
+            CSS class applied to the completion list dropdown container.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.CompletionListItemCssClass">
+            <summary>
+            CSS class applied to each item in the completion list.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.CompletionListHighlightedItemCssClass">
+            <summary>
+            CSS class applied to the highlighted item in the completion list.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.DelimiterCharacters">
+            <summary>
+            Characters that delimit separate completion entries within the same text box.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.FirstRowSelected">
+            <summary>
+            Whether to automatically select the first item in the completion list.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.ShowOnlyCurrentWordInCompletionListItem">
+            <summary>
+            When true, shows only the current word in each completion list item
+            instead of the full value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.OnClientItemSelected">
+            <summary>
+            Client-side script invoked when an item is selected from the completion list.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.OnClientPopulating">
+            <summary>
+            Client-side script invoked before the completion list is populated.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.OnClientPopulated">
+            <summary>
+            Client-side script invoked after the completion list is populated.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.CompletionDataRequested">
+            <summary>
+            Blazor callback for requesting completion data server-side.
+            The string parameter is the current prefix typed by the user.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.BaseExtenderComponent">
             <summary>
             Base class for Ajax Control Toolkit extender components.
@@ -59,6 +267,125 @@
         <member name="M:BlazorAjaxToolkitComponents.BaseExtenderComponent.DisposeAsync">
             <inheritdoc />
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.CalendarExtender">
+            <summary>
+            Attaches a popup calendar date picker to a target TextBox.
+            Supports configurable date formats, navigation views, and date range constraints.
+            Emulates the Ajax Control Toolkit CalendarExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.Format">
+            <summary>
+            The date format string used to display and parse dates (e.g., "MM/dd/yyyy").
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.PopupPosition">
+            <summary>
+            The position of the popup calendar relative to the target control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.DefaultView">
+            <summary>
+            The default view when the calendar popup opens.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.StartDate">
+            <summary>
+            The earliest selectable date. Dates before this are disabled.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.EndDate">
+            <summary>
+            The latest selectable date. Dates after this are disabled.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.SelectedDate">
+            <summary>
+            The currently selected date.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.TodaysDate">
+            <summary>
+            The date highlighted as today. Defaults to the current date if not set.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.CssClass">
+            <summary>
+            CSS class applied to the calendar popup container.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CalendarExtender.OnClientDateSelectionChanged">
+            <summary>
+            Client-side script invoked when a date is selected.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.CollapsiblePanelExtender">
+            <summary>
+            Adds collapsible behavior to a target panel, toggling between collapsed and expanded states
+            with smooth CSS transitions. Supports separate collapse/expand triggers and dynamic label text.
+            Emulates the Ajax Control Toolkit CollapsiblePanelExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.CollapseControlID">
+            <summary>
+            The ID of the element that triggers collapse.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandControlID">
+            <summary>
+            The ID of the element that triggers expand. Can be the same as CollapseControlID for toggle behavior.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.Collapsed">
+            <summary>
+            Whether the panel starts in the collapsed state.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.CollapsedSize">
+            <summary>
+            The height (or width for horizontal) in pixels when collapsed. 0 means fully hidden.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandedSize">
+            <summary>
+            The height (or width for horizontal) in pixels when expanded. 0 means auto-size.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.CollapsedText">
+            <summary>
+            Text displayed in the TextLabelID element when the panel is collapsed.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandedText">
+            <summary>
+            Text displayed in the TextLabelID element when the panel is expanded.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.TextLabelID">
+            <summary>
+            The ID of the element whose text content changes to reflect collapsed/expanded state.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ExpandDirection">
+            <summary>
+            The direction of the collapse/expand animation.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.AutoCollapse">
+            <summary>
+            Whether to automatically collapse the panel when the mouse leaves.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.AutoExpand">
+            <summary>
+            Whether to automatically expand the panel when the mouse enters.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.CollapsiblePanelExtender.ScrollContents">
+            <summary>
+            Whether to enable scrolling within the panel when content overflows.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.ConfirmButtonExtender">
             <summary>
             Attaches a confirmation dialog to a target button.
@@ -83,6 +410,46 @@
             Not implemented in v1 — reserved for future use.
             </summary>
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.AcceptNegative">
+            <summary>
+            Specifies how negative values are accepted in the MaskedEditExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.AutoSizeMode">
+            <summary>
+            Specifies how the Accordion automatically sizes its content panes.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.AutoSizeMode.None">
+            <summary>
+            No automatic sizing. Panes use their natural height.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.AutoSizeMode.Fill">
+            <summary>
+            Panes are sized to fill the available space in the Accordion container.
+            </summary>
+        </member>
+        <member name="F:BlazorAjaxToolkitComponents.Enums.AutoSizeMode.Limit">
+            <summary>
+            Panes are limited to the Accordion container height but do not expand to fill it.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.CalendarDefaultView">
+            <summary>
+            Specifies the default view when the calendar popup opens.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.CalendarPosition">
+            <summary>
+            Specifies the position of the calendar popup relative to the target control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.ExpandDirection">
+            <summary>
+            Specifies the direction in which a CollapsiblePanelExtender expands or collapses.
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.Enums.FilterMode">
             <summary>
             Specifies whether the FilteredTextBoxExtender uses ValidChars or InvalidChars.
@@ -92,6 +459,26 @@
             <summary>
             Specifies the types of characters to allow in a FilteredTextBoxExtender.
             This is a flags enum — values can be combined.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.InputDirection">
+            <summary>
+            Specifies the direction of input for the MaskedEditExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.MaskType">
+            <summary>
+            Specifies the type of mask applied by the MaskedEditExtender.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.PopupPosition">
+            <summary>
+            Specifies the position of a popup relative to its target control.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.Enums.SliderOrientation">
+            <summary>
+            Specifies the orientation of a SliderExtender control.
             </summary>
         </member>
         <member name="T:BlazorAjaxToolkitComponents.FilteredTextBoxExtender">
@@ -124,6 +511,501 @@
         <member name="P:BlazorAjaxToolkitComponents.FilteredTextBoxExtender.FilterInterval">
             <summary>
             Milliseconds interval for filtering. Default is 250.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.HoverMenuExtender">
+            <summary>
+            Displays a popup panel when the user hovers over a target control.
+            Supports configurable show/hide delays, positional placement, and hover CSS styling.
+            Emulates the Ajax Control Toolkit HoverMenuExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopupControlID">
+            <summary>
+            The ID of the panel element to display as a hover menu.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopupPosition">
+            <summary>
+            The position of the popup relative to the target control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.OffsetX">
+            <summary>
+            Horizontal offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.OffsetY">
+            <summary>
+            Vertical offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.PopDelay">
+            <summary>
+            Delay in milliseconds before showing the popup after mouse enters the target.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverDelay">
+            <summary>
+            Delay in milliseconds before hiding the popup after mouse leaves the target and popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.HoverMenuExtender.HoverCssClass">
+            <summary>
+            CSS class applied to the target control while the hover menu is visible.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.MaskedEditExtender">
+            <summary>
+            Applies an input mask to a target TextBox, restricting and formatting user input
+            according to a mask pattern. Supports number, date, time, and custom masks.
+            Emulates the Ajax Control Toolkit MaskedEditExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.Mask">
+            <summary>
+            The mask pattern string (e.g., "999-999-9999" for phone numbers).
+            9 = digit, L = letter, $ = digit or space, C = any character, A = letter or digit.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.MaskType">
+            <summary>
+            The type of mask to apply.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.InputDirection">
+            <summary>
+            The direction of text input within the mask.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.PromptCharacter">
+            <summary>
+            The character displayed for unfilled mask positions. Default is "_".
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.AutoComplete">
+            <summary>
+            Whether to enable browser autocomplete on the target input.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.AutoCompleteValue">
+            <summary>
+            The value to use for autocomplete when AutoComplete is enabled.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.Filtered">
+            <summary>
+            Additional characters allowed beyond the mask definition.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.ClearMaskOnLostFocus">
+            <summary>
+            Whether to remove the mask characters when the input loses focus,
+            showing only the raw value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.ClearTextOnInvalid">
+            <summary>
+            Whether to clear the text when it does not match the mask on lost focus.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.AcceptAMPM">
+            <summary>
+            Whether to accept AM/PM designator for time masks.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.AcceptNegative">
+            <summary>
+            How negative values are displayed for number masks.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.ErrorTooltipEnabled">
+            <summary>
+            Whether to show a tooltip with error information when validation fails.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.MaskedEditExtender.ErrorTooltipCssClass">
+            <summary>
+            CSS class applied to the error tooltip.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ModalPopupExtender">
+            <summary>
+            Displays a target element as a modal popup with an overlay backdrop.
+            Supports OK/Cancel buttons, focus trapping, drag support, and Escape key dismissal.
+            Emulates the Ajax Control Toolkit ModalPopupExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.PopupControlID">
+            <summary>
+            The ID of the element to display as a modal popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.BackgroundCssClass">
+            <summary>
+            CSS class applied to the overlay backdrop behind the modal.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.OkControlID">
+            <summary>
+            The ID of the control that confirms and closes the modal (OK action).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.CancelControlID">
+            <summary>
+            The ID of the control that cancels and closes the modal.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.OnOkScript">
+            <summary>
+            JavaScript to execute when the modal is dismissed via the OK control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.OnCancelScript">
+            <summary>
+            JavaScript to execute when the modal is dismissed via the Cancel control or Escape key.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.DropShadow">
+            <summary>
+            Whether to add a drop shadow effect to the popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.Drag">
+            <summary>
+            Whether the popup can be dragged by the user.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ModalPopupExtender.PopupDragHandleControlID">
+            <summary>
+            The ID of the element used as a drag handle when Drag is enabled.
+            If not set, the entire popup is draggable.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.NumericUpDownExtender">
+            <summary>
+            Adds numeric up/down spinner buttons to a target TextBox.
+            Supports min/max range, step increments, and cycling through a reference value list.
+            Emulates the Ajax Control Toolkit NumericUpDownExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.Width">
+            <summary>
+            The width of the spinner control in pixels.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.Minimum">
+            <summary>
+            The minimum allowed value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.Maximum">
+            <summary>
+            The maximum allowed value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.Step">
+            <summary>
+            The amount to increment or decrement on each step. Default is 1.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.RefValues">
+            <summary>
+            Semicolon-separated list of values to cycle through instead of numeric stepping.
+            When set, the up/down buttons cycle through these values in order.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.ServiceUpPath">
+            <summary>
+            URL of the web service to call for the up action.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.ServiceUpMethod">
+            <summary>
+            Web service method name for the up action.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.ServiceDownPath">
+            <summary>
+            URL of the web service to call for the down action.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.ServiceDownMethod">
+            <summary>
+            Web service method name for the down action.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.NumericUpDownExtender.Tag">
+            <summary>
+            An arbitrary string value passed to the web service methods.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.PopupControlExtender">
+            <summary>
+            Attaches a popup panel to a target control, displaying it on click.
+            Lighter than ModalPopupExtender — no overlay, no focus trap.
+            Supports positional placement, commit property/script, and outside-click dismissal.
+            Emulates the Ajax Control Toolkit PopupControlExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.PopupControlID">
+            <summary>
+            The ID of the panel element to display as a popup.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.Position">
+            <summary>
+            The position of the popup relative to the target control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.OffsetX">
+            <summary>
+            Horizontal offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.OffsetY">
+            <summary>
+            Vertical offset in pixels from the calculated position.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.CommitProperty">
+            <summary>
+            The property name on the target control to set when the popup is committed.
+            Typically "value" for input elements.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.CommitScript">
+            <summary>
+            JavaScript to execute when the popup is committed (a value is selected).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.PopupControlExtender.ExtenderControlID">
+            <summary>
+            The ID of this extender control for programmatic access.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.SliderExtender">
+            <summary>
+            Attaches range slider behavior to a target input element.
+            Supports horizontal/vertical orientation, bound control synchronization,
+            and customizable rail/handle appearance via CSS classes or image URLs.
+            Emulates the Ajax Control Toolkit SliderExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Minimum">
+            <summary>
+            The minimum value of the slider range.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Maximum">
+            <summary>
+            The maximum value of the slider range.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Steps">
+            <summary>
+            The number of discrete steps in the slider range. 0 means continuous.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Value">
+            <summary>
+            The current value of the slider.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.BoundControlID">
+            <summary>
+            The ID of another element whose value is synchronized with the slider value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Orientation">
+            <summary>
+            The orientation of the slider (Horizontal or Vertical).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.RailCssClass">
+            <summary>
+            CSS class applied to the slider rail/track element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.HandleCssClass">
+            <summary>
+            CSS class applied to the slider handle element.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.HandleImageUrl">
+            <summary>
+            URL of an image to use for the slider handle.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Length">
+            <summary>
+            The length of the slider in pixels.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.Decimals">
+            <summary>
+            The number of decimal places for the slider value.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.SliderExtender.TooltipText">
+            <summary>
+            Tooltip text displayed when hovering over the slider handle.
+            Use {0} as a placeholder for the current value.
+            </summary>
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.TabContainer">
+            <summary>
+            A container component that displays content in tabbed panels.
+            Only the active tab's content is visible. Clicking a tab header switches the active tab.
+            Emulates the Ajax Control Toolkit TabContainer control.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.ActiveTabIndex">
+            <summary>
+            The zero-based index of the currently active tab.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.OnActiveTabChanged">
+            <summary>
+            Raised when the active tab changes.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.OnClientActiveTabChanged">
+            <summary>
+            Name of a client-side JavaScript function to invoke when the active tab changes.
+            The function receives the new tab index as its argument.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.ScrollBars">
+            <summary>
+            Specifies which scrollbars to display on the tab content area.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.CssClass">
+            <summary>
+            CSS class applied to the outer TabContainer div.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.ChildContent">
+            <summary>
+            Child content containing <see cref="T:BlazorAjaxToolkitComponents.TabPanel"/> components.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.ContainerId">
+            <summary>
+            Gets the unique DOM element ID for this TabContainer.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabContainer.PanelCount">
+            <summary>
+            Gets the number of registered tab panels.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.TabContainer.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.TabContainer.OnAfterRenderAsync(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.TabContainer.DisposeAsync">
+            <inheritdoc />
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.TabPanel">
+            <summary>
+            Represents a single tab within a <see cref="T:BlazorAjaxToolkitComponents.TabContainer"/>.
+            Each tab has a header (text or template) and a content area.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabPanel.ParentContainer">
+            <summary>
+            The parent <see cref="T:BlazorAjaxToolkitComponents.TabContainer"/>, provided via CascadingParameter.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabPanel.HeaderText">
+            <summary>
+            The text displayed in this tab's header. Used when <see cref="P:BlazorAjaxToolkitComponents.TabPanel.HeaderTemplate"/> is not set.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabPanel.HeaderTemplate">
+            <summary>
+            Custom header content for this tab. When set, takes precedence over <see cref="P:BlazorAjaxToolkitComponents.TabPanel.HeaderText"/>.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabPanel.ContentTemplate">
+            <summary>
+            The content rendered in the tab panel body when this tab is active.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TabPanel.Enabled">
+            <summary>
+            Whether this tab can be selected. Default is true.
+            Disabled tabs are rendered but cannot be clicked.
+            </summary>
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.TabPanel.OnInitialized">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.TabPanel.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorAjaxToolkitComponents.TabPanel.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:BlazorAjaxToolkitComponents.ToggleButtonExtender">
+            <summary>
+            Replaces a target checkbox with a clickable image that toggles between checked and unchecked states.
+            Supports separate images for checked, unchecked, hover, and disabled states.
+            Emulates the Ajax Control Toolkit ToggleButtonExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.ImageWidth">
+            <summary>
+            The width of the toggle image in pixels.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.ImageHeight">
+            <summary>
+            The height of the toggle image in pixels.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.UncheckedImageUrl">
+            <summary>
+            URL of the image displayed when the checkbox is unchecked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.CheckedImageUrl">
+            <summary>
+            URL of the image displayed when the checkbox is checked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.UncheckedImageAlternateText">
+            <summary>
+            Alternate text for the unchecked image (accessibility).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.CheckedImageAlternateText">
+            <summary>
+            Alternate text for the checked image (accessibility).
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.CheckedImageOverUrl">
+            <summary>
+            URL of the image displayed on hover when the checkbox is checked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.UncheckedImageOverUrl">
+            <summary>
+            URL of the image displayed on hover when the checkbox is unchecked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.DisabledUncheckedImageUrl">
+            <summary>
+            URL of the image displayed when the checkbox is disabled and unchecked.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.ToggleButtonExtender.DisabledCheckedImageUrl">
+            <summary>
+            URL of the image displayed when the checkbox is disabled and checked.
             </summary>
         </member>
     </members>

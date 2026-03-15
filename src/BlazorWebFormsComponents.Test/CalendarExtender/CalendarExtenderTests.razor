@@ -1,0 +1,314 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string CALENDAR_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/calendar-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txtDate" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.TargetControlID.ShouldBe("txtDate");
+	}
+
+	// === Format ===
+
+	[Fact]
+	public void Format_Default_IsD()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.Format.ShouldBe("d");
+	}
+
+	[Fact]
+	public void Format_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" Format="MM/dd/yyyy" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.Format.ShouldBe("MM/dd/yyyy");
+	}
+
+	// === PopupPosition ===
+
+	[Fact]
+	public void PopupPosition_Default_IsBottomLeft()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.PopupPosition.ShouldBe(CalendarPosition.BottomLeft);
+	}
+
+	[Fact]
+	public void PopupPosition_SetToTopRight()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" PopupPosition="CalendarPosition.TopRight" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.PopupPosition.ShouldBe(CalendarPosition.TopRight);
+	}
+
+	[Fact]
+	public void PopupPosition_SetToRight()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" PopupPosition="CalendarPosition.Right" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.PopupPosition.ShouldBe(CalendarPosition.Right);
+	}
+
+	// === DefaultView ===
+
+	[Fact]
+	public void DefaultView_Default_IsDays()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.DefaultView.ShouldBe(CalendarDefaultView.Days);
+	}
+
+	[Fact]
+	public void DefaultView_SetToMonths()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" DefaultView="CalendarDefaultView.Months" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.DefaultView.ShouldBe(CalendarDefaultView.Months);
+	}
+
+	[Fact]
+	public void DefaultView_SetToYears()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" DefaultView="CalendarDefaultView.Years" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.DefaultView.ShouldBe(CalendarDefaultView.Years);
+	}
+
+	// === StartDate / EndDate ===
+
+	[Fact]
+	public void StartDate_Default_IsNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.StartDate.ShouldBeNull();
+	}
+
+	[Fact]
+	public void StartDate_SetCorrectly()
+	{
+		var start = new DateTime(2024, 1, 1);
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" StartDate="@start" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.StartDate.ShouldBe(start);
+	}
+
+	[Fact]
+	public void EndDate_Default_IsNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.EndDate.ShouldBeNull();
+	}
+
+	[Fact]
+	public void EndDate_SetCorrectly()
+	{
+		var end = new DateTime(2024, 12, 31);
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" EndDate="@end" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.EndDate.ShouldBe(end);
+	}
+
+	// === SelectedDate ===
+
+	[Fact]
+	public void SelectedDate_Default_IsNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.SelectedDate.ShouldBeNull();
+	}
+
+	[Fact]
+	public void SelectedDate_SetCorrectly()
+	{
+		var date = new DateTime(2024, 6, 15);
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" SelectedDate="@date" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.SelectedDate.ShouldBe(date);
+	}
+
+	// === TodaysDate ===
+
+	[Fact]
+	public void TodaysDate_Default_IsNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.TodaysDate.ShouldBeNull();
+	}
+
+	// === CssClass ===
+
+	[Fact]
+	public void CssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.CssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CssClass_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" CssClass="cal-popup" />
+		);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.CssClass.ShouldBe("cal-popup");
+	}
+
+	// === OnClientDateSelectionChanged ===
+
+	[Fact]
+	public void OnClientDateSelectionChanged_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.OnClientDateSelectionChanged.ShouldBe(string.Empty);
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<CalendarExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(CALENDAR_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<CalendarExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<CalendarExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<CalendarExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}
