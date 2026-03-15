@@ -1,157 +1,157 @@
 {
+  "Results": {
+    "AfterContosoUniversity": {
+      "Pages": [
+        {
+          "P95Ms": 3,
+          "ResponseBytes": 4721,
+          "MinMs": 1,
+          "ColdStartMs": 7,
+          "Page": "Home",
+          "Url": "http://localhost:55505/",
+          "Error": null,
+          "AverageMs": 1.8,
+          "StatusCode": 200,
+          "MaxMs": 10
+        },
+        {
+          "P95Ms": 14,
+          "ResponseBytes": 7548,
+          "MinMs": 4,
+          "ColdStartMs": 962,
+          "Page": "Students",
+          "Url": "http://localhost:55505/Students",
+          "Error": null,
+          "AverageMs": 6.3,
+          "StatusCode": 200,
+          "MaxMs": 51
+        },
+        {
+          "P95Ms": 6,
+          "ResponseBytes": 4968,
+          "MinMs": 3,
+          "ColdStartMs": 50,
+          "Page": "About",
+          "Url": "http://localhost:55505/About",
+          "Error": null,
+          "AverageMs": 3.7,
+          "StatusCode": 200,
+          "MaxMs": 7
+        }
+      ],
+      "Skipped": false,
+      "Kind": "Blazor",
+      "Port": 55505,
+      "App": "AfterContosoUniversity"
+    },
+    "WingtipToys": {
+      "Pages": [
+        {
+          "P95Ms": 8,
+          "ResponseBytes": 6113,
+          "MinMs": 5,
+          "ColdStartMs": 11,
+          "Page": "Home",
+          "Url": "http://localhost:55502/",
+          "Error": null,
+          "AverageMs": 6.3,
+          "StatusCode": 200,
+          "MaxMs": 9
+        },
+        {
+          "P95Ms": 12,
+          "ResponseBytes": 35108,
+          "MinMs": 7,
+          "ColdStartMs": 49,
+          "Page": "ProductList",
+          "Url": "http://localhost:55502/ProductList",
+          "Error": null,
+          "AverageMs": 9.7,
+          "StatusCode": 200,
+          "MaxMs": 23
+        },
+        {
+          "P95Ms": 8,
+          "ResponseBytes": 5938,
+          "MinMs": 4,
+          "ColdStartMs": 17,
+          "Page": "About",
+          "Url": "http://localhost:55502/About",
+          "Error": null,
+          "AverageMs": 5.9,
+          "StatusCode": 200,
+          "MaxMs": 8
+        }
+      ],
+      "Skipped": false,
+      "Kind": "Framework",
+      "Port": 55502,
+      "App": "WingtipToys"
+    },
+    "AfterWingtipToys": {
+      "Pages": [
+        {
+          "P95Ms": 7,
+          "ResponseBytes": 5725,
+          "MinMs": 2,
+          "ColdStartMs": 49,
+          "Page": "Home",
+          "Url": "http://localhost:55504/",
+          "Error": null,
+          "AverageMs": 3.2,
+          "StatusCode": 200,
+          "MaxMs": 12
+        },
+        {
+          "P95Ms": 3,
+          "ResponseBytes": 5560,
+          "MinMs": 2,
+          "ColdStartMs": 12,
+          "Page": "ProductList",
+          "Url": "http://localhost:55504/ProductList",
+          "Error": null,
+          "AverageMs": 2.5,
+          "StatusCode": 200,
+          "MaxMs": 8
+        },
+        {
+          "P95Ms": 3,
+          "ResponseBytes": 5542,
+          "MinMs": 2,
+          "ColdStartMs": 4,
+          "Page": "About",
+          "Url": "http://localhost:55504/About",
+          "Error": null,
+          "AverageMs": 2.5,
+          "StatusCode": 200,
+          "MaxMs": 12
+        }
+      ],
+      "Skipped": false,
+      "Kind": "Blazor",
+      "Port": 55504,
+      "App": "AfterWingtipToys"
+    },
+    "ContosoUniversity": {
+      "App": "ContosoUniversity",
+      "Skipped": true,
+      "Port": 55503,
+      "Pages": [],
+      "Reason": "IIS Express started but app did not respond within 180s\n    IIS Express stderr:\nFailed to register URL \"http://localhost:55503/\" for site \"Development Web Site\" application \"/\". Error description: Cannot create a file when that file already exists. (0x800700b7)\r\n",
+      "Kind": "Framework"
+    }
+  },
   "Configuration": {
     "Iterations": 50,
     "SkipFramework": false
   },
   "Environment": {
-    "ProcessorCount": 24,
-    "Timestamp": "2026-03-15T08:38:47Z",
-    "DotNetVersion": "10.0.200-preview.0.26103.119",
     "PowerShell": "7.4.13",
+    "MachineName": "JFRITZ-4",
+    "Timestamp": "2026-03-15T10:07:44Z",
+    "ProcessorCount": 24,
     "OS": "Microsoft Windows 10.0.26220",
-    "MachineName": "JFRITZ-4"
+    "DotNetVersion": "10.0.200-preview.0.26103.119"
   },
-  "DurationSeconds": 200.0,
-  "Results": {
-    "AfterContosoUniversity": {
-      "App": "AfterContosoUniversity",
-      "Pages": [
-        {
-          "StatusCode": 200,
-          "AverageMs": 1.8,
-          "MaxMs": 9,
-          "Error": null,
-          "ResponseBytes": 4706,
-          "Page": "Home",
-          "MinMs": 1,
-          "ColdStartMs": 7,
-          "P95Ms": 4,
-          "Url": "http://localhost:55505/"
-        },
-        {
-          "StatusCode": 200,
-          "AverageMs": 7.2,
-          "MaxMs": 57,
-          "Error": null,
-          "ResponseBytes": 7508,
-          "Page": "Students",
-          "MinMs": 4,
-          "ColdStartMs": 971,
-          "P95Ms": 15,
-          "Url": "http://localhost:55505/Students"
-        },
-        {
-          "StatusCode": 200,
-          "AverageMs": 3.2,
-          "MaxMs": 5,
-          "Error": null,
-          "ResponseBytes": 4993,
-          "Page": "About",
-          "MinMs": 3,
-          "ColdStartMs": 50,
-          "P95Ms": 4,
-          "Url": "http://localhost:55505/About"
-        }
-      ],
-      "Port": 55505,
-      "Kind": "Blazor",
-      "Skipped": false
-    },
-    "WingtipToys": {
-      "App": "WingtipToys",
-      "Pages": [
-        {
-          "StatusCode": 200,
-          "AverageMs": 6.0,
-          "MaxMs": 8,
-          "Error": null,
-          "ResponseBytes": 6113,
-          "Page": "Home",
-          "MinMs": 5,
-          "ColdStartMs": 11,
-          "P95Ms": 7,
-          "Url": "http://localhost:55502/"
-        },
-        {
-          "StatusCode": 200,
-          "AverageMs": 10.0,
-          "MaxMs": 24,
-          "Error": null,
-          "ResponseBytes": 35108,
-          "Page": "ProductList",
-          "MinMs": 8,
-          "ColdStartMs": 53,
-          "P95Ms": 11,
-          "Url": "http://localhost:55502/ProductList"
-        },
-        {
-          "StatusCode": 200,
-          "AverageMs": 6.7,
-          "MaxMs": 9,
-          "Error": null,
-          "ResponseBytes": 5938,
-          "Page": "About",
-          "MinMs": 5,
-          "ColdStartMs": 15,
-          "P95Ms": 8,
-          "Url": "http://localhost:55502/About"
-        }
-      ],
-      "Port": 55502,
-      "Kind": "Framework",
-      "Skipped": false
-    },
-    "ContosoUniversity": {
-      "App": "ContosoUniversity",
-      "Skipped": true,
-      "Reason": "IIS Express started but app did not respond within 180s",
-      "Pages": [],
-      "Kind": "Framework",
-      "Port": 55503
-    },
-    "AfterWingtipToys": {
-      "App": "AfterWingtipToys",
-      "Pages": [
-        {
-          "StatusCode": 200,
-          "AverageMs": 3.2,
-          "MaxMs": 10,
-          "Error": null,
-          "ResponseBytes": 5780,
-          "Page": "Home",
-          "MinMs": 2,
-          "ColdStartMs": 52,
-          "P95Ms": 4,
-          "Url": "http://localhost:55504/"
-        },
-        {
-          "StatusCode": 200,
-          "AverageMs": 2.4,
-          "MaxMs": 8,
-          "Error": null,
-          "ResponseBytes": 5530,
-          "Page": "ProductList",
-          "MinMs": 2,
-          "ColdStartMs": 12,
-          "P95Ms": 3,
-          "Url": "http://localhost:55504/ProductList"
-        },
-        {
-          "StatusCode": 200,
-          "AverageMs": 2.8,
-          "MaxMs": 19,
-          "Error": null,
-          "ResponseBytes": 5587,
-          "Page": "About",
-          "MinMs": 2,
-          "ColdStartMs": 5,
-          "P95Ms": 3,
-          "Url": "http://localhost:55504/About"
-        }
-      ],
-      "Port": 55504,
-      "Kind": "Blazor",
-      "Skipped": false
-    }
-  }
+  "DurationSeconds": 200.9
 }

@@ -115,6 +115,35 @@ function Write-OK    { param([string]$Msg) Write-Host "  OK  $Msg" -ForegroundCo
 function Write-Warn  { param([string]$Msg) Write-Host "  WARN $Msg" -ForegroundColor Yellow }
 function Write-Fail  { param([string]$Msg) Write-Host "  FAIL $Msg" -ForegroundColor Red }
 
+# ── MSBuild discovery ────────────────────────────────────────
+function Find-MSBuild {
+    # VS 2022 (any edition)
+    $vs2022 = Get-ChildItem "${env:ProgramFiles}\Microsoft Visual Studio\2022\*\MSBuild\Current\Bin\MSBuild.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($vs2022) { return $vs2022.FullName }
+
+    # VS 2019 (any edition, x86 program files)
+    $vs2019 = Get-ChildItem "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\*\MSBuild\Current\Bin\MSBuild.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($vs2019) { return $vs2019.FullName }
+
+    # VS 2017 (any edition, x86 program files — MSBuild 15.0)
+    $vs2017 = Get-ChildItem "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\*\MSBuild\15.0\Bin\MSBuild.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($vs2017) { return $vs2017.FullName }
+
+    # vswhere fallback (finds any VS installation with MSBuild)
+    $vswhereExe = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path $vswhereExe) {
+        $found = & $vswhereExe -all -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null | Select-Object -First 1
+        if ($found -and (Test-Path $found)) { return $found }
+    }
+    $vswhereCli = Get-Command vswhere -ErrorAction SilentlyContinue
+    if ($vswhereCli) {
+        $found = & vswhere -latest -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null | Select-Object -First 1
+        if ($found -and (Test-Path $found)) { return $found }
+    }
+
+    return $null
+}
+
 # ── WhatIf: just print plan and exit ─────────────────────────
 if ($WhatIfPreference) {
     Write-Step 'Benchmark Plan (WhatIf mode — no actions taken)'
@@ -239,6 +268,13 @@ function Start-FrameworkApp {
         return @{ Success = $false; Reason = "Site path not found: $($App.SitePath)" }
     }
 
+    # Start LocalDB if sqllocaldb is available (needed for SQL Server–backed Framework apps)
+    $sqllocaldb = Get-Command sqllocaldb -ErrorAction SilentlyContinue
+    if ($sqllocaldb) {
+        Write-Host "    Starting LocalDB instance..."
+        & sqllocaldb start MSSQLLocalDB 2>&1 | Out-Null
+    }
+
     # NuGet restore if packages.config exists
     $pkgConfig = Join-Path $App.SitePath 'packages.config'
     if (Test-Path $pkgConfig) {
@@ -250,16 +286,62 @@ function Start-FrameworkApp {
         }
     }
 
+    # MSBuild pre-compilation — compile the project before IIS Express launch
+    # so that first-request JIT time is dramatically reduced
+    $msbuildExe = Find-MSBuild
+    $csproj = Get-ChildItem -Path $App.SitePath -Filter "*.csproj" -Recurse | Select-Object -First 1
+    if ($csproj -and $msbuildExe) {
+        Write-Host "    Pre-compiling $($App.Name) with MSBuild..."
+        $buildOutput = & $msbuildExe $csproj.FullName /p:Configuration=Debug /v:minimal /nologo 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "MSBuild pre-compilation failed (non-fatal) — IIS Express will compile on demand"
+            $buildOutput | ForEach-Object { Write-Host "      $_" -ForegroundColor DarkYellow }
+        } else {
+            Write-OK "MSBuild pre-compilation succeeded"
+        }
+    } elseif (-not $msbuildExe) {
+        Write-Warn "MSBuild not found — skipping pre-compilation (IIS Express will JIT on first request)"
+    }
+
+    # ASP.NET view pre-compilation — pre-compiles .aspx/.ascx/.master files
+    $aspnetCompiler = Join-Path $env:windir "Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe"
+    if (Test-Path $aspnetCompiler) {
+        Write-Host "    Pre-compiling ASP.NET views..."
+        & $aspnetCompiler -v / -p $App.SitePath -fixednames 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "ASP.NET view pre-compilation failed (non-fatal)"
+        } else {
+            Write-OK "ASP.NET view pre-compilation succeeded"
+        }
+    }
+
     # Launch IIS Express
     try {
+        $iisStderrLog = Join-Path ([System.IO.Path]::GetTempPath()) "iisexpress-$($App.Name)-stderr.log"
         $proc = Start-Process -FilePath $iisExe `
             -ArgumentList "/path:`"$($App.SitePath)`" /port:$($App.Port)" `
-            -PassThru -WindowStyle Hidden
+            -PassThru -WindowStyle Hidden `
+            -RedirectStandardError $iisStderrLog
         $launchedProcesses.Add($proc)
 
         $ready = Wait-ForEndpoint -Url $App.BaseUrl -TimeoutSeconds 180
         if (-not $ready) {
-            return @{ Success = $false; Reason = 'IIS Express started but app did not respond within 180s' }
+            # Capture diagnostic info to help debug startup failures
+            $reason = 'IIS Express started but app did not respond within 180s'
+            if (Test-Path $iisStderrLog) {
+                $stderr = Get-Content $iisStderrLog -Raw -ErrorAction SilentlyContinue
+                if ($stderr) {
+                    $reason += "`n    IIS Express stderr:`n$stderr"
+                    Write-Fail "IIS Express stderr for $($App.Name):"
+                    $stderr -split "`n" | ForEach-Object { Write-Host "      $_" -ForegroundColor DarkRed }
+                }
+            }
+            if ($proc -and -not $proc.HasExited) {
+                Write-Warn "IIS Express PID $($proc.Id) is still running — process did not crash"
+            } elseif ($proc) {
+                Write-Fail "IIS Express exited with code $($proc.ExitCode)"
+            }
+            return @{ Success = $false; Reason = $reason }
         }
         return @{ Success = $true; Process = $proc }
     }
