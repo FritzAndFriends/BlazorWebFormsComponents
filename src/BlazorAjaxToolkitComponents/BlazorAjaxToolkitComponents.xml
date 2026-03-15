@@ -951,6 +951,25 @@
         <member name="M:BlazorAjaxToolkitComponents.TabPanel.Dispose">
             <inheritdoc />
         </member>
+        <member name="T:BlazorAjaxToolkitComponents.TextBoxWatermarkExtender">
+            <summary>
+            Displays placeholder/watermark text in a TextBox when it is empty.
+            The watermark text appears in a different style (via WatermarkCssClass)
+            and disappears when the user focuses the field or types.
+            Emulates the Ajax Control Toolkit TextBoxWatermarkExtender.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TextBoxWatermarkExtender.WatermarkText">
+            <summary>
+            The placeholder/watermark text to display when the TextBox is empty.
+            </summary>
+        </member>
+        <member name="P:BlazorAjaxToolkitComponents.TextBoxWatermarkExtender.WatermarkCssClass">
+            <summary>
+            CSS class applied to the TextBox when showing the watermark.
+            Typically used to style the watermark text differently (e.g., gray, italic).
+            </summary>
+        </member>
         <member name="T:BlazorAjaxToolkitComponents.ToggleButtonExtender">
             <summary>
             Replaces a target checkbox with a clickable image that toggles between checked and unchecked states.
