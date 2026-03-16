@@ -310,3 +310,23 @@ Fixed 3 bugs in `dev-docs/prd-component-health-dashboard.md` identified during r
 3. **Acceptance criterion #9 (10) was dishonest:** Changed from 'All 52 completed components show tests=check' to explicitly exclude the 7 Login controls (ChangePassword, CreateUserWizard, Login, LoginName, LoginStatus, LoginView, PasswordRecovery) which have zero bUnit coverage.
 
 📌 Team update (2026-03-16): MSBuild toolchain verified for .NET 4.8 WebForms compilation — reflection-based property discovery tool confirmed viable as primary methodology. — verified by Coordinator
+
+### PRD Decomposition — Component Health Dashboard #439 (2026-07-25)
+
+**Task:** Decompose PRD `dev-docs/prd-component-health-dashboard.md` into implementable work items with dependency ordering.
+
+**Deliverable:** `.squad/decisions/inbox/forge-prd-decomposition.md` — 12 work items (11 actionable + 1 blocked).
+
+**Key decomposition decisions:**
+
+1. **Reflection tool is primary, not fallback:** MSBuild 18.5 + Roslyn confirmed viable this session. The `webforms-reflection-tool` work item (Cyclops, L) builds `tools/WebFormsPropertyCounter/` as a .NET Fx 4.8 console app — the denominator for all health scoring.
+
+2. **Invoke-ComponentHealthScan.ps1 abandoned:** Was planned 2026-03-15 but never created. PRD supersedes with C# runtime reflection — strictly superior for type hierarchy awareness and the 10 pitfalls from §8. No overlap to manage.
+
+3. **HTML Fidelity dimension BLOCKED:** Playwright not installed. Work item `html-fidelity-dimension` (Colossus, L) parked until Playwright infrastructure exists. Current scoring model uses 6 dimensions (100% weight) — when HTML Fidelity is added, weights redistribute.
+
+4. **Critical path:** `webforms-reflection-tool` → `reference-baselines-curate` → `scoring-engine` → `health-service-assembly` → `dashboard-razor-page`. ~XL overall. 3 parallel lanes possible after `tracked-components-config` and after `health-service-assembly`.
+
+5. **5 agents engaged:** Cyclops (4 items: tool + counter + detection + service + scoring), Forge (2 items: config + baselines curation), Rogue (1: unit tests), Jubilee (2: UI + catalog), Beast (1: MkDocs export). Colossus blocked on Playwright.
+
+6. **Open questions for Jeff:** Where should ComponentHealthService live (sample app vs library)? Should reflection tool auto-generate tracked-components-config? MkDocs export: CI or manual?

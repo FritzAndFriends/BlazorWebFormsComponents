@@ -350,3 +350,4 @@ ew Function(script)() with try/catch safety
 - XML docs file updated with all new members
 
 Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cyclops. Branch squad/446-447-modal-collapsible-extenders. Fixes #446, #447.
+

@@ -209,3 +209,4 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 **Test files:** `src/BlazorWebFormsComponents.Test/ModalPopupExtender/ModalPopupExtenderTests.razor` (28 tests), `src/BlazorWebFormsComponents.Test/CollapsiblePanelExtender/CollapsiblePanelExtenderTests.razor` (32 tests).
 
+

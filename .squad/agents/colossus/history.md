@@ -185,3 +185,4 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 
 📌 Team update (2026-03-16): Playwright infrastructure confirmed shipping. Unblocks HTML Fidelity dimension for Component Health Dashboard v1. — Forge
+
