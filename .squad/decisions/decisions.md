@@ -637,3 +637,34 @@ The PRD spec from 2026-03-15 planned `scripts/Invoke-ComponentHealthScan.ps1` as
 
 3. **MkDocs export: build step or manual?** CI-integrated means `docs/component-health.md` is always fresh. Manual means less CI complexity but risk of staleness.
 
+---
+
+### 2026-03-16T14:46:34Z: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Dashboard work should be in a dedicated feature branch, not directly on dev.
+**Why:** User request — captured for team memory
+
+---
+
+### 2026-03-16: Forge — Dashboard PRD Review
+
+**Verdict:** CONDITIONAL APPROVE
+
+**Acceptance Criteria Results:**
+| # | Check | Result |
+|---|-------|--------|
+| 1 | Button ~7-8 props, 2 events | ✅ |
+| 2 | GridView ~18-21 props, ~10 events | ✅ |
+| 3 | Repeater 0/0 | ✅ |
+| 4 | No generic backtick mismatch | ✅ |
+| 5 | No base class inflation | ✅ |
+| 6 | No EventCallback double-count | ✅ |
+| 7 | No RenderFragment in counts | ✅ |
+| 8 | Missing baselines show N/A | ✅ |
+| 9 | Login controls tests | ✅ (overtaken — tests exist) |
+| 10 | Deferred show Status=Deferred | ❌ BUG — tracked-components.json missing status fields |
+
+**Must-Fix:** Add `status` fields to tracked-components.json for Substitution (Deferred), Xml (Deferred), ScriptManager (Stub).
+
+**Low-Priority:** Add Xml to DefaultTrackedComponents fallback; add DataBoundComponent<T> to stop-type list in docs; cross-check GridView baseline.
+
