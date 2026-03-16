@@ -277,6 +277,26 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 📌 Team update (2026-03-15): Ajax Toolkit extender pattern designed for #442 (M24). Two base classes (BaseExtenderComponent, BaseStandaloneToolkitComponent), string-based TargetControlID→FindControl→ClientID resolution, one ES module per component, separate NuGet package. 10 extenders + 3 standalone classified. 4-phase implementation plan (~8 sprints). SSR-safe. Decision in inbox for Jeff review. — decided by Forge
 
 
+### Component Health Dashboard PRD Review (2026-07-25)
+
+**Task:** Self-review of PRD `dev-docs/prd-component-health-dashboard.md` (issue #439) at Jeff's request.
+
+**Key findings:**
+
+1. **Data model bug — ToolTip misplaced:** Appendix A lists ToolTip under BaseStyledComponent (claiming 10 params) but ToolTip is actually declared on BaseWebFormsComponent (line 146). Correct counts: BaseWebFormsComponent = 21 params, BaseStyledComponent = 9 params. PRD total says 36 base class params — needs recalculation.
+
+2. **Scoring model evolved:** Original spec (2026-03-15) had 7 dimensions including HTML Fidelity (15%), Style Support (15%), and Integration Tests (5%). Current PRD has 6 dimensions — dropped HTML Fidelity, Style Support, Integration Tests; added Documentation (15%) and Implementation Status (10%). The simplification is an improvement — HTML fidelity requires Playwright infrastructure that doesn't exist, and binary test detection is more honest than complexity-weighted thresholds.
+
+3. **tools/WebFormsPropertyCounter/ doesn't exist** and no tools/ directory exists. The .NET Fx 4.8 console app approach requires infrastructure the team doesn't have. MSDN manual-count fallback is realistic.
+
+4. **No overlap with bwfc-scan.ps1:** That script scans *customer* Web Forms projects for migration readiness. The dashboard scans *BWFC library* components for implementation completeness. Completely different tools, no redundancy.
+
+5. **scripts/Invoke-ComponentHealthScan.ps1 was planned (2026-03-15 spec) but never created.** The PRD supersedes that plan with a C# runtime reflection approach instead of PowerShell — correct decision, reflection from the live assembly is more reliable.
+
+6. **ComponentCatalog.cs has 183 entries** but PRD tracks 54 components. The catalog includes AJAX controls, sub-components, and utilities that the dashboard correctly excludes. No conflict.
+
+**Architecture learnings:** Phase ordering (baselines → service → UI → export) is correct. Phase 1 (baselines) is the bottleneck — no .NET Fx 4.8 toolchain available, so manual curation from MSDN is the realistic path.
+
 ### Reskill Audit  Charter Optimization (2026-03-15)
 
-Completed full reskill audit of all 7 agent charters per .squad/skills/reskill/SKILL.md. Total current: 21,875 bytes across 7 charters. Identified 18 procedural blocks for extraction into 3 new skills: gent-workflow (shared collaboration boilerplate from all 7 agents), playwright-testing (Colossus's 5 test procedure blocks), scribe-procedures (Scribe's 6 operational procedure blocks). Projected savings: ~13,875 bytes (64%). All charters projected under 1,500 bytes. Biggest wins: Scribe (5,045800, -84%) and Colossus (4,8041,400, -71%). Also flagged .ai-team/  .squad/ path correction needed across all charters. Full analysis with complete slim charter text written to .squad/decisions/inbox/forge-reskill-audit.md for Scribe to merge.
+Completed full reskill audit of all 7 agent charters per .squad/skills/reskill/SKILL.md.Total current: 21,875 bytes across 7 charters. Identified 18 procedural blocks for extraction into 3 new skills: gent-workflow (shared collaboration boilerplate from all 7 agents), playwright-testing (Colossus's 5 test procedure blocks), scribe-procedures (Scribe's 6 operational procedure blocks). Projected savings: ~13,875 bytes (64%). All charters projected under 1,500 bytes. Biggest wins: Scribe (5,045800, -84%) and Colossus (4,8041,400, -71%). Also flagged .ai-team/  .squad/ path correction needed across all charters. Full analysis with complete slim charter text written to .squad/decisions/inbox/forge-reskill-audit.md for Scribe to merge.

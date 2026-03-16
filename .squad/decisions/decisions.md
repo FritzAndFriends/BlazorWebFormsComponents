@@ -168,3 +168,29 @@ These are **not** blocking approval but would improve the parser for broader EDM
 - **Good diagnostics**: Summary object returned with entity count, relationship count, cascade count, and warnings
 
 **Decision:** Approve and ship.
+
+---
+
+## 2026-07-25: Forge Review: PRD #439 Component Health Dashboard
+
+**By:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-07-25  
+**Status:** Advisory — PRD errata to fix before implementation begins
+
+### Summary
+
+Self-reviewed the Component Health Dashboard PRD at Jeff's request. The PRD is strong overall — the pitfall catalog alone will save Cyclops days of debugging. Three items need correction before Cyclops picks this up.
+
+### Required Corrections
+
+1. **Appendix A ToolTip placement is wrong.** ToolTip is on `BaseWebFormsComponent` (line 146), not `BaseStyledComponent`. BaseWebFormsComponent has 21 [Parameter] properties, not 20. BaseStyledComponent has 9, not 10. Total base class params need recount.
+
+2. **`tools/WebFormsPropertyCounter/` path is aspirational.** No `tools/` directory exists. The PRD should mark the .NET Fx 4.8 console app as "future/optional" and make MSDN manual curation the primary path for Phase 1.
+
+3. **Acceptance criterion #9 ("All 52 completed components show at least tests=✅") is likely wrong.** History shows Login controls had 0 bUnit tests as of 2026-03-15. This criterion should say "most" or be verified against current test directory before hard-coding into acceptance.
+
+### No Action Required
+
+- No overlap with `bwfc-scan.ps1` (different purpose entirely).
+- Phase ordering is correct.
+- Scoring weights are reasonable for v1.

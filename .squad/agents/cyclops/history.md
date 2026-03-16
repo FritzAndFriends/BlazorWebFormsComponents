@@ -5,6 +5,10 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Active Decisions & Alerts
+
+📌 **Team update (2026-03-16):** Forge reviewed Component Health Dashboard PRD; 3 errata items identified before Cyclops implementation. (1) Appendix A: ToolTip base class error. (2) tools/WebFormsPropertyCounter/ doesn't exist—use MSDN curation as Phase 1 primary. (3) Acceptance criterion #9 needs verification (Login controls had 0 bUnit tests as of 2026-03-15). See decisions.md for full details. — decided by Forge
+
 ## Learnings
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
