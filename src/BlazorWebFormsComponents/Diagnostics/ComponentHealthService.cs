@@ -56,6 +56,7 @@ namespace BlazorWebFormsComponents.Diagnostics
 			["TextBox"] = new TrackedComponent("Editor", ImplementationStatus.Complete),
 			["View"] = new TrackedComponent("Editor", ImplementationStatus.Complete),
 			["Substitution"] = new TrackedComponent("Editor", ImplementationStatus.Deferred),
+			["Xml"] = new TrackedComponent("Editor", ImplementationStatus.Deferred),
 
 			// Data Controls
 			["Chart"] = new TrackedComponent("Data", ImplementationStatus.Complete),

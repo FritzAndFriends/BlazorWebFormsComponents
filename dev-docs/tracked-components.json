@@ -107,11 +107,13 @@
     },
     "Substitution": {
       "webFormsType": "System.Web.UI.WebControls.Substitution",
-      "category": "Editor"
+      "category": "Editor",
+      "status": "Deferred"
     },
     "Xml": {
       "webFormsType": "System.Web.UI.WebControls.Xml",
-      "category": "Editor"
+      "category": "Editor",
+      "status": "Deferred"
     },
     "Chart": {
       "webFormsType": "System.Web.UI.DataVisualization.Charting.Chart",
@@ -239,7 +241,8 @@
     },
     "ScriptManager": {
       "webFormsType": "System.Web.UI.ScriptManager",
-      "category": "Infrastructure"
+      "category": "Infrastructure",
+      "status": "Stub"
     },
     "UpdatePanel": {
       "webFormsType": "System.Web.UI.UpdatePanel",
