@@ -183,3 +183,5 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - 3 new interaction tests verify all three rendering modes (Block, ContentTemplate, Inline) and their interactive behaviors
 - All 8 UpdatePanel tests passing (5 smoke + 3 interaction)
 
+
+📌 Team update (2026-03-16): Playwright infrastructure confirmed shipping. Unblocks HTML Fidelity dimension for Component Health Dashboard v1. — Forge

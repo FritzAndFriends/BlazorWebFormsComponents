@@ -300,3 +300,11 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 ### Reskill Audit  Charter Optimization (2026-03-15)
 
 Completed full reskill audit of all 7 agent charters per .squad/skills/reskill/SKILL.md.Total current: 21,875 bytes across 7 charters. Identified 18 procedural blocks for extraction into 3 new skills: gent-workflow (shared collaboration boilerplate from all 7 agents), playwright-testing (Colossus's 5 test procedure blocks), scribe-procedures (Scribe's 6 operational procedure blocks). Projected savings: ~13,875 bytes (64%). All charters projected under 1,500 bytes. Biggest wins: Scribe (5,045800, -84%) and Colossus (4,8041,400, -71%). Also flagged .ai-team/  .squad/ path correction needed across all charters. Full analysis with complete slim charter text written to .squad/decisions/inbox/forge-reskill-audit.md for Scribe to merge.
+
+### PRD Bug Fixes — Component Health Dashboard (2026-07-25)
+
+Fixed 3 bugs in `dev-docs/prd-component-health-dashboard.md` identified during review:
+
+1. **ToolTip misplaced in Appendix A:** ToolTip was listed under BaseStyledComponent (10 params) but source code (BaseWebFormsComponent.cs:146) proves it is declared on BaseWebFormsComponent. Fixed counts: BaseWebFormsComponent=21, BaseStyledComponent=9, total still 36. Also corrected the Pitfall 2 example counts and the hierarchy annotation.
+2. **Baseline methodology priority flipped (3.2):** MSDN manual curation is now Preferred (immediately actionable), .NET Fx 4.8 reflection tool is Acceptable fallback (requires SDK + nonexistent tools/WebFormsPropertyCounter/).
+3. **Acceptance criterion #9 (10) was dishonest:** Changed from 'All 52 completed components show tests=check' to explicitly exclude the 7 Login controls (ChangePassword, CreateUserWizard, Login, LoginName, LoginStatus, LoginView, PasswordRecovery) which have zero bUnit coverage.
