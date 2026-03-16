@@ -7847,3 +7847,16 @@ This verification establishes that the reflection-based property discovery tool 
 - All 480 concrete WebControls are discoverable via reflection
 - Build infrastructure is production-ready pending NuGet package restore
 
+
+---
+### 2026-03-16T13:58:00Z: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** No reflection tool needed for baseline property counts. Get the data from the docs (MSDN documentation) instead of building a .NET Fx 4.8 reflection tool.
+**Why:** User request — simplifies the dashboard by eliminating work item #1 (webforms-reflection-tool) and keeping MSDN manual curation as the sole methodology for reference baselines.
+
+---
+### 2026-03-16T13:59:00Z: Correction — Playwright IS installed
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Playwright .NET libraries and browsers are installed. 3 test projects already reference it (AfterBlazorServerSide.Tests, ContosoUniversity.AcceptanceTests, WingtipToys.AcceptanceTests). Browsers installed: Chromium, Firefox, WebKit. HTML Fidelity dimension is UNBLOCKED for v1.
+**Why:** Corrects earlier incorrect assumption that Playwright was not available.
+
