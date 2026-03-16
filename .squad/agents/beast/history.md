@@ -239,6 +239,62 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 - CollapsiblePanelExtender ScrollContents property is subtle — pair it with ExpandedSize limit in examples to make the behavior obvious
 - FAQ accordion is the most powerful use case for CollapsiblePanelExtender — lead with that to show power
 - Drag handle examples should show visual distinction (darker background, cursor change) to teach UX best practices
+
+### Component Health Dashboard Documentation (Current Session)
+
+**Task:** Create MkDocs documentation page for the Component Health Dashboard per PRD §6.4.
+
+**Delivered:** `docs/dashboard.md` — comprehensive 9 KB documentation page covering:
+
+**Content structure:**
+1. **Overview** — Explains what the dashboard measures and why (6 dimensions, 52 tracked components)
+2. **How to Access** — Live dashboard at `/dashboard` in sample app; static snapshot in docs
+3. **Scoring Model** — 6-dimensional scoring table with rationale:
+   - Property Parity (30%) — Most critical: developers need the properties they use
+   - Event Parity (15%) — Important but fewer events than properties
+   - Has bUnit Tests (20%) — Untested components are unreliable
+   - Has Documentation (15%) — Table-stakes for open-source
+   - Has Sample Page (10%) — Shows usage but less critical
+   - Implementation Status (10%) — Sanity check (Complete/Stub/Deferred)
+4. **Reading the Dashboard** — User-focused guidance:
+   - Color coding: 🟢 Green (≥90%), 🟡 Yellow (70-89%), 🔴 Red (<70%)
+   - Fraction display: "7/8" means 7 of 8 expected properties (why numerator/denominator matters)
+   - N/A handling: baseline not yet curated (excluded from weighted average)
+   - Binary indicators: ✅/❌ for tests, docs, samples
+5. **What Counts (and Doesn't)** — Detailed counting rules from PRD §2:
+   - Component-specific properties only (stops at base classes)
+   - EventCallback parameters are events, not properties
+   - RenderFragments excluded (Blazor infrastructure)
+   - Infrastructure parameters excluded (AdditionalAttributes, CascadingParameter, Inject, Obsolete)
+6. **Maintaining Baselines** — Operational guidance:
+   - When adding a component: add to `dev-docs/reference-baselines.json`
+   - When counts seem wrong: verify against MSDN .NET Fx 4.8 API docs
+   - Link to PRD for detailed counting rules (§2)
+7. **Glossary** — Quick reference for key terms (Expected, Implemented, Parity, Baseline, etc.)
+8. **Next Steps** — Action items (run dashboard, improve components, add baselines)
+
+**Key design decisions:**
+- **Tone:** Empathetic to developers, focuses on "why" each metric matters
+- **Accuracy:** All content derives directly from PRD §§1–7; no interpretation beyond the PRD
+- **Accessibility:** Glossary + cross-references to PRD sections for those needing deeper understanding
+- **Actionability:** "Maintaining Baselines" section gives developers concrete steps, not abstract guidance
+- **Link strategy:** References PRD §2 for detailed counting rules instead of duplicating 40+ lines of rules
+
+**Navigation update:** Added to `mkdocs.yml` as top-level nav entry immediately after "Home," positioning it as a key diagnostic tool alongside component documentation.
+
+**File:** `docs/dashboard.md` (9,010 bytes)  
+**Branch:** Ready for commit with co-authored-by trailer
+
+**Style alignment:**
+- Matches existing BWFC doc patterns: problem → solution → examples/tables
+- Uses Material theme formatting: admonitions, markdown tables, links
+- Tone matches Button.md and migration guides: practical, Web Forms-aware, developer-focused
+
+**Learnings:**
+- PRD §4.2 weight rationale needed clear translation to "why developers care" (property fidelity = migration success; tests = reliability)
+- N/A handling is subtle: developers need to know "missing baseline" ≠ "broken implementation"
+- Terminology matters: "component-specific" vs "base class" vs "infrastructure" — glossary prevents confusion
+- Reference baselines are the bottleneck: good docs can't overcome missing baseline data (links to MSDN, not invented)
 - Partial visibility pattern (CollapsedSize > 0) is underutilized; showcase it as a way to show "preview" of collapsed content
 
 ### Ajax Control Toolkit L1 Migration Skill Document (2026-03-XX)

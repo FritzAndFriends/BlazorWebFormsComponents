@@ -180,6 +180,10 @@ public static class ComponentCatalog
         // Theming
         new("Theming", "Theming", "/ControlSamples/Theming", "Skins and Themes PoC with ThemeProvider and ControlSkin",
             Keywords: new[] { "skin", "theme", "provider", "skinid" }),
+
+        // Diagnostics
+        new("Dashboard", "Diagnostics", "/dashboard", "Component health dashboard showing implementation parity with Web Forms originals",
+            Keywords: new[] { "health", "score", "parity", "diagnostics", "status", "coverage" }),
     }.AsReadOnly();
 
     public static IReadOnlyList<string> Categories { get; } = Components
