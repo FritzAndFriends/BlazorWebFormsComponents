@@ -1,4 +1,5 @@
 using System;
+using BlazorWebFormsComponents.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +37,23 @@ public static class ServiceCollectionExtensions
         configure?.Invoke(options);
         services.AddSingleton(options);
 
+        return services;
+    }
+
+    /// <summary>
+    /// Adds the Component Health Dashboard diagnostic service as a singleton.
+    /// Loads reference baselines from dev-docs/reference-baselines.json and enables
+    /// runtime reflection-based health scoring of all tracked components.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="solutionRoot">Path to the repository root (for file scanning of tests, docs, samples).</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddComponentHealthDashboard(this IServiceCollection services, string solutionRoot)
+    {
+        var baselinesPath = System.IO.Path.Combine(solutionRoot, "dev-docs", "reference-baselines.json");
+        var baselines = ReferenceBaselines.LoadFromFile(baselinesPath);
+        var healthService = new ComponentHealthService(baselines, solutionRoot);
+        services.AddSingleton(healthService);
         return services;
     }
 

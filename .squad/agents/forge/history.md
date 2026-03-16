@@ -330,3 +330,22 @@ Fixed 3 bugs in `dev-docs/prd-component-health-dashboard.md` identified during r
 5. **5 agents engaged:** Cyclops (4 items: tool + counter + detection + service + scoring), Forge (2 items: config + baselines curation), Rogue (1: unit tests), Jubilee (2: UI + catalog), Beast (1: MkDocs export). Colossus blocked on Playwright.
 
 6. **Open questions for Jeff:** Where should ComponentHealthService live (sample app vs library)? Should reflection tool auto-generate tracked-components-config? MkDocs export: CI or manual?
+
+### Reference Baselines & Tracked Components — Deliverables Complete (2026-07-25)
+
+**What was done:**
+1. **PRD §3.2 updated:** Removed reflection-tool fallback. MSDN manual curation is now the SOLE method for obtaining reference baselines. Source field updated in JSON example. §7.3 updated to remove `tools/WebFormsPropertyCounter/` reference.
+2. **`dev-docs/tracked-components.json` created:** 61 components mapped to Web Forms types and categories (Editor:28, Data:9, Validation:8, Navigation:3, Login:7, Infrastructure:6). Includes all deferred (Substitution, Xml) and abstract (BaseValidator, BaseCompareValidator).
+3. **`dev-docs/reference-baselines.json` created:** Full property/event baselines for all 61 components sourced from MSDN .NET Framework 4.8 API documentation. Includes propertyList and eventList arrays for verifiability. 24 complex controls flagged with `confidence: needs-verification`.
+
+**Key architecture decisions:**
+- **MSDN-only sourcing:** Jeff's directive — no reflection tools, no .NET Fx console apps. MSDN docs are the sole authoritative source.
+- **Symmetric counting rules:** Style sub-object properties (DayStyle, HeaderStyle, etc.) excluded from Web Forms baselines to match BWFC's RenderFragment exclusion. Template properties (ITemplate) likewise excluded.
+- **Stop-points for Web Forms counting:** WebControl, Control, BaseDataBoundControl, DataBoundControl — symmetric with BWFC's BaseWebFormsComponent/BaseStyledComponent/BaseDataBoundComponent/DataBoundComponent<T>.
+- **Validator family inclusion:** Concrete validators include full property chain from their family (e.g., CompareValidator includes BaseCompareValidator + BaseValidator + Label declared properties).
+
+**Key file paths:**
+- `dev-docs/prd-component-health-dashboard.md` — updated §3.2, §7.3
+- `dev-docs/tracked-components.json` — component → Web Forms type mapping
+- `dev-docs/reference-baselines.json` — expected property/event counts per component
+- Decision: `.squad/decisions/inbox/forge-baselines-methodology.md`

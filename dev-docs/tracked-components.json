@@ -1,0 +1,249 @@
+{
+  "version": "1.0",
+  "components": {
+    "AdRotator": {
+      "webFormsType": "System.Web.UI.WebControls.AdRotator",
+      "category": "Editor"
+    },
+    "Button": {
+      "webFormsType": "System.Web.UI.WebControls.Button",
+      "category": "Editor"
+    },
+    "BulletedList": {
+      "webFormsType": "System.Web.UI.WebControls.BulletedList",
+      "category": "Editor"
+    },
+    "Calendar": {
+      "webFormsType": "System.Web.UI.WebControls.Calendar",
+      "category": "Editor"
+    },
+    "CheckBox": {
+      "webFormsType": "System.Web.UI.WebControls.CheckBox",
+      "category": "Editor"
+    },
+    "CheckBoxList": {
+      "webFormsType": "System.Web.UI.WebControls.CheckBoxList",
+      "category": "Editor"
+    },
+    "DropDownList": {
+      "webFormsType": "System.Web.UI.WebControls.DropDownList",
+      "category": "Editor"
+    },
+    "FileUpload": {
+      "webFormsType": "System.Web.UI.WebControls.FileUpload",
+      "category": "Editor"
+    },
+    "HiddenField": {
+      "webFormsType": "System.Web.UI.WebControls.HiddenField",
+      "category": "Editor"
+    },
+    "HyperLink": {
+      "webFormsType": "System.Web.UI.WebControls.HyperLink",
+      "category": "Editor"
+    },
+    "Image": {
+      "webFormsType": "System.Web.UI.WebControls.Image",
+      "category": "Editor"
+    },
+    "ImageButton": {
+      "webFormsType": "System.Web.UI.WebControls.ImageButton",
+      "category": "Editor"
+    },
+    "ImageMap": {
+      "webFormsType": "System.Web.UI.WebControls.ImageMap",
+      "category": "Editor"
+    },
+    "Label": {
+      "webFormsType": "System.Web.UI.WebControls.Label",
+      "category": "Editor"
+    },
+    "LinkButton": {
+      "webFormsType": "System.Web.UI.WebControls.LinkButton",
+      "category": "Editor"
+    },
+    "ListBox": {
+      "webFormsType": "System.Web.UI.WebControls.ListBox",
+      "category": "Editor"
+    },
+    "Literal": {
+      "webFormsType": "System.Web.UI.WebControls.Literal",
+      "category": "Editor"
+    },
+    "Localize": {
+      "webFormsType": "System.Web.UI.WebControls.Localize",
+      "category": "Editor"
+    },
+    "MultiView": {
+      "webFormsType": "System.Web.UI.WebControls.MultiView",
+      "category": "Editor"
+    },
+    "Panel": {
+      "webFormsType": "System.Web.UI.WebControls.Panel",
+      "category": "Editor"
+    },
+    "PlaceHolder": {
+      "webFormsType": "System.Web.UI.WebControls.PlaceHolder",
+      "category": "Editor"
+    },
+    "RadioButton": {
+      "webFormsType": "System.Web.UI.WebControls.RadioButton",
+      "category": "Editor"
+    },
+    "RadioButtonList": {
+      "webFormsType": "System.Web.UI.WebControls.RadioButtonList",
+      "category": "Editor"
+    },
+    "Table": {
+      "webFormsType": "System.Web.UI.WebControls.Table",
+      "category": "Editor"
+    },
+    "TextBox": {
+      "webFormsType": "System.Web.UI.WebControls.TextBox",
+      "category": "Editor"
+    },
+    "View": {
+      "webFormsType": "System.Web.UI.WebControls.View",
+      "category": "Editor"
+    },
+    "Substitution": {
+      "webFormsType": "System.Web.UI.WebControls.Substitution",
+      "category": "Editor"
+    },
+    "Xml": {
+      "webFormsType": "System.Web.UI.WebControls.Xml",
+      "category": "Editor"
+    },
+    "Chart": {
+      "webFormsType": "System.Web.UI.DataVisualization.Charting.Chart",
+      "category": "Data"
+    },
+    "DataGrid": {
+      "webFormsType": "System.Web.UI.WebControls.DataGrid",
+      "category": "Data"
+    },
+    "DataList": {
+      "webFormsType": "System.Web.UI.WebControls.DataList",
+      "category": "Data"
+    },
+    "DataPager": {
+      "webFormsType": "System.Web.UI.WebControls.DataPager",
+      "category": "Data"
+    },
+    "DetailsView": {
+      "webFormsType": "System.Web.UI.WebControls.DetailsView",
+      "category": "Data"
+    },
+    "FormView": {
+      "webFormsType": "System.Web.UI.WebControls.FormView",
+      "category": "Data"
+    },
+    "GridView": {
+      "webFormsType": "System.Web.UI.WebControls.GridView",
+      "category": "Data"
+    },
+    "ListView": {
+      "webFormsType": "System.Web.UI.WebControls.ListView",
+      "category": "Data"
+    },
+    "Repeater": {
+      "webFormsType": "System.Web.UI.WebControls.Repeater",
+      "category": "Data"
+    },
+    "CompareValidator": {
+      "webFormsType": "System.Web.UI.WebControls.CompareValidator",
+      "category": "Validation"
+    },
+    "CustomValidator": {
+      "webFormsType": "System.Web.UI.WebControls.CustomValidator",
+      "category": "Validation"
+    },
+    "RangeValidator": {
+      "webFormsType": "System.Web.UI.WebControls.RangeValidator",
+      "category": "Validation"
+    },
+    "RegularExpressionValidator": {
+      "webFormsType": "System.Web.UI.WebControls.RegularExpressionValidator",
+      "category": "Validation"
+    },
+    "RequiredFieldValidator": {
+      "webFormsType": "System.Web.UI.WebControls.RequiredFieldValidator",
+      "category": "Validation"
+    },
+    "ValidationSummary": {
+      "webFormsType": "System.Web.UI.WebControls.ValidationSummary",
+      "category": "Validation"
+    },
+    "BaseValidator": {
+      "webFormsType": "System.Web.UI.WebControls.BaseValidator",
+      "category": "Validation"
+    },
+    "BaseCompareValidator": {
+      "webFormsType": "System.Web.UI.WebControls.BaseCompareValidator",
+      "category": "Validation"
+    },
+    "Menu": {
+      "webFormsType": "System.Web.UI.WebControls.Menu",
+      "category": "Navigation"
+    },
+    "SiteMapPath": {
+      "webFormsType": "System.Web.UI.WebControls.SiteMapPath",
+      "category": "Navigation"
+    },
+    "TreeView": {
+      "webFormsType": "System.Web.UI.WebControls.TreeView",
+      "category": "Navigation"
+    },
+    "ChangePassword": {
+      "webFormsType": "System.Web.UI.WebControls.ChangePassword",
+      "category": "Login"
+    },
+    "CreateUserWizard": {
+      "webFormsType": "System.Web.UI.WebControls.CreateUserWizard",
+      "category": "Login"
+    },
+    "Login": {
+      "webFormsType": "System.Web.UI.WebControls.Login",
+      "category": "Login"
+    },
+    "LoginName": {
+      "webFormsType": "System.Web.UI.WebControls.LoginName",
+      "category": "Login"
+    },
+    "LoginStatus": {
+      "webFormsType": "System.Web.UI.WebControls.LoginStatus",
+      "category": "Login"
+    },
+    "LoginView": {
+      "webFormsType": "System.Web.UI.WebControls.LoginView",
+      "category": "Login"
+    },
+    "PasswordRecovery": {
+      "webFormsType": "System.Web.UI.WebControls.PasswordRecovery",
+      "category": "Login"
+    },
+    "Content": {
+      "webFormsType": "System.Web.UI.WebControls.Content",
+      "category": "Infrastructure"
+    },
+    "ContentPlaceHolder": {
+      "webFormsType": "System.Web.UI.WebControls.ContentPlaceHolder",
+      "category": "Infrastructure"
+    },
+    "MasterPage": {
+      "webFormsType": "System.Web.UI.MasterPage",
+      "category": "Infrastructure"
+    },
+    "NamingContainer": {
+      "webFormsType": "System.Web.UI.WebControls.Panel",
+      "category": "Infrastructure"
+    },
+    "ScriptManager": {
+      "webFormsType": "System.Web.UI.ScriptManager",
+      "category": "Infrastructure"
+    },
+    "UpdatePanel": {
+      "webFormsType": "System.Web.UI.UpdatePanel",
+      "category": "Infrastructure"
+    }
+  }
+}

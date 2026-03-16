@@ -351,3 +351,26 @@ ew Function(script)() with try/catch safety
 
 Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cyclops. Branch squad/446-447-modal-collapsible-extenders. Fixes #446, #447.
 
+### ComponentHealthService Implementation (2026-03-16)
+
+**Summary:** Built the core `ComponentHealthService` in `src/BlazorWebFormsComponents/Diagnostics/` per PRD §7. Four files created: `ImplementationStatus.cs` (enum), `ComponentHealthReport.cs` (data model), `ReferenceBaselines.cs` (JSON loader), `ComponentHealthService.cs` (reflection + scoring engine). DI registration via `AddComponentHealthDashboard()` added to `ServiceCollectionExtensions.cs`.
+
+**Key Implementation Details:**
+- **Property/Event Counter (§5.4):** Walks inheritance chain with DeclaredOnly, stops at BaseWebFormsComponent/BaseStyledComponent/BaseDataBoundComponent/DataBoundComponent<>. Uses GetGenericTypeDefinition() for generic base matching. Skips [Obsolete], [CascadingParameter], RenderFragment/RenderFragment<T>, AdditionalAttributes, ChildContent, ChildComponents. EventCallback/EventCallback<T> counted as events only.
+- **Component Discovery (§5.1-5.2):** Reflects over BWFC assembly, matches against tracked components list. Falls back to hardcoded 56-component list when `dev-docs/tracked-components.json` doesn't exist.
+- **File Detection (§7.4):** Scans test project directories/files for component names, docs/ for matching .md files, ComponentCatalog.cs for sample page registration.
+- **Score Computation (§4.1):** Weighted average (Props 30%, Events 15%, Tests 20%, Docs 15%, Sample 10%, Status 10%). Missing baselines excluded and weights re-distributed. Scores capped at 100%. 0/0 treated as 1.0.
+- **Baselines Loading:** ReferenceBaselines.LoadFromFile() gracefully handles missing/malformed JSON.
+- **Project enforces `var` over explicit types** via IDE0007 as error — all code uses var.
+
+**Files Created:**
+- `src/BlazorWebFormsComponents/Diagnostics/ImplementationStatus.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthReport.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ReferenceBaselines.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthService.cs`
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/ServiceCollectionExtensions.cs` (added AddComponentHealthDashboard extension)
+
+**Build verified:** 0 errors, 99 pre-existing warnings.
+
