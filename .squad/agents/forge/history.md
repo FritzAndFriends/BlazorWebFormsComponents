@@ -308,3 +308,5 @@ Fixed 3 bugs in `dev-docs/prd-component-health-dashboard.md` identified during r
 1. **ToolTip misplaced in Appendix A:** ToolTip was listed under BaseStyledComponent (10 params) but source code (BaseWebFormsComponent.cs:146) proves it is declared on BaseWebFormsComponent. Fixed counts: BaseWebFormsComponent=21, BaseStyledComponent=9, total still 36. Also corrected the Pitfall 2 example counts and the hierarchy annotation.
 2. **Baseline methodology priority flipped (3.2):** MSDN manual curation is now Preferred (immediately actionable), .NET Fx 4.8 reflection tool is Acceptable fallback (requires SDK + nonexistent tools/WebFormsPropertyCounter/).
 3. **Acceptance criterion #9 (10) was dishonest:** Changed from 'All 52 completed components show tests=check' to explicitly exclude the 7 Login controls (ChangePassword, CreateUserWizard, Login, LoginName, LoginStatus, LoginView, PasswordRecovery) which have zero bUnit coverage.
+
+📌 Team update (2026-03-16): MSBuild toolchain verified for .NET 4.8 WebForms compilation — reflection-based property discovery tool confirmed viable as primary methodology. — verified by Coordinator
