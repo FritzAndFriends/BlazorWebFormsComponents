@@ -7,6 +7,8 @@
 
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
+
 📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
 
 📌 **Team update (2026-03-16):** Forge reviewed Component Health Dashboard PRD; 3 errata items identified before Cyclops implementation. (1) Appendix A: ToolTip base class error. (2) tools/WebFormsPropertyCounter/ doesn't exist—use MSDN curation as Phase 1 primary. (3) Acceptance criterion #9 needs verification (Login controls had 0 bUnit tests as of 2026-03-15). See decisions.md for full details. — decided by Forge
