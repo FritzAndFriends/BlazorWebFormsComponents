@@ -1,4 +1,4 @@
-# Project Context
+﻿# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
@@ -268,3 +268,5 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - Label-for accessibility: always verify label.for == input.id
 - _Imports.razor provides `@inherits BlazorWebFormsTestContext` — no need for explicit @inherits in test files
 - `@using Shouldly` added locally when not using _Imports default assertions
+
+

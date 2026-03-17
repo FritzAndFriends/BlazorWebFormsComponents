@@ -349,3 +349,59 @@ Fixed 3 bugs in `dev-docs/prd-component-health-dashboard.md` identified during r
 - `dev-docs/tracked-components.json` — component → Web Forms type mapping
 - `dev-docs/reference-baselines.json` — expected property/event counts per component
 - Decision: `.squad/decisions/inbox/forge-baselines-methodology.md`
+
+### HttpHandlerBase Architecture Proposal (2026-07-25)
+
+**Task:** Design base class for migrating `.ashx` handler code-behind to ASP.NET Core middleware with minimal rewrites.
+
+**Deliverable:** `.squad/decisions/inbox/forge-ashx-handler-base-class.md` — comprehensive architecture proposal covering IHttpHandler API surface analysis, ASP.NET Core mapping (member-by-member), proposed class hierarchy, before/after code examples, risks, and 6-issue implementation plan.
+
+**Key design decisions:**
+
+1. **`HttpHandlerBase` abstract base class** (not interface) — follows `WebFormsPageBase` pattern. Exposes `ProcessRequestAsync(HttpHandlerContext)` as the migration-compatible override point. `IsReusable` always true (middleware is inherently reusable).
+
+2. **`HttpHandlerContext` adapter class** — wraps ASP.NET Core `HttpContext` with Web Forms-like API surface. Sub-objects: `HttpHandlerRequest` (QueryString, Form, Files), `HttpHandlerResponse` (Write, BinaryWrite, AddHeader, ContentType), `HttpHandlerServer` (MapPath, HtmlEncode, UrlEncode).
+
+3. **Endpoint routing, not raw middleware** — handlers are URL-specific, so `MapHandler<T>()` and `MapBlazorWebFormsHandlers()` use endpoint routing. Convention-based assembly scanning via `[HandlerRoute]` attribute.
+
+4. **Sync-over-async shims for Write/BinaryWrite** — deliberate migration compatibility decision. No SynchronizationContext in middleware context (unlike Blazor), so sync-over-async is safe. Async alternatives provided for perf-sensitive handlers.
+
+5. **`Response.End()` marked `[Obsolete]`** — cannot replicate ThreadAbortException. Sets `IsEnded` flag instead. Developer adds `return`. Matches `ViewState` obsolescence pattern.
+
+6. **Session support via `[RequiresSessionState]` attribute** — middleware auto-calls `LoadAsync()` before `ProcessRequestAsync()`. `GetObject<T>()`/`SetObject<T>()` extensions for typed session values.
+
+7. **Main BWFC package** — not separate NuGet. ~500 lines of production code, same migration infrastructure category as WebFormsPageBase/ResponseShim/RequestShim.
+
+8. **Coordinates with existing AshxHandlerMiddleware** — modified to skip paths with registered handler endpoints (no 410 for migrated handlers).
+
+**What doesn't map:**
+- `Server.Transfer()` / `Server.Execute()` — no Core equivalent, unsupported
+- `Application["key"]` — global mutable state, migrate to DI/IMemoryCache
+- `Response.End()` ThreadAbortException — behavioral change, shim only sets flag
+- Complex `HttpPostedFile.SaveAs()` — different API shape from `IFormFile`
+
+**Scope:** Medium. ~1,200 lines total (840 prod + 380 test). 6 issues: core adapters (M), routing (S), middleware coordination (S), session (S), docs (S), L1 script (S).
+
+📌 Team update (2026-07-25): HttpHandlerBase architecture proposal delivered — abstract base class + context adapters for .ashx code migration. Endpoint routing, sync-over-async shims, session via attribute, main BWFC package. 6-issue implementation plan. Decision in inbox for Jeff review. — decided by Forge
+
+### Minimal API Pivot for HttpHandlerBase (2026-07-25)
+
+Jeff directed a design pivot: replace custom `[HandlerRoute]` attribute + `MapBlazorWebFormsHandlers()` assembly scanning with **Minimal API registration**. Analyzed and produced revised design (§R1–R9) appended to the original proposal.
+
+**Key design decisions in the revision:**
+
+1. **`app.MapHandler<THandler>("/path")` as primary API** — generic extension on `IEndpointRouteBuilder`, follows `MapGet`/`MapPost` naming convention. Returns `RouteHandlerBuilder` for auth/CORS/rate-limiting chaining.
+
+2. **`ActivatorUtilities.CreateInstance<THandler>` per request** — DI-powered handler instantiation without explicit container registration. Constructor injection just works. Transient lifetime (matches Web Forms `IsReusable = false` common case).
+
+3. **`endpoints.Map()` for all HTTP methods** — not `MapGet`/`MapPost`. Web Forms `ProcessRequest` handles all methods; `Map()` (available .NET 7+, we target .NET 10) preserves this behavior exactly.
+
+4. **No `IResult` return** — delegate returns `Task` (void). Handler writes directly to Response via adapter. Minimal API sees no return value and doesn't interfere. Matches Web Forms behavior.
+
+5. **`[HandlerRoute]` attribute eliminated** — routes declared in `Program.cs` only. Explicit, visible, matches Minimal API philosophy. One fewer file, one fewer concept.
+
+6. **Assembly scanning eliminated** — no `MapBlazorWebFormsHandlers()`. Each handler gets an explicit `MapHandler<T>()` call. L1 script generates these lines.
+
+**Impact:** ~100 fewer lines of production code (400 vs 500). One fewer file (`HandlerRouteAttribute.cs` gone). Issue 2 (routing) shrinks from Size S to XS. Estimated timeline: 2-3 weeks (was 3-4). Adapter layer (`HttpHandlerContext`, `HttpHandlerResponse`, `HttpHandlerServer`) completely unchanged.
+
+**Learning:** Original §7.3 rejected Minimal API because "they require completely different code structure." Wrong framing — Jeff's insight is to use Minimal API as *registration and dispatch infrastructure* while keeping the `HttpHandlerBase` class structure intact. The handler code developers write is nearly identical. Only the plumbing underneath changes.
