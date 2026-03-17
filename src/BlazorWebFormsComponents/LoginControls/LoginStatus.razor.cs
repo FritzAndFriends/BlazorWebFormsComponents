@@ -1,7 +1,5 @@
-﻿using BlazorComponentUtilities;
-using BlazorWebFormsComponents.Enums;
+﻿using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using System;
 using System.Threading.Tasks;
@@ -14,16 +12,14 @@ namespace BlazorWebFormsComponents.LoginControls
 		[Parameter] public LogoutAction LogoutAction { get; set; } = Refresh;
 
 		[Inject]
-		protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-
-		[Inject]
 		protected NavigationManager NavigationManager { get; set; }
 
 		[Parameter] public string LoginText { get; set; } = "Login";
 
 		[Parameter] public string LoginImageUrl { get; set; }
 
-		// This property was not in Webforms
+		// Blazor adaptation: Web Forms LoginStatus used FormsAuthentication.LoginUrl from web.config,
+		// which doesn't exist in Blazor. This parameter lets the consumer specify the login page URL directly.
 		[Parameter] public string LoginPageUrl { get; set; }
 
 		[Parameter] public string LogoutText { get; set; } = "Logout";
@@ -42,14 +38,13 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		#endregion
 
-		public StyleBuilder CalculatedStyle => this.ToStyle();
-
-		private bool UserAuthenticated { get; set; }
-
 		private void LoginHandle(MouseEventArgs args)
 		{
 
-			NavigationManager.NavigateTo(LoginPageUrl);
+			if (!string.IsNullOrEmpty(LoginPageUrl))
+			{
+				NavigationManager.NavigateTo(LoginPageUrl);
+			}
 
 		}
 
@@ -71,19 +66,6 @@ namespace BlazorWebFormsComponents.LoginControls
 
 				}
 			}
-
-		}
-
-
-
-		protected override async Task OnInitializedAsync()
-		{
-
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-			UserAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
-
-			await base.OnInitializedAsync();
 
 		}
 

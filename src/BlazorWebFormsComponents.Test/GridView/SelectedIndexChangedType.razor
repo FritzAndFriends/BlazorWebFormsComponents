@@ -1,0 +1,90 @@
+@code {
+
+	// ─── P1-5: GridView SelectedIndexChanged receives GridViewSelectEventArgs ───
+	// Previously typed as EventCallback<int>, now should be EventCallback<GridViewSelectEventArgs>.
+	// Verifies: SelectedIndexChanged fires with GridViewSelectEventArgs,
+	//           OnSelectedIndexChanged alias receives same type.
+
+	GridViewSelectEventArgs _changedArgs;
+
+	[Fact]
+	public void SelectedIndexChanged_Receives_GridViewSelectEventArgs()
+	{
+		_changedArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView ItemType="SelTypeItem" DataSource="data" AutoGenerateColumns="false"
+				AutoGenerateSelectButton="true"
+				SelectedIndexChanged="@((GridViewSelectEventArgs e) => _changedArgs = e)">
+				<Columns>
+					<BoundField ItemType="SelTypeItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// Click the Select link on the first row
+		var selectLinks = cut.FindAll("tbody a").Where(a => a.TextContent == "Select").ToList();
+		selectLinks.Count.ShouldBeGreaterThan(0);
+		selectLinks[0].Click();
+
+		_changedArgs.ShouldNotBeNull("SelectedIndexChanged should fire with GridViewSelectEventArgs");
+		_changedArgs.NewSelectedIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OnSelectedIndexChanged_Alias_Receives_GridViewSelectEventArgs()
+	{
+		_changedArgs = null;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView ItemType="SelTypeItem" DataSource="data" AutoGenerateColumns="false"
+				AutoGenerateSelectButton="true"
+				OnSelectedIndexChanged="@((GridViewSelectEventArgs e) => _changedArgs = e)">
+				<Columns>
+					<BoundField ItemType="SelTypeItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		var selectLinks = cut.FindAll("tbody a").Where(a => a.TextContent == "Select").ToList();
+		selectLinks[1].Click();
+
+		_changedArgs.ShouldNotBeNull("OnSelectedIndexChanged alias should fire with GridViewSelectEventArgs");
+		_changedArgs.NewSelectedIndex.ShouldBe(1);
+	}
+
+	[Fact]
+	public void SelectedIndexChanged_Type_Is_EventCallback_Of_GridViewSelectEventArgs()
+	{
+		// Compile-time type check: this lambda proves the parameter is GridViewSelectEventArgs, not int
+		EventCallback<GridViewSelectEventArgs> handler =
+			EventCallback.Factory.Create<GridViewSelectEventArgs>(this, (GridViewSelectEventArgs e) => { });
+
+		var data = GetTestData();
+		var cut = Render<GridView<SelTypeItem>>(p => p
+			.Add(ps => ps.Items, data)
+			.Add(ps => ps.AutoGenerateColumns, true)
+			.Add(ps => ps.SelectedIndexChanged, handler)
+		);
+
+		cut.Instance.ShouldNotBeNull();
+	}
+
+	private List<SelTypeItem> GetTestData()
+	{
+		return new List<SelTypeItem>
+		{
+			new SelTypeItem { Id = 1, Name = "Alice" },
+			new SelTypeItem { Id = 2, Name = "Bob" },
+			new SelTypeItem { Id = 3, Name = "Carol" }
+		};
+	}
+
+	public class SelTypeItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

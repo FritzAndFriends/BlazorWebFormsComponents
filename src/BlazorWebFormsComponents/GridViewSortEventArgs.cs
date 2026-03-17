@@ -14,5 +14,10 @@ namespace BlazorWebFormsComponents
 			SortExpression = sortExpression;
 			SortDirection = sortDirection;
 		}
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

@@ -32,5 +32,10 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets a value indicating whether the row should stay in edit mode.
 		/// </summary>
 		public bool KeepInEditMode { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

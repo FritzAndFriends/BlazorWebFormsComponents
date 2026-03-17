@@ -1,0 +1,81 @@
+@code {
+
+	// ─── P0-7: SelectMethod lifecycle ───────────────────────────────────
+	// The audit found SelectMethod only fires on firstRender.
+	// It should re-fire when parameters change (e.g., sort, page).
+
+	private int _selectCallCount = 0;
+
+	[Fact]
+	public void SelectMethod_FiresOnInitialRender()
+	{
+		_selectCallCount = 0;
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectMethod="GetWidgets">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		_selectCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectMethod should fire at least once on initial render");
+		cut.FindAll("tbody tr").Count.ShouldBeGreaterThan(0, "Data from SelectMethod should render");
+	}
+
+	[Fact]
+	public void SelectMethod_RendersCorrectData()
+	{
+		_selectCallCount = 0;
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectMethod="GetWidgets">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// Verify the data actually came from SelectMethod
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void SelectMethod_RefiresOnParameterChange()
+	{
+		_selectCallCount = 0;
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				AllowSorting="true" AllowPaging="true" PageSize="5"
+				SelectMethod="GetWidgets">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" SortExpression="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		var initialCallCount = _selectCallCount;
+		initialCallCount.ShouldBeGreaterThanOrEqualTo(1, "Should fire on initial render");
+
+		// Trigger a re-render by changing parameters (e.g., via sorting)
+		// Click a sort header link if one exists
+		var sortLinks = cut.FindAll("thead a");
+		if (sortLinks.Any())
+		{
+			sortLinks.First().Click();
+			_selectCallCount.ShouldBeGreaterThan(initialCallCount,
+				"SelectMethod should re-fire after sort (parameter change)");
+		}
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		_selectCallCount++;
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

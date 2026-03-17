@@ -154,6 +154,7 @@ nav:
     - NamingContainer: UtilityFeatures/NamingContainer.md
     - Page System: UtilityFeatures/PageService.md
     - Response.Redirect: UtilityFeatures/ResponseRedirect.md
+    - Service Registration: UtilityFeatures/ServiceRegistration.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
