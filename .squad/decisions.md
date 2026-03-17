@@ -8012,3 +8012,97 @@ ButtonBaseComponent.Coordinator is `protected`, not `public`. The `BindingFlags.
 2. **PRD §2.7 GridView example:** Update "~18 properties" → "21 properties" or note that the exact count will be determined by reflection
 3. **Reference baselines (dev-docs/reference-baselines.json):** When creating baselines, use the actual reflection counts (8, 21) not the PRD estimates (~7, ~18)
 4. **Tests pass with ranges:** The acceptance tests use ranges (7-8 for Button, 10-25 for GridView) to accommodate minor future changes. If exact-match assertions are preferred, set Button=8, GridView=21.
+
+
+# Decision: No GUID-based IDs in rendered HTML
+
+**Date:** 2026-03-17
+**Author:** Cyclops
+**Issue:** #471
+
+## Context
+
+CheckBox, RadioButton, and RadioButtonList generated `Guid.NewGuid().ToString("N")` as fallback HTML `id` attributes when no developer ID was set. This polluted the DOM with unpredictable 32-char hex strings that break CSS selectors and JavaScript targeting.
+
+## Decision
+
+**Components must use `ClientID` (from `ComponentIdGenerator`) as the sole source for HTML `id` attributes.** No component should generate its own GUID for `id` or `for` attributes.
+
+- When developer sets `ID="X"`: render `id="X"` (or `id="X_0"`, `id="X_1"` for list items)
+- When no ID is set: omit the `id` and `for` attributes entirely
+- The only acceptable GUID fallback is for the radio button `name` attribute (required for mutual exclusion grouping when neither `ID` nor `GroupName` is set)
+
+## Impact
+
+- All new components should follow this pattern
+- CheckBoxList already uses a similar pattern with `_baseId` — may need the same fix if flagged
+- FileUpload was already correct (only renders id when ClientID present)
+
+## Status
+
+Implemented. 2105/2105 tests pass.
+
+
+
+# Decision: L1 Script Bug Fixes + Test Coverage for #472
+
+**Author:** Cyclops  
+**Date:** 2026-03-17  
+**Issue:** #472 — Improve L1 migration script automation  
+
+## Context
+
+The L1 migration script had 3 bugs causing test failures (7/10 pass rate). All five conversion patterns requested in #472 (bool/enum/unit normalization, Response.Redirect, Session detection, ViewState detection, DataSourceID warnings) were already implemented but lacked test coverage.
+
+## Decisions
+
+1. **Scoped Eval regex in GetRouteUrl** — The `Eval()` → `context.` conversion now only runs on lines containing `GetRouteUrl` to avoid corrupting data-binding expressions elsewhere. This is a safe narrowing since `Eval()` inside `GetRouteUrl` route values is the only legitimate use case for that conversion.
+
+2. **Test harness extended for code-behind verification** — `Run-L1Tests.ps1` now copies `.aspx.cs` files alongside `.aspx` inputs and compares `.razor.cs` output when expected files exist. This enables testing code-behind transforms (Response.Redirect, Session, ViewState) without changing the core test flow.
+
+3. **ContentWrapper regex uses horizontal whitespace only** — Changed `\s*\r?\n?` to `[ \t]*\r?\n?` after Content tag closing `>` to prevent eating indentation on the next line.
+
+## Impact
+
+Test suite: 7/10 (70%) → 15/15 (100%), line accuracy: 94.3% → 100%.
+
+
+
+# Decision: GUID ID Test Coverage for Issue #471
+
+**Author:** Rogue (QA Analyst)
+**Date:** 2026-03-16
+**Issue:** #471 — [D-11] Fix GUID-based IDs
+
+## Context
+
+Issue #471 requires CheckBox, RadioButton, RadioButtonList, and FileUpload to render developer-provided IDs instead of GUIDs. Tests were written proactively in parallel with Cyclops's implementation.
+
+## Decision
+
+Added 11 tests across 2 files (1 new, 1 enhanced) covering the expected Web Forms ID behavior:
+
+- **RadioButton/IDRendering.razor** (new, 6 tests) — full coverage for RadioButton ID rendering
+- **CheckBox/IDRendering.razor** (enhanced, +3 tests) — label-for and anti-GUID assertions
+
+Pre-existing tests in FileUpload/IdRendering.razor (2) and RadioButtonList/StableIds.razor (8) already covered those controls well.
+
+## Key Test Patterns
+
+1. **Anti-GUID regex assertion** — verifies rendered ID doesn't contain GUID hex pattern
+2. **Label-for accessibility** — every test with Text verifies label.for matches input.id
+3. **No-ID fallback** — components render gracefully with generated IDs when no developer ID set
+
+## Team Impact
+
+- All 11 tests currently PASS against existing component code
+- RadioButtonList suffix pattern (_0, _1) tests already existed and pass
+- If Cyclops's implementation changes the generated ID format for no-ID cases, the fallback tests may need adjustment
+
+
+
+### 2026-03-17T05:40:26Z: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Issues and milestones should only exist on the upstream repo (FritzAndFriends/BlazorWebFormsComponents), not on origin (csharpfritz/BlazorWebFormsComponents). All `gh issue` and `gh` commands should target upstream, not origin.
+**Why:** User request — captured for team memory. The fork (origin) should not have its own issues. All issue tracking happens on the shared upstream.
+

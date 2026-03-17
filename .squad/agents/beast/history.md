@@ -31,6 +31,8 @@
 
 ### Issue #438: Deprecation Guidance Docs (Latest)
 
+📌 **Team update (2026-03-17):** #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100%. 2105 tests passing. — decided by Cyclops
+
 **Delivered:** Comprehensive deprecation guidance page (`docs/Migration/DeprecationGuidance.md`) covering Web Forms patterns with no Blazor equivalent.
 
 **Content:**

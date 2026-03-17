@@ -5,6 +5,10 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Active Decisions & Alerts
+
+📌 **Team update (2026-03-17):** Rogue wrote 11 bUnit tests for GUID ID rendering (#471). New RadioButton/IDRendering.razor (6 tests), enhanced CheckBox/IDRendering.razor (+3 tests). All tests pass; integrated into regression suite. — decided by Rogue
+
 ## Learnings
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
@@ -235,3 +239,32 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - Algorithm uses `BWF =` namespace alias to avoid test project folder name conflicts (Button/, Label/, etc.)
 
 **Patterns:** xUnit [Fact]/[Theory], Shouldly assertions, `typeof(BWF.Button)` aliasing, `BwfAssembly` static field for reflection, `GetParameterDetails()` helper returns categorized lists with skip reasons for diagnostic messages.
+
+### Issue #471 — GUID-based ID Fix Tests (2026-03-16)
+
+**11 bUnit tests verifying developer-set IDs render correctly (no GUIDs) for CheckBox, RadioButton, FileUpload, and RadioButtonList.**
+
+**New file: RadioButton/IDRendering.razor (6 tests):**
+- RadioButton_WithID_RendersIDOnInput — developer ID used directly on input element
+- RadioButton_WithID_LabelForMatchesInputId — label for=developer ID (accessibility)
+- RadioButton_WithoutID_RendersGeneratedID — no crash, generated fallback exists
+- RadioButton_WithoutID_LabelStillLinked — label-for matches generated ID
+- RadioButton_WithID_NoGuidInRenderedId — regex-verified: no GUID pattern in rendered ID
+- RadioButton_WithID_NameAttributeUsesGroupNameWhenSet — name=GroupName, not ID
+
+**Enhanced file: CheckBox/IDRendering.razor (+3 tests, now 5 total):**
+- CheckBox_WithID_LabelForMatchesInputId — label for=developer ID
+- CheckBox_WithID_NoGuidInRenderedId — regex GUID check
+- CheckBox_WithoutID_LabelStillLinked — generated ID label-for association
+
+**Pre-existing tests confirmed solid:**
+- FileUpload/IdRendering.razor (2 tests) — exact ID and no-ID behavior
+- RadioButtonList/StableIds.razor (8 tests) — _0/_1 suffix pattern, name attribute, label-for, multiple layouts
+
+**All 11 new/enhanced tests PASS.** Written proactively ahead of Cyclops's fix. Tests describe expected Web Forms behavior — may need minor adjustments once implementation lands.
+
+**Key patterns:**
+- Regex GUID detection: `[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-...` for anti-GUID assertions
+- Label-for accessibility: always verify label.for == input.id
+- _Imports.razor provides `@inherits BlazorWebFormsTestContext` — no need for explicit @inherits in test files
+- `@using Shouldly` added locally when not using _Imports default assertions
