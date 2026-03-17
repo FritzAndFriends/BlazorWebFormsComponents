@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Checkout;
 
-public partial class CheckoutCancel : ComponentBase
+public partial class CheckoutCancel
 {
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.CompletedTask;
+    }
 }

@@ -1,10 +1,14 @@
-using Microsoft.AspNetCore.Components;
+using System.Linq;
 
 namespace WingtipToys.Account;
 
-public partial class OpenAuthProviders : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — external auth providers need AuthenticationSchemeProvider
+public partial class OpenAuthProviders
 {
-    [Parameter] public string? ReturnUrl { get; set; }
-
-    private List<string> _providers = new();
+    private IQueryable<string> GetProviderNames(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        // TODO: Implement with AuthenticationSchemeProvider
+        totalRowCount = 0;
+        return Array.Empty<string>().AsQueryable();
+    }
 }

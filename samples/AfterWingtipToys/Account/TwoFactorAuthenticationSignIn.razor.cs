@@ -1,8 +1,15 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class TwoFactorAuthenticationSignIn : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — 2FA sign-in needs SignInManager/UserManager
+public partial class TwoFactorAuthenticationSignIn
 {
-    private string Title => "Two-Factor Authentication";
+    private void ProviderSubmit_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with SignInManager
+    }
+
+    private void CodeSubmit_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with SignInManager
+    }
 }

@@ -28,7 +28,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the alignment of the Image control in relation to other elements on the Web page.
 		/// </summary>
 		[Parameter]
-		public ImageAlign ImageAlign { get; set; } = ImageAlign.NotSet;
+		public EnumParameter<ImageAlign> ImageAlign { get; set; } = Enums.ImageAlign.NotSet;
 
 		/// <summary>
 		/// Gets or sets the URL to the image to display in the ImageMap control.
@@ -40,7 +40,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the default behavior for the HotSpot objects in the ImageMap control when the HotSpot objects are clicked.
 		/// </summary>
 		[Parameter]
-		public HotSpotMode HotSpotMode { get; set; } = HotSpotMode.Navigate;
+		public EnumParameter<HotSpotMode> HotSpotMode { get; set; } = Enums.HotSpotMode.Navigate;
 
 		/// <summary>
 		/// Gets or sets the target window or frame in which to display the Web page content linked to when a HotSpot object in an ImageMap control is clicked.
@@ -79,9 +79,9 @@ namespace BlazorWebFormsComponents
 		/// <param name="hotSpot">The hot spot that was clicked</param>
 		protected async Task HandleHotSpotClick(HotSpot hotSpot)
 		{
-			var effectiveMode = hotSpot.HotSpotMode != HotSpotMode.NotSet ? hotSpot.HotSpotMode : HotSpotMode;
+			var effectiveMode = hotSpot.HotSpotMode != Enums.HotSpotMode.NotSet ? hotSpot.HotSpotMode : HotSpotMode.Value;
 			
-			if (effectiveMode == HotSpotMode.PostBack)
+			if (effectiveMode == Enums.HotSpotMode.PostBack)
 			{
 				var eventArgs = new ImageMapEventArgs(hotSpot.PostBackValue);
 				await OnClick.InvokeAsync(eventArgs);

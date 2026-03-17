@@ -1,0 +1,275 @@
+# Ajax Control Toolkit Components
+
+The **Ajax Control Toolkit** in BWFC provides Blazor components that emulate Ajax Control Toolkit extender components, enabling seamless migration of Ajax-enriched Web Forms pages to Blazor with minimal markup changes.
+
+!!! tip "New to Migration?"
+    See the **[Ajax Toolkit Migration Guide](migration-guide.md)** for a comprehensive, step-by-step walkthrough of converting your Ajax Control Toolkit controls to Blazor — including installation, before/after examples for every control, L1 script automation, and troubleshooting.
+
+## What are Extenders?
+
+Extenders are special components that **attach JavaScript behavior to existing HTML controls** without rendering any HTML themselves. They enhance a target control's functionality through client-side JavaScript.
+
+### Key Characteristics
+
+- **Target-based** — Extenders identify their target control by `TargetControlID`
+- **Non-rendering** — Extenders produce no HTML output; they only inject behavior
+- **JavaScript-powered** — All functionality runs client-side via ES modules
+- **Declarative** — Attach to controls with simple Blazor syntax
+- **Familiar API** — Same properties and patterns as the original Ajax Control Toolkit
+
+### The Migration Advantage
+
+Migration from Web Forms is remarkably simple:
+
+| Web Forms (Ajax Control Toolkit) | BWFC Blazor |
+|---|---|
+| `<ajaxToolkit:ConfirmButtonExtender>` | `<ConfirmButtonExtender>` |
+| `TargetControlID="btnSubmit"` | `TargetControlID="btnSubmit"` |
+| All same properties | All same properties |
+
+**You literally just remove the `ajaxToolkit:` prefix** — everything else stays the same!
+
+## Available Components
+
+### Accordion
+A container that displays collapsible content panes arranged vertically. Only one pane is expanded at a time. Includes the companion AccordionPane component.
+
+[View Documentation →](Accordion.md)
+
+### AutoCompleteExtender
+Provides typeahead/autocomplete functionality for a TextBox. Fetches suggestions via a service URL or Blazor callback and renders a dropdown with keyboard navigation.
+
+[View Documentation →](AutoCompleteExtender.md)
+
+### CalendarExtender
+Attaches a popup calendar date picker to a TextBox. Supports date formats, navigation views, and date range constraints.
+
+[View Documentation →](CalendarExtender.md)
+
+### CollapsiblePanelExtender
+Adds collapse/expand functionality to a panel with smooth CSS transitions. Supports separate collapse/expand triggers, dynamic label updates, auto-collapse/expand on hover, and vertical/horizontal animations.
+
+[View Documentation →](CollapsiblePanelExtender.md)
+
+### ConfirmButtonExtender
+Displays a browser confirmation dialog when a button is clicked. If the user cancels, the click is suppressed.
+
+[View Documentation →](ConfirmButtonExtender.md)
+
+### FilteredTextBoxExtender
+Restricts input in a TextBox to specified character types. Filters keystrokes in real-time and strips invalid characters on paste.
+
+[View Documentation →](FilteredTextBoxExtender.md)
+
+### HoverMenuExtender
+Displays a popup panel when the user hovers over a target control. Supports configurable show/hide delays, positional placement, and hover CSS styling.
+
+[View Documentation →](HoverMenuExtender.md)
+
+### MaskedEditExtender
+Applies an input mask to a TextBox, restricting and formatting user input according to a mask pattern. Supports number, date, time, and custom masks.
+
+[View Documentation →](MaskedEditExtender.md)
+
+### ModalPopupExtender
+Displays a target element as a modal popup with an overlay backdrop. Supports OK/Cancel actions, focus trapping, drag support, and Escape key dismissal.
+
+[View Documentation →](ModalPopupExtender.md)
+
+### NumericUpDownExtender
+Adds numeric up/down spinner buttons to a TextBox. Supports min/max range, step increments, and cycling through a reference value list.
+
+[View Documentation →](NumericUpDownExtender.md)
+
+### PopupControlExtender
+Attaches a popup panel to a target control, displaying it on click. Lighter than ModalPopupExtender — no overlay, no focus trap.
+
+[View Documentation →](PopupControlExtender.md)
+
+### SliderExtender
+Attaches range slider behavior to a target input. Supports horizontal/vertical orientation, bound control synchronization, and customizable appearance.
+
+[View Documentation →](SliderExtender.md)
+
+### TabContainer
+Displays content in tabbed panels with only the active tab visible. Includes the companion TabPanel component for defining each tab.
+
+[View Documentation →](TabContainer.md)
+
+### ToggleButtonExtender
+Replaces a checkbox with a clickable image that toggles between checked and unchecked states. Supports separate images for checked, unchecked, hover, and disabled states.
+
+[View Documentation →](ToggleButtonExtender.md)
+
+### TextBoxWatermarkExtender
+Displays placeholder/watermark text in a TextBox when it is empty. The watermark disappears when the user focuses or types in the field.
+
+[View Documentation →](TextBoxWatermarkExtender.md)
+
+### DragPanelExtender
+Makes a panel or container element draggable. Users can click and drag the panel to reposition it on the page, with optional drag handle support.
+
+[View Documentation →](DragPanelExtender.md)
+
+### ResizableControlExtender
+Allows users to resize an element by dragging its edges or a resize handle. Supports minimum and maximum size constraints.
+
+[View Documentation →](ResizableControlExtender.md)
+
+### DropShadowExtender
+Adds a drop shadow effect to an element, giving it a raised or floating appearance. Supports customizable opacity, width, and corner rounding.
+
+[View Documentation →](DropShadowExtender.md)
+
+### AlwaysVisibleControlExtender
+Keeps a control visible in a fixed position on the screen even when the user scrolls. Useful for sticky toolbars and persistent navigation.
+
+[View Documentation →](AlwaysVisibleControlExtender.md)
+
+### RoundedCornersExtender
+Applies rounded corners to an element using CSS border-radius. Supports selecting which corners to round and optional background color.
+
+[View Documentation →](RoundedCornersExtender.md)
+
+### UpdatePanelAnimationExtender
+Provides visual feedback animations when content is updating. Applies CSS classes and fade effects during and after updates.
+
+[View Documentation →](UpdatePanelAnimationExtender.md)
+
+### PasswordStrength
+Displays a visual indicator of password strength as the user types. Evaluates passwords against configurable character requirements.
+
+[View Documentation →](PasswordStrength.md)
+
+### ValidatorCalloutExtender
+Enhances validators by displaying validation messages in a callout or tooltip bubble instead of inline text.
+
+[View Documentation →](ValidatorCalloutExtender.md)
+
+### SlideShowExtender
+Turns an Image control into an automatic slideshow that cycles through images. Supports auto-play, manual navigation, and image titles/descriptions.
+
+[View Documentation →](SlideShowExtender.md)
+
+### ListSearchExtender
+Enables search and filter functionality on a ListBox or DropDownList. As the user types, items are filtered by the search text.
+
+[View Documentation →](ListSearchExtender.md)
+
+### BalloonPopupExtender
+Displays a balloon or tooltip-style popup with a pointer arrow when the user hovers over, focuses on, or clicks a target element.
+
+[View Documentation →](BalloonPopupExtender.md)
+
+## Requirements
+
+### Render Mode
+Extender components require **InteractiveServer** render mode because they depend on JavaScript interoperability.
+
+```razor
+@rendermode InteractiveServer
+```
+
+### JavaScript Support
+Your application must have `IJSRuntime` available and be able to execute ES modules. Extenders gracefully degrade in:
+- Static Site Generation (SSR) mode without interactivity
+- Pre-rendering scenarios
+
+When JavaScript isn't available, extenders silently skip initialization (no errors thrown).
+
+## Usage Pattern
+
+All extender components follow this pattern:
+
+```razor
+@* 1. Render the target control (Button, TextBox, etc.) *@
+<Button ID="btnConfirm" Text="Delete" />
+
+@* 2. Attach the extender to the target *@
+<ConfirmButtonExtender 
+    TargetControlID="btnConfirm"
+    ConfirmText="Are you really sure?" />
+```
+
+## Common Properties
+
+All extender components inherit these properties from `BaseExtenderComponent`:
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `TargetControlID` | `string` | (required) | ID of the control to enhance |
+| `BehaviorID` | `string` | TargetControlID | Optional behavior identifier for JS lookup |
+| `Enabled` | `bool` | `true` | Whether the extender is active |
+
+## Render Mode Considerations
+
+### InteractiveServer Mode
+
+In `InteractiveServer` render mode, extenders work normally:
+- JavaScript initializes automatically after first render
+- Parameters can be updated and changes propagate to JavaScript
+- Full interoperability available
+
+### Static/SSR Mode
+
+When extenders are placed in Static (non-interactive) components:
+- JavaScript interop is **not available**
+- Extenders detect this and skip initialization
+- No exceptions are thrown — graceful degradation
+- Consider wrapping in an `InteractiveServer` child component
+
+### Recommended Pattern
+
+```razor
+@rendermode InteractiveServer
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <!-- Your routes here -->
+    </Router>
+</CascadingAuthenticationState>
+```
+
+## Troubleshooting
+
+### Extender not activating
+1. Verify `TargetControlID` matches the target control's `ID` attribute
+2. Ensure the component is in `InteractiveServer` render mode
+3. Check browser console for JavaScript errors
+4. Verify browser allows dynamic module imports
+
+### Target control not found
+- Extenders initialize after first render; ensure the target control renders before the extender
+- JavaScript looks for `document.getElementById(TargetControlID)`
+- If target is dynamically created, initialize the extender after the target
+
+## See Also
+
+- [Accordion](Accordion.md) — Collapsible content panes
+- [AutoCompleteExtender](AutoCompleteExtender.md) — Typeahead suggestions
+- [CalendarExtender](CalendarExtender.md) — Popup date picker
+- [CollapsiblePanelExtender](CollapsiblePanelExtender.md) — Panel collapse/expand
+- [ConfirmButtonExtender](ConfirmButtonExtender.md) — Browser confirmation dialogs
+- [FilteredTextBoxExtender](FilteredTextBoxExtender.md) — Character filtering for text input
+- [HoverMenuExtender](HoverMenuExtender.md) — Hover-triggered popup
+- [MaskedEditExtender](MaskedEditExtender.md) — Input mask formatting
+- [ModalPopupExtender](ModalPopupExtender.md) — Modal popup dialogs
+- [NumericUpDownExtender](NumericUpDownExtender.md) — Numeric spinner
+- [PopupControlExtender](PopupControlExtender.md) — Click-triggered popup
+- [SliderExtender](SliderExtender.md) — Range slider
+- [TabContainer](TabContainer.md) — Tabbed content panels
+- [ToggleButtonExtender](ToggleButtonExtender.md) — Image toggle for checkboxes
+- [TextBoxWatermarkExtender](TextBoxWatermarkExtender.md) — Placeholder watermark text
+- [DragPanelExtender](DragPanelExtender.md) — Draggable panels
+- [ResizableControlExtender](ResizableControlExtender.md) — Resizable elements
+- [DropShadowExtender](DropShadowExtender.md) — Drop shadow effects
+- [AlwaysVisibleControlExtender](AlwaysVisibleControlExtender.md) — Sticky/fixed positioning
+- [RoundedCornersExtender](RoundedCornersExtender.md) — Rounded corners
+- [UpdatePanelAnimationExtender](UpdatePanelAnimationExtender.md) — Update animations
+- [PasswordStrength](PasswordStrength.md) — Password strength indicator
+- [ValidatorCalloutExtender](ValidatorCalloutExtender.md) — Validation callouts
+- [SlideShowExtender](SlideShowExtender.md) — Image slideshows
+- [ListSearchExtender](ListSearchExtender.md) — List filtering/search
+- [BalloonPopupExtender](BalloonPopupExtender.md) — Balloon tooltips
+- [Button Component](../EditorControls/Button.md) — The Button control
+- [TextBox Component](../EditorControls/TextBox.md) — The TextBox control

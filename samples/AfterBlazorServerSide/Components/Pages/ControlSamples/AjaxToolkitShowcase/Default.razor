@@ -1,0 +1,824 @@
+@page "/ControlSamples/AjaxToolkitShowcase"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>Ajax Toolkit Migration Showcase</PageTitle>
+
+<h2>Ajax Toolkit Migration Showcase</h2>
+
+<p>
+    This page demonstrates a comprehensive <strong>before/after migration scenario</strong> from the
+    ASP.NET AJAX Control Toolkit to Blazor using BlazorWebFormsComponents (BWFC). Each section shows a
+    working Blazor component alongside its original Web Forms equivalent.
+</p>
+
+<div class="alert alert-success">
+    <strong>Migration in action:</strong> Every control below was converted by removing <code>asp:</code>
+    and <code>ajaxToolkit:</code> prefixes, replacing server controls with HTML elements, and using the
+    same property names. No JavaScript rewrites were needed.
+</div>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 1. NAVIGATION WITH ACCORDION                                             *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>1. Navigation with Accordion</h3>
+<p>A sidebar-style accordion menu with multiple panes. Only one pane is expanded at a time.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-1">
+    <div class="row">
+        <div class="col-md-4">
+            <Accordion SelectedIndex="@navPaneIndex"
+                       SelectedIndexChanged="OnNavPaneChanged"
+                       HeaderCssClass="showcase-accordion-header"
+                       ContentCssClass="showcase-accordion-content">
+                <AccordionPane>
+                    <Header>📁 Getting Started</Header>
+                    <Content>
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="#">Installation Guide</a></li>
+                            <li><a href="#">Quick Start Tutorial</a></li>
+                            <li><a href="#">System Requirements</a></li>
+                        </ul>
+                    </Content>
+                </AccordionPane>
+                <AccordionPane>
+                    <Header>📦 Components</Header>
+                    <Content>
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="#">Extender Controls</a></li>
+                            <li><a href="#">Container Controls</a></li>
+                            <li><a href="#">Data Controls</a></li>
+                        </ul>
+                    </Content>
+                </AccordionPane>
+                <AccordionPane>
+                    <Header>🔧 Configuration</Header>
+                    <Content>
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="#">Theme Settings</a></li>
+                            <li><a href="#">Performance Tuning</a></li>
+                        </ul>
+                    </Content>
+                </AccordionPane>
+            </Accordion>
+        </div>
+        <div class="col-md-8">
+            <div class="p-3 border rounded bg-light">
+                <strong>Selected pane:</strong> @navPaneIndex
+                @if (!string.IsNullOrEmpty(navMessage))
+                {
+                    <span class="text-muted ms-2">— @navMessage</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;ajaxToolkit:Accordion ID="AccordionNav" runat="server" SelectedIndex="0"
+    HeaderCssClass="accHeader" ContentCssClass="accContent"&gt;
+    &lt;Panes&gt;
+        &lt;ajaxToolkit:AccordionPane&gt;
+            &lt;Header&gt;Getting Started&lt;/Header&gt;
+            &lt;Content&gt;...links...&lt;/Content&gt;
+        &lt;/ajaxToolkit:AccordionPane&gt;
+    &lt;/Panes&gt;
+&lt;/ajaxToolkit:Accordion&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;Accordion SelectedIndex="0" HeaderCssClass="accHeader" ContentCssClass="accContent"&gt;
+    &lt;AccordionPane&gt;
+        &lt;Header&gt;Getting Started&lt;/Header&gt;
+        &lt;Content&gt;...links...&lt;/Content&gt;
+    &lt;/AccordionPane&gt;
+&lt;/Accordion&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 2. TABBED FORM                                                            *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>2. Tabbed Form</h3>
+<p>A <code>TabContainer</code> with form fields in each tab — personal info, address, and preferences.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-2">
+    <TabContainer ActiveTabIndex="@formTabIndex" OnActiveTabChanged="OnFormTabChanged">
+        <TabPanel HeaderText="👤 Personal Info">
+            <ContentTemplate>
+                <div class="row g-3 p-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" @bind="firstName" placeholder="Jane" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" @bind="lastName" placeholder="Doe" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" @bind="email" placeholder="jane@@example.com" />
+                    </div>
+                </div>
+            </ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="📍 Address">
+            <ContentTemplate>
+                <div class="row g-3 p-3">
+                    <div class="col-12">
+                        <label class="form-label">Street Address</label>
+                        <input type="text" class="form-control" @bind="street" placeholder="123 Main St" />
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" @bind="city" placeholder="Springfield" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">State</label>
+                        <input type="text" class="form-control" @bind="state" placeholder="IL" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Zip Code</label>
+                        <input type="text" id="txtShowcaseZip" class="form-control" placeholder="_____-____" />
+                        <MaskedEditExtender TargetControlID="txtShowcaseZip"
+                                            Mask="99999-9999"
+                                            MaskType="MaskType.None"
+                                            PromptCharacter="_"
+                                            ClearMaskOnLostFocus="true" />
+                    </div>
+                </div>
+            </ContentTemplate>
+        </TabPanel>
+        <TabPanel HeaderText="⚙️ Preferences">
+            <ContentTemplate>
+                <div class="row g-3 p-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Notification Frequency</label>
+                        <select class="form-select" @bind="notificationFreq">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="never">Never</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Theme</label>
+                        <select class="form-select" @bind="theme">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="auto">Auto</option>
+                        </select>
+                    </div>
+                </div>
+            </ContentTemplate>
+        </TabPanel>
+    </TabContainer>
+
+    <div class="mt-2">
+        <button class="btn btn-primary" @onclick="HandleFormSubmit">Submit Form</button>
+        @if (!string.IsNullOrEmpty(formStatus))
+        {
+            <span class="alert alert-success d-inline-block ms-2 py-1 px-2 mb-0">@formStatus</span>
+        }
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;ajaxToolkit:TabContainer ID="TabContainer1" runat="server" ActiveTabIndex="0"&gt;
+    &lt;ajaxToolkit:TabPanel HeaderText="Personal Info" runat="server"&gt;
+        &lt;ContentTemplate&gt;
+            &lt;asp:TextBox ID="txtFirstName" runat="server" /&gt;
+        &lt;/ContentTemplate&gt;
+    &lt;/ajaxToolkit:TabPanel&gt;
+&lt;/ajaxToolkit:TabContainer&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;TabContainer ActiveTabIndex="0"&gt;
+    &lt;TabPanel HeaderText="Personal Info"&gt;
+        &lt;ContentTemplate&gt;
+            &lt;input type="text" @@bind="firstName" /&gt;
+        &lt;/ContentTemplate&gt;
+    &lt;/TabPanel&gt;
+&lt;/TabContainer&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 3. MODAL DIALOG                                                           *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>3. Modal Dialog</h3>
+<p>A <code>ModalPopupExtender</code> for confirmation dialogs — triggered by a button, dismissed with OK/Cancel.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-3">
+    <button id="btnShowConfirm" class="btn btn-danger">
+        🗑️ Delete Account
+    </button>
+    <ModalPopupExtender TargetControlID="btnShowConfirm"
+                        PopupControlID="pnlConfirmModal"
+                        OkControlID="btnConfirmOk"
+                        CancelControlID="btnConfirmCancel"
+                        BackgroundCssClass="showcase-modal-backdrop"
+                        DropShadow="true" />
+
+    <div id="pnlConfirmModal" class="showcase-modal-popup" style="display:none;">
+        <h4>⚠️ Confirm Deletion</h4>
+        <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+        <div class="d-flex gap-2 justify-content-end">
+            <button id="btnConfirmOk" class="btn btn-danger" @onclick="HandleDeleteConfirm">Yes, Delete</button>
+            <button id="btnConfirmCancel" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(deleteStatus))
+    {
+        <div class="alert alert-warning mt-2">@deleteStatus</div>
+    }
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:Button ID="btnDelete" runat="server" Text="Delete Account" /&gt;
+&lt;asp:Panel ID="pnlConfirm" runat="server" style="display:none"&gt;
+    &lt;asp:Button ID="btnOk" runat="server" Text="Yes" /&gt;
+    &lt;asp:Button ID="btnCancel" runat="server" Text="Cancel" /&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:ModalPopupExtender ID="mpe1" runat="server"
+    TargetControlID="btnDelete" PopupControlID="pnlConfirm"
+    OkControlID="btnOk" CancelControlID="btnCancel"
+    BackgroundCssClass="modal-bg" DropShadow="true" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;button id="btnDelete"&gt;Delete Account&lt;/button&gt;
+&lt;div id="pnlConfirm" style="display:none"&gt;
+    &lt;button id="btnOk"&gt;Yes&lt;/button&gt;
+    &lt;button id="btnCancel"&gt;Cancel&lt;/button&gt;
+&lt;/div&gt;
+&lt;ModalPopupExtender TargetControlID="btnDelete" PopupControlID="pnlConfirm"
+    OkControlID="btnOk" CancelControlID="btnCancel"
+    BackgroundCssClass="modal-bg" DropShadow="true" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 4. AUTOCOMPLETE SEARCH                                                    *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>4. Autocomplete Search</h3>
+<p>An <code>AutoCompleteExtender</code> on a search box. Type at least 2 characters to see suggestions from a mock product list.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-4">
+    <div class="input-group" style="max-width: 400px;">
+        <span class="input-group-text">🔍</span>
+        <input type="text" id="txtProductSearch" class="form-control" placeholder="Search products..." />
+    </div>
+    <AutoCompleteExtender TargetControlID="txtProductSearch"
+                          MinimumPrefixLength="2"
+                          CompletionSetCount="8"
+                          CompletionInterval="300"
+                          FirstRowSelected="true"
+                          CompletionListCssClass="showcase-ac-dropdown"
+                          CompletionListItemCssClass="showcase-ac-item"
+                          CompletionListHighlightedItemCssClass="showcase-ac-item-hl" />
+    <small class="text-muted">Try typing: "Wid", "Pro", "Gad"</small>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:TextBox ID="txtSearch" runat="server" /&gt;
+&lt;ajaxToolkit:AutoCompleteExtender ID="ace1" runat="server"
+    TargetControlID="txtSearch"
+    ServicePath="ProductSearch.asmx" ServiceMethod="GetProducts"
+    MinimumPrefixLength="2" CompletionSetCount="8" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;input type="text" id="txtSearch" /&gt;
+&lt;AutoCompleteExtender TargetControlID="txtSearch"
+    MinimumPrefixLength="2" CompletionSetCount="8"
+    FirstRowSelected="true" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 5. DATE PICKER                                                            *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>5. Date Picker</h3>
+<p>A <code>CalendarExtender</code> attached to a date field with format constraints.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-5">
+    <div class="row g-3">
+        <div class="col-auto">
+            <label for="txtBirthDate" class="form-label">Birth Date</label>
+            <input type="text" id="txtBirthDate" class="form-control" style="width: 200px;" placeholder="MM/dd/yyyy" />
+            <CalendarExtender TargetControlID="txtBirthDate"
+                              Format="MM/dd/yyyy"
+                              StartDate="@calendarStart"
+                              EndDate="@calendarEnd" />
+            <small class="text-muted">Range: 1920–today</small>
+        </div>
+        <div class="col-auto">
+            <label for="txtEventDate" class="form-label">Event Date</label>
+            <input type="text" id="txtEventDate" class="form-control" style="width: 200px;" placeholder="yyyy-MM-dd" />
+            <CalendarExtender TargetControlID="txtEventDate"
+                              Format="yyyy-MM-dd"
+                              PopupPosition="CalendarPosition.BottomRight" />
+        </div>
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:TextBox ID="txtDate" runat="server" /&gt;
+&lt;ajaxToolkit:CalendarExtender ID="cal1" runat="server"
+    TargetControlID="txtDate" Format="MM/dd/yyyy" PopupPosition="BottomLeft" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;input type="text" id="txtDate" /&gt;
+&lt;CalendarExtender TargetControlID="txtDate"
+    Format="MM/dd/yyyy" PopupPosition="CalendarPosition.BottomLeft" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 6. MASKED INPUT                                                           *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>6. Masked Input</h3>
+<p>A <code>MaskedEditExtender</code> for phone number entry — only digits allowed in each position.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-6">
+    <label for="txtShowcasePhone" class="form-label">Phone Number</label>
+    <input type="text" id="txtShowcasePhone" class="form-control" style="max-width: 250px;" placeholder="___-___-____" />
+    <MaskedEditExtender TargetControlID="txtShowcasePhone"
+                        Mask="999-999-9999"
+                        MaskType="MaskType.None"
+                        PromptCharacter="_"
+                        ClearMaskOnLostFocus="true" />
+    <small class="text-muted">Mask: <code>999-999-9999</code> — digits only</small>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:TextBox ID="txtPhone" runat="server" /&gt;
+&lt;ajaxToolkit:MaskedEditExtender ID="mee1" runat="server"
+    TargetControlID="txtPhone" Mask="999-999-9999"
+    MaskType="None" PromptCharacter="_" ClearMaskOnLostFocus="true" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;input type="text" id="txtPhone" /&gt;
+&lt;MaskedEditExtender TargetControlID="txtPhone"
+    Mask="999-999-9999" MaskType="MaskType.None"
+    PromptCharacter="_" ClearMaskOnLostFocus="true" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 7. NUMERIC SPINNER                                                        *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>7. Numeric Spinner</h3>
+<p>A <code>NumericUpDownExtender</code> for quantity selection with min/max constraints.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-7">
+    <div class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="txtQuantity" class="form-label">Quantity (1–50)</label>
+            <input type="text" id="txtQuantity" class="form-control" style="width: 150px;" value="1" />
+            <NumericUpDownExtender TargetControlID="txtQuantity"
+                                   Width="150"
+                                   Minimum="1"
+                                   Maximum="50"
+                                   Step="1" />
+        </div>
+        <div class="col-auto">
+            <label for="txtPrice" class="form-label">Price Increment ($0.25 steps)</label>
+            <input type="text" id="txtPrice" class="form-control" style="width: 150px;" value="10.00" />
+            <NumericUpDownExtender TargetControlID="txtPrice"
+                                   Width="150"
+                                   Minimum="0"
+                                   Maximum="100"
+                                   Step="0.25" />
+        </div>
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:TextBox ID="txtQty" runat="server" Text="1" /&gt;
+&lt;ajaxToolkit:NumericUpDownExtender ID="nud1" runat="server"
+    TargetControlID="txtQty" Minimum="1" Maximum="50" Step="1" Width="150" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;input type="text" id="txtQty" value="1" /&gt;
+&lt;NumericUpDownExtender TargetControlID="txtQty"
+    Minimum="1" Maximum="50" Step="1" Width="150" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 8. COLLAPSIBLE SECTIONS                                                   *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>8. Collapsible Sections</h3>
+<p>A <code>CollapsiblePanelExtender</code> for show/hide content areas with dynamic label text.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-8">
+    <div class="mb-3">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <button id="btnToggleFaq" class="btn btn-outline-primary btn-sm">Toggle</button>
+            <span id="lblFaqStatus" class="badge bg-primary">Click to hide FAQ ▲</span>
+        </div>
+        <CollapsiblePanelExtender TargetControlID="pnlFaq"
+                                  CollapseControlID="btnToggleFaq"
+                                  ExpandControlID="btnToggleFaq"
+                                  TextLabelID="lblFaqStatus"
+                                  CollapsedText="Click to show FAQ ▼"
+                                  ExpandedText="Click to hide FAQ ▲" />
+
+        <div id="pnlFaq" class="showcase-collapsible-panel">
+            <h5>Frequently Asked Questions</h5>
+            <dl>
+                <dt>Q: Can I migrate incrementally?</dt>
+                <dd>A: Yes! BWFC components work alongside native Blazor markup.</dd>
+                <dt>Q: Do I need to rewrite my CSS?</dt>
+                <dd>A: No — the rendered HTML matches what Web Forms produced.</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div>
+        <button id="btnToggleAdvanced" class="btn btn-outline-secondary btn-sm mb-1">
+            Advanced Options
+        </button>
+        <CollapsiblePanelExtender TargetControlID="pnlAdvanced"
+                                  CollapseControlID="btnToggleAdvanced"
+                                  ExpandControlID="btnToggleAdvanced"
+                                  Collapsed="true" />
+
+        <div id="pnlAdvanced" class="showcase-collapsible-panel">
+            <h5>Advanced Configuration</h5>
+            <p>These settings are hidden by default (<code>Collapsed="true"</code>) and revealed on demand.</p>
+            <ul>
+                <li>Enable debug logging</li>
+                <li>Custom serialization options</li>
+                <li>Performance profiling hooks</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:LinkButton ID="lnkToggle" runat="server" Text="Toggle" /&gt;
+&lt;asp:Label ID="lblStatus" runat="server" /&gt;
+&lt;asp:Panel ID="pnlContent" runat="server"&gt;Content&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:CollapsiblePanelExtender ID="cpe1" runat="server"
+    TargetControlID="pnlContent" CollapseControlID="lnkToggle"
+    ExpandControlID="lnkToggle" Collapsed="true"
+    CollapsedText="Show" ExpandedText="Hide" TextLabelID="lblStatus" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;button id="btnToggle"&gt;Toggle&lt;/button&gt;
+&lt;span id="lblStatus"&gt;&lt;/span&gt;
+&lt;div id="pnlContent"&gt;Content&lt;/div&gt;
+&lt;CollapsiblePanelExtender TargetControlID="pnlContent"
+    CollapseControlID="btnToggle" ExpandControlID="btnToggle"
+    Collapsed="true" CollapsedText="Show" ExpandedText="Hide"
+    TextLabelID="lblStatus" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 9. SLIDER CONTROL                                                         *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>9. Slider Control</h3>
+<p>A <code>SliderExtender</code> for range selection with a bound label display.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-9">
+    <div class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="txtBudget" class="form-label">Monthly Budget</label>
+            <input type="text" id="txtBudget" class="form-control" style="width: 100px;" value="500" />
+            <SliderExtender TargetControlID="txtBudget"
+                            Minimum="0"
+                            Maximum="2000"
+                            Value="500"
+                            Length="300"
+                            BoundControlID="lblBudgetValue"
+                            TooltipText="${0}" />
+        </div>
+        <div class="col-auto">
+            <span class="badge bg-success fs-6" id="lblBudgetValue">500</span>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-end mt-2">
+        <div class="col-auto">
+            <label for="txtSatisfaction" class="form-label">Satisfaction (1–5)</label>
+            <input type="text" id="txtSatisfaction" class="form-control" style="width: 80px;" value="3" />
+            <SliderExtender TargetControlID="txtSatisfaction"
+                            Minimum="1"
+                            Maximum="5"
+                            Value="3"
+                            Steps="5"
+                            Length="250"
+                            RailCssClass="showcase-slider-rail"
+                            HandleCssClass="showcase-slider-handle"
+                            TooltipText="Rating: {0}/5" />
+        </div>
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:TextBox ID="txtSlider" runat="server" /&gt;
+&lt;asp:Label ID="lblValue" runat="server" /&gt;
+&lt;ajaxToolkit:SliderExtender ID="se1" runat="server"
+    TargetControlID="txtSlider" Minimum="0" Maximum="2000"
+    BoundControlID="lblValue" Orientation="Horizontal" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;input type="text" id="txtSlider" /&gt;
+&lt;span id="lblValue"&gt;&lt;/span&gt;
+&lt;SliderExtender TargetControlID="txtSlider"
+    Minimum="0" Maximum="2000" BoundControlID="lblValue"
+    TooltipText="${0}" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* 10. HOVER TOOLTIP                                                         *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>10. Hover Tooltip</h3>
+<p>A <code>HoverMenuExtender</code> showing extra info cards on hover.</p>
+
+<div data-audit-control="AjaxToolkitShowcase-10">
+    <div class="row g-4">
+        <div class="col-auto">
+            <div id="hoverProduct1" class="p-3 border rounded bg-light" style="width: 180px; cursor: pointer;">
+                <strong>Widget Pro</strong><br />
+                <small class="text-muted">Hover for details</small>
+            </div>
+            <div id="menuProduct1" style="display: none;" class="showcase-hover-card">
+                <strong>Widget Pro</strong>
+                <p class="mb-1">High-performance widget with titanium core. Ships in 2-3 business days.</p>
+                <span class="badge bg-success">$29.99</span>
+                <span class="badge bg-info">In Stock</span>
+            </div>
+            <HoverMenuExtender TargetControlID="hoverProduct1"
+                               PopupControlID="menuProduct1"
+                               PopupPosition="PopupPosition.Right"
+                               PopDelay="200"
+                               HoverDelay="500"
+                               HoverCssClass="showcase-hover-active"
+                               OffsetX="10" />
+        </div>
+        <div class="col-auto">
+            <div id="hoverProduct2" class="p-3 border rounded bg-light" style="width: 180px; cursor: pointer;">
+                <strong>Gadget Max</strong><br />
+                <small class="text-muted">Hover for details</small>
+            </div>
+            <div id="menuProduct2" style="display: none;" class="showcase-hover-card">
+                <strong>Gadget Max</strong>
+                <p class="mb-1">Oversized gadget for industrial use. Free shipping on orders over $50.</p>
+                <span class="badge bg-warning text-dark">$49.99</span>
+                <span class="badge bg-danger">Low Stock</span>
+            </div>
+            <HoverMenuExtender TargetControlID="hoverProduct2"
+                               PopupControlID="menuProduct2"
+                               PopupPosition="PopupPosition.Bottom"
+                               PopDelay="200"
+                               HoverDelay="500"
+                               HoverCssClass="showcase-hover-active"
+                               OffsetY="5" />
+        </div>
+    </div>
+</div>
+
+<details class="mb-3">
+    <summary><strong>Migration Notes</strong></summary>
+<pre><code class="language-aspx">&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:Panel ID="pnlTarget" runat="server"&gt;Widget Pro&lt;/asp:Panel&gt;
+&lt;asp:Panel ID="pnlMenu" runat="server" Style="display:none"&gt;Details...&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:HoverMenuExtender ID="hme1" runat="server"
+    TargetControlID="pnlTarget" PopupControlID="pnlMenu"
+    PopupPosition="Right" PopDelay="200" HoverCssClass="highlight" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;div id="pnlTarget"&gt;Widget Pro&lt;/div&gt;
+&lt;div id="pnlMenu" style="display:none"&gt;Details...&lt;/div&gt;
+&lt;HoverMenuExtender TargetControlID="pnlTarget"
+    PopupControlID="pnlMenu" PopupPosition="PopupPosition.Right"
+    PopDelay="200" HoverCssClass="highlight" /&gt;</code></pre>
+</details>
+
+<hr />
+
+@* ───────────────────────────────────────────────────────────────────────── *@
+@* SUMMARY                                                                   *@
+@* ───────────────────────────────────────────────────────────────────────── *@
+
+<h3>Migration Summary</h3>
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Web Forms Control</th>
+                <th>Blazor Component</th>
+                <th>Key Changes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><code>ajaxToolkit:Accordion</code></td><td><code>Accordion</code></td><td>Remove <code>&lt;Panes&gt;</code> wrapper</td></tr>
+            <tr><td><code>ajaxToolkit:TabContainer</code></td><td><code>TabContainer</code></td><td>Direct child <code>TabPanel</code> elements</td></tr>
+            <tr><td><code>ajaxToolkit:ModalPopupExtender</code></td><td><code>ModalPopupExtender</code></td><td>Replace <code>asp:Panel</code> → <code>div</code></td></tr>
+            <tr><td><code>ajaxToolkit:AutoCompleteExtender</code></td><td><code>AutoCompleteExtender</code></td><td>Replace web service with server-side data</td></tr>
+            <tr><td><code>ajaxToolkit:CalendarExtender</code></td><td><code>CalendarExtender</code></td><td>Prefix enums: <code>CalendarPosition.X</code></td></tr>
+            <tr><td><code>ajaxToolkit:MaskedEditExtender</code></td><td><code>MaskedEditExtender</code></td><td>Prefix enums: <code>MaskType.X</code></td></tr>
+            <tr><td><code>ajaxToolkit:NumericUpDownExtender</code></td><td><code>NumericUpDownExtender</code></td><td>Same property names</td></tr>
+            <tr><td><code>ajaxToolkit:CollapsiblePanelExtender</code></td><td><code>CollapsiblePanelExtender</code></td><td>Prefix enums: <code>ExpandDirection.X</code></td></tr>
+            <tr><td><code>ajaxToolkit:SliderExtender</code></td><td><code>SliderExtender</code></td><td>Prefix enums: <code>SliderOrientation.X</code></td></tr>
+            <tr><td><code>ajaxToolkit:HoverMenuExtender</code></td><td><code>HoverMenuExtender</code></td><td>Prefix enums: <code>PopupPosition.X</code></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="alert alert-info">
+    <strong>Common pattern for all controls:</strong>
+    <ol class="mb-0">
+        <li>Remove <code>asp:ScriptManager</code></li>
+        <li>Replace <code>&lt;asp:TextBox&gt;</code>/<code>&lt;asp:Panel&gt;</code>/<code>&lt;asp:Button&gt;</code> with standard HTML</li>
+        <li>Replace <code>&lt;ajaxToolkit:XYZ&gt;</code> with <code>&lt;XYZ&gt;</code></li>
+        <li>Prefix enum values with their type name (e.g., <code>PopupPosition.Right</code>)</li>
+        <li>Ensure <code>@@rendermode InteractiveServer</code> for extender components</li>
+    </ol>
+</div>
+
+@code {
+    // Section 1: Accordion navigation
+    private int navPaneIndex = 0;
+    private string navMessage = "";
+
+    private void OnNavPaneChanged(int index)
+    {
+        navPaneIndex = index;
+        navMessage = $"Navigated to pane {index} at {DateTime.Now:h:mm:ss tt}";
+    }
+
+    // Section 2: Tabbed form
+    private int formTabIndex = 0;
+    private string firstName = "";
+    private string lastName = "";
+    private string email = "";
+    private string street = "";
+    private string city = "";
+    private string state = "";
+    private string notificationFreq = "weekly";
+    private string theme = "light";
+    private string formStatus = "";
+
+    private void OnFormTabChanged(int index)
+    {
+        formTabIndex = index;
+    }
+
+    private void HandleFormSubmit()
+    {
+        var name = $"{firstName} {lastName}".Trim();
+        formStatus = string.IsNullOrEmpty(name)
+            ? $"Form submitted at {DateTime.Now:h:mm:ss tt}"
+            : $"Submitted for {name} at {DateTime.Now:h:mm:ss tt}";
+    }
+
+    // Section 3: Modal dialog
+    private string deleteStatus = "";
+
+    private void HandleDeleteConfirm()
+    {
+        deleteStatus = $"Account deletion confirmed at {DateTime.Now:h:mm:ss tt} (demo only — no action taken)";
+    }
+
+    // Section 5: Calendar
+    private DateTime calendarStart = new DateTime(1920, 1, 1);
+    private DateTime calendarEnd = DateTime.Today;
+}
+
+<style>
+    /* Accordion (Section 1) */
+    .showcase-accordion-header {
+        background-color: #343a40;
+        color: white;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-weight: 600;
+        border-radius: 4px;
+        margin-bottom: 2px;
+    }
+    .showcase-accordion-content {
+        background-color: #f8f9fa;
+        padding: 12px 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 0 0 4px 4px;
+    }
+
+    /* Modal (Section 3) */
+    .showcase-modal-popup {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        min-width: 350px;
+        max-width: 450px;
+    }
+    .showcase-modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Autocomplete (Section 4) */
+    .showcase-ac-dropdown {
+        border: 1px solid #0d6efd;
+        border-radius: 4px;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .showcase-ac-item {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    .showcase-ac-item-hl {
+        padding: 8px 12px;
+        background-color: #0d6efd;
+        color: white;
+        cursor: pointer;
+    }
+
+    /* Collapsible (Section 8) */
+    .showcase-collapsible-panel {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        margin-bottom: 10px;
+    }
+
+    /* Slider (Section 9) */
+    .showcase-slider-rail {
+        background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+        height: 8px;
+        border-radius: 4px;
+    }
+    .showcase-slider-handle {
+        width: 20px;
+        height: 20px;
+        background-color: #0d6efd;
+        border: 2px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Hover (Section 10) */
+    .showcase-hover-card {
+        border: 1px solid #dee2e6;
+        padding: 12px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        max-width: 260px;
+    }
+    .showcase-hover-active {
+        background-color: #e7f1ff !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+</style>

@@ -1,8 +1,17 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class ManagePassword : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — password management needs UserManager
+public partial class ManagePassword
 {
-    private string Title => "Manage Password";
+    private string Password { get; set; } = "";
+
+    private void SetPassword_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with UserManager
+    }
+
+    private void ChangePassword_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with UserManager
+    }
 }

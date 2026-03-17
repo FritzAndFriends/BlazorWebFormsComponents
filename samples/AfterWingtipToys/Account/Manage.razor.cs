@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class Manage : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — account management needs UserManager
+public partial class Manage
 {
-    private string Title => "Manage Account";
+    private string SuccessMessage { get; set; } = "";
     private int LoginsCount { get; set; }
 }

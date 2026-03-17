@@ -1,0 +1,165 @@
+@page "/ControlSamples/AutoCompleteExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>AutoCompleteExtender Component Samples</PageTitle>
+
+<h2>AutoCompleteExtender Component</h2>
+
+<p>The <code>AutoCompleteExtender</code> provides typeahead autocomplete suggestions for a target textbox. As the user types, matching suggestions appear in a dropdown list. This emulates the Ajax Control Toolkit <code>AutoCompleteExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Autocomplete</h3>
+<p>Type at least 2 characters to see suggestions from a static list of fruits.</p>
+
+<div data-audit-control="AutoCompleteExtender-1">
+    <label for="txtFruits">Search fruits:</label>
+    <input type="text" id="txtFruits" class="form-control" style="max-width: 300px;" placeholder="Type a fruit name..." />
+    <AutoCompleteExtender TargetControlID="txtFruits"
+                          MinimumPrefixLength="2"
+                          CompletionSetCount="5"
+                          CompletionInterval="500" />
+
+    @if (!string.IsNullOrEmpty(selectedFruit))
+    {
+        <div class="alert alert-success mt-2">Selected: @selectedFruit</div>
+    }
+</div>
+
+<pre><code>&lt;input type="text" id="txtFruits" /&gt;
+&lt;AutoCompleteExtender TargetControlID="txtFruits"
+                      MinimumPrefixLength="2"
+                      CompletionSetCount="5"
+                      CompletionInterval="500" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Styled Dropdown</h3>
+<p>Use <code>CompletionListCssClass</code>, <code>CompletionListItemCssClass</code>, and <code>CompletionListHighlightedItemCssClass</code> to style the suggestion dropdown.</p>
+
+<div data-audit-control="AutoCompleteExtender-2">
+    <label for="txtStyledAc">Search with styled dropdown:</label>
+    <input type="text" id="txtStyledAc" class="form-control" style="max-width: 300px;" placeholder="Type to search..." />
+    <AutoCompleteExtender TargetControlID="txtStyledAc"
+                          MinimumPrefixLength="1"
+                          CompletionSetCount="8"
+                          CompletionListCssClass="ac-dropdown"
+                          CompletionListItemCssClass="ac-item"
+                          CompletionListHighlightedItemCssClass="ac-item-highlight" />
+</div>
+
+<pre><code>&lt;AutoCompleteExtender TargetControlID="txtStyledAc"
+                      MinimumPrefixLength="1"
+                      CompletionListCssClass="ac-dropdown"
+                      CompletionListItemCssClass="ac-item"
+                      CompletionListHighlightedItemCssClass="ac-item-highlight" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Minimum Prefix Length</h3>
+<p>Compare different <code>MinimumPrefixLength</code> values. A lower value triggers suggestions sooner.</p>
+
+<div data-audit-control="AutoCompleteExtender-3">
+    <div class="row g-3">
+        <div class="col-auto">
+            <label for="txtPrefix1">Min 1 char:</label>
+            <input type="text" id="txtPrefix1" class="form-control" style="width: 220px;" placeholder="1 character trigger" />
+            <AutoCompleteExtender TargetControlID="txtPrefix1" MinimumPrefixLength="1" CompletionSetCount="5" />
+        </div>
+        <div class="col-auto">
+            <label for="txtPrefix3">Min 3 chars:</label>
+            <input type="text" id="txtPrefix3" class="form-control" style="width: 220px;" placeholder="3 character trigger" />
+            <AutoCompleteExtender TargetControlID="txtPrefix3" MinimumPrefixLength="3" CompletionSetCount="5" />
+        </div>
+        <div class="col-auto">
+            <label for="txtPrefix5">Min 5 chars:</label>
+            <input type="text" id="txtPrefix5" class="form-control" style="width: 220px;" placeholder="5 character trigger" />
+            <AutoCompleteExtender TargetControlID="txtPrefix5" MinimumPrefixLength="5" CompletionSetCount="5" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;AutoCompleteExtender TargetControlID="txtPrefix1" MinimumPrefixLength="1" /&gt;
+&lt;AutoCompleteExtender TargetControlID="txtPrefix3" MinimumPrefixLength="3" /&gt;
+&lt;AutoCompleteExtender TargetControlID="txtPrefix5" MinimumPrefixLength="5" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. First Row Selected</h3>
+<p>When <code>FirstRowSelected="true"</code>, the first suggestion is automatically highlighted so the user can press Enter to select it immediately.</p>
+
+<div data-audit-control="AutoCompleteExtender-4">
+    <label for="txtFirstRow">Type and press Enter:</label>
+    <input type="text" id="txtFirstRow" class="form-control" style="max-width: 300px;" placeholder="First item auto-selected" />
+    <AutoCompleteExtender TargetControlID="txtFirstRow"
+                          MinimumPrefixLength="2"
+                          CompletionSetCount="5"
+                          FirstRowSelected="true" />
+</div>
+
+<pre><code>&lt;AutoCompleteExtender TargetControlID="txtFirstRow"
+                      MinimumPrefixLength="2"
+                      FirstRowSelected="true" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtSearch" runat="server" /&gt;
+&lt;ajaxToolkit:AutoCompleteExtender ID="AutoComplete1" runat="server"
+    TargetControlID="txtSearch"
+    ServicePath="AutoComplete.asmx"
+    ServiceMethod="GetCompletionList"
+    MinimumPrefixLength="2"
+    CompletionSetCount="10"
+    FirstRowSelected="true" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="text" id="txtSearch" /&gt;
+&lt;AutoCompleteExtender TargetControlID="txtSearch"
+                      MinimumPrefixLength="2"
+                      CompletionSetCount="10"
+                      FirstRowSelected="true" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input type="text"&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:AutoCompleteExtender&gt;</code> with <code>&lt;AutoCompleteExtender&gt;</code></li>
+    <li>Keep property names: <code>MinimumPrefixLength</code>, <code>CompletionSetCount</code>, <code>FirstRowSelected</code></li>
+    <li>Replace web service calls with Blazor event callbacks or server-side data</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+    private string selectedFruit = "";
+}
+
+<style>
+    .ac-dropdown {
+        border: 1px solid #0d6efd;
+        border-radius: 4px;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .ac-item {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    .ac-item-highlight {
+        padding: 8px 12px;
+        background-color: #0d6efd;
+        color: white;
+        cursor: pointer;
+    }
+</style>

@@ -27,7 +27,7 @@ namespace BlazorWebFormsComponents
 		public TreeViewImageSet ImageSet { get; set; } = TreeViewImageSet._Default;
 
 		[Parameter]
-		public TreeNodeTypes ShowCheckBoxes { get; set; }
+		public EnumParameter<TreeNodeTypes> ShowCheckBoxes { get; set; }
 
 		[Parameter]
 		public bool ShowExpandCollapse { get; set; } = true;

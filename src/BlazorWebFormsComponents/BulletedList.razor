@@ -1,7 +1,7 @@
 @using BlazorWebFormsComponents.DataBinding
 @using BlazorWebFormsComponents.Enums
-@typeparam TItem
-@inherits BaseListControl<TItem>
+@typeparam ItemType
+@inherits BaseListControl<ItemType>
 
 @if (Visible)
 {
@@ -31,7 +31,7 @@
 			var isEnabled = Enabled && item.Enabled;
 			
 			<li>
-				@switch (DisplayMode)
+				@switch (DisplayMode.Value)
 				{
 					case BulletedListDisplayMode.Text:
 						@item.Text

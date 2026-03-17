@@ -1,0 +1,92 @@
+@page "/Students"
+<HeadContent>
+    <link href="/CSS/Students_CSS.css" rel="stylesheet" />
+    <script src="/JQuery/JQuery_Students.js"></script>
+</HeadContent>
+<ScriptManager></ScriptManager>       
+    <UpdatePanel>
+        <ContentTemplate>
+            <div id="grvStudentsData">
+                <GridView Items="@_students" ItemType="object"
+                    CssClass="grv"
+                    AutoGenerateColumns="false"
+                    EmptyDataText="There are no records to display"
+                    DataKeyNames="ID"
+                    BackColor="WebColor.White" BorderColor="@("#3366CC")" BorderStyle="BorderStyle.None" BorderWidth="1"
+                    CellPadding="4" Height="336" Width="416">
+                    <Columns>
+                        <BoundField DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                        <BoundField DataField="FullName" HeaderText="Student Name" />
+                        <BoundField DataField="Email" HeaderText="Email" />
+                        <BoundField DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                        <BoundField DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                    </Columns>
+                    <FooterStyleContent><GridViewRowStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" /></FooterStyleContent>
+                    <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#003399")" Font-Bold="true" ForeColor="@("#CCCCFF")" /></HeaderStyleContent>
+                    <PagerStyleContent><GridViewRowStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" HorizontalAlign="HorizontalAlign.Left" /></PagerStyleContent>
+                    <RowStyleContent><GridViewRowStyle BackColor="WebColor.White" ForeColor="@("#003399")" /></RowStyleContent>
+                    <SelectedRowStyleContent><GridViewRowStyle BackColor="@("#009999")" Font-Bold="true" ForeColor="@("#CCFF99")" /></SelectedRowStyleContent>
+                </GridView>
+            </div>
+            <div id="addStud">
+                <h1 id="addStudent">Add Student</h1>
+                <Table
+                    CssClass="tabAddStud" BorderColor="@("#0033CC")" Font-Bold="true" Font-Italic="false"
+                    Font-Underline="false" ForeColor="WebColor.White"
+                    Font-Overline="false">
+                    <TableRow>
+                        <TableCell>First Name</TableCell>
+                        <TableCell>
+                            <TextBox @bind-Text="_firstName" placeholder="Type Your First Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Last Name</TableCell><TableCell>
+                            <TextBox @bind-Text="_lastName" placeholder="Type Your Last Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Birth Date</TableCell><TableCell>
+                            <TextBox @bind-Text="_birthDate" placeholder="dd.mm.year" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Email</TableCell><TableCell>
+                            <TextBox @bind-Text="_email" placeholder="Email is Optional..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Course Name</TableCell><TableCell>
+                            <select id="dropListCourses" @bind="_selectedCourse">
+                                <option value="">-- Select Course --</option>
+                                @foreach (var course in _courseNames)
+                                {
+                                    <option value="@course">@course</option>
+                                }
+                            </select>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>               
+                        </TableCell><TableCell>
+                            <Button CssClass="insert" Text="New Enrollment" OnClick="btnInsert_Click" />
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     <Button Text="Clear" OnClick="btnClear_Click" />
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </div>
+            <div id="ajax">
+                <h1 id="searchStud">Search Student</h1>
+                <TextBox CssClass="txtSearch" @bind-Text="_searchText" placeholder="Type Student Name..." />
+                <Button Text="Show Student Info" OnClick="btnSearch_Click" CssClass="btnInfo" />
+                <DetailsView Items="@_studentDetails" ItemType="object"
+                    Width="125"
+                    Height="50"
+                    AutoGenerateRows="true"
+                    CssClass="detailsView" BorderColor="WebColor.Black" ForeColor="WebColor.Black">
+                    <RowStyleContent><DetailsViewRowStyle BackColor="WebColor.White" /></RowStyleContent>
+                </DetailsView>
+            </div>
+        </ContentTemplate>
+    </UpdatePanel>

@@ -1,0 +1,1254 @@
+{
+  "version": "1.0",
+  "source": "MSDN .NET Framework 4.8 API documentation",
+  "generated": "2026-03-16T14:28:40.665Z",
+  "countingRules": "Properties declared on control class + immediate family only. Style sub-objects and ITemplate properties excluded (symmetric with BWFC RenderFragment exclusion). Events counted separately. Stop-points: WebControl, Control, BaseDataBoundControl, DataBoundControl.",
+  "components": {
+    "Button": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 8,
+      "expectedEvents": 2,
+      "propertyList": [
+        "Text",
+        "CausesValidation",
+        "ValidationGroup",
+        "CommandName",
+        "CommandArgument",
+        "PostBackUrl",
+        "OnClientClick",
+        "UseSubmitBehavior"
+      ],
+      "eventList": [
+        "Click",
+        "Command"
+      ],
+      "notes": "Chain: Button -> WebControl. Text thru OnClientClick shared with ButtonBase. UseSubmitBehavior on Button itself. Anchor control per PRD 2.7."
+    },
+    "AdRotator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 5,
+      "expectedEvents": 1,
+      "propertyList": [
+        "AdvertisementFile",
+        "AlternateTextField",
+        "ImageUrlField",
+        "NavigateUrlField",
+        "Target"
+      ],
+      "eventList": [
+        "AdCreated"
+      ],
+      "notes": "Chain: AdRotator -> DataBoundControl (stop). KeywordFilter is protected."
+    },
+    "BulletedList": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 15,
+      "expectedEvents": 3,
+      "propertyList": [
+        "BulletImageUrl",
+        "BulletStyle",
+        "DisplayMode",
+        "FirstBulletNumber",
+        "Target",
+        "AppendDataBoundItems",
+        "AutoPostBack",
+        "CausesValidation",
+        "DataTextField",
+        "DataTextFormatString",
+        "DataValueField",
+        "SelectedIndex",
+        "SelectedValue",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "Click",
+        "SelectedIndexChanged",
+        "TextChanged"
+      ],
+      "notes": "Chain: BulletedList -> ListControl -> DataBoundControl (stop). ListControl family included. BulletedList overrides some to throw.",
+      "confidence": "needs-verification"
+    },
+    "Calendar": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 22,
+      "expectedEvents": 3,
+      "propertyList": [
+        "Caption",
+        "CaptionAlign",
+        "CellPadding",
+        "CellSpacing",
+        "DayNameFormat",
+        "FirstDayOfWeek",
+        "NextMonthText",
+        "NextPrevFormat",
+        "PrevMonthText",
+        "SelectedDate",
+        "SelectedDates",
+        "SelectionMode",
+        "SelectMonthText",
+        "SelectWeekText",
+        "ShowDayHeader",
+        "ShowGridLines",
+        "ShowNextPrevMonth",
+        "ShowTitle",
+        "TitleFormat",
+        "TodaysDate",
+        "UseAccessibleHeader",
+        "VisibleDate"
+      ],
+      "eventList": [
+        "DayRender",
+        "SelectionChanged",
+        "VisibleMonthChanged"
+      ],
+      "notes": "Chain: Calendar -> WebControl (stop). Style sub-objects excluded (DayStyle, TitleStyle, etc.)."
+    },
+    "CheckBox": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 6,
+      "expectedEvents": 1,
+      "propertyList": [
+        "AutoPostBack",
+        "CausesValidation",
+        "Checked",
+        "Text",
+        "TextAlign",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "CheckedChanged"
+      ],
+      "notes": "Chain: CheckBox -> WebControl (stop). InputAttributes excluded (runtime collection)."
+    },
+    "CheckBoxList": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 14,
+      "expectedEvents": 2,
+      "propertyList": [
+        "CellPadding",
+        "CellSpacing",
+        "RepeatColumns",
+        "RepeatDirection",
+        "RepeatLayout",
+        "TextAlign",
+        "AppendDataBoundItems",
+        "AutoPostBack",
+        "CausesValidation",
+        "DataTextField",
+        "DataTextFormatString",
+        "DataValueField",
+        "SelectedValue",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "SelectedIndexChanged",
+        "TextChanged"
+      ],
+      "notes": "Chain: CheckBoxList -> ListControl -> DataBoundControl (stop). ListControl family included.",
+      "confidence": "needs-verification"
+    },
+    "DropDownList": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 11,
+      "expectedEvents": 2,
+      "propertyList": [
+        "SelectedIndex",
+        "AppendDataBoundItems",
+        "AutoPostBack",
+        "CausesValidation",
+        "DataTextField",
+        "DataTextFormatString",
+        "DataValueField",
+        "SelectedValue",
+        "Text",
+        "ValidationGroup",
+        "SelectedItem"
+      ],
+      "eventList": [
+        "SelectedIndexChanged",
+        "TextChanged"
+      ],
+      "notes": "Chain: DropDownList -> ListControl -> DataBoundControl (stop). DropDownList overrides SelectedIndex. ListControl family included.",
+      "confidence": "needs-verification"
+    },
+    "FileUpload": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 5,
+      "expectedEvents": 0,
+      "propertyList": [
+        "AllowMultiple",
+        "FileBytes",
+        "FileContent",
+        "FileName",
+        "HasFile"
+      ],
+      "eventList": [],
+      "notes": "Chain: FileUpload -> WebControl (stop). PostedFile excluded (HttpPostedFile wrapper). No declared events."
+    },
+    "HiddenField": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 1,
+      "expectedEvents": 1,
+      "propertyList": [
+        "Value"
+      ],
+      "eventList": [
+        "ValueChanged"
+      ],
+      "notes": "Chain: HiddenField -> Control (stop). Minimal control."
+    },
+    "HyperLink": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 4,
+      "expectedEvents": 0,
+      "propertyList": [
+        "ImageUrl",
+        "NavigateUrl",
+        "Target",
+        "Text"
+      ],
+      "eventList": [],
+      "notes": "Chain: HyperLink -> WebControl (stop). No interactive events."
+    },
+    "Image": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 5,
+      "expectedEvents": 0,
+      "propertyList": [
+        "AlternateText",
+        "DescriptionUrl",
+        "GenerateEmptyAlternateText",
+        "ImageAlign",
+        "ImageUrl"
+      ],
+      "eventList": [],
+      "notes": "Chain: Image -> WebControl (stop). Display-only control."
+    },
+    "ImageButton": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 11,
+      "expectedEvents": 2,
+      "propertyList": [
+        "AlternateText",
+        "DescriptionUrl",
+        "GenerateEmptyAlternateText",
+        "ImageAlign",
+        "ImageUrl",
+        "CausesValidation",
+        "CommandArgument",
+        "CommandName",
+        "OnClientClick",
+        "PostBackUrl",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "Click",
+        "Command"
+      ],
+      "notes": "Chain: ImageButton -> Image -> WebControl (stop). Image family properties included."
+    },
+    "ImageMap": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 7,
+      "expectedEvents": 1,
+      "propertyList": [
+        "AlternateText",
+        "DescriptionUrl",
+        "GenerateEmptyAlternateText",
+        "ImageAlign",
+        "ImageUrl",
+        "HotSpotMode",
+        "HotSpots"
+      ],
+      "eventList": [
+        "Click"
+      ],
+      "notes": "Chain: ImageMap -> Image -> WebControl (stop). Image family included."
+    },
+    "Label": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 2,
+      "expectedEvents": 0,
+      "propertyList": [
+        "AssociatedControlID",
+        "Text"
+      ],
+      "eventList": [],
+      "notes": "Chain: Label -> WebControl (stop). Simple text display."
+    },
+    "LinkButton": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 7,
+      "expectedEvents": 2,
+      "propertyList": [
+        "CausesValidation",
+        "CommandArgument",
+        "CommandName",
+        "OnClientClick",
+        "PostBackUrl",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "Click",
+        "Command"
+      ],
+      "notes": "Chain: LinkButton -> WebControl (stop). Same button properties as Button minus UseSubmitBehavior."
+    },
+    "ListBox": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 12,
+      "expectedEvents": 2,
+      "propertyList": [
+        "Rows",
+        "SelectionMode",
+        "AppendDataBoundItems",
+        "AutoPostBack",
+        "CausesValidation",
+        "DataTextField",
+        "DataTextFormatString",
+        "DataValueField",
+        "SelectedIndex",
+        "SelectedValue",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "SelectedIndexChanged",
+        "TextChanged"
+      ],
+      "notes": "Chain: ListBox -> ListControl -> DataBoundControl (stop). ListControl family included.",
+      "confidence": "needs-verification"
+    },
+    "Literal": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 2,
+      "expectedEvents": 0,
+      "propertyList": [
+        "Mode",
+        "Text"
+      ],
+      "eventList": [],
+      "notes": "Chain: Literal -> Control (stop). Does not inherit WebControl."
+    },
+    "Localize": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 2,
+      "expectedEvents": 0,
+      "propertyList": [
+        "Mode",
+        "Text"
+      ],
+      "eventList": [],
+      "notes": "Chain: Localize -> Literal -> Control (stop). Inherits Text and Mode from Literal."
+    },
+    "MultiView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 1,
+      "expectedEvents": 1,
+      "propertyList": [
+        "ActiveViewIndex"
+      ],
+      "eventList": [
+        "ActiveViewChanged"
+      ],
+      "notes": "Chain: MultiView -> Control (stop). Views is a ControlCollection."
+    },
+    "Panel": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 6,
+      "expectedEvents": 0,
+      "propertyList": [
+        "BackImageUrl",
+        "DefaultButton",
+        "GroupingText",
+        "HorizontalAlign",
+        "ScrollBars",
+        "Wrap"
+      ],
+      "eventList": [],
+      "notes": "Chain: Panel -> WebControl (stop). ScrollBars added in .NET 2.0."
+    },
+    "PlaceHolder": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 0,
+      "expectedEvents": 0,
+      "propertyList": [],
+      "eventList": [],
+      "notes": "Chain: PlaceHolder -> Control (stop). No declared properties. Score 100% (0/0)."
+    },
+    "RadioButton": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 7,
+      "expectedEvents": 1,
+      "propertyList": [
+        "GroupName",
+        "AutoPostBack",
+        "CausesValidation",
+        "Checked",
+        "Text",
+        "TextAlign",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "CheckedChanged"
+      ],
+      "notes": "Chain: RadioButton -> CheckBox -> WebControl (stop). CheckBox family included. GroupName is RadioButton-specific."
+    },
+    "RadioButtonList": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 14,
+      "expectedEvents": 2,
+      "propertyList": [
+        "CellPadding",
+        "CellSpacing",
+        "RepeatColumns",
+        "RepeatDirection",
+        "RepeatLayout",
+        "TextAlign",
+        "AppendDataBoundItems",
+        "AutoPostBack",
+        "CausesValidation",
+        "DataTextField",
+        "DataTextFormatString",
+        "DataValueField",
+        "SelectedValue",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "SelectedIndexChanged",
+        "TextChanged"
+      ],
+      "notes": "Chain: RadioButtonList -> ListControl -> DataBoundControl (stop). Same structure as CheckBoxList.",
+      "confidence": "needs-verification"
+    },
+    "Table": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 7,
+      "expectedEvents": 0,
+      "propertyList": [
+        "BackImageUrl",
+        "Caption",
+        "CaptionAlign",
+        "CellPadding",
+        "CellSpacing",
+        "GridLines",
+        "HorizontalAlign"
+      ],
+      "eventList": [],
+      "notes": "Chain: Table -> WebControl (stop). Rows collection excluded (child component)."
+    },
+    "TextBox": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 10,
+      "expectedEvents": 1,
+      "propertyList": [
+        "AutoCompleteType",
+        "AutoPostBack",
+        "CausesValidation",
+        "Columns",
+        "MaxLength",
+        "ReadOnly",
+        "Rows",
+        "Text",
+        "TextMode",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "TextChanged"
+      ],
+      "notes": "Chain: TextBox -> WebControl (stop). Wrap is also a declared property but may overlap with style.",
+      "confidence": "needs-verification"
+    },
+    "View": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 0,
+      "expectedEvents": 2,
+      "propertyList": [],
+      "eventList": [
+        "Activate",
+        "Deactivate"
+      ],
+      "notes": "Chain: View -> Control (stop). No properties, two lifecycle events."
+    },
+    "Substitution": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 1,
+      "expectedEvents": 0,
+      "propertyList": [
+        "MethodName"
+      ],
+      "eventList": [],
+      "notes": "Deferred. Chain: Substitution -> Control (stop). Cache substitution callback."
+    },
+    "Xml": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 4,
+      "expectedEvents": 0,
+      "propertyList": [
+        "DocumentContent",
+        "DocumentSource",
+        "TransformSource",
+        "TransformArgumentList"
+      ],
+      "eventList": [],
+      "notes": "Deferred. Chain: Xml -> Control (stop). XML/XSLT rendering."
+    },
+    "Chart": {
+      "namespace": "System.Web.UI.DataVisualization.Charting",
+      "expectedProperties": 10,
+      "expectedEvents": 2,
+      "propertyList": [
+        "AntiAliasing",
+        "BackGradientStyle",
+        "BackHatchStyle",
+        "BackSecondaryColor",
+        "BorderlineDashStyle",
+        "ImageLocation",
+        "ImageStorageMode",
+        "ImageType",
+        "Palette",
+        "TextAntiAliasingQuality"
+      ],
+      "eventList": [
+        "CustomizeLegend",
+        "CustomizeMapAreas"
+      ],
+      "notes": "Chain: Chart -> DataBoundControl (stop). ChartAreas, Series, Legends, Titles excluded as collection sub-objects.",
+      "confidence": "needs-verification"
+    },
+    "DataGrid": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 14,
+      "expectedEvents": 8,
+      "propertyList": [
+        "AllowCustomPaging",
+        "AllowPaging",
+        "AllowSorting",
+        "AutoGenerateColumns",
+        "BackImageUrl",
+        "CellPadding",
+        "CellSpacing",
+        "CurrentPageIndex",
+        "DataKeyField",
+        "EditItemIndex",
+        "GridLines",
+        "PageSize",
+        "SelectedIndex",
+        "ShowFooter"
+      ],
+      "eventList": [
+        "CancelCommand",
+        "DeleteCommand",
+        "EditCommand",
+        "ItemCommand",
+        "ItemCreated",
+        "ItemDataBound",
+        "PageIndexChanged",
+        "SortCommand"
+      ],
+      "notes": "Chain: DataGrid -> BaseDataList -> DataBoundControl (stop). BaseDataList family included. Style/template excluded.",
+      "confidence": "needs-verification"
+    },
+    "DataList": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 14,
+      "expectedEvents": 6,
+      "propertyList": [
+        "BackImageUrl",
+        "CellPadding",
+        "CellSpacing",
+        "DataKeyField",
+        "EditItemIndex",
+        "ExtractTemplateRows",
+        "GridLines",
+        "RepeatColumns",
+        "RepeatDirection",
+        "RepeatLayout",
+        "SelectedIndex",
+        "ShowFooter",
+        "ShowHeader",
+        "HorizontalAlign"
+      ],
+      "eventList": [
+        "CancelCommand",
+        "DeleteCommand",
+        "EditCommand",
+        "ItemCommand",
+        "ItemCreated",
+        "ItemDataBound"
+      ],
+      "notes": "Chain: DataList -> BaseDataList -> DataBoundControl (stop). BaseDataList family included. Template/style excluded.",
+      "confidence": "needs-verification"
+    },
+    "DataPager": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 4,
+      "expectedEvents": 0,
+      "propertyList": [
+        "MaximumRows",
+        "PagedControlID",
+        "PageSize",
+        "QueryStringField"
+      ],
+      "eventList": [],
+      "notes": "Chain: DataPager -> Control (stop). Fields collection excluded.",
+      "confidence": "needs-verification"
+    },
+    "DetailsView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 18,
+      "expectedEvents": 12,
+      "propertyList": [
+        "AllowPaging",
+        "AutoGenerateDeleteButton",
+        "AutoGenerateEditButton",
+        "AutoGenerateInsertButton",
+        "AutoGenerateRows",
+        "BackImageUrl",
+        "Caption",
+        "CaptionAlign",
+        "CellPadding",
+        "CellSpacing",
+        "DataKeyNames",
+        "DefaultMode",
+        "EmptyDataText",
+        "FooterText",
+        "GridLines",
+        "HeaderText",
+        "PageIndex",
+        "UseAccessibleHeader"
+      ],
+      "eventList": [
+        "ItemCommand",
+        "ItemCreated",
+        "ItemDeleted",
+        "ItemDeleting",
+        "ItemInserted",
+        "ItemInserting",
+        "ItemUpdated",
+        "ItemUpdating",
+        "ModeChanged",
+        "ModeChanging",
+        "PageIndexChanged",
+        "PageIndexChanging"
+      ],
+      "notes": "Chain: DetailsView -> CompositeDataBoundControl -> DataBoundControl (stop). Style/template/fields excluded.",
+      "confidence": "needs-verification"
+    },
+    "FormView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 11,
+      "expectedEvents": 12,
+      "propertyList": [
+        "AllowPaging",
+        "BackImageUrl",
+        "Caption",
+        "CaptionAlign",
+        "CellPadding",
+        "CellSpacing",
+        "DataKeyNames",
+        "DefaultMode",
+        "FooterText",
+        "GridLines",
+        "HeaderText"
+      ],
+      "eventList": [
+        "ItemCommand",
+        "ItemCreated",
+        "ItemDeleted",
+        "ItemDeleting",
+        "ItemInserted",
+        "ItemInserting",
+        "ItemUpdated",
+        "ItemUpdating",
+        "ModeChanged",
+        "ModeChanging",
+        "PageIndexChanged",
+        "PageIndexChanging"
+      ],
+      "notes": "Chain: FormView -> CompositeDataBoundControl -> DataBoundControl (stop). All templates excluded.",
+      "confidence": "needs-verification"
+    },
+    "GridView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 22,
+      "expectedEvents": 16,
+      "propertyList": [
+        "AllowPaging",
+        "AllowSorting",
+        "AutoGenerateColumns",
+        "AutoGenerateDeleteButton",
+        "AutoGenerateEditButton",
+        "AutoGenerateSelectButton",
+        "BackImageUrl",
+        "Caption",
+        "CaptionAlign",
+        "CellPadding",
+        "CellSpacing",
+        "DataKeyNames",
+        "EditIndex",
+        "EmptyDataText",
+        "EnableSortingAndPagingCallbacks",
+        "GridLines",
+        "PageIndex",
+        "PageSize",
+        "RowHeaderColumn",
+        "SelectedIndex",
+        "ShowFooter",
+        "ShowHeader"
+      ],
+      "eventList": [
+        "DataBound",
+        "PageIndexChanged",
+        "PageIndexChanging",
+        "RowCancelingEdit",
+        "RowCommand",
+        "RowCreated",
+        "RowDataBound",
+        "RowDeleted",
+        "RowDeleting",
+        "RowEditing",
+        "RowUpdated",
+        "RowUpdating",
+        "SelectedIndexChanged",
+        "SelectedIndexChanging",
+        "Sorted",
+        "Sorting"
+      ],
+      "notes": "Chain: GridView -> CompositeDataBoundControl -> DataBoundControl (stop). Style sub-objects, Columns, PagerSettings, templates excluded. Complex control per PRD 2.7.",
+      "confidence": "needs-verification"
+    },
+    "ListView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 8,
+      "expectedEvents": 14,
+      "propertyList": [
+        "DataKeyNames",
+        "EditIndex",
+        "GroupItemCount",
+        "GroupPlaceholderID",
+        "InsertItemPosition",
+        "ItemPlaceholderID",
+        "SelectedIndex",
+        "SortExpression"
+      ],
+      "eventList": [
+        "ItemCanceling",
+        "ItemCommand",
+        "ItemCreated",
+        "ItemDataBound",
+        "ItemDeleted",
+        "ItemDeleting",
+        "ItemEditing",
+        "ItemInserted",
+        "ItemInserting",
+        "ItemUpdated",
+        "ItemUpdating",
+        "LayoutCreated",
+        "PagePropertiesChanged",
+        "SelectedIndexChanged"
+      ],
+      "notes": "Chain: ListView -> DataBoundControl (stop). All templates excluded.",
+      "confidence": "needs-verification"
+    },
+    "Repeater": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 2,
+      "expectedEvents": 2,
+      "propertyList": [
+        "DataMember",
+        "DataSourceID"
+      ],
+      "eventList": [
+        "ItemCommand",
+        "ItemDataBound"
+      ],
+      "notes": "Chain: Repeater -> Control (stop). Inherits from Control, not WebControl. Templates excluded. Anchor per PRD 2.7.",
+      "confidence": "needs-verification"
+    },
+    "BaseValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 9,
+      "expectedEvents": 0,
+      "propertyList": [
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: BaseValidator -> Label -> WebControl (stop). Abstract class, scored N/A. Label family included (Text, AssociatedControlID). Properties roll up into concrete validators."
+    },
+    "BaseCompareValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 11,
+      "expectedEvents": 0,
+      "propertyList": [
+        "CultureInvariantValues",
+        "Type",
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: BaseCompareValidator -> BaseValidator -> Label -> WebControl (stop). Abstract class, scored N/A. Includes BaseValidator + Label family."
+    },
+    "CompareValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 14,
+      "expectedEvents": 0,
+      "propertyList": [
+        "ControlToCompare",
+        "Operator",
+        "ValueToCompare",
+        "CultureInvariantValues",
+        "Type",
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: CompareValidator -> BaseCompareValidator -> BaseValidator -> Label -> WebControl (stop). Full validator family included."
+    },
+    "CustomValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 11,
+      "expectedEvents": 1,
+      "propertyList": [
+        "ClientValidationFunction",
+        "ValidateEmptyText",
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [
+        "ServerValidate"
+      ],
+      "notes": "Chain: CustomValidator -> BaseValidator -> Label -> WebControl (stop). ServerValidate is the custom validation event."
+    },
+    "RangeValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 13,
+      "expectedEvents": 0,
+      "propertyList": [
+        "MaximumValue",
+        "MinimumValue",
+        "CultureInvariantValues",
+        "Type",
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: RangeValidator -> BaseCompareValidator -> BaseValidator -> Label -> WebControl (stop). Full validator family included."
+    },
+    "RegularExpressionValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 10,
+      "expectedEvents": 0,
+      "propertyList": [
+        "ValidationExpression",
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: RegularExpressionValidator -> BaseValidator -> Label -> WebControl (stop). Full validator family included."
+    },
+    "RequiredFieldValidator": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 10,
+      "expectedEvents": 0,
+      "propertyList": [
+        "InitialValue",
+        "AssociatedControlID",
+        "ControlToValidate",
+        "Display",
+        "EnableClientScript",
+        "ErrorMessage",
+        "IsValid",
+        "SetFocusOnError",
+        "Text",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: RequiredFieldValidator -> BaseValidator -> Label -> WebControl (stop). Full validator family included."
+    },
+    "ValidationSummary": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 6,
+      "expectedEvents": 0,
+      "propertyList": [
+        "DisplayMode",
+        "EnableClientScript",
+        "HeaderText",
+        "ShowMessageBox",
+        "ShowSummary",
+        "ValidationGroup"
+      ],
+      "eventList": [],
+      "notes": "Chain: ValidationSummary -> WebControl (stop)."
+    },
+    "Menu": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 14,
+      "expectedEvents": 2,
+      "propertyList": [
+        "DataSourceID",
+        "DisappearAfter",
+        "DynamicHorizontalOffset",
+        "DynamicVerticalOffset",
+        "IncludeStyleBlock",
+        "MaximumDynamicDisplayLevels",
+        "Orientation",
+        "PathSeparator",
+        "RenderingMode",
+        "ScrollDownText",
+        "ScrollUpText",
+        "SkipLinkText",
+        "StaticDisplayLevels",
+        "StaticSubMenuIndent"
+      ],
+      "eventList": [
+        "MenuItemClick",
+        "MenuItemDataBound"
+      ],
+      "notes": "Chain: Menu -> HierarchicalDataBoundControl -> WebControl (stop). Items collection and style sub-objects excluded.",
+      "confidence": "needs-verification"
+    },
+    "SiteMapPath": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 7,
+      "expectedEvents": 2,
+      "propertyList": [
+        "ParentLevelsDisplayed",
+        "PathDirection",
+        "PathSeparator",
+        "RenderCurrentNodeAsLink",
+        "ShowToolTips",
+        "SiteMapProvider",
+        "SkipLinkText"
+      ],
+      "eventList": [
+        "ItemCreated",
+        "ItemDataBound"
+      ],
+      "notes": "Chain: SiteMapPath -> CompositeControl -> WebControl (stop). Style sub-objects/templates excluded.",
+      "confidence": "needs-verification"
+    },
+    "TreeView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 18,
+      "expectedEvents": 5,
+      "propertyList": [
+        "AutoGenerateDataBindings",
+        "CollapseImageToolTip",
+        "CollapseImageUrl",
+        "DataSourceID",
+        "EnableClientScript",
+        "ExpandDepth",
+        "ExpandImageToolTip",
+        "ExpandImageUrl",
+        "ImageSet",
+        "LineImagesFolder",
+        "MaxDataBindDepth",
+        "NodeIndent",
+        "NodeWrap",
+        "NoExpandImageUrl",
+        "PathSeparator",
+        "ShowCheckBoxes",
+        "ShowExpandCollapse",
+        "ShowLines"
+      ],
+      "eventList": [
+        "SelectedNodeChanged",
+        "TreeNodeCheckChanged",
+        "TreeNodeCollapsed",
+        "TreeNodeExpanded",
+        "TreeNodePopulate"
+      ],
+      "notes": "Chain: TreeView -> HierarchicalDataBoundControl -> WebControl (stop). Nodes collection and style sub-objects excluded.",
+      "confidence": "needs-verification"
+    },
+    "ChangePassword": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 20,
+      "expectedEvents": 6,
+      "propertyList": [
+        "CancelButtonText",
+        "CancelDestinationPageUrl",
+        "ChangePasswordButtonText",
+        "ChangePasswordFailureText",
+        "ChangePasswordTitleText",
+        "ConfirmNewPasswordLabelText",
+        "ConfirmPasswordCompareErrorMessage",
+        "ContinueButtonText",
+        "ContinueDestinationPageUrl",
+        "CreateUserText",
+        "CreateUserUrl",
+        "DisplayUserName",
+        "HelpPageText",
+        "HelpPageUrl",
+        "InstructionText",
+        "MembershipProvider",
+        "NewPasswordLabelText",
+        "PasswordHintText",
+        "PasswordLabelText",
+        "UserNameLabelText"
+      ],
+      "eventList": [
+        "CancelButtonClick",
+        "ChangedPassword",
+        "ChangePasswordError",
+        "ChangingPassword",
+        "ContinueButtonClick",
+        "SendingMail"
+      ],
+      "notes": "Chain: ChangePassword -> CompositeControl -> WebControl (stop). Template/style excluded.",
+      "confidence": "needs-verification"
+    },
+    "CreateUserWizard": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 22,
+      "expectedEvents": 6,
+      "propertyList": [
+        "AnswerLabelText",
+        "AutoGeneratePassword",
+        "CompleteSuccessText",
+        "ConfirmPasswordCompareErrorMessage",
+        "ConfirmPasswordLabelText",
+        "ContinueButtonText",
+        "ContinueDestinationPageUrl",
+        "CreateUserButtonText",
+        "DisableCreatedUser",
+        "DuplicateEmailErrorMessage",
+        "DuplicateUserNameErrorMessage",
+        "EditProfileText",
+        "EditProfileUrl",
+        "EmailLabelText",
+        "HelpPageText",
+        "HelpPageUrl",
+        "InstructionText",
+        "LoginCreatedUser",
+        "MembershipProvider",
+        "PasswordLabelText",
+        "QuestionLabelText",
+        "UserNameLabelText"
+      ],
+      "eventList": [
+        "ContinueButtonClick",
+        "CreatedUser",
+        "CreateUserError",
+        "CreatingUser",
+        "SendingMail",
+        "SendMailError"
+      ],
+      "notes": "Chain: CreateUserWizard -> Wizard -> CompositeControl -> WebControl (stop). Complex wizard. Template/style excluded.",
+      "confidence": "needs-verification"
+    },
+    "Login": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 18,
+      "expectedEvents": 4,
+      "propertyList": [
+        "CreateUserText",
+        "CreateUserUrl",
+        "DestinationPageUrl",
+        "DisplayRememberMe",
+        "FailureText",
+        "HelpPageText",
+        "HelpPageUrl",
+        "InstructionText",
+        "LoginButtonText",
+        "MembershipProvider",
+        "Orientation",
+        "PasswordLabelText",
+        "PasswordRecoveryText",
+        "PasswordRecoveryUrl",
+        "RememberMeSet",
+        "TextLayout",
+        "TitleText",
+        "UserNameLabelText"
+      ],
+      "eventList": [
+        "Authenticate",
+        "LoggedIn",
+        "LoggingIn",
+        "LoginError"
+      ],
+      "notes": "Chain: Login -> CompositeControl -> WebControl (stop). Template/style excluded.",
+      "confidence": "needs-verification"
+    },
+    "LoginName": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 1,
+      "expectedEvents": 0,
+      "propertyList": [
+        "FormatString"
+      ],
+      "eventList": [],
+      "notes": "Chain: LoginName -> WebControl (stop). Simple display control."
+    },
+    "LoginStatus": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 6,
+      "expectedEvents": 2,
+      "propertyList": [
+        "LogoutAction",
+        "LogoutPageUrl",
+        "LogoutText",
+        "LoginText",
+        "LoginImageUrl",
+        "LogoutImageUrl"
+      ],
+      "eventList": [
+        "LoggedOut",
+        "LoggingOut"
+      ],
+      "notes": "Chain: LoginStatus -> CompositeControl -> WebControl (stop). Shows login/logout based on auth."
+    },
+    "LoginView": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 0,
+      "expectedEvents": 1,
+      "propertyList": [],
+      "eventList": [
+        "ViewChanged"
+      ],
+      "notes": "Chain: LoginView -> Control (stop). Templates (AnonymousTemplate, LoggedInTemplate) excluded. RoleGroups collection excluded.",
+      "confidence": "needs-verification"
+    },
+    "PasswordRecovery": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 16,
+      "expectedEvents": 4,
+      "propertyList": [
+        "GeneralFailureText",
+        "HelpPageText",
+        "HelpPageUrl",
+        "MembershipProvider",
+        "QuestionFailureText",
+        "QuestionInstructionText",
+        "QuestionLabelText",
+        "QuestionTitleText",
+        "SubmitButtonText",
+        "SuccessPageUrl",
+        "SuccessText",
+        "UserNameFailureText",
+        "UserNameInstructionText",
+        "UserNameLabelText",
+        "UserNameTitleText",
+        "MailDefinition"
+      ],
+      "eventList": [
+        "AnswerLookupError",
+        "SendingMail",
+        "SendMailError",
+        "VerifyingUser"
+      ],
+      "notes": "Chain: PasswordRecovery -> CompositeControl -> WebControl (stop). Template/style excluded.",
+      "confidence": "needs-verification"
+    },
+    "Content": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 1,
+      "expectedEvents": 0,
+      "propertyList": [
+        "ContentPlaceHolderID"
+      ],
+      "eventList": [],
+      "notes": "Chain: Content -> Control (stop)."
+    },
+    "ContentPlaceHolder": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 0,
+      "expectedEvents": 0,
+      "propertyList": [],
+      "eventList": [],
+      "notes": "Chain: ContentPlaceHolder -> Control (stop). Score 100% (0/0)."
+    },
+    "MasterPage": {
+      "namespace": "System.Web.UI",
+      "expectedProperties": 0,
+      "expectedEvents": 0,
+      "propertyList": [],
+      "eventList": [],
+      "notes": "Chain: MasterPage -> UserControl -> Control (stop). Infrastructure shim. Score 100% (0/0)."
+    },
+    "NamingContainer": {
+      "namespace": "System.Web.UI.WebControls",
+      "expectedProperties": 0,
+      "expectedEvents": 0,
+      "propertyList": [],
+      "eventList": [],
+      "notes": "BWFC-specific infrastructure component. Maps to Panel in Web Forms for naming container behavior. Score 100% (0/0)."
+    },
+    "ScriptManager": {
+      "namespace": "System.Web.UI",
+      "expectedProperties": 6,
+      "expectedEvents": 1,
+      "propertyList": [
+        "EnablePageMethods",
+        "EnablePartialRendering",
+        "EnableScriptGlobalization",
+        "EnableScriptLocalization",
+        "ScriptMode",
+        "ScriptPath"
+      ],
+      "eventList": [
+        "AsyncPostBackError"
+      ],
+      "notes": "Chain: ScriptManager -> Control (stop). In BWFC this is a stub/shim. Scripts collection excluded.",
+      "confidence": "needs-verification"
+    },
+    "UpdatePanel": {
+      "namespace": "System.Web.UI",
+      "expectedProperties": 3,
+      "expectedEvents": 0,
+      "propertyList": [
+        "ChildrenAsTriggers",
+        "RenderMode",
+        "UpdateMode"
+      ],
+      "eventList": [],
+      "notes": "Chain: UpdatePanel -> Control (stop). ContentTemplate excluded (template). Triggers collection excluded."
+    }
+  }
+}

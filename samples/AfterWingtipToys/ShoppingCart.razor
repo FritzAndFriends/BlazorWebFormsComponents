@@ -1,29 +1,25 @@
 @page "/ShoppingCart"
-<div id="ShoppingCartTitle" class="ContentHead"><h1>@_title</h1></div>
-@if (_cartItems.Any())
-{
-    <GridView TItem="CartItem" Items="@_cartItems" AutoGenerateColumns="@false" ShowFooter="@true"
-        GridLines="@GridLines.Vertical" CellPadding="4"
-        CssClass="table table-striped table-bordered">
+<div id="ShoppingCartTitle" class="ContentHead"><h1>@_cartTitle</h1></div>
+    <GridView ID="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+        ItemType="CartItem" SelectMethod="@GetShoppingCartItems" 
+        CssClass="table table-striped table-bordered" >
         <Columns>
-        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />        
         <BoundField DataField="Product.ProductName" HeaderText="Name" />        
         <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
         <TemplateField HeaderText="Quantity">            
-                <ItemTemplate>
-                    <TextBox Width="40" Text="@context.Quantity.ToString()"
-                        OnTextChanged="@(e => OnQuantityChanged(context, e))" /> 
+                <ItemTemplate Context="context">
+                    <TextBox ID="PurchaseQuantity" Width="40" Text="@context.Quantity.ToString()"></TextBox> 
                 </ItemTemplate>        
         </TemplateField>    
         <TemplateField HeaderText="Item Total">            
-                <ItemTemplate>
-                    @($"{(context.Quantity * (context.Product.UnitPrice ?? 0)):c}")
-                </ItemTemplate>        
+                <ItemTemplate Context="context">
+                    @($"{(Convert.ToDouble(context.Quantity) * Convert.ToDouble(context.Product?.UnitPrice ?? 0)):c}")
+                </ItemTemplate>
         </TemplateField> 
         <TemplateField HeaderText="Remove Item">            
                 <ItemTemplate>
-                    <CheckBox Checked="@_removeFlags.GetValueOrDefault(context.ProductId)"
-                        OnCheckedChanged="@(e => OnRemoveChanged(context, e))" />
+                    <CheckBox id="Remove"></CheckBox>
                 </ItemTemplate>        
         </TemplateField>    
         </Columns>    
@@ -31,27 +27,26 @@
     <div>
         <p></p>
         <strong>
-            <Label Text="Order Total: " />
-            <Label Text="@_total.ToString("c")" />
+            <Label ID="LabelTotalText" Text="@_totalLabelText"></Label>
+            <Label ID="lblTotal" Text="@_cartTotal"></Label>
         </strong> 
     </div>
     <br />
+    @if (_showButtons)
+    {
     <table> 
     <tr>
       <td>
-        <Button Text="Update" OnClick="UpdateBtn_Click" />
+        <Button ID="UpdateBtn" Text="Update" OnClick="@UpdateBtn_Click" />
       </td>
       <td>
-        <a href="/RemoveAllCartItems" role="button" onclick="event.preventDefault(); window.location.href=this.href;">Remove</a>
-      </td>
-      <td>
-        <Button Text="Checkout" OnClick="CheckoutBtn_Click" />
+        <ImageButton ID="CheckoutImageBtn" 
+                      ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
+                      Width="145" AlternateText="Check out with PayPal" 
+                      OnClick="@CheckoutBtn_Click" 
+                      BorderWidth="0" />
       </td>
     </tr>
     </table>
-}
-else
-{
-    <p>Your shopping cart is empty.</p>
-}
+    }
 

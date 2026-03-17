@@ -1,0 +1,390 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersContainerDiv()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.Find("div").ShouldNotBeNull();
+		cut.Find("div").ClassList.ShouldContain("ajax__accordion");
+	}
+
+	[Fact]
+	public void RendersContainerDivWithId()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		var div = cut.Find("div");
+		div.Id.ShouldNotBeNullOrEmpty();
+		div.Id.ShouldStartWith("act-accordion-");
+	}
+
+	// === SelectedIndex ===
+
+	[Fact]
+	public void SelectedIndex_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.SelectedIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public void SelectedIndex_SetToOne_ShowsSecondPane()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion SelectedIndex="1">
+				<AccordionPane>
+					<Header>Header 1</Header>
+					<Content><p>Content 1</p></Content>
+				</AccordionPane>
+				<AccordionPane>
+					<Header>Header 2</Header>
+					<Content><p>Content 2</p></Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		var contentDivs = cut.FindAll("div[role='tabpanel']");
+		contentDivs.Count.ShouldBe(2);
+		// First pane should be hidden, second visible
+		contentDivs[0].GetAttribute("style").ShouldContain("display:none");
+		contentDivs[1].GetAttribute("style").ShouldBeNull();
+	}
+
+	// === AccordionPane rendering ===
+
+	[Fact]
+	public void AccordionPane_RendersHeaderAndContent()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion>
+				<AccordionPane>
+					<Header>My Header</Header>
+					<Content><p>My Content</p></Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		cut.Markup.ShouldContain("My Header");
+		cut.Markup.ShouldContain("My Content");
+	}
+
+	[Fact]
+	public void AccordionPane_HeaderHasRoleTab()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion>
+				<AccordionPane>
+					<Header>Header</Header>
+					<Content>Content</Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		var header = cut.Find("div[role='tab']");
+		header.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void AccordionPane_ContentHasRoleTabpanel()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion>
+				<AccordionPane>
+					<Header>Header</Header>
+					<Content>Content</Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		var content = cut.Find("div[role='tabpanel']");
+		content.ShouldNotBeNull();
+	}
+
+	// === Clicking header toggles pane ===
+
+	[Fact]
+	public void ClickingHeader_SwitchesSelectedPane()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion>
+				<AccordionPane>
+					<Header>Header 1</Header>
+					<Content><p>Content 1</p></Content>
+				</AccordionPane>
+				<AccordionPane>
+					<Header>Header 2</Header>
+					<Content><p>Content 2</p></Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		// Click second pane header
+		var headers = cut.FindAll("div[role='tab']");
+		headers[1].Click();
+
+		cut.FindComponent<Accordion>().Instance.SelectedIndex.ShouldBe(1);
+	}
+
+	// === FadeTransitions ===
+
+	[Fact]
+	public void FadeTransitions_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.FadeTransitions.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void FadeTransitions_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion FadeTransitions="true" />);
+
+		cut.FindComponent<Accordion>().Instance
+			.FadeTransitions.ShouldBeTrue();
+	}
+
+	// === TransitionDuration ===
+
+	[Fact]
+	public void TransitionDuration_Default_Is300()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.TransitionDuration.ShouldBe(300);
+	}
+
+	[Fact]
+	public void TransitionDuration_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion TransitionDuration="500" />);
+
+		cut.FindComponent<Accordion>().Instance
+			.TransitionDuration.ShouldBe(500);
+	}
+
+	// === HeaderCssClass ===
+
+	[Fact]
+	public void HeaderCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.HeaderCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void HeaderCssClass_AppliedToPaneHeaders()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion HeaderCssClass="custom-header">
+				<AccordionPane>
+					<Header>H</Header>
+					<Content>C</Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		var header = cut.Find("div[role='tab']");
+		header.ClassList.ShouldContain("custom-header");
+	}
+
+	// === ContentCssClass ===
+
+	[Fact]
+	public void ContentCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.ContentCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ContentCssClass_AppliedToPaneContent()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion ContentCssClass="custom-content">
+				<AccordionPane>
+					<Header>H</Header>
+					<Content>C</Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		var content = cut.Find("div[role='tabpanel']");
+		content.ClassList.ShouldContain("custom-content");
+	}
+
+	// === RequireOpenedPane ===
+
+	[Fact]
+	public void RequireOpenedPane_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.RequireOpenedPane.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RequireOpenedPane_False_AllowsCollapseAll()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion RequireOpenedPane="false">
+				<AccordionPane>
+					<Header>Header 1</Header>
+					<Content><p>Content 1</p></Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		// Click the selected pane header to collapse it
+		var header = cut.Find("div[role='tab']");
+		header.Click();
+
+		cut.FindComponent<Accordion>().Instance.SelectedIndex.ShouldBe(-1);
+	}
+
+	// === AutoSize ===
+
+	[Fact]
+	public void AutoSize_Default_IsNone()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.AutoSize.ShouldBe(AutoSizeMode.None);
+	}
+
+	[Fact]
+	public void AutoSize_SetToFill()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion AutoSize="AutoSizeMode.Fill" />);
+
+		cut.FindComponent<Accordion>().Instance
+			.AutoSize.ShouldBe(AutoSizeMode.Fill);
+	}
+
+	[Fact]
+	public void AutoSize_SetToLimit()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion AutoSize="AutoSizeMode.Limit" />);
+
+		cut.FindComponent<Accordion>().Instance
+			.AutoSize.ShouldBe(AutoSizeMode.Limit);
+	}
+
+	// === SuppressHeaderPostbacks ===
+
+	[Fact]
+	public void SuppressHeaderPostbacks_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.SuppressHeaderPostbacks.ShouldBeTrue();
+	}
+
+	// === CssClass ===
+
+	[Fact]
+	public void CssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion />);
+
+		cut.FindComponent<Accordion>().Instance
+			.CssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CssClass_AppliedToOuterDiv()
+	{
+		SetupLooseJs();
+		var cut = Render(@<Accordion CssClass="my-accordion" />);
+
+		var div = cut.Find("div");
+		div.ClassList.ShouldContain("my-accordion");
+		div.ClassList.ShouldContain("ajax__accordion");
+	}
+
+	// === AccordionPane requires parent ===
+
+	[Fact]
+	public void AccordionPane_ThrowsWithoutParent()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<AccordionPane>
+				<Header>H</Header>
+				<Content>C</Content>
+			</AccordionPane>);
+		}).Message.ShouldContain("Accordion");
+	}
+
+	// === SelectedIndexChanged event ===
+
+	[Fact]
+	public void SelectedIndexChanged_FiresOnPaneSwitch()
+	{
+		int receivedIndex = -1;
+		SetupLooseJs();
+		var cut = Render(
+			@<Accordion SelectedIndexChanged="@((int idx) => receivedIndex = idx)">
+				<AccordionPane>
+					<Header>Header 1</Header>
+					<Content>Content 1</Content>
+				</AccordionPane>
+				<AccordionPane>
+					<Header>Header 2</Header>
+					<Content>Content 2</Content>
+				</AccordionPane>
+			</Accordion>
+		);
+
+		var headers = cut.FindAll("div[role='tab']");
+		headers[1].Click();
+
+		receivedIndex.ShouldBe(1);
+	}
+}

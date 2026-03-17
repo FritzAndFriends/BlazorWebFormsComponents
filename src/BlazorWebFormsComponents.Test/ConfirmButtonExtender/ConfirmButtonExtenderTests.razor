@@ -1,0 +1,176 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string CONFIRM_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/confirm-button-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup. Extender JS behavior
+	/// is out of scope for bUnit — that's Playwright's job.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btnSubmit" />);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.TargetControlID.ShouldBe("btnSubmit");
+	}
+
+	// === ConfirmText ===
+
+	[Fact]
+	public void ConfirmText_DefaultIsAreYouSure()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.ConfirmText.ShouldBe("Are you sure?");
+	}
+
+	[Fact]
+	public void ConfirmText_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ConfirmButtonExtender TargetControlID="btn1" ConfirmText="Delete this record?" />
+		);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.ConfirmText.ShouldBe("Delete this record?");
+	}
+
+	// === ConfirmOnFormSubmit ===
+
+	[Fact]
+	public void ConfirmOnFormSubmit_DefaultsFalse()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.ConfirmOnFormSubmit.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ConfirmOnFormSubmit_SetTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ConfirmButtonExtender TargetControlID="btn1" ConfirmOnFormSubmit="true" />
+		);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.ConfirmOnFormSubmit.ShouldBeTrue();
+	}
+
+	// === Enabled ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ConfirmButtonExtender TargetControlID="btn1" Enabled="false" />
+		);
+
+		// Renders nothing and no JS module was imported
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === BehaviorID ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	[Fact]
+	public void BehaviorID_WhenSet_ReturnsSetValue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<ConfirmButtonExtender TargetControlID="btn1" BehaviorID="confirmBehavior1" />
+		);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.BehaviorID.ShouldBe("confirmBehavior1");
+	}
+
+	// === DisplayModalPopupID ===
+
+	[Fact]
+	public void DisplayModalPopupID_DefaultsToEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		cut.FindComponent<ConfirmButtonExtender>().Instance
+			.DisplayModalPopupID.ShouldBe(string.Empty);
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<ConfirmButtonExtender TargetControlID="btn1" />);
+
+		// Verify the component imported the correct module path
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(CONFIRM_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<ConfirmButtonExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+}

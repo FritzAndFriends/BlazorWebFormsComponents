@@ -1,0 +1,397 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersContainerDiv()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer />);
+
+		cut.Find("div").ShouldNotBeNull();
+		cut.Find("div").ClassList.ShouldContain("ajax__tab_container");
+	}
+
+	[Fact]
+	public void RendersContainerDivWithId()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer />);
+
+		var div = cut.Find("div");
+		div.Id.ShouldNotBeNullOrEmpty();
+		div.Id.ShouldStartWith("act-tabcontainer-");
+	}
+
+	[Fact]
+	public void RendersTabHeaderStrip()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate>Content 1</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		cut.Find("div.ajax__tab_header").ShouldNotBeNull();
+	}
+
+	// === Tab headers rendering ===
+
+	[Fact]
+	public void TabPanel_HeaderText_RendersInTabHeader()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="First Tab">
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+				<TabPanel HeaderText="Second Tab">
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var tabs = cut.FindAll("span[role='tab']");
+		tabs.Count.ShouldBe(2);
+		tabs[0].TextContent.ShouldBe("First Tab");
+		tabs[1].TextContent.ShouldBe("Second Tab");
+	}
+
+	// === ActiveTabIndex ===
+
+	[Fact]
+	public void ActiveTabIndex_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer />);
+
+		cut.FindComponent<TabContainer>().Instance
+			.ActiveTabIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ActiveTabIndex_ShowsCorrectContent()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer ActiveTabIndex="1">
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate><p>Content 1</p></ContentTemplate>
+				</TabPanel>
+				<TabPanel HeaderText="Tab 2">
+					<ContentTemplate><p>Content 2</p></ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var panels = cut.FindAll("div.ajax__tab_panel");
+		panels.Count.ShouldBe(2);
+		panels[0].GetAttribute("style").ShouldContain("display:none");
+		panels[1].GetAttribute("style").ShouldBeNull();
+	}
+
+	[Fact]
+	public void ActiveTab_HasActiveClass()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer ActiveTabIndex="0">
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate>Content 1</ContentTemplate>
+				</TabPanel>
+				<TabPanel HeaderText="Tab 2">
+					<ContentTemplate>Content 2</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var tabs = cut.FindAll("span[role='tab']");
+		tabs[0].ClassList.ShouldContain("ajax__tab_active");
+		tabs[1].ClassList.ShouldContain("ajax__tab_inactive");
+	}
+
+	// === Clicking tab switches content ===
+
+	[Fact]
+	public void ClickingTab_SwitchesActiveTab()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate><p>Content 1</p></ContentTemplate>
+				</TabPanel>
+				<TabPanel HeaderText="Tab 2">
+					<ContentTemplate><p>Content 2</p></ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var tabs = cut.FindAll("span[role='tab']");
+		tabs[1].Click();
+
+		cut.FindComponent<TabContainer>().Instance.ActiveTabIndex.ShouldBe(1);
+	}
+
+	// === Enabled ===
+
+	[Fact]
+	public void TabPanel_Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate>C</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		cut.FindComponent<TabPanel>().Instance.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void TabPanel_Enabled_False_HasDisabledClass()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="Disabled Tab" Enabled="false">
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var tab = cut.Find("span[role='tab']");
+		tab.ClassList.ShouldContain("ajax__tab_disabled");
+	}
+
+	[Fact]
+	public void TabPanel_Enabled_False_CannotBeSelected()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate>Content 1</ContentTemplate>
+				</TabPanel>
+				<TabPanel HeaderText="Disabled" Enabled="false">
+					<ContentTemplate>Content 2</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		// Disabled tab should not have onclick or cursor style
+		var tabs = cut.FindAll("span[role='tab']");
+		tabs[1].GetAttribute("style").ShouldBeNull();
+	}
+
+	// === OnActiveTabChanged ===
+
+	[Fact]
+	public void OnActiveTabChanged_FiresOnTabSwitch()
+	{
+		int receivedIndex = -1;
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer OnActiveTabChanged="@((int idx) => receivedIndex = idx)">
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate>Content 1</ContentTemplate>
+				</TabPanel>
+				<TabPanel HeaderText="Tab 2">
+					<ContentTemplate>Content 2</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var tabs = cut.FindAll("span[role='tab']");
+		tabs[1].Click();
+
+		receivedIndex.ShouldBe(1);
+	}
+
+	// === ScrollBars ===
+
+	[Fact]
+	public void ScrollBars_Default_IsNone()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer />);
+
+		cut.FindComponent<TabContainer>().Instance
+			.ScrollBars.ShouldBe(ScrollBars.None);
+	}
+
+	[Fact]
+	public void ScrollBars_Horizontal_AppliesOverflowStyle()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer ScrollBars="ScrollBars.Horizontal">
+				<TabPanel HeaderText="Tab">
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var body = cut.Find("div.ajax__tab_body");
+		body.GetAttribute("style").ShouldContain("overflow-x:auto");
+	}
+
+	[Fact]
+	public void ScrollBars_Vertical_AppliesOverflowStyle()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer ScrollBars="ScrollBars.Vertical">
+				<TabPanel HeaderText="Tab">
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var body = cut.Find("div.ajax__tab_body");
+		body.GetAttribute("style").ShouldContain("overflow-y:auto");
+	}
+
+	[Fact]
+	public void ScrollBars_Both_AppliesOverflowAuto()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer ScrollBars="ScrollBars.Both">
+				<TabPanel HeaderText="Tab">
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var body = cut.Find("div.ajax__tab_body");
+		body.GetAttribute("style").ShouldContain("overflow:auto");
+	}
+
+	// === CssClass ===
+
+	[Fact]
+	public void CssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer />);
+
+		cut.FindComponent<TabContainer>().Instance
+			.CssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void CssClass_AppliedToOuterDiv()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer CssClass="my-tabs" />);
+
+		var div = cut.Find("div");
+		div.ClassList.ShouldContain("my-tabs");
+		div.ClassList.ShouldContain("ajax__tab_container");
+	}
+
+	// === HeaderTemplate override ===
+
+	[Fact]
+	public void HeaderTemplate_OverridesHeaderText()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel HeaderText="Plain">
+					<HeaderTemplate><strong>Rich Header</strong></HeaderTemplate>
+					<ContentTemplate>Content</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		var tab = cut.Find("span[role='tab']");
+		tab.InnerHtml.ShouldContain("<strong>Rich Header</strong>");
+	}
+
+	// === TabPanel requires parent ===
+
+	[Fact]
+	public void TabPanel_ThrowsWithoutParent()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<TabPanel HeaderText="Orphan">
+				<ContentTemplate>C</ContentTemplate>
+			</TabPanel>);
+		}).Message.ShouldContain("TabContainer");
+	}
+
+	// === OnClientActiveTabChanged ===
+
+	[Fact]
+	public void OnClientActiveTabChanged_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer />);
+
+		cut.FindComponent<TabContainer>().Instance
+			.OnClientActiveTabChanged.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void OnClientActiveTabChanged_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TabContainer OnClientActiveTabChanged="onTabChange" />);
+
+		cut.FindComponent<TabContainer>().Instance
+			.OnClientActiveTabChanged.ShouldBe("onTabChange");
+	}
+
+	// === TabPanel content rendering ===
+
+	[Fact]
+	public void TabPanel_ContentTemplate_RendersWhenActive()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer ActiveTabIndex="0">
+				<TabPanel HeaderText="Tab 1">
+					<ContentTemplate><p>Active Content</p></ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		cut.Markup.ShouldContain("Active Content");
+	}
+
+	// === HeaderText default ===
+
+	[Fact]
+	public void TabPanel_HeaderText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TabContainer>
+				<TabPanel>
+					<ContentTemplate>C</ContentTemplate>
+				</TabPanel>
+			</TabContainer>
+		);
+
+		cut.FindComponent<TabPanel>().Instance
+			.HeaderText.ShouldBe(string.Empty);
+	}
+}

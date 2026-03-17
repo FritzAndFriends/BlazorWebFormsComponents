@@ -8,7 +8,7 @@
 	{
 		var cut = Render(@<UpdatePanel><p>Content</p></UpdatePanel>);
 		var panel = cut.FindComponent<UpdatePanel>();
-		panel.Instance.RenderMode.ShouldBe(UpdatePanelRenderMode.Block);
+		panel.Instance.RenderMode.Value.ShouldBe(UpdatePanelRenderMode.Block);
 	}
 
 	[Fact]
@@ -63,7 +63,7 @@
 	{
 		var cut = Render(@<UpdatePanel><p>Content</p></UpdatePanel>);
 		var panel = cut.FindComponent<UpdatePanel>();
-		panel.Instance.UpdateMode.ShouldBe(UpdatePanelUpdateMode.Always);
+		panel.Instance.UpdateMode.Value.ShouldBe(UpdatePanelUpdateMode.Always);
 	}
 
 	[Fact]
@@ -73,7 +73,7 @@
 
 		var cut = Render(@<UpdatePanel UpdateMode="mode"><p>Content</p></UpdatePanel>);
 		var panel = cut.FindComponent<UpdatePanel>();
-		panel.Instance.UpdateMode.ShouldBe(UpdatePanelUpdateMode.Conditional);
+		panel.Instance.UpdateMode.Value.ShouldBe(UpdatePanelUpdateMode.Conditional);
 	}
 
 	[Fact]

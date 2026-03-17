@@ -1,109 +1,22 @@
 ---
 name: bwfc-data-migration
-description: "Migrate Web Forms data access and application architecture to Blazor Server. Covers Entity Framework 6 to EF Core, DataSource controls to service injection, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json, routing, HTTP handlers to middleware, and third-party integrations. Use for Layer 3 architecture decisions during Web Forms migration."
+description: "Migrate Web Forms data access and application architecture to Blazor Server. Covers EF6 to EF Core, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json, and HTTP handlers to middleware. WHEN: \"migrate EF6\", \"session state to services\", \"Global.asax to Program.cs\", \"Web.config to appsettings\", \"data access migration\"."
 ---
 
 # Web Forms Data Access & Architecture Migration
 
-> ## 🚫 REMINDER: ALL DATA CONTROLS MUST USE BWFC COMPONENTS
->
-> This skill covers the **back-end architecture** (services, EF Core, DI, config).
-> The **front-end data controls** (`GridView`, `ListView`, `Repeater`, `FormView`, `DetailsView`, `DataList`, `DataGrid`) are BWFC components.
-> **NEVER** replace them with `@foreach` loops, raw `<table>` elements, or manual HTML rendering.
-
 This skill covers migrating Web Forms data access patterns and application architecture to Blazor Server. These are the **Layer 3 architecture decisions** that require project-specific judgment.
 
 **Related skills:**
-- `/bwfc-migration` — Core markup migration (controls, expressions, layouts) — **read this first**
+- `/bwfc-migration` — Core markup migration (controls, expressions, layouts)
 - `/bwfc-identity-migration` — Authentication and authorization migration
-
----
-
-## BWFC Data Controls — Use Them, Don't Replace Them
-
-The BWFC library provides drop-in replacements for ALL Web Forms data controls. When migrating data access, the **front-end components stay as BWFC components** — only the **back-end data loading** changes (from `SelectMethod`/`DataSource` to injected services).
-
-### The Pattern: BWFC Front-End + Service Back-End
-
-```xml
-<!-- Web Forms — declarative data binding -->
-<asp:SqlDataSource ID="ProductsDS" runat="server"
-    ConnectionString="<%$ ConnectionStrings:DefaultConnection %>"
-    SelectCommand="SELECT * FROM Products" />
-<asp:GridView ID="Grid" runat="server" DataSourceID="ProductsDS"
-    AutoGenerateColumns="false">
-    <Columns>
-        <asp:BoundField DataField="Name" HeaderText="Product" />
-        <asp:BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:c}" />
-    </Columns>
-</asp:GridView>
-```
-
-```razor
-@* Blazor — BWFC GridView preserved, only data loading changes *@
-@inject IProductService ProductService
-
-<GridView Items="products" TItem="Product" AutoGenerateColumns="false">
-    <Columns>
-        <BoundField DataField="Name" HeaderText="Product" />
-        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:c}" />
-    </Columns>
-</GridView>
-
-@code {
-    private List<Product> products = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        products = await ProductService.GetProductsAsync();
-    }
-}
-```
-
-**Key insight:** The `GridView` markup is almost identical — only the data source changes. The `SqlDataSource` is removed and replaced with an injected service. The `GridView` component, its columns, and all attributes are preserved.
-
-### 🚫 Anti-Pattern: Replacing Data Controls with Raw HTML
-
-```razor
-@* ❌ WRONG — GridView replaced with @foreach + <table> *@
-@* This loses sorting, paging, editing, footer totals, GridLines, CellPadding *@
-<table class="table">
-    <thead><tr><th>Product</th><th>Price</th></tr></thead>
-    <tbody>
-        @foreach (var p in products)
-        {
-            <tr><td>@p.Name</td><td>@p.Price.ToString("c")</td></tr>
-        }
-    </tbody>
-</table>
-
-@* ✅ CORRECT — Use BWFC GridView *@
-<GridView Items="products" TItem="Product" AutoGenerateColumns="false">
-    <Columns>
-        <BoundField DataField="Name" HeaderText="Product" />
-        <BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:c}" />
-    </Columns>
-</GridView>
-```
-
-### BWFC Data Control Quick Reference
-
-| Web Forms Control | BWFC Component | Data Property | Use Instead Of |
-|---|---|---|---|
-| `<asp:GridView>` | `<GridView Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + `<table>` |
-| `<asp:ListView>` | `<ListView Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + HTML divs |
-| `<asp:Repeater>` | `<Repeater Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` loops |
-| `<asp:DataList>` | `<DataList Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + grid HTML |
-| `<asp:DataGrid>` | `<DataGrid Items="@data" TItem="T">` | `Items` (collection) | ❌ `@foreach` + `<table>` |
-| `<asp:FormView>` | `<FormView DataItem="@item" TItem="T">` | `DataItem` (single) | ❌ Direct HTML rendering |
-| `<asp:DetailsView>` | `<DetailsView Items="@data" TItem="T">` | `Items` (collection) | ❌ Manual field rendering |
 
 ---
 
 ## When to Use This Skill
 
 Use this skill when you need to:
-- Replace `SelectMethod`/`DataSource` controls with service injection (back-end only — keep BWFC front-end)
+- Convert `SelectMethod` string to `SelectHandler` delegate, replace `DataSource` controls with service injection
 - Migrate Entity Framework 6 to EF Core
 - Convert `Session`/`ViewState`/`Application` state to Blazor patterns
 - Migrate `Global.asax` to `Program.cs`
@@ -113,12 +26,162 @@ Use this skill when you need to:
 
 ---
 
+## ⚠️ Session State Under Interactive Server Mode
+
+> **CRITICAL:** When using `<Routes @rendermode="InteractiveServer" />` (global interactive server mode), `HttpContext.Session` is **NULL** during WebSocket rendering. Any code that accesses `HttpContext.Session` inside a Blazor component event handler or lifecycle method will throw a `NullReferenceException` or silently fail.
+
+**Why this happens:** After the initial HTTP request establishes the SignalR circuit, Blazor communicates over WebSocket. There is no HTTP request/response — and therefore no session middleware processing — during component interactions.
+
+**Options for session-dependent operations (shopping cart, user preferences, etc.):**
+
+### Option A: Minimal API Endpoints (Recommended for form submissions)
+
+Use the same `<form method="post">` → minimal API pattern used for auth. The endpoint has a real `HttpContext` with session access.
+
+```csharp
+// Program.cs
+app.MapPost("/api/students/add", async (StudentDto dto, SchoolContext db) =>
+{
+    var student = new Student 
+    { 
+        FirstName = dto.FirstName, 
+        LastName = dto.LastName, 
+        EnrollmentDate = dto.EnrollmentDate 
+    };
+    db.Students.Add(student);
+    await db.SaveChangesAsync();
+    return Results.Ok(student.StudentID);
+}).DisableAntiforgery();
+```
+
+```razor
+@* In Students.razor *@
+@inject HttpClient Http
+
+@code {
+    private async Task AddStudent()
+    {
+        await Http.PostAsJsonAsync("/api/students/add", newStudent);
+        await RefreshGrid();
+    }
+}
+```
+
+> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens.
+
+### Option B: Scoped Service (For transient UI state)
+
+Replace `Session["key"]` with a scoped DI service. State lives in server memory for the duration of the SignalR circuit.
+
+```csharp
+// CartService.cs
+public class CartService
+{
+    private readonly List<CartItem> _items = new();
+    public void Add(CartItem item) => _items.Add(item);
+    public IReadOnlyList<CartItem> Items => _items.AsReadOnly();
+    public decimal GetTotal() => _items.Sum(i => i.Price * i.Quantity);
+}
+
+// Program.cs
+builder.Services.AddScoped<CartService>();
+
+// Component usage
+@inject CartService CartService
+
+<button @onclick="() => CartService.Add(new CartItem(...))">Add</button>
+```
+
+**Trade-off:** State is lost if the user refreshes the page or the circuit disconnects. Good for transient UI state (form drafts, temporary selections), not for durable cart data.
+
+### Option C: Database-Backed (For persistent state)
+
+Store state in the database, keyed by user ID or a cookie-based session token. Survives circuit disconnects, page refreshes, and server restarts.
+
+```csharp
+// UserPreferencesService.cs  
+public class UserPreferencesService(IDbContextFactory<SchoolContext> factory)
+{
+    public async Task<string?> GetAsync(string userId, string key)
+    {
+        using var db = factory.CreateDbContext();
+        var pref = await db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId && p.Key == key);
+        return pref?.Value;
+    }
+    
+    public async Task SetAsync(string userId, string key, string value)
+    {
+        using var db = factory.CreateDbContext();
+        var pref = await db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId && p.Key == key);
+        if (pref != null)
+            pref.Value = value;
+        else
+            db.UserPreferences.Add(new UserPreference { UserId = userId, Key = key, Value = value });
+        await db.SaveChangesAsync();
+    }
+}
+
+// Program.cs
+builder.Services.AddScoped<UserPreferencesService>();
+```
+
+**Recommendation:** For shopping carts and other business-critical state, prefer Option A (minimal API endpoints) or Option C (database). Use Option B only for transient UI state that can be safely lost on refresh or disconnect.
+
+---
+
 ## 1. Entity Framework 6 → EF Core
 
-**Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod`.
+**Web Forms:** EF6 with `DbContext` instantiated directly in code-behind or via `SelectMethod` string binding.
 **Blazor:** EF Core **10.0.3** (latest .NET 10) with `IDbContextFactory` registered in DI.
 
-> **Always use the latest .NET 10 EF Core packages** (currently 10.0.3): `Microsoft.EntityFrameworkCore`, `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`.
+> **Step 1: Detect the provider.** The L1 script's `Find-DatabaseProvider` function reads `Web.config` `<connectionStrings>` and scaffolds the correct EF Core package. Check the L1 output's `[DatabaseProvider]` review item for the detected provider and connection string. Use these values in your `Program.cs` configuration — do not guess or substitute.
+>
+> **CRITICAL: Preserve the original database provider.** Examine the Web Forms project's `Web.config` connection strings and EF configuration to identify the database provider (SQL Server, PostgreSQL, MySQL, SQLite, Oracle, etc.). The migrated Blazor application MUST use the **same database provider** — do NOT switch providers unless explicitly requested by the user.
+>
+> **⚠️ NEVER default to SQLite.** The most common Web Forms database is SQL Server (often LocalDB for dev). If you see `System.Data.SqlClient` or `(LocalDB)` in connection strings, use `Microsoft.EntityFrameworkCore.SqlServer` — NOT `Microsoft.EntityFrameworkCore.Sqlite`. SQLite is ONLY appropriate if the original application specifically used `System.Data.SQLite`.
+
+### Database Provider Detection & Migration
+
+**Step 1: Identify the original provider** from the Web Forms project:
+
+| Web.config Indicator | Original Provider | EF Core Package |
+|---------------------|------------------|-----------------|
+| `providerName="System.Data.SqlClient"` | SQL Server | `Microsoft.EntityFrameworkCore.SqlServer` |
+| `providerName="System.Data.SQLite"` | SQLite | `Microsoft.EntityFrameworkCore.Sqlite` |
+| `providerName="Npgsql"` or `Server=...;Port=5432` | PostgreSQL | `Npgsql.EntityFrameworkCore.PostgreSQL` |
+| `providerName="MySql.Data.MySqlClient"` | MySQL | `Pomelo.EntityFrameworkCore.MySql` or `MySql.EntityFrameworkCore` |
+| `providerName="Oracle.ManagedDataAccess.Client"` | Oracle | `Oracle.EntityFrameworkCore` |
+
+**Step 2: Install the matching EF Core provider package** in the Blazor project:
+
+```bash
+# Example for SQL Server
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.3
+
+# Example for PostgreSQL
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 10.0.3
+
+# Example for MySQL (Pomelo)
+dotnet add package Pomelo.EntityFrameworkCore.MySql --version 10.0.3
+```
+
+**Step 3: Configure the matching provider** in `Program.cs`:
+
+```csharp
+// SQL Server — matches System.Data.SqlClient
+options.UseSqlServer(connectionString)
+
+// PostgreSQL — matches Npgsql
+options.UseNpgsql(connectionString)
+
+// MySQL — matches MySql.Data.MySqlClient
+options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+
+// SQLite — matches System.Data.SQLite
+options.UseSqlite(connectionString)
+```
+
+> Install matching EF Core packages for .NET 10: `Microsoft.EntityFrameworkCore`, the provider-specific package (see table above), `.Tools`, and `.Design`.
 
 ```csharp
 // Web Forms — direct DbContext in code-behind
@@ -130,9 +193,10 @@ public IQueryable<Product> GetProducts()
 ```
 
 ```csharp
-// Blazor — Program.cs
+// Blazor — Program.cs (use the provider that matches the original Web Forms database)
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // ↑ Replace with UseNpgsql(), UseMySql(), UseSqlite(), etc. to match original provider
 ```
 
 ```csharp
@@ -189,11 +253,9 @@ public class ProductService(IDbContextFactory<ProductContext> factory)
 
 ---
 
-## 2. DataSource Controls → Service Injection (Back-End Only)
+## 2. DataSource Controls → Service Injection
 
-Web Forms `DataSource` controls have **no BWFC equivalent** — they are the ONE thing you replace. But the **data-bound controls** (`GridView`, `ListView`, etc.) **ARE BWFC components** and MUST be preserved.
-
-> **Rule:** Replace the `DataSource` control with an injected service. Keep the `GridView`/`ListView`/etc. as a BWFC component. Only change `DataSourceID` → `Items`.
+Web Forms `DataSource` controls have **no BWFC equivalent**. Replace with injected services.
 
 ```xml
 <!-- Web Forms — declarative data binding -->
@@ -204,10 +266,10 @@ Web Forms `DataSource` controls have **no BWFC equivalent** — they are the ONE
 ```
 
 ```razor
-@* Blazor — service injection, BWFC GridView preserved *@
+@* Blazor — service injection *@
 @inject IProductService ProductService
 
-<GridView Items="products" TItem="Product" AutoGenerateColumns="true" />
+<GridView Items="products" ItemType="Product" AutoGenerateColumns="true" />
 
 @code {
     private List<Product> products = new();
@@ -222,20 +284,46 @@ Web Forms `DataSource` controls have **no BWFC equivalent** — they are the ONE
 ### Service Registration Pattern
 
 ```csharp
-// Program.cs
+// Program.cs — use the provider that matches the original Web Forms database
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddBlazorWebFormsComponents(); // ⚠️ REQUIRED — registers BWFC services
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // ↑ Match the original provider: UseNpgsql(), UseMySql(), UseSqlite(), etc.
+
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+// ... after builder.Build() ...
+app.UseBlazorWebFormsComponents(); // ⚠️ REQUIRED — .aspx URL rewriting middleware. BEFORE MapRazorComponents.
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 ```
 
-### SelectMethod → Service Method Mapping
+### SelectMethod String → SelectHandler Delegate Conversion
+
+BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` — a delegate with signature `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`. When set, `OnAfterRenderAsync` automatically calls it to populate `Items`. This is the **native BWFC data-binding pattern** that mirrors how Web Forms did it.
+
+**Option A — Preserve SelectMethod as delegate (recommended):**
+
+| Web Forms SelectMethod | BWFC SelectMethod Delegate |
+|----------------------|---------------------|
+| `SelectMethod="GetProducts"` | `SelectMethod="@productService.GetProducts"` (if signature matches `SelectHandler<T>`) |
+| `SelectMethod="GetProduct"` | `SelectMethod="@productService.GetProduct"` (or use `DataItem` for single-record controls) |
+
+**Option B — Items binding (ONLY when original used DataSource, NOT SelectMethod):**
+
+> ⚠️ Use Option B ONLY when the original Web Forms markup used `DataSource`/`DataBind()`, NOT when it used `SelectMethod`. If the original had `SelectMethod="GetProducts"`, you MUST use Option A above.
 
 | Web Forms SelectMethod | Blazor Service Call |
 |----------------------|---------------------|
-| `SelectMethod="GetProducts"` | `products = await ProductService.GetProductsAsync();` |
-| `SelectMethod="GetProduct"` | `product = await ProductService.GetProductAsync(id);` |
+| `SelectMethod="GetProducts"` | `products = await ProductService.GetProductsAsync();` then `Items="@products"` |
+| `SelectMethod="GetProduct"` | `product = await ProductService.GetProductAsync(id);` then `DataItem="@product"` |
+
+**CRUD methods** (no BWFC parameter equivalent — wire to service calls in event handlers):
+
+| Web Forms Method | Blazor Service Call |
+|----------------------|---------------------|
 | `InsertMethod="InsertProduct"` | `await ProductService.InsertAsync(product);` |
 | `UpdateMethod="UpdateProduct"` | `await ProductService.UpdateAsync(product);` |
 | `DeleteMethod="DeleteProduct"` | `await ProductService.DeleteAsync(id);` |
@@ -307,235 +395,11 @@ builder.Services.AddScoped<CartService>();
 
 ---
 
-## 4. Global.asax → Program.cs
+## Reference Documents
 
-```csharp
-// Web Forms — Global.asax
-protected void Application_Start(object sender, EventArgs e)
-{
-    RouteConfig.RegisterRoutes(RouteTable.Routes);
-    BundleConfig.RegisterBundles(BundleTable.Bundles);
-}
+Architecture migration patterns (Global.asax, Web.config, routes, handlers, enhanced navigation) are in the child document:
 
-protected void Application_Error(object sender, EventArgs e)
-{
-    var ex = Server.GetLastError();
-    Logger.LogError(ex);
-}
-
-protected void Session_Start(object sender, EventArgs e)
-{
-    Session["Cart"] = new ShoppingCart();
-}
-```
-
-```csharp
-// Blazor — Program.cs
-var builder = WebApplication.CreateBuilder(args);
-
-// Services (replaces Application_Start registrations)
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddBlazorWebFormsComponents();
-builder.Services.AddDbContextFactory<ProductContext>(options => ...);
-builder.Services.AddScoped<CartService>(); // replaces Session_Start
-
-var app = builder.Build();
-
-// Middleware pipeline
-app.UseExceptionHandler("/Error"); // replaces Application_Error
-app.UseStaticFiles();
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseAntiforgery();
-app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-
-app.Run();
-```
-
-### Global.asax Event → Blazor Equivalent
-
-| Global.asax Event | Blazor Equivalent |
-|-------------------|-------------------|
-| `Application_Start` | `Program.cs` — service registration and app configuration |
-| `Application_Error` | `app.UseExceptionHandler(...)` middleware |
-| `Session_Start` | Scoped service constructor (lazy init) |
-| `Session_End` | `IDisposable` on scoped services or circuit handler |
-| `Application_BeginRequest` | Custom middleware |
-| `Application_EndRequest` | Custom middleware |
-
----
-
-## 5. Web.config → appsettings.json
-
-```xml
-<!-- Web Forms — Web.config -->
-<appSettings>
-  <add key="PayPal:Mode" value="sandbox" />
-  <add key="MaxItemsPerPage" value="20" />
-</appSettings>
-```
-
-```json
-// Blazor — appsettings.json
-{
-  "PayPal": {
-    "Mode": "sandbox"
-  },
-  "MaxItemsPerPage": 20
-}
-```
-
-```csharp
-// Web Forms access
-var mode = ConfigurationManager.AppSettings["PayPal:Mode"];
-
-// Blazor access — IConfiguration
-@inject IConfiguration Config
-var mode = Config["PayPal:Mode"];
-
-// Blazor access — Options pattern (recommended)
-builder.Services.Configure<PayPalOptions>(builder.Configuration.GetSection("PayPal"));
-@inject IOptions<PayPalOptions> PayPalOptions
-var mode = PayPalOptions.Value.Mode;
-```
-
----
-
-## 6. Route Table → @page Directives
-
-```csharp
-// Web Forms — RouteConfig.cs
-routes.MapPageRoute("ProductRoute", "Product/{productId}", "~/ProductDetail.aspx");
-routes.MapPageRoute("CategoryRoute", "Category/{categoryId}", "~/ProductList.aspx");
-```
-
-```razor
-@* Blazor — ProductDetail.razor *@
-@page "/Product/{ProductId:int}"
-@code {
-    [Parameter] public int ProductId { get; set; }
-}
-
-@* Blazor — ProductList.razor *@
-@page "/Category/{CategoryId:int}"
-@code {
-    [Parameter] public int CategoryId { get; set; }
-}
-```
-
-### URL Pattern Conversion
-
-| Web Forms Route Pattern | Blazor @page Pattern |
-|------------------------|---------------------|
-| `{id}` | `{Id:int}` (add type constraint) |
-| `{name}` | `{Name}` (string, no constraint needed) |
-| `{category}/{subcategory}` | `{Category}/{Subcategory}` |
-| Optional: `{id?}` | `{Id:int?}` |
-| Default: `{action=Index}` | Multiple `@page` directives |
-
-### Friendly URLs
-
-```csharp
-// Web Forms — FriendlyUrls
-routes.EnableFriendlyUrls();
-// Maps Products.aspx → /Products, Products/Details/5 → Products.aspx?id=5
-
-// Blazor — direct @page mapping
-@page "/Products"
-@page "/Products/Details/{Id:int}"
-```
-
----
-
-## 7. HTTP Handlers/Modules → Middleware
-
-```csharp
-// Web Forms — IHttpHandler
-public class ImageHandler : IHttpHandler
-{
-    public void ProcessRequest(HttpContext context)
-    {
-        var id = context.Request.QueryString["id"];
-        // serve image
-    }
-    public bool IsReusable => true;
-}
-```
-
-```csharp
-// Blazor — Minimal API endpoint
-app.MapGet("/api/images/{id}", async (int id, ImageService svc) =>
-{
-    var image = await svc.GetImageAsync(id);
-    return Results.File(image.Data, image.ContentType);
-});
-```
-
-```csharp
-// Web Forms — IHttpModule
-public class LoggingModule : IHttpModule
-{
-    public void Init(HttpApplication context)
-    {
-        context.BeginRequest += (s, e) => Log("Begin: " + context.Request.Url);
-    }
-}
-```
-
-```csharp
-// Blazor — Middleware
-app.Use(async (context, next) =>
-{
-    Log($"Begin: {context.Request.Path}");
-    await next(context);
-});
-```
-
----
-
-## 8. Third-Party Integrations → HttpClient
-
-```csharp
-// Web Forms — WebRequest/WebClient
-var request = WebRequest.Create("https://api.paypal.com/v1/payments");
-request.Method = "POST";
-// ... manual serialization and error handling
-```
-
-```csharp
-// Blazor — Program.cs
-builder.Services.AddHttpClient("PayPal", client =>
-{
-    client.BaseAddress = new Uri("https://api.paypal.com/v1/");
-});
-
-// Blazor — Service
-public class PayPalService(IHttpClientFactory factory)
-{
-    public async Task<PaymentResult> CreatePaymentAsync(Order order)
-    {
-        var client = factory.CreateClient("PayPal");
-        var response = await client.PostAsJsonAsync("payments", order);
-        return await response.Content.ReadFromJsonAsync<PaymentResult>()!;
-    }
-}
-```
-
----
-
-## Files to Create During Migration
-
-| File | Purpose | Replaces |
-|------|---------|----------|
-| `Program.cs` | Service registration, middleware | `Global.asax`, `Startup.cs`, `RouteConfig.cs` |
-| `appsettings.json` | Configuration | `Web.config` `<appSettings>` and `<connectionStrings>` |
-| `App.razor` | Root component with Router | `Default.aspx` (entry point) |
-| `_Imports.razor` | Global usings | `Web.config` `<namespaces>` |
-| `Components/Layout/MainLayout.razor` | Application layout | `Site.Master` |
-| `Components/Pages/*.razor` | Pages | `*.aspx` files |
-| `Services/*.cs` | Data access services | `SelectMethod`s, DataSource controls, code-behind queries |
-| `Models/*.cs` | Domain models | Copy from Web Forms project |
+- **[ARCHITECTURE-TRANSFORMS.md](ARCHITECTURE-TRANSFORMS.md)**  Global.asax → Program.cs, Web.config → appsettings.json, route table → @page directives, HTTP handlers/modules → middleware, third-party integrations → HttpClient, files to create during migration, and Blazor enhanced navigation workarounds.
 
 ---
 
@@ -565,3 +429,5 @@ Web Forms `SelectMethod` returns `IQueryable` synchronously. Blazor services sho
 
 ### Static Helpers with HttpContext
 Web Forms often has static helper classes that access `HttpContext.Current`. These must be refactored to accept dependencies via constructor injection.
+
+

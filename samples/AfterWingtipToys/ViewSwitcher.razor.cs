@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys;
 
-public partial class ViewSwitcher : ComponentBase
+// ViewSwitcher — Web Forms FriendlyUrls mobile view switching is not applicable in Blazor.
+// Blazor uses responsive CSS. This component is preserved as a no-op stub.
+public partial class ViewSwitcher
 {
-    private string CurrentView => "Desktop";
-    private string AlternateView => "Mobile";
-    private string SwitchUrl => "#";
 }

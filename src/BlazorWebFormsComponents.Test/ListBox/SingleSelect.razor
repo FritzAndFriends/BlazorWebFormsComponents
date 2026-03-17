@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" SelectionMode="ListSelectionMode.Single" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" SelectionMode="ListSelectionMode.Single" />);
 
 		// Assert
 		var select = cut.Find("select");
@@ -31,7 +31,7 @@
 		};
 
 		// Act
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var select = cut.Find("select");

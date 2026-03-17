@@ -1,22 +1,23 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
 using WingtipToys.Models;
 
 namespace WingtipToys;
 
-public partial class ProductList : ComponentBase
+public partial class ProductList
 {
     [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
 
     [SupplyParameterFromQuery(Name = "id")]
-    private int? CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
-    private List<Product> _products = new();
+    [SupplyParameterFromQuery(Name = "categoryName")]
+    public string? CategoryName { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    private IQueryable<Product> GetProducts(
+        int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
     {
-        using var db = await DbFactory.CreateDbContextAsync();
+        using var db = DbFactory.CreateDbContext();
         IQueryable<Product> query = db.Products.Include(p => p.Category);
 
         if (CategoryId.HasValue && CategoryId > 0)
@@ -24,7 +25,19 @@ public partial class ProductList : ComponentBase
             query = query.Where(p => p.CategoryID == CategoryId);
         }
 
-        _products = await query.ToListAsync();
+        if (!string.IsNullOrEmpty(CategoryName))
+        {
+            query = query.Where(p =>
+                string.Compare(p.Category!.CategoryName, CategoryName) == 0);
+        }
+
+        totalRowCount = query.Count();
+        return query;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Page.Title = "Products";
+        await Task.CompletedTask;
     }
 }
-

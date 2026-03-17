@@ -1,0 +1,163 @@
+@page "/ControlSamples/ToggleButtonExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>ToggleButtonExtender Component Samples</PageTitle>
+
+<h2>ToggleButtonExtender Component</h2>
+
+<p>The <code>ToggleButtonExtender</code> replaces a standard checkbox with clickable toggle images. Different images are shown for checked, unchecked, hover, and disabled states. This emulates the Ajax Control Toolkit <code>ToggleButtonExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Toggle</h3>
+<p>A checkbox with custom checked/unchecked images and alt text.</p>
+
+<div data-audit-control="ToggleButtonExtender-1">
+    <input type="checkbox" id="chkBasicToggle" />
+    <label for="chkBasicToggle" class="ms-2">Subscribe to newsletter</label>
+    <ToggleButtonExtender TargetControlID="chkBasicToggle"
+                          CheckedImageUrl="/images/toggle-on.png"
+                          UncheckedImageUrl="/images/toggle-off.png"
+                          CheckedImageAlternateText="Subscribed"
+                          UncheckedImageAlternateText="Not subscribed"
+                          ImageWidth="48"
+                          ImageHeight="24" />
+</div>
+
+<pre><code>&lt;input type="checkbox" id="chkBasicToggle" /&gt;
+&lt;ToggleButtonExtender TargetControlID="chkBasicToggle"
+                      CheckedImageUrl="/images/toggle-on.png"
+                      UncheckedImageUrl="/images/toggle-off.png"
+                      CheckedImageAlternateText="Subscribed"
+                      UncheckedImageAlternateText="Not subscribed"
+                      ImageWidth="48" ImageHeight="24" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Custom Image Paths</h3>
+<p>Different toggle images for different use cases — a star rating toggle and a heart favorite toggle.</p>
+
+<div data-audit-control="ToggleButtonExtender-2">
+    <div class="d-flex gap-4">
+        <div>
+            <input type="checkbox" id="chkStar" />
+            <label for="chkStar" class="ms-1">Star Rating</label>
+            <ToggleButtonExtender TargetControlID="chkStar"
+                                  CheckedImageUrl="/images/star-filled.png"
+                                  UncheckedImageUrl="/images/star-empty.png"
+                                  CheckedImageAlternateText="Starred"
+                                  UncheckedImageAlternateText="Not starred"
+                                  ImageWidth="32"
+                                  ImageHeight="32" />
+        </div>
+        <div>
+            <input type="checkbox" id="chkHeart" />
+            <label for="chkHeart" class="ms-1">Favorite</label>
+            <ToggleButtonExtender TargetControlID="chkHeart"
+                                  CheckedImageUrl="/images/heart-filled.png"
+                                  UncheckedImageUrl="/images/heart-empty.png"
+                                  CheckedImageAlternateText="Favorited"
+                                  UncheckedImageAlternateText="Not favorited"
+                                  ImageWidth="32"
+                                  ImageHeight="32" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;input type="checkbox" id="chkStar" /&gt;
+&lt;ToggleButtonExtender TargetControlID="chkStar"
+                      CheckedImageUrl="/images/star-filled.png"
+                      UncheckedImageUrl="/images/star-empty.png"
+                      ImageWidth="32" ImageHeight="32" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Hover Images</h3>
+<p>Use <code>CheckedImageOverUrl</code> and <code>UncheckedImageOverUrl</code> to provide hover-state images for better interactivity.</p>
+
+<div data-audit-control="ToggleButtonExtender-3">
+    <input type="checkbox" id="chkHover" />
+    <label for="chkHover" class="ms-2">Enable notifications</label>
+    <ToggleButtonExtender TargetControlID="chkHover"
+                          CheckedImageUrl="/images/bell-on.png"
+                          UncheckedImageUrl="/images/bell-off.png"
+                          CheckedImageOverUrl="/images/bell-on-hover.png"
+                          UncheckedImageOverUrl="/images/bell-off-hover.png"
+                          CheckedImageAlternateText="Notifications enabled"
+                          UncheckedImageAlternateText="Notifications disabled"
+                          ImageWidth="32"
+                          ImageHeight="32" />
+</div>
+
+<pre><code>&lt;ToggleButtonExtender TargetControlID="chkHover"
+                      CheckedImageUrl="/images/bell-on.png"
+                      UncheckedImageUrl="/images/bell-off.png"
+                      CheckedImageOverUrl="/images/bell-on-hover.png"
+                      UncheckedImageOverUrl="/images/bell-off-hover.png"
+                      ImageWidth="32" ImageHeight="32" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. Disabled State</h3>
+<p>Use <code>DisabledCheckedImageUrl</code> and <code>DisabledUncheckedImageUrl</code> to show grayed-out images when the checkbox is disabled.</p>
+
+<div data-audit-control="ToggleButtonExtender-4">
+    <input type="checkbox" id="chkDisabled" disabled checked />
+    <label for="chkDisabled" class="ms-2 text-muted">Premium feature (disabled)</label>
+    <ToggleButtonExtender TargetControlID="chkDisabled"
+                          CheckedImageUrl="/images/lock-closed.png"
+                          UncheckedImageUrl="/images/lock-open.png"
+                          DisabledCheckedImageUrl="/images/lock-closed-disabled.png"
+                          DisabledUncheckedImageUrl="/images/lock-open-disabled.png"
+                          CheckedImageAlternateText="Locked"
+                          UncheckedImageAlternateText="Unlocked"
+                          ImageWidth="32"
+                          ImageHeight="32" />
+</div>
+
+<pre><code>&lt;input type="checkbox" id="chkDisabled" disabled checked /&gt;
+&lt;ToggleButtonExtender TargetControlID="chkDisabled"
+                      CheckedImageUrl="/images/lock-closed.png"
+                      UncheckedImageUrl="/images/lock-open.png"
+                      DisabledCheckedImageUrl="/images/lock-closed-disabled.png"
+                      DisabledUncheckedImageUrl="/images/lock-open-disabled.png"
+                      ImageWidth="32" ImageHeight="32" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:CheckBox ID="chkToggle" runat="server" Text="Subscribe" /&gt;
+&lt;ajaxToolkit:ToggleButtonExtender ID="ToggleButton1" runat="server"
+    TargetControlID="chkToggle"
+    CheckedImageUrl="~/images/toggle-on.png"
+    UncheckedImageUrl="~/images/toggle-off.png"
+    ImageWidth="48" ImageHeight="24" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="checkbox" id="chkToggle" /&gt;
+&lt;ToggleButtonExtender TargetControlID="chkToggle"
+                      CheckedImageUrl="/images/toggle-on.png"
+                      UncheckedImageUrl="/images/toggle-off.png"
+                      ImageWidth="48" ImageHeight="24" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:CheckBox&gt;</code> with <code>&lt;input type="checkbox"&gt;</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:ToggleButtonExtender&gt;</code> with <code>&lt;ToggleButtonExtender&gt;</code></li>
+    <li>Update image URLs from <code>~/images/</code> to <code>/images/</code> (Blazor static file path)</li>
+    <li>Keep all image properties unchanged</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+}

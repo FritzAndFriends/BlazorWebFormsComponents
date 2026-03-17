@@ -60,7 +60,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the position of the insert item template. Controls whether the insert row appears at the top, bottom, or not at all.
 		/// </summary>
 		[Parameter]
-		public InsertItemPosition InsertItemPosition { get; set; }
+		public EnumParameter<InsertItemPosition> InsertItemPosition { get; set; }
 
 		/// <summary>
 		/// Gets or sets the index of the item currently in edit mode. -1 means no item is being edited.
@@ -80,7 +80,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the current sort direction.
 		/// </summary>
 		[Parameter]
-		public SortDirection SortDirection { get; set; } = SortDirection.Ascending;
+		public EnumParameter<SortDirection> SortDirection { get; set; } = Enums.SortDirection.Ascending;
 
 		/// <summary>
 		/// Gets or sets the index of the first record to display on a page.
@@ -397,7 +397,7 @@ namespace BlazorWebFormsComponents
 
 		private async Task HandleCancelCommand(int itemIndex)
 		{
-			var cancelMode = InsertItemPosition != InsertItemPosition.None && EditIndex < 0
+			var cancelMode = InsertItemPosition.Value != Enums.InsertItemPosition.None && EditIndex < 0
 				? ListViewCancelMode.CancelingInsert
 				: ListViewCancelMode.CancelingEdit;
 
@@ -485,9 +485,9 @@ namespace BlazorWebFormsComponents
 
 		private async Task HandleSortCommand(string sortExpression)
 		{
-			var newDirection = (sortExpression == SortExpression && SortDirection == SortDirection.Ascending)
-				? SortDirection.Descending
-				: SortDirection.Ascending;
+			var newDirection = (sortExpression == SortExpression && SortDirection.Value == Enums.SortDirection.Ascending)
+				? Enums.SortDirection.Descending
+				: Enums.SortDirection.Ascending;
 
 			var args = new ListViewSortEventArgs(sortExpression, newDirection);
 			var sortingHandler = Sorting.HasDelegate ? Sorting : OnSorting;

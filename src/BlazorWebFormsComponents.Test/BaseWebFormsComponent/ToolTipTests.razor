@@ -196,7 +196,7 @@
 	public void DropDownList_WithToolTip_RendersTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<DropDownList TItem="object" StaticItems="items" ToolTip="DropDownList tooltip" />);
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" ToolTip="DropDownList tooltip" />);
 		var select = cut.Find("select");
 		select.HasAttribute("title").ShouldBeTrue();
 		select.GetAttribute("title").ShouldBe("DropDownList tooltip");
@@ -206,7 +206,7 @@
 	public void DropDownList_WithoutToolTip_DoesNotRenderTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<DropDownList TItem="object" StaticItems="items" />);
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" />);
 		cut.Find("select").HasAttribute("title").ShouldBeFalse();
 	}
 
@@ -214,7 +214,7 @@
 	public void ListBox_WithToolTip_RendersTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" ToolTip="ListBox tooltip" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" ToolTip="ListBox tooltip" />);
 		var select = cut.Find("select");
 		select.HasAttribute("title").ShouldBeTrue();
 		select.GetAttribute("title").ShouldBe("ListBox tooltip");
@@ -224,7 +224,7 @@
 	public void ListBox_WithoutToolTip_DoesNotRenderTitleAttribute()
 	{
 		var items = new ListItemCollection { new ListItem("One", "1") };
-		var cut = Render(@<ListBox TItem="object" StaticItems="items" />);
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" />);
 		cut.Find("select").HasAttribute("title").ShouldBeFalse();
 	}
 
@@ -242,6 +242,47 @@
 	{
 		var cut = Render(@<LinkButton>Click</LinkButton>);
 		cut.Find("a").HasAttribute("title").ShouldBeFalse();
+	}
+
+	// =================================================================
+	// Issue #16 — ToolTip with special characters
+	// =================================================================
+
+	[Fact]
+	public void Button_ToolTip_WithAmpersand_RendersCorrectly()
+	{
+		var cut = Render(@<Button Text="Save" ToolTip="Save & Continue" />);
+		cut.Find("input[type=submit]").GetAttribute("title").ShouldBe("Save & Continue");
+	}
+
+	[Fact]
+	public void Label_ToolTip_WithQuotes_RendersCorrectly()
+	{
+		var cut = Render(@<Label Text="Info" ToolTip='He said "hello"' />);
+		cut.Find("span").GetAttribute("title").ShouldBe("He said \"hello\"");
+	}
+
+	[Fact]
+	public void Image_ToolTip_WithAngleBrackets_RendersCorrectly()
+	{
+		var cut = Render(@<Image ImageUrl="/img/test.png" AlternateText="Test" ToolTip="Size < 100 & > 50" />);
+		cut.Find("img").GetAttribute("title").ShouldBe("Size < 100 & > 50");
+	}
+
+	[Fact]
+	public void Panel_ToolTip_WithSpecialChars_RendersCorrectly()
+	{
+		var cut = Render(@<Panel ToolTip="Tom &amp; Jerry's &quot;show&quot;"><p>Content</p></Panel>);
+		var div = cut.Find("div");
+		div.HasAttribute("title").ShouldBeTrue();
+		div.GetAttribute("title").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void TextBox_ToolTip_WithApostrophe_RendersCorrectly()
+	{
+		var cut = Render(@<TextBox Text="value" ToolTip="Enter user's name" />);
+		cut.Find("input").GetAttribute("title").ShouldBe("Enter user's name");
 	}
 
 }

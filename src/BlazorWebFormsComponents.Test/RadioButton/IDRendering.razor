@@ -1,0 +1,72 @@
+@using Shouldly
+
+@code {
+
+	[Fact]
+	public void RadioButton_WithID_RendersIDOnInput()
+	{
+		// When a developer sets ID="myRadio", the input element must use that exact ID
+		var cut = Render(@<RadioButton ID="myRadio" Text="Option A" />);
+
+		var input = cut.Find("input[type='radio']");
+		input.GetAttribute("id").ShouldBe("myRadio");
+	}
+
+	[Fact]
+	public void RadioButton_WithID_LabelForMatchesInputId()
+	{
+		// Accessibility: label's "for" attribute must match the input's id
+		var cut = Render(@<RadioButton ID="myRadio" Text="Option A" />);
+
+		var label = cut.Find("label");
+		label.GetAttribute("for").ShouldBe("myRadio");
+	}
+
+	[Fact]
+	public void RadioButton_WithoutID_DoesNotRenderIdAttribute()
+	{
+		// When no ID is set, no id attribute is rendered (no GUID)
+		var cut = Render(@<RadioButton Text="Option A" />);
+
+		var input = cut.Find("input[type='radio']");
+		input.HasAttribute("id").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void RadioButton_WithoutID_LabelDoesNotRenderForAttribute()
+	{
+		// Without developer ID, label's for attribute is omitted (no GUID)
+		var cut = Render(@<RadioButton Text="Option A" />);
+
+		var label = cut.Find("label");
+		label.HasAttribute("for").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void RadioButton_WithID_NoGuidInRenderedId()
+	{
+		// The rendered id must be the developer's ID, not a GUID
+		var cut = Render(@<RadioButton ID="MyControl" Text="Pick me" />);
+
+		var input = cut.Find("input[type='radio']");
+		var renderedId = input.GetAttribute("id");
+
+		renderedId.ShouldBe("MyControl");
+		// Must not contain GUID patterns (8-4-4-4-12 hex chars)
+		System.Text.RegularExpressions.Regex.IsMatch(
+			renderedId,
+			@"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+		).ShouldBeFalse("Rendered ID should not contain a GUID when developer sets ID");
+	}
+
+	[Fact]
+	public void RadioButton_WithID_NameAttributeUsesGroupNameWhenSet()
+	{
+		// When GroupName is explicitly set, name should be the GroupName, not the ID
+		var cut = Render(@<RadioButton ID="myRadio" Text="Option A" GroupName="myGroup" />);
+
+		var input = cut.Find("input[type='radio']");
+		input.GetAttribute("name").ShouldBe("myGroup");
+	}
+
+}

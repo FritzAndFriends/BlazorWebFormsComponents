@@ -70,17 +70,9 @@ Layer 1 handles every transform that can be expressed as a regex find-and-replac
 | Content wrapper removals (`<asp:Content>`) | 28 | 100% |
 | URL conversions (`~/` → `/`) | All | 100% |
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
-| CSS extraction from master pages | 1 per master | 100% |
-| Static file copying to wwwroot | all | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
 `_Imports.razor` includes `@inherits BlazorWebFormsComponents.WebFormsPageBase` so that all converted pages get `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` without per-page injection. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
-
-### Post-Transform Verification: Control Preservation
-
-After transforming each file, the script runs `Test-BwfcControlPreservation` to verify that **every `asp:` control in the source was preserved as a BWFC component** in the output. If the verification reports a control count deficit, it means a control was lost during transformation — this is always a bug in the migration script, not an expected outcome.
-
-> ⚠️ **Rule:** The script preserves ALL `asp:` controls as BWFC components. If the verification step reports a control deficit, it means a control was incorrectly flattened to raw HTML during Layer 2 work. Never replace a BWFC component (e.g., `<GridView>`, `<TextBox>`) with raw HTML (`<table>`, `<input>`) — the component must be preserved so that existing CSS, JavaScript, and server-side behavior continue to work.
 
 ### What Layer 1 Does NOT Do
 
@@ -89,7 +81,6 @@ After transforming each file, the script runs `Test-BwfcControlPreservation` to 
 - Replace DataSource controls (requires architecture decisions)
 - Wire authentication (requires knowing your auth strategy)
 - Convert Master Pages to layouts (partially — removes directives but doesn't create `@Body`)
-- Validate that image paths in templates match the copied file locations in `wwwroot/` — that is Layer 2 work
 
 These are intentionally left for Layer 2 and Layer 3.
 
@@ -111,16 +102,9 @@ After Layer 1, pages fall into three readiness categories:
 
 **Tool:** [Copilot migration skill](skills/bwfc-migration/SKILL.md)
 
-> ## 🚫 CRITICAL: BWFC Components Must Be Preserved
->
-> Layer 2 is where BWFC control loss has historically occurred. Agents replace `<GridView>` with `@foreach` + `<table>`, `<TextBox>` with `<input>`, `<LoginView>` with `@if` blocks, etc.
-> **This is ALWAYS wrong.** BWFC components must be preserved — only their data loading and event wiring changes.
-
-Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably — **as long as it uses BWFC components, not raw HTML**.
+Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably.
 
 ### What Layer 2 Handles
-
-> **BWFC-FIRST RULE:** Every transform below changes the DATA LOADING or EVENT WIRING — it does NOT replace BWFC components with raw HTML.
 
 | Transform | Before | After |
 |---|---|---|
@@ -133,13 +117,6 @@ Layer 2 handles transforms that follow consistent patterns but require understan
 | Layout conversion | `<asp:ContentPlaceHolder ID="MainContent">` | `@Body` |
 | Query parameters | `[QueryString] int? id` | `[SupplyParameterFromQuery]` |
 | Route parameters | `[RouteData] int id` | `@page "/path/{id:int}"` + `[Parameter]` |
-
-**What Layer 2 MUST NOT do:**
-- ❌ Replace `<GridView>` with `@foreach` + `<table>`
-- ❌ Replace `<TextBox>` with `<input>`
-- ❌ Replace `<LoginView>` with `@if (isAuth) { ... }`
-- ❌ Replace `<HyperLink>` with `<a href="...">`
-- ❌ Replace ANY BWFC component with raw HTML
 
 ### How to Use Layer 2
 
@@ -162,8 +139,6 @@ Layer 2 is "high accuracy" rather than "100% accuracy" because:
 - Some event handler signatures have application-specific parameters
 - Navigation routes depend on your URL structure
 
-**Always verify that Copilot preserved ALL BWFC components.** The #1 failure mode in Runs 6-8 was Layer 2 replacing BWFC controls with raw HTML. Check every data control (`GridView`, `ListView`, `Repeater`), every form control (`TextBox`, `Button`, `CheckBox`), and every login control (`LoginView`, `LoginStatus`) to confirm they remain as BWFC components.
-
 Always review Copilot's changes before committing.
 
 ---
@@ -171,6 +146,7 @@ Always review Copilot's changes before committing.
 ## Layer 3: Architecture Decisions
 
 **Tool:** [Data migration skill](skills/bwfc-data-migration/SKILL.md) + your own judgment
+
 
 Layer 3 is the ~15% of migration work that requires understanding your application's architecture. No script or AI can make these decisions for you — but the data migration skill and Copilot can guide you through the options and trade-offs.
 
@@ -199,12 +175,42 @@ The skill provides decision frameworks for common architecture patterns — see 
 
 ---
 
+## Layer L3-opt: Performance Optimization Pass (Optional)
+
+**Tool:** [L3 performance optimization skill](skills/l3-performance-optimization/SKILL.md)
+
+This is an **optional fourth step** that runs after the app builds and passes verification. It is not part of the core migration pipeline — it is a post-migration polish pass that applies modern .NET 10 performance patterns to already-functional migrated code.
+
+### What L3-opt Handles
+
+| Optimization | Before (typical migration output) | After |
+|---|---|---|
+| Sync lifecycle | `void OnInitialized()` with DB calls | `async Task OnInitializedAsync()` |
+| Sync EF Core | `.ToList()`, `.SaveChanges()` | `await .ToListAsync()`, `await .SaveChangesAsync()` |
+| No-tracking reads | `db.Products.ToListAsync()` | `db.Products.AsNoTracking().ToListAsync()` |
+| `@key` on loops | `@foreach (var p in products)` | `@foreach (...) { <C @key="p.ID" ... />}` |
+| Query string params | Manual `Uri` parsing | `[SupplyParameterFromQuery]` |
+| Code-behind extraction | Inline `@code` blocks > 50 lines | Partial `.razor.cs` class |
+
+### When to Apply
+
+Apply L3-opt after:
+1. ✅ App builds without errors
+2. ✅ App runs and renders pages correctly
+3. ✅ Interactive features (forms, navigation, data) work
+4. ✅ Basic verification checklist is complete
+
+Do **not** apply L3-opt to a broken build. Async patterns surface errors that were previously hidden.
+
+---
+
 ## Why This Ordering Matters
 
 Layers must run in order: 1 → 2 → 3. Each layer assumes the previous one has completed.
 
 - **Layer 1 before Layer 2:** Copilot expects files to already have `asp:` prefixes removed and expressions converted. If Layer 1 hasn't run, Copilot wastes time on mechanical transforms.
 - **Layer 2 before Layer 3:** Architecture decisions are easier when the markup is already in Blazor syntax. You can see what's left to wire up instead of mentally translating Web Forms markup.
+- **Layer 3 before L3-opt:** Performance optimizations assume functional code. Async migrations and `IDbContextFactory` patterns require the service layer to already exist.
 
 Don't skip layers. Don't try to do Layer 3 work in Layer 1. The pipeline is designed so that each layer makes the next layer's job easier.
 
@@ -220,7 +226,8 @@ Based on the [WingtipToys proof-of-concept](../planning-docs/WINGTIPTOYS-MIGRATI
 | Layer 1 (automated) | ~30 seconds | ~30 seconds |
 | Layer 2 (structural) | 8–12 hours | 2–4 hours |
 | Layer 3 (architecture) | 10–14 hours | 8–12 hours |
-| **Total** | **18–26 hours** | **10–16 hours** |
+| **L3-opt (optional)** | **1–2 hours** | **30–60 minutes** |
+| **Total** | **18–28 hours** | **10–17 hours** |
 
 Layer 3 time varies the most because it depends on your application's complexity. A simple CRUD app with no auth may have almost no Layer 3 work. An enterprise app with custom session state, complex auth, and third-party integrations will spend most of its time in Layer 3.
 

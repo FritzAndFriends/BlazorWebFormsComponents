@@ -15,7 +15,7 @@
 		};
 		
 		int clickedIndex = -1;
-		var cut = Render(@<BulletedList TItem="object" 
+		var cut = Render(@<BulletedList ItemType="object" 
 			StaticItems="items" 
 			DisplayMode="BulletedListDisplayMode.LinkButton" 
 			OnClick="e => clickedIndex = e.Index" />);
@@ -39,7 +39,7 @@
 		};
 		
 		int clickedIndex = -1;
-		var cut = Render(@<BulletedList TItem="object" 
+		var cut = Render(@<BulletedList ItemType="object" 
 			StaticItems="items" 
 			DisplayMode="BulletedListDisplayMode.LinkButton" 
 			OnClick="e => clickedIndex = e.Index" />);
@@ -65,7 +65,7 @@
 		};
 		
 		int clickedIndex = -1;
-		var cut = Render(@<BulletedList TItem="object" 
+		var cut = Render(@<BulletedList ItemType="object" 
 			StaticItems="items" 
 			DisplayMode="BulletedListDisplayMode.LinkButton" 
 			OnClick="e => clickedIndex = e.Index" />);
@@ -88,7 +88,7 @@
 		};
 		
 		int clickedIndex = -1;
-		var cut = Render(@<BulletedList TItem="object" 
+		var cut = Render(@<BulletedList ItemType="object" 
 			StaticItems="items" 
 			DisplayMode="BulletedListDisplayMode.Text" 
 			OnClick="e => clickedIndex = e.Index" />);
@@ -108,7 +108,7 @@
 			new ListItem("Link", "http://example.com")
 		};
 
-		var cut = Render(@<BulletedList TItem="object" 
+		var cut = Render(@<BulletedList ItemType="object" 
 			StaticItems="items" 
 			DisplayMode="BulletedListDisplayMode.HyperLink" />);
 

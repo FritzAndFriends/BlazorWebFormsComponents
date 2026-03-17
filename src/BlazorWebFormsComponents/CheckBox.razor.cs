@@ -8,8 +8,7 @@ namespace BlazorWebFormsComponents
 {
 	public partial class CheckBox : BaseStyledComponent
 	{
-		private string _inputId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedInputId;
-		private readonly string _generatedInputId = Guid.NewGuid().ToString("N");
+		private string _inputId => ClientID;
 
 		[Parameter]
 		public bool CausesValidation { get; set; } = true;
@@ -30,7 +29,7 @@ namespace BlazorWebFormsComponents
 		public string Text { get; set; }
 
 		[Parameter]
-		public TextAlign TextAlign { get; set; } = TextAlign.Right;
+		public EnumParameter<TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		[Parameter]
 		public EventCallback<ChangeEventArgs> OnCheckedChanged { get; set; }

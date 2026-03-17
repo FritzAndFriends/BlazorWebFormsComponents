@@ -1,19 +1,20 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
-using WingtipToys.Services;
 
 namespace WingtipToys;
 
-public partial class ShoppingCart : ComponentBase
+public partial class ShoppingCart
 {
-    [Inject] private ShoppingCartService CartService { get; set; } = default!;
-    [Inject] private NavigationManager Nav { get; set; } = default!;
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
     private List<CartItem> _cartItems = new();
-    private decimal _total;
-    private string _title = "Shopping Cart";
-    private Dictionary<int, bool> _removeFlags = new();
+    private string _cartTotal = "";
+    private string _totalLabelText = "Order Total: ";
+    private string _cartTitle = "Shopping Cart";
+    private bool _showButtons = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,47 +23,61 @@ public partial class ShoppingCart : ComponentBase
 
     private async Task LoadCart()
     {
-        _cartItems = await CartService.GetCartItemsAsync();
-        _total = await CartService.GetTotalAsync();
-        _removeFlags = _cartItems.ToDictionary(c => c.ProductId, _ => false);
-        _title = _cartItems.Any() ? "Shopping Cart" : "Shopping Cart is Empty";
-    }
+        using var db = DbFactory.CreateDbContext();
+        var cartId = GetCartId();
+        _cartItems = await db.ShoppingCartItems
+            .Where(c => c.CartId == cartId)
+            .Include(c => c.Product)
+            .ToListAsync();
 
-    private void OnQuantityChanged(CartItem item, ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var qty))
+        var cartTotal = _cartItems.Sum(c => c.Quantity * (c.Product?.UnitPrice ?? 0));
+        if (cartTotal > 0)
         {
-            item.Quantity = qty;
+            _cartTotal = string.Format("{0:c}", cartTotal);
+        }
+        else
+        {
+            _totalLabelText = "";
+            _cartTotal = "";
+            _cartTitle = "Shopping Cart is Empty";
+            _showButtons = false;
         }
     }
 
-    private void OnRemoveChanged(CartItem item, ChangeEventArgs e)
+    private IQueryable<CartItem> GetShoppingCartItems(
+        int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
     {
-        if (e.Value is bool val)
-        {
-            _removeFlags[item.ProductId] = val;
-        }
+        using var db = DbFactory.CreateDbContext();
+        var cartId = GetCartId();
+        var query = db.ShoppingCartItems
+            .Where(c => c.CartId == cartId)
+            .Include(c => c.Product);
+        totalRowCount = query.Count();
+        return query;
     }
 
-    private async Task UpdateBtn_Click(EventArgs e)
+    private string GetCartId()
     {
-        foreach (var item in _cartItems)
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext?.Request.Cookies.TryGetValue("CartId", out var cartId) == true && !string.IsNullOrEmpty(cartId))
         {
-            if (_removeFlags.GetValueOrDefault(item.ProductId))
-            {
-                await CartService.RemoveCartItemAsync(item.ProductId);
-            }
-            else
-            {
-                await CartService.UpdateCartItemAsync(item.ProductId, item.Quantity);
-            }
+            return cartId;
         }
+
+        var newCartId = Guid.NewGuid().ToString();
+        httpContext?.Response.Cookies.Append("CartId", newCartId, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(30) });
+        return newCartId;
+    }
+
+    private async Task UpdateBtn_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement cart update logic — read quantities from form, update DB
         await LoadCart();
     }
 
-    private async Task CheckoutBtn_Click(EventArgs e)
+    private void CheckoutBtn_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
     {
-        Nav.NavigateTo("/Checkout/CheckoutStart");
+        // TODO: Implement PayPal checkout start — store payment amount and redirect
+        NavigationManager.NavigateTo("/CheckoutStart");
     }
 }
-

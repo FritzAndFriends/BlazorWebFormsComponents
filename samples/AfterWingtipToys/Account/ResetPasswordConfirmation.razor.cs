@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class ResetPasswordConfirmation : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — password reset confirmation page
+public partial class ResetPasswordConfirmation
 {
-    private string Title => "Reset Password Confirmation";
 }

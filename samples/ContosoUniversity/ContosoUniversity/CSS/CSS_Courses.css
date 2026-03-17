@@ -1,0 +1,50 @@
+﻿.active {background-color:#131414;        
+}
+
+body {color:#c7e6e2;
+      background-image: url('../Images/space-4.jpg');
+}
+
+#hdrCourse {text-decoration:underline;
+            font-family:Ebrima;
+            position:relative;
+            left:-1px;
+            text-shadow:-1px -1px 10px 10px #131423;
+}
+
+#dropList{border:1px solid black;  
+          border-radius:5px;
+          width: 12%;
+          height:250px;
+          text-align:center;
+          position:relative;
+          left:10%;
+          top:98px;
+          overflow:auto;
+          box-shadow:-1px -1px 10px 10px #131423;
+}
+
+#autoComplete {border:1px solid black;
+               border-radius:5px;
+               width:15%;
+               height:250px;
+               position:relative;
+               left:30%;
+               overflow:auto;
+               text-align:center; 
+               top:-150px;   
+               box-shadow:-1px -1px 10px 10px #131423;          
+}
+
+#crsByName {text-decoration:underline;
+            font-family:Ebrima;
+            position:relative;
+            left:-2px;
+            text-shadow:-1px -1px 10px 10px #131423;
+            
+
+}
+
+.details {position:relative;
+          left:34px;
+}

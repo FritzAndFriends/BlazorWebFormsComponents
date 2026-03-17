@@ -1,0 +1,342 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string HOVER_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/hover-menu-extender.js";
+
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === TargetControlID ===
+
+	[Fact]
+	public void TargetControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="rowItem" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.TargetControlID.ShouldBe("rowItem");
+	}
+
+	// === PopupControlID ===
+
+	[Fact]
+	public void PopupControlID_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupControlID.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void PopupControlID_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" PopupControlID="pnlMenu" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupControlID.ShouldBe("pnlMenu");
+	}
+
+	// === PopupPosition ===
+
+	[Fact]
+	public void PopupPosition_Default_IsRight()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.Right);
+	}
+
+	[Fact]
+	public void PopupPosition_SetToLeft()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" PopupPosition="PopupPosition.Left" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.Left);
+	}
+
+	[Fact]
+	public void PopupPosition_SetToTop()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" PopupPosition="PopupPosition.Top" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.Top);
+	}
+
+	[Fact]
+	public void PopupPosition_SetToBottom()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" PopupPosition="PopupPosition.Bottom" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.Bottom);
+	}
+
+	[Fact]
+	public void PopupPosition_SetToCenter()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" PopupPosition="PopupPosition.Center" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopupPosition.ShouldBe(PopupPosition.Center);
+	}
+
+	// === OffsetX ===
+
+	[Fact]
+	public void OffsetX_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.OffsetX.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OffsetX_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" OffsetX="5" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.OffsetX.ShouldBe(5);
+	}
+
+	// === OffsetY ===
+
+	[Fact]
+	public void OffsetY_Default_IsZero()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.OffsetY.ShouldBe(0);
+	}
+
+	[Fact]
+	public void OffsetY_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" OffsetY="10" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.OffsetY.ShouldBe(10);
+	}
+
+	// === PopDelay ===
+
+	[Fact]
+	public void PopDelay_Default_Is100()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopDelay.ShouldBe(100);
+	}
+
+	[Fact]
+	public void PopDelay_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" PopDelay="200" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.PopDelay.ShouldBe(200);
+	}
+
+	// === HoverDelay ===
+
+	[Fact]
+	public void HoverDelay_Default_Is300()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.HoverDelay.ShouldBe(300);
+	}
+
+	[Fact]
+	public void HoverDelay_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" HoverDelay="500" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.HoverDelay.ShouldBe(500);
+	}
+
+	// === HoverCssClass ===
+
+	[Fact]
+	public void HoverCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.HoverCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void HoverCssClass_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" HoverCssClass="hover-highlight" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.HoverCssClass.ShouldBe("hover-highlight");
+	}
+
+	// === Enabled (inherited) ===
+
+	[Fact]
+	public void Enabled_DefaultsTrue()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.Enabled.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(HOVER_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<HoverMenuExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	// === BehaviorID (inherited) ===
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<HoverMenuExtender TargetControlID="row1" />);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+
+	[Fact]
+	public void BehaviorID_WhenSet_ReturnsSetValue()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender TargetControlID="row1" BehaviorID="hoverBehavior1" />
+		);
+
+		cut.FindComponent<HoverMenuExtender>().Instance
+			.BehaviorID.ShouldBe("hoverBehavior1");
+	}
+
+	// === Full Configuration ===
+
+	[Fact]
+	public void AllParameters_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<HoverMenuExtender
+				TargetControlID="gridRow1"
+				PopupControlID="pnlActions"
+				PopupPosition="PopupPosition.Left"
+				OffsetX="3"
+				OffsetY="7"
+				PopDelay="150"
+				HoverDelay="400"
+				HoverCssClass="row-hover" />
+		);
+
+		var instance = cut.FindComponent<HoverMenuExtender>().Instance;
+		instance.TargetControlID.ShouldBe("gridRow1");
+		instance.PopupControlID.ShouldBe("pnlActions");
+		instance.PopupPosition.ShouldBe(PopupPosition.Left);
+		instance.OffsetX.ShouldBe(3);
+		instance.OffsetY.ShouldBe(7);
+		instance.PopDelay.ShouldBe(150);
+		instance.HoverDelay.ShouldBe(400);
+		instance.HoverCssClass.ShouldBe("row-hover");
+	}
+}

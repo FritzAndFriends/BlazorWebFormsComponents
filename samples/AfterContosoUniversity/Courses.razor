@@ -1,0 +1,45 @@
+@page "/Courses"
+<HeadContent>
+    <link href="/CSS/CSS_Courses.css" rel="stylesheet" />
+    <script src="/JQuery/JQuery_Courses.js"></script>
+</HeadContent>
+<ScriptManager></ScriptManager>
+    <UpdatePanel>
+        <ContentTemplate>
+            <div id="dropList">
+                <h1 id="hdrCourse">Select Course</h1>
+                <select @bind="_selectedDepartment">
+                    <option value="">-- Select Department --</option>
+                    @foreach (var dept in _departments)
+                    {
+                        <option value="@dept">@dept</option>
+                    }
+                </select>
+                <Button Text="Search Courses" OnClick="btnSearchCourse_Click"></Button>
+                <br />
+                <br />
+                <GridView Items="@_courses" ItemType="Cours" AllowPaging="true" DataKeyNames="CourseID"
+                    PageSize="1" AutoGenerateColumns="false"
+                    EmptyDataText = "Chose Department To Display Courses">
+                    <Columns>
+                        <BoundField DataField="CourseID" HeaderText="ID" />
+                        <BoundField DataField="CourseName" HeaderText="Course Name" />
+                        <BoundField DataField="StudentsMax" HeaderText="Max Capacity" />
+                    </Columns>
+                </GridView>
+            </div>
+            <div id="autoComplete">
+                <h1 id="crsByName">Courses By Name</h1>
+                <TextBox @bind-Text="_courseSearchText" placeholder="Search Course..."></TextBox>
+                <Button Text="Search" OnClick="search_Click"></Button>
+                <br />
+                <br />
+                <DetailsView Items="@_courseDetails" ItemType="Cours"
+                    Width="125" Height="50" CssClass="details"
+                    AutoGenerateRows="true">
+                </DetailsView>
+            </div>
+        </ContentTemplate>         
+    </UpdatePanel>
+
+

@@ -1,8 +1,12 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class AddPhoneNumber : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — phone number management needs UserManager
+public partial class AddPhoneNumber
 {
-    private string Title => "Add Phone Number";
+    private string Phone { get; set; } = "";
+
+    private void PhoneNumber_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with UserManager
+    }
 }

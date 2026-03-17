@@ -23,7 +23,7 @@ public partial class ChartSeries : BaseWebFormsComponent
 	/// Gets or sets the chart type for this series.
 	/// </summary>
 	[Parameter]
-	public SeriesChartType ChartType { get; set; } = SeriesChartType.Column;
+	public EnumParameter<SeriesChartType> ChartType { get; set; } = SeriesChartType.Column;
 
 	/// <summary>
 	/// Gets or sets the name of the chart area this series belongs to.
@@ -72,12 +72,6 @@ public partial class ChartSeries : BaseWebFormsComponent
 	/// </summary>
 	[Parameter]
 	public string MarkerStyle { get; set; }
-
-	/// <summary>
-	/// Gets or sets the tooltip for the series.
-	/// </summary>
-	[Parameter]
-	public string ToolTip { get; set; }
 
 	/// <summary>
 	/// Gets or sets the rendering order of this series in mixed charts.

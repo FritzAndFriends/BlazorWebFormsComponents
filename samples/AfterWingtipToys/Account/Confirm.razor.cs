@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class Confirm : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — email confirmation needs UserManager
+public partial class Confirm
 {
 }
-

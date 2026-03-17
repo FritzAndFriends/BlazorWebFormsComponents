@@ -1,8 +1,13 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class Register : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — registration needs UserManager
+public partial class Register
 {
-}
+    private string Email { get; set; } = "";
+    private string Password { get; set; } = "";
 
+    private void CreateUser_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with UserManager
+    }
+}

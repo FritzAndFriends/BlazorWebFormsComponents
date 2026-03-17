@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class Lockout : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — account lockout page
+public partial class Lockout
 {
 }

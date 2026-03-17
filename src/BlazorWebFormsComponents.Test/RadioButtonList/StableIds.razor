@@ -14,7 +14,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" ID="MyList" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" ID="MyList" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -36,7 +36,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" ID="MyList" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" ID="MyList" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -50,7 +50,8 @@
 	[Fact]
 	public void RadioButtonList_WithoutID_StillRenders()
 	{
-		// Arrange — When no ID is provided, component should still render with fallback IDs
+		// Arrange — When no ID is provided, component renders without id attributes
+		// but radios still share a name for mutual exclusion
 		var items = new ListItemCollection
 		{
 			new ListItem("Yes", "Y"),
@@ -58,17 +59,16 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
 		radios.Count.ShouldBe(2);
 
-		// Each radio should have an id attribute (generated fallback)
+		// Without developer ID, no id attributes are rendered (no GUID pollution)
 		foreach (var radio in radios)
 		{
-			radio.HasAttribute("id").ShouldBeTrue();
-			radio.GetAttribute("id").ShouldNotBeNullOrEmpty();
+			radio.HasAttribute("id").ShouldBeFalse();
 		}
 
 		// All radios should share the same name for mutual exclusion
@@ -88,7 +88,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" ID="Colors" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" ID="Colors" StaticItems="items" />);
 
 		// Assert
 		var labels = cut.FindAll("label");
@@ -109,7 +109,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object" ID="FlowList" StaticItems="items"
+			@<RadioButtonList ItemType="object" ID="FlowList" StaticItems="items"
 							  RepeatLayout="RepeatLayout.Flow" />
 		);
 
@@ -146,7 +146,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object" ID="UlList" StaticItems="items"
+			@<RadioButtonList ItemType="object" ID="UlList" StaticItems="items"
 							  RepeatLayout="RepeatLayout.UnorderedList" />
 		);
 

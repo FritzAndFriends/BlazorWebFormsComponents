@@ -20,19 +20,19 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the section of the table where this row belongs.
 		/// </summary>
 		[Parameter]
-		public TableRowSection TableSection { get; set; } = TableRowSection.TableBody;
+		public EnumParameter<TableRowSection> TableSection { get; set; } = Enums.TableRowSection.TableBody;
 
 		/// <summary>
 		/// Gets or sets the horizontal alignment of the row content.
 		/// </summary>
 		[Parameter]
-		public HorizontalAlign HorizontalAlign { get; set; } = HorizontalAlign.NotSet;
+		public EnumParameter<HorizontalAlign> HorizontalAlign { get; set; } = Enums.HorizontalAlign.NotSet;
 
 		/// <summary>
 		/// Gets or sets the vertical alignment of the row content.
 		/// </summary>
 		[Parameter]
-		public VerticalAlign VerticalAlign { get; set; } = VerticalAlign.NotSet;
+		public EnumParameter<VerticalAlign> VerticalAlign { get; set; } = Enums.VerticalAlign.NotSet;
 
 		/// <summary>
 		/// Gets the alignment style for the row.
@@ -43,27 +43,27 @@ namespace BlazorWebFormsComponents
 			{
 				var styles = new List<string>();
 
-				if (HorizontalAlign != HorizontalAlign.NotSet)
+				if (HorizontalAlign.Value != Enums.HorizontalAlign.NotSet)
 				{
-					var align = HorizontalAlign switch
+					var align = HorizontalAlign.Value switch
 					{
-						HorizontalAlign.Left => "left",
-						HorizontalAlign.Center => "center",
-						HorizontalAlign.Right => "right",
-						HorizontalAlign.Justify => "justify",
+						Enums.HorizontalAlign.Left => "left",
+						Enums.HorizontalAlign.Center => "center",
+						Enums.HorizontalAlign.Right => "right",
+						Enums.HorizontalAlign.Justify => "justify",
 						_ => null
 					};
 					if (align != null)
 						styles.Add($"text-align: {align}");
 				}
 
-				if (VerticalAlign != VerticalAlign.NotSet)
+				if (VerticalAlign.Value != Enums.VerticalAlign.NotSet)
 				{
-					var valign = VerticalAlign switch
+					var valign = VerticalAlign.Value switch
 					{
-						VerticalAlign.Top => "top",
-						VerticalAlign.Middle => "middle",
-						VerticalAlign.Bottom => "bottom",
+						Enums.VerticalAlign.Top => "top",
+						Enums.VerticalAlign.Middle => "middle",
+						Enums.VerticalAlign.Bottom => "bottom",
 						_ => null
 					};
 					if (valign != null)

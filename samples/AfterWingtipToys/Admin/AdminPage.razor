@@ -7,8 +7,9 @@
             <td><Label ID="LabelAddCategory">Category:</Label></td>
             <td>
                 <DropDownList ID="DropDownAddCategory" 
-                    TItem="Category" DataTextField="CategoryName" 
-                    DataValueField="CategoryID" Items="@_categories">
+                    ItemType="Category" 
+                    Items="@_categories" DataTextField="CategoryName" 
+                    DataValueField="CategoryID" >
                 </DropDownList>
             </td>
         </tr>
@@ -16,48 +17,49 @@
             <td><Label ID="LabelAddName">Name:</Label></td>
             <td>
                 <TextBox ID="AddProductName"></TextBox>
-                <RequiredFieldValidator Type="string" ID="RequiredFieldValidator1" Text="* Product name required." SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
+                <RequiredFieldValidator ID="RequiredFieldValidator1" Text="* Product name required." ControlToValidate="AddProductName" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddDescription">Description:</Label></td>
             <td>
                 <TextBox ID="AddProductDescription"></TextBox>
-                <RequiredFieldValidator Type="string" ID="RequiredFieldValidator2" Text="* Description required." SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
+                <RequiredFieldValidator ID="RequiredFieldValidator2" Text="* Description required." ControlToValidate="AddProductDescription" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddPrice">Price:</Label></td>
             <td>
                 <TextBox ID="AddProductPrice"></TextBox>
-                <RequiredFieldValidator Type="string" ID="RequiredFieldValidator3" Text="* Price required." SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
-                <RegularExpressionValidator Type="string" ID="RegularExpressionValidator1" Text="* Must be a valid price without $." SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic" ValidationExpression="^[0-9]*(\.)?[0-9]?[0-9]?$"></RegularExpressionValidator>
+                <RequiredFieldValidator ID="RequiredFieldValidator3" Text="* Price required." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                <RegularExpressionValidator ID="RegularExpressionValidator1" Text="* Must be a valid price without $." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic" ValidationExpression="^[0-9]*(\.)?[0-9]?[0-9]?$"></RegularExpressionValidator>
             </td>
         </tr>
         <tr>
             <td><Label ID="LabelAddImageFile">Image File:</Label></td>
             <td>
                 <FileUpload ID="ProductImage" />
-                <RequiredFieldValidator Type="string" ID="RequiredFieldValidator4" Text="* Image path required." SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
+                <RequiredFieldValidator ID="RequiredFieldValidator4" Text="* Image path required." ControlToValidate="ProductImage" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
             </td>
         </tr>
     </table>
     <p></p>
     <p></p>
-    <Button ID="AddProductButton" Text="Add Product" OnClick="AddProductButton_Click"  CausesValidation="true"/>
-    <Label ID="LabelAddStatus" Text=""></Label>
+    <Button ID="AddProductButton" Text="Add Product" OnClick="@AddProductButton_Click" CausesValidation="true"/>
+    <Label ID="LabelAddStatus" Text="@_addStatus"></Label>
     <p></p>
     <h3>Remove Product:</h3>
     <table>
         <tr>
             <td><Label ID="LabelRemoveProduct">Product:</Label></td>
-            <td><DropDownList ID="DropDownRemoveProduct" TItem="Product" AppendDataBoundItems="true" 
-                    DataTextField="ProductName" DataValueField="ProductID" Items="@_products">
+            <td><DropDownList ID="DropDownRemoveProduct" ItemType="Product" 
+                    Items="@_products" AppendDataBoundItems="true" 
+                    DataTextField="ProductName" DataValueField="ProductID" >
                 </DropDownList>
             </td>
         </tr>
     </table>
     <p></p>
-    <Button ID="RemoveProductButton" Text="Remove Product" OnClick="RemoveProductButton_Click" CausesValidation="false"/>
-    <Label ID="LabelRemoveStatus" Text=""></Label>
+    <Button ID="RemoveProductButton" Text="Remove Product" OnClick="@RemoveProductButton_Click" CausesValidation="false"/>
+    <Label ID="LabelRemoveStatus" Text="@_removeStatus"></Label>
 

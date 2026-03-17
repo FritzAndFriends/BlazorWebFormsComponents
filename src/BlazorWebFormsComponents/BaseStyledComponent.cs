@@ -14,7 +14,7 @@ namespace BlazorWebFormsComponents
 		public WebColor BorderColor { get; set; }
 
 		[Parameter]
-		public BorderStyle BorderStyle { get; set; }
+		public EnumParameter<BorderStyle> BorderStyle { get; set; }
 
 		[Parameter]
 		public Unit BorderWidth { get; set; }
@@ -34,9 +34,6 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public FontInfo Font { get; set; } = new FontInfo();
 
-		[Parameter]
-		public string ToolTip { get; set; }
-
 		protected string Style => this.ToStyle().Build().NullIfEmpty();
 
 		/// <summary>
@@ -54,7 +51,7 @@ namespace BlazorWebFormsComponents
 			if (BorderColor == default && skin.BorderColor != default)
 				BorderColor = skin.BorderColor;
 
-			if (BorderStyle == default && skin.BorderStyle.HasValue)
+			if (BorderStyle.Value == default && skin.BorderStyle.HasValue)
 				BorderStyle = skin.BorderStyle.Value;
 
 			if (BorderWidth == default && skin.BorderWidth.HasValue)

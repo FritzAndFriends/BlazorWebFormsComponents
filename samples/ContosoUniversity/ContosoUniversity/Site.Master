@@ -1,0 +1,36 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="ContosoUniversity.Site" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+     <link href="CSS/Master_CSS.css" rel="stylesheet" />
+     <meta charset="utf-8"/>
+     <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+       <asp:ContentPlaceHolder ID="head" runat="server">
+       </asp:ContentPlaceHolder>   
+</head>
+<body>
+    <form id="frmMain" runat="server">
+        <div id="navUp">
+            <h1><a href="Home.aspx">Contoso University</a><span>.com</span></h1>
+        </div>
+        <div id="navBar">
+            <ul>
+                <li><a id="home" href="Home.aspx">Home</a></li>
+                <li><a id="about" href="About.aspx">About</a></li>
+                <li><a id="students" href="Students.aspx">Students</a></li>
+                <li><a id="courses" href="Courses.aspx">Courses</a></li>
+                <li><a id="instructors" href="Instructors.aspx">Instructors</a></li>
+            </ul>
+        </div>
+
+        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+        
+        </asp:ContentPlaceHolder>
+    
+    </form>
+</body>
+</html>

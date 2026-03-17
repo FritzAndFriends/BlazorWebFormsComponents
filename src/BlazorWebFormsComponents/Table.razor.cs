@@ -26,7 +26,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the alignment of the caption.
 		/// </summary>
 		[Parameter]
-		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
+		public EnumParameter<TableCaptionAlign> CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
 		/// <summary>
 		/// Gets or sets the cell padding in pixels.
@@ -44,13 +44,13 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets which grid lines are displayed.
 		/// </summary>
 		[Parameter]
-		public GridLines GridLines { get; set; } = GridLines.None;
+		public EnumParameter<GridLines> GridLines { get; set; } = Enums.GridLines.None;
 
 		/// <summary>
 		/// Gets or sets the horizontal alignment of the table.
 		/// </summary>
 		[Parameter]
-		public HorizontalAlign HorizontalAlign { get; set; } = HorizontalAlign.NotSet;
+		public EnumParameter<HorizontalAlign> HorizontalAlign { get; set; } = Enums.HorizontalAlign.NotSet;
 
 		/// <summary>
 		/// Gets or sets the background image URL for the table.
@@ -71,7 +71,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets the caption-side CSS value.
 		/// </summary>
-		protected string CaptionSideStyle => CaptionAlign switch
+		protected string CaptionSideStyle => CaptionAlign.Value switch
 		{
 			TableCaptionAlign.Top => "caption-side: top",
 			TableCaptionAlign.Bottom => "caption-side: bottom",
@@ -81,18 +81,18 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets the rules attribute for grid lines (deprecated HTML, but matches Web Forms output).
 		/// </summary>
-		protected string RulesAttribute => GridLines switch
+		protected string RulesAttribute => GridLines.Value switch
 		{
-			GridLines.Horizontal => "rows",
-			GridLines.Vertical => "cols",
-			GridLines.Both => "all",
+			Enums.GridLines.Horizontal => "rows",
+			Enums.GridLines.Vertical => "cols",
+			Enums.GridLines.Both => "all",
 			_ => null
 		};
 
 		/// <summary>
 		/// Gets the border attribute for the table.
 		/// </summary>
-		protected int? BorderAttribute => GridLines != GridLines.None ? 1 : null;
+		protected int? BorderAttribute => GridLines.Value != Enums.GridLines.None ? 1 : null;
 
 		/// <summary>
 		/// Gets the combined style string.
@@ -107,13 +107,13 @@ namespace BlazorWebFormsComponents
 				if (!string.IsNullOrEmpty(baseStyle))
 					styles.Add(baseStyle);
 
-				if (HorizontalAlign != HorizontalAlign.NotSet)
+				if (HorizontalAlign.Value != Enums.HorizontalAlign.NotSet)
 				{
-					var marginStyle = HorizontalAlign switch
+					var marginStyle = HorizontalAlign.Value switch
 					{
-						HorizontalAlign.Left => "margin-right: auto",
-						HorizontalAlign.Center => "margin-left: auto; margin-right: auto",
-						HorizontalAlign.Right => "margin-left: auto",
+						Enums.HorizontalAlign.Left => "margin-right: auto",
+						Enums.HorizontalAlign.Center => "margin-left: auto; margin-right: auto",
+						Enums.HorizontalAlign.Right => "margin-left: auto",
 						_ => null
 					};
 					if (marginStyle != null)
@@ -126,7 +126,7 @@ namespace BlazorWebFormsComponents
 				}
 
 				// Modern CSS for grid lines (in addition to deprecated attributes for compatibility)
-				if (GridLines != GridLines.None)
+				if (GridLines.Value != Enums.GridLines.None)
 				{
 					styles.Add("border-collapse: collapse");
 				}

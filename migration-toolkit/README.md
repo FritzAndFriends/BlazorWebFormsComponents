@@ -46,6 +46,7 @@ Copy these into your project's `.github/skills/` directory so Copilot can use th
 | [`bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | **Core markup migration** — control translation, expression conversion, data binding, code-behind lifecycle, and Master Page to Layout conversion. Covers Layer 2 structural transforms (~45% of migration work). |
 | [`bwfc-identity-migration/SKILL.md`](skills/bwfc-identity-migration/SKILL.md) | **Identity & auth migration** — OWIN to ASP.NET Core auth middleware, login page migration, BWFC login controls, role-based authorization, and AuthorizeView patterns. |
 | [`bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) | **Data access & architecture migration** — EF6 to EF Core, DataSource controls to service injection, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json. Covers Layer 3 architecture decisions. |
+| [`l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | **Post-migration performance optimization** — async/await modernization, `AsNoTracking()`, `IDbContextFactory`, `[StreamRendering]`, `@key` directives, and .NET 10 patterns. Optional pass after the app builds and runs. |
 
 ### `scripts/` — PowerShell Migration Scripts
 
@@ -67,6 +68,7 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 | **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming | [`scripts/bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | ~40% of work |
 | **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method migration | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~45% of work |
 | **Layer 3** — Architecture Decisions | Identity, EF Core, session state, third-party integrations | [`skills/bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) + human judgment | ~15% of work |
+| **L3-opt** — Performance (optional) | Async/await, `AsNoTracking`, `IDbContextFactory`, .NET 10 patterns | [`skills/l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | After app is functional |
 
 **Start here:** [QUICKSTART.md](QUICKSTART.md) — the linear "just tell me what to do" path.
 

@@ -45,7 +45,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the type of pager buttons to display.
 		/// </summary>
 		[Parameter]
-		public PagerButtons Mode { get; set; } = PagerButtons.Numeric;
+		public EnumParameter<PagerButtons> Mode { get; set; } = PagerButtons.Numeric;
 
 		/// <summary>
 		/// Gets or sets the text for the First page button.

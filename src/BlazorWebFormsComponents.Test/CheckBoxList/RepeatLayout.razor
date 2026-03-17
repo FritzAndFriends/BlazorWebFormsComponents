@@ -14,7 +14,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.Table" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" RepeatLayout="RL.Table" />);
 
 		// Assert
 		cut.Find("table").ShouldNotBeNull();
@@ -33,7 +33,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.Flow" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" RepeatLayout="RL.Flow" />);
 
 		// Assert
 		var span = cut.Find("span");
@@ -54,7 +54,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.OrderedList" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" RepeatLayout="RL.OrderedList" />);
 
 		// Assert
 		cut.Find("ol").ShouldNotBeNull();
@@ -73,7 +73,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" RepeatLayout="RL.UnorderedList" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" RepeatLayout="RL.UnorderedList" />);
 
 		// Assert
 		cut.Find("ul").ShouldNotBeNull();
@@ -92,7 +92,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" 
+		var cut = Render(@<CheckBoxList ItemType="object" 
 									   StaticItems="items" 
 									   RepeatLayout="RL.Flow" 
 									   RepeatDirection="DataListEnum.Vertical" />);
@@ -114,7 +114,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" 
+		var cut = Render(@<CheckBoxList ItemType="object" 
 									   StaticItems="items" 
 									   RepeatLayout="RL.Table"
 									   RepeatDirection="DataListEnum.Horizontal" />);

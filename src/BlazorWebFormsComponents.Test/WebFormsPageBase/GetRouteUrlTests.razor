@@ -1,0 +1,157 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Routing
+@using Moq
+
+@code {
+
+	/// <summary>
+	/// Tests for OPP-6: GetRouteUrl on WebFormsPageBase.
+	/// Verifies .aspx extension stripping from route names and
+	/// correct delegation to LinkGenerator.
+	/// </summary>
+	private class TestPage : WebFormsPageBase
+	{
+		public string ExposedGetRouteUrl(string routeName, object routeParameters = null)
+			=> GetRouteUrl(routeName, routeParameters);
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenElement(0, "div");
+			builder.AddContent(1, "TestPage");
+			builder.CloseElement();
+		}
+	}
+
+	/// <summary>
+	/// Concrete LinkGenerator that captures the route name passed to it
+	/// and returns a configurable path string.
+	/// </summary>
+	private class CapturingLinkGenerator : LinkGenerator
+	{
+		public string CapturedRouteName { get; private set; }
+		public string ReturnPath { get; set; } = "/generated";
+
+		public override string? GetPathByAddress<TAddress>(
+			HttpContext? httpContext, TAddress address, RouteValueDictionary values,
+			RouteValueDictionary? ambientValues = null, PathString? pathBase = null,
+			FragmentString fragment = default, LinkOptions? options = null)
+		{
+			// Extract the route name from the RouteValuesAddress
+			var prop = typeof(TAddress).GetProperty("RouteName");
+			if (prop != null)
+				CapturedRouteName = prop.GetValue(address)?.ToString();
+			return ReturnPath;
+		}
+
+		public override string? GetPathByAddress<TAddress>(
+			TAddress address, RouteValueDictionary values,
+			PathString pathBase = default, FragmentString fragment = default,
+			LinkOptions? options = null)
+		{
+			return ReturnPath;
+		}
+
+		public override string? GetUriByAddress<TAddress>(
+			HttpContext? httpContext, TAddress address, RouteValueDictionary values,
+			RouteValueDictionary? ambientValues = null, string? scheme = null,
+			HostString? host = null, PathString? pathBase = null,
+			FragmentString fragment = default, LinkOptions? options = null)
+		{
+			return null;
+		}
+
+		public override string? GetUriByAddress<TAddress>(
+			TAddress address, RouteValueDictionary values,
+			string scheme, HostString host,
+			PathString pathBase = default, FragmentString fragment = default,
+			LinkOptions? options = null)
+		{
+			return null;
+		}
+	}
+
+	private (IRenderedComponent<TestPage> cut, CapturingLinkGenerator linkGen) RenderWithCapturingLinkGen()
+	{
+		var linkGen = new CapturingLinkGenerator();
+		Services.AddSingleton<LinkGenerator>(linkGen);
+		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
+		mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
+		Services.AddScoped<IPageService, PageService>();
+		return (Render<TestPage>(), linkGen);
+	}
+
+	[Fact]
+	public void GetRouteUrl_StripsAspxFromRouteName()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+
+		cut.Instance.ExposedGetRouteUrl("Products.aspx", new { id = 1 });
+
+		linkGen.CapturedRouteName.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void GetRouteUrl_PassesThroughNameWithoutAspx()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+
+		cut.Instance.ExposedGetRouteUrl("Products", new { id = 1 });
+
+		linkGen.CapturedRouteName.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void GetRouteUrl_ReturnsLinkGeneratorResult()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+		linkGen.ReturnPath = "/Products/1";
+
+		var result = cut.Instance.ExposedGetRouteUrl("Products", new { id = 1 });
+
+		result.ShouldBe("/Products/1");
+	}
+
+	[Fact]
+	public void GetRouteUrl_NullRouteName_PassesThroughToLinkGenerator()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+
+		cut.Instance.ExposedGetRouteUrl(null);
+
+		// null routeName should NOT trigger .aspx stripping and should pass null through
+		linkGen.CapturedRouteName.ShouldBeNull();
+	}
+
+	[Fact]
+	public void GetRouteUrl_CaseInsensitiveAspxStripping()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+
+		cut.Instance.ExposedGetRouteUrl("Products.ASPX");
+
+		linkGen.CapturedRouteName.ShouldBe("Products");
+	}
+
+	[Fact]
+	public void GetRouteUrl_NullParameters_DefaultsCorrectly()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+		linkGen.ReturnPath = "/Products";
+
+		var result = cut.Instance.ExposedGetRouteUrl("Products");
+
+		result.ShouldBe("/Products");
+	}
+
+	[Fact]
+	public void GetRouteUrl_MixedCaseAspx_StripsExtension()
+	{
+		var (cut, linkGen) = RenderWithCapturingLinkGen();
+
+		cut.Instance.ExposedGetRouteUrl("Products.Aspx");
+
+		linkGen.CapturedRouteName.ShouldBe("Products");
+	}
+}

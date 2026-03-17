@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1e1e1e; color: #d4d4d4; padding: 24px; }
+        h1 { text-align: center; color: #fff; margin-bottom: 8px; font-size: 28px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1400px; margin: 0 auto; }
+        .panel { background: #252526; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .panel-header { padding: 12px 16px; font-weight: 600; font-size: 14px; }
+        .panel-header.before { background: #4a1919; color: #f48771; border-bottom: 2px solid #f48771; }
+        .panel-header.after { background: #1a3a1a; color: #89d185; border-bottom: 2px solid #89d185; }
+        pre { padding: 16px; font-size: 12.5px; line-height: 1.5; overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; }
+        .highlight { background: rgba(255, 255, 0, 0.08); }
+        .removed { color: #f48771; }
+        .added { color: #89d185; }
+        .badge { display: inline-block; background: #0078d4; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 8px; }
+        .stats { text-align: center; margin-top: 16px; color: #888; font-size: 13px; }
+        .stats strong { color: #89d185; }
+    </style>
+</head>
+<body>
+    <h1>ProductList — Before &amp; After</h1>
+    <p class="subtitle">WingtipToys Migration: ASP.NET Web Forms → Blazor with BWFC</p>
+    <div class="container">
+        <div class="panel">
+            <div class="panel-header before">❌ Before — Web Forms (.aspx)</div>
+            <pre><span class="removed">&lt;asp:ListView</span> ID="productList" <span class="removed">runat="server"</span>
+    DataKeyNames="ProductID" GroupItemCount="4"
+    <span class="removed">ItemType="WingtipToys.Models.Product"</span> SelectMethod="GetProducts"<span class="removed">&gt;</span>
+    &lt;EmptyDataTemplate&gt;
+        &lt;table&gt;
+            &lt;tr&gt;&lt;td&gt;No data was returned.&lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/EmptyDataTemplate&gt;
+    &lt;GroupTemplate&gt;
+        &lt;tr id="itemPlaceholderContainer" <span class="removed">runat="server"</span>&gt;
+            &lt;td id="itemPlaceholder" <span class="removed">runat="server"</span>&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/GroupTemplate&gt;
+    &lt;ItemTemplate&gt;
+        &lt;td <span class="removed">runat="server"</span>&gt;
+            &lt;table&gt;
+                &lt;tr&gt;&lt;td&gt;
+                  &lt;a href="<span class="removed">&lt;%#: GetRouteUrl("ProductByNameRoute",
+                      new {productName = Item.ProductName}) %&gt;</span>"&gt;
+                    &lt;image src='/Catalog/Images/Thumbs/<span class="removed">&lt;%#:Item.ImagePath%&gt;</span>'
+                      width="100" height="75" border="1" /&gt;
+                  &lt;/a&gt;
+                &lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;td&gt;
+                    &lt;a href="<span class="removed">&lt;%#: GetRouteUrl("ProductByNameRoute",
+                        new {productName = Item.ProductName}) %&gt;</span>"&gt;
+                      <span class="removed">&lt;%#:Item.ProductName%&gt;</span>
+                    &lt;/a&gt;&lt;br /&gt;
+                    &lt;b&gt;Price: &lt;/b&gt;<span class="removed">&lt;%#:String.Format("{0:c}", Item.UnitPrice)%&gt;</span>
+                &lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;
+        &lt;/td&gt;
+    &lt;/ItemTemplate&gt;
+<span class="removed">&lt;/asp:ListView&gt;</span></pre>
+        </div>
+        <div class="panel">
+            <div class="panel-header after">✅ After — Blazor + BWFC (.razor)</div>
+            <pre><span class="added">&lt;ListView</span> ID="productList"
+    DataKeyNames="ProductID" GroupItemCount="4"
+    <span class="added">TItem="Product"</span> SelectMethod="GetProducts"<span class="added">&gt;</span>
+    &lt;EmptyDataTemplate&gt;
+        &lt;table&gt;
+            &lt;tr&gt;&lt;td&gt;No data was returned.&lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/EmptyDataTemplate&gt;
+    &lt;GroupTemplate&gt;
+        &lt;tr id="itemPlaceholderContainer"&gt;
+            &lt;td id="itemPlaceholder"&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/GroupTemplate&gt;
+    &lt;ItemTemplate&gt;
+        &lt;td&gt;
+            &lt;table&gt;
+                &lt;tr&gt;&lt;td&gt;
+                  &lt;a href="<span class="added">@($"/Product/{context.ProductName}")</span>"&gt;
+                    &lt;image src='/Catalog/Images/Thumbs/<span class="added">@context.ImagePath</span>'
+                      width="100" height="75" border="1" /&gt;
+                  &lt;/a&gt;
+                &lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;td&gt;
+                    &lt;a href="<span class="added">@($"/Product/{context.ProductName}")</span>"&gt;
+                      <span class="added">@context.ProductName</span>
+                    &lt;/a&gt;&lt;br /&gt;
+                    &lt;b&gt;Price: &lt;/b&gt;<span class="added">@context.UnitPrice.ToString("c")</span>
+                &lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;
+        &lt;/td&gt;
+    &lt;/ItemTemplate&gt;
+<span class="added">&lt;/ListView&gt;</span></pre>
+        </div>
+    </div>
+    <p class="stats">
+        Controls migrated: <strong>1 (ListView)</strong> | 
+        Attributes preserved: <strong>5 of 6</strong> | 
+        Lines changed: <strong>11 of 33</strong> — <strong>removed</strong> asp: prefix, runat="server", server-side binding expressions
+    </p>
+</body>
+</html>

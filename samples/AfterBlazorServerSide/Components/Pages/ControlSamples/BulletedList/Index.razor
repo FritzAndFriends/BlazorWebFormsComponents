@@ -5,9 +5,9 @@
 
 <h3>Basic BulletedList with Static Items (Text Mode)</h3>
 <div data-audit-control="BulletedList-1">
-    <BulletedList TItem="object" StaticItems="discItems" BulletStyle="BulletStyle.Disc" />
+    <BulletedList ItemType="object" StaticItems="discItems" BulletStyle="BulletStyle.Disc" />
 </div>
-<pre><code>&lt;BulletedList TItem="object" StaticItems="discItems" BulletStyle="BulletStyle.Disc" /&gt;
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="discItems" BulletStyle="BulletStyle.Disc" /&gt;
 
 @@code {
     private ListItemCollection discItems = new() {
@@ -22,65 +22,65 @@
 
 <h3>Bullet Style: Numbered</h3>
 <div data-audit-control="BulletedList-2">
-    <BulletedList TItem="object" StaticItems="numberedItems" BulletStyle="BulletStyle.Numbered" />
+    <BulletedList ItemType="object" StaticItems="numberedItems" BulletStyle="BulletStyle.Numbered" />
 </div>
-<pre><code>&lt;BulletedList TItem="object" StaticItems="numberedItems" BulletStyle="BulletStyle.Numbered" /&gt;</code></pre>
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="numberedItems" BulletStyle="BulletStyle.Numbered" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Square with HyperLinks</h3>
 <div data-audit-control="BulletedList-3">
-    <BulletedList TItem="object" StaticItems="squareLinkItems" BulletStyle="BulletStyle.Square" DisplayMode="BulletedListDisplayMode.HyperLink" />
+    <BulletedList ItemType="object" StaticItems="squareLinkItems" BulletStyle="BulletStyle.Square" DisplayMode="BulletedListDisplayMode.HyperLink" />
 </div>
-<pre><code>&lt;BulletedList TItem="object" StaticItems="squareLinkItems" BulletStyle="BulletStyle.Square" DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;</code></pre>
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="squareLinkItems" BulletStyle="BulletStyle.Square" DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Square</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Square" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Square" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Square" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Square" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Numbered</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Lower Alpha (a, b, c...)</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerAlpha" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerAlpha" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerAlpha" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerAlpha" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Upper Alpha (A, B, C...)</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperAlpha" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperAlpha" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperAlpha" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperAlpha" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Lower Roman (i, ii, iii...)</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerRoman" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerRoman" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerRoman" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.LowerRoman" /&gt;</code></pre>
 
 <hr />
 
 <h3>Bullet Style: Upper Roman (I, II, III...)</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperRoman" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperRoman" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperRoman" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.UpperRoman" /&gt;</code></pre>
 
 <hr />
 
 <h3>Numbered List Starting at 5</h3>
-<BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" FirstBulletNumber="5" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" FirstBulletNumber="5" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" FirstBulletNumber="5" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="bulletItems" BulletStyle="BulletStyle.Numbered" FirstBulletNumber="5" /&gt;</code></pre>
 
 <hr />
 
 <h3>Display Mode: HyperLink</h3>
-<BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;
+<BulletedList ItemType="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;
 
 @@code {
     private ListItemCollection linkItems = new() {
@@ -93,15 +93,15 @@
 <hr />
 
 <h3>Display Mode: HyperLink with Target="_blank"</h3>
-<BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" />
-<pre><code>&lt;BulletedList TItem="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" /&gt;</code></pre>
+<BulletedList ItemType="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" />
+<pre><code>&lt;BulletedList ItemType="object" StaticItems="linkItems" DisplayMode="BulletedListDisplayMode.HyperLink" Target="_blank" /&gt;</code></pre>
 
 <hr />
 
 <h3>Display Mode: LinkButton (Clickable)</h3>
-<BulletedList TItem="object" StaticItems="clickItems" DisplayMode="BulletedListDisplayMode.LinkButton" OnClick="HandleItemClick" />
+<BulletedList ItemType="object" StaticItems="clickItems" DisplayMode="BulletedListDisplayMode.LinkButton" OnClick="HandleItemClick" />
 <p>@clickMessage</p>
-<pre><code>&lt;BulletedList TItem="object" 
+<pre><code>&lt;BulletedList ItemType="object" 
               StaticItems="clickItems" 
               DisplayMode="BulletedListDisplayMode.LinkButton" 
               OnClick="HandleItemClick" /&gt;
@@ -115,12 +115,12 @@
 <hr />
 
 <h3>Data-Bound BulletedList</h3>
-<BulletedList TItem="Product" 
+<BulletedList ItemType="Product" 
               Items="products" 
               DataTextField="Name" 
               DataValueField="Url"
               DisplayMode="BulletedListDisplayMode.HyperLink" />
-<pre><code>&lt;BulletedList TItem="Product" 
+<pre><code>&lt;BulletedList ItemType="Product" 
               Items="products" 
               DataTextField="Name" 
               DataValueField="Url"
@@ -136,7 +136,7 @@
 <hr />
 
 <h3>With Styling</h3>
-<BulletedList TItem="object" 
+<BulletedList ItemType="object" 
               StaticItems="bulletItems" 
               CssClass="styled-list"
               BackColor="new WebColor(System.Drawing.Color.LightYellow)"
@@ -144,7 +144,7 @@
               BorderStyle="BorderStyle.Dashed"
               BorderWidth="Unit.Pixel(2)"
               Width="Unit.Pixel(300)" />
-<pre><code>&lt;BulletedList TItem="object" 
+<pre><code>&lt;BulletedList ItemType="object" 
               StaticItems="bulletItems" 
               CssClass="styled-list"
               BackColor="new WebColor(System.Drawing.Color.LightYellow)"
@@ -156,10 +156,10 @@
 <hr />
 
 <h3>Disabled Item in List</h3>
-<BulletedList TItem="object" 
+<BulletedList ItemType="object" 
               StaticItems="disabledItems" 
               DisplayMode="BulletedListDisplayMode.HyperLink" />
-<pre><code>&lt;BulletedList TItem="object" 
+<pre><code>&lt;BulletedList ItemType="object" 
               StaticItems="disabledItems" 
               DisplayMode="BulletedListDisplayMode.HyperLink" /&gt;
 
@@ -174,12 +174,12 @@
 <hr />
 
 <h3>Entire List Disabled</h3>
-<BulletedList TItem="object" 
+<BulletedList ItemType="object" 
               StaticItems="linkItems" 
               DisplayMode="BulletedListDisplayMode.LinkButton"
               Enabled="false" />
 <p><em>(Entire BulletedList is disabled - items render as text)</em></p>
-<pre><code>&lt;BulletedList TItem="object" 
+<pre><code>&lt;BulletedList ItemType="object" 
               StaticItems="linkItems" 
               DisplayMode="BulletedListDisplayMode.LinkButton"
               Enabled="false" /&gt;</code></pre>

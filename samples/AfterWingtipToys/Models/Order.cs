@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace WingtipToys.Models;
 
@@ -48,7 +48,7 @@ public class Order
     [Required(ErrorMessage = "Email Address is required")]
     [DisplayName("Email Address")]
     [RegularExpression(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",
-        ErrorMessage = "Email is not valid.")]
+        ErrorMessage = "Email is is not valid.")]
     [DataType(DataType.EmailAddress)]
     public string Email { get; set; } = string.Empty;
 

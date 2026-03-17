@@ -1,0 +1,314 @@
+@page "/ControlSamples/ModalPopupExtender"
+@rendermode InteractiveServer
+
+<PageTitle>ModalPopupExtender Component Samples</PageTitle>
+
+<h2>ModalPopupExtender Component</h2>
+
+<p>The <code>ModalPopupExtender</code> displays a target element as a modal popup with an overlay backdrop. It supports OK/Cancel buttons, drag support, drop shadow, and Escape key dismissal. This emulates the Ajax Control Toolkit <code>ModalPopupExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Modal Popup with OK/Cancel</h3>
+<p>A button opens a modal popup panel. The user confirms with OK or dismisses with Cancel.</p>
+
+<div data-audit-control="ModalPopupExtender-1">
+    <button id="btnShowBasic" class="btn btn-primary">
+        Show Modal
+    </button>
+    <ModalPopupExtender TargetControlID="btnShowBasic"
+                        PopupControlID="pnlBasicModal"
+                        OkControlID="btnBasicOk"
+                        CancelControlID="btnBasicCancel"
+                        BackgroundCssClass="modal-backdrop-demo" />
+
+    <div id="pnlBasicModal" class="modal-popup-demo" style="display:none;">
+        <h4>Confirm Action</h4>
+        <p>Are you sure you want to proceed?</p>
+        <div class="d-flex gap-2 justify-content-end">
+            <button id="btnBasicOk" class="btn btn-primary" @onclick="HandleBasicOk">OK</button>
+            <button id="btnBasicCancel" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(basicStatus))
+    {
+        <div class="alert alert-success mt-2">@basicStatus</div>
+    }
+</div>
+
+<pre><code>&lt;!-- Web Forms (Before) --&gt;
+&lt;asp:Button ID="btnShow" runat="server" Text="Show Modal" /&gt;
+&lt;asp:Panel ID="pnlModal" runat="server" CssClass="modal-popup" style="display:none"&gt;
+    &lt;p&gt;Are you sure you want to proceed?&lt;/p&gt;
+    &lt;asp:Button ID="btnOk" runat="server" Text="OK" /&gt;
+    &lt;asp:Button ID="btnCancel" runat="server" Text="Cancel" /&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:ModalPopupExtender ID="mpe1" runat="server"
+    TargetControlID="btnShow" PopupControlID="pnlModal"
+    OkControlID="btnOk" CancelControlID="btnCancel"
+    BackgroundCssClass="modal-backdrop" /&gt;
+
+&lt;!-- Blazor with BWFC (After) --&gt;
+&lt;button id="btnShow"&gt;Show Modal&lt;/button&gt;
+&lt;div id="pnlModal" style="display:none"&gt;
+    &lt;p&gt;Are you sure you want to proceed?&lt;/p&gt;
+    &lt;button id="btnOk"&gt;OK&lt;/button&gt;
+    &lt;button id="btnCancel"&gt;Cancel&lt;/button&gt;
+&lt;/div&gt;
+&lt;ModalPopupExtender TargetControlID="btnShow" PopupControlID="pnlModal"
+                    OkControlID="btnOk" CancelControlID="btnCancel"
+                    BackgroundCssClass="modal-backdrop" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Modal with Custom Backdrop CSS</h3>
+<p>Customize the backdrop overlay using your own CSS class for branding or visual emphasis.</p>
+
+<div data-audit-control="ModalPopupExtender-2">
+    <button id="btnShowCustom" class="btn btn-info">
+        Show Modal (Custom Backdrop)
+    </button>
+    <ModalPopupExtender TargetControlID="btnShowCustom"
+                        PopupControlID="pnlCustomModal"
+                        OkControlID="btnCustomOk"
+                        CancelControlID="btnCustomCancel"
+                        BackgroundCssClass="modal-backdrop-custom" />
+
+    <div id="pnlCustomModal" class="modal-popup-demo" style="display:none;">
+        <h4>Custom Backdrop</h4>
+        <p>This modal uses a tinted backdrop. The <code>BackgroundCssClass</code> controls the overlay appearance.</p>
+        <div class="d-flex gap-2 justify-content-end">
+            <button id="btnCustomOk" class="btn btn-info">Got It</button>
+            <button id="btnCustomCancel" class="btn btn-outline-secondary">Dismiss</button>
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;!-- Use BackgroundCssClass to style the overlay --&gt;
+&lt;ModalPopupExtender TargetControlID="btnShow" PopupControlID="pnlModal"
+                    OkControlID="btnOk" CancelControlID="btnCancel"
+                    BackgroundCssClass="modal-backdrop-custom" /&gt;
+
+&lt;style&gt;
+    .modal-backdrop-custom {
+        background-color: rgba(0, 100, 200, 0.4);
+    }
+&lt;/style&gt;</code></pre>
+
+<hr />
+
+<h3>3. Modal with Drag Support</h3>
+<p>Enable <code>Drag="true"</code> to allow the user to reposition the modal popup. Use <code>PopupDragHandleControlID</code> to designate a specific drag handle.</p>
+
+<div data-audit-control="ModalPopupExtender-3">
+    <button id="btnShowDrag" class="btn btn-warning">
+        Show Draggable Modal
+    </button>
+    <ModalPopupExtender TargetControlID="btnShowDrag"
+                        PopupControlID="pnlDragModal"
+                        OkControlID="btnDragClose"
+                        BackgroundCssClass="modal-backdrop-demo"
+                        Drag="true"
+                        PopupDragHandleControlID="dragHandle" />
+
+    <div id="pnlDragModal" class="modal-popup-demo" style="display:none;">
+        <div id="dragHandle" class="modal-drag-handle">
+            ☰ Drag me to reposition
+        </div>
+        <p>This modal can be dragged by its title bar. Try moving it around!</p>
+        <button id="btnDragClose" class="btn btn-warning">Close</button>
+    </div>
+</div>
+
+<pre><code>&lt;ModalPopupExtender TargetControlID="btnShow" PopupControlID="pnlModal"
+                    OkControlID="btnClose"
+                    BackgroundCssClass="modal-backdrop"
+                    Drag="true"
+                    PopupDragHandleControlID="dragHandle" /&gt;
+
+&lt;div id="pnlModal" style="display:none"&gt;
+    &lt;div id="dragHandle" class="drag-handle"&gt;Drag me&lt;/div&gt;
+    &lt;p&gt;Draggable content&lt;/p&gt;
+    &lt;button id="btnClose"&gt;Close&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+<hr />
+
+<h3>4. Modal with Drop Shadow</h3>
+<p>Set <code>DropShadow="true"</code> to add a visual shadow effect to the popup panel.</p>
+
+<div data-audit-control="ModalPopupExtender-4">
+    <button id="btnShowShadow" class="btn btn-dark">
+        Show Modal (Drop Shadow)
+    </button>
+    <ModalPopupExtender TargetControlID="btnShowShadow"
+                        PopupControlID="pnlShadowModal"
+                        OkControlID="btnShadowClose"
+                        BackgroundCssClass="modal-backdrop-demo"
+                        DropShadow="true" />
+
+    <div id="pnlShadowModal" class="modal-popup-demo" style="display:none;">
+        <h4>Drop Shadow Modal</h4>
+        <p>This popup has <code>DropShadow="true"</code> enabled, adding a shadow effect for visual depth.</p>
+        <button id="btnShadowClose" class="btn btn-dark">Close</button>
+    </div>
+</div>
+
+<pre><code>&lt;ModalPopupExtender TargetControlID="btnShow" PopupControlID="pnlModal"
+                    OkControlID="btnClose"
+                    BackgroundCssClass="modal-backdrop"
+                    DropShadow="true" /&gt;</code></pre>
+
+<hr />
+
+<h3>5. Programmatic Show/Hide</h3>
+<p>Use Blazor visibility state to programmatically control when the modal trigger becomes active. The extender still manages the show/hide behavior via the target button.</p>
+
+<div data-audit-control="ModalPopupExtender-5">
+    <div class="d-flex gap-2 mb-2">
+        <button class="btn btn-success" @onclick="() => showTrigger = true">Enable Modal Trigger</button>
+        <button class="btn btn-outline-secondary" @onclick="() => showTrigger = false">Disable Modal Trigger</button>
+    </div>
+
+    @if (showTrigger)
+    {
+        <button id="btnShowProgrammatic" class="btn btn-success">
+            Open Programmatic Modal
+        </button>
+        <ModalPopupExtender TargetControlID="btnShowProgrammatic"
+                            PopupControlID="pnlProgrammaticModal"
+                            OkControlID="btnProgrammaticOk"
+                            CancelControlID="btnProgrammaticCancel"
+                            BackgroundCssClass="modal-backdrop-demo" />
+    }
+    else
+    {
+        <span class="text-muted">Modal trigger is disabled. Click "Enable Modal Trigger" to activate.</span>
+    }
+
+    <div id="pnlProgrammaticModal" class="modal-popup-demo" style="display:none;">
+        <h4>Programmatic Modal</h4>
+        <p>This modal's trigger button is conditionally rendered via Blazor state.</p>
+        <div class="d-flex gap-2 justify-content-end">
+            <button id="btnProgrammaticOk" class="btn btn-success" @onclick="HandleProgrammaticOk">Confirm</button>
+            <button id="btnProgrammaticCancel" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(programmaticStatus))
+    {
+        <div class="alert alert-info mt-2">@programmaticStatus</div>
+    }
+</div>
+
+<pre><code>@@if (showTrigger)
+{
+    &lt;button id="btnShow"&gt;Open Modal&lt;/button&gt;
+    &lt;ModalPopupExtender TargetControlID="btnShow"
+                        PopupControlID="pnlModal"
+                        OkControlID="btnOk" CancelControlID="btnCancel"
+                        BackgroundCssClass="modal-backdrop" /&gt;
+}
+
+@@code {
+    private bool showTrigger = false;
+}</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:Button ID="btnShow" runat="server" Text="Show Popup" /&gt;
+&lt;asp:Panel ID="pnlPopup" runat="server" CssClass="popup" style="display:none"&gt;
+    &lt;p&gt;Modal content here&lt;/p&gt;
+    &lt;asp:Button ID="btnOk" runat="server" Text="OK" /&gt;
+    &lt;asp:Button ID="btnCancel" runat="server" Text="Cancel" /&gt;
+&lt;/asp:Panel&gt;
+&lt;ajaxToolkit:ModalPopupExtender ID="ModalPopupExtender1" runat="server"
+    TargetControlID="btnShow"
+    PopupControlID="pnlPopup"
+    OkControlID="btnOk"
+    CancelControlID="btnCancel"
+    BackgroundCssClass="modal-backdrop"
+    DropShadow="true"
+    Drag="true"
+    PopupDragHandleControlID="pnlDragHandle" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;button id="btnShow"&gt;Show Popup&lt;/button&gt;
+&lt;div id="pnlPopup" style="display:none"&gt;
+    &lt;p&gt;Modal content here&lt;/p&gt;
+    &lt;button id="btnOk"&gt;OK&lt;/button&gt;
+    &lt;button id="btnCancel"&gt;Cancel&lt;/button&gt;
+&lt;/div&gt;
+&lt;ModalPopupExtender TargetControlID="btnShow"
+                    PopupControlID="pnlPopup"
+                    OkControlID="btnOk"
+                    CancelControlID="btnCancel"
+                    BackgroundCssClass="modal-backdrop"
+                    DropShadow="true"
+                    Drag="true"
+                    PopupDragHandleControlID="pnlDragHandle" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code> (not needed in Blazor)</li>
+    <li>Replace <code>&lt;asp:Button&gt;</code> with a standard <code>&lt;button&gt;</code> element</li>
+    <li>Replace <code>&lt;asp:Panel&gt;</code> with a <code>&lt;div&gt;</code> (keep the same <code>id</code>)</li>
+    <li>Replace <code>&lt;ajaxToolkit:ModalPopupExtender&gt;</code> with <code>&lt;ModalPopupExtender&gt;</code></li>
+    <li>Keep the same property names: <code>TargetControlID</code>, <code>PopupControlID</code>, <code>OkControlID</code>, <code>CancelControlID</code>, <code>BackgroundCssClass</code></li>
+    <li><code>DropShadow</code> and <code>Drag</code> properties carry over directly</li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code> (JS interop required)</li>
+</ol>
+
+<style>
+    .modal-popup-demo {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        min-width: 300px;
+        max-width: 450px;
+    }
+
+    .modal-backdrop-demo {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-backdrop-custom {
+        background-color: rgba(0, 100, 200, 0.4);
+    }
+
+    .modal-drag-handle {
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #ddd;
+        padding: 8px 12px;
+        margin: -20px -20px 15px -20px;
+        border-radius: 8px 8px 0 0;
+        cursor: move;
+        font-weight: bold;
+    }
+</style>
+
+@code {
+    private string basicStatus = "";
+    private string programmaticStatus = "";
+    private bool showTrigger = false;
+
+    private void HandleBasicOk()
+    {
+        basicStatus = $"Confirmed at {DateTime.Now:h:mm:ss tt}";
+    }
+
+    private void HandleProgrammaticOk()
+    {
+        programmaticStatus = $"Action confirmed at {DateTime.Now:h:mm:ss tt}";
+    }
+}

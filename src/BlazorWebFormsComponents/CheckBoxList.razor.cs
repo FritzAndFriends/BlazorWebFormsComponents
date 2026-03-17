@@ -12,8 +12,8 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Represents a list control that renders a group of checkboxes for multi-select scenarios.
 	/// </summary>
-	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-	public partial class CheckBoxList<TItem> : BaseListControl<TItem>
+	/// <typeparam name="ItemType">The type of items in the data source.</typeparam>
+	public partial class CheckBoxList<ItemType> : BaseListControl<ItemType>
 	{
 		private readonly string _generatedBaseId = Guid.NewGuid().ToString("N").Substring(0, 8);
 		private string _baseId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedBaseId;
@@ -40,7 +40,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the text alignment of the label relative to the checkbox (Left or Right).
 		/// </summary>
 		[Parameter]
-		public TextAlign TextAlign { get; set; } = TextAlign.Right;
+		public EnumParameter<TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		/// <summary>
 		/// Gets or sets the list of selected values.

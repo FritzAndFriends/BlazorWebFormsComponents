@@ -33,13 +33,13 @@ namespace BlazorWebFormsComponents
 		public int DisappearAfter { get; set; }
 
 		[Parameter]
-		public Orientation Orientation { get; set; } = Orientation.Vertical;
+		public EnumParameter<Orientation> Orientation { get; set; } = Enums.Orientation.Vertical;
 
 		/// <summary>
 		/// Gets or sets how the menu renders HTML. List uses ul/li (default), Table uses table/tr/td (legacy).
 		/// </summary>
 		[Parameter]
-		public MenuRenderingMode RenderingMode { get; set; } = MenuRenderingMode.List;
+		public EnumParameter<MenuRenderingMode> RenderingMode { get; set; } = Enums.MenuRenderingMode.List;
 
 		[Parameter]
 		public int StaticDisplayLevels { get; set; }

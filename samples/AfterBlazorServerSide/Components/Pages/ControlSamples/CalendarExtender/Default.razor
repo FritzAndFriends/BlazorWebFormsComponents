@@ -1,0 +1,155 @@
+@page "/ControlSamples/CalendarExtender"
+@rendermode InteractiveServer
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+<PageTitle>CalendarExtender Component Samples</PageTitle>
+
+<h2>CalendarExtender Component</h2>
+
+<p>The <code>CalendarExtender</code> attaches a popup calendar date picker to a target textbox. When the user clicks or focuses the textbox, a calendar appears for date selection. This emulates the Ajax Control Toolkit <code>CalendarExtender</code>.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> Extender components render <strong>no HTML</strong> themselves — they attach JavaScript behavior to an existing target element identified by <code>TargetControlID</code>. This page requires <code>InteractiveServer</code> render mode for JS interop.
+</div>
+
+<hr />
+
+<h3>1. Basic Date Picker</h3>
+<p>Attach a calendar popup to a textbox with the default <code>MM/dd/yyyy</code> format.</p>
+
+<div data-audit-control="CalendarExtender-1">
+    <label for="txtBasicDate">Select a date:</label>
+    <input type="text" id="txtBasicDate" class="form-control" style="max-width: 250px;" placeholder="Click to pick a date" />
+    <CalendarExtender TargetControlID="txtBasicDate" Format="MM/dd/yyyy" />
+</div>
+
+<pre><code>&lt;input type="text" id="txtBasicDate" /&gt;
+&lt;CalendarExtender TargetControlID="txtBasicDate" Format="MM/dd/yyyy" /&gt;</code></pre>
+
+<hr />
+
+<h3>2. Date Range Constraints</h3>
+<p>Use <code>StartDate</code> and <code>EndDate</code> to restrict selectable dates. Dates outside the range are disabled.</p>
+
+<div data-audit-control="CalendarExtender-2">
+    <label for="txtRangeDate">Pick a date (this month only):</label>
+    <input type="text" id="txtRangeDate" class="form-control" style="max-width: 250px;" placeholder="Restricted range" />
+    <CalendarExtender TargetControlID="txtRangeDate"
+                      Format="MM/dd/yyyy"
+                      StartDate="@startOfMonth"
+                      EndDate="@endOfMonth" />
+    <small class="text-muted">Range: @startOfMonth.ToString("MM/dd/yyyy") to @endOfMonth.ToString("MM/dd/yyyy")</small>
+</div>
+
+<pre><code>&lt;input type="text" id="txtRangeDate" /&gt;
+&lt;CalendarExtender TargetControlID="txtRangeDate"
+                  Format="MM/dd/yyyy"
+                  StartDate="@@startOfMonth"
+                  EndDate="@@endOfMonth" /&gt;</code></pre>
+
+<hr />
+
+<h3>3. Different Date Formats</h3>
+<p>The <code>Format</code> property accepts .NET date format strings.</p>
+
+<div data-audit-control="CalendarExtender-3">
+    <div class="row g-3">
+        <div class="col-auto">
+            <label for="txtShortDate">Short (d):</label>
+            <input type="text" id="txtShortDate" class="form-control" style="width: 200px;" />
+            <CalendarExtender TargetControlID="txtShortDate" Format="d" />
+        </div>
+        <div class="col-auto">
+            <label for="txtLongDate">yyyy-MM-dd:</label>
+            <input type="text" id="txtLongDate" class="form-control" style="width: 200px;" />
+            <CalendarExtender TargetControlID="txtLongDate" Format="yyyy-MM-dd" />
+        </div>
+        <div class="col-auto">
+            <label for="txtEuroDate">dd/MM/yyyy:</label>
+            <input type="text" id="txtEuroDate" class="form-control" style="width: 200px;" />
+            <CalendarExtender TargetControlID="txtEuroDate" Format="dd/MM/yyyy" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;input type="text" id="txtShortDate" /&gt;
+&lt;CalendarExtender TargetControlID="txtShortDate" Format="d" /&gt;
+
+&lt;input type="text" id="txtLongDate" /&gt;
+&lt;CalendarExtender TargetControlID="txtLongDate" Format="yyyy-MM-dd" /&gt;</code></pre>
+
+<hr />
+
+<h3>4. PopupPosition Options</h3>
+<p>Control where the calendar appears relative to the textbox using <code>PopupPosition</code>.</p>
+
+<div data-audit-control="CalendarExtender-4">
+    <div class="row g-3">
+        <div class="col-auto">
+            <label for="txtBottomLeft">BottomLeft:</label>
+            <input type="text" id="txtBottomLeft" class="form-control" style="width: 180px;" />
+            <CalendarExtender TargetControlID="txtBottomLeft" Format="MM/dd/yyyy"
+                              PopupPosition="CalendarPosition.BottomLeft" />
+        </div>
+        <div class="col-auto">
+            <label for="txtBottomRight">BottomRight:</label>
+            <input type="text" id="txtBottomRight" class="form-control" style="width: 180px;" />
+            <CalendarExtender TargetControlID="txtBottomRight" Format="MM/dd/yyyy"
+                              PopupPosition="CalendarPosition.BottomRight" />
+        </div>
+        <div class="col-auto">
+            <label for="txtTopLeft">TopLeft:</label>
+            <input type="text" id="txtTopLeft" class="form-control" style="width: 180px;" />
+            <CalendarExtender TargetControlID="txtTopLeft" Format="MM/dd/yyyy"
+                              PopupPosition="CalendarPosition.TopLeft" />
+        </div>
+        <div class="col-auto">
+            <label for="txtRight">Right:</label>
+            <input type="text" id="txtRight" class="form-control" style="width: 180px;" />
+            <CalendarExtender TargetControlID="txtRight" Format="MM/dd/yyyy"
+                              PopupPosition="CalendarPosition.Right" />
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;input type="text" id="txtBottomLeft" /&gt;
+&lt;CalendarExtender TargetControlID="txtBottomLeft"
+                  PopupPosition="CalendarPosition.BottomLeft" /&gt;
+
+&lt;input type="text" id="txtRight" /&gt;
+&lt;CalendarExtender TargetControlID="txtRight"
+                  PopupPosition="CalendarPosition.Right" /&gt;</code></pre>
+
+<hr />
+
+<h3>Migration Guide: Ajax Control Toolkit to Blazor</h3>
+
+<h4>Ajax Control Toolkit (Before)</h4>
+<pre><code class="language-aspx">&lt;asp:ScriptManager ID="ScriptManager1" runat="server" /&gt;
+&lt;asp:TextBox ID="txtDate" runat="server" /&gt;
+&lt;ajaxToolkit:CalendarExtender ID="CalendarExtender1" runat="server"
+    TargetControlID="txtDate"
+    Format="MM/dd/yyyy"
+    PopupPosition="BottomLeft" /&gt;</code></pre>
+
+<h4>Blazor with BWFC (After)</h4>
+<pre><code>&lt;input type="text" id="txtDate" /&gt;
+&lt;CalendarExtender TargetControlID="txtDate"
+                  Format="MM/dd/yyyy"
+                  PopupPosition="CalendarPosition.BottomLeft" /&gt;</code></pre>
+
+<h4>Migration Steps</h4>
+<ol>
+    <li>Remove <code>asp:ScriptManager</code></li>
+    <li>Replace <code>&lt;asp:TextBox&gt;</code> with <code>&lt;input type="text"&gt;</code> keeping the same <code>id</code></li>
+    <li>Replace <code>&lt;ajaxToolkit:CalendarExtender&gt;</code> with <code>&lt;CalendarExtender&gt;</code></li>
+    <li>Keep <code>TargetControlID</code> and <code>Format</code> values unchanged</li>
+    <li>Prefix enum values with type name: <code>PopupPosition="CalendarPosition.BottomLeft"</code></li>
+    <li>Ensure the page uses <code>@@rendermode InteractiveServer</code></li>
+</ol>
+
+@code {
+    private DateTime startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateTime endOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
+}

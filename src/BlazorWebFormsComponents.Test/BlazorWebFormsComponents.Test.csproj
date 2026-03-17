@@ -9,12 +9,16 @@
 	  <None Remove="Ads4.xml" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="bunit" Version="2.5.3" />
 		<PackageReference Include="MartinCostello.Logging.XUnit" Version="0.5.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="$(AspNetCoreVersion)" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="$(AspNetCoreVersion)" />
+		<PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
 		<PackageReference Include="Moq" Version="4.20.72" />
 		<PackageReference Include="Shouldly" Version="4.3.0" />
@@ -28,6 +32,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\samples\SharedSampleObjects\SharedSampleObjects.csproj" />
+		<ProjectReference Include="..\BlazorAjaxToolkitComponents\BlazorAjaxToolkitComponents.csproj" />
 		<ProjectReference Include="..\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
 	</ItemGroup>
 

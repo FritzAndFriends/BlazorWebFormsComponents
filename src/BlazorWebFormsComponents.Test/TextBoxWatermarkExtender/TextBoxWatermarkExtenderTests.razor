@@ -1,0 +1,124 @@
+@using BlazorAjaxToolkitComponents
+
+@code {
+
+	private const string MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/textbox-watermark-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TextBoxWatermarkExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === WatermarkText ===
+
+	[Fact]
+	public void WatermarkText_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TextBoxWatermarkExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<TextBoxWatermarkExtender>().Instance
+			.WatermarkText.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void WatermarkText_SetCorrectly()
+	{
+		string text = "Enter your name...";
+		SetupLooseJs();
+		var cut = Render(
+			@<TextBoxWatermarkExtender TargetControlID="txt1" WatermarkText="@text" />
+		);
+
+		cut.FindComponent<TextBoxWatermarkExtender>().Instance
+			.WatermarkText.ShouldBe("Enter your name...");
+	}
+
+	// === WatermarkCssClass ===
+
+	[Fact]
+	public void WatermarkCssClass_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TextBoxWatermarkExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<TextBoxWatermarkExtender>().Instance
+			.WatermarkCssClass.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void WatermarkCssClass_SetCorrectly()
+	{
+		string cssClass = "watermark-style";
+		SetupLooseJs();
+		var cut = Render(
+			@<TextBoxWatermarkExtender TargetControlID="txt1" WatermarkCssClass="@cssClass" />
+		);
+
+		cut.FindComponent<TextBoxWatermarkExtender>().Instance
+			.WatermarkCssClass.ShouldBe("watermark-style");
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<TextBoxWatermarkExtender TargetControlID="txt1" />);
+
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<TextBoxWatermarkExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<TextBoxWatermarkExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<TextBoxWatermarkExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<TextBoxWatermarkExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

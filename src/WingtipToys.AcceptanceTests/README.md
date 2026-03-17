@@ -43,6 +43,7 @@ dotnet test src/WingtipToys.AcceptanceTests
 | **NavigationTests** | Home page loads, About/Contact/Products navbar links work, Shopping Cart link works, Register link works, Login link works |
 | **ShoppingCartTests** | Product list displays products, add item to cart, update cart quantity, remove item from cart |
 | **AuthenticationTests** | Register page has expected form fields, Login page has expected form fields, Register → Login end-to-end flow |
+| **StaticAssetTests** | CSS files are served (HTTP 200), no broken images on ProductList, navbar has Bootstrap classes & reasonable height, homepage/ProductList/ProductDetails visual sanity screenshots, no failed static asset requests on homepage |
 
 ## Usage in Migration Iterations
 

@@ -14,16 +14,16 @@ namespace BlazorWebFormsComponents
 		public string DefaultButton { get; set; }
 
 		[Parameter]
-		public ContentDirection Direction { get; set; } = ContentDirection.NotSet;
+		public EnumParameter<ContentDirection> Direction { get; set; } = ContentDirection.NotSet;
 
 		[Parameter]
 		public string GroupingText { get; set; }
 
 		[Parameter]
-		public HorizontalAlign HorizontalAlign { get; set; } = HorizontalAlign.NotSet;
+		public EnumParameter<HorizontalAlign> HorizontalAlign { get; set; } = Enums.HorizontalAlign.NotSet;
 
 		[Parameter]
-		public ScrollBars ScrollBars { get; set; } = ScrollBars.None;
+		public EnumParameter<ScrollBars> ScrollBars { get; set; } = Enums.ScrollBars.None;
 
 		[Parameter]
 		public string BackImageUrl { get; set; }
@@ -31,7 +31,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool Wrap { get; set; } = true;
 
-		private string DirectionAttr => Direction switch
+		private string DirectionAttr => Direction.Value switch
 		{
 			ContentDirection.LeftToRight => "ltr",
 			ContentDirection.RightToLeft => "rtl",
@@ -49,19 +49,19 @@ namespace BlazorWebFormsComponents
 				styles.Add(baseStyle);
 
 			// Add HorizontalAlign
-			if (HorizontalAlign != HorizontalAlign.NotSet)
+			if (HorizontalAlign.Value != Enums.HorizontalAlign.NotSet)
 			{
 				var alignValue = HorizontalAlign.ToString().ToLowerInvariant();
 				styles.Add($"text-align:{alignValue}");
 			}
 
 			// Add ScrollBars
-			var overflowStyle = ScrollBars switch
+			var overflowStyle = ScrollBars.Value switch
 			{
-				ScrollBars.Horizontal => "overflow-x:scroll;overflow-y:hidden",
-				ScrollBars.Vertical => "overflow-x:hidden;overflow-y:scroll",
-				ScrollBars.Both => "overflow:scroll",
-				ScrollBars.Auto => "overflow:auto",
+				Enums.ScrollBars.Horizontal => "overflow-x:scroll;overflow-y:hidden",
+				Enums.ScrollBars.Vertical => "overflow-x:hidden;overflow-y:scroll",
+				Enums.ScrollBars.Both => "overflow:scroll",
+				Enums.ScrollBars.Auto => "overflow:auto",
 				_ => null
 			};
 			if (overflowStyle != null)

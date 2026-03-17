@@ -1,0 +1,269 @@
+@using BlazorAjaxToolkitComponents
+@using BlazorAjaxToolkitComponents.Enums
+
+@code {
+
+	private const string FILTER_MODULE_PATH =
+		"./_content/BlazorAjaxToolkitComponents/js/filtered-textbox-extender.js";
+
+	/// <summary>
+	/// Loose JS mode lets the extender's import/createBehavior/disposeBehavior
+	/// calls succeed without explicit per-function setup. Extender JS behavior
+	/// is out of scope for bUnit — that's Playwright's job.
+	/// </summary>
+	private void SetupLooseJs()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	// === Rendering ===
+
+	[Fact]
+	public void RendersNoVisibleHTML()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// === FilterType: single values ===
+
+	[Fact]
+	public void FilterType_DefaultIsCustom()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterType.ShouldBe(FilterType.Custom);
+	}
+
+	[Fact]
+	public void FilterType_Numbers()
+	{
+		FilterType ft = FilterType.Numbers;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterType="ft" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterType.ShouldBe(FilterType.Numbers);
+	}
+
+	[Fact]
+	public void FilterType_LowercaseLetters()
+	{
+		FilterType ft = FilterType.LowercaseLetters;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterType="ft" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterType.ShouldBe(FilterType.LowercaseLetters);
+	}
+
+	[Fact]
+	public void FilterType_UppercaseLetters()
+	{
+		FilterType ft = FilterType.UppercaseLetters;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterType="ft" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterType.ShouldBe(FilterType.UppercaseLetters);
+	}
+
+	// === FilterType: flags combinations ===
+
+	[Fact]
+	public void FilterType_NumbersAndLowercase()
+	{
+		FilterType ft = FilterType.Numbers | FilterType.LowercaseLetters;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterType="ft" />
+		);
+
+		var instance = cut.FindComponent<FilteredTextBoxExtender>().Instance;
+		instance.FilterType.HasFlag(FilterType.Numbers).ShouldBeTrue();
+		instance.FilterType.HasFlag(FilterType.LowercaseLetters).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void FilterType_AllLetters()
+	{
+		FilterType ft = FilterType.LowercaseLetters | FilterType.UppercaseLetters;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterType="ft" />
+		);
+
+		var instance = cut.FindComponent<FilteredTextBoxExtender>().Instance;
+		instance.FilterType.HasFlag(FilterType.LowercaseLetters).ShouldBeTrue();
+		instance.FilterType.HasFlag(FilterType.UppercaseLetters).ShouldBeTrue();
+	}
+
+	[Fact]
+	public void FilterType_AllFlags()
+	{
+		FilterType ft = FilterType.Numbers | FilterType.LowercaseLetters | FilterType.UppercaseLetters;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterType="ft" />
+		);
+
+		var instance = cut.FindComponent<FilteredTextBoxExtender>().Instance;
+		((int)instance.FilterType).ShouldBe(7); // 1 | 2 | 4
+	}
+
+	// === ValidChars / InvalidChars ===
+
+	[Fact]
+	public void ValidChars_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.ValidChars.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void ValidChars_SetCorrectly()
+	{
+		string chars = ".-_@";
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" ValidChars="@chars" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.ValidChars.ShouldBe(".-_@");
+	}
+
+	[Fact]
+	public void InvalidChars_DefaultIsEmpty()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.InvalidChars.ShouldBe(string.Empty);
+	}
+
+	[Fact]
+	public void InvalidChars_SetCorrectly()
+	{
+		string chars = "<>&";
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" InvalidChars="@chars" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.InvalidChars.ShouldBe("<>&");
+	}
+
+	// === FilterMode ===
+
+	[Fact]
+	public void FilterMode_DefaultIsValidChars()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterMode.ShouldBe(FilterMode.ValidChars);
+	}
+
+	[Fact]
+	public void FilterMode_SetToInvalidChars()
+	{
+		FilterMode mode = FilterMode.InvalidChars;
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterMode="mode" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterMode.ShouldBe(FilterMode.InvalidChars);
+	}
+
+	// === FilterInterval ===
+
+	[Fact]
+	public void FilterInterval_DefaultIs250()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterInterval.ShouldBe(250);
+	}
+
+	[Fact]
+	public void FilterInterval_SetCorrectly()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" FilterInterval="100" />
+		);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.FilterInterval.ShouldBe(100);
+	}
+
+	// === JS Module Path ===
+
+	[Fact]
+	public void JsModulePath_MatchesExpectedPath()
+	{
+		SetupLooseJs();
+		Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		// Verify the component imported the correct module path
+		var importCalls = JSInterop.Invocations["import"];
+		importCalls.ShouldNotBeEmpty();
+		((string)importCalls[0].Arguments[0]).ShouldBe(FILTER_MODULE_PATH);
+	}
+
+	// === Edge Cases ===
+
+	[Fact]
+	public void ThrowsWhenTargetControlIDEmpty()
+	{
+		SetupLooseJs();
+		Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(@<FilteredTextBoxExtender />);
+		}).Message.ShouldContain("TargetControlID");
+	}
+
+	[Fact]
+	public void Enabled_False_DoesNotInitializeJs()
+	{
+		SetupLooseJs();
+		var cut = Render(
+			@<FilteredTextBoxExtender TargetControlID="txt1" Enabled="false" />
+		);
+
+		// Renders nothing and no JS module was imported
+		cut.Markup.Trim().ShouldBeEmpty();
+		JSInterop.Invocations["import"].ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BehaviorID_DefaultsToNull()
+	{
+		SetupLooseJs();
+		var cut = Render(@<FilteredTextBoxExtender TargetControlID="txt1" />);
+
+		cut.FindComponent<FilteredTextBoxExtender>().Instance
+			.BehaviorID.ShouldBeNull();
+	}
+}

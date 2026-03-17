@@ -9,5 +9,5 @@ public partial class Literal : BaseWebFormsComponent
     public string Text { get; set; } = string.Empty;
 
     [Parameter]
-    public LiteralMode Mode { get; set; } = LiteralMode.Encode; // Changed from PassThrough to Encode to match Web Forms default
+    public EnumParameter<LiteralMode> Mode { get; set; } = LiteralMode.Encode; // Changed from PassThrough to Encode to match Web Forms default
 }

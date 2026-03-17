@@ -24,6 +24,7 @@ namespace BlazorWebFormsComponents.LoginControls
 
 		private RenderFragment GetAuthenticatedView(ClaimsPrincipal user)
 		{
+
 			var roleGroup = RoleGroupCollection.GetRoleGroup(user);
 			if (roleGroup != null)
 			{

@@ -62,6 +62,7 @@ plugins:
 
 nav:
   - Home: README.md
+  - Component Health Dashboard: dashboard.md
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
     - BulletedList: EditorControls/BulletedList.md
@@ -127,12 +128,32 @@ nav:
     - Timer: EditorControls/Timer.md
     - UpdatePanel: EditorControls/UpdatePanel.md
     - UpdateProgress: EditorControls/UpdateProgress.md
+  - Ajax Control Toolkit Extenders:
+    - Overview: AjaxToolkit/index.md
+    - Migration Guide: AjaxToolkit/migration-guide.md
+    - Accordion: AjaxToolkit/Accordion.md
+    - AutoCompleteExtender: AjaxToolkit/AutoCompleteExtender.md
+    - CalendarExtender: AjaxToolkit/CalendarExtender.md
+    - CollapsiblePanelExtender: AjaxToolkit/CollapsiblePanelExtender.md
+    - ConfirmButtonExtender: AjaxToolkit/ConfirmButtonExtender.md
+    - FilteredTextBoxExtender: AjaxToolkit/FilteredTextBoxExtender.md
+    - HoverMenuExtender: AjaxToolkit/HoverMenuExtender.md
+    - MaskedEditExtender: AjaxToolkit/MaskedEditExtender.md
+    - ModalPopupExtender: AjaxToolkit/ModalPopupExtender.md
+    - NumericUpDownExtender: AjaxToolkit/NumericUpDownExtender.md
+    - PopupControlExtender: AjaxToolkit/PopupControlExtender.md
+    - SliderExtender: AjaxToolkit/SliderExtender.md
+    - TabContainer: AjaxToolkit/TabContainer.md
+    - ToggleButtonExtender: AjaxToolkit/ToggleButtonExtender.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
+    - EnumParameter: UtilityFeatures/EnumParameter.md
     - ID Rendering: UtilityFeatures/IDRendering.md
     - JavaScript Setup: UtilityFeatures/JavaScriptSetup.md
+    - L2 Automation Shims: UtilityFeatures/L2AutomationShims.md
     - NamingContainer: UtilityFeatures/NamingContainer.md
     - Page System: UtilityFeatures/PageService.md
+    - Response.Redirect: UtilityFeatures/ResponseRedirect.md
     - Service Registration: UtilityFeatures/ServiceRegistration.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
@@ -146,4 +167,8 @@ nav:
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - Themes and Skins: Migration/ThemesAndSkins.md
       - User Controls: Migration/User-Controls.md
+      - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
+  - Migration Tests:
+      - Overview: migration-tests/README.md
+      - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md

@@ -69,7 +69,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the selection mode of the Calendar control.
 		/// </summary>
 		[Parameter]
-		public CalendarSelectionMode SelectionMode { get; set; } = CalendarSelectionMode.Day;
+		public EnumParameter<CalendarSelectionMode> SelectionMode { get; set; } = CalendarSelectionMode.Day;
 
 		/// <summary>
 		/// Gets or sets the text displayed as the caption of the calendar table.
@@ -81,7 +81,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the alignment of the caption relative to the calendar table.
 		/// </summary>
 		[Parameter]
-		public TableCaptionAlign CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
+		public EnumParameter<TableCaptionAlign> CaptionAlign { get; set; } = TableCaptionAlign.NotSet;
 
 		/// <summary>
 		/// Gets or sets whether the calendar renders accessible table headers using scope attributes.
@@ -135,13 +135,13 @@ namespace BlazorWebFormsComponents
 		/// Format for displaying day names.
 		/// </summary>
 		[Parameter]
-		public DayNameFormat DayNameFormat { get; set; } = DayNameFormat.Short;
+		public EnumParameter<DayNameFormat> DayNameFormat { get; set; } = Enums.DayNameFormat.Short;
 
 		/// <summary>
 		/// Format for the title.
 		/// </summary>
 		[Parameter]
-		public TitleFormat TitleFormat { get; set; } = TitleFormat.MonthYear;
+		public EnumParameter<TitleFormat> TitleFormat { get; set; } = Enums.TitleFormat.MonthYear;
 
 		/// <summary>
 		/// Text for next month link.
@@ -171,7 +171,7 @@ namespace BlazorWebFormsComponents
 		/// First day of the week.
 		/// </summary>
 		[Parameter]
-		public DayOfWeek FirstDayOfWeek { get; set; } = DayOfWeek.Sunday;
+		public EnumParameter<DayOfWeek> FirstDayOfWeek { get; set; } = DayOfWeek.Sunday;
 
 		/// <summary>
 		/// Cell padding for the table.
@@ -277,14 +277,14 @@ namespace BlazorWebFormsComponents
 
 		private string GetTitleText()
 		{
-			var format = TitleFormat == TitleFormat.Month ? "MMMM" : "MMMM yyyy";
+			var format = TitleFormat.Value == Enums.TitleFormat.Month ? "MMMM" : "MMMM yyyy";
 			return _visibleMonth.ToString(format, CultureInfo.CurrentCulture);
 		}
 
 		private List<DayOfWeek> GetDayHeaders()
 		{
 			var days = new List<DayOfWeek>();
-			var current = FirstDayOfWeek;
+			var current = FirstDayOfWeek.Value;
 			for (var i = 0; i < 7; i++)
 			{
 				days.Add(current);
@@ -295,7 +295,7 @@ namespace BlazorWebFormsComponents
 
 		private string GetDayName(DayOfWeek day)
 		{
-			return DayNameFormat switch
+			return DayNameFormat.Value switch
 			{
 				Enums.DayNameFormat.Full => CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day),
 				Enums.DayNameFormat.FirstLetter => SafeSubstring(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(day), 0, 1),

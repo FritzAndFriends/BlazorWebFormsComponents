@@ -12,8 +12,8 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Represents a list control that displays a group of radio buttons for single selection.
 	/// </summary>
-	/// <typeparam name="TItem">The type of items in the data source.</typeparam>
-	public partial class RadioButtonList<TItem> : BaseListControl<TItem>
+	/// <typeparam name="ItemType">The type of items in the data source.</typeparam>
+	public partial class RadioButtonList<ItemType> : BaseListControl<ItemType>
 	{
 		private readonly string _generatedGroupName = Guid.NewGuid().ToString("N");
 		private string _groupName => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedGroupName;
@@ -40,7 +40,7 @@ namespace BlazorWebFormsComponents
 		/// Gets or sets the alignment of the text label with respect to the radio button.
 		/// </summary>
 		[Parameter]
-		public TextAlign TextAlign { get; set; } = TextAlign.Right;
+		public EnumParameter<TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		/// <summary>
 		/// Gets or sets the selected value.
@@ -108,6 +108,6 @@ namespace BlazorWebFormsComponents
 			await OnSelectedIndexChanged.InvokeAsync(e);
 		}
 
-		private string GetInputId(int index) => $"{_groupName}_{index}";
+		private string GetInputId(int index) => !string.IsNullOrEmpty(ClientID) ? $"{ClientID}_{index}" : null;
 	}
 }

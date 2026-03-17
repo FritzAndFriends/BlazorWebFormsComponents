@@ -1,8 +1,10 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Account;
 
-public partial class VerifyPhoneNumber : ComponentBase
+// TODO: Requires ASP.NET Core Identity migration — phone verification needs UserManager
+public partial class VerifyPhoneNumber
 {
-    private string Title => "Verify Phone Number";
+    private void Code_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        // TODO: Implement with UserManager
+    }
 }

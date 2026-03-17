@@ -33,14 +33,14 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public string Text { get; set; }
 		[Parameter] public string ErrorMessage { get; set; }
 		[Parameter] public string ValidationGroup { get; set; }
-		[Parameter] public HorizontalAlign HorizontalAlign { get; set; }
-		[Parameter] public VerticalAlign VerticalAlign { get; set; }
-		[Parameter] public ValidatorDisplay Display { get; set; } = ValidatorDisplay.Static;
+		[Parameter] public EnumParameter<HorizontalAlign> HorizontalAlign { get; set; }
+		[Parameter] public EnumParameter<VerticalAlign> VerticalAlign { get; set; }
+		[Parameter] public EnumParameter<ValidatorDisplay> Display { get; set; } = ValidatorDisplay.Static;
 		[Parameter] public bool SetFocusOnError { get; set; }
 
 		public abstract bool Validate(string value);
 
-		protected string DisplayStyle => Display switch
+		protected string DisplayStyle => Display.Value switch
 		{
 			ValidatorDisplay.None => "display:none;",
 			ValidatorDisplay.Dynamic when IsValid => "display:none;",

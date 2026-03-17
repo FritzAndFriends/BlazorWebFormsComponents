@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1e1e1e; color: #d4d4d4; padding: 24px; }
+        h1 { text-align: center; color: #fff; margin-bottom: 8px; font-size: 28px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1400px; margin: 0 auto; }
+        .panel { background: #252526; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .panel-header { padding: 12px 16px; font-weight: 600; font-size: 14px; }
+        .panel-header.before { background: #4a1919; color: #f48771; border-bottom: 2px solid #f48771; }
+        .panel-header.after { background: #1a3a1a; color: #89d185; border-bottom: 2px solid #89d185; }
+        pre { padding: 16px; font-size: 12.5px; line-height: 1.5; overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; }
+        .highlight { background: rgba(255, 255, 0, 0.08); }
+        .removed { color: #f48771; }
+        .added { color: #89d185; }
+        .badge { display: inline-block; background: #0078d4; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 8px; }
+        .stats { text-align: center; margin-top: 16px; color: #888; font-size: 13px; }
+        .stats strong { color: #89d185; }
+    </style>
+</head>
+<body>
+    <h1>Login — Before &amp; After</h1>
+    <p class="subtitle">WingtipToys Migration: ASP.NET Web Forms → Blazor with BWFC</p>
+    <div class="container">
+        <div class="panel">
+            <div class="panel-header before">❌ Before — Web Forms (.aspx)</div>
+            <pre>&lt;div class="form-horizontal"&gt;
+    &lt;h4&gt;Use a local account to log in.&lt;/h4&gt;
+    &lt;hr /&gt;
+    <span class="removed">&lt;asp:PlaceHolder runat="server"</span> ID="ErrorMessage"
+        Visible="false"&gt;
+        &lt;p class="text-danger"&gt;
+            <span class="removed">&lt;asp:Literal runat="server"</span> ID="FailureText" /&gt;
+        &lt;/p&gt;
+    <span class="removed">&lt;/asp:PlaceHolder&gt;</span>
+    &lt;div class="form-group"&gt;
+        <span class="removed">&lt;asp:Label runat="server"</span> AssociatedControlID="Email"
+            CssClass="col-md-2 control-label"&gt;Email<span class="removed">&lt;/asp:Label&gt;</span>
+        &lt;div class="col-md-10"&gt;
+            <span class="removed">&lt;asp:TextBox runat="server"</span> ID="Email"
+                CssClass="form-control" TextMode="Email" /&gt;
+            <span class="removed">&lt;asp:RequiredFieldValidator runat="server"</span>
+                ControlToValidate="Email" CssClass="text-danger"
+                ErrorMessage="The email field is required." /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-group"&gt;
+        <span class="removed">&lt;asp:Label runat="server"</span> AssociatedControlID="Password"
+            CssClass="col-md-2 control-label"&gt;Password<span class="removed">&lt;/asp:Label&gt;</span>
+        &lt;div class="col-md-10"&gt;
+            <span class="removed">&lt;asp:TextBox runat="server"</span> ID="Password"
+                TextMode="Password" CssClass="form-control" /&gt;
+            <span class="removed">&lt;asp:RequiredFieldValidator runat="server"</span>
+                ControlToValidate="Password" CssClass="text-danger"
+                ErrorMessage="The password field is required." /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-group"&gt;
+        &lt;div class="col-md-offset-2 col-md-10"&gt;
+            &lt;div class="checkbox"&gt;
+                <span class="removed">&lt;asp:CheckBox runat="server"</span> ID="RememberMe" /&gt;
+                <span class="removed">&lt;asp:Label runat="server"</span>
+                    AssociatedControlID="RememberMe"&gt;
+                    Remember me?<span class="removed">&lt;/asp:Label&gt;</span>
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-group"&gt;
+        &lt;div class="col-md-offset-2 col-md-10"&gt;
+            <span class="removed">&lt;asp:Button runat="server"</span> OnClick="LogIn"
+                Text="Log in" CssClass="btn btn-default" /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+    <span class="removed">&lt;asp:HyperLink runat="server"</span> ID="RegisterHyperLink"
+        <span class="removed">ViewStateMode="Disabled"</span>&gt;
+        Register as a new user<span class="removed">&lt;/asp:HyperLink&gt;</span>
+&lt;/p&gt;</pre>
+        </div>
+        <div class="panel">
+            <div class="panel-header after">✅ After — Blazor + BWFC (.razor)</div>
+            <pre>&lt;div class="form-horizontal"&gt;
+    &lt;h4&gt;Use a local account to log in.&lt;/h4&gt;
+    &lt;hr /&gt;
+    <span class="added">&lt;PlaceHolder</span> ID="ErrorMessage"
+        Visible="false"&gt;
+        &lt;p class="text-danger"&gt;
+            <span class="added">&lt;Literal</span> ID="FailureText" /&gt;
+        &lt;/p&gt;
+    <span class="added">&lt;/PlaceHolder&gt;</span>
+    &lt;div class="form-group"&gt;
+        <span class="added">&lt;Label</span> AssociatedControlID="Email"
+            CssClass="col-md-2 control-label"&gt;Email<span class="added">&lt;/Label&gt;</span>
+        &lt;div class="col-md-10"&gt;
+            <span class="added">&lt;TextBox</span> ID="Email"
+                CssClass="form-control" TextMode="Email" /&gt;
+            <span class="added">&lt;RequiredFieldValidator</span>
+                ControlToValidate="Email" CssClass="text-danger"
+                ErrorMessage="The email field is required." /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-group"&gt;
+        <span class="added">&lt;Label</span> AssociatedControlID="Password"
+            CssClass="col-md-2 control-label"&gt;Password<span class="added">&lt;/Label&gt;</span>
+        &lt;div class="col-md-10"&gt;
+            <span class="added">&lt;TextBox</span> ID="Password"
+                TextMode="Password" CssClass="form-control" /&gt;
+            <span class="added">&lt;RequiredFieldValidator</span>
+                ControlToValidate="Password" CssClass="text-danger"
+                ErrorMessage="The password field is required." /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-group"&gt;
+        &lt;div class="col-md-offset-2 col-md-10"&gt;
+            &lt;div class="checkbox"&gt;
+                <span class="added">&lt;CheckBox</span> ID="RememberMe" /&gt;
+                <span class="added">&lt;Label</span>
+                    AssociatedControlID="RememberMe"&gt;
+                    Remember me?<span class="added">&lt;/Label&gt;</span>
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-group"&gt;
+        &lt;div class="col-md-offset-2 col-md-10"&gt;
+            <span class="added">&lt;Button</span> OnClick="LogIn"
+                Text="Log in" CssClass="btn btn-default" /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+    <span class="added">&lt;HyperLink</span> ID="RegisterHyperLink"&gt;
+        Register as a new user<span class="added">&lt;/HyperLink&gt;</span>
+&lt;/p&gt;</pre>
+        </div>
+    </div>
+    <p class="stats">
+        Controls migrated: <strong>10 (PlaceHolder, Literal, Label ×3, TextBox ×2, RequiredFieldValidator ×2, CheckBox, Button, HyperLink)</strong> | 
+        Attributes preserved: <strong>16 of 18</strong> | 
+        Lines changed: <strong>14 of 40</strong> — <strong>removed</strong> asp: prefixes, runat="server", ViewStateMode
+    </p>
+</body>
+</html>

@@ -1,7 +1,7 @@
 @using BlazorWebFormsComponents.DataBinding
 @using BlazorWebFormsComponents.Enums
-@typeparam TItem
-@inherits BaseListControl<TItem>
+@typeparam ItemType
+@inherits BaseListControl<ItemType>
 
 @if (Visible)
 {
@@ -87,7 +87,7 @@
 @code {
 	private RenderFragment RenderRadioItem(ListItem item, string inputId) => __builder =>
 	{
-		if (TextAlign == TextAlign.Left)
+		if (TextAlign.Value == Enums.TextAlign.Left)
 		{
 			<label for="@inputId">@item.Text</label>
 			<input id="@inputId"

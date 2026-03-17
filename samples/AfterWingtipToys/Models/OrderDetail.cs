@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WingtipToys.Models;
 
 public class OrderDetail

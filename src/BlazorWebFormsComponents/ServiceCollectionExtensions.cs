@@ -1,32 +1,79 @@
 using System;
-using System.Reflection;
+using BlazorWebFormsComponents.Diagnostics;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorWebFormsComponents;
 
 /// <summary>
-/// Extension methods for registering BlazorWebFormsComponents services
+/// Extension methods for registering and configuring BlazorWebFormsComponents.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds BlazorWebFormsComponents services to the service collection.
+    /// Adds BlazorWebFormsComponents services to the service collection with default options.
     /// This automatically handles JavaScript loading - no manual script tags required.
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddBlazorWebFormsComponents(this IServiceCollection services)
-    {
-        // Register IHttpContextAccessor via reflection — the consuming ASP.NET Core app
-        // always has Microsoft.AspNetCore.Http loaded, but this library can't reference
-        // it at compile time (no shared framework reference in the Razor class library).
-        var httpExtType = Type.GetType(
-            "Microsoft.Extensions.DependencyInjection.HttpServiceCollectionExtensions, Microsoft.AspNetCore.Http");
-        httpExtType?.GetMethod("AddHttpContextAccessor", BindingFlags.Public | BindingFlags.Static,
-            null, new[] { typeof(IServiceCollection) }, null)?.Invoke(null, new object[] { services });
+        => services.AddBlazorWebFormsComponents(configure: null);
 
+    /// <summary>
+    /// Adds BlazorWebFormsComponents services to the service collection with configurable options.
+    /// This automatically registers HttpContextAccessor (required by BaseWebFormsComponent),
+    /// JS interop services, and the page service.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="configure">Optional action to configure <see cref="BlazorWebFormsComponentsOptions"/></param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddBlazorWebFormsComponents(this IServiceCollection services, Action<BlazorWebFormsComponentsOptions>? configure)
+    {
+        services.AddHttpContextAccessor();
         services.AddScoped<BlazorWebFormsJsInterop>();
         services.AddScoped<IPageService, PageService>();
+
+        var options = new BlazorWebFormsComponentsOptions();
+        configure?.Invoke(options);
+        services.AddSingleton(options);
+
         return services;
+    }
+
+    /// <summary>
+    /// Adds the Component Health Dashboard diagnostic service as a singleton.
+    /// Loads reference baselines from dev-docs/reference-baselines.json and enables
+    /// runtime reflection-based health scoring of all tracked components.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="solutionRoot">Path to the repository root (for file scanning of tests, docs, samples).</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddComponentHealthDashboard(this IServiceCollection services, string solutionRoot)
+    {
+        var baselinesPath = System.IO.Path.Combine(solutionRoot, "dev-docs", "reference-baselines.json");
+        var baselines = ReferenceBaselines.LoadFromFile(baselinesPath);
+        var healthService = new ComponentHealthService(baselines, solutionRoot);
+        services.AddSingleton(healthService);
+        return services;
+    }
+
+    /// <summary>
+    /// Adds BlazorWebFormsComponents middleware to the application pipeline.
+    /// When <see cref="BlazorWebFormsComponentsOptions.EnableAspxUrlRewriting"/> is true (default),
+    /// requests ending in .aspx are permanently redirected (301) to clean Blazor URLs.
+    /// </summary>
+    /// <param name="app">The application builder</param>
+    /// <returns>The application builder for chaining</returns>
+    public static IApplicationBuilder UseBlazorWebFormsComponents(this IApplicationBuilder app)
+    {
+        var options = app.ApplicationServices.GetService<BlazorWebFormsComponentsOptions>()
+                     ?? new BlazorWebFormsComponentsOptions();
+
+        if (options.EnableAspxUrlRewriting)
+        {
+            app.UseMiddleware<AspxRewriteMiddleware>();
+        }
+
+        return app;
     }
 }

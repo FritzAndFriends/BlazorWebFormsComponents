@@ -1,4 +1,5 @@
 @using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
 
 @code {
 
@@ -115,6 +116,170 @@
 
 		var table = cut.Find("table");
 		table.GetAttribute("style").ShouldContain("height:300px");
+	}
+
+	// =================================================================
+	// Issue #17 — DataBoundComponent styling: GridView + DataList
+	// After fix, data controls support BackColor, ForeColor, CssClass,
+	// Font, BorderStyle, BorderWidth, BorderColor, Height, Width
+	// =================================================================
+
+	// --- GridView styling on outer table element ---
+
+	[Fact]
+	public void GridView_BackColor_RendersInTableStyle()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+							BackColor="Yellow"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("background-color:Yellow");
+	}
+
+	[Fact]
+	public void GridView_ForeColor_RendersInTableStyle()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+							ForeColor="Red"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("color:Red");
+	}
+
+	[Fact]
+	public void GridView_Width_RendersInTableStyle()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+							Width="Unit.Pixel(500)"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("width:500px");
+	}
+
+	[Fact]
+	public void GridView_Height_RendersInTableStyle()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+							Height="Unit.Pixel(300)"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("height:300px");
+	}
+
+	[Fact]
+	public void GridView_MultipleStyles_CombineOnTable()
+	{
+		var cut = Render(@<GridView ItemType="Widget"
+							CssClass="styled-grid"
+							BackColor="LightGray"
+							ForeColor="Navy"
+							Width="Unit.Pixel(600)"
+							AutoGenerateColumns="false"
+							SelectMethod="GetWidgets">
+			<Columns>
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var table = cut.Find("table");
+		table.ClassList.ShouldContain("styled-grid");
+		var style = table.GetAttribute("style");
+		style.ShouldContain("background-color:LightGrey");
+		style.ShouldContain("color:Navy");
+		style.ShouldContain("width:600px");
+	}
+
+	// --- DataList ForeColor and Font styling ---
+
+	[Fact]
+	public void DataList_ForeColor_RendersInStyle()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							ForeColor="Blue"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("color:Blue");
+	}
+
+	[Fact]
+	public void DataList_Font_RendersInStyle()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							Font="@(new FontInfo { Bold = true })"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var table = cut.Find("table");
+		table.GetAttribute("style").ShouldContain("font-weight:bold");
+	}
+
+	[Fact]
+	public void DataList_MultipleStyles_CombineOnTable()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							BackColor="LightBlue"
+							ForeColor="DarkBlue"
+							Width="Unit.Pixel(400)"
+							Height="Unit.Pixel(200)"
+							RepeatLayout="Enums.RepeatLayout.Table"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var table = cut.Find("table");
+		var style = table.GetAttribute("style");
+		style.ShouldContain("background-color:LightBlue");
+		style.ShouldContain("color:DarkBlue");
+		style.ShouldContain("width:400px");
+		style.ShouldContain("height:200px");
+	}
+
+	[Fact]
+	public void DataList_FlowLayout_BackColor_RendersInStyle()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList"
+							ItemType="Widget"
+							BackColor="Lime"
+							RepeatLayout="Enums.RepeatLayout.Flow"
+							Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("background-color:Lime");
 	}
 
 	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)

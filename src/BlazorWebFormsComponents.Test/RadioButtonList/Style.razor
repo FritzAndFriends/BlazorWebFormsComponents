@@ -11,7 +11,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" CssClass="my-radio-list" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" CssClass="my-radio-list" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -29,7 +29,7 @@
 
 		// Act
 		var cut = Render(
-			@<RadioButtonList TItem="object"
+			@<RadioButtonList ItemType="object"
 							  StaticItems="items"
 							  BackColor="new WebColor(System.Drawing.Color.LightBlue)" />
 		);
@@ -52,7 +52,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" Enabled="false" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" Enabled="false" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -71,7 +71,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var radios = cut.FindAll("input[type='radio']");
@@ -89,7 +89,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" Visible="false" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" Visible="false" />);
 
 		// Assert
 		cut.Markup.ShouldBeEmpty();
@@ -105,7 +105,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" CellPadding="5" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" CellPadding="5" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -122,7 +122,7 @@
 		};
 
 		// Act
-		var cut = Render(@<RadioButtonList TItem="object" StaticItems="items" CellSpacing="3" />);
+		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" CellSpacing="3" />);
 
 		// Assert
 		var table = cut.Find("table");

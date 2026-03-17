@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" TextAlign="Enums.TextAlign.Right" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" TextAlign="Enums.TextAlign.Right" />);
 
 		// Assert
 		var td = cut.Find("td");
@@ -31,7 +31,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" TextAlign="Enums.TextAlign.Left" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" TextAlign="Enums.TextAlign.Left" />);
 
 		// Assert
 		var td = cut.Find("td");
@@ -49,7 +49,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" />);
 
 		// Assert
 		var td = cut.Find("td");
@@ -67,7 +67,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" 
+		var cut = Render(@<CheckBoxList ItemType="object" 
 									   StaticItems="items" 
 									   RepeatLayout="RL.Flow"
 									   TextAlign="Enums.TextAlign.Left" />);

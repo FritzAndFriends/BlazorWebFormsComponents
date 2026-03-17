@@ -8,8 +8,8 @@ namespace BlazorWebFormsComponents
 {
 	public partial class RadioButton : BaseStyledComponent
 	{
-		private string _inputId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedInputId;
-		private readonly string _generatedInputId = Guid.NewGuid().ToString("N");
+		private string _inputId => ClientID;
+		private readonly string _generatedGroupName = Guid.NewGuid().ToString("N");
 
 		[Parameter]
 		public bool CausesValidation { get; set; } = true;
@@ -33,7 +33,7 @@ namespace BlazorWebFormsComponents
 		public string GroupName { get; set; }
 
 		[Parameter]
-		public Enums.TextAlign TextAlign { get; set; } = Enums.TextAlign.Right;
+		public EnumParameter<Enums.TextAlign> TextAlign { get; set; } = Enums.TextAlign.Right;
 
 		[Parameter]
 		public EventCallback<ChangeEventArgs> OnCheckedChanged { get; set; }
@@ -41,7 +41,9 @@ namespace BlazorWebFormsComponents
 		[Parameter, Obsolete("AutoPostBack is not supported in Blazor. Use OnCheckedChanged event instead.")]
 		public bool AutoPostBack { get; set; }
 
-		private string EffectiveGroupName => string.IsNullOrEmpty(GroupName) ? _inputId : GroupName;
+		private string EffectiveGroupName => !string.IsNullOrEmpty(GroupName)
+			? GroupName
+			: (!string.IsNullOrEmpty(ClientID) ? ClientID : _generatedGroupName);
 
 		private async Task HandleChange(ChangeEventArgs e)
 		{

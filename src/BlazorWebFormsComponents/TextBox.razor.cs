@@ -23,7 +23,7 @@ namespace BlazorWebFormsComponents
 		public string Text { get; set; } = string.Empty;
 
 		[Parameter]
-		public TextBoxMode TextMode { get; set; } = TextBoxMode.SingleLine;
+		public EnumParameter<TextBoxMode> TextMode { get; set; } = TextBoxMode.SingleLine;
 
 		[Parameter]
 		public int MaxLength { get; set; }
@@ -52,7 +52,7 @@ namespace BlazorWebFormsComponents
 		[Parameter, Obsolete("AutoPostBack is not supported in Blazor")]
 		public bool AutoPostBack { get; set; }
 
-		internal string CalculatedType => TextMode switch
+		internal string CalculatedType => TextMode.Value switch
 		{
 			TextBoxMode.SingleLine => "text",
 			TextBoxMode.Password => "password",
@@ -121,6 +121,9 @@ namespace BlazorWebFormsComponents
 
 				if (!string.IsNullOrEmpty(ToolTip))
 					attributes["title"] = ToolTip;
+
+				if (!string.IsNullOrEmpty(AccessKey))
+					attributes["accesskey"] = AccessKey;
 
 				if (TextMode == TextBoxMode.MultiLine)
 				{

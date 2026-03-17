@@ -1,6 +1,12 @@
 @inherits LayoutComponentBase
 
-<PageTitle>Wingtip Toys</PageTitle>
+<BlazorWebFormsComponents.Page />
+
+<HeadContent>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</HeadContent>
 
 <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
@@ -18,22 +24,22 @@
                         <li><a href="/About">About</a></li>
                         <li><a href="/Contact">Contact</a></li>
                         <li><a href="/ProductList">Products</a></li>
-                        <li><a href="/ShoppingCart" id="cartCount">Cart (@_cartCount)</a></li>
+                        <li><a href="/ShoppingCart" ID="cartCount">&nbsp;</a></li>
                     </ul>
-                    <AuthorizeView>
-                        <NotAuthorized>
+                    <LoginView>
+                        <AnonymousTemplate>
                             <ul class="nav navbar-nav navbar-right">
                                 <li><a href="/Account/Register">Register</a></li>
                                 <li><a href="/Account/Login">Log in</a></li>
                             </ul>
-                        </NotAuthorized>
-                        <Authorized>
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a href="/Account/Manage" title="Manage your account">Hello, @context.User.Identity?.Name !</a></li>
-                                <li><a href="/">Log off</a></li>
+                                <li><a href="/Account/Manage" title="Manage your account">Hello!</a></li>
+                                <li><a href="/" data-enhance-nav="false">Log off</a></li>
                             </ul>
-                        </Authorized>
-                    </AuthorizeView>
+                        </LoggedInTemplate>
+                    </LoginView>
                 </div>
             </div>
         </div>
@@ -44,8 +50,10 @@
             <br />  
         </div>
         <div id="CategoryMenu" style="text-align: center">       
-            <ListView Items="@_categories">
-                <ItemTemplate>
+            <ListView ID="categoryList"  
+                ItemType="Category"
+                Items="@_categories">
+                <ItemTemplate Context="context">
                     <b style="font-size: large; font-style: normal">
                     <a href="/ProductList?id=@context.CategoryID">
                         @context.CategoryName
@@ -59,7 +67,6 @@
             @Body
             <hr />
             <footer>
-                <p>&copy; @DateTime.Now.Year - Wingtip Toys</p>
+                <p>&copy; @(DateTime.Now.Year) - Wingtip Toys</p>
             </footer>
         </div>
-    

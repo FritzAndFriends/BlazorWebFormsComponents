@@ -1,8 +1,8 @@
 ---
 name: "migration-standards"
-description: "Canonical standards for migrating ASP.NET Web Forms applications to Blazor using BWFC"
+description: "Enforce canonical migration standards for ASP.NET Web Forms to Blazor using BWFC. Covers target architecture (.NET 10, Server Interactive), database provider detection, event handler preservation, SelectMethod patterns, and page lifecycle mapping. WHEN: \"migration standards\", \"target architecture\", \"render mode placement\", \"page base class\", \"Layer 1 vs Layer 2\"."
 domain: "migration"
-confidence: "high"
+confidence: "medium"
 source: "earned"
 ---
 
@@ -16,153 +16,6 @@ Apply these standards to:
 - Migration documentation and checklists
 - Any new migration test runs
 
----
-
-## 🚫 BWFC CONTROL PRESERVATION — MANDATORY (ZERO EXCEPTIONS)
-
-> **Jeff's directive:** "We need to ALWAYS preserve the default asp: controls by using the BWFC components."
->
-> **This is the #1 rule of every migration. No exceptions. No shortcuts.**
-
-**The entire purpose of BlazorWebFormsComponents is that these components exist — USE THEM.**
-
-Every `asp:` control in the Web Forms source MUST become a BWFC component in the migration output. The migration strips the `asp:` prefix (`<asp:GridView>` → `<GridView>`) and converts Web Forms attributes to BWFC parameters. The resulting markup should look nearly identical to the original, minus the `asp:` prefix and `runat="server"`.
-
-### The 5 Mandatory Rules
-
-1. **ALL `asp:` controls MUST be preserved as BWFC components.** The script strips the prefix; the component name stays.
-2. **NEVER flatten data controls to raw HTML.** GridView, ListView, Repeater, DataList, DataGrid, DetailsView, FormView → MUST remain as BWFC components.
-3. **NEVER flatten editor controls to raw HTML elements.** TextBox → `<input>`, CheckBox → `<input type="checkbox">`, Button → `<button>`, Label → `<span>` are all FORBIDDEN.
-4. **NEVER flatten navigation/login/structural controls.** HyperLink, ImageButton, LinkButton, Panel, PlaceHolder, LoginView, LoginStatus, LoginName → MUST remain as BWFC components.
-5. **The migration script `Test-BwfcControlPreservation` verification function runs post-transform** to catch any control loss.
-
-### Complete BWFC Component Inventory (110+ Components)
-
-The BWFC library provides drop-in replacements for ALL of these controls. Every one MUST be used:
-
-| Category | Components |
-|----------|-----------|
-| **Editor Controls** (33) | AdRotator, Button, BulletedList, Calendar, Chart, CheckBox, CheckBoxList, DropDownList, FileUpload, HiddenField, HyperLink, Image, ImageButton, ImageMap, Label, LinkButton, ListBox, Literal, MultiView, Panel, PlaceHolder, RadioButton, RadioButtonList, Substitution, Table, TableCell, TableRow, TableHeaderRow, TableFooterRow, TableHeaderCell, TextBox, Timer, View |
-| **Data Controls** (22+) | BoundField, ButtonField, DataGrid, DataList, DataPager, DetailsView, FormView, GridView, GridViewRow, HyperLinkField, ListView, Repeater, TemplateField + style sub-components: AlternatingItemStyle, EditRowStyle, FooterStyle, HeaderStyle, ItemStyle, PagerStyle, PagerSettings, RowStyle, SelectedRowStyle |
-| **Navigation** (6+) | Menu, MenuItem, MenuItemStyle, SiteMapPath, TreeView, TreeNode + node style sub-components |
-| **Login** (18+) | ChangePassword, CreateUserWizard, Login, **LoginName**, **LoginStatus**, **LoginView**, PasswordRecovery, RoleGroup + style sub-components |
-| **Validation** (7) | CompareValidator, CustomValidator, ModelErrorMessage, RangeValidator, RegularExpressionValidator, RequiredFieldValidator, ValidationSummary |
-| **Layout/AJAX** (14) | Content, ContentPlaceHolder, MasterPage, EmptyLayout, NamingContainer, ScriptManager, ScriptManagerProxy, Timer, UpdatePanel, UpdateProgress |
-| **Utility** | WebFormsPageBase, Page (render component), AddBlazorWebFormsComponents(), BaseWebFormsComponent, BaseStyledComponent, ThemeProvider, FontInfo |
-
-### BWFC Utility Features — MANDATORY for Every Migration
-
-1. **`AddBlazorWebFormsComponents()`** in `Program.cs` — registers IPageService, IHttpContextAccessor, JS interop
-2. **`@inherits WebFormsPageBase`** in `_Imports.razor` — provides Page.Title, IsPostBack, GetRouteUrl
-3. **`<BlazorWebFormsComponents.Page />`** in `MainLayout.razor` — renders PageTitle and meta tags
-4. **`BaseStyledComponent`** — provides CssClass, BackColor, ForeColor, Font, Border*, Height, Width, ToolTip
-
-### ⚠️ Commonly Missed Controls: LoginView and LoginStatus
-
-`<asp:LoginView>` and `<asp:LoginStatus>` are BWFC components. They are the **most frequently broken** controls during migration — agents consistently replace them with raw `@if` blocks or `<a>` tags.
-
-```razor
-@* ❌ WRONG — LoginView replaced with @if block *@
-@if (isAuthenticated) { <span>Welcome</span> } else { <a href="/login">Log in</a> }
-
-@* ✅ CORRECT — BWFC LoginView preserved *@
-<LoginView>
-    <AnonymousTemplate><a href="/Account/Login">Log in</a></AnonymousTemplate>
-    <LoggedInTemplate>Welcome, <LoginName />! <LoginStatus LogoutAction="Redirect" LogoutPageUrl="/" /></LoggedInTemplate>
-</LoginView>
-```
-
-### What "Flattening" Means (Quick Reference)
-
-| BWFC Component (✅ CORRECT) | Flattened HTML (❌ FORBIDDEN) |
-|---|---|
-| `<GridView Items="@data">` | `<table>` + `@foreach` loop |
-| `<ListView Items="@data">` | `@foreach` + HTML divs |
-| `<TextBox @bind-Text="val" />` | `<input @bind="val" />` |
-| `<Label Text="Hello" />` | `<span>Hello</span>` |
-| `<HyperLink NavigateUrl="/x" />` | `<a href="/x">` |
-| `<Button Text="Go" OnClick="X" />` | `<button @onclick="X">` |
-| `<LoginView>` | `@if (isAuth) { ... }` |
-| `<LoginStatus />` | `<a href="/logout">` |
-| `<Panel CssClass="x">` | `<div class="x">` |
-
-### Concrete Example: ShoppingCart GridView (WingtipToys)
-
-The AfterWingtipToys `ShoppingCart.razor` was migrated BEFORE the migration scripts existed. Someone (AI or human) decomposed the `<asp:GridView>` into a plain HTML `<table>` with `@foreach`. This destroyed:
-- Editable TextBox for quantity (became read-only)
-- CheckBox for item removal (gone)
-- Update/Checkout buttons (gone)
-- CssClass stripes, GridLines, CellPadding (degraded)
-- ShowFooter with totals (gone)
-
-The cart became **read-only** — users could not edit quantities or check out. Meanwhile, the BWFC GridView supports ALL of these features. Zero component gaps.
-
-### Anti-Pattern: Flattened GridView (BAD)
-
-```razor
-@* ❌ BAD — Someone decomposed the GridView into raw HTML *@
-<table class="table">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in _cartItems)
-        {
-            <tr>
-                <td>@item.Product.ProductName</td>
-                <td>@item.Product.UnitPrice?.ToString("c")</td>
-                <td>@item.Quantity</td>
-                <td>@((item.Quantity * item.Product.UnitPrice)?.ToString("c"))</td>
-            </tr>
-        }
-    </tbody>
-</table>
-```
-
-### Correct Pattern: Preserved GridView (GOOD)
-
-```razor
-@* ✅ GOOD — GridView preserved as BWFC component with full functionality *@
-<GridView TItem="CartItem" Items="@_cartItems"
-    AutoGenerateColumns="false" CssClass="table table-striped"
-    ShowFooter="true" GridLines="GridLines.Both" CellPadding="5">
-    <Columns>
-        <BoundField DataField="Product.ProductName" HeaderText="Product" />
-        <BoundField DataField="Product.UnitPrice" HeaderText="Price"
-            DataFormatString="{0:c}" />
-        <TemplateField HeaderText="Quantity">
-            <ItemTemplate>
-                <TextBox Text="@context.Quantity.ToString()" />
-            </ItemTemplate>
-        </TemplateField>
-        <TemplateField HeaderText="Remove">
-            <ItemTemplate>
-                <CheckBox />
-            </ItemTemplate>
-        </TemplateField>
-        <TemplateField HeaderText="Total">
-            <ItemTemplate>
-                @((context.Quantity * context.Product.UnitPrice)?.ToString("c"))
-            </ItemTemplate>
-        </TemplateField>
-    </Columns>
-</GridView>
-```
-
-### Why This Matters
-
-- **CSS preservation:** BWFC components render the same HTML as Web Forms controls. Raw HTML tables don't.
-- **Feature parity:** GridView has sorting, paging, editing, footer totals, GridLines, CellPadding built-in. A `@foreach` loop has none of these.
-- **Migration velocity:** Preserving the component means the markup is 90% done after `asp:` prefix stripping. Flattening requires rewriting the entire page.
-- **Fidelity guarantee:** The `Test-BwfcControlPreservation` function in the migration script catches control loss automatically.
-
----
-
 ## Patterns
 
 ### Target Architecture
@@ -174,23 +27,6 @@ The cart became **read-only** — users could not edit quantities or check out. 
 | Render mode | Global Server Interactive (see [Render Mode Placement](#render-mode-placement) below) |
 | Base class | `WebFormsPageBase` for pages (`@inherits` in `_Imports.razor`); `ComponentBase` for non-page components |
 | Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
-| **BWFC service registration** | **`builder.Services.AddBlazorWebFormsComponents()`** in `Program.cs` — MANDATORY |
-| **Page render component** | **`<BlazorWebFormsComponents.Page />`** in `MainLayout.razor` — MANDATORY |
-
-### Standard Blazor Server-Side Patterns (for infrastructure)
-
-These patterns use standard Blazor/ASP.NET Core features (NOT BWFC components) for application infrastructure:
-
-| Concern | Pattern | Where |
-|---------|---------|-------|
-| **Static files** | `app.UseStaticFiles()` + `app.MapStaticAssets()` | `Program.cs` — `UseStaticFiles()` MUST come first |
-| **CSS links** | `<link rel="stylesheet" href="/Content/Site.css" />` | `App.razor` `<head>` section |
-| **JS references** | `<script src="/Scripts/app.js"></script>` | `App.razor` after `<Routes>` |
-| **BWFC JS** | `<script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>` | `App.razor` `<head>` |
-| **Render mode** | `@rendermode="InteractiveServer"` on `HeadOutlet` and `Routes` | `App.razor` |
-| **CSS isolation** | `{Component}.razor.css` for component-scoped styles | Per-component |
-| **CSS bundles** | `BundleConfig.cs` → explicit `<link>` tags in `App.razor` | `App.razor` `<head>` |
-| **JS bundles** | `Scripts.Render(...)` → explicit `<script>` tags in `App.razor` | `App.razor` |
 
 ### Render Mode Placement
 
@@ -253,8 +89,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 ### Database Migration
 
 - **Always** migrate EF6 → EF Core using the **latest .NET 10 packages** (currently **10.0.3**)
-- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` / `.Sqlite`, `.Tools`, `.Design`
-- Prefer SQLite for local dev / demos; SQL Server for production
+- Required packages: `Microsoft.EntityFrameworkCore` (10.0.3), `.SqlServer` (or provider matching original app), `.Tools`, `.Design`
+- **⚠️ CRITICAL: Detect and match the original database provider.** Examine the source project's `Web.config` `<connectionStrings>` to identify the database provider (`System.Data.SqlClient` → SqlServer, `System.Data.SQLite` → Sqlite, `Npgsql` → PostgreSQL). Install the matching EF Core provider package (`Microsoft.EntityFrameworkCore.SqlServer`, `.Sqlite`, `Npgsql.EntityFrameworkCore.PostgreSQL`, etc.). The L1 script auto-detects this — verify its detection in the [DatabaseProvider] review item. NEVER substitute a different provider than what the original application used.
 - Replace `DropCreateDatabaseIfModelChanges` with `EnsureCreated` + idempotent seed
 - Use `IDbContextFactory<T>` or scoped `DbContext` injection
 - Models: nullable reference types, file-scoped namespaces, modern init patterns
@@ -266,7 +102,6 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 - Postback-based auth → HTTP endpoints + cookie auth
 - Use `dotnet aspnet-codegenerator identity` for scaffolding
 - `SignInManager` / `UserManager` APIs change — full subsystem replacement
-- **AuthorizeView requirement:** If `LoginView` → `AuthorizeView` conversion is used, `Program.cs` MUST have `AddCascadingAuthenticationState()` and `AddAuthorization()` — even without full Identity. Without these, any page containing `<AuthorizeView>` crashes at runtime.
 
 ### Event Handler Strategy
 
@@ -293,21 +128,20 @@ private async Task Button1_Click(MouseEventArgs e) { ... }
 
 The script should preserve the attribute and annotate the signature change needed.
 
-### Data Control Strategy — ALWAYS Use BWFC (Never Raw HTML)
+### Data Control Strategy — Prefer BWFC Over Raw HTML
 
-> **This is the #1 failure mode in migration runs.** Layer 2 agents consistently replace BWFC data controls with `@foreach` loops and HTML tables. This is ALWAYS wrong.
-
-| Web Forms Control | BWFC Component (✅ USE THIS) | Raw HTML (❌ NEVER USE) |
+| Web Forms Control | BWFC Component | Use Instead Of |
 |---|---|---|
 | `<asp:ListView>` | `<ListView Items="@data">` with `ItemTemplate` | `@foreach` + HTML table |
 | `<asp:GridView>` | `<GridView Items="@data">` with columns | `@foreach` + `<table>` |
-| `<asp:FormView>` | `<FormView DataItem="@item">` with `ItemTemplate` | Direct HTML rendering |
+| `<asp:FormView>` | `<FormView Items="@data">` with `ItemTemplate` | Direct HTML rendering |
 | `<asp:Repeater>` | `<Repeater Items="@data">` with `ItemTemplate` | `@foreach` loops |
 | `<asp:DetailsView>` | `<DetailsView Items="@data">` with fields | Manual field rendering |
 | `<asp:DataList>` | `<DataList Items="@data">` with `ItemTemplate` | `@foreach` + grid HTML |
-| `<asp:DataGrid>` | `<DataGrid Items="@data">` with columns | `@foreach` + `<table>` |
 
-**SelectMethod → Items:** Replace `SelectMethod="GetProducts"` with `Items="@_products"` where `_products` is populated in `OnInitializedAsync` via an injected service or DbContext.
+**SelectMethod PRESERVED:** BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` (delegate signature: `(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount) → IQueryable<ItemType>`). Convert the Web Forms string method name to a delegate reference: `SelectMethod="@productService.GetProducts"` (if the service method signature matches) or use explicit lambda wiring: `SelectMethod="@((maxRows, startRow, sort, out total) => service.GetProducts(maxRows, startRow, sort, out total))"`. When `SelectMethod` is set, `DataBoundComponent.OnAfterRenderAsync` automatically calls it to populate `Items`.
+
+> **⚠️ DO NOT convert SelectMethod to Items= binding.** When the original Web Forms markup uses `SelectMethod`, the migrated Blazor markup MUST preserve `SelectMethod` as a delegate reference. Converting to `Items=` loses the native BWFC data-binding pattern and defeats the purpose of drop-in replacement. The ONLY acceptable alternative is when the original Web Forms markup used `DataSource` (not `SelectMethod`), in which case `Items=` is correct.
 
 ### Session State → Scoped Services
 
@@ -316,16 +150,78 @@ The script should preserve the attribute and annotate the signature change neede
 - Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
 - Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID
 
+### Blazor Enhanced Navigation
+
+When linking to minimal API endpoints from Blazor pages, use `<form method="post">` or add `data-enhance-nav="false"` to prevent Blazor's enhanced navigation from intercepting the request. Enhanced navigation handles `<a href>` clicks as client-side SPA navigation, which breaks links to server endpoints (the request never reaches the server). This applies to all auth endpoints, cart operations, file downloads, and any other minimal API routes.
+
+### TextBox Binding Timing for Playwright Tests
+
+BWFC `TextBox` uses `@onchange` (fires on blur), **not** `@oninput` (fires on keystroke). This affects Playwright test interactions:
+
+- Playwright `FillAsync()` triggers `input` events, but the Blazor binding value is **NOT committed** until the element loses focus
+- The change event fires on blur, updating the bound property
+- Tests that fill fields and immediately submit may fail if the binding hasn't updated yet
+
+**Recommended Playwright pattern for form submissions:**
+
+```csharp
+// Fill the last field
+await lastField.FillAsync("value");
+
+// Trigger blur to commit the binding
+await lastField.BlurAsync();
+
+// Wait for binding propagation
+await Task.Delay(200);
+
+// Now click submit — the value is committed
+await submitButton.ClickAsync();
+```
+
+**Alternative using keyboard navigation:**
+
+```csharp
+// Fill fields
+await field1.FillAsync("value1");
+await field2.FillAsync("value2");
+
+// Press Tab after the last field to trigger blur
+await lastField.PressAsync("Tab");
+
+// Small delay for binding update
+await Task.Delay(200);
+
+// Submit
+await submitButton.ClickAsync();
+```
+
+This is a BWFC-specific behavior that mirrors Web Forms' `TextBox` `TextChanged` event semantics — both fire on blur, not on keystroke.
+
 ### Static Asset Relocation
 
-- All static files → `wwwroot/` (preserving original directory structure)
-- `UseStaticFiles()` MUST be in the middleware pipeline BEFORE `MapStaticAssets()` — without it, files in `wwwroot/` subdirectories (e.g., `wwwroot/Content/`, `wwwroot/Catalog/Images/`) may return 404
+- All static files → `wwwroot/`
 - CSS bundles (`BundleConfig.cs`) → explicit `<link>` tags in `App.razor`
-- CSS/JS `<link>` and `<script>` tags from master pages (`Site.Master`) must be extracted into `App.razor` `<head>` — the migration script does this automatically via `New-AppRazorScaffold -SourceRoot`
 - JS bundles → explicit `<script>` tags in `App.razor`
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
-- **Image path preservation rule:** Paths in templates (e.g., `<Image ImageUrl="...">`) must match WHERE files actually land in `wwwroot/`. Do not invent paths — check the source project's actual directory structure
+
+### Generated Code — Variable Declaration Styles
+
+> **CRITICAL:** All local variable declarations in generated Blazor code MUST use `var` (implicit typing), not explicit types. This is enforced by `.editorconfig` as **IDE0007 error**.
+
+```csharp
+// CORRECT — var for all local declarations
+var students = db.Students.ToList();
+var product = await productService.GetProductAsync(id);
+var count = items.Count();
+
+// WRONG — explicit type declarations cause build failures
+List<Student> students = db.Students.ToList();
+Product product = await productService.GetProductAsync(id);
+int count = items.Count();
+```
+
+This applies to **both L1-generated scaffolding and L2 Copilot-generated code**. IDE0007 is enabled as a build error in `/.editorconfig` — explicit types will fail the build immediately.
 
 ### Page Lifecycle Mapping
 
@@ -338,24 +234,35 @@ The script should preserve the attribute and annotate the signature change neede
 | `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
-### Layer 1 (Script) vs Layer 2 (Manual) Boundary
+### Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary
 
-**Script handles (Layer 1):**
+> ⚠️ **CRITICAL: Layer 1 and Layer 2 MUST both run in sequence. Do NOT make any manual code fixes between Layer 1 and Layer 2.** Manual fixes between layers corrupt pipeline quality measurement. If Layer 1 output has issues, fix the script — not the output.
+
+**Layer 1 — Automated Script** (`migration-toolkit/scripts/bwfc-migrate.ps1`):
+
+Run via:
+```powershell
+.\migration-toolkit\scripts\bwfc-migrate.ps1 -Path "<source-webforms-project>" -Output "<blazor-output-dir>"
+```
+
+Script handles:
 - `asp:` prefix stripping (preserves BWFC tags)
 - Data-binding expression conversion (5 variants)
-- LoginView → AuthorizeView
+- LoginView → **preserve as BWFC LoginView** — do NOT rewrite as AuthorizeView. The BWFC `LoginView` injects `AuthenticationStateProvider` natively and uses the same template names (`AnonymousTemplate`, `LoggedInTemplate`). The migration script handles this automatically.
 - Master page → MainLayout.razor
-- CSS/JS link extraction from master pages → `App.razor` (via `New-AppRazorScaffold -SourceRoot`)
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
 
-**Always manual (Layer 2):**
+**Layer 2 — Copilot-Assisted** (NOT manual — guided by the `bwfc-migration` skill):
 - EF6 → EF Core (models, DbContext, seed)
 - Identity/Auth subsystem
 - Session → scoped services
 - Business logic (checkout, payment, admin CRUD)
 - Complex data-binding with arithmetic/method chains
+- Data loading patterns (`SelectMethod` string → `SelectHandler` delegate, or `Items` via `OnInitializedAsync`)
+- Template context wiring (`Context="Item"`)
+- Navigation conversions (`Response.Redirect` → `NavigationManager.NavigateTo`)
 
 ## Examples
 
@@ -372,7 +279,20 @@ The script should preserve the attribute and annotate the signature change neede
     </ItemTemplate>
 </asp:ListView>
 
-@* After migration (BWFC preserved) *@
+@* After migration — Option A: SelectMethod preserved as delegate (BWFC native) *@
+<ListView SelectMethod="@productService.GetProducts" GroupItemCount="4">
+    <ItemTemplate>
+        <td>@context.ProductName</td>
+    </ItemTemplate>
+</ListView>
+
+@code {
+    [Inject] private ProductService productService { get; set; }
+}
+```
+
+```razor
+@* After migration — Option B: Items loaded in OnInitializedAsync *@
 <ListView Items="@_products" GroupItemCount="4">
     <ItemTemplate>
         <td>@context.ProductName</td>

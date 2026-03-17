@@ -13,7 +13,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" CssClass="my-custom-class" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" CssClass="my-custom-class" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -30,7 +30,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" CellPadding="5" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" CellPadding="5" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -47,7 +47,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" CellSpacing="3" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" CellSpacing="3" />);
 
 		// Assert
 		var table = cut.Find("table");
@@ -64,7 +64,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" 
+		var cut = Render(@<CheckBoxList ItemType="object" 
 									   StaticItems="items" 
 									   RepeatLayout="RL.Flow" 
 									   CssClass="flow-class" />);
@@ -85,7 +85,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" Enabled="false" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" Enabled="false" />);
 
 		// Assert
 		var checkboxes = cut.FindAll("input[type='checkbox']");
@@ -103,7 +103,7 @@
 		};
 
 		// Act
-		var cut = Render(@<CheckBoxList TItem="object" StaticItems="items" Visible="false" />);
+		var cut = Render(@<CheckBoxList ItemType="object" StaticItems="items" Visible="false" />);
 
 		// Assert
 		cut.Markup.Trim().ShouldBeEmpty();
