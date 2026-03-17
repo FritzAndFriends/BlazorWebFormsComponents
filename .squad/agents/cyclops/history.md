@@ -81,6 +81,26 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 
 📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
 
+### L1 Script Bug Fixes + Test Coverage Expansion (#472)
+
+**Summary:** Fixed 3 bugs in bwfc-migrate.ps1 that caused test failures, added 5 new test cases covering all five L1 patterns from issue #472. Test suite: 7/10 → 15/15 (100%), line accuracy: 94.3% → 100%.
+
+**Bugs fixed:**
+1. `ConvertFrom-GetRouteUrl` — `Eval()` regex was global instead of scoped to GetRouteUrl lines. Corrupted `<%#: Eval("Name") %>` expressions by stripping the Eval wrapper but leaving `<%#: %>` delimiters. Fix: only apply Eval→context conversion on lines containing `GetRouteUrl`.
+2. `ConvertFrom-ContentWrappers` — `\s*\r?\n?` after `>` consumed leading indentation of the next line. Fix: changed to `[ \t]*\r?\n?` (horizontal whitespace only).
+3. `Remove-WebFormsAttributes` — ItemType fallback regex `(?![^>]*ItemType=)` didn't check for `TItem=`, so tags that already had `ItemType` converted to `TItem` got a duplicate `ItemType="object"`. Fix: lookahead now checks `(?![^>]*(?:ItemType|TItem)=)`.
+
+**New test cases:**
+- TC11-BoolEnumUnit: boolean lowercase, enum type-qualifying, unit px-stripping
+- TC12-DataSourceID: DataSourceID removal + data source control → TODO replacement
+- TC13-ResponseRedirect: Response.Redirect → NavigationManager.NavigateTo in code-behind
+- TC14-SessionDetect: Session["key"] detection with migration guidance block
+- TC15-ViewState: ViewState["key"] detection with private field suggestions
+
+**Test harness enhancements:** Extended Run-L1Tests.ps1 to copy `.aspx.cs` inputs and compare `.razor.cs` expected output, enabling code-behind transform verification.
+
+**Key files:** `migration-toolkit/scripts/bwfc-migrate.ps1`, `migration-toolkit/tests/Run-L1Tests.ps1`, `migration-toolkit/tests/inputs/TC11-TC15*`, `migration-toolkit/tests/expected/TC11-TC15*`
+
 ### Run 22 L1 Script Fixes — 5 Migration Toolkit Improvements (2026-03-14)
 
 **Summary:** Implemented 5 script fixes identified from ContosoUniversity Run 22 (39/40 tests, 97.5% pass rate): (1) Strip ContentTemplate wrappers to eliminate RZ10012 warnings, (2) Add dual `@page` routes for home pages (e.g., `/Home` + `/`), (3) Extract PageTitle from TitleContent placeholders, (4) Convert `ID=` to `id=` for HTML compatibility, (5) Add `[DatabaseGenerated(Computed)]` support to EDMX parser.

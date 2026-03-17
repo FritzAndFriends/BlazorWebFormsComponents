@@ -121,6 +121,14 @@ foreach ($inputFile in $inputFiles) {
     New-Item -ItemType Directory -Path $tmpIn -Force | Out-Null
     Copy-Item $inputFile.FullName -Destination $tmpIn
 
+    # Also copy code-behind files if they exist (.aspx.cs, .aspx.vb)
+    foreach ($cbExt in @('.cs', '.vb')) {
+        $cbSource = $inputFile.FullName + $cbExt
+        if (Test-Path $cbSource) {
+            Copy-Item $cbSource -Destination $tmpIn
+        }
+    }
+
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $scriptError = $null
 
@@ -129,8 +137,9 @@ foreach ($inputFile in $inputFiles) {
         $null = & $MigrateScript -Path $tmpIn -Output $tmpOut -SkipProjectScaffold *>&1
         $sw.Stop()
 
-        # Find the output .razor file
-        $razorFile = Get-ChildItem $tmpOut -Filter '*.razor' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+        # Find the output .razor file (exclude .razor.cs)
+        $razorFile = Get-ChildItem $tmpOut -Filter '*.razor' -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.Extension -eq '.razor' } | Select-Object -First 1
 
         if (-not $razorFile) {
             $results.Add([PSCustomObject]@{
@@ -160,6 +169,37 @@ foreach ($inputFile in $inputFiles) {
 
         $totalLines    = [Math]::Max($expectedLines.Count, $actualLines.Count)
         $matchingLines = $totalLines - $diffs.Count
+
+        # Also compare code-behind (.razor.cs) if expected file exists
+        $expectedCsFile = Join-Path $ExpectedDir "$tcName.razor.cs"
+        if (Test-Path $expectedCsFile) {
+            $actualCsFile = Get-ChildItem $tmpOut -Filter '*.razor.cs' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($actualCsFile) {
+                $actualCsRaw   = Get-Content $actualCsFile.FullName -Raw -Encoding UTF8
+                $expectedCsRaw = Get-Content $expectedCsFile -Raw -Encoding UTF8
+
+                $actualCsNorm   = Normalize-Content $actualCsRaw
+                $expectedCsNorm = Normalize-Content $expectedCsRaw
+
+                $actualCsLines   = $actualCsNorm -split "`n"
+                $expectedCsLines = $expectedCsNorm -split "`n"
+
+                $csDiffs = @(Get-LineDiff -Expected $expectedCsLines -Actual $actualCsLines)
+
+                $csTotalLines    = [Math]::Max($expectedCsLines.Count, $actualCsLines.Count)
+                $csMatchingLines = $csTotalLines - $csDiffs.Count
+
+                $totalLines    += $csTotalLines
+                $matchingLines += $csMatchingLines
+                $diffs         += $csDiffs
+            }
+            else {
+                # Expected code-behind but none produced — count as diff
+                $expectedCsLines = (Normalize-Content (Get-Content $expectedCsFile -Raw -Encoding UTF8)) -split "`n"
+                $totalLines += $expectedCsLines.Count
+                $diffs += [PSCustomObject]@{ Line = 0; Expected = '<code-behind file>'; Actual = '<missing>' }
+            }
+        }
 
         $status = if ($diffs.Count -eq 0) { 'PASS' } else { 'FAIL' }
 
