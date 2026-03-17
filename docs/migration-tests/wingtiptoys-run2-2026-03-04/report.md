@@ -124,9 +124,9 @@ Since FreshWingtipToys was already complete, Layer 2+3 was accomplished by copyi
 
 | Page | Screenshot |
 |------|-----------|
-| Home Page | ![Original Home](../../planning-docs/screenshots/original-home-real.png) |
-| Product List | ![Original Products](../../planning-docs/screenshots/original-products-real.png) |
-| Shopping Cart | ![Original Cart](../../planning-docs/screenshots/original-cart-real.png) |
+| Home Page | *(Original Web Forms screenshot — not available in docs)* |
+| Product List | *(Original Web Forms screenshot — not available in docs)* |
+| Shopping Cart | *(Original Web Forms screenshot — not available in docs)* |
 
 ## Fixes from PR #418 — Critical Impact
 

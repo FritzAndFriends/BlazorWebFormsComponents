@@ -75,7 +75,7 @@ You can add additional rules in this file to route and choose different layouts 
 
 For more complex scenarios and a walk-through with samples, read the [MasterPages strategy documentation](MasterPages.md).
 
-[Back to top](#Migration---Getting-Started)
+[Back to top](#step-0-acknowledgement)
 
 ## Step 5 - User Controls
 

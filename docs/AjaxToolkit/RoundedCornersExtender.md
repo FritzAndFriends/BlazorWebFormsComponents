@@ -261,6 +261,6 @@ Use the RoundedCornersExtender primarily for dynamic scenarios or legacy compone
 ## See Also
 
 - [Ajax Control Toolkit Overview](index.md) — How extenders work and render mode requirements
-- [Panel Component](../LayoutControls/Panel.md) — The Panel control
+- Panel Component — The Panel control (documentation coming soon)
 - [DropShadowExtender](DropShadowExtender.md) — Add drop shadows to elements
 - Original Ajax Control Toolkit: https://www.asp.net/ajax/ajaxcontroltoolkit
