@@ -7,6 +7,8 @@
 
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
+
 📌 **Team update (2026-03-16):** Forge reviewed Component Health Dashboard PRD; 3 errata items identified before Cyclops implementation. (1) Appendix A: ToolTip base class error. (2) tools/WebFormsPropertyCounter/ doesn't exist—use MSDN curation as Phase 1 primary. (3) Acceptance criterion #9 needs verification (Login controls had 0 bUnit tests as of 2026-03-15). See decisions.md for full details. — decided by Forge
 
 ## Learnings
@@ -80,6 +82,26 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 **Impact:** Students without enrollments now visible in GridView. Blazor Server form submission timing stable.
 
 📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
+
+### L1 Script Bug Fixes + Test Coverage Expansion (#472)
+
+**Summary:** Fixed 3 bugs in bwfc-migrate.ps1 that caused test failures, added 5 new test cases covering all five L1 patterns from issue #472. Test suite: 7/10 → 15/15 (100%), line accuracy: 94.3% → 100%.
+
+**Bugs fixed:**
+1. `ConvertFrom-GetRouteUrl` — `Eval()` regex was global instead of scoped to GetRouteUrl lines. Corrupted `<%#: Eval("Name") %>` expressions by stripping the Eval wrapper but leaving `<%#: %>` delimiters. Fix: only apply Eval→context conversion on lines containing `GetRouteUrl`.
+2. `ConvertFrom-ContentWrappers` — `\s*\r?\n?` after `>` consumed leading indentation of the next line. Fix: changed to `[ \t]*\r?\n?` (horizontal whitespace only).
+3. `Remove-WebFormsAttributes` — ItemType fallback regex `(?![^>]*ItemType=)` didn't check for `TItem=`, so tags that already had `ItemType` converted to `TItem` got a duplicate `ItemType="object"`. Fix: lookahead now checks `(?![^>]*(?:ItemType|TItem)=)`.
+
+**New test cases:**
+- TC11-BoolEnumUnit: boolean lowercase, enum type-qualifying, unit px-stripping
+- TC12-DataSourceID: DataSourceID removal + data source control → TODO replacement
+- TC13-ResponseRedirect: Response.Redirect → NavigationManager.NavigateTo in code-behind
+- TC14-SessionDetect: Session["key"] detection with migration guidance block
+- TC15-ViewState: ViewState["key"] detection with private field suggestions
+
+**Test harness enhancements:** Extended Run-L1Tests.ps1 to copy `.aspx.cs` inputs and compare `.razor.cs` expected output, enabling code-behind transform verification.
+
+**Key files:** `migration-toolkit/scripts/bwfc-migrate.ps1`, `migration-toolkit/tests/Run-L1Tests.ps1`, `migration-toolkit/tests/inputs/TC11-TC15*`, `migration-toolkit/tests/expected/TC11-TC15*`
 
 ### Run 22 L1 Script Fixes — 5 Migration Toolkit Improvements (2026-03-14)
 
@@ -350,4 +372,50 @@ ew Function(script)() with try/catch safety
 - XML docs file updated with all new members
 
 Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cyclops. Branch squad/446-447-modal-collapsible-extenders. Fixes #446, #447.
+
+### ComponentHealthService Implementation (2026-03-16)
+
+**Summary:** Built the core `ComponentHealthService` in `src/BlazorWebFormsComponents/Diagnostics/` per PRD §7. Four files created: `ImplementationStatus.cs` (enum), `ComponentHealthReport.cs` (data model), `ReferenceBaselines.cs` (JSON loader), `ComponentHealthService.cs` (reflection + scoring engine). DI registration via `AddComponentHealthDashboard()` added to `ServiceCollectionExtensions.cs`.
+
+**Key Implementation Details:**
+- **Property/Event Counter (§5.4):** Walks inheritance chain with DeclaredOnly, stops at BaseWebFormsComponent/BaseStyledComponent/BaseDataBoundComponent/DataBoundComponent<>. Uses GetGenericTypeDefinition() for generic base matching. Skips [Obsolete], [CascadingParameter], RenderFragment/RenderFragment<T>, AdditionalAttributes, ChildContent, ChildComponents. EventCallback/EventCallback<T> counted as events only.
+- **Component Discovery (§5.1-5.2):** Reflects over BWFC assembly, matches against tracked components list. Falls back to hardcoded 56-component list when `dev-docs/tracked-components.json` doesn't exist.
+- **File Detection (§7.4):** Scans test project directories/files for component names, docs/ for matching .md files, ComponentCatalog.cs for sample page registration.
+- **Score Computation (§4.1):** Weighted average (Props 30%, Events 15%, Tests 20%, Docs 15%, Sample 10%, Status 10%). Missing baselines excluded and weights re-distributed. Scores capped at 100%. 0/0 treated as 1.0.
+- **Baselines Loading:** ReferenceBaselines.LoadFromFile() gracefully handles missing/malformed JSON.
+- **Project enforces `var` over explicit types** via IDE0007 as error — all code uses var.
+
+**Files Created:**
+- `src/BlazorWebFormsComponents/Diagnostics/ImplementationStatus.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthReport.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ReferenceBaselines.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthService.cs`
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/ServiceCollectionExtensions.cs` (added AddComponentHealthDashboard extension)
+
+**Build verified:** 0 errors, 99 pre-existing warnings.
+
+### Fix GUID-based IDs (#471) (2026-03-17)
+
+**Summary:** Removed GUID-based fallback IDs from CheckBox, RadioButton, and RadioButtonList. When developer sets `ID="X"`, rendered HTML uses that ID exactly (with `_N` suffixes for list items). When no ID is set, no `id`/`for` attributes are rendered — no GUID pollution in the DOM.
+
+**Pattern:** `ComponentIdGenerator.GetClientID(this)` via `ClientID` property is the single source of truth for element IDs. Components should never generate their own GUIDs for HTML `id` attributes. Radio group `name` attribute is the only acceptable GUID fallback (required for mutual exclusion when no developer ID or GroupName is set).
+
+**Key decisions:**
+- FileUpload already correct — no changes needed (only renders id when ClientID present)
+- RadioButton keeps GUID fallback exclusively for `EffectiveGroupName` (radio `name` attribute), not for `id`
+- RadioButtonList `GetInputId(index)` returns null when no ClientID, preserving clean HTML
+- 7 tests updated to match new behavior; all 2105 tests pass
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/CheckBox.razor.cs` (removed GUID, use ClientID directly)
+- `src/BlazorWebFormsComponents/RadioButton.razor.cs` (removed GUID for id, kept for group name)
+- `src/BlazorWebFormsComponents/RadioButtonList.razor.cs` (GetInputId uses ClientID with suffix)
+- `src/BlazorWebFormsComponents.Test/CheckBox/IDRendering.razor` (updated WithoutID tests)
+- `src/BlazorWebFormsComponents.Test/CheckBox/Text.razor` (LabelForAttribute test uses ID)
+- `src/BlazorWebFormsComponents.Test/RadioButton/IDRendering.razor` (updated WithoutID tests)
+- `src/BlazorWebFormsComponents.Test/RadioButton/Text.razor` (LabelForAttribute test uses ID)
+- `src/BlazorWebFormsComponents.Test/RadioButtonList/TextAlignTests.razor` (tests use developer ID)
+- `src/BlazorWebFormsComponents.Test/RadioButtonList/StableIds.razor` (WithoutID expects no id attr)
 

@@ -5,6 +5,10 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Active Decisions & Alerts
+
+📌 **Team update (2026-03-17):** Rogue wrote 11 bUnit tests for GUID ID rendering (#471). New RadioButton/IDRendering.razor (6 tests), enhanced CheckBox/IDRendering.razor (+3 tests). All tests pass; integrated into regression suite. — decided by Rogue
+
 ## Learnings
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
@@ -210,3 +214,57 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 **Test files:** `src/BlazorWebFormsComponents.Test/ModalPopupExtender/ModalPopupExtenderTests.razor` (28 tests), `src/BlazorWebFormsComponents.Test/CollapsiblePanelExtender/CollapsiblePanelExtenderTests.razor` (32 tests).
 
 
+
+### Component Health Dashboard — Counting Verification Tests (2026-07-25)
+
+**39 tests created in** `src/BlazorWebFormsComponents.Test/Diagnostics/ComponentHealthCountingTests.cs` verifying PRD §5.4 counting algorithm against real BWFC types. All 39 pass.
+
+**Test categories (matching PRD §10 acceptance criteria):**
+- AC-1: Button = 8 props, 2 events (PRD said ~7 — PostBackUrl from ButtonBaseComponent counts; see findings)
+- AC-2: GridView = 21 props, 10 events (PRD said ~18; all 21 are legitimate)
+- AC-3: Repeater = 0 props, 0 events (all RenderFragment templates correctly excluded)
+- AC-4: Generic type name stripping (backtick removal) works for GridView, Repeater, ListView, DataList
+- AC-5: 15 base class properties (ID, CssClass, BackColor, etc.) verified absent from Button, Label, TextBox, Panel
+- AC-6: EventCallback disjointness — no parameter appears in both prop and event lists across 20 components
+- AC-7: RenderFragment exclusion — 12 GridView templates excluded; 5 Repeater templates excluded
+- AC-8: [Obsolete] exclusion — Button's PostBackUrl override skipped; base obsolete params never counted
+- AC-9: AdditionalAttributes excluded across 20 component spot-check
+- AC-10: Intermediate base (ButtonBaseComponent) properties counted for Button — Text, CausesValidation, etc.
+- AC-11: CascadingParameter exclusion — Coordinator (protected, so excluded by visibility) and CascadedTheme
+
+**Key findings (documented in .squad/decisions/inbox/rogue-counting-findings.md):**
+- PRD §2.7 has off-by-one for Button (table shows 8, text says 7)
+- GridView actual count is 21 properties, not ~18
+- ButtonBaseComponent.Coordinator is `protected` — excluded by visibility before [CascadingParameter] check fires
+- Algorithm uses `BWF =` namespace alias to avoid test project folder name conflicts (Button/, Label/, etc.)
+
+**Patterns:** xUnit [Fact]/[Theory], Shouldly assertions, `typeof(BWF.Button)` aliasing, `BwfAssembly` static field for reflection, `GetParameterDetails()` helper returns categorized lists with skip reasons for diagnostic messages.
+
+### Issue #471 — GUID-based ID Fix Tests (2026-03-16)
+
+**11 bUnit tests verifying developer-set IDs render correctly (no GUIDs) for CheckBox, RadioButton, FileUpload, and RadioButtonList.**
+
+**New file: RadioButton/IDRendering.razor (6 tests):**
+- RadioButton_WithID_RendersIDOnInput — developer ID used directly on input element
+- RadioButton_WithID_LabelForMatchesInputId — label for=developer ID (accessibility)
+- RadioButton_WithoutID_RendersGeneratedID — no crash, generated fallback exists
+- RadioButton_WithoutID_LabelStillLinked — label-for matches generated ID
+- RadioButton_WithID_NoGuidInRenderedId — regex-verified: no GUID pattern in rendered ID
+- RadioButton_WithID_NameAttributeUsesGroupNameWhenSet — name=GroupName, not ID
+
+**Enhanced file: CheckBox/IDRendering.razor (+3 tests, now 5 total):**
+- CheckBox_WithID_LabelForMatchesInputId — label for=developer ID
+- CheckBox_WithID_NoGuidInRenderedId — regex GUID check
+- CheckBox_WithoutID_LabelStillLinked — generated ID label-for association
+
+**Pre-existing tests confirmed solid:**
+- FileUpload/IdRendering.razor (2 tests) — exact ID and no-ID behavior
+- RadioButtonList/StableIds.razor (8 tests) — _0/_1 suffix pattern, name attribute, label-for, multiple layouts
+
+**All 11 new/enhanced tests PASS.** Written proactively ahead of Cyclops's fix. Tests describe expected Web Forms behavior — may need minor adjustments once implementation lands.
+
+**Key patterns:**
+- Regex GUID detection: `[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-...` for anti-GUID assertions
+- Label-for accessibility: always verify label.for == input.id
+- _Imports.razor provides `@inherits BlazorWebFormsTestContext` — no need for explicit @inherits in test files
+- `@using Shouldly` added locally when not using _Imports default assertions

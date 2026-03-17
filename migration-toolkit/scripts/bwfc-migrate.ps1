@@ -877,7 +877,8 @@ function ConvertFrom-ContentWrappers {
     }
 
     # MainContent / other ContentPlaceHolderIDs → strip wrapper entirely
-    $mainRegex = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"[^"]*"[^>]*>\s*\r?\n?'
+    # Use [ \t]* (horizontal whitespace only) to avoid consuming indentation on the next line
+    $mainRegex = [regex]'<asp:Content\s+[^>]*ContentPlaceHolderID\s*=\s*"[^"]*"[^>]*>[ \t]*\r?\n?'
     $matches_ = $mainRegex.Matches($Content)
     foreach ($m in $matches_) {
         Write-TransformLog -File $RelPath -Transform 'Content' -Detail "Removed asp:Content open tag"
@@ -1245,12 +1246,25 @@ function ConvertFrom-GetRouteUrl {
         $transformed = $true
     }
 
-    # Inside route value arguments, convert Eval("Prop") to context.Prop
-    $evalInRouteRegex = [regex]'Eval\("(\w+)"\)'
-    $evalInRouteMatches = $evalInRouteRegex.Matches($Content)
-    if ($evalInRouteMatches.Count -gt 0) {
-        $Content = $evalInRouteRegex.Replace($Content, 'context.$1')
-        Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $($evalInRouteMatches.Count) Eval() in route values to context.Property"
+    # Inside GetRouteUrl calls only, convert Eval("Prop") to context.Prop.
+    # Scoped to lines containing GetRouteUrl to avoid corrupting <%#: Eval("Name") %> expressions.
+    if ($transformed) {
+        $evalInRouteRegex = [regex]'Eval\("(\w+)"\)'
+        $lines = $Content -split "`n"
+        $convertedCount = 0
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -match 'GetRouteUrl') {
+                $matches_ = $evalInRouteRegex.Matches($lines[$i])
+                if ($matches_.Count -gt 0) {
+                    $lines[$i] = $evalInRouteRegex.Replace($lines[$i], 'context.$1')
+                    $convertedCount += $matches_.Count
+                }
+            }
+        }
+        if ($convertedCount -gt 0) {
+            $Content = $lines -join "`n"
+            Write-TransformLog -File $RelPath -Transform 'GetRouteUrl' -Detail "Converted $convertedCount Eval() in route values to context.Property"
+        }
     }
 
     # Flag RouteValueDictionary usage as manual
@@ -1461,8 +1475,8 @@ function Remove-WebFormsAttributes {
         'HyperLinkField', 'ButtonField', 'TemplateField', 'DataList', 'DataGrid')
     $addedCount = 0
     foreach ($comp in $genericComponents) {
-        # Match opening tags for this component that do NOT already have ItemType
-        $tagRegex = [regex]"(<${comp}\s)(?![^>]*ItemType=)([^/>]*)(>|/>)"
+        # Match opening tags for this component that do NOT already have ItemType or TItem
+        $tagRegex = [regex]"(<${comp}\s)(?![^>]*(?:ItemType|TItem)=)([^/>]*)(>|/>)"
         $tagMatches = $tagRegex.Matches($Content)
         if ($tagMatches.Count -gt 0) {
             $Content = $tagRegex.Replace($Content, '${1}ItemType="object" ${2}${3}')

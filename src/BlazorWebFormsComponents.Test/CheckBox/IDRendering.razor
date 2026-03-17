@@ -14,15 +14,49 @@
 	}
 
 	[Fact]
-	public void CheckBox_WithoutID_RendersGeneratedID()
+	public void CheckBox_WithoutID_DoesNotRenderIdAttribute()
 	{
 		// Arrange & Act
 		var cut = Render(@<CheckBox Text="Accept terms" />);
 
-		// Assert
+		// Assert — no GUID-based IDs; when developer omits ID, no id attribute is rendered
 		var input = cut.Find("input[type='checkbox']");
-		// Should still have an ID (generated GUID) for label association
-		input.HasAttribute("id").ShouldBeTrue();
-		input.GetAttribute("id").Length.ShouldBeGreaterThan(0);
+		input.HasAttribute("id").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CheckBox_WithID_LabelForMatchesInputId()
+	{
+		// Accessibility: label's "for" must reference the developer-set ID
+		var cut = Render(@<CheckBox ID="myCheckBox" Text="Accept terms" />);
+
+		var label = cut.Find("label");
+		label.GetAttribute("for").ShouldBe("myCheckBox");
+	}
+
+	[Fact]
+	public void CheckBox_WithID_NoGuidInRenderedId()
+	{
+		// The rendered id must be the developer's exact ID, not a GUID
+		var cut = Render(@<CheckBox ID="AcceptTerms" Text="I agree" />);
+
+		var input = cut.Find("input[type='checkbox']");
+		var renderedId = input.GetAttribute("id");
+
+		renderedId.ShouldBe("AcceptTerms");
+		System.Text.RegularExpressions.Regex.IsMatch(
+			renderedId,
+			@"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+		).ShouldBeFalse("Rendered ID should not contain a GUID when developer sets ID");
+	}
+
+	[Fact]
+	public void CheckBox_WithoutID_LabelDoesNotRenderForAttribute()
+	{
+		// Without developer ID, label's for attribute is omitted (no GUID)
+		var cut = Render(@<CheckBox Text="Accept terms" />);
+
+		var label = cut.Find("label");
+		label.HasAttribute("for").ShouldBeFalse();
 	}
 }
