@@ -167,6 +167,7 @@ nav:
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - Themes and Skins: Migration/ThemesAndSkins.md
       - User Controls: Migration/User-Controls.md
+      - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
   - Migration Tests:
       - Overview: migration-tests/README.md

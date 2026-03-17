@@ -48,24 +48,13 @@ jobs:
           echo "Computed version: $VERSION"
 
       - name: Restore dependencies
-        run: |
-          dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
-          dotnet restore samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj
+        run: dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
 
       - name: Publish Server-Side Demo
         run: dotnet publish samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --output ./publish/server-side
-
-      - name: Publish Client-Side Demo (WebAssembly)
-        run: dotnet publish samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj --configuration Release --output ./publish/client-side
 
       - name: Upload Server-Side Demo artifact
         uses: actions/upload-artifact@v4
         with:
           name: demo-server-side-${{ steps.nbgv.outputs.version }}
           path: ./publish/server-side
-
-      - name: Upload Client-Side Demo artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: demo-client-side-${{ steps.nbgv.outputs.version }}
-          path: ./publish/client-side

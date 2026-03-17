@@ -1,4 +1,4 @@
-# Project Context
+﻿# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
@@ -6,6 +6,8 @@
 - **Created:** 2026-02-10
 
 ## Active Decisions & Alerts
+
+📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
 
 📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
 
@@ -418,4 +420,29 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 - `src/BlazorWebFormsComponents.Test/RadioButton/Text.razor` (LabelForAttribute test uses ID)
 - `src/BlazorWebFormsComponents.Test/RadioButtonList/TextAlignTests.razor` (tests use developer ID)
 - `src/BlazorWebFormsComponents.Test/RadioButtonList/StableIds.razor` (WithoutID expects no id attr)
+
+
+### HttpHandlerBase Implementation for Issue #473 (2026-07-25)
+
+**Summary:** Implemented core HttpHandlerBase feature — 7 new files in src/BlazorWebFormsComponents/Handlers/ enabling migration of ASP.NET Web Forms .ashx handlers to ASP.NET Core with minimal code changes.
+
+**Files created:**
+1. `HttpHandlerBase.cs` — Abstract base class with `ProcessRequestAsync(HttpHandlerContext)` and virtual `IsReusable` (default false)
+2. `HttpHandlerContext.cs` — Adapter wrapping ASP.NET Core HttpContext with Request/Response/Server/Session/User/Items properties
+3. `HttpHandlerRequest.cs` — Request adapter with NameValueCollection-based QueryString/Form/Headers, `this[key]` indexer (checks QS then Form), Files, InputStream, Url, RawUrl, etc.
+4. `HttpHandlerResponse.cs` — Response adapter with sync Write/BinaryWrite (safe sync-over-async), async variants, AddHeader/AppendHeader, Clear, Redirect, Flush, and `[Obsolete] End()` that sets IsEnded flag
+5. `HttpHandlerServer.cs` — Server utilities with MapPath (`~/` → WebRootPath, other → ContentRootPath), HtmlEncode/Decode, UrlEncode/Decode, and `Transfer()` → NotSupportedException with migration guidance
+6. `RequiresSessionStateAttribute.cs` — Marker attribute; when present, MapHandler calls `Session.LoadAsync()` before ProcessRequestAsync
+7. `HandlerEndpointExtensions.cs` — Three `MapHandler<T>` overloads on IEndpointRouteBuilder: explicit path, convention-based (strips Handler suffix → .ashx), multi-path
+
+**Key decisions:**
+- Return type is `IEndpointConventionBuilder` (not `RouteHandlerBuilder`) because `endpoints.Map(pattern, RequestDelegate)` returns `IEndpointConventionBuilder`. All chaining methods (.RequireAuthorization, .RequireCors) work on this interface.
+- No AshxHandlerMiddleware exists to modify — the existing middleware is AspxRewriteMiddleware (handles .aspx URLs only). Middleware coordination deferred until AshxHandlerMiddleware is created.
+- Namespace is `BlazorWebFormsComponents` (root) per spec requirement that migrated code uses `using BlazorWebFormsComponents;`
+- HttpHandlerRequest caches NameValueCollections lazily to avoid rebuilding on each access
+- Form/Files properties safely check `HasFormContentType` before accessing Request.Form to avoid exceptions on non-form requests
+- Session exposed as lazy property on HttpHandlerContext — throws standard ASP.NET Core error if session middleware not configured
+
+**Build:** 0 errors, all pre-existing warnings only.
+
 
