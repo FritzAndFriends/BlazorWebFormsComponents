@@ -44,6 +44,8 @@ public static class ServiceCollectionExtensions
     /// Adds the Component Health Dashboard diagnostic service as a singleton.
     /// Loads reference baselines from dev-docs/reference-baselines.json and enables
     /// runtime reflection-based health scoring of all tracked components.
+    /// Falls back to a pre-generated health-snapshot.json when the repository
+    /// filesystem is not available (e.g., in Docker containers).
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="solutionRoot">Path to the repository root (for file scanning of tests, docs, samples).</param>
@@ -51,9 +53,42 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddComponentHealthDashboard(this IServiceCollection services, string solutionRoot)
     {
         var baselinesPath = System.IO.Path.Combine(solutionRoot, "dev-docs", "reference-baselines.json");
-        var baselines = ReferenceBaselines.LoadFromFile(baselinesPath);
-        var healthService = new ComponentHealthService(baselines, solutionRoot);
-        services.AddSingleton(healthService);
+        var trackedPath = System.IO.Path.Combine(solutionRoot, "dev-docs", "tracked-components.json");
+
+        // If the repo filesystem exists, use live reflection/file scanning
+        if (System.IO.File.Exists(baselinesPath) || System.IO.File.Exists(trackedPath))
+        {
+            var baselines = ReferenceBaselines.LoadFromFile(baselinesPath);
+            var healthService = new ComponentHealthService(baselines, solutionRoot);
+            services.AddSingleton(healthService);
+            return services;
+        }
+
+        // Fallback: look for a pre-generated snapshot alongside the running assembly
+        var assemblyDir = System.IO.Path.GetDirectoryName(typeof(ComponentHealthService).Assembly.Location) ?? "";
+        var snapshotPath = System.IO.Path.Combine(assemblyDir, HealthSnapshotGenerator.SnapshotFileName);
+        var snapshotReports = HealthSnapshotGenerator.LoadSnapshot(snapshotPath);
+
+        // Also check the app's base directory (common for published apps)
+        if (snapshotReports == null)
+        {
+            snapshotPath = System.IO.Path.Combine(System.AppContext.BaseDirectory, HealthSnapshotGenerator.SnapshotFileName);
+            snapshotReports = HealthSnapshotGenerator.LoadSnapshot(snapshotPath);
+        }
+
+        if (snapshotReports != null)
+        {
+            var healthService = new ComponentHealthService(snapshotReports);
+            services.AddSingleton(healthService);
+        }
+        else
+        {
+            // Last resort: use empty baselines (components will show partial health)
+            var baselines = ReferenceBaselines.LoadFromFile(baselinesPath);
+            var healthService = new ComponentHealthService(baselines, solutionRoot);
+            services.AddSingleton(healthService);
+        }
+
         return services;
     }
 
