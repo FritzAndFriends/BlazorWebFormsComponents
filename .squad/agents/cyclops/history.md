@@ -419,3 +419,15 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 - `src/BlazorWebFormsComponents.Test/RadioButtonList/TextAlignTests.razor` (tests use developer ID)
 - `src/BlazorWebFormsComponents.Test/RadioButtonList/StableIds.razor` (WithoutID expects no id attr)
 
+
+### ASHX and AXD URL Handling Middleware (#423)
+
+**Summary:** Extended UseBlazorWebFormsComponents() middleware to handle legacy .ashx (HTTP handler) and .axd (Web Resource) URL patterns per issue #423.
+
+**Changes:**
+- BlazorWebFormsComponentsOptions: Added EnableAshxHandling (default: true), EnableAxdHandling (default: true), and AshxRedirectMappings dictionary for custom .ashx redirects.
+- AshxHandlerMiddleware: Intercepts .ashx requests. Returns 410 Gone by default; 301 redirect if a custom mapping exists in AshxRedirectMappings.
+- AxdHandlerMiddleware: Intercepts .axd requests. Returns 404 for WebResource/ScriptResource/Trace.axd; 410 Gone for ChartImg.axd.
+- ServiceCollectionExtensions.UseBlazorWebFormsComponents(): Conditionally registers both new middleware alongside existing AspxRewriteMiddleware.
+
+**Impact:** Existing .aspx rewriting unchanged. All three middleware classes follow the same internal pattern (constructor injection, Invoke method, early return on match). ar used everywhere per IDE0007 rule. Build: 0 errors.
