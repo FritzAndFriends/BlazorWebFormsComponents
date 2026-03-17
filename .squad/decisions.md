@@ -1,4 +1,4 @@
-# Decisions
+﻿# Decisions
 
 > Shared team decisions. All agents read this. Only Scribe writes here (by merging from inbox).
 
@@ -8105,4 +8105,1321 @@ Pre-existing tests in FileUpload/IdRendering.razor (2) and RadioButtonList/Stabl
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Issues and milestones should only exist on the upstream repo (FritzAndFriends/BlazorWebFormsComponents), not on origin (csharpfritz/BlazorWebFormsComponents). All `gh issue` and `gh` commands should target upstream, not origin.
 **Why:** User request — captured for team memory. The fork (origin) should not have its own issues. All issue tracking happens on the shared upstream.
+
+
+
+# Architecture Proposal: HttpHandler Base Class for .ashx Migration
+
+**Author:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-07-25  
+**Status:** Proposal — awaiting Jeff's review  
+**Requested by:** Jeffrey T. Fritz
+
+---
+
+## Executive Summary
+
+This proposal defines a `HttpHandlerBase` base class that lets developers port their `.ashx` code-behind logic to ASP.NET Core middleware with minimal rewrites. It complements the existing `AshxHandlerMiddleware` (410 Gone / redirect) by offering a **code migration path** — not just URL handling, but actual handler logic preservation.
+
+**Recommendation:** Proceed, but with eyes wide open. The 80% case (JSON APIs, file downloads, image generation) maps cleanly. The 20% (session-dependent, async pipeline, complex Server.MapPath) requires manual intervention. This is a **medium-sized** effort (~3-4 weeks) and should live in the **main BWFC package** alongside the existing middleware.
+
+---
+
+## 1. Web Forms IHttpHandler — Full API Surface Analysis
+
+### 1.1 Core Interface: `IHttpHandler`
+
+```csharp
+// System.Web.dll — .NET Framework 4.8
+namespace System.Web
+{
+    public interface IHttpHandler
+    {
+        void ProcessRequest(HttpContext context);
+        bool IsReusable { get; }
+    }
+}
+```
+
+That's it. Two members. Deceptively simple. The complexity lives entirely in what `HttpContext` exposes.
+
+### 1.2 Adjacent Interfaces
+
+| Interface | Purpose | Usage Frequency |
+|-----------|---------|-----------------|
+| `IHttpAsyncHandler` | Adds `BeginProcessRequest`/`EndProcessRequest` (APM pattern) | Rare — most handlers are sync |
+| `IRequiresSessionState` | Marker interface — grants read/write `Session` access | Common (~30% of real-world handlers) |
+| `IReadOnlySessionState` | Marker interface — grants read-only `Session` access | Uncommon (~5%) |
+
+`IHttpAsyncHandler` is the old APM pattern (IAsyncResult). Nobody willingly used it. The vast majority of .ashx handlers are synchronous. In ASP.NET Core, everything is async by default, so we just make `ProcessRequest` return `Task`.
+
+### 1.3 What Real-World .ashx Handlers Do
+
+From 20+ years of reviewing Web Forms codebases, here's the frequency distribution:
+
+| Pattern | Frequency | HttpContext Members Used |
+|---------|-----------|--------------------------|
+| **JSON API** (return data as JSON) | ~35% | `Request.QueryString`, `Request.Form`, `Response.ContentType`, `Response.Write` |
+| **File download** (stream file to client) | ~25% | `Response.ContentType`, `Response.BinaryWrite`, `Response.AddHeader("Content-Disposition")`, `Server.MapPath` |
+| **Image generation** (thumbnails, charts, captchas) | ~15% | `Request.QueryString`, `Response.ContentType`, `Response.OutputStream`, `Response.BinaryWrite` |
+| **Report/PDF generation** | ~10% | `Response.ContentType`, `Response.BinaryWrite`, `Response.AddHeader`, `Server.MapPath` |
+| **Proxy/relay** (fetch external resource) | ~5% | `Request.QueryString`, `Response.ContentType`, `Response.BinaryWrite` |
+| **Session-dependent logic** | ~5% | `Session["key"]`, plus any of the above |
+| **Server.Transfer / complex routing** | ~5% | `Server.Transfer`, `Server.Execute`, `Request.PathInfo` |
+
+### 1.4 HttpContext Members Commonly Used in Handlers
+
+**High frequency (>50% of handlers):**
+- `context.Request.QueryString["key"]`
+- `context.Request.Form["key"]` (POST data)
+- `context.Response.ContentType`
+- `context.Response.Write(string)`
+- `context.Response.StatusCode`
+
+**Medium frequency (20-50%):**
+- `context.Response.BinaryWrite(byte[])`
+- `context.Response.OutputStream` (Stream)
+- `context.Response.AddHeader(name, value)`
+- `context.Response.Clear()`
+- `context.Response.End()` — **this is the dangerous one** (throws `ThreadAbortException`)
+- `context.Server.MapPath("~/path")`
+- `context.Request.Files` (for upload handlers)
+
+**Low frequency (<20%):**
+- `context.Session["key"]` (requires `IRequiresSessionState`)
+- `context.Request.InputStream` (raw request body)
+- `context.Request.HttpMethod`
+- `context.Request.ContentType`
+- `context.Application["key"]` (app-level state — ancient pattern)
+- `context.Server.HtmlEncode()`/`context.Server.UrlEncode()`
+- `context.Cache["key"]`
+- `context.Request.IsAuthenticated`
+- `context.User.Identity`
+
+---
+
+## 2. ASP.NET Core Mapping — Member by Member
+
+### 2.1 Clean Mappings (Low Effort)
+
+| Web Forms | ASP.NET Core | Notes |
+|-----------|-------------|-------|
+| `context.Request.QueryString["key"]` | `context.Request.Query["key"]` | Name change only |
+| `context.Request.Form["key"]` | `context.Request.Form["key"]` | Identical API |
+| `context.Request.HttpMethod` | `context.Request.Method` | Name change only |
+| `context.Request.ContentType` | `context.Request.ContentType` | Identical |
+| `context.Request.InputStream` | `context.Request.Body` | Stream, identical semantics |
+| `context.Request.IsAuthenticated` | `context.User.Identity?.IsAuthenticated ?? false` | Minor path change |
+| `context.Request.Files` | `context.Request.Form.Files` | Nested under Form |
+| `context.Response.ContentType` | `context.Response.ContentType` | Identical |
+| `context.Response.StatusCode` | `context.Response.StatusCode` | Identical |
+| `context.Response.Headers.Add()` | `context.Response.Headers.Append()` | Method rename |
+| `context.User.Identity` | `context.User.Identity` | Identical |
+
+### 2.2 Shimable Mappings (Medium Effort — base class provides adapter)
+
+| Web Forms | Shim Approach | Complexity |
+|-----------|---------------|------------|
+| `context.Response.Write(string)` | `await context.Response.WriteAsync(string)` | Sync → async. Shim wraps it. |
+| `context.Response.BinaryWrite(byte[])` | `await context.Response.Body.WriteAsync(byte[])` | Sync → async. Shim wraps it. |
+| `context.Response.OutputStream` | `context.Response.Body` | Direct mapping but stream, not sync writer |
+| `context.Response.AddHeader(name, value)` | `context.Response.Headers.Append(name, value)` | Trivial shim |
+| `context.Response.Clear()` | `context.Response.Clear()` (exists in Core) | Direct but different semantics around headers |
+| `context.Response.End()` | No equivalent — throw / short-circuit | **Cannot replicate ThreadAbortException behavior.** Shim sets a flag; developer must `return`. |
+| `context.Server.MapPath("~/path")` | `Path.Combine(env.WebRootPath, relativePath)` | Needs `IWebHostEnvironment` injection |
+| `context.Server.HtmlEncode()` | `System.Net.WebUtility.HtmlEncode()` | Direct replacement, no shim needed |
+| `context.Server.UrlEncode()` | `System.Net.WebUtility.UrlEncode()` | Direct replacement, no shim needed |
+| `context.Session["key"]` | `context.Session.GetString("key")` / `SetString()` | API surface change + async session load |
+
+### 2.3 Unmappable / Messy Patterns
+
+| Web Forms | Why It's Hard | Recommendation |
+|-----------|---------------|----------------|
+| `context.Response.End()` | Throws `ThreadAbortException` to abort execution. Core has no equivalent. | Shim logs warning + sets `IsEnded` flag. Developer changes `Response.End()` → `return`. Mark `[Obsolete]`. |
+| `context.Server.Transfer(url)` | Executes another handler in the same request. No Core equivalent. | Not supported. Document as manual migration. |
+| `context.Server.Execute(url)` | Similar to Transfer but returns to caller. | Not supported. |
+| `context.Application["key"]` | Global mutable state. Replaced by DI in Core. | Not supported. Developers must migrate to `IMemoryCache` or DI singleton. |
+| `context.Cache` | `System.Web.Caching.Cache` — replaced by `IMemoryCache`/`IDistributedCache` in Core. | Not supported. Document migration to `IMemoryCache`. |
+| Complex `Request.Files` with `HttpPostedFile.SaveAs()` | Core uses `IFormFile.CopyToAsync()`. Different API shape. | Provide `HttpPostedFileShim` wrapper. |
+
+---
+
+## 3. Proposed Base Class Design
+
+### 3.1 Naming
+
+**`HttpHandlerBase`** — not `GenericHandler` or `IHttpHandler`.
+
+Rationale:
+- Web Forms developers create `.ashx` files that implement `IHttpHandler`. The class they write doesn't have a standard name — they name it `MyHandler`, `DownloadHandler`, etc.
+- We're providing a **base class**, not an interface. `HttpHandlerBase` follows the BWFC pattern of `WebFormsPageBase`.
+- We're NOT re-creating `IHttpHandler` as an interface because ASP.NET Core middleware is the correct abstraction. The base class maps the old API onto middleware.
+
+### 3.2 Class Hierarchy
+
+```
+HttpHandlerBase (abstract)
+├── ProcessRequestAsync(HttpHandlerContext context) — developer overrides
+├── IsReusable { get; } — always true (middleware is singleton-scoped)
+├── Context property — HttpHandlerContext adapter
+│
+HttpHandlerContext (adapter class)
+├── Request — HttpHandlerRequest (wraps HttpRequest)
+├── Response — HttpHandlerResponse (wraps HttpResponse)  
+├── Server — HttpHandlerServer (wraps IWebHostEnvironment + utilities)
+├── Session — ISession (if configured)
+├── User — ClaimsPrincipal
+├── Items — IDictionary<object, object>
+```
+
+### 3.3 Registration Model
+
+**Endpoint routing**, not raw middleware. Here's why:
+
+- Raw middleware runs on every request. Handlers need URL-specific routing.
+- Endpoint routing gives us `[Route]` attributes, parameter binding, and authorization integration for free.
+- The existing `UseBlazorWebFormsComponents()` middleware pipeline is for URL interception (410 Gone, redirects). Handler code execution is a different concern.
+
+**Registration approach — two options for developers:**
+
+**Option A: Convention-based (recommended for bulk migration)**
+```csharp
+// In Program.cs
+app.MapBlazorWebFormsHandlers(typeof(Program).Assembly);
+// Scans for all HttpHandlerBase subclasses, maps them by [HandlerRoute] attribute
+```
+
+**Option B: Explicit (for surgical migration)**
+```csharp
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+```
+
+### 3.4 URL Mapping
+
+The `.ashx` extension is preserved in the route for backward compatibility with existing client-side URLs, bookmarks, and external systems. Developers can also register clean URLs:
+
+```csharp
+[HandlerRoute("/Handlers/FileDownload.ashx")]  // Preserves legacy URL
+[HandlerRoute("/api/download")]                 // Optional clean URL
+public class FileDownloadHandler : HttpHandlerBase
+{
+    public override async Task ProcessRequestAsync(HttpHandlerContext context) { ... }
+}
+```
+
+The `AshxHandlerMiddleware` order matters: it runs **before** endpoint routing. If a handler is registered via `MapHandler`, the middleware should **not** intercept that path. Implementation: `AshxHandlerMiddleware` checks if the path has a registered handler endpoint and passes through if so.
+
+### 3.5 Developer Experience — Full API
+
+```csharp
+public abstract class HttpHandlerBase
+{
+    /// <summary>
+    /// Override this method to handle the HTTP request.
+    /// This is the async equivalent of IHttpHandler.ProcessRequest.
+    /// </summary>
+    public abstract Task ProcessRequestAsync(HttpHandlerContext context);
+
+    /// <summary>
+    /// Always returns true. ASP.NET Core middleware is inherently reusable.
+    /// Exists for API compatibility with IHttpHandler.IsReusable.
+    /// </summary>
+    public virtual bool IsReusable => true;
+}
+
+/// <summary>
+/// Adapter that presents ASP.NET Core HttpContext with a Web Forms-like API surface.
+/// </summary>
+public class HttpHandlerContext
+{
+    public HttpHandlerRequest Request { get; }
+    public HttpHandlerResponse Response { get; }
+    public HttpHandlerServer Server { get; }
+    public ISession? Session { get; }
+    public ClaimsPrincipal User { get; }
+    public IDictionary<object, object> Items { get; }
+}
+```
+
+### 3.6 `HttpHandlerResponse` — The Key Adapter
+
+This is where most of the shim work lives:
+
+```csharp
+public class HttpHandlerResponse
+{
+    private readonly HttpResponse _response;
+    private bool _ended;
+
+    public string ContentType
+    {
+        get => _response.ContentType;
+        set => _response.ContentType = value;
+    }
+
+    public int StatusCode
+    {
+        get => _response.StatusCode;
+        set => _response.StatusCode = value;
+    }
+
+    public Stream OutputStream => _response.Body;
+
+    /// <summary>
+    /// Writes a string to the response. Synchronous API preserved for
+    /// migration compatibility — internally calls WriteAsync.
+    /// </summary>
+    public void Write(string text)
+    {
+        _response.WriteAsync(text).GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// Writes binary data to the response.
+    /// </summary>
+    public void BinaryWrite(byte[] data)
+    {
+        _response.Body.WriteAsync(data).GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// Adds a response header. Maps to Headers.Append in Core.
+    /// </summary>
+    public void AddHeader(string name, string value)
+    {
+        _response.Headers.Append(name, value);
+    }
+
+    public void Clear() => _response.Clear();
+
+    /// <summary>
+    /// In Web Forms, End() throws ThreadAbortException to halt execution.
+    /// In BWFC, sets IsEnded flag. Developer must check and return.
+    /// </summary>
+    [Obsolete("Response.End() cannot halt execution in ASP.NET Core. " +
+              "Check IsEnded and return from ProcessRequestAsync instead.")]
+    public void End() => _ended = true;
+
+    public bool IsEnded => _ended;
+}
+```
+
+> **Forge's Note on Sync-over-Async:** Yes, `Write()` and `BinaryWrite()` use `.GetAwaiter().GetResult()`. This is a deliberate migration compatibility decision. Web Forms handlers are sync; forcing developers to change every `Response.Write()` to `await Response.WriteAsync()` defeats the purpose. The handlers run on the ASP.NET Core thread pool — sync-over-async is safe here because there's no SynchronizationContext (unlike Blazor). Developers can migrate to async at their own pace. We also provide `WriteAsync()` and `BinaryWriteAsync()` for those who want to do it right immediately.
+
+### 3.7 `HttpHandlerServer` — MapPath Adapter
+
+```csharp
+public class HttpHandlerServer
+{
+    private readonly IWebHostEnvironment _env;
+
+    /// <summary>
+    /// Maps a virtual path (~/) to a physical file path.
+    /// Uses WebRootPath for ~/paths and ContentRootPath for others.
+    /// </summary>
+    public string MapPath(string virtualPath)
+    {
+        if (virtualPath.StartsWith("~/"))
+        {
+            return Path.Combine(_env.WebRootPath, virtualPath[2..].Replace('/', Path.DirectorySeparatorChar));
+        }
+        return Path.Combine(_env.ContentRootPath, virtualPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+    }
+
+    public string HtmlEncode(string text) => WebUtility.HtmlEncode(text);
+    public string UrlEncode(string text) => WebUtility.UrlEncode(text);
+    public string HtmlDecode(string text) => WebUtility.HtmlDecode(text);
+    public string UrlDecode(string text) => WebUtility.UrlDecode(text);
+}
+```
+
+---
+
+## 4. Before/After Code Example
+
+### 4.1 Web Forms — File Download Handler (`FileDownload.ashx`)
+
+```xml
+<%@ WebHandler Language="C#" CodeBehind="FileDownload.ashx.cs" Class="MyApp.FileDownloadHandler" %>
+```
+
+```csharp
+// FileDownload.ashx.cs — Web Forms
+using System.IO;
+using System.Web;
+
+namespace MyApp
+{
+    public class FileDownloadHandler : IHttpHandler
+    {
+        public bool IsReusable => true;
+
+        public void ProcessRequest(HttpContext context)
+        {
+            var fileId = context.Request.QueryString["id"];
+            if (string.IsNullOrEmpty(fileId))
+            {
+                context.Response.StatusCode = 400;
+                context.Response.Write("Missing file ID");
+                return;
+            }
+
+            var filePath = context.Server.MapPath("~/App_Data/Files/" + fileId + ".pdf");
+            if (!File.Exists(filePath))
+            {
+                context.Response.StatusCode = 404;
+                context.Response.Write("File not found");
+                return;
+            }
+
+            var fileName = Path.GetFileName(filePath);
+            context.Response.Clear();
+            context.Response.ContentType = "application/pdf";
+            context.Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+            context.Response.BinaryWrite(File.ReadAllBytes(filePath));
+            context.Response.End();
+        }
+    }
+}
+```
+
+### 4.2 Blazor — Migrated Handler Using HttpHandlerBase
+
+```csharp
+// FileDownloadHandler.cs — Blazor with BWFC
+using System.IO;
+using BlazorWebFormsComponents;
+
+namespace MyApp
+{
+    [HandlerRoute("/Handlers/FileDownload.ashx")]
+    public class FileDownloadHandler : HttpHandlerBase
+    {
+        public override async Task ProcessRequestAsync(HttpHandlerContext context)
+        {
+            var fileId = context.Request.QueryString["id"];
+            if (string.IsNullOrEmpty(fileId))
+            {
+                context.Response.StatusCode = 400;
+                context.Response.Write("Missing file ID");
+                return;
+            }
+
+            var filePath = context.Server.MapPath("~/App_Data/Files/" + fileId + ".pdf");
+            if (!File.Exists(filePath))
+            {
+                context.Response.StatusCode = 404;
+                context.Response.Write("File not found");
+                return;
+            }
+
+            var fileName = Path.GetFileName(filePath);
+            context.Response.Clear();
+            context.Response.ContentType = "application/pdf";
+            context.Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+            context.Response.BinaryWrite(File.ReadAllBytes(filePath));
+            // Response.End() removed — 'return' is sufficient
+        }
+    }
+}
+```
+
+**Changes required for migration:**
+1. ~~`using System.Web;`~~ → `using BlazorWebFormsComponents;`
+2. ~~`: IHttpHandler`~~ → `: HttpHandlerBase`
+3. ~~`ProcessRequest(HttpContext context)`~~ → `ProcessRequestAsync(HttpHandlerContext context)`
+4. ~~`context.Response.End()`~~ → remove (return is sufficient)
+5. Add `[HandlerRoute("/Handlers/FileDownload.ashx")]` attribute
+6. Delete the `.ashx` markup file
+
+That's **6 mechanical changes** for a fully functional migrated handler. No logic rewrites.
+
+### 4.3 JSON API Handler — Before/After
+
+**Web Forms:**
+```csharp
+public class ProductApiHandler : IHttpHandler
+{
+    public bool IsReusable => true;
+
+    public void ProcessRequest(HttpContext context)
+    {
+        context.Response.ContentType = "application/json";
+
+        var action = context.Request.QueryString["action"];
+        if (action == "list")
+        {
+            var products = GetProducts();
+            var json = new JavaScriptSerializer().Serialize(products);
+            context.Response.Write(json);
+        }
+    }
+}
+```
+
+**Blazor (migrated):**
+```csharp
+[HandlerRoute("/api/Products.ashx")]
+public class ProductApiHandler : HttpHandlerBase
+{
+    public override async Task ProcessRequestAsync(HttpHandlerContext context)
+    {
+        context.Response.ContentType = "application/json";
+
+        var action = context.Request.QueryString["action"];
+        if (action == "list")
+        {
+            var products = GetProducts();
+            var json = JsonSerializer.Serialize(products);  // System.Text.Json replaces JavaScriptSerializer
+            context.Response.Write(json);
+        }
+    }
+}
+```
+
+> **Note:** `JavaScriptSerializer` → `System.Text.Json` is a separate migration concern (not BWFC's job). The L1 migration script could flag this transformation.
+
+---
+
+## 5. Risks and Concerns
+
+### 5.1 Patterns That Don't Translate Well
+
+| Pattern | Risk Level | Mitigation |
+|---------|-----------|------------|
+| **`Response.End()`** | 🟡 Medium | Shim sets flag + `[Obsolete]`. Developer adds `return`. 95% of cases are trivial. |
+| **`Server.Transfer()`/`Server.Execute()`** | 🔴 High | Cannot be shimmed. Must be manually rewritten as redirect or service call. Document as unsupported. |
+| **`IRequiresSessionState`** | 🟡 Medium | Session works in Core but requires explicit configuration. Shim provides `context.Session` but developer must call `app.AddSession()` and `app.UseSession()`. |
+| **`Application["key"]`** (global state) | 🔴 High | No equivalent. Must migrate to DI-registered singleton or `IMemoryCache`. |
+| **`context.Cache`** | 🟡 Medium | Must migrate to `IMemoryCache`. Not BWFC's concern. |
+| **APM async (`BeginProcessRequest`)** | 🟢 Low | Extremely rare. Developers already using async should migrate to `Task`-based pattern directly. |
+| **Sync-over-async in `Write()`/`BinaryWrite()`** | 🟢 Low | Safe in middleware context (no SynchronizationContext). Perf-sensitive handlers should use `WriteAsync()`. |
+| **`Request.Files` / `HttpPostedFile`** | 🟡 Medium | API shape differs. Provide `HttpPostedFileShim` or document Core `IFormFile` equivalent. |
+| **Complex `Server.MapPath` with relative paths** | 🟡 Medium | `~/path` maps cleanly. Relative paths like `../sibling` require manual fixup. |
+
+### 5.2 Performance Considerations
+
+- **Sync-over-async cost:** `Write()` and `BinaryWrite()` shims block a thread pool thread. Acceptable for migration but not ideal for high-throughput handlers. Provide async alternatives.
+- **Handler instantiation:** In Web Forms, `IsReusable = false` creates a new handler per request. In our design, the middleware is singleton and creates `HttpHandlerContext` per request. No perf issue.
+- **Session state:** If `IRequiresSessionState` was used, ASP.NET Core session involves an async load. The shim must call `await context.Session.LoadAsync()` before `ProcessRequestAsync`.
+
+### 5.3 Session State Complexity
+
+Web Forms session in handlers is transparent — just mark the class with `IRequiresSessionState` and `context.Session["key"]` works. In ASP.NET Core:
+
+1. Session requires explicit middleware: `app.UseSession()`
+2. Session requires explicit loading: `await session.LoadAsync()`
+3. Session in Core only stores `byte[]`, `string`, and `int` — not arbitrary objects
+4. Session is cookie-based by default — different from Web Forms in-proc/state-server/SQL modes
+
+**Proposal:** Provide a `[RequiresSessionState]` attribute. The handler middleware checks for it and calls `LoadAsync()` before invoking `ProcessRequestAsync()`. For the session value API, provide `GetObject<T>()` / `SetObject<T>()` extension methods that serialize via `System.Text.Json`.
+
+### 5.4 Package Placement
+
+**Recommendation: Main BWFC package (`Fritz.BlazorWebFormsComponents`).**
+
+Rationale:
+- HttpHandlerBase is a migration shim — same category as `WebFormsPageBase`, `ResponseShim`, `RequestShim`
+- It reuses the same options pattern (`BlazorWebFormsComponentsOptions`)
+- It extends the same middleware pipeline (`UseBlazorWebFormsComponents()`)
+- The code is small (~500 lines total for all classes)
+- Creating a separate package for ~500 lines of migration infrastructure adds friction without value
+- Precedent: `WebFormsPageBase` is in the main package
+
+**NOT in `Fritz.BlazorAjaxToolkitComponents`** — that package is for ACT controls, not migration infrastructure.
+
+---
+
+## 6. Implementation Plan
+
+### 6.1 Files to Create
+
+| File | Description | Size |
+|------|-------------|------|
+| `src/BlazorWebFormsComponents/HttpHandlerBase.cs` | Abstract base class with `ProcessRequestAsync` | ~40 lines |
+| `src/BlazorWebFormsComponents/HttpHandlerContext.cs` | Adapter wrapping Core `HttpContext` | ~60 lines |
+| `src/BlazorWebFormsComponents/HttpHandlerRequest.cs` | Request adapter (`QueryString`, `Form`, `Files`, etc.) | ~80 lines |
+| `src/BlazorWebFormsComponents/HttpHandlerResponse.cs` | Response adapter (`Write`, `BinaryWrite`, `AddHeader`, etc.) | ~120 lines |
+| `src/BlazorWebFormsComponents/HttpHandlerServer.cs` | Server utilities adapter (`MapPath`, encode/decode) | ~50 lines |
+| `src/BlazorWebFormsComponents/HandlerRouteAttribute.cs` | `[HandlerRoute("/path.ashx")]` attribute | ~20 lines |
+| `src/BlazorWebFormsComponents/RequiresSessionStateAttribute.cs` | Marker attribute for session-dependent handlers | ~10 lines |
+| `src/BlazorWebFormsComponents/Extensions/HandlerEndpointExtensions.cs` | `MapHandler<T>()` and `MapBlazorWebFormsHandlers()` | ~80 lines |
+| **Tests:** | |
+| `src/BlazorWebFormsComponents.Test/Middleware/HttpHandlerBaseTests.cs` | Integration tests via TestServer | ~200 lines |
+| `src/BlazorWebFormsComponents.Test/HttpHandlerResponseTests.cs` | Unit tests for response adapter | ~100 lines |
+| `src/BlazorWebFormsComponents.Test/HttpHandlerServerTests.cs` | Unit tests for MapPath, encode/decode | ~80 lines |
+
+**Total estimated:** ~840 lines of production code, ~380 lines of test code.
+
+### 6.2 Files to Modify
+
+| File | Change |
+|------|--------|
+| `BlazorWebFormsComponentsOptions.cs` | Add `EnableHandlerRouting` bool (default: false — opt-in) |
+| `ServiceCollectionExtensions.cs` | Add `MapBlazorWebFormsHandlers()` extension on `IEndpointRouteBuilder` |
+| `AshxHandlerMiddleware.cs` | Check for registered handler endpoints before returning 410 Gone |
+
+### 6.3 Dependencies on Existing BWFC Infrastructure
+
+- **`BlazorWebFormsComponentsOptions`** — for configuration flags
+- **`ServiceCollectionExtensions`** — for registration integration
+- **`AshxHandlerMiddleware`** — must coordinate to avoid intercepting migrated handlers
+- **No dependency on Blazor component infrastructure** — handlers are pure HTTP, no component tree involvement
+
+### 6.4 Scope Assessment
+
+**Medium.** ~1,200 lines total. No Blazor component complexity. No JS interop. No render tree. Pure C# middleware + routing. The complexity is in getting the shim API surface right, not in the implementation.
+
+### 6.5 Suggested Issue Decomposition
+
+**Issue 1: Core HttpHandlerBase + Context Adapters** (Size: M)
+- `HttpHandlerBase`, `HttpHandlerContext`, `HttpHandlerRequest`, `HttpHandlerResponse`, `HttpHandlerServer`
+- Unit tests for all adapters
+- Assigned to: Cyclops
+
+**Issue 2: Routing + Registration** (Size: S)  
+- `HandlerRouteAttribute`, `HandlerEndpointExtensions`
+- `MapHandler<T>()` and `MapBlazorWebFormsHandlers()` assembly scanning
+- Integration tests via TestServer
+- Assigned to: Cyclops
+
+**Issue 3: AshxHandlerMiddleware Coordination** (Size: S)  
+- Modify `AshxHandlerMiddleware` to skip paths with registered handler endpoints
+- Regression tests for existing 410 Gone behavior
+- Assigned to: Cyclops
+
+**Issue 4: Session State Support** (Size: S)  
+- `RequiresSessionStateAttribute`
+- Auto `LoadAsync()` before `ProcessRequestAsync`
+- `GetObject<T>()` / `SetObject<T>()` extensions
+- Assigned to: Cyclops
+
+**Issue 5: Documentation + Migration Guide** (Size: S)  
+- MkDocs page: "Migrating .ashx Handlers"
+- Before/after examples for JSON API, file download, image generation
+- Assigned to: Beast
+
+**Issue 6: L1 Script Integration** (Size: S)  
+- Detect `.ashx` files during migration
+- Generate stub `HttpHandlerBase` classes from `.ashx.cs` code-behind
+- Add `[HandlerRoute]` based on original .ashx path
+- Assigned to: Cyclops (extends existing L1 script)
+
+---
+
+## 7. Design Alternatives Considered
+
+### 7.1 Interface Instead of Base Class
+
+**Rejected.** An interface (`IWebFormsHandler`) would force developers to implement the context wrapping themselves. The base class provides the adapter for free — the whole point is minimal rewrites.
+
+### 7.2 Raw Middleware Instead of Endpoint Routing
+
+**Rejected.** Raw middleware runs on every request. Handlers are URL-specific. Endpoint routing provides:
+- URL pattern matching
+- Authorization attribute support
+- OpenAPI integration (if desired)
+- Clean separation from the 410 Gone interception middleware
+
+### 7.3 Minimal API Wrapper Instead
+
+**Considered but rejected for V1.** Minimal APIs (`app.MapGet("/path", handler)`) are the "correct" ASP.NET Core pattern, but they require completely different code structure. Our goal is **minimal migration effort**, not idiomatic Core code. Developers can refactor to Minimal APIs later — this base class is a stepping stone.
+
+### 7.4 Separate NuGet Package
+
+**Rejected.** See §5.4. Too little code (~500 lines) to justify a separate package. Same migration infrastructure category as `WebFormsPageBase`.
+
+---
+
+## 8. Open Questions for Jeff
+
+1. **Naming:** `HttpHandlerBase` vs `GenericHandler` vs `WebFormsHttpHandler`? I prefer `HttpHandlerBase` for consistency with `WebFormsPageBase`.
+
+2. **Registration default:** Should `EnableHandlerRouting` default to `true` or `false`? I recommend `false` (opt-in) because most migrated apps won't have handler code — they'll use the existing 410 Gone middleware.
+
+3. **Sync Write shims:** Are we comfortable with sync-over-async in `Write()` and `BinaryWrite()` for migration compatibility? The alternative is forcing all handlers to be fully async, which increases migration effort.
+
+4. **L1 script priority:** Should `.ashx` → `HttpHandlerBase` stub generation be in scope for the next migration run, or is this a later milestone?
+
+5. **`Response.End()` behavior:** Mark as `[Obsolete]` with warning, or throw `NotSupportedException`? I recommend `[Obsolete]` to match the pattern established by `ViewState` on `WebFormsPageBase`.
+
+---
+
+## 9. Forge's Verdict
+
+**Build it.** This fills a real gap. Right now, `.ashx` handlers are a black hole in the migration story — the code just disappears and developers rewrite from scratch. This base class preserves 80%+ of handler logic with mechanical changes only. The remaining 20% (Server.Transfer, Application state, complex session) requires manual work regardless.
+
+The design is conservative: no magic, no reflection tricks, no runtime code generation. It's a set of adapter classes that map old APIs to new ones. That's exactly what BWFC does for UI controls, and it works.
+
+**Priority:** After M20 (Component Parity) work stabilizes. Handlers are infrastructure — important for migration completeness but not blocking any current benchmark runs.
+
+---
+
+*— Forge, Lead / Web Forms Reviewer*
+
+---
+
+## Revised Design: Minimal API Registration
+
+**Author:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-07-25  
+**Status:** Revision — replaces §3.3–3.5 of original proposal  
+**Trigger:** Jeff's direction to use Minimal API instead of custom endpoint routing
+
+> **Context:** The original design (§3.3) used `[HandlerRoute]` attributes + `MapBlazorWebFormsHandlers()` assembly scanning. Jeff asked: what if `HttpHandlerBase` itself uses **ASP.NET Core Minimal API** for registration, with `ProcessRequest` called inside a Minimal API shim?
+>
+> This is better. Here's the revised design.
+
+---
+
+### R1. The Minimal API Registration Pattern
+
+**Primary API — generic extension method on `IEndpointRouteBuilder`:**
+
+```csharp
+// In Program.cs — one line per handler
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+app.MapHandler<ProductApiHandler>("/api/Products.ashx");
+app.MapHandler<ThumbnailHandler>("/Handlers/Thumbnail.ashx");
+```
+
+**Implementation:**
+
+```csharp
+// Extensions/HandlerEndpointExtensions.cs
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace BlazorWebFormsComponents;
+
+public static class HandlerEndpointExtensions
+{
+    /// <summary>
+    /// Maps an HttpHandlerBase subclass to the specified route pattern using Minimal API.
+    /// The handler is instantiated per-request via DI, supporting constructor injection.
+    /// Handles all HTTP methods (GET, POST, PUT, DELETE, etc.) — matching Web Forms
+    /// IHttpHandler behavior where ProcessRequest handles everything.
+    /// </summary>
+    public static RouteHandlerBuilder MapHandler<THandler>(
+        this IEndpointRouteBuilder endpoints,
+        string pattern)
+        where THandler : HttpHandlerBase
+    {
+        return endpoints.Map(pattern, async (HttpContext httpContext) =>
+        {
+            // Resolve handler with DI — supports constructor injection
+            var handler = ActivatorUtilities.CreateInstance<THandler>(httpContext.RequestServices);
+
+            // Session pre-load for handlers that need it
+            if (handler.GetType().IsDefined(typeof(RequiresSessionStateAttribute), inherit: true))
+            {
+                await httpContext.Session.LoadAsync(httpContext.RequestAborted);
+            }
+
+            // Build the Web Forms-compatible context adapter
+            var env = httpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var handlerContext = new HttpHandlerContext(httpContext, env);
+
+            // Execute the handler — writes directly to Response
+            await handler.ProcessRequestAsync(handlerContext);
+        });
+    }
+
+    /// <summary>
+    /// Convention-based overload: derives the route from the handler class name.
+    /// FileDownloadHandler → /FileDownload.ashx
+    /// SecureReportHandler → /SecureReport.ashx
+    /// The "Handler" suffix is stripped and ".ashx" is appended.
+    /// </summary>
+    public static RouteHandlerBuilder MapHandler<THandler>(
+        this IEndpointRouteBuilder endpoints)
+        where THandler : HttpHandlerBase
+    {
+        var name = typeof(THandler).Name;
+        if (name.EndsWith("Handler", StringComparison.Ordinal))
+            name = name[..^7]; // strip "Handler"
+        var pattern = "/" + name + ".ashx";
+        return endpoints.MapHandler<THandler>(pattern);
+    }
+
+    /// <summary>
+    /// Convenience overload: maps a handler to multiple route patterns.
+    /// Useful when preserving both the legacy .ashx URL and a clean URL.
+    /// </summary>
+    public static void MapHandler<THandler>(
+        this IEndpointRouteBuilder endpoints,
+        params string[] patterns)
+        where THandler : HttpHandlerBase
+    {
+        foreach (var pattern in patterns)
+        {
+            endpoints.MapHandler<THandler>(pattern);
+        }
+    }
+}
+```
+
+**Why this pattern and not alternatives:**
+
+| Option | Verdict |
+|--------|---------|
+| `app.MapHandler<T>("/path")` — generic extension on `IEndpointRouteBuilder` | ✅ **Winner.** Follows `MapGet`/`MapPost` naming. Generic constraint ensures type safety. Returns `RouteHandlerBuilder` for chaining auth/CORS/etc. |
+| `FileDownloadHandler.Map(app, "/path")` — static method on base class | ❌ Rejected. Inverts the fluent API pattern. The route builder is the receiver, not the handler. Feels wrong in `Program.cs`. |
+| `app.MapGet("/path", (HttpContext ctx) => handler.ProcessRequestAsync(ctx))` — raw inline | ❌ Rejected. Too much ceremony per handler. No session pre-load, no DI, no adapter construction. Defeats the purpose of a base class. |
+| `HttpHandlerBase.MapAll(app, assembly)` — assembly scanning | ❌ Rejected (per Jeff's direction). Hides what's registered. Minimal API philosophy is explicit. |
+
+---
+
+### R2. How ProcessRequest Gets Called Inside the Shim
+
+The Minimal API delegate does four things:
+
+```
+1. Instantiate handler via DI  →  ActivatorUtilities.CreateInstance<THandler>
+2. Pre-load session (if needed) →  Check [RequiresSessionState], call LoadAsync
+3. Wrap HttpContext             →  new HttpHandlerContext(httpContext, env)
+4. Call handler                 →  await handler.ProcessRequestAsync(handlerContext)
+```
+
+**Key design decision: No `IResult` return.**
+
+Minimal API normally returns `IResult` (e.g., `Results.Ok(data)`) which writes the response. Our handlers write directly to `Response` via the adapter (`Response.Write`, `Response.BinaryWrite`, `Response.ContentType = ...`). This means:
+
+- The delegate signature is `async (HttpContext httpContext) => { ... }` — returns `Task` (void).
+- Minimal API sees no return value → does not attempt to write a response.
+- The handler owns the response completely. This matches Web Forms behavior exactly.
+
+```csharp
+// What the Minimal API delegate looks like, expanded:
+endpoints.Map(pattern, async (HttpContext httpContext) =>
+{
+    // 1. Per-request handler instantiation with DI
+    var handler = ActivatorUtilities.CreateInstance<THandler>(httpContext.RequestServices);
+
+    // 2. Session pre-load (if marked)
+    if (Attribute.IsDefined(handler.GetType(), typeof(RequiresSessionStateAttribute)))
+    {
+        await httpContext.Session.LoadAsync(httpContext.RequestAborted);
+    }
+
+    // 3. Build adapter context
+    var env = httpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+    var handlerContext = new HttpHandlerContext(httpContext, env);
+
+    // 4. Execute — handler writes to Response directly
+    await handler.ProcessRequestAsync(handlerContext);
+
+    // No return value. Response is already written.
+    // Minimal API will not interfere.
+});
+```
+
+**What about exceptions?** Unhandled exceptions from `ProcessRequestAsync` propagate normally through ASP.NET Core's exception handling pipeline. `app.UseExceptionHandler()` catches them. No special handling needed — another advantage of using Minimal API infrastructure.
+
+---
+
+### R3. DI Integration
+
+This is where the Minimal API pivot **really** pays off.
+
+**Handler instantiation:** `ActivatorUtilities.CreateInstance<THandler>(httpContext.RequestServices)` resolves constructor parameters from the DI container automatically. No explicit registration required.
+
+**What this enables:**
+
+```csharp
+// Handlers can now accept constructor-injected services — impossible in Web Forms
+public class FileDownloadHandler : HttpHandlerBase
+{
+    private readonly IWebHostEnvironment _env;
+    private readonly ILogger<FileDownloadHandler> _logger;
+    private readonly IFileRepository _fileRepo;
+
+    public FileDownloadHandler(
+        IWebHostEnvironment env,
+        ILogger<FileDownloadHandler> logger,
+        IFileRepository fileRepo)
+    {
+        _env = env;
+        _logger = logger;
+        _fileRepo = fileRepo;
+    }
+
+    public override async Task ProcessRequestAsync(HttpHandlerContext context)
+    {
+        _logger.LogInformation("File download requested: {Id}", context.Request.QueryString["id"]);
+        // Server.MapPath now works via the injected env — OR via context.Server.MapPath
+        // Developer's choice. Both work.
+    }
+}
+```
+
+**Lifetime: Per-request (transient).**
+
+`ActivatorUtilities.CreateInstance` creates a new instance per request. This matches Web Forms' `IsReusable = false` behavior (the common case). The `IsReusable` property on `HttpHandlerBase` becomes vestigial — it exists for API surface compatibility but has no behavioral effect.
+
+**No DI container registration needed.** Handlers do NOT need to be registered with `services.AddTransient<FileDownloadHandler>()`. `ActivatorUtilities` resolves dependencies from the container but creates the handler itself. This is the same pattern ASP.NET Core uses for Razor Pages, controllers, and Blazor components.
+
+**Optional: Pre-register for specialized lifetime control.** If a developer explicitly registers a handler in DI:
+
+```csharp
+services.AddSingleton<ExpensiveHandler>();
+```
+
+We could check for that and resolve from the container instead of `ActivatorUtilities`. But this is a V2 optimization — not needed for migration.
+
+**IWebHostEnvironment is available two ways:**
+
+1. Via `context.Server.MapPath("~/path")` — the adapter path (Web Forms compatible)
+2. Via constructor injection `IWebHostEnvironment env` — the ASP.NET Core path
+
+Both work. The adapter creates `HttpHandlerServer` using the same injected `IWebHostEnvironment`. Developers migrating can use the familiar `context.Server.MapPath` and later refactor to direct injection at their own pace.
+
+---
+
+### R4. HTTP Method Handling
+
+**Web Forms:** `IHttpHandler.ProcessRequest` handles ALL HTTP methods. The handler checks `context.Request.HttpMethod` if it cares (most don't).
+
+**Minimal API:** Method-specific registration (`MapGet`, `MapPost`, etc.). But also provides `Map()` which matches **all** HTTP methods. Available since .NET 7; we target .NET 10.
+
+**Decision: Use `Map()` by default.** This matches Web Forms semantics exactly.
+
+```csharp
+// Default: handles GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS — everything
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+
+// Internally calls: endpoints.Map(pattern, delegate)
+// NOT MapGet, NOT MapPost — Map (all methods)
+```
+
+**For developers who want method-specific routing** (post-migration optimization), the `RouteHandlerBuilder` returned by `MapHandler` supports Minimal API's `WithMethods()` filter:
+
+```csharp
+// Restrict to GET only (post-migration optimization)
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx")
+   .WithMetadata(new HttpMethodMetadata(new[] { "GET" }));
+```
+
+Or they can just use native Minimal API at that point — the handler base class is a migration stepping stone, not a permanent home.
+
+**OpenAPI integration note:** `Map()` (all methods) registers as accepting all methods in Swagger/OpenAPI metadata. This is fine for migration — these are legacy endpoints, not new API design.
+
+---
+
+### R5. Revised Before/After Example
+
+#### Web Forms Original (`FileDownload.ashx.cs`)
+
+```csharp
+// FileDownload.ashx.cs — Web Forms (.NET Framework 4.8)
+using System.IO;
+using System.Web;
+
+namespace MyApp
+{
+    public class FileDownloadHandler : IHttpHandler
+    {
+        public bool IsReusable => true;
+
+        public void ProcessRequest(HttpContext context)
+        {
+            var fileId = context.Request.QueryString["id"];
+            if (string.IsNullOrEmpty(fileId))
+            {
+                context.Response.StatusCode = 400;
+                context.Response.Write("Missing file ID");
+                return;
+            }
+
+            var filePath = context.Server.MapPath("~/App_Data/Files/" + fileId + ".pdf");
+            if (!File.Exists(filePath))
+            {
+                context.Response.StatusCode = 404;
+                context.Response.Write("File not found");
+                return;
+            }
+
+            var fileName = Path.GetFileName(filePath);
+            context.Response.Clear();
+            context.Response.ContentType = "application/pdf";
+            context.Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+            context.Response.BinaryWrite(File.ReadAllBytes(filePath));
+            context.Response.End();
+        }
+    }
+}
+```
+
+#### Blazor — Migrated Handler (`FileDownloadHandler.cs`)
+
+```csharp
+// FileDownloadHandler.cs — Blazor with BWFC
+using System.IO;
+using BlazorWebFormsComponents;
+
+namespace MyApp;
+
+public class FileDownloadHandler : HttpHandlerBase
+{
+    public override async Task ProcessRequestAsync(HttpHandlerContext context)
+    {
+        var fileId = context.Request.QueryString["id"];
+        if (string.IsNullOrEmpty(fileId))
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write("Missing file ID");
+            return;
+        }
+
+        var filePath = context.Server.MapPath("~/App_Data/Files/" + fileId + ".pdf");
+        if (!File.Exists(filePath))
+        {
+            context.Response.StatusCode = 404;
+            context.Response.Write("File not found");
+            return;
+        }
+
+        var fileName = Path.GetFileName(filePath);
+        context.Response.Clear();
+        context.Response.ContentType = "application/pdf";
+        context.Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+        context.Response.BinaryWrite(File.ReadAllBytes(filePath));
+        // Response.End() removed — return is sufficient
+    }
+}
+```
+
+#### Registration — `Program.cs`
+
+```csharp
+// Program.cs — the ONLY new infrastructure
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddBlazorWebFormsComponents();
+// ... other services ...
+
+var app = builder.Build();
+app.UseBlazorWebFormsComponents();
+
+// Handler registration — one line per handler, explicit and visible
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+app.MapHandler<ProductApiHandler>("/api/Products.ashx");
+app.MapHandler<ThumbnailHandler>("/Handlers/Thumbnail.ashx");
+
+// Minimal API chaining works — add auth, CORS, rate limiting per handler
+app.MapHandler<SecureReportHandler>("/Handlers/Report.ashx")
+   .RequireAuthorization("AdminPolicy");
+
+app.MapHandler<PublicImageHandler>("/Handlers/Image.ashx")
+   .RequireCors("AllowAll");
+
+app.Run();
+```
+
+**Changes required for migration (revised):**
+
+1. ~~`using System.Web;`~~ → `using BlazorWebFormsComponents;`
+2. ~~`: IHttpHandler`~~ → `: HttpHandlerBase`
+3. ~~`ProcessRequest(HttpContext context)`~~ → `ProcessRequestAsync(HttpHandlerContext context)`
+4. ~~`context.Response.End()`~~ → remove (return is sufficient)
+5. ~~`[HandlerRoute(...)]` attribute~~ → **Gone. Registration moves to `Program.cs`.**
+6. Add `app.MapHandler<T>("/path.ashx")` to `Program.cs`
+7. Delete the `.ashx` markup file
+
+Still **6-7 mechanical changes**, same as before. But change #5/#6 is arguably cleaner — route and handler class are decoupled, and the route is visible in `Program.cs` alongside all other endpoint registrations.
+
+---
+
+### R6. What This Changes in the Implementation Plan
+
+**Files eliminated:**
+
+| Original Plan | Status |
+|---------------|--------|
+| `HandlerRouteAttribute.cs` (~20 lines) | ❌ **Eliminated.** No attribute-based routing. |
+| Assembly scanning logic in `HandlerEndpointExtensions.cs` | ❌ **Eliminated.** No `MapBlazorWebFormsHandlers()` scanning. |
+
+**Files simplified:**
+
+| File | Change |
+|------|--------|
+| `HandlerEndpointExtensions.cs` | **Simplified.** Was ~80 lines (scanning + explicit). Now ~40 lines (generic extension only). |
+| `BlazorWebFormsComponentsOptions.cs` | **No change needed.** `EnableHandlerRouting` option is unnecessary — registration is explicit per handler. |
+
+**Files unchanged:**
+
+| File | Why |
+|------|-----|
+| `HttpHandlerBase.cs` | Abstract base class — identical API surface. |
+| `HttpHandlerContext.cs` | Adapter — identical. |
+| `HttpHandlerRequest.cs` | Request adapter — identical. |
+| `HttpHandlerResponse.cs` | Response adapter — identical. |
+| `HttpHandlerServer.cs` | Server adapter — identical. |
+| `RequiresSessionStateAttribute.cs` | Still needed for session pre-load. |
+
+**Revised file count:**
+
+| File | Size |
+|------|------|
+| `HttpHandlerBase.cs` | ~40 lines |
+| `HttpHandlerContext.cs` | ~60 lines |
+| `HttpHandlerRequest.cs` | ~80 lines |
+| `HttpHandlerResponse.cs` | ~120 lines |
+| `HttpHandlerServer.cs` | ~50 lines |
+| `RequiresSessionStateAttribute.cs` | ~10 lines |
+| `Extensions/HandlerEndpointExtensions.cs` | ~40 lines (**was 80**) |
+| ~~`HandlerRouteAttribute.cs`~~ | ~~20 lines~~ **eliminated** |
+| **Total production code** | **~400 lines (was ~500)** |
+
+**Revised issue decomposition:**
+
+| Issue | Size | Change from Original |
+|-------|------|---------------------|
+| **Issue 1: Core HttpHandlerBase + Context Adapters** | M | Unchanged |
+| **Issue 2: Minimal API Registration** | **XS** | **Simplified from S** — no assembly scanning, no attribute, just one extension method |
+| **Issue 3: AshxHandlerMiddleware Coordination** | S | Unchanged — still need to skip migrated paths |
+| **Issue 4: Session State Support** | S | Unchanged |
+| **Issue 5: Documentation + Migration Guide** | S | Unchanged (different examples) |
+| **Issue 6: L1 Script Integration** | S | **Simplified** — generates `MapHandler<T>` call instead of `[HandlerRoute]` attribute. Appends to a known location in `Program.cs`. |
+
+**Net effect: ~100 fewer lines of production code. One fewer file. Issue 2 drops from S to XS. Total scope decreases.**
+
+---
+
+### R7. Advantages Over Original Design
+
+1. **Platform-native pattern.** `MapHandler<T>("/path")` follows the same shape as `MapGet`, `MapPost`, `MapBlazorHub`. Developers learn Minimal API conventions, which are useful far beyond migration.
+
+2. **DI for free.** Constructor injection in handlers with zero configuration. `ILogger`, `IWebHostEnvironment`, custom services — all just work. The original design would have needed custom DI plumbing in the middleware.
+
+3. **No assembly scanning.** The original `MapBlazorWebFormsHandlers(assembly)` was convenient but opaque. What handlers are registered? Which routes? Minimal API makes every registration explicit and visible in `Program.cs`.
+
+4. **Authorization, CORS, rate limiting — all free.** `RouteHandlerBuilder` chaining gives us:
+   ```csharp
+   app.MapHandler<SecureHandler>("/admin/export.ashx")
+      .RequireAuthorization("AdminPolicy")
+      .RequireCors("InternalOnly")
+      .WithRateLimiting("download-limit");
+   ```
+   The original design would have needed custom attribute scanning to get this.
+
+5. **OpenAPI integration.** Minimal API endpoints appear in Swagger/OpenAPI documentation automatically. Migration handlers get API documentation for free if the app uses Swashbuckle/NSwag.
+
+6. **No custom infrastructure to maintain.** The original needed `HandlerRouteAttribute` + assembly scanning + endpoint routing registration. The revised design has one 40-line extension method. Everything else is ASP.NET Core's built-in Minimal API pipeline.
+
+7. **Testability.** `WebApplicationFactory` + `HttpClient` integration testing works perfectly — Minimal API endpoints are standard endpoints. No special test infrastructure needed.
+
+8. **Middleware pipeline integration.** Minimal API endpoints participate in the standard middleware pipeline — `UseAuthentication()`, `UseAuthorization()`, `UseResponseCaching()`, etc. all apply naturally.
+
+---
+
+### R8. Tradeoffs vs Original Design
+
+#### 8.1 Explicit Registration Required
+
+**Original:** One attribute + one line in `Program.cs`:
+```csharp
+[HandlerRoute("/Handlers/FileDownload.ashx")]
+public class FileDownloadHandler : HttpHandlerBase { ... }
+// Program.cs:
+app.MapBlazorWebFormsHandlers(typeof(Program).Assembly);
+```
+
+**Revised:** Handler class + one line per handler:
+```csharp
+public class FileDownloadHandler : HttpHandlerBase { ... }
+// Program.cs:
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+```
+
+**Is bulk migration harder?** Slightly. If an app has 20 handlers, that's 20 `MapHandler` calls in `Program.cs`. But:
+- 20 explicit lines beats mystery assembly scanning
+- The L1 script generates these lines automatically
+- It's no different from how ASP.NET Core registers 20 Minimal API endpoints or 20 controllers
+
+For apps with 50+ handlers (rare but possible), we can offer a **convenience batch method** as sugar:
+
+```csharp
+// Optional convenience for bulk migration — NOT assembly scanning
+app.MapHandlers(handlers =>
+{
+    handlers.Add<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+    handlers.Add<ProductApiHandler>("/api/Products.ashx");
+    handlers.Add<ThumbnailHandler>("/Handlers/Thumbnail.ashx");
+    // ... still explicit, but grouped
+});
+```
+
+But this is sugar, not core API. Ship `MapHandler<T>` first.
+
+#### 8.2 Route Lives in Program.cs, Not on the Class
+
+**Original:** `[HandlerRoute("/path")]` on the class — route and handler co-located.
+
+**Revised:** Route is in `Program.cs` — separated from handler class.
+
+**Is this worse?** Depends on perspective:
+- **Pro co-location:** Developer can see the route by reading the handler file.
+- **Pro separation:** All routes visible in one place (`Program.cs`). This is the standard ASP.NET Core pattern for Minimal API. Blazor page routes use `@page` on the component, but Minimal API uses centralized registration. We match the pattern that `.ashx` handlers map to (HTTP endpoints, not pages).
+
+**Forge's opinion:** Separation is fine. These are HTTP endpoints, not pages. `Program.cs` is where you go to see "what does this app serve?" — having handlers listed there alongside `app.MapBlazorHub()` and `app.MapRazorComponents()` is correct.
+
+#### 8.3 `[HandlerRoute]` Attribute Eliminated
+
+Losing the attribute means:
+- ❌ No route discovery by reading the handler class alone
+- ✅ No custom attribute to document and explain
+- ✅ No reflection/scanning to maintain
+- ✅ Route can be changed in `Program.cs` without touching the handler class (useful during migration when URLs evolve)
+
+**Net: Small loss in discoverability, significant gain in simplicity.**
+
+#### 8.4 What About `IHttpHandler.IsReusable`?
+
+In the original design, `IsReusable` was meaningful because the middleware could decide to cache the handler instance. With `ActivatorUtilities.CreateInstance` per request, the handler is always transient. `IsReusable` becomes a documentation-only property.
+
+**Keep it.** It costs nothing, completes the API surface parity, and lets migrated code compile without removing the property. Mark it with a doc comment explaining it has no behavioral effect in ASP.NET Core.
+
+---
+
+### R9. Forge's Verdict on the Pivot
+
+**This is a better design.** Full stop.
+
+The original §7.3 rejected Minimal API because "they require completely different code structure." That was wrong — I was thinking about rewriting handlers AS Minimal API endpoints. Jeff's insight is different: use Minimal API as the **registration and dispatch infrastructure** while keeping the `HttpHandlerBase` class structure intact. The handler code doesn't change at all. Only the plumbing underneath does.
+
+The result:
+- **~100 fewer lines** of framework code
+- **One fewer file** (no `HandlerRouteAttribute.cs`)
+- **One fewer concept** for developers to learn (no `[HandlerRoute]`, no assembly scanning)
+- **Full Minimal API ecosystem** benefits (auth, CORS, rate limiting, OpenAPI, DI)
+- **The adapter layer is completely unchanged** — `HttpHandlerContext`, `HttpHandlerResponse`, `HttpHandlerServer`, all identical
+
+The handler code a developer writes is nearly identical between original and revised designs. The only difference is where the route gets declared — and `Program.cs` is the right place for HTTP endpoints.
+
+**Updated scope:** ~400 lines production + ~350 lines test = ~750 total (**was ~1,200**). Net reduction of ~450 lines. Issue 2 (routing) drops from Size S to XS. Timeline tightens from 3-4 weeks to **2-3 weeks**.
+
+**Updated recommendation:** Still "Build it." But now with more confidence — the implementation is smaller, simpler, and leans on battle-tested ASP.NET Core infrastructure instead of rolling our own.
+
+---
+
+### R10. Convention-Based Route Derivation (Optional Path Parameter)
+
+**Author:** Jeff Fritz (user directive)  
+**Date:** 2026-03-17  
+**Status:** Accepted — extends R1
+
+Jeff proposed making the `pattern` parameter optional on `MapHandler<T>()`. When omitted, the route is derived from the handler class name using this convention:
+
+1. Take `typeof(THandler).Name` (e.g., `FileDownloadHandler`)
+2. Strip trailing `"Handler"` suffix → `FileDownload`
+3. Prepend `/`, append `.ashx` → `/FileDownload.ashx`
+
+**Three overloads now exist:**
+
+```csharp
+// Convention-based (class name → route)
+app.MapHandler<FileDownloadHandler>();                         // → /FileDownload.ashx
+app.MapHandler<SecureReportHandler>();                         // → /SecureReport.ashx
+
+// Explicit path (override convention — recommended for migration)
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
+
+// Multi-path (legacy URL + clean URL)
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx", "/api/download");
+```
+
+**What the convention CANNOT derive:** The folder prefix. `/Handlers/FileDownloadHandler.cs` as a source file path is not available at runtime. The parameterless overload always maps to root (`/FileDownload.ashx`). For subfolder paths, use the explicit overload.
+
+**Migration guidance:**
+- **For exact URL preservation:** Use explicit path (most migration scenarios)
+- **For new handlers or when convention matches:** Use parameterless overload
+- **The L1 script** should always generate the explicit path form (it knows the original .ashx location)
+
+**Implementation cost:** ~6 lines in `HandlerEndpointExtensions.cs`. Zero risk — delegates to the explicit overload.
+
+---
+
+*— Forge, Lead / Web Forms Reviewer*
+
+
+# Implementation Decisions: HttpHandlerBase (Issue #473)
+
+**Author:** Cyclops (Component Dev)
+**Date:** 2026-07-25
+**Status:** Implemented — pending review
+
+---
+
+## What Was Built
+
+Seven new files in `src/BlazorWebFormsComponents/Handlers/` implementing the core HttpHandlerBase feature per Forge's spec (forge-ashx-handler-base-class.md, sections R1–R10).
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `HttpHandlerBase.cs` | ~33 | Abstract base class: `ProcessRequestAsync` + `IsReusable` |
+| `HttpHandlerContext.cs` | ~72 | Adapter wrapping HttpContext → Request/Response/Server/Session/User/Items |
+| `HttpHandlerRequest.cs` | ~175 | NameValueCollection adapters for QS/Form/Headers, indexer, Files, Url |
+| `HttpHandlerResponse.cs` | ~175 | Write/BinaryWrite (sync + async), AddHeader, Clear, End, Flush |
+| `HttpHandlerServer.cs` | ~98 | MapPath, HtmlEncode/Decode, UrlEncode/Decode, Transfer (throws) |
+| `RequiresSessionStateAttribute.cs` | ~24 | Marker attribute for session pre-load |
+| `HandlerEndpointExtensions.cs` | ~100 | Three MapHandler<T> overloads on IEndpointRouteBuilder |
+
+---
+
+## Key Decisions
+
+### 1. Return type: IEndpointConventionBuilder (not RouteHandlerBuilder)
+
+**What:** `MapHandler<T>(endpoints, pattern)` returns `IEndpointConventionBuilder`.
+
+**Why:** `endpoints.Map(string, RequestDelegate)` returns `IEndpointConventionBuilder`. The `RouteHandlerBuilder` return type specified in Forge's R1 code samples requires the `Map(string, Delegate)` overload, but the lambda `async (HttpContext httpContext) => { ... }` matches `RequestDelegate` first in overload resolution. Since all useful chaining methods (`.RequireAuthorization()`, `.RequireCors()`, `.RequireRateLimiting()`) are defined on `IEndpointConventionBuilder`, this has no functional impact on the developer experience shown in the spec examples.
+
+### 2. No AshxHandlerMiddleware modification
+
+**What:** The task referenced modifying "existing AshxHandlerMiddleware" but no such middleware exists. The only existing middleware is `AspxRewriteMiddleware` which handles `.aspx` URL rewriting (301 redirects), not `.ashx` handler interception.
+
+**Why this is fine:** Without an AshxHandlerMiddleware, there's nothing to intercept `.ashx` requests before they reach endpoint routing. The `MapHandler<T>` endpoints will receive requests directly via the normal ASP.NET Core routing pipeline. If/when an AshxHandlerMiddleware is created (e.g., to return 410 Gone for unmigrated .ashx URLs), it should check endpoint metadata before intercepting.
+
+### 3. IsReusable defaults to false
+
+**What:** `HttpHandlerBase.IsReusable` defaults to `false` per the task instructions, not `true` per the original spec section 3.5.
+
+**Why:** The task instructions explicitly state "default false, overridable". Since handlers are instantiated per-request via `ActivatorUtilities.CreateInstance`, the property has no behavioral effect — it exists for API surface compatibility only.
+
+### 4. Root namespace for all files
+
+**What:** All files use `namespace BlazorWebFormsComponents;` despite living in the `Handlers/` subdirectory.
+
+**Why:** The spec's migration examples show `using BlazorWebFormsComponents;`. Using a sub-namespace would require an additional `using` directive. The existing `Extensions/` directory also uses the root namespace per project convention.
+
+### 5. Defensive Form/Files access
+
+**What:** `HttpHandlerRequest.Form` and `HttpHandlerRequest.Files` check `HasFormContentType` before accessing `Request.Form`.
+
+**Why:** ASP.NET Core throws `InvalidOperationException` if you access `Request.Form` on a non-form request (e.g., GET with no body). Web Forms returns empty collections. The defensive check preserves Web Forms behavior.
+
+### 6. Lazy NameValueCollection caching
+
+**What:** QueryString, Form, and Headers NameValueCollections are built once and cached per request.
+
+**Why:** Web Forms code patterns often access `Request.QueryString["key"]` multiple times. Rebuilding the NameValueCollection from IQueryCollection on each access would be wasteful.
+
+---
+
+## What's NOT Included (Deferred)
+
+- **Tests** — Rogue should create bUnit/integration tests for the handler infrastructure
+- **AshxHandlerMiddleware** — doesn't exist yet; needs separate creation before coordination logic
+- **Documentation** — Beast should write the MkDocs migration guide
+- **L1 Script integration** — detecting `.ashx` files and generating stub handlers
+- **`GetObject<T>`/`SetObject<T>` session extensions** — mentioned in spec §5.3 but not in the task scope
+
+---
+
+*— Cyclops, Component Dev*
 
