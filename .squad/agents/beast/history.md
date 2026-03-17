@@ -29,33 +29,38 @@
 - Run 9 Skill Fixes — 6 RF items across 4 skill files (2026-03-07)
 - Run 9 RCA Documentation — path preservation + CSS verification rules (2026-03-07)
 
-### Issue #438: Deprecation Guidance Docs (Latest)
+### Issue #438: Deprecation Guidance Docs
 
 📌 **Team update (2026-03-17):** #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100%. 2105 tests passing. — decided by Cyclops
 
-**Delivered:** Comprehensive deprecation guidance page (`docs/Migration/DeprecationGuidance.md`) covering Web Forms patterns with no Blazor equivalent.
+**✅ DELIVERED** — Comprehensive deprecation guidance page covering Web Forms patterns with no Blazor equivalent.
 
-**Content:**
-- `runat="server"` → Blazor native components
-- `ViewState` → Component fields + scoped services  
-- `UpdatePanel` → Blazor's incremental component rendering
-- `ScriptManager` → `IJSRuntime` + `HttpClient`
-- PostBack events → Component lifecycle + event handlers
-- Page lifecycle (`Page_Load`, `Page_Init`) → `OnInitializedAsync`, `OnParametersSetAsync`
-- `IsPostBack` → Removed (use `OnInitializedAsync`)
-- Server-side control properties → Declarative data binding
+**Session (2026-03-17 by Beast):**
+- Created `docs/Migration/DeprecationGuidance.md` — 32 KB, ~600 lines covering 8 deprecation patterns
+- Updated `mkdocs.yml` — added "Deprecation Guidance" to Migration navigation section (after "Automated Migration Guide")
+- Created decision record: `.squad/decisions/inbox/beast-deprecation-docs.md`
+
+**Content patterns documented:**
+- `runat="server"` — Scope marker; remove (Blazor components always server-side)
+- `ViewState` — Use component fields + scoped/singleton services instead
+- `UpdatePanel` — Blazor incremental rendering makes triggers obsolete; UpdatePanel is now just a CSS-compatible wrapper
+- `Page_Load` / `IsPostBack` → `OnInitializedAsync` + event handlers + lifecycle mapping table
+- `ScriptManager` — Stub for migration compat; replace with `IJSRuntime` + `HttpClient` + DI
+- Server control properties → Reactive data binding (fields, not imperative assignment)
 - Application/Session state → Singleton/scoped services
 - Data binding events (`ItemDataBound`) → Component templates with `@context`
 
-**Format:** Before/after tabbed code examples, migration checklist table, lifecycle mapping.
+**Format & Tone:**
+- Each pattern: "What It Was" → "Why Deprecated" → "What To Do Instead" + before/after code
+- Tabbed markdown for side-by-side comparison of Web Forms vs Blazor
+- Lifecycle mapping table (Page_Init → OnInitializedAsync, etc.)
+- Empathetic tone — acknowledges these are familiar patterns being left behind
+- Audience: Experienced Web Forms developers learning Blazor
 
-**Branch:** `squad/438-deprecation-docs` — pushed to FritzAndFriends upstream. Commit 5b17682b.
-
-**Files:** 
-- Created `docs/Migration/DeprecationGuidance.md` (23.3 KB, ~400 lines)
-- Updated `mkdocs.yml` — added to Migration section navigation
-
-**Design decision:** Placed after "Automated Migration Guide" in nav to catch developers early in their migration journey. Each section pairs Web Forms pattern with clear Blazor alternative, supporting the library's goal of enabling code reuse with minimal markup changes.
+**Design decision rationale:**
+- Placed after "Automated Migration Guide" in nav — developers run L1 automation first, then encounter these patterns; this doc is their reference
+- Each section pairs Web Forms pattern with clear Blazor alternative — supports library goal of enabling code reuse with minimal markup changes
+- Comprehensive coverage including derived patterns (e.g., application state → services)
 
 **Summary (2026-03-05 through 2026-03-07 pre-Run 11)
 
