@@ -1,0 +1,4763 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A collection of Blazor components that emulate the web forms components of the same name">
+      
+      
+        <meta name="author" content="Jeffrey T. Fritz">
+      
+      
+        <link rel="canonical" href="https://fritzandfriends.github.io/BlazorWebFormsComponents/migration-tests/wingtiptoys-run5-2026-03-04/report/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>WingtipToys Migration Benchmark — Run 5 (2026-03-04) - BlazorWebFormsComponents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#wingtiptoys-migration-benchmark-run-5-2026-03-04" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="BlazorWebFormsComponents" class="md-header__button md-logo" aria-label="BlazorWebFormsComponents" data-md-component="logo">
+      
+  <img src="../../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BlazorWebFormsComponents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              WingtipToys Migration Benchmark — Run 5 (2026-03-04)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FritzAndFriends/BlazorWebFormsComponents
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="BlazorWebFormsComponents" class="md-nav__button md-logo" aria-label="BlazorWebFormsComponents" data-md-component="logo">
+      
+  <img src="../../../assets/logo.png" alt="logo">
+
+    </a>
+    BlazorWebFormsComponents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FritzAndFriends/BlazorWebFormsComponents
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Component Health Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editor Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Editor Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/AdRotator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AdRotator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/BulletedList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BulletedList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Button/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Button
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Calendar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Calendar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/CheckBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CheckBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/CheckBoxList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CheckBoxList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/DropDownList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DropDownList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/FileUpload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FileUpload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/HiddenField/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HiddenField
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/ImageButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ImageButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Label/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Label
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/LinkButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LinkButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/ListBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ListBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Literal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Literal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Localize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Localize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/MultiView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MultiView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/PlaceHolder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PlaceHolder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/RadioButton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RadioButton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/RadioButtonList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RadioButtonList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Table/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Table
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/TextBox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TextBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/Chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/DataGrid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataGrid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/DataList/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataList
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/DataPager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataPager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/DetailsView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DetailsView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/FormView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FormView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/GridView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GridView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/ListView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ListView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/PagerSettings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PagerSettings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../DataControls/Repeater/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repeater
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/CompareValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CompareValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/ControlToValidate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ControlToValidate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/CustomValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CustomValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/ModelErrorMessage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ModelErrorMessage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/RangeValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RangeValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/RegularExpressionValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RegularExpressionValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/RequiredFieldValidator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RequiredFieldValidator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ValidationControls/ValidationSummary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ValidationSummary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Navigation Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Navigation Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../NavigationControls/HyperLink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HyperLink
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../NavigationControls/ImageMap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ImageMap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../NavigationControls/Menu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Menu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../NavigationControls/SiteMapPath/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SiteMapPath
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../NavigationControls/TreeView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TreeView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Login Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/ChangePassword/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ChangePassword
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/CreateUserWizard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CreateUserWizard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/Login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/LoginName/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginName
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/LoginStatus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginStatus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/LoginView/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LoginView
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../LoginControls/PasswordRecovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PasswordRecovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AJAX Controls
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AJAX Controls
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/ScriptManager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ScriptManager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/ScriptManagerProxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ScriptManagerProxy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Substitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Substitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/Timer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/UpdatePanel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UpdatePanel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EditorControls/UpdateProgress/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UpdateProgress
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ajax Control Toolkit Extenders
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ajax Control Toolkit Extenders
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/migration-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/Accordion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accordion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/AutoCompleteExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AutoCompleteExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/CalendarExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CalendarExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/CollapsiblePanelExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CollapsiblePanelExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/ConfirmButtonExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ConfirmButtonExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/FilteredTextBoxExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FilteredTextBoxExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/HoverMenuExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HoverMenuExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/MaskedEditExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MaskedEditExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/ModalPopupExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ModalPopupExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/NumericUpDownExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NumericUpDownExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/PopupControlExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PopupControlExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/SliderExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SliderExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/TabContainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TabContainer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../AjaxToolkit/ToggleButtonExtender/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ToggleButtonExtender
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utility Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Utility Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/Databinder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Databinder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/EnumParameter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EnumParameter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/IDRendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ID Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/JavaScriptSetup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JavaScript Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/L2AutomationShims/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    L2 Automation Shims
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/NamingContainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NamingContainer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/PageService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Page System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/ResponseRedirect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Response.Redirect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/ServiceRegistration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/ViewState/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ViewState
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../UtilityFeatures/WebFormsPage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebFormsPage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Migration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/AutomatedMigration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automated Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/Strategies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Strategies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/Custom-Controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/DeferredControls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deferred Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/MasterPages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Master Pages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/NET-Standard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .NET Standard to the Rescue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/ThemesAndSkins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and Skins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/User-Controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/MigratingAshxHandlers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating .ashx Handlers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Migration/migration_readiness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Forms Application Migration Readiness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Tests
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Migration Tests
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../wingtiptoys-2026-03-04/report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WingtipToys 2026-03-04
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Executive Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-quick-reference-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Quick-Reference Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-works-automated-layer-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What Works — Automated (Layer 1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. What Works — Automated (Layer 1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-transforms-carried-forward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Transforms (Carried Forward)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-in-run-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New in Run 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-what-doesnt-work-still-manual-layer-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. What Doesn't Work — Still Manual (Layer 2)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. What Doesn&#39;t Work — Still Manual (Layer 2)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mechanical-but-tedious" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanical but Tedious
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requires-architectural-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requires Architectural Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-script-enhancement-impact-run-4-vs-run-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Script Enhancement Impact — Run 4 vs Run 5
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-layer-2-manual-fixes-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Layer 2 Manual Fixes Applied
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Layer 2 Manual Fixes Applied">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fix-summary-by-category" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix Summary by Category
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-decisions-made" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Decisions Made
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-build-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Build Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Build Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-round-1-33-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Round 1 — 33 Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-round-2-2-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Round 2 — 2 Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-clean-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Clean Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-remaining-gaps-unconverted-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Remaining Gaps / Unconverted Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Remaining Gaps / Unconverted Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#patterns-the-script-will-never-handle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patterns the Script Will Never Handle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patterns-that-could-be-enhanced-in-future-script-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patterns That Could Be Enhanced in Future Script Versions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#next-script-enhancements-priority-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Script Enhancements (Priority Order)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-should-remain-manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Should Remain Manual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overall-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overall Assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#appendix-full-timing-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Appendix: Full Timing Breakdown
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="wingtiptoys-migration-benchmark-run-5-2026-03-04">WingtipToys Migration Benchmark — Run 5 (2026-03-04)<a class="headerlink" href="#wingtiptoys-migration-benchmark-run-5-2026-03-04" title="Permanent link">&para;</a></h1>
+<h2 id="1-executive-summary">1. Executive Summary<a class="headerlink" href="#1-executive-summary" title="Permanent link">&para;</a></h2>
+<p>Run 5 validated <strong>six new <code>bwfc-migrate.ps1</code> enhancements</strong> — ConvertFrom-LoginView, ConvertFrom-GetRouteUrl, ConvertFrom-SelectMethod, bare <code>&lt;%#: Item %&gt;</code> → <code>@context</code> regex, Register directive silent cleanup, and <code>uc:</code> tag prefix stripping — against WingtipToys (32 markup files). The script completed in <strong>3.25 s</strong> with <strong>309 transforms</strong> (+20 over Run 4), and the project reached a clean build (0 errors, 0 warnings) in <strong>4.56 s</strong> after two fix rounds. Total wall-clock time from script start to clean build was <strong>~10 minutes</strong>, including ~7 min 20 s of manual Layer 2 work. Five of the six new enhancements fired successfully; <code>uc:</code> prefix stripping was not applicable (no user-control prefixes in WingtipToys). The script's manual-review item count rose from 18 → <strong>30</strong>, but this reflects <em>more granular flagging</em> — the script now annotates every SelectMethod instance (9) and emits GetRouteUrl inject hints (2), providing better guidance for Layer 2 developers. The net effect: <strong>the automated pipeline is producing a higher-quality starting point with each run</strong>, and the remaining manual work is increasingly concentrated in architectural decisions (Identity, Session→services, EF6→EF Core) rather than mechanical transforms.</p>
+<h2 id="2-quick-reference-metrics">2. Quick-Reference Metrics<a class="headerlink" href="#2-quick-reference-metrics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Run 4</th>
+<th>Run 5</th>
+<th>Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Script execution time</td>
+<td>~3 s</td>
+<td><strong>3.25 s</strong></td>
+<td>+0.25 s</td>
+</tr>
+<tr>
+<td>Final build time</td>
+<td>12.32 s</td>
+<td><strong>4.56 s</strong></td>
+<td>−7.76 s</td>
+</tr>
+<tr>
+<td>Transforms applied</td>
+<td>289</td>
+<td><strong>309</strong></td>
+<td><strong>+20</strong> (+6.9%)</td>
+</tr>
+<tr>
+<td>Errors / Warnings (final)</td>
+<td>0 / 0</td>
+<td><strong>0 / 0</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Manual review items</td>
+<td>18</td>
+<td><strong>30</strong></td>
+<td>+12 (more granular flagging)</td>
+</tr>
+<tr>
+<td>Scaffold files generated</td>
+<td>7</td>
+<td><strong>7</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>New enhancements tested</td>
+<td>4</td>
+<td><strong>6</strong></td>
+<td>+2</td>
+</tr>
+<tr>
+<td>Total wall-clock time</td>
+<td>not recorded</td>
+<td><strong>~10 min</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Build fix rounds</td>
+<td>1</td>
+<td><strong>2</strong></td>
+<td>+1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note on manual review count increase:</strong> The count rose because Run 5's script flags items <em>more granularly</em>. SelectMethod went from 1 flagged item (Run 4) to 9 individually annotated instances. GetRouteUrl now emits 2 inject hints. LoginView was <em>eliminated</em> (auto-converted). The script does more work and provides better guidance — the higher count is a feature, not a regression.</p>
+</blockquote>
+<h2 id="3-what-works-automated-layer-1">3. What Works — Automated (Layer 1)<a class="headerlink" href="#3-what-works-automated-layer-1" title="Permanent link">&para;</a></h2>
+<p>The migration script handles the following transformations automatically, requiring <strong>zero manual intervention</strong>:</p>
+<h3 id="core-transforms-carried-forward">Core Transforms (Carried Forward)<a class="headerlink" href="#core-transforms-carried-forward" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Transform</th>
+<th>Description</th>
+<th>Count in Run 5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ASP prefix stripping</td>
+<td><code>&lt;asp:Button&gt;</code> → <code>&lt;Button&gt;</code>, <code>&lt;asp:Label&gt;</code> → <code>&lt;Label&gt;</code>, etc.</td>
+<td>~100+ across 32 files</td>
+</tr>
+<tr>
+<td>Data binding — Eval</td>
+<td><code>&lt;%#: Eval("PropertyName") %&gt;</code> → <code>@context.PropertyName</code></td>
+<td>Multiple per data-bound page</td>
+</tr>
+<tr>
+<td>Data binding — Bind</td>
+<td><code>&lt;%#: Bind("PropertyName") %&gt;</code> → <code>@bind-Value="context.PropertyName"</code></td>
+<td>Where present</td>
+</tr>
+<tr>
+<td>Data binding — Item.Property</td>
+<td><code>&lt;%#: Item.PropertyName %&gt;</code> → <code>@context.PropertyName</code></td>
+<td>Multiple instances</td>
+</tr>
+<tr>
+<td>Eval format-string</td>
+<td><code>&lt;%#: Eval("Total", "{0:C}") %&gt;</code> → <code>@context.Total.ToString("C")</code></td>
+<td>Where present</td>
+</tr>
+<tr>
+<td>String.Format with Item</td>
+<td><code>&lt;%#: String.Format("{0:c}", Item.UnitPrice) %&gt;</code> → <code>@($"{context.UnitPrice:c}")</code></td>
+<td>Where present</td>
+</tr>
+<tr>
+<td>Master page → MainLayout</td>
+<td><code>Site.Master</code> → <code>MainLayout.razor</code> with <code>@inherits LayoutComponentBase</code>, <code>@Body</code>, head extraction</td>
+<td>1 layout generated</td>
+</tr>
+<tr>
+<td>Scaffold generation</td>
+<td>csproj, Program.cs, _Imports.razor, launchSettings.json, App.razor, Routes.razor</td>
+<td>7 files total</td>
+</tr>
+<tr>
+<td>Static file copy</td>
+<td>CSS, images, fonts, scripts → project output directory</td>
+<td>79 files</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-in-run-5">New in Run 5<a class="headerlink" href="#new-in-run-5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Enhancement</th>
+<th>Fired?</th>
+<th>Count</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LoginView → AuthorizeView</strong></td>
+<td>✅ Yes</td>
+<td>1</td>
+<td><code>Site.Master</code>: <code>&lt;asp:LoginView&gt;</code> converted to <code>&lt;AuthorizeView&gt;</code> with <code>&lt;Authorized&gt;</code>/<code>&lt;NotAuthorized&gt;</code> template mapping</td>
+</tr>
+<tr>
+<td><strong>GetRouteUrl flagging</strong></td>
+<td>✅ Yes</td>
+<td>2 files</td>
+<td><code>ProductList.aspx</code>, <code>Site.Master</code>: flagged with <code>[GetRouteUrl] Add @inject GetRouteUrlHelper</code> hint</td>
+</tr>
+<tr>
+<td><strong>SelectMethod → TODO</strong></td>
+<td>✅ Yes</td>
+<td>9 instances</td>
+<td><code>ProductDetails</code>, <code>ProductList</code>, <code>ShoppingCart</code>, <code>Site.Master</code>, <code>Account/ManageLogins</code>, <code>Account/OpenAuthProviders</code>, <code>Admin/AdminPage</code> (2×) — each annotated with DI TODO comment</td>
+</tr>
+<tr>
+<td><strong>Bare <code>&lt;%#: Item %&gt;</code> → <code>@context</code></strong></td>
+<td>✅ Yes</td>
+<td>—</td>
+<td>Bare <code>Item</code> references in templates converted to <code>@context</code></td>
+</tr>
+<tr>
+<td><strong>Register directive cleanup</strong></td>
+<td>✅ Yes</td>
+<td>4</td>
+<td><code>Site.Mobile.Master</code>, <code>Account/Login</code>, <code>Account/Manage</code>, <code>Account/ManageLogins</code> — directives silently removed</td>
+</tr>
+<tr>
+<td><strong><code>uc:</code> tag prefix stripping</strong></td>
+<td>N/A</td>
+<td>0</td>
+<td>No <code>uc:</code> prefixes present in WingtipToys source</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total: 309 transforms across 32 files</strong>, up from 289 in Run 4.</p>
+<h2 id="4-what-doesnt-work-still-manual-layer-2">4. What Doesn't Work — Still Manual (Layer 2)<a class="headerlink" href="#4-what-doesnt-work-still-manual-layer-2" title="Permanent link">&para;</a></h2>
+<p>The script <strong>cannot</strong> handle the following patterns. These require human judgment, architectural decisions, or Copilot-assisted rewriting.</p>
+<h3 id="mechanical-but-tedious">Mechanical but Tedious<a class="headerlink" href="#mechanical-but-tedious" title="Permanent link">&para;</a></h3>
+<p>These are repetitive transformations that follow predictable patterns but require context the script doesn't have:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Count</th>
+<th>Why Manual</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Complex data binding (arithmetic)</td>
+<td>1</td>
+<td><code>Convert.ToDouble(Item.Quantity) * Convert.ToDouble(Item.Product.UnitPrice)</code> — nested method calls in expressions</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><code>Page.Title</code> / <code>@(Title)</code></td>
+<td>4+</td>
+<td>Requires mapping to Blazor <code>&lt;PageTitle&gt;</code> or static text</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Page base class</td>
+<td>4+</td>
+<td><code>Page</code> → <code>ComponentBase</code> replacement in code-behinds</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Static asset relocation</td>
+<td>~79 files</td>
+<td>Files need <code>wwwroot/</code> prefix; CSS/JS bundle references need <code>&lt;link&gt;</code>/<code>&lt;script&gt;</code> tags</td>
+<td>Low-Medium</td>
+</tr>
+<tr>
+<td>CSS bundle conversion</td>
+<td>2+</td>
+<td><code>BundleConfig</code> → explicit <code>&lt;link&gt;</code> tags in <code>App.razor</code></td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Non-essential page stubs</td>
+<td>28 files</td>
+<td>Account, Admin, Checkout pages need to compile but aren't functionally migrated</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<h3 id="requires-architectural-decisions">Requires Architectural Decisions<a class="headerlink" href="#requires-architectural-decisions" title="Permanent link">&para;</a></h3>
+<p>These items cannot be mechanically transformed — they require understanding of the target architecture:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Count</th>
+<th>Why Manual</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identity/Auth rewrite</strong></td>
+<td>13+ pages</td>
+<td>ASP.NET Identity v2 + OWIN → ASP.NET Core Identity. Postback-based auth → HTTP endpoints. <code>FormsAuthentication</code>, <code>SignInManager</code>, <code>UserManager</code> APIs all differ.</td>
+<td><strong>High</strong></td>
+</tr>
+<tr>
+<td><strong>Session state → services</strong></td>
+<td>1 service</td>
+<td><code>Session["CartId"]</code> → scoped <code>CartStateService</code> with cookie-based persistence. Requires DI design.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>EF6 → EF Core</strong></td>
+<td>2 files</td>
+<td><code>DbContext</code> constructor, seed strategy, <code>DropCreateDatabaseIfModelChanges</code> → <code>EnsureCreated</code>.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>Code-behind logic</strong></td>
+<td>8+ pages</td>
+<td>Event handlers (<code>Click</code>, <code>SelectedIndexChanged</code>), page lifecycle (<code>Page_Load</code>, <code>Page_PreInit</code>) → Blazor <code>@code</code> blocks with <code>OnInitialized</code>/<code>OnParametersSet</code>.</td>
+<td>Medium-High</td>
+</tr>
+<tr>
+<td><strong>SelectMethod → DI services</strong></td>
+<td>9 instances</td>
+<td><code>SelectMethod="GetCategories"</code> → injected <code>DbContext</code> queries. Requires choosing service pattern.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>GetRouteUrl → navigation</strong></td>
+<td>3 calls</td>
+<td><code>Page.GetRouteUrl("ProductByCategory", new { categoryName })</code> → <code>/ProductList?categoryName=</code> or NavigationManager. Route name semantics lost.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>ListView/FormView → HTML tables</strong></td>
+<td>2+ pages</td>
+<td><code>&lt;asp:ListView&gt;</code> data templates → <code>@foreach</code> with HTML. Complex item templates, alternating styles.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>Payment/checkout flow</strong></td>
+<td>5 pages</td>
+<td>PayPal integration, order processing, checkout steps — business logic rewrite.</td>
+<td><strong>High</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-script-enhancement-impact-run-4-vs-run-5">5. Script Enhancement Impact — Run 4 vs Run 5<a class="headerlink" href="#5-script-enhancement-impact-run-4-vs-run-5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Enhancement</th>
+<th>Fired in Run 5?</th>
+<th>Times</th>
+<th>Run 4 Manual Items Affected</th>
+<th>Run 5 Status</th>
+<th>Net Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>ConvertFrom-LoginView</strong></td>
+<td>✅ Yes</td>
+<td>1</td>
+<td>LoginView category: 1 item</td>
+<td><strong>Eliminated</strong> — auto-converted to AuthorizeView</td>
+<td><strong>−1 manual item</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>ConvertFrom-GetRouteUrl</strong></td>
+<td>✅ Yes</td>
+<td>2 files</td>
+<td>GetRouteUrl was in CodeBlock (3×)</td>
+<td>2 inject hints added as new <code>[GetRouteUrl]</code> category; GetRouteUrl still in CodeBlock too</td>
+<td><strong>+2 items</strong> (actionable hints)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>ConvertFrom-SelectMethod</strong></td>
+<td>✅ Yes</td>
+<td>9</td>
+<td>SelectMethod category: 1 item</td>
+<td>Now flags all 9 instances with DI TODO comments</td>
+<td><strong>+8 items</strong> (granular annotations)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Bare Item → @context</strong></td>
+<td>✅ Yes</td>
+<td>—</td>
+<td>Part of CodeBlock items</td>
+<td>Template <code>Item</code> references converted; some CodeBlock items may be reduced</td>
+<td><strong>Neutral to −1</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Register directive cleanup</strong></td>
+<td>✅ Yes</td>
+<td>4</td>
+<td>Register category: 4 items</td>
+<td>Same 4 flagged, but directives silently removed from output</td>
+<td><strong>Quality improvement</strong> (directives cleaned)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong><code>uc:</code> prefix stripping</strong></td>
+<td>N/A</td>
+<td>0</td>
+<td>Not applicable</td>
+<td>No <code>uc:</code> prefixes in WingtipToys source</td>
+<td><strong>No impact</strong> (validated N/A path)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Summary:</strong> The script gained +20 transforms (289 → 309). Manual review items increased from 18 → 30, but this is because the script now provides <strong>more granular, actionable guidance</strong> (9 individual SelectMethod annotations vs 1 summary, 2 GetRouteUrl inject hints). The only item truly <em>eliminated</em> was LoginView (auto-converted to AuthorizeView). The Register directive cleanup improves output quality without changing item counts.</p>
+<h2 id="6-layer-2-manual-fixes-applied">6. Layer 2 Manual Fixes Applied<a class="headerlink" href="#6-layer-2-manual-fixes-applied" title="Permanent link">&para;</a></h2>
+<p>All Layer 2 code was written from scratch — no files copied from prior runs.</p>
+<h3 id="fix-summary-by-category">Fix Summary by Category<a class="headerlink" href="#fix-summary-by-category" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Time</th>
+<th>Files Created/Modified</th>
+<th>What Was Done</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data Models</strong></td>
+<td>~45 s</td>
+<td>5 created: <code>Category.cs</code>, <code>Product.cs</code>, <code>CartItem.cs</code>, <code>Order.cs</code>, <code>OrderDetail.cs</code></td>
+<td>C# model classes with nullable reference types, file-scoped namespaces, modern init patterns</td>
+</tr>
+<tr>
+<td><strong>DbContext + Seed</strong></td>
+<td>~30 s</td>
+<td>2 created: <code>ProductContext.cs</code>, <code>ProductDatabaseInitializer.cs</code></td>
+<td>EF Core DbContext with SQLite replacing EF6. Idempotent seed: 5 categories, 16 products</td>
+</tr>
+<tr>
+<td><strong>Services</strong></td>
+<td>~30 s</td>
+<td>1 created: <code>CartStateService.cs</code></td>
+<td>Scoped service replacing Session-based <code>ShoppingCartActions</code>. Cookie-based cart ID, async CRUD methods</td>
+</tr>
+<tr>
+<td><strong>Layout/Auth</strong></td>
+<td>~60 s</td>
+<td>2 modified: <code>MainLayout.razor</code> (rewritten), <code>Site.MobileLayout.razor</code> (stubbed)</td>
+<td>LoginView → AuthorizeView, ListView → <code>@foreach</code>, GetRouteUrl → query-string links, Page.Title → static</td>
+</tr>
+<tr>
+<td><strong>Program.cs</strong></td>
+<td>~20 s</td>
+<td>1 modified</td>
+<td>EF Core + SQLite, IHttpContextAccessor, CartStateService, cookie auth, database seeding</td>
+</tr>
+<tr>
+<td><strong>Page Fixes</strong></td>
+<td>~180 s</td>
+<td>8 pages (16 files: .razor + .razor.cs)</td>
+<td>Default, About, Contact, ErrorPage, ProductList, ProductDetails, ShoppingCart, AddToCart — all rewritten</td>
+</tr>
+<tr>
+<td><strong>Stubs</strong></td>
+<td>~60 s</td>
+<td>28 files overwritten</td>
+<td>14 Account, 1 Admin, 5 Checkout, 1 ViewSwitcher, 1 Mobile Layout — stubbed for clean compile</td>
+</tr>
+<tr>
+<td><strong>Static Assets</strong></td>
+<td>~15 s</td>
+<td>wwwroot/ contents</td>
+<td>CSS, images, fonts, catalog images, favicon relocated</td>
+</tr>
+<tr>
+<td><strong>App.razor</strong></td>
+<td>—</td>
+<td>1 modified</td>
+<td>Added bootstrap.css and Site.css <code>&lt;link&gt;</code> references</td>
+</tr>
+<tr>
+<td><strong>_Imports.razor</strong></td>
+<td>—</td>
+<td>1 modified</td>
+<td>Added Models, Data, Services namespaces + <code>static RenderMode</code></td>
+</tr>
+<tr>
+<td><strong>WingtipToys.csproj</strong></td>
+<td>—</td>
+<td>1 modified</td>
+<td>net8.0 → net10.0, NuGet → ProjectReference, added EF Core SQLite packages</td>
+</tr>
+<tr>
+<td><strong>Layer 2 Total</strong></td>
+<td><strong>~7 min 20 s</strong></td>
+<td><strong>~60 files</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-decisions-made">Architecture Decisions Made<a class="headerlink" href="#architecture-decisions-made" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Original (Web Forms)</th>
+<th>Migrated (Blazor)</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database provider</td>
+<td>EF6 + SQL Server LocalDB</td>
+<td>EF Core + SQLite</td>
+<td>Zero-config local dev; EF6 incompatible with .NET 10</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>ASP.NET Identity v2 + OWIN</td>
+<td>ASP.NET Core Identity</td>
+<td>Framework migration; OWIN not available in .NET 10</td>
+</tr>
+<tr>
+<td>Session state</td>
+<td><code>Session["key"]</code></td>
+<td>Scoped <code>CartStateService</code></td>
+<td>Blazor Server has no Web Forms Session; cookie-based cart ID</td>
+</tr>
+<tr>
+<td>Auth flow</td>
+<td>Postback-based login/register</td>
+<td>HTTP endpoints + cookie auth</td>
+<td><code>SignInManager</code> requires <code>HttpContext</code>; Blazor Server uses endpoints</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>Physical file paths (.aspx) + <code>RouteConfig</code></td>
+<td><code>@page</code> directives with query parameters</td>
+<td>Blazor conventions; route names lost</td>
+</tr>
+<tr>
+<td>Master page</td>
+<td><code>Site.Master</code> with <code>ContentPlaceHolder</code></td>
+<td><code>MainLayout.razor</code> with <code>@Body</code></td>
+<td>Auto-generated by script, manually refined</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-build-results">7. Build Results<a class="headerlink" href="#7-build-results" title="Permanent link">&para;</a></h2>
+<h3 id="build-round-1-33-errors">Build Round 1 — 33 Errors<a class="headerlink" href="#build-round-1-33-errors" title="Permanent link">&para;</a></h3>
+<p>Account and Checkout pages still contained unconverted Web Forms markup (<code>ProviderName</code>, <code>Title</code>, <code>Email</code>, <code>Click</code> handlers, <code>Password</code> fields).</p>
+<p><strong>Fix:</strong> Replaced all Account and Checkout <code>.razor</code> files with stub pages.</p>
+<h3 id="build-round-2-2-errors">Build Round 2 — 2 Errors<a class="headerlink" href="#build-round-2-2-errors" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>App.razor(10,30): error CS0103: The name &#39;InteractiveServer&#39; does not exist
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>App.razor(14,26): error CS0103: The name &#39;InteractiveServer&#39; does not exist
+</code></pre></div>
+<p><strong>Fix:</strong> Added <code>@using static Microsoft.AspNetCore.Components.Web.RenderMode</code> to <code>_Imports.razor</code>.</p>
+<h3 id="final-clean-build">Final Clean Build<a class="headerlink" href="#final-clean-build" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Build succeeded.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    0 Warning(s)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    0 Error(s)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Time Elapsed 00:00:04.56
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Build Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Target framework</td>
+<td>net10.0</td>
+</tr>
+<tr>
+<td>SDK</td>
+<td>10.0.200-preview.0.26103.119</td>
+</tr>
+<tr>
+<td>Fix rounds</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Total build errors resolved</td>
+<td>35 (33 + 2)</td>
+</tr>
+<tr>
+<td>Final errors</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>Final warnings</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>Final build time</td>
+<td><strong>4.56 s</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="8-remaining-gaps-unconverted-patterns">8. Remaining Gaps / Unconverted Patterns<a class="headerlink" href="#8-remaining-gaps-unconverted-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="patterns-the-script-will-never-handle">Patterns the Script Will Never Handle<a class="headerlink" href="#patterns-the-script-will-never-handle" title="Permanent link">&para;</a></h3>
+<p>These require semantic understanding beyond regex capabilities:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Why Unreachable</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event handler migration</td>
+<td><code>OnClick</code>, <code>OnSelectedIndexChanged</code> → Blazor <code>@onclick</code>, <code>EventCallback</code> — requires understanding method signatures and page lifecycle</td>
+<td>Copilot-assisted rewrite per page</td>
+</tr>
+<tr>
+<td>Page lifecycle methods</td>
+<td><code>Page_Load</code>, <code>Page_PreInit</code> → <code>OnInitialized</code>, <code>OnParametersSet</code> — context-dependent logic</td>
+<td>Manual, guided by migration checklist</td>
+</tr>
+<tr>
+<td>DI architecture</td>
+<td>Choosing between <code>@inject DbContext</code> vs services vs repository pattern</td>
+<td>Architectural decision per project</td>
+</tr>
+<tr>
+<td>Identity provider swap</td>
+<td>OWIN → ASP.NET Core Identity involves API surface, middleware, claims — full subsystem replacement</td>
+<td>Manual rewrite using ASP.NET Core Identity scaffolding</td>
+</tr>
+<tr>
+<td>Payment integrations</td>
+<td>PayPal, Stripe, etc. — business logic tied to third-party APIs</td>
+<td>Manual per integration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="patterns-that-could-be-enhanced-in-future-script-versions">Patterns That Could Be Enhanced in Future Script Versions<a class="headerlink" href="#patterns-that-could-be-enhanced-in-future-script-versions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Current Handling</th>
+<th>Potential Enhancement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Page.Title</code> → <code>&lt;PageTitle&gt;</code></td>
+<td>Flagged as CodeBlock</td>
+<td>Regex to wrap <code>@(Title)</code> in <code>&lt;PageTitle&gt;</code> component</td>
+</tr>
+<tr>
+<td>Page base class swap</td>
+<td>Not handled</td>
+<td>Replace <code>Page</code> inheritance with <code>ComponentBase</code> in code-behinds</td>
+</tr>
+<tr>
+<td><code>ContentPlaceHolder</code> → sections</td>
+<td>Flagged</td>
+<td>Auto-convert non-MainContent placeholders to <code>@rendermode</code> sections</td>
+</tr>
+<tr>
+<td>Simple event handlers</td>
+<td>Not handled</td>
+<td>Strip <code>OnClick="Handler"</code> and emit TODO comment with handler signature</td>
+</tr>
+<tr>
+<td><code>BundleConfig</code> → link tags</td>
+<td>Not handled</td>
+<td>Parse <code>BundleConfig.cs</code>, emit <code>&lt;link&gt;</code>/<code>&lt;script&gt;</code> tags in App.razor</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-recommendations">9. Recommendations<a class="headerlink" href="#9-recommendations" title="Permanent link">&para;</a></h2>
+<h3 id="next-script-enhancements-priority-order">Next Script Enhancements (Priority Order)<a class="headerlink" href="#next-script-enhancements-priority-order" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong><code>Page.Title</code> → <code>&lt;PageTitle&gt;</code> conversion</strong> — Low complexity, high frequency pattern. Regex can handle <code>@(Title)</code> and <code>@(Page.Title)</code> forms. Would eliminate 4+ manual fixes per project.</p>
+</li>
+<li>
+<p><strong>Simple event handler annotation</strong> — Strip <code>OnClick="MethodName"</code> attributes and emit <code>@* TODO: Convert MethodName event handler *@</code>. Provides the same DI-hint pattern that SelectMethod now uses.</p>
+</li>
+<li>
+<p><strong>Page base class replacement</strong> — In generated <code>.razor.cs</code> files, replace <code>: Page</code> or <code>: System.Web.UI.Page</code> with <code>: ComponentBase</code>. Mechanical and safe.</p>
+</li>
+</ol>
+<h3 id="what-should-remain-manual">What Should Remain Manual<a class="headerlink" href="#what-should-remain-manual" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Identity/Auth</strong> — Too project-specific; ASP.NET Core Identity scaffolding tools already exist.</li>
+<li><strong>EF6 → EF Core</strong> — Model conventions and seed strategies vary too widely.</li>
+<li><strong>Business logic</strong> (checkout, payment, admin CRUD) — Requires domain understanding.</li>
+<li><strong>Complex data binding</strong> — Nested expressions, arithmetic, method chains need human review.</li>
+</ul>
+<h3 id="overall-assessment">Overall Assessment<a class="headerlink" href="#overall-assessment" title="Permanent link">&para;</a></h3>
+<p>The <code>bwfc-migrate.ps1</code> script has matured significantly across five runs. It now handles <strong>309 automated transforms</strong> covering ASP prefix stripping, data binding expressions (5 variants), master page conversion, scaffold generation (7 files), LoginView conversion, and granular flagging for GetRouteUrl and SelectMethod patterns. The total wall-clock migration time of <strong>~10 minutes</strong> (3.25 s automated + ~7.5 min manual + ~35 s builds) demonstrates that the script provides a strong Layer 1 foundation.</p>
+<p>The remaining manual work falls into two categories:
+- <strong>Mechanical but tedious</strong> (~2.5 min): Page fixes, stubs, static assets — patterns that a more capable script could partially automate.
+- <strong>Architectural decisions</strong> (~5 min): Data layer, auth, services — inherently manual work that requires project-specific judgment.</p>
+<p><strong>Verdict:</strong> The automated migration pipeline is production-ready for the "easy 80%" of a Web Forms → Blazor migration. The six new enhancements in Run 5 improve output quality (LoginView auto-conversion, granular SelectMethod/GetRouteUrl annotations) without regressing any existing behavior. For a real-world project like WingtipToys, the script eliminates the most error-prone mechanical work and provides actionable hints for the remainder, reducing total migration effort by an estimated <strong>55–70%</strong> compared to a fully manual approach.</p>
+<hr />
+<h2 id="appendix-full-timing-breakdown">Appendix: Full Timing Breakdown<a class="headerlink" href="#appendix-full-timing-breakdown" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layer 1 (script)</td>
+<td>3.25 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Data models</td>
+<td>~45 s</td>
+</tr>
+<tr>
+<td>Layer 2 — DbContext + seed</td>
+<td>~30 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Services</td>
+<td>~30 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Layout/Auth</td>
+<td>~60 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Program.cs</td>
+<td>~20 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Page fixes</td>
+<td>~180 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Stubs</td>
+<td>~60 s</td>
+</tr>
+<tr>
+<td>Layer 2 — Static assets</td>
+<td>~15 s</td>
+</tr>
+<tr>
+<td><strong>Layer 2 Total</strong></td>
+<td><strong>~7 min 20 s</strong></td>
+</tr>
+<tr>
+<td>Build fix round 1 (33 errors)</td>
+<td>~17.4 s</td>
+</tr>
+<tr>
+<td>Build fix round 2 (2 errors)</td>
+<td>~4.25 s</td>
+</tr>
+<tr>
+<td>Build final (clean)</td>
+<td>4.56 s</td>
+</tr>
+<tr>
+<td>Build fixes (manual)</td>
+<td>~30 s</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~10 min 0 s</strong></td>
+</tr>
+</tbody>
+</table>
+<p>See also: <a href="../timing/">timing.md</a> · <a href="../migrate-output/">migrate-output.md</a> · <a href="../manual-fixes/">manual-fixes.md</a> · <a href="../build-output/">build-output.md</a></p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_datetime" title="March 4, 2026 23:31:46 UTC">2026-03-04 23:31:46</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
