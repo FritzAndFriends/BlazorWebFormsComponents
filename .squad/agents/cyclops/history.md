@@ -394,3 +394,26 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 
 **Build verified:** 0 errors, 99 pre-existing warnings.
 
+### Fix GUID-based IDs (#471) (2026-03-17)
+
+**Summary:** Removed GUID-based fallback IDs from CheckBox, RadioButton, and RadioButtonList. When developer sets `ID="X"`, rendered HTML uses that ID exactly (with `_N` suffixes for list items). When no ID is set, no `id`/`for` attributes are rendered — no GUID pollution in the DOM.
+
+**Pattern:** `ComponentIdGenerator.GetClientID(this)` via `ClientID` property is the single source of truth for element IDs. Components should never generate their own GUIDs for HTML `id` attributes. Radio group `name` attribute is the only acceptable GUID fallback (required for mutual exclusion when no developer ID or GroupName is set).
+
+**Key decisions:**
+- FileUpload already correct — no changes needed (only renders id when ClientID present)
+- RadioButton keeps GUID fallback exclusively for `EffectiveGroupName` (radio `name` attribute), not for `id`
+- RadioButtonList `GetInputId(index)` returns null when no ClientID, preserving clean HTML
+- 7 tests updated to match new behavior; all 2105 tests pass
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/CheckBox.razor.cs` (removed GUID, use ClientID directly)
+- `src/BlazorWebFormsComponents/RadioButton.razor.cs` (removed GUID for id, kept for group name)
+- `src/BlazorWebFormsComponents/RadioButtonList.razor.cs` (GetInputId uses ClientID with suffix)
+- `src/BlazorWebFormsComponents.Test/CheckBox/IDRendering.razor` (updated WithoutID tests)
+- `src/BlazorWebFormsComponents.Test/CheckBox/Text.razor` (LabelForAttribute test uses ID)
+- `src/BlazorWebFormsComponents.Test/RadioButton/IDRendering.razor` (updated WithoutID tests)
+- `src/BlazorWebFormsComponents.Test/RadioButton/Text.razor` (LabelForAttribute test uses ID)
+- `src/BlazorWebFormsComponents.Test/RadioButtonList/TextAlignTests.razor` (tests use developer ID)
+- `src/BlazorWebFormsComponents.Test/RadioButtonList/StableIds.razor` (WithoutID expects no id attr)
+
