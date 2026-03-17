@@ -446,3 +446,14 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 **Build:** 0 errors, all pre-existing warnings only.
 
 
+
+### Fix AfterBlazorServerSide Sample Compilation Errors (2026-03-17)
+
+**Summary:** Fixed 4 compilation errors in the AfterBlazorServerSide sample project introduced by merge of upstream/main into dev (PR #475).
+
+**Errors fixed:**
+1. **CS1503** in ImageButton/Index.razor — OnClick handlers used MouseEventArgs but ButtonBaseComponent.OnClick is EventCallback<EventArgs>. Changed both handlers to accept EventArgs.
+2. **CS0103** in FormView/Simple.razor and FormView/Edit.razor — markup referenced WidgetFormView_PageIndexChanging but no such method existed. Added stub handlers with correct PageChangedEventArgs signature.
+3. **CS1503** in GridView/Selection.razor — SelectedIndexChanged handler took int but component expects EventCallback<GridViewSelectEventArgs>. Changed handler (and code example) to accept GridViewSelectEventArgs.
+
+**Key insight:** Always check the base class parameter types — ImageButton inherits OnClick from ButtonBaseComponent which uses EventArgs, not MouseEventArgs. GridView's SelectedIndexChanged was recently changed to GridViewSelectEventArgs (matching Web Forms behavior).
