@@ -1721,14 +1721,17 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
         }
 
-        $rdRegex = [regex]'([ \t]*)\[RouteData\]'
+        # [RouteData] is a Web Forms model-binding attribute for method parameters.
+        # It has no inline Blazor equivalent — [Parameter] targets properties, not
+        # method parameters, so placing it here would cause CS0592.  Strip the
+        # attribute and leave a TODO for Layer 2 to promote the value to a
+        # [Parameter] property on the component class.
+        $rdRegex = [regex]'([ \t]*)\[RouteData\]\s*'
         $rdMatches = $rdRegex.Matches($annotatedContent)
         if ($rdMatches.Count -gt 0) {
-            # P0-2: Put TODO on a separate line ABOVE [Parameter] so it doesn't
-            # swallow the rest of the line (property type/name) into a comment.
-            $rdReplacement = '${1}// TODO: Verify RouteData → [Parameter] conversion — ensure @page route has matching {parameter}' + "`n" + '${1}[Parameter]'
+            $rdReplacement = '${1}/* TODO: RouteData parameter — add a [Parameter] property to the component class and remove from method signature */' + "`n" + '${1}'
             $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
-            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Stripped $($rdMatches.Count) [RouteData] attribute(s) — needs [Parameter] property in L2"
         }
 
         # --- Response.Redirect → NavigationManager.NavigateTo conversion ---
