@@ -27,6 +27,8 @@
 @code {
 
   BlazorWebFormsComponents.DataList<Widget> simpleDataList { get; set; }
+  BlazorWebFormsComponents.DataList<Widget> keyDataList { get; set; }
+  private int _editIndex = -1;
 
   protected override void OnAfterRender(bool firstRender)
   {
@@ -35,6 +37,8 @@
       {
           simpleDataList.DataSource = Widget.SimpleWidgetList;
           simpleDataList.DataBind();
+          keyDataList.DataSource = Widget.SimpleWidgetList;
+          keyDataList.DataBind();
       }
 
       //base.OnParametersSet();
@@ -45,6 +49,34 @@
 }
 
 <hr />
+
+<h3>DataKeyField &amp; EditItemIndex</h3>
+<p>The <code>DataKeyField</code> property identifies the key field in the data source for item tracking.
+   The <code>EditItemIndex</code> property specifies the zero-based index of the item in edit mode
+   (-1 means no item is being edited). These properties are accepted for migration compatibility with
+   Web Forms <code>&lt;asp:DataList DataKeyField="ID" EditItemIndex="0"&gt;</code>.</p>
+
+<div data-audit-control="DataList-2">
+		<DataList @ref="keyDataList"
+							Context="Item"
+							DataKeyField="Name"
+							EditItemIndex="@_editIndex"
+							ItemType="SharedSampleObjects.Models.Widget">
+            <HeaderTemplate>Widgets (DataKeyField="Name", EditItemIndex=@_editIndex)</HeaderTemplate>
+			<ItemTemplate>
+                    @Item.Name - @Item.Price.ToString("c")
+			</ItemTemplate>
+		</DataList>
+</div>
+
+<p><em>DataKeyField: <code>Name</code> — EditItemIndex: <code>@_editIndex</code></em></p>
+
+<pre><code>&lt;DataList DataKeyField="Name"
+          EditItemIndex="-1"
+          Context="Item"
+          ItemType="Widget"&gt;
+    &lt;ItemTemplate&gt;@@Item.Name - @@Item.Price.ToString("c")&lt;/ItemTemplate&gt;
+&lt;/DataList&gt;</code></pre>
 
 <p>Code:</p>
 <code>

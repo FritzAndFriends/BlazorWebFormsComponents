@@ -20,10 +20,21 @@
 
 <hr />
 
+<h3>ImageUrl</h3>
+<p>The <code>ImageUrl</code> property accepts an image URL for migration compatibility with Web Forms
+   <code>&lt;asp:HyperLink ImageUrl="~/images/logo.png"&gt;</code>.</p>
+
+<div data-audit-control="HyperLink-5">
+    <HyperLink NavigateUrl="https://bing.com" ImageUrl="/Content/Images/banner.png" Text="Image Link" ToolTip="Link with ImageUrl" />
+</div>
+
+<hr />
+
 <p>Code:</p>
 <code>
 &lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" BackColor="WebColor.Blue" ForeColor="WebColor.White" /&gt;<br />
 &lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" ToolTip="Navigate to Bing!" /&gt;<br />
 &lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" Visible="false" /&gt;<br />
-&lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" /&gt;
+&lt;HyperLink NavigateUrl="https://bing.com" Text="Blue Button" /&gt;<br />
+&lt;HyperLink NavigateUrl="https://bing.com" ImageUrl="/Content/Images/banner.png" Text="Image Link" /&gt;
 </code>
