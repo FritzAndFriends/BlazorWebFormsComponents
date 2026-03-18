@@ -9423,3 +9423,41 @@ Seven new files in `src/BlazorWebFormsComponents/Handlers/` implementing the cor
 
 *— Cyclops, Component Dev*
 
+
+### 2026-03-18: ID Rendering Pattern for Data Controls — Approved
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**Date:** 2026-03-18
+
+**Status:** APPROVED
+
+## Cyclops — id="@ClientID" on Data Controls
+
+**Verdict: APPROVED**
+
+Components modified: GridView, DropDownList, FormView, DataList (table + flow layouts), DataGrid.
+
+### Why this is correct
+
+1. **Pattern consistency** — Uses the same id="@ClientID" binding as Button, Label, Panel, DetailsView, HiddenField. No deviation.
+2. **Null safety** — ComponentIdGenerator.GetClientID() returns 
+ull when no ID parameter is set. Blazor omits null-valued attributes entirely, so no empty id="" ever renders.
+3. **Web Forms fidelity** — Original Web Forms data controls always render their ClientID as the HTML id attribute. This was a gap in the Blazor implementation.
+4. **Build clean** — 0 errors, same 101 pre-existing warnings.
+
+## Bishop — RouteData Script Fix
+
+**Verdict: APPROVED**
+
+### Why this is correct
+
+1. **Root cause addressed** — // TODO line comment before [Parameter] consumed trailing content (closing parens). Block comment /* TODO */ is self-terminating and cannot absorb adjacent syntax.
+2. **Correct semantic change** — [RouteData] is a Web Forms model-binding attribute for method parameters. [Parameter] targets properties, not method params. Placing [Parameter] inline would cause CS0592. Stripping the attribute and leaving a TODO for L2 is the right approach.
+3. **Pattern consistency** — /* TODO */ block comments already used in the same script for NavigationManager.NavigateTo conversions (lines 1772, 1781).
+4. **L1 tests** — 15/15 pass, 100% line accuracy.
+
+## Convention Established
+
+The canonical pattern for rendering HTML id on Blazor components is id="@ClientID" as a direct attribute binding. No conditional wrapper needed — Blazor's null-attribute omission handles the no-ID case. This applies to all current and future component implementations.
+
