@@ -50,6 +50,20 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Items Items { get; set; }
 
+		/// <summary>
+		/// Gets or sets the horizontal offset (in pixels) for dynamic flyout submenus.
+		/// Applied as a CSS left offset on submenu containers.
+		/// </summary>
+		[Parameter]
+		public int DynamicHorizontalOffset { get; set; }
+
+		/// <summary>
+		/// Gets or sets the vertical offset (in pixels) for dynamic flyout submenus.
+		/// Applied as a CSS top offset on submenu containers.
+		/// </summary>
+		[Parameter]
+		public int DynamicVerticalOffset { get; set; }
+
 		#region WI-23: Core missing properties
 
 		/// <summary>

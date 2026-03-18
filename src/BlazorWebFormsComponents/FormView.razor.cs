@@ -13,6 +13,53 @@ namespace BlazorWebFormsComponents
 	public partial class FormView<ItemType> : DataBoundComponent<ItemType>, IFormViewStyleContainer, IPagerSettingsContainer where ItemType : class, new()
 	{
 
+		/// <summary>
+		/// Gets or sets whether the pager UI is displayed. When false, the pager row is hidden
+		/// even when multiple items exist.
+		/// </summary>
+		[Parameter]
+		public bool AllowPaging { get; set; }
+
+		/// <summary>
+		/// Gets or sets the cell padding for the outer table. -1 means the attribute is not rendered.
+		/// </summary>
+		[Parameter]
+		public int CellPadding { get; set; } = -1;
+
+		/// <summary>
+		/// Gets or sets the cell spacing for the outer table. -1 means the attribute is not rendered.
+		/// </summary>
+		[Parameter]
+		public int CellSpacing { get; set; } = -1;
+
+		/// <summary>
+		/// Gets or sets the grid line style for the outer table.
+		/// </summary>
+		[Parameter]
+		public EnumParameter<GridLines> GridLines { get; set; } = Enums.GridLines.None;
+
+		/// <summary>
+		/// Gets the HTML rules attribute value corresponding to the GridLines setting.
+		/// </summary>
+		internal string GetGridLinesRules()
+		{
+			return GridLines.Value switch
+			{
+				Enums.GridLines.Horizontal => "rows",
+				Enums.GridLines.Vertical => "cols",
+				Enums.GridLines.Both => "all",
+				_ => null
+			};
+		}
+
+		/// <summary>
+		/// Gets the border attribute value. Renders border="1" when GridLines is not None.
+		/// </summary>
+		internal string GetGridLinesBorder()
+		{
+			return GridLines.Value != Enums.GridLines.None ? "1" : null;
+		}
+
 		private static readonly Dictionary<string, FormViewMode> CommandNameModeLookup = new Dictionary<string, FormViewMode> {
 			{ "delete", FormViewMode.ReadOnly },
 			{ "edit", FormViewMode.Edit },

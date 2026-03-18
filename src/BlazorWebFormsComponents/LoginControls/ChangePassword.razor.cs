@@ -98,6 +98,16 @@ namespace BlazorWebFormsComponents.LoginControls
 		[Parameter] public EventCallback<LoginCancelEventArgs> OnChangingPassword { get; set; }
 		[Parameter] public EventCallback<EventArgs> OnContinueButtonClick { get; set; }
 
+		/// <summary>
+		/// Occurs when the control is about to send a mail message after a password change.
+		/// </summary>
+		[Parameter] public EventCallback<MailMessageEventArgs> OnSendingMail { get; set; }
+
+		/// <summary>
+		/// Occurs when an error happens while sending a mail message.
+		/// </summary>
+		[Parameter] public EventCallback<SendMailErrorEventArgs> OnSendMailError { get; set; }
+
 		#endregion
 
 		#region Templates
