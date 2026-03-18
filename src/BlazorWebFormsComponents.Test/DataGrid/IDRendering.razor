@@ -1,0 +1,29 @@
+@code {
+
+	[Fact]
+	public void DataGrid_WithID_RendersIdOnTable()
+	{
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="true"
+							SelectMethod="GetWidgets"
+							ID="myDataGrid" />);
+
+		cut.Find("table").GetAttribute("id").ShouldBe("myDataGrid");
+	}
+
+	[Fact]
+	public void DataGrid_WithoutID_NoIdOnTable()
+	{
+		var cut = Render(@<DataGrid ItemType="Widget"
+							AutoGenerateColumns="true"
+							SelectMethod="GetWidgets" />);
+
+		cut.Find("table").HasAttribute("id").ShouldBeFalse();
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

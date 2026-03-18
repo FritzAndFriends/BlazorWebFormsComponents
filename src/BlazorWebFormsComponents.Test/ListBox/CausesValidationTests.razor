@@ -1,0 +1,54 @@
+@code {
+
+	[Fact]
+	public void ListBox_CausesValidation_DefaultIsTrue()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" />);
+
+		cut.FindComponent<ListBox<object>>().Instance.CausesValidation.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ListBox_CausesValidation_CanBeSetToFalse()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" CausesValidation="false" />);
+
+		cut.FindComponent<ListBox<object>>().Instance.CausesValidation.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ListBox_ValidationGroup_DefaultIsNull()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" />);
+
+		cut.FindComponent<ListBox<object>>().Instance.ValidationGroup.ShouldBeNull();
+	}
+
+	[Fact]
+	public void ListBox_ValidationGroup_AcceptsValue()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<ListBox ItemType="object" StaticItems="items" ValidationGroup="SearchGroup" />);
+
+		cut.FindComponent<ListBox<object>>().Instance.ValidationGroup.ShouldBe("SearchGroup");
+	}
+}

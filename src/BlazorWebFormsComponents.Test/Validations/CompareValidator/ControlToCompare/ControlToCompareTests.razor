@@ -1,0 +1,46 @@
+@code {
+	ForwardRef<InputBase<int>> Number = new ForwardRef<InputBase<int>>();
+
+	[Fact]
+	public void CompareValidator_ControlToCompare_DefaultIsNull()
+	{
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputNumber @ref="Number.Current" @bind-Value="model.Number" />
+				<CompareValidator InputType="int"
+								ControlRef="@Number"
+								ValueToCompare="5"
+								Type="Integer"
+								Operator="Equal"
+								Text="invalid" />
+			</EditForm>
+		);
+
+		cut.FindComponent<CompareValidator<int>>().Instance.ControlToCompare.ShouldBeNull();
+	}
+
+	[Fact]
+	public void CompareValidator_ControlToCompare_AcceptsValue()
+	{
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputNumber @ref="Number.Current" @bind-Value="model.Number" />
+				<CompareValidator InputType="int"
+								ControlRef="@Number"
+								ControlToCompare="OtherInput"
+								Type="Integer"
+								Operator="Equal"
+								Text="invalid" />
+			</EditForm>
+		);
+
+		cut.FindComponent<CompareValidator<int>>().Instance.ControlToCompare.ShouldBe("OtherInput");
+	}
+
+	private ExampleModel model = new ExampleModel();
+
+	public class ExampleModel
+	{
+		public int Number { get; set; }
+	}
+}

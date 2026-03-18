@@ -1,0 +1,48 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void GridView_WithID_RendersIdOnTable()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="TestItem" DataSource="data" AutoGenerateColumns="false"
+						ID="myGridView">
+			<Columns>
+				<BoundField ItemType="TestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		cut.Find("table").GetAttribute("id").ShouldBe("myGridView");
+	}
+
+	[Fact]
+	public void GridView_WithoutID_NoIdOnTable()
+	{
+		var data = GetTestItems();
+
+		var cut = Render(@<GridView ItemType="TestItem" DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="TestItem" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		cut.Find("table").HasAttribute("id").ShouldBeFalse();
+	}
+
+	private List<TestItem> GetTestItems()
+	{
+		return new List<TestItem>
+		{
+			new TestItem { Id = 1, Name = "Alpha" },
+			new TestItem { Id = 2, Name = "Beta" }
+		};
+	}
+
+	public class TestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}

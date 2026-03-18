@@ -1,0 +1,20 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void ScriptManager_ScriptPath_DefaultIsNull()
+	{
+		var cut = Render(@<ScriptManager />);
+
+		cut.FindComponent<ScriptManager>().Instance.ScriptPath.ShouldBeNull();
+	}
+
+	[Fact]
+	public void ScriptManager_ScriptPath_AcceptsValue()
+	{
+		var cut = Render(@<ScriptManager ScriptPath="~/Scripts" />);
+
+		cut.FindComponent<ScriptManager>().Instance.ScriptPath.ShouldBe("~/Scripts");
+	}
+}

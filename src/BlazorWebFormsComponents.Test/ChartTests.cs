@@ -931,6 +931,232 @@ public class ChartTests : BunitContext
 
 	#endregion
 
+	#region Chart Phase 1 — New Parameters
+
+	[Fact]
+	public void Chart_AntiAliasing_DefaultIsAll()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.AntiAliasing.Value.ShouldBe(AntiAliasingStyles.All);
+	}
+
+	[Fact]
+	public void Chart_AntiAliasing_AcceptsNone()
+	{
+		EnumParameter<AntiAliasingStyles> val = AntiAliasingStyles.None;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.AntiAliasing, val));
+		cut.Instance.AntiAliasing.Value.ShouldBe(AntiAliasingStyles.None);
+	}
+
+	[Fact]
+	public void Chart_BackGradientStyle_DefaultIsNone()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.BackGradientStyle.Value.ShouldBe(GradientStyle.None);
+	}
+
+	[Fact]
+	public void Chart_BackGradientStyle_WithSecondaryColor_RendersGradient()
+	{
+		EnumParameter<GradientStyle> grad = GradientStyle.TopBottom;
+		WebColor backColor = System.Drawing.Color.Red;
+		WebColor secondaryColor = System.Drawing.Color.Blue;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BackGradientStyle, grad)
+			.Add(c => c.BackColor, backColor)
+			.Add(c => c.BackSecondaryColor, secondaryColor));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("background:");
+		style.ShouldContain("linear-gradient");
+	}
+
+	[Fact]
+	public void Chart_BackGradientStyle_Center_RendersRadialGradient()
+	{
+		EnumParameter<GradientStyle> grad = GradientStyle.Center;
+		WebColor backColor = System.Drawing.Color.White;
+		WebColor secondaryColor = System.Drawing.Color.Gray;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BackGradientStyle, grad)
+			.Add(c => c.BackColor, backColor)
+			.Add(c => c.BackSecondaryColor, secondaryColor));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("radial-gradient");
+	}
+
+	[Fact]
+	public void Chart_BackGradientStyle_None_NoGradientInStyle()
+	{
+		EnumParameter<GradientStyle> grad = GradientStyle.None;
+		WebColor secondaryColor = System.Drawing.Color.Blue;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BackGradientStyle, grad)
+			.Add(c => c.BackSecondaryColor, secondaryColor));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style") ?? "";
+		style.ShouldNotContain("gradient");
+	}
+
+	[Fact]
+	public void Chart_BackHatchStyle_DefaultIsNone()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.BackHatchStyle.Value.ShouldBe(ChartHatchStyle.None);
+	}
+
+	[Fact]
+	public void Chart_BackHatchStyle_AcceptsValue()
+	{
+		EnumParameter<ChartHatchStyle> val = ChartHatchStyle.Cross;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BackHatchStyle, val));
+		cut.Instance.BackHatchStyle.Value.ShouldBe(ChartHatchStyle.Cross);
+	}
+
+	[Fact]
+	public void Chart_BackSecondaryColor_DefaultIsDefault()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.BackSecondaryColor.ShouldBeNull();
+	}
+
+	[Fact]
+	public void Chart_BackSecondaryColor_AcceptsValue()
+	{
+		WebColor color = System.Drawing.Color.Green;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BackSecondaryColor, color));
+		((System.Drawing.Color)cut.Instance.BackSecondaryColor).ShouldBe(System.Drawing.Color.Green);
+	}
+
+	[Fact]
+	public void Chart_BorderlineDashStyle_DefaultIsNotSet()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.BorderlineDashStyle.Value.ShouldBe(ChartDashStyle.NotSet);
+	}
+
+	[Fact]
+	public void Chart_BorderlineDashStyle_Solid_RendersBorderStyle()
+	{
+		EnumParameter<ChartDashStyle> val = ChartDashStyle.Solid;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BorderlineDashStyle, val));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("border-style:solid");
+	}
+
+	[Fact]
+	public void Chart_BorderlineDashStyle_Dot_RendersDotted()
+	{
+		EnumParameter<ChartDashStyle> val = ChartDashStyle.Dot;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BorderlineDashStyle, val));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("border-style:dotted");
+	}
+
+	[Fact]
+	public void Chart_BorderlineDashStyle_Dash_RendersDashed()
+	{
+		EnumParameter<ChartDashStyle> val = ChartDashStyle.Dash;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BorderlineDashStyle, val));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style");
+		style.ShouldContain("border-style:dashed");
+	}
+
+	[Fact]
+	public void Chart_BorderlineDashStyle_NotSet_NoBorderStyle()
+	{
+		EnumParameter<ChartDashStyle> val = ChartDashStyle.NotSet;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.BorderlineDashStyle, val));
+
+		var div = cut.Find("div");
+		var style = div.GetAttribute("style") ?? "";
+		style.ShouldNotContain("border-style");
+	}
+
+	[Fact]
+	public void Chart_ImageLocation_DefaultIsEmpty()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.ImageLocation.ShouldBe("");
+	}
+
+	[Fact]
+	public void Chart_ImageLocation_AcceptsValue()
+	{
+		var cut = Render<Chart>(p => p
+			.Add(c => c.ImageLocation, "/charts/output.png"));
+		cut.Instance.ImageLocation.ShouldBe("/charts/output.png");
+	}
+
+	[Fact]
+	public void Chart_ImageStorageMode_DefaultIsUseHttpHandler()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.ImageStorageMode.Value.ShouldBe(Enums.ImageStorageMode.UseHttpHandler);
+	}
+
+	[Fact]
+	public void Chart_ImageStorageMode_AcceptsValue()
+	{
+		EnumParameter<ImageStorageMode> val = Enums.ImageStorageMode.UseImageLocation;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.ImageStorageMode, val));
+		cut.Instance.ImageStorageMode.Value.ShouldBe(Enums.ImageStorageMode.UseImageLocation);
+	}
+
+	[Fact]
+	public void Chart_TextAntiAliasingQuality_DefaultIsHigh()
+	{
+		var cut = Render<Chart>();
+		cut.Instance.TextAntiAliasingQuality.Value.ShouldBe(Enums.TextAntiAliasingQuality.High);
+	}
+
+	[Fact]
+	public void Chart_TextAntiAliasingQuality_AcceptsValue()
+	{
+		EnumParameter<TextAntiAliasingQuality> val = Enums.TextAntiAliasingQuality.Normal;
+		var cut = Render<Chart>(p => p
+			.Add(c => c.TextAntiAliasingQuality, val));
+		cut.Instance.TextAntiAliasingQuality.Value.ShouldBe(Enums.TextAntiAliasingQuality.Normal);
+	}
+
+	[Fact]
+	public void Chart_CustomizeLegend_EventCallbackIsAccepted()
+	{
+		var cut = Render<Chart>(p => p
+			.Add(c => c.CustomizeLegend, () => { }));
+
+		cut.Instance.CustomizeLegend.HasDelegate.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Chart_CustomizeMapAreas_EventCallbackIsAccepted()
+	{
+		var cut = Render<Chart>(p => p
+			.Add(c => c.CustomizeMapAreas, () => { }));
+
+		cut.Instance.CustomizeMapAreas.HasDelegate.ShouldBeTrue();
+	}
+
+	#endregion
+
 	#region Config Snapshot Classes
 
 	[Fact]

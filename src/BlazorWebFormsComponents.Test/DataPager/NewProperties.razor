@@ -1,0 +1,35 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void DataPager_PagedControlID_DefaultIsNull()
+	{
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" />);
+
+		cut.FindComponent<DataPager>().Instance.PagedControlID.ShouldBeNull();
+	}
+
+	[Fact]
+	public void DataPager_PagedControlID_AcceptsValue()
+	{
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" PagedControlID="ListView1" />);
+
+		cut.FindComponent<DataPager>().Instance.PagedControlID.ShouldBe("ListView1");
+	}
+
+	[Fact]
+	public void DataPager_QueryStringField_DefaultIsNull()
+	{
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" />);
+
+		cut.FindComponent<DataPager>().Instance.QueryStringField.ShouldBeNull();
+	}
+
+	[Fact]
+	public void DataPager_QueryStringField_AcceptsValue()
+	{
+		var cut = Render(@<DataPager TotalRowCount="100" PageSize="10" QueryStringField="page" />);
+
+		cut.FindComponent<DataPager>().Instance.QueryStringField.ShouldBe("page");
+	}
+}

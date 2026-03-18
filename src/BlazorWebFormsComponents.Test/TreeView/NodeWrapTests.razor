@@ -1,0 +1,31 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void TreeView_NodeWrap_DefaultIsFalse()
+	{
+		var cut = Render(
+			@<TreeView>
+				<Nodes>
+					<TreeNode Text="Root" Value="root" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.NodeWrap.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TreeView_NodeWrap_CanBeSetToTrue()
+	{
+		var cut = Render(
+			@<TreeView NodeWrap="true">
+				<Nodes>
+					<TreeNode Text="Root" Value="root" />
+				</Nodes>
+			</TreeView>
+		);
+
+		cut.FindComponent<TreeView>().Instance.NodeWrap.ShouldBeTrue();
+	}
+}
