@@ -240,6 +240,28 @@ public class ControlSampleTests
         await VerifyPageLoadsWithoutErrors(path);
     }
 
+    // Ajax Control Toolkit Controls
+    [Theory]
+    [InlineData("/ControlSamples/Accordion")]
+    [InlineData("/ControlSamples/AjaxToolkitShowcase")]
+    [InlineData("/ControlSamples/AutoCompleteExtender")]
+    [InlineData("/ControlSamples/CalendarExtender")]
+    [InlineData("/ControlSamples/CollapsiblePanelExtender")]
+    [InlineData("/ControlSamples/ConfirmButtonExtender")]
+    [InlineData("/ControlSamples/FilteredTextBoxExtender")]
+    [InlineData("/ControlSamples/HoverMenuExtender")]
+    [InlineData("/ControlSamples/MaskedEditExtender")]
+    [InlineData("/ControlSamples/ModalPopupExtender")]
+    [InlineData("/ControlSamples/NumericUpDownExtender")]
+    [InlineData("/ControlSamples/PopupControlExtender")]
+    [InlineData("/ControlSamples/SliderExtender")]
+    [InlineData("/ControlSamples/TabContainer")]
+    [InlineData("/ControlSamples/ToggleButtonExtender")]
+    public async Task AjaxToolkitControl_Loads_AndRendersContent(string path)
+    {
+        await VerifyAjaxToolkitPageLoads(path);
+    }
+
     // Other Controls
     [Theory]
     [InlineData("/ControlSamples/AdRotator")]
@@ -413,6 +435,87 @@ public class ControlSampleTests
             Assert.NotNull(canvas);
 
             Assert.Empty(pageErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies Ajax Control Toolkit pages load and render content. ACT components use JS interop
+    /// that may produce console errors in headless Playwright, so only page-level errors are checked.
+    /// </summary>
+    private async Task VerifyAjaxToolkitPageLoads(string path)
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+        var pageErrors = new List<string>();
+
+        page.PageError += (_, error) =>
+        {
+            pageErrors.Add($"{path}: {error}");
+        };
+
+        try
+        {
+            // Act
+            var response = await page.GotoAsync($"{_fixture.BaseUrl}{path}", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Page loads successfully
+            Assert.NotNull(response);
+            Assert.True(response.Ok, $"Page {path} failed to load with status: {response.Status}");
+
+            // Assert - Page renders meaningful content (headings, paragraphs, or component elements)
+            var content = await page.Locator("h2, h3, p, div[data-audit-control]").AllAsync();
+            Assert.NotEmpty(content);
+
+            Assert.Empty(pageErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies the Chart Styling page renders multiple chart canvases for palette,
+    /// axis configuration, and custom color examples.
+    /// </summary>
+    [Fact]
+    public async Task ChartStyling_RendersMultipleCanvases_WithContent()
+    {
+        // Arrange
+        var page = await _fixture.NewPageAsync();
+
+        try
+        {
+            // Act
+            var response = await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Chart/Styling", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Assert - Page loads successfully
+            Assert.NotNull(response);
+            Assert.True(response.Ok, $"Page failed to load with status: {response.Status}");
+
+            // Assert - Multiple canvas elements render (palette comparison + axis + custom colors)
+            var canvases = await page.Locator("canvas").AllAsync();
+            Assert.True(canvases.Count >= 4, $"Expected at least 4 chart canvases on Styling page, found {canvases.Count}");
+
+            // Assert - Page title section is present
+            var heading = await page.Locator("h2").Filter(new() { HasTextString = "Chart - Styling" }).CountAsync();
+            Assert.Equal(1, heading);
+
+            // Assert - Palette section headings render
+            var paletteHeadings = await page.Locator("h4").AllAsync();
+            Assert.True(paletteHeadings.Count >= 4, $"Expected at least 4 palette headings, found {paletteHeadings.Count}");
         }
         finally
         {
