@@ -19,6 +19,18 @@ namespace BlazorWebFormsComponents
 		private string _baseId => !string.IsNullOrEmpty(ClientID) ? ClientID : _generatedBaseId;
 
 		/// <summary>
+		/// Gets or sets a value indicating whether validation is performed when the control posts back.
+		/// </summary>
+		[Parameter]
+		public bool CausesValidation { get; set; } = true;
+
+		/// <summary>
+		/// Gets or sets the group of controls for which the control causes validation.
+		/// </summary>
+		[Parameter]
+		public string ValidationGroup { get; set; }
+
+		/// <summary>
 		/// Gets or sets the number of columns to display in the CheckBoxList.
 		/// </summary>
 		[Parameter]

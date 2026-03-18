@@ -88,6 +88,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public bool ShowFooter { get; set; } = true;
 		[Parameter] public new string Style { get; set; }
 		[Parameter] public bool UseAccessibleHeader { get; set; } = false;
+
+		/// <summary>
+		/// Gets or sets the key field name in the data source.
+		/// </summary>
+		[Parameter]
+		public string DataKeyField { get; set; }
+
+		/// <summary>
+		/// Gets or sets the zero-based index of the item to edit. Default is -1 (no item in edit mode).
+		/// </summary>
+		[Parameter]
+		public int EditItemIndex { get; set; } = -1;
+
 		[Parameter]
 		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }
 

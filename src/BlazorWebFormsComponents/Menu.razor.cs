@@ -53,6 +53,24 @@ namespace BlazorWebFormsComponents
 		#region WI-23: Core missing properties
 
 		/// <summary>
+		/// Gets or sets the text displayed for scrolling down in dynamic menus.
+		/// </summary>
+		[Parameter]
+		public string ScrollDownText { get; set; }
+
+		/// <summary>
+		/// Gets or sets the text displayed for scrolling up in dynamic menus.
+		/// </summary>
+		[Parameter]
+		public string ScrollUpText { get; set; }
+
+		/// <summary>
+		/// Gets or sets whether the menu renders an inline style block. Default is true.
+		/// </summary>
+		[Parameter]
+		public bool IncludeStyleBlock { get; set; } = true;
+
+		/// <summary>
 		/// Gets or sets the maximum number of dynamic menu levels to display.
 		/// </summary>
 		[Parameter]

@@ -35,6 +35,12 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public bool ShowLines { get; set; } = false;
 
+		/// <summary>
+		/// Gets or sets whether text wraps in a node.
+		/// </summary>
+		[Parameter]
+		public bool NodeWrap { get; set; }
+
 		[Parameter]
 		public bool UseAccessibilityFeatures { get; set; } = false;
 

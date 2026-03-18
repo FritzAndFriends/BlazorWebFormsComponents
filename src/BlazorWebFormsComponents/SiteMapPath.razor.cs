@@ -85,6 +85,12 @@ namespace BlazorWebFormsComponents
 		public string CurrentUrl { get; set; }
 
 		/// <summary>
+		/// Gets or sets the text for the accessibility skip navigation link.
+		/// </summary>
+		[Parameter]
+		public string SkipLinkText { get; set; } = "Skip Navigation Links";
+
+		/// <summary>
 		/// Gets or sets custom child content (not typically used).
 		/// </summary>
 		[Parameter]

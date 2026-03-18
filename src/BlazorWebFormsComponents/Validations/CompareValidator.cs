@@ -10,6 +10,11 @@ namespace BlazorWebFormsComponents.Validations
 
 		[Parameter] public string ValueToCompare { get; set; }
 
+		/// <summary>
+		/// Gets or sets the ID of the input control to compare against.
+		/// </summary>
+		[Parameter] public string ControlToCompare { get; set; }
+
 		public override bool Validate(string value)
 		{
 

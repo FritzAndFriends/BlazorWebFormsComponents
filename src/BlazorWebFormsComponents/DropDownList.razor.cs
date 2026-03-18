@@ -16,6 +16,18 @@ namespace BlazorWebFormsComponents
 public partial class DropDownList<ItemType> : BaseListControl<ItemType>
 {
 /// <summary>
+/// Gets or sets a value indicating whether validation is performed when the control posts back.
+/// </summary>
+[Parameter]
+public bool CausesValidation { get; set; } = true;
+
+/// <summary>
+/// Gets or sets the group of controls for which the control causes validation.
+/// </summary>
+[Parameter]
+public string ValidationGroup { get; set; }
+
+/// <summary>
 /// Gets or sets the selected value.
 /// </summary>
 [Parameter]
