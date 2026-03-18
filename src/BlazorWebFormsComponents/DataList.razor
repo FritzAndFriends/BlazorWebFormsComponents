@@ -19,7 +19,8 @@
 	{
 
 		case TableRepeatLayout t:
-			<table accesskey="@AccessKey"
+			<table id="@ClientID"
+						 accesskey="@AccessKey"
 						 cellpadding="@(CellPadding == default ? null : (int?)CellPadding)"
 						 cellspacing="@(CellSpacing == default ? null : (int?)CellSpacing)"
 						 itemtype="@GetItemTypeAttribute()"
@@ -95,7 +96,7 @@
 			</table>
 			break;
 		case FlowRepeatLayout f:
-			<span accesskey="@AccessKey" itemtype="@GetItemTypeAttribute()" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
+			<span id="@ClientID" accesskey="@AccessKey" itemtype="@GetItemTypeAttribute()" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
 				@if (HeaderTemplate != null && ShowHeader)
 				{
 					<span class="@HeaderStyle.CssClass" style="@HeaderStyle">@HeaderTemplate</span><br />
