@@ -42,6 +42,7 @@ jobs:
           dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
           dotnet restore src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj
           dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
+          dotnet restore scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj
 
       - name: Build library
         run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
@@ -54,6 +55,16 @@ jobs:
 
       - name: Run tests
         run: dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --results-directory src/BlazorWebFormsComponents.Test/TestResults
+
+      - name: Generate health snapshot
+        run: dotnet run --project scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj --configuration Release -- ${{ github.workspace }} ${{ github.workspace }}/health-snapshot.json
+
+      - name: Upload health snapshot
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: health-snapshot
+          path: health-snapshot.json
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

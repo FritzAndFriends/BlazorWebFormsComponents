@@ -24,8 +24,7 @@ namespace BlazorWebFormsComponents.Diagnostics
 		{
 			typeof(BaseWebFormsComponent),
 			typeof(BaseStyledComponent),
-			typeof(BaseDataBoundComponent),
-			typeof(DataBoundComponent<>)
+			typeof(BaseDataBoundComponent)
 		};
 
 		/// <summary>
@@ -244,8 +243,8 @@ namespace BlazorWebFormsComponents.Diagnostics
 					if (!HasParameterAttribute(prop))
 						continue;
 
-					if (HasObsoleteAttribute(prop))
-						continue;
+					// [Obsolete] properties are still counted — they represent
+					// migration-compatible implementations (Pattern B+).
 
 					if (HasCascadingParameterAttribute(prop))
 						continue;

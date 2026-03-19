@@ -47,7 +47,8 @@ public class ComponentHealthCountingTests
 			{
 				var paramAttr = prop.GetCustomAttribute<ParameterAttribute>();
 				if (paramAttr == null) continue;
-				if (prop.GetCustomAttribute<ObsoleteAttribute>() != null) continue;
+				// [Obsolete] properties are counted — they represent migration-compatible
+				// implementations (Pattern B+).
 				if (prop.GetCustomAttribute<CascadingParameterAttribute>() != null) continue;
 
 				var propType = prop.PropertyType;
@@ -79,12 +80,6 @@ public class ComponentHealthCountingTests
 	private static bool IsStopType(Type t)
 	{
 		if (StopTypes.Contains(t)) return true;
-		if (t.IsGenericType)
-		{
-			var genericDef = t.GetGenericTypeDefinition();
-			if (genericDef.Name.StartsWith("DataBoundComponent"))
-				return true;
-		}
 		return false;
 	}
 
@@ -127,7 +122,7 @@ public class ComponentHealthCountingTests
 			{
 				var paramAttr = prop.GetCustomAttribute<ParameterAttribute>();
 				if (paramAttr == null) { skippedNames.Add($"{current.Name}.{prop.Name} (no [Parameter])"); continue; }
-				if (prop.GetCustomAttribute<ObsoleteAttribute>() != null) { skippedNames.Add($"{current.Name}.{prop.Name} ([Obsolete])"); continue; }
+				// [Obsolete] properties are counted — they represent migration-compatible implementations.
 				if (prop.GetCustomAttribute<CascadingParameterAttribute>() != null) { skippedNames.Add($"{current.Name}.{prop.Name} ([CascadingParameter])"); continue; }
 
 				var propType = prop.PropertyType;
@@ -168,6 +163,7 @@ public class ComponentHealthCountingTests
 	{
 		// Button → ButtonBaseComponent → BaseStyledComponent (stop)
 		// PRD §2.7 worked example: ~7 properties, 2 events
+		// After counting [Obsolete] properties (PostBackUrl), range increases to 8-10.
 		var buttonType = typeof(BWF.Button);
 		var (props, events) = CountComponentSpecific(buttonType);
 		var (propNames, eventNames, _) = GetParameterDetails(buttonType);
@@ -176,9 +172,8 @@ public class ComponentHealthCountingTests
 		events.ShouldBe(2, $"Event list: {string.Join(", ", eventNames)}");
 
 		// Properties should be in realistic range — not 40+ (inherited inflation)
-		// and not 1 (DeclaredOnly-too-far). PRD says ~7; may be 7 or 8 depending
-		// on whether ButtonBaseComponent.PostBackUrl counts (see findings).
-		props.ShouldBeInRange(7, 8, $"Property list: {string.Join(", ", propNames)}");
+		// and not 1 (DeclaredOnly-too-far). Includes [Obsolete] PostBackUrl now.
+		props.ShouldBeInRange(8, 10, $"Property list: {string.Join(", ", propNames)}");
 	}
 
 	#endregion
@@ -188,8 +183,8 @@ public class ComponentHealthCountingTests
 	[Fact]
 	public void GridView_ShowsCorrectPropertyEventCounts()
 	{
-		// GridView<T> → DataBoundComponent<T> (stop)
-		// PRD §2.7: ~18 properties, ~10 events (not 30+ or 0)
+		// GridView<T> → DataBoundComponent<T> → BaseDataBoundComponent (stop)
+		// DataBoundComponent<T> is no longer a stop type, so DataMember, SelectMethod, etc. are counted.
 		var gridViewType = FindComponentType("GridView");
 		var (props, events) = CountComponentSpecific(gridViewType);
 		var (propNames, eventNames, _) = GetParameterDetails(gridViewType);
@@ -197,7 +192,7 @@ public class ComponentHealthCountingTests
 		// Must not be inflated by RenderFragment templates (12+) or base class props
 		props.ShouldBeGreaterThan(10,
 			$"Too few GridView properties. Got: {string.Join(", ", propNames)}");
-		props.ShouldBeLessThanOrEqualTo(25,
+		props.ShouldBeLessThanOrEqualTo(30,
 			$"GridView properties inflated. Got: {string.Join(", ", propNames)}");
 
 		// Events: sort, page, select, row operations (including On* variants)
@@ -209,21 +204,22 @@ public class ComponentHealthCountingTests
 
 	#endregion
 
-	#region AC-3: Repeater shows 0 properties, events from ItemCommand/ItemCreated/ItemDataBound (PRD §10.3)
+	#region AC-3: Repeater shows DataMember property and events from ItemCommand/ItemCreated/ItemDataBound (PRD §10.3)
 
 	[Fact]
-	public void Repeater_Shows0PropertiesAndEvents()
+	public void Repeater_ShowsDataMemberAndEvents()
 	{
-		// Repeater<T> → DataBoundComponent<T> (stop)
-		// All Repeater non-event [Parameter]s are RenderFragment templates → excluded
-		// EventCallbacks (ItemCommand, ItemCreated, ItemDataBound + On* variants) are counted
+		// Repeater<T> → DataBoundComponent<T> → BaseDataBoundComponent (stop)
+		// DataBoundComponent<T> is no longer a stop type, so DataMember is counted.
+		// EventCallbacks (ItemCommand, ItemCreated, ItemDataBound + On* variants) are counted.
 		var repeaterType = FindComponentType("Repeater");
 		var (props, events) = CountComponentSpecific(repeaterType);
 		var (propNames, eventNames, skipped) = GetParameterDetails(repeaterType);
 
-		props.ShouldBe(0,
-			$"Repeater should have 0 properties (all RenderFragment). " +
-			$"Got properties: {string.Join(", ", propNames)}");
+		// DataMember from DataBoundComponent<T> is now counted
+		propNames.ShouldContain(s => s.Contains("DataMember"),
+			$"DataMember should be counted for Repeater. Got properties: {string.Join(", ", propNames)}");
+
 		events.ShouldBeGreaterThanOrEqualTo(6,
 			$"Repeater should have ≥6 events (ItemCommand/ItemCreated/ItemDataBound + On* variants). Got: {string.Join(", ", eventNames)}");
 
@@ -392,11 +388,11 @@ public class ComponentHealthCountingTests
 		var repeaterType = FindComponentType("Repeater");
 		var (propNames, eventNames, skipped) = GetParameterDetails(repeaterType);
 
-		// Repeater non-event params are templates — ItemTemplate, AlternatingItemTemplate,
-		// HeaderTemplate, FooterTemplate, SeparatorTemplate → all excluded
-		// EventCallbacks (ItemCommand, ItemCreated, ItemDataBound + On* variants) are expected
-		propNames.ShouldBeEmpty(
-			$"Repeater should have no counted properties (all RenderFragment). Got: {string.Join(", ", propNames)}");
+		// Repeater's own non-event params are templates — ItemTemplate, AlternatingItemTemplate,
+		// HeaderTemplate, FooterTemplate, SeparatorTemplate → all excluded.
+		// DataBoundComponent<T> properties (DataMember, SelectMethod, etc.) ARE now counted.
+		propNames.ShouldContain(s => s.Contains("DataMember"),
+			$"DataMember from DataBoundComponent should be counted. Got: {string.Join(", ", propNames)}");
 
 		skipped.Count(s => s.Contains("RenderFragment")).ShouldBeGreaterThanOrEqualTo(5,
 			"Repeater should have ≥5 RenderFragment templates skipped");
@@ -404,28 +400,32 @@ public class ComponentHealthCountingTests
 
 	#endregion
 
-	#region AC-8: Obsolete params excluded (PRD §10.8 / §2.5)
+	#region AC-8: Obsolete params counted as migration-compatible (Pattern B+)
 
 	[Fact]
-	public void ObsoleteParams_Excluded()
+	public void ObsoleteParams_CountedForMigrationCompat()
 	{
-		// Button overrides PostBackUrl with [Obsolete] — it should be skipped at Button level
-		var (propNames, eventNames, skipped) = GetParameterDetails(typeof(BWF.Button));
+		// Chart has multiple [Obsolete] properties (AntiAliasing, BackHatchStyle, etc.)
+		// that represent Pattern B+ migration-compatible implementations.
+		// They should now be COUNTED, not skipped.
+		var chartType = FindComponentType("Chart");
+		var (propNames, eventNames, _) = GetParameterDetails(chartType);
 		var allCounted = propNames.Concat(eventNames).ToList();
 
-		// Button's PostBackUrl override is [Obsolete] — verify it's in the skipped list.
-		// Note: it may be skipped as "[Obsolete]" or "no [Parameter]" depending on
-		// whether the override redeclares [Parameter].
-		skipped.ShouldContain(
-			s => s.Contains("PostBackUrl"),
-			"Button's PostBackUrl override should be in the skipped list");
+		// These [Obsolete] properties should now appear in the count
+		allCounted.ShouldContain(s => s.Contains("AntiAliasing"),
+			"[Obsolete] AntiAliasing should be counted for migration compatibility");
+		allCounted.ShouldContain(s => s.Contains("BackHatchStyle"),
+			"[Obsolete] BackHatchStyle should be counted for migration compatibility");
+		allCounted.ShouldContain(s => s.Contains("ImageLocation"),
+			"[Obsolete] ImageLocation should be counted for migration compatibility");
 	}
 
 	[Fact]
 	public void ObsoleteBaseParams_NeverCounted()
 	{
-		// Even if the stop-type mechanism were removed, [Obsolete] params should still be filtered.
-		// Verify known obsolete params from BaseWebFormsComponent are not in any component's counts.
+		// Base infrastructure params like runat, EnableViewState, DataKeys remain uncounted
+		// because they're on stop types (BaseWebFormsComponent), not because of [Obsolete].
 		var obsoleteParams = new[] { "runat", "EnableViewState", "DataKeys", "ItemPlaceholderID" };
 
 		var (propNames, eventNames, _) = GetParameterDetails(typeof(BWF.Button));
