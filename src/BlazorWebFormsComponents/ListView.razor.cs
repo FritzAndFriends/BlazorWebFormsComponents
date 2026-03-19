@@ -116,10 +116,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewCommandEventArgs> ItemCommand { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewCommandEventArgs> OnItemCommand { get; set; }
+
+		/// <summary>
 		/// Occurs when an Edit command is requested, before the item enters edit mode.
 		/// </summary>
 		[Parameter]
 		public EventCallback<ListViewEditEventArgs> ItemEditing { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemEditing.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewEditEventArgs> OnItemEditing { get; set; }
 
 		/// <summary>
 		/// Occurs when a Cancel command is requested.
@@ -128,10 +140,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewCancelEventArgs> ItemCanceling { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemCanceling.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewCancelEventArgs> OnItemCanceling { get; set; }
+
+		/// <summary>
 		/// Occurs when a Delete command is requested, before the item is deleted.
 		/// </summary>
 		[Parameter]
 		public EventCallback<ListViewDeleteEventArgs> ItemDeleting { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemDeleting.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewDeleteEventArgs> OnItemDeleting { get; set; }
 
 		/// <summary>
 		/// Occurs after the delete operation completes.
@@ -140,10 +164,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewDeletedEventArgs> ItemDeleted { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemDeleted.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewDeletedEventArgs> OnItemDeleted { get; set; }
+
+		/// <summary>
 		/// Occurs when an Insert command is requested, before the insert operation.
 		/// </summary>
 		[Parameter]
 		public EventCallback<ListViewInsertEventArgs> ItemInserting { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemInserting.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewInsertEventArgs> OnItemInserting { get; set; }
 
 		/// <summary>
 		/// Occurs after the insert operation completes.
@@ -152,10 +188,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewInsertedEventArgs> ItemInserted { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemInserted.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewInsertedEventArgs> OnItemInserted { get; set; }
+
+		/// <summary>
 		/// Occurs when an Update command is requested, before the update operation.
 		/// </summary>
 		[Parameter]
 		public EventCallback<ListViewUpdateEventArgs> ItemUpdating { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemUpdating.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewUpdateEventArgs> OnItemUpdating { get; set; }
 
 		/// <summary>
 		/// Occurs after the update operation completes.
@@ -164,10 +212,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewUpdatedEventArgs> ItemUpdated { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemUpdated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewUpdatedEventArgs> OnItemUpdated { get; set; }
+
+		/// <summary>
 		/// Occurs when an item is created in the ListView control, before data binding.
 		/// </summary>
 		[Parameter]
 		public EventCallback<ListViewItemEventArgs> ItemCreated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewItemEventArgs> OnItemCreated { get; set; }
 
 		/// <summary>
 		/// Occurs before a sort operation. Can be cancelled.
@@ -176,10 +236,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewSortEventArgs> Sorting { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for Sorting.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewSortEventArgs> OnSorting { get; set; }
+
+		/// <summary>
 		/// Occurs after a sort operation completes.
 		/// </summary>
 		[Parameter]
 		public EventCallback<ListViewSortEventArgs> Sorted { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for Sorted.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewSortEventArgs> OnSorted { get; set; }
 
 		/// <summary>
 		/// Occurs when the page properties are changing.
@@ -188,10 +260,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewPagePropertiesChangingEventArgs> PagePropertiesChanging { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for PagePropertiesChanging.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewPagePropertiesChangingEventArgs> OnPagePropertiesChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the page properties have changed.
 		/// </summary>
 		[Parameter]
 		public EventCallback<EventArgs> PagePropertiesChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for PagePropertiesChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnPagePropertiesChanged { get; set; }
 
 		/// <summary>
 		/// Occurs before the selected index changes. Can be cancelled.
@@ -200,10 +284,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<ListViewSelectEventArgs> SelectedIndexChanging { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanging.
+		/// </summary>
+		[Parameter]
+		public EventCallback<ListViewSelectEventArgs> OnSelectedIndexChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the selected index has changed.
 		/// </summary>
 		[Parameter]
 		public EventCallback<EventArgs> SelectedIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnSelectedIndexChanged { get; set; }
 
 		#endregion
 
@@ -231,9 +327,10 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal void RaiseItemCreated(ListViewItem item)
 		{
-			if (ItemCreated.HasDelegate)
+			if (ItemCreated.HasDelegate || OnItemCreated.HasDelegate)
 			{
-				_ = ItemCreated.InvokeAsync(new ListViewItemEventArgs(item) { Sender = this });
+				var handler = ItemCreated.HasDelegate ? ItemCreated : OnItemCreated;
+				_ = handler.InvokeAsync(new ListViewItemEventArgs(item) { Sender = this });
 			}
 		}
 
@@ -258,7 +355,8 @@ namespace BlazorWebFormsComponents
 		{
 			// Web Forms always fires ItemCommand first, regardless of command type
 			var cmdArgs = new ListViewCommandEventArgs(commandName, commandArgument);
-			await ItemCommand.InvokeAsync(cmdArgs);
+			var itemCommandHandler = ItemCommand.HasDelegate ? ItemCommand : OnItemCommand;
+			await itemCommandHandler.InvokeAsync(cmdArgs);
 
 			switch (commandName.ToLowerInvariant())
 			{
@@ -291,7 +389,8 @@ namespace BlazorWebFormsComponents
 		private async Task HandleEditCommand(int itemIndex)
 		{
 			var args = new ListViewEditEventArgs(itemIndex);
-			await ItemEditing.InvokeAsync(args);
+			var itemEditingHandler = ItemEditing.HasDelegate ? ItemEditing : OnItemEditing;
+			await itemEditingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 			EditIndex = args.NewEditIndex;
 		}
@@ -303,7 +402,8 @@ namespace BlazorWebFormsComponents
 				: ListViewCancelMode.CancelingEdit;
 
 			var args = new ListViewCancelEventArgs(itemIndex, cancelMode);
-			await ItemCanceling.InvokeAsync(args);
+			var itemCancelingHandler = ItemCanceling.HasDelegate ? ItemCanceling : OnItemCanceling;
+			await itemCancelingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 
 			if (cancelMode == ListViewCancelMode.CancelingEdit)
@@ -315,7 +415,8 @@ namespace BlazorWebFormsComponents
 		private async Task HandleDeleteCommand(int itemIndex)
 		{
 			var deletingArgs = new ListViewDeleteEventArgs(itemIndex);
-			await ItemDeleting.InvokeAsync(deletingArgs);
+			var itemDeletingHandler = ItemDeleting.HasDelegate ? ItemDeleting : OnItemDeleting;
+			await itemDeletingHandler.InvokeAsync(deletingArgs);
 			if (deletingArgs.Cancel) return;
 
 			Exception caughtException = null;
@@ -329,13 +430,15 @@ namespace BlazorWebFormsComponents
 			}
 
 			var deletedArgs = new ListViewDeletedEventArgs(1, caughtException);
-			await ItemDeleted.InvokeAsync(deletedArgs);
+			var itemDeletedHandler = ItemDeleted.HasDelegate ? ItemDeleted : OnItemDeleted;
+			await itemDeletedHandler.InvokeAsync(deletedArgs);
 		}
 
 		private async Task HandleInsertCommand()
 		{
 			var insertingArgs = new ListViewInsertEventArgs();
-			await ItemInserting.InvokeAsync(insertingArgs);
+			var itemInsertingHandler = ItemInserting.HasDelegate ? ItemInserting : OnItemInserting;
+			await itemInsertingHandler.InvokeAsync(insertingArgs);
 			if (insertingArgs.Cancel) return;
 
 			Exception caughtException = null;
@@ -349,13 +452,15 @@ namespace BlazorWebFormsComponents
 			}
 
 			var insertedArgs = new ListViewInsertedEventArgs(1, caughtException);
-			await ItemInserted.InvokeAsync(insertedArgs);
+			var itemInsertedHandler = ItemInserted.HasDelegate ? ItemInserted : OnItemInserted;
+			await itemInsertedHandler.InvokeAsync(insertedArgs);
 		}
 
 		private async Task HandleUpdateCommand(int itemIndex)
 		{
 			var updatingArgs = new ListViewUpdateEventArgs(itemIndex);
-			await ItemUpdating.InvokeAsync(updatingArgs);
+			var itemUpdatingHandler = ItemUpdating.HasDelegate ? ItemUpdating : OnItemUpdating;
+			await itemUpdatingHandler.InvokeAsync(updatingArgs);
 			if (updatingArgs.Cancel) return;
 
 			Exception caughtException = null;
@@ -369,7 +474,8 @@ namespace BlazorWebFormsComponents
 			}
 
 			var updatedArgs = new ListViewUpdatedEventArgs(1, caughtException);
-			await ItemUpdated.InvokeAsync(updatedArgs);
+			var itemUpdatedHandler = ItemUpdated.HasDelegate ? ItemUpdated : OnItemUpdated;
+			await itemUpdatedHandler.InvokeAsync(updatedArgs);
 
 			if (!updatedArgs.KeepInEditMode)
 			{
@@ -384,22 +490,26 @@ namespace BlazorWebFormsComponents
 				: Enums.SortDirection.Ascending;
 
 			var args = new ListViewSortEventArgs(sortExpression, newDirection);
-			await Sorting.InvokeAsync(args);
+			var sortingHandler = Sorting.HasDelegate ? Sorting : OnSorting;
+			await sortingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 
 			SortExpression = args.SortExpression;
 			SortDirection = args.SortDirection;
-			await Sorted.InvokeAsync(args);
+			var sortedHandler = Sorted.HasDelegate ? Sorted : OnSorted;
+			await sortedHandler.InvokeAsync(args);
 		}
 
 		private async Task HandleSelectCommand(int itemIndex)
 		{
 			var args = new ListViewSelectEventArgs(itemIndex);
-			await SelectedIndexChanging.InvokeAsync(args);
+			var selectedIndexChangingHandler = SelectedIndexChanging.HasDelegate ? SelectedIndexChanging : OnSelectedIndexChanging;
+			await selectedIndexChangingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 
 			SelectedIndex = args.NewSelectedIndex;
-			await SelectedIndexChanged.InvokeAsync(EventArgs.Empty);
+			var selectedIndexChangedHandler = SelectedIndexChanged.HasDelegate ? SelectedIndexChanged : OnSelectedIndexChanged;
+			await selectedIndexChangedHandler.InvokeAsync(EventArgs.Empty);
 		}
 
 		#endregion
@@ -410,12 +520,14 @@ namespace BlazorWebFormsComponents
 		public async Task SetPageProperties(int startRowIndex, int maximumRows)
 		{
 			var args = new ListViewPagePropertiesChangingEventArgs(startRowIndex, maximumRows);
-			await PagePropertiesChanging.InvokeAsync(args);
+			var pagePropertiesChangingHandler = PagePropertiesChanging.HasDelegate ? PagePropertiesChanging : OnPagePropertiesChanging;
+			await pagePropertiesChangingHandler.InvokeAsync(args);
 
 			StartRowIndex = args.StartRowIndex;
 			MaximumRows = args.MaximumRows;
 
-			await PagePropertiesChanged.InvokeAsync(EventArgs.Empty);
+			var pagePropertiesChangedHandler = PagePropertiesChanged.HasDelegate ? PagePropertiesChanged : OnPagePropertiesChanged;
+			await pagePropertiesChangedHandler.InvokeAsync(EventArgs.Empty);
 			StateHasChanged();
 		}
 

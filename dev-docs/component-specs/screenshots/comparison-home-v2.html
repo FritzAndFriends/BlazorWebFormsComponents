@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; }
+  .comparison { display: flex; gap: 4px; padding: 4px; }
+  .panel { flex: 1; background: white; overflow: hidden; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+  .panel-label { text-align: center; padding: 6px; font-size: 13px; font-weight: 600; }
+  .panel-label.original { background: #e8eaf6; color: #283593; }
+  .panel-label.migrated { background: #e8f5e9; color: #2e7d32; }
+  .panel img { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<div class="comparison">
+  <div class="panel">
+    <div class="panel-label original">Original ASP.NET Web Forms (.NET 4.5) &#x2014; IIS Express :5200</div>
+    <img src="original-home-matched.png" alt="Original Home Page" />
+  </div>
+  <div class="panel">
+    <div class="panel-label migrated">Migrated Blazor Server (.NET 10) &#x2014; Kestrel :5001</div>
+    <img src="migrated-home-matched.png" alt="Migrated Home Page" />
+  </div>
+</div>
+</body>
+</html>

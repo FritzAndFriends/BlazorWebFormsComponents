@@ -71,7 +71,7 @@
         _selectedIndex = e.NewSelectedIndex;
     }
 
-    void HandleSelected(int index)
+    void HandleSelected(GridViewSelectEventArgs e)
     {
         // index contains the newly selected row
     }
@@ -87,7 +87,7 @@
         _selectedIndex = e.NewSelectedIndex;
     }
 
-    private void HandleSelected(int index)
+    private void HandleSelected(GridViewSelectEventArgs e)
     {
         _selectionCount++;
     }

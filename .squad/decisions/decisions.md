@@ -1,79 +1,3 @@
-# Team Decisions
-
-## 2026-03-14: Cyclops & Colossus: Students GridView LEFT JOIN + Test Timing
-
-**Agents:** Cyclops (Component Dev), Colossus (Integration Test Engineer)  
-**Date:** 2026-03-14  
-
-### Decision 1: GetJoinedTableData LEFT JOIN Fix
-
-**Problem:** `GetJoinedTableData()` used `SelectMany` (INNER JOIN), hiding students without enrollments from GridView.
-
-**Solution:** Replaced with `Students.Include(Enrollments)` loop. Students without enrollments now appear with Count=0 and Date=DateTime.Today.
-
-**Rationale:** Simplest correct approach. No GroupJoin complexity needed. Data loss bug resolved; each student appears exactly once with total enrollment count.
-
-**Impact:** All students visible in GridView regardless of enrollment status. No other files changed. Build clean. Commit d3dc610f.
-
-### Decision 2: Blur + Retry Pattern for BWFC TextBox Playwright Tests
-
-**Problem:** `StudentsPage_AddNewStudentFormWorks` failing due to BWFC TextBox using `@onchange` (blur-triggered) for `TextChanged`, not `@oninput`. Playwright's `FillAsync` triggers `input` events; `change` fires only on blur.
-
-**Solution:** 
-1. Explicit blur after last field: `await emailBox.BlurAsync()` + 200ms wait
-2. Increased post-click wait: 1000ms (up from 500ms)
-3. Retry loop with 3-second deadline, polling every 300ms
-
-**Convention:** Future BWFC TextBox Playwright tests must blur the last field before button submit. BWFC-specific requirement (Web Forms `onchange` semantics).
-
-**Status:** Already implemented from previous session. Verified in place. No new changes needed.
-
----
-
-## 2026-03-14: Forge Review: UpdatePanel ContentTemplate Enhancement
-
-**Reviewer:** Forge (Lead / Web Forms Reviewer)  
-**Related Agent:** Cyclops (implementation), Rogue (tests), Jubilee (samples)  
-**Status:** ✅ APPROVED
-
-### Summary
-
-UpdatePanel ContentTemplate enhancement is production-ready. Added `ContentTemplate` RenderFragment parameter, updated base class to `BaseStyledComponent`, verified Web Forms fidelity.
-
-### Verdict Checklist
-
-| Criterion | Result |
-|-----------|--------|
-| Web Forms fidelity | ✅ PASS — `ContentTemplate` matches System.Web.UI.UpdatePanel property |
-| HTML output | ✅ PASS — Renders as `<div>` (Block) or `<span>` (Inline), exactly matching Web Forms |
-| Base class change | ✅ ACCEPTABLE — `BaseStyledComponent` is enhancement over expando `class` only; justified & maintains backward compatibility |
-| Backward compatibility | ✅ PASS — Existing `<ChildContent>` patterns work; zero breaking changes |
-| Migration story | ✅ PASS — L1 script output `<ContentTemplate>` compiles without RZ10012 warnings |
-| Render mode decision | ✅ CORRECT — Library components don't force render modes |
-| Tests (12 total) | ✅ PASS — 100% pass rate; all scenarios covered |
-| Sample page | ✅ EXCELLENT — Reference quality; 6 examples + migration guide |
-
-### Key Technical Validations
-
-1. **ContentTemplate Property:** Confirmed in Microsoft Learn as property of `System.Web.UI.UpdatePanel` (NET Framework 3.5+). Blazor `RenderFragment` is correct equivalent.
-
-2. **UpdatePanel Styling:** Web Forms UpdatePanel inherits from `Control` (not `WebControl`) but accepts expando attributes including `class`. Our `BaseStyledComponent` goes beyond original (adds full style properties) but is justified enhancement: doesn't break compatibility, improves consistency, better migration experience.
-
-3. **Fallback Logic:** `@(ContentTemplate ?? ChildContent)` correctly prioritizes ContentTemplate while maintaining Blazor convention support.
-
-### Team Recognition
-
-- **Cyclops:** Clean implementation, thorough XML docs, correct architectural decisions
-- **Rogue:** Comprehensive test coverage (12 tests, all scenarios)
-- **Jubilee:** Gold-standard sample page with migration guide
-- **All agents:** Perfect adherence to lockout protocol
-
-**Approved by:** Forge  
-**Status:** Ready to merge  
-**Blocking issues:** None
-
----
-
 ## 2026-03-12: Beast: UpdatePanel ContentTemplate Documentation Update
 
 **Owner:** Beast (Technical Writer)  
@@ -168,3 +92,579 @@ These are **not** blocking approval but would improve the parser for broader EDM
 - **Good diagnostics**: Summary object returned with entity count, relationship count, cascade count, and warnings
 
 **Decision:** Approve and ship.
+
+---
+
+## 2026-07-25: Forge Review: PRD #439 Component Health Dashboard
+
+**By:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-07-25  
+**Status:** Advisory — PRD errata to fix before implementation begins
+
+### Summary
+
+Self-reviewed the Component Health Dashboard PRD at Jeff's request. The PRD is strong overall — the pitfall catalog alone will save Cyclops days of debugging. Three items need correction before Cyclops picks this up.
+
+### Required Corrections
+
+1. **Appendix A ToolTip placement is wrong.** ToolTip is on `BaseWebFormsComponent` (line 146), not `BaseStyledComponent`. BaseWebFormsComponent has 21 [Parameter] properties, not 20. BaseStyledComponent has 9, not 10. Total base class params need recount.
+
+2. **`tools/WebFormsPropertyCounter/` path is aspirational.** No `tools/` directory exists. The PRD should mark the .NET Fx 4.8 console app as "future/optional" and make MSDN manual curation the primary path for Phase 1.
+
+3. **Acceptance criterion #9 ("All 52 completed components show at least tests=✅") is likely wrong.** History shows Login controls had 0 bUnit tests as of 2026-03-15. This criterion should say "most" or be verified against current test directory before hard-coding into acceptance.
+
+### No Action Required
+
+- No overlap with `bwfc-scan.ps1` (different purpose entirely).
+- Phase ordering is correct.
+- Scoring weights are reasonable for v1.
+
+---
+
+
+# PRD Decomposition: Component Health Dashboard (#439)
+
+**Author:** Forge (Lead / Web Forms Reviewer)
+**Date:** 2026-07-25
+**PRD:** `dev-docs/prd-component-health-dashboard.md`
+**Issue:** [#439](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/439)
+
+---
+
+## Session Context
+
+Key facts informing this decomposition:
+
+- **MSBuild 18.5** (VS 2026 Insiders) confirmed working with .NET Fx 4.8
+- **Roslyn csc** can compile and reflect on `System.Web.dll` — TextBox=52 props, GridView=110 props, 480 concrete WebControls discovered
+- The **reflection-based property counter is now the primary approach** (promoted from fallback)
+- **Playwright is NOT installed** — HTML Fidelity dimension is BLOCKED
+- `scripts/Invoke-ComponentHealthScan.ps1` was **planned (2026-03-15) but never created** — the PRD supersedes it with a C# runtime reflection approach
+- `tools/WebFormsPropertyCounter/` and `dev-docs/reference-baselines.json` **do not exist yet** — they are greenfield
+- 3 bugs already fixed in the PRD: ToolTip class in Appendix A, §3.2 methodology priority, acceptance criterion #9
+
+---
+
+## Work Items (Dependency-Ordered)
+
+### 1. `webforms-reflection-tool`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Build .NET Fx 4.8 Reflection Tool for Web Forms Property/Event Baselines |
+| **Agent** | Cyclops |
+| **Dependencies** | — (none) |
+| **Complexity** | L |
+| **PRD Sections** | §3.1, §3.2 |
+
+**Description:**
+Create a .NET Framework 4.8 console app at `tools/WebFormsPropertyCounter/`. This tool:
+
+- References `System.Web.dll` from the .NET Fx 4.8 reference assemblies
+- Enumerates all concrete types in `System.Web.UI.WebControls` (and `.HtmlControls`, `.WebParts`) that inherit from `WebControl` or `Control`
+- For each type that maps to a tracked BWFC component, counts public instance properties using `DeclaredOnly`, walking from the leaf type up to (but not including) `WebControl`, `Control`, `BaseDataBoundControl`, `DataBoundControl` stop-types — symmetric to BWFC's counting rules in PRD §2.2
+- Separates events (`public event EventHandler<T>`) from properties
+- Strips generic arity suffixes (§2.6)
+- Outputs `dev-docs/reference-baselines.json` in the schema from PRD §3.2
+- Records source as `"System.Web 4.8 reflection via tools/WebFormsPropertyCounter"`
+
+**Key constraint:** The tool MUST use MSBuild 18.5 / .NET Fx 4.8 target framework since it needs to load live `System.Web` types. Confirmed viable this session.
+
+**Verified reference points:** TextBox = ~52 raw public props (before exclusions), GridView = ~110 raw public props. After applying symmetric stop-type exclusions, expect TextBox ≈ 8-10, GridView ≈ 35.
+
+---
+
+### 2. `tracked-components-config`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Create Tracked Components Configuration |
+| **Agent** | Forge |
+| **Dependencies** | — (none) |
+| **Complexity** | S |
+| **PRD Sections** | §5.2, §5.3, §3.3 |
+
+**Description:**
+Create the TrackedComponents config (JSON file at `dev-docs/tracked-components.json` or embedded in C# source) mapping each BWFC class name to its Web Forms counterpart. Per §5.3, each entry has:
+
+```json
+{ "webFormsType": "System.Web.UI.WebControls.Button", "category": "Editor" }
+```
+
+Must cover:
+- 25 Editor Controls (AdRotator through View, excluding Substitution/Xml)
+- 9 Data Controls (Chart through Repeater)
+- 6 Validation Controls (CompareValidator through ValidationSummary)
+- 3 Navigation Controls (Menu, SiteMapPath, TreeView)
+- 7 Login Controls (ChangePassword through PasswordRecovery)
+- 6 Infrastructure (Content, ContentPlaceHolder, MasterPage, NamingContainer, ScriptManager, UpdatePanel)
+- 2 Deferred (Substitution, Xml) — marked with `"status": "deferred"`
+
+Generic components (GridView, Repeater, ListView, etc.) use stripped names — `"GridView"` not `"GridView`1"`.
+
+This is the **single source of truth** for what the dashboard tracks. Consumed by both the reflection tool and the runtime health service.
+
+---
+
+### 3. `reference-baselines-curate`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Curate and Verify Reference Baselines JSON |
+| **Agent** | Forge |
+| **Dependencies** | `webforms-reflection-tool` |
+| **Complexity** | M |
+| **PRD Sections** | §3.2, §3.3 |
+
+**Description:**
+After the reflection tool generates raw baseline data, curate and verify:
+
+1. **Spot-check** counts for key controls against MSDN documentation:
+   - Button: ~8 properties, 2 events (Click, Command)
+   - GridView: ~35 properties, ~12 events
+   - TextBox: ~8 specific props, 1 event (TextChanged)
+   - Repeater: ~2 props, ~5 events (ItemCommand, ItemCreated, ItemDataBound, DataBinding, DataBound)
+2. **Add `notes` field** for complex controls documenting what was counted/excluded
+3. **Add `category` field** matching BWFC categories
+4. **Add `propertyList` and `eventList` arrays** for the most important controls (enables detailed comparison)
+5. Ensure all 54+ tracked components present (cross-reference with tracked-components-config)
+6. Handle edge cases:
+   - Deferred components (Substitution, Xml) — include their real counts
+   - Abstract bases (BaseValidator, BaseCompareValidator) — mark as `"status": "abstract"`
+   - Infrastructure components with minimal APIs (ScriptManager, UpdatePanel)
+
+The verified JSON becomes the **denominator for all health scoring**. Errors here cascade into every health percentage.
+
+---
+
+### 4. `property-event-counter`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Implement Hierarchy-Walking Property/Event Counter |
+| **Agent** | Cyclops |
+| **Dependencies** | `tracked-components-config` |
+| **Complexity** | L |
+| **PRD Sections** | §2, §5.4, §8 |
+
+**Description:**
+Implement the core BWFC-side counting algorithm per §5.4. This is the **highest-risk code** — the 10 pitfalls from §8 are all real bugs from a failed prior attempt.
+
+Given a tracked component type `T` from the loaded `BlazorWebFormsComponents.dll` assembly:
+
+1. Walk inheritance chain from leaf type upward
+2. At each level, get `[Parameter]` properties using `DeclaredOnly` reflection
+3. **Stop when hitting:** `BaseWebFormsComponent`, `BaseStyledComponent`, `BaseDataBoundComponent`, `DataBoundComponent<>` (use `GetGenericTypeDefinition()` for generic comparisons)
+4. **Classify each parameter:**
+   - `EventCallback` or `EventCallback<T>` → **event** (not property) — §2.3
+   - `RenderFragment` or `RenderFragment<T>` → **excluded** — §2.4
+   - `[Obsolete]` → excluded — §2.5
+   - `[CascadingParameter]` → excluded — §2.5
+   - `AdditionalAttributes`, `ChildContent`, `ChildComponents` → excluded — §2.5
+   - Everything else → **property**
+5. Strip generic arity suffix when matching component names — §2.6
+
+**Implement as a standalone, testable class** (`ComponentPropertyCounter` or similar). Not coupled to the health service yet — that's the assembly step.
+
+**Must-pass smoke test:** Button = 7 props / 2 events. GridView = ~18 props / ~10 events. Repeater = 0 props / 0 events.
+
+---
+
+### 5. `file-detection-service`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Implement Test/Docs/Sample File Detection |
+| **Agent** | Cyclops |
+| **Dependencies** | `tracked-components-config` |
+| **Complexity** | S |
+| **PRD Sections** | §7.4 |
+
+**Description:**
+Implement the binary detection logic for 3 dimensions per §7.4:
+
+| Dimension | Detection Method |
+|-----------|-----------------|
+| **bUnit Tests** | Scan `src/BlazorWebFormsComponents.Test/` recursively for `.razor` or `.cs` files whose name contains the component name. Has ≥1 match = ✅. Note: test project has 451 `.razor` test files organized in subdirectories by component. |
+| **Documentation** | Scan `docs/` recursively for a `.md` file matching the component name (case-insensitive). Check `docs/DataControls/`, `docs/EditorControls/`, `docs/LoginControls/`, `docs/NavigationControls/`, `docs/ValidationControls/`, `docs/UtilityFeatures/`, `docs/AjaxToolkit/`. |
+| **Sample Page** | Reflect on or parse `ComponentCatalog.Components` in the sample app to check if the component name is registered. ComponentCatalog has 80+ entries including AJAX, sub-components, etc. Match by name. |
+
+**All return boolean.** "Has tests" doesn't mean "has good tests" — binary scoring is intentional (§4.2).
+
+**Known gap:** 7 Login controls (ChangePassword, CreateUserWizard, Login, LoginName, LoginStatus, LoginView, PasswordRecovery) have zero bUnit test files. The detector must correctly return ❌ for these.
+
+---
+
+### 6. `scoring-engine`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Implement Health Scoring Engine |
+| **Agent** | Cyclops |
+| **Dependencies** | `property-event-counter`, `file-detection-service`, `reference-baselines-curate` |
+| **Complexity** | M |
+| **PRD Sections** | §4.1–4.4 |
+
+**Description:**
+Implement the weighted scoring model per §4:
+
+| # | Dimension | Weight | Formula |
+|---|-----------|--------|---------|
+| 1 | Property Parity | 30% | `min(implementedProps / expectedProps, 1.0)` |
+| 2 | Event Parity | 15% | `min(implementedEvents / expectedEvents, 1.0)` |
+| 3 | bUnit Tests | 20% | Binary: 0.0 or 1.0 |
+| 4 | Documentation | 15% | Binary: 0.0 or 1.0 |
+| 5 | Sample Page | 10% | Binary: 0.0 or 1.0 |
+| 6 | Implementation Status | 10% | Complete=1.0, Stub=0.5, Deferred=0.0 |
+
+**Rules:**
+- **Score capping:** Each dimension ≤ 100%. Overall ≤ 100%.
+- **0/0 = 100%:** Components with no expected properties (Literal, PlaceHolder) get 100% property parity.
+- **Missing baselines → N/A:** If no reference baseline exists, Property/Event Parity show "N/A" and are excluded. Remaining dimensions re-weighted proportionally (e.g., if both P+E are N/A, Tests becomes 20%/55% ≈ 36.4%, etc.).
+- **Color coding:** Green (≥90%), Yellow (70-89%), Red (<70%).
+
+**Output:** `ComponentHealthReport` record per §7.2 with all fields populated.
+
+---
+
+### 7. `health-service-assembly`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Assemble ComponentHealthService and Register in DI |
+| **Agent** | Cyclops |
+| **Dependencies** | `scoring-engine` |
+| **Complexity** | M |
+| **PRD Sections** | §7.1, §7.2, §7.3 |
+
+**Description:**
+Wire all service components into the `ComponentHealthService` class per §7.1:
+
+```csharp
+public class ComponentHealthService
+{
+    public IReadOnlyList<ComponentHealthReport> GetAllReports();
+    public ComponentHealthReport GetReport(string componentName);
+}
+```
+
+- Register as **singleton** in the sample app's DI container
+- Load reference baselines from `dev-docs/reference-baselines.json` (embedded resource or file path)
+- Coordinate: counter → detection → scoring → report assembly
+- Expose category grouping (Editor, Data, Validation, Navigation, Login, Infrastructure)
+- Expose summary stats (total components, average health, category averages)
+
+**Integration point:** This is what the Razor page and the markdown exporter both consume. Must be a clean, injectable service.
+
+**Where it lives:** `samples/AfterBlazorServerSide/Services/ComponentHealthService.cs` (or in the BWFC library itself if we want it available outside the sample app — team decision needed).
+
+---
+
+### 8. `counting-unit-tests`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Unit Tests for Counting Logic and Acceptance Criteria |
+| **Agent** | Rogue |
+| **Dependencies** | `health-service-assembly` |
+| **Complexity** | M |
+| **PRD Sections** | §10 |
+
+**Description:**
+Write bUnit/xUnit tests validating ALL 10 acceptance criteria from §10:
+
+1. ✅ **Button** shows ~7 properties, 2 events (NOT 40+ or 1)
+2. ✅ **GridView** shows ~18 properties, ~10 events (NOT 30+ or 0)
+3. ✅ **Repeater** shows 0 properties, 0 events (all its [Parameter]s are RenderFragment templates)
+4. ✅ **No generic component** shows as "not found" due to backtick name mismatch
+5. ✅ **No base class properties** (ID, CssClass, BackColor, etc.) inflate any component's count
+6. ✅ **No EventCallback** appears in both the properties AND events columns
+7. ✅ **No RenderFragment** appears in any count column
+8. ✅ **Missing baselines** show "N/A," not 0%
+9. ✅ **All completed components except Login controls** show tests=✅; Login controls show tests=❌
+10. ✅ **Deferred components** (Substitution, Xml) show Status=Deferred with honest scores
+
+**Additional tests:**
+- Test the hierarchy walk stops at each stop-type (BaseWebFormsComponent, BaseStyledComponent, BaseDataBoundComponent, DataBoundComponent<>)
+- Test generic type definition comparison works (GridView<T>, Repeater<T>)
+- Test scoring engine: 0/0 → 100%, missing baseline → N/A re-weighting, capping at 100%
+
+---
+
+### 9. `dashboard-razor-page`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Build Interactive Dashboard Razor Page |
+| **Agent** | Jubilee |
+| **Dependencies** | `health-service-assembly` |
+| **Complexity** | L |
+| **PRD Sections** | §6.1–6.4 |
+
+**Description:**
+Build the `/dashboard` page in `samples/AfterBlazorServerSide/` per §6:
+
+**Layout:**
+- Category summary table with **worst-first sorting** (low scores surface to top)
+- Columns: Component, Score, Props (x/y fraction), Events (x/y fraction), Tests (✅/❌), Docs (✅/❌), Sample (✅/❌), Status
+- Category grouping matching status.md: Editor, Data, Validation, Navigation, Login, Infrastructure
+- Category header showing category average health
+
+**Interactivity:**
+- Filter by category (dropdown)
+- Filter by status (Complete / Stub / Deferred)
+- Sort by: Score, Name, Category, Property Parity, Event Parity
+- Show/hide deferred components (default: hidden)
+
+**Visual:**
+- Color coding: Green (≥90%), Yellow (70-89%), Red (<70%) for Score column
+- Summary banner: "52 components tracked │ Average health: XX% │ Generated: YYYY-MM-DD"
+
+**Technical:**
+- Inject `ComponentHealthService` via DI
+- Render `ComponentHealthReport` data
+- Page route: `/dashboard`
+- Follow existing sample app patterns (look at other sample pages for layout conventions)
+
+---
+
+### 10. `dashboard-catalog-registration`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Register Dashboard in ComponentCatalog |
+| **Agent** | Jubilee |
+| **Dependencies** | `dashboard-razor-page` |
+| **Complexity** | S |
+| **PRD Sections** | §6.4 |
+
+**Description:**
+Add the dashboard page to `samples/AfterBlazorServerSide/ComponentCatalog.cs`:
+
+```csharp
+new("Dashboard", "Diagnostics", "/dashboard",
+    "Component health monitoring — measures how completely each BWFC component reproduces its Web Forms original",
+    Array.Empty<string>(),
+    new[] { "health", "dashboard", "audit", "parity", "diagnostics" })
+```
+
+This creates a new "Diagnostics" category in the catalog. The dashboard page will appear in the sample app navigation.
+
+---
+
+### 11. `mkdocs-markdown-export`
+
+| Field | Value |
+|-------|-------|
+| **Title** | Build Markdown Generator for MkDocs Dashboard Snapshot |
+| **Agent** | Beast |
+| **Dependencies** | `health-service-assembly` |
+| **Complexity** | M |
+| **PRD Sections** | §6.4, Phase 4 |
+
+**Description:**
+Build a markdown generator that produces a static MkDocs-compatible dashboard page:
+
+**Output:** `docs/component-health.md` (or `docs/dashboard.md`)
+
+**Content:**
+- Summary stats: component count, average health, generation date
+- Category tables matching the Razor dashboard format
+- Worst-first sorting within categories
+- ✅/❌ indicators for binary dimensions
+- x/y fractions for property/event parity
+
+**Implementation options (pick one):**
+- A) A build step in the sample app that writes markdown at compile time
+- B) A standalone script (`scripts/Export-HealthDashboard.ps1` or C# tool) that launches the health service and serializes to markdown
+- C) A `dotnet test` fixture that generates markdown as a side effect
+
+**Also:**
+- Register the page in `mkdocs.yml` navigation
+- Add a note that this is a generated snapshot — the authoritative version is the live `/dashboard` page
+
+---
+
+### 12. `html-fidelity-dimension` — ⛔ BLOCKED
+
+| Field | Value |
+|-------|-------|
+| **Title** | Add HTML Fidelity Scoring Dimension |
+| **Agent** | Colossus |
+| **Dependencies** | `health-service-assembly` |
+| **Complexity** | L |
+| **PRD Sections** | §1.4 (item 6), original 2026-03-15 spec |
+| **Status** | ⛔ **BLOCKED — Playwright not installed** |
+
+**Description:**
+Add a 7th scoring dimension measuring HTML output fidelity against original Web Forms controls. This requires:
+
+1. **Playwright infrastructure** to render BWFC components in a browser
+2. **Reference HTML snapshots** from original Web Forms controls
+3. **DOM comparison logic** to score structural fidelity
+4. **Weight redistribution** in the scoring model (HTML Fidelity would likely take ~15%, reducing other weights)
+
+**Blocker:** Playwright is NOT installed in the development environment. This dimension should be implemented AFTER Playwright infrastructure is established (separate initiative, not part of this PRD).
+
+**When unblocked:** Re-weight scoring model per the original 2026-03-15 spec (7 dimensions). Colossus owns the Playwright test infrastructure.
+
+---
+
+## Dependency Graph
+
+```
+                           ┌──────────────────────────┐
+                           │  tracked-components-     │
+                           │  config (Forge, S)       │
+                           └──────┬──────────┬────────┘
+                                  │          │
+                    ┌─────────────┘          └──────────────┐
+                    ▼                                       ▼
+    ┌───────────────────────────┐         ┌────────────────────────────┐
+    │  property-event-counter   │         │  file-detection-service    │
+    │  (Cyclops, L)             │         │  (Cyclops, S)              │
+    └───────────┬───────────────┘         └────────────┬───────────────┘
+                │                                      │
+                │    ┌──────────────────────────────┐   │
+                │    │  reference-baselines-curate  │   │
+                │    │  (Forge, M)                  │   │
+                │    └──────────┬───────────────────┘   │
+                │               │                       │
+                │               │  ▲                    │
+                │               │  │                    │
+                │               │  │ ┌────────────────────────────────┐
+                │               │  │ │  webforms-reflection-tool      │
+                │               │  └─│  (Cyclops, L)                  │
+                │               │    └────────────────────────────────┘
+                │               │                       │
+                ▼               ▼                       ▼
+           ┌────────────────────────────────────────────────┐
+           │              scoring-engine                     │
+           │              (Cyclops, M)                       │
+           └──────────────────────┬─────────────────────────┘
+                                  │
+                                  ▼
+           ┌────────────────────────────────────────────────┐
+           │         health-service-assembly                 │
+           │         (Cyclops, M)                            │
+           └──┬────────────┬────────────┬───────────────────┘
+              │            │            │
+              ▼            ▼            ▼
+  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐
+  │ dashboard-   │  │ counting-    │  │ mkdocs-markdown-     │
+  │ razor-page   │  │ unit-tests   │  │ export               │
+  │ (Jubilee, L) │  │ (Rogue, M)   │  │ (Beast, M)           │
+  └──────┬───────┘  └──────────────┘  └──────────────────────┘
+         │
+         ▼
+  ┌──────────────────────┐
+  │ dashboard-catalog-   │
+  │ registration         │
+  │ (Jubilee, S)         │
+  └──────────────────────┘
+
+  ⛔ BLOCKED (no Playwright):
+  ┌──────────────────────┐
+  │ html-fidelity-       │
+  │ dimension            │
+  │ (Colossus, L)        │
+  └──────────────────────┘
+```
+
+### Critical Path
+
+```
+webforms-reflection-tool (L)
+  → reference-baselines-curate (M)
+    → scoring-engine (M)
+      → health-service-assembly (M)
+        → dashboard-razor-page (L)
+          → dashboard-catalog-registration (S)
+```
+
+**Critical path total: ~L + M + M + M + L + S ≈ XL effort**
+
+### Parallelizable Work
+
+These can run **in parallel** once their deps are met:
+
+| After `tracked-components-config` completes | After `health-service-assembly` completes |
+|---------------------------------------------|------------------------------------------|
+| `property-event-counter` ∥ `file-detection-service` ∥ `webforms-reflection-tool` | `dashboard-razor-page` ∥ `counting-unit-tests` ∥ `mkdocs-markdown-export` |
+
+---
+
+## Summary Table
+
+| # | ID | Title | Agent | Deps | Size | PRD §§ |
+|---|-----|-------|-------|------|------|--------|
+| 1 | `webforms-reflection-tool` | .NET Fx 4.8 Reflection Tool | Cyclops | — | L | §3.1-3.2 |
+| 2 | `tracked-components-config` | Tracked Components Config | Forge | — | S | §5.2-5.3 |
+| 3 | `reference-baselines-curate` | Curate Reference Baselines | Forge | #1 | M | §3.2-3.3 |
+| 4 | `property-event-counter` | Hierarchy-Walking Counter | Cyclops | #2 | L | §2, §5.4, §8 |
+| 5 | `file-detection-service` | Test/Docs/Sample Detection | Cyclops | #2 | S | §7.4 |
+| 6 | `scoring-engine` | Health Scoring Engine | Cyclops | #3, #4, #5 | M | §4 |
+| 7 | `health-service-assembly` | ComponentHealthService | Cyclops | #6 | M | §7.1-7.3 |
+| 8 | `counting-unit-tests` | Unit Tests + Acceptance | Rogue | #7 | M | §10 |
+| 9 | `dashboard-razor-page` | Interactive Dashboard Page | Jubilee | #7 | L | §6 |
+| 10 | `dashboard-catalog-registration` | Catalog Registration | Jubilee | #9 | S | §6.4 |
+| 11 | `mkdocs-markdown-export` | MkDocs Static Export | Beast | #7 | M | §6.4 |
+| 12 | `html-fidelity-dimension` | HTML Fidelity (BLOCKED) | Colossus | #7 | L | §1.4 |
+
+**Total: 12 work items (11 actionable + 1 blocked)**
+**Agents engaged: 5 of 6** (Forge, Cyclops, Rogue, Jubilee, Beast; Colossus blocked)
+**Estimated effort: ~3 L + 5 M + 3 S + 1 L(blocked) = XL overall**
+
+---
+
+## Relationship to Existing `Invoke-ComponentHealthScan.ps1`
+
+The PRD spec from 2026-03-15 planned `scripts/Invoke-ComponentHealthScan.ps1` as a PowerShell file scanner generating `docs/component-health.md`. **This script was never created.** The current PRD supersedes it with a C# runtime reflection approach, which is strictly superior:
+
+1. **Reflection is live** — always matches the compiled assembly, no manual updates
+2. **Type hierarchy awareness** — PowerShell can't walk .NET inheritance chains for DeclaredOnly property counting
+3. **The 10 pitfalls (§8)** all involve reflection subtleties that require C# code
+
+**Decision: The PowerShell script approach is abandoned. No overlap to manage.**
+
+---
+
+## Open Questions for Jeff
+
+1. **Where should `ComponentHealthService` live?** In the sample app (`samples/AfterBlazorServerSide/Services/`) or in the BWFC library itself (`src/BlazorWebFormsComponents/`)? Library placement makes it available to anyone consuming BWFC; sample placement keeps it out of the NuGet package.
+
+2. **Should the reflection tool also generate the tracked-components-config?** The tool discovers 480 concrete WebControls — it could auto-generate the mapping. But the curated list is safer (prevents false positives). Recommend: tool generates a superset, Forge curates the final list.
+
+3. **MkDocs export: build step or manual?** CI-integrated means `docs/component-health.md` is always fresh. Manual means less CI complexity but risk of staleness.
+
+---
+
+### 2026-03-16T14:46:34Z: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Dashboard work should be in a dedicated feature branch, not directly on dev.
+**Why:** User request — captured for team memory
+
+---
+
+### 2026-03-16: Forge — Dashboard PRD Review
+
+**Verdict:** CONDITIONAL APPROVE
+
+**Acceptance Criteria Results:**
+| # | Check | Result |
+|---|-------|--------|
+| 1 | Button ~7-8 props, 2 events | ✅ |
+| 2 | GridView ~18-21 props, ~10 events | ✅ |
+| 3 | Repeater 0/0 | ✅ |
+| 4 | No generic backtick mismatch | ✅ |
+| 5 | No base class inflation | ✅ |
+| 6 | No EventCallback double-count | ✅ |
+| 7 | No RenderFragment in counts | ✅ |
+| 8 | Missing baselines show N/A | ✅ |
+| 9 | Login controls tests | ✅ (overtaken — tests exist) |
+| 10 | Deferred show Status=Deferred | ❌ BUG — tracked-components.json missing status fields |
+
+**Must-Fix:** Add `status` fields to tracked-components.json for Substitution (Deferred), Xml (Deferred), ScriptManager (Stub).
+
+**Low-Priority:** Add Xml to DefaultTrackedComponents fallback; add DataBoundComponent<T> to stop-type list in docs; cross-check GridView baseline.
+

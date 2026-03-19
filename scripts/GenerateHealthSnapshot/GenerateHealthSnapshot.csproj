@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Exclude from NBGV versioning to keep this tool simple -->
+    <NerdbankGitVersioningEnabled>false</NerdbankGitVersioningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+  </ItemGroup>
+
+</Project>

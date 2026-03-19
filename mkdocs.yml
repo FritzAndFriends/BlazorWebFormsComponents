@@ -62,6 +62,7 @@ plugins:
 
 nav:
   - Home: README.md
+  - Component Health Dashboard: dashboard.md
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
     - BulletedList: EditorControls/BulletedList.md
@@ -153,11 +154,13 @@ nav:
     - NamingContainer: UtilityFeatures/NamingContainer.md
     - Page System: UtilityFeatures/PageService.md
     - Response.Redirect: UtilityFeatures/ResponseRedirect.md
+    - Service Registration: UtilityFeatures/ServiceRegistration.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
       - Automated Migration Guide: Migration/AutomatedMigration.md
+      - Deprecation Guidance: Migration/DeprecationGuidance.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Deferred Controls: Migration/DeferredControls.md
@@ -165,6 +168,7 @@ nav:
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - Themes and Skins: Migration/ThemesAndSkins.md
       - User Controls: Migration/User-Controls.md
+      - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
   - Migration Tests:
       - Overview: migration-tests/README.md

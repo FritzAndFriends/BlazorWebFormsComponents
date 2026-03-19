@@ -293,8 +293,22 @@ namespace BlazorWebFormsComponents
 
 			_UserExpanded = !Expanded;
 
-			if (Expanded) ParentTreeView.OnTreeNodeExpanded.InvokeAsync(new TreeNodeEventArgs(this));
-			else ParentTreeView.OnTreeNodeCollapsed.InvokeAsync(new TreeNodeEventArgs(this));
+			if (Expanded)
+			{
+				var expandedHandler = ParentTreeView.TreeNodeExpanded.HasDelegate ? ParentTreeView.TreeNodeExpanded : ParentTreeView.OnTreeNodeExpanded;
+				if (expandedHandler.HasDelegate) expandedHandler.InvokeAsync(new TreeNodeEventArgs(this));
+
+				if (PopulateOnDemand)
+				{
+					var populateHandler = ParentTreeView.TreeNodePopulate.HasDelegate ? ParentTreeView.TreeNodePopulate : ParentTreeView.OnTreeNodePopulate;
+					if (populateHandler.HasDelegate) populateHandler.InvokeAsync(new TreeNodeEventArgs(this));
+				}
+			}
+			else
+			{
+				var collapsedHandler = ParentTreeView.TreeNodeCollapsed.HasDelegate ? ParentTreeView.TreeNodeCollapsed : ParentTreeView.OnTreeNodeCollapsed;
+				if (collapsedHandler.HasDelegate) collapsedHandler.InvokeAsync(new TreeNodeEventArgs(this));
+			}
 
 		}
 
@@ -311,7 +325,8 @@ namespace BlazorWebFormsComponents
 
 			this.Checked = (bool)args.Value;
 
-			ParentTreeView.OnTreeNodeCheckChanged.InvokeAsync(new TreeNodeEventArgs(this));
+			var checkChangedHandler = ParentTreeView.TreeNodeCheckChanged.HasDelegate ? ParentTreeView.TreeNodeCheckChanged : ParentTreeView.OnTreeNodeCheckChanged;
+			if (checkChangedHandler.HasDelegate) checkChangedHandler.InvokeAsync(new TreeNodeEventArgs(this));
 
 		}
 

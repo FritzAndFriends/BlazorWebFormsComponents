@@ -1,9 +1,17 @@
-# Project Context
+﻿# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
+
+## Active Decisions & Alerts
+
+📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
+
+📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
+
+📌 **Team update (2026-03-16):** Forge reviewed Component Health Dashboard PRD; 3 errata items identified before Cyclops implementation. (1) Appendix A: ToolTip base class error. (2) tools/WebFormsPropertyCounter/ doesn't exist—use MSDN curation as Phase 1 primary. (3) Acceptance criterion #9 needs verification (Login controls had 0 bUnit tests as of 2026-03-15). See decisions.md for full details. — decided by Forge
 
 ## Learnings
 
@@ -76,6 +84,26 @@ Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mand
 **Impact:** Students without enrollments now visible in GridView. Blazor Server form submission timing stable.
 
 📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
+
+### L1 Script Bug Fixes + Test Coverage Expansion (#472)
+
+**Summary:** Fixed 3 bugs in bwfc-migrate.ps1 that caused test failures, added 5 new test cases covering all five L1 patterns from issue #472. Test suite: 7/10 → 15/15 (100%), line accuracy: 94.3% → 100%.
+
+**Bugs fixed:**
+1. `ConvertFrom-GetRouteUrl` — `Eval()` regex was global instead of scoped to GetRouteUrl lines. Corrupted `<%#: Eval("Name") %>` expressions by stripping the Eval wrapper but leaving `<%#: %>` delimiters. Fix: only apply Eval→context conversion on lines containing `GetRouteUrl`.
+2. `ConvertFrom-ContentWrappers` — `\s*\r?\n?` after `>` consumed leading indentation of the next line. Fix: changed to `[ \t]*\r?\n?` (horizontal whitespace only).
+3. `Remove-WebFormsAttributes` — ItemType fallback regex `(?![^>]*ItemType=)` didn't check for `TItem=`, so tags that already had `ItemType` converted to `TItem` got a duplicate `ItemType="object"`. Fix: lookahead now checks `(?![^>]*(?:ItemType|TItem)=)`.
+
+**New test cases:**
+- TC11-BoolEnumUnit: boolean lowercase, enum type-qualifying, unit px-stripping
+- TC12-DataSourceID: DataSourceID removal + data source control → TODO replacement
+- TC13-ResponseRedirect: Response.Redirect → NavigationManager.NavigateTo in code-behind
+- TC14-SessionDetect: Session["key"] detection with migration guidance block
+- TC15-ViewState: ViewState["key"] detection with private field suggestions
+
+**Test harness enhancements:** Extended Run-L1Tests.ps1 to copy `.aspx.cs` inputs and compare `.razor.cs` expected output, enabling code-behind transform verification.
+
+**Key files:** `migration-toolkit/scripts/bwfc-migrate.ps1`, `migration-toolkit/tests/Run-L1Tests.ps1`, `migration-toolkit/tests/inputs/TC11-TC15*`, `migration-toolkit/tests/expected/TC11-TC15*`
 
 ### Run 22 L1 Script Fixes — 5 Migration Toolkit Improvements (2026-03-14)
 
@@ -346,3 +374,97 @@ ew Function(script)() with try/catch safety
 - XML docs file updated with all new members
 
 Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cyclops. Branch squad/446-447-modal-collapsible-extenders. Fixes #446, #447.
+
+### ComponentHealthService Implementation (2026-03-16)
+
+**Summary:** Built the core `ComponentHealthService` in `src/BlazorWebFormsComponents/Diagnostics/` per PRD §7. Four files created: `ImplementationStatus.cs` (enum), `ComponentHealthReport.cs` (data model), `ReferenceBaselines.cs` (JSON loader), `ComponentHealthService.cs` (reflection + scoring engine). DI registration via `AddComponentHealthDashboard()` added to `ServiceCollectionExtensions.cs`.
+
+**Key Implementation Details:**
+- **Property/Event Counter (§5.4):** Walks inheritance chain with DeclaredOnly, stops at BaseWebFormsComponent/BaseStyledComponent/BaseDataBoundComponent/DataBoundComponent<>. Uses GetGenericTypeDefinition() for generic base matching. Skips [Obsolete], [CascadingParameter], RenderFragment/RenderFragment<T>, AdditionalAttributes, ChildContent, ChildComponents. EventCallback/EventCallback<T> counted as events only.
+- **Component Discovery (§5.1-5.2):** Reflects over BWFC assembly, matches against tracked components list. Falls back to hardcoded 56-component list when `dev-docs/tracked-components.json` doesn't exist.
+- **File Detection (§7.4):** Scans test project directories/files for component names, docs/ for matching .md files, ComponentCatalog.cs for sample page registration.
+- **Score Computation (§4.1):** Weighted average (Props 30%, Events 15%, Tests 20%, Docs 15%, Sample 10%, Status 10%). Missing baselines excluded and weights re-distributed. Scores capped at 100%. 0/0 treated as 1.0.
+- **Baselines Loading:** ReferenceBaselines.LoadFromFile() gracefully handles missing/malformed JSON.
+- **Project enforces `var` over explicit types** via IDE0007 as error — all code uses var.
+
+**Files Created:**
+- `src/BlazorWebFormsComponents/Diagnostics/ImplementationStatus.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthReport.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ReferenceBaselines.cs`
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthService.cs`
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/ServiceCollectionExtensions.cs` (added AddComponentHealthDashboard extension)
+
+**Build verified:** 0 errors, 99 pre-existing warnings.
+
+### Fix GUID-based IDs (#471) (2026-03-17)
+
+**Summary:** Removed GUID-based fallback IDs from CheckBox, RadioButton, and RadioButtonList. When developer sets `ID="X"`, rendered HTML uses that ID exactly (with `_N` suffixes for list items). When no ID is set, no `id`/`for` attributes are rendered — no GUID pollution in the DOM.
+
+**Pattern:** `ComponentIdGenerator.GetClientID(this)` via `ClientID` property is the single source of truth for element IDs. Components should never generate their own GUIDs for HTML `id` attributes. Radio group `name` attribute is the only acceptable GUID fallback (required for mutual exclusion when no developer ID or GroupName is set).
+
+**Key decisions:**
+- FileUpload already correct — no changes needed (only renders id when ClientID present)
+- RadioButton keeps GUID fallback exclusively for `EffectiveGroupName` (radio `name` attribute), not for `id`
+- RadioButtonList `GetInputId(index)` returns null when no ClientID, preserving clean HTML
+- 7 tests updated to match new behavior; all 2105 tests pass
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/CheckBox.razor.cs` (removed GUID, use ClientID directly)
+- `src/BlazorWebFormsComponents/RadioButton.razor.cs` (removed GUID for id, kept for group name)
+- `src/BlazorWebFormsComponents/RadioButtonList.razor.cs` (GetInputId uses ClientID with suffix)
+- `src/BlazorWebFormsComponents.Test/CheckBox/IDRendering.razor` (updated WithoutID tests)
+- `src/BlazorWebFormsComponents.Test/CheckBox/Text.razor` (LabelForAttribute test uses ID)
+- `src/BlazorWebFormsComponents.Test/RadioButton/IDRendering.razor` (updated WithoutID tests)
+- `src/BlazorWebFormsComponents.Test/RadioButton/Text.razor` (LabelForAttribute test uses ID)
+- `src/BlazorWebFormsComponents.Test/RadioButtonList/TextAlignTests.razor` (tests use developer ID)
+- `src/BlazorWebFormsComponents.Test/RadioButtonList/StableIds.razor` (WithoutID expects no id attr)
+
+
+### ASHX and AXD URL Handling Middleware (#423)
+
+**Summary:** Extended UseBlazorWebFormsComponents() middleware to handle legacy .ashx (HTTP handler) and .axd (Web Resource) URL patterns per issue #423.
+
+**Changes:**
+- BlazorWebFormsComponentsOptions: Added EnableAshxHandling (default: true), EnableAxdHandling (default: true), and AshxRedirectMappings dictionary for custom .ashx redirects.
+- AshxHandlerMiddleware: Intercepts .ashx requests. Returns 410 Gone by default; 301 redirect if a custom mapping exists in AshxRedirectMappings.
+- AxdHandlerMiddleware: Intercepts .axd requests. Returns 404 for WebResource/ScriptResource/Trace.axd; 410 Gone for ChartImg.axd.
+- ServiceCollectionExtensions.UseBlazorWebFormsComponents(): Conditionally registers both new middleware alongside existing AspxRewriteMiddleware.
+
+**Impact:** Existing .aspx rewriting unchanged. All three middleware classes follow the same internal pattern (constructor injection, Invoke method, early return on match). ar used everywhere per IDE0007 rule. Build: 0 errors.
+### HttpHandlerBase Implementation for Issue #473 (2026-07-25)
+
+**Summary:** Implemented core HttpHandlerBase feature — 7 new files in src/BlazorWebFormsComponents/Handlers/ enabling migration of ASP.NET Web Forms .ashx handlers to ASP.NET Core with minimal code changes.
+
+**Files created:**
+1. `HttpHandlerBase.cs` — Abstract base class with `ProcessRequestAsync(HttpHandlerContext)` and virtual `IsReusable` (default false)
+2. `HttpHandlerContext.cs` — Adapter wrapping ASP.NET Core HttpContext with Request/Response/Server/Session/User/Items properties
+3. `HttpHandlerRequest.cs` — Request adapter with NameValueCollection-based QueryString/Form/Headers, `this[key]` indexer (checks QS then Form), Files, InputStream, Url, RawUrl, etc.
+4. `HttpHandlerResponse.cs` — Response adapter with sync Write/BinaryWrite (safe sync-over-async), async variants, AddHeader/AppendHeader, Clear, Redirect, Flush, and `[Obsolete] End()` that sets IsEnded flag
+5. `HttpHandlerServer.cs` — Server utilities with MapPath (`~/` → WebRootPath, other → ContentRootPath), HtmlEncode/Decode, UrlEncode/Decode, and `Transfer()` → NotSupportedException with migration guidance
+6. `RequiresSessionStateAttribute.cs` — Marker attribute; when present, MapHandler calls `Session.LoadAsync()` before ProcessRequestAsync
+7. `HandlerEndpointExtensions.cs` — Three `MapHandler<T>` overloads on IEndpointRouteBuilder: explicit path, convention-based (strips Handler suffix → .ashx), multi-path
+
+**Key decisions:**
+- Return type is `IEndpointConventionBuilder` (not `RouteHandlerBuilder`) because `endpoints.Map(pattern, RequestDelegate)` returns `IEndpointConventionBuilder`. All chaining methods (.RequireAuthorization, .RequireCors) work on this interface.
+- No AshxHandlerMiddleware exists to modify — the existing middleware is AspxRewriteMiddleware (handles .aspx URLs only). Middleware coordination deferred until AshxHandlerMiddleware is created.
+- Namespace is `BlazorWebFormsComponents` (root) per spec requirement that migrated code uses `using BlazorWebFormsComponents;`
+- HttpHandlerRequest caches NameValueCollections lazily to avoid rebuilding on each access
+- Form/Files properties safely check `HasFormContentType` before accessing Request.Form to avoid exceptions on non-form requests
+- Session exposed as lazy property on HttpHandlerContext — throws standard ASP.NET Core error if session middleware not configured
+
+**Build:** 0 errors, all pre-existing warnings only.
+
+
+
+### Fix AfterBlazorServerSide Sample Compilation Errors (2026-03-17)
+
+**Summary:** Fixed 4 compilation errors in the AfterBlazorServerSide sample project introduced by merge of upstream/main into dev (PR #475).
+
+**Errors fixed:**
+1. **CS1503** in ImageButton/Index.razor — OnClick handlers used MouseEventArgs but ButtonBaseComponent.OnClick is EventCallback<EventArgs>. Changed both handlers to accept EventArgs.
+2. **CS0103** in FormView/Simple.razor and FormView/Edit.razor — markup referenced WidgetFormView_PageIndexChanging but no such method existed. Added stub handlers with correct PageChangedEventArgs signature.
+3. **CS1503** in GridView/Selection.razor — SelectedIndexChanged handler took int but component expects EventCallback<GridViewSelectEventArgs>. Changed handler (and code example) to accept GridViewSelectEventArgs.
+
+**Key insight:** Always check the base class parameter types — ImageButton inherits OnClick from ButtonBaseComponent which uses EventArgs, not MouseEventArgs. GridView's SelectedIndexChanged was recently changed to GridViewSelectEventArgs (matching Web Forms behavior).

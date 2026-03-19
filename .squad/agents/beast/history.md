@@ -1,10 +1,12 @@
-# Project Context
+﻿# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents — Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+
+📌 Team update (2026-03-17): HttpHandlerBase implementation complete (7 files in Handlers/). Returns IEndpointConventionBuilder; Session markers added; build passes 0 errors. — decided by Cyclops
 ## Learnings
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->
@@ -29,31 +31,38 @@
 - Run 9 Skill Fixes — 6 RF items across 4 skill files (2026-03-07)
 - Run 9 RCA Documentation — path preservation + CSS verification rules (2026-03-07)
 
-### Issue #438: Deprecation Guidance Docs (Latest)
+### Issue #438: Deprecation Guidance Docs
 
-**Delivered:** Comprehensive deprecation guidance page (`docs/Migration/DeprecationGuidance.md`) covering Web Forms patterns with no Blazor equivalent.
+📌 **Team update (2026-03-17):** #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100%. 2105 tests passing. — decided by Cyclops
 
-**Content:**
-- `runat="server"` → Blazor native components
-- `ViewState` → Component fields + scoped services  
-- `UpdatePanel` → Blazor's incremental component rendering
-- `ScriptManager` → `IJSRuntime` + `HttpClient`
-- PostBack events → Component lifecycle + event handlers
-- Page lifecycle (`Page_Load`, `Page_Init`) → `OnInitializedAsync`, `OnParametersSetAsync`
-- `IsPostBack` → Removed (use `OnInitializedAsync`)
-- Server-side control properties → Declarative data binding
+**✅ DELIVERED** — Comprehensive deprecation guidance page covering Web Forms patterns with no Blazor equivalent.
+
+**Session (2026-03-17 by Beast):**
+- Created `docs/Migration/DeprecationGuidance.md` — 32 KB, ~600 lines covering 8 deprecation patterns
+- Updated `mkdocs.yml` — added "Deprecation Guidance" to Migration navigation section (after "Automated Migration Guide")
+- Created decision record: `.squad/decisions/inbox/beast-deprecation-docs.md`
+
+**Content patterns documented:**
+- `runat="server"` — Scope marker; remove (Blazor components always server-side)
+- `ViewState` — Use component fields + scoped/singleton services instead
+- `UpdatePanel` — Blazor incremental rendering makes triggers obsolete; UpdatePanel is now just a CSS-compatible wrapper
+- `Page_Load` / `IsPostBack` → `OnInitializedAsync` + event handlers + lifecycle mapping table
+- `ScriptManager` — Stub for migration compat; replace with `IJSRuntime` + `HttpClient` + DI
+- Server control properties → Reactive data binding (fields, not imperative assignment)
 - Application/Session state → Singleton/scoped services
 - Data binding events (`ItemDataBound`) → Component templates with `@context`
 
-**Format:** Before/after tabbed code examples, migration checklist table, lifecycle mapping.
+**Format & Tone:**
+- Each pattern: "What It Was" → "Why Deprecated" → "What To Do Instead" + before/after code
+- Tabbed markdown for side-by-side comparison of Web Forms vs Blazor
+- Lifecycle mapping table (Page_Init → OnInitializedAsync, etc.)
+- Empathetic tone — acknowledges these are familiar patterns being left behind
+- Audience: Experienced Web Forms developers learning Blazor
 
-**Branch:** `squad/438-deprecation-docs` — pushed to FritzAndFriends upstream. Commit 5b17682b.
-
-**Files:** 
-- Created `docs/Migration/DeprecationGuidance.md` (23.3 KB, ~400 lines)
-- Updated `mkdocs.yml` — added to Migration section navigation
-
-**Design decision:** Placed after "Automated Migration Guide" in nav to catch developers early in their migration journey. Each section pairs Web Forms pattern with clear Blazor alternative, supporting the library's goal of enabling code reuse with minimal markup changes.
+**Design decision rationale:**
+- Placed after "Automated Migration Guide" in nav — developers run L1 automation first, then encounter these patterns; this doc is their reference
+- Each section pairs Web Forms pattern with clear Blazor alternative — supports library goal of enabling code reuse with minimal markup changes
+- Comprehensive coverage including derived patterns (e.g., application state → services)
 
 **Summary (2026-03-05 through 2026-03-07 pre-Run 11)
 
@@ -144,6 +153,57 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 
 **Files:** migration-toolkit/skills/migration-standards/SKILL.md (lines ~165–199), migration-toolkit/skills/bwfc-data-migration/SKILL.md (lines ~29–95)  
 **Decision log:** .squad/decisions/inbox/beast-migration-docs.md
+
+### Issue #473 Issue 4: Migrating .ashx Handlers Documentation
+
+**Delivered:** Comprehensive MkDocs page for migrating ASP.NET Web Forms `.ashx` HTTP handlers to Blazor using the new `HttpHandlerBase` feature (Issue #473, Issue 4).
+
+**File created:** `docs/Migration/MigratingAshxHandlers.md` (~33.5 KB, ~800 lines)
+
+**Content structure:**
+1. **Overview** — What `.ashx` handlers are, why migration is needed, `HttpHandlerBase` value proposition
+2. **Quick Start** — 6-step migration checklist (mechanical changes)
+3. **Registration** — Four registration patterns:
+   - Explicit path via `[HandlerRoute]` attribute
+   - Convention-based routing (derive from class name)
+   - Multi-path registration with `MapHandler<T>()`
+   - Chaining auth/CORS with `.RequireAuthorization()`, `.RequireCors()`
+4. **Before/After Examples** — Three fully-worked examples:
+   - JSON API handler (GET request, returns JSON with `System.Text.Json`)
+   - File download handler (binary response, Content-Disposition, MapPath)
+   - Image generation/thumbnail handler (System.Drawing, thumbnail generation)
+5. **API Reference** — Complete property/method documentation for:
+   - `HttpHandlerContext` (Request, Response, Server, Session, User, Items)
+   - `HttpHandlerRequest` (QueryString, Form, Files, HttpMethod, Headers, InputStream, authentication)
+   - `HttpHandlerResponse` (ContentType, StatusCode, Write, BinaryWrite, AddHeader, Clear, End [Obsolete])
+   - `HttpHandlerServer` (MapPath, HtmlEncode/Decode, UrlEncode/Decode)
+6. **Session State** — Using `[RequiresSessionState]` attribute, session configuration, `GetObject<T>()`/`SetObject<T>()` extensions
+7. **What's Not Supported** — Clear list with workarounds for:
+   - `Response.End()` → use `return`
+   - `Server.Transfer()`/`Server.Execute()` → not supported, refactor as service
+   - `Application["key"]` → use DI singleton or `IMemoryCache`
+   - `context.Cache` → migrate to `IMemoryCache`
+   - Complex `Request.Files` scenarios → documented with `IFormFile` equivalent
+8. **Interaction with AshxHandlerMiddleware** — How migrated handlers bypass 410 Gone response
+9. **Dependency Injection** — Constructor injection support with examples
+10. **Testing** — `TestServer`-based unit test example
+11. **Common Patterns** — JSON POST handler, authenticated handler with `.RequireAuthorization()`
+12. **Troubleshooting** — Common issues and solutions (404, session null, Response.End() warning, DI failures, file uploads, CORS)
+13. **Summary** — Quick recap: 6 mechanical changes, familiar API, modern routing, DI support, session state support
+
+**Style & format:**
+- Written for Web Forms developers learning Blazor
+- Before/after code examples side-by-side or sequential
+- Admonitions (!!!note, !!!warning, !!!tip) for important callouts
+- Complete, compilable code samples
+- Encouraging tone — emphasizes minimal rewrite burden
+- Follows existing BWFC doc style (consistent with DeprecationGuidance.md, Strategies.md)
+
+**Navigation updated:** `mkdocs.yml` — added "Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md" after User Controls, before migration readiness checklist
+
+**Design decision:** Placed in Migration section after User Controls and before Readiness checklist, making it discoverable for developers working through migration guides sequentially. Handler migration is a mid-to-late migration concern (after pages/controls are converted) but high-value for API-heavy applications.
+
+**Reference documents:** Built on Forge's `forge-ashx-handler-base-class.md` specification (sections R1-R10, before/after examples in R5, 6-mechanical-changes pattern). Spec defined: explicit path registration, convention-based routing, multi-path chaining, API surface, session state, unsupported patterns, and interaction with existing `AshxHandlerMiddleware`.
 
 ### Ajax Control Toolkit Extender Documentation (2026-03-15)
 
@@ -239,6 +299,62 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 - CollapsiblePanelExtender ScrollContents property is subtle — pair it with ExpandedSize limit in examples to make the behavior obvious
 - FAQ accordion is the most powerful use case for CollapsiblePanelExtender — lead with that to show power
 - Drag handle examples should show visual distinction (darker background, cursor change) to teach UX best practices
+
+### Component Health Dashboard Documentation (Current Session)
+
+**Task:** Create MkDocs documentation page for the Component Health Dashboard per PRD §6.4.
+
+**Delivered:** `docs/dashboard.md` — comprehensive 9 KB documentation page covering:
+
+**Content structure:**
+1. **Overview** — Explains what the dashboard measures and why (6 dimensions, 52 tracked components)
+2. **How to Access** — Live dashboard at `/dashboard` in sample app; static snapshot in docs
+3. **Scoring Model** — 6-dimensional scoring table with rationale:
+   - Property Parity (30%) — Most critical: developers need the properties they use
+   - Event Parity (15%) — Important but fewer events than properties
+   - Has bUnit Tests (20%) — Untested components are unreliable
+   - Has Documentation (15%) — Table-stakes for open-source
+   - Has Sample Page (10%) — Shows usage but less critical
+   - Implementation Status (10%) — Sanity check (Complete/Stub/Deferred)
+4. **Reading the Dashboard** — User-focused guidance:
+   - Color coding: 🟢 Green (≥90%), 🟡 Yellow (70-89%), 🔴 Red (<70%)
+   - Fraction display: "7/8" means 7 of 8 expected properties (why numerator/denominator matters)
+   - N/A handling: baseline not yet curated (excluded from weighted average)
+   - Binary indicators: ✅/❌ for tests, docs, samples
+5. **What Counts (and Doesn't)** — Detailed counting rules from PRD §2:
+   - Component-specific properties only (stops at base classes)
+   - EventCallback parameters are events, not properties
+   - RenderFragments excluded (Blazor infrastructure)
+   - Infrastructure parameters excluded (AdditionalAttributes, CascadingParameter, Inject, Obsolete)
+6. **Maintaining Baselines** — Operational guidance:
+   - When adding a component: add to `dev-docs/reference-baselines.json`
+   - When counts seem wrong: verify against MSDN .NET Fx 4.8 API docs
+   - Link to PRD for detailed counting rules (§2)
+7. **Glossary** — Quick reference for key terms (Expected, Implemented, Parity, Baseline, etc.)
+8. **Next Steps** — Action items (run dashboard, improve components, add baselines)
+
+**Key design decisions:**
+- **Tone:** Empathetic to developers, focuses on "why" each metric matters
+- **Accuracy:** All content derives directly from PRD §§1–7; no interpretation beyond the PRD
+- **Accessibility:** Glossary + cross-references to PRD sections for those needing deeper understanding
+- **Actionability:** "Maintaining Baselines" section gives developers concrete steps, not abstract guidance
+- **Link strategy:** References PRD §2 for detailed counting rules instead of duplicating 40+ lines of rules
+
+**Navigation update:** Added to `mkdocs.yml` as top-level nav entry immediately after "Home," positioning it as a key diagnostic tool alongside component documentation.
+
+**File:** `docs/dashboard.md` (9,010 bytes)  
+**Branch:** Ready for commit with co-authored-by trailer
+
+**Style alignment:**
+- Matches existing BWFC doc patterns: problem → solution → examples/tables
+- Uses Material theme formatting: admonitions, markdown tables, links
+- Tone matches Button.md and migration guides: practical, Web Forms-aware, developer-focused
+
+**Learnings:**
+- PRD §4.2 weight rationale needed clear translation to "why developers care" (property fidelity = migration success; tests = reliability)
+- N/A handling is subtle: developers need to know "missing baseline" ≠ "broken implementation"
+- Terminology matters: "component-specific" vs "base class" vs "infrastructure" — glossary prevents confusion
+- Reference baselines are the bottleneck: good docs can't overcome missing baseline data (links to MSDN, not invented)
 - Partial visibility pattern (CollapsedSize > 0) is underutilized; showcase it as a way to show "preview" of collapsed content
 
 ### Ajax Control Toolkit L1 Migration Skill Document (2026-03-XX)
@@ -335,5 +451,8 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 **Next Steps (for Cyclops/Rogue):**
 - Ensure L1 script uses this skill doc as reference when auditing/enhancing ACT handling
 - L2 agents should consult per-component docs when troubleshooting ACT issues
+
+
+
 
 

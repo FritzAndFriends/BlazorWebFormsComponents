@@ -332,5 +332,5 @@ The SlideShowExtender requires **InteractiveServer** render mode:
 ## See Also
 
 - [Ajax Control Toolkit Overview](index.md) — How extenders work and render mode requirements
-- [Image Component](../WebControls/Image.md) — The Image control
+- Image Component — The Image control (documentation coming soon)
 - Original Ajax Control Toolkit: https://www.asp.net/ajax/ajaxcontroltoolkit

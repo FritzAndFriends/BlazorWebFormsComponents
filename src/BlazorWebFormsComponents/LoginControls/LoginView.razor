@@ -1,9 +1,17 @@
-﻿@inherits BaseStyledComponent
+﻿@inherits BaseWebFormsComponent
+@using Microsoft.AspNetCore.Components.Authorization
 
-<div id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip">
-	<CascadingValue Name="LoginView" Value="this">
-		@ChildContent
-	</CascadingValue>
+@* Phase 1: Render RoleGroups fragment so child RoleGroup components self-register *@
+<CascadingValue Name="LoginView" Value="this">
+	@RoleGroups
+</CascadingValue>
 
-	@GetView()
-</div>
+@* Phase 2: Delegate to AuthorizeView for auth state management *@
+<AuthorizeView>
+	<Authorized Context="authState">
+		@GetAuthenticatedView(authState.User)
+	</Authorized>
+	<NotAuthorized>
+		@AnonymousTemplate
+	</NotAuthorized>
+</AuthorizeView>

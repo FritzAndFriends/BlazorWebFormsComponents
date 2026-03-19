@@ -108,6 +108,6 @@ namespace BlazorWebFormsComponents
 			await OnSelectedIndexChanged.InvokeAsync(e);
 		}
 
-		private string GetInputId(int index) => $"{_groupName}_{index}";
+		private string GetInputId(int index) => !string.IsNullOrEmpty(ClientID) ? $"{ClientID}_{index}" : null;
 	}
 }

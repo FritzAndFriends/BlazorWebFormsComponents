@@ -1,5 +1,3 @@
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims;
 @using Moq;
 
 @code {
@@ -9,14 +7,8 @@
 	[Fact]
 	public void LoginStatus_LogoutEvent_FiresBothEvents()
 	{
-		var principal = new ClaimsPrincipal();
-		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "James Bond") }, "Test authentication");
-		principal.AddIdentity(identity);
-
-		var autheMock = new Mock<AuthenticationStateProvider>();
-		autheMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
-
-		Services.AddSingleton<AuthenticationStateProvider>(autheMock.Object);
+		var authContext = this.AddAuthorization();
+		authContext.SetAuthorized("James Bond");
 
 		var navMock = new Mock<NavigationManager>();
 		Services.AddSingleton<NavigationManager>(navMock.Object);

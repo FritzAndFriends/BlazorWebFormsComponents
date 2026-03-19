@@ -11,11 +11,17 @@ builder.WebHost.UseStaticWebAssets();
 
 builder.Services.AddBlazorWebFormsComponents();
 
+// Register the Component Health Dashboard diagnostic service.
+// Navigate from the sample app content root up to the repository root.
+var solutionRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", ".."));
+builder.Services.AddComponentHealthDashboard(solutionRoot);
+
 var services = builder.Services;
 
 services.AddRazorComponents()
     .AddInteractiveServerComponents();
 services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
+services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 

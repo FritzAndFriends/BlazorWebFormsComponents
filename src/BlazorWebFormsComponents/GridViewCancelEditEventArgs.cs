@@ -11,5 +11,10 @@ namespace BlazorWebFormsComponents
 		{
 			RowIndex = rowIndex;
 		}
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

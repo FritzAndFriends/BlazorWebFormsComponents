@@ -18,6 +18,8 @@
 | Jubilee | Sample Writer | `.ai-team/agents/jubilee/charter.md` | ✅ Active |
 | Rogue | QA Analyst | `.ai-team/agents/rogue/charter.md` | ✅ Active |
 | Colossus | Integration Test Engineer | `.ai-team/agents/colossus/charter.md` | ✅ Active |
+| Psylocke | Skills Engineer | `.ai-team/agents/psylocke/charter.md` | ✅ Active |
+| Bishop | Migration Tooling Dev | `.ai-team/agents/bishop/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 

@@ -53,8 +53,8 @@
 			new ListItem("Test", "t")
 		};
 
-		// Act
-		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
+		// Act — use developer ID so stable IDs are generated
+		var cut = Render(@<RadioButtonList ItemType="object" ID="TestList" StaticItems="items" />);
 
 		// Assert
 		var input = cut.Find("input[type='radio']");
@@ -64,6 +64,7 @@
 		var labelFor = label.GetAttribute("for");
 		
 		inputId.ShouldNotBeNullOrEmpty();
+		inputId.ShouldBe("TestList_0");
 		labelFor.ShouldBe(inputId);
 	}
 
@@ -78,19 +79,22 @@
 			new ListItem("C", "c")
 		};
 
-		// Act
-		var cut = Render(@<RadioButtonList ItemType="object" StaticItems="items" />);
+		// Act — use developer ID for stable, predictable IDs
+		var cut = Render(@<RadioButtonList ItemType="object" ID="TestList" StaticItems="items" />);
 
 		// Assert
 		var inputs = cut.FindAll("input[type='radio']");
 		var ids = inputs.Select(i => i.GetAttribute("id")).ToList();
 		
-		// All IDs should be unique
+		// All IDs should be unique and follow the pattern TestList_0, TestList_1, TestList_2
 		ids.Distinct().Count().ShouldBe(3);
+		ids[0].ShouldBe("TestList_0");
+		ids[1].ShouldBe("TestList_1");
+		ids[2].ShouldBe("TestList_2");
 		
 		// All labels should reference correct inputs
 		var labels = cut.FindAll("label");
-		for (int i = 0; i < labels.Count; i++)
+		for (var i = 0; i < labels.Count; i++)
 		{
 			labels[i].GetAttribute("for").ShouldBe(ids[i]);
 		}

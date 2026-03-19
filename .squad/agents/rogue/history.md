@@ -1,9 +1,15 @@
-# Project Context
+﻿# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
+
+## Active Decisions & Alerts
+
+📌 **Team update (2026-03-17):** HttpHandlerBase handler tests validated — 94 tests passing, 1 test fixed (HttpMethod_DefaultIsGet bad assumption). No implementation bugs found; adapter architecture verified. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base. — decided by Rogue
+
+📌 **Team update (2026-03-17):** Rogue wrote 11 bUnit tests for GUID ID rendering (#471). New RadioButton/IDRendering.razor (6 tests), enhanced CheckBox/IDRendering.razor (+3 tests). All tests pass; integrated into regression suite. — decided by Rogue
 
 ## Learnings
 
@@ -209,3 +215,92 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 **Test files:** `src/BlazorWebFormsComponents.Test/ModalPopupExtender/ModalPopupExtenderTests.razor` (28 tests), `src/BlazorWebFormsComponents.Test/CollapsiblePanelExtender/CollapsiblePanelExtenderTests.razor` (32 tests).
 
+
+
+### Component Health Dashboard — Counting Verification Tests (2026-07-25)
+
+**39 tests created in** `src/BlazorWebFormsComponents.Test/Diagnostics/ComponentHealthCountingTests.cs` verifying PRD §5.4 counting algorithm against real BWFC types. All 39 pass.
+
+**Test categories (matching PRD §10 acceptance criteria):**
+- AC-1: Button = 8 props, 2 events (PRD said ~7 — PostBackUrl from ButtonBaseComponent counts; see findings)
+- AC-2: GridView = 21 props, 10 events (PRD said ~18; all 21 are legitimate)
+- AC-3: Repeater = 0 props, 0 events (all RenderFragment templates correctly excluded)
+- AC-4: Generic type name stripping (backtick removal) works for GridView, Repeater, ListView, DataList
+- AC-5: 15 base class properties (ID, CssClass, BackColor, etc.) verified absent from Button, Label, TextBox, Panel
+- AC-6: EventCallback disjointness — no parameter appears in both prop and event lists across 20 components
+- AC-7: RenderFragment exclusion — 12 GridView templates excluded; 5 Repeater templates excluded
+- AC-8: [Obsolete] exclusion — Button's PostBackUrl override skipped; base obsolete params never counted
+- AC-9: AdditionalAttributes excluded across 20 component spot-check
+- AC-10: Intermediate base (ButtonBaseComponent) properties counted for Button — Text, CausesValidation, etc.
+- AC-11: CascadingParameter exclusion — Coordinator (protected, so excluded by visibility) and CascadedTheme
+
+**Key findings (documented in .squad/decisions/inbox/rogue-counting-findings.md):**
+- PRD §2.7 has off-by-one for Button (table shows 8, text says 7)
+- GridView actual count is 21 properties, not ~18
+- ButtonBaseComponent.Coordinator is `protected` — excluded by visibility before [CascadingParameter] check fires
+- Algorithm uses `BWF =` namespace alias to avoid test project folder name conflicts (Button/, Label/, etc.)
+
+**Patterns:** xUnit [Fact]/[Theory], Shouldly assertions, `typeof(BWF.Button)` aliasing, `BwfAssembly` static field for reflection, `GetParameterDetails()` helper returns categorized lists with skip reasons for diagnostic messages.
+
+### Issue #471 — GUID-based ID Fix Tests (2026-03-16)
+
+**11 bUnit tests verifying developer-set IDs render correctly (no GUIDs) for CheckBox, RadioButton, FileUpload, and RadioButtonList.**
+
+**New file: RadioButton/IDRendering.razor (6 tests):**
+- RadioButton_WithID_RendersIDOnInput — developer ID used directly on input element
+- RadioButton_WithID_LabelForMatchesInputId — label for=developer ID (accessibility)
+- RadioButton_WithoutID_RendersGeneratedID — no crash, generated fallback exists
+- RadioButton_WithoutID_LabelStillLinked — label-for matches generated ID
+- RadioButton_WithID_NoGuidInRenderedId — regex-verified: no GUID pattern in rendered ID
+- RadioButton_WithID_NameAttributeUsesGroupNameWhenSet — name=GroupName, not ID
+
+**Enhanced file: CheckBox/IDRendering.razor (+3 tests, now 5 total):**
+- CheckBox_WithID_LabelForMatchesInputId — label for=developer ID
+- CheckBox_WithID_NoGuidInRenderedId — regex GUID check
+- CheckBox_WithoutID_LabelStillLinked — generated ID label-for association
+
+**Pre-existing tests confirmed solid:**
+- FileUpload/IdRendering.razor (2 tests) — exact ID and no-ID behavior
+- RadioButtonList/StableIds.razor (8 tests) — _0/_1 suffix pattern, name attribute, label-for, multiple layouts
+
+**All 11 new/enhanced tests PASS.** Written proactively ahead of Cyclops's fix. Tests describe expected Web Forms behavior — may need minor adjustments once implementation lands.
+
+**Key patterns:**
+- Regex GUID detection: `[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-...` for anti-GUID assertions
+- Label-for accessibility: always verify label.for == input.id
+- _Imports.razor provides `@inherits BlazorWebFormsTestContext` — no need for explicit @inherits in test files
+- `@using Shouldly` added locally when not using _Imports default assertions
+
+### ASHX/AXD Middleware Tests — Issue #423 (2026-03-17)
+
+**46 integration tests for UseBlazorWebFormsComponents middleware (all pass).** Test file: `src/BlazorWebFormsComponents.Test/Middleware/AspxRewriteMiddlewareTests.cs`. Uses `Microsoft.AspNetCore.TestHost` + `TestServer` for full pipeline integration testing — first middleware test file in the project.
+
+**Test categories (46 total):**
+- .aspx rewriting regression (5 tests): 301 redirect, Default.aspx→root, query string preservation, subdirectory Default.aspx, aspx works with ashx/axd disabled
+- .ashx handler interception (7 tests): 410 Gone default, descriptive body, query string, mixed case (Theory×3), subdirectory path, disabled passthrough
+- .ashx custom redirect mappings (6 tests): 301 redirect, Location header, case-insensitive lookup, unmapped returns 410, multiple mappings, query string preservation on redirect
+- .axd resource interception (12 tests): 404 for WebResource/ScriptResource/Trace (Theory×3), ChartImg.axd 410 Gone, query strings, mixed case (Theory×3 for 404, Theory×3 for 410), unknown .axd returns 404, disabled passthrough, ChartImg disabled passthrough
+- Edge cases (16 tests): ashx/axd substrings passthrough, .html/.api/root passthrough, all disabled passthrough, file-name-only paths, .ashx.bak/.axd.old non-extension paths, 404 empty body, ChartImg descriptive body, subdirectory ChartImg
+
+**Key patterns:** TestServer creates full ASP.NET Core pipeline via `UseBlazorWebFormsComponents` extension. Terminal `app.Run` returns 200 "PASSTHROUGH" — any request reaching it means middleware didn't intercept. `CreateServerAndClient` helper for custom options with proper disposal. Added `Microsoft.AspNetCore.TestHost 10.0.5` package to test csproj.
+
+**Middleware implementation review:** AshxHandlerMiddleware uses `StringComparer.OrdinalIgnoreCase` dictionary for case-insensitive custom mappings. AxdHandlerMiddleware special-cases ChartImg.axd for 410 Gone, all others get 404. Both use `path.EndsWith` with `OrdinalIgnoreCase` — correct for URL path matching.
+
+
+### HttpHandler Test Coverage (2026-03-23, Issue #473)
+
+**Handler test suite validated (94 tests, all pass):** Tests for HttpHandlerBase, HttpHandlerContext, HttpHandlerRequest, HttpHandlerResponse, HttpHandlerServer, HandlerEndpointExtensions, RequiresSessionStateAttribute. Cyclops created 7 implementation files in src/BlazorWebFormsComponents/Handlers/. Session interrupted during test creation. All files compile cleanly; tests pass after fixing one incorrect default assumption.
+
+**Test fix:** HttpHandlerRequestTests.HttpMethod_DefaultIsGet was wrong — DefaultHttpContext.Request.Method is empty string by default, not "GET". Changed test to explicitly set Method="POST" and verify it returns. Test name changed to HttpMethod_ReturnsHttpMethod. This is a test issue, not an implementation bug.
+
+**Key patterns:**
+- DefaultHttpContext doesn't set default HTTP method — always empty string until explicitly set
+- Use Microsoft.AspNetCore.TestHost for integration-style handler tests (pattern from existing Middleware tests)
+- Project enforces var over explicit types (IDE0007 as error) — always use var declarations
+- Test project builds depend on core library compiling — build test project validates implementation
+
+**File paths:**
+- Implementation: src/BlazorWebFormsComponents/Handlers/*.cs (7 files)
+- Tests: src/BlazorWebFormsComponents.Test/Handlers/*.cs (5 test files)
+- Build: dotnet build src\BlazorWebFormsComponents.Test\BlazorWebFormsComponents.Test.csproj validates all
+- Run handler tests: dotnet test --filter "FullyQualifiedName~Handlers"

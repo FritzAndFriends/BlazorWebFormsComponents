@@ -14,8 +14,8 @@
 	[Fact]
 	public void CheckBox_WithText_LabelHasForAttribute()
 	{
-		// Arrange & Act
-		var cut = Render(@<CheckBox Text="Accept terms" />);
+		// Arrange & Act — use developer ID to verify label-input linkage
+		var cut = Render(@<CheckBox ID="terms" Text="Accept terms" />);
 
 		// Assert
 		var input = cut.Find("input");
@@ -23,7 +23,7 @@
 		var inputId = input.GetAttribute("id");
 		var labelFor = label.GetAttribute("for");
 
-		inputId.ShouldNotBeNullOrEmpty();
+		inputId.ShouldBe("terms");
 		labelFor.ShouldBe(inputId);
 	}
 

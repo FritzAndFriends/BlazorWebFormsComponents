@@ -342,6 +342,6 @@ The ValidatorCalloutExtender requires **InteractiveServer** render mode:
 
 - [Ajax Control Toolkit Overview](index.md) — How extenders work and render mode requirements
 - [TextBox Component](../EditorControls/TextBox.md) — The TextBox control
-- [RequiredFieldValidator](../Validators/RequiredFieldValidator.md) — Validator control
+- RequiredFieldValidator — Validator control (documentation coming soon)
 - [PasswordStrength](PasswordStrength.md) — Password feedback extender
 - Original Ajax Control Toolkit: https://www.asp.net/ajax/ajaxcontroltoolkit

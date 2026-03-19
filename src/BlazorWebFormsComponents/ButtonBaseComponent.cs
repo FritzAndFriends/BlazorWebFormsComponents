@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using BlazorWebFormsComponents.Validations;
+using System;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
@@ -33,7 +33,7 @@ namespace BlazorWebFormsComponents
 		public string OnClientClick { get; set; }
 
 		[Parameter]
-		public EventCallback<MouseEventArgs> OnClick { get; set; }
+		public EventCallback<EventArgs> OnClick { get; set; }
 
 		[Parameter]
 		public EventCallback<CommandEventArgs> OnCommand { get; set; }
@@ -57,7 +57,7 @@ namespace BlazorWebFormsComponents
 			}
 			else
 			{
-				await OnClick.InvokeAsync(new MouseEventArgs());
+				await OnClick.InvokeAsync(EventArgs.Empty);
 			}
 		}
 	}

@@ -167,3 +167,15 @@
 - **Audit markers:** `data-audit-control` attributes applied (ModalPopupExtender-1 through -5, CollapsiblePanelExtender-1 through -6).
 - **Build verified:** 0 errors, warnings are pre-existing BL0005 from other pages.
 
+### Component Health Dashboard Page (2026-07-25)
+
+- **Created `Components/Pages/Dashboard.razor`** — Full diagnostic dashboard at `/dashboard` route showing health scores for all tracked BWFC components.
+- **UX features:** Category-grouped tables with worst-first sorting, color-coded scores (green ≥90%, yellow 70-89%, red <70%), fraction display for props/events (e.g. "7/8"), binary ✅/❌ for tests/docs/samples, "N/A" for missing baselines.
+- **Filtering:** Category dropdown, status filter (Complete/Stub/Deferred/NotStarted), sort by Score/Name/Props/Events, show/hide deferred toggle (default: hidden).
+- **Service registration:** Added `AddComponentHealthDashboard(solutionRoot)` call in `Program.cs`. Solution root computed as two directories up from `ContentRootPath`.
+- **ComponentCatalog.cs updated** — Added Dashboard entry under new "Diagnostics" category. NavMenu auto-populates.
+- **No InteractiveServer needed** — Dashboard uses SSR (static server rendering) since it only reads from a singleton service on initialization; no interactive features needed.
+- **Key pattern:** `ComponentHealthService` is registered as singleton via `AddComponentHealthDashboard()` extension method. It takes `solutionRoot` path to locate `dev-docs/reference-baselines.json`, test files, docs, and `ComponentCatalog.cs`.
+- **Build verified:** 0 errors, all warnings pre-existing BL0005.
+
+

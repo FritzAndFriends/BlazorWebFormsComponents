@@ -1,0 +1,90 @@
+@using BlazorWebFormsComponents.DataBinding
+
+@code {
+
+	// ─── P1-8: SelectMethodAsync parameter ──────────────────────────────
+	// SelectMethodAsync should accept Func<Task<IEnumerable<T>>> for async data loading.
+	// It should take precedence over synchronous SelectMethod and SelectItems.
+
+	int _syncCallCount;
+	int _asyncCallCount;
+
+	[Fact]
+	public void SelectMethodAsync_Works_WithAsyncDataLoading()
+	{
+		_asyncCallCount = 0;
+		var widgets = Widget.SimpleWidgetList.Take(4).ToArray();
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectMethodAsync="@(async (int maxRows, int startRowIndex, string sortBy) => { _asyncCallCount++; await Task.Yield(); return widgets.AsEnumerable(); })">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// Wait for async data to load and re-render
+		cut.WaitForState(() => cut.FindAll("tbody tr").Count > 1, TimeSpan.FromSeconds(2));
+
+		_asyncCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectMethodAsync should be invoked");
+		cut.FindAll("tbody tr").Count.ShouldBe(4, "Data from SelectMethodAsync should render");
+	}
+
+	[Fact]
+	public void SelectMethodAsync_Takes_Precedence_Over_SyncSelectMethod()
+	{
+		_syncCallCount = 0;
+		_asyncCallCount = 0;
+		var asyncData = new[] { new Widget { Id = 200, Name = "AsyncItem" } };
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectMethodAsync="@(async (int maxRows, int startRowIndex, string sortBy) => { _asyncCallCount++; await Task.Yield(); return asyncData.AsEnumerable(); })"
+				SelectMethod="GetWidgetsSync">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// Wait for async data to load
+		cut.WaitForState(() => _asyncCallCount >= 1, TimeSpan.FromSeconds(2));
+
+		_asyncCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectMethodAsync should be invoked");
+		_syncCallCount.ShouldBe(0, "Sync SelectMethod should NOT be invoked when async is set");
+
+		cut.Find("tbody tr td").TextContent.ShouldContain("AsyncItem");
+	}
+
+	[Fact]
+	public void SelectMethodAsync_Takes_Precedence_Over_SelectItems()
+	{
+		_asyncCallCount = 0;
+		var syncItems = new[] { new Widget { Id = 1, Name = "SyncItem" } };
+		var asyncData = new[] { new Widget { Id = 2, Name = "AsyncItem" } };
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectMethodAsync="@(async (int maxRows, int startRowIndex, string sortBy) => { _asyncCallCount++; await Task.Yield(); return asyncData.AsEnumerable(); })"
+				SelectItems="@((int maxRows, int startRowIndex, string sortBy) => syncItems.AsEnumerable())">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		// Wait for async data to load
+		cut.WaitForState(() => _asyncCallCount >= 1, TimeSpan.FromSeconds(2));
+
+		_asyncCallCount.ShouldBeGreaterThanOrEqualTo(1);
+		cut.Find("tbody tr td").TextContent.ShouldContain("AsyncItem");
+	}
+
+	IQueryable<Widget> GetWidgetsSync(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		_syncCallCount++;
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}

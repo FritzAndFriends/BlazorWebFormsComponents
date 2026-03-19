@@ -3,6 +3,7 @@ using BlazorWebFormsComponents.DataBinding;
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +11,48 @@ namespace BlazorWebFormsComponents
 {
 	public partial class DataList<ItemType> : DataBoundComponent<ItemType>, IDataListStyleContainer
 	{
+		public DataList()
+		{
+			BubbledEvent += DataList_BubbledEvent;
+		}
+
+		private void DataList_BubbledEvent(object sender, System.EventArgs e)
+		{
+			if (e is CommandEventArgs cmd)
+			{
+				var args = new DataListCommandEventArgs(cmd.CommandName, cmd.CommandArgument, null) { Sender = cmd.Sender ?? this };
+
+				// Fire ItemCommand for all commands
+				var itemCommandHandler = OnItemCommand.HasDelegate ? OnItemCommand : ItemCommand;
+				if (itemCommandHandler.HasDelegate) { _ = itemCommandHandler.InvokeAsync(args); }
+
+				// Dispatch to specific command events based on CommandName
+				switch (cmd.CommandName?.ToLowerInvariant())
+				{
+					case "select":
+						var selHandler = OnSelectedIndexChanged.HasDelegate ? OnSelectedIndexChanged : SelectedIndexChanged;
+						if (selHandler.HasDelegate) { _ = selHandler.InvokeAsync(EventArgs.Empty); }
+						break;
+					case "edit":
+						var editHandler = OnEditCommand.HasDelegate ? OnEditCommand : EditCommand;
+						if (editHandler.HasDelegate) { _ = editHandler.InvokeAsync(args); }
+						break;
+					case "update":
+						var updateHandler = OnUpdateCommand.HasDelegate ? OnUpdateCommand : UpdateCommand;
+						if (updateHandler.HasDelegate) { _ = updateHandler.InvokeAsync(args); }
+						break;
+					case "delete":
+						var deleteHandler = OnDeleteCommand.HasDelegate ? OnDeleteCommand : DeleteCommand;
+						if (deleteHandler.HasDelegate) { _ = deleteHandler.InvokeAsync(args); }
+						break;
+					case "cancel":
+						var cancelHandler = OnCancelCommand.HasDelegate ? OnCancelCommand : CancelCommand;
+						if (cancelHandler.HasDelegate) { _ = cancelHandler.InvokeAsync(args); }
+						break;
+				}
+			}
+		}
+
 		private static readonly Dictionary<DataListEnum, string?> _GridLines = new Dictionary<DataListEnum, string?> {
 			{DataListEnum.None, null },
 			{DataListEnum.Horizontal, "rows" },
@@ -47,6 +90,96 @@ namespace BlazorWebFormsComponents
 		[Parameter] public bool UseAccessibleHeader { get; set; } = false;
 		[Parameter]
 		public EventCallback<DataListItemEventArgs> OnItemDataBound { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias (bare name) for OnItemDataBound.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListItemEventArgs> ItemDataBound { get; set; }
+
+		/// <summary>
+		/// Occurs when a command button within the DataList is clicked.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> ItemCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> OnItemCommand { get; set; }
+
+		/// <summary>
+		/// Occurs when the selected index changes.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> SelectedIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnSelectedIndexChanged { get; set; }
+
+		/// <summary>
+		/// Occurs when an Edit command is raised.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> EditCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for EditCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> OnEditCommand { get; set; }
+
+		/// <summary>
+		/// Occurs when an Update command is raised.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> UpdateCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for UpdateCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> OnUpdateCommand { get; set; }
+
+		/// <summary>
+		/// Occurs when a Delete command is raised.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> DeleteCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for DeleteCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> OnDeleteCommand { get; set; }
+
+		/// <summary>
+		/// Occurs when a Cancel command is raised.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> CancelCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for CancelCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListCommandEventArgs> OnCancelCommand { get; set; }
+
+		/// <summary>
+		/// Occurs when an item is created in the DataList control.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListItemEventArgs> ItemCreated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DataListItemEventArgs> OnItemCreated { get; set; }
 
 		private IList<ItemType> ElementIndex(int columns, IEnumerable<ItemType> items, DataListEnum direction)
 		{
@@ -102,6 +235,25 @@ namespace BlazorWebFormsComponents
 			base.OnInitialized();
 		}
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+			FireItemCreatedEvents();
+		}
+
+		private void FireItemCreatedEvents()
+		{
+			if (Items == null || !Items.Any()) return;
+
+			var handler = OnItemCreated.HasDelegate ? OnItemCreated : ItemCreated;
+			if (!handler.HasDelegate) return;
+
+			foreach (var item in Items)
+			{
+				_ = handler.InvokeAsync(new DataListItemEventArgs(item) { Sender = this });
+			}
+		}
+
 		protected string GetItemTypeAttribute()
 		{
 			if (AdditionalAttributes != null && AdditionalAttributes.TryGetValue("itemtype", out var value))
@@ -116,9 +268,10 @@ namespace BlazorWebFormsComponents
 			return string.IsNullOrEmpty(combined) ? null : combined;
 		}
 
-		protected virtual void ItemDataBound(DataListItemEventArgs e)
+		protected virtual void ItemDataBoundInternal(DataListItemEventArgs e)
 		{
-			OnItemDataBound.InvokeAsync(e);
+			var handler = OnItemDataBound.HasDelegate ? OnItemDataBound : ItemDataBound;
+			handler.InvokeAsync(e);
 		}
 	}
 }

@@ -275,5 +275,5 @@ The AlwaysVisibleControlExtender requires **InteractiveServer** render mode:
 ## See Also
 
 - [Ajax Control Toolkit Overview](index.md) — How extenders work and render mode requirements
-- [Panel Component](../LayoutControls/Panel.md) — The Panel control
+- Panel Component — The Panel control (documentation coming soon)
 - Original Ajax Control Toolkit: https://www.asp.net/ajax/ajaxcontroltoolkit

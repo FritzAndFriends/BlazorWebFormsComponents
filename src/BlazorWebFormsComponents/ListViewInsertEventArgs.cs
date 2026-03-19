@@ -20,5 +20,10 @@ namespace BlazorWebFormsComponents
 		/// Gets the item to be inserted.
 		/// </summary>
 		public object Item { get; set; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

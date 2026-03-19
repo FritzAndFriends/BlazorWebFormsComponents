@@ -16,6 +16,47 @@ namespace BlazorWebFormsComponents
 	public partial class DataGrid<ItemType> : DataBoundComponent<ItemType>, IRowCollection<ItemType>, IColumnCollection<ItemType>, IDataGridStyleContainer
 	{
 
+		public DataGrid()
+		{
+			BubbledEvent += DataGrid_BubbledEvent;
+		}
+
+		private void DataGrid_BubbledEvent(object sender, System.EventArgs e)
+		{
+			if (e is CommandEventArgs cmd)
+			{
+				var args = new DataGridCommandEventArgs
+				{
+					CommandName = cmd.CommandName,
+					CommandArgument = cmd.CommandArgument,
+					CommandSource = cmd.Sender ?? this
+				};
+
+				var itemCommandHandler = ItemCommand.HasDelegate ? ItemCommand : OnItemCommand;
+				if (itemCommandHandler.HasDelegate) { _ = itemCommandHandler.InvokeAsync(args); }
+
+				switch (cmd.CommandName?.ToLowerInvariant())
+				{
+					case "edit":
+						var editHandler = EditCommand.HasDelegate ? EditCommand : OnEditCommand;
+						if (editHandler.HasDelegate) { _ = editHandler.InvokeAsync(args); }
+						break;
+					case "update":
+						var updateHandler = UpdateCommand.HasDelegate ? UpdateCommand : OnUpdateCommand;
+						if (updateHandler.HasDelegate) { _ = updateHandler.InvokeAsync(args); }
+						break;
+					case "delete":
+						var deleteHandler = DeleteCommand.HasDelegate ? DeleteCommand : OnDeleteCommand;
+						if (deleteHandler.HasDelegate) { _ = deleteHandler.InvokeAsync(args); }
+						break;
+					case "cancel":
+						var cancelHandler = CancelCommand.HasDelegate ? CancelCommand : OnCancelCommand;
+						if (cancelHandler.HasDelegate) { _ = cancelHandler.InvokeAsync(args); }
+						break;
+				}
+			}
+		}
+
 		/// <summary>
 		///	Specify if the DataGrid component will autogenerate its columns
 		/// </summary>
@@ -191,9 +232,19 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<DataGridPageChangedEventArgs> PageIndexChanged { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for PageIndexChanged.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridPageChangedEventArgs> OnPageIndexChanged { get; set; }
+
+		/// <summary>
 		/// Fires when a sort header is clicked.
 		/// </summary>
 		[Parameter] public EventCallback<DataGridSortCommandEventArgs> SortCommand { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SortCommand.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridSortCommandEventArgs> OnSortCommand { get; set; }
 
 		/// <summary>
 		/// Fires when an item row is created.
@@ -201,14 +252,29 @@ namespace BlazorWebFormsComponents
 		[Parameter] public EventCallback<DataGridItemEventArgs> ItemCreated { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridItemEventArgs> OnItemCreated { get; set; }
+
+		/// <summary>
 		/// Fires after an item is data-bound.
 		/// </summary>
 		[Parameter] public EventCallback<DataGridItemEventArgs> ItemDataBound { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemDataBound.
+		/// </summary>
+		[Parameter] public EventCallback<DataGridItemEventArgs> OnItemDataBound { get; set; }
+
+		/// <summary>
 		/// Fires when the selected index changes.
 		/// </summary>
 		[Parameter] public EventCallback SelectedIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for SelectedIndexChanged.
+		/// </summary>
+		[Parameter] public EventCallback OnSelectedIndexChanged { get; set; }
 
 		#endregion
 
@@ -265,16 +331,31 @@ namespace BlazorWebFormsComponents
 		}
 
 		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> ItemCommand { get; set; }
+
+		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnItemCommand { get; set; }
+
+		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> EditCommand { get; set; }
 
 		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnEditCommand { get; set; }
 
 		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> CancelCommand { get; set; }
+
+		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnCancelCommand { get; set; }
 
 		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> UpdateCommand { get; set; }
+
+		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnUpdateCommand { get; set; }
+
+		[Parameter]
+		public EventCallback<DataGridCommandEventArgs> DeleteCommand { get; set; }
 
 		[Parameter]
 		public EventCallback<DataGridCommandEventArgs> OnDeleteCommand { get; set; }
@@ -287,7 +368,8 @@ namespace BlazorWebFormsComponents
 			if (Items == null) return;
 			CurrentPageIndex = newPageIndex;
 			var args = new DataGridPageChangedEventArgs(newPageIndex);
-			await PageIndexChanged.InvokeAsync(args);
+			var pageIndexChangedHandler = PageIndexChanged.HasDelegate ? PageIndexChanged : OnPageIndexChanged;
+			await pageIndexChangedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 
@@ -297,7 +379,8 @@ namespace BlazorWebFormsComponents
 		internal async Task Sort(string sortExpression)
 		{
 			var args = new DataGridSortCommandEventArgs(sortExpression, this);
-			await SortCommand.InvokeAsync(args);
+			var sortCommandHandler = SortCommand.HasDelegate ? SortCommand : OnSortCommand;
+			await sortCommandHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 

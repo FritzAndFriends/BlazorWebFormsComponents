@@ -36,6 +36,8 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 ## Team Updates (Current)
 
+📌 Team update (2026-03-17): #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100% passing. FileUpload already compliant. May need CheckBoxList audit. — decided by Cyclops
+
 📌 Team update (2026-02-26): WebFormsPage unified wrapper — inherits NamingContainer, adds Theme cascading — decided by Jeffrey T. Fritz, Forge
 📌 Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity — decided by Jeffrey T. Fritz
 📌 Team update (2026-02-26): M15 HTML fidelity strategy — full audit pipeline re-run assigned to Colossus — decided by Forge
@@ -182,4 +184,7 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - Smoke test already existed: `[InlineData("/ControlSamples/UpdatePanel")]` in `AjaxControl_Loads_WithoutErrors` Theory group (line 234, ControlSampleTests.cs)
 - 3 new interaction tests verify all three rendering modes (Block, ContentTemplate, Inline) and their interactive behaviors
 - All 8 UpdatePanel tests passing (5 smoke + 3 interaction)
+
+
+📌 Team update (2026-03-16): Playwright infrastructure confirmed shipping. Unblocks HTML Fidelity dimension for Component Health Dashboard v1. — Forge
 

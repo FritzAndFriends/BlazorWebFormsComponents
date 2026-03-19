@@ -208,6 +208,6 @@ The DragPanelExtender requires **InteractiveServer** render mode:
 ## See Also
 
 - [Ajax Control Toolkit Overview](index.md) — How extenders work and render mode requirements
-- [Panel Component](../LayoutControls/Panel.md) — The Panel control
+- Panel Component — The Panel control (documentation coming soon)
 - [ResizableControlExtender](ResizableControlExtender.md) — Make panels resizable
 - Original Ajax Control Toolkit: https://www.asp.net/ajax/ajaxcontroltoolkit

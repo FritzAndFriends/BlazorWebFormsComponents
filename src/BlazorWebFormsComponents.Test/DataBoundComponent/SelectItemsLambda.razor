@@ -1,0 +1,77 @@
+@using BlazorWebFormsComponents.DataBinding
+
+@code {
+
+	// ─── P1-7: SelectItems lambda-friendly parameter ────────────────────
+	// SelectItems should accept Func<IEnumerable<T>> (no out param) as an
+	// alternative to the SelectMethod delegate that requires out totalRowCount.
+	// SelectItems should take precedence over SelectMethod when both are set.
+
+	int _selectMethodCallCount;
+	int _selectItemsCallCount;
+
+	[Fact]
+	public void SelectItems_Works_With_Lambda()
+	{
+		_selectItemsCallCount = 0;
+		var widgets = Widget.SimpleWidgetList.Take(3).ToArray();
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectItems="@((int maxRows, int startRowIndex, string sortBy) => { _selectItemsCallCount++; return widgets.AsEnumerable(); })">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		_selectItemsCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectItems lambda should be invoked");
+		cut.FindAll("tbody tr").Count.ShouldBe(3, "Data from SelectItems should render");
+	}
+
+	[Fact]
+	public void SelectItems_Takes_Precedence_Over_SelectMethod()
+	{
+		_selectMethodCallCount = 0;
+		_selectItemsCallCount = 0;
+		var itemsData = new[] { new Widget { Id = 100, Name = "FromItems" } };
+
+		var cut = Render(
+			@<GridView ItemType="Widget" AutoGenerateColumns="false"
+				SelectItems="@((int maxRows, int startRowIndex, string sortBy) => { _selectItemsCallCount++; return itemsData.AsEnumerable(); })"
+				SelectMethod="GetWidgets">
+				<Columns>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		_selectItemsCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectItems should be invoked");
+		_selectMethodCallCount.ShouldBe(0, "SelectMethod should NOT be invoked when SelectItems is set");
+
+		// Verify data came from SelectItems
+		cut.Find("tbody tr td").TextContent.ShouldContain("FromItems");
+	}
+
+	[Fact]
+	public void SelectItems_Works_With_Repeater()
+	{
+		var items = new[] { new Widget { Id = 1, Name = "RepA" }, new Widget { Id = 2, Name = "RepB" } };
+
+		var cut = Render(
+			@<Repeater ItemType="Widget" Context="Item"
+				SelectItems="@((int maxRows, int startRowIndex, string sortBy) => items.AsEnumerable())">
+				<ItemTemplate><span class="rep-item">@Item.Name</span></ItemTemplate>
+			</Repeater>
+		);
+
+		cut.FindAll(".rep-item").Count.ShouldBe(2, "Repeater should render items from SelectItems");
+	}
+
+	IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+	{
+		_selectMethodCallCount++;
+		totalRowCount = Widget.SimpleWidgetList.Length;
+		return Widget.SimpleWidgetList.AsQueryable();
+	}
+}
