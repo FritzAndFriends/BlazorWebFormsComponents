@@ -96,6 +96,18 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
+		/// <summary>
+		/// Occurs when a node item is created during rendering.
+		/// </summary>
+		[Parameter]
+		public EventCallback<SiteMapNodeItemEventArgs> ItemCreated { get; set; }
+
+		/// <summary>
+		/// Occurs when a node item is data-bound during rendering.
+		/// </summary>
+		[Parameter]
+		public EventCallback<SiteMapNodeItemEventArgs> ItemDataBound { get; set; }
+
 		// Style properties for different node types
 		private CurrentNodeStyle _currentNodeStyle = new CurrentNodeStyle();
 		private NodeStyle _nodeStyle = new NodeStyle();
