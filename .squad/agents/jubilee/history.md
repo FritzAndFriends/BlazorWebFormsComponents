@@ -178,4 +178,20 @@
 - **Key pattern:** `ComponentHealthService` is registered as singleton via `AddComponentHealthDashboard()` extension method. It takes `solutionRoot` path to locate `dev-docs/reference-baselines.json`, test files, docs, and `ComponentCatalog.cs`.
 - **Build verified:** 0 errors, all warnings pre-existing BL0005.
 
+### AfterBlazorServerSide Navigation UX Changes (2026-03-15)
+
+**Summary:** Two targeted changes to improve component catalog navigation in the sample app:
+
+1. **Alphabetized components in all categories** — Modified `ComponentCatalog.GetByCategory()` to add `.OrderBy(c => c.Name)` to the LINQ chain. This sorts components alphabetically within each category, fixing the out-of-order AJAX section and ensuring consistent organization across all categories.
+
+2. **AJAX category collapsed on desktop by default** — Modified `NavMenu.razor` method `CheckIfDesktopAndExpandCategories()` to exclude the AJAX category from automatic expansion on desktop. The AJAX section now starts collapsed (too many items), while all other categories expand normally. Mobile behavior unchanged (expands only the category containing the current page).
+
+**Why these changes matter:** The component catalog had grown to 20+ AJAX-related controls, making the desktop navigation cluttered. Alphabetization improves discoverability within each section. Collapsing AJAX by default on desktop keeps the nav compact while still maintaining full access (users can expand when needed).
+
+**Files modified:**
+- `samples/AfterBlazorServerSide/ComponentCatalog.cs` (line 193-195)
+- `samples/AfterBlazorServerSide/Components/Layout/NavMenu.razor` (line 86-93)
+
+**Build verification:** `dotnet build` completed with 0 errors, pre-existing warnings only.
+
 
