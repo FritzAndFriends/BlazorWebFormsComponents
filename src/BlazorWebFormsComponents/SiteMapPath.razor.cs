@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BlazorWebFormsComponents.Enums;
 
 using Microsoft.AspNetCore.Components;
@@ -171,10 +172,35 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		protected List<SiteMapNode> NavigationPath { get; private set; } = new List<SiteMapNode>();
 
-		protected override void OnParametersSet()
+		private string _lastBuiltUrl;
+
+		protected override async Task OnParametersSetAsync()
 		{
-			base.OnParametersSet();
+			await base.OnParametersSetAsync();
 			BuildNavigationPath();
+
+			// Fire lifecycle events only when the URL changes
+			var url = CurrentUrl ?? string.Empty;
+			if (url != _lastBuiltUrl && NavigationPath.Count > 0)
+			{
+				_lastBuiltUrl = url;
+
+				if (ItemCreated.HasDelegate)
+				{
+					foreach (var node in NavigationPath)
+					{
+						await ItemCreated.InvokeAsync(new SiteMapNodeItemEventArgs(node));
+					}
+				}
+
+				if (ItemDataBound.HasDelegate)
+				{
+					foreach (var node in NavigationPath)
+					{
+						await ItemDataBound.InvokeAsync(new SiteMapNodeItemEventArgs(node));
+					}
+				}
+			}
 		}
 
 		private void BuildNavigationPath()
