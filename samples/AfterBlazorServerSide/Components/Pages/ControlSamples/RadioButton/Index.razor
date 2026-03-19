@@ -1,0 +1,79 @@
+@page "/ControlSamples/RadioButton"
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+
+<h2>RadioButton Component Samples</h2>
+
+<Nav></Nav>
+
+<h3>Basic RadioButton</h3>
+<div data-audit-control="RadioButton-1">
+    <RadioButton ID="rdoSingle" Text="Option 1" GroupName="basicGroup" @bind-Checked="option1Selected" />
+    <br />
+    <RadioButton ID="rdoOption2" Text="Option 2" GroupName="basicGroup" @bind-Checked="option2Selected" />
+</div>
+<p>Option 1 Selected: <strong>@option1Selected</strong></p>
+<p>Option 2 Selected: <strong>@option2Selected</strong></p>
+
+<h3>Pre-checked RadioButton</h3>
+<div data-audit-control="RadioButton-2">
+    <RadioButton Text="Agree" GroupName="agreeGroup" Checked="true" />
+    <br />
+    <RadioButton Text="Disagree" GroupName="agreeGroup" />
+</div>
+
+<h3>RadioButton with Text Alignment</h3>
+<div data-audit-control="RadioButton-3">
+    <p><em>Text on right (default)</em></p>
+    <RadioButton Text="Label on right" GroupName="alignGroup1" TextAlign="TextAlign.Right" />
+    <br />
+    <br />
+    <p><em>Text on left</em></p>
+    <RadioButton Text="Label on left" GroupName="alignGroup2" TextAlign="TextAlign.Left" />
+</div>
+
+<h3>Disabled RadioButton</h3>
+<div data-audit-control="RadioButton-4">
+    <RadioButton Text="Available option" GroupName="disabledGroup" Enabled="true" />
+    <br />
+    <RadioButton Text="Disabled option" GroupName="disabledGroup" Enabled="false" Checked="true" />
+</div>
+
+<h3>RadioButton without Text</h3>
+<div data-audit-control="RadioButton-5">
+    <RadioButton GroupName="noTextGroup" @bind-Checked="noTextChecked" />
+    <p>Checked: <strong>@noTextChecked</strong></p>
+</div>
+
+<h3>Styled RadioButton</h3>
+<div data-audit-control="RadioButton-6">
+    <RadioButton Text="Styled option" GroupName="styledGroup" BackColor="LightYellow" ForeColor="DarkGreen" />
+</div>
+
+<h3>Event Handling</h3>
+<div data-audit-control="RadioButton-7">
+    <RadioButton Text="Trigger event" GroupName="eventGroup" OnCheckedChanged="HandleRadioChanged" />
+    <p>Event fired: <strong>@radioEventCount</strong> times</p>
+</div>
+
+<hr />
+
+<p>Code:</p>
+<code>
+&lt;RadioButton Text="Option 1" GroupName="basicGroup" @@bind-Checked="option1Selected" /&gt;<br/>
+&lt;RadioButton Text="Option 2" GroupName="basicGroup" @@bind-Checked="option2Selected" /&gt;<br/>
+&lt;RadioButton Text="Label on left" GroupName="alignGroup" TextAlign="TextAlign.Left" /&gt;<br/>
+&lt;RadioButton Text="Disabled option" GroupName="disabledGroup" Enabled="false" Checked="true" /&gt;
+</code>
+
+@code {
+    private bool option1Selected = true;
+    private bool option2Selected = false;
+    private bool noTextChecked = false;
+    private int radioEventCount = 0;
+
+    private void HandleRadioChanged(ChangeEventArgs e)
+    {
+        radioEventCount++;
+    }
+}
