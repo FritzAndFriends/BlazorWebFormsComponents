@@ -1,0 +1,19 @@
+@code {
+
+	[Fact]
+	public void HiddenField_WithID_RendersIdOnInput()
+	{
+		var cut = Render(@<HiddenField Value="token123" ID="myHidden" />);
+
+		cut.Find("input").GetAttribute("id").ShouldBe("myHidden");
+	}
+
+	[Fact]
+	public void HiddenField_WithoutID_NoIdOnInput()
+	{
+		var cut = Render(@<HiddenField Value="token123" />);
+
+		cut.Find("input").HasAttribute("id").ShouldBeFalse();
+	}
+
+}

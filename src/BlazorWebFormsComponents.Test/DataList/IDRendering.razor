@@ -1,0 +1,45 @@
+@code {
+
+	[Fact]
+	public void DataList_WithID_RendersIdOnTable()
+	{
+		var items = Widget.SimpleWidgetList.Take(2).ToList();
+
+		var cut = Render(
+			@<DataList Items="items" ItemType="Widget" Context="Item" ID="myDataList">
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("table").GetAttribute("id").ShouldBe("myDataList");
+	}
+
+	[Fact]
+	public void DataList_WithoutID_NoIdOnTable()
+	{
+		var items = Widget.SimpleWidgetList.Take(2).ToList();
+
+		var cut = Render(
+			@<DataList Items="items" ItemType="Widget" Context="Item">
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("table").HasAttribute("id").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void DataList_FlowLayout_WithID_RendersIdOnSpan()
+	{
+		var items = Widget.SimpleWidgetList.Take(2).ToList();
+
+		var cut = Render(
+			@<DataList Items="items" ItemType="Widget" RepeatLayout="Flow" Context="Item" ID="flowList">
+				<ItemTemplate>@Item.Name</ItemTemplate>
+			</DataList>
+		);
+
+		cut.Find("span").GetAttribute("id").ShouldBe("flowList");
+	}
+
+}

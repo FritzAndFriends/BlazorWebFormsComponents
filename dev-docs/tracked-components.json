@@ -107,8 +107,7 @@
     },
     "Substitution": {
       "webFormsType": "System.Web.UI.WebControls.Substitution",
-      "category": "Editor",
-      "status": "Deferred"
+      "category": "Editor"
     },
     "Xml": {
       "webFormsType": "System.Web.UI.WebControls.Xml",

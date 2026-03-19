@@ -166,6 +166,7 @@ nav:
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
+      - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
       - Automated Migration Guide: Migration/AutomatedMigration.md
       - Deprecation Guidance: Migration/DeprecationGuidance.md
       - Migration Strategies: Migration/Strategies.md
