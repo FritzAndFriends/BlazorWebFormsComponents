@@ -39,7 +39,6 @@ jobs:
           dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
           dotnet restore src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj
           dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
-          dotnet restore samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj
 
       - name: Build library
         run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
@@ -49,9 +48,6 @@ jobs:
 
       - name: Build server-side sample
         run: dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --no-restore
-
-      - name: Build client-side sample
-        run: dotnet build samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj --configuration Release --no-restore
 
       - name: Run tests
         run: dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --results-directory src/BlazorWebFormsComponents.Test/TestResults
@@ -248,28 +244,16 @@ jobs:
           dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
           dotnet publish samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --output ./publish/server-side
 
-      - name: Publish Client-Side Demo (WebAssembly)
-        run: |
-          dotnet restore samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj
-          dotnet publish samples/AfterBlazorClientSide/AfterBlazorClientSide.csproj --configuration Release --output ./publish/client-side
-
       - name: Upload Server-Side Demo artifact
         uses: actions/upload-artifact@v4
         with:
           name: demo-server-side-${{ env.VERSION }}
           path: ./publish/server-side
 
-      - name: Upload Client-Side Demo artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: demo-client-side-${{ env.VERSION }}
-          path: ./publish/client-side
-
       - name: Create demo archives for release
         run: |
           cd ./publish
           tar -czf server-side-demo-${{ env.VERSION }}.tar.gz -C server-side .
-          tar -czf client-side-demo-${{ env.VERSION }}.tar.gz -C client-side .
 
       - name: Attach demo artifacts to GitHub Release
         env:
@@ -277,5 +261,4 @@ jobs:
         run: |
           gh release upload ${{ github.event.release.tag_name }} \
             ./publish/server-side-demo-${{ env.VERSION }}.tar.gz \
-            ./publish/client-side-demo-${{ env.VERSION }}.tar.gz \
             --clobber

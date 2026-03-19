@@ -22,5 +22,10 @@ namespace BlazorWebFormsComponents
 		/// Gets the maximum number of items to display on each page.
 		/// </summary>
 		public int MaximumRows { get; }
+
+		/// <summary>
+		/// The component that raised this event.
+		/// </summary>
+		public object Sender { get; set; }
 	}
 }

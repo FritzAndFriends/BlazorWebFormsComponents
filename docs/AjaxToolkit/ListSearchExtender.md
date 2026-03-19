@@ -313,6 +313,6 @@ The ListSearchExtender requires **InteractiveServer** render mode:
 ## See Also
 
 - [Ajax Control Toolkit Overview](index.md) — How extenders work and render mode requirements
-- [ListBox Component](../DataControls/ListBox.md) — The ListBox control
-- [DropDownList Component](../DataControls/DropDownList.md) — The DropDownList control
+- ListBox Component — The ListBox control (documentation coming soon)
+- DropDownList Component — The DropDownList control (documentation coming soon)
 - Original Ajax Control Toolkit: https://www.asp.net/ajax/ajaxcontroltoolkit

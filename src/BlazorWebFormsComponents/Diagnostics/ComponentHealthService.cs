@@ -11,11 +11,14 @@ namespace BlazorWebFormsComponents.Diagnostics
 	/// <summary>
 	/// Analyzes BWFC components via reflection and file scanning to produce health reports
 	/// measuring how completely each Blazor component reproduces its Web Forms original.
+	/// When the repository filesystem is not available (e.g., in Docker), the service can
+	/// serve pre-computed reports from a snapshot JSON file.
 	/// </summary>
 	public class ComponentHealthService
 	{
 		private readonly ReferenceBaselines _baselines;
 		private readonly string _solutionRoot;
+		private readonly IReadOnlyList<ComponentHealthReport> _snapshotReports;
 
 		private static readonly HashSet<Type> StopTypes = new HashSet<Type>
 		{
@@ -24,6 +27,12 @@ namespace BlazorWebFormsComponents.Diagnostics
 			typeof(BaseDataBoundComponent),
 			typeof(DataBoundComponent<>)
 		};
+
+		/// <summary>
+		/// Returns true when this instance is serving pre-computed snapshot data
+		/// rather than live reflection/file-scanning results.
+		/// </summary>
+		public bool IsFromSnapshot => _snapshotReports != null;
 
 		// Hardcoded fallback per PRD §3.3 — used when dev-docs/tracked-components.json doesn't exist
 		private static readonly Dictionary<string, TrackedComponent> DefaultTrackedComponents = new Dictionary<string, TrackedComponent>(StringComparer.OrdinalIgnoreCase)
@@ -111,7 +120,7 @@ namespace BlazorWebFormsComponents.Diagnostics
 		private Dictionary<string, Type> _discoveredTypes;
 
 		/// <summary>
-		/// Creates a new ComponentHealthService.
+		/// Creates a new ComponentHealthService that performs live reflection and file scanning.
 		/// </summary>
 		/// <param name="baselines">Reference baselines loaded from JSON.</param>
 		/// <param name="solutionRoot">Path to the repository root (for file scanning).</param>
@@ -119,15 +128,34 @@ namespace BlazorWebFormsComponents.Diagnostics
 		{
 			_baselines = baselines ?? new ReferenceBaselines();
 			_solutionRoot = solutionRoot ?? "";
+			_snapshotReports = null;
 			_trackedComponents = LoadTrackedComponents();
 			_discoveredTypes = DiscoverComponentTypes();
 		}
 
 		/// <summary>
+		/// Creates a ComponentHealthService that serves pre-computed snapshot data.
+		/// Used in environments where the repository filesystem is not available.
+		/// </summary>
+		/// <param name="snapshotReports">Pre-computed health reports loaded from a snapshot file.</param>
+		internal ComponentHealthService(IReadOnlyList<ComponentHealthReport> snapshotReports)
+		{
+			_snapshotReports = snapshotReports ?? throw new ArgumentNullException(nameof(snapshotReports));
+			_baselines = new ReferenceBaselines();
+			_solutionRoot = "";
+			_trackedComponents = new Dictionary<string, TrackedComponent>(StringComparer.OrdinalIgnoreCase);
+			_discoveredTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
 		/// Gets health reports for all tracked components.
+		/// When running from a snapshot, returns the pre-computed reports.
 		/// </summary>
 		public IReadOnlyList<ComponentHealthReport> GetAllReports()
 		{
+			if (_snapshotReports != null)
+				return _snapshotReports;
+
 			var reports = new List<ComponentHealthReport>();
 			foreach (var kvp in _trackedComponents.OrderBy(k => k.Value.Category).ThenBy(k => k.Key))
 			{
@@ -142,6 +170,9 @@ namespace BlazorWebFormsComponents.Diagnostics
 		/// </summary>
 		public ComponentHealthReport GetReport(string componentName)
 		{
+			if (_snapshotReports != null)
+				return _snapshotReports.FirstOrDefault(r => r.Name.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+
 			if (!_trackedComponents.TryGetValue(componentName, out var tracked))
 				return null;
 			return BuildReport(componentName, tracked);

@@ -152,9 +152,9 @@ Time Elapsed 00:00:12.32
 
 | Page | Screenshot |
 |------|-----------|
-| Home Page | ![Original Home](../../../planning-docs/screenshots/original-home-real.png) |
-| Product List | ![Original Products](../../../planning-docs/screenshots/original-products-real.png) |
-| Shopping Cart | ![Original Cart](../../../planning-docs/screenshots/original-cart-real.png) |
+| Home Page | *(Original Web Forms screenshot — not available in docs)* |
+| Product List | *(Original Web Forms screenshot — not available in docs)* |
+| Shopping Cart | *(Original Web Forms screenshot — not available in docs)* |
 
 ## 8. Run Comparison
 

@@ -21,6 +21,7 @@ var services = builder.Services;
 services.AddRazorComponents()
     .AddInteractiveServerComponents();
 services.AddScoped<AuthenticationStateProvider, StaticAuthStateProvider>();
+services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 

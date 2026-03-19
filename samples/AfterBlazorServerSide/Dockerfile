@@ -12,7 +12,9 @@ COPY ["Directory.Build.props", "./"]
 COPY ["samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj", "samples/AfterBlazorServerSide/"]
 COPY ["src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj", "src/BlazorWebFormsComponents/"]
 COPY ["samples/SharedSampleObjects/SharedSampleObjects.csproj", "samples/SharedSampleObjects/"]
+COPY ["scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj", "scripts/GenerateHealthSnapshot/"]
 RUN dotnet restore "samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj"
+RUN dotnet restore "scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj"
 COPY . .
 # Remove NBGV - not functional in Docker without .git; version is injected via VERSION build arg
 RUN sed -i '/<PackageReference Include="Nerdbank.GitVersioning"/,/<\/PackageReference>/d' Directory.Build.props
@@ -21,6 +23,8 @@ RUN dotnet build "AfterBlazorServerSide.csproj" -c Release -o /app/build -p:Vers
 
 FROM build AS publish
 RUN dotnet publish "AfterBlazorServerSide.csproj" -c Release -o /app/publish -p:Version=$VERSION -p:InformationalVersion=$VERSION
+# Generate health snapshot while the full repo is still available in /src
+RUN dotnet run --project /src/scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj -- /src /app/publish/health-snapshot.json
 
 FROM base AS final
 WORKDIR /app

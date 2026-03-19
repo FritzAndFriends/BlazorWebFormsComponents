@@ -1,10 +1,12 @@
-# Project Context
+﻿# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents — Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+
+📌 Team update (2026-03-17): HttpHandlerBase implementation complete (7 files in Handlers/). Returns IEndpointConventionBuilder; Session markers added; build passes 0 errors. — decided by Cyclops
 ## Learnings
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->
@@ -151,6 +153,57 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 
 **Files:** migration-toolkit/skills/migration-standards/SKILL.md (lines ~165–199), migration-toolkit/skills/bwfc-data-migration/SKILL.md (lines ~29–95)  
 **Decision log:** .squad/decisions/inbox/beast-migration-docs.md
+
+### Issue #473 Issue 4: Migrating .ashx Handlers Documentation
+
+**Delivered:** Comprehensive MkDocs page for migrating ASP.NET Web Forms `.ashx` HTTP handlers to Blazor using the new `HttpHandlerBase` feature (Issue #473, Issue 4).
+
+**File created:** `docs/Migration/MigratingAshxHandlers.md` (~33.5 KB, ~800 lines)
+
+**Content structure:**
+1. **Overview** — What `.ashx` handlers are, why migration is needed, `HttpHandlerBase` value proposition
+2. **Quick Start** — 6-step migration checklist (mechanical changes)
+3. **Registration** — Four registration patterns:
+   - Explicit path via `[HandlerRoute]` attribute
+   - Convention-based routing (derive from class name)
+   - Multi-path registration with `MapHandler<T>()`
+   - Chaining auth/CORS with `.RequireAuthorization()`, `.RequireCors()`
+4. **Before/After Examples** — Three fully-worked examples:
+   - JSON API handler (GET request, returns JSON with `System.Text.Json`)
+   - File download handler (binary response, Content-Disposition, MapPath)
+   - Image generation/thumbnail handler (System.Drawing, thumbnail generation)
+5. **API Reference** — Complete property/method documentation for:
+   - `HttpHandlerContext` (Request, Response, Server, Session, User, Items)
+   - `HttpHandlerRequest` (QueryString, Form, Files, HttpMethod, Headers, InputStream, authentication)
+   - `HttpHandlerResponse` (ContentType, StatusCode, Write, BinaryWrite, AddHeader, Clear, End [Obsolete])
+   - `HttpHandlerServer` (MapPath, HtmlEncode/Decode, UrlEncode/Decode)
+6. **Session State** — Using `[RequiresSessionState]` attribute, session configuration, `GetObject<T>()`/`SetObject<T>()` extensions
+7. **What's Not Supported** — Clear list with workarounds for:
+   - `Response.End()` → use `return`
+   - `Server.Transfer()`/`Server.Execute()` → not supported, refactor as service
+   - `Application["key"]` → use DI singleton or `IMemoryCache`
+   - `context.Cache` → migrate to `IMemoryCache`
+   - Complex `Request.Files` scenarios → documented with `IFormFile` equivalent
+8. **Interaction with AshxHandlerMiddleware** — How migrated handlers bypass 410 Gone response
+9. **Dependency Injection** — Constructor injection support with examples
+10. **Testing** — `TestServer`-based unit test example
+11. **Common Patterns** — JSON POST handler, authenticated handler with `.RequireAuthorization()`
+12. **Troubleshooting** — Common issues and solutions (404, session null, Response.End() warning, DI failures, file uploads, CORS)
+13. **Summary** — Quick recap: 6 mechanical changes, familiar API, modern routing, DI support, session state support
+
+**Style & format:**
+- Written for Web Forms developers learning Blazor
+- Before/after code examples side-by-side or sequential
+- Admonitions (!!!note, !!!warning, !!!tip) for important callouts
+- Complete, compilable code samples
+- Encouraging tone — emphasizes minimal rewrite burden
+- Follows existing BWFC doc style (consistent with DeprecationGuidance.md, Strategies.md)
+
+**Navigation updated:** `mkdocs.yml` — added "Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md" after User Controls, before migration readiness checklist
+
+**Design decision:** Placed in Migration section after User Controls and before Readiness checklist, making it discoverable for developers working through migration guides sequentially. Handler migration is a mid-to-late migration concern (after pages/controls are converted) but high-value for API-heavy applications.
+
+**Reference documents:** Built on Forge's `forge-ashx-handler-base-class.md` specification (sections R1-R10, before/after examples in R5, 6-mechanical-changes pattern). Spec defined: explicit path registration, convention-based routing, multi-path chaining, API surface, session state, unsupported patterns, and interaction with existing `AshxHandlerMiddleware`.
 
 ### Ajax Control Toolkit Extender Documentation (2026-03-15)
 
@@ -398,6 +451,8 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 **Next Steps (for Cyclops/Rogue):**
 - Ensure L1 script uses this skill doc as reference when auditing/enhancing ACT handling
 - L2 agents should consult per-component docs when troubleshooting ACT issues
+
+
 
 
 

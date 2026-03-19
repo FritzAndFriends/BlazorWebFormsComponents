@@ -200,22 +200,23 @@ public class ComponentHealthCountingTests
 		props.ShouldBeLessThanOrEqualTo(25,
 			$"GridView properties inflated. Got: {string.Join(", ", propNames)}");
 
-		// Events: ~10 (sort, page, select, row operations)
+		// Events: sort, page, select, row operations (including On* variants)
 		events.ShouldBeGreaterThanOrEqualTo(8,
 			$"Too few GridView events. Got: {string.Join(", ", eventNames)}");
-		events.ShouldBeLessThanOrEqualTo(12,
+		events.ShouldBeLessThanOrEqualTo(35,
 			$"Too many GridView events. Got: {string.Join(", ", eventNames)}");
 	}
 
 	#endregion
 
-	#region AC-3: Repeater shows 0 properties, 0 events (PRD §10.3)
+	#region AC-3: Repeater shows 0 properties, events from ItemCommand/ItemCreated/ItemDataBound (PRD §10.3)
 
 	[Fact]
-	public void Repeater_Shows0Properties0Events()
+	public void Repeater_Shows0PropertiesAndEvents()
 	{
 		// Repeater<T> → DataBoundComponent<T> (stop)
-		// All Repeater [Parameter]s are RenderFragment templates → excluded
+		// All Repeater non-event [Parameter]s are RenderFragment templates → excluded
+		// EventCallbacks (ItemCommand, ItemCreated, ItemDataBound + On* variants) are counted
 		var repeaterType = FindComponentType("Repeater");
 		var (props, events) = CountComponentSpecific(repeaterType);
 		var (propNames, eventNames, skipped) = GetParameterDetails(repeaterType);
@@ -223,8 +224,8 @@ public class ComponentHealthCountingTests
 		props.ShouldBe(0,
 			$"Repeater should have 0 properties (all RenderFragment). " +
 			$"Got properties: {string.Join(", ", propNames)}");
-		events.ShouldBe(0,
-			$"Repeater should have 0 events. Got: {string.Join(", ", eventNames)}");
+		events.ShouldBeGreaterThanOrEqualTo(6,
+			$"Repeater should have ≥6 events (ItemCommand/ItemCreated/ItemDataBound + On* variants). Got: {string.Join(", ", eventNames)}");
 
 		// Verify templates were actually found and skipped
 		skipped.ShouldContain(s => s.Contains("RenderFragment"),
@@ -391,11 +392,11 @@ public class ComponentHealthCountingTests
 		var repeaterType = FindComponentType("Repeater");
 		var (propNames, eventNames, skipped) = GetParameterDetails(repeaterType);
 
-		// All Repeater params are templates — ItemTemplate, AlternatingItemTemplate,
-		// HeaderTemplate, FooterTemplate, SeparatorTemplate
-		var allCounted = propNames.Concat(eventNames).ToList();
-		allCounted.ShouldBeEmpty(
-			$"Repeater should have no counted parameters. Got: {string.Join(", ", allCounted)}");
+		// Repeater non-event params are templates — ItemTemplate, AlternatingItemTemplate,
+		// HeaderTemplate, FooterTemplate, SeparatorTemplate → all excluded
+		// EventCallbacks (ItemCommand, ItemCreated, ItemDataBound + On* variants) are expected
+		propNames.ShouldBeEmpty(
+			$"Repeater should have no counted properties (all RenderFragment). Got: {string.Join(", ", propNames)}");
 
 		skipped.Count(s => s.Contains("RenderFragment")).ShouldBeGreaterThanOrEqualTo(5,
 			"Repeater should have ≥5 RenderFragment templates skipped");

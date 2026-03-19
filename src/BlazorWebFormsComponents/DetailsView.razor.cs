@@ -264,10 +264,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<DetailsViewCommandEventArgs> ItemCommand { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemCommand.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewCommandEventArgs> OnItemCommand { get; set; }
+
+		/// <summary>
 		/// Occurs before a delete operation.
 		/// </summary>
 		[Parameter]
 		public EventCallback<DetailsViewDeleteEventArgs> ItemDeleting { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemDeleting.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewDeleteEventArgs> OnItemDeleting { get; set; }
 
 		/// <summary>
 		/// Occurs after a delete operation.
@@ -276,10 +288,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<DetailsViewDeletedEventArgs> ItemDeleted { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemDeleted.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewDeletedEventArgs> OnItemDeleted { get; set; }
+
+		/// <summary>
 		/// Occurs before an insert operation.
 		/// </summary>
 		[Parameter]
 		public EventCallback<DetailsViewInsertEventArgs> ItemInserting { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemInserting.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewInsertEventArgs> OnItemInserting { get; set; }
 
 		/// <summary>
 		/// Occurs after an insert operation.
@@ -288,10 +312,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<DetailsViewInsertedEventArgs> ItemInserted { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemInserted.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewInsertedEventArgs> OnItemInserted { get; set; }
+
+		/// <summary>
 		/// Occurs before an update operation.
 		/// </summary>
 		[Parameter]
 		public EventCallback<DetailsViewUpdateEventArgs> ItemUpdating { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemUpdating.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewUpdateEventArgs> OnItemUpdating { get; set; }
 
 		/// <summary>
 		/// Occurs after an update operation.
@@ -300,10 +336,22 @@ namespace BlazorWebFormsComponents
 		public EventCallback<DetailsViewUpdatedEventArgs> ItemUpdated { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ItemUpdated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewUpdatedEventArgs> OnItemUpdated { get; set; }
+
+		/// <summary>
 		/// Occurs when the mode of the control is changing.
 		/// </summary>
 		[Parameter]
 		public EventCallback<DetailsViewModeEventArgs> ModeChanging { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ModeChanging.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewModeEventArgs> OnModeChanging { get; set; }
 
 		/// <summary>
 		/// Occurs after the mode of the control has changed.
@@ -312,16 +360,46 @@ namespace BlazorWebFormsComponents
 		public EventCallback<DetailsViewModeEventArgs> ModeChanged { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for ModeChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<DetailsViewModeEventArgs> OnModeChanged { get; set; }
+
+		/// <summary>
 		/// Occurs when the page index is changing.
 		/// </summary>
 		[Parameter]
 		public EventCallback<PageChangedEventArgs> PageIndexChanging { get; set; }
 
 		/// <summary>
+		/// Web Forms migration alias for PageIndexChanging.
+		/// </summary>
+		[Parameter]
+		public EventCallback<PageChangedEventArgs> OnPageIndexChanging { get; set; }
+
+		/// <summary>
 		/// Occurs after the page index has changed.
 		/// </summary>
 		[Parameter]
 		public EventCallback<PageChangedEventArgs> PageIndexChanged { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for PageIndexChanged.
+		/// </summary>
+		[Parameter]
+		public EventCallback<PageChangedEventArgs> OnPageIndexChanged { get; set; }
+
+		/// <summary>
+		/// Occurs when the DetailsView control is first created.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> ItemCreated { get; set; }
+
+		/// <summary>
+		/// Web Forms migration alias for ItemCreated.
+		/// </summary>
+		[Parameter]
+		public EventCallback<EventArgs> OnItemCreated { get; set; }
 
 		#endregion
 
@@ -433,6 +511,18 @@ namespace BlazorWebFormsComponents
 		{
 			base.OnParametersSet();
 			UpdateCurrentItem();
+			FireItemCreatedEvent();
+		}
+
+		private void FireItemCreatedEvent()
+		{
+			if (CurrentItem == null) return;
+
+			var handler = OnItemCreated.HasDelegate ? OnItemCreated : ItemCreated;
+			if (handler.HasDelegate)
+			{
+				_ = handler.InvokeAsync(EventArgs.Empty);
+			}
 		}
 
 		private void UpdateCurrentItem()
@@ -501,35 +591,41 @@ namespace BlazorWebFormsComponents
 		private async Task ChangeMode(DetailsViewMode newMode)
 		{
 			var args = new DetailsViewModeEventArgs(newMode, false);
-			await ModeChanging.InvokeAsync(args);
+			var modeChangingHandler = ModeChanging.HasDelegate ? ModeChanging : OnModeChanging;
+			await modeChangingHandler.InvokeAsync(args);
 
 			if (args.Cancel) return;
 
 			CurrentMode = args.NewMode;
-			await ModeChanged.InvokeAsync(args);
+			var modeChangedHandler = ModeChanged.HasDelegate ? ModeChanged : OnModeChanged;
+			await modeChangedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 
 		private async Task HandleCancel()
 		{
 			var args = new DetailsViewModeEventArgs(DefaultMode, true);
-			await ModeChanging.InvokeAsync(args);
+			var modeChangingHandler = ModeChanging.HasDelegate ? ModeChanging : OnModeChanging;
+			await modeChangingHandler.InvokeAsync(args);
 
 			if (args.Cancel) return;
 
 			CurrentMode = args.NewMode;
-			await ModeChanged.InvokeAsync(args);
+			var modeChangedHandler = ModeChanged.HasDelegate ? ModeChanged : OnModeChanged;
+			await modeChangedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 
 		private async Task HandleDelete()
 		{
 			var deleteArgs = new DetailsViewDeleteEventArgs(PageIndex);
-			await ItemDeleting.InvokeAsync(deleteArgs);
+			var itemDeletingHandler = ItemDeleting.HasDelegate ? ItemDeleting : OnItemDeleting;
+			await itemDeletingHandler.InvokeAsync(deleteArgs);
 
 			if (deleteArgs.Cancel) return;
 
-			await ItemDeleted.InvokeAsync(new DetailsViewDeletedEventArgs(1, null));
+			var itemDeletedHandler = ItemDeleted.HasDelegate ? ItemDeleted : OnItemDeleted;
+			await itemDeletedHandler.InvokeAsync(new DetailsViewDeletedEventArgs(1, null));
 			CurrentMode = DefaultMode;
 			StateHasChanged();
 		}
@@ -537,32 +633,40 @@ namespace BlazorWebFormsComponents
 		private async Task HandleUpdate()
 		{
 			var updateArgs = new DetailsViewUpdateEventArgs("update");
-			await ItemUpdating.InvokeAsync(updateArgs);
+			var itemUpdatingHandler = ItemUpdating.HasDelegate ? ItemUpdating : OnItemUpdating;
+			await itemUpdatingHandler.InvokeAsync(updateArgs);
 
 			if (updateArgs.Cancel) return;
 
-			await ItemUpdated.InvokeAsync(new DetailsViewUpdatedEventArgs(1, null));
+			var itemUpdatedHandler = ItemUpdated.HasDelegate ? ItemUpdated : OnItemUpdated;
+			await itemUpdatedHandler.InvokeAsync(new DetailsViewUpdatedEventArgs(1, null));
 
 			var modeArgs = new DetailsViewModeEventArgs(DefaultMode, false);
-			await ModeChanging.InvokeAsync(modeArgs);
+			var modeChangingHandler = ModeChanging.HasDelegate ? ModeChanging : OnModeChanging;
+			await modeChangingHandler.InvokeAsync(modeArgs);
 			CurrentMode = DefaultMode;
-			await ModeChanged.InvokeAsync(modeArgs);
+			var modeChangedHandler = ModeChanged.HasDelegate ? ModeChanged : OnModeChanged;
+			await modeChangedHandler.InvokeAsync(modeArgs);
 			StateHasChanged();
 		}
 
 		private async Task HandleInsert()
 		{
 			var insertArgs = new DetailsViewInsertEventArgs("insert");
-			await ItemInserting.InvokeAsync(insertArgs);
+			var itemInsertingHandler = ItemInserting.HasDelegate ? ItemInserting : OnItemInserting;
+			await itemInsertingHandler.InvokeAsync(insertArgs);
 
 			if (insertArgs.Cancel) return;
 
-			await ItemInserted.InvokeAsync(new DetailsViewInsertedEventArgs(1, null));
+			var itemInsertedHandler = ItemInserted.HasDelegate ? ItemInserted : OnItemInserted;
+			await itemInsertedHandler.InvokeAsync(new DetailsViewInsertedEventArgs(1, null));
 
 			var modeArgs = new DetailsViewModeEventArgs(DefaultMode, false);
-			await ModeChanging.InvokeAsync(modeArgs);
+			var modeChangingHandler = ModeChanging.HasDelegate ? ModeChanging : OnModeChanging;
+			await modeChangingHandler.InvokeAsync(modeArgs);
 			CurrentMode = DefaultMode;
-			await ModeChanged.InvokeAsync(modeArgs);
+			var modeChangedHandler = ModeChanged.HasDelegate ? ModeChanged : OnModeChanged;
+			await modeChangedHandler.InvokeAsync(modeArgs);
 			StateHasChanged();
 		}
 
@@ -574,14 +678,16 @@ namespace BlazorWebFormsComponents
 			var oldPageIndex = PageIndex;
 
 			var args = new PageChangedEventArgs(newPageIndex, oldPageIndex, totalItems, newPageIndex);
-			await PageIndexChanging.InvokeAsync(args);
+			var pageIndexChangingHandler = PageIndexChanging.HasDelegate ? PageIndexChanging : OnPageIndexChanging;
+			await pageIndexChangingHandler.InvokeAsync(args);
 
 			if (args.Cancel) return;
 
 			PageIndex = args.NewPageIndex;
 			UpdateCurrentItem();
 
-			await PageIndexChanged.InvokeAsync(args);
+			var pageIndexChangedHandler = PageIndexChanged.HasDelegate ? PageIndexChanged : OnPageIndexChanged;
+			await pageIndexChangedHandler.InvokeAsync(args);
 			StateHasChanged();
 		}
 

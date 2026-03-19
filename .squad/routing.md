@@ -14,6 +14,8 @@ How to decide who handles what.
 | Testing & QA | Rogue | bUnit tests, edge cases, validation, quality |
 | Integration testing | Colossus | Playwright integration tests, sample page verification, end-to-end testing |
 | Code review | Forge | Review PRs, check quality, verify Web Forms compatibility |
+| Copilot skills & prompts | Psylocke | Write/tune SKILL.md files, copilot-instructions templates, prompt engineering, skill effectiveness testing |
+| Migration tooling & scripts | Bishop | Migration scripts (bwfc-migrate.ps1), pipeline tooling, methodology, checklists, control coverage, toolkit packaging |
 | Session logging | Scribe | Automatic — never needs routing |
 
 ## Rules

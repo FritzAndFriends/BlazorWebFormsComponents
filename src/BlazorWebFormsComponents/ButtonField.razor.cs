@@ -61,10 +61,11 @@ namespace BlazorWebFormsComponents
 
 		public void OnCommand(object src, string commandName, object commandArg) {
 
-			var handler = (base.ParentColumnsCollection as GridView<ItemType>)?.OnRowCommand;
-			if (handler == null) return;
+			var gridView = base.ParentColumnsCollection as GridView<ItemType>;
+			if (gridView == null) return;
 
-			handler.Value.InvokeAsync(new GridViewCommandEventArgs {
+			var handler = gridView.RowCommand.HasDelegate ? gridView.RowCommand : gridView.OnRowCommand;
+			handler.InvokeAsync(new GridViewCommandEventArgs {
 				CommandArgument = commandArg,
 				CommandName = commandName,
 				CommandSource = src

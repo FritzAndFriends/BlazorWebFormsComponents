@@ -1,0 +1,226 @@
+@code {
+
+	// ─── P0-3 + P0-4: GridView RowDataBound and RowCreated ────────────
+	// Verifies: RowDataBound/OnRowDataBound, RowCreated/OnRowCreated with GridViewRowEventArgs
+
+	#region RowDataBound
+
+	[Fact]
+	public void GridView_RowDataBound_BareAlias_FiresPerRow()
+	{
+		var boundCount = 0;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				RowDataBound="@((GridViewRowEventArgs e) => boundCount++)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		boundCount.ShouldBe(3, "RowDataBound should fire once per data row");
+	}
+
+	[Fact]
+	public void GridView_OnRowDataBound_OnPrefix_FiresPerRow()
+	{
+		var boundCount = 0;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				OnRowDataBound="@((GridViewRowEventArgs e) => boundCount++)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		boundCount.ShouldBe(3, "OnRowDataBound should fire once per data row");
+	}
+
+	[Fact]
+	public void GridView_RowDataBound_ArgsContainRowAndIndex()
+	{
+		var capturedArgs = new List<GridViewRowEventArgs>();
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				RowDataBound="@((GridViewRowEventArgs e) => capturedArgs.Add(e))">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		capturedArgs.Count.ShouldBe(3);
+		capturedArgs[0].RowIndex.ShouldBe(0);
+		capturedArgs[0].Row.ShouldNotBeNull();
+		capturedArgs[1].RowIndex.ShouldBe(1);
+		capturedArgs[2].RowIndex.ShouldBe(2);
+	}
+
+	[Fact]
+	public void GridView_RowDataBound_EmptyData_DoesNotFire()
+	{
+		var boundCount = 0;
+		var emptyData = new List<RowEventTestItem>();
+
+		var cut = Render(
+			@<GridView Items="emptyData" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				EmptyDataText="No data"
+				RowDataBound="@((GridViewRowEventArgs e) => boundCount++)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		boundCount.ShouldBe(0, "RowDataBound should not fire when there are no rows");
+	}
+
+	[Fact]
+	public void GridView_RowDataBound_WithPaging_FiresOnlyForCurrentPage()
+	{
+		var boundCount = 0;
+		var data = Enumerable.Range(1, 10).Select(i => new RowEventTestItem { Id = i, Name = $"Item {i}" }).ToList();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				AllowPaging="true" PageSize="3"
+				RowDataBound="@((GridViewRowEventArgs e) => boundCount++)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		boundCount.ShouldBe(3, "RowDataBound should only fire for items on the current page");
+	}
+
+	#endregion
+
+	#region RowCreated
+
+	[Fact]
+	public void GridView_RowCreated_BareAlias_FiresPerRow()
+	{
+		var createdCount = 0;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				RowCreated="@((GridViewRowEventArgs e) => createdCount++)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		createdCount.ShouldBe(3, "RowCreated should fire once per data row");
+	}
+
+	[Fact]
+	public void GridView_OnRowCreated_OnPrefix_FiresPerRow()
+	{
+		var createdCount = 0;
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				OnRowCreated="@((GridViewRowEventArgs e) => createdCount++)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		createdCount.ShouldBe(3, "OnRowCreated should fire once per data row");
+	}
+
+	[Fact]
+	public void GridView_RowCreated_ArgsContainRowIndex()
+	{
+		var capturedArgs = new List<GridViewRowEventArgs>();
+		var data = GetTestData();
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				RowCreated="@((GridViewRowEventArgs e) => capturedArgs.Add(e))">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		capturedArgs.Count.ShouldBe(3);
+		capturedArgs[0].RowIndex.ShouldBe(0);
+		capturedArgs[1].RowIndex.ShouldBe(1);
+		capturedArgs[2].RowIndex.ShouldBe(2);
+	}
+
+	[Fact]
+	public void GridView_RowCreated_FiresBeforeRowDataBound()
+	{
+		var eventOrder = new List<string>();
+		var data = new List<RowEventTestItem> { new RowEventTestItem { Id = 1, Name = "One" } };
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				RowCreated="@((GridViewRowEventArgs e) => eventOrder.Add("Created"))"
+				RowDataBound="@((GridViewRowEventArgs e) => eventOrder.Add("DataBound"))">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		eventOrder.Count.ShouldBe(2);
+		eventOrder[0].ShouldBe("Created", "RowCreated should fire before RowDataBound");
+		eventOrder[1].ShouldBe("DataBound");
+	}
+
+	#endregion
+
+	#region Edge Cases
+
+	[Fact]
+	public void GridView_RowDataBound_SenderIsSet()
+	{
+		GridViewRowEventArgs capturedArgs = null;
+		var data = new List<RowEventTestItem> { new RowEventTestItem { Id = 1, Name = "Test" } };
+
+		var cut = Render(
+			@<GridView Items="data" ItemType="RowEventTestItem" AutoGenerateColumns="false"
+				RowDataBound="@((GridViewRowEventArgs e) => capturedArgs = e)">
+				<Columns>
+					<BoundField ItemType="RowEventTestItem" DataField="Name" HeaderText="Name" />
+				</Columns>
+			</GridView>
+		);
+
+		capturedArgs.ShouldNotBeNull();
+		capturedArgs.Sender.ShouldNotBeNull("GridViewRowEventArgs.Sender should be set");
+	}
+
+	#endregion
+
+	private List<RowEventTestItem> GetTestData()
+	{
+		return new List<RowEventTestItem>
+		{
+			new RowEventTestItem { Id = 1, Name = "Alpha" },
+			new RowEventTestItem { Id = 2, Name = "Beta" },
+			new RowEventTestItem { Id = 3, Name = "Gamma" }
+		};
+	}
+
+	public class RowEventTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+}
