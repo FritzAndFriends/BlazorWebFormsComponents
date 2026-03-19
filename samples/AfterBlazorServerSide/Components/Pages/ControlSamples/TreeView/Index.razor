@@ -30,6 +30,30 @@
 
 Checkboxes clicked:  @clickCount
 
+<hr />
+
+<h3>NodeWrap</h3>
+<p>The <code>NodeWrap</code> property controls whether long text in tree nodes wraps to the next line
+   instead of being clipped.</p>
+
+<div data-audit-control="TreeView-2">
+    <TreeView ID="WrapTreeView" NodeWrap="true">
+        <Nodes>
+            <TreeNode Text="This is a very long node label that demonstrates text wrapping behavior in the TreeView component" Value="long" Expanded="true">
+                <TreeNode Text="Short child" Value="short" />
+                <TreeNode Text="Another child node with a long description to show wrapping" Value="long-child" />
+            </TreeNode>
+            <TreeNode Text="Normal node" Value="normal" />
+        </Nodes>
+    </TreeView>
+</div>
+
+<pre><code>&lt;TreeView NodeWrap="true"&gt;
+    &lt;Nodes&gt;
+        &lt;TreeNode Text="Long text that wraps..." /&gt;
+    &lt;/Nodes&gt;
+&lt;/TreeView&gt;</code></pre>
+
 @code {
 
 	public int clickCount { get; set; } = 0;

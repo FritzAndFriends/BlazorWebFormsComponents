@@ -1,0 +1,31 @@
+@code {
+
+	[Fact]
+	public void FormView_WithID_RendersIdOnTable()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				ID="myFormView">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").GetAttribute("id").ShouldBe("myFormView");
+	}
+
+	[Fact]
+	public void FormView_WithoutID_NoIdOnTable()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").HasAttribute("id").ShouldBeFalse();
+	}
+}

@@ -1,0 +1,133 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	bool _validSubmit = false;
+	bool _invalidSubmit = false;
+	ForwardRef<InputBase<string>> NameRef = new ForwardRef<InputBase<string>>();
+	ForwardRef<InputBase<int>> NumberRef = new ForwardRef<InputBase<int>>();
+
+	// --- EnableClientScript tests ---
+
+	[Fact]
+	public void RequiredFieldValidator_EnableClientScript_DefaultsToTrue()
+	{
+		var model = new ValidatorPropTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@NameRef"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<RequiredFieldValidator<string>>().Instance;
+		validator.EnableClientScript.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void RequiredFieldValidator_EnableClientScript_CanBeSetToFalse()
+	{
+		var model = new ValidatorPropTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@NameRef"
+					EnableClientScript="false"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<RequiredFieldValidator<string>>().Instance;
+		validator.EnableClientScript.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CompareValidator_EnableClientScript_DefaultsToTrue()
+	{
+		var model = new ValidatorPropTestModel { Name = "valid", ConfirmName = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.ConfirmName" />
+				<CompareValidator InputType="string"
+					ControlRef="@NameRef"
+					Operator="Equal"
+					ValueToCompare="valid"
+					ErrorMessage="Values must match." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<string>>().Instance;
+		validator.EnableClientScript.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CompareValidator_EnableClientScript_CanBeSetToFalse()
+	{
+		var model = new ValidatorPropTestModel { Name = "valid", ConfirmName = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.ConfirmName" />
+				<CompareValidator InputType="string"
+					ControlRef="@NameRef"
+					Operator="Equal"
+					ValueToCompare="valid"
+					EnableClientScript="false"
+					ErrorMessage="Values must match." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<string>>().Instance;
+		validator.EnableClientScript.ShouldBeFalse();
+	}
+
+	// --- AssociatedControlID tests ---
+
+	[Fact]
+	public void RequiredFieldValidator_AssociatedControlID_AcceptsStringValue()
+	{
+		var model = new ValidatorPropTestModel { Name = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.Name" />
+				<RequiredFieldValidator Type="string"
+					ControlRef="@NameRef"
+					AssociatedControlID="txtName"
+					ErrorMessage="Name is required." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<RequiredFieldValidator<string>>().Instance;
+		validator.AssociatedControlID.ShouldBe("txtName");
+	}
+
+	[Fact]
+	public void CompareValidator_AssociatedControlID_AcceptsStringValue()
+	{
+		var model = new ValidatorPropTestModel { Name = "valid", ConfirmName = "valid" };
+		var cut = Render(
+			@<EditForm Model="@model" OnValidSubmit="@HandleValid" OnInvalidSubmit="@HandleInvalid">
+				<InputText @ref="NameRef.Current" @bind-Value="model.ConfirmName" />
+				<CompareValidator InputType="string"
+					ControlRef="@NameRef"
+					Operator="Equal"
+					ValueToCompare="valid"
+					AssociatedControlID="txtConfirmName"
+					ErrorMessage="Values must match." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<string>>().Instance;
+		validator.AssociatedControlID.ShouldBe("txtConfirmName");
+	}
+
+	private void HandleValid() { _validSubmit = true; }
+	private void HandleInvalid() { _invalidSubmit = true; }
+
+	public class ValidatorPropTestModel
+	{
+		public string Name { get; set; }
+		public string ConfirmName { get; set; }
+	}
+}

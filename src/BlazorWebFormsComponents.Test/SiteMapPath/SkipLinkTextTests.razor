@@ -1,0 +1,31 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	private SiteMapNode CreateTestSiteMap()
+	{
+		var root = new SiteMapNode("Home", "/");
+		var products = new SiteMapNode("Products", "/products");
+		root.AddChild(products);
+		return root;
+	}
+
+	[Fact]
+	public void SiteMapPath_SkipLinkText_DefaultIsSkipNavigationLinks()
+	{
+		var siteMap = CreateTestSiteMap();
+
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/" />);
+
+		cut.FindComponent<SiteMapPath>().Instance.SkipLinkText.ShouldBe("Skip Navigation Links");
+	}
+
+	[Fact]
+	public void SiteMapPath_SkipLinkText_AcceptsCustomValue()
+	{
+		var siteMap = CreateTestSiteMap();
+
+		var cut = Render(@<SiteMapPath SiteMapProvider="@siteMap" CurrentUrl="/" SkipLinkText="Jump Past Nav" />);
+
+		cut.FindComponent<SiteMapPath>().Instance.SkipLinkText.ShouldBe("Jump Past Nav");
+	}
+}

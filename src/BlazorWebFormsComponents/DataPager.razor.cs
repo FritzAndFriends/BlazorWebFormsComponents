@@ -102,6 +102,18 @@ namespace BlazorWebFormsComponents
 		public EventCallback<PageChangedEventArgs> OnPageIndexChanged { get; set; }
 
 		/// <summary>
+		/// Gets or sets the ID of the data-bound control to page.
+		/// </summary>
+		[Parameter]
+		public string PagedControlID { get; set; }
+
+		/// <summary>
+		/// Gets or sets the name of the query string field used for paging.
+		/// </summary>
+		[Parameter]
+		public string QueryStringField { get; set; }
+
+		/// <summary>
 		/// Gets or sets custom child content (for TemplatePagerField support).
 		/// </summary>
 		[Parameter]

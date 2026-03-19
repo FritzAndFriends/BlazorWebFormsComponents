@@ -42,8 +42,33 @@
 	LastPageText="Last »" />
 </div>
 
+<hr />
+
+<h3>PagedControlID &amp; QueryStringField</h3>
+<p>The <code>PagedControlID</code> property identifies the data-bound control being paged, and
+   <code>QueryStringField</code> specifies a query string parameter for paging navigation.
+   These are accepted for Web Forms migration compatibility.</p>
+
+<div data-audit-control="DataPager-2">
+<DataPager TotalRowCount="@_allProducts.Count"
+	PageSize="4"
+	PageIndex="@_pageIndex2"
+	PageIndexChanged="HandlePageChanged2"
+	Mode="PagerButtons.NextPreviousFirstLast"
+	PagedControlID="ProductListView"
+	QueryStringField="page" />
+</div>
+
+<p><em>PagedControlID: <code>ProductListView</code> — QueryStringField: <code>page</code></em></p>
+
+<pre><code>&lt;DataPager PagedControlID="ProductListView"
+           QueryStringField="page"
+           PageSize="4"
+           Mode="PagerButtons.NextPreviousFirstLast" /&gt;</code></pre>
+
 @code {
 	private int _pageIndex = 0;
+	private int _pageIndex2 = 0;
 
 	private List<ProductItem> _allProducts = Enumerable.Range(1, 12).Select(i => new ProductItem
 	{
@@ -61,6 +86,11 @@
 	private void HandlePageChanged(int newPage)
 	{
 		_pageIndex = newPage;
+	}
+
+	private void HandlePageChanged2(int newPage)
+	{
+		_pageIndex2 = newPage;
 	}
 
 	private class ProductItem

@@ -96,3 +96,28 @@
         _clickCount++;
     }
 }
+
+<hr />
+
+<h3>ScrollDownText &amp; ScrollUpText</h3>
+<p>The <code>ScrollDownText</code> and <code>ScrollUpText</code> properties set the text displayed for
+   scroll indicators in dynamic menus. These mirror the Web Forms properties for migration compatibility.</p>
+
+<div data-audit-control="Menu-3">
+<Menu ID="ScrollMenu" Orientation="Orientation.Vertical"
+      ScrollDownText="▼ More items"
+      ScrollUpText="▲ Previous items">
+    <Items>
+        <MenuItem Text="Item 1" Value="item1" />
+        <MenuItem Text="Item 2" Value="item2" />
+        <MenuItem Text="Item 3" Value="item3" />
+        <MenuItem Text="Item 4" Value="item4" />
+        <MenuItem Text="Item 5" Value="item5" />
+    </Items>
+</Menu>
+</div>
+
+<pre><code>&lt;Menu ScrollDownText="▼ More items"
+      ScrollUpText="▲ Previous items"&gt;
+    ...
+&lt;/Menu&gt;</code></pre>

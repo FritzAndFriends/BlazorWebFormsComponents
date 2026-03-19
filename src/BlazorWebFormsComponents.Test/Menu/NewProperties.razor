@@ -1,0 +1,98 @@
+@code {
+
+	[Fact]
+	public void Menu_ScrollDownText_DefaultIsNull()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.ScrollDownText.ShouldBeNull();
+	}
+
+	[Fact]
+	public void Menu_ScrollDownText_AcceptsValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ScrollDownText="Scroll Down">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.ScrollDownText.ShouldBe("Scroll Down");
+	}
+
+	[Fact]
+	public void Menu_ScrollUpText_DefaultIsNull()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.ScrollUpText.ShouldBeNull();
+	}
+
+	[Fact]
+	public void Menu_ScrollUpText_AcceptsValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu ScrollUpText="Scroll Up">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.ScrollUpText.ShouldBe("Scroll Up");
+	}
+
+	[Fact]
+	public void Menu_IncludeStyleBlock_DefaultIsTrue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.IncludeStyleBlock.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Menu_IncludeStyleBlock_CanBeSetToFalse()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu IncludeStyleBlock="false">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.IncludeStyleBlock.ShouldBeFalse();
+	}
+}

@@ -1,0 +1,28 @@
+@code {
+
+	[Fact]
+	public void DropDownList_WithID_RendersIdOnSelect()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" ID="myDropDown" />);
+
+		cut.Find("select").GetAttribute("id").ShouldBe("myDropDown");
+	}
+
+	[Fact]
+	public void DropDownList_WithoutID_NoIdOnSelect()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" />);
+
+		cut.Find("select").HasAttribute("id").ShouldBeFalse();
+	}
+}

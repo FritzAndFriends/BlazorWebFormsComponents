@@ -1,0 +1,126 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void FormView_AllowPaging_ParameterAccepted()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				AllowPaging="true">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		var formView = cut.FindComponent<FormView<Widget>>().Instance;
+		formView.AllowPaging.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void FormView_AllowPaging_DefaultIsFalse()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		var formView = cut.FindComponent<FormView<Widget>>().Instance;
+		formView.AllowPaging.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void FormView_CellPadding_RendersAsTableAttribute()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				CellPadding="5">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").GetAttribute("cellpadding").ShouldBe("5");
+	}
+
+	[Fact]
+	public void FormView_CellSpacing_RendersAsTableAttribute()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				CellSpacing="3">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").GetAttribute("cellspacing").ShouldBe("3");
+	}
+
+	[Fact]
+	public void FormView_CellPadding_DefaultDoesNotRenderAttribute()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		// Default CellPadding (-1) should not render the attribute
+		var cellpadding = cut.Find("table").GetAttribute("cellpadding");
+		(cellpadding == null || cellpadding == "").ShouldBeTrue("CellPadding should not render when default");
+	}
+
+	[Fact]
+	public void FormView_GridLines_Both_RendersRulesAll()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				GridLines="GridLines.Both">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").GetAttribute("rules").ShouldBe("all");
+	}
+
+	[Fact]
+	public void FormView_GridLines_Horizontal_RendersRulesRows()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				GridLines="GridLines.Horizontal">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").GetAttribute("rules").ShouldBe("rows");
+	}
+
+	[Fact]
+	public void FormView_GridLines_Vertical_RendersRulesCols()
+	{
+		var cut = Render(
+			@<FormView Items="Widget.SimpleWidgetList" ItemType="Widget" Context="Item"
+				GridLines="GridLines.Vertical">
+				<ItemTemplate>
+					<span>@Item.Name</span>
+				</ItemTemplate>
+			</FormView>
+		);
+
+		cut.Find("table").GetAttribute("rules").ShouldBe("cols");
+	}
+}

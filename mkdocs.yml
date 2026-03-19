@@ -155,6 +155,7 @@ nav:
     - Page System: UtilityFeatures/PageService.md
     - Response.Redirect: UtilityFeatures/ResponseRedirect.md
     - Service Registration: UtilityFeatures/ServiceRegistration.md
+    - Styling Components: UtilityFeatures/StylingComponents.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:

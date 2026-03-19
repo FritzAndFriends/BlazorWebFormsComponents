@@ -19,6 +19,18 @@ public partial class BulletedList<ItemType> : BaseListControl<ItemType>
 private readonly string _baseId = Guid.NewGuid().ToString("N").Substring(0, 8);
 
 /// <summary>
+/// Gets or sets a value indicating whether validation is performed when the control posts back.
+/// </summary>
+[Parameter]
+public bool CausesValidation { get; set; } = true;
+
+/// <summary>
+/// Gets or sets the group of controls for which the control causes validation.
+/// </summary>
+[Parameter]
+public string ValidationGroup { get; set; }
+
+/// <summary>
 /// Gets or sets the bullet style of the list.
 /// </summary>
 [Parameter]

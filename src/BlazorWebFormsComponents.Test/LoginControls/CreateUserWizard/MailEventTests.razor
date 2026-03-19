@@ -1,0 +1,45 @@
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+@code {
+	bool _sendingMailFired = false;
+	bool _sendMailErrorFired = false;
+
+	[Fact]
+	public void CreateUserWizard_OnSendingMail_ParameterAccepted()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false"
+			OnSendingMail="@((MailMessageEventArgs e) => { _sendingMailFired = true; })" />);
+
+		var instance = cut.FindComponent<CreateUserWizard>().Instance;
+		instance.OnSendingMail.HasDelegate.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CreateUserWizard_OnSendMailError_ParameterAccepted()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false"
+			OnSendMailError="@((SendMailErrorEventArgs e) => { _sendMailErrorFired = true; })" />);
+
+		var instance = cut.FindComponent<CreateUserWizard>().Instance;
+		instance.OnSendMailError.HasDelegate.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CreateUserWizard_MailEvents_DefaultHaveNoDelegate()
+	{
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+
+		var cut = Render(@<CreateUserWizard ID="cuw1" DisplaySideBar="false" />);
+
+		var instance = cut.FindComponent<CreateUserWizard>().Instance;
+		instance.OnSendingMail.HasDelegate.ShouldBeFalse();
+		instance.OnSendMailError.HasDelegate.ShouldBeFalse();
+	}
+}

@@ -184,6 +184,20 @@
 
 <hr />
 
+<!-- TodaysDate property -->
+<h3>TodaysDate Override</h3>
+<p>The <code>TodaysDate</code> property overrides which date the calendar considers "today".
+   This is useful for testing or displaying a calendar anchored to a specific date.</p>
+
+<div data-audit-control="Calendar-8">
+    <Calendar TodaysDate="@customToday" @bind-SelectedDate="todaysDateDemo" />
+</div>
+<p>Calendar thinks today is: <strong>@customToday.ToShortDateString()</strong></p>
+
+<pre><code>&lt;Calendar TodaysDate="@@(new DateTime(2025, 12, 25))" /&gt;</code></pre>
+
+<hr />
+
 <!-- Event handling -->
 <h3>Event Handling</h3>
 <p>Track selection changes and month navigation, matching the Web Forms
@@ -220,6 +234,8 @@
     private DateTime customNavDate = DateTime.Today;
     private DateTime styledDate = DateTime.Today;
     private DateTime subComponentDate = DateTime.Today;
+    private DateTime todaysDateDemo = new DateTime(2025, 12, 25);
+    private DateTime customToday = new DateTime(2025, 12, 25);
     private DateTime eventDate = DateTime.Today;
     private int selectionChangedCount = 0;
     private int monthChangedCount = 0;

@@ -55,6 +55,89 @@ public partial class Chart : BaseStyledComponent
 	[Parameter]
 	public RenderFragment ChildContent { get; set; }
 
+	#region Phase 1 Properties — Web Forms Chart parity (Pattern B+)
+
+#pragma warning disable CS0618 // Obsolete members used in default assignments
+
+	/// <summary>
+	/// Gets or sets the anti-aliasing style. Canvas rendering always applies anti-aliasing;
+	/// this property is accepted for migration compatibility only.
+	/// </summary>
+	[Parameter]
+	[Obsolete("Canvas rendering always applies anti-aliasing. This property is accepted for migration compatibility.")]
+	public EnumParameter<AntiAliasingStyles> AntiAliasing { get; set; } = AntiAliasingStyles.All;
+
+	/// <summary>
+	/// Gets or sets the gradient style for the chart background. When set to a value other
+	/// than None, a CSS linear-gradient or radial-gradient is applied to the container using
+	/// BackColor and BackSecondaryColor.
+	/// </summary>
+	[Parameter]
+	public EnumParameter<GradientStyle> BackGradientStyle { get; set; } = GradientStyle.None;
+
+	/// <summary>
+	/// Gets or sets the hatch pattern style for the chart background. GDI+ hatch patterns
+	/// have no direct CSS or Canvas equivalent; this property is accepted for migration
+	/// compatibility only.
+	/// </summary>
+	[Parameter]
+	[Obsolete("GDI+ hatch patterns cannot be rendered in CSS/Canvas. This property is accepted for migration compatibility.")]
+	public EnumParameter<ChartHatchStyle> BackHatchStyle { get; set; } = ChartHatchStyle.None;
+
+	/// <summary>
+	/// Gets or sets the secondary background color, used as the second color stop in gradient fills.
+	/// </summary>
+	[Parameter]
+	public WebColor BackSecondaryColor { get; set; }
+
+	/// <summary>
+	/// Gets or sets the border line dash style. Maps to CSS border-style on the container div.
+	/// </summary>
+	[Parameter]
+	public EnumParameter<ChartDashStyle> BorderlineDashStyle { get; set; } = ChartDashStyle.NotSet;
+
+	/// <summary>
+	/// Gets or sets the image file location. Client-side Chart.js rendering does not generate
+	/// server images; this property is accepted for migration compatibility only.
+	/// </summary>
+	[Parameter]
+	[Obsolete("Client-side Chart.js rendering does not generate server images. This property is accepted for migration compatibility.")]
+	public string ImageLocation { get; set; } = "";
+
+	/// <summary>
+	/// Gets or sets the image storage mode. Client-side Chart.js rendering does not generate
+	/// server images; this property is accepted for migration compatibility only.
+	/// </summary>
+	[Parameter]
+	[Obsolete("Chart.js renders directly to canvas. Server-side image storage is not applicable.")]
+	public EnumParameter<ImageStorageMode> ImageStorageMode { get; set; } = Enums.ImageStorageMode.UseHttpHandler;
+
+	/// <summary>
+	/// Gets or sets the text anti-aliasing quality. Browser canvas text rendering is always
+	/// high-quality; this property is accepted for migration compatibility only.
+	/// </summary>
+	[Parameter]
+	[Obsolete("Browser canvas text rendering is always high-quality. This property is accepted for migration compatibility.")]
+	public EnumParameter<TextAntiAliasingQuality> TextAntiAliasingQuality { get; set; } = Enums.TextAntiAliasingQuality.High;
+
+	/// <summary>
+	/// Fires to allow customization of map areas. Canvas-based charts do not use HTML image
+	/// maps; this event is accepted for migration compatibility only and is never raised.
+	/// </summary>
+	[Parameter]
+	[Obsolete("Canvas-based charts do not use HTML image maps. Use Chart.js click handlers instead.")]
+	public EventCallback CustomizeMapAreas { get; set; }
+
+#pragma warning restore CS0618
+
+	/// <summary>
+	/// Fires to allow customization of the chart legend before rendering.
+	/// </summary>
+	[Parameter]
+	public EventCallback CustomizeLegend { get; set; }
+
+	#endregion
+
 	/// <summary>
 	/// Computed inline style for chart dimensions.
 	/// </summary>
@@ -69,6 +152,67 @@ public partial class Chart : BaseStyledComponent
 				parts.Add($"height:{ChartHeight}");
 			return string.Join(";", parts);
 		}
+	}
+
+	/// <summary>
+	/// Computed inline style for gradient background and border dash style.
+	/// </summary>
+	private string ChartPropertyStyle
+	{
+		get
+		{
+			var parts = new List<string>();
+
+			var gradient = GetGradientCss();
+			if (!string.IsNullOrEmpty(gradient))
+				parts.Add($"background:{gradient}");
+
+			var border = GetBorderStyleCss();
+			if (!string.IsNullOrEmpty(border))
+				parts.Add($"border-style:{border}");
+
+			return string.Join(";", parts);
+		}
+	}
+
+	private string GetGradientCss()
+	{
+		var style = (GradientStyle)BackGradientStyle;
+		if (style == GradientStyle.None)
+			return null;
+
+		if (BackSecondaryColor == default(WebColor))
+			return null;
+
+		var primary = BackColor != default(WebColor) ? BackColor.ToHtml() : "transparent";
+		var secondary = BackSecondaryColor.ToHtml();
+
+		return style switch
+		{
+			GradientStyle.TopBottom => $"linear-gradient(to bottom, {primary}, {secondary})",
+			GradientStyle.BottomTop => $"linear-gradient(to top, {primary}, {secondary})",
+			GradientStyle.LeftRight => $"linear-gradient(to right, {primary}, {secondary})",
+			GradientStyle.RightLeft => $"linear-gradient(to left, {primary}, {secondary})",
+			GradientStyle.Center => $"radial-gradient(circle, {primary}, {secondary})",
+			GradientStyle.DiagonalLeft => $"linear-gradient(to bottom right, {primary}, {secondary})",
+			GradientStyle.DiagonalRight => $"linear-gradient(to bottom left, {primary}, {secondary})",
+			GradientStyle.HorizontalCenter => $"linear-gradient(to right, {secondary}, {primary}, {secondary})",
+			GradientStyle.VerticalCenter => $"linear-gradient(to bottom, {secondary}, {primary}, {secondary})",
+			_ => null
+		};
+	}
+
+	private string GetBorderStyleCss()
+	{
+		return (ChartDashStyle)BorderlineDashStyle switch
+		{
+			ChartDashStyle.Solid => "solid",
+			ChartDashStyle.Dash => "dashed",
+			ChartDashStyle.Dot => "dotted",
+			ChartDashStyle.DashDot => "dashed",
+			ChartDashStyle.DashDotDot => "dashed",
+			_ => null
+		};
 	}
 
 	internal void RegisterSeries(ChartSeries series)

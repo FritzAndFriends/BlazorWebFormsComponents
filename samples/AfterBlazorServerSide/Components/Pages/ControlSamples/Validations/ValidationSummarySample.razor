@@ -37,6 +37,12 @@
 	<h5>Italic Single Paragraph</h5>
 	<AspNetValidationSummary Font_Italic="true" DisplayMode="SingleParagraph" />
 
+	<h5>ShowMessageBox (Migration Compatibility)</h5>
+	<p>The <code>ShowMessageBox</code> property is accepted for migration compatibility with
+	   Web Forms <code>&lt;asp:ValidationSummary ShowMessageBox="true"&gt;</code>.
+	   In Blazor, validation messages are displayed inline.</p>
+	<AspNetValidationSummary ShowMessageBox="true" DisplayMode="BulletList" HeaderText="MessageBox mode (rendered inline):" />
+
 </EditForm>
 </div>
 

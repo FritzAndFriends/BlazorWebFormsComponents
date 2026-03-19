@@ -33,5 +33,11 @@ namespace BlazorWebFormsComponents
 
 		[Parameter]
 		public List<ScriptReference> Scripts { get; set; } = new();
+
+		/// <summary>
+		/// Gets or sets the path used as the root for script file references. Stub for migration compatibility.
+		/// </summary>
+		[Parameter]
+		public string ScriptPath { get; set; }
 	}
 }

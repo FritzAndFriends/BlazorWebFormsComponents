@@ -148,6 +148,140 @@
     Color="WebColor.OrangeRed"
     Points="@@targetData" /&gt;</code></pre>
 
+<hr />
+
+<h3>Background Gradient Styles</h3>
+
+<p>Use <code>BackGradientStyle</code> with <code>BackSecondaryColor</code> to apply CSS gradients to the chart container.
+   The gradient blends the chart's <code>BackColor</code> with <code>BackSecondaryColor</code>.</p>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+	<div>
+		<h4>TopBottom</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BackColor="WebColor.Navy" BackSecondaryColor="WebColor.LightSkyBlue"
+			BackGradientStyle="GradientStyle.TopBottom">
+			<ChartArea Name="G1" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Column" ChartArea="G1" Points="@gradientData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>LeftRight</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BackColor="WebColor.DarkGreen" BackSecondaryColor="WebColor.PaleGreen"
+			BackGradientStyle="GradientStyle.LeftRight">
+			<ChartArea Name="G2" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Column" ChartArea="G2" Points="@gradientData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Center (Radial)</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BackColor="WebColor.DarkRed" BackSecondaryColor="WebColor.LightCoral"
+			BackGradientStyle="GradientStyle.Center">
+			<ChartArea Name="G3" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Column" ChartArea="G3" Points="@gradientData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>DiagonalLeft</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BackColor="WebColor.Indigo" BackSecondaryColor="WebColor.Lavender"
+			BackGradientStyle="GradientStyle.DiagonalLeft">
+			<ChartArea Name="G4" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Column" ChartArea="G4" Points="@gradientData" />
+		</Chart>
+	</div>
+
+</div>
+
+<pre><code class="language-razor">&lt;Chart BackColor="WebColor.Navy"
+       BackSecondaryColor="WebColor.LightSkyBlue"
+       BackGradientStyle="GradientStyle.TopBottom"&gt;
+    ...
+&lt;/Chart&gt;</code></pre>
+
+<hr />
+
+<h3>Border Dash Styles</h3>
+
+<p>Use <code>BorderlineDashStyle</code> to set the CSS border style on the chart container.</p>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+	<div>
+		<h4>Solid</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BorderlineDashStyle="ChartDashStyle.Solid"
+			BorderColor="WebColor.Black" BorderWidth="2">
+			<ChartArea Name="B1" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Bar" ChartArea="B1" Points="@gradientData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Dash</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BorderlineDashStyle="ChartDashStyle.Dash"
+			BorderColor="WebColor.DarkBlue" BorderWidth="2">
+			<ChartArea Name="B2" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Bar" ChartArea="B2" Points="@gradientData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>Dot</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BorderlineDashStyle="ChartDashStyle.Dot"
+			BorderColor="WebColor.DarkRed" BorderWidth="2">
+			<ChartArea Name="B3" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Bar" ChartArea="B3" Points="@gradientData" />
+		</Chart>
+	</div>
+
+	<div>
+		<h4>DashDot</h4>
+		<Chart ChartWidth="280px" ChartHeight="200px"
+			BorderlineDashStyle="ChartDashStyle.DashDot"
+			BorderColor="WebColor.Purple" BorderWidth="2">
+			<ChartArea Name="B4" />
+			<ChartSeries Name="Data" ChartType="SeriesChartType.Bar" ChartArea="B4" Points="@gradientData" />
+		</Chart>
+	</div>
+
+</div>
+
+<pre><code class="language-razor">&lt;Chart BorderlineDashStyle="ChartDashStyle.Solid"
+       BorderColor="WebColor.Black" BorderWidth="2"&gt;
+    ...
+&lt;/Chart&gt;</code></pre>
+
+<hr />
+
+<h3>AntiAliasing (Migration Compatibility)</h3>
+
+<p>The <code>AntiAliasing</code> property is marked <code>[Obsolete]</code> because canvas rendering always applies
+   anti-aliasing. It compiles without errors for migration compatibility.</p>
+
+#pragma warning disable CS0618
+<Chart ChartWidth="400px" ChartHeight="250px"
+	AntiAliasing="AntiAliasingStyles.All">
+	<ChartArea Name="AA1" />
+	<ChartSeries Name="Data" ChartType="SeriesChartType.Line" ChartArea="AA1" Points="@gradientData" />
+</Chart>
+#pragma warning restore CS0618
+
+<pre><code class="language-razor">@@* Suppress obsolete warning for migration compatibility *@@
+#pragma warning disable CS0618
+&lt;Chart AntiAliasing="AntiAliasingStyles.All"&gt;
+    ...
+&lt;/Chart&gt;
+#pragma warning restore CS0618</code></pre>
+
 @code {
 
 	// Pie chart data for palette comparison
@@ -184,6 +318,15 @@
 		new() { XValue = "A", YValues = new[] { 100.0 } },
 		new() { XValue = "B", YValues = new[] { 115.0 } },
 		new() { XValue = "C", YValues = new[] { 125.0 } }
+	};
+
+	// Gradient and border demo data
+	private List<DataPoint> gradientData = new()
+	{
+		new() { XValue = "A", YValues = new[] { 40.0 } },
+		new() { XValue = "B", YValues = new[] { 70.0 } },
+		new() { XValue = "C", YValues = new[] { 55.0 } },
+		new() { XValue = "D", YValues = new[] { 85.0 } }
 	};
 
 	// Custom color data
