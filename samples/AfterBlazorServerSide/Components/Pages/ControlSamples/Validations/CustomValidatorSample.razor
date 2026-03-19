@@ -41,7 +41,49 @@
 
 <hr />
 
+<h3>ClientValidationFunction &amp; IsValid</h3>
+<p>The <code>ClientValidationFunction</code> property is accepted for migration compatibility.
+   In Web Forms it referenced a client-side JavaScript function — Blazor does not execute client scripts,
+   so this is a migration stub. <code>IsValid</code> indicates whether the control passes validation.</p>
+
+<div data-audit-control="CustomValidator-2">
+<EditForm Model="@exampleModel2" OnValidSubmit="@HandleValidSubmit2">
+
+	<label>Write something (IsValid starts true):</label>
+	<InputText id="clientVal" @ref="ClientValRef.Current" @bind-Value="exampleModel2.Name" />
+	<CustomValidator ServerValidate="@AlwaysValid"
+					 ControlRef="@ClientValRef"
+					 ClientValidationFunction="CheckValue"
+					 IsValid="true"
+					 Text="Validation failed."
+					 ErrorMessage="Client validation failed!" />
+
+	<button type="submit">Submit</button>
+
+</EditForm>
+</div>
+
+@code {
+	ForwardRef<InputBase<string>> ClientValRef = new ForwardRef<InputBase<string>>();
+
+	private ExampleModel exampleModel2 = new ExampleModel();
+
+	private void HandleValidSubmit2()
+	{
+		Console.WriteLine("ClientValidation: OnValidSubmit");
+	}
+
+	private bool AlwaysValid(string value) => true;
+}
+
+<hr />
+
 <p>Code:</p>
-<code>
-&lt;CustomValidator ServerValidate="@@DoesItStartWithA" ControlRef="@@Name" Text="Does not start with 'A'." /&gt;
-</code>
+<pre><code>&lt;CustomValidator ServerValidate="@@DoesItStartWithA" ControlRef="@@Name" Text="Does not start with 'A'." /&gt;
+
+&lt;!-- Migration compatibility properties --&gt;
+&lt;CustomValidator ServerValidate="@@AlwaysValid"
+                 ControlRef="@@ClientValRef"
+                 ClientValidationFunction="CheckValue"
+                 IsValid="true"
+                 Text="Validation failed." /&gt;</code></pre>

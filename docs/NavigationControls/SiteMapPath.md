@@ -16,6 +16,7 @@ Original Microsoft implementation: https://docs.microsoft.com/en-us/dotnet/api/s
 - **NodeTemplate** - Custom template for ancestor nodes
 - **RootNodeTemplate** - Custom template for the root/home node
 - **Style properties** - CurrentNodeStyle, NodeStyle, RootNodeStyle, PathSeparatorStyle
+- **Events** - `ItemCreated` and `ItemDataBound` for node lifecycle callbacks
 
 ### Blazor Notes
 
@@ -35,7 +36,6 @@ root.AddChild(products);
 - **Web.sitemap XML file** - Not supported; build the hierarchy in code
 - **Provider** - The `SiteMapProvider` property accepts a `SiteMapNode` root, not a provider name
 - **SkipLinkText** - Accessibility skip link not implemented
-- **ItemDataBound event** - Not supported; use templates for customization
 
 ## Web Forms Declarative Syntax
 
@@ -175,6 +175,48 @@ root.AddChild(products);
     PathDirection="PathDirection.CurrentToRoot" />
 @* Renders: Electronics > Products > Home *@
 ```
+
+## Events
+
+### ItemCreated
+
+Fires when a breadcrumb node item is created during rendering. The callback receives a `SiteMapNodeItemEventArgs` with an `Item` property referencing the `SiteMapNode`.
+
+```razor
+<SiteMapPath SiteMapProvider="@SiteMap"
+             CurrentUrl="/products"
+             ItemCreated="HandleItemCreated" />
+
+@code {
+    private void HandleItemCreated(SiteMapNodeItemEventArgs e)
+    {
+        Console.WriteLine($"Node created: {e.Item.Title}");
+    }
+}
+```
+
+### ItemDataBound
+
+Fires when a breadcrumb node item is bound to its data source. Useful for customizing node display dynamically.
+
+```razor
+<SiteMapPath SiteMapProvider="@SiteMap"
+             CurrentUrl="/products"
+             ItemDataBound="HandleItemDataBound" />
+
+@code {
+    private void HandleItemDataBound(SiteMapNodeItemEventArgs e)
+    {
+        Console.WriteLine($"Node data-bound: {e.Item.Title} → {e.Item.Url}");
+    }
+}
+```
+
+### SiteMapNodeItemEventArgs
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Item` | `SiteMapNode` | The site map node associated with the event |
 
 ## See Also
 

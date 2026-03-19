@@ -1,0 +1,125 @@
+@page "/ControlSamples/SiteMapPath/Events"
+
+<PageTitle>SiteMapPath Events</PageTitle>
+
+<h2>SiteMapPath — ItemCreated &amp; ItemDataBound Events</h2>
+
+<p>The <code>ItemCreated</code> and <code>ItemDataBound</code> events fire during rendering
+   when breadcrumb nodes are created or data-bound. These are useful for customizing node
+   appearance dynamically.</p>
+
+<hr />
+
+<h3>ItemCreated Event</h3>
+<p>The <code>ItemCreated</code> callback receives a <code>SiteMapNodeItemEventArgs</code>
+   with an <code>Item</code> property containing the <code>SiteMapNode</code> being created.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="SiteMapPath-Events-1">
+        <SiteMapPath SiteMapProvider="@SiteMap"
+                     CurrentUrl="/products/electronics/phones"
+                     ItemCreated="HandleItemCreated" />
+    </div>
+    <div class="card-footer">
+        <strong>Items created:</strong>
+        <ul class="mb-0">
+            @foreach (var item in createdItems)
+            {
+                <li>@item</li>
+            }
+        </ul>
+    </div>
+</div>
+
+<pre><code>&lt;SiteMapPath SiteMapProvider="@@SiteMap"
+             CurrentUrl="/products/electronics"
+             ItemCreated="HandleItemCreated" /&gt;
+
+@@code {
+    private void HandleItemCreated(SiteMapNodeItemEventArgs e)
+    {
+        createdItems.Add($"Created: {e.Item.Title} ({e.Item.Url})");
+    }
+}</code></pre>
+
+<hr />
+
+<h3>ItemDataBound Event</h3>
+<p>The <code>ItemDataBound</code> callback fires when each node is bound to its data source.
+   Use it to inspect or log the nodes as they render.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="SiteMapPath-Events-2">
+        <SiteMapPath SiteMapProvider="@SiteMap"
+                     CurrentUrl="/products/clothing"
+                     ItemDataBound="HandleItemDataBound" />
+    </div>
+    <div class="card-footer">
+        <strong>Items data-bound:</strong>
+        <ul class="mb-0">
+            @foreach (var item in boundItems)
+            {
+                <li>@item</li>
+            }
+        </ul>
+    </div>
+</div>
+
+<pre><code>&lt;SiteMapPath SiteMapProvider="@@SiteMap"
+             CurrentUrl="/products/clothing"
+             ItemDataBound="HandleItemDataBound" /&gt;
+
+@@code {
+    private void HandleItemDataBound(SiteMapNodeItemEventArgs e)
+    {
+        boundItems.Add($"Bound: {e.Item.Title}");
+    }
+}</code></pre>
+
+<hr />
+
+<h3>SiteMapNodeItemEventArgs Reference</h3>
+
+<table class="table table-bordered">
+    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>Item</code></td><td>SiteMapNode</td><td>The site map node associated with the event</td></tr>
+    </tbody>
+</table>
+
+@code {
+    private SiteMapNode SiteMap;
+    private List<string> createdItems = new();
+    private List<string> boundItems = new();
+
+    protected override void OnInitialized()
+    {
+        SiteMap = BuildSiteMap();
+    }
+
+    private void HandleItemCreated(SiteMapNodeItemEventArgs e)
+    {
+        createdItems.Add($"Created: {e.Item.Title} ({e.Item.Url})");
+    }
+
+    private void HandleItemDataBound(SiteMapNodeItemEventArgs e)
+    {
+        boundItems.Add($"Bound: {e.Item.Title}");
+    }
+
+    private static SiteMapNode BuildSiteMap()
+    {
+        var root = new SiteMapNode("Home", "/", "Return to home page");
+        var products = new SiteMapNode("Products", "/products", "Browse our catalog");
+        var electronics = new SiteMapNode("Electronics", "/products/electronics", "Electronic devices");
+        var phones = new SiteMapNode("Phones", "/products/electronics/phones", "Mobile phones");
+        var clothing = new SiteMapNode("Clothing", "/products/clothing", "Apparel and accessories");
+
+        root.AddChild(products);
+        products.AddChild(electronics);
+        products.AddChild(clothing);
+        electronics.AddChild(phones);
+
+        return root;
+    }
+}

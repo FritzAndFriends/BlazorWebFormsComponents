@@ -1,0 +1,159 @@
+@page "/ControlSamples/BulletedList/Selection"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>BulletedList Selection &amp; Events</PageTitle>
+
+<h2>BulletedList — Selection Properties &amp; Events</h2>
+
+<p>These features support migration from Web Forms and provide enhanced selection tracking.</p>
+
+<hr />
+
+<h3>Click Event Alias</h3>
+<p>Both <code>OnClick</code> and <code>Click</code> can be used to handle item clicks in
+   <code>LinkButton</code> mode. <code>Click</code> matches the Web Forms event name for
+   easier migration.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-1">
+        <BulletedList ItemType="object"
+                      StaticItems="clickItems"
+                      DisplayMode="BulletedListDisplayMode.LinkButton"
+                      Click="HandleClick" />
+        <p class="mt-2"><strong>Last click:</strong> @clickMessage</p>
+    </div>
+</div>
+
+<pre><code>&lt;BulletedList ItemType="object"
+              StaticItems="clickItems"
+              DisplayMode="BulletedListDisplayMode.LinkButton"
+              Click="HandleClick" /&gt;
+
+@@code {
+    private void HandleClick(BulletedListEventArgs e)
+    {
+        clickMessage = $"Clicked index {e.Index}";
+    }
+}</code></pre>
+
+<hr />
+
+<h3>SelectedIndex &amp; SelectedValue</h3>
+<p><code>SelectedIndex</code> and <code>SelectedValue</code> are accepted for Web Forms
+   migration compatibility. They represent the currently selected item in the list.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-2">
+        <BulletedList ItemType="object"
+                      StaticItems="selectionItems"
+                      BulletStyle="BulletStyle.Disc"
+                      SelectedIndex="1"
+                      SelectedValue="banana" />
+        <p class="text-muted"><em>SelectedIndex="1", SelectedValue="banana"</em></p>
+    </div>
+</div>
+
+<pre><code>&lt;BulletedList ItemType="object"
+              StaticItems="selectionItems"
+              SelectedIndex="1"
+              SelectedValue="banana" /&gt;</code></pre>
+
+<hr />
+
+<h3>AutoPostBack &amp; Text</h3>
+<p><code>AutoPostBack</code> and <code>Text</code> are migration stubs accepted for
+   compatibility with Web Forms markup. In Blazor, events fire immediately without
+   postback.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-3">
+        <BulletedList ItemType="object"
+                      StaticItems="selectionItems"
+                      BulletStyle="BulletStyle.Numbered"
+                      AutoPostBack="true"
+                      Text="My Fruit List" />
+    </div>
+</div>
+
+<pre><code>&lt;BulletedList ItemType="object"
+              StaticItems="selectionItems"
+              AutoPostBack="true"
+              Text="My Fruit List" /&gt;</code></pre>
+
+<hr />
+
+<h3>SelectedIndexChanged &amp; TextChanged Events</h3>
+<p>These <code>EventCallback</code> parameters are accepted for Web Forms migration
+   compatibility. Wire them up just as you would in Web Forms markup.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-4">
+        <BulletedList ItemType="object"
+                      StaticItems="selectionItems"
+                      BulletStyle="BulletStyle.Square"
+                      DisplayMode="BulletedListDisplayMode.LinkButton"
+                      OnClick="HandleClick"
+                      SelectedIndexChanged="HandleSelectionChanged"
+                      TextChanged="HandleTextChanged" />
+        <p class="mt-2">@eventMessage</p>
+    </div>
+</div>
+
+<pre><code>&lt;BulletedList ItemType="object"
+              StaticItems="selectionItems"
+              DisplayMode="BulletedListDisplayMode.LinkButton"
+              OnClick="HandleClick"
+              SelectedIndexChanged="HandleSelectionChanged"
+              TextChanged="HandleTextChanged" /&gt;</code></pre>
+
+<hr />
+
+<h3>Properties Reference</h3>
+
+<table class="table table-bordered">
+    <thead><tr><th>Property / Event</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>Click</code></td><td>EventCallback&lt;BulletedListEventArgs&gt;</td><td>—</td><td>Web Forms event alias for <code>OnClick</code></td></tr>
+        <tr><td><code>SelectedIndex</code></td><td>int</td><td>-1</td><td>Index of the selected item</td></tr>
+        <tr><td><code>SelectedValue</code></td><td>string</td><td>null</td><td>Value of the selected item</td></tr>
+        <tr><td><code>AutoPostBack</code></td><td>bool</td><td>false</td><td>Migration stub — Blazor events fire immediately</td></tr>
+        <tr><td><code>Text</code></td><td>string</td><td>null</td><td>Text caption for the control (migration stub)</td></tr>
+        <tr><td><code>SelectedIndexChanged</code></td><td>EventCallback&lt;EventArgs&gt;</td><td>—</td><td>Fires when selection changes (migration stub)</td></tr>
+        <tr><td><code>TextChanged</code></td><td>EventCallback&lt;EventArgs&gt;</td><td>—</td><td>Fires when text changes (migration stub)</td></tr>
+    </tbody>
+</table>
+
+@code {
+    private string clickMessage = "(none)";
+    private string eventMessage = "Events will fire here.";
+
+    private ListItemCollection clickItems = new()
+    {
+        new ListItem("Apple", "apple"),
+        new ListItem("Banana", "banana"),
+        new ListItem("Cherry", "cherry"),
+        new ListItem("Date", "date")
+    };
+
+    private ListItemCollection selectionItems = new()
+    {
+        new ListItem("Apple", "apple"),
+        new ListItem("Banana", "banana"),
+        new ListItem("Cherry", "cherry")
+    };
+
+    private void HandleClick(BulletedListEventArgs e)
+    {
+        clickMessage = $"Clicked index {e.Index}: {clickItems[e.Index].Text}";
+    }
+
+    private void HandleSelectionChanged(EventArgs e)
+    {
+        eventMessage = "SelectedIndexChanged fired!";
+    }
+
+    private void HandleTextChanged(EventArgs e)
+    {
+        eventMessage = "TextChanged fired!";
+    }
+}
