@@ -261,6 +261,56 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 
 **Learnings:**
 - BaseStyledComponent inheritance chain gives most components 90%+ on style support automatically — good design payoff from early base-class investment.
+
+### ASPX Middleware Experiment Scope — Phase 1 Definition (2026-03-14)
+
+**Decision:** Phase 1 scope locked to **markup-only rendering** via new `BlazorWebFormsComponents.AspxMiddleware` project.
+
+**Key scoping decisions:**
+
+1. **Project structure:** New project (not embedded in main), allows experimental work to stay isolated; opt-in via `UseAspxPages()` extension method.
+
+2. **Parser choice:** XDocument (System.Xml.Linq) with pre-processing regex to strip `<% %>` code blocks. Rationale: safer than custom tokenizer, less coupling than AngleSharp. Phase 2 can switch if needed.
+
+3. **Three concrete "done" scenarios:**
+   - Simple controls (Button+Label+TextBox+static HTML) render correctly
+   - Nested panels with ChildContent render correct nesting
+   - Master pages with ContentPlaceHolder map to Blazor layouts
+
+4. **Attribute coercion strategy:** `AttributeCoercer` class handles string → bool, int, Unit, enum, Color. RenderTreeBuilder walks AST and builds RenderFragment programmatically.
+
+5. **Test files:** Three minimal .aspx files created in `samples/AspxMiddlewareTest/`:
+   - `simple-form.aspx` (form with textboxes, labels, button)
+   - `dashboard-with-panels.aspx` (nested panels with static HTML)
+   - `page-with-master.aspx` + `site.Master` (layout mapping)
+
+6. **Explicit out-of-scope for Phase 1:** Code-behind, data binding, events, ViewState, PostBack, lifecycle, user controls, custom controls, validation controls, themes, JS interop. All logged as warnings ("Phase 2" or "Not supported"), rendering continues.
+
+7. **Component registry:** All 50+ BWFC components mapped via `ComponentRegistry.ControlMap`. Unknown tags render as `<!-- Unknown control: ... -->` with warning.
+
+8. **Error handling:** Non-fatal warnings (log, continue); fatal errors (malformed XML) throw `AspxParseException`. Gives developers quick feedback without blocking.
+
+9. **Phase 2 handoff:** If Phase 1 succeeds, Phase 2 will add expression compiler, data provider registry, template mapping, PostBack handling. Estimated ~4 weeks.
+
+**Why this scope is right:**
+- Achievable in 1 week (new project, parser, middleware, 3 tests, integration)
+- Proves the concept: "Old ASPX files render as Blazor SSR via BWFC"
+- Clear boundary prevents creep (code-behind is phase 2, not phase 1)
+- Represents all three major markup patterns (simple, nested, layout)
+- Aligns with Jeff's request for "minimal viable experiment"
+
+**Risk mitigations:**
+- XDocument pre-processing is well-understood, lower risk than custom parsing
+- RenderTreeBuilder + HtmlRenderer are battle-tested BWFC/Blazor APIs
+- Test files are small, fast to iterate on
+- New project means zero blast radius if abandoned
+- ComponentRegistry is simple static dict, easy to update if BWFC adds components
+
+**Learnings from decision:**
+- Separating experiments (new project) from core library (main project) keeps blast radius bounded
+- Three concrete "done" scenarios are far more useful than abstract success criteria
+- Explicit "Phase 2" labeling on all deferred features prevents scope creep and sets expectations
+- Pre-processing ASPX before XDocument is cleaner than trying to retrofit .NET's XML parser for malformed input
 - GridView estimated at ~72% health (property parity is the drag — AllowPaging/AllowSorting still missing).
 - Label estimated at ~92% health — simple controls score highest because they have less to implement.
 - Sample coverage is excellent (48/60+ components have samples), but 3 Login controls lack individual samples.

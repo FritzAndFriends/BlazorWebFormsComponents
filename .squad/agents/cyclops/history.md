@@ -468,3 +468,16 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 3. **CS1503** in GridView/Selection.razor — SelectedIndexChanged handler took int but component expects EventCallback<GridViewSelectEventArgs>. Changed handler (and code example) to accept GridViewSelectEventArgs.
 
 **Key insight:** Always check the base class parameter types — ImageButton inherits OnClick from ButtonBaseComponent which uses EventArgs, not MouseEventArgs. GridView's SelectedIndexChanged was recently changed to GridViewSelectEventArgs (matching Web Forms behavior).
+
+### ASPX Middleware Experiment (2026-03-19)
+
+Built Phase 1 prototype of `BlazorWebFormsComponents.AspxMiddleware` — runtime ASPX→Blazor SSR rendering.
+
+**Architecture:** AspxParser (XML pre-process) → AspxComponentRegistry (47 mapped controls) → AspxComponentTreeBuilder (RenderFragment via RenderTreeBuilder) → AspxRenderingMiddleware (HtmlRenderer SSR).
+
+**Key learnings:**
+- ASPX `asp:` prefix breaks XML parsers. Solution: regex-replace `asp:` → `asp_` before XDocument.Parse, then detect `asp_` prefixed elements as controls.
+- Many BWFC list/data controls are generic (`GridView<ItemType>`, `DropDownList<ItemType>`). Registered as `typeof(X<object>)` for Phase 1 markup-only rendering.
+- BWFC components inject `LinkGenerator`, `IJSRuntime`, `IHttpContextAccessor` via `[Inject]`. For SSR test harness, must register `AddBlazorWebFormsComponents()`, `AddRouting()`, and a no-op `IJSRuntime`.
+- Attribute type coercion uses reflection on the component type's properties to infer target types (bool, int, enum, Unit).
+- 52 tests passing: parser (14), registry (9), builder (5), integration (3), plus existing suite (21).
