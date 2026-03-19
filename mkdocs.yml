@@ -70,6 +70,8 @@ nav:
     - Calendar: EditorControls/Calendar.md
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
+    - Content: EditorControls/Content.md
+    - ContentPlaceHolder: EditorControls/ContentPlaceHolder.md
     - DropDownList: EditorControls/DropDownList.md
     - FileUpload: EditorControls/FileUpload.md
     - HiddenField: EditorControls/HiddenField.md
@@ -80,6 +82,7 @@ nav:
     - ListBox: EditorControls/ListBox.md
     - Literal: EditorControls/Literal.md
     - Localize: EditorControls/Localize.md
+    - MasterPage: EditorControls/MasterPage.md
     - MultiView: EditorControls/MultiView.md
     - Panel: EditorControls/Panel.md
     - PlaceHolder: EditorControls/PlaceHolder.md
@@ -87,6 +90,7 @@ nav:
     - RadioButtonList: EditorControls/RadioButtonList.md
     - Table: EditorControls/Table.md
     - TextBox: EditorControls/TextBox.md
+    - View: EditorControls/View.md
   - Data Controls:
     - Chart: DataControls/Chart.md
     - DataGrid: DataControls/DataGrid.md

@@ -9,9 +9,12 @@ public static class ComponentCatalog
     public static IReadOnlyList<ComponentInfo> Components { get; } = new List<ComponentInfo>
     {
         // Utility Controls
+        new("Content", "Utility", "/control-samples/masterpage", "Provides content to ContentPlaceHolder regions in master page layouts"),
+        new("ContentPlaceHolder", "Utility", "/control-samples/masterpage", "Defines replaceable content regions in master page layouts"),
         new("MasterPage", "Utility", "/control-samples/masterpage", "Master page template support for consistent layouts"),
         new("Localize", "Utility", "/ControlSamples/Localize", "Localization and resource string rendering"),
         new("MultiView", "Utility", "/ControlSamples/MultiView", "Container for multiple View controls with switching"),
+        new("View", "Utility", "/ControlSamples/MultiView", "Container panel within a MultiView, visible one at a time"),
         new("PlaceHolder", "Utility", "/ControlSamples/PlaceHolder", "Container for dynamically added controls"),
         new("DataBinder", "Utility", "/ControlSamples/DataBinder", "Data binding helper with Eval() expressions",
             Keywords: new[] { "databind", "eval", "expression" }),
@@ -54,6 +57,8 @@ public static class ComponentCatalog
         new("Panel", "Editor", "/ControlSamples/Panel", "Container that renders as a div element",
             new[] { "BackImageUrl" },
             new[] { "container", "div", "group" }),
+        new("RadioButton", "Editor", "/ControlSamples/RadioButton", "Single radio button control for mutually exclusive selection",
+            Keywords: new[] { "radio", "option", "single" }),
         new("RadioButtonList", "Editor", "/ControlSamples/RadioButtonList", "List of mutually exclusive radio buttons",
             Keywords: new[] { "radio", "options", "select" }),
         new("Table", "Editor", "/ControlSamples/Table", "Programmatically created HTML table",
@@ -169,6 +174,8 @@ public static class ComponentCatalog
             Keywords: new[] { "showcase", "migration", "demo", "accordion", "tabs", "modal", "autocomplete", "calendar", "mask", "slider", "hover", "toolkit" }),
 
         // Migration Helpers
+        new("NamingContainer", "Migration Helpers", "/ControlSamples/NamingContainer", "Establishes naming scope for child components, equivalent to INamingContainer",
+            Keywords: new[] { "naming", "scope", "id", "prefix" }),
         new("ScriptManager", "Migration Helpers", "/ControlSamples/ScriptManager", "Migration stub for AJAX script management",
             Keywords: new[] { "ajax", "script", "migration", "stub" }),
         new("ScriptManagerProxy", "Migration Helpers", "/ControlSamples/ScriptManagerProxy", "Migration stub for content page script references",
