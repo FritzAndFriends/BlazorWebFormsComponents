@@ -237,18 +237,18 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 | `Target` | `string` | null | Target window for hyperlinks |
 | `OnClick` | `EventCallback<BulletedListEventArgs>` | - | Click handler for LinkButton mode |
 | `Click` | `EventCallback<BulletedListEventArgs>` | - | Web Forms event alias for `OnClick` |
-| `SelectedIndex` | `int` | -1 | Index of the selected item |
-| `SelectedValue` | `string` | null | Value of the selected item |
+| `SelectedIndex` | `int` | -1 | Migration stub — accepted for markup compatibility |
+| `SelectedValue` | `string` | null | Migration stub — accepted for markup compatibility |
 | `AutoPostBack` | `bool` | false | Migration stub — Blazor events fire immediately |
-| `Text` | `string` | null | Text caption for the control (migration stub) |
+| `Text` | `string` | null | Migration stub — accepted for markup compatibility |
 
 ## Key Events
 
 | Event | Type | Description |
 |-------|------|-------------|
 | `OnClick` / `Click` | `EventCallback<BulletedListEventArgs>` | Fires when a LinkButton-mode item is clicked |
-| `SelectedIndexChanged` | `EventCallback<EventArgs>` | Fires when the selected item changes (migration stub) |
-| `TextChanged` | `EventCallback<EventArgs>` | Fires when the text changes (migration stub) |
+| `SelectedIndexChanged` | `EventCallback<EventArgs>` | Migration stub — accepted but not fired by the component |
+| `TextChanged` | `EventCallback<EventArgs>` | Migration stub — accepted but not fired by the component |
 
 ## Key Differences from Web Forms
 
