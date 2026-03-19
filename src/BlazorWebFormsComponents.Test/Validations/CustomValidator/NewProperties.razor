@@ -1,0 +1,46 @@
+@code {
+
+	[Fact]
+	public void CustomValidator_ClientValidationFunction_DefaultIsNull()
+	{
+		var cut = Render(@<EditForm Model="new object()">
+			<CustomValidator ServerValidate="v => true" />
+		</EditForm>);
+
+		cut.FindComponent<BlazorWebFormsComponents.Validations.CustomValidator>()
+			.Instance.ClientValidationFunction.ShouldBeNull();
+	}
+
+	[Fact]
+	public void CustomValidator_ClientValidationFunction_CanBeSet()
+	{
+		var cut = Render(@<EditForm Model="new object()">
+			<CustomValidator ServerValidate="v => true" ClientValidationFunction="validateField" />
+		</EditForm>);
+
+		cut.FindComponent<BlazorWebFormsComponents.Validations.CustomValidator>()
+			.Instance.ClientValidationFunction.ShouldBe("validateField");
+	}
+
+	[Fact]
+	public void CustomValidator_IsValid_DefaultIsTrue()
+	{
+		var cut = Render(@<EditForm Model="new object()">
+			<CustomValidator ServerValidate="v => true" />
+		</EditForm>);
+
+		cut.FindComponent<BlazorWebFormsComponents.Validations.CustomValidator>()
+			.Instance.IsValid.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void CustomValidator_IsValid_CanBeSetToFalse()
+	{
+		var cut = Render(@<EditForm Model="new object()">
+			<CustomValidator ServerValidate="v => true" IsValid="false" />
+		</EditForm>);
+
+		cut.FindComponent<BlazorWebFormsComponents.Validations.CustomValidator>()
+			.Instance.IsValid.ShouldBeFalse();
+	}
+}

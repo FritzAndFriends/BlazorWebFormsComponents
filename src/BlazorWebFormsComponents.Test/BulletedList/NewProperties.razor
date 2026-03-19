@@ -1,0 +1,75 @@
+@using BulletStyleEnum = BlazorWebFormsComponents.Enums.BulletStyle
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void BulletedList_AutoPostBack_DefaultIsFalse()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" />);
+		cut.FindComponent<BulletedList<object>>().Instance.AutoPostBack.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void BulletedList_SelectedIndex_DefaultIsNegativeOne()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" />);
+		cut.FindComponent<BulletedList<object>>().Instance.SelectedIndex.ShouldBe(-1);
+	}
+
+	[Fact]
+	public void BulletedList_SelectedValue_CanBeSet()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1"),
+			new ListItem("Item 2", "2")
+		};
+
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" SelectedValue="2" />);
+		cut.FindComponent<BulletedList<object>>().Instance.SelectedValue.ShouldBe("2");
+	}
+
+	[Fact]
+	public void BulletedList_Text_CanBeSet()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 1", "1")
+		};
+
+		var cut = Render(@<BulletedList ItemType="object" StaticItems="items" Text="test" />);
+		cut.FindComponent<BulletedList<object>>().Instance.Text.ShouldBe("test");
+	}
+
+	[Fact]
+	public async Task BulletedList_ClickAlias_InvokesHandler()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("Item 0", "v0"),
+			new ListItem("Item 1", "v1")
+		};
+
+		var clickedIndex = -1;
+		var cut = Render(@<BulletedList ItemType="object"
+			StaticItems="items"
+			DisplayMode="BulletedListDisplayMode.LinkButton"
+			Click="e => clickedIndex = e.Index" />);
+
+		var links = cut.FindAll("a");
+		await links[0].ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
+
+		clickedIndex.ShouldBe(0);
+	}
+}

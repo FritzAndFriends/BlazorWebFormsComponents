@@ -1,0 +1,39 @@
+@code {
+
+	[Fact]
+	public void SiteMapPath_ItemCreated_CanBeSet()
+	{
+		var root = new SiteMapNode("Home", "/", "Home page")
+		{
+			ChildNodes = {
+				new SiteMapNode("Products", "/products", "Products page")
+				{
+					ChildNodes = { new SiteMapNode("Widget", "/products/widget", "Widget page") }
+				}
+			}
+		};
+
+		var createdNodes = new List<SiteMapNode>();
+
+		var cut = Render(@<SiteMapPath
+			SiteMapProvider="root"
+			CurrentUrl="/products/widget"
+			ItemCreated="e => createdNodes.Add(e.Item)" />);
+
+		// Verify the parameter can be bound (event is a migration stub)
+		cut.FindComponent<SiteMapPath>().Instance.ItemCreated.HasDelegate.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void SiteMapPath_ItemDataBound_CanBeSet()
+	{
+		var root = new SiteMapNode("Home", "/", "Home page");
+
+		var cut = Render(@<SiteMapPath
+			SiteMapProvider="root"
+			CurrentUrl="/"
+			ItemDataBound="e => { }" />);
+
+		cut.FindComponent<SiteMapPath>().Instance.ItemDataBound.HasDelegate.ShouldBeTrue();
+	}
+}

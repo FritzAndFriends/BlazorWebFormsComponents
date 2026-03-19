@@ -19,7 +19,6 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ## WebForms Features Not Supported
 
-- **AutoPostBack** - Not supported in Blazor; use `OnClick` event for LinkButton mode
 - **DataSourceID** - Not supported; bind directly to collections via `Items` parameter
 
 ## WebForms Syntax
@@ -237,14 +236,27 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 | `FirstBulletNumber` | `int` | 1 | Starting number for ordered lists |
 | `Target` | `string` | null | Target window for hyperlinks |
 | `OnClick` | `EventCallback<BulletedListEventArgs>` | - | Click handler for LinkButton mode |
+| `Click` | `EventCallback<BulletedListEventArgs>` | - | Web Forms event alias for `OnClick` |
+| `SelectedIndex` | `int` | -1 | Migration stub — accepted for markup compatibility |
+| `SelectedValue` | `string` | null | Migration stub — accepted for markup compatibility |
+| `AutoPostBack` | `bool` | false | Migration stub — Blazor events fire immediately |
+| `Text` | `string` | null | Migration stub — accepted for markup compatibility |
+
+## Key Events
+
+| Event | Type | Description |
+|-------|------|-------------|
+| `OnClick` / `Click` | `EventCallback<BulletedListEventArgs>` | Fires when a LinkButton-mode item is clicked |
+| `SelectedIndexChanged` | `EventCallback<EventArgs>` | Migration stub — accepted but not fired by the component |
+| `TextChanged` | `EventCallback<EventArgs>` | Migration stub — accepted but not fired by the component |
 
 ## Key Differences from Web Forms
 
 1. **Type Parameter**: Blazor BulletedList requires a `TItem` type parameter for data binding
 2. **Property Names**: Use `StaticItems` for the item collection (not `Items`), as `Items` is reserved for data-bound scenarios
-3. **Event Handling**: Uses `OnClick` with `EventCallback<BulletedListEventArgs>` instead of server-side postback
+3. **Event Handling**: Uses `OnClick` (or `Click` alias) with `EventCallback<BulletedListEventArgs>` instead of server-side postback
 4. **Enum References**: Use `BulletStyle.Numbered` and `BulletedListDisplayMode.HyperLink` syntax
-5. **No AutoPostBack**: Blazor's event model is immediate; events fire without postback
+5. **No AutoPostBack**: `AutoPostBack` is accepted for migration but Blazor events fire immediately
 
 ## BulletedListEventArgs
 
@@ -272,6 +284,7 @@ When migrating from Web Forms to Blazor:
 3. Remove `<asp:ListItem>` tags and define items in code-behind as `ListItemCollection`
 4. For LinkButton mode, add an `OnClick` handler
 5. Update enum references to Blazor syntax (e.g., `BulletStyle.Numbered`)
+6. `AutoPostBack`, `SelectedIndex`, `SelectedValue`, and `Text` are accepted for migration compatibility
 
 ### Before (Web Forms):
 

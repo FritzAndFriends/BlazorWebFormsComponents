@@ -15,6 +15,7 @@ public class ControlSampleTests
     // Editor Controls
     [Theory]
     [InlineData("/ControlSamples/BulletedList")]
+    [InlineData("/ControlSamples/BulletedList/Selection")]
     [InlineData("/ControlSamples/Button")]
     [InlineData("/ControlSamples/Button/Style")]
     [InlineData("/ControlSamples/Button/JavaScript")]
@@ -141,6 +142,7 @@ public class ControlSampleTests
     [Theory]
     [InlineData("/ControlSamples/ImageMap")]
     [InlineData("/ControlSamples/SiteMapPath")]
+    [InlineData("/ControlSamples/SiteMapPath/Events")]
     [InlineData("/ControlSamples/TreeView")]
     [InlineData("/ControlSamples/TreeView/Accessibility")]
     [InlineData("/ControlSamples/TreeView/ArrowsImages")]
@@ -152,6 +154,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/TreeView/XmlDataSource")]
     [InlineData("/ControlSamples/TreeView/Selection")]
     [InlineData("/ControlSamples/TreeView/ExpandCollapse")]
+    [InlineData("/ControlSamples/TreeView/ImageAndConfig")]
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);

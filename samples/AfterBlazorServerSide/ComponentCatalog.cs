@@ -20,7 +20,9 @@ public static class ComponentCatalog
 
         // Editor Controls
         new("AdRotator", "Editor", "/ControlSamples/AdRotator", "Displays rotating advertisement images"),
-        new("BulletedList", "Editor", "/ControlSamples/BulletedList", "Displays items as a bulleted or numbered list"),
+        new("BulletedList", "Editor", "/ControlSamples/BulletedList", "Displays items as a bulleted or numbered list",
+            new[] { "Selection" },
+            new[] { "list", "bullet", "numbered" }),
         new("Button", "Editor", "/ControlSamples/Button", "Server-side button control with click events",
             new[] { "Style", "JavaScript", "CausesValidation", "ValidationGroup" },
             new[] { "submit", "click", "postback" }),
@@ -106,9 +108,10 @@ public static class ComponentCatalog
         new("Menu", "Navigation", "/ControlSamples/Menu/Selection", "Hierarchical menu navigation control",
             Keywords: new[] { "menu", "navigation", "horizontal", "vertical" }),
         new("SiteMapPath", "Navigation", "/ControlSamples/SiteMapPath", "Breadcrumb navigation based on site map",
-            Keywords: new[] { "breadcrumb", "path", "sitemap" }),
+            new[] { "Events" },
+            new[] { "breadcrumb", "path", "sitemap" }),
         new("TreeView", "Navigation", "/ControlSamples/TreeView", "Hierarchical tree navigation control",
-            new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
+            new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "ImageAndConfig", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
             new[] { "tree", "hierarchy", "expand", "collapse" }),
 
         // Login Controls

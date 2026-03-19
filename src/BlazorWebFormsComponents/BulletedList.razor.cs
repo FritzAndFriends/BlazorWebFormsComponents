@@ -68,6 +68,48 @@ public string Target { get; set; }
 public EventCallback<BulletedListEventArgs> OnClick { get; set; }
 
 /// <summary>
+/// Blazor event alias for the Web Forms Click event.
+/// </summary>
+[Parameter]
+public EventCallback<BulletedListEventArgs> Click { get; set; }
+
+/// <summary>
+/// Occurs when the selection changes. Migration stub for Web Forms postback event.
+/// </summary>
+[Parameter]
+public EventCallback<EventArgs> SelectedIndexChanged { get; set; }
+
+/// <summary>
+/// Occurs when the text changes. Migration stub for Web Forms postback event.
+/// </summary>
+[Parameter]
+public EventCallback<EventArgs> TextChanged { get; set; }
+
+/// <summary>
+/// Gets or sets whether the control automatically posts back when selection changes. Migration stub.
+/// </summary>
+[Parameter]
+public bool AutoPostBack { get; set; }
+
+/// <summary>
+/// Gets or sets the index of the selected item. -1 when no item is selected.
+/// </summary>
+[Parameter]
+public int SelectedIndex { get; set; } = -1;
+
+/// <summary>
+/// Gets or sets the value of the selected item.
+/// </summary>
+[Parameter]
+public string SelectedValue { get; set; }
+
+/// <summary>
+/// Gets or sets the text caption for the control. Migration stub for ListControl.Text.
+/// </summary>
+[Parameter]
+public string Text { get; set; }
+
+/// <summary>
 /// Gets a value indicating whether the bullet style renders as an ordered list.
 /// </summary>
 protected bool IsOrderedList => BulletStyle.Value switch
@@ -136,7 +178,9 @@ protected async Task HandleItemClick(int index)
 {
 if (DisplayMode == BulletedListDisplayMode.LinkButton && Enabled)
 {
-await OnClick.InvokeAsync(new BulletedListEventArgs(index));
+	var args = new BulletedListEventArgs(index);
+	var clickHandler = OnClick.HasDelegate ? OnClick : Click;
+	await clickHandler.InvokeAsync(args);
 }
 }
 }
