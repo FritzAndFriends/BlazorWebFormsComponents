@@ -161,6 +161,7 @@ nav:
   - Migration:
       - Getting started: Migration/readme.md
       - Automated Migration Guide: Migration/AutomatedMigration.md
+      - Deprecation Guidance: Migration/DeprecationGuidance.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Deferred Controls: Migration/DeferredControls.md

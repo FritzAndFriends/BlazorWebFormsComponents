@@ -9461,3 +9461,8 @@ ull when no ID parameter is set. Blazor omits null-valued attributes entirely, s
 
 The canonical pattern for rendering HTML id on Blazor components is id="@ClientID" as a direct attribute binding. No conditional wrapper needed — Blazor's null-attribute omission handles the no-ID case. This applies to all current and future component implementations.
 
+### 2026-03-19T02:50Z: Defer AJAX controls from Component Health Dashboard
+**By:** Squad (Coordinator), on behalf of Jeffrey T. Fritz
+**What:** AJAX Control Toolkit extenders will NOT be added to the Component Health Dashboard at this time. The dashboard tracks parity against System.Web.dll controls using reflection-based baselines. ACT extenders are third-party (AjaxControlToolkit.dll) and would need a separate baseline source. This can be revisited if/when the baseline infrastructure supports multiple assemblies.
+**Why:** Different baseline source — would require significant infrastructure changes to the reflection tool and tracked-components model.
+

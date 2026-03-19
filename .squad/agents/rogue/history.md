@@ -271,6 +271,20 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - _Imports.razor provides `@inherits BlazorWebFormsTestContext` — no need for explicit @inherits in test files
 - `@using Shouldly` added locally when not using _Imports default assertions
 
+### ASHX/AXD Middleware Tests — Issue #423 (2026-03-17)
+
+**46 integration tests for UseBlazorWebFormsComponents middleware (all pass).** Test file: `src/BlazorWebFormsComponents.Test/Middleware/AspxRewriteMiddlewareTests.cs`. Uses `Microsoft.AspNetCore.TestHost` + `TestServer` for full pipeline integration testing — first middleware test file in the project.
+
+**Test categories (46 total):**
+- .aspx rewriting regression (5 tests): 301 redirect, Default.aspx→root, query string preservation, subdirectory Default.aspx, aspx works with ashx/axd disabled
+- .ashx handler interception (7 tests): 410 Gone default, descriptive body, query string, mixed case (Theory×3), subdirectory path, disabled passthrough
+- .ashx custom redirect mappings (6 tests): 301 redirect, Location header, case-insensitive lookup, unmapped returns 410, multiple mappings, query string preservation on redirect
+- .axd resource interception (12 tests): 404 for WebResource/ScriptResource/Trace (Theory×3), ChartImg.axd 410 Gone, query strings, mixed case (Theory×3 for 404, Theory×3 for 410), unknown .axd returns 404, disabled passthrough, ChartImg disabled passthrough
+- Edge cases (16 tests): ashx/axd substrings passthrough, .html/.api/root passthrough, all disabled passthrough, file-name-only paths, .ashx.bak/.axd.old non-extension paths, 404 empty body, ChartImg descriptive body, subdirectory ChartImg
+
+**Key patterns:** TestServer creates full ASP.NET Core pipeline via `UseBlazorWebFormsComponents` extension. Terminal `app.Run` returns 200 "PASSTHROUGH" — any request reaching it means middleware didn't intercept. `CreateServerAndClient` helper for custom options with proper disposal. Added `Microsoft.AspNetCore.TestHost 10.0.5` package to test csproj.
+
+**Middleware implementation review:** AshxHandlerMiddleware uses `StringComparer.OrdinalIgnoreCase` dictionary for case-insensitive custom mappings. AxdHandlerMiddleware special-cases ChartImg.axd for 410 Gone, all others get 404. Both use `path.EndsWith` with `OrdinalIgnoreCase` — correct for URL path matching.
 
 
 ### HttpHandler Test Coverage (2026-03-23, Issue #473)

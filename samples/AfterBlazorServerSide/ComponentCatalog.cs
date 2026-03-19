@@ -191,7 +191,8 @@ public static class ComponentCatalog
         .AsReadOnly();
 
     public static IEnumerable<ComponentInfo> GetByCategory(string category) =>
-        Components.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+        Components.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(c => c.Name);
 
     public static ComponentInfo? GetByRoute(string route) =>
         Components.FirstOrDefault(c => c.Route.Equals(route, StringComparison.OrdinalIgnoreCase));
