@@ -9423,3 +9423,10 @@ Seven new files in `src/BlazorWebFormsComponents/Handlers/` implementing the cor
 
 *— Cyclops, Component Dev*
 
+
+
+### 2026-03-19T02:50Z: Defer AJAX controls from Component Health Dashboard
+**By:** Squad (Coordinator), on behalf of Jeffrey T. Fritz
+**What:** AJAX Control Toolkit extenders will NOT be added to the Component Health Dashboard at this time. The dashboard tracks parity against System.Web.dll controls using reflection-based baselines. ACT extenders are third-party (AjaxControlToolkit.dll) and would need a separate baseline source. This can be revisited if/when the baseline infrastructure supports multiple assemblies.
+**Why:** Different baseline source — would require significant infrastructure changes to the reflection tool and tracked-components model.
+

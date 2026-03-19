@@ -1122,7 +1122,7 @@ public class InteractiveComponentTests
             var initialContent = await page.ContentAsync();
 
             // Find pager links (DetailsView renders numeric pager links)
-            var pagerLinks = await page.Locator("a:has-text('2'), a:has-text('Next')").AllAsync();
+            var pagerLinks = await page.Locator(".main-content a:has-text('2'), .main-content a:has-text('Next')").AllAsync();
             if (pagerLinks.Count > 0)
             {
                 await pagerLinks[0].ClickAsync();
