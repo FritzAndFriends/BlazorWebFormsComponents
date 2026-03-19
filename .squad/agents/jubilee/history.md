@@ -194,4 +194,14 @@
 
 **Build verification:** `dotnet build` completed with 0 errors, pre-existing warnings only.
 
+### Standalone Sample Pages for Content, ContentPlaceHolder, View (2026-03-19)
+
+- **Created 3 standalone sample pages** — each component now has its own route and dedicated page:
+  - `Components/Pages/ControlSamples/Content/Index.razor` — route `/ControlSamples/Content`. Demos: Web Forms before/after comparison, basic Content with ContentPlaceHolderID, multiple content regions, dynamic content with interactive button. 3 audit markers (Content-1, Content-2, Content-3).
+  - `Components/Pages/ControlSamples/ContentPlaceHolder/Index.razor` — route `/ControlSamples/ContentPlaceHolder`. Demos: default content (no override), content replacement, interactive toggle showing default vs override behavior. 3 audit markers (ContentPlaceHolder-1, ContentPlaceHolder-2, ContentPlaceHolder-3).
+  - `Components/Pages/ControlSamples/View/Index.razor` — route `/ControlSamples/View`. Demos: basic ActiveViewIndex navigation, wizard-style multi-step form, OnActivate/OnDeactivate events with tab UI. 3 audit markers (View-1, View-2, View-3).
+- **Updated ComponentCatalog.cs** — Content route changed from `/control-samples/masterpage` to `/ControlSamples/Content`, ContentPlaceHolder from `/control-samples/masterpage` to `/ControlSamples/ContentPlaceHolder`, View from `/ControlSamples/MultiView` to `/ControlSamples/View`.
+- **Convention:** All three pages use `@rendermode InteractiveServer` for interactive demos, include parameter reference tables, migration notes, and `data-audit-control` markers per project conventions.
+- **Build verified:** 0 errors.
+
 

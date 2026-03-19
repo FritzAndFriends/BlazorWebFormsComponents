@@ -226,6 +226,9 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/DataBinder")]
     [InlineData("/ControlSamples/Theming")]
     [InlineData("/ControlSamples/ViewState")]
+    [InlineData("/ControlSamples/Content")]
+    [InlineData("/ControlSamples/ContentPlaceHolder")]
+    [InlineData("/ControlSamples/View")]
     public async Task UtilityFeature_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);

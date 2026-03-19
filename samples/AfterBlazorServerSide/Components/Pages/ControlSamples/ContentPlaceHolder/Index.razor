@@ -1,0 +1,213 @@
+@page "/ControlSamples/ContentPlaceHolder"
+@rendermode InteractiveServer
+
+<h2>ContentPlaceHolder Component</h2>
+<p>
+    The <code>ContentPlaceHolder</code> component defines a replaceable content region
+    within a <code>MasterPage</code> layout. It emulates ASP.NET Web Forms'
+    <code>&lt;asp:ContentPlaceHolder&gt;</code> control.
+</p>
+
+<h3>Web Forms → Blazor Comparison</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>Web Forms — Site.Master</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;%&#64; Master Language="C#" %&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;div class="header"&gt;My Site&lt;/div&gt;
+    &lt;asp:ContentPlaceHolder ID="MainContent"
+         runat="server"&gt;
+        &lt;p&gt;Default content shown when
+           no child page overrides it.&lt;/p&gt;
+    &lt;/asp:ContentPlaceHolder&gt;
+    &lt;div class="footer"&gt;Footer&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Blazor with BWFC</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;MasterPage&gt;
+    &lt;div class="header"&gt;My Site&lt;/div&gt;
+    &lt;ContentPlaceHolder ID="MainContent"&gt;
+        &lt;p&gt;Default content shown when
+           no Content component overrides it.&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+    &lt;div class="footer"&gt;Footer&lt;/div&gt;
+&lt;/MasterPage&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h3>Default Content (No Override)</h3>
+<p>
+    When no <code>Content</code> component targets a <code>ContentPlaceHolder</code>,
+    the placeholder renders its <code>ChildContent</code> as default content.
+</p>
+
+<div data-audit-control="ContentPlaceHolder-1">
+    <MasterPage>
+        <div style="border: 1px solid #dee2e6; border-radius: 4px; padding: 12px;">
+            <ContentPlaceHolder ID="DefaultDemo">
+                <div style="background-color: #fff3cd; padding: 10px; border-radius: 4px;">
+                    <strong>Default Content:</strong> This is the default content defined inside
+                    the ContentPlaceHolder. It appears because no Content component overrides it.
+                </div>
+            </ContentPlaceHolder>
+        </div>
+    </MasterPage>
+</div>
+
+<pre><code>&lt;MasterPage&gt;
+    &lt;ContentPlaceHolder ID="DefaultDemo"&gt;
+        &lt;div&gt;This default content shows because
+             no Content component overrides it.&lt;/div&gt;
+    &lt;/ContentPlaceHolder&gt;
+&lt;/MasterPage&gt;</code></pre>
+
+<hr />
+
+<h3>Content Replacement</h3>
+<p>
+    When a <code>Content</code> component targets a placeholder by matching
+    <code>ContentPlaceHolderID</code>, the default content is replaced.
+</p>
+
+<div data-audit-control="ContentPlaceHolder-2">
+    <MasterPage>
+        <div style="border: 1px solid #dee2e6; border-radius: 4px; padding: 12px;">
+            <p><strong>Region A</strong> (replaced):</p>
+            <ContentPlaceHolder ID="RegionA">
+                <p style="color: #999;"><em>Default Region A content</em></p>
+            </ContentPlaceHolder>
+
+            <p class="mt-3"><strong>Region B</strong> (not replaced — shows default):</p>
+            <ContentPlaceHolder ID="RegionB">
+                <div style="background-color: #fff3cd; padding: 8px; border-radius: 4px;">
+                    ✅ This default Region B content is visible because no Content targets it.
+                </div>
+            </ContentPlaceHolder>
+        </div>
+        <Content ContentPlaceHolderID="RegionA">
+            <div style="background-color: #d4edda; padding: 8px; border-radius: 4px;">
+                🔄 Region A was <strong>replaced</strong> by a Content component.
+            </div>
+        </Content>
+    </MasterPage>
+</div>
+
+<pre><code>&lt;MasterPage&gt;
+    &lt;ContentPlaceHolder ID="RegionA"&gt;
+        &lt;p&gt;Default Region A content&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+
+    &lt;ContentPlaceHolder ID="RegionB"&gt;
+        &lt;div&gt;Default Region B (not replaced)&lt;/div&gt;
+    &lt;/ContentPlaceHolder&gt;
+
+    &lt;Content ContentPlaceHolderID="RegionA"&gt;
+        &lt;div&gt;Region A was replaced!&lt;/div&gt;
+    &lt;/Content&gt;
+&lt;/MasterPage&gt;</code></pre>
+
+<hr />
+
+<h3>Interactive Replacement Toggle</h3>
+<p>
+    This demo lets you toggle whether a Content component overrides the placeholder,
+    showing how the default content appears and disappears.
+</p>
+
+<div data-audit-control="ContentPlaceHolder-3">
+    <div class="mb-2">
+        <button class="btn btn-sm btn-outline-primary" @onclick="ToggleOverride">
+            @(showOverride ? "Remove Override (show default)" : "Apply Override (replace default)")
+        </button>
+    </div>
+    <MasterPage>
+        <div style="border: 1px solid #dee2e6; border-radius: 4px; padding: 12px;">
+            <ContentPlaceHolder ID="@togglePlaceholderId">
+                <div style="background-color: #fff3cd; padding: 10px; border-radius: 4px;">
+                    📋 <strong>Default content</strong> — no override is active.
+                </div>
+            </ContentPlaceHolder>
+        </div>
+        @if (showOverride)
+        {
+            <Content ContentPlaceHolderID="@togglePlaceholderId">
+                <div style="background-color: #d4edda; padding: 10px; border-radius: 4px;">
+                    ✨ <strong>Override active!</strong> Content component is providing this content.
+                </div>
+            </Content>
+        }
+    </MasterPage>
+</div>
+
+<pre><code>&lt;MasterPage&gt;
+    &lt;ContentPlaceHolder ID="ToggleArea"&gt;
+        &lt;div&gt;Default content&lt;/div&gt;
+    &lt;/ContentPlaceHolder&gt;
+    @@if (showOverride)
+    {
+        &lt;Content ContentPlaceHolderID="ToggleArea"&gt;
+            &lt;div&gt;Override active!&lt;/div&gt;
+        &lt;/Content&gt;
+    }
+&lt;/MasterPage&gt;
+
+@@code {
+    private bool showOverride = false;
+    private void ToggleOverride() =&gt; showOverride = !showOverride;
+}</code></pre>
+
+<hr />
+
+<h3>Key Parameters</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>ID</code></td>
+            <td><code>string</code></td>
+            <td>Unique identifier for the placeholder. Content components reference this ID via <code>ContentPlaceHolderID</code>.</td>
+        </tr>
+        <tr>
+            <td><code>ChildContent</code></td>
+            <td><code>RenderFragment</code></td>
+            <td>Default markup rendered when no <code>Content</code> component overrides this region.</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert alert-warning mt-3">
+    <strong>Migration Note:</strong> <code>ContentPlaceHolder</code> is a bridge component for
+    migrating Web Forms MasterPage patterns. In native Blazor, layouts use <code>@@Body</code>
+    for the main content area and <code>RenderFragment</code> parameters for additional sections.
+</div>
+
+@code {
+    private bool showOverride = false;
+    private string togglePlaceholderId = "ToggleArea";
+
+    private void ToggleOverride()
+    {
+        showOverride = !showOverride;
+    }
+}

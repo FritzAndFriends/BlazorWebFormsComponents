@@ -9,12 +9,12 @@ public static class ComponentCatalog
     public static IReadOnlyList<ComponentInfo> Components { get; } = new List<ComponentInfo>
     {
         // Utility Controls
-        new("Content", "Utility", "/control-samples/masterpage", "Provides content to ContentPlaceHolder regions in master page layouts"),
-        new("ContentPlaceHolder", "Utility", "/control-samples/masterpage", "Defines replaceable content regions in master page layouts"),
+        new("Content", "Utility", "/ControlSamples/Content", "Provides content to ContentPlaceHolder regions in master page layouts"),
+        new("ContentPlaceHolder", "Utility", "/ControlSamples/ContentPlaceHolder", "Defines replaceable content regions in master page layouts"),
         new("MasterPage", "Utility", "/control-samples/masterpage", "Master page template support for consistent layouts"),
         new("Localize", "Utility", "/ControlSamples/Localize", "Localization and resource string rendering"),
         new("MultiView", "Utility", "/ControlSamples/MultiView", "Container for multiple View controls with switching"),
-        new("View", "Utility", "/ControlSamples/MultiView", "Container panel within a MultiView, visible one at a time"),
+        new("View", "Utility", "/ControlSamples/View", "Container panel within a MultiView, visible one at a time"),
         new("PlaceHolder", "Utility", "/ControlSamples/PlaceHolder", "Container for dynamically added controls"),
         new("DataBinder", "Utility", "/ControlSamples/DataBinder", "Data binding helper with Eval() expressions",
             Keywords: new[] { "databind", "eval", "expression" }),

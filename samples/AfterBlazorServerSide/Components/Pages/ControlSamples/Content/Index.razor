@@ -1,0 +1,223 @@
+@page "/ControlSamples/Content"
+@rendermode InteractiveServer
+
+<h2>Content Component</h2>
+<p>
+    The <code>Content</code> component provides content to <code>ContentPlaceHolder</code> regions
+    in a <code>MasterPage</code> layout. It emulates ASP.NET Web Forms'
+    <code>&lt;asp:Content&gt;</code> control for gradual migration to Blazor.
+</p>
+
+<h3>Web Forms → Blazor Comparison</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>Web Forms</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;%&#64; Page MasterPageFile="~/Site.Master" %&gt;
+
+&lt;asp:Content
+    ContentPlaceHolderID="MainContent"
+    runat="server"&gt;
+    &lt;h1&gt;Welcome&lt;/h1&gt;
+    &lt;p&gt;Page body goes here.&lt;/p&gt;
+&lt;/asp:Content&gt;
+
+&lt;asp:Content
+    ContentPlaceHolderID="Sidebar"
+    runat="server"&gt;
+    &lt;nav&gt;Side navigation&lt;/nav&gt;
+&lt;/asp:Content&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Blazor with BWFC</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;MasterPage&gt;
+    &lt;ContentPlaceHolder ID="MainContent"&gt;
+        &lt;p&gt;Default main content&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+    &lt;ContentPlaceHolder ID="Sidebar"&gt;
+        &lt;p&gt;Default sidebar&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+&lt;/MasterPage&gt;
+
+@* Child page provides Content: *@
+&lt;Content ContentPlaceHolderID="MainContent"&gt;
+    &lt;h1&gt;Welcome&lt;/h1&gt;
+    &lt;p&gt;Page body goes here.&lt;/p&gt;
+&lt;/Content&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h3>Basic Content with ContentPlaceHolderID</h3>
+<p>
+    The <code>ContentPlaceHolderID</code> parameter links this Content block to a named
+    <code>ContentPlaceHolder</code> region. The <code>ChildContent</code> replaces the
+    placeholder's default content.
+</p>
+
+<div data-audit-control="Content-1">
+    <MasterPage>
+        <ContentPlaceHolder ID="DemoHeader">
+            <p><em>(Default header — replaced by Content below)</em></p>
+        </ContentPlaceHolder>
+        <ContentPlaceHolder ID="DemoBody">
+            <p><em>(Default body — not replaced, so this default shows)</em></p>
+        </ContentPlaceHolder>
+        <Content ContentPlaceHolderID="DemoHeader">
+            <div style="background-color: #d4edda; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px;">
+                <strong>Custom Header:</strong> This content was injected via the Content component.
+            </div>
+        </Content>
+    </MasterPage>
+</div>
+
+<pre><code>&lt;MasterPage&gt;
+    &lt;ContentPlaceHolder ID="DemoHeader"&gt;
+        &lt;p&gt;Default header&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+    &lt;ContentPlaceHolder ID="DemoBody"&gt;
+        &lt;p&gt;Default body (not replaced)&lt;/p&gt;
+    &lt;/ContentPlaceHolder&gt;
+    &lt;Content ContentPlaceHolderID="DemoHeader"&gt;
+        &lt;div&gt;Custom Header injected via Content&lt;/div&gt;
+    &lt;/Content&gt;
+&lt;/MasterPage&gt;</code></pre>
+
+<hr />
+
+<h3>Multiple Content Regions</h3>
+<p>
+    A <code>MasterPage</code> can define several <code>ContentPlaceHolder</code> regions.
+    Each <code>Content</code> targets a specific region by <code>ContentPlaceHolderID</code>.
+</p>
+
+<div data-audit-control="Content-2">
+    <MasterPage>
+        <div style="border: 2px solid #007bff; border-radius: 6px; overflow: hidden;">
+            <div style="background-color: #007bff; color: white; padding: 8px;">
+                <ContentPlaceHolder ID="MultiHeader">
+                    <span>Default Header</span>
+                </ContentPlaceHolder>
+            </div>
+            <div style="padding: 12px;">
+                <ContentPlaceHolder ID="MultiMain">
+                    <p>Default main content area</p>
+                </ContentPlaceHolder>
+            </div>
+            <div style="background-color: #f8f9fa; padding: 8px; border-top: 1px solid #dee2e6;">
+                <ContentPlaceHolder ID="MultiFooter">
+                    <small>Default footer</small>
+                </ContentPlaceHolder>
+            </div>
+        </div>
+        <Content ContentPlaceHolderID="MultiHeader">
+            <strong>📄 My Application</strong>
+        </Content>
+        <Content ContentPlaceHolderID="MultiMain">
+            <h4>Welcome to the App</h4>
+            <p>This main content was provided by a Content component targeting the "MultiMain" region.</p>
+        </Content>
+        <Content ContentPlaceHolderID="MultiFooter">
+            <small>&copy; 2026 BlazorWebFormsComponents — Footer injected via Content</small>
+        </Content>
+    </MasterPage>
+</div>
+
+<pre><code>&lt;MasterPage&gt;
+    &lt;div class="header"&gt;
+        &lt;ContentPlaceHolder ID="MultiHeader"&gt;Default&lt;/ContentPlaceHolder&gt;
+    &lt;/div&gt;
+    &lt;div class="body"&gt;
+        &lt;ContentPlaceHolder ID="MultiMain"&gt;Default&lt;/ContentPlaceHolder&gt;
+    &lt;/div&gt;
+    &lt;div class="footer"&gt;
+        &lt;ContentPlaceHolder ID="MultiFooter"&gt;Default&lt;/ContentPlaceHolder&gt;
+    &lt;/div&gt;
+    &lt;Content ContentPlaceHolderID="MultiHeader"&gt;My Application&lt;/Content&gt;
+    &lt;Content ContentPlaceHolderID="MultiMain"&gt;Welcome content&lt;/Content&gt;
+    &lt;Content ContentPlaceHolderID="MultiFooter"&gt;Footer content&lt;/Content&gt;
+&lt;/MasterPage&gt;</code></pre>
+
+<hr />
+
+<h3>Dynamic Content</h3>
+<p>
+    The <code>ChildContent</code> render fragment can include dynamic Blazor expressions
+    and interactive elements, just like any other Blazor child content.
+</p>
+
+<div data-audit-control="Content-3">
+    <MasterPage>
+        <ContentPlaceHolder ID="DynamicArea">
+            <p>Default content</p>
+        </ContentPlaceHolder>
+        <Content ContentPlaceHolderID="DynamicArea">
+            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <p>Message: <strong>@message</strong></p>
+                <button class="btn btn-sm btn-primary" @onclick="UpdateMessage">Change Message</button>
+            </div>
+        </Content>
+    </MasterPage>
+</div>
+
+<pre><code>&lt;Content ContentPlaceHolderID="DynamicArea"&gt;
+    &lt;p&gt;Message: &lt;strong&gt;@@message&lt;/strong&gt;&lt;/p&gt;
+    &lt;button @@onclick="UpdateMessage"&gt;Change Message&lt;/button&gt;
+&lt;/Content&gt;
+
+@@code {
+    private string message = "Hello from Content!";
+    private void UpdateMessage() =&gt;
+        message = "Updated at " + DateTime.Now.ToLongTimeString();
+}</code></pre>
+
+<hr />
+
+<h3>Key Parameters</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>ContentPlaceHolderID</code></td>
+            <td><code>string</code></td>
+            <td>The ID of the <code>ContentPlaceHolder</code> this content targets.</td>
+        </tr>
+        <tr>
+            <td><code>ChildContent</code></td>
+            <td><code>RenderFragment</code></td>
+            <td>The markup to render in the targeted placeholder region.</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert alert-warning mt-3">
+    <strong>Migration Note:</strong> The <code>Content</code> and <code>ContentPlaceHolder</code>
+    components are provided as a bridge for migrating Web Forms MasterPage patterns. For new
+    development, prefer native Blazor layouts with <code>@@Body</code> and
+    <code>@@inherits LayoutComponentBase</code>.
+</div>
+
+@code {
+    private string message = "Hello from Content!";
+
+    private void UpdateMessage()
+    {
+        message = "Updated at " + DateTime.Now.ToLongTimeString();
+    }
+}
