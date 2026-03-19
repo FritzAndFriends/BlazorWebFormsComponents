@@ -164,7 +164,7 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 1. **Overview** — What `.ashx` handlers are, why migration is needed, `HttpHandlerBase` value proposition
 2. **Quick Start** — 6-step migration checklist (mechanical changes)
 3. **Registration** — Four registration patterns:
-   - Explicit path via `[HandlerRoute]` attribute
+   - Explicit path via `MapHandler<T>("/path")` in `Program.cs`
    - Convention-based routing (derive from class name)
    - Multi-path registration with `MapHandler<T>()`
    - Chaining auth/CORS with `.RequireAuthorization()`, `.RequireCors()`
