@@ -456,3 +456,44 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 
 
 
+
+## BaseValidator & BaseCompareValidator Documentation (2026-03-17)
+
+ **Session (2026-03-17 by Beast):**
+- Created docs/ValidationControls/BaseValidator.md  6.6 KB comprehensive base class docs covering:
+  - Abstract base class overview for all validators
+  - Shared properties: ControlToValidate, ControlRef, Display, Text, ErrorMessage, ValidationGroup, Enabled, style properties
+  - ForwardRef<InputBase<T>> pattern for Blazor-native field binding
+  - Validation lifecycle (EditContext integration, cascading context, registration/validation/cleanup)
+  - Child validator references (RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator)
+  - Web Forms  Blazor comparison with code examples
+
+- Created docs/ValidationControls/BaseCompareValidator.md  6.4 KB docs for comparison-based validators:
+  - Abstract base class extending BaseValidator with type conversion and comparison logic
+  - Type property with supported types table (String, Integer, Double, Date, Currency)
+  - CultureInvariantValues property explanation with practical examples
+  - Type conversion and comparison logic documentation
+  - Comprehensive examples (Integer, Date, Currency) with real code samples
+  - Web Forms  Blazor syntax comparison
+  - Child validator references (CompareValidator, RangeValidator)
+
+- Updated mkdocs.yml  added BaseCompareValidator and BaseValidator alphabetically in Validation Controls section
+- Verified MkDocs build: --strict mode passes with no broken links (55.59 seconds build time)
+
+**Pattern Consistency:**
+- Followed RequiredFieldValidator.md and CompareValidator.md formatting conventions
+- Maintained heading structure: Overview, Properties, Examples, Web Forms comparison, Child references
+- Used property tables for enums (Display, Type values)
+- Included Microsoft documentation links to original Web Forms classes
+- All Blazor code examples shown with EditForm context
+
+**Key Decisions:**
+- BaseValidator docs positioned as "framework for all validators" not a user-facing component
+- Emphasized ControlRef as Blazor-native approach; ControlToValidate as Web Forms migration bridge
+- Type conversion explanation in BaseCompareValidator targets developers migrating numeric/date comparisons
+- CultureInvariantValues documentation included practical locale examples (US "." vs European "," decimals)
+
+**Files:**
+- Created docs/ValidationControls/BaseValidator.md 
+- Created docs/ValidationControls/BaseCompareValidator.md
+- Updated mkdocs.yml (Validation Controls section)

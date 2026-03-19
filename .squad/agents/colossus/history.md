@@ -188,3 +188,30 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 📌 Team update (2026-03-16): Playwright infrastructure confirmed shipping. Unblocks HTML Fidelity dimension for Component Health Dashboard v1. — Forge
 
+### Validator + New Page Integration Tests (2026-03-17)
+
+**Summary:** Added 14 new integration tests — 11 interaction tests and 3 smoke tests.
+
+**Smoke tests added to `ControlSampleTests.cs`:**
+- `[InlineData("/ControlSamples/Content")]`, `[InlineData("/ControlSamples/ContentPlaceHolder")]`, `[InlineData("/ControlSamples/View")]` in `UtilityFeature_Loads_WithoutErrors` Theory group.
+
+**Interaction tests added to `InteractiveComponentTests.cs`:**
+1. `CompareValidator_InvalidValue_ShowsError` — submits "5" (not > 10), asserts error text appears
+2. `CompareValidator_ValidValue_SubmitsSuccessfully` — submits "15", asserts no error
+3. `RangeValidator_OutOfRange_ShowsError` — submits "1800" (below 1900–2100), asserts error
+4. `RangeValidator_InRange_SubmitsSuccessfully` — submits "2000", asserts no error
+5. `RegularExpressionValidator_NonMatching_ShowsError` — submits "abc" (not 5-digit), asserts error
+6. `RegularExpressionValidator_Matching_SubmitsSuccessfully` — submits "12345", asserts no error
+7. `CustomValidator_InvalidValue_ShowsError` — submits "Banana" (doesn't start with A), asserts error
+8. `CustomValidator_ValidValue_SubmitsSuccessfully` — submits "Apple", asserts no error
+9. `ValidationSummary_InvalidSubmit_ShowsSummaryWithMultipleErrors` — submits empty, asserts summary header + error messages
+10. `Content_Renders_MasterPageDemoElements` — verifies heading and content rendered
+11. `ContentPlaceHolder_Renders_DemoContent` — verifies heading and content rendered
+12. `View_ClickThrough_ChangesVisibleContent` — verifies initial view, clicks button, checks content persists
+
+**Patterns:** Used `data-audit-control` locators for all validators, `PressSequentiallyAsync` + `Tab` for input fields, `TextContentAsync()` on container + `Assert.Contains`/`DoesNotContain` for error text validation, `#region` blocks per component. Content/ContentPlaceHolder/View tests written defensively since pages are being created in parallel by Jubilee.
+
+**Files modified:**
+- `samples/AfterBlazorServerSide.Tests/ControlSampleTests.cs` — 3 new `[InlineData]` entries
+- `samples/AfterBlazorServerSide.Tests/InteractiveComponentTests.cs` — 11 new `[Fact]` methods
+

@@ -103,6 +103,8 @@ nav:
     - PagerSettings: DataControls/PagerSettings.md
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
+    - BaseCompareValidator: ValidationControls/BaseCompareValidator.md
+    - BaseValidator: ValidationControls/BaseValidator.md
     - CompareValidator: ValidationControls/CompareValidator.md
     - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md

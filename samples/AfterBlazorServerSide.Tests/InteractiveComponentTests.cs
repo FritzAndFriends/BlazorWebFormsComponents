@@ -3499,4 +3499,539 @@ public class InteractiveComponentTests
             await page.CloseAsync();
         }
     }
+
+    #region CompareValidator Tests
+
+    [Fact]
+    public async Task CompareValidator_InvalidValue_ShowsError()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/CompareValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter an invalid value (5 is not greater than 10)
+            var input = page.Locator("[data-audit-control='CompareValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("5");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='CompareValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error message appears
+            var errorText = await page.Locator("[data-audit-control='CompareValidator-1']").TextContentAsync();
+            Assert.Contains("Number must be greater than 10", errorText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CompareValidator_ValidValue_SubmitsSuccessfully()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/CompareValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter a valid value (15 is greater than 10)
+            var input = page.Locator("[data-audit-control='CompareValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("15");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='CompareValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error is not visible (validators keep text in DOM when hidden)
+            var errorLocator = page.Locator("[data-audit-control='CompareValidator-1']").GetByText("Number must be greater than 10");
+            if (await errorLocator.CountAsync() > 0)
+                Assert.False(await errorLocator.First.IsVisibleAsync(), "Validation error should not be visible for valid input");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    #endregion
+
+    #region RangeValidator Tests
+
+    [Fact]
+    public async Task RangeValidator_OutOfRange_ShowsError()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/RangeValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter an out-of-range value (1800 is below 1900)
+            var input = page.Locator("[data-audit-control='RangeValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("1800");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='RangeValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error appears
+            var containerText = await page.Locator("[data-audit-control='RangeValidator-1']").TextContentAsync();
+            Assert.Contains("Year must be between 1900 and 2100", containerText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task RangeValidator_InRange_SubmitsSuccessfully()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/RangeValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter an in-range value (2000 is between 1900 and 2100)
+            var input = page.Locator("[data-audit-control='RangeValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("2000");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='RangeValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error is not visible (validators keep text in DOM when hidden)
+            var errorLocator = page.Locator("[data-audit-control='RangeValidator-1']").GetByText("Year must be between 1900 and 2100");
+            if (await errorLocator.CountAsync() > 0)
+                Assert.False(await errorLocator.First.IsVisibleAsync(), "Validation error should not be visible for valid input");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    #endregion
+
+    #region RegularExpressionValidator Tests
+
+    [Fact]
+    public async Task RegularExpressionValidator_NonMatching_ShowsError()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/RegularExpressionValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter a value that doesn't match ^[0-9]{5}$ (e.g., "abc")
+            var input = page.Locator("[data-audit-control='RegularExpressionValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("abc");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='RegularExpressionValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error appears
+            var containerText = await page.Locator("[data-audit-control='RegularExpressionValidator-1']").TextContentAsync();
+            Assert.Contains("Not a 5 digit number", containerText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task RegularExpressionValidator_Matching_SubmitsSuccessfully()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/RegularExpressionValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter a matching value (12345 is a 5-digit number)
+            var input = page.Locator("[data-audit-control='RegularExpressionValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("12345");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='RegularExpressionValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error is not visible (validators keep text in DOM when hidden)
+            var errorLocator = page.Locator("[data-audit-control='RegularExpressionValidator-1']").GetByText("Not a 5 digit number");
+            if (await errorLocator.CountAsync() > 0)
+                Assert.False(await errorLocator.First.IsVisibleAsync(), "Validation error should not be visible for valid input");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    #endregion
+
+    #region CustomValidator Tests
+
+    [Fact]
+    public async Task CustomValidator_InvalidValue_ShowsError()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/CustomValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter a value that doesn't start with 'A'
+            var input = page.Locator("[data-audit-control='CustomValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("Banana");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='CustomValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify custom validation error appears
+            var containerText = await page.Locator("[data-audit-control='CustomValidator-1']").TextContentAsync();
+            Assert.Contains("Does not start with 'A'", containerText);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CustomValidator_ValidValue_SubmitsSuccessfully()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/CustomValidator", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Enter a value that starts with 'A'
+            var input = page.Locator("[data-audit-control='CustomValidator-1'] input[id='name']");
+            await input.WaitForAsync(new() { Timeout = 5000 });
+            await input.ClickAsync();
+            await input.PressSequentiallyAsync("Apple");
+            await page.Keyboard.PressAsync("Tab");
+
+            // Submit the form
+            var submitButton = page.Locator("[data-audit-control='CustomValidator-1'] button[type='submit']");
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify validation error is not visible (validators keep text in DOM when hidden)
+            var errorLocator = page.Locator("[data-audit-control='CustomValidator-1']").GetByText("Does not start with 'A'");
+            if (await errorLocator.CountAsync() > 0)
+                Assert.False(await errorLocator.First.IsVisibleAsync(), "Validation error should not be visible for valid input");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    #endregion
+
+    #region ValidationSummary Tests
+
+    [Fact]
+    public async Task ValidationSummary_InvalidSubmit_ShowsSummaryWithMultipleErrors()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ValidationSummary", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Submit the form empty to trigger multiple validators
+            var submitButton = page.Locator("[data-audit-control='ValidationSummary-1'] button[type='submit']");
+            await submitButton.WaitForAsync(new() { Timeout = 5000 });
+            await submitButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify inline validator Text messages appear
+            var containerText = await page.Locator("[data-audit-control='ValidationSummary-1']").TextContentAsync();
+            Assert.Contains("Name is required", containerText);
+
+            // Verify the bold bullet list summary renders with header text
+            var summaryHeader = page.Locator("text=Please fix these errors:");
+            Assert.True(await summaryHeader.CountAsync() >= 1, "Expected summary header 'Please fix these errors:' to appear");
+
+            // Verify summary contains ErrorMessage text (the "but in summary!" variants)
+            Assert.Contains("summary", containerText, StringComparison.OrdinalIgnoreCase);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    #endregion
+
+    #region Content / ContentPlaceHolder / View Tests
+
+    [Fact]
+    public async Task Content_Renders_MasterPageDemoElements()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Content", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify the page renders Content demo elements
+            var heading = page.Locator("h3");
+            await heading.First.WaitForAsync(new() { Timeout = 5000 });
+            var headingText = await heading.First.TextContentAsync();
+            Assert.False(string.IsNullOrWhiteSpace(headingText), "Content page should have a heading");
+
+            // Page should have meaningful content (not a blank/error page)
+            var bodyText = await page.Locator("body").TextContentAsync();
+            Assert.True(bodyText!.Length > 50, "Content page should have substantial content");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task ContentPlaceHolder_Renders_DemoContent()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ContentPlaceHolder", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Verify the page renders ContentPlaceHolder demo elements
+            var heading = page.Locator("h3");
+            await heading.First.WaitForAsync(new() { Timeout = 5000 });
+            var headingText = await heading.First.TextContentAsync();
+            Assert.False(string.IsNullOrWhiteSpace(headingText), "ContentPlaceHolder page should have a heading");
+
+            // Page should have meaningful content
+            var bodyText = await page.Locator("body").TextContentAsync();
+            Assert.True(bodyText!.Length > 50, "ContentPlaceHolder page should have substantial content");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task View_ClickThrough_ChangesVisibleContent()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/View", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Scope to the View-1 demo section
+            var container = page.Locator("[data-audit-control='View-1']");
+            await container.WaitForAsync(new() { Timeout = 5000 });
+
+            // Verify View 1 is initially visible
+            var view1 = container.Locator("h4").Filter(new() { HasTextString = "View 1" });
+            await view1.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await view1.IsVisibleAsync(), "View 1 should be visible initially");
+
+            // Click the Next button within the demo container
+            var nextButton = container.GetByText("Next »");
+            await nextButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Verify View 2 is now visible
+            var view2 = container.Locator("h4").Filter(new() { HasTextString = "View 2" });
+            Assert.True(await view2.IsVisibleAsync(), "View 2 should be visible after clicking Next");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    #endregion
 }

@@ -1,0 +1,304 @@
+@page "/ControlSamples/View"
+@rendermode InteractiveServer
+
+<h2>View Component</h2>
+<p>
+    The <code>View</code> component is a container panel within a <code>MultiView</code>.
+    Only one View is visible at a time, controlled by the parent MultiView's
+    <code>ActiveViewIndex</code> property. It emulates ASP.NET Web Forms'
+    <code>&lt;asp:View&gt;</code> control.
+</p>
+
+<h3>Web Forms → Blazor Comparison</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>Web Forms</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;asp:MultiView ID="mv" runat="server"
+    ActiveViewIndex="0"&gt;
+    &lt;asp:View ID="Step1" runat="server"&gt;
+        &lt;p&gt;Step 1 content&lt;/p&gt;
+    &lt;/asp:View&gt;
+    &lt;asp:View ID="Step2" runat="server"&gt;
+        &lt;p&gt;Step 2 content&lt;/p&gt;
+    &lt;/asp:View&gt;
+    &lt;asp:View ID="Step3" runat="server"&gt;
+        &lt;p&gt;Step 3 content&lt;/p&gt;
+    &lt;/asp:View&gt;
+&lt;/asp:MultiView&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Blazor with BWFC</h5>
+            </div>
+            <div class="card-body">
+                <pre><code>&lt;MultiView ActiveViewIndex="@@activeIndex"&gt;
+    &lt;View&gt;
+        &lt;p&gt;Step 1 content&lt;/p&gt;
+    &lt;/View&gt;
+    &lt;View&gt;
+        &lt;p&gt;Step 2 content&lt;/p&gt;
+    &lt;/View&gt;
+    &lt;View&gt;
+        &lt;p&gt;Step 3 content&lt;/p&gt;
+    &lt;/View&gt;
+&lt;/MultiView&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h3>Basic View with ActiveViewIndex</h3>
+<p>
+    Each <code>View</code> is a child of <code>MultiView</code>. The <code>ActiveViewIndex</code>
+    (zero-based) determines which View is rendered. Only the active View's
+    <code>ChildContent</code> is visible.
+</p>
+
+<div data-audit-control="View-1">
+    <p>Active View: <strong>@(activeIndex + 1)</strong> of 3</p>
+    <MultiView ActiveViewIndex="@activeIndex">
+        <View>
+            <div style="padding: 12px; border: 1px solid #28a745; border-radius: 4px; background-color: #d4edda;">
+                <h4>🟢 View 1 — Introduction</h4>
+                <p>This is the first View. Click <strong>Next</strong> to proceed.</p>
+                <button class="btn btn-primary btn-sm" @onclick="() => activeIndex = 1">Next &raquo;</button>
+            </div>
+        </View>
+        <View>
+            <div style="padding: 12px; border: 1px solid #007bff; border-radius: 4px; background-color: #cce5ff;">
+                <h4>🔵 View 2 — Details</h4>
+                <p>This is the second View with more details.</p>
+                <button class="btn btn-secondary btn-sm" @onclick="() => activeIndex = 0">&laquo; Previous</button>
+                <button class="btn btn-primary btn-sm" @onclick="() => activeIndex = 2">Next &raquo;</button>
+            </div>
+        </View>
+        <View>
+            <div style="padding: 12px; border: 1px solid #ffc107; border-radius: 4px; background-color: #fff3cd;">
+                <h4>🟡 View 3 — Complete</h4>
+                <p>You've reached the final View!</p>
+                <button class="btn btn-secondary btn-sm" @onclick="() => activeIndex = 0">Start Over</button>
+            </div>
+        </View>
+    </MultiView>
+</div>
+
+<pre><code>&lt;MultiView ActiveViewIndex="@@activeIndex"&gt;
+    &lt;View&gt;
+        &lt;h4&gt;View 1 — Introduction&lt;/h4&gt;
+        &lt;button @@onclick="() =&gt; activeIndex = 1"&gt;Next&lt;/button&gt;
+    &lt;/View&gt;
+    &lt;View&gt;
+        &lt;h4&gt;View 2 — Details&lt;/h4&gt;
+        &lt;button @@onclick="() =&gt; activeIndex = 0"&gt;Previous&lt;/button&gt;
+        &lt;button @@onclick="() =&gt; activeIndex = 2"&gt;Next&lt;/button&gt;
+    &lt;/View&gt;
+    &lt;View&gt;
+        &lt;h4&gt;View 3 — Complete&lt;/h4&gt;
+        &lt;button @@onclick="() =&gt; activeIndex = 0"&gt;Start Over&lt;/button&gt;
+    &lt;/View&gt;
+&lt;/MultiView&gt;
+
+@@code {
+    private int activeIndex = 0;
+}</code></pre>
+
+<hr />
+
+<h3>Wizard-Style Form</h3>
+<p>
+    A practical scenario: use View components to build a multi-step wizard where each step
+    collects different information.
+</p>
+
+<div data-audit-control="View-2">
+    <div style="border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden;">
+        <div style="background-color: #f8f9fa; padding: 10px; border-bottom: 1px solid #dee2e6;">
+            <strong>Registration Wizard</strong> — Step @(wizardIndex + 1) of 3
+            <div class="mt-1">
+                @for (int i = 0; i < 3; i++)
+                {
+                    var step = i;
+                    <span style="display:inline-block; width:30px; height:30px; line-height:30px; text-align:center; border-radius:50%; margin-right:4px;
+                        background-color:@(step == wizardIndex ? "#007bff" : step < wizardIndex ? "#28a745" : "#dee2e6");
+                        color:@(step <= wizardIndex ? "white" : "#666");">
+                        @(step + 1)
+                    </span>
+                }
+            </div>
+        </div>
+        <div style="padding: 16px;">
+            <MultiView ActiveViewIndex="@wizardIndex">
+                <View>
+                    <h5>Step 1: Personal Information</h5>
+                    <div class="mb-2">
+                        <label>Name:</label>
+                        <input type="text" class="form-control form-control-sm" @bind="wizardName" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Email:</label>
+                        <input type="email" class="form-control form-control-sm" @bind="wizardEmail" />
+                    </div>
+                    <button class="btn btn-primary btn-sm" @onclick="() => wizardIndex = 1">Next &raquo;</button>
+                </View>
+                <View>
+                    <h5>Step 2: Preferences</h5>
+                    <div class="mb-2">
+                        <label>
+                            <input type="checkbox" @bind="wizardNewsletter" /> Subscribe to newsletter
+                        </label>
+                    </div>
+                    <div class="mb-2">
+                        <label>Notification frequency:</label>
+                        <select class="form-select form-select-sm" @bind="wizardFrequency">
+                            <option>Daily</option>
+                            <option>Weekly</option>
+                            <option>Monthly</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" @onclick="() => wizardIndex = 0">&laquo; Back</button>
+                    <button class="btn btn-primary btn-sm" @onclick="() => wizardIndex = 2">Next &raquo;</button>
+                </View>
+                <View>
+                    <h5>Step 3: Confirmation</h5>
+                    <p><strong>Name:</strong> @(string.IsNullOrEmpty(wizardName) ? "(not provided)" : wizardName)</p>
+                    <p><strong>Email:</strong> @(string.IsNullOrEmpty(wizardEmail) ? "(not provided)" : wizardEmail)</p>
+                    <p><strong>Newsletter:</strong> @(wizardNewsletter ? "Yes" : "No")</p>
+                    <p><strong>Frequency:</strong> @wizardFrequency</p>
+                    <button class="btn btn-secondary btn-sm" @onclick="() => wizardIndex = 1">&laquo; Back</button>
+                    <button class="btn btn-success btn-sm" @onclick="ResetWizard">✓ Submit</button>
+                </View>
+            </MultiView>
+        </div>
+    </div>
+</div>
+
+<pre><code>&lt;MultiView ActiveViewIndex="@@wizardIndex"&gt;
+    &lt;View&gt;
+        &lt;h5&gt;Step 1: Personal Information&lt;/h5&gt;
+        &lt;input @@bind="wizardName" /&gt;
+        &lt;button @@onclick="() =&gt; wizardIndex = 1"&gt;Next&lt;/button&gt;
+    &lt;/View&gt;
+    &lt;View&gt;
+        &lt;h5&gt;Step 2: Preferences&lt;/h5&gt;
+        &lt;button @@onclick="() =&gt; wizardIndex = 0"&gt;Back&lt;/button&gt;
+        &lt;button @@onclick="() =&gt; wizardIndex = 2"&gt;Next&lt;/button&gt;
+    &lt;/View&gt;
+    &lt;View&gt;
+        &lt;h5&gt;Step 3: Confirmation&lt;/h5&gt;
+        &lt;p&gt;Name: @@wizardName&lt;/p&gt;
+        &lt;button @@onclick="() =&gt; wizardIndex = 1"&gt;Back&lt;/button&gt;
+        &lt;button @@onclick="ResetWizard"&gt;Submit&lt;/button&gt;
+    &lt;/View&gt;
+&lt;/MultiView&gt;</code></pre>
+
+<hr />
+
+<h3>OnActivate / OnDeactivate Events</h3>
+<p>
+    Each <code>View</code> supports <code>OnActivate</code> and <code>OnDeactivate</code>
+    event callbacks, fired when the view becomes active or inactive.
+</p>
+
+<div data-audit-control="View-3">
+    <p>Select a tab:</p>
+    <div class="btn-group mb-2" role="group">
+        <button class="btn btn-sm @(eventViewIndex == 0 ? "btn-primary" : "btn-outline-primary")" @onclick="() => eventViewIndex = 0">Tab A</button>
+        <button class="btn btn-sm @(eventViewIndex == 1 ? "btn-primary" : "btn-outline-primary")" @onclick="() => eventViewIndex = 1">Tab B</button>
+        <button class="btn btn-sm @(eventViewIndex == 2 ? "btn-primary" : "btn-outline-primary")" @onclick="() => eventViewIndex = 2">Tab C</button>
+    </div>
+    <MultiView ActiveViewIndex="@eventViewIndex">
+        <View OnActivate="@(() => eventLog = "Tab A activated")" OnDeactivate="@(() => eventLog = "Tab A deactivated → " + eventLog)">
+            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <strong>Tab A content</strong>
+            </div>
+        </View>
+        <View OnActivate="@(() => eventLog = "Tab B activated")" OnDeactivate="@(() => eventLog = "Tab B deactivated → " + eventLog)">
+            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <strong>Tab B content</strong>
+            </div>
+        </View>
+        <View OnActivate="@(() => eventLog = "Tab C activated")" OnDeactivate="@(() => eventLog = "Tab C deactivated → " + eventLog)">
+            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <strong>Tab C content</strong>
+            </div>
+        </View>
+    </MultiView>
+    <p class="mt-2"><small>Event log: <code>@eventLog</code></small></p>
+</div>
+
+<pre><code>&lt;MultiView ActiveViewIndex="@@eventViewIndex"&gt;
+    &lt;View OnActivate="@@(() =&gt; log = &quot;Tab A activated&quot;)"&gt;
+        Tab A content
+    &lt;/View&gt;
+    &lt;View OnActivate="@@(() =&gt; log = &quot;Tab B activated&quot;)"&gt;
+        Tab B content
+    &lt;/View&gt;
+&lt;/MultiView&gt;</code></pre>
+
+<hr />
+
+<h3>Key Parameters</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>ChildContent</code></td>
+            <td><code>RenderFragment</code></td>
+            <td>The content rendered when this View is the active view.</td>
+        </tr>
+        <tr>
+            <td><code>OnActivate</code></td>
+            <td><code>EventCallback&lt;EventArgs&gt;</code></td>
+            <td>Fired when this View becomes active.</td>
+        </tr>
+        <tr>
+            <td><code>OnDeactivate</code></td>
+            <td><code>EventCallback&lt;EventArgs&gt;</code></td>
+            <td>Fired when this View is deactivated.</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert alert-info mt-3">
+    <strong>Tip:</strong> The <code>View</code> component must always be a direct child of
+    <code>MultiView</code>. The parent controls visibility via <code>ActiveViewIndex</code>.
+    Use <code>OnActivate</code> to load data lazily when a step becomes visible.
+</div>
+
+@code {
+    // Basic demo
+    private int activeIndex = 0;
+
+    // Wizard demo
+    private int wizardIndex = 0;
+    private string wizardName = "";
+    private string wizardEmail = "";
+    private bool wizardNewsletter = false;
+    private string wizardFrequency = "Weekly";
+
+    private void ResetWizard()
+    {
+        wizardIndex = 0;
+        wizardName = "";
+        wizardEmail = "";
+        wizardNewsletter = false;
+        wizardFrequency = "Weekly";
+    }
+
+    // Event demo
+    private int eventViewIndex = 0;
+    private string eventLog = "(no events yet)";
+}
