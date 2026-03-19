@@ -83,10 +83,13 @@
             
             if (isDesktop)
             {
-                // Expand all categories on desktop
+                // Expand all categories on desktop except AJAX (too many items)
                 foreach (var category in ComponentCatalog.Categories)
                 {
-                    expandedCategories.Add(category);
+                    if (!category.Equals("AJAX", StringComparison.OrdinalIgnoreCase))
+                    {
+                        expandedCategories.Add(category);
+                    }
                 }
             }
             else
