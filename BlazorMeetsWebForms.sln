@@ -50,6 +50,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWebFormsComponents.As
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWebFormsComponents.AspxMiddleware.Test", "src\BlazorWebFormsComponents.AspxMiddleware.Test\BlazorWebFormsComponents.AspxMiddleware.Test.csproj", "{6C11DFB8-B415-4F40-A67B-F7B295445C30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWebFormsComponents.Analyzers.Test", "src\BlazorWebFormsComponents.Analyzers.Test\BlazorWebFormsComponents.Analyzers.Test.csproj", "{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -257,6 +259,24 @@ Global
 		{6C11DFB8-B415-4F40-A67B-F7B295445C30}.WebForms|x64.Build.0 = Debug|Any CPU
 		{6C11DFB8-B415-4F40-A67B-F7B295445C30}.WebForms|x86.ActiveCfg = Debug|Any CPU
 		{6C11DFB8-B415-4F40-A67B-F7B295445C30}.WebForms|x86.Build.0 = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Debug|x64.Build.0 = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Debug|x86.Build.0 = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Release|x64.ActiveCfg = Release|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Release|x64.Build.0 = Release|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Release|x86.ActiveCfg = Release|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.Release|x86.Build.0 = Release|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.WebForms|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.WebForms|Any CPU.Build.0 = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.WebForms|x64.ActiveCfg = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.WebForms|x64.Build.0 = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.WebForms|x86.ActiveCfg = Debug|Any CPU
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8}.WebForms|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -272,6 +292,7 @@ Global
 		{70142BE9-A3B0-4E6E-9A8B-0F20EADB875D} = {FD758025-7F6D-4EE8-9837-98C0E0BFCB6B}
 		{D86DF487-2675-4274-BA4B-8531014B5A25} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{6C11DFB8-B415-4F40-A67B-F7B295445C30} = {FD758025-7F6D-4EE8-9837-98C0E0BFCB6B}
+		{FA4D5CAE-0B07-42FB-BA50-78E5418B8CB8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E288F9FB-039F-4718-8AEB-85F89B29EB4E}
