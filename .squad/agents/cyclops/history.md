@@ -496,3 +496,7 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 
 **Verification:** Build succeeds (0 errors), all 111 analyzer tests pass, prescan tested against src/ (1,092 matches across 176 files).
 
+
+### CI Workflow: Analyzer Tests Added (2026-03-20)
+
+**Summary:** Updated .github/workflows/build.yml to restore, build, run, upload, and publish analyzer test results alongside the existing unit tests. Also replaced the squad-ci.yml placeholder with real dotnet restore/build/test commands covering both test suites, including setup-dotnet for .NET 10. YAML validated with Python yaml parser.
