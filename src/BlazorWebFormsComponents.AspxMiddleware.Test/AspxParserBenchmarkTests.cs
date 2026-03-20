@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using BlazorWebFormsComponents.AspxMiddleware;
+using Shouldly;
 using Xunit.Abstractions;
 
 namespace BlazorWebFormsComponents.AspxMiddleware.Test;
@@ -123,6 +124,7 @@ public class AspxParserBenchmarkTests
             ("Medium (~50 lines)", GenerateMediumInput()),
             ("Large (~200 lines)", GenerateLargeInput()),
             ("XL (~500 lines)", GenerateExtraLargeInput()),
+            ("Stress 500KB+", Generate500KBStressInput()),
             ("Unclosed tags", GenerateUnclosedTagsInput()),
             ("& entities", GenerateEntityInput()),
             ("Single-quote attrs", GenerateSingleQuoteInput()),
@@ -507,6 +509,238 @@ public class AspxParserBenchmarkTests
         return sb.ToString();
     }
 
+    // ── Stress benchmark: 500KB+ ──────────────────────────────────────
+
+    private const int StressIterations = 50;
+    private const int StressWarmupIterations = 5;
+
+    [Fact]
+    public void Benchmark_StressTest_500KB()
+    {
+        var input = Generate500KBStressInput();
+        var lineCount = CountLines(input);
+        var sizeKB = input.Length / 1024.0;
+
+        _output.WriteLine($"Input size: {input.Length} chars ({sizeKB:N1} KB), {lineCount} lines");
+        sizeKB.ShouldBeGreaterThan(500, "Stress input must exceed 500 KB");
+
+        // Verify parsing completes without error
+        var sw = Stopwatch.StartNew();
+        var result = AspxParser.Parse(input);
+        sw.Stop();
+
+        var controlCount = CountAspControlNodes(result.Nodes);
+        var exprCount = result.Nodes.OfType<ExpressionNode>().Count();
+
+        _output.WriteLine($"Parse time: {sw.ElapsedMilliseconds} ms");
+        _output.WriteLine($"ASP controls: {controlCount}");
+        _output.WriteLine($"Expressions: {exprCount}");
+        _output.WriteLine($"Directives: {result.Directives.Count}");
+        _output.WriteLine($"Top-level nodes: {result.Nodes.Count}");
+        _output.WriteLine($"Throughput: {sizeKB / sw.Elapsed.TotalSeconds:N0} KB/sec");
+
+        // Sanity: parser found the controls we generated
+        controlCount.ShouldBeGreaterThan(500, "Should find 500+ ASP controls");
+        result.Directives.ShouldNotBeEmpty();
+
+        // Run reduced-iteration benchmark (500KB × 1000 iters is too slow for CI)
+        RunStressBenchmark("Stress 500KB+", input);
+    }
+
+    private void RunStressBenchmark(string label, string input)
+    {
+        var stats = MeasureStressBenchmark(input);
+
+        _output.WriteLine("");
+        _output.WriteLine($"=== AngleSharp Parser Benchmark: {label} ===");
+        _output.WriteLine($"  Avg parse time:  {stats.AvgMs:F3} ms");
+        _output.WriteLine($"  Min parse time:  {stats.MinMs:F3} ms");
+        _output.WriteLine($"  Max parse time:  {stats.MaxMs:F3} ms");
+        _output.WriteLine($"  Std deviation:   {stats.StdDevMs:F3} ms");
+        _output.WriteLine($"  Throughput:      {stats.ParsesPerSec:N0} parses/sec");
+        _output.WriteLine($"  GC alloc (avg):  {stats.AllocKB:N1} KB/parse");
+        _output.WriteLine($"  Iterations:      {StressIterations} (+ {StressWarmupIterations} warmup)");
+    }
+
+    private static BenchmarkStats MeasureStressBenchmark(string input)
+    {
+        for (var i = 0; i < StressWarmupIterations; i++)
+        {
+            AspxParser.Parse(input);
+        }
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        var timings = new double[StressIterations];
+        var sw = new Stopwatch();
+
+        var memBefore = GC.GetTotalAllocatedBytes(precise: true);
+
+        for (var i = 0; i < StressIterations; i++)
+        {
+            sw.Restart();
+            AspxParser.Parse(input);
+            sw.Stop();
+            timings[i] = sw.Elapsed.TotalMilliseconds;
+        }
+
+        var memAfter = GC.GetTotalAllocatedBytes(precise: true);
+        var totalAllocBytes = memAfter - memBefore;
+        var allocKBPerParse = totalAllocBytes / 1024.0 / StressIterations;
+
+        var avg = timings.Average();
+        var min = timings.Min();
+        var max = timings.Max();
+        var variance = timings.Select(t => (t - avg) * (t - avg)).Average();
+        var stdDev = Math.Sqrt(variance);
+        var parsesPerSec = avg > 0 ? 1000.0 / avg : double.PositiveInfinity;
+
+        return new BenchmarkStats
+        {
+            AvgMs = avg,
+            MinMs = min,
+            MaxMs = max,
+            StdDevMs = stdDev,
+            ParsesPerSec = parsesPerSec,
+            AllocKB = allocKBPerParse
+        };
+    }
+
+    /// <summary>
+    /// Generates a realistic ~500KB+ .aspx file with 500+ controls,
+    /// deep nesting (5-10 levels), mixed expressions, directives,
+    /// server comments, and realistic attribute density.
+    /// </summary>
+    private static string Generate500KBStressInput()
+    {
+        var sb = new StringBuilder();
+
+        // ── Directives (realistic page header)
+        sb.AppendLine("""<%@ Page Title="Enterprise Dashboard" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Dashboard.aspx.cs" Inherits="App.Dashboard" %>""");
+        sb.AppendLine("""<%@ Import Namespace="System.Data" %>""");
+        sb.AppendLine("""<%@ Import Namespace="System.Linq" %>""");
+        sb.AppendLine("""<%@ Import Namespace="System.Collections.Generic" %>""");
+        sb.AppendLine("""<%@ Import Namespace="System.Web.UI.WebControls" %>""");
+        sb.AppendLine("""<%@ Register TagPrefix="uc" TagName="Header" Src="~/Controls/Header.ascx" %>""");
+        sb.AppendLine("""<%@ Register TagPrefix="uc" TagName="Footer" Src="~/Controls/Footer.ascx" %>""");
+        sb.AppendLine("""<%@ Register TagPrefix="uc" TagName="Sidebar" Src="~/Controls/Sidebar.ascx" %>""");
+        sb.AppendLine("<html><head><title>Enterprise Dashboard</title></head><body>");
+        sb.AppendLine("<form id=\"form1\" runat=\"server\">");
+
+        // ── Server comments
+        sb.AppendLine("<%-- Enterprise Dashboard: generated stress test for AngleSharp benchmarking --%>");
+
+        // ── 50 major sections x ~12 controls each = 600+ controls
+        for (var section = 1; section <= 50; section++)
+        {
+            sb.AppendLine($"<%-- Section {section}: Module {section} configuration panel --%>");
+            sb.AppendLine($"<div class=\"container-fluid\" id=\"section-{section}\" data-module=\"module-{section}\" data-version=\"2.1.{section}\">");
+
+            // Level 1: outer panel
+            sb.AppendLine($"  <asp:Panel ID=\"pnlOuter{section}\" CssClass=\"panel panel-default shadow-sm mb-4\" Visible=\"true\" EnableViewState=\"true\" GroupingText=\"Module {section}\">");
+
+            // Level 2: header panel
+            sb.AppendLine($"    <asp:Panel ID=\"pnlHeader{section}\" CssClass=\"panel-heading bg-primary text-white d-flex justify-content-between align-items-center\">");
+            sb.AppendLine($"      <asp:Label ID=\"lblTitle{section}\" Text=\"Section {section} - Dashboard Module Configuration\" Font-Bold=\"true\" Font-Size=\"16pt\" CssClass=\"panel-title mb-0\" />");
+            sb.AppendLine($"      <asp:HyperLink ID=\"lnkHelp{section}\" NavigateUrl=\"~/Help.aspx?section={section}&amp;mode=detail&amp;tab=overview\" Text=\"Help &amp; Documentation\" CssClass=\"btn btn-sm btn-outline-light float-right\" ToolTip=\"Open help for section {section}\" />");
+            sb.AppendLine($"    </asp:Panel>");
+
+            // Level 2: body panel
+            sb.AppendLine($"    <asp:Panel ID=\"pnlBody{section}\" CssClass=\"panel-body p-4\">");
+
+            // Level 3: form rows (5 rows per section)
+            for (var row = 1; row <= 5; row++)
+            {
+                sb.AppendLine($"      <div class=\"form-group row mb-3\" data-row=\"{row}\" data-section=\"{section}\">");
+
+                // Level 4: inner panel
+                sb.AppendLine($"        <asp:Panel ID=\"pnlRow{section}_{row}\" CssClass=\"col-md-12 border rounded p-3 bg-light\">");
+
+                // Level 5: label + input + validators
+                sb.AppendLine($"          <div class=\"input-group mb-2\">");
+                sb.AppendLine($"            <asp:Label ID=\"lbl{section}_{row}\" Text=\"Field {section}.{row} — Configuration Value:\" AssociatedControlID=\"txt{section}_{row}\" CssClass=\"form-label fw-bold text-secondary\" />");
+                sb.AppendLine($"            <asp:TextBox ID=\"txt{section}_{row}\" CssClass=\"form-control border-primary\" MaxLength=\"200\" Placeholder=\"Enter configuration value for module {section}, field {row}\" ToolTip=\"Input field {section}.{row} — accepts alphanumeric characters\" TextMode=\"SingleLine\" />");
+                sb.AppendLine($"            <asp:RequiredFieldValidator ID=\"rfv{section}_{row}\" ControlToValidate=\"txt{section}_{row}\" ErrorMessage=\"Configuration field {section}.{row} is required — please provide a value\" Display=\"Dynamic\" CssClass=\"text-danger small mt-1\" ValidationGroup=\"grp{section}\" SetFocusOnError=\"true\" />");
+
+                if (row % 2 == 0)
+                {
+                    sb.AppendLine($"            <asp:RegularExpressionValidator ID=\"rev{section}_{row}\" ControlToValidate=\"txt{section}_{row}\" ValidationExpression=\"^[a-zA-Z0-9_\\-\\.]+$\" ErrorMessage=\"Only alphanumeric characters, underscores, hyphens, and periods are allowed\" Display=\"Dynamic\" CssClass=\"text-danger small\" ValidationGroup=\"grp{section}\" />");
+                }
+
+                if (row % 3 == 0)
+                {
+                    sb.AppendLine($"            <asp:CompareValidator ID=\"cv{section}_{row}\" ControlToValidate=\"txt{section}_{row}\" Operator=\"NotEqual\" ValueToCompare=\"\" ErrorMessage=\"Value cannot be empty\" Display=\"Dynamic\" CssClass=\"text-danger small\" />");
+                }
+
+                sb.AppendLine($"          </div>");
+
+                // Level 5: dropdown + checkbox + radio
+                sb.AppendLine($"          <div class=\"d-flex flex-wrap gap-3 align-items-center mt-2\">");
+                sb.AppendLine($"            <asp:DropDownList ID=\"ddl{section}_{row}\" CssClass=\"form-select\" AutoPostBack=\"true\" EnableViewState=\"true\" ToolTip=\"Select category for field {section}.{row}\">");
+                sb.AppendLine($"            </asp:DropDownList>");
+                sb.AppendLine($"            <asp:CheckBox ID=\"chk{section}_{row}\" Text=\"Enable advanced option {section}.{row}\" CssClass=\"form-check\" AutoPostBack=\"false\" />");
+                sb.AppendLine($"            <asp:RadioButton ID=\"rb{section}_{row}_a\" Text=\"Mode A\" GroupName=\"grp{section}_{row}\" CssClass=\"form-check-inline\" />");
+                sb.AppendLine($"            <asp:RadioButton ID=\"rb{section}_{row}_b\" Text=\"Mode B\" GroupName=\"grp{section}_{row}\" CssClass=\"form-check-inline\" />");
+                sb.AppendLine($"          </div>");
+
+                sb.AppendLine($"        </asp:Panel>");
+                sb.AppendLine($"      </div>");
+            }
+
+            // Expressions within the section
+            sb.AppendLine($"      <div class=\"section-metadata text-muted small\">");
+            sb.AppendLine($"        <p>Last updated: <%= DateTime.Now.AddHours(-{section}).ToString(\"yyyy-MM-dd HH:mm:ss\") %></p>");
+            sb.AppendLine($"        <p>Status: <%# Eval(\"Section{section}Status\") %></p>");
+            sb.AppendLine($"        <p>Count: <%# Eval(\"Section{section}ItemCount\", \"{{0:N0}}\") %></p>");
+            sb.AppendLine($"      </div>");
+
+            sb.AppendLine($"    </asp:Panel>");
+
+            // Level 2: footer panel with buttons
+            sb.AppendLine($"    <asp:Panel ID=\"pnlFooter{section}\" CssClass=\"panel-footer bg-light border-top p-3 d-flex gap-2\">");
+            sb.AppendLine($"      <asp:Button ID=\"btnSave{section}\" Text=\"Save Module {section} Configuration\" CssClass=\"btn btn-primary\" ValidationGroup=\"grp{section}\" ToolTip=\"Save all changes for section {section}\" />");
+            sb.AppendLine($"      <asp:Button ID=\"btnCancel{section}\" Text=\"Cancel Changes\" CssClass=\"btn btn-secondary\" CausesValidation=\"false\" ToolTip=\"Discard all unsaved changes\" />");
+            sb.AppendLine($"      <asp:LinkButton ID=\"lnkDelete{section}\" Text=\"Delete Module\" CssClass=\"btn btn-outline-danger\" OnClientClick=\"return confirm('Are you sure you want to permanently delete module {section}?');\" />");
+            sb.AppendLine($"      <asp:HiddenField ID=\"hf{section}\" Value=\"section-{section}-state-active\" />");
+            sb.AppendLine($"      <asp:HiddenField ID=\"hfTimestamp{section}\" Value=\"\" />");
+            sb.AppendLine($"    </asp:Panel>");
+
+            sb.AppendLine($"  </asp:Panel>");
+            sb.AppendLine($"</div>");
+        }
+
+        // ── GridView section (deeply nested)
+        sb.AppendLine("<div class=\"table-responsive mt-4\">");
+        sb.AppendLine("  <asp:GridView ID=\"gvMaster\" CssClass=\"table table-striped table-hover table-bordered\" AutoGenerateColumns=\"false\" AllowPaging=\"true\" PageSize=\"25\" AllowSorting=\"true\">");
+        for (var col = 1; col <= 15; col++)
+        {
+            sb.AppendLine($"    <asp:BoundField DataField=\"Column{col}\" HeaderText=\"Column {col} Header\" SortExpression=\"Column{col}\" ItemStyle-CssClass=\"text-nowrap\" />");
+        }
+        sb.AppendLine("  </asp:GridView>");
+        sb.AppendLine("</div>");
+
+        // ── More databind expressions
+        sb.AppendLine("<div class=\"expression-block\">");
+        for (var e = 1; e <= 20; e++)
+        {
+            sb.AppendLine($"  <p class=\"mb-1\">Property {e}: <%# Eval(\"Property{e}\") %></p>");
+            sb.AppendLine($"  <span class=\"badge bg-info\"><%= Model.GetValue({e}).ToString(\"N2\") %></span>");
+        }
+        sb.AppendLine("</div>");
+
+        // ── Server comments
+        for (var c = 1; c <= 10; c++)
+        {
+            sb.AppendLine($"<%-- TODO: Review section {c} before release (ticket #{1000 + c}) — assigned to team lead for final approval --%>");
+        }
+
+        sb.AppendLine("</form></body></html>");
+
+        return sb.ToString();
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────────
 
     private static int CountLines(string text) =>
@@ -514,4 +748,18 @@ public class AspxParserBenchmarkTests
 
     private static int CountAllNodes(AspxParseResult result) =>
         result.Nodes.Count + result.Directives.Count;
+
+    private static int CountAspControlNodes(IEnumerable<AspxNode> nodes)
+    {
+        var count = 0;
+        foreach (var node in nodes)
+        {
+            if (node is AspControlNode control)
+            {
+                count++;
+                count += CountAspControlNodes(control.Children);
+            }
+        }
+        return count;
+    }
 }

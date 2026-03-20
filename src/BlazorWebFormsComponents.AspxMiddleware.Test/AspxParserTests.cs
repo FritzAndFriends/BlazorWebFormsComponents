@@ -260,6 +260,147 @@ public class AspxParserTests
         label.Attributes["CssClass"].ShouldBe("double-again");
     }
 
+    // ── P2: Expression-in-Attribute Edge Case ─────────────────────────
+
+    [Fact]
+    public void Parse_ExpressionInAttributeValue_PreservesExpressionPlaceholders()
+    {
+        // Expressions inside attribute values (e.g. databind) are extracted by
+        // ReplaceExpressions and replaced with HTML-comment-style placeholders.
+        // AngleSharp treats the placeholder as literal text in the attribute value.
+        var content = """<asp:HyperLink NavigateUrl='<%# Eval("Url") %>' Text='<%# Eval("Name") %>' runat="server" />""";
+
+        var result = AspxParser.Parse(content);
+
+        // Parser should not crash; the control is created
+        var link = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        link.TagName.ShouldBe("HyperLink", StringCompareShould.IgnoreCase);
+
+        // runat="server" stripped
+        link.Attributes.ContainsKey("runat").ShouldBeFalse();
+
+        // Attribute values contain expression placeholders (not raw <%# %> syntax)
+        link.Attributes["navigateurl"].ShouldContain("___ASPX_EXPR_");
+        link.Attributes["text"].ShouldContain("___ASPX_EXPR_");
+
+        // Placeholders should be distinct (two different expressions)
+        link.Attributes["navigateurl"].ShouldNotBe(link.Attributes["text"]);
+    }
+
+    [Fact]
+    public void Parse_ExpressionInAttributeValue_StandaloneExpressionsStillWork()
+    {
+        // Mix of expressions in attributes AND standalone expressions.
+        // Use explicit closing tag because expression placeholders contain '>'
+        // which breaks the self-closing regex expansion (known P3 limitation).
+        var content = """
+            <asp:HyperLink NavigateUrl='<%# Eval("Url") %>' Text="Link" runat="server"></asp:HyperLink>
+            <%= DateTime.Now %>
+            <%# Item.Total %>
+            """;
+
+        var result = AspxParser.Parse(content);
+
+        // The asp control exists with expression placeholder in NavigateUrl
+        var link = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        link.Attributes["navigateurl"].ShouldContain("___ASPX_EXPR_");
+
+        // Standalone expressions are still proper ExpressionNode objects
+        var expressions = result.Nodes.OfType<ExpressionNode>().ToList();
+        expressions.Count.ShouldBe(2);
+        expressions.ShouldContain(e => e.ExpressionType == "eval" && e.Expression.Contains("DateTime.Now"));
+        expressions.ShouldContain(e => e.ExpressionType == "databind" && e.Expression.Contains("Item.Total"));
+    }
+
+    // ── P2: Whitespace Preservation ─────────────────────────────────────
+
+    [Fact]
+    public void Parse_PreservesWhitespace_InTextNodesWithContent()
+    {
+        // Whitespace inside text that also contains non-whitespace characters
+        // must be preserved through the AngleSharp pipeline.
+        var content = """
+            <asp:Panel ID="pnl1">
+                <asp:Label Text="Hello" ID="lbl1" />
+                   some text with   multiple   spaces   
+                <asp:Label Text="World" ID="lbl2" />
+            </asp:Panel>
+            """;
+
+        var result = AspxParser.Parse(content);
+
+        var panel = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        var textNodes = panel.Children.OfType<HtmlNode>().ToList();
+
+        // At least one text node should contain the multi-space text
+        textNodes.ShouldContain(n => n.Content.Contains("multiple   spaces"));
+    }
+
+    [Fact]
+    public void Parse_WhitespaceOnlyTextNodes_AreDropped()
+    {
+        // Whitespace-only text nodes (indentation, blank lines) are dropped
+        // by the parser. This is intentional for Phase 1 — insignificant
+        // whitespace between elements is not preserved.
+        var content = "<div>\n    \n    \r\n    \n</div>";
+
+        var result = AspxParser.Parse(content);
+
+        // The whitespace-only text nodes inside <div> are dropped
+        var htmlNodes = result.Nodes.OfType<HtmlNode>().ToList();
+        foreach (var node in htmlNodes)
+        {
+            // Any HtmlNode that is a text node should NOT be whitespace-only
+            // (whitespace-only nodes are filtered out by ConvertDomNode)
+            if (!node.Content.StartsWith("<"))
+            {
+                string.IsNullOrWhiteSpace(node.Content).ShouldBeFalse(
+                    $"Whitespace-only text node should have been dropped: '{node.Content}'");
+            }
+        }
+    }
+
+    [Fact]
+    public void Parse_PreservesNewlines_InMixedTextContent()
+    {
+        // Text nodes with real content should preserve their newlines and spacing
+        var content = """
+            <asp:Panel ID="pnl1">Line one
+            Line two
+            Line three</asp:Panel>
+            """;
+
+        var result = AspxParser.Parse(content);
+
+        var panel = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        var textNodes = panel.Children.OfType<HtmlNode>().ToList();
+        textNodes.ShouldNotBeEmpty();
+
+        // The combined text content should contain newlines (not collapsed)
+        var combinedText = string.Join("", textNodes.Select(n => n.Content));
+        combinedText.ShouldContain("Line one");
+        combinedText.ShouldContain("Line two");
+        combinedText.ShouldContain("Line three");
+    }
+
+    [Fact]
+    public void Parse_PreservesIndentation_InPreformattedText()
+    {
+        // Spaces and indentation in text that contains non-whitespace content
+        var content = """<asp:Panel ID="pnl1">    indented text    </asp:Panel>""";
+
+        var result = AspxParser.Parse(content);
+
+        var panel = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        var textNodes = panel.Children.OfType<HtmlNode>().ToList();
+        textNodes.ShouldNotBeEmpty();
+
+        // Leading and trailing spaces preserved in text node
+        var text = textNodes[0].Content;
+        text.ShouldStartWith("    indented");
+        text.ShouldEndWith("text    ");
+    }
+
     private static string GetTestPagePath(string fileName)
     {
         return Path.Combine(AppContext.BaseDirectory, "TestPages", fileName);

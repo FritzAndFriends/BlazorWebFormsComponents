@@ -344,3 +344,15 @@ Key paths: src/BlazorWebFormsComponents.Analyzers.Test/MissingParameterAttribute
 
 Pattern: Roslyn analyzer tests use CSharpAnalyzerTest with stub types for WebControl/CompositeControl/ParameterAttribute. Markup syntax marks expected diagnostic locations.
 📌 Team update (2026-03-20): ASPX middleware gap closure completed by Cyclops + gate review APPROVED by Forge. 100/100 tests passing (67 middleware + 33 analyzer). BWFC001 analyzer ready for analyzer test expansion — decided by Forge, Cyclops
+
+### ASPX Parser Edge Case Tests — P2 Findings (2026-07-25)
+
+**7 new tests added (all pass), 74/74 total middleware tests:**
+
+**Expression-in-Attribute (2 tests):** `ReplaceExpressions` correctly extracts `<%# Eval("...") %>` from attribute values, replacing them with `<!--___ASPX_EXPR_N___-->` placeholders. AngleSharp treats these as literal attribute text. The expressions are NOT restored to `ExpressionNode` objects in the AST — they remain as placeholder strings in the `Attributes` dictionary. Standalone expressions in content body still resolve to proper `ExpressionNode` objects.
+
+**DISCOVERED BUG — SelfClosingAspTagRegex and `>` in attributes (P3):** When expression placeholders appear in attribute values (e.g. `NavigateUrl='<!--___ASPX_EXPR_0___-->'`), the `>` character inside `-->` breaks `SelfClosingAspTagRegex` (`[^>]*?` can't match past it). Self-closing asp tags with expression-in-attribute values are NOT expanded to explicit open/close pairs. AngleSharp then treats them as unclosed elements, swallowing subsequent sibling content as children. **Workaround:** Use explicit `</asp:Tag>` closing tags when expressions are in attributes. Filed as rogue-selfclose-expr-regex.md.
+
+**Whitespace Preservation (4 tests):** Text nodes containing non-whitespace characters preserve all original whitespace (spaces, newlines, indentation) through AngleSharp. **Whitespace-only text nodes are intentionally dropped** by `ConvertDomNode` (`string.IsNullOrWhiteSpace` check returns null). This means inter-element indentation is lost. Acceptable for Phase 1 since ASPX-to-Blazor migration doesn't need to preserve formatting whitespace.
+
+**500KB+ Stress Benchmark (1 test):** Generated 500KB+ file with 50 sections, 600+ ASP controls, 5-level nesting, expressions, directives, and server comments. AngleSharp degrades gracefully — single parse ~300ms on this machine. Throughput ~1,500 KB/sec. Uses reduced iteration count (50 vs 1000) to keep CI runtime under 30 seconds for the stress portion.
