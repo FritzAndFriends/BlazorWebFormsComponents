@@ -1,12 +1,13 @@
 ---
-updated_at: 2026-03-20T10:48:00Z
-focus_area: ASPX middleware completion + Analyzers tests
+updated_at: 2026-03-20T12:00:00Z
+focus_area: Analyzer expansion (BWFC002-005) on experiment/aspx-middleware
 active_issues: []
 ---
 
 # What We're Focused On
 
-Finishing the ASPX middleware experiment on `experiment/aspx-middleware`:
-- Cyclops: Register missing validators, table elements, EventCallback coercion
-- Rogue: Write BWFC001 analyzer tests (P0)
-- Next: Forge gate review before merge consideration
+Expanding the Roslyn analyzer suite on `experiment/aspx-middleware`:
+- Cyclops: BWFC002 (ViewState) + BWFC003 (IsPostBack) analyzers
+- Rogue: BWFC004 (Response.Redirect) + BWFC005 (Session) analyzers
+- All P2 edge case tests complete, gate review approved
+- Next: Analyzer wiring into main NuGet package
