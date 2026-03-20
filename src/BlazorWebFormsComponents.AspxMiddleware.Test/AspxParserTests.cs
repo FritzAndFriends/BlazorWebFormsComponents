@@ -178,6 +178,88 @@ public class AspxParserTests
         result.Nodes.OfType<ExpressionNode>().ShouldNotBeEmpty();
     }
 
+    [Fact]
+    public void Parse_UnclosedHtmlTags_ParsesSuccessfully()
+    {
+        var content = """
+            <br>
+            <asp:Label Text="Test" ID="lbl1" />
+            <hr>
+            <asp:Button Text="Go" ID="btn1" />
+            """;
+
+        var result = AspxParser.Parse(content);
+
+        result.Nodes.OfType<AspControlNode>().Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public void Parse_EntityInAttributeValue_PreservesEntity()
+    {
+        var content = """<asp:HyperLink NavigateUrl="page.aspx?id=1&amp;view=details" Text="Link" ID="lnk1" />""";
+        var result = AspxParser.Parse(content);
+
+        var link = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        link.Attributes["NavigateUrl"].ShouldContain("&");
+    }
+
+    [Fact]
+    public void Parse_SingleQuoteAttributes_ExtractedCorrectly()
+    {
+        var content = """<%@ Page Title='Single Quote Test' Language='C#' %>""";
+        var result = AspxParser.Parse(content);
+
+        result.Directives.ShouldHaveSingleItem();
+        result.Directives[0].Attributes["Title"].ShouldBe("Single Quote Test");
+        result.Directives[0].Attributes["Language"].ShouldBe("C#");
+    }
+
+    [Fact]
+    public void Parse_RunatServerAttribute_Stripped()
+    {
+        var content = """<asp:Button Text="Submit" ID="btn1" runat="server" CssClass="btn" />""";
+        var result = AspxParser.Parse(content);
+
+        var button = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        button.Attributes.ContainsKey("runat").ShouldBeFalse();
+        button.Attributes["Text"].ShouldBe("Submit");
+        button.Attributes["CssClass"].ShouldBe("btn");
+    }
+
+    [Fact]
+    public void Parse_ServerSideComment_Stripped()
+    {
+        var content = """
+            <asp:Label Text="Before" ID="lbl1" />
+            <%-- This is a server comment --%>
+            <asp:Label Text="After" ID="lbl2" />
+            """;
+
+        var result = AspxParser.Parse(content);
+
+        var labels = result.Nodes.OfType<AspControlNode>().ToList();
+        labels.Count.ShouldBe(2);
+        labels[0].Attributes["Text"].ShouldBe("Before");
+        labels[1].Attributes["Text"].ShouldBe("After");
+        
+        // Should not have any HTML nodes containing the comment
+        var htmlNodes = result.Nodes.OfType<HtmlNode>().ToList();
+        htmlNodes.ShouldNotContain(n => n.Content.Contains("server comment"));
+    }
+
+    [Fact]
+    public void Parse_MixedQuotesInAttributes_HandledCorrectly()
+    {
+        var content = """<asp:Label Text="Double" ID='mixed' ToolTip='Single' CssClass="double-again" />""";
+        var result = AspxParser.Parse(content);
+
+        var label = result.Nodes.OfType<AspControlNode>().ShouldHaveSingleItem();
+        label.Attributes["Text"].ShouldBe("Double");
+        label.Attributes["ID"].ShouldBe("mixed");
+        label.Attributes["ToolTip"].ShouldBe("Single");
+        label.Attributes["CssClass"].ShouldBe("double-again");
+    }
+
     private static string GetTestPagePath(string fileName)
     {
         return Path.Combine(AppContext.BaseDirectory, "TestPages", fileName);

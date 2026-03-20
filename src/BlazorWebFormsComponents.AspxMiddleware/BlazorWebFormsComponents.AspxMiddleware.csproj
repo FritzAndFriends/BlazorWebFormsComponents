@@ -15,4 +15,8 @@
     <ProjectReference Include="..\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.4.0" />
+  </ItemGroup>
+
 </Project>
