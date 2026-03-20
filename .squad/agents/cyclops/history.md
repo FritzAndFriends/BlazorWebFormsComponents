@@ -560,3 +560,28 @@ Replaced XDocument-based ASPX parser with AngleSharp for tolerant HTML5 parsing 
 
 📌 Team update (2026-03-20): ASPX middleware AngleSharp implementation gate review APPROVED — production-ready, no blockers. 67/67 tests passing, performance validated (3.3ms for 18KB stress test). Merge ready — decided by Forge
 
+### BWFC002 & BWFC003 Roslyn Analyzers (2026-07-25)
+
+**Summary:** Built two new Roslyn analyzers for Web Forms migration pattern detection, following the established BWFC001 pattern.
+
+**BWFC002 — ViewState Usage Detected:**
+- Registers for `SyntaxKind.ElementAccessExpression`, checks if expression is `IdentifierNameSyntax("ViewState")` or `MemberAccessExpression(this.ViewState)`
+- No class hierarchy scoping — `ViewState["key"]` is sufficiently distinctive as a Web Forms pattern
+- Code fix uses SourceText replacement (not trivia manipulation) to comment out the containing statement with a TODO comment that includes the actual key from the element access arguments
+- 5 tests (2 positive, 2 negative, 1 code fix)
+
+**BWFC003 — IsPostBack Usage Detected:**
+- Registers for `SyntaxKind.IdentifierName`, checks for exact text `IsPostBack` (case-sensitive)
+- When `IsPostBack` is the `Name` of a `MemberAccessExpressionSyntax` (e.g., `Page.IsPostBack`), reports at the parent MemberAccess location
+- Skips when identifier is the `Expression` part of a MemberAccess (e.g., `IsPostBack.Something`)
+- Code fix uses same SourceText replacement pattern as BWFC002
+- 4 tests (2 positive, 1 negative, 1 code fix)
+
+**Key Roslyn analyzer patterns learned:**
+- SourceText.Replace(statement.Span, replacement) is far simpler than trivia manipulation for "comment out" code fixes — preserves leading trivia (indentation) automatically
+- For multi-line statement commenting, split by line endings, preserve per-line indentation, prefix each line's code portion with `// `
+- Detect line endings from the source's first line (`EndIncludingLineBreak - End`) to avoid mixed line-ending issues
+- The analyzer project enforces `var` via IDE0007 as error — use `var` even for loop counters (`for (var i = 0; ...`)
+- `{0}` message format args work well with the containing method name via `FirstAncestorOrSelf<MethodDeclarationSyntax>()`
+- Test project uses type aliases for `CSharpAnalyzerTest<T>` and `CSharpCodeFixTest<T1,T2>` with `DefaultVerifier`
+
