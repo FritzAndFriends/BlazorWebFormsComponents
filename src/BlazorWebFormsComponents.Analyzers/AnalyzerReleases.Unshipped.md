@@ -7,3 +7,5 @@ BWFC002 | Usage    | Warning  | ViewStateUsageAnalyzer
 BWFC003 | Usage    | Warning  | IsPostBackUsageAnalyzer
 BWFC004 | Usage    | Warning  | ResponseRedirectAnalyzer
 BWFC005 | Usage    | Warning  | SessionUsageAnalyzer
+BWFC010 | Usage    | Info     | RequiredAttributeAnalyzer
+BWFC012 | Usage    | Warning  | RunatServerAnalyzer
