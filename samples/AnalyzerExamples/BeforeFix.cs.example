@@ -1,0 +1,138 @@
+// ============================================================================
+// BeforeFix.cs.example
+// A realistic Blazor component code-behind BEFORE the BWFC analyzer code fixes.
+// This file contains every pattern that the 8 BWFC analyzers (BWFC001-005,
+// BWFC010-012) will flag. It is NOT compilable — it is a reference example.
+// ============================================================================
+
+using System;
+using System.Web;
+using System.Web.UI.WebControls;
+using BlazorWebFormsComponents;
+
+namespace MyApp.Components.Pages;
+
+/// <summary>
+/// A product management page migrated from Web Forms to Blazor.
+/// This code-behind still contains several Web Forms patterns
+/// that the BWFC analyzers will flag.
+/// </summary>
+public class ProductManager : WebControl
+{
+    // ⚠️ BWFC001 — Missing [Parameter] attribute
+    // Public properties in WebControl-derived classes need [Parameter]
+    // for Blazor to recognize them as component parameters.
+    public string PageTitle { get; set; }
+
+    // ⚠️ BWFC001 — Missing [Parameter] attribute
+    public int CategoryId { get; set; }
+
+    // ⚠️ BWFC001 — Missing [Parameter] attribute
+    public bool ShowInactive { get; set; }
+
+    private string _statusMessage;
+
+    // ⚠️ BWFC011 — Web Forms event handler signature (object sender, EventArgs e)
+    // Blazor uses EventCallback, not the classic sender/args pattern.
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        // ⚠️ BWFC003 — IsPostBack check
+        // Blazor has no postbacks. Use OnInitialized() for first-load logic.
+        if (!IsPostBack)
+        {
+            // ⚠️ BWFC002 — ViewState usage
+            // Blazor has no ViewState. Use component fields or properties.
+            var lastCategory = ViewState["LastCategory"];
+            if (lastCategory != null)
+            {
+                CategoryId = (int)lastCategory;
+            }
+
+            // ⚠️ BWFC005 — Session state usage
+            // Blazor Server uses scoped services or ProtectedSessionStorage.
+            var userId = Session["CurrentUserId"];
+            _statusMessage = $"Welcome back, user {userId}";
+
+            LoadProducts();
+        }
+
+        // ⚠️ BWFC002 — ViewState usage (storing state)
+        ViewState["LastCategory"] = CategoryId;
+    }
+
+    // ⚠️ BWFC011 — Web Forms event handler signature
+    protected void BtnSearch_Click(object sender, EventArgs e)
+    {
+        var searchTerm = ""; // would come from a TextBox
+        LoadProducts(searchTerm);
+    }
+
+    // ⚠️ BWFC011 — Web Forms event handler signature
+    protected void BtnDelete_Click(object sender, EventArgs e)
+    {
+        DeleteSelectedProduct();
+
+        // ⚠️ BWFC004 — Response.Redirect
+        // Use NavigationManager.NavigateTo() in Blazor.
+        Response.Redirect("/Products?deleted=true");
+    }
+
+    // ⚠️ BWFC011 — Web Forms event handler signature
+    protected void GridView1_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        // ⚠️ BWFC004 — Response.Redirect
+        Response.Redirect($"/Products/Edit/{e.NewEditIndex}");
+    }
+
+    private void CheckAdminAccess()
+    {
+        // ⚠️ BWFC005 — Session state usage (HttpContext.Current)
+        var context = HttpContext.Current;
+        if (context?.User?.Identity?.IsAuthenticated != true)
+        {
+            // ⚠️ BWFC004 — Response.Redirect
+            Response.Redirect("/Login");
+        }
+
+        // ⚠️ BWFC005 — Session state usage
+        var role = Session["UserRole"];
+        if ((string)role != "Admin")
+        {
+            // ⚠️ BWFC004 — Response.Redirect
+            Response.Redirect("/AccessDenied");
+        }
+    }
+
+    private void SetupGrid()
+    {
+        // ⚠️ BWFC010 — Required attribute missing (GridView needs DataSource)
+        var grid = new GridView();
+
+        // ⚠️ BWFC010 — Required attribute missing (HyperLink needs NavigateUrl)
+        var detailLink = new HyperLink();
+
+        // ⚠️ BWFC010 — Required attribute missing (Image needs ImageUrl)
+        var productImage = new Image();
+    }
+
+    private string BuildLegacyMarkup()
+    {
+        // ⚠️ BWFC012 — Leftover runat="server" in string literal
+        string markup = "<asp:TextBox ID='txtSearch' runat='server' CssClass='form-control' />";
+
+        // ⚠️ BWFC012 — Leftover runat="server" in string literal
+        string button = "<asp:Button ID=\"btnGo\" runat=\"server\" Text=\"Search\" />";
+
+        return markup + button;
+    }
+
+    private void LoadProducts(string filter = null)
+    {
+        // Load product data...
+    }
+
+    private void DeleteSelectedProduct()
+    {
+        // Delete logic...
+    }
+}

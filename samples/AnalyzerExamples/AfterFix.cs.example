@@ -1,0 +1,151 @@
+// ============================================================================
+// AfterFix.cs.example
+// The same product management component AFTER all BWFC analyzer code fixes
+// have been applied. Compare with BeforeFix.cs.example to see every change.
+// This file is NOT compilable — it is a reference example.
+// ============================================================================
+
+using System;
+using System.Threading.Tasks;
+using BlazorWebFormsComponents;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
+namespace MyApp.Components.Pages;
+
+/// <summary>
+/// A product management page fully migrated to Blazor patterns.
+/// All 8 BWFC analyzer rules have been resolved.
+/// </summary>
+public class ProductManager : WebControl
+{
+    // ✅ BWFC001 fixed — [Parameter] attribute added
+    [Parameter]
+    public string PageTitle { get; set; }
+
+    // ✅ BWFC001 fixed — [Parameter] attribute added
+    [Parameter]
+    public int CategoryId { get; set; }
+
+    // ✅ BWFC001 fixed — [Parameter] attribute added
+    [Parameter]
+    public bool ShowInactive { get; set; }
+
+    // ✅ BWFC004 fixed — NavigationManager replaces Response.Redirect
+    [Inject]
+    private NavigationManager Nav { get; set; }
+
+    // ✅ BWFC005 fixed — ProtectedSessionStorage replaces Session["key"]
+    [Inject]
+    private ProtectedSessionStorage SessionStore { get; set; }
+
+    private string _statusMessage;
+
+    // ✅ BWFC002 fixed — component field replaces ViewState["LastCategory"]
+    private int? _lastCategory;
+
+    // ✅ BWFC011 fixed — Web Forms event handler signature removed
+    // ✅ BWFC003 fixed — IsPostBack replaced with Blazor lifecycle
+    protected override void OnInitialized()
+    {
+        // First-load logic now lives in OnInitialized (replaces !IsPostBack check)
+        if (_lastCategory.HasValue)
+        {
+            CategoryId = _lastCategory.Value;
+        }
+
+        LoadProducts();
+    }
+
+    // ✅ BWFC005 fixed — Session access moved to OnAfterRenderAsync
+    // (ProtectedSessionStorage requires JS interop, available after first render)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await SessionStore.GetAsync<string>("CurrentUserId");
+            if (result.Success)
+            {
+                _statusMessage = $"Welcome back, user {result.Value}";
+                StateHasChanged();
+            }
+        }
+    }
+
+    // ✅ BWFC011 fixed — no sender/args parameters
+    private void BtnSearch_Click()
+    {
+        var searchTerm = ""; // would come from a bound property
+        LoadProducts(searchTerm);
+    }
+
+    // ✅ BWFC011 fixed — no sender/args parameters
+    // ✅ BWFC004 fixed — NavigationManager.NavigateTo replaces Response.Redirect
+    private void BtnDelete_Click()
+    {
+        DeleteSelectedProduct();
+        Nav.NavigateTo("/Products?deleted=true");
+    }
+
+    // ✅ BWFC011 fixed — Blazor EventCallback pattern
+    // ✅ BWFC004 fixed — NavigationManager.NavigateTo replaces Response.Redirect
+    private void GridView1_RowEditing(int newEditIndex)
+    {
+        Nav.NavigateTo($"/Products/Edit/{newEditIndex}");
+    }
+
+    private void CheckAdminAccess()
+    {
+        // ✅ BWFC005 fixed — HttpContext.Current removed
+        // Authentication in Blazor: use AuthenticationStateProvider
+        // or [CascadingParameter] Task<AuthenticationState>
+
+        // ✅ BWFC005 fixed — Session["UserRole"] replaced with service call
+        // Role checks handled via AuthorizeView or policy-based authorization
+
+        // ✅ BWFC004 fixed — Response.Redirect replaced
+        Nav.NavigateTo("/Login");
+    }
+
+    private void SetupGrid()
+    {
+        // ✅ BWFC010 fixed — DataSource provided
+        var grid = new GridView
+        {
+            DataSource = new object[] { }
+        };
+
+        // ✅ BWFC010 fixed — NavigateUrl provided
+        var detailLink = new HyperLink
+        {
+            NavigateUrl = "/Products/Detail"
+        };
+
+        // ✅ BWFC010 fixed — ImageUrl provided
+        var productImage = new Image
+        {
+            ImageUrl = "/images/product-placeholder.png"
+        };
+    }
+
+    private string BuildLegacyMarkup()
+    {
+        // ✅ BWFC012 fixed — runat="server" removed from string literals
+        string markup = "<asp:TextBox ID='txtSearch' CssClass='form-control' />";
+
+        // ✅ BWFC012 fixed — runat="server" removed from string literals
+        string button = "<asp:Button ID=\"btnGo\" Text=\"Search\" />";
+
+        return markup + button;
+    }
+
+    private void LoadProducts(string filter = null)
+    {
+        // Load product data...
+    }
+
+    private void DeleteSelectedProduct()
+    {
+        // Delete logic...
+    }
+}
