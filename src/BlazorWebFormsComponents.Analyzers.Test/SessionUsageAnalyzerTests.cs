@@ -177,8 +177,7 @@ public class MyPage
 
     public void LoadUser()
     {
-        // TODO: Replace Session[""UserName""] with scoped service or ProtectedSessionStorage
-        var name = Session[""UserName""];
+        // TODO: Replace Session[""UserName""] with scoped service or ProtectedSessionStorage;
     }
 }";
 

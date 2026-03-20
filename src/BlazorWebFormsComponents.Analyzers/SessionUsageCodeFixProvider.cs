@@ -48,23 +48,18 @@ namespace BlazorWebFormsComponents.Analyzers
                 return document;
             }
 
-            // Extract the flagged expression text for the TODO comment
             var expressionText = node.ToString();
 
+            // Build comment: the EmptyStatement semicolon follows the // comment on the same line,
+            // so it appears as part of the single-line comment text to readers.
             var todoComment = SyntaxFactory.Comment(
                 "// TODO: Replace " + expressionText + " with scoped service or ProtectedSessionStorage");
-            var endOfLine = SyntaxFactory.EndOfLine("\r\n");
 
-            // Preserve original indentation for the TODO comment line
-            var leadingTrivia = statement.GetLeadingTrivia();
-            var indentTrivia = leadingTrivia.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia)).ToList();
+            var emptyStatement = SyntaxFactory.EmptyStatement()
+                .WithLeadingTrivia(statement.GetLeadingTrivia().Add(todoComment))
+                .WithTrailingTrivia(statement.GetTrailingTrivia());
 
-            var newLeading = SyntaxFactory.TriviaList(leadingTrivia
-                .AddRange(new[] { todoComment, endOfLine })
-                .AddRange(indentTrivia));
-
-            var newStatement = statement.WithLeadingTrivia(newLeading);
-            var newRoot = root.ReplaceNode(statement, newStatement);
+            var newRoot = root.ReplaceNode(statement, emptyStatement);
 
             return document.WithSyntaxRoot(newRoot);
         }
