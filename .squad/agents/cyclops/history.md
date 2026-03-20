@@ -587,3 +587,31 @@ Replaced XDocument-based ASPX parser with AngleSharp for tolerant HTML5 parsing 
 
 
 📌 Team update (2026-03-20): Rogue fixed code fix trivia bugs in BWFC002/003 (and authored BWFC004/005). Issue: EmptyStatement code fixes placed semicolons immediately after // comments, causing parse failures. Solution: Add EndOfLine trivia after comments before semicolon. Pattern now applied to all BWFC code fix providers (decision merged to decisions.md). All 54 tests passing.
+
+### BWFC010 & BWFC011 Roslyn Analyzers (2026-07-25)
+
+**Summary:** Built two BWFC Usage Validation analyzers with code fixes and full test coverage. All 89 analyzer tests passing.
+
+**BWFC010 — Required Attribute Missing on BWFC Component:**
+- Registers for SyntaxKind.ObjectCreationExpression, detects 
+ew GridView<T>(), 
+ew HyperLink(), 
+ew Image() without critical property assignment
+- Checks both object initializer assignments (
+ew GridView<T> { DataSource = ... }) and subsequent member access assignments (grid.DataSource = ...)
+- Verifies type resolves to BlazorWebFormsComponents namespace via IsBwfcType() walk up the type hierarchy
+- Severity: Info (guidance, not errors)
+- Code fix adds TODO comment suggesting the missing attribute
+- 9 tests (4 positive, 5 negative)
+
+**BWFC011 — Web Forms Event Handler Signature Detected:**
+- Registers for SyntaxKind.MethodDeclaration, detects methods with exactly 2 params where first is object and second type name ends with EventArgs
+- Only fires when containing class derives from ComponentBase, WebControl, CompositeControl, BaseWebFormsComponent, BaseStyledComponent, or WebFormsPageBase
+- Severity: Info
+- Code fix adds TODO comment; made idempotent by checking existing leading trivia for TODO before re-adding
+- 8 tests (3 positive, 4 negative, 1 code fix)
+
+**Key patterns learned:**
+- For "advisory" code fixes that don't remove the diagnostic, the code fix MUST be idempotent (check if TODO already exists in trivia before adding) — otherwise the test framework's iterative application creates duplicates
+- Code fix tests with persistent diagnostics require FixedState.ExpectedDiagnostics + NumberOfIncrementalIterations = 2 + NumberOfFixAllIterations = 2 to account for apply-once-then-converge behavior
+- RequiredProperties dictionary pattern (type name → required property names) is extensible for future BWFC components
