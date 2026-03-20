@@ -304,3 +304,7 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - Tests: src/BlazorWebFormsComponents.Test/Handlers/*.cs (5 test files)
 - Build: dotnet build src\BlazorWebFormsComponents.Test\BlazorWebFormsComponents.Test.csproj validates all
 - Run handler tests: dotnet test --filter "FullyQualifiedName~Handlers"
+
+
+ **Team update (2026-03-20):** Middleware integration testing pattern established (TestServer + AspxRewriteMiddlewareTests.cs, 46 tests). Microsoft.AspNetCore.TestHost added to test dependencies.  decided by Rogue
+

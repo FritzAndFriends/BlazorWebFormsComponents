@@ -205,3 +205,7 @@
 - **Build verified:** 0 errors.
 
 
+
+
+ **Team update (2026-03-20):** Navigation UX improvements (alphabetical sort, AJAX collapse on desktop) + standalone sample pages for Content, ContentPlaceHolder, View. ComponentCatalog updated.  decided by Jubilee
+

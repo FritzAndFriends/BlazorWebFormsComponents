@@ -559,3 +559,7 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 **Tests:** All analyzer tests in Analyzers.Test/ pass (no new analyzer implementations in this doc-only sprint)  
 **Verified:** MkDocs build passes strict mode, no broken links or syntax errors in markdown
 
+
+
+ **Team update (2026-03-20):** Analyzer architecture guide (579 lines) + expanded Analyzers.md (+363 lines). Deprecation Guidance docs (#438, 32 KB). BaseValidator/BaseCompareValidator base class docs. MkDocs strict build clean. PR #487 opened on upstream.  decided by Beast
+

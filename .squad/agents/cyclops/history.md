@@ -482,3 +482,7 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 - All 111 tests pass (90 existing + 21 new).
 
 **Key patterns:** Code fix uses EmptyStatement with SyntaxFactory.EndOfLine("\r\n") between comment trivia and semicolon. BWFC014 registers for both ElementAccessExpression (indexed properties) and SimpleMemberAccessExpression (direct properties like Files), with parent-check to avoid double-reporting.
+
+
+ **Team update (2026-03-20):** BWFC013/BWFC014 analyzers + architecture (6 files, 21 tests, 111 passing, commit b267b854). PR #487 opened on upstream. Next analyzer ID: BWFC015.  decided by Cyclops
+

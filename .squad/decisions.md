@@ -1,4 +1,4 @@
-﻿# Decisions
+# Decisions
 
 > Shared team decisions. All agents read this. Only Scribe writes here (by merging from inbox).
 
@@ -9465,4 +9465,206 @@ The canonical pattern for rendering HTML id on Blazor components is id="@ClientI
 **By:** Squad (Coordinator), on behalf of Jeffrey T. Fritz
 **What:** AJAX Control Toolkit extenders will NOT be added to the Component Health Dashboard at this time. The dashboard tracks parity against System.Web.dll controls using reflection-based baselines. ACT extenders are third-party (AjaxControlToolkit.dll) and would need a separate baseline source. This can be revisited if/when the baseline infrastructure supports multiple assemblies.
 **Why:** Different baseline source — would require significant infrastructure changes to the reflection tool and tracked-components model.
+
+
+### 2026-03-20: BWFC013 + BWFC014 Analyzer IDs Reserved
+
+**By:** Cyclops
+
+**What:** BWFC013 and BWFC014 diagnostic IDs are now allocated in AnalyzerReleases.Unshipped.md:
+- **BWFC013**  ResponseObjectUsageAnalyzer (Response.Write/WriteFile/Clear/Flush/End)
+- **BWFC014**  RequestObjectUsageAnalyzer (Request.Form/Cookies/Headers/Files/QueryString/ServerVariables)
+
+**Decision:** Next available analyzer ID is **BWFC015**. Both new analyzers follow the established code fix pattern: replace statement with EmptyStatement + TODO comment trivia.
+
+**Impact:** AllAnalyzersIntegrationTests now expects 10+ analyzers and validates both new IDs in ExpectedIds. Any future analyzer must use BWFC015 or higher.
+
+---
+
+### 2026-03-17: BaseValidator and BaseCompareValidator Documentation
+
+**By:** Beast (Technical Writer)
+
+**What:** Created comprehensive documentation for two abstract base classes:
+- docs/ValidationControls/BaseValidator.md (6.6 KB)  framework for ALL validation controls
+- docs/ValidationControls/BaseCompareValidator.md (6.4 KB)  base for comparison validators
+
+**Why:** All 5 concrete validators now have documented base classes. New developers can understand validation inheritance hierarchy. Web Forms developers have clear "base class properties" reference.
+
+**Impact:** MkDocs build passes strict validation. No broken links. Validator ecosystem fully documented.
+
+---
+
+### 2026-03-17: Deprecation Guidance Documentation (#438)
+
+**By:** Beast (Technical Writer)
+
+**What:** Created comprehensive docs/Migration/DeprecationGuidance.md (32 KB, ~600 lines) documenting Web Forms patterns that do not have direct Blazor equivalents and explaining Blazor alternatives.
+
+**Patterns Covered:**
+1. unat="server"  Just remove it
+2. ViewState  Use component fields and scoped services
+3. UpdatePanel  Blazor incremental rendering
+4. Page_Load / IsPostBack  OnInitializedAsync / event handlers
+5. ScriptManager  IJSRuntime + HttpClient + DI
+6. Server control properties  Declarative data binding
+7. Application/Session state  Singleton/scoped services
+8. Data binding events  Component templates with @context
+
+**Why:** Prevents developers from attempting to recreate obsolete patterns. Clear, working code examples using tabbed before/after format. Updated mkdocs.yml with "Deprecation Guidance" in Migration section.
+
+**Impact:** All 5 core patterns from issue #438 documented. Accessible to Web Forms developers with empathetic, non-judgmental tone.
+
+---
+
+### 2026-03-18: ASHX/AXD Middleware Design (#423)
+
+**By:** Cyclops
+
+**What:** Designed separate middleware classes for handling legacy .ashx and .axd URLs:
+- **AshxHandlerMiddleware**  takes BlazorWebFormsComponentsOptions via constructor; returns 410 Gone by default, 301 redirect when mapping exists
+- **AxdHandlerMiddleware**  stateless, uses path suffix matching
+- **AshxRedirectMappings**  uses StringComparer.OrdinalIgnoreCase for case-insensitive matching
+
+**Decision:** Registration order in UseBlazorWebFormsComponents(): aspx  ashx  axd. Order doesn't matter since each targets a distinct file extension.
+
+**Impact:** No breaking changes. All three features default to 	rue. Sample projects continue to work with no config changes.
+
+---
+
+### 2026-03-08: Strip [RouteData] instead of replacing with [Parameter]
+
+**By:** Bishop
+
+**What:** The [RouteData]  [Parameter] conversion in wfc-migrate.ps1 caused build failures because [Parameter] targets properties only, but [RouteData] appears on **method parameters**.
+
+**Decision:** Strip [RouteData] from method parameters entirely. A /* TODO */ block comment is placed above the parameter directing Layer 2 to create a [Parameter] property.
+
+**Why:** [RouteData] has no inline Blazor equivalent. [Parameter] cannot decorate method parameters. Layer 2 is the right place to refactor the method signature. Block comments are safe inside method parameter lists.
+
+**Impact:** All L1 tests pass 15/15, 100% line accuracy. Layer 2 agents recognize /* TODO: RouteData parameter */ as signals.
+
+---
+
+### 2026-03-20: BWFC013 + BWFC014 Analyzers Implementation
+
+**By:** Cyclops
+
+**What:** Two new analyzers implemented following established code fix pattern:
+- **BWFC013:** ResponseObjectUsageAnalyzer  detects Response.Write, Response.WriteFile, Response.Clear, Response.Flush, Response.End
+- **BWFC014:** RequestObjectUsageAnalyzer  detects Request.Form, Request.Cookies, Request.Headers, Request.Files, Request.QueryString, Request.ServerVariables
+
+**Deliverables:** 6 new files (2 analyzers, 2 code fixes, 2 test files), 21 new tests, 111 total passing, commit b267b854
+
+**Impact:** AnalyzerReleases.Unshipped.md updated. Next available ID: BWFC015.
+
+---
+
+### 2026-03-20: Analyzer Architecture Guide and Documentation
+
+**By:** Beast
+
+**What:** Created complete analyzer subsystem documentation:
+- dev-docs/ANALYZER-ARCHITECTURE.md  579 lines, complete architecture guide, code examples, patterns, extensibility
+- Updated docs/Migration/Analyzers.md  +363 lines with BWFC013/BWFC014 explanations, CI/CD integration section, prioritization guide
+
+**Why:** Architecture documentation completes the analyzer subsystem. Integrated BWFC013 and BWFC014 with strategic guidance on analyzer prioritization and CI/CD integration.
+
+**Impact:** Full strict MkDocs build validation passed. PR #487 opened on upstream targeting dev branch.
+
+---
+
+### 2025-07-17: Health Snapshot in CI Pipeline
+
+**By:** Cyclops
+
+**What:** Added health snapshot generation to CI pipeline. Three steps added to uild.yml after build phase and before tests:
+1. Restore the snapshot tool
+2. Run with --configuration Release
+3. Upload health-snapshot.json as build artifact with if: always()
+
+**Rationale:** Placing after library build guarantees ProjectReference is satisfied. if: always() ensures artifact captured even on test failures. Separate restore step keeps --no-restore pattern consistent.
+
+**Impact:** Every build produces an up-to-date health snapshot without manual effort.
+
+---
+
+### 2026-03-16: Component Audit  Prioritized Recommendations
+
+**By:** Forge
+
+**Status:** 52/54 components at 100% health (96.3% complete)
+
+**Executive Summary:** Library is in excellent shape for production use. Main gaps: FileUpload property parity (88% health), infrastructure component documentation, ACT extender coverage (12/40 = 30%), ScriptManager stub decision.
+
+**Tier 1  Quick Wins (1-2 days each):**
+1. FileUpload property completion  SaveAs() method, FileContent property
+2. Infrastructure component documentation  Content, ContentPlaceHolder docs
+3. View component documentation + sample
+4. ScriptManager implementation or removal decision
+
+**Tier 2  Medium Effort (3-5 days):**
+- BulletedList event completion
+- TextBoxWatermarkExtender (ACT)  HIGH DEMAND
+- TreeView property parity
+- SiteMapPath event support
+- CustomValidator event support
+
+**Tier 3  Major Work (1-2 weeks):**
+- ScriptManager decision documentation
+- ACT extender priority expansion  CascadingDropDownExtender (CRITICAL), ResizableControlExtender, DragPanelExtender, ListSearchExtender
+- Skins & Themes full implementation (#369)
+
+**Recommendation:** Complete Tier 1 in next sprint (1 day), then prioritize based on customer feedback. FileUpload + docs eliminate all critical blockers.
+
+**Impact:** Professional roadmap for remaining work, prioritized by migration blocker status and implementation effort.
+
+---
+
+### 2026-03-15: Navigation UX Improvements for AfterBlazorServerSide Sample App
+
+**By:** Jubilee (Sample Writer)
+
+**What:** Two targeted UX improvements to component navigation:
+
+1. **Alphabetize Components by Name**  ComponentCatalog.cs method GetByCategory() now sorts by component name. Fixes out-of-order AJAX section, creates consistent organization throughout catalog.
+
+2. **Collapse AJAX Category on Desktop**  NavMenu.razor method CheckIfDesktopAndExpandCategories() expands all categories on desktop except AJAX. Reduces visual clutter (AJAX has 20+ items) while preserving full access.
+
+**Why:** Alphabetical ordering improves discoverability. AJAX category starting collapsed on desktop reduces clutter; users can expand as needed.
+
+**Impact:** 2 files modified, 3 lines of logic added. Clean build (0 errors). No breaking changes.
+
+---
+
+### 2026-03-19: Standalone sample pages for Content, ContentPlaceHolder, View
+
+**By:** Jubilee (Sample Writer)
+
+**What:** Created individual standalone sample pages for three components previously sharing group pages:
+- Content  /ControlSamples/Content
+- ContentPlaceHolder  /ControlSamples/ContentPlaceHolder
+- View  /ControlSamples/View
+
+**Why:** Each component needs its own navigable page for ComponentCatalog sidebar to link directly to focused demos. Shared pages made deep-linking impossible.
+
+**Files Changed:**
+- samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Content/Index.razor (new)
+- samples/AfterBlazorServerSide/Components/Pages/ControlSamples/ContentPlaceHolder/Index.razor (new)
+- samples/AfterBlazorServerSide/Components/Pages/ControlSamples/View/Index.razor (new)
+- samples/AfterBlazorServerSide/ComponentCatalog.cs (routes updated)
+
+---
+
+### 2026-03-17: Middleware Integration Testing Pattern with TestServer
+
+**By:** Rogue (QA Analyst)
+
+**What:** Established Microsoft.AspNetCore.TestHost + TestServer as the standard middleware testing pattern. Added Microsoft.AspNetCore.TestHost 10.0.5 package to test csproj. Created AspxRewriteMiddlewareTests.cs with 46 integration tests covering full UseBlazorWebFormsComponents pipeline (.aspx, .ashx, .axd handling).
+
+**Pattern:** Tests create a TestServer with UseBlazorWebFormsComponents() in pipeline and terminal pp.Run returning 200 "PASSTHROUGH". Requests that reach terminal mean no middleware intercepted them. Tests send HTTP requests via TestServer.CreateClient() and assert on status codes, headers, body.
+
+**Why:** Integration testing validates full registration + middleware chain. TestServer is lightweight (no ports, no networking, sub-millisecond per request). 46 tests run in under 1 second. Aligned with ASP.NET Core conventions.
+
+**Impact:** Future middleware should follow same TestServer pattern in Middleware/ test folder.
 
