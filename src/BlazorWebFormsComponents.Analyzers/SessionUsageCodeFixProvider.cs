@@ -50,13 +50,25 @@ namespace BlazorWebFormsComponents.Analyzers
 
             var expressionText = node.ToString();
 
-            // Build comment: the EmptyStatement semicolon follows the // comment on the same line,
-            // so it appears as part of the single-line comment text to readers.
             var todoComment = SyntaxFactory.Comment(
                 "// TODO: Replace " + expressionText + " with scoped service or ProtectedSessionStorage");
 
+            // Collect indentation trivia from the original statement
+            var indentation = new System.Collections.Generic.List<SyntaxTrivia>();
+            foreach (var trivia in statement.GetLeadingTrivia())
+            {
+                if (trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+                    indentation.Add(trivia);
+            }
+
+            // Build leading trivia: original leading + comment + newline + indentation for the ;
+            var leading = statement.GetLeadingTrivia()
+                .Add(todoComment)
+                .Add(SyntaxFactory.EndOfLine("\r\n"))
+                .AddRange(indentation);
+
             var emptyStatement = SyntaxFactory.EmptyStatement()
-                .WithLeadingTrivia(statement.GetLeadingTrivia().Add(todoComment))
+                .WithLeadingTrivia(leading)
                 .WithTrailingTrivia(statement.GetTrailingTrivia());
 
             var newRoot = root.ReplaceNode(statement, emptyStatement);
