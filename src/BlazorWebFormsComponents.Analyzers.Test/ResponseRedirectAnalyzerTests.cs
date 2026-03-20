@@ -185,7 +185,8 @@ public class MyPage
 
     public void DoRedirect()
     {
-        // TODO: Replace Response.Redirect(""~/Home"") with NavigationManager.NavigateTo(""url"");
+        // TODO: Replace Response.Redirect(""~/Home"") with NavigationManager.NavigateTo(""url"")
+        ;
     }
 }";
 
