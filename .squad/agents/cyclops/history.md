@@ -486,3 +486,13 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 
  **Team update (2026-03-20):** BWFC013/BWFC014 analyzers + architecture (6 files, 21 tests, 111 passing, commit b267b854). PR #487 opened on upstream. Next analyzer ID: BWFC015.  decided by Cyclops
 
+### NuGet Analyzer Integration + L1 Prescan Switch (2026-03-20)
+
+**Summary:** Two tasks completed on feature/analyzer-sprint1:
+
+1. **NuGet Analyzer Integration** — Added ProjectReference from BlazorWebFormsComponents.csproj to BlazorWebFormsComponents.Analyzers.csproj with `PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer"`. Consumers now get Roslyn analyzers automatically when referencing the main NuGet package.
+
+2. **L1/L2 Pipeline Pre-Scan** — Added `-Prescan` switch to `bwfc-migrate.ps1`. Scans source .cs files for 9 BWFC analyzer patterns (BWFC001-005, 011-014) and outputs JSON summary with file-level detail + human-readable breakdown. Early return — no migration transforms executed.
+
+**Verification:** Build succeeds (0 errors), all 111 analyzer tests pass, prescan tested against src/ (1,092 matches across 176 files).
+
