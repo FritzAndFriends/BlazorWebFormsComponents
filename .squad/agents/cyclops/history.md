@@ -1,4 +1,4 @@
-﻿# Project Context
+# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
@@ -8,6 +8,7 @@
 ## Active Decisions & Alerts
 
 📌 **Team update (2026-03-20):** AngleSharp parser prototype implemented & validated — 58/58 tests passing (52 existing + 6 new). Fixed 3 Phase 1 bugs (single-quote attrs, runat stripping, server comments). Handles HTML5 tolerance (unclosed tags, entities, malformed markup). AST output identical to XDocument version. Ready for team review + gate approval. — decided by Cyclops
+📌 Team update (2026-03-20): P3 bug found in SelfClosingAspTagRegex — expression placeholders in attribute values break parsing (comment wrapper contains >). Workaround: use explicit closing tags. Assigned to Cyclops for fix (Option C: quote-aware regex recommended). — decided by Rogue
 
 📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
 
@@ -558,3 +559,4 @@ Replaced XDocument-based ASPX parser with AngleSharp for tolerant HTML5 parsing 
 
 
 📌 Team update (2026-03-20): ASPX middleware AngleSharp implementation gate review APPROVED — production-ready, no blockers. 67/67 tests passing, performance validated (3.3ms for 18KB stress test). Merge ready — decided by Forge
+
