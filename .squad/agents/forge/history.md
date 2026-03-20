@@ -568,3 +568,9 @@ Jeff directed a design pivot: replace custom `[HandlerRoute]` attribute + `MapBl
 **Impact:** ~100 fewer lines of production code (400 vs 500). One fewer file (`HandlerRouteAttribute.cs` gone). Issue 2 (routing) shrinks from Size S to XS. Estimated timeline: 2-3 weeks (was 3-4). Adapter layer (`HttpHandlerContext`, `HttpHandlerResponse`, `HttpHandlerServer`) completely unchanged.
 
 **Learning:** Original §7.3 rejected Minimal API because "they require completely different code structure." Wrong framing — Jeff's insight is to use Minimal API as *registration and dispatch infrastructure* while keeping the `HttpHandlerBase` class structure intact. The handler code developers write is nearly identical. Only the plumbing underneath changes.
+
+### Analyzers Project Review (2026-07-25)
+
+Conducted full review of `src/BlazorWebFormsComponents.Analyzers/` at Jeff's request. Project contains one Roslyn analyzer (BWFC001 — missing `[Parameter]` on WebControl/CompositeControl properties) with code fix. Builds clean, produces NuGet package, is in the solution. However: zero tests (empty placeholder only), not referenced by any other project, test project not in `.sln`. Targets the Custom Controls migration path specifically — no overlap with L1/L2 migration scripts which handle file-level conversion. Recommendation: **Keep and Expand**. P0: write tests, add test project to sln, fix RS2008. P1: add BWFC002-005 for ViewState/IsPostBack/Response.Redirect/Session detection. Full analysis at `dev-docs/analyzers-project-review.md`. Decision filed at `.squad/decisions/inbox/forge-analyzers-review.md`.
+
+📌 Team update (2026-03-20): Analyzers project review completed — KEEP and EXPAND recommendation. P0 blockers (tests, solution file, RS2008) identified. P1 expansion (BWFC002–005 diagnostics) proposed — decided by Forge

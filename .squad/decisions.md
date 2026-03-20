@@ -11307,3 +11307,56 @@ For custom options, a `CreateServerAndClient` helper creates a fresh server+clie
 
 Future middleware (e.g., .asmx handling, custom URL rewriting rules) should follow this same TestServer pattern in the `Middleware/` test folder.
 
+
+
+### Analyzers Project: Keep and Expand
+
+**By:** Forge (Lead / Web Forms Reviewer)
+**Date:** 2026-07-25
+**Requested by:** Jeffrey T. Fritz
+
+**What:** After full review of `src/BlazorWebFormsComponents.Analyzers/`, recommendation is **KEEP and EXPAND** with conditions. The project contains one Roslyn analyzer (BWFC001 — missing `[Parameter]` on WebControl properties) and one code fix. It builds, produces a NuGet package, and is in the solution — but has zero tests, isn't referenced by anything, and the test project isn't in the `.sln`.
+
+**Decision:**
+- **Keep the project** — it fills a unique gap (continuous post-migration validation) that the L1/L2 scripts don't cover
+- **P0 blockers before shipping:** (1) Write real tests for BWFC001, (2) Add `Analyzers.Test` to solution, (3) Fix RS2008 release tracking warning
+- **P1 expansion:** Add BWFC002–BWFC005 for ViewState, IsPostBack, Response.Redirect, and Session/HttpContext.Current detection — these are the top code-behind migration hazards
+- **P2 expansion:** BWFC usage validation (missing required attributes, wrong event signatures, leftover `runat="server"`)
+- **Do NOT ship** the analyzer NuGet until BWFC001 has verified tests
+- **Do NOT retire** — this is the only tool providing IDE-integrated migration guidance
+
+**Why:** The migration toolkit handles file-level conversion (one-time). The analyzer provides ongoing, IDE-integrated validation — squiggles in VS/VS Code, quick fixes on `Ctrl+.`, build warnings. With 4-5 more diagnostics targeting common code-behind migration pitfalls, this becomes a genuinely valuable post-migration companion. Full analysis in `dev-docs/analyzers-project-review.md`.
+
+
+
+# Decision: AngleSharp Performance Benchmark Results
+
+**Date:** 2026-03-20  
+**Author:** Rogue (QA)  
+**Status:** Informational  
+
+## Context
+
+The team replaced XDocument with AngleSharp in `AspxParser.cs`. Forge estimated 10-20% slower performance, but no actual measurements existed. Jeff requested a proper benchmark.
+
+## Decision
+
+AngleSharp parser performance is **acceptable for production use**. No performance-related blockers to merging.
+
+## Evidence
+
+| Scenario | Avg Parse (ms) | Throughput | Alloc/parse |
+|----------|----------------|------------|-------------|
+| Small (252 chars) | 0.044 | 22,614/sec | 51 KB |
+| Medium (1.5 KB) | 0.254 | 3,933/sec | 121 KB |
+| Large (4.2 KB) | 0.636 | 1,574/sec | 261 KB |
+| XL stress (18 KB) | 3.348 | 299/sec | 926 KB |
+
+AngleSharp-specific scenarios (unclosed tags, entities, single-quotes, script blocks) showed **zero measurable overhead** vs equivalent clean inputs.
+
+## Implications
+
+- The "Performance delta unknown" risk in the evaluation doc is now resolved
+- No need for further XDocument comparison (code has been replaced; absolute numbers are what matters)
+- Memory allocation scales linearly — no unexpected spikes even at stress test sizes
+

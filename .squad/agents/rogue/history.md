@@ -304,3 +304,23 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - Tests: src/BlazorWebFormsComponents.Test/Handlers/*.cs (5 test files)
 - Build: dotnet build src\BlazorWebFormsComponents.Test\BlazorWebFormsComponents.Test.csproj validates all
 - Run handler tests: dotnet test --filter "FullyQualifiedName~Handlers"
+
+### AngleSharp Parser Performance Benchmark (2026-03-20)
+
+**9 benchmark tests written and passing** for AngleSharp-based AspxParser. Measured parse time, throughput, and GC allocation across 4 input sizes + 4 AngleSharp-specific scenarios (unclosed tags, & entities, single-quote attrs, script blocks). All using Stopwatch + GC.GetTotalAllocatedBytes, 1000 iterations with 50 warmup.
+
+**Key results:**
+- Small (252 chars, 8 lines): 0.044ms avg, 22,614 parses/sec, 51.5 KB alloc
+- Medium (1,493 chars, 32 lines): 0.254ms avg, 3,933 parses/sec, 121 KB alloc
+- Large (4,218 chars, 83 lines): 0.636ms avg, 1,574 parses/sec, 261 KB alloc
+- XL stress (18,277 chars, 268 lines, 100+ controls): 3.35ms avg, 299 parses/sec, 926 KB alloc
+- AngleSharp-specific scenarios (unclosed tags, entities, quotes, scripts): 0.14–0.21ms, no overhead vs clean inputs
+
+**Conclusion:** Performance is well within acceptable bounds for on-demand .aspx rendering. Even the XL stress test parses in ~3.3ms. Forge's 10-20% slower estimate cannot be directly verified (XDocument code replaced), but absolute perf is a non-issue. Updated evaluation doc with full results table.
+
+**File paths:**
+- Benchmark tests: src/BlazorWebFormsComponents.AspxMiddleware.Test/AspxParserBenchmarkTests.cs
+- Evaluation doc: dev-docs/aspx-middleware-anglesharp-evaluation.md
+- Run benchmarks: `dotnet test src/BlazorWebFormsComponents.AspxMiddleware.Test/ --filter "FullyQualifiedName~Benchmark" -v n`
+
+📌 Team update (2026-03-20): AngleSharp benchmark completed — performance is acceptable (3.3ms for 18KB stress test). No performance-related blockers to merging — decided by Rogue
