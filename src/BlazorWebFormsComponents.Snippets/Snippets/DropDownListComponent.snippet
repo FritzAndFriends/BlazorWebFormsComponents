@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>BlazorWebForms DropDownList Component</Title>
+      <Shortcut>bwfdropdown</Shortcut>
+      <Description>Creates a DropDownList component</Description>
+      <Author>Jeffrey T. Fritz</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>ItemType</ID>
+          <ToolTip>Type of items to display</ToolTip>
+          <Default>MyItemType</Default>
+        </Literal>
+        <Literal>
+          <ID>DataSource</ID>
+          <ToolTip>Data source for the dropdown</ToolTip>
+          <Default>myDataSource</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="Razor">
+        <![CDATA[<DropDownList TItem="$ItemType$" 
+              DataSource="@$DataSource$"
+              DataTextField="Name"
+              DataValueField="Id"
+              @bind-SelectedValue="selectedValue" />$end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

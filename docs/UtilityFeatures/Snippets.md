@@ -27,14 +27,27 @@ This Visual Studio extension includes snippets for:
 
 ## Building the Extension
 
-To build the VSIX extension from source:
+**Note:** VSIX extensions can only be built on Windows with Visual Studio 2022 installed.
 
-```bash
+### Prerequisites
+- Windows OS
+- Visual Studio 2022 (any edition)
+- Visual Studio SDK (VSSDK) component installed
+
+### Build Steps
+
+#### Using PowerShell Script (Recommended)
+```powershell
 cd src/BlazorWebFormsComponents.Snippets
-dotnet build
+.\Build-VSIX.ps1
 ```
 
-The VSIX file will be created in `bin/Debug/net472/` or `bin/Release/net472/`.
+#### Using Visual Studio
+1. Open `BlazorMeetsWebForms.sln` in Visual Studio 2022
+2. Right-click the `BlazorWebFormsComponents.Snippets` project
+3. Select "Build"
+
+The VSIX file will be created in `bin\Release\BlazorWebFormsComponents.Snippets.vsix`.
 
 ## Available Snippets
 
@@ -54,10 +67,13 @@ The VSIX file will be created in `bin/Debug/net472/` or `bin/Release/net472/`.
 | `bwfgridview` | GridView | Basic GridView with columns |
 | `bwfdl` | DataList | DataList with ItemTemplate |
 | `bwfrepeater` | Repeater | Repeater with ItemTemplate |
+| `bwflistview` | ListView | ListView with ItemTemplate |
 | `bwfformview` | FormView | FormView with Item and Edit templates |
 | `bwfbutton` | Button | Button with click handler |
 | `bwftextbox` | TextBox | TextBox with binding |
+| `bwfdropdown` | DropDownList | DropDownList with data binding |
 | `bwfcheckboxlist` | CheckBoxList | CheckBoxList with data binding |
+| `bwfradiolist` | RadioButtonList | RadioButtonList with data binding |
 
 ### Validation Snippets
 

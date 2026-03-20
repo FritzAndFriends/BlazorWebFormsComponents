@@ -12,14 +12,39 @@ This extension provides a collection of code snippets to make it easier to work 
 
 ## Installation
 
+### From Pre-built VSIX
+
 1. Download the `.vsix` file from the [releases page](https://github.com/FritzAndFriends/BlazorWebFormsComponents/releases)
 2. Double-click the `.vsix` file to install it in Visual Studio
 3. Restart Visual Studio if it's already running
 
-Alternatively, you can install from within Visual Studio:
-1. Go to **Extensions** > **Manage Extensions**
-2. Search for "Blazor Web Forms Components Snippets"
-3. Click **Download** and restart Visual Studio
+### From Visual Studio Marketplace (Future)
+
+Once published to the marketplace:
+1. Open Visual Studio
+2. Go to **Extensions** > **Manage Extensions**
+3. Search for "Blazor Web Forms Components Snippets"
+4. Click **Download** and restart Visual Studio
+
+## Building the VSIX
+
+**Note:** VSIX extensions can only be built on Windows with Visual Studio 2022 installed.
+
+### Prerequisites
+- Windows OS
+- Visual Studio 2022 (any edition)
+- Visual Studio SDK (VSSDK) component installed
+
+### Build Steps
+
+1. Open PowerShell in this directory
+2. Run the build script:
+   ```powershell
+   .\Build-VSIX.ps1
+   ```
+3. The VSIX file will be created in `bin\Release\`
+
+Alternatively, open the solution in Visual Studio and build the project normally.
 
 ## Available Snippets
 
@@ -43,10 +68,13 @@ These snippets create common component markup patterns.
 | `bwfgridview` | Creates a basic GridView component with columns |
 | `bwfdl` | Creates a DataList component with ItemTemplate |
 | `bwfrepeater` | Creates a Repeater component with ItemTemplate |
+| `bwflistview` | Creates a ListView component with ItemTemplate |
 | `bwfformview` | Creates a FormView component with templates |
 | `bwfbutton` | Creates a Button component with click handler |
 | `bwftextbox` | Creates a TextBox component |
+| `bwfdropdown` | Creates a DropDownList component |
 | `bwfcheckboxlist` | Creates a CheckBoxList component |
+| `bwfradiolist` | Creates a RadioButtonList component |
 | `bwfrequired` | Creates a RequiredFieldValidator |
 | `bwfvalsummary` | Creates a ValidationSummary component |
 
