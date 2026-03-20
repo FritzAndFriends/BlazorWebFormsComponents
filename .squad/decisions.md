@@ -11597,3 +11597,62 @@ Change the expression placeholder format to avoid `>`:
 - Option C: Use a regex for self-closing that is aware of quoted attribute values: `<(asp_\w+)((?:\s+\w+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*/>`
 
 **Assigned to:** Cyclops (parser owner)
+
+### 2026-07-25: Idempotent Code Fixes for Advisory Analyzers
+
+**Author:** Cyclops  
+**Date:** 2026-07-25  
+**Context:** BWFC010/BWFC011 implementation
+
+## Decision
+
+When a Roslyn code fix adds a TODO comment but does NOT remove the underlying diagnostic (advisory/Info-severity analyzers), the code fix **must be idempotent** — check for existing TODO in leading trivia before adding.
+
+## Rationale
+
+The Roslyn test framework (and IDE) applies code fixes iteratively until convergence. If a fix adds a comment but the diagnostic persists, the fix runs again. Without an idempotency guard, duplicates accumulate.
+
+## Pattern
+
+`csharp
+// In code fix provider, before adding TODO:
+foreach (var trivia in node.GetLeadingTrivia())
+{
+    if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) &&
+        trivia.ToString().Contains("TODO: <unique marker>"))
+        return document; // Already applied
+}
+`
+
+Test configuration for persistent diagnostics:
+`csharp
+FixedState = { ExpectedDiagnostics = { ... } },
+NumberOfIncrementalIterations = 2,
+NumberOfFixAllIterations = 2,
+`
+
+## Scope
+
+Applies to all future BWFC analyzers at Info severity where the code fix doesn't resolve the diagnostic.
+
+### 2026-03-21: BWFC011 Code Fix Test Failure
+
+**Author:** Rogue (QA Analyst)  
+**Date:** 2026-03-21  
+**Branch:** experiment/aspx-middleware  
+**Status:** Bug — needs Cyclops fix
+
+## Context
+
+While running the full analyzer test suite (89 tests), discovered that EventHandlerSignatureAnalyzerTests.CodeFix_AddsTodoComment fails with a content mismatch. The BWFC011 analyzer itself works correctly (all 6 non-code-fix tests pass), but the code fix provider produces output that doesn't match the expected fixed source.
+
+## Impact
+
+- 88/89 tests pass; only this one code fix test fails
+- The analyzer detection is fine — only the automated fix is broken
+- Not blocking BWFC012 or integration test work
+
+## Recommendation
+
+Cyclops should check the EventHandlerSignatureCodeFixProvider output against the expected ixedSource in the test. Likely a trivia/whitespace issue similar to the BWFC004/005 fixes that needed EndOfLine trivia corrections.
+

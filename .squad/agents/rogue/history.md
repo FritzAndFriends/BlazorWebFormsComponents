@@ -368,3 +368,25 @@ Pattern: Roslyn analyzer tests use CSharpAnalyzerTest with stub types for WebCon
 **Key Roslyn Trivia Lesson:** When using `EmptyStatement` as a replacement anchor for TODO comments, the semicolon token MUST be on its own line — never after a `//` comment. Single-line comments consume everything until end-of-line, making any trailing tokens invisible to re-parsing.
 
 **Test stats:** 54/54 passing (BWFC001: 26, BWFC002: 6, BWFC003: 6, BWFC004: 6, BWFC005: 6, code fixes: 4).
+
+### BWFC012 Analyzer + Integration Tests (2026-03-21)
+
+**BWFC012 RunatServerAnalyzer (10 tests, all pass):** Detects leftover `runat="server"` and `runat='server'` patterns in C# string literals. Case-insensitive matching via `ToLowerInvariant()`. Registers on `SyntaxKind.StringLiteralExpression`. Code fix uses `Regex.Replace` to strip the attribute and surrounding whitespace from the string value.
+
+**Tests:** 4 positive (double-quote, single-quote, field initializer, case-insensitive), 4 negative (runat without server, variable named runat, server without runat, empty string), 2 code fix (removes double-quote variant, removes single-quote variant).
+
+**AllAnalyzersIntegrationTests (8 tests, all pass):** Cross-analyzer validation:
+- `AllAnalyzerTypes_AreDiscoverable` — reflection finds ≥8 analyzer classes in assembly
+- `AllDiagnosticIds_AreUnique` — no two analyzers share a diagnostic ID
+- `AllExpectedIds_AreRegistered` — all 8 IDs (BWFC001-005, 010-012) present
+- `AllAnalyzers_HaveUsageCategory` — every descriptor uses "Usage" category
+- `AllAnalyzers_AreEnabledByDefault` — all enabled by default
+- `ComplexWebControl_TriggersMultipleDiagnostics` — BWFC001+002+003 fire together on a single WebControl subclass
+- `KitchenSink_FiveAnalyzersFire` — 6 analyzers fire simultaneously (001+002+003+005+011+012)
+- `CleanBlazorComponent_NoDiagnostics` — properly migrated code produces zero warnings
+
+**Pre-existing failure noted:** Cyclops's `EventHandlerSignatureAnalyzerTests.CodeFix_AddsTodoComment` (BWFC011) fails — code fix output doesn't match expected. Not related to BWFC012 or integration tests.
+
+**Key patterns:** Multi-analyzer integration tests use `CompilationWithAnalyzers` directly (not `CSharpAnalyzerTest<T>`) since the standard test harness only supports single-analyzer testing. Stub types (WebControl, ViewState, Session) must be defined inline for the compilation to resolve semantic checks.
+
+**Test stats:** 88/89 passing (BWFC001: 26, BWFC002: 6, BWFC003: 6, BWFC004: 6, BWFC005: 6, BWFC010: 9, BWFC011: 7 [1 fail], BWFC012: 10, integration: 8, code fixes: 4).
