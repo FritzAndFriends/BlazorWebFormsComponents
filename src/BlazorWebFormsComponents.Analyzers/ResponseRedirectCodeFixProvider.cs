@@ -64,7 +64,7 @@ namespace BlazorWebFormsComponents.Analyzers
             // Build leading trivia: original leading + comment + newline + indentation for the ;
             var leading = statement.GetLeadingTrivia()
                 .Add(todoComment)
-                .Add(SyntaxFactory.EndOfLine("\r\n"))
+                .Add(root.DetectEndOfLine())
                 .AddRange(indentation);
 
             var emptyStatement = SyntaxFactory.EmptyStatement()
