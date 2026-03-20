@@ -47,6 +47,10 @@ namespace BlazorWebFormsComponents.Analyzers
             if (!propertyDeclaration.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)))
                 return;
 
+            // Skip static properties — they can't be set via Blazor markup
+            if (propertyDeclaration.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)))
+                return;
+
             // Skip if property already has [Parameter] attribute
             if (HasParameterAttribute(propertyDeclaration))
                 return;

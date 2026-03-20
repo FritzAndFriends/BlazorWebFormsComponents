@@ -1,0 +1,320 @@
+@page "/MigrationTools/Analyzers"
+
+<PageTitle>BWFC Roslyn Analyzers</PageTitle>
+
+<h2>BWFC Roslyn Analyzers</h2>
+<p>
+    The <strong>BlazorWebFormsComponents.Analyzers</strong> package provides Roslyn analyzers that automatically
+    detect leftover Web Forms patterns in your migrated Blazor code and offer one-click code fixes in your IDE.
+</p>
+
+<hr />
+
+<!-- ==================== Installation ==================== -->
+
+<h3>Installation</h3>
+<p>Install via the .NET CLI:</p>
+<pre><code>dotnet add package BlazorWebFormsComponents.Analyzers</code></pre>
+<p>Or add a <code>PackageReference</code> to your <code>.csproj</code>:</p>
+<pre><code>&lt;PackageReference Include="BlazorWebFormsComponents.Analyzers" Version="*" /&gt;</code></pre>
+<p>
+    Once installed, the analyzers run automatically during build and inside Visual Studio, VS Code, and any
+    Roslyn-powered IDE. Warnings appear in the Error List and as squiggly underlines — press <kbd>Ctrl+.</kbd>
+    to apply the suggested code fix.
+</p>
+
+<hr />
+
+<!-- ==================== Analyzer Reference ==================== -->
+
+<h3>Analyzer Reference</h3>
+<p>
+    The package includes <strong>8 analyzers</strong> covering the most common Web Forms migration pitfalls.
+    Each rule has an automatic code fix.
+</p>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Rule</th>
+            <th>Severity</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td><a href="#bwfc001">BWFC001</a></td><td>⚠️ Warning</td><td>Missing <code>[Parameter]</code> attribute on public property</td></tr>
+        <tr><td><a href="#bwfc002">BWFC002</a></td><td>⚠️ Warning</td><td>ViewState usage detected</td></tr>
+        <tr><td><a href="#bwfc003">BWFC003</a></td><td>⚠️ Warning</td><td>IsPostBack check detected</td></tr>
+        <tr><td><a href="#bwfc004">BWFC004</a></td><td>⚠️ Warning</td><td>Response.Redirect usage detected</td></tr>
+        <tr><td><a href="#bwfc005">BWFC005</a></td><td>⚠️ Warning</td><td>Session state usage detected</td></tr>
+        <tr><td><a href="#bwfc010">BWFC010</a></td><td>ℹ️ Info</td><td>Required attribute may be missing on BWFC component</td></tr>
+        <tr><td><a href="#bwfc011">BWFC011</a></td><td>ℹ️ Info</td><td>Web Forms event handler signature detected</td></tr>
+        <tr><td><a href="#bwfc012">BWFC012</a></td><td>⚠️ Warning</td><td>Leftover <code>runat="server"</code> in string literal</td></tr>
+    </tbody>
+</table>
+
+<hr />
+
+<!-- ==================== BWFC001 ==================== -->
+
+<h4 id="bwfc001">BWFC001 — Missing [Parameter] Attribute</h4>
+<p>
+    Public properties in <code>WebControl</code>-derived classes need <code>[Parameter]</code> to work as
+    Blazor component parameters. The analyzer skips inherited base properties (ID, CssClass, etc.).
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>public class HelloLabel : WebControl
+{
+    // ⚠️ BWFC001
+    public string Text { get; set; }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>public class HelloLabel : WebControl
+{
+    [Parameter]
+    public string Text { get; set; }
+}</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC002 ==================== -->
+
+<h4 id="bwfc002">BWFC002 — ViewState Usage</h4>
+<p>
+    Blazor has no ViewState. The analyzer flags <code>ViewState["key"]</code> access and replaces it with
+    a TODO comment prompting you to use component fields or properties instead.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>protected void Page_Load(object sender, EventArgs e)
+{
+    // ⚠️ BWFC002
+    var count = ViewState["ClickCount"];
+    ViewState["ClickCount"] = (int)(count ?? 0) + 1;
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>// Use a component field instead:
+private int _clickCount;
+
+protected override void OnInitialized()
+{
+    _clickCount++;
+}</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC003 ==================== -->
+
+<h4 id="bwfc003">BWFC003 — IsPostBack Check</h4>
+<p>
+    Blazor doesn't have postbacks. The analyzer flags <code>IsPostBack</code> and
+    <code>Page.IsPostBack</code> checks and suggests using Blazor lifecycle methods instead.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>protected void Page_Load(object sender, EventArgs e)
+{
+    // ⚠️ BWFC003
+    if (!IsPostBack)
+    {
+        LoadInitialData();
+    }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>// Move first-load logic into OnInitialized:
+protected override void OnInitialized()
+{
+    LoadInitialData();
+}</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC004 ==================== -->
+
+<h4 id="bwfc004">BWFC004 — Response.Redirect</h4>
+<p>
+    In Blazor, navigation is handled by <code>NavigationManager</code>. The analyzer flags
+    <code>Response.Redirect()</code> calls and suggests <code>NavigationManager.NavigateTo()</code>.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>protected void LoginButton_Click(object s, EventArgs e)
+{
+    if (ValidateUser())
+    {
+        // ⚠️ BWFC004
+        Response.Redirect("/Dashboard");
+    }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>// Inject NavigationManager:
+[Inject] NavigationManager Nav { get; set; }
+
+private void LoginButton_Click()
+{
+    if (ValidateUser())
+    {
+        Nav.NavigateTo("/Dashboard");
+    }
+}</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC005 ==================== -->
+
+<h4 id="bwfc005">BWFC005 — Session State Usage</h4>
+<p>
+    Blazor Server uses scoped services or <code>ProtectedSessionStorage</code> instead of
+    <code>Session["key"]</code>. The analyzer flags Session access and HttpContext.Current usage.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>protected void Page_Load(object sender, EventArgs e)
+{
+    // ⚠️ BWFC005
+    var userId = Session["UserId"];
+    var ctx = HttpContext.Current;
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>// Use a scoped service or ProtectedSessionStorage:
+[Inject] ProtectedSessionStorage SessionStore { get; set; }
+
+protected override async Task OnAfterRenderAsync(bool first)
+{
+    if (first)
+    {
+        var result = await SessionStore
+            .GetAsync&lt;string&gt;("UserId");
+        _userId = result.Success ? result.Value : null;
+    }
+}</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC010 ==================== -->
+
+<h4 id="bwfc010">BWFC010 — Required Attribute Missing on BWFC Component</h4>
+<p>
+    Certain BWFC components require specific properties for correct rendering (e.g., <code>GridView</code>
+    needs <code>DataSource</code>). This informational rule flags object creations that may be incomplete.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>// ⚠️ BWFC010 — missing DataSource
+var grid = new GridView();
+
+// ⚠️ BWFC010 — missing NavigateUrl
+var link = new HyperLink();</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>var grid = new GridView
+{
+    DataSource = products
+};
+
+var link = new HyperLink
+{
+    NavigateUrl = "/products"
+};</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC011 ==================== -->
+
+<h4 id="bwfc011">BWFC011 — Web Forms Event Handler Signature</h4>
+<p>
+    Methods with the classic <code>(object sender, EventArgs e)</code> signature indicate un-migrated
+    event handlers. In Blazor, use <code>EventCallback</code> patterns without the sender parameter.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>// ⚠️ BWFC011
+protected void BtnSave_Click(
+    object sender, EventArgs e)
+{
+    SaveData();
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>// Blazor EventCallback pattern:
+private void BtnSave_Click()
+{
+    SaveData();
+}</code></pre>
+    </div>
+</div>
+
+<!-- ==================== BWFC012 ==================== -->
+
+<h4 id="bwfc012">BWFC012 — Leftover runat="server"</h4>
+<p>
+    String literals containing <code>runat="server"</code> are remnants of Web Forms markup.
+    The code fix strips the attribute from the string automatically.
+</p>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>❌ Before (flagged)</h5>
+        <pre><code>// ⚠️ BWFC012
+string html = "&lt;input type='text'"
+    + " runat='server' /&gt;";</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>✅ After (fixed)</h5>
+        <pre><code>string html = "&lt;input type='text' /&gt;";</code></pre>
+    </div>
+</div>
+
+<hr />
+
+<!-- ==================== Suppressing Warnings ==================== -->
+
+<h3>Suppressing Warnings</h3>
+<p>If you have a valid reason to keep a flagged pattern, suppress the specific rule:</p>
+<pre><code>#pragma warning disable BWFC002
+var legacy = ViewState["KeepThis"];  // Intentionally preserved
+#pragma warning restore BWFC002</code></pre>
+<p>Or use the <code>[SuppressMessage]</code> attribute:</p>
+<pre><code>[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "BWFC003")]
+protected void Page_Load(object sender, EventArgs e) { ... }</code></pre>
+
+<hr />
+
+<!-- ==================== Full Example ==================== -->
+
+<h3>Full Before &amp; After Example</h3>
+<p>
+    See the complete before/after comparison files in the repository at
+    <code>samples/AnalyzerExamples/</code>. These show a realistic Blazor component code-behind
+    containing every pattern the 8 analyzers detect, followed by the fully-fixed version.
+</p>
+
+<hr />
+
+<!-- ==================== Links ==================== -->
+
+<h3>Learn More</h3>
+<ul>
+    <li><a href="https://github.com/FritzAndFriends/BlazorWebFormsComponents">BlazorWebFormsComponents on GitHub</a></li>
+    <li><a href="https://www.nuget.org/packages/BlazorWebFormsComponents.Analyzers">NuGet Package</a></li>
+    <!-- TODO: Link to full analyzer documentation once Beast creates it -->
+</ul>

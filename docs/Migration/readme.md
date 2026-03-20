@@ -199,4 +199,14 @@ More information and strategy for re-writing these controls can be found in the 
 
 Use the tool from Telerik at: https://converter.telerik.com/
 
+## Follow-up: Clean Up with Roslyn Analyzers
+
+After migrating your markup and code-behind, install the **BlazorWebFormsComponents.Analyzers** NuGet package to catch leftover Web Forms patterns in your C# code:
+
+```shell
+dotnet add package BlazorWebFormsComponents.Analyzers
+```
+
+The analyzer suite includes 8 rules that detect `ViewState` usage, `IsPostBack` checks, `Response.Redirect()` calls, `Session` access, missing `[Parameter]` attributes, and more. Each diagnostic comes with an automatic code fix. See the [Roslyn Analyzers guide](Analyzers.md) for full details.
+
 ## Follow-up: Move components to Razor Component Library
