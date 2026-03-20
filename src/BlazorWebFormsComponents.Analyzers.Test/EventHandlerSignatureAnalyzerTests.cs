@@ -233,12 +233,12 @@ public class MyComponent : ComponentBase
             FixedState =
             {
                 Sources = { fixedSource, ComponentBaseStub },
+                ExpectedDiagnostics = { ExpectBWFC011("Button_Click").WithLocation(0) },
             },
             ExpectedDiagnostics = { ExpectBWFC011("Button_Click").WithLocation(0) },
-            // The code fix adds a TODO comment but doesn't change the method signature,
-            // so the diagnostic persists. Limit to one iteration.
-            NumberOfIncrementalIterations = 1,
-            NumberOfFixAllIterations = 1,
+            // Apply once → TODO added. Apply again → idempotent (no change). 2 iterations to converge.
+            NumberOfIncrementalIterations = 2,
+            NumberOfFixAllIterations = 2,
         };
         await test.RunAsync();
     }

@@ -43,6 +43,16 @@ namespace BlazorWebFormsComponents.Analyzers
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
+            // Don't add if a TODO comment already exists in leading trivia
+            foreach (var trivia in method.GetLeadingTrivia())
+            {
+                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) &&
+                    trivia.ToString().Contains("TODO: Convert to EventCallback"))
+                {
+                    return document;
+                }
+            }
+
             var todoComment = SyntaxFactory.Comment(
                 "// TODO: Convert to EventCallback pattern \u2014 remove sender parameter, change return type if needed");
 
