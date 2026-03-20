@@ -1,4 +1,4 @@
-﻿# Project Context
+# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
@@ -324,3 +324,23 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 - Run benchmarks: `dotnet test src/BlazorWebFormsComponents.AspxMiddleware.Test/ --filter "FullyQualifiedName~Benchmark" -v n`
 
 📌 Team update (2026-03-20): AngleSharp benchmark completed — performance is acceptable (3.3ms for 18KB stress test). No performance-related blockers to merging — decided by Rogue
+
+
+### BWFC001 Roslyn Analyzer Test Suite (2026-03-20)
+
+**33 tests written for MissingParameterAttributeAnalyzer (BWFC001) + MissingParameterAttributeCodeFixProvider.** P0 blocker from Forge's review resolved.
+
+Positive tests (4): WebControl subclass, CompositeControl subclass, multiple missing properties, indirect descendant.
+
+Negative tests (26 via Theory+Facts): [Parameter] already present, 18 inherited base properties, non-WebControl class, private/protected/internal, static, empty class, wrong-namespace WebControl.
+
+Code fix tests (3): adds [Parameter], adds using directive when missing, no duplicate using.
+
+Bug found and fixed: Analyzer fired on public static properties. Added StaticKeyword skip. Static props cannot be set via Blazor markup.
+
+Infrastructure: Added test project to solution. Created AnalyzerReleases files (RS2008 fix). Pinned CodeAnalysis 4.11.0 in test csproj.
+
+Key paths: src/BlazorWebFormsComponents.Analyzers.Test/MissingParameterAttributeAnalyzerTests.cs, MissingParameterAttributeCodeFixTests.cs
+
+Pattern: Roslyn analyzer tests use CSharpAnalyzerTest with stub types for WebControl/CompositeControl/ParameterAttribute. Markup syntax marks expected diagnostic locations.
+📌 Team update (2026-03-20): ASPX middleware gap closure completed by Cyclops + gate review APPROVED by Forge. 100/100 tests passing (67 middleware + 33 analyzer). BWFC001 analyzer ready for analyzer test expansion — decided by Forge, Cyclops

@@ -534,3 +534,27 @@ Replaced XDocument-based ASPX parser with AngleSharp for tolerant HTML5 parsing 
 ✅ Phase 1 bugs fixed (single-quote, runat, server comments)  
 ✅ Cleaner error handling (no total fallback on parse errors)
 
+### ASPX Middleware Gap Closure (experiment/aspx-middleware)
+
+**Task:** Fill three gaps identified in AngleSharp evaluation.
+
+**Decisions & patterns:**
+- Validators in `BlazorWebFormsComponents.Validations` are referenced as `Validations.X` in the registry, matching the `LoginControls.X` pattern for sub-namespaces.
+- Three validators are generic (`CompareValidator<T>`, `RangeValidator<T>`, `RequiredFieldValidator<T>`); registered with `<object>` following the data controls Phase 1 pattern.
+- `ValidationSummary` does NOT exist as a BWFC component (only the enum `ValidationSummaryDisplayMode` exists) — skipped.
+- `CustomValidator` and `RegularExpressionValidator` are non-generic — registered directly.
+- `TableRow`, `TableCell`, `TableHeaderCell` are in root `BlazorWebFormsComponents` namespace — no qualifier needed.
+- EventCallback coercion: `EventCallback` → `EventCallback.Empty`; `EventCallback<T>` → `Activator.CreateInstance(targetType)` (default no-op). Phase 1 doesn't resolve handler methods.
+- Note: coercion uses `targetType` (not `underlyingType`) since `EventCallback` is a struct, not nullable.
+
+**Key files:**
+- `src/BlazorWebFormsComponents.AspxMiddleware/AspxComponentRegistry.cs` — 8 new entries (5 validators + 3 table types)
+- `src/BlazorWebFormsComponents.AspxMiddleware/AspxComponentTreeBuilder.cs` — EventCallback coercion in `CoerceAttributeValue`
+
+**Outcome:**
+✅ 67/67 middleware tests passing
+✅ Registry count increased from ~50 to ~58
+✅ No IDE0007 violations (var enforcement)
+
+
+📌 Team update (2026-03-20): ASPX middleware AngleSharp implementation gate review APPROVED — production-ready, no blockers. 67/67 tests passing, performance validated (3.3ms for 18KB stress test). Merge ready — decided by Forge

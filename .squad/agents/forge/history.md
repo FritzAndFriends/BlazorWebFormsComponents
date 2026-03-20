@@ -149,6 +149,91 @@ Created temp-anglesharp-test console app to validate behavior:
 
 - Jeff wants thorough feasibility analysis before implementation (specific examples, test results, risks, migration path)
 - Code examples in analysis docs should show both current state and expected behavior
+
+### ASPX Middleware AngleSharp Gate Review (2026-03-20)
+
+**Branch:** `experiment/aspx-middleware` (commit ca82f80c)  
+**Review scope:** AspxParser.cs rewrite + registry expansions + EventCallback coercion + 6 tolerance tests + 9 benchmarks
+
+#### Verdict: ✅ APPROVED
+
+Cyclops delivered **production-ready work**. The AngleSharp implementation fixes all 6 Phase 1 bugs, passes 67/67 tests (100% green), and benchmarks show acceptable performance (0.04–3.3ms for 252–18,277 char inputs). Code quality is exemplary: var-compliant, clean separation of concerns, proper generated regex usage.
+
+#### Key Technical Findings
+
+1. **Parser architecture (8-step pipeline):**
+   - Directives extracted via regex (supports single + double quotes) ✅
+   - Server comments (`<%-- --%>`) stripped entirely, not hidden ✅
+   - Expression placeholders preserve server-side code for AST ✅
+   - Case mapping dictionary preserves original tag names (AngleSharp lowercases) ✅
+   - Self-closing `<asp_Control />` expanded to `<asp_Control></asp_Control>` (AngleSharp HTML5 mode bug mitigation) ✅
+   - AngleSharp tolerates unclosed tags, entities, script blocks ✅
+
+2. **Component registry:**
+   - 5 validators added: RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator ✅
+   - 3 table types added: TableRow, TableCell, TableHeaderCell ✅
+   - All 56 registered components verified against BWFC source ✅
+
+3. **EventCallback coercion:**
+   - `EventCallback` → `EventCallback.Empty` (non-generic) ✅
+   - `EventCallback<T>` → `Activator.CreateInstance(targetType)` (generic) ✅
+   - Phase 1 behavior: no-op callbacks, handler names preserved for future binding ✅
+
+4. **Test coverage:**
+   - 58 functional tests (19 original + 39 existing + 6 new tolerance tests) ✅
+   - 9 benchmark tests (4 size-based + 5 scenario-based) ✅
+   - All tolerance scenarios validated: unclosed tags, entities, single-quote attrs, runat="server" stripping, server comment removal, mixed quotes ✅
+
+5. **Performance validation:**
+   - Small (252 chars): 0.044 ms, 22,614 parses/sec ✅
+   - Medium (1.5KB): 0.254 ms, 3,933 parses/sec ✅
+   - Large (4KB): 0.636 ms, 1,574 parses/sec ✅
+   - XL (18KB): 3.348 ms, 299 parses/sec ✅
+   - Memory scales linearly: 51–926 KB/parse ✅
+   - **Conclusion:** Acceptable for on-demand .aspx rendering (not a hot path)
+
+#### Non-Blocking Recommendations (P2-P3)
+
+1. **Add test:** `Parse_ExpressionInAttributeValue_CreatesExpressionNode()` — validate `Text="<%= GetTitle() %>"` (Rogue)
+2. **Add test:** `Parse_PreservesWhitespace_InTextNodes()` — validate `\n`, `\r\n`, multiple spaces (Rogue)
+3. **Benchmark:** Test on WingtipToys/ContosoUniversity largest .aspx file (500KB+ validation) (Cyclops)
+4. **Document:** Edge case where `SelfClosingAspTagRegex` breaks on `Text="Click > here"` (theoretical, very low likelihood)
+
+#### Architecture Decisions Validated
+
+- **Keep asp: → asp_ rename:** Mitigates AngleSharp auto-closing bug (critical) ✅
+- **Keep regex pre-processing:** Directives and expressions must be extracted before HTML parsing ✅
+- **Case mapping dictionary:** Preserves original tag names after AngleSharp lowercases them ✅
+- **Pure HTML elements:** Output as single HtmlNode when no asp: children present (performance optimization) ✅
+- **HTML wrapper decomposition:** Decompose mixed HTML + asp: content into opening tag, children, closing tag ✅
+
+#### Code Quality Assessment
+
+- **var enforcement (IDE0007):** 100% compliant — 74 var usages across 4 files, zero explicit type declarations ✅
+- **Generated regex:** All 8 patterns use `[GeneratedRegex]` for performance ✅
+- **Separation of concerns:** Parser → AST → TreeBuilder → Middleware (zero coupling) ✅
+- **XML doc comments:** Public APIs documented ✅
+- **Pattern matching:** Consistent use of `is not null`, `switch` expressions ✅
+
+#### Documentation Quality
+
+`dev-docs/aspx-middleware-anglesharp-evaluation.md` is **reference-quality** — clear problem statement, concrete examples of AngleSharp behavior, risk mitigation strategies, performance benchmarks, decision log. This reads like a principal engineer's design doc.
+
+#### Merge Readiness
+
+**Blocking issues:** NONE  
+**Merge to `dev` branch:** Ready after Rogue adds 2 P2 tests (optional but recommended)  
+**Cyclops NOT locked out:** This is exemplary work, no revisions required
+
+#### Key Learnings for Future Work
+
+- **AngleSharp auto-closing bug:** Unknown custom elements (`<asp:Button />`) auto-close at end of parent, breaking sibling nesting. The asp_ rename is MANDATORY, not optional.
+- **HTML5 tolerance comes for free:** Unclosed tags, entities, boolean attrs, script blocks all handled with zero performance penalty vs equivalent clean inputs.
+- **Regex pre-processing is non-negotiable:** ASP.NET directives and expressions are NOT HTML — they must be extracted before any HTML parser sees the content.
+- **Case preservation matters:** Web Forms controls are case-sensitive in source but case-insensitive at runtime. The case mapping dictionary future-proofs for any case-dependent scenarios.
+- **Performance is a non-issue:** Even the stress test (18KB, 100+ controls) parses in ~3ms. This is on-demand rendering, not a hot loop.
+
+**Full review:** `.squad/decisions/inbox/forge-aspx-gate-review.md`
 - Critical issues must be called out with ⚠️ and mitigation strategies
 
 ### Component Health Audit — March 2026
@@ -574,3 +659,5 @@ Jeff directed a design pivot: replace custom `[HandlerRoute]` attribute + `MapBl
 Conducted full review of `src/BlazorWebFormsComponents.Analyzers/` at Jeff's request. Project contains one Roslyn analyzer (BWFC001 — missing `[Parameter]` on WebControl/CompositeControl properties) with code fix. Builds clean, produces NuGet package, is in the solution. However: zero tests (empty placeholder only), not referenced by any other project, test project not in `.sln`. Targets the Custom Controls migration path specifically — no overlap with L1/L2 migration scripts which handle file-level conversion. Recommendation: **Keep and Expand**. P0: write tests, add test project to sln, fix RS2008. P1: add BWFC002-005 for ViewState/IsPostBack/Response.Redirect/Session detection. Full analysis at `dev-docs/analyzers-project-review.md`. Decision filed at `.squad/decisions/inbox/forge-analyzers-review.md`.
 
 📌 Team update (2026-03-20): Analyzers project review completed — KEEP and EXPAND recommendation. P0 blockers (tests, solution file, RS2008) identified. P1 expansion (BWFC002–005 diagnostics) proposed — decided by Forge
+
+📌 Team update (2026-03-20): ASPX middleware completion summary. Cyclops closed all gaps (validators, table types, EventCallback). Rogue wrote comprehensive analyzer test suite (33/33 tests, static bug fixed). All work merge-ready. Synchronization checkpoint complete.
