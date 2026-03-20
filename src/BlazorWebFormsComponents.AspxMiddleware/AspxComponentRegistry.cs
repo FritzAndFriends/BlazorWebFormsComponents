@@ -32,6 +32,9 @@ public static class AspxComponentRegistry
         ["radiobutton"] = typeof(RadioButton),
         ["radiobuttonlist"] = typeof(RadioButtonList<object>),
         ["table"] = typeof(Table),
+        ["tablecell"] = typeof(TableCell),
+        ["tableheadercell"] = typeof(TableHeaderCell),
+        ["tablerow"] = typeof(TableRow),
         ["textbox"] = typeof(TextBox),
         ["view"] = typeof(View),
 
@@ -45,6 +48,13 @@ public static class AspxComponentRegistry
         ["gridview"] = typeof(GridView<object>),
         ["listview"] = typeof(ListView<object>),
         ["repeater"] = typeof(Repeater<object>),
+
+        // Validation controls
+        ["comparevalidator"] = typeof(Validations.CompareValidator<object>),
+        ["customvalidator"] = typeof(Validations.CustomValidator),
+        ["rangevalidator"] = typeof(Validations.RangeValidator<object>),
+        ["regularexpressionvalidator"] = typeof(Validations.RegularExpressionValidator),
+        ["requiredfieldvalidator"] = typeof(Validations.RequiredFieldValidator<object>),
 
         // Navigation
         ["menu"] = typeof(Menu),

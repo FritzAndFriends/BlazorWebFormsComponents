@@ -151,6 +151,18 @@ public static class AspxComponentTreeBuilder
             return Enum.TryParse(underlyingType, value, ignoreCase: true, out var e) ? e! : value;
         }
 
+        // EventCallback (non-generic) — Phase 1: no-op callback, handler name preserved as comment
+        if (targetType == typeof(EventCallback))
+        {
+            return EventCallback.Empty;
+        }
+
+        // EventCallback<T> — Phase 1: default (no-op) typed callback
+        if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(EventCallback<>))
+        {
+            return Activator.CreateInstance(targetType)!;
+        }
+
         // Default: return as string
         return value;
     }
