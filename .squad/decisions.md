@@ -8920,6 +8920,35 @@ The design is conservative: no magic, no reflection tricks, no runtime code gene
 
 ---
 
+### 2026-07-17: EmptyStatement code fixes require EndOfLine trivia before semicolon
+
+**Author:** Rogue (QA)
+**Date:** 2026-07-17
+**Status:** Decided
+
+## Context
+
+BWFC004 and BWFC005 code fix providers use `SyntaxFactory.EmptyStatement()` to replace
+flagged statements with a TODO comment. The semicolon token of the EmptyStatement was
+placed immediately after a `//` single-line comment, causing the `;` to be consumed by
+the comment during re-parsing (single-line comments extend to end-of-line).
+
+This created a syntax tree mismatch: the code fix output had an EmptyStatement node, but
+re-parsed expected text did not. All code fix tests (BWFC004, BWFC005) failed.
+
+## Decision
+
+When using `EmptyStatement()` as a replacement anchor for TODO comments in code fixes:
+1. Always add `SyntaxFactory.EndOfLine("\r\n")` after the comment trivia
+2. Replicate indentation trivia so the `;` aligns with the original statement
+3. Test expected output must have the `;` on its own indented line
+
+## Applies To
+
+All future BWFC code fix providers that replace statements with TODO comments.
+
+---
+
 ## Revised Design: Minimal API Registration
 
 **Author:** Forge (Lead / Web Forms Reviewer)  

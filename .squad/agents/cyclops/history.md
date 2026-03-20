@@ -585,3 +585,5 @@ Replaced XDocument-based ASPX parser with AngleSharp for tolerant HTML5 parsing 
 - `{0}` message format args work well with the containing method name via `FirstAncestorOrSelf<MethodDeclarationSyntax>()`
 - Test project uses type aliases for `CSharpAnalyzerTest<T>` and `CSharpCodeFixTest<T1,T2>` with `DefaultVerifier`
 
+
+📌 Team update (2026-03-20): Rogue fixed code fix trivia bugs in BWFC002/003 (and authored BWFC004/005). Issue: EmptyStatement code fixes placed semicolons immediately after // comments, causing parse failures. Solution: Add EndOfLine trivia after comments before semicolon. Pattern now applied to all BWFC code fix providers (decision merged to decisions.md). All 54 tests passing.

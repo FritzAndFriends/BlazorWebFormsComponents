@@ -356,3 +356,15 @@ Pattern: Roslyn analyzer tests use CSharpAnalyzerTest with stub types for WebCon
 **Whitespace Preservation (4 tests):** Text nodes containing non-whitespace characters preserve all original whitespace (spaces, newlines, indentation) through AngleSharp. **Whitespace-only text nodes are intentionally dropped** by `ConvertDomNode` (`string.IsNullOrWhiteSpace` check returns null). This means inter-element indentation is lost. Acceptable for Phase 1 since ASPX-to-Blazor migration doesn't need to preserve formatting whitespace.
 
 **500KB+ Stress Benchmark (1 test):** Generated 500KB+ file with 50 sections, 600+ ASP controls, 5-level nesting, expressions, directives, and server comments. AngleSharp degrades gracefully — single parse ~300ms on this machine. Throughput ~1,500 KB/sec. Uses reduced iteration count (50 vs 1000) to keep CI runtime under 30 seconds for the stress portion.
+
+### BWFC004/005 Roslyn Analyzer Code Fix Review (2026-07-17)
+
+**Context:** Cyclops created BWFC004 (Response.Redirect) and BWFC005 (Session/HttpContext.Current) analyzers with code fixes and tests. My job was to build them, but Cyclops beat me to it. Found their code fix tests were broken (3 of 54 failing).
+
+**Root Cause:** EmptyStatement's SemicolonToken was placed on the same line as a single-line `//` comment in the code fix output. When the test framework re-parsed the expected source text, the `;` was hidden inside the `//` comment (single-line comments extend to end-of-line), so the parsed tree had NO EmptyStatement node. But the actual code fix tree DID have an EmptyStatement. Syntax tree structure mismatch = test failure.
+
+**Fix:** Added `EndOfLine(\r\n)` + indentation trivia between the comment and the `;`, so the semicolon appears on its own line. Both the actual and expected trees now produce identical `EmptyStatement` nodes.
+
+**Key Roslyn Trivia Lesson:** When using `EmptyStatement` as a replacement anchor for TODO comments, the semicolon token MUST be on its own line — never after a `//` comment. Single-line comments consume everything until end-of-line, making any trailing tokens invisible to re-parsing.
+
+**Test stats:** 54/54 passing (BWFC001: 26, BWFC002: 6, BWFC003: 6, BWFC004: 6, BWFC005: 6, code fixes: 4).
