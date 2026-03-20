@@ -9466,3 +9466,1844 @@ The canonical pattern for rendering HTML id on Blazor components is id="@ClientI
 **What:** AJAX Control Toolkit extenders will NOT be added to the Component Health Dashboard at this time. The dashboard tracks parity against System.Web.dll controls using reflection-based baselines. ACT extenders are third-party (AjaxControlToolkit.dll) and would need a separate baseline source. This can be revisited if/when the baseline infrastructure supports multiple assemblies.
 **Why:** Different baseline source — would require significant infrastructure changes to the reflection tool and tracked-components model.
 
+
+---
+
+# Decision: BaseValidator and BaseCompareValidator Documentation
+
+**Date:** 2026-03-17  
+**Author:** Beast (Technical Writer)  
+**Status:** Complete  
+**Requested by:** Jeffrey T. Fritz  
+
+## Summary
+
+Created comprehensive documentation for two abstract base classes in the validation control hierarchy: BaseValidator (parent of all validators) and BaseCompareValidator (parent of comparison-based validators). Both docs follow existing validator documentation patterns and integrate into mkdocs.yml.
+
+## Problem
+
+BaseValidator and BaseCompareValidator had no documentation despite being the foundation for all validation controls in BlazorWebFormsComponents. Other concrete validators (RequiredFieldValidator, CompareValidator, etc.) were documented, but the base classes were missing.
+
+## Solution
+
+**1. BaseValidator Documentation** (`docs/ValidationControls/BaseValidator.md`)
+- Positioned as the abstract framework for ALL validation controls
+- Explains shared properties accessible to all validators:
+  - ControlToValidate (string ID, Web Forms style)
+  - ControlRef (ForwardRef<InputBase<T>>, Blazor native)
+  - Display (Static, Dynamic, None) with behavioral explanation
+  - Text (inline error message) and ErrorMessage (summary message)
+  - ValidationGroup (selective validation)
+  - Enabled and style properties (ForeColor, BackColor, CssClass, Font.*, etc.)
+  - IsValid (read-only validation state)
+- Documents the validation lifecycle: registration → validation request → value resolution → validation → state notification → cleanup
+- Explains EditContext integration and cascading context
+- References all child validators with links
+- Provides Web Forms → Blazor comparison with code examples
+
+**2. BaseCompareValidator Documentation** (`docs/ValidationControls/BaseCompareValidator.md`)
+- Positioned as abstract base for comparison validators (CompareValidator, RangeValidator)
+- Documents Type property with full data type table (String, Integer, Double, Date, Currency)
+- Explains CultureInvariantValues with practical locale examples (US "." vs European "," decimal separators)
+- Documents the Compare() method logic: conversion → type check → comparison
+- Provides real examples:
+  - Integer age range validation (18-120)
+  - Date range validation (1900-2023)
+  - Currency minimum price validation
+  - Culture-invariant parsing example
+- Includes Web Forms → Blazor syntax comparison
+- References inherited BaseValidator properties
+- References child validators
+
+**3. mkdocs.yml Navigation Update**
+- Added BaseCompareValidator and BaseValidator to Validation Controls section
+- Placed alphabetically (BaseCompareValidator, BaseValidator, CompareValidator, ...)
+- Verified strict MkDocs build passes with no broken links
+
+## Design Decisions
+
+### Scope
+- **Audience:** Experienced Web Forms developers learning Blazor
+- **BaseValidator as Framework:** Not presented as a user-facing component, but as the infrastructure that ALL validators depend on
+- **BaseCompareValidator as Type System:** Explains how comparison validators handle numeric, date, and currency conversions
+
+### ControlToValidate vs. ControlRef
+- Documented both patterns equally:
+  - ControlToValidate (string ID) — Web Forms migration path, uses property name on model
+  - ControlRef (ForwardRef<InputBase<T>>) — Blazor native, uses component @ref
+  - Precedence rule: ControlRef takes priority if both are set
+
+### Type Conversion Philosophy
+- Emphasized safe conversion: left value → right value → comparison
+- Noted DataTypeCheck operator special case (validates type without comparison)
+- Explained culture-invariant vs. culture-aware parsing with practical examples
+
+### Formatting Consistency
+- Matched RequiredFieldValidator.md and CompareValidator.md patterns:
+  - H1 overview with Microsoft docs link
+  - Properties section with property tables
+  - Examples section with real code (EditForm context)
+  - Web Forms → Blazor syntax comparison at end
+  - Child class references
+- All code examples fully runnable (includes @code block with model class)
+
+## Impact
+
+### Documentation
+- 2 new markdown files in docs/ValidationControls/
+- 1 mkdocs.yml update (2 new nav entries)
+- MkDocs build passes in strict mode
+- No broken links introduced
+
+### Validator Ecosystem
+- All 5 concrete validators (RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator) now have documented base classes
+- New developers can understand validation inheritance hierarchy
+- Web Forms developers have clear "base class properties" reference
+
+### Future Work
+- Custom validator documentation can reference BaseValidator for common properties
+- ValidationSummary docs can reference BaseValidator validation lifecycle
+- Migration guides can reference ControlToValidate vs. ControlRef pattern
+
+## Files Changed
+- Created: `docs/ValidationControls/BaseValidator.md` (6.6 KB)
+- Created: `docs/ValidationControls/BaseCompareValidator.md` (6.4 KB)
+- Updated: `mkdocs.yml` (2 nav entries added)
+
+## Verification
+✅ MkDocs build: `mkdocs build --strict` passes (55.59 seconds)  
+✅ No broken links  
+✅ Both new docs rendered correctly with proper markdown formatting  
+✅ Code examples tested for syntax validity (Razor/C# patterns match existing docs)
+
+
+---
+
+# Decision: Deprecation Guidance Documentation (#438)
+
+**Date:** 2026-03-17 (Session by Beast)  
+**Issue:** #438 — Add deprecation guidance docs for runat=server, ViewState, UpdatePanel  
+**Decision Owner:** Beast (Technical Writer)  
+**Status:** SHIPPED
+
+## What We Decided
+
+Create a comprehensive `docs/Migration/DeprecationGuidance.md` page documenting Web Forms patterns that **do not have direct Blazor equivalents** and explaining the Blazor alternative for each.
+
+## Why
+
+Web Forms developers migrating to Blazor encounter patterns they can't directly replicate:
+- `runat="server"` — Just a scope marker; Blazor components are always server-side
+- `ViewState` — BWFC provides it for compatibility, but developers should use component fields
+- `UpdatePanel` — Blazor's component model handles incremental rendering natively
+- `ScriptManager` — Migration compatibility stub; use `IJSRuntime` instead
+- Page lifecycle (`Page_Load`, `IsPostBack`) — Blazor uses different lifecycle hooks
+- Server control property manipulation — Use reactive binding instead
+
+Without guidance, developers might:
+- Attempt to recreate obsolete patterns (wasting time)
+- Misunderstand why familiar APIs are gone (frustration)
+- Miss the Blazor-native alternatives (produce suboptimal code)
+
+## What We Built
+
+**File:** `docs/Migration/DeprecationGuidance.md` (32 KB, ~600 lines)
+
+**Content Structure:**
+- Each deprecated pattern has a section: "What It Was" → "Why It's Deprecated" → "What To Do Instead"
+- Before/after code examples using markdown tabs for easy comparison
+- Pattern-specific migration checklists (e.g., lifecycle mapping table)
+- Explanation of why the deprecation makes sense in Blazor architecture
+
+**Patterns Covered:**
+1. `runat="server"` — Scope marker; just remove it
+2. `ViewState` — Use component fields and scoped services
+3. `UpdatePanel` → Blazor incremental rendering (no trigger coordination needed)
+4. `Page_Load` / `IsPostBack` → `OnInitializedAsync` / event handlers
+5. `ScriptManager` → `IJSRuntime` + `HttpClient` + dependency injection
+6. Server control properties → Declarative data binding
+7. Application/Session state → Singleton/scoped services
+8. Data binding events → Component templates with `@context`
+
+**Navigation Update:**
+- Added "Deprecation Guidance" to `mkdocs.yml` Migration section
+- Placed after "Automated Migration Guide" (early in the migration journey)
+
+## Tone & Audience
+
+**Audience:** Experienced Web Forms developers learning Blazor
+
+**Tone:**
+- ✅ Empathetic — Acknowledges these are familiar patterns being left behind
+- ✅ Educational — Explains *why* Blazor works differently
+- ✅ Practical — Shows clear, working code examples
+- ✅ Non-judgmental — No "ViewState was bad"; just "here's the Blazor way"
+
+**Example language:**
+> "In Web Forms, you could manipulate control properties on the server in code-behind... This approach worked because Web Forms re-rendered the entire page on each postback. **Blazor uses reactive data binding.** Control properties are derived from component state, not set imperatively."
+
+## Design Decisions
+
+**Placement in Navigation:**
+- *After* Automated Migration Guide (not before)
+- *Before* Migration Strategies (guides thinking about approach)
+- Rationale: Developers run L1 automation first, then encounter these patterns — this doc addresses them early
+
+**Format: Tabbed Before/After Code:**
+- **Why tabbed?** MkDocs markdown supports tabbed syntax; easy to read side-by-side
+- **Why always paired?** No Web Forms example without Blazor equivalent
+- **Why both `razor` and `csharp` blocks?** Shows markup + code-behind for complete picture
+
+**Lifecycle Mapping Table:**
+- Explicit table mapping Web Forms lifecycle to Blazor equivalents
+- Helps developers quickly find the right hook (`Page_Load` → `OnInitializedAsync`)
+
+## Success Criteria Met
+
+✅ Covers all 5 core patterns from issue #438:
+- runat="server"
+- ViewState
+- UpdatePanel
+- Page_Load / IsPostBack
+- ScriptManager
+
+✅ Includes one additional critical pattern:
+- Server-side control property manipulation → Reactive binding
+
+✅ Covers derived patterns:
+- Application/Session state → Services
+- Data binding events → Component templates
+- All patterns have before/after code examples
+
+✅ Accessible to Web Forms developers:
+- Explains each pattern in Web Forms terms first
+- Shows clear "Blazor way" alternative
+- Empathetic, non-judgmental tone
+
+## Future Maintenance
+
+**When to update this doc:**
+- New BWFC components or patterns added (link to new docs)
+- Migration toolkit adds new L1 patterns that lack Blazor equivalents
+- Team discovers common migration anti-patterns
+
+**Cross-references to maintain:**
+- Migration Strategy Guide (link there from Overview section)
+- Automated Migration Guide (link there from Overview section)
+- Page Service docs (linked in IsPostBack → lifecycle section)
+
+## Files Modified
+
+1. **Created:** `docs/Migration/DeprecationGuidance.md`
+   - 32 KB, ~600 lines
+   - 8 major sections + summary checklist
+   - Markdown with tabs, admonitions, code blocks
+
+2. **Updated:** `mkdocs.yml`
+   - Added "Deprecation Guidance: Migration/DeprecationGuidance.md" entry
+   - Positioned after "Automated Migration Guide"
+
+## Related Issues & PRs
+
+- **Linked Issue:** #438
+- **Related Skill:** documentation (component-documentation practices applied)
+- **Related Docs:** Strategies.md, AutomatedMigration.md, MasterPages.md, User-Controls.md
+
+
+---
+
+# Decision: Broken Doc Links → Plain Text (Not Stub Pages)
+
+**Date:** 2026-03-18
+**Author:** Beast (Technical Writer)
+**Status:** Implemented on `dev` (commit b59bf6de)
+
+## Context
+
+MkDocs `--strict` mode rejects any internal markdown link that doesn't resolve to an existing file. Nine Ajax Toolkit docs linked to component pages (Panel, ListBox, DropDownList, Image, RequiredFieldValidator) that haven't been written yet.
+
+## Decision
+
+Replace broken cross-references with **plain text mentions** (e.g., `Panel Component — The Panel control (documentation coming soon)`) rather than creating empty stub pages.
+
+## Rationale
+
+- Stub pages pollute the docs site with content-free entries
+- Plain text is honest — readers know the page doesn't exist yet
+- When a real component doc is created, the author can restore the link at that time
+- This pattern is easy to grep for: search `documentation coming soon` to find all deferred links
+
+## Impact
+
+- **Docs CI:** Unblocked — `mkdocs build --strict` should now pass
+- **Future work:** When Panel, ListBox, DropDownList, Image, or RequiredFieldValidator docs are written, search for `documentation coming soon` in `docs/AjaxToolkit/` and restore the markdown links
+
+
+---
+
+# Decision: Strip [RouteData] instead of replacing with [Parameter]
+
+**Date:** 2026-03-08
+**Author:** Bishop
+**Status:** Implemented
+
+## Context
+
+Run 15 revealed that the `[RouteData]` → `[Parameter]` conversion in `bwfc-migrate.ps1` caused build failures (`CS0592`) in `ProductDetails.razor.cs` and `ProductList.razor.cs`. The `[Parameter]` attribute targets `Property` declarations only, but `[RouteData]` appears on **method parameters** in Web Forms model-binding signatures.
+
+## Decision
+
+**Strip `[RouteData]` from method parameters entirely.** Do not replace with `[Parameter]` inline.
+
+- A `/* TODO */` block comment is placed above the parameter directing Layer 2 to create a `[Parameter]` property on the component class.
+- Block comment (`/* */`) is used instead of line comment (`//`) to prevent absorbing the closing `)` of the method signature.
+
+## Rationale
+
+- `[RouteData]` is a Web Forms model-binding attribute with no inline Blazor equivalent
+- `[Parameter]` cannot decorate method parameters — it targets properties only
+- Layer 2 is the right place to refactor the method signature (promote parameters to component properties)
+- Block comments are safe inside method parameter lists; line comments risk absorbing trailing syntax
+
+## Impact
+
+- **bwfc-migrate.ps1**: RouteData regex updated (lines ~1724-1732)
+- **All L1 tests pass**: 15/15, 100% line accuracy
+- **Layer 2 agents** should look for `/* TODO: RouteData parameter */` comments as signals to create `[Parameter]` properties
+
+
+---
+
+# Decision: AngleSharp-Based ASPX Parser Implementation
+
+**Date:** 2026-03-20  
+**Decided by:** Cyclops  
+**Status:** Implemented & Validated  
+**Branch:** `experiment/aspx-middleware`  
+
+## Context
+
+The Phase 1 ASPX middleware prototype used `System.Xml.Linq.XDocument` to parse `.aspx` markup. This approach failed on real-world .aspx files containing:
+- Unclosed HTML tags (`<br>`, `<hr>`, `<input>`)
+- Unescaped entities (`&` in URLs)
+- Non-XHTML attributes (boolean attributes without values)
+- Server-side comments (`<%-- --%>`)
+
+## Decision
+
+Replace `XDocument.Parse()` with `AngleSharp.HtmlParser.ParseDocument()` for tolerant HTML5 parsing.
+
+## Rationale
+
+**Why AngleSharp:**
+- Native HTML5 parsing handles malformed markup gracefully
+- Active maintenance (v1.4.0 stable)
+- DOM API familiar to web developers
+- Handles entities, unclosed tags, and HTML comments natively
+
+**Key Implementation Choices:**
+
+1. **Self-Closing Tag Workaround**
+   - AngleSharp's HTML5 mode treats unknown self-closing tags as open tags
+   - Pre-process with regex: `<asp_Control />` → `<asp_Control></asp_Control>`
+   - Ensures proper sibling relationships between multiple ASP controls
+
+2. **Case Preservation**
+   - AngleSharp lowercases tag names per HTML5 spec
+   - Build case mapping dictionary via regex before parsing
+   - Restore original casing during AST construction
+
+3. **Regex Pre-Processing Retained**
+   - Directives (`<%@ %>`) — AngleSharp doesn't handle server syntax
+   - Expressions (`<%= %>`, `<%# %>`) — converted to HTML comments as placeholders
+   - Server comments (`<%-- --%>`) — completely stripped
+
+4. **Bug Fixes Included**
+   - Single-quote attributes: Updated regex to `[""']([^""']*)[""']`
+   - `runat="server"`: Stripped during attribute extraction
+   - Server-side comments: Added `ServerCommentRegex` to remove before expression processing
+
+## Consequences
+
+**Positive:**
+- ✅ All 52 existing tests pass (100% backward compatibility)
+- ✅ 6 new tolerance tests added for HTML5 scenarios
+- ✅ Handles unclosed tags, entities, malformed markup
+- ✅ Fixed 3 Phase 1 bugs (single-quote, runat, server comments)
+- ✅ AST output identical to XDocument version
+
+**Negative:**
+- ⚠️ Still requires regex pre-processing for asp: → asp_ rename
+- ⚠️ Self-closing tag workaround adds one more regex pass
+- ⚠️ AngleSharp dependency adds ~450KB to middleware project
+
+**Trade-offs:**
+- Regex passes: 7 total (directives, comments, expressions, asp rename, self-close, open/close tags)
+- Slightly more complex than pure XDocument approach
+- But: eliminates total fallback on any XML error
+
+## Validation
+
+- **Test Coverage:** 58/58 tests passing (52 original + 6 new)
+- **No Regressions:** All existing ASPX files parse identically
+- **New Capabilities:** Handles real-world .aspx files that crashed XDocument
+
+## Files Changed
+
+- `AspxParser.cs` — Complete rewrite, 320 lines
+- `AspxParserTests.cs` — Added 6 tolerance tests
+- `BlazorWebFormsComponents.AspxMiddleware.csproj` — Added AngleSharp 1.4.0
+- `aspx-middleware-anglesharp-evaluation.md` — Updated status report
+
+## Next Steps
+
+- Consider merging to main branch after team review
+- Optional: Performance comparison with XDocument version
+- Monitor for edge cases in real-world .aspx files
+
+
+---
+
+# Decision: ASHX/AXD Middleware Design (#423)
+
+**Author:** Cyclops  
+**Date:** 2026-03-18  
+**Status:** Implemented on `feature/docs-middleware-reports`
+
+## Context
+
+Issue #423 requires handling legacy `.ashx` and `.axd` URLs in the existing `UseBlazorWebFormsComponents()` middleware pipeline.
+
+## Decision
+
+- **Separate middleware classes** for each URL type (`.aspx`, `.ashx`, `.axd`) rather than one monolith. Each is focused and independently toggleable.
+- **AshxHandlerMiddleware** takes `BlazorWebFormsComponentsOptions` via constructor injection to access `AshxRedirectMappings`. Returns 410 Gone by default; 301 redirect when a mapping exists.
+- **AxdHandlerMiddleware** is stateless (no options needed). Uses path suffix matching: `ChartImg.axd` → 410 Gone; everything else → 404.
+- **Registration order** in `UseBlazorWebFormsComponents()`: aspx → ashx → axd. Order doesn't matter since each targets a distinct file extension.
+- **`AshxRedirectMappings`** uses `StringComparer.OrdinalIgnoreCase` for case-insensitive path matching, consistent with how ASP.NET handles URLs.
+
+## Team Impact
+
+- No breaking changes. All three features default to `true`.
+- Sample projects continue to work with no config changes.
+- Future work: if we need more granular .axd control, we can add an `AxdResponseMappings` dictionary similar to `AshxRedirectMappings`.
+
+
+---
+
+# Decision: ASPX Middleware Phase 1 Architecture
+
+**Date:** 2026-03-19  
+**Author:** Cyclops  
+**Status:** Experimental  
+
+## Context
+
+Jeff requested an experiment: middleware to parse .aspx files at runtime and render them via BWFC Blazor components using HtmlRenderer SSR.
+
+## Decision
+
+Built `BlazorWebFormsComponents.AspxMiddleware` with this pipeline:
+
+1. **Parser** — Regex pre-process (`asp:` → `asp_`, `<% %>` → XML comments) then XDocument.Parse
+2. **Registry** — 47 BWFC components mapped (generic data controls use `<object>` type arg)
+3. **TreeBuilder** — Walks AST, builds RenderFragment via RenderTreeBuilder with reflection-based attribute coercion
+4. **Middleware** — Intercepts `.aspx` requests, runs pipeline, returns HTML via HtmlRenderer
+
+## Rationale
+
+- Pre-processing asp: prefix avoids XML namespace issues (simplest approach)
+- `typeof(GridView<object>)` for generic controls enables Phase 1 markup rendering without data
+- NoOpJsRuntime needed for SSR since BWFC components inject IJSRuntime
+
+## Impact
+
+New experimental project. Does not affect existing library or tests.
+
+
+---
+
+# Decision: Health Snapshot in CI Pipeline
+
+**Date:** 2025-07-17
+**Author:** Cyclops (Component Dev)
+**Status:** Implemented
+
+## Context
+The `scripts/GenerateHealthSnapshot` console app can produce a `health-snapshot.json` summarizing component health. Running this in CI ensures every build produces an up-to-date snapshot without manual effort.
+
+## Decision
+Added three steps to `build.yml` after the build phase and before tests:
+1. Restore the snapshot tool
+2. Run it with `--configuration Release` passing workspace root and output path
+3. Upload `health-snapshot.json` as a build artifact (`if: always()`)
+
+Also added the snapshot tool to the initial dependency restore block.
+
+## Rationale
+- Placing after library build guarantees the ProjectReference is satisfied
+- `if: always()` on upload ensures the artifact is captured even on test failures
+- Separate restore step keeps the `--no-restore` pattern consistent for the run step
+
+
+---
+
+# Decision: Proceed with AngleSharp for ASPX Parser (with Guardrails)
+
+**Date:** 2026-03-20  
+**Decider:** Forge (Lead / Web Forms Reviewer)  
+**Status:** ✅ Recommended — Pending Cyclops prototype  
+**Branch:** `experiment/aspx-middleware`
+
+---
+
+## Decision
+
+**Replace `System.Xml.Linq.XDocument` with `AngleSharp` in `AspxParser.cs`** to parse .aspx markup, with **mandatory guardrails** to prevent HTML5 auto-closing issues.
+
+---
+
+## Context
+
+The Phase 1 ASPX middleware uses `XDocument.Parse()` to parse .aspx files after regex preprocessing. This works for well-formed XML but breaks on real-world .aspx files with:
+
+1. Unclosed HTML tags (`<br>`, `<hr>`, `<input>`)
+2. Unescaped `&` in URLs (`page.aspx?cat=1&page=2`)
+3. Boolean attributes without values (`<input checked disabled>`)
+4. `<script>` blocks with `<` or `&&` operators
+5. Single-quote attributes (handled by AngleSharp, but current regex drops them)
+
+AngleSharp is a tolerant HTML5 parser that handles all of these scenarios.
+
+---
+
+## Evidence
+
+### AngleSharp Test Results
+
+Prototype testing confirmed:
+
+✅ **Preserves `asp:` prefix tags:**
+```csharp
+Input:  <asp:Button ID="btn1" Text="Submit" runat="server" />
+Output: TagName="ASP:BUTTON", Attributes={"ID": "btn1", "Text": "Submit", "runat": "server"}
+```
+
+✅ **Handles unclosed tags:**
+```html
+<br> → <br>
+<input type="text"> → <input type="text">
+```
+
+✅ **Tolerates `&` in URLs:**
+```html
+<a href="page.aspx?id=1&name=test"> → href="page.aspx?id=1&amp;name=test"
+```
+
+✅ **Parses single-quote attributes:**
+```html
+<asp:Label Text='Single Quote' /> → Text="Single Quote"
+```
+
+⚠️ **CRITICAL ISSUE — Auto-closes unknown elements:**
+```html
+Input:
+<asp:Label ID="lbl1" Text="Name:" />
+<asp:Button ID="btn1" Text="Go" />
+
+AngleSharp Output (WRONG):
+<asp:label id="lbl1" text="Name:">
+<asp:button id="btn1" text="Go">
+</asp:button></asp:label>  <!-- Button nested inside Label! -->
+```
+
+### XDocument Issues NOT Fixed by AngleSharp
+
+❌ **Directives:** `<%@ Page %>` are HTML-encoded by AngleSharp → regex extraction MUST remain.  
+❌ **Expressions:** `<%= %>`, `<%# %>` are HTML-encoded → regex extraction MUST remain.
+
+---
+
+## Guardrails (Mandatory)
+
+To prevent the auto-closing bug and maintain compatibility:
+
+### 1. Keep `asp:` → `asp_` Rename
+The current parser renames `asp:Button` → `asp_Button` before parsing. **This MUST remain with AngleSharp** to prevent HTML5 treating `asp:` tags as unknown elements and auto-closing them incorrectly.
+
+### 2. Keep Regex Pre-Processing
+- `ExtractDirectives()` — Remove `<%@ ... %>` before parsing
+- `ReplaceExpressions()` — Replace `<%= %>`, `<%# %>` with HTML comment placeholders
+- Both are required because AngleSharp HTML-encodes these constructs
+
+### 3. Add HTML-Tolerance Tests
+Cyclops must add 6 new tests to `AspxParserTests.cs`:
+- Unclosed `<br>`, `<hr>`, `<input>` tags
+- Single-quote attributes: `Text='value'`
+- Unescaped `&` in URLs
+- Boolean attributes: `<input checked disabled>`
+- `<script>` with operators: `if (x < 5 && y > 2)`
+- Nested asp: controls to verify sibling relationships (not parent-child)
+
+### 4. Performance Benchmark
+Measure AngleSharp vs XDocument on large .aspx files (WingtipToys `Default.aspx`, ContosoUniversity pages). Expected 10-20% slower — acceptable for non-hot-path middleware.
+
+### 5. Whitespace Validation
+Ensure AngleSharp preserves text node whitespace (may need `HtmlParserOptions` tuning).
+
+---
+
+## Implementation Plan
+
+### Phase 1: Prototype (Cyclops)
+- Replace `XDocument.Parse()` with `AngleSharp.Html.Parser.HtmlParser`
+- Replace `ConvertXmlNode(XNode)` with `ConvertAngleSharpNode(INode)`
+- Map `IElement` → `AspControlNode`, `IText` → `HtmlNode`, `IComment` → expression placeholders
+- Keep `asp:` → `asp_` rename
+- Keep regex pre-processing
+
+### Phase 2: Test Migration (Rogue)
+- Run all 52 existing tests → must pass
+- Add 6 new HTML-tolerance tests
+- Update assertions to handle case normalization (`ASP:BUTTON` vs `asp:button`)
+
+### Phase 3: Validation (Forge)
+- Performance benchmark
+- Review Cyclops implementation
+- Gate review before merge to `experiment/aspx-middleware`
+
+---
+
+## Risks
+
+| Risk | Severity | Mitigation |
+|------|----------|------------|
+| Auto-closing `asp:` tags | **CRITICAL** | Keep `asp:` → `asp_` rename |
+| Attribute reordering | Low | Use dictionary comparison in tests |
+| Case normalization | Low | Case-insensitive assertions |
+| Performance | Low | Benchmark + accept 10-20% overhead |
+| Dependency size | Negligible | AngleSharp is 450 KB, no transitive deps |
+
+---
+
+## Impact
+
+### Files Changed
+- `AspxParser.cs` — ~100 lines (replace XDocument tree walk)
+- `AspxMiddleware.csproj` — Add AngleSharp NuGet reference
+
+### Files Unchanged
+- `AspxNodes.cs` (AST definitions)
+- `AspxComponentTreeBuilder.cs` (AST consumer)
+- `AspxComponentRegistry.cs`
+- All middleware plumbing files
+
+### Test Impact
+- 52 existing tests must pass (case normalization only)
+- 6 new tests added
+
+---
+
+## Alternatives Considered
+
+### Option A: Stick with XDocument
+**Pros:** No change, known behavior.  
+**Cons:** Breaks on real-world .aspx with unclosed tags, `&`, boolean attrs.  
+**Verdict:** ❌ Not viable for production migration toolkit.
+
+### Option B: HtmlAgilityPack
+**Pros:** Similar to AngleSharp, widely used.  
+**Cons:** Less standards-compliant than AngleSharp, older API design.  
+**Verdict:** ⚠️ Viable alternative if AngleSharp performance is unacceptable.
+
+### Option C: AngleSharp.Xml (XML mode)
+**Pros:** Respects XML namespaces, no auto-closing.  
+**Cons:** Still requires well-formed XML (doesn't solve unclosed tags).  
+**Verdict:** ❌ Doesn't solve the core problem.
+
+---
+
+## Success Criteria
+
+- [ ] All 52 existing tests pass
+- [ ] 6 new HTML-tolerance tests pass
+- [ ] Performance benchmark shows <30% overhead vs XDocument
+- [ ] No breaking changes to AST or TreeBuilder
+- [ ] Forge gate review approves
+
+---
+
+## Recommendation
+
+✅ **PROCEED** — AngleSharp solves 5 of 6 XDocument bugs with minimal code changes. The auto-closing issue is fully mitigated by keeping the `asp:` → `asp_` rename. This is the right architectural choice for a production-ready migration toolkit.
+
+**Next action:** Cyclops implements prototype in `AspxParser.cs`.
+
+---
+
+**References:**
+- Full analysis: `dev-docs/aspx-middleware-anglesharp-evaluation.md`
+- AngleSharp NuGet: https://www.nuget.org/packages/AngleSharp
+- Test prototype results: Run 2026-03-20 (temp-anglesharp-test/)
+
+
+---
+
+# ASPX Middleware Experiment Scope — Forge Decision
+
+**Date:** 2026-03-14  
+**Decision Maker:** Forge (Lead / Web Forms Reviewer)  
+**Requested by:** Jeffrey T. Fritz  
+**Context:** Phase 1 of ASPX-to-Blazor SSR runtime middleware (see planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md)  
+
+---
+
+## Executive Summary
+
+The ASPX middleware experiment is **scoped to Phase 1: Markup Rendering** — the minimal viable scope that proves the concept works. This session will:
+
+1. Build a `BlazorWebFormsComponents.AspxMiddleware` project (new, experimental)
+2. Implement a hybrid XML/regex ASPX parser that handles the three core control patterns
+3. Create component tree rendering via RenderTreeBuilder + HtmlRenderer
+4. Validate against 3 simple .aspx test files
+5. Intentionally defer data binding, code-behind, and advanced features to Phase 2+
+
+**Definition of Done:** A developer can point a middleware-enabled Blazor app at a folder of .aspx files and see them render correctly as HTML, using BWFC components under the hood, without manual migration.
+
+---
+
+## 1. Definition of Done (2-3 Concrete Scenarios)
+
+### Scenario A: Simple Button + Label + Static HTML
+**Input:** `simple.aspx`
+```html
+<%@ Page %>
+<div class="container">
+  <asp:Label Text="Enter your name:" />
+  <asp:TextBox ID="txtName" />
+  <asp:Button Text="Submit" CssClass="btn btn-primary" />
+</div>
+```
+
+**Expected Outcome:**
+- Middleware intercepts request to `/simple.aspx`
+- Parser extracts markup AST
+- ComponentTreeBuilder maps `asp:Label` → `Label` component, `asp:TextBox` → `TextBox`, `asp:Button` → `Button`
+- Attributes (`Text`, `CssClass`, `ID`) coerce to component parameters
+- Static `<div class="container">` passes through unchanged
+- HtmlRenderer produces valid HTML string
+- Response renders in browser with correct visual structure (label, input field, button)
+
+**Verification:** HTTP GET `/simple.aspx` returns 200 with HTML; browser DOM contains expected elements.
+
+---
+
+### Scenario B: Nested Panel with Child Controls (Template Content)
+**Input:** `nested.aspx`
+```html
+<%@ Page %>
+<asp:Panel CssClass="panel panel-default">
+  <asp:Label Text="Header" />
+  <asp:Panel>
+    <asp:Label Text="Inner content" />
+  </asp:Panel>
+</asp:Panel>
+```
+
+**Expected Outcome:**
+- Parser correctly nests `<asp:Panel>` tags and identifies child controls
+- ComponentTreeBuilder builds nested RenderFragment for Panel's `ChildContent` parameter
+- Outer Panel renders with CssClass, inner Panel renders as child
+- Final HTML shows nested `<div>` structure matching Panel's HTML template
+
+**Verification:** Rendered HTML contains nested divs with correct nesting depth; inner label is visually positioned as child of inner panel.
+
+---
+
+### Scenario C: Master Page + Content Placeholder (Layout Mapping)
+**Input:** `master.Master` + `content.aspx`
+```html
+<!-- master.Master -->
+<%@ Master %>
+<html>
+<head><title>My App</title></head>
+<body>
+  <header>Navigation</header>
+  <asp:ContentPlaceHolder ID="cph_Main" />
+  <footer>Copyright</footer>
+</body>
+</html>
+
+<!-- content.aspx -->
+<%@ Page MasterPageFile="~/master.Master" %>
+<%@ MasterType VirtualPath="~/master.Master" %>
+<asp:Content ContentPlaceHolderID="cph_Main">
+  <asp:Label Text="Hello from content page" />
+</asp:Content>
+```
+
+**Expected Outcome:**
+- Middleware loads master.Master and maps `<asp:ContentPlaceHolder>` to a Blazor layout component
+- Middleware loads content.aspx and maps `<asp:Content>` to @Body-like child content
+- Final HTML renders master layout with content page injected into placeholder
+- Header, footer, and page content all render in correct order
+
+**Verification:** HTTP GET `/content.aspx` returns 200; HTML contains "Navigation" (header), "Hello from content page" (content), "Copyright" (footer) in correct DOM positions.
+
+---
+
+## 2. Project Structure Decision
+
+### Decision: New Project `BlazorWebFormsComponents.AspxMiddleware`
+
+**Location:** `src/BlazorWebFormsComponents.AspxMiddleware/` (parallel to `src/BlazorWebFormsComponents/`)
+
+**Rationale:**
+
+1. **Experimental scope:** This is an experiment, not a guaranteed feature. Keeping it separate prevents accidental dependencies in the main library.
+2. **Clear ownership:** Signals to the team that this is optional middleware, not core BWFC.
+3. **Clean dependencies:** The main BWFC project provides *components*; the middleware project provides *orchestration*. They remain loosely coupled.
+4. **Future extraction:** If this becomes a standalone tool, moving to a separate repo is frictionless. If it's abandoned, removing a single project is safer than unwinding entangled code.
+5. **Test isolation:** Middleware tests live in `BlazorWebFormsComponents.AspxMiddleware.Tests/`, separate from BWFC unit tests.
+
+**Integration point:** New extension method in `BlazorWebFormsComponents.ServiceCollectionExtensions`:
+```csharp
+public static IApplicationBuilder UseAspxPages(this IApplicationBuilder app, string aspxRootPath)
+{
+    // Wires up the AspxMiddleware from the new project
+    return app.UseMiddleware<AspxPageMiddleware>(aspxRootPath);
+}
+```
+
+This allows the middleware to be **opt-in** — developers who don't need ASPX parsing pay zero cost.
+
+---
+
+## 3. Parser Approach Decision
+
+### Decision: XDocument (System.Xml.Linq) with Pre-Processing
+
+**Why XDocument, not AngleSharp or Custom Tokenizer:**
+
+| Approach | Pros | Cons | Verdict |
+|----------|------|------|---------|
+| **XDocument** | DOM parsing, familiar to .NET, handles malformed XML reasonably, pre-processing handles `<% %>` blocks | Slower than regex for simple extraction | **CHOSEN for Phase 1** |
+| **AngleSharp** | HTML5-spec parser, handles broken HTML | Extra NuGet dependency, overkill for ASPX | Not chosen; defer to Phase 2 if needed |
+| **Custom Tokenizer** | Full control, fast, regex-based | High implementation risk, edge cases, manual test burden | Risky for experiment; only if XDocument fails |
+
+**Implementation Strategy:**
+
+1. **Pre-processing step:** Strip `<% ... %>` code blocks and `<%# ... %>` data-binding expressions *before* XDocument parsing. Replace with placeholders or remove entirely (Phase 1 doesn't support expressions).
+   ```csharp
+   string aspxMarkup = File.ReadAllText(filePath);
+   aspxMarkup = Regex.Replace(aspxMarkup, @"<%[^>]*%>", "");  // Strip code blocks
+   aspxMarkup = Regex.Replace(aspxMarkup, @"<%#[^>]*%>", "");  // Strip data-binding expressions
+   ```
+
+2. **Parse with XDocument:**
+   ```csharp
+   var doc = XDocument.Parse(aspxMarkup);
+   var root = doc.Root;
+   ```
+
+3. **Handle directives separately:** `<%@ Page %>`, `<%@ Master %>` are XML comments or processing instructions; parse them with regex before XDocument.
+   ```csharp
+   var pageMatch = Regex.Match(aspxMarkup, @"<%@\s*Page\s+([^%>]*)\s*%>");
+   var masterPageFile = pageMatch.Groups[1].Value;  // Extract MasterPageFile attribute
+   ```
+
+4. **Recursive tree walk:** Once XDocument is built, walk `XElement` nodes and convert to component tree.
+
+**Supported Markup in Phase 1:**
+- ✅ `<asp:Button Text="Submit" />`
+- ✅ `<asp:Label Text="Hello" />`
+- ✅ `<asp:TextBox ID="txt" CssClass="form-control" />`
+- ✅ `<asp:Panel><asp:Label Text="Child" /></asp:Panel>` (nested controls)
+- ✅ `<div class="container">...</div>` (static HTML passthrough)
+- ✅ `<%@ Page %>` directive (ignored for now, parsed for future metadata)
+- ✅ `<%@ Master %>` and `<asp:ContentPlaceHolder />` (mapped to layout)
+- ❌ `<% C# code %>` (stripped, logged as "not supported in Phase 1")
+- ❌ `<%# data-binding expressions %>` (stripped, logged as "Phase 2")
+
+---
+
+## 4. Test ASPX Files (Minimal but Representative)
+
+Create three test .aspx files in `samples/AspxMiddlewareTest/` (new folder):
+
+### File 1: `simple-form.aspx`
+```html
+<%@ Page Title="Simple Form" %>
+<form>
+  <fieldset>
+    <legend>Contact Form</legend>
+    <div class="form-group">
+      <asp:Label Text="Name:" For="txtName" />
+      <asp:TextBox ID="txtName" CssClass="form-control" />
+    </div>
+    <div class="form-group">
+      <asp:Label Text="Email:" For="txtEmail" />
+      <asp:TextBox ID="txtEmail" TextMode="Email" CssClass="form-control" />
+    </div>
+    <asp:Button Text="Send" CssClass="btn btn-primary" />
+  </fieldset>
+</form>
+```
+
+**Tests:** 
+- Parser produces AST with 2 TextBox, 2 Label, 1 Button
+- ComponentTreeBuilder maps each to correct BWFC type
+- Attributes (`CssClass`, `For`, `TextMode`) coerce correctly
+- HTML output contains `<form>`, `<fieldset>`, `<input>` elements with classes
+
+---
+
+### File 2: `dashboard-with-panels.aspx`
+```html
+<%@ Page Title="Dashboard" %>
+<div class="dashboard">
+  <asp:Panel CssClass="card">
+    <h3>Statistics</h3>
+    <asp:Panel CssClass="card-body">
+      <asp:Label Text="Total Users: 42" />
+    </asp:Panel>
+  </asp:Panel>
+  <asp:Panel CssClass="card">
+    <h3>Recent Activity</h3>
+    <asp:Panel CssClass="card-body">
+      <asp:Label Text="Last login: today" />
+    </asp:Panel>
+  </asp:Panel>
+</div>
+```
+
+**Tests:**
+- Parser correctly nests multiple Panel controls
+- ChildContent parameter receives nested HTML
+- CssClass applied to outer Panel
+- Static `<h3>` elements pass through unchanged
+- HTML output shows nested divs with correct structure
+
+---
+
+### File 3: `page-with-master.aspx` + `site.Master`
+```html
+<!-- site.Master -->
+<%@ Master Title="Site Master" %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title><asp:ContentPlaceHolder ID="head" /></title>
+</head>
+<body>
+  <header>
+    <asp:Label Text="My App" CssClass="brand" />
+  </header>
+  <main>
+    <asp:ContentPlaceHolder ID="main" />
+  </main>
+  <footer>
+    <asp:Label Text="© 2026" />
+  </footer>
+</body>
+</html>
+
+<!-- page-with-master.aspx -->
+<%@ Page MasterPageFile="~/site.Master" Title="Home" %>
+<%@ MasterType VirtualPath="~/site.Master" %>
+<asp:Content ContentPlaceHolderID="main">
+  <h1>Welcome</h1>
+  <asp:Label Text="This is the home page" />
+  <asp:Button Text="Learn More" />
+</asp:Content>
+```
+
+**Tests:**
+- Parser loads master.Master, maps ContentPlaceholder IDs
+- Parser loads page-with-master.aspx, extracts Content blocks by ID
+- ComponentTreeBuilder builds nested layout structure
+- HTML output contains header, main content, footer in correct order
+- Title attribute from Page directive maps to `<PageTitle>` or HEAD
+
+---
+
+## 5. Explicit Out-of-Scope Items (Phase 2+)
+
+### Phase 1 Explicitly SKIPS:
+
+1. **Code-Behind (.aspx.cs files)**
+   - `Page_Load`, `Page_Init`, event handlers (btnSubmit_Click)
+   - Will log a warning: "Phase 1 does not support code-behind; data and events will not function."
+   - Middleware renders markup only; developers must wire interactivity via Blazor components or code-behind refactoring
+
+2. **Data Binding**
+   - `<asp:GridView SelectMethod="GetProducts" />`
+   - `<%# Eval("Name") %>`, `<%# Bind("Price") %>`
+   - Will be parsed but data=null; middleware logs "Phase 2 feature; wire data via BWFC's Items parameter"
+
+3. **Server-Side Events**
+   - `OnClick="btnSubmit_Click"` handlers
+   - Middleware logs "Not supported; use Blazor @onclick handlers instead"
+   - Button will render but no event wiring
+
+4. **ViewState and PostBack**
+   - No `IsPostBack` detection
+   - No ViewState persistence
+   - Each request renders the page fresh; form submissions are ignored (middleware is SSR-only)
+
+5. **Web Forms Page Lifecycle**
+   - No Page_Load, Page_PreRender, Page_Render
+   - No Init → Load → PostBack → Render progression
+   - Middleware performs single-pass SSR render
+
+6. **Master Page Code-Behind**
+   - Only markup from .Master files is processed
+   - Events/properties on master page class ignored
+   - Will warn if master has code-behind
+
+7. **User Controls (.ascx)**
+   - Phase 1 only handles .aspx files
+   - `<uc:MyControl />` tags will render as empty or log "User controls deferred to Phase 2"
+
+8. **Custom Server Controls**
+   - Third-party controls not in the BWFC component registry
+   - Middleware logs "Not found in component registry; skipping"
+
+9. **JavaScript Integration**
+   - No `ClientScript.RegisterClientScriptBlock()`
+   - No `Page.ClientScript.RegisterStartupScript()`
+   - Middleware cannot extract or execute server-side JS registration logic
+
+10. **Web Forms HTTP Handlers (.ashx)**
+    - Not applicable; middleware handles .aspx only
+    - (Already separate `AshxHandlerMiddleware` exists in main project)
+
+11. **Themes and Skins (.skin files)**
+    - Phase 1 parses markup only, not theme metadata
+    - Defer to Phase 2 (may integrate with BWFC ThemeProvider)
+
+12. **Control State, Validation Rules**
+    - No `RequiredFieldValidator`, `RangeValidator`, etc.
+    - These will be parsed but rendered as-is (Phase 2 maps to Blazor validation)
+    - Will warn: "Validation controls deferred to Phase 2; use Blazor's DataAnnotations instead"
+
+---
+
+## 6. Parser Error Handling Strategy
+
+**Non-Fatal Warnings (log, continue rendering):**
+- Unknown `<asp:*>` control name → render as empty placeholder with warning
+- Unparseable attribute → use default value, log warning
+- Missing master page file → render without layout, log warning
+- `<% %>` code block → skip, log "Code-behind not supported in Phase 1"
+
+**Fatal Errors (throw, fail-fast):**
+- Malformed XML after preprocessing → throw `AspxParseException`
+- Missing required attribute on component (e.g., Button without Text) → log warning but continue (set Text="")
+- Circular layout references (master includes master) → detect cycle, throw
+
+**Logging:**
+- Use `Microsoft.Extensions.Logging.ILogger`
+- Middleware takes optional `Action<AspxMiddlewareOptions>` to configure log level (Debug, Information, Warning)
+- Default: Warning (only critical issues)
+
+---
+
+## 7. Component Registry (asp: Tag → BWFC Type Mapping)
+
+Create a static registry in `BlazorWebFormsComponents.AspxMiddleware`:
+
+```csharp
+public static class ComponentRegistry
+{
+    public static readonly Dictionary<string, Type> ControlMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // Basic Controls
+        ["button"]       = typeof(Button),
+        ["label"]        = typeof(Label),
+        ["textbox"]      = typeof(TextBox),
+        ["checkbox"]     = typeof(CheckBox),
+        ["radiobutton"]  = typeof(RadioButton),
+        ["hyperlink"]    = typeof(HyperLink),
+        ["image"]        = typeof(Image),
+        ["imagemap"]     = typeof(ImageMap),
+        ["panel"]        = typeof(Panel),
+        ["literal"]      = typeof(Literal),
+
+        // Data Controls
+        ["gridview"]     = typeof(GridView),
+        ["formview"]     = typeof(FormView),
+        ["detailsview"]  = typeof(DetailsView),
+        ["repeater"]     = typeof(Repeater),
+        ["datalist"]     = typeof(DataList),
+
+        // Login Controls
+        ["login"]        = typeof(Login),
+        ["loginview"]    = typeof(LoginView),
+        ["loginname"]    = typeof(LoginName),
+        ["passwordrecovery"] = typeof(PasswordRecovery),
+        ["changepassword"]   = typeof(ChangePassword),
+
+        // Validation
+        ["requiredfieldvalidator"]  = typeof(RequiredFieldValidator),
+        ["rangevalidator"]          = typeof(RangeValidator),
+        ["comparevalidator"]        = typeof(CompareValidator),
+        ["customvalidator"]         = typeof(CustomValidator),
+        ["validationsummary"]       = typeof(ValidationSummary),
+
+        // Navigation
+        ["sitemap"]      = typeof(SiteMapPath),
+        ["menu"]         = typeof(Menu),
+        ["treeview"]     = typeof(TreeView),
+
+        // Other
+        ["placeholder"]  = typeof(ContentPlaceHolder),
+        ["content"]      = typeof(Content),
+        ["multiview"]    = typeof(MultiView),
+        ["view"]         = typeof(View),
+
+        // Infrastructure (render but don't bind)
+        ["scriptmanager"] = typeof(ScriptManager),
+
+        // Deferred
+        ["chart"]        = null,  // Phase 2+
+        ["substitution"] = null,
+        ["xml"]          = null,
+    };
+
+    public static bool TryGetComponentType(string aspTagName, out Type? componentType)
+    {
+        return ControlMap.TryGetValue(aspTagName, out componentType);
+    }
+}
+```
+
+---
+
+## 8. Attribute Coercion Strategy
+
+Create `AttributeCoercer` class to map string attributes → component parameters:
+
+```csharp
+public static class AttributeCoercer
+{
+    public static object? CoerceValue(Type targetType, string? value)
+    {
+        if (value == null) return GetDefaultValue(targetType);
+
+        if (targetType == typeof(string)) return value;
+        if (targetType == typeof(bool)) return bool.TryParse(value, out var b) ? b : false;
+        if (targetType == typeof(int)) return int.TryParse(value, out var i) ? i : 0;
+        if (targetType == typeof(Unit)) return Unit.Parse(value);  // BWFC Unit class
+        if (targetType.IsEnum) return Enum.Parse(targetType, value, ignoreCase: true);
+        if (targetType == typeof(Color)) return ColorTranslator.FromHtml(value);
+
+        // Fallback: return as-is (RenderTreeBuilder will handle type mismatch)
+        return value;
+    }
+
+    private static object? GetDefaultValue(Type type) =>
+        type.IsValueType ? Activator.CreateInstance(type) : null;
+}
+```
+
+Phase 1 coerces:
+- `Text="Hello"` → string
+- `CssClass="btn btn-primary"` → string
+- `Enabled="false"` → bool
+- `Width="100"`, `Width="100px"`, `Width="10em"` → Unit
+- `BorderStyle="Solid"` → enum (BorderStyle)
+- `ForeColor="#FF0000"` → Color
+
+---
+
+## 9. RenderTreeBuilder Strategy
+
+High-level pseudocode for tree building:
+
+```csharp
+public class ComponentTreeBuilder
+{
+    private readonly HtmlRenderer _htmlRenderer;
+    private readonly ComponentRegistry _registry;
+
+    public async Task<string> BuildAndRenderAsync(AspxNode rootNode)
+    {
+        var renderFragment = BuildRenderFragment(rootNode);
+        
+        var html = await _htmlRenderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await _htmlRenderer.RenderComponentAsync<DynamicPage>(
+                ParameterView.FromDictionary(new Dictionary<string, object?>
+                {
+                    { "Content", renderFragment }
+                }));
+            return output.ToHtmlString();
+        });
+
+        return html;
+    }
+
+    private RenderFragment BuildRenderFragment(AspxNode node) =>
+        builder =>
+        {
+            int sequence = 0;
+
+            foreach (var child in node.Children)
+            {
+                if (child is AspxControl control)
+                {
+                    // asp:* tag
+                    if (ComponentRegistry.TryGetComponentType(control.TagName, out var componentType) && componentType != null)
+                    {
+                        builder.OpenComponent(sequence++, componentType);
+
+                        // Set attributes as parameters
+                        foreach (var attr in control.Attributes)
+                        {
+                            var paramValue = AttributeCoercer.CoerceValue(attr.Type, attr.Value);
+                            builder.AddAttribute(sequence++, attr.Name, paramValue);
+                        }
+
+                        // Recursively build ChildContent
+                        builder.AddAttribute(sequence++, "ChildContent",
+                            new RenderFragment(innerBuilder =>
+                            {
+                                int innerSeq = 0;
+                                foreach (var child of control.Children)
+                                {
+                                    innerBuilder.AddContent(innerSeq++,
+                                        BuildRenderFragment(child));
+                                }
+                            }));
+
+                        builder.CloseComponent();
+                    }
+                    else
+                    {
+                        // Unknown control; render placeholder with warning
+                        builder.AddMarkupContent(sequence++,
+                            $"<!-- Unknown control: {control.TagName} -->");
+                    }
+                }
+                else if (child is AspxHtmlElement html)
+                {
+                    // Static HTML passthrough
+                    builder.AddMarkupContent(sequence++, html.OuterHtml);
+                }
+                else if (child is AspxText text)
+                {
+                    // Text node
+                    builder.AddContent(sequence++, text.Value);
+                }
+            }
+        };
+}
+```
+
+---
+
+## 10. Middleware Integration Point
+
+Extend `ServiceCollectionExtensions.cs` in main project:
+
+```csharp
+public static IApplicationBuilder UseAspxPages(
+    this IApplicationBuilder app,
+    string aspxRootPath = "aspx-pages",
+    Action<AspxMiddlewareOptions>? configure = null)
+{
+    var options = new AspxMiddlewareOptions { AspxRootPath = aspxRootPath };
+    configure?.Invoke(options);
+
+    app.UseMiddleware<AspxPageMiddleware>(options);
+    return app;
+}
+
+public class AspxMiddlewareOptions
+{
+    public string AspxRootPath { get; set; } = "aspx-pages";
+    public bool EnableCaching { get; set; } = true;
+    public LogLevel LogLevel { get; set; } = LogLevel.Warning;
+    public Func<string, bool>? FileFilter { get; set; }  // Custom file filter
+}
+```
+
+Usage in Program.cs:
+```csharp
+app.UseAspxPages("LegacyPages", options =>
+{
+    options.EnableCaching = true;
+    options.LogLevel = LogLevel.Information;
+});
+```
+
+---
+
+## 11. Success Criteria (Definition of Done — Detailed Checklist)
+
+- [ ] New project `src/BlazorWebFormsComponents.AspxMiddleware/` created and added to solution
+- [ ] AspxParser class: parses simple.aspx, nested.aspx, site.Master + page-with-master.aspx without errors
+- [ ] ComponentRegistry populated with all 50+ BWFC components
+- [ ] AttributeCoercer handles string, bool, int, Unit, enum, Color coercion
+- [ ] RenderTreeBuilder walks AST and builds RenderFragment using RenderTreeBuilder API
+- [ ] AspxPageMiddleware intercepts .aspx requests and returns HTML via HtmlRenderer
+- [ ] Three test .aspx files in `samples/AspxMiddlewareTest/` render correctly in browser
+- [ ] Unit tests for parser, registry, coercer in `BlazorWebFormsComponents.AspxMiddleware.Tests`
+- [ ] Integration test: HTTP GET `/simple.aspx` returns 200 with HTML containing expected elements
+- [ ] Integration test: HTTP GET `/nested.aspx` renders nested panels
+- [ ] Integration test: HTTP GET `/page-with-master.aspx` renders layout with master + content
+- [ ] Error handling: unknown controls logged as warnings, rendering continues
+- [ ] Error handling: `<% %>` blocks logged as "Phase 1: not supported", rendering continues
+- [ ] No regressions in main BWFC project (all 797 tests still pass)
+
+---
+
+## 12. Phase 2 Handoff (Not in Scope, But Noted)
+
+If this experiment succeeds, Phase 2 will include:
+
+1. **Expression Compiler:** Parse `<%# Eval("Name") %>`, `<%# Item.Price %>` and compile to lambdas
+2. **Data Provider Registry:** `SelectMethod="GetProducts"` → resolve via DI
+3. **Template Mapping:** `<ItemTemplate>` → RenderFragment<T> parameters
+4. **Form PostBack:** Two-way binding, event handlers (via code-behind service)
+5. **Master Page Code-Behind:** Event hookup for master page classes
+
+Phase 2 is estimated at ~4 weeks additional work.
+
+---
+
+## Sign-Off
+
+This scope is **approved for experimental Phase 1**. It is:
+- ✅ Technically achievable in a 1-week sprint
+- ✅ Representatively tests the three core patterns (simple controls, nesting, layouts)
+- ✅ Intentionally scoped to avoid over-commitment
+- ✅ Clear exit criteria (Definition of Done checklist)
+- ✅ Defers complex features to Phase 2 without blocking initial validation
+
+**Assigned to:** Cyclops (implementation), Rogue (unit tests), Colossus (integration tests)  
+**Review gate:** Forge will review completed work against this scope before Phase 2 decision.
+
+
+---
+
+# ASPX Middleware Experiment — Phase 1 Review
+
+**Date:** 2026-03-15
+**Author:** Forge
+**Branch:** `experiment/aspx-middleware`
+**Status:** Prototype — works for simple cases, critical gaps for real-world use
+
+## Decision: Phase 1 is viable but needs 3 critical fixes before Phase 2
+
+### What the experiment proves
+The pipeline works: .aspx file → parse → AST → BWFC component tree → SSR HTML via HtmlRenderer. 55 controls registered, 52 tests passing. The architecture is clean and extensible.
+
+### Must-fix before any broader testing
+1. **Single-quote attribute support in directive parsing** — AttributeRegex must accept both `"` and `'`. Most real .aspx files mix quote styles.
+2. **Add validators to registry** — 6 validators exist in BWFC but aren't registered. These are among the most common Web Forms controls.
+3. **Strip `runat="server"`** — This attribute must be removed during parsing, not passed through as a Blazor parameter.
+
+### Should-fix for Phase 2
+- Custom tag prefix support (`<%@ Register TagPrefix="uc" %>`)
+- EventCallback coercion for event handler attributes
+- Table child components (TableRow, TableCell) in registry
+- Server-side comment handling
+
+### Out of scope (intentionally)
+- Master page composition
+- Expression evaluation
+- Data-binding
+- Code-behind execution
+
+### Team impact
+No changes needed from other agents. This stays on the experiment branch until Jeff decides to promote it.
+
+
+---
+
+# Component Audit — Prioritized Recommendations (March 2026)
+
+**Auditor:** Forge  
+**Date:** 2026-03-16  
+**Status:** 52/54 components at 100% health (96.3% complete)
+
+---
+
+## Executive Summary
+
+The library is in **excellent shape** for production use. Core Web Forms controls are feature-complete with strong test coverage (797+ tests) and comprehensive documentation (136 markdown files). Main gaps are:
+
+1. **FileUpload** property parity (88% health)
+2. **Infrastructure component documentation** (Content, ContentPlaceHolder lack docs)
+3. **ACT extender coverage** (12/40 implemented, 30%)
+4. **ScriptManager** stub needs implementation or removal decision
+
+---
+
+## 🎯 TIER 1 — Quick Wins (1-2 days each)
+
+These are high-value, low-complexity improvements with immediate migration impact.
+
+### 1. FileUpload Property Completion ⭐ **TOP PRIORITY**
+**Health:** 88% (3/5 properties)  
+**Why Critical:** File upload is essential for forms migration. Missing properties break common scenarios.
+
+**Missing Properties:**
+- `SaveAs(string filename)` method — save uploaded file to server path
+- `FileContent` property — stream access to uploaded file
+
+**Implementation:**
+- `SaveAs()` delegates to `IBrowserFile.OpenReadStream().CopyToAsync()`
+- `FileContent` returns `IBrowserFile.OpenReadStream()`
+- Both use existing `PostedFile` property
+
+**Value:** Enables server-side file storage patterns from Web Forms apps  
+**Effort:** 2-3 hours (property additions + tests)
+
+---
+
+### 2. Infrastructure Component Documentation
+**Components:** Content (75%), ContentPlaceHolder (75%)  
+**Why Important:** Master Page migration is a key migration scenario. These work but lack usage docs.
+
+**Needed Documentation:**
+- `docs/EditorControls/Content.md` — how ContentPlaceHolderID maps content
+- `docs/EditorControls/ContentPlaceHolder.md` — how to define placeholders
+
+**Value:** Completes Master Page migration guide  
+**Effort:** 2-3 hours (2 markdown files with examples)
+
+---
+
+### 3. View Component Documentation + Sample
+**Health:** 75% (missing docs/sample)  
+**Why Important:** MultiView/View pattern is common for wizard/tabbed UIs.
+
+**Needed:**
+- `docs/EditorControls/View.md` — usage with MultiView
+- Sample page showing tab-like navigation
+
+**Value:** Documents existing functionality, no code changes  
+**Effort:** 2-3 hours (docs + sample)
+
+---
+
+## 🔧 TIER 2 — Medium Effort (3-5 days each)
+
+These require new functionality or multi-component changes but have high migration ROI.
+
+### 4. BulletedList Event Completion
+**Health:** 90% (1/3 events)  
+**Missing:** 2 events from Web Forms baseline (investigation needed to identify which)
+
+**Implementation:**
+- Review `System.Web.UI.WebControls.BulletedList` event API
+- Add missing `EventCallback` declarations
+- Write tests for event handlers
+
+**Value:** Completes a mature component  
+**Effort:** 4-6 hours (event analysis + implementation + tests)
+
+---
+
+### 5. TextBoxWatermarkExtender (ACT) ⭐ **HIGH MIGRATION DEMAND**
+**Status:** Not implemented  
+**Why High Priority:** Extremely common in Web Forms apps, easy implementation.
+
+**Implementation:**
+- Inherit `BaseExtenderComponent`
+- Add `WatermarkText`, `WatermarkCssClass` properties
+- JS module: set placeholder attribute or custom overlay
+- Modern approach: map to HTML5 `placeholder` attribute
+
+**Value:** Eliminates manual placeholder migration for thousands of textboxes  
+**Effort:** 6-8 hours (component + JS interop + tests + docs)
+
+---
+
+### 6. TreeView Property Parity
+**Health:** 88.3% (11/18 properties, 61% parity)  
+**Why Important:** Navigation tree is feature-rich, missing properties limit advanced scenarios.
+
+**Missing Properties (investigation needed):**
+- Review `System.Web.UI.WebControls.TreeView` API
+- Identify 7 missing properties
+- Prioritize by migration impact
+
+**Value:** Completes a complex navigation component  
+**Effort:** 8-12 hours (7 properties + tests)
+
+---
+
+### 7. SiteMapPath Event Support
+**Health:** 85% (missing events)  
+**Why Important:** Breadcrumb navigation events enable customization.
+
+**Implementation:**
+- Review `System.Web.UI.WebControls.SiteMapPath` events
+- Add `ItemCreated`, `ItemDataBound` equivalent events
+- EventCallback patterns for node customization
+
+**Value:** Enables dynamic breadcrumb scenarios  
+**Effort:** 6-8 hours (event implementation + tests)
+
+---
+
+## 🏗️ TIER 3 — Major Work (1-2 weeks each)
+
+These are strategic investments with high migration value but require significant effort.
+
+### 8. ScriptManager Implementation or Removal Decision ⚠️ **DECISION REQUIRED**
+**Health:** 70% (stub only)  
+**Why Critical:** Currently just a stub. Either implement or mark as "not needed in Blazor".
+
+**Option A: Remove/Document as N/A**
+- ScriptManager manages UpdatePanel AJAX in Web Forms
+- Blazor has native interactivity — ScriptManager is obsolete
+- Mark as deferred with migration guidance
+
+**Option B: Implement Minimal Functionality**
+- Script registration for legacy JS libraries
+- CDN script references
+- Minimal API for script ordering
+
+**Recommendation:** **Option A** — document as obsolete, provide Blazor equivalents guide  
+**Effort:** 2-3 hours (decision doc + migration guide)
+
+---
+
+### 9. ACT Extender Priority Expansion (4 extenders)
+**Coverage:** 12/40 (30%)  
+**Why Important:** Real-world Web Forms apps use 20-25 extenders on average.
+
+**Priority Additions (in order):**
+
+#### 9a. CascadingDropDownExtender ⭐ **CRITICAL FOR DATA FORMS**
+**Use Case:** State/City dependent dropdowns, category/subcategory pickers  
+**Why Critical:** Extremely common pattern, no easy Blazor alternative without custom code  
+**Effort:** 12-16 hours (most complex — async data loading, chaining logic)
+
+#### 9b. ResizableControlExtender
+**Use Case:** Drag-to-resize panels, textareas  
+**Why High Priority:** Form productivity, frequently requested  
+**Effort:** 8-10 hours (JS interop for resize handles)
+
+#### 9c. DragPanelExtender
+**Use Case:** Drag-to-move panels (simpler than ModalPopup)  
+**Why High Priority:** Common for dashboards, customizable UIs  
+**Effort:** 6-8 hours (drag JS interop)
+
+#### 9d. ListSearchExtender
+**Use Case:** Client-side search within ListBox/DropDown  
+**Why Important:** UX enhancement for long lists  
+**Effort:** 6-8 hours (filter logic + UI)
+
+**Total Effort:** ~35-42 hours (1 week)
+
+---
+
+### 10. CustomValidator Event Support
+**Health:** 85% (missing events)  
+**Why Important:** Validation extensibility is critical for complex forms.
+
+**Missing Events:**
+- `ServerValidate` equivalent (likely already functional, needs verification)
+- Client-side validation callback
+
+**Value:** Enables custom validation scenarios  
+**Effort:** 4-6 hours (event wiring + tests)
+
+---
+
+### 11. Skins & Themes Full Implementation (Issue #369) 🎨
+**Status:** M11 milestone, PoC pending  
+**Why Strategic:** Enterprise apps rely on theming for branding consistency.
+
+**Scope (from issue):**
+- StyleSheetTheme vs Theme priority modes
+- .skin file parser for existing Web Forms themes
+- Sub-component style theming (HeaderStyle, RowStyle, etc.)
+- CSS bundling from theme folders
+- Runtime theme switching
+- Migration tooling integration
+
+**Value:** Enables visual parity during migration without manual CSS rewrite  
+**Effort:** 2-3 weeks (major feature, requires PoC validation first)  
+**Prerequisite:** Jeff's answers to open questions in planning-docs
+
+---
+
+## 📊 TIER 4 — Tooling & Infrastructure
+
+These enhance developer experience but don't block migrations.
+
+### 12. Migration Reporting System (Issue #469)
+**Status:** Open enhancement  
+**Why Important:** Visibility into migration progress builds confidence.
+
+**Deliverables:**
+1. Pre-migration evaluation report (control inventory, coverage analysis)
+2. Post-L1 report (script transform summary, warnings)
+3. Post-L2 report (Copilot transform status)
+4. L3 recommendations (optimization opportunities)
+5. Final migration summary (metrics, remaining work)
+
+**Value:** Professional tooling, stakeholder communication  
+**Effort:** 2-3 weeks (PowerShell reporting + JSON output + HTML rendering)
+
+---
+
+### 13. Concurrent Load Testing (Issue #465)
+**Status:** Open enhancement  
+**Why Important:** Performance story needs stress testing data.
+
+**Deliverables:**
+- Load test script (`Run-LoadTests.ps1`)
+- Bombardier or similar tool integration
+- 10/25/50/100 concurrent connection benchmarks
+- Throughput/latency/error rate analysis
+
+**Value:** Marketing data, performance validation under load  
+**Effort:** 1-2 weeks (tooling + benchmarking + report generation)
+
+---
+
+## 🎯 Recommended Sprint Plan
+
+### Sprint 1 — Quick Wins (Week 1)
+1. **FileUpload property completion** (2-3 hours)
+2. **Infrastructure docs** (2-3 hours)
+3. **View component docs** (2-3 hours)
+4. **ScriptManager decision** (2-3 hours)
+
+**Total:** ~12 hours  
+**Outcome:** 4 components to 100% health, ScriptManager clarity
+
+---
+
+### Sprint 2 — High-Value Completions (Week 2)
+1. **TextBoxWatermarkExtender** (8 hours)
+2. **BulletedList events** (6 hours)
+3. **TreeView properties** (12 hours)
+4. **SiteMapPath events** (8 hours)
+
+**Total:** ~34 hours (1 week)  
+**Outcome:** 4 components to 100%, 1 new ACT extender
+
+---
+
+### Sprint 3 — ACT Expansion (Week 3)
+1. **CascadingDropDownExtender** (16 hours)
+2. **ResizableControlExtender** (10 hours)
+3. **DragPanelExtender** (8 hours)
+4. **ListSearchExtender** (8 hours)
+
+**Total:** ~42 hours (1 week)  
+**Outcome:** 4 critical ACT extenders, 16/40 coverage (40%)
+
+---
+
+## 📈 Impact Analysis
+
+### Migration Blocker Priority
+
+| Issue | Blocks Migrations? | Workaround Available? |
+|-------|-------------------|-----------------------|
+| FileUpload properties | **Yes** | Manual file handling code |
+| TextBoxWatermark | **Yes** | Manual placeholder HTML |
+| CascadingDropDown | **Yes** | Custom Blazor component |
+| Infrastructure docs | No | Components work without docs |
+| TreeView properties | Rarely | Most features present |
+| ScriptManager stub | No | Not needed in Blazor |
+
+---
+
+## ✅ Acceptance Criteria
+
+**Tier 1 Complete When:**
+- [ ] FileUpload at 100% health (5/5 properties)
+- [ ] Content, ContentPlaceHolder docs published
+- [ ] View docs + sample page exist
+- [ ] ScriptManager decision documented
+
+**Tier 2 Complete When:**
+- [ ] BulletedList at 100% (3/3 events)
+- [ ] TextBoxWatermarkExtender functional + tested + documented
+- [ ] TreeView at 100% (18/18 properties)
+- [ ] SiteMapPath at 100% with events
+
+**Tier 3 Complete When:**
+- [ ] 4 new ACT extenders shipped (Cascading, Resizable, Drag, ListSearch)
+- [ ] CustomValidator events functional
+- [ ] Themes PoC validated, full implementation planned
+
+---
+
+## 🔍 Audit Methodology
+
+**Data Sources:**
+- Health snapshot generator (`scripts/Generate-HealthSnapshot.ps1`)
+- `dev-docs/reference-baselines.json` — expected property/event counts
+- `dev-docs/tracked-components.json` — component inventory
+- Test project structure analysis (797+ tests)
+- Documentation inventory (136 markdown files)
+- `ACT_EXTENDER_COVERAGE_ANALYSIS.md` — extender gaps
+- GitHub issues #369 (Themes), #465 (Load Testing), #469 (Migration Reports)
+
+**Health Calculation:**
+- Property parity: actual / expected properties
+- Event parity: actual / expected events
+- Test coverage: bUnit test files exist
+- Documentation: markdown file exists
+- Sample: sample page exists
+- Overall health: weighted average (properties 40%, events 40%, tests 10%, docs 10%)
+
+---
+
+## 🎤 Bottom Line
+
+The library is **production-ready** for most Web Forms migrations. Tier 1 work (FileUpload + docs) takes 1 day and eliminates all critical blockers. Tier 2/3 are **enhancements** that improve migration experience but don't block adoption.
+
+**Recommended Focus:** Complete Tier 1 in next sprint, then prioritize based on customer feedback from active migrations.
+
+
+---
+
+# Decision: Navigation UX Improvements for AfterBlazorServerSide Sample App
+
+**Date:** 2026-03-15  
+**Agent:** Jubilee (Sample Writer)  
+**Requested by:** Jeffrey T. Fritz
+
+## Context
+
+The AfterBlazorServerSide sample app's component navigation had grown to include 20+ AJAX-related controls. The catalog displayed components in insertion order, resulting in an unsorted AJAX section. Additionally, the desktop view expanded ALL categories by default, creating an overly cluttered navigation panel.
+
+## Decision
+
+Implement two targeted UX improvements:
+
+### 1. Alphabetize Components by Name
+
+**Change:** `ComponentCatalog.cs` method `GetByCategory()`
+
+**Before:**
+```csharp
+public static IEnumerable<ComponentInfo> GetByCategory(string category) =>
+    Components.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+```
+
+**After:**
+```csharp
+public static IEnumerable<ComponentInfo> GetByCategory(string category) =>
+    Components.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(c => c.Name);
+```
+
+**Rationale:** Alphabetical ordering improves component discoverability across all categories. Fixes the out-of-order AJAX section and creates consistent organization throughout the catalog.
+
+### 2. Collapse AJAX Category on Desktop
+
+**Change:** `NavMenu.razor` method `CheckIfDesktopAndExpandCategories()`
+
+**Before:**
+```csharp
+if (isDesktop)
+{
+    // Expand all categories on desktop
+    foreach (var category in ComponentCatalog.Categories)
+    {
+        expandedCategories.Add(category);
+    }
+}
+```
+
+**After:**
+```csharp
+if (isDesktop)
+{
+    // Expand all categories on desktop except AJAX (too many items)
+    foreach (var category in ComponentCatalog.Categories)
+    {
+        if (!category.Equals("AJAX", StringComparison.OrdinalIgnoreCase))
+        {
+            expandedCategories.Add(category);
+        }
+    }
+}
+```
+
+**Rationale:** The AJAX category contains numerous extender and control components. Starting it collapsed on desktop reduces visual clutter while preserving full access (users can expand as needed). Mobile behavior is unchanged, still expanding only the category containing the current page.
+
+## Trade-offs
+
+- **Pro:** Cleaner desktop navigation, improved discoverability
+- **Pro:** Mobile experience unchanged
+- **Con:** Users must take one extra click to expand AJAX category on first visit
+- **Mitigation:** AJAX section remains clearly visible in the nav; expanding takes a single click
+
+## Implementation Notes
+
+- **Files modified:** 2 files, 3 lines of logic added
+- **Build status:** ✅ Clean build (0 errors)
+- **Testing:** Manual verification that component catalog sorts alphabetically and desktop nav excludes AJAX from auto-expansion
+- **Backward compatibility:** No breaking changes; component routing and sample functionality unchanged
+
+## Approval Status
+
+✅ **Implemented** — Changes verified to compile and function as intended.
+
+
+---
+
+# Decision: Standalone sample pages for Content, ContentPlaceHolder, View
+
+**By:** Jubilee (Sample Writer)
+**Date:** 2026-03-19
+
+**What:** Created individual standalone sample pages for Content, ContentPlaceHolder, and View components. Previously these shared group pages (Content/ContentPlaceHolder → `/control-samples/masterpage`, View → `/ControlSamples/MultiView`). Each now has a dedicated route and page.
+
+**Routes:**
+- Content → `/ControlSamples/Content`
+- ContentPlaceHolder → `/ControlSamples/ContentPlaceHolder`
+- View → `/ControlSamples/View`
+
+**Why:** Each component needs its own navigable page for the ComponentCatalog sidebar to link directly to focused demos. Shared pages made it impossible to deep-link to a specific component's samples.
+
+**Files changed:**
+- `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Content/Index.razor` (new)
+- `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/ContentPlaceHolder/Index.razor` (new)
+- `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/View/Index.razor` (new)
+- `samples/AfterBlazorServerSide/ComponentCatalog.cs` (routes updated)
+
+
+---
+
+# Decision: Middleware Integration Testing Pattern with TestServer
+
+**By:** Rogue (QA Analyst)
+**Date:** 2026-03-17
+**Issue:** #423
+
+## What
+
+Established `Microsoft.AspNetCore.TestHost` + `TestServer` as the standard middleware testing pattern for this project. Added `Microsoft.AspNetCore.TestHost 10.0.5` package to the test csproj. Created `src/BlazorWebFormsComponents.Test/Middleware/AspxRewriteMiddlewareTests.cs` with 46 integration tests covering the full `UseBlazorWebFormsComponents` middleware pipeline (.aspx, .ashx, .axd handling).
+
+## Pattern
+
+Tests create a `TestServer` with `UseBlazorWebFormsComponents()` in the pipeline and a terminal `app.Run` returning 200 "PASSTHROUGH". Any request that reaches the terminal means no middleware intercepted it. Tests send HTTP requests via `TestServer.CreateClient()` and assert on status codes, headers, and body content.
+
+For custom options, a `CreateServerAndClient` helper creates a fresh server+client pair with proper disposal.
+
+## Why
+
+- **Integration over unit tests:** Testing through the extension method validates the full registration + middleware chain, not individual classes in isolation. Catches wiring bugs.
+- **TestServer is lightweight:** No ports, no networking, sub-millisecond per request. 46 tests run in under 1 second.
+- **Aligned with ASP.NET Core conventions:** This is the recommended Microsoft pattern for middleware testing.
+
+## Impact
+
+Future middleware (e.g., .asmx handling, custom URL rewriting rules) should follow this same TestServer pattern in the `Middleware/` test folder.
+

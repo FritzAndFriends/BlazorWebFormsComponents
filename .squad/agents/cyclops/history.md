@@ -7,6 +7,8 @@
 
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-20):** AngleSharp parser prototype implemented & validated — 58/58 tests passing (52 existing + 6 new). Fixed 3 Phase 1 bugs (single-quote attrs, runat stripping, server comments). Handles HTML5 tolerance (unclosed tags, entities, malformed markup). AST output identical to XDocument version. Ready for team review + gate approval. — decided by Cyclops
+
 📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
 
 📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
@@ -481,3 +483,54 @@ Built Phase 1 prototype of `BlazorWebFormsComponents.AspxMiddleware` — runtime
 - BWFC components inject `LinkGenerator`, `IJSRuntime`, `IHttpContextAccessor` via `[Inject]`. For SSR test harness, must register `AddBlazorWebFormsComponents()`, `AddRouting()`, and a no-op `IJSRuntime`.
 - Attribute type coercion uses reflection on the component type's properties to infer target types (bool, int, enum, Unit).
 - 52 tests passing: parser (14), registry (9), builder (5), integration (3), plus existing suite (21).
+
+## 2026-03-20: AngleSharp Parser Replacement
+
+### Task
+Replaced XDocument-based ASPX parser with AngleSharp for tolerant HTML5 parsing while maintaining 100% backward compatibility.
+
+### Key Learnings
+
+**AngleSharp HTML5 Parsing Behavior:**
+- AngleSharp's HTML5 mode does NOT treat unknown self-closing tags (<asp_Control />) as self-closing
+- Unknown tags like <asp_Button /> are treated as open tags, causing subsequent elements to become children
+- Solution: Pre-process with regex to convert <asp_Control /> → <asp_Control></asp_Control>
+- This ensures proper sibling relationships between multiple ASP controls
+
+**Tag Name Case Preservation:**
+- AngleSharp lowercases all tag names (HTML5 spec behavior)
+- Web Forms tag names are case-sensitive for component registry lookups
+- Solution: Build case mapping dictionary before parsing using regex on original content
+- Store lowercase → OriginalCase mapping and restore during AST construction
+
+**Regex Attribute Matching:**
+- Original regex (\w+)\s*=\s*""([^""]*)"" only matched double-quote attributes
+- Updated to (\w+)\s*=\s*[""']([^""']*)[""'] to support both single and double quotes
+- Critical for directive parsing: <%@ Page Title='Test' %> now works
+
+**Server-Side Comments:**
+- Web Forms server comments <%-- comment --%> should be completely stripped (not treated as expressions)
+- Added ServerCommentRegex to remove these before expression processing
+- Prevents comments from being converted to code block placeholders
+
+**runat="server" Stripping:**
+- This attribute is meaningful in Web Forms but invalid for Blazor components
+- Must be stripped during ASP control attribute extraction
+- Simple case-insensitive check in attribute loop: if (attr.LocalName.Equals("runat", ...)) continue;
+
+**Test-Driven Success:**
+- All 52 existing tests passed without modifying test expectations
+- 6 new tolerance tests added for HTML5 scenarios
+- Proves AST output is identical to XDocument version despite using different parser
+
+### Files Modified
+- AspxParser.cs — Complete rewrite using AngleSharp, 320 lines
+- AspxParserTests.cs — Added 6 new tolerance tests
+- spx-middleware-anglesharp-evaluation.md — Updated status report
+
+### Outcome
+✅ 58/58 tests passing  
+✅ AngleSharp handles unclosed tags, entities, malformed markup  
+✅ Phase 1 bugs fixed (single-quote, runat, server comments)  
+✅ Cleaner error handling (no total fallback on parse errors)
+

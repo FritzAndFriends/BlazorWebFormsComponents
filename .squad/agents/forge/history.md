@@ -11,6 +11,8 @@
 
 M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2–M3 shipped (50/53 controls, 797 tests). Chart.js for Chart. DataBoundStyledComponent<T> recommended. Key patterns: Enums/ with int values, On-prefix events, feature branches→upstream/dev, ComponentCatalog.cs. Deployment: Docker+NBGV, dual NuGet, Azure webhook. M7–M14 milestone plans. HTML audit: 3 tiers, M11–M13. M15 fidelity: 132→131 divergences, 5 fixable bugs. Data controls: 90%+ sample parity, 4 remaining bugs. M17 AJAX: 6 controls shipped.
 
+📌 Team update (2026-03-20): AngleSharp feasibility analysis complete — Parser solution for Phase 1 ASPX middleware. Evaluated AngleSharp 1.4.0 to replace XDocument, identified auto-closing mitigation via asp: → asp_ rename. Recommended proceed pending Cyclops prototype validation. Decision documented in decisions.md. — decided by Forge
+
 ## Learnings
 
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
@@ -98,6 +100,56 @@ Run 18 analysis: Test-UnconvertiblePage architecturally flawed (P0), [Parameter]
 
 
  Team update (2026-03-12): L2 automation consolidated  EnumParameter<T> (OPP-1) + WebFormsPageBase shims (OPP-2,3,5,6) all implemented. Rogue: 4 test files need .Value.ShouldBe() fix. Beast: L2 scripts can emit bare enum strings.  decided by Forge (analysis), Cyclops (implementation)
+
+### AngleSharp ASPX Parser Evaluation (2026-03-20)
+
+- **Branch:** `experiment/aspx-middleware` (checked out)
+- **Problem:** XDocument parser breaks on real-world .aspx files (unclosed tags, unescaped `&`, boolean attrs, `<script>` operators, single-quote attrs)
+- **Solution evaluated:** Replace XDocument with AngleSharp HTML5 parser
+- **Key files examined:**
+  - `src/BlazorWebFormsComponents.AspxMiddleware/AspxParser.cs` (211 lines — the file being replaced)
+  - `src/BlazorWebFormsComponents.AspxMiddleware/AspxNodes.cs` (AST nodes — no change)
+  - `src/BlazorWebFormsComponents.AspxMiddleware/AspxComponentTreeBuilder.cs` (AST consumer — no change)
+  - `src/BlazorWebFormsComponents.AspxMiddleware.Test/AspxParserTests.cs` (52 tests — must all pass)
+
+#### Critical Findings
+
+1. **AngleSharp preserves `asp:` tags perfectly** — Treats `<asp:Button>` as literal tag name `"ASP:BUTTON"`, preserves all attributes including single-quote syntax
+2. **Auto-closing bug identified** — AngleSharp auto-closes unknown elements like `<asp:Button />` as `<asp:button>...</asp:button>`, causing sibling controls to nest incorrectly
+3. **Mitigation required** — MUST keep existing `asp:` → `asp_` rename workaround to prevent auto-closing
+4. **Regex pre-processing still needed** — Directives (`<%@ %>`) and expressions (`<%= %>`, `<%# %>`) are HTML-encoded by AngleSharp, so regex extraction MUST remain
+5. **HTML5 tolerance validated** — Unclosed tags (`<br>`, `<input>`), unescaped `&`, boolean attributes, `<script>` operators all handled correctly
+
+#### Prototype Testing
+
+Created temp-anglesharp-test console app to validate behavior:
+- ✅ Single-quote attributes parsed correctly
+- ✅ `&` in URLs handled (auto-escapes to `&amp;`)
+- ✅ Unclosed `<br>` handled
+- ✅ Nested `<asp:Panel><asp:Label /></asp:Panel>` preserved
+- ⚠️ Self-closing `<asp:Button />` becomes open tag with auto-close at end of parent (BREAKS without asp_ rename)
+
+#### Recommendation
+
+**✅ PROCEED** with mandatory guardrails:
+1. Keep `asp:` → `asp_` rename (prevents auto-closing bug)
+2. Keep regex pre-processing (directives + expressions)
+3. Add 6 HTML-tolerance tests (unclosed tags, single-quote, `&`, boolean attrs, script, nesting)
+4. Performance benchmark (expect 10-20% slower, acceptable)
+5. Whitespace validation
+
+**Scope:** ~100 lines in `AspxParser.cs`, zero changes to AST/TreeBuilder/Registry. All 52 tests must pass + 6 new tests.
+
+#### Artifacts
+
+- Full analysis: `dev-docs/aspx-middleware-anglesharp-evaluation.md`
+- Decision: `.squad/decisions/inbox/forge-anglesharp-feasibility.md`
+
+#### User Preferences Learned
+
+- Jeff wants thorough feasibility analysis before implementation (specific examples, test results, risks, migration path)
+- Code examples in analysis docs should show both current state and expected behavior
+- Critical issues must be called out with ⚠️ and mitigation strategies
 
 ### Component Health Audit — March 2026
 
@@ -316,6 +368,42 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 - Sample coverage is excellent (48/60+ components have samples), but 3 Login controls lack individual samples.
 
 📌 Team update (2026-03-15): Component Health Dashboard scoring spec delivered to decisions inbox. 7 dimensions, weighted formula, reference data for 60+ components. Rogue implements as `scripts/Invoke-ComponentHealthScan.ps1` → `docs/component-health.md`. — decided by Forge
+
+### ASPX Middleware Experiment Review (2026-03-15)
+
+**Branch:** `experiment/aspx-middleware` — Phase 1 prototype for serving .aspx files through BWFC components via ASP.NET Core middleware + SSR HtmlRenderer.
+
+**Architecture:** 8 source files, 52 tests (all passing). Pipeline: .aspx request → `AspxRenderingMiddleware` → `AspxParser` (regex + XDocument) → AST → `AspxComponentTreeBuilder` (RenderTreeBuilder) → `AspxPageHost` (HtmlRenderer SSR) → HTML response. Clean separation.
+
+**What Works:**
+- 55 controls registered in `AspxComponentRegistry`, covers all major BWFC component categories
+- Parser handles directives, asp: controls, nested controls, mixed HTML+ASP content, 4 expression types
+- Type coercion: bool, int, double, Unit, enums via reflection
+- Full end-to-end SSR rendering through HtmlRenderer with NoOpJsRuntime for JS-dependent components
+- Graceful fallback: malformed XML → raw HtmlNode; unknown asp: tags → HTML comment + child rendering
+
+**Critical Gaps Found:**
+1. **Single-quote attributes in directives FAIL** — AttributeRegex only matches double quotes. Any `<%@ ... attr='val' %>` loses all attributes. Real-world .aspx files commonly use single quotes.
+2. **Validators missing from registry** — all 6 validators (RequiredFieldValidator, CompareValidator, etc.) exist in BWFC but not registered. These have generic type params (`<T>`) complicating `<object>` registration.
+3. **Custom prefix tags ignored** — `<%@ Register TagPrefix="uc" %>` directives are parsed but `uc:Control` tags aren't recognized by the asp:-only prefix replacement.
+4. **Server-side comments misclassified** — `<%-- --%>` matched as code expression, not discarded or preserved as comment.
+5. **runat="server"** attribute passes through as a Blazor parameter, will cause runtime errors on most components.
+6. **No EventCallback coercion** — 37+ BWFC files use EventCallback; string→EventCallback coercion not implemented. Event handler attributes (OnClick, etc.) will fail.
+7. **No Color type coercion** — BWFC uses ForeColor/BackColor but Color not in coercion switch.
+8. **Data controls hardcoded to `<object>`** — GridView<object>, Repeater<object> etc. means no typed data binding.
+9. **Table children missing** — TableRow, TableCell, TableHeaderCell not in registry, so `<asp:Table>` children won't resolve.
+
+**Risks:**
+- XDocument approach fragile for messy real-world .aspx — any malformed markup falls back to raw string
+- No master page resolution — MasterPageFile extracted but not fetched/composed
+- Expression placeholders rendered as HTML comments, not evaluated
+- Sequence numbering in RenderTreeBuilder is monotonic without gaps — could cause diffing issues in interactive scenarios (SSR-only mitigates this)
+
+**Learnings:**
+- The regex-then-XML approach is clever but fundamentally limited by XML well-formedness requirements. Real .aspx files are not XML.
+- Phase 1 scope is right: prove the middleware→parser→renderer pipeline works. Don't try to handle all edge cases yet.
+- Generic type registration (`<object>`) is a reasonable Phase 1 tradeoff but blocks data-binding scenarios.
+- HtmlRenderer + BWFC components produces valid HTML output — the SSR rendering path is viable.
 
 ### Ajax Control Toolkit Extender Pattern Design (2026-03-15)
 
