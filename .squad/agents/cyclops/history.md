@@ -468,3 +468,17 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 3. **CS1503** in GridView/Selection.razor — SelectedIndexChanged handler took int but component expects EventCallback<GridViewSelectEventArgs>. Changed handler (and code example) to accept GridViewSelectEventArgs.
 
 **Key insight:** Always check the base class parameter types — ImageButton inherits OnClick from ButtonBaseComponent which uses EventArgs, not MouseEventArgs. GridView's SelectedIndexChanged was recently changed to GridViewSelectEventArgs (matching Web Forms behavior).
+
+### BWFC013 + BWFC014 Analyzer Implementation (2026-03-20)
+
+**Summary:** Implemented two new Roslyn analyzers following established patterns (ResponseRedirect/Session as templates).
+
+- **BWFC013 ResponseObjectUsageAnalyzer:** Detects Response.Write(), WriteFile(), Clear(), Flush(), End() via InvocationExpression + ImmutableHashSet method matching. Code fix replaces with TODO comment.
+- **BWFC014 RequestObjectUsageAnalyzer:** Detects Request.Form/Cookies/Headers/QueryString/ServerVariables["key"] via ElementAccessExpression, and Request.Files via SimpleMemberAccessExpression. Code fix replaces with TODO comment.
+- Both analyzers use xpressionText.EndsWith(".Response") / .EndsWith(".Request") pattern to match 	his.Response, HttpContext.Current.Response, and any *.Response prefix.
+- 21 new tests (10 for BWFC013, 11 for BWFC014): 5+6 positive, 3+3 negative, 2+2 code fix tests.
+- Updated AllAnalyzersIntegrationTests ExpectedIds and analyzer count (810).
+- Updated AnalyzerReleases.Unshipped.md with both rules.
+- All 111 tests pass (90 existing + 21 new).
+
+**Key patterns:** Code fix uses EmptyStatement with SyntaxFactory.EndOfLine("\r\n") between comment trivia and semicolon. BWFC014 registers for both ElementAccessExpression (indexed properties) and SimpleMemberAccessExpression (direct properties like Files), with parent-check to avoid double-reporting.

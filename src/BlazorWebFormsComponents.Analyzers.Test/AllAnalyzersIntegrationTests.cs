@@ -35,6 +35,8 @@ public class AllAnalyzersIntegrationTests
         "BWFC010", // RequiredAttributeAnalyzer
         "BWFC011", // EventHandlerSignatureAnalyzer
         "BWFC012", // RunatServerAnalyzer
+        "BWFC013", // ResponseObjectUsageAnalyzer
+        "BWFC014", // RequestObjectUsageAnalyzer
     };
 
     #region ID Registration and Uniqueness
@@ -42,9 +44,9 @@ public class AllAnalyzersIntegrationTests
     [Fact]
     public void AllAnalyzerTypes_AreDiscoverable()
     {
-        // Sanity check: we should find at least the 8 analyzers we know exist
-        Assert.True(AllAnalyzerTypes.Length >= 8,
-            $"Expected at least 8 analyzer types but found {AllAnalyzerTypes.Length}: " +
+        // Sanity check: we should find at least the 10 analyzers we know exist
+        Assert.True(AllAnalyzerTypes.Length >= 10,
+            $"Expected at least 10 analyzer types but found {AllAnalyzerTypes.Length}: " +
             string.Join(", ", AllAnalyzerTypes.Select(t => t.Name)));
     }
 

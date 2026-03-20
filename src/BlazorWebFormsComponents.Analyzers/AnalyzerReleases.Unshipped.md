@@ -10,3 +10,5 @@ BWFC005 | Usage    | Warning  | SessionUsageAnalyzer
 BWFC010 | Usage    | Info     | RequiredAttributeAnalyzer
 BWFC011 | Usage    | Info     | EventHandlerSignatureAnalyzer
 BWFC012 | Usage    | Warning  | RunatServerAnalyzer
+BWFC013 | Usage    | Warning  | ResponseObjectUsageAnalyzer
+BWFC014 | Usage    | Warning  | RequestObjectUsageAnalyzer
