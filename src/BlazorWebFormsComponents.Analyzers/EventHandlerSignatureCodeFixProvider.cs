@@ -58,7 +58,7 @@ namespace BlazorWebFormsComponents.Analyzers
 
             var newLeadingTrivia = method.GetLeadingTrivia()
                 .Add(todoComment)
-                .Add(SyntaxFactory.EndOfLine("\r\n"));
+                .Add(root.DetectEndOfLine());
 
             // Collect indentation from original method
             foreach (var trivia in method.GetLeadingTrivia())

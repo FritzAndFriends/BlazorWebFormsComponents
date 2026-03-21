@@ -57,7 +57,7 @@ namespace BlazorWebFormsComponents.Analyzers
 
             var newLeadingTrivia = statement.GetLeadingTrivia()
                 .Insert(0, todoComment)
-                .Insert(1, SyntaxFactory.EndOfLine("\r\n"));
+                .Insert(1, root.DetectEndOfLine());
 
             var newStatement = statement.WithLeadingTrivia(newLeadingTrivia);
             var newRoot = root.ReplaceNode(statement, newStatement);
