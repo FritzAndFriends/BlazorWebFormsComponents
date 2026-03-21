@@ -209,3 +209,36 @@
 
  **Team update (2026-03-20):** Navigation UX improvements (alphabetical sort, AJAX collapse on desktop) + standalone sample pages for Content, ContentPlaceHolder, View. ComponentCatalog updated.  decided by Jubilee
 
+
+
+### Phase 1 Foundation  DepartmentPortal Web Forms Project (2026-03-20)
+
+- **Created complete DepartmentPortal Web Application Project** at `samples/DepartmentPortal/`  .NET Framework 4.8, old-style .csproj, packages.config-based NuGet restore.
+- **28 files created:** .csproj, Web.config, packages.config, Global.asax/.cs, AssemblyInfo.cs, 6 model POCOs (Employee, Department, Announcement, TrainingCourse, Resource, Enrollment), PortalDataProvider (static in-memory data  5 depts, 20 employees, 10 announcements, 15 courses, 20 resources), 3 custom EventArgs (Search, Notification, Breadcrumb), 3 base classes (BasePage, BaseMasterPage, BaseUserControl) in App_Code/, Site.Master with Bootstrap 3 CDN + navbar, 3 pages (Default.aspx, Login.aspx, Dashboard.aspx) with code-behind, Content/Site.css.
+- **Build command:** `.\nuget.exe restore samples\DepartmentPortal\packages.config -PackagesDirectory packages -NonInteractive` then `& "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" samples\DepartmentPortal\DepartmentPortal.csproj /p:Configuration=Debug /verbosity:minimal /nologo`
+- **Build succeeded on first attempt**  zero errors.
+- **Key decisions:** No .designer.cs files (typed field declarations in code-behind partials). CodeFile directive in .aspx/.master (matching BeforeWebForms pattern). App_Code classes included as `<Compile>` items in .csproj. No Entity Framework  PortalDataProvider is static in-memory. Bootstrap 3 via CDN (no NuGet). Only Microsoft.CodeDom.Providers.DotNetCompilerPlatform in packages.config. CodeDom import target referencing `..\..\packages\` (repo-root packages folder).
+- **BasePage pattern:** OnPreInit sets MasterPageFile, OnInit checks Session["UserId"] and redirects to Login.aspx. Exposes CurrentUser (Employee) and IsAdmin properties. ShowMessage() helper writes to master page MessageLiteral.
+- **Login flow:** DropDownList populated from PortalDataProvider.GetEmployees(), sets Session["UserId"] + Session["UserName"], redirects to Dashboard.
+- **Default.aspx:** Does NOT inherit BasePage (public page). Shows different panels for logged-in vs guest visitors.
+## Phase 2  12 ASCX User Controls
+
+### Files Created (24 total)
+- Controls/Breadcrumb.ascx + .ascx.cs  nav breadcrumb with CurrentPath, ShowHomeLink
+- Controls/PageHeader.ascx + .ascx.cs  page header with Session["UserName"] access
+- Controls/Footer.ascx + .ascx.cs  site footer with ShowLinks, Year
+- Controls/AnnouncementCard.ascx + .ascx.cs  data-bound card with ViewState ShowFullText
+- Controls/EmployeeList.ascx + .ascx.cs  GridView with paging and DepartmentFilter
+- Controls/TrainingCatalog.ascx + .ascx.cs  Repeater with EnrollmentRequested event
+- Controls/SearchBox.ascx + .ascx.cs  TextBox + Button with SearchEventArgs event
+- Controls/DepartmentFilter.ascx + .ascx.cs  DropDownList loading from PortalDataProvider
+- Controls/Pager.ascx + .ascx.cs  custom pagination with PageChanged event
+- Controls/DashboardWidget.ascx + .ascx.cs  PlaceHolder-based widget container
+- Controls/ResourceBrowser.ascx + .ascx.cs  nested SearchBox + Breadcrumb controls
+- Controls/QuickStats.ascx + .ascx.cs  web.config-registered with tagPrefix "uc"
+
+## Learnings
+- **CodeFile vs CodeBehind:** This project uses CodeFile (not CodeBehind) in directives, matching its Website-like project pattern. No .designer.cs files; all server control fields are manually declared as protected in the code-behind partial class.
+- **HtmlGenericControl for runat=server divs:** HTML elements with unat="server" map to System.Web.UI.HtmlControls.HtmlGenericControl, not Panel or WebControl types.
+- **Nested ASCX controls:** ResourceBrowser uses <%@ Register Src %> directives and types the fields as the concrete ASCX class (e.g., protected SearchBox ctlSearchBox).
+- **Build result:** Build succeeded after fixing CodeFile directives and adding field declarations.
