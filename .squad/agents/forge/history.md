@@ -525,5 +525,6 @@ DepartmentPortal scope expanded to include **6 custom server controls** covering
 - Section 3: Custom Server Controls (6 controls, 7 subsections, ~600 lines)
 - Updated Executive Summary (Purpose, Gap Analysis, Target reflect custom controls scope)
 - Renumbered Sections 4-14 (Custom Base Classes now §4, Page Inventory §5, etc.)
+- **Bare System.Web.UI.Control base class coverage added (3.7 DepartmentBreadcrumb):** Jeff requested explicit testing of the primitive Control base class (no WebControl wrapping, no built-in HTML element, no style properties). DepartmentBreadcrumb demonstrates pure `Render()` override, `IPostBackEventHandler` direct event handling, and zero ViewState usage—patterns distinct from WebControl/CompositeControl/DataBoundControl. Rounds out custom control pattern coverage for migration testing.
 
 **Decision:** Planning doc finalized. Custom controls scope is *designed, not implemented*. Implementation will verify these patterns execute on .NET Framework 4.8, render correct HTML, and exercise the code-based control creation patterns Blazor components must simulate. Approved for L1 scripting phase.

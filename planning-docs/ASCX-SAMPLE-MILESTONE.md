@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-**Purpose:** Create a .NET Framework 4.8 sample application that prominently features ASCX user controls and custom base classes to test migration toolkit coverage and demonstrate real-world Web Forms patterns.
+**Purpose:** Create a .NET Framework 4.8 sample application that prominently features ASCX user controls, custom server controls (WebControl/CompositeControl subclasses), and custom base classes to test migration toolkit coverage and demonstrate real-world Web Forms patterns.
 
-**Gap Analysis:** Current samples (BeforeWebForms, WingtipToys, ContosoUniversity) have minimal ASCX usage (only trivial ViewSwitcher controls) and no custom base classes. This leaves significant migration patterns untested.
+**Gap Analysis:** Current samples (BeforeWebForms, WingtipToys, ContosoUniversity) have minimal ASCX usage (only trivial ViewSwitcher controls) and no custom base classes or custom server controls. This leaves significant migration patterns untested, particularly programmatic control creation, templating, postback handling, and data binding at the custom control level.
 
-**Target:** A complete, realistic Web Forms application with 8-12 reusable ASCX controls exercising diverse patterns, custom Page/MasterPage/UserControl base classes, and ~15-20 pages that consume these controls.
+**Target:** A complete, realistic Web Forms application with 8-12 reusable ASCX controls, 7 custom server controls covering diverse patterns (Control, WebControl, CompositeControl, Templated, ViewState/Postback, custom events, data-bound), custom Page/MasterPage/UserControl base classes, and ~15-20 pages that consume these controls.
 
 ---
 
@@ -133,9 +133,426 @@
 
 ---
 
-## 3. Custom Base Classes
+## 3. Custom Server Controls
 
-### 3.1 BasePage : System.Web.UI.Page
+Custom server controls are C#-based controls that inherit from `WebControl`, `CompositeControl`, `DataBoundControl`, or other `Control` base classes. Unlike ASCX controls, they have no markup file—all rendering and behavior is programmatic. These patterns are critical for migration testing because they exercise different code paths than ASCX controls.
+
+### 3.1 StarRating : WebControl
+
+**File:** `App_Code/Controls/StarRating.cs`
+
+**Base class:** `System.Web.UI.WebControls.WebControl`
+
+**Purpose:** Display a 1-5 star rating in the DepartmentPortal employee profiles and training course reviews. Renders stars as individual span elements.
+
+**Key Properties:**
+- `Rating` (int, 1-5) — Current rating value
+- `ReadOnly` (bool) — If true, renders as display-only; if false, renders clickable stars
+- `StarColor` (string, CSS color) — Color of filled stars (default: gold)
+- `EmptyStarColor` (string) — Color of empty stars (default: lightgray)
+
+**Key Methods:**
+- `RenderContents(HtmlTextWriter)` — Renders `<span class="star-rating">` with individual star spans for each rating
+
+**HTML Output:**
+```html
+<span class="star-rating" style="color: gold;">
+  <span class="star filled" data-rating="1">★</span>
+  <span class="star filled" data-rating="2">★</span>
+  <span class="star filled" data-rating="3">★</span>
+  <span class="star empty" data-rating="4">☆</span>
+  <span class="star empty" data-rating="5">☆</span>
+</span>
+```
+
+**ViewState Usage:** Rating value stored in ViewState
+
+**Migration Pattern:** Simple WebControl subclass demonstrating `RenderContents()` override, property rendering via `AddAttributesToRender()`, and HTML generation via `HtmlTextWriter`.
+
+---
+
+### 3.2 EmployeeCard : CompositeControl
+
+**File:** `App_Code/Controls/EmployeeCard.cs`
+
+**Base class:** `System.Web.UI.WebControls.CompositeControl`
+
+**Purpose:** Display an employee information card with photo, name, title, department, and contact info. Demonstrates programmatic child control creation.
+
+**Key Properties:**
+- `EmployeeId` (int)
+- `EmployeeName` (string)
+- `Title` (string)
+- `Department` (string)
+- `PhotoUrl` (string)
+- `ShowContactInfo` (bool) — Conditionally shows email/phone
+- `EnableDetailsLink` (bool) — If true, wraps name in hyperlink to employee details
+
+**Key Methods:**
+- `CreateChildControls()` — Creates Image, Label, HyperLink, and other child controls
+- `EnsureChildControls()` — Called before rendering to ensure children are created
+- Overrides `OnDataBinding()` to bind employee data
+
+**Rendered Child Controls:**
+- `Image` for photo
+- `Label` controls for name, title, department, email, phone
+- `HyperLink` (conditional) for name link
+
+**HTML Output:**
+```html
+<div class="employee-card">
+  <div class="card-header">
+    <img src="..." alt="Photo" class="employee-photo" />
+  </div>
+  <div class="card-body">
+    <h3><a href="EmployeeDetails.aspx?id=123">John Doe</a></h3>
+    <p class="title">Senior Developer</p>
+    <p class="department">Engineering</p>
+    <div class="contact-info" style="display: block;">
+      <p>john.doe@company.com | (555) 123-4567</p>
+    </div>
+  </div>
+</div>
+```
+
+**ViewState Usage:** Stores property values for child controls
+
+**Migration Pattern:** CompositeControl demonstrating `CreateChildControls()` pattern, parent-child control hierarchy, and data binding to composite controls.
+
+---
+
+### 3.3 SectionPanel : Templated Control
+
+**File:** `App_Code/Controls/SectionPanel.cs`
+
+**Base class:** `System.Web.UI.Control` (implements `INamingContainer`)
+
+**Purpose:** Container control for dashboard sections with customizable header and body content via `ITemplate`. Used to wrap section content throughout DepartmentPortal.
+
+**Key Properties:**
+- `Title` (string) — Section title (not templated, used as default header)
+- `HeaderTemplate` (ITemplate) — Custom header template (default: renders Title in `<h2>`)
+- `ContentTemplate` (ITemplate, required) — Consumer-defined body content
+- `FooterTemplate` (ITemplate, optional) — Custom footer template
+- `CssClass` (string) — Additional CSS classes
+
+**Key Methods:**
+- `CreateChildControls()` — Instantiates and adds templated controls
+- `DataBind()` — Override to bind nested templates
+- `OnInit()` — Calls `EnsureChildControls()`
+
+**Instantiation Pattern (in ASPX):**
+```aspx
+<local:SectionPanel Title="Training Courses" runat="server">
+  <ContentTemplate>
+    <asp:Repeater DataSource="<%# Courses %>" runat="server">
+      <ItemTemplate>
+        <div><%# Eval("CourseName") %></div>
+      </ItemTemplate>
+    </asp:Repeater>
+  </ContentTemplate>
+  <HeaderTemplate>
+    <div class="custom-header">
+      <h2>Courses for <%# Department %></h2>
+    </div>
+  </HeaderTemplate>
+</local:SectionPanel>
+```
+
+**HTML Output:**
+```html
+<div class="section-panel">
+  <div class="section-header">
+    <h2>Training Courses</h2>
+  </div>
+  <div class="section-content">
+    <!-- ContentTemplate rendered here -->
+  </div>
+  <div class="section-footer" style="display: none;">
+    <!-- FooterTemplate rendered here if specified -->
+  </div>
+</div>
+```
+
+**ViewState Usage:** Minimal — mostly used for template instantiation
+
+**Migration Pattern:** Templated control demonstrating `ITemplate` property declarations, `InstantiateIn()` pattern, template instantiation in `CreateChildControls()`, and nested control binding.
+
+---
+
+### 3.4 PollQuestion : Control with ViewState and Postback
+
+**File:** `App_Code/Controls/PollQuestion.cs`
+
+**Base class:** `System.Web.UI.Control` (implements `IPostBackEventHandler`)
+
+**Purpose:** Display a poll/survey question with radio button options and "Submit Vote" button. Stores selected answer in ViewState and handles postback voting events.
+
+**Key Properties:**
+- `QuestionText` (string)
+- `OptionsData` (string[], comma-separated) — Poll answer options
+- `SelectedOption` (int, 0-based index) — Currently selected option
+- `VotesPerOption` (int[]) — Vote counts per option (cached, readonly)
+
+**Key Events:**
+- `VoteSubmitted` event (custom EventArgs: `selectedOption` int, `optionText` string)
+
+**Key Methods:**
+- `RenderContents(HtmlTextWriter)` — Renders question, radio buttons, and submit button
+- `RaisePostBackEvent(string eventArgument)` — Implements `IPostBackEventHandler`, handles vote submission
+- `LoadViewState()` / `SaveViewState()` — Custom ViewState management for SelectedOption
+
+**HTML Output:**
+```html
+<div class="poll-question">
+  <h4>What is your preferred training format?</h4>
+  <div class="poll-options">
+    <div>
+      <input type="radio" name="poll_123" value="0" id="opt_0" />
+      <label for="opt_0">In-Person</label>
+    </div>
+    <div>
+      <input type="radio" name="poll_123" value="1" id="opt_1" />
+      <label for="opt_1">Online</label>
+    </div>
+    <div>
+      <input type="radio" name="poll_123" value="2" id="opt_2" />
+      <label for="opt_2">Hybrid</label>
+    </div>
+  </div>
+  <button type="submit" name="poll_123_submit" value="submit">Submit Vote</button>
+</div>
+```
+
+**ViewState Usage:** Stores `SelectedOption` index across postbacks
+
+**Postback Handling:** Implements `IPostBackEventHandler.RaisePostBackEvent()` to process vote submission, validate selection, raise `VoteSubmitted` event.
+
+**Migration Pattern:** Control with postback event handling, custom ViewState, and `IPostBackEventHandler` implementation. Demonstrates Web Forms event-driven postback model.
+
+---
+
+### 3.5 NotificationBell : Control with Custom Events
+
+**File:** `App_Code/Controls/NotificationBell.cs`
+
+**Base class:** `System.Web.UI.WebControls.WebControl`
+
+**Purpose:** Display a notification bell icon in the page header showing unread announcements count. Supports click events to open/close notification drawer.
+
+**Key Properties:**
+- `UnreadCount` (int) — Number of unread notifications
+- `IconUrl` (string) — Bell icon image URL
+- `NotificationDrawerVisible` (bool, ViewState) — Whether drawer is expanded
+- `MaxNotificationsToDisplay` (int) — Limit notifications shown in drawer (default 5)
+
+**Custom Events:**
+- `NotificationClicked` event (custom `NotificationEventArgs`)
+- `NotificationDismissed` event (custom `NotificationEventArgs` with `NotificationId` int)
+
+**Custom EventArgs Class (`NotificationEventArgs`):**
+```csharp
+public class NotificationEventArgs : EventArgs
+{
+    public int NotificationId { get; set; }
+    public string NotificationText { get; set; }
+    public DateTime Timestamp { get; set; }
+}
+```
+
+**Key Methods:**
+- `RenderContents(HtmlTextWriter)` — Renders bell icon with badge showing count, drawer HTML structure
+- `OnNotificationClicked(NotificationEventArgs)` — Raises `NotificationClicked` event
+- Custom event delegates and event declarations
+
+**HTML Output:**
+```html
+<div class="notification-bell">
+  <span class="bell-icon">🔔
+    <span class="badge">3</span>
+  </span>
+  <div class="notification-drawer" style="display: none;">
+    <div class="drawer-header">
+      <h4>Notifications</h4>
+      <button class="close-btn">×</button>
+    </div>
+    <div class="drawer-body">
+      <ul>
+        <li class="notification-item" data-id="1">
+          New policy document: IT Security Update
+          <span class="timestamp">2 hours ago</span>
+        </li>
+        <!-- more notifications -->
+      </ul>
+    </div>
+  </div>
+</div>
+```
+
+**ViewState Usage:** Stores `NotificationDrawerVisible` state
+
+**Migration Pattern:** Control with custom events and custom `EventArgs` classes. Demonstrates event-based communication between control and container page, custom event delegate declarations.
+
+---
+
+### 3.6 EmployeeDataGrid : Data-Bound Control
+
+**File:** `App_Code/Controls/EmployeeDataGrid.cs`
+
+**Base class:** `System.Web.UI.WebControls.DataBoundControl` (or implements `IDataItemContainer`)
+
+**Purpose:** Display a searchable, sortable, pageable grid of employees bound to a data source. Wraps GridView with custom filtering and sorting logic.
+
+**Key Properties:**
+- `DataSource` (IEnumerable, IDataReader, DataTable) — Employee data source
+- `SearchText` (string) — Filter grid by employee name (ViewState)
+- `SortColumn` (string) — Current sort column name (ViewState)
+- `SortDirection` (SortDirection enum: Ascending/Descending) — Sort direction (ViewState)
+- `PageSize` (int) — Rows per page (default 10)
+- `AllowPaging` (bool)
+- `AllowSorting` (bool)
+- `AllowSearch` (bool)
+
+**Key Events:**
+- `RowCommand` event (BoundGrid-style: e.CommandName, e.CommandArgument for Edit/Delete/View)
+- `SortChanged` event (custom `SortChangedEventArgs`: SortColumn, SortDirection)
+- `PageChanged` event
+
+**Key Methods:**
+- `PerformDataBinding()` — Override to apply filtering and sorting before binding
+- `CreateChildControls()` — Creates internal GridView, Repeater for pager
+- `CreateDataSource()` — Apply search/sort filters to data source
+- Implement `IPageableItemContainer` for paging support
+
+**HTML Output:**
+```html
+<div class="employee-data-grid">
+  <div class="grid-toolbar">
+    <input type="text" placeholder="Search employees..." id="searchText" />
+    <button type="submit">Search</button>
+  </div>
+  <table class="grid">
+    <thead>
+      <tr>
+        <th><a href="?sort=Name">Name</a></th>
+        <th><a href="?sort=Department">Department</a></th>
+        <th><a href="?sort=Title">Title</a></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>John Doe</td>
+        <td>Engineering</td>
+        <td>Senior Developer</td>
+        <td>
+          <a href="..." data-cmd="View" data-arg="123">View</a>
+          <a href="..." data-cmd="Edit" data-arg="123">Edit</a>
+        </td>
+      </tr>
+      <!-- more rows -->
+    </tbody>
+  </table>
+  <div class="grid-pager">
+    <span>Page 1 of 5</span>
+    <button>Previous</button> <button>Next</button>
+  </div>
+</div>
+```
+
+**ViewState Usage:** Stores `SearchText`, `SortColumn`, `SortDirection`, `CurrentPageIndex` across postbacks
+
+**Data Binding Lifecycle:** Demonstrates `PerformDataBinding()`, `CreateDataSource()` override pattern, integration with ASP.NET data source controls (ObjectDataSource), and child control binding.
+
+**Migration Pattern:** DataBoundControl demonstrating advanced data binding patterns, paging/sorting state in ViewState, command event handling (RowCommand), and complex child control hierarchy with data-driven grid rendering.
+
+---
+
+### 3.7 DepartmentBreadcrumb : Bare Control
+
+**File:** `App_Code/Controls/DepartmentBreadcrumb.cs`
+
+**Base class:** `System.Web.UI.Control` (bare base class, no HTML wrapper)
+
+**Purpose:** Render a breadcrumb navigation path showing current department hierarchy (Organization → Division → Department). Demonstrates rendering custom HTML from scratch without inheriting from WebControl or CompositeControl, no built-in style support.
+
+**Key Properties:**
+- `OrganizationName` (string) — Root organization name
+- `DivisionName` (string) — Middle-level division name (optional)
+- `DepartmentName` (string) — Current department name
+- `DepartmentId` (int) — Current department identifier
+- `Separator` (string) — HTML separator between breadcrumb items (default: " → ")
+- `EnableLinks` (bool) — Whether breadcrumb items are clickable links (default: true)
+- `LinkCssClass` (string) — CSS class applied to breadcrumb links
+
+**Custom Events:**
+- `BreadcrumbItemClicked` event (custom `BreadcrumbEventArgs` with `DepartmentId` int, `ItemName` string)
+
+**Custom EventArgs Class (`BreadcrumbEventArgs`):**
+```csharp
+public class BreadcrumbEventArgs : EventArgs
+{
+    public int DepartmentId { get; set; }
+    public string ItemName { get; set; }
+    public string NavigationLevel { get; set; } // "organization", "division", "department"
+}
+```
+
+**Key Methods:**
+- `Render(HtmlTextWriter)` — Directly writes HTML string with breadcrumb structure (no CreateChildControls, no controls collection used)
+- `OnBreadcrumbItemClicked(BreadcrumbEventArgs)` — Raises `BreadcrumbItemClicked` event on postback
+- `RaisePostBackEvent(string eventArgument)` — Implements `IPostBackEventHandler` for breadcrumb link postback handling
+
+**HTML Output (No ViewState):**
+```html
+<div class="breadcrumb-container">
+  <a href="javascript:__doPostBack('BreadcrumbControl', 'org_0')" class="breadcrumb-link">Organization</a>
+  <span class="breadcrumb-separator"> → </span>
+  <a href="javascript:__doPostBack('BreadcrumbControl', 'div_1')" class="breadcrumb-link">Engineering Division</a>
+  <span class="breadcrumb-separator"> → </span>
+  <span class="breadcrumb-current">Software Development</span>
+</div>
+```
+
+**No ViewState:** This bare Control uses no ViewState (no properties persisted across postback). State is managed by parent page or parent control.
+
+**Postback Handling:** Implements `IPostBackEventHandler` interface to handle breadcrumb link clicks directly in `RaisePostBackEvent()` without child controls.
+
+**Migration Pattern:** Bare `System.Web.UI.Control` inheritor demonstrating pure HTML rendering via `Render()` override, direct postback event handling without child control hierarchy, and event-driven breadcrumb navigation. Exercises the most primitive control base class with no wrapper HTML element or ViewState support.
+
+---
+
+### 3.8 Web.config Registration for Custom Controls
+
+Custom server controls can be registered in Web.config for application-wide use:
+
+```xml
+<system.web>
+  <httpHandlers>
+    <!-- Custom control registration not needed in Web.config 
+         but assembly must be accessible and control types resolvable -->
+  </httpHandlers>
+</system.web>
+```
+
+In ASPX pages, use `@Register` directive (similar to ASCX, but points to control class):
+
+```aspx
+<%@ Register Assembly="DepartmentPortal" Namespace="DepartmentPortal.Controls" TagPrefix="local" %>
+<local:StarRating Rating="4" ReadOnly="true" runat="server" />
+<local:EmployeeCard EmployeeId="123" ShowContactInfo="true" runat="server" />
+<local:SectionPanel Title="Dashboard" runat="server">
+  <ContentTemplate>
+    <local:EmployeeDataGrid AllowPaging="true" AllowSorting="true" runat="server" />
+  </ContentTemplate>
+</local:SectionPanel>
+```
+
+---
+
+## 4. Custom Base Classes
+
+### 4.1 BasePage : System.Web.UI.Page
 
 **File:** `App_Code/BasePage.cs`
 
@@ -150,7 +567,7 @@
 
 **Migration challenge:** BasePage assumes Session access, theme system, OnInit/OnPreRender overrides
 
-### 3.2 BaseMasterPage : System.Web.UI.MasterPage
+### 4.2 BaseMasterPage : System.Web.UI.MasterPage
 
 **File:** `App_Code/BaseMasterPage.cs`
 
@@ -164,7 +581,7 @@
 
 **Migration challenge:** MasterPage-specific APIs, ContentPlaceHolder access pattern
 
-### 3.3 BaseUserControl : System.Web.UI.UserControl
+### 4.3 BaseUserControl : System.Web.UI.UserControl
 
 **File:** `App_Code/BaseUserControl.cs`
 
@@ -180,9 +597,9 @@
 
 ---
 
-## 4. Page Inventory
+## 5. Page Inventory
 
-### 4.1 Public Pages (No Auth Required)
+### 5.1 Public Pages (No Auth Required)
 
 1. **Default.aspx** (Home)
    - Controls: PageHeader, Footer, QuickStats (web.config registered)
@@ -192,7 +609,7 @@
    - Controls: Footer
    - Purpose: Authentication page (sets Session["UserId"])
 
-### 4.2 Authenticated Pages (Inherit from BasePage)
+### 5.2 Authenticated Pages (Inherit from BasePage)
 
 3. **Dashboard.aspx**
    - Base class: `BasePage`
@@ -248,7 +665,7 @@
     - Controls: PageHeader, Breadcrumb, Footer
     - QueryString: ResourceId
 
-### 4.3 Admin Pages (BasePage + Admin Check)
+### 5.3 Admin Pages (BasePage + Admin Check)
 
 12. **Admin/ManageAnnouncements.aspx**
     - Base class: `BasePage` (checks `IsAdmin`)
@@ -265,7 +682,7 @@
     - Controls: PageHeader, Breadcrumb, SearchBox, EmployeeList, Footer
     - Purpose: Employee management
 
-### 4.4 Master Pages
+### 5.4 Master Pages
 
 15. **Site.Master**
     - Base class: `BaseMasterPage`
@@ -274,7 +691,7 @@
 
 ---
 
-## 5. Work Breakdown
+## 6. Work Breakdown
 
 ### Phase 1: Foundation (Jubilee)
 **Deliverable:** Working .NET Framework 4.8 project with data model and base classes
@@ -398,7 +815,7 @@
 
 ---
 
-## 6. Dependencies and Sequencing
+## 7. Dependencies and Sequencing
 
 ### Critical Path
 
@@ -434,7 +851,7 @@ Documentation (4.3)
 
 ---
 
-## 7. Success Criteria
+## 8. Success Criteria
 
 ### Minimum Viable Sample (Phase 1-3 Complete)
 
@@ -476,7 +893,7 @@ Documentation (4.3)
 
 ---
 
-## 8. Risk Assessment
+## 9. Risk Assessment
 
 ### High Risk
 
@@ -521,7 +938,7 @@ Documentation (4.3)
 
 ---
 
-## 9. Future Enhancements
+## 10. Future Enhancements
 
 ### Post-MVP Features (Not in Scope)
 
@@ -542,7 +959,7 @@ Documentation (4.3)
 
 ---
 
-## 10. Timeline Estimate
+## 11. Timeline Estimate
 
 **Phase 1 (Foundation):** 1-2 days  
 **Phase 2 (ASCX Controls):** 2-3 days  
@@ -557,7 +974,7 @@ Documentation (4.3)
 
 ---
 
-## 11. Key Decision Points
+## 12. Key Decision Points
 
 ### Decision 1: EF6 Database First vs Code First
 **Recommendation:** Database First with EDMX  
@@ -586,7 +1003,7 @@ Documentation (4.3)
 
 ---
 
-## 12. File Structure
+## 13. File Structure
 
 ```
 DepartmentPortal/
@@ -660,7 +1077,7 @@ DepartmentPortal/
 
 ---
 
-## 13. Integration with Existing Milestones
+## 14. Integration with Existing Milestones
 
 ### Relationship to M22 (Migration Toolkit)
 - DepartmentPortal provides **new test surface** for ASCX patterns
