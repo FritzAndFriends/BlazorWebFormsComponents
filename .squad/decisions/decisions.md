@@ -668,3 +668,233 @@ The PRD spec from 2026-03-15 planned `scripts/Invoke-ComponentHealthScan.ps1` as
 
 **Low-Priority:** Add Xml to DefaultTrackedComponents fallback; add DataBoundComponent<T> to stop-type list in docs; cross-check GridView baseline.
 
+
+
+---
+
+# Decision: ASCX Sample Application Milestone (DepartmentPortal)
+
+**By:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-03-12  
+**Requested by:** Jeffrey T. Fritz  
+
+## What
+
+Created comprehensive milestone plan for **DepartmentPortal**, a new .NET Framework 4.8 sample application showcasing ASCX user controls and custom base classes.
+
+**Deliverable:** `planning-docs/ASCX-SAMPLE-MILESTONE.md` (detailed 28KB specification)
+
+## Why This Matters
+
+**Current gap:** All existing samples (BeforeWebForms, WingtipToys, ContosoUniversity) have minimal ASCX usage—only trivial ViewSwitcher controls. Zero custom base classes exist. This leaves significant migration patterns untested:
+- ❌ No ASCX → Blazor component migration path validated
+- ❌ No custom Page/MasterPage/UserControl base class patterns
+- ❌ No nested user controls
+- ❌ No ITemplate controls
+- ❌ No web.config tagPrefix registration
+- ❌ No custom event args
+- ❌ Limited ViewState/Session usage in controls
+
+**Impact:** Migration toolkit coverage unknown for these enterprise Web Forms patterns. Customers with ASCX-heavy apps have no reference.
+
+## Application Concept
+
+**DepartmentPortal** — Internal HR/IT portal for managing employees, announcements, training, and resources.
+
+**Why this domain:**
+- Real-world relevance (enterprise IT actually builds these)
+- Component-rich (dashboard widgets, grids, search, filters)
+- Justifies custom base classes (shared auth, audit logging, theme)
+- Data-driven (EF6 EDMX → tests toolkit's existing EDMX conversion)
+- Session usage (user preferences, training enrollment)
+
+## Key Features
+
+### 12 ASCX User Controls
+
+**Simple display:**
+1. Breadcrumb.ascx — navigation trail
+2. PageHeader.ascx — header with Session["UserName"]
+3. Footer.ascx — standard footer
+4. QuickStats.ascx — **web.config tagPrefix registration**
+
+**Data-bound:**
+5. AnnouncementCard.ascx — ViewState for expand/collapse
+6. EmployeeList.ascx — GridView with filter, ViewState
+7. TrainingCatalog.ascx — Repeater with custom event
+
+**Input with events:**
+8. SearchBox.ascx — custom SearchEventArgs, ViewState
+9. DepartmentFilter.ascx — dropdown with event
+10. Pager.ascx — pagination control with ViewState
+
+**Complex:**
+11. DashboardWidget.ascx — **ITemplate pattern**
+12. ResourceBrowser.ascx — **nested ASCX** (contains SearchBox + Breadcrumb)
+
+### 3 Custom Base Classes
+
+**BasePage : System.Web.UI.Page**
+- Auth check (Session["UserId"] redirect)
+- Audit logging (database write in OnPreRender)
+- Theme management (Session["Theme"])
+- Properties: CurrentUser, IsAdmin
+- Methods: ShowMessage(), LogError()
+
+**BaseMasterPage : System.Web.UI.MasterPage**
+- Menu population (database load)
+- UserDisplayName property
+- Script injection (OnPreRender)
+
+**BaseUserControl : System.Web.UI.UserControl**
+- LogActivity() method
+- Cache helpers (CacheGet/CacheSet)
+- Common properties with ViewState
+
+### 14 Pages
+
+- 2 public (Default, Login)
+- 9 authenticated (inherit BasePage)
+- 3 admin (inherit BasePage + admin check)
+- 1 master (Site.Master inherits BaseMasterPage)
+
+**Key patterns demonstrated:**
+- Template controls (DashboardWidget x3 instances)
+- Repeater with ASCX as ItemTemplate
+- Event handling (Search, DepartmentChanged, PageChanged, EnrollmentRequested)
+- Session write/read (training enrollment)
+- Nested ASCX composition
+- Web.config tagPrefix usage
+
+## Work Breakdown
+
+### Phase 1: Foundation (Jubilee)
+- Create .NET Framework 4.8 project
+- EF6 Database First with EDMX (6 entities)
+- Custom base classes (BasePage, BaseMasterPage, BaseUserControl)
+- Site.Master (inherits BaseMasterPage)
+
+### Phase 2: ASCX Controls (Jubilee)
+- All 12 ASCX controls with code-behind
+- Web.config tagPrefix registration for QuickStats
+- Custom event args (SearchEventArgs)
+
+### Phase 3: Pages (Jubilee)
+- All 14 pages wired to controls
+- Authentication flow
+- Event handlers
+- Session/ViewState usage
+
+### Phase 4: Testing & Documentation
+- **4.1 Manual smoke test** (Jubilee) — verify all patterns work
+- **4.2 Migration coverage analysis** (Bishop) — run toolkit, document gaps
+- **4.3 Documentation** (Beast) — DEPARTMENTPORTAL.md with migration notes
+- **4.4 Acceptance tests** (Colossus) — **DEFERRED** until Blazor version exists
+- **4.5 Unit tests** (Rogue) — **DEFERRED** until Blazor components exist
+
+## Success Criteria
+
+### MVP (Phase 1-3)
+✅ .NET 4.8 project builds and runs  
+✅ All 12 ASCX render with sample data  
+✅ All 3 base classes function (auth, audit, theme, logging, cache)  
+✅ All 14 pages load  
+✅ Events fire, ViewState persists, Session works  
+✅ Nested controls render (ResourceBrowser → SearchBox + Breadcrumb)  
+✅ Web.config tagPrefix works  
+✅ ITemplate works (DashboardWidget.ContentTemplate)  
+
+### Migration Coverage (Phase 4.2)
+✅ Toolkit executed against DepartmentPortal  
+✅ Coverage gaps documented (ASCX, base classes, ITemplate, tagPrefix)  
+✅ Backlog items created for toolkit enhancements  
+
+### Documentation (Phase 4.3)
+✅ dev-docs/samples/DEPARTMENTPORTAL.md created  
+✅ Each ASCX documented with migration notes  
+✅ Base class migration patterns documented  
+
+## High Risks
+
+**R1: Migration toolkit may not support ASCX → Blazor**  
+- Impact: Cannot produce "After" Blazor version  
+- Mitigation: Document manual conversion patterns  
+- Owner: Bishop  
+
+**R2: Custom base classes have no Blazor equivalent**  
+- Impact: Significant manual migration work  
+- Mitigation: Design Blazor base component patterns, update BWFC if needed  
+- Owner: Forge (architecture), Cyclops (implementation if needed)  
+
+**R3: ITemplate not supported in Blazor**  
+- Impact: DashboardWidget.ContentTemplate cannot migrate directly  
+- Mitigation: Document RenderFragment approach  
+- Owner: Beast  
+
+## Key Decisions
+
+1. **EF6 Database First with EDMX** — tests toolkit's existing EDMX conversion
+2. **Bootstrap 3** — matches BeforeWebForms/WingtipToys era
+3. **SQL Server LocalDB** — realistic, tests connection strings
+4. **Read-only + CRUD admin** — reduces complexity
+5. **Session-based auth** — no ASP.NET Identity, keeps focus on ASCX patterns
+
+## Timeline
+
+Phase 1: 1-2 days  
+Phase 2: 2-3 days  
+Phase 3: 2-3 days  
+Phase 4.1-4.3: 1.5-3 days  
+**Total: 7-11 days (1.5-2 weeks)**
+
+Deferred work (4.4, 4.5): TBD based on toolkit roadmap
+
+## Integration with Existing Work
+
+**M22 (Migration Toolkit):**
+- New test surface for ASCX patterns
+- Validates EDMX conversion (already implemented)
+- Identifies toolkit gaps → backlog prioritization
+
+**Sample Apps:**
+- BeforeWebForms: 62 control samples
+- WingtipToys: 28-page e-commerce
+- ContosoUniversity: 5-page education
+- **DepartmentPortal: 14-page ASCX showcase** ← NEW
+
+**Component Library:**
+- May need new BWFC utilities (Session shims, base components)
+- Validates existing components with complex ASCX compositions
+
+## Next Steps
+
+1. **Jeff approves milestone plan** → proceed with Phase 1
+2. **Jubilee:** Create DepartmentPortal project (Foundation → Controls → Pages)
+3. **Bishop:** Run toolkit analysis when app is ready
+4. **Beast:** Documentation
+5. **Forge + Team:** Evaluate toolkit gaps, design Blazor base class patterns, prioritize BWFC enhancements
+
+---
+
+**Full specification:** `planning-docs/ASCX-SAMPLE-MILESTONE.md` (28KB, includes control catalog, feature matrix, file structure, appendices)
+
+
+---
+
+# Analyzer NuGet Integration + Prescan Switch
+
+**Date:** 2026-03-20
+**Author:** Cyclops
+
+## Decision 1: Analyzer bundled into main NuGet package
+
+Added a `ProjectReference` with `OutputItemType="Analyzer"` from `BlazorWebFormsComponents.csproj` → `BlazorWebFormsComponents.Analyzers.csproj`. This means consumers who reference `Fritz.BlazorWebFormsComponents` automatically get all BWFC Roslyn analyzers — no separate package install needed.
+
+**Rationale:** Single NuGet reference gives migration guidance out of the box. The analyzer DLL ships in `analyzers/dotnet/cs` inside the package, not as a library dependency.
+
+## Decision 2: `-Prescan` switch uses same rule IDs as Roslyn analyzers
+
+The `Invoke-BwfcPrescan` function in `bwfc-migrate.ps1` uses BWFC001–BWFC014 rule IDs matching the Roslyn analyzer diagnostic IDs. This creates a consistent vocabulary between the PowerShell pre-scan (for quick assessment) and the IDE-based Roslyn analyzers (for precise in-editor guidance).
+
+**Rationale:** Teams can triage a codebase with `-Prescan` first, then drill into specific BWFC0XX rules in Visual Studio.
+
