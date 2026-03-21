@@ -63,18 +63,14 @@ namespace BlazorWebFormsComponents.Analyzers
             var todoComment = SyntaxFactory.Comment(
                 "// TODO: Replace Request." + propertyName + " access with Blazor equivalent");
 
-            // Collect indentation trivia from the original statement
-            var indentation = new System.Collections.Generic.List<SyntaxTrivia>();
-            foreach (var trivia in statement.GetLeadingTrivia())
-            {
-                if (trivia.IsKind(SyntaxKind.WhitespaceTrivia))
-                    indentation.Add(trivia);
-            }
+            var indentation = statement.GetLeadingTrivia()
+                .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
+                .ToList();
 
             // Build leading trivia: original leading + comment + newline + indentation for the ;
             var leading = statement.GetLeadingTrivia()
                 .Add(todoComment)
-                .Add(SyntaxFactory.EndOfLine("\r\n"))
+                .Add(root.DetectEndOfLine())
                 .AddRange(indentation);
 
             var emptyStatement = SyntaxFactory.EmptyStatement()
