@@ -898,3 +898,201 @@ The `Invoke-BwfcPrescan` function in `bwfc-migrate.ps1` uses BWFC001–BWFC014 r
 
 **Rationale:** Teams can triage a codebase with `-Prescan` first, then drill into specific BWFC0XX rules in Visual Studio.
 
+
+## 2026-03-21T14:35:35Z: User directive
+
+**By:** Jeffrey T. Fritz (via Copilot)
+
+**What:** The DepartmentPortal ASCX sample should also include custom controls built with ASP.NET custom control base classes (WebControl, CompositeControl, etc.) for testing migration toolkit coverage of custom control patterns.
+
+**Why:** User request  captured for team memory. Expands the sample app scope beyond ASCX user controls to cover custom control migration patterns.
+
+---
+
+# Decision: Custom Server Controls Scope for DepartmentPortal Milestone
+
+**Decision ID:** forge-custom-controls-scope  
+**Date:** 2026-03-21  
+**Author:** Forge (Lead/Web Forms Reviewer)  
+**Status:** APPROVED  
+**Affects:** DepartmentPortal sample application, migration toolkit design
+
+---
+
+## Problem Statement
+
+The DepartmentPortal sample application was initially designed with 12 ASCX user controls and 3 custom base classes (BasePage, BaseMasterPage, BaseUserControl) to test ASCX migration patterns. However, ASCX controls represent only ~50% of real-world Web Forms component architectures.
+
+**Missing coverage:**
+- Custom server controls built entirely in C# code (WebControl, CompositeControl subclasses)
+- Programmatic control tree creation (CreateChildControls)
+- Templated controls using ITemplate properties
+- Postback handling (IPostBackEventHandler, IPostBackDataHandler)
+- ViewState management at the control level
+- Custom EventArgs and event delegates
+- DataBoundControl patterns with filtering/sorting/paging
+
+These patterns are **common in enterprise Web Forms applications** and require different migration logic than ASCX controls. ASCX uses declarative markup; custom controls build their tree in code.
+
+---
+
+## Solution: Add 6 Custom Server Controls
+
+Expand DepartmentPortal to include 6 custom server controls that fit naturally into the HR/IT portal domain and cover all 6 required patterns:
+
+### 1. StarRating : WebControl
+- **Pattern:** Simple WebControl subclass
+- **Key technique:** Override `RenderContents()`, generate HTML via HtmlTextWriter
+- **Purpose:** Star rating display for employee profiles and course reviews
+- **Domain fit:** Ratings are common in HR/training portals
+
+### 2. EmployeeCard : CompositeControl
+- **Pattern:** Programmatic child control creation
+- **Key technique:** Override `CreateChildControls()`, instantiate Image, Label, HyperLink children
+- **Purpose:** Employee information card with photo, name, title, contact info
+- **Domain fit:** Fits naturally in employee directory / dashboard
+
+### 3. SectionPanel : Templated Control
+- **Pattern:** ITemplate-based templating
+- **Key technique:** Declare HeaderTemplate, ContentTemplate, FooterTemplate properties; instantiate in CreateChildControls()
+- **Purpose:** Reusable section container for dashboard widgets
+- **Domain fit:** Dashboard layout with flexible content areas
+
+### 4. PollQuestion : IPostBackEventHandler
+- **Pattern:** ViewState + postback event handling
+- **Key technique:** Implement IPostBackEventHandler.RaisePostBackEvent(), store selected option in ViewState
+- **Purpose:** Survey/poll widget for employee feedback
+- **Domain fit:** HR portals often have pulse surveys and feedback mechanisms
+
+### 5. NotificationBell : Custom Events
+- **Pattern:** Custom EventArgs and event delegates
+- **Key technique:** Define NotificationEventArgs, declare NotificationClicked and NotificationDismissed events
+- **Purpose:** Notification icon in page header showing unread announcements
+- **Domain fit:** Portal navigation component, common in enterprise UIs
+
+### 6. EmployeeDataGrid : DataBoundControl
+- **Pattern:** DataBoundControl with filtering, sorting, paging
+- **Key technique:** Override PerformDataBinding(), manage sort/filter state in ViewState
+- **Purpose:** Employee directory grid with search, department filter, paging
+- **Domain fit:** Core HR portal feature
+
+---
+
+## Rationale
+
+### Why These Patterns Matter for Migration
+
+ASCX controls represent a **declarative, markup-driven** component model:
+- Child controls defined in `.ascx` markup
+- Events handled in code-behind delegates
+- Data binding via <%# %> expressions
+
+Custom controls represent a **programmatic, code-driven** component model:
+- Child controls created in `CreateChildControls()`
+- Events raised via method implementations (IPostBackEventHandler)
+- Data binding via `PerformDataBinding()` override
+- ViewState managed explicitly in control code
+
+**Migration toolkit must handle BOTH patterns:**
+1. ASCX → Blazor component with declarative markup
+2. Custom control → Blazor component with programmatic child creation + binding
+
+Without custom control examples in DepartmentPortal, the toolkit will be tested only against the easier pattern.
+
+### Coverage Impact
+
+| Pattern | ASCX | Custom Controls | Total |
+|---------|------|-----------------|-------|
+| Simple display | ✓ (Breadcrumb, Footer) | ✓ (StarRating) | 3 |
+| Data-bound with events | ✓ (SearchBox, DepartmentFilter) | ✓ (EmployeeDataGrid) | 2 |
+| Composite/nested controls | ✓ (EmployeeList, ResourceBrowser) | ✓ (EmployeeCard) | 2 |
+| Templated | ✓ (DashboardWidget) | ✓ (SectionPanel) | 2 |
+| Custom events | ✓ (TrainingCatalog) | ✓ (NotificationBell) | 2 |
+| ViewState/postback | ✓ (SearchBox, Pager) | ✓ (PollQuestion) | 2 |
+
+Custom controls fill structural gaps in the test matrix. **StarRating** exercises the bare-minimum RenderContents pattern. **PollQuestion** is the *only* control testing postback handling. **SectionPanel** tests ITemplate with child binding.
+
+### Architecture Notes
+
+Custom controls differ fundamentally from ASCX:
+
+| Aspect | ASCX | Custom Control |
+|--------|------|-----------------|
+| Definition | `.ascx` file with markup | `.cs` file with class code |
+| Child controls | Declared in markup | Created in `CreateChildControls()` |
+| Rendering | ASP.NET engine processes markup | Control calls `RenderContents()` or renders children |
+| Events | Page-level event handlers | Control method implementations |
+| Postback handling | Page handles postback, control fires events | Control implements IPostBackEventHandler |
+| ViewState | Automatic for nested ASP.NET controls | Control must manage explicitly |
+
+Blazor components emulating *markup-based* patterns (ASCX) are straightforward. Emulating *code-based* patterns (custom controls) requires:
+- Component properties matching control properties
+- Cascading child components for programmatically-created children
+- OnInitializedAsync / OnParametersSet for PerformDataBinding equivalent
+- Custom event patterns for postback equivalents
+
+**This expansion is necessary for toolkit completeness.**
+
+---
+
+## Decisions
+
+### ✅ APPROVED
+
+1. **Add Section 3: Custom Server Controls** to DepartmentPortal planning doc
+   - Document 6 custom control designs
+   - Specify class names, base classes, properties, events, HTML output
+   - Map each to migration pattern
+
+2. **Update Executive Summary**
+   - Change "8-12 ASCX controls and custom base classes" → "8-12 ASCX controls, 6 custom server controls, and custom base classes"
+   - Expand Gap Analysis and Target to mention custom control patterns
+
+3. **Renumber document sections** (Sections 4-14 shift +1)
+   - Custom Base Classes now Section 4
+   - Page Inventory now Section 5
+   - Work Breakdown now Section 6, etc.
+
+4. **Scope is "designed, not implemented"**
+   - Planning doc finalizes the custom control specifications
+   - Implementation will be driven by L1 scripting phase
+   - Custom controls will be instantiated, compiled, tested on .NET Framework 4.8
+   - HTML output will be captured for fidelity audit
+
+### Ownership
+
+- **Forge:** Architecture, design, Web Forms pattern research ✓
+- **Cyclops:** Implementation of custom controls (after L1 phase approval)
+- **Rogue:** bUnit tests for each custom control
+- **Beast:** Documentation of migration patterns
+- **Jubilee:** Sample pages consuming the controls
+
+### Timeline
+
+- **Planning (done):** Custom control designs finalized
+- **L1 scripting:** DepartmentPortal.csproj created, custom control `.cs` files generated
+- **Implementation:** Custom controls compiled and tested (~2-3 weeks)
+- **Migration testing:** L2 toolkit tested against custom control patterns
+- **Completion:** Target end of April 2026
+
+---
+
+## Implications
+
+### Risk: Scope Expansion
+Adding 6 new controls increases DepartmentPortal complexity and test coverage scope. Mitigation: Controls are straightforward (no Ajax, no data validation, minimal styling). 2-3 day implementation per control.
+
+### Benefit: Toolkit Completeness
+Custom controls exercise ~50% of Web Forms patterns not covered by ASCX. Without them, toolkit will fail on real-world applications using custom controls. This is a *critical gap*.
+
+### Benefit: Pattern Library
+Each control serves as a reference implementation for a specific pattern. Developers migrating custom controls can point to DepartmentPortal as a worked example.
+
+---
+
+## Approval
+
+**Decided by:** Forge  
+**Approved:** 2026-03-21  
+**Next phase:** Coordinator confirms scope before L1 scripting begins
+

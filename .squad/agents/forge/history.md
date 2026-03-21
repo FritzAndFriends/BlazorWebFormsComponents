@@ -501,3 +501,29 @@ Jeff directed a design pivot: replace custom `[HandlerRoute]` attribute + `MapBl
 
 
  **Team update (2026-03-21):** DepartmentPortal ASCX sample milestone plan created (28KB specification). 12 ASCX controls, 3 custom base classes, 14 pages designed to test migration toolkit coverage for enterprise Web Forms patterns. 4-phase work breakdown with 7-11 day timeline.  decided by Forge
+
+### Custom Server Controls Addition to DepartmentPortal Milestone (2026-03-21)
+
+DepartmentPortal scope expanded to include **6 custom server controls** covering Web Forms custom control patterns absent from ASCX-only test coverage:
+
+1. **StarRating : WebControl** — Simple property-driven rendering, `RenderContents()`, star HTML generation
+2. **EmployeeCard : CompositeControl** — Programmatic child control creation, `CreateChildControls()`, data binding to composite children
+3. **SectionPanel : Templated Control** — `ITemplate` properties, template instantiation, INamingContainer pattern
+4. **PollQuestion : IPostBackEventHandler** — ViewState for selected option, postback event routing, vote submission handling
+5. **NotificationBell : Custom Events** — Custom EventArgs classes, event delegates, UI state events
+6. **EmployeeDataGrid : DataBoundControl** — `PerformDataBinding()`, filtering/sorting, paging state in ViewState, child GridView binding
+
+**Rationale:** ASCX controls exercise 50% of Web Forms component patterns. Custom controls hit the other 50%: programmatic control creation (CompositeControl), template-driven rendering (ITemplate), postback handling (IPostBackEventHandler/IPostBackDataHandler), ViewState management at control level, custom events, and DataBoundControl patterns. These patterns appear frequently in enterprise Web Forms and require distinct migration logic.
+
+**Key migration challenge differences:**
+- ASCX: markup-defined child controls, declarative data binding, server-side include pattern
+- Custom controls: code-defined control tree (CreateChildControls), imperative binding (PerformDataBinding), postback events as method implementations
+
+**Architecture note:** Custom controls differ from ASCX in control tree construction (code vs markup) and event routing (method implementation vs page event handlers). The migration strategy must handle both patterns: ASCX→Blazor component markup, custom controls→Blazor component C# class with programmatic child binding.
+
+**File additions to planning doc:**
+- Section 3: Custom Server Controls (6 controls, 7 subsections, ~600 lines)
+- Updated Executive Summary (Purpose, Gap Analysis, Target reflect custom controls scope)
+- Renumbered Sections 4-14 (Custom Base Classes now §4, Page Inventory §5, etc.)
+
+**Decision:** Planning doc finalized. Custom controls scope is *designed, not implemented*. Implementation will verify these patterns execute on .NET Framework 4.8, render correct HTML, and exercise the code-based control creation patterns Blazor components must simulate. Approved for L1 scripting phase.
