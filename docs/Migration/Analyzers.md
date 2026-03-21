@@ -37,6 +37,8 @@ Once installed, diagnostics appear automatically in Visual Studio's Error List a
 | [BWFC010](#bwfc010-required-attribute-missing) | ℹ️ Info | Required Attribute Missing | BWFC components instantiated without critical properties |
 | [BWFC011](#bwfc011-event-handler-signature) | ℹ️ Info | Event Handler Signature | Methods with `(object sender, EventArgs e)` signature |
 | [BWFC012](#bwfc012-runatserver-leftover) | ⚠️ Warning | runat="server" Leftover | String literals containing `runat="server"` |
+| [BWFC013](#bwfc013-response-object-usage) | ⚠️ Warning | Response Object Usage | `Response.Write()`, `Response.WriteFile()`, `Response.Clear()`, `Response.Flush()`, `Response.End()` |
+| [BWFC014](#bwfc014-request-object-usage) | ⚠️ Warning | Request Object Usage | `Request.Form[]`, `Request.Cookies[]`, `Request.Headers[]`, `Request.Files`, `Request.QueryString[]`, `Request.ServerVariables[]` |
 
 ---
 
@@ -451,6 +453,367 @@ String literals in C# code that contain `runat="server"` or `runat='server'` (ca
 ### Code Fix
 
 Removes the `runat="server"` substring (and any leading whitespace before it) from the string literal.
+
+---
+
+## BWFC013: Response Object Usage
+
+**Severity:** ⚠️ Warning  
+**Category:** Usage
+
+### What It Detects
+
+Calls to `Response.Write()`, `Response.WriteFile()`, `Response.Clear()`, `Response.Flush()`, and `Response.End()`. Blazor has no `HttpResponse` object available in components — it uses markup rendering and result objects instead.
+
+### Why It Matters
+
+The Web Forms `Response` object is tightly coupled to the HTTP request-response cycle. In Blazor Server (which uses SignalR over WebSocket) and Blazor WebAssembly (which runs client-side), there is no `HttpResponse` to write to. These methods either fail at runtime or require the BWFC compatibility shim, which is meant as a stepping stone, not a long-term solution.
+
+Each method maps to a different Blazor pattern:
+
+| Web Forms Method | Blazor Equivalent |
+|-----------------|-------------------|
+| `Response.Write()` | Markup rendering (component state + template) |
+| `Response.WriteFile()` | `FileResult` (from minimal API) or `HttpClient` for file downloads |
+| `Response.Clear()` | Not needed — use `@if` conditionals in markup |
+| `Response.Flush()` | Not needed — streaming is automatic in Blazor Server |
+| `Response.End()` | Early return from event handler + state update |
+
+### Example
+
+=== "Before (triggers BWFC013)"
+    ```csharp
+    protected void ExportButton_Click(object sender, EventArgs e)
+    {
+        Response.Clear();
+        Response.Write("<html><body>");
+        Response.Write(GenerateReport());
+        Response.Write("</body></html>");
+        Response.End();
+    }
+    ```
+
+=== "After (code fix applied)"
+    ```csharp
+    // TODO: Replace Response.Write/Clear/End with markup rendering or FileResult
+    protected void ExportButton_Click(object sender, EventArgs e)
+    {
+        // TODO: Replace Response.Write/Clear/End with markup rendering or FileResult
+        // TODO: Replace Response.Write/Clear/End with markup rendering or FileResult
+        // TODO: Replace Response.Write/Clear/End with markup rendering or FileResult
+        // TODO: Replace Response.Write/Clear/End with markup rendering or FileResult
+    }
+    ```
+
+### Code Fix
+
+Comments out each `Response` method call and adds a `// TODO` comment pointing to the appropriate Blazor pattern.
+
+### Recommended Patterns
+
+**For writing HTML content to the page:**
+
+Instead of `Response.Write()`, use component state and markup:
+
+```csharp
+@page "/report"
+@implements IAsyncDisposable
+
+<div>
+    @if (!string.IsNullOrEmpty(ReportHtml))
+    {
+        @((MarkupString)ReportHtml)
+    }
+</div>
+
+@code {
+    private string ReportHtml { get; set; }
+
+    private void ExportButton_Click()
+    {
+        ReportHtml = GenerateReport();
+    }
+}
+```
+
+**For file downloads:**
+
+Use a minimal API endpoint that returns `FileResult`:
+
+```csharp
+// In Program.cs or a service:
+app.MapGet("/api/export-report", async () =>
+{
+    var fileBytes = GenerateReportFile();
+    return Results.File(fileBytes, "application/pdf", "report.pdf");
+});
+
+// In your component:
+@inject NavigationManager Navigation
+
+private void ExportButton_Click()
+{
+    Navigation.NavigateTo("/api/export-report", forceLoad: true);
+}
+```
+
+---
+
+## BWFC014: Request Object Usage
+
+**Severity:** ⚠️ Warning  
+**Category:** Usage
+
+### What It Detects
+
+Access to `Request.Form[]`, `Request.Cookies[]`, `Request.Headers[]`, `Request.Files`, `Request.QueryString[]`, and `Request.ServerVariables[]`. Blazor does not expose an `HttpRequest` object in components — data flows through components properties, form binding, and `HttpContextAccessor` (Blazor Server only).
+
+### Why It Matters
+
+The Web Forms `Request` object provided a centralized way to access browser-sent data. In Blazor:
+
+- **Query strings** — Passed as route parameters or via `NavigationManager.Uri`
+- **Form data** — Bound to component properties using `@bind`
+- **Cookies** — Accessed via `HttpContextAccessor` (Blazor Server only) or JavaScript interop
+- **Headers** — Accessed via `HttpContextAccessor` (Blazor Server only)
+- **Uploaded files** — Handled by `InputFile` component, not raw file access
+
+Leaving `Request` calls in place will fail at runtime or require compatibility shims.
+
+### Example
+
+=== "Before (triggers BWFC014)"
+    ```csharp
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        var userId = Request.QueryString["id"];
+        var email = Request.Form["email"];
+        var sessionId = Request.Cookies["session"];
+        var apiKey = Request.Headers["X-API-Key"];
+        
+        if (Request.Files.Count > 0)
+        {
+            var file = Request.Files[0];
+        }
+    }
+    ```
+
+=== "After (code fix applied)"
+    ```csharp
+    // TODO: Replace Request.QueryString[] with route parameters or NavigationManager.Uri
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        // TODO: Replace Request.QueryString[] with route parameters or NavigationManager.Uri
+        // TODO: Replace Request.Form[] with @bind or parameter binding
+        // TODO: Replace Request.Cookies[] with HttpContextAccessor (Blazor Server) or JS interop
+        // TODO: Replace Request.Headers[] with HttpContextAccessor (Blazor Server)
+        
+        // TODO: Replace Request.Files with InputFile component
+    }
+    ```
+
+### Code Fix
+
+Comments out each `Request` access and adds a `// TODO` comment pointing to the appropriate Blazor pattern.
+
+### Recommended Patterns
+
+**For query string parameters:**
+
+Use route parameters in your `@page` directive:
+
+```razor
+@page "/products/{ProductId:int}"
+
+<h1>Product @ProductId</h1>
+
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+}
+```
+
+**For form data:**
+
+Use `@bind` two-way binding:
+
+```razor
+<input @bind="Email" />
+<button @onclick="HandleSubmit">Submit</button>
+
+@code {
+    private string Email { get; set; }
+
+    private void HandleSubmit()
+    {
+        // Email is already populated
+    }
+}
+```
+
+**For cookies (Blazor Server):**
+
+Use `HttpContextAccessor`:
+
+```csharp
+@inject HttpContextAccessor HttpContextAccessor
+
+@code {
+    private string GetCookie(string name)
+    {
+        var context = HttpContextAccessor.HttpContext;
+        if (context?.Request.Cookies.TryGetValue(name, out var value) ?? false)
+        {
+            return value;
+        }
+        return null;
+    }
+}
+```
+
+**For headers (Blazor Server):**
+
+Also use `HttpContextAccessor`:
+
+```csharp
+private string GetHeader(string name)
+{
+    var context = HttpContextAccessor.HttpContext;
+    if (context?.Request.Headers.TryGetValue(name, out var value) ?? false)
+    {
+        return value.ToString();
+    }
+    return null;
+}
+```
+
+**For file uploads:**
+
+Use the `InputFile` component:
+
+```razor
+<InputFile OnChange="HandleFileSelected" />
+
+@code {
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        using var stream = file.OpenReadStream(maxAllowedSize: 1_000_000);
+        // Process file stream
+    }
+}
+```
+
+!!! note "See Also"
+    The [InputFile documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor/file-uploads) explains how to use the component for file handling in Blazor.
+
+---
+
+## Using Analyzers in CI/CD
+
+The analyzers integrate seamlessly with `dotnet build` and CI/CD pipelines. You can configure severity levels per rule and fail the build on violations.
+
+### Example: .editorconfig for CI Enforcement
+
+```ini
+# .editorconfig — enforce analyzer rules in CI
+
+# Mandatory rules: fail the build
+dotnet_diagnostic.BWFC001.severity = error
+dotnet_diagnostic.BWFC003.severity = error
+dotnet_diagnostic.BWFC004.severity = error
+
+# Important patterns: treat as warnings
+dotnet_diagnostic.BWFC002.severity = warning
+dotnet_diagnostic.BWFC005.severity = warning
+dotnet_diagnostic.BWFC011.severity = warning
+dotnet_diagnostic.BWFC012.severity = warning
+dotnet_diagnostic.BWFC013.severity = warning
+dotnet_diagnostic.BWFC014.severity = warning
+
+# Informational patterns: visible but don't block build
+dotnet_diagnostic.BWFC010.severity = suggestion
+```
+
+### CI Workflow
+
+```bash
+# Build the project — BWFC violations will appear as compiler warnings/errors
+dotnet build MyBlazorProject.csproj
+
+# In CI scripts, check for BWFC violations:
+dotnet build MyBlazorProject.csproj --no-restore 2>&1 | grep "BWFC"
+if [ $? -eq 0 ]; then
+    echo "Web Forms migration violations detected"
+    exit 1
+fi
+```
+
+### Notes
+
+- All BWFC diagnostics use the format `BWFC{NNN}` and can be configured via standard Roslyn mechanisms
+- Build-time diagnostics are consistent with editor diagnostics
+- Use `.editorconfig` to customize severity per project, not per file
+- For bulk suppression (migrating a large codebase), set all rules to `suggestion` initially, then upgrade as you clean up
+
+---
+
+## Prioritization Guide: Which Rules to Fix First
+
+If you're migrating a large application, fix analyzers in this order:
+
+### Phase 1: Blocking Patterns (Fix First)
+
+These patterns prevent your components from working at all:
+
+1. **BWFC001** — Missing `[Parameter]` on public properties
+   - Components silently ignore bound values → visual regression
+   - Usually quick fixes (add one attribute per property)
+
+2. **BWFC003** — `IsPostBack` checks
+   - Affects page initialization and event handling
+   - Core logic may depend on this check
+   - Need to refactor to `OnInitialized` / event handlers
+
+3. **BWFC004** — `Response.Redirect()` calls
+   - All navigation breaks → user can't move between pages
+   - Quick 1:1 replacement with `NavigationManager.NavigateTo()`
+
+4. **BWFC011** — Old event handler signatures
+   - Event handlers won't fire → broken interactions
+   - Prevents using Blazor's `@onclick`, `@onchange`, etc.
+
+### Phase 2: Data & State Patterns (Fix Next)
+
+These affect how data flows through your app:
+
+5. **BWFC002** — `ViewState` usage
+   - Replace with component fields/properties
+   - May require refactoring persistence logic
+
+6. **BWFC005** — `Session` and `HttpContext` access
+   - Replace with scoped services, protected storage, etc.
+   - Medium complexity depending on scope
+
+7. **BWFC014** — `Request` object usage
+   - Replace with route parameters, `@bind`, `InputFile`, etc.
+   - Usually straightforward per-instance fixes
+
+### Phase 3: Output & Response Patterns (Fix Last)
+
+These are less common and more specialized:
+
+8. **BWFC013** — `Response.Write()`, `Response.WriteFile()`, etc.
+   - Less common in modern applications
+   - Usually isolated to reporting/export features
+
+9. **BWFC012** — `runat="server"` in strings
+   - Pure string cleanup, no logic impact
+   - Can be done last as a polish pass
+
+10. **BWFC010** — Missing required attributes
+    - Usually caught by testing; low risk
+    - Fix as you discover missing data
 
 ---
 

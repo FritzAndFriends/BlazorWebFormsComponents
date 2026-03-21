@@ -468,3 +468,35 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 3. **CS1503** in GridView/Selection.razor — SelectedIndexChanged handler took int but component expects EventCallback<GridViewSelectEventArgs>. Changed handler (and code example) to accept GridViewSelectEventArgs.
 
 **Key insight:** Always check the base class parameter types — ImageButton inherits OnClick from ButtonBaseComponent which uses EventArgs, not MouseEventArgs. GridView's SelectedIndexChanged was recently changed to GridViewSelectEventArgs (matching Web Forms behavior).
+
+### BWFC013 + BWFC014 Analyzer Implementation (2026-03-20)
+
+**Summary:** Implemented two new Roslyn analyzers following established patterns (ResponseRedirect/Session as templates).
+
+- **BWFC013 ResponseObjectUsageAnalyzer:** Detects Response.Write(), WriteFile(), Clear(), Flush(), End() via InvocationExpression + ImmutableHashSet method matching. Code fix replaces with TODO comment.
+- **BWFC014 RequestObjectUsageAnalyzer:** Detects Request.Form/Cookies/Headers/QueryString/ServerVariables["key"] via ElementAccessExpression, and Request.Files via SimpleMemberAccessExpression. Code fix replaces with TODO comment.
+- Both analyzers use xpressionText.EndsWith(".Response") / .EndsWith(".Request") pattern to match 	his.Response, HttpContext.Current.Response, and any *.Response prefix.
+- 21 new tests (10 for BWFC013, 11 for BWFC014): 5+6 positive, 3+3 negative, 2+2 code fix tests.
+- Updated AllAnalyzersIntegrationTests ExpectedIds and analyzer count (810).
+- Updated AnalyzerReleases.Unshipped.md with both rules.
+- All 111 tests pass (90 existing + 21 new).
+
+**Key patterns:** Code fix uses EmptyStatement with SyntaxFactory.EndOfLine("\r\n") between comment trivia and semicolon. BWFC014 registers for both ElementAccessExpression (indexed properties) and SimpleMemberAccessExpression (direct properties like Files), with parent-check to avoid double-reporting.
+
+
+ **Team update (2026-03-20):** BWFC013/BWFC014 analyzers + architecture (6 files, 21 tests, 111 passing, commit b267b854). PR #487 opened on upstream. Next analyzer ID: BWFC015.  decided by Cyclops
+
+### NuGet Analyzer Integration + L1 Prescan Switch (2026-03-20)
+
+**Summary:** Two tasks completed on feature/analyzer-sprint1:
+
+1. **NuGet Analyzer Integration** — Added ProjectReference from BlazorWebFormsComponents.csproj to BlazorWebFormsComponents.Analyzers.csproj with `PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer"`. Consumers now get Roslyn analyzers automatically when referencing the main NuGet package.
+
+2. **L1/L2 Pipeline Pre-Scan** — Added `-Prescan` switch to `bwfc-migrate.ps1`. Scans source .cs files for 9 BWFC analyzer patterns (BWFC001-005, 011-014) and outputs JSON summary with file-level detail + human-readable breakdown. Early return — no migration transforms executed.
+
+**Verification:** Build succeeds (0 errors), all 111 analyzer tests pass, prescan tested against src/ (1,092 matches across 176 files).
+
+
+### CI Workflow: Analyzer Tests Added (2026-03-20)
+
+**Summary:** Updated .github/workflows/build.yml to restore, build, run, upload, and publish analyzer test results alongside the existing unit tests. Also replaced the squad-ci.yml placeholder with real dotnet restore/build/test commands covering both test suites, including setup-dotnet for .NET 10. YAML validated with Python yaml parser.

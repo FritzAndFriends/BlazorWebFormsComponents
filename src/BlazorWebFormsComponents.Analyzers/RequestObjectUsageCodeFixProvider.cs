@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 namespace BlazorWebFormsComponents.Analyzers
 {
     /// <summary>
-    /// Code fix provider that replaces Response.Redirect() calls with a TODO comment
-    /// pointing to NavigationManager.NavigateTo().
+    /// Code fix provider that replaces Request object property access with a TODO comment
+    /// pointing to BWFC migration docs.
     /// </summary>
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ResponseRedirectCodeFixProvider)), Shared]
-    public class ResponseRedirectCodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RequestObjectUsageCodeFixProvider)), Shared]
+    public class RequestObjectUsageCodeFixProvider : CodeFixProvider
     {
-        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(ResponseRedirectAnalyzer.DiagnosticId);
+        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(RequestObjectUsageAnalyzer.DiagnosticId);
 
         public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -30,28 +30,38 @@ namespace BlazorWebFormsComponents.Analyzers
 
             var node = root.FindNode(diagnosticSpan);
 
+            // Extract the property name from the diagnostic
+            var propertyName = "Property";
+            if (node is ElementAccessExpressionSyntax elementAccess &&
+                elementAccess.Expression is MemberAccessExpressionSyntax memberAccess)
+            {
+                propertyName = memberAccess.Name.Identifier.Text;
+            }
+            else if (node is MemberAccessExpressionSyntax directAccess)
+            {
+                propertyName = directAccess.Name.Identifier.Text;
+            }
+
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    title: "Replace with NavigationManager.NavigateTo() TODO",
-                    createChangedDocument: c => ReplaceWithTodoCommentAsync(context.Document, node, c),
-                    equivalenceKey: "Replace with NavigationManager.NavigateTo() TODO"),
+                    title: "Replace with TODO comment",
+                    createChangedDocument: c => ReplaceWithTodoCommentAsync(context.Document, node, propertyName, c),
+                    equivalenceKey: "Replace Request access with TODO"),
                 diagnostic);
         }
 
-        private async Task<Document> ReplaceWithTodoCommentAsync(Document document, SyntaxNode node, CancellationToken cancellationToken)
+        private async Task<Document> ReplaceWithTodoCommentAsync(Document document, SyntaxNode node, string propertyName, CancellationToken cancellationToken)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
-            var statement = node.FirstAncestorOrSelf<ExpressionStatementSyntax>();
+            var statement = node.FirstAncestorOrSelf<StatementSyntax>();
             if (statement == null)
             {
                 return document;
             }
 
-            var expressionText = node.ToString();
-
             var todoComment = SyntaxFactory.Comment(
-                "// TODO: Replace " + expressionText + " with NavigationManager.NavigateTo(\"url\")");
+                "// TODO: Replace Request." + propertyName + " access with Blazor equivalent");
 
             var indentation = statement.GetLeadingTrivia()
                 .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia))

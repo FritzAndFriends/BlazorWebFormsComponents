@@ -430,3 +430,7 @@ Jeff directed a design pivot: replace custom `[HandlerRoute]` attribute + `MapBl
 **Impact:** ~100 fewer lines of production code (400 vs 500). One fewer file (`HandlerRouteAttribute.cs` gone). Issue 2 (routing) shrinks from Size S to XS. Estimated timeline: 2-3 weeks (was 3-4). Adapter layer (`HttpHandlerContext`, `HttpHandlerResponse`, `HttpHandlerServer`) completely unchanged.
 
 **Learning:** Original §7.3 rejected Minimal API because "they require completely different code structure." Wrong framing — Jeff's insight is to use Minimal API as *registration and dispatch infrastructure* while keeping the `HttpHandlerBase` class structure intact. The handler code developers write is nearly identical. Only the plumbing underneath changes.
+
+
+ **Team update (2026-03-20):** Component audit recommendations merged (March 2026 prioritization guide). 52/54 components at 100% health (96.3%). Tier 1 quick wins identified: FileUpload properties, infrastructure docs, View docs, ScriptManager decision.  decided by Forge
+

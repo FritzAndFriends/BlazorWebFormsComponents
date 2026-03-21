@@ -57,7 +57,7 @@ namespace BlazorWebFormsComponents.Analyzers
             {
                 var usingDirective = SyntaxFactory.UsingDirective(
                     SyntaxFactory.ParseName("Microsoft.AspNetCore.Components"))
-                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                    .WithTrailingTrivia(newRoot.DetectEndOfLine());
 
                 newRoot = compilationUnit.AddUsings(usingDirective);
             }

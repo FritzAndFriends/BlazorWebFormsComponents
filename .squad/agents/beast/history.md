@@ -497,3 +497,69 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 - Created docs/ValidationControls/BaseValidator.md 
 - Created docs/ValidationControls/BaseCompareValidator.md
 - Updated mkdocs.yml (Validation Controls section)
+
+### Analyzer Architecture & Expansion Documentation (Feature/analyzer-sprint1)
+
+**Delivered:** Comprehensive analyzer contributor guide and expanded rule documentation for BWFC013 and BWFC014 rules.
+
+**Files created/updated:**
+1. **dev-docs/ANALYZER-ARCHITECTURE.md** (18.7 KB, new)  Contributor guide for developing new Roslyn analyzers
+2. **docs/Migration/Analyzers.md** (updated)  Added BWFC013 (Response Object Usage) and BWFC014 (Request Object Usage) rule documentation
+
+**ANALYZER-ARCHITECTURE.md content:**
+- **Project Layout**  File naming convention, rule ID assignment, directory structure (Analyzers/ and Analyzers.Test/)
+- **DiagnosticAnalyzer anatomy**  Minimum viable structure with DiagnosticDescriptor, Initialize(), SyntaxKind callbacks, SeverityLevels (Hidden/Info/Warning/Error)
+- **CodeFixProvider anatomy**  BatchFixer pattern, RegisterCodeFixesAsync, trivia preservation, async best practices
+- **Testing strategy**  CSharpAnalyzerTest/CSharpCodeFixTest patterns, stub types for external dependencies ({|#N:code|} markers), positive/negative/edge cases
+- **Common pitfalls**  Trivia handling (EndOfLine between comment/semicolon), null guards on ancestor traversal, SyntaxKind selection mistakes, string comparisons vs syntax API, message format arguments
+- **PR checklist**  Analyzer implementation (7 items), CodeFixProvider (8 items), Testing (6 items), Documentation (5 items), Integration (3 items)
+- **Reference implementation**  Points to ResponseRedirectAnalyzer as working example
+- **Build/test commands**  dotnet build, test, pack workflows
+
+**Analyzers.md updates:**
+- **Updated summary table**  Added BWFC013 and BWFC014 to rule matrix
+- **BWFC013: Response Object Usage**  Detects Response.Write(), WriteFile(), Clear(), Flush(), End()
+  - Mapping table: Web Forms method  Blazor equivalent (markup rendering, FileResult, not needed, not needed, early return)
+  - Before/after example: HTML export page  markup-based rendering
+  - Recommended patterns: component state + markup for write, minimal API endpoint with FileResult for writeFile
+- **BWFC014: Request Object Usage**  Detects Request.Form[], Cookies[], Headers[], Files, QueryString[], ServerVariables[]
+  - Mapping table: Request collection  Blazor equivalent (form binding, HttpContextAccessor, InputFile, nav params, etc.)
+  - Before/after example: Page_Load with multiple Request accesses  component with recommended patterns
+  - Recommended patterns: route parameters (QueryString), @bind (Form), HttpContextAccessor (Cookies/Headers for Blazor Server), InputFile (Files)
+- **"Using Analyzers in CI/CD" section** (new)  .editorconfig per-rule severity settings, dotnet build integration, grep for violations in CI scripts
+- **"Prioritization Guide: Which Rules to Fix First"** (new)  Phase 1 (Blocking: BWFC001, BWFC003, BWFC004, BWFC011), Phase 2 (Data: BWFC002, BWFC005, BWFC014), Phase 3 (Output: BWFC013, BWFC012, BWFC010)
+
+**Format & style:**
+- Analyzer guide written for experienced C# developers contributing new rules (Cyclops' audience)
+- Analyzers.md entries written for Web Forms developers learning to interpret/fix violations
+- All code examples are complete and compilable (test-driven)
+- Admonitions (!!! note, !!! warning, !!! tip) for actionable insights
+- Before/After pairs show real Web Forms patterns and Blazor migrations
+- Tables for quick reference (SyntaxKind callbacks, mapping tables, phase priorities)
+- Consistent with existing BWFC doc style (Deprecation Guidance, MigratingAshxHandlers)
+
+**MkDocs verification:**
+- Ran python -m mkdocs build --strict  0 errors, 54.08s build time
+- Unshipped analyzer notes already present in AnalyzerReleases.Unshipped.md (BWFC013, BWFC014 added by Cyclops in advance)
+- No documentation links or cross-references broken
+
+**Design decisions:**
+- ANALYZER-ARCHITECTURE.md placed in dev-docs/ (developer-only, not end-user docs) vs docs/ (migration user-facing)
+- Prioritization guide ordered by business impact (blocking patterns first) vs alphabetical, with rationale for each phase
+- CI/CD section emphasizes dotnet build + .editorconfig as the primary integration point, with note that detailed CI templates are "available separately"
+- Request.Form[]  @bind example is the most direct mapping; QueryString examples show both route parameters and NavigationManager.Uri approaches
+
+**Audience understanding:**
+- Analyzer rules address code-behind patterns (BWFC001BWFC005: property/state/event patterns; BWFC010BWFC014: specific object usage)
+- Developers see these rules in Visual Studio's Error List after L1 migration script + L2 Copilot transforms
+- Rules guide developers from "code compiles but behaves wrong" (blindspots) to "code compiles and works correctly" (full migration)
+- Prioritization guide helps developers allocate effort, fixing high-impact rules first to unblock testing/UAT
+
+**Branch:** eature/analyzer-sprint1  
+**Tests:** All analyzer tests in Analyzers.Test/ pass (no new analyzer implementations in this doc-only sprint)  
+**Verified:** MkDocs build passes strict mode, no broken links or syntax errors in markdown
+
+
+
+ **Team update (2026-03-20):** Analyzer architecture guide (579 lines) + expanded Analyzers.md (+363 lines). Deprecation Guidance docs (#438, 32 KB). BaseValidator/BaseCompareValidator base class docs. MkDocs strict build clean. PR #487 opened on upstream.  decided by Beast
+
