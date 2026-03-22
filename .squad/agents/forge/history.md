@@ -576,3 +576,30 @@ Analysis written to `.squad/decisions/inbox/forge-departmentportal-migration-pla
 
 
  Team update (2026-03-22): Upstream issue creation completed  7 GitHub issues created on FritzAndFriends/BlazorWebFormsComponents (#490 P1 DataBoundWebControl, #491 P4 CompositeControl, #492 P2 TagKey, #493 P3 HtmlTextWriter, #494 P5 ITemplate, #495 User Controls docs, #496 FindControl)  decided by Forge
+
+### P1–P5 Drop-in Replacement Implementation Plan (2026-03-22)
+
+**Created comprehensive implementation plan** for addressing all 7 upstream issues (#490–#496) with drop-in replacement shimming. Key decisions:
+
+1. **Implementation order:** P2 (TagKey) → P3 (enums) → P1 (DataBoundWebControl) → P4 (CompositeControl) → P5 (TemplatedWebControl) → FindControl → Docs. P2 is foundation because Web Forms Render() pipeline depends on TagKey/AddAttributesToRender.
+
+2. **Namespace: `BlazorWebFormsComponents.CustomControls`** — NOT `System.Web.UI`. Avoids conflicts with any remaining Web Forms references during incremental migration.
+
+3. **WebControl.Render() breaking change accepted:** Default Render() changes from no-op to auto-rendering outer tag via TagKey. Matches Web Forms behavior. Controls overriding Render() unaffected.
+
+4. **Postback controls (DepartmentBreadcrumb, PollQuestion) cannot be shimmed** — IPostBackEventHandler/GetPostBackEventReference require manual rewrite to EventCallback/@onclick. Documented as migration pattern, not shim target.
+
+5. **ITemplate → RenderFragment is documentation + TemplatedWebControl base class** — no fake ITemplate interface. The paradigms are fundamentally different (imperative vs declarative).
+
+6. **FindControl: guidance-first with FindControlRecursive bridge** — existing FindControl compiles but doesn't traverse deep. Add opt-in recursive version, but document @ref/CascadingParameter/EventCallback as the real target.
+
+7. **4 new files, 4 modified files, ~9 days estimated effort.** Net-new: DataBoundWebControl.cs, LiteralControl.cs, ShimControls.cs, TemplatedWebControl.cs.
+
+**Learnings:**
+- Web Forms WebControl.Render() is NOT a blank canvas — it's a structured pipeline (AddAttributesToRender → RenderBeginTag → RenderContents → RenderEndTag). BWFC's current Render() as a virtual no-op is incorrect.
+- 5 of 7 DepartmentPortal custom controls can be drop-in shimmed; 2 (postback-based) require manual rewrite.
+- The DataBoundWebControl gap is the single biggest blocker — data-heavy migrations (grids, lists) all hit this.
+
+Plan written to session workspace plan.md. Architecture decisions written to `.squad/decisions/inbox/forge-p1p5-plan.md`.
+
+📡 Team update (2026-03-22): P1–P5 implementation plan completed — 6 phases, 4 new files, 4 modified files, ~9 days. Execution order: P2→P3→P1→P4→P5→FindControl. Key: WebControl gets proper Render pipeline, 4 new shim types, namespace stays in BWFC.CustomControls. ✅ decided by Forge

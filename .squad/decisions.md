@@ -11911,3 +11911,67 @@ Once issues are created upstream, update this file with issue numbers and close 
 - Authentication barrier: Copilot's token lacks upstream write permissions; manual creation required by org maintainers
 - `FindControl` discovery: Web Forms control tree traversal is incompatible with flat search; migration guidance should favor `@ref`/`CascadingParameter`/`EventCallback`
 
+
+### 2026-03-22: P1-P5 Custom Controls Implementation Order --- P2 before P1
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**What:** Implement TagKey/AddAttributesToRender (#492, P2) BEFORE DataBoundWebControl (#490, P1), even though P1 has higher priority. Execution order: P2 -> P3 -> P1 -> P4 -> P5.
+
+**Why:** Web Forms WebControl.Render() delegates to RenderBeginTag()->AddAttributesToRender()->RenderContents()->RenderEndTag(). DataBoundWebControl inherits from WebControl and relies on this pipeline for outer tag rendering. Building P1 without P2 would require temporary workarounds that get thrown away.
+
+### 2026-03-22: P1-P5 Custom Controls --- Namespace in BlazorWebFormsComponents.CustomControls
+
+**By:** Forge (Lead)
+
+**What:** All shim types (Panel, LiteralControl, PlaceHolder, HtmlGenericControl, DataBoundWebControl, TemplatedWebControl) live in BlazorWebFormsComponents.CustomControls, NOT in System.Web.UI.
+
+**Why:** Creating a System.Web.UI namespace would conflict if any Web Forms assembly reference remains during migration (common in incremental migrations). One using change is acceptable and makes the shim nature explicit.
+
+### 2026-03-22: P1-P5 Custom Controls --- WebControl.Render() auto-renders outer tag
+
+**By:** Forge (Lead)
+
+**What:** The default WebControl.Render() changes from doing nothing to rendering <span> (via TagKey) wrapping RenderContents() output. Controls overriding Render() are unaffected. Controls overriding only RenderContents() now correctly get a wrapper tag. The private AddBaseAttributes() method is removed --- its logic moves to the new virtual AddAttributesToRender().
+
+**Why:** This matches Web Forms behavior exactly. Low risk: any control that previously relied on Render() doing nothing was already broken.
+
+### 2026-03-22: P1-P5 Custom Controls --- FindControl + FindControlRecursive
+
+**By:** Forge (Lead)
+
+**What:** Add FindControlRecursive(string id) to BaseWebFormsComponent as opt-in deep search. Primary recommendation is migration to @ref, CascadingParameter, EventCallback, DI.
+
+**Why:** The "just works" tenet says make code compile. Existing FindControl only searches flat. FindControlRecursive bridges deep-search cases. But the Blazor-native patterns are fundamentally better and should be the documented target.
+
+### 2026-03-22: P1-P5 Custom Controls --- ITemplate bridging via TemplatedWebControl
+
+**By:** Forge (Lead)
+
+**What:** Do NOT create an ITemplate interface in BWFC. Instead: document the ITemplate -> RenderFragment mapping, and provide a TemplatedWebControl base class with RenderTemplate(writer, fragment) helper.
+
+**Why:** ITemplate.InstantiateIn() is imperative (creates control instances). RenderFragment is declarative (describes UI). These are fundamentally incompatible paradigms. A fake ITemplate would mislead developers. Clean mapping documentation + useful base class is the right approach.
+
+### 2026-03-22: P1-P5 Custom Controls --- Postback controls cannot be drop-in shimmed
+
+**By:** Forge (Lead)
+
+**What:** Controls using IPostBackEventHandler, Page.ClientScript.GetPostBackEventReference, or RaisePostBackEvent require manual rewrite to EventCallback/@onclick. Examples: DepartmentBreadcrumb, PollQuestion.
+
+**Why:** Postback is a server-round-trip model with no Blazor equivalent. Document the migration pattern but don't pretend these can be shimmed.
+
+### 2026-03-22: P1-P5 Custom Controls --- HtmlTextWriter data-* attributes stay string-based
+
+**By:** Forge (Lead)
+
+**What:** Common ARIA attributes (aria-label, aria-hidden, etc.) get enum members in HtmlTextWriter. data-* attributes use the existing string-based AddAttribute("data-foo", value) overload.
+
+**Why:** data-* is an infinite namespace --- can't enumerate all possible names. The string overload already works. ARIA attributes are finite and benefit from IntelliSense.
+
+### 2026-03-22: Drop-in Replacement Tenet --- User Directive
+
+**By:** Jeffrey T. Fritz (via Copilot)
+
+**What:** BWFC must adhere to 'drop-in replacement' tenet: shim and create objects that allow old Web Forms custom control code to 'just work' when pointed at BWFC's library. No rewriting required by the migrating developer.
+
+**Why:** Core design principle for P1-P5 feature gap work. Captured for team memory and decision guidance.
