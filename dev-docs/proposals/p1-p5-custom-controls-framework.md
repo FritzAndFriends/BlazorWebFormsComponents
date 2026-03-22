@@ -20,7 +20,7 @@ The P1–P5 Custom Controls framework extends BWFC's `CustomControls/` namespace
 | P1 | #490 | `DataBoundWebControl` + `DataBoundWebControl<T>` | `DataBoundWebControl.cs` |
 | P4 | #491 | `CompositeControl` fix + shim types | `CompositeControl.cs`, `LiteralControl.cs`, `ShimControls.cs` |
 | P5 | #494 | `TemplatedWebControl` (ITemplate → RenderFragment bridge) | `TemplatedWebControl.cs` |
-| — | #496 | `FindControlRecursive` on `BaseWebFormsComponent` | `BaseWebFormsComponent.cs` |
+| — | #496 | `FindControl` (recursive) on `BaseWebFormsComponent` | `BaseWebFormsComponent.cs` |
 
 ### Validation
 
@@ -36,7 +36,7 @@ The P1–P5 Custom Controls framework extends BWFC's `CustomControls/` namespace
 ### Class Hierarchy
 
 ```
-BaseWebFormsComponent                        (BWFC base — ID, Controls, FindControlRecursive)
+BaseWebFormsComponent                        (BWFC base — ID, Controls, FindControl)
   └── BaseStyledComponent                    (CssClass, Style, Enabled, Visible, ToolTip, ForeColor, etc.)
         └── WebControl                       (TagKey, Render pipeline, AddAttributesToRender)
               ├── DataBoundWebControl         (DataSource, PerformDataBinding, OnDataBound)
@@ -125,7 +125,7 @@ This means `AddAttributesToRender` is called **before** `Render`, and the pendin
 
 **Inherited from `BaseStyledComponent`:** `CssClass`, `Style`, `Enabled`, `Visible`, `ToolTip`, `ForeColor`, `BackColor`, `Font`, `Height`, `Width`, `BorderColor`, `BorderStyle`, `BorderWidth`
 
-**Inherited from `BaseWebFormsComponent`:** `ID`, `ClientID`, `Controls`, `Parent`, `FindControlRecursive(string)`
+**Inherited from `BaseWebFormsComponent`:** `ID`, `ClientID`, `Controls`, `Parent`, `FindControl(string)`
 
 ### 3.2 DataBoundWebControl
 
@@ -242,13 +242,13 @@ This means `AddAttributesToRender` is called **before** `Render`, and the pendin
 
 Marker interface. Controls implementing this create a naming scope for child control IDs.
 
-### 3.8 FindControlRecursive
+### 3.8 FindControl
 
 **File:** `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` (line ~382)  
 **Added to:** `BaseWebFormsComponent`
 
 ```csharp
-public BaseWebFormsComponent FindControlRecursive(string controlId)
+public BaseWebFormsComponent FindControl(string controlId)
 ```
 
 - Returns first control with matching `ID`, or `null`.
@@ -669,7 +669,7 @@ The DepartmentPortal sample application contains 7 custom controls. Testing agai
 | [#493](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/493) | P3: HtmlTextWriter enum expansion | P3 (impl order: 2nd) | ✅ Implemented |
 | [#494](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/494) | P5: TemplatedWebControl (ITemplate → RenderFragment bridge) | P5 (impl order: 5th) | ✅ Implemented |
 | [#495](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/495) | Documentation for P1–P5 framework | Docs | 🔄 In Progress |
-| [#496](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/496) | FindControlRecursive | Utility | ✅ Implemented |
+| [#496](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/496) | FindControl (recursive) | Utility | ✅ Implemented |
 
 ---
 
@@ -686,4 +686,4 @@ All new/modified files in the `CustomControls/` namespace:
 | `src/BlazorWebFormsComponents/CustomControls/LiteralControl.cs` | New (P4) | ~30 |
 | `src/BlazorWebFormsComponents/CustomControls/ShimControls.cs` | New (P4) | ~100 |
 | `src/BlazorWebFormsComponents/CustomControls/CompositeControl.cs` | Modified (P4) | ~161 |
-| `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` | Modified (#496) | (FindControlRecursive added) |
+| `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` | Modified (#496) | (FindControl recursive search added) |

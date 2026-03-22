@@ -19,7 +19,6 @@ public class FindControlUsageAnalyzerTests
 public class Control
 {
     public Control FindControl(string id) => null;
-    public Control FindControlRecursive(string id) => null;
 }
 
 public class BaseWebFormsComponent
@@ -171,25 +170,6 @@ public class MyComponent : BaseWebFormsComponent
     {
         BaseWebFormsComponent parent = this;
         var ctl = parent.FindControl(""txtName"");
-    }
-}";
-
-        var test = new AnalyzerTest
-        {
-            TestState = { Sources = { source, StubSource } }
-        };
-        await test.RunAsync();
-    }
-
-    [Fact]
-    public async Task FindControlRecursive_NoDiagnostic()
-    {
-        var source = @"
-public class MyPage : Control
-{
-    public void Page_Load()
-    {
-        var ctl = FindControlRecursive(""txtName"");
     }
 }";
 

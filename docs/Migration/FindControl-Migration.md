@@ -328,29 +328,21 @@ userLabel.Text = GetCurrentUserName();
 
 ---
 
-## BWFC's FindControl — What It Does and Its Limitations
+## BWFC's FindControl — What It Does
 
-The `BaseWebFormsComponent` class provides a `FindControl` method for compatibility:
+The `BaseWebFormsComponent` class provides a `FindControl` method that matches the Web Forms API name:
 
 ```csharp
 public class BaseWebFormsComponent : ComponentBase
 {
-    public Control FindControl(string id)
+    public BaseWebFormsComponent FindControl(string id)
     {
-        // Searches this component's children for matching ID
+        // Recursively searches this component and all descendants for matching ID
     }
 }
 ```
 
-**What it does:** Searches the current component's child controls (those added to its `Controls` collection) for one with the matching ID.
-
-**Limitations:**
-1. Does not cross component boundaries (unlike Web Forms' ability to search through naming containers)
-2. Does not search BWFC components by default — only web control children
-3. Requires controls to be in the `Controls` collection, not in Razor markup
-4. No support for complex predicates or type-safe searches
-
-**When to use it:** Only for migrating old `CompositeControl`-based controls that explicitly build a Controls collection. For new development, prefer the patterns above.
+**What it does:** Searches the current component's child controls and all descendants recursively for one with the matching ID. This mirrors the deep-search behavior that migrated Web Forms code typically expects.
 
 ---
 

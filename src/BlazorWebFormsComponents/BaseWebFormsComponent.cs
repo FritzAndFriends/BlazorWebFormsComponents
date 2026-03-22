@@ -376,23 +376,13 @@ namespace BlazorWebFormsComponents
 		public List<BaseWebFormsComponent> Controls { get; set; } = new List<BaseWebFormsComponent>();
 
 		/// <summary>
-		/// Finds a child control by its ID
-		/// </summary>
-		/// <param name="controlId"> the ID of the child</param>
-		/// <returns></returns>
-		public BaseWebFormsComponent FindControl(string controlId)
-		{
-			return Controls.Find(control => control.ID == controlId);
-		}
-
-		/// <summary>
-		/// Recursively searches this control and all descendants for a control with the specified ID.
-		/// This is useful for finding controls across naming container boundaries, similar to
-		/// a deep FindControl search in Web Forms.
+		/// Searches this control and all descendants for a control with the specified ID.
+		/// Matches the ASP.NET Web Forms Control.FindControl API name for drop-in migration.
+		/// Checks direct children first, then recurses into the full component tree.
 		/// </summary>
 		/// <param name="controlId">The ID of the control to find.</param>
 		/// <returns>The matching control, or null if not found.</returns>
-		public BaseWebFormsComponent FindControlRecursive(string controlId)
+		public BaseWebFormsComponent FindControl(string controlId)
 		{
 			if (string.IsNullOrEmpty(controlId)) return null;
 
@@ -403,7 +393,7 @@ namespace BlazorWebFormsComponents
 			// Recurse into children
 			foreach (var child in Controls)
 			{
-				found = child.FindControlRecursive(controlId);
+				found = child.FindControl(controlId);
 				if (found != null) return found;
 			}
 
