@@ -362,3 +362,5 @@
 
 
  Team update (2026-03-22): AfterDepartmentPortal Blazor SSR scaffold completed and integrated into solution. 31 files, 7 pages, 12 shared components, 6 models. Project builds clean. Decisions merged to shared decisions.md.  decided by Jubilee
+
+**Runnable demo (2026-03-22):** Made AfterDepartmentPortal fully runnable. App.razor now uses Bootstrap 5.3.3 CDN + Bootstrap Icons CDN instead of missing local CSS. Site.css copied from DepartmentPortal source. Home.razor at /home provides navigation cards to all sections. Fixed SectionPanel duplicate CssClass parameter bug (`new` keyword shadowed base class `[Parameter]`, causing AmbiguousMatchException). Dashboard already owns `@page "/"` so Home lives at `/home`. All routes verified returning 200.
