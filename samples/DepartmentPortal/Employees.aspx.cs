@@ -9,7 +9,6 @@ namespace DepartmentPortal
     public partial class EmployeesPage : BasePage
     {
         protected Label EmployeeCountLabel;
-        
         private const int PageSize = 12;
         private int CurrentPageIndex
         {

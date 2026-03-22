@@ -8,21 +8,17 @@ namespace DepartmentPortal.Admin
 {
     public partial class ManageEmployeesPage : BasePage
     {
-        protected GridView EmployeeGridView;
         protected Label EmployeeCountLabel;
-        protected Panel EditEmployeePanel;
         protected Label EditEmployeePanelTitle;
         protected HiddenField EditEmployeeId;
+        protected Panel EditEmployeePanel;
+        protected DropDownList DepartmentDropDownList;
+        protected GridView EmployeeGridView;
         protected TextBox NameTextBox;
         protected TextBox EmailTextBox;
         protected TextBox TitleTextBox;
         protected TextBox PhoneTextBox;
-        protected DropDownList DepartmentDropDownList;
         protected TextBox HireDateTextBox;
-        protected Button AddNewEmployeeButton;
-        protected Button SaveEmployeeButton;
-        protected Button CancelEmployeeButton;
-        
         private string SearchQuery
         {
             get { return ViewState["SearchQuery"] as string ?? string.Empty; }

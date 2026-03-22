@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="QuickStats.ascx.cs" Inherits="DepartmentPortal.Controls.QuickStats" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="QuickStats.ascx.cs" Inherits="DepartmentPortal.Controls.QuickStats" %>
 
 <div class="quick-stats">
     <div class="stat-item" runat="server" id="pnlEmployeeCount" visible="false">

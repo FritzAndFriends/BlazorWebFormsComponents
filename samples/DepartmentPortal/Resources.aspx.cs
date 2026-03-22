@@ -10,7 +10,6 @@ namespace DepartmentPortal
         protected Repeater DocumentsRepeater;
         protected Repeater TemplatesRepeater;
         protected Repeater ToolsRepeater;
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)

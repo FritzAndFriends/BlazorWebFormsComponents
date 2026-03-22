@@ -1,4 +1,4 @@
-<%@ Page Title="Resource Details" Language="C#" AutoEventWireup="true" CodeFile="ResourceDetail.aspx.cs" Inherits="DepartmentPortal.ResourceDetailPage" %>
+<%@ Page Title="Resource Details" Language="C#" AutoEventWireup="true" CodeBehind="ResourceDetail.aspx.cs" Inherits="DepartmentPortal.ResourceDetailPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Footer.ascx" TagName="Footer" TagPrefix="uc" %>

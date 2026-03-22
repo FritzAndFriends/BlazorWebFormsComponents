@@ -8,19 +8,15 @@ namespace DepartmentPortal.Admin
 {
     public partial class ManageAnnouncementsPage : BasePage
     {
-        protected GridView AnnouncementsGridView;
-        protected Panel EditPanel;
         protected Label EditPanelTitle;
         protected HiddenField EditAnnouncementId;
+        protected Panel EditPanel;
+        protected GridView AnnouncementsGridView;
         protected TextBox TitleTextBox;
         protected TextBox BodyTextBox;
         protected TextBox AuthorTextBox;
         protected TextBox PublishDateTextBox;
         protected CheckBox IsActiveCheckBox;
-        protected Button AddNewButton;
-        protected Button SaveButton;
-        protected Button CancelButton;
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsAdmin)

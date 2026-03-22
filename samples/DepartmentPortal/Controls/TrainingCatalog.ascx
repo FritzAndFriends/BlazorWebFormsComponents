@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="TrainingCatalog.ascx.cs" Inherits="DepartmentPortal.Controls.TrainingCatalog" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="TrainingCatalog.ascx.cs" Inherits="DepartmentPortal.Controls.TrainingCatalog" %>
 
 <div class="training-catalog">
     <asp:Repeater ID="rptCourses" runat="server" OnItemCommand="rptCourses_ItemCommand">

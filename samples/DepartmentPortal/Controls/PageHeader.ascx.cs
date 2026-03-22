@@ -1,14 +1,14 @@
 using System;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace DepartmentPortal.Controls
 {
     public partial class PageHeader : BaseUserControl
     {
-        protected System.Web.UI.WebControls.Literal litPageTitle;
+        protected Literal litPageTitle;
         protected System.Web.UI.HtmlControls.HtmlGenericControl pnlUserInfo;
-        protected System.Web.UI.WebControls.Literal litUserName;
-
+        protected Literal litUserName;
         public string PageTitle
         {
             get { return (string)ViewState["PageTitle"] ?? string.Empty; }

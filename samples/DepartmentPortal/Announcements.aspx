@@ -1,4 +1,4 @@
-<%@ Page Title="Announcements" Language="C#" AutoEventWireup="true" CodeFile="Announcements.aspx.cs" Inherits="DepartmentPortal.AnnouncementsPage" %>
+<%@ Page Title="Announcements" Language="C#" AutoEventWireup="true" CodeBehind="Announcements.aspx.cs" Inherits="DepartmentPortal.AnnouncementsPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/SearchBox.ascx" TagName="SearchBox" TagPrefix="uc" %>
@@ -16,7 +16,7 @@
         </div>
     </div>
     
-    <local:SectionPanel ID="AnnouncementsSectionPanel" runat="server" Title="Recent Announcements" IsCollapsible="false">
+    <local:SectionPanel ID="AnnouncementsSectionPanel" runat="server" Title="Recent Announcements">
         <ContentTemplate>
             <asp:Repeater ID="AnnouncementsRepeater" runat="server">
                 <ItemTemplate>

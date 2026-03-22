@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Breadcrumb.ascx.cs" Inherits="DepartmentPortal.Controls.Breadcrumb" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="Breadcrumb.ascx.cs" Inherits="DepartmentPortal.Controls.Breadcrumb" %>
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">

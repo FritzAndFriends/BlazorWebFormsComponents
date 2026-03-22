@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SearchBox.ascx.cs" Inherits="DepartmentPortal.Controls.SearchBox" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="SearchBox.ascx.cs" Inherits="DepartmentPortal.Controls.SearchBox" %>
 
 <div class="search-box">
     <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" />

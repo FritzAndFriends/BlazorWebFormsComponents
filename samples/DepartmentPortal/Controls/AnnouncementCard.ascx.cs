@@ -1,17 +1,17 @@
 using System;
 using System.Web;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using DepartmentPortal.Models;
 
 namespace DepartmentPortal.Controls
 {
     public partial class AnnouncementCard : BaseUserControl
     {
-        protected System.Web.UI.WebControls.Literal litTitle;
-        protected System.Web.UI.WebControls.Literal litDate;
-        protected System.Web.UI.WebControls.Literal litAuthor;
-        protected System.Web.UI.WebControls.Literal litBody;
-
+        protected Literal litTitle;
+        protected Literal litDate;
+        protected Literal litAuthor;
+        protected Literal litBody;
         public Announcement Announcement { get; set; }
 
         public bool ShowFullText

@@ -6,7 +6,6 @@ namespace DepartmentPortal
     public partial class SiteMaster : BaseMasterPage
     {
         protected Label UserNameLabel;
-        protected Literal MessageLiteral;
 
         protected new void Page_Load(object sender, EventArgs e)
         {

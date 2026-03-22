@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="EmployeeList.ascx.cs" Inherits="DepartmentPortal.Controls.EmployeeList" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="EmployeeList.ascx.cs" Inherits="DepartmentPortal.Controls.EmployeeList" %>
 
 <div class="employee-list">
     <asp:GridView ID="gvEmployees" runat="server"

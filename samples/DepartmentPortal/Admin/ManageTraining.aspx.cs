@@ -8,20 +8,16 @@ namespace DepartmentPortal.Admin
 {
     public partial class ManageTrainingPage : BasePage
     {
-        protected GridView CoursesGridView;
-        protected Panel EditCoursePanel;
         protected Label EditCoursePanelTitle;
         protected HiddenField EditCourseId;
+        protected Panel EditCoursePanel;
+        protected GridView CoursesGridView;
         protected TextBox CourseNameTextBox;
         protected TextBox DescriptionTextBox;
         protected TextBox CategoryTextBox;
         protected TextBox DurationTextBox;
         protected TextBox InstructorTextBox;
         protected CheckBox IsAvailableCheckBox;
-        protected Button AddNewCourseButton;
-        protected Button SaveCourseButton;
-        protected Button CancelCourseButton;
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsAdmin)

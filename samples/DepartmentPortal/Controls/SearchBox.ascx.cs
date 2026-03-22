@@ -1,14 +1,13 @@
 using System;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using DepartmentPortal.Models;
 
 namespace DepartmentPortal.Controls
 {
     public partial class SearchBox : BaseUserControl
     {
-        protected System.Web.UI.WebControls.TextBox txtSearch;
-        protected System.Web.UI.WebControls.Button btnSearch;
-
+        protected TextBox txtSearch;
         public event EventHandler<SearchEventArgs> Search;
 
         public string Placeholder

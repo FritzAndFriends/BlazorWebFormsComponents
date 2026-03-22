@@ -14,8 +14,6 @@ namespace DepartmentPortal
         protected Label DepartmentLabel;
         protected Label HireDateLabel;
         protected HyperLink SendEmailLink;
-        protected HyperLink ViewScheduleLink;
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)

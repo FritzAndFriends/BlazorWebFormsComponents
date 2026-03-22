@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="PageHeader.ascx.cs" Inherits="DepartmentPortal.Controls.PageHeader" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PageHeader.ascx.cs" Inherits="DepartmentPortal.Controls.PageHeader" %>
 
 <div class="page-header">
     <h1><asp:Literal ID="litPageTitle" runat="server" /></h1>

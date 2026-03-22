@@ -89,67 +89,53 @@
     <Content Include="Controls\QuickStats.ascx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\BaseMasterPage.cs" />
-    <Compile Include="App_Code\BasePage.cs" />
-    <Compile Include="App_Code\BaseUserControl.cs" />
+    <Compile Include="Code\BaseMasterPage.cs" />
+    <Compile Include="Code\BasePage.cs" />
+    <Compile Include="Code\BaseUserControl.cs" />
     <Compile Include="Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Employees.aspx.cs">
       <DependentUpon>Employees.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EmployeeDetail.aspx.cs">
       <DependentUpon>EmployeeDetail.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Announcements.aspx.cs">
       <DependentUpon>Announcements.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="AnnouncementDetail.aspx.cs">
       <DependentUpon>AnnouncementDetail.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Training.aspx.cs">
       <DependentUpon>Training.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="MyTraining.aspx.cs">
       <DependentUpon>MyTraining.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Resources.aspx.cs">
       <DependentUpon>Resources.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ResourceDetail.aspx.cs">
       <DependentUpon>ResourceDetail.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\ManageAnnouncements.aspx.cs">
       <DependentUpon>ManageAnnouncements.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\ManageTraining.aspx.cs">
       <DependentUpon>ManageTraining.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\ManageEmployees.aspx.cs">
       <DependentUpon>ManageEmployees.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Models\Announcement.cs" />
     <Compile Include="Models\BreadcrumbEventArgs.cs" />
@@ -197,17 +183,16 @@
     <Compile Include="Controls\QuickStats.ascx.cs">
       <DependentUpon>QuickStats.ascx</DependentUpon>
     </Compile>
-    <Compile Include="App_Code\Controls\StarRating.cs" />
-    <Compile Include="App_Code\Controls\EmployeeCard.cs" />
-    <Compile Include="App_Code\Controls\SectionPanel.cs" />
-    <Compile Include="App_Code\Controls\PollQuestion.cs" />
-    <Compile Include="App_Code\Controls\NotificationBell.cs" />
-    <Compile Include="App_Code\Controls\EmployeeDataGrid.cs" />
-    <Compile Include="App_Code\Controls\DepartmentBreadcrumb.cs" />
+    <Compile Include="Code\Controls\StarRating.cs" />
+    <Compile Include="Code\Controls\EmployeeCard.cs" />
+    <Compile Include="Code\Controls\SectionPanel.cs" />
+    <Compile Include="Code\Controls\PollQuestion.cs" />
+    <Compile Include="Code\Controls\NotificationBell.cs" />
+    <Compile Include="Code\Controls\EmployeeDataGrid.cs" />
+    <Compile Include="Code\Controls\DepartmentBreadcrumb.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

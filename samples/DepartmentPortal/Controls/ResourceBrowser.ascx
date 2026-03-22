@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="ResourceBrowser.ascx.cs" Inherits="DepartmentPortal.Controls.ResourceBrowser" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="ResourceBrowser.ascx.cs" Inherits="DepartmentPortal.Controls.ResourceBrowser" %>
 <%@ Register Src="~/Controls/SearchBox.ascx" TagPrefix="uc" TagName="SearchBox" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagPrefix="uc" TagName="Breadcrumb" %>
 

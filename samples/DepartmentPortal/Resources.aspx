@@ -1,4 +1,4 @@
-<%@ Page Title="Resources" Language="C#" AutoEventWireup="true" CodeFile="Resources.aspx.cs" Inherits="DepartmentPortal.ResourcesPage" %>
+<%@ Page Title="Resources" Language="C#" AutoEventWireup="true" CodeBehind="Resources.aspx.cs" Inherits="DepartmentPortal.ResourcesPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/ResourceBrowser.ascx" TagName="ResourceBrowser" TagPrefix="uc" %>
@@ -10,7 +10,7 @@
     <uc:Breadcrumb ID="BreadcrumbControl" runat="server" CurrentPage="Resources" />
     
     <div class="resource-library">
-        <local:SectionPanel ID="DocumentsSection" runat="server" Title="Documents" IsCollapsible="true" IsExpanded="true">
+        <local:SectionPanel ID="DocumentsSection" runat="server" Title="Documents">
             <ContentTemplate>
                 <asp:Repeater ID="DocumentsRepeater" runat="server">
                     <ItemTemplate>
@@ -26,7 +26,7 @@
             </ContentTemplate>
         </local:SectionPanel>
         
-        <local:SectionPanel ID="TemplatesSection" runat="server" Title="Templates" IsCollapsible="true" IsExpanded="true">
+        <local:SectionPanel ID="TemplatesSection" runat="server" Title="Templates">
             <ContentTemplate>
                 <asp:Repeater ID="TemplatesRepeater" runat="server">
                     <ItemTemplate>
@@ -42,7 +42,7 @@
             </ContentTemplate>
         </local:SectionPanel>
         
-        <local:SectionPanel ID="ToolsSection" runat="server" Title="Tools & Utilities" IsCollapsible="true" IsExpanded="false">
+        <local:SectionPanel ID="ToolsSection" runat="server" Title="Tools &amp; Utilities">
             <ContentTemplate>
                 <asp:Repeater ID="ToolsRepeater" runat="server">
                     <ItemTemplate>

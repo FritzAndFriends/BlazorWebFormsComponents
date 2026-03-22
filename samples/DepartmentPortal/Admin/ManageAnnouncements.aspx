@@ -1,4 +1,4 @@
-<%@ Page Title="Manage Announcements" Language="C#" AutoEventWireup="true" CodeFile="ManageAnnouncements.aspx.cs" Inherits="DepartmentPortal.Admin.ManageAnnouncementsPage" %>
+<%@ Page Title="Manage Announcements" Language="C#" AutoEventWireup="true" CodeBehind="ManageAnnouncements.aspx.cs" Inherits="DepartmentPortal.Admin.ManageAnnouncementsPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Footer.ascx" TagName="Footer" TagPrefix="uc" %>

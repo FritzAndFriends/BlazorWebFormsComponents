@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="AnnouncementCard.ascx.cs" Inherits="DepartmentPortal.Controls.AnnouncementCard" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="AnnouncementCard.ascx.cs" Inherits="DepartmentPortal.Controls.AnnouncementCard" %>
 
 <div class="announcement-card">
     <div class="announcement-header">

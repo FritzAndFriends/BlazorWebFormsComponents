@@ -7,10 +7,9 @@ namespace DepartmentPortal.Controls
 {
     public partial class Pager : BaseUserControl
     {
-        protected System.Web.UI.WebControls.LinkButton lnkPrevious;
-        protected System.Web.UI.WebControls.Repeater rptPages;
-        protected System.Web.UI.WebControls.LinkButton lnkNext;
-
+        protected LinkButton lnkPrevious;
+        protected LinkButton lnkNext;
+        protected Repeater rptPages;
         public event EventHandler<int> PageChanged;
 
         public int CurrentPage

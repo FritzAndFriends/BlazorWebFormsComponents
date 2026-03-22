@@ -10,7 +10,6 @@ namespace DepartmentPortal
     {
         protected Repeater AnnouncementsRepeater;
         protected Panel NoResultsPanel;
-        
         private const int PageSize = 10;
         private int CurrentPageIndex
         {

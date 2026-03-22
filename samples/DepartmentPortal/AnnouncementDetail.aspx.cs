@@ -13,7 +13,6 @@ namespace DepartmentPortal
         protected Label PublishDateLabel;
         protected Label AuthorLabel;
         protected Label BodyLabel;
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)

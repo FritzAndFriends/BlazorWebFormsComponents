@@ -6,10 +6,9 @@ namespace DepartmentPortal.Controls
 {
     public partial class DashboardWidget : BaseUserControl
     {
-        protected System.Web.UI.WebControls.Literal litIcon;
-        protected System.Web.UI.WebControls.Literal litWidgetTitle;
+        protected Literal litWidgetTitle;
+        protected Literal litIcon;
         protected PlaceHolder phContent;
-
         public string WidgetTitle
         {
             get { return (string)ViewState["WidgetTitle"] ?? string.Empty; }

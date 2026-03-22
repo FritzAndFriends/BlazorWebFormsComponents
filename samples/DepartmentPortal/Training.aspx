@@ -1,4 +1,4 @@
-<%@ Page Title="Training" Language="C#" AutoEventWireup="true" CodeFile="Training.aspx.cs" Inherits="DepartmentPortal.TrainingPage" %>
+<%@ Page Title="Training" Language="C#" AutoEventWireup="true" CodeBehind="Training.aspx.cs" Inherits="DepartmentPortal.TrainingPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/SearchBox.ascx" TagName="SearchBox" TagPrefix="uc" %>
@@ -28,8 +28,8 @@
                 </div>
                 <div class="panel-body">
                     <local:PollQuestion ID="PollQuestionControl" runat="server" 
-                        Question="What's your preferred training format?" 
-                        OnAnswerSubmitted="PollQuestionControl_AnswerSubmitted" />
+                        QuestionText="What's your preferred training format?" 
+                        OnVoteSubmitted="PollQuestionControl_AnswerSubmitted" />
                 </div>
             </div>
             

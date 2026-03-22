@@ -10,7 +10,6 @@ namespace DepartmentPortal.Controls
     public partial class EmployeeList : BaseUserControl
     {
         protected GridView gvEmployees;
-
         public IEnumerable<Employee> Employees { get; set; }
 
         public string DepartmentFilter

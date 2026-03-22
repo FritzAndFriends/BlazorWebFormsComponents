@@ -1,4 +1,4 @@
-<%@ Page Title="My Training" Language="C#" AutoEventWireup="true" CodeFile="MyTraining.aspx.cs" Inherits="DepartmentPortal.MyTrainingPage" %>
+<%@ Page Title="My Training" Language="C#" AutoEventWireup="true" CodeBehind="MyTraining.aspx.cs" Inherits="DepartmentPortal.MyTrainingPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/TrainingCatalog.ascx" TagName="TrainingCatalog" TagPrefix="uc" %>

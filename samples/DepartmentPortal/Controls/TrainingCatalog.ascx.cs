@@ -10,7 +10,6 @@ namespace DepartmentPortal.Controls
     public partial class TrainingCatalog : BaseUserControl
     {
         protected Repeater rptCourses;
-
         public event EventHandler<int> EnrollmentRequested;
 
         public IEnumerable<TrainingCourse> Courses { get; set; }

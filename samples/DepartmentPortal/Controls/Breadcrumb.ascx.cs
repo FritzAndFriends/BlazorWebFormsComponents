@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace DepartmentPortal.Controls
 {
     public partial class Breadcrumb : BaseUserControl
     {
         protected System.Web.UI.HtmlControls.HtmlGenericControl homeLinkItem;
-        protected System.Web.UI.WebControls.Repeater rptBreadcrumb;
-
+        protected Repeater rptBreadcrumb;
         public string CurrentPath
         {
             get { return (string)ViewState["CurrentPath"] ?? string.Empty; }

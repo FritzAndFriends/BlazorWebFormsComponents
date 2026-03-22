@@ -1,14 +1,13 @@
 using System;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using DepartmentPortal.Models;
 
 namespace DepartmentPortal.Controls
 {
     public partial class DepartmentFilter : BaseUserControl
     {
-        protected System.Web.UI.WebControls.Label lblDepartment;
-        protected System.Web.UI.WebControls.DropDownList ddlDepartments;
-
+        protected DropDownList ddlDepartments;
         public event EventHandler DepartmentChanged;
 
         public int SelectedDepartmentId

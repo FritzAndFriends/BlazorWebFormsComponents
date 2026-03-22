@@ -11,7 +11,6 @@ namespace DepartmentPortal
         protected Panel EnrolledCoursesPanel;
         protected Panel NoCoursesPanel;
         protected Label EnrolledCountLabel;
-        
         private List<int> EnrolledCourses
         {
             get

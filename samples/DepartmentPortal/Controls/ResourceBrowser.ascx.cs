@@ -9,12 +9,11 @@ namespace DepartmentPortal.Controls
 {
     public partial class ResourceBrowser : BaseUserControl
     {
-        protected SearchBox ctlSearchBox;
-        protected Breadcrumb ctlBreadcrumb;
         protected System.Web.UI.HtmlControls.HtmlGenericControl pnlCategories;
-        protected System.Web.UI.WebControls.Repeater rptCategories;
-        protected System.Web.UI.WebControls.Repeater rptResources;
-
+        protected Breadcrumb ctlBreadcrumb;
+        protected Repeater rptCategories;
+        protected SearchBox ctlSearchBox;
+        protected Repeater rptResources;
         public event EventHandler<int> ResourceSelected;
 
         public int CategoryId

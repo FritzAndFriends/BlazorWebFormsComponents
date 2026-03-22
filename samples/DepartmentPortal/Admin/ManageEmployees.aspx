@@ -1,4 +1,4 @@
-<%@ Page Title="Manage Employees" Language="C#" AutoEventWireup="true" CodeFile="ManageEmployees.aspx.cs" Inherits="DepartmentPortal.Admin.ManageEmployeesPage" %>
+<%@ Page Title="Manage Employees" Language="C#" AutoEventWireup="true" CodeBehind="ManageEmployees.aspx.cs" Inherits="DepartmentPortal.Admin.ManageEmployeesPage" %>
 <%@ Register Src="~/Controls/PageHeader.ascx" TagName="PageHeader" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/Breadcrumb.ascx" TagName="Breadcrumb" TagPrefix="uc" %>
 <%@ Register Src="~/Controls/SearchBox.ascx" TagName="SearchBox" TagPrefix="uc" %>

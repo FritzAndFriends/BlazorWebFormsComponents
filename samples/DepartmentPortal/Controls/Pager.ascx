@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Pager.ascx.cs" Inherits="DepartmentPortal.Controls.Pager" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="Pager.ascx.cs" Inherits="DepartmentPortal.Controls.Pager" %>
 
 <div class="pager">
     <asp:LinkButton ID="lnkPrevious" runat="server" Text="&laquo; Previous" CssClass="pager-link pager-prev"

@@ -9,7 +9,6 @@ namespace DepartmentPortal
     public partial class TrainingPage : BasePage
     {
         protected Label EnrollmentCountLabel;
-        
         private string SearchQuery
         {
             get { return ViewState["SearchQuery"] as string ?? string.Empty; }
@@ -44,7 +43,7 @@ namespace DepartmentPortal
             BindTrainingCatalog();
         }
         
-        protected void TrainingCatalogControl_EnrollmentRequested(object sender, EventArgs e)
+        protected void TrainingCatalogControl_EnrollmentRequested(object sender, int courseId)
         {
             // In a real app, this would get the course ID from the event
             // For now, just show a message
@@ -52,7 +51,7 @@ namespace DepartmentPortal
             UpdateEnrollmentCount();
         }
         
-        protected void PollQuestionControl_AnswerSubmitted(object sender, EventArgs e)
+        protected void PollQuestionControl_AnswerSubmitted(object sender, DepartmentPortal.Controls.PollVoteEventArgs e)
         {
             ShowMessage("Thank you for your feedback!");
         }

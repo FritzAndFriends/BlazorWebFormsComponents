@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using DepartmentPortal.Models;
 
 namespace DepartmentPortal.Controls
@@ -8,10 +9,9 @@ namespace DepartmentPortal.Controls
     public partial class QuickStats : BaseUserControl
     {
         protected System.Web.UI.HtmlControls.HtmlGenericControl pnlEmployeeCount;
-        protected System.Web.UI.WebControls.Literal litEmployeeCount;
+        protected Literal litEmployeeCount;
         protected System.Web.UI.HtmlControls.HtmlGenericControl pnlAnnouncementCount;
-        protected System.Web.UI.WebControls.Literal litAnnouncementCount;
-
+        protected Literal litAnnouncementCount;
         public bool ShowEmployeeCount
         {
             get

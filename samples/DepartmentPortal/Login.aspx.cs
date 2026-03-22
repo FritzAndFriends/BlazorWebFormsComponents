@@ -9,7 +9,6 @@ namespace DepartmentPortal
     public partial class LoginPage : Page
     {
         protected DropDownList UserDropDown;
-        protected Button LoginButton;
 
         protected void Page_Load(object sender, EventArgs e)
         {

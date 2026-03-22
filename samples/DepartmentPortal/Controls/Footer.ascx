@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Footer.ascx.cs" Inherits="DepartmentPortal.Controls.Footer" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="Footer.ascx.cs" Inherits="DepartmentPortal.Controls.Footer" %>
 
 <footer class="site-footer">
     <div class="footer-content">

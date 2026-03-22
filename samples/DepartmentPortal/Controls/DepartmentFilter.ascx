@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="DepartmentFilter.ascx.cs" Inherits="DepartmentPortal.Controls.DepartmentFilter" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="DepartmentFilter.ascx.cs" Inherits="DepartmentPortal.Controls.DepartmentFilter" %>
 
 <div class="department-filter">
     <asp:Label ID="lblDepartment" runat="server" Text="Department:" AssociatedControlID="ddlDepartments" CssClass="filter-label" />

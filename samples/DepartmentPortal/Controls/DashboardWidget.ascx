@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="DashboardWidget.ascx.cs" Inherits="DepartmentPortal.Controls.DashboardWidget" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="DashboardWidget.ascx.cs" Inherits="DepartmentPortal.Controls.DashboardWidget" %>
 
 <div class="widget">
     <div class="widget-header">

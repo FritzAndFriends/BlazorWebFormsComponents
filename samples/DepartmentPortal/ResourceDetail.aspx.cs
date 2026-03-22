@@ -16,8 +16,6 @@ namespace DepartmentPortal
         protected Label FileSizeLabel;
         protected Label LastUpdatedLabel;
         protected HyperLink DownloadLink;
-        protected Button ShareButton;
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
