@@ -9,6 +9,9 @@ namespace DepartmentPortal
     public partial class EmployeesPage : BasePage
     {
         protected Label EmployeeCountLabel;
+        protected DepartmentPortal.Controls.EmployeeList EmployeeListControl;
+        protected DepartmentPortal.Controls.Pager PagerControl;
+        protected DepartmentPortal.Controls.EmployeeDataGrid EmployeeDataGridControl;
         private const int PageSize = 12;
         private int CurrentPageIndex
         {
@@ -30,17 +33,18 @@ namespace DepartmentPortal
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                BindEmployees();
-            }
+        }
+        
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+            BindEmployees();
         }
         
         protected void SearchBoxControl_Search(object sender, SearchEventArgs e)
         {
             SearchQuery = e.SearchTerm;
             CurrentPageIndex = 0;
-            BindEmployees();
         }
         
         protected void DepartmentFilterControl_DepartmentChanged(object sender, EventArgs e)
@@ -48,13 +52,11 @@ namespace DepartmentPortal
             var filter = (DepartmentPortal.Controls.DepartmentFilter)sender;
             SelectedDepartmentId = filter.SelectedDepartmentId;
             CurrentPageIndex = 0;
-            BindEmployees();
         }
         
         protected void PagerControl_PageChanged(object sender, int pageNumber)
         {
             CurrentPageIndex = pageNumber - 1;
-            BindEmployees();
         }
         
         private void BindEmployees()
@@ -82,14 +84,16 @@ namespace DepartmentPortal
             }
             
             var employeeList = filteredEmployees.ToList();
-            EmployeeCountLabel.Text = employeeList.Count.ToString();
+            if (EmployeeCountLabel != null)
+            {
+                EmployeeCountLabel.Text = employeeList.Count.ToString();
+            }
             
             // Set up pager
-            var pager = (DepartmentPortal.Controls.Pager)FindControl("PagerControl");
-            if (pager != null)
+            if (PagerControl != null)
             {
-                pager.TotalPages = (int)Math.Ceiling((double)employeeList.Count / PageSize);
-                pager.CurrentPage = CurrentPageIndex + 1;
+                PagerControl.TotalPages = (int)Math.Ceiling((double)employeeList.Count / PageSize);
+                PagerControl.CurrentPage = CurrentPageIndex + 1;
             }
             
             // Get page of employees
@@ -99,18 +103,16 @@ namespace DepartmentPortal
                 .ToList();
             
             // Bind to employee list control
-            var employeeListControl = (DepartmentPortal.Controls.EmployeeList)FindControl("EmployeeListControl");
-            if (employeeListControl != null)
+            if (EmployeeListControl != null)
             {
-                employeeListControl.Employees = pagedEmployees;
+                EmployeeListControl.Employees = pagedEmployees;
             }
             
             // Also bind to data grid for demonstration
-            var dataGrid = (DepartmentPortal.Controls.EmployeeDataGrid)FindControl("EmployeeDataGridControl");
-            if (dataGrid != null)
+            if (EmployeeDataGridControl != null)
             {
-                dataGrid.DataSource = pagedEmployees;
-                dataGrid.DataBind();
+                EmployeeDataGridControl.DataSource = pagedEmployees;
+                EmployeeDataGridControl.DataBind();
             }
         }
     }
