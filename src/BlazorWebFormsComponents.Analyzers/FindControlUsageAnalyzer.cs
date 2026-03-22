@@ -7,8 +7,9 @@ using System.Collections.Immutable;
 namespace BlazorWebFormsComponents.Analyzers
 {
     /// <summary>
-    /// Analyzer that detects FindControl("id") calls.
-    /// Blazor does not have FindControl; use FindControlRecursive or @ref instead.
+    /// Analyzer that detects FindControl("id") calls on types that do not inherit
+    /// from BaseWebFormsComponent. BWFC provides FindControl on BaseWebFormsComponent
+    /// with recursive search built in, so only non-BWFC usages need migration.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class FindControlUsageAnalyzer : DiagnosticAnalyzer
@@ -16,8 +17,8 @@ namespace BlazorWebFormsComponents.Analyzers
         public const string DiagnosticId = "BWFC021";
 
         private static readonly LocalizableString Title = "FindControl usage detected";
-        private static readonly LocalizableString MessageFormat = "FindControl is not available in Blazor. Use FindControlRecursive from BWFC or @ref for component references.";
-        private static readonly LocalizableString Description = "FindControl is a Web Forms API not available in Blazor. Use FindControlRecursive (available on BaseWebFormsComponent) or @ref for component references.";
+        private static readonly LocalizableString MessageFormat = "FindControl from System.Web.UI is not available. BWFC provides FindControl on BaseWebFormsComponent with recursive search.";
+        private static readonly LocalizableString Description = "FindControl from System.Web.UI is not available in Blazor. Inherit from BaseWebFormsComponent which provides FindControl with built-in recursive search.";
         private const string Category = "Migration";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
@@ -45,20 +46,51 @@ namespace BlazorWebFormsComponents.Analyzers
             if (!IsFindControlCall(invocation))
                 return;
 
+            // Don't flag FindControl calls on BWFC types — those use the built-in recursive implementation
+            if (IsOnBwfcType(context, invocation))
+                return;
+
             var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation());
             context.ReportDiagnostic(diagnostic);
         }
 
         private static bool IsFindControlCall(InvocationExpressionSyntax invocation)
         {
-            // FindControl("id")
             if (invocation.Expression is IdentifierNameSyntax identifier)
                 return identifier.Identifier.Text == "FindControl";
 
-            // this.FindControl("id") or someObject.FindControl("id")
             if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
                 return memberAccess.Name.Identifier.Text == "FindControl";
 
+            return false;
+        }
+
+        private static bool IsOnBwfcType(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+        {
+            var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
+
+            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+                return InheritsFromOrIs(methodSymbol.ContainingType, "BaseWebFormsComponent");
+
+            foreach (var candidate in symbolInfo.CandidateSymbols)
+            {
+                if (candidate is IMethodSymbol candidateMethod &&
+                    InheritsFromOrIs(candidateMethod.ContainingType, "BaseWebFormsComponent"))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool InheritsFromOrIs(INamedTypeSymbol type, string baseTypeName)
+        {
+            var current = type;
+            while (current != null)
+            {
+                if (current.Name == baseTypeName)
+                    return true;
+                current = current.BaseType;
+            }
             return false;
         }
     }

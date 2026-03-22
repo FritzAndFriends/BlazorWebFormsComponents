@@ -7,13 +7,11 @@ using AnalyzerTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpAnalyzerTest<
     FindControlUsageAnalyzer,
     DefaultVerifier>;
 
-using CodeFixTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpCodeFixTest<
-    FindControlUsageAnalyzer,
-    FindControlUsageCodeFixProvider,
-    DefaultVerifier>;
-
 /// <summary>
-/// Tests for BWFC021: FindControl usage detection and code fix.
+/// Tests for BWFC021: FindControl usage detection.
+/// The analyzer flags FindControl calls on non-BWFC types (e.g., System.Web.UI.Control)
+/// but does NOT flag FindControl calls on BaseWebFormsComponent subclasses.
+/// No code fix is offered — BWFC's FindControl is the canonical API name.
 /// </summary>
 public class FindControlUsageAnalyzerTests
 {
@@ -22,6 +20,11 @@ public class Control
 {
     public Control FindControl(string id) => null;
     public Control FindControlRecursive(string id) => null;
+}
+
+public class BaseWebFormsComponent
+{
+    public BaseWebFormsComponent FindControl(string id) => null;
 }
 ";
 
@@ -121,6 +124,64 @@ public class MyPage : Control
     #region Negative cases — BWFC021 should NOT fire
 
     [Fact]
+    public async Task FindControl_OnBwfcType_NoDiagnostic()
+    {
+        var source = @"
+public class MyComponent : BaseWebFormsComponent
+{
+    public void OnInit()
+    {
+        var ctl = FindControl(""txtName"");
+    }
+}";
+
+        var test = new AnalyzerTest
+        {
+            TestState = { Sources = { source, StubSource } }
+        };
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task FindControl_OnBwfcType_ThisQualified_NoDiagnostic()
+    {
+        var source = @"
+public class MyComponent : BaseWebFormsComponent
+{
+    public void OnInit()
+    {
+        var ctl = this.FindControl(""txtName"");
+    }
+}";
+
+        var test = new AnalyzerTest
+        {
+            TestState = { Sources = { source, StubSource } }
+        };
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task FindControl_OnBwfcVariable_NoDiagnostic()
+    {
+        var source = @"
+public class MyComponent : BaseWebFormsComponent
+{
+    public void OnInit()
+    {
+        BaseWebFormsComponent parent = this;
+        var ctl = parent.FindControl(""txtName"");
+    }
+}";
+
+        var test = new AnalyzerTest
+        {
+            TestState = { Sources = { source, StubSource } }
+        };
+        await test.RunAsync();
+    }
+
+    [Fact]
     public async Task FindControlRecursive_NoDiagnostic()
     {
         var source = @"
@@ -156,70 +217,6 @@ public class MyPage
         var test = new AnalyzerTest
         {
             TestState = { Sources = { source, StubSource } }
-        };
-        await test.RunAsync();
-    }
-
-    #endregion
-
-    #region Code fix tests
-
-    [Fact]
-    public async Task CodeFix_ReplacesWithFindControlRecursive()
-    {
-        var testSource = @"
-public class MyPage : Control
-{
-    public void Page_Load()
-    {
-        var ctl = {|#0:FindControl(""txtName"")|};
-    }
-}";
-
-        var fixedSource = @"
-public class MyPage : Control
-{
-    public void Page_Load()
-    {
-        var ctl = FindControlRecursive(""txtName"");
-    }
-}";
-
-        var test = new CodeFixTest
-        {
-            TestState = { Sources = { testSource, StubSource } },
-            FixedState = { Sources = { fixedSource, StubSource } },
-            ExpectedDiagnostics = { ExpectBWFC021().WithLocation(0) }
-        };
-        await test.RunAsync();
-    }
-
-    [Fact]
-    public async Task CodeFix_ThisQualified_ReplacesWithFindControlRecursive()
-    {
-        var testSource = @"
-public class MyPage : Control
-{
-    public void Page_Load()
-    {
-        var ctl = {|#0:this.FindControl(""txtName"")|};
-    }
-}";
-
-        var fixedSource = @"
-public class MyPage : Control
-{
-    public void Page_Load()
-    {
-        var ctl = this.FindControlRecursive(""txtName"");
-    }
-}";
-
-        var test = new CodeFixTest
-        {
-            TestState = { Sources = { testSource, StubSource } },
-            FixedState = { Sources = { fixedSource, StubSource } },
-            ExpectedDiagnostics = { ExpectBWFC021().WithLocation(0) }
         };
         await test.RunAsync();
     }
