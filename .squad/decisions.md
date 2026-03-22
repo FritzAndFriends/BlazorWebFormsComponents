@@ -9668,3 +9668,284 @@ The canonical pattern for rendering HTML id on Blazor components is id="@ClientI
 
 **Impact:** Future middleware should follow same TestServer pattern in Middleware/ test folder.
 
+
+
+# Decision: DepartmentPortal Phase 1 Foundation Conventions
+
+**Author:** Jubilee (Sample Writer)
+**Date:** 2026-03-20
+**Status:** Implemented
+
+## Context
+Phase 1 of the ASCX Sample Milestone — creating the DepartmentPortal Web Forms project foundation.
+
+## Decisions Made
+
+1. **No .designer.cs files** — Typed field declarations (`protected Label foo;`) go directly in code-behind partial classes. Simpler and avoids generated file churn.
+
+2. **CodeFile directive** (not CodeBehind) in .aspx/.master directives — matches BeforeWebForms convention.
+
+3. **packages.config format** with NuGet restore to repo-root `packages/` directory. CodeDom .props import path: `..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\...`
+
+4. **Static in-memory data** via `PortalDataProvider` — no EF, no database. 5 departments, 20 employees, 10 announcements, 15 courses, 20 resources.
+
+5. **Bootstrap 3 via CDN** in Site.Master `<head>` — no NuGet package for Bootstrap/jQuery.
+
+6. **App_Code/** for base classes — included as `<Compile>` items in .csproj (Web Application Project style, not Web Site).
+
+## Impact
+All future DepartmentPortal phases should follow these patterns. ASCX controls (Phase 2+) should inherit from `BaseUserControl`. Authenticated pages inherit from `BasePage`.
+
+
+# Decision: Phase 2 ASCX Control Implementation Patterns
+
+**Author:** Jubilee (Sample Writer)
+**Date:** 2026-03-21
+**Status:** Accepted
+
+## Context
+Creating 12 ASCX user controls for the DepartmentPortal sample application (Phase 2).
+
+## Decisions
+
+### 1. CodeFile over CodeBehind
+Used `CodeFile` directive (not `CodeBehind`) to match the existing Phase 1 pattern established in .aspx and .master files. This avoids .designer.cs files and keeps field declarations explicit in code-behind.
+
+### 2. Manual field declarations
+All server control references (Literal, Repeater, GridView, etc.) are declared as `protected` fields in the code-behind class. HTML elements with `runat="server"` use `HtmlGenericControl`.
+
+### 3. ViewState for all stateful properties
+Properties that need to survive postback (CurrentPage, SearchText, DepartmentFilter, ShowFullText, etc.) use `ViewState["PropertyName"]` pattern consistently.
+
+### 4. Event patterns
+- Simple events: `EventHandler` (DepartmentChanged)
+- Typed events: `EventHandler<int>` (EnrollmentRequested, PageChanged, ResourceSelected)
+- Custom args: `EventHandler<SearchEventArgs>` (Search)
+
+### 5. ResourceBrowser nesting
+ResourceBrowser uses `<%@ Register Src %>` to nest SearchBox and Breadcrumb controls, demonstrating ASCX composition — a key migration pattern.
+
+### 6. QuickStats web.config registration
+Added `<add tagPrefix="uc" src="~/Controls/QuickStats.ascx" tagName="QuickStats" />` alongside the existing namespace-based registration.
+
+## Consequences
+All 12 controls build successfully. They cover: simple display, data-bound, event-driven, complex/nested, and web.config-registered patterns per the milestone spec.
+
+
+# Decision: DepartmentPortal Phase 3 — Custom Server Control Architecture
+
+**Date:** 2026-03-21  
+**Decider:** Jubilee (Sample Writer)  
+**Status:** Implemented
+
+## Context
+
+Phase 3 of the DepartmentPortal sample required creating 7 custom server controls demonstrating various ASP.NET Web Forms control development patterns. These controls showcase different inheritance hierarchies and implementation techniques that migration developers need to understand.
+
+## Decision
+
+Created 7 custom server controls in `samples/DepartmentPortal/App_Code/Controls/`:
+
+1. **StarRating.cs** (WebControl) — Demonstrates simple property rendering with ViewState
+2. **EmployeeCard.cs** (CompositeControl) — Shows programmatic child control creation
+3. **SectionPanel.cs** (Templated Control) — ITemplate pattern with multiple template regions
+4. **PollQuestion.cs** (IPostBackEventHandler) — Interactive postback handling
+5. **NotificationBell.cs** (Custom Events) — Event-driven UI with custom EventArgs
+6. **EmployeeDataGrid.cs** (DataBoundControl) — Data binding with search/sort/paging
+7. **DepartmentBreadcrumb.cs** (Bare Control) — Direct HTML rendering via HtmlTextWriter
+
+### Implementation Patterns
+
+- **ViewState properties:** Standard pattern: `get { return (type)ViewState["Key"] ?? default; } set { ViewState["Key"] = value; }`
+- **HTML encoding:** Use `System.Web.HttpUtility.HtmlEncode()` directly (not `Server.HtmlEncode()` which is only available in Page/UserControl)
+- **Custom HTML attributes:** Use string overload `writer.AddAttribute("attrname", value)` for non-enum attributes like "placeholder"
+- **Templated controls:** Use `[TemplateContainer]` and `[PersistenceMode(PersistenceMode.InnerProperty)]` attributes, instantiate via `ITemplate.InstantiateIn(PlaceHolder)`
+- **Postback handling:** Use `Page.ClientScript.GetPostBackEventReference(this, eventArg)` for client-side postback generation
+
+### Web.config Registration
+
+Added namespace registration to enable `<local:*>` prefix usage:
+```xml
+<add tagPrefix="local" namespace="DepartmentPortal.Controls" assembly="DepartmentPortal" />
+```
+
+### EventArgs Reuse
+
+Reused existing `NotificationEventArgs` and `BreadcrumbEventArgs` from Models namespace. Created `PollVoteEventArgs` as inner class in PollQuestion.cs.
+
+## Rationale
+
+This set of controls provides comprehensive coverage of Web Forms server control development patterns:
+
+- **Inheritance diversity:** WebControl, CompositeControl, DataBoundControl, bare Control
+- **Rendering approaches:** RenderContents override, CreateChildControls, direct HtmlTextWriter
+- **Interactivity:** ViewState, postback handling, custom events
+- **Advanced features:** Templates, data binding, composite controls
+
+These patterns are essential for migration developers to understand, as they represent the most common custom control scenarios in enterprise Web Forms applications.
+
+## Consequences
+
+### Positive
+- Sample demonstrates 7 distinct Web Forms control development patterns
+- Build succeeds with zero errors
+- Controls follow authentic .NET Framework 4.8 conventions
+- Reuses existing EventArgs types where appropriate
+
+### Negative
+- Controls are functional demonstrations, not production-ready components
+- Some controls (like EmployeeDataGrid) render placeholder data rather than implementing full functionality
+- No CSS provided (relies on class names for styling hooks)
+
+### Neutral
+- App_Code location follows Web Application Project conventions
+- Namespace `DepartmentPortal.Controls` shared by both ASCX controls and custom server controls
+- PollQuestion creates its own EventArgs inner class (could have been in Models, but inner class is also idiomatic)
+
+## Notes
+
+**Build process:**
+1. Restore: `.\nuget.exe restore samples\DepartmentPortal\packages.config -PackagesDirectory packages -NonInteractive`
+2. Build: `& "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" samples\DepartmentPortal\DepartmentPortal.csproj /p:Configuration=Debug /verbosity:minimal /nologo`
+
+**Next phase:** Phase 4 will likely involve creating sample pages that use these custom controls alongside the ASCX controls to demonstrate a complete migration scenario.
+
+
+# Decision: Phase 4 ASPX Page Implementation Patterns
+
+**Date:** 2026-03-21  
+**Context:** Creating all remaining ASPX pages for DepartmentPortal sample
+
+## Decisions Made
+
+### 1. Page Architecture Pattern
+- **All authenticated pages inherit from BasePage** (not directly from System.Web.UI.Page)
+- BasePage provides: CurrentUser (Employee), IsAdmin (bool), ShowMessage(string)
+- Login.aspx → sets Session["CurrentUser"] → BasePage reads it
+
+### 2. Admin Page Security Pattern
+```csharp
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (!IsAdmin)
+    {
+        ShowMessage("Access denied. Administrator privileges required.");
+        Response.Redirect("~/Dashboard.aspx");
+        return;
+    }
+    // ... rest of page logic
+}
+```
+**Rationale:** Consistent guard pattern at top of Page_Load for all admin pages
+
+### 3. Pager Control Integration Pattern
+```csharp
+// Pager event handler signature: EventHandler<int>
+protected void PagerControl_PageChanged(object sender, int pageNumber)
+{
+    CurrentPageIndex = pageNumber - 1; // Convert to 0-indexed
+    BindData();
+}
+
+// Pager setup
+pager.TotalPages = (int)Math.Ceiling((double)totalItems / PageSize);
+pager.CurrentPage = CurrentPageIndex + 1; // Convert to 1-indexed
+```
+**Rationale:** 
+- Pager control uses 1-indexed CurrentPage for UI display
+- Page logic uses 0-indexed CurrentPageIndex internally
+- Event passes pageNumber directly (int), not EventArgs wrapper
+
+### 4. SearchBox Event Pattern
+```csharp
+protected void SearchBoxControl_Search(object sender, SearchEventArgs e)
+{
+    SearchQuery = e.SearchTerm; // Property is SearchTerm, not SearchQuery
+    CurrentPageIndex = 0; // Reset to first page
+    BindData();
+}
+```
+**Rationale:** SearchEventArgs has SearchTerm property, always reset pagination on search
+
+### 5. Department Lookup Pattern (No DepartmentId in Employee)
+```csharp
+// Employee.Department is string (department name), not ID
+// To filter by DepartmentId from DepartmentFilter:
+if (SelectedDepartmentId > 0)
+{
+    var dept = PortalDataProvider.GetDepartments().FirstOrDefault(d => d.Id == SelectedDepartmentId);
+    if (dept != null)
+    {
+        filteredEmployees = filteredEmployees.Where(e => e.Department == dept.Name);
+    }
+}
+```
+**Rationale:** Employee model stores department name directly, requires join to filter by ID
+
+### 6. Session State for Enrollment
+```csharp
+private List<int> EnrolledCourses
+{
+    get
+    {
+        if (Session["EnrolledCourses"] == null)
+        {
+            Session["EnrolledCourses"] = new List<int>();
+        }
+        return (List<int>)Session["EnrolledCourses"];
+    }
+}
+```
+**Rationale:** Shared session state between Training.aspx and MyTraining.aspx, lazy initialization
+
+### 7. PageHeader Title Setting Pattern
+```csharp
+var pageHeader = (DepartmentPortal.Controls.PageHeader)FindControl("PageHeaderControl");
+if (pageHeader != null)
+{
+    pageHeader.PageTitle = "Title"; // Property is PageTitle, not Title
+}
+```
+**Rationale:** PageHeader control exposes PageTitle property, not Title/Description pair
+
+### 8. Resource Model Simplified Properties
+```csharp
+// Resource model has: CategoryName (string), not Category
+// Resource model DOES NOT have: FileSize, LastUpdated
+// Solution: Use CategoryName, set FileSize/LastUpdated to "N/A"
+CategoryLabel.Text = resource.CategoryName;
+FileSizeLabel.Text = "N/A";
+LastUpdatedLabel.Text = "N/A";
+```
+**Rationale:** Keep code simple, avoid adding properties to model for sample app
+
+### 9. StarRating Control Property
+```csharp
+ratingControl.Rating = 4; // Property is Rating, not CurrentRating
+```
+**Rationale:** StarRating control uses Rating property
+
+### 10. PollQuestion Options Format
+```csharp
+poll.Options = "In-person classroom,Live virtual sessions,Self-paced online,Hybrid";
+// NOT: new List<string> { ... }
+```
+**Rationale:** PollQuestion.Options is string (comma-delimited), not List<string>
+
+### 11. ASPX Directive Pattern
+```aspx
+<%@ Page Title="..." Language="C#" AutoEventWireup="true" CodeFile="Page.aspx.cs" Inherits="DepartmentPortal.PageClass" %>
+```
+**Rationale:** Use CodeFile (not CodeBehind) for this Web Application Project structure
+
+## Impact
+- **Build Success:** All 11 pages (22 files) compile with 0 errors
+- **Consistency:** All pages follow same patterns for auth, events, pagination
+- **Demonstrates Controls:** Uses all ASCX controls and all custom server controls
+- **Admin Security:** Consistent guard pattern protects admin pages
+
+## Alternatives Considered
+- **DepartmentId in Employee:** Could have added DepartmentId property, but keeping it simple with Department string
+- **Resource extended properties:** Could have added FileSize/LastUpdated to Resource model, but unnecessary for sample
+- **Pager 0-indexed:** Could have made Pager 0-indexed, but 1-indexed is more user-friendly
+
