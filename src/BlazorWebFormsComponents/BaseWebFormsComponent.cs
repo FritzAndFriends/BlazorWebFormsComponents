@@ -162,6 +162,19 @@ namespace BlazorWebFormsComponents
 		public void DataBind() { }
 
 		/// <summary>
+		/// Sets input focus to the control. Matches the ASP.NET Web Forms Control.Focus() method.
+		/// Uses fire-and-forget JS interop to focus the element by its ClientID.
+		/// Gracefully no-ops during SSR pre-render when JsRuntime is unavailable.
+		/// </summary>
+		public virtual void Focus()
+		{
+			var id = ClientID;
+			if (JsRuntime is null || string.IsNullOrEmpty(id)) return;
+
+			_ = JsRuntime.InvokeVoidAsync("bwfc.Page.Focus", id);
+		}
+
+		/// <summary>
 		/// 🚨🚨 Placeholders are not available in Blazor 🚨🚨
 		/// </summary>
 		[Parameter, Obsolete("Placeholders are not available in Blazor")]
