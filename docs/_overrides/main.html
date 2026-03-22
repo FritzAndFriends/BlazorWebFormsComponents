@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ config.site_url }}sitemap.xml">
+{% endblock %}
