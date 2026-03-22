@@ -1,0 +1,11 @@
+@* Migrated from: DepartmentPortal/Controls/TrainingCatalog.ascx
+   Original: Displays a grid/list of available training courses with category, duration,
+   and instructor. Bound to PortalDataProvider.GetCourses() via asp:GridView. *@
+
+<div class="training-catalog">
+    <p><em>Training catalog component — will render course listings when fully migrated.</em></p>
+</div>
+
+@code {
+    [Parameter] public string? CategoryFilter { get; set; }
+}

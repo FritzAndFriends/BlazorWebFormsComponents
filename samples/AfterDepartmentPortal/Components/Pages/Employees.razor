@@ -1,0 +1,27 @@
+@* Migrated from: DepartmentPortal/Employees.aspx
+   Original: Employee directory page with DepartmentFilter, SearchBox, EmployeeList, and Pager.
+   Uses EmployeeDataGrid (custom server control) — BWFC analysis target. *@
+
+@page "/employees"
+
+<PageTitle>Employees - Department Portal</PageTitle>
+
+<PageHeader Title="Employee Directory" Subtitle="Browse and search employees across all departments" />
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Employees", "") })" />
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <DepartmentFilter />
+    </div>
+    <div class="col-md-4 offset-md-4">
+        <SearchBox Placeholder="Search employees..." />
+    </div>
+</div>
+
+@* TODO: EmployeeDataGrid (custom C# server control inheriting DataBoundControl) — BWFC analysis target.
+   Original used a custom data-bound grid with sorting, paging, and row templates.
+   For now, use the EmployeeList user control stub as a simpler placeholder. *@
+<EmployeeList />
+
+<Pager />

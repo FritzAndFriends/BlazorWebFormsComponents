@@ -1,0 +1,42 @@
+@* Migrated from: DepartmentPortal/Site.Master
+   Original: ASP.NET Web Forms Master Page with navbar, login status, ContentPlaceHolder, footer.
+   Uses BWFC components where applicable. *@
+
+@inherits LayoutComponentBase
+
+<div class="page">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Department Portal</a>
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="nav navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/employees">Employees</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/announcements">Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/training">Training</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/resources">Resources</a></li>
+                </ul>
+                <ul class="nav navbar-nav ms-auto">
+                    @* TODO: Login/logout status — original used asp:HyperLink, asp:LinkButton, asp:Label
+                       Consider BWFC LoginStatus / LoginName components when migrating *@
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container body-content" style="padding-top: 70px;">
+        @Body
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Department Portal | Contoso Corporation</p>
+        </footer>
+    </div>
+</div>

@@ -10811,3 +10811,737 @@ The DepartmentPortal sample is an **excellent candidate** for demonstrating BWFC
 
 **End of Analysis**
 
+
+
+---
+
+# DepartmentPortal Migration Analysis — ASCX + Custom Controls → BWFC
+
+**Author:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-07-25  
+**Requested by:** Jeffrey T. Fritz  
+**Status:** Complete analysis, pending team review
+
+---
+
+## Executive Summary
+
+DepartmentPortal contains **12 ASCX user controls** and **7 custom C# server controls** representing two fundamentally different migration challenges. The ASCX controls are primarily markup-with-code-behind compositions of standard asp: controls — BWFC handles these well today. The custom server controls use HtmlTextWriter rendering, ITemplate, DataBoundControl, IPostBackEventHandler, and CompositeControl patterns — BWFC's `CustomControls/` namespace now provides base classes for most of these, but significant gaps remain around ITemplate→RenderFragment bridging, DataBoundControl custom rendering, and PostBack event handling.
+
+**Bottom line:** ~70% of this migration is supported by BWFC today. The remaining 30% requires 4 specific BWFC enhancements detailed in Part 4.
+
+---
+
+## Part 1: ASCX User Controls Migration Map
+
+All 12 ASCX controls inherit from `BaseUserControl : UserControl`, a thin wrapper providing logging and caching helpers. In Blazor, these become `.razor` components inheriting from `ComponentBase` (or `BaseWebFormsComponent` if they need BWFC lifecycle events).
+
+### 1.1 PageHeader
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/PageHeader.ascx` + `.ascx.cs` — Displays page title with optional user info panel. Uses `asp:Literal` × 2, `HtmlGenericControl` div. |
+| **After** | `PageHeader.razor` component with `[Parameter] string PageTitle`, `[Parameter] bool ShowUserInfo`. Renders `<h1>` and conditional user info div. |
+| **BWFC components used** | `<Literal>` for text output (or just use Razor `@PageTitle` directly) |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 script converts `asp:Literal` → `<Literal>`, preserves HTML structure. `runat="server"` stripped. |
+| **What needs manual work** | `Session["UserName"]` access needs conversion to Blazor auth state (`AuthenticationStateProvider` or cascading `Task<AuthenticationState>`). `Server.HtmlEncode` → use Razor's default encoding. |
+
+### 1.2 Breadcrumb
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/Breadcrumb.ascx` + `.ascx.cs` — Breadcrumb nav using `asp:Repeater` with `ItemTemplate` for path segments. Splits `CurrentPath` on `/`. |
+| **After** | `Breadcrumb.razor` with `[Parameter] string CurrentPath`, `[Parameter] bool ShowHomeLink`. Uses `@foreach` loop over path segments. |
+| **BWFC components used** | `<Repeater>` could be used but a simple `@foreach` is cleaner for this pattern |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 handles `asp:Repeater` → `<Repeater>` tag conversion |
+| **What needs manual work** | Complex `Container.ItemIndex` / `Container.DataItem` expressions in `ItemTemplate` need manual conversion to Blazor `@context` patterns. The inline ternary CSS class logic needs rewriting as Razor expressions. |
+
+### 1.3 SearchBox
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/SearchBox.ascx` + `.ascx.cs` — `asp:TextBox` + `asp:Button` with custom `Search` event (`SearchEventArgs`). |
+| **After** | `SearchBox.razor` with `[Parameter] string Placeholder`, `[Parameter] EventCallback<SearchEventArgs> OnSearch`. |
+| **BWFC components used** | `<TextBox>`, `<Button>` — both fully supported |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 converts `asp:TextBox` → `<TextBox>`, `asp:Button` → `<Button>`. |
+| **What needs manual work** | `OnClick="btnSearch_Click"` server-side handler → Blazor `OnClick` EventCallback. Custom `Search` event → `[Parameter] EventCallback<SearchEventArgs>`. `!IsPostBack` guard → remove (no postbacks in Blazor). `txtSearch.Attributes["placeholder"]` → `[Parameter] string Placeholder` on TextBox. |
+
+### 1.4 DepartmentFilter
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/DepartmentFilter.ascx` + `.ascx.cs` — `asp:Label` + `asp:DropDownList` with `OnSelectedIndexChanged` event. Loads departments from `PortalDataProvider`. |
+| **After** | `DepartmentFilter.razor` with `[Parameter] EventCallback DepartmentChanged`, `[Parameter] int SelectedDepartmentId`. |
+| **BWFC components used** | `<Label>`, `<DropDownList>` — both fully supported. DropDownList has `DataTextField`, `DataValueField`, `SelectMethod` support. |
+| **Migration complexity** | **Medium** |
+| **What works automatically** | L1 converts `asp:Label` → `<Label>`, `asp:DropDownList` → `<DropDownList>`. |
+| **What needs manual work** | `Page_Load` data loading → move to `OnInitializedAsync`. `ListItem` population → use BWFC's `DataSource`/`DataTextField`/`DataValueField` or static `<ListItem>` children. `AutoPostBack` → BWFC DropDownList supports this. `ddlDepartments.SelectedValue` assignment → two-way binding pattern. |
+
+### 1.5 EmployeeList
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/EmployeeList.ascx` + `.ascx.cs` — `asp:GridView` with 5 `asp:BoundField` columns, paging, LINQ filtering on `DepartmentFilter`. |
+| **After** | `EmployeeList.razor` with `[Parameter] IEnumerable<Employee> Employees`, `[Parameter] string DepartmentFilter`, `[Parameter] int PageSize`. |
+| **BWFC components used** | `<GridView>` with `<BoundField>` columns — fully supported with paging |
+| **Migration complexity** | **Medium** |
+| **What works automatically** | L1 converts `asp:GridView` → `<GridView>`, `asp:BoundField` → `<BoundField>`. Column definitions preserved. |
+| **What needs manual work** | `OnPageIndexChanging` event → BWFC GridView handles paging internally. `DataBind()` call pattern → set `DataSource` or use `SelectMethod`. `Page_PreRender` binding → `OnParametersSet` or `OnInitializedAsync`. LINQ filtering stays the same. |
+
+### 1.6 Pager
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/Pager.ascx` + `.ascx.cs` — Custom paging with `asp:LinkButton` (Previous/Next) + `asp:Repeater` generating numbered page links. Custom `PageChanged` event. |
+| **After** | `Pager.razor` with `[Parameter] int CurrentPage`, `[Parameter] int TotalPages`, `[Parameter] EventCallback<int> OnPageChanged`. |
+| **BWFC components used** | `<LinkButton>`, `<Repeater>` |
+| **Migration complexity** | **Medium** |
+| **What works automatically** | L1 converts `asp:LinkButton` → `<LinkButton>`, `asp:Repeater` → `<Repeater>` |
+| **What needs manual work** | `CommandArgument` data-binding in Repeater ItemTemplate → Blazor `@context` pattern. Dynamic CSS class ternary (`CurrentPage == ...`) → Razor expression. `OnClick` server events → EventCallback delegates. ViewState-backed properties → `[Parameter]` properties. |
+
+### 1.7 Footer
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/Footer.ascx` + `.ascx.cs` — Footer with `asp:Literal` for year, conditional links panel. |
+| **After** | `Footer.razor` with `[Parameter] bool ShowLinks`, `[Parameter] int Year`. |
+| **BWFC components used** | `<Literal>` (or just Razor `@Year`) |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 converts `asp:Literal` → `<Literal>`, HTML structure preserved |
+| **What needs manual work** | `DateTime.Now.Year` default → set in `OnInitialized`. `.aspx` links → update to Blazor routes. |
+
+### 1.8 AnnouncementCard
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/AnnouncementCard.ascx` + `.ascx.cs` — Card display with 4 `asp:Literal` controls. Takes `Announcement` model object. Truncates body text. |
+| **After** | `AnnouncementCard.razor` with `[Parameter] Announcement Announcement`, `[Parameter] bool ShowFullText`. |
+| **BWFC components used** | `<Literal>` × 4 (or direct Razor output) |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 converts all `asp:Literal` tags. HTML structure preserved. |
+| **What needs manual work** | `HttpUtility.HtmlEncode` → Razor's default encoding handles this. `Page_Load` data binding → set in `OnParametersSet`. Text truncation logic stays as-is. |
+
+### 1.9 TrainingCatalog
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/TrainingCatalog.ascx` + `.ascx.cs` — `asp:Repeater` with `ItemTemplate` containing course cards with `Eval()` bindings and `asp:Button` for enrollment. Custom `EnrollmentRequested` event via `OnItemCommand`. |
+| **After** | `TrainingCatalog.razor` with `[Parameter] IEnumerable<TrainingCourse> Courses`, `[Parameter] EventCallback<int> OnEnrollmentRequested`. |
+| **BWFC components used** | `<Repeater>` with ItemTemplate, `<Button>` with CommandName/CommandArgument |
+| **Migration complexity** | **Medium** |
+| **What works automatically** | L1 converts `asp:Repeater` → `<Repeater>`, `asp:Button` → `<Button>` |
+| **What needs manual work** | `<%# Eval("CourseName") %>` → `@context.CourseName`. `OnItemCommand` with `CommandName`/`CommandArgument` → BWFC Repeater + Button `OnCommand` event pattern. `Page_PreRender` binding → `OnParametersSet`. |
+
+### 1.10 QuickStats
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/QuickStats.ascx` + `.ascx.cs` — Dashboard stats with conditional panels and `asp:Literal` for counts. Calls `PortalDataProvider` directly. |
+| **After** | `QuickStats.razor` with `[Parameter] bool ShowEmployeeCount`, `[Parameter] bool ShowAnnouncementCount`. |
+| **BWFC components used** | `<Literal>` (or direct Razor output) |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 converts `asp:Literal` → `<Literal>`. HTML structure preserved. |
+| **What needs manual work** | `PortalDataProvider` static calls → inject as service. `HtmlGenericControl.Visible` → Blazor `@if` conditional. |
+
+### 1.11 DashboardWidget
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/DashboardWidget.ascx` + `.ascx.cs` — Widget shell with `asp:Literal` for icon/title and `asp:PlaceHolder` for arbitrary child content. Exposes `ContentPlaceHolder` property. |
+| **After** | `DashboardWidget.razor` with `[Parameter] string WidgetTitle`, `[Parameter] string IconClass`, `[Parameter] RenderFragment ChildContent`. |
+| **BWFC components used** | `<Literal>`, `<PlaceHolder>` — PlaceHolder maps naturally to `RenderFragment ChildContent` |
+| **Migration complexity** | **Easy** |
+| **What works automatically** | L1 converts asp: tags |
+| **What needs manual work** | `PlaceHolder` content injection pattern → `RenderFragment ChildContent` in Blazor. This is a natural Blazor pattern. `Server.HtmlEncode` → default Razor encoding. |
+
+### 1.12 ResourceBrowser
+
+| Aspect | Details |
+|--------|---------|
+| **Before** | `Controls/ResourceBrowser.ascx` + `.ascx.cs` — Complex composite: embeds `uc:Breadcrumb` and `uc:SearchBox` user controls + 2 `asp:Repeater` controls with `asp:LinkButton` children. Handles `OnItemCommand`, subscribes to child SearchBox's `Search` event. |
+| **After** | `ResourceBrowser.razor` with `[Parameter] int CategoryId`, `[Parameter] bool ShowCategories`, `[Parameter] EventCallback<int> OnResourceSelected`. Nests `<Breadcrumb>` and `<SearchBox>` as child components. |
+| **BWFC components used** | `<Repeater>` × 2, `<LinkButton>`, plus migrated `Breadcrumb` and `SearchBox` components |
+| **Migration complexity** | **Hard** |
+| **What works automatically** | L1 converts asp: tags and `<%@ Register %>` directives to `@using` statements |
+| **What needs manual work** | User control composition (`uc:` prefix tags) → Blazor component references. `OnInit` event wiring (`ctlSearchBox.Search += ...`) → Blazor EventCallback pattern. `OnItemCommand` with `CommandName`/`CommandArgument` → Blazor command handling. LINQ filtering in search handler stays. This is the most complex ASCX because it composes other user controls and has bidirectional eventing. |
+
+### ASCX Migration Summary
+
+| Complexity | Controls | Count |
+|-----------|---------|-------|
+| **Easy** | PageHeader, Footer, AnnouncementCard, QuickStats, DashboardWidget, Breadcrumb, SearchBox | 7 |
+| **Medium** | DepartmentFilter, EmployeeList, Pager, TrainingCatalog | 4 |
+| **Hard** | ResourceBrowser | 1 |
+
+---
+
+## Part 2: Custom C# Server Controls — Deep Analysis
+
+### 2.1 SectionPanel
+
+**Web Forms implementation:**
+- **Base class:** `Control` + `INamingContainer`
+- **Rendering pattern:** `CreateChildControls()` with 3 `ITemplate` properties (`HeaderTemplate`, `ContentTemplate`, `FooterTemplate`)
+- **Key feature:** `[ParseChildren(true)]` enables declarative template markup. `TemplateContainer` attributes. Programmatic child control creation with Panel, PlaceHolder, Literal.
+- **HTML output:** Nested `<div>` structure with section-panel/section-header/section-content/section-footer classes
+
+**BWFC equivalent base class:** `CustomControls.CompositeControl` (inherits WebControl → BaseStyledComponent → BaseWebFormsComponent)
+
+**Blazor equivalent pattern:**
+```razor
+<div class="@CssClass">
+    <div class="section-header">
+        @if (HeaderTemplate != null) { @HeaderTemplate }
+        else if (!string.IsNullOrEmpty(Title)) { <h3>@Title</h3> }
+    </div>
+    <div class="section-content">@ContentTemplate</div>
+    @if (FooterTemplate != null) {
+        <div class="section-footer">@FooterTemplate</div>
+    }
+</div>
+```
+
+**What BWFC provides today:**
+- `CompositeControl` base class with `CreateChildControls()` pattern
+- `BaseStyledComponent` with CssClass, Style properties
+- `BaseWebFormsComponent.ChildComponents` RenderFragment parameter
+
+**What's MISSING in BWFC:**
+- **ITemplate → RenderFragment bridging:** There is no helper or base class to convert Web Forms `ITemplate` properties to Blazor `RenderFragment` parameters. Developers must manually rewrite templates.
+- **ParseChildren/TemplateContainer semantics:** No equivalent to `[ParseChildren(true)]` or `[TemplateContainer]` — these are purely declarative in Blazor via `[Parameter] RenderFragment`.
+- **INamingContainer equivalent:** BWFC's `BaseWebFormsComponent` already handles parent-child hierarchy, but there's no explicit INamingContainer marker interface.
+
+**Recommended improvements:**
+1. Add documentation/guidance for ITemplate → RenderFragment migration pattern
+2. Consider a `TemplatedComponent` base class that pre-declares HeaderTemplate/ContentTemplate/FooterTemplate RenderFragment parameters as a common pattern
+
+**Migration complexity:** **Medium** — The ITemplate pattern maps cleanly to RenderFragment conceptually, but requires complete rewrite from CreateChildControls to Razor markup.
+
+---
+
+### 2.2 EmployeeDataGrid
+
+**Web Forms implementation:**
+- **Base class:** `DataBoundControl` (System.Web.UI.WebControls)
+- **Rendering pattern:** `PerformDataBinding(IEnumerable)` + `RenderContents(HtmlTextWriter)`
+- **Key features:** Custom paging (AllowPaging/PageSize/CurrentPageIndex), sorting (AllowSorting/SortColumn/SortDirection), search (AllowSearch/SearchText). Hardcoded column structure (ID, Name, Title, Department, Actions). Renders full HTML table with thead/tbody. Typed cast to `Employee` model.
+
+**BWFC equivalent base class:** `DataBoundComponent<T>` (DataBinding namespace) or `CustomControls.WebControl` with `HtmlTextWriter`
+
+**Blazor equivalent pattern — two approaches:**
+
+*Approach A (Recommended):* Use BWFC's existing `<GridView>` component with BoundField/TemplateField columns. This gives paging and sorting for free.
+
+*Approach B (For exact custom rendering):* Inherit from `CustomControls.WebControl`, override `RenderContents()`, port the HtmlTextWriter code nearly verbatim.
+
+**What BWFC provides today:**
+- `CustomControls.WebControl` with `Render(HtmlTextWriter)` and `RenderContents(HtmlTextWriter)` — allows near-direct port of RenderContents code
+- `CustomControls.HtmlTextWriter` with tag/attribute/style enums matching Web Forms API
+- `DataBoundComponent<T>` with `DataSource`, `Items`, `SelectMethod` for data binding
+- `GridView` component with built-in paging, sorting, BoundField/TemplateField columns
+
+**What's MISSING in BWFC:**
+- **No `DataBoundWebControl<T>` combining data binding + HtmlTextWriter rendering.** Currently `DataBoundComponent<T>` inherits `BaseStyledComponent` (uses Razor rendering), and `WebControl` inherits `BaseStyledComponent` (uses HtmlTextWriter rendering). There's no class that bridges both — a custom DataBoundControl that binds data AND renders via HtmlTextWriter.
+- **PerformDataBinding(IEnumerable) pattern:** BWFC's `DataBoundComponent<T>` uses `OnParametersSet` for binding, not a `PerformDataBinding` override. Custom controls that override `PerformDataBinding` need restructuring.
+- **HtmlTextWriter missing enums:** `HtmlTextWriterAttribute.Colspan`, `HtmlTextWriterAttribute.For`, `HtmlTextWriterAttribute.Checked`, `HtmlTextWriterAttribute.Placeholder` are not in BWFC's enum set.
+
+**Recommended improvements:**
+1. **Create `DataBoundWebControl<T>`** — inherits `WebControl` + includes DataBoundComponent data binding logic. This bridges the gap for custom controls that bind data and render via HtmlTextWriter.
+2. **Extend HtmlTextWriter enums** — add missing attributes (Colspan, For, Checked, Placeholder, Onclick, Tabindex) and tags (Tfoot, Nav, Header, Footer, Section, Article).
+
+**Migration complexity:** **Hard** — The PerformDataBinding + RenderContents dual pattern doesn't have a single BWFC base class today.
+
+---
+
+### 2.3 StarRating
+
+**Web Forms implementation:**
+- **Base class:** `WebControl`
+- **Rendering pattern:** `RenderContents(HtmlTextWriter)` + `AddAttributesToRender(HtmlTextWriter)` + `TagKey` override
+- **Key features:** 5-star display with configurable colors. Star/empty colors via inline styles. `TagKey` returns `HtmlTextWriterTag.Span` (outer wrapping element).
+
+**BWFC equivalent base class:** `CustomControls.WebControl`
+
+**Blazor equivalent pattern:**
+```razor
+<span class="star-rating" style="color: @StarColor">
+    @for (int i = 1; i <= 5; i++) {
+        <span class="@(i <= Rating ? "star filled" : "star empty")"
+              data-rating="@i"
+              style="color: @(i <= Rating ? StarColor : EmptyStarColor)">★</span>
+    }
+</span>
+```
+
+**What BWFC provides today:**
+- `CustomControls.WebControl` with `Render(HtmlTextWriter)` and `RenderContents(HtmlTextWriter)` — allows near-exact port
+- `CustomControls.HtmlTextWriter` with `AddStyleAttribute`, `AddAttribute`, `RenderBeginTag/RenderEndTag`
+- `BaseStyledComponent` with CssClass, Style properties
+
+**What's MISSING in BWFC:**
+- **`TagKey` property:** Web Forms `WebControl.TagKey` defines the outer HTML element tag. BWFC's `CustomControls.WebControl` doesn't support this pattern — it has no auto-wrapping outer tag. The developer must manually write the outer tag in `Render()`.
+- **`AddAttributesToRender` hook:** Web Forms calls this automatically before the outer tag. BWFC's `WebControl.AddBaseAttributes` is private and only handles ID/CssClass/Style. No extensible hook for custom attributes on the outer tag.
+
+**Recommended improvements:**
+1. Add `protected virtual HtmlTextWriterTag TagKey` property to `CustomControls.WebControl` (default: `Div`)
+2. Add `protected virtual void AddAttributesToRender(HtmlTextWriter writer)` hook called before outer tag rendering
+3. Auto-render outer tag from TagKey in BuildRenderTree, calling RenderContents inside
+
+**Migration complexity:** **Easy** — Straightforward HtmlTextWriter port. Could also be written as pure Razor trivially.
+
+---
+
+### 2.4 EmployeeCard
+
+**Web Forms implementation:**
+- **Base class:** `CompositeControl`
+- **Rendering pattern:** `CreateChildControls()` — programmatically creates Panel, Image, Label, Literal, HyperLink child controls
+- **Key features:** Card layout with photo, name/title/department labels, optional contact info and details link. Builds control tree imperatively.
+
+**BWFC equivalent base class:** `CustomControls.CompositeControl`
+
+**Blazor equivalent pattern:**
+```razor
+<div class="employee-card">
+    @if (!string.IsNullOrEmpty(PhotoUrl)) {
+        <img class="employee-photo" src="@PhotoUrl" alt="@EmployeeName" />
+    }
+    <div class="employee-info">
+        <span class="employee-name">@EmployeeName</span>
+        <span class="employee-title">@Title</span>
+        <span class="employee-department">@Department</span>
+        @if (ShowContactInfo) {
+            <div class="employee-contact">Contact info available</div>
+        }
+    </div>
+    @if (EnableDetailsLink) {
+        <a class="employee-details-link" href="@($"EmployeeDetails?id={EmployeeId}")">View Details</a>
+    }
+</div>
+```
+
+**What BWFC provides today:**
+- `CustomControls.CompositeControl` with `CreateChildControls()` and `RenderChildren()` — allows port of control tree creation
+- BWFC `<Panel>`, `<Image>`, `<Label>`, `<Literal>`, `<HyperLink>` components usable as children
+
+**What's MISSING in BWFC:**
+- **CompositeControl child rendering limitation:** `RenderChildren` throws `NotSupportedException` for non-WebControl children. Standard BWFC components (Label, Image, HyperLink) don't inherit from `CustomControls.WebControl` — they inherit from `BaseStyledComponent`. So you can't programmatically add a BWFC `Label` to a `CompositeControl.Controls` list and have it render.
+- **URL resolution:** `~/EmployeeDetails.aspx?id=` → `NavigationManager` pattern not automatically handled
+
+**Recommended improvements:**
+1. **Fix CompositeControl.RenderChildren** to support `BaseWebFormsComponent` children (not just `WebControl` children) by using Blazor's RenderTreeBuilder for non-WebControl children
+2. Better yet, recommend pure Razor approach over CompositeControl for new migrations (it's simpler)
+
+**Migration complexity:** **Easy** — Best migrated as pure Razor markup, not using CompositeControl. The imperative control tree pattern is an anti-pattern in Blazor.
+
+---
+
+### 2.5 PollQuestion
+
+**Web Forms implementation:**
+- **Base class:** `Control` + `IPostBackEventHandler` + `INamingContainer`
+- **Rendering pattern:** `Render(HtmlTextWriter)` — fully custom rendering of radio buttons, labels, and vote button with postback JavaScript
+- **Key features:** `RaisePostBackEvent(string)` handles vote submission. Custom `VoteSubmitted` event with `PollVoteEventArgs`. `Page.ClientScript.GetPostBackEventReference` for JavaScript postback.
+- **Unique complexity:** Tightly coupled to Web Forms postback model. Radio button name uses `UniqueID`, IDs use `ClientID`.
+
+**BWFC equivalent base class:** `CustomControls.WebControl` for rendering, but no postback equivalent
+
+**Blazor equivalent pattern:**
+```razor
+<div class="poll-question">
+    <div class="poll-question-text">@QuestionText</div>
+    <div class="poll-options">
+        @foreach (var (option, index) in Options.Split(',').Select((o, i) => (o.Trim(), i))) {
+            <div class="poll-option">
+                <input type="radio" name="@_groupName" value="@index"
+                       checked="@(SelectedOption == index)"
+                       @onchange="() => SelectedOption = index" />
+                <label>@option</label>
+            </div>
+        }
+    </div>
+    <button class="poll-submit-button" @onclick="SubmitVote">Vote</button>
+</div>
+
+@code {
+    [Parameter] public EventCallback<PollVoteEventArgs> OnVoteSubmitted { get; set; }
+    private async Task SubmitVote() => await OnVoteSubmitted.InvokeAsync(...);
+}
+```
+
+**What BWFC provides today:**
+- `CustomControls.WebControl` for HtmlTextWriter rendering
+- `RadioButton` / `RadioButtonList` BWFC components
+- `BaseWebFormsComponent.OnBubbledEvent` for event bubbling
+
+**What's MISSING in BWFC:**
+- **IPostBackEventHandler → EventCallback bridging:** No guidance or helper for converting postback event patterns to Blazor EventCallbacks. The `RaisePostBackEvent` / `GetPostBackEventReference` JavaScript pattern has no equivalent.
+- **UniqueID/ClientID in custom renders:** BWFC has `ClientID` support but the postback script generation pattern (`Page.ClientScript`) is inherently incompatible with Blazor.
+- **RadioButton group management:** BWFC `RadioButton` exists but doesn't support dynamic group naming within custom render code.
+
+**Recommended improvements:**
+1. Add migration guidance document for IPostBackEventHandler → EventCallback patterns
+2. Consider a `PostBackEventBridge` utility that maps legacy postback command strings to EventCallbacks for controls being incrementally migrated
+
+**Migration complexity:** **Hard** — The postback model is fundamentally different in Blazor. Requires complete rewrite of interaction pattern.
+
+---
+
+### 2.6 NotificationBell
+
+**Web Forms implementation:**
+- **Base class:** `WebControl`
+- **Rendering pattern:** `RenderContents(HtmlTextWriter)` with `TagKey` → `Div`
+- **Key features:** Bell icon with badge count (caps at "99+"), expandable notification drawer. Custom events `NotificationClicked` and `NotificationDismissed` (declared but no postback wiring — would need JavaScript).
+- **HTML:** Nested divs with notification-bell-container/notification-bell-icon/notification-badge/notification-drawer structure
+
+**BWFC equivalent base class:** `CustomControls.WebControl`
+
+**Blazor equivalent pattern:**
+```razor
+<div class="notification-bell-container">
+    <span class="notification-bell-icon" @onclick="ToggleDrawer">
+        🔔
+        @if (UnreadCount > 0) {
+            <span class="notification-badge">@(UnreadCount > 99 ? "99+" : UnreadCount.ToString())</span>
+        }
+    </span>
+    @if (DrawerVisible) {
+        <div class="notification-drawer">...</div>
+    }
+</div>
+```
+
+**What BWFC provides today:**
+- `CustomControls.WebControl` with `RenderContents(HtmlTextWriter)` — allows near-direct port
+- Full HtmlTextWriter API for rendering
+
+**What's MISSING in BWFC:**
+- **TagKey property** (same issue as StarRating — no auto outer-tag)
+- **Interactive event binding in HtmlTextWriter output:** HtmlTextWriter renders static HTML markup. You can't attach Blazor `@onclick` handlers in HtmlTextWriter output. The rendered HTML is added via `AddMarkupContent` which doesn't support Blazor event binding.
+- **Client-side interactivity:** Toggle drawer behavior needs JS interop or Blazor event handling, which HtmlTextWriter can't provide.
+
+**Recommended improvements:**
+1. For interactive controls, recommend pure Razor approach over HtmlTextWriter
+2. Document the HtmlTextWriter limitation: it produces static markup only — no Blazor event binding
+3. Consider hybrid approach: `WebControl` renders static structure, component adds `@onclick` via RenderTreeBuilder
+
+**Migration complexity:** **Medium** — Static rendering is easy via HtmlTextWriter; interactivity (drawer toggle, click events) requires Razor or JS interop.
+
+---
+
+### 2.7 DepartmentBreadcrumb
+
+**Web Forms implementation:**
+- **Base class:** `Control` + `IPostBackEventHandler`
+- **Rendering pattern:** `Render(HtmlTextWriter)` — custom rendering of breadcrumb items with `<a>` links using postback JavaScript
+- **Key features:** Hierarchical navigation (Organization → Division → Department). `RaisePostBackEvent` handles breadcrumb clicks. Custom `BreadcrumbItemClicked` event with `BreadcrumbEventArgs`. `Page.ClientScript.GetPostBackEventReference` for link hrefs. Configurable separator, link CSS class, enable/disable links.
+
+**BWFC equivalent base class:** `CustomControls.WebControl` for rendering, but no postback equivalent
+
+**Blazor equivalent pattern:**
+```razor
+<div class="department-breadcrumb">
+    @{ bool isFirst = true; }
+    @if (!string.IsNullOrEmpty(OrganizationName)) {
+        <span class="breadcrumb-item">
+            @if (EnableLinks) {
+                <a class="@LinkCssClass" @onclick="() => OnItemClicked(OrganizationName, \"organization\")">
+                    @OrganizationName
+                </a>
+            } else { @OrganizationName }
+        </span>
+        isFirst = false;
+    }
+    @* ... repeat for Division, Department with separator ... *@
+</div>
+```
+
+**What BWFC provides today:**
+- `CustomControls.WebControl` for HtmlTextWriter rendering
+- `SiteMapPath` component (a BWFC breadcrumb control — but uses SiteMap data model, not custom properties)
+
+**What's MISSING in BWFC:**
+- Same IPostBackEventHandler gap as PollQuestion
+- `SiteMapPath` is close conceptually but uses `SiteMapNode` hierarchy, not flat Organization/Division/Department properties
+- No `GetPostBackEventReference` equivalent
+
+**Recommended improvements:**
+1. Same as PollQuestion — PostBack → EventCallback migration guidance
+2. Consider whether `SiteMapPath` could accept custom node data (currently requires `SiteMapNode` objects)
+
+**Migration complexity:** **Medium** — Rendering is straightforward; postback links → `@onclick` EventCallbacks is a manual but well-understood conversion.
+
+---
+
+### Custom Controls Migration Summary
+
+| Control | WF Base Class | BWFC Base Class | Complexity | Key Gap |
+|---------|--------------|-----------------|------------|---------|
+| **SectionPanel** | Control + INamingContainer | CompositeControl or Razor | Medium | ITemplate → RenderFragment |
+| **EmployeeDataGrid** | DataBoundControl | WebControl (no data binding bridge) | Hard | No DataBoundWebControl<T> |
+| **StarRating** | WebControl | CustomControls.WebControl | Easy | Missing TagKey/AddAttributesToRender |
+| **EmployeeCard** | CompositeControl | Razor (recommended) | Easy | CompositeControl child limitation |
+| **PollQuestion** | Control + IPostBackEventHandler | Razor (required) | Hard | No postback model |
+| **NotificationBell** | WebControl | CustomControls.WebControl + Razor | Medium | No event binding in HtmlTextWriter |
+| **DepartmentBreadcrumb** | Control + IPostBackEventHandler | Razor (required) | Medium | No postback model |
+
+---
+
+## Part 3: BWFC Base Class Inventory & Gap Analysis
+
+### 3.1 Complete Base Class Hierarchy
+
+```
+ComponentBase
+├── BaseWebFormsComponent (abstract) ─── corresponds to System.Web.UI.Control
+│   ├── BaseStyledComponent (abstract) ─── corresponds to System.Web.UI.WebControls.WebControl
+│   │   ├── ButtonBaseComponent (abstract) ─── Button/LinkButton/ImageButton base
+│   │   ├── BaseDataBoundComponent ─── corresponds to System.Web.UI.WebControls.DataBoundControl
+│   │   │   └── DataBoundComponent<T> ─── generic typed data binding
+│   │   │       └── BaseListControl<T> ─── DropDownList/CheckBoxList/RadioButtonList/ListBox
+│   │   ├── CustomControls.WebControl (abstract) ─── HtmlTextWriter rendering bridge
+│   │   │   └── CustomControls.CompositeControl (abstract) ─── child control composition
+│   │   └── BaseValidator<T> (abstract) ─── validation controls
+│   │       └── BaseCompareValidator<T> (abstract) ─── CompareValidator/RangeValidator
+│   ├── BaseColumn<T> ─── grid column base
+│   └── BaseRow<T> ─── grid row base
+│
+└── WebFormsPageBase (abstract) ─── corresponds to System.Web.UI.Page
+
+Standalone:
+└── HttpHandlerBase (abstract) ─── corresponds to IHttpHandler
+```
+
+### 3.2 Per-Class Analysis
+
+| BWFC Class | WF Equivalent | What It Provides | What's Missing |
+|-----------|--------------|-----------------|----------------|
+| **BaseWebFormsComponent** | Control | ID, ClientID, Visible, Enabled, ViewState dict, lifecycle events (OnInit/OnLoad/OnPreRender/OnUnload), parent-child hierarchy, CascadingValue wrapping, theming, AdditionalAttributes | No INamingContainer marker, no FindControl across tree (only immediate children), no built-in postback event handling |
+| **BaseStyledComponent** | WebControl | BackColor, ForeColor, BorderColor/Style/Width, CssClass, Width, Height, Font, computed Style string, IStyle interface, theme skin application | No TagKey, no AddAttributesToRender hook, no HtmlTextWriter integration (that's in CustomControls.WebControl) |
+| **ButtonBaseComponent** | Button base | Text, CommandName, CommandArgument, OnClick, OnCommand, CausesValidation, ValidationGroup, PostBackUrl, event bubbling | OnClientClick is a stub (no-op) |
+| **BaseDataBoundComponent** | DataBoundControl | DataSource (object), DataSourceID (obsolete), OnDataBound event | No PerformDataBinding(IEnumerable), no PerformSelect(), no DataBinding lifecycle |
+| **DataBoundComponent\<T\>** | Typed DataBoundControl | Items (IEnumerable\<T\>), DataMember, SelectMethod/SelectItems/SelectMethodAsync delegates, DataSet/DataTable support via IListSource, RefreshSelectMethod | No PerformDataBinding override, no rendering — just data management |
+| **BaseListControl\<T\>** | ListControl | DataTextField, DataValueField, DataTextFormatString, StaticItems, AppendDataBoundItems, GetItems() combining static + data items | Adequate for list controls |
+| **CustomControls.WebControl** | WebControl (custom) | Render(HtmlTextWriter), RenderContents(HtmlTextWriter), BuildRenderTree integration, auto ID/CssClass/Style | No TagKey, no AddAttributesToRender, static markup only (no Blazor event binding), AddBaseAttributes is private not virtual |
+| **CustomControls.CompositeControl** | CompositeControl | CreateChildControls(), EnsureChildControls(), RenderChildren(HtmlTextWriter), dual-mode rendering (HtmlTextWriter or Blazor components) | RenderChildren only supports WebControl children — throws for standard BWFC components. RenderChildrenAsBlazorComponents is simplistic (no parameter passing). |
+| **CustomControls.HtmlTextWriter** | System.Web.UI.HtmlTextWriter | Tag/attribute/style stacks, BeginTag/EndTag, AddAttribute/AddStyleAttribute, GetHtml(), class concatenation | Missing enums: Colspan, For, Checked, Placeholder, Onclick, Tabindex, Tfoot, Nav, Header, Footer, Section, Article, Textarea, Fieldset, Legend |
+| **BaseValidator\<T\>** | BaseValidator | ControlToValidate, ErrorMessage, Text, ValidationGroup, Display, EditContext integration, ValidationMessageStore | Adequate for validation migration |
+| **WebFormsPageBase** | Page | Title, MetaDescription, MetaKeywords, IsPostBack (always false), Page self-reference, Response/Request shims, ViewState dict, GetRouteUrl | No Session access, no ClientScript |
+
+### 3.3 Unsupported Patterns
+
+| Web Forms Pattern | Status in BWFC | Impact |
+|------------------|---------------|--------|
+| **ITemplate** | ❌ No support — must manually convert to `RenderFragment` | Affects SectionPanel, any templated custom control |
+| **IPostBackEventHandler** | ❌ No equivalent — postback model doesn't exist in Blazor | Affects PollQuestion, DepartmentBreadcrumb, any interactive custom control |
+| **DataBoundControl + custom RenderContents** | ⚠️ Partial — data binding and HtmlTextWriter exist separately but not combined | Affects EmployeeDataGrid |
+| **WebControl.TagKey** | ❌ Not implemented in CustomControls.WebControl | Affects StarRating, NotificationBell, any control that overrides TagKey |
+| **WebControl.AddAttributesToRender** | ❌ Not implemented | Affects StarRating, any control that adds custom outer-tag attributes |
+| **CompositeControl with BWFC children** | ❌ RenderChildren throws for non-WebControl children | Affects EmployeeCard |
+| **Page.ClientScript.GetPostBackEventReference** | ❌ No equivalent | Affects PollQuestion, DepartmentBreadcrumb |
+| **UserControl base class** | ⚠️ No direct equivalent — ASCX becomes Razor component | Low impact — natural Blazor pattern |
+| **Eval() / Container.DataItem** | ⚠️ BWFC Repeater/GridView have DataBinder but Eval() syntax → `@context.Property` | Requires manual conversion |
+
+---
+
+## Part 4: Recommended BWFC Improvements
+
+### Priority 1: DataBoundWebControl\<T\> Base Class (HIGH VALUE)
+
+**Problem:** Custom controls inheriting `DataBoundControl` that override both `PerformDataBinding()` and `RenderContents(HtmlTextWriter)` have no single BWFC base class. Currently `DataBoundComponent<T>` does data binding but uses Razor rendering, while `CustomControls.WebControl` does HtmlTextWriter rendering but has no data binding.
+
+**Proposal:** Create `CustomControls.DataBoundWebControl<T>` that:
+- Inherits from `CustomControls.WebControl`
+- Includes `DataSource`, `Items`, `SelectMethod`/`SelectMethodAsync` from `DataBoundComponent<T>`
+- Adds `protected virtual void PerformDataBinding(IEnumerable<T> data)` for overriding
+- Calls `PerformDataBinding` from `OnParametersSet`
+- Calls `RenderContents(HtmlTextWriter)` from `BuildRenderTree`
+
+**Impact:** Directly enables migration of EmployeeDataGrid and any custom DataBoundControl with custom rendering. This is the single highest-value improvement for custom control migration.
+
+**Files to modify/create:**
+- New: `src/BlazorWebFormsComponents/CustomControls/DataBoundWebControl.cs`
+
+---
+
+### Priority 2: WebControl TagKey + AddAttributesToRender (HIGH VALUE)
+
+**Problem:** Web Forms `WebControl` automatically renders an outer tag from `TagKey` and calls `AddAttributesToRender` before the tag. BWFC's `CustomControls.WebControl` doesn't do this — developers must manually write the outer tag.
+
+**Proposal:** Enhance `CustomControls.WebControl`:
+```csharp
+protected virtual HtmlTextWriterTag TagKey => HtmlTextWriterTag.Span;
+protected virtual void AddAttributesToRender(HtmlTextWriter writer) { }
+
+protected override void BuildRenderTree(RenderTreeBuilder builder) {
+    if (!Visible) return;
+    using (var writer = new HtmlTextWriter()) {
+        AddBaseAttributes(writer);     // existing: ID, CssClass, Style
+        AddAttributesToRender(writer); // new hook for custom attributes
+        writer.RenderBeginTag(TagKey); // auto outer tag from TagKey
+        RenderContents(writer);        // developer's inner content
+        writer.RenderEndTag();
+        builder.AddMarkupContent(0, writer.GetHtml());
+    }
+}
+```
+
+If `Render()` is overridden (check via a flag), use the existing direct-render path. If only `RenderContents()` is overridden, use the TagKey wrapping path. This preserves backward compatibility.
+
+**Impact:** Enables near-direct port of StarRating, NotificationBell, and any control using TagKey/AddAttributesToRender/RenderContents pattern.
+
+**Files to modify:**
+- `src/BlazorWebFormsComponents/CustomControls/WebControl.cs`
+
+---
+
+### Priority 3: HtmlTextWriter Enum Expansion (MEDIUM VALUE)
+
+**Problem:** Missing HTML attributes, tags, and styles that the DepartmentPortal controls use.
+
+**Proposal:** Extend the enums in `CustomControls/HtmlTextWriter.cs`:
+
+**Missing HtmlTextWriterAttribute values:**
+- `Colspan`, `Rowspan`, `For`, `Checked`, `Placeholder`, `Onclick`, `Tabindex`, `Role`, `Aria`, `Data`
+
+**Missing HtmlTextWriterTag values:**
+- `Tfoot`, `Nav`, `Header`, `Footer`, `Section`, `Article`, `Textarea`, `Fieldset`, `Legend`, `Caption`, `Small`, `Strong`, `Em`, `Code`, `Pre`
+
+**Missing HtmlTextWriterStyle values:**
+- `Cursor`, `TextDecoration`, `VerticalAlign`, `ListStyleType`, `Overflow`, `Position`, `Top`, `Left`, `Right`, `Bottom`, `ZIndex`
+
+**Also add:** Support for `data-*` attributes via a generic `AddAttribute(string name, string value)` overload (already exists, just ensure no validation rejects unknown names).
+
+**Impact:** Prevents compilation errors when porting controls with these attributes/tags. Reduces friction.
+
+**Files to modify:**
+- `src/BlazorWebFormsComponents/CustomControls/HtmlTextWriter.cs`
+
+---
+
+### Priority 4: CompositeControl Child Rendering Fix (MEDIUM VALUE)
+
+**Problem:** `CompositeControl.RenderChildren()` throws `NotSupportedException` for non-WebControl children. This means you can't programmatically add standard BWFC components (Label, Image, HyperLink) as children.
+
+**Proposal:** Instead of throwing, render non-WebControl children using Blazor's RenderTreeBuilder:
+```csharp
+protected void RenderChildren(HtmlTextWriter writer)
+{
+    EnsureChildControls();
+    foreach (var control in Controls)
+    {
+        if (control is WebControl webControl)
+            webControl.RenderControl(writer);
+        else
+            writer.Write($"<!-- Non-WebControl child: {control.GetType().Name} (render via Blazor) -->");
+    }
+}
+```
+
+Or better: add a `RenderChildControl(HtmlTextWriter, BaseWebFormsComponent)` that handles both paths. For standard BWFC components, trigger their BuildRenderTree and capture the output.
+
+**Impact:** Enables EmployeeCard-style composite controls to use BWFC components as children.
+
+**Files to modify:**
+- `src/BlazorWebFormsComponents/CustomControls/CompositeControl.cs`
+
+---
+
+### Priority 5: ITemplate → RenderFragment Migration Guidance (LOW-MEDIUM VALUE)
+
+**Problem:** No documentation or helper for converting `ITemplate` properties to `RenderFragment` parameters.
+
+**Proposal:** Create:
+1. A migration guide document: "Converting ITemplate to RenderFragment"
+2. Example showing before/after for SectionPanel pattern
+3. An optional `TemplatedComponent` base class with pre-declared `HeaderTemplate`, `ContentTemplate`, `FooterTemplate` RenderFragment parameters
+
+The mapping is conceptually simple:
+```
+Web Forms: [TemplateContainer(typeof(T))] public ITemplate HeaderTemplate { get; set; }
+Blazor:    [Parameter] public RenderFragment HeaderTemplate { get; set; }
+
+Web Forms: HeaderTemplate.InstantiateIn(placeholder);
+Blazor:    @HeaderTemplate (direct rendering)
+```
+
+**Impact:** Reduces confusion for developers migrating template-heavy controls. SectionPanel and similar patterns are common.
+
+**Files to create:**
+- `docs/migration/itemplate-to-renderfragment.md`
+
+---
+
+### Priority 6: PostBack Event Pattern Migration Guide (LOW VALUE)
+
+**Problem:** `IPostBackEventHandler.RaisePostBackEvent` and `Page.ClientScript.GetPostBackEventReference` have no equivalent in Blazor.
+
+**Proposal:** Documentation showing the pattern:
+```
+Web Forms: IPostBackEventHandler.RaisePostBackEvent(string eventArgument)
+Blazor:    [Parameter] EventCallback<CustomEventArgs> OnEvent + @onclick handler
+
+Web Forms: Page.ClientScript.GetPostBackEventReference(this, arg)
+Blazor:    @onclick="() => HandleEvent(arg)"
+```
+
+No code changes needed — this is purely a documentation/guidance item.
+
+**Impact:** Helps developers understand the conceptual gap. PollQuestion and DepartmentBreadcrumb are examples.
+
+**Files to create:**
+- `docs/migration/postback-to-eventcallback.md`
+
+---
+
+## Improvement Priority Matrix
+
+| Priority | Improvement | Value | Effort | Controls Unblocked |
+|---------|------------|-------|--------|-------------------|
+| **P1** | DataBoundWebControl\<T\> | High | Medium | EmployeeDataGrid + any custom DataBoundControl |
+| **P2** | TagKey + AddAttributesToRender | High | Low | StarRating, NotificationBell + many custom WebControls |
+| **P3** | HtmlTextWriter enum expansion | Medium | Low | All HtmlTextWriter-based controls |
+| **P4** | CompositeControl child fix | Medium | Medium | EmployeeCard + any CompositeControl with BWFC children |
+| **P5** | ITemplate → RenderFragment docs | Low-Med | Low | SectionPanel + any templated control |
+| **P6** | PostBack migration docs | Low | Low | PollQuestion, DepartmentBreadcrumb |
+
+---
+
+## Appendix: DepartmentPortal BaseUserControl
+
+All 12 ASCX controls inherit from `DepartmentPortal.BaseUserControl : UserControl`, which adds:
+- `LogActivity(string)` — debug logging
+- `CacheGet<T>(string)` / `CacheSet<T>(string, T, int)` — `HttpRuntime.Cache` wrapper
+
+**Blazor equivalent:** These become `@inject ILogger<T> Logger` for logging and `@inject IMemoryCache Cache` (or `IDistributedCache`) for caching. No BWFC base class needed — standard .NET DI handles this.
+
+
+
+---
+
+# Decision: AfterDepartmentPortal Project Structure
+
+**Author:** Jubilee (Sample Writer)
+**Date:** 2026-07-25
+**Status:** Implemented
+
+## Context
+
+Scaffolded `samples/AfterDepartmentPortal/` as the Blazor SSR migration target for `samples/DepartmentPortal/`.
+
+## Decisions Made
+
+1. **Models use actual DepartmentPortal names** — `TrainingCourse` (not "Course"), `Enrollment` (not "TrainingEnrollment") to maintain apples-to-apples comparison with the Before project.
+
+2. **Shared components in `Components/Shared/`** — Following AfterBlazorServerSide convention. The 12 ASCX user controls live here, not in a separate `Controls/` folder.
+
+3. **PhotoUrl paths use `/images/` not `~/Content/Images/`** — Web Forms `~` prefix doesn't exist in Blazor. URLs updated to Blazor static file conventions.
+
+4. **7 custom server controls intentionally NOT scaffolded** — SectionPanel, EmployeeDataGrid, StarRating, EmployeeCard, PollQuestion, NotificationBell, DepartmentBreadcrumb are BWFC analysis targets. TODO comments placed in consuming pages.
+
+5. **Project added to BlazorMeetsWebForms.sln** — Ensures solution-wide builds include the new project.
+

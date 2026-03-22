@@ -89,53 +89,73 @@
     <Content Include="Controls\QuickStats.ascx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\BaseMasterPage.cs" />
-    <Compile Include="Code\BasePage.cs" />
-    <Compile Include="Code\BaseUserControl.cs" />
+    <Compile Include="Code\BaseMasterPage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Code\BasePage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Code\BaseUserControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Employees.aspx.cs">
       <DependentUpon>Employees.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EmployeeDetail.aspx.cs">
       <DependentUpon>EmployeeDetail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Announcements.aspx.cs">
       <DependentUpon>Announcements.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="AnnouncementDetail.aspx.cs">
       <DependentUpon>AnnouncementDetail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Training.aspx.cs">
       <DependentUpon>Training.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="MyTraining.aspx.cs">
       <DependentUpon>MyTraining.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Resources.aspx.cs">
       <DependentUpon>Resources.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ResourceDetail.aspx.cs">
       <DependentUpon>ResourceDetail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\ManageAnnouncements.aspx.cs">
       <DependentUpon>ManageAnnouncements.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\ManageTraining.aspx.cs">
       <DependentUpon>ManageTraining.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\ManageEmployees.aspx.cs">
       <DependentUpon>ManageEmployees.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Models\Announcement.cs" />
     <Compile Include="Models\BreadcrumbEventArgs.cs" />
@@ -149,39 +169,51 @@
     <Compile Include="Models\TrainingCourse.cs" />
     <Compile Include="Controls\Breadcrumb.ascx.cs">
       <DependentUpon>Breadcrumb.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\PageHeader.ascx.cs">
       <DependentUpon>PageHeader.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\Footer.ascx.cs">
       <DependentUpon>Footer.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\AnnouncementCard.ascx.cs">
       <DependentUpon>AnnouncementCard.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\EmployeeList.ascx.cs">
       <DependentUpon>EmployeeList.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\TrainingCatalog.ascx.cs">
       <DependentUpon>TrainingCatalog.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\SearchBox.ascx.cs">
       <DependentUpon>SearchBox.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\DepartmentFilter.ascx.cs">
       <DependentUpon>DepartmentFilter.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\Pager.ascx.cs">
       <DependentUpon>Pager.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\DashboardWidget.ascx.cs">
       <DependentUpon>DashboardWidget.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\ResourceBrowser.ascx.cs">
       <DependentUpon>ResourceBrowser.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Controls\QuickStats.ascx.cs">
       <DependentUpon>QuickStats.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Code\Controls\StarRating.cs" />
     <Compile Include="Code\Controls\EmployeeCard.cs" />
@@ -193,6 +225,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -212,4 +245,22 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
   <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:50667/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

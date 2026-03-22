@@ -1,0 +1,25 @@
+@* Migrated from: DepartmentPortal/EmployeeDetail.aspx
+   Original: Employee detail page showing full profile with photo, contact info, training enrollments.
+   Uses EmployeeCard and StarRating (custom server controls) — BWFC analysis targets. *@
+
+@page "/employees/{Id:int}"
+
+<PageTitle>Employee Detail - Department Portal</PageTitle>
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Employees", "/employees"), ("Detail", "") })" />
+
+@* TODO: EmployeeCard (custom C# server control) — BWFC analysis target.
+   Renders employee photo, name, title, department, contact info in a card layout. *@
+
+@* TODO: StarRating (custom C# server control) — BWFC analysis target.
+   Original showed employee skill ratings with interactive stars. *@
+
+@* TODO: DepartmentBreadcrumb (custom C# server control) — BWFC analysis target.
+   Renders department hierarchy breadcrumb trail. *@
+
+<p><em>Employee detail page — will display full profile for employee @Id when fully migrated.</em></p>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+}

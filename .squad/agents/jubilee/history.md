@@ -339,3 +339,26 @@
 - **Session State for Enrollment:** List<int> stored in Session["EnrolledCourses"], managed across Training.aspx and MyTraining.aspx
 - **ASPX Directive:** Use CodeFile (not CodeBehind) for Web Application Project pages
 
+### AfterDepartmentPortal Scaffold (2026-07-25)
+
+**Scaffolded `samples/AfterDepartmentPortal/`** — Blazor SSR (net10.0) migration target for `samples/DepartmentPortal/` (.NET Framework 4.8 Web Forms app). Added to `BlazorMeetsWebForms.sln`.
+
+**Structure:**
+- `AfterDepartmentPortal.csproj` — net10.0, ProjectReference to BWFC
+- `Program.cs` — `AddBlazorWebFormsComponents()`, `AddRazorComponents()`, `MapRazorComponents<App>()`
+- `Components/App.razor`, `Components/Routes.razor` — standard Blazor 8+ shell
+- `Components/Layout/MainLayout.razor` — migrated from Site.Master (nav links, footer, ContentPlaceHolder → @Body)
+- `_Imports.razor` — includes `@using BlazorWebFormsComponents`, `AfterDepartmentPortal.Models`, etc.
+
+**Models (7 files):** Employee, Announcement, TrainingCourse, Resource, Department, Enrollment, PortalDataProvider — identical data to DepartmentPortal with Blazor-friendly URLs (no `~/` prefix).
+
+**Pages (7 stubs):** Dashboard (/), Employees (/employees), EmployeeDetail (/employees/{id}), Announcements (/announcements), AnnouncementDetail (/announcements/{id}), Training (/training), Resources (/resources). Each has TODO comments for custom server controls (BWFC analysis targets).
+
+**Shared Components (12 ASCX stubs):** PageHeader, Breadcrumb, SearchBox, DepartmentFilter, EmployeeList, Pager, Footer, AnnouncementCard, TrainingCatalog, QuickStats, RecentAnnouncements, UpcomingTraining. Each annotated with original .ascx source.
+
+**Not scaffolded (by design):** 7 custom C# server controls (SectionPanel, EmployeeDataGrid, StarRating, EmployeeCard, PollQuestion, NotificationBell, DepartmentBreadcrumb) — these are BWFC analysis targets. TODO comments placed in pages where they'd be used.
+
+**Build:** `dotnet build` succeeds with 0 errors (warnings are pre-existing BWFC library warnings).
+
+
+ Team update (2026-03-22): AfterDepartmentPortal Blazor SSR scaffold completed and integrated into solution. 31 files, 7 pages, 12 shared components, 6 models. Project builds clean. Decisions merged to shared decisions.md.  decided by Jubilee

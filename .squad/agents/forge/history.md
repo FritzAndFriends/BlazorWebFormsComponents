@@ -528,3 +528,22 @@ DepartmentPortal scope expanded to include **6 custom server controls** covering
 - **Bare System.Web.UI.Control base class coverage added (3.7 DepartmentBreadcrumb):** Jeff requested explicit testing of the primitive Control base class (no WebControl wrapping, no built-in HTML element, no style properties). DepartmentBreadcrumb demonstrates pure `Render()` override, `IPostBackEventHandler` direct event handling, and zero ViewState usage—patterns distinct from WebControl/CompositeControl/DataBoundControl. Rounds out custom control pattern coverage for migration testing.
 
 **Decision:** Planning doc finalized. Custom controls scope is *designed, not implemented*. Implementation will verify these patterns execute on .NET Framework 4.8, render correct HTML, and exercise the code-based control creation patterns Blazor components must simulate. Approved for L1 scripting phase.
+
+### DepartmentPortal Migration Analysis (2026-07-25)
+
+Completed comprehensive migration analysis of DepartmentPortal's 12 ASCX + 7 custom controls against BWFC capabilities. Key findings:
+
+- **BWFC covers ~70% of migration patterns today.** ASCX controls (7 Easy, 4 Medium, 1 Hard) map well to existing BWFC components. Simple asp:Literal/TextBox/Button/Label/DropDownList/GridView conversions are well-supported.
+- **CustomControls/ namespace is the critical enabler** for custom C# server controls. `WebControl` + `HtmlTextWriter` bridge allows near-direct port of `RenderContents` code. `CompositeControl` supports `CreateChildControls` pattern.
+- **4 key gaps identified:**
+  1. No `DataBoundWebControl<T>` — controls inheriting `DataBoundControl` with custom `RenderContents` can't use a single base class (P1, HIGH)
+  2. No `TagKey` / `AddAttributesToRender` on `CustomControls.WebControl` — Web Forms auto-wraps outer tag, BWFC doesn't (P2, HIGH)
+  3. `HtmlTextWriter` enum coverage incomplete — missing Colspan, For, Checked, Nav, Footer, etc. (P3, MEDIUM)
+  4. `CompositeControl.RenderChildren` throws for non-WebControl children — can't add BWFC Label/Image/HyperLink as children (P4, MEDIUM)
+- **IPostBackEventHandler has no BWFC equivalent** and requires complete rewrite to EventCallback — this is by design (Blazor has no postback model).
+- **ITemplate → RenderFragment is conceptually clean** but has no documentation or helper in BWFC.
+- **BaseUserControl (logging + caching)** maps to standard .NET DI: `ILogger<T>` + `IMemoryCache`.
+
+Analysis written to `.squad/decisions/inbox/forge-departmentportal-migration-plan.md`.
+
+ Team update (2026-03-22): DepartmentPortal migration analysis completed  12 ASCX + 7 custom controls assessed, BWFC gaps identified, improvement recommendations provided. Analysis logged to decisions.md for team review.  decided by Forge

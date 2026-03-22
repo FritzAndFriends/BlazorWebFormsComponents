@@ -1,0 +1,19 @@
+@* Migrated from: DepartmentPortal/Resources.aspx
+   Original: Resource library page with category-based filtering and resource cards.
+   Used asp:ListView bound to PortalDataProvider.GetResources(). *@
+
+@page "/resources"
+
+<PageTitle>Resources - Department Portal</PageTitle>
+
+<PageHeader Title="Resources" Subtitle="Company documents, templates, and guides" />
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Resources", "") })" />
+
+<SearchBox Placeholder="Search resources..." />
+
+@* TODO: Original grouped resources by CategoryName and displayed with download links.
+   Migrate ListView/Repeater pattern to BWFC components or Blazor foreach. *@
+<p><em>Resource listing — will display categorized resources when fully migrated.</em></p>
+
+<Pager />
