@@ -13,6 +13,41 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### NuGet Static Asset Migration Strategy (2026-03-08)
+
+**Strategic Analysis Complete — Hybrid Option C Recommended**
+
+Analyzed how Web Forms apps reference static assets via NuGet packages (`packages.config` → `packages/` folder auto-extraction → `BundleConfig.cs` bundling). Discovered:
+
+1. **DepartmentPortal Pattern (Minimal Case):** Only custom `Content/Site.css`, no external NuGet libraries. Build tool (`Microsoft.CodeDom.Providers`) has no static assets. Validates extraction logic: custom CSS copied to `wwwroot/css/`, no external packages to map.
+
+2. **Four Migration Strategies Evaluated:**
+   - **Option A (CDN):** Simple but breaks for custom packages, internet-dependent. ❌ Insufficient for enterprise.
+   - **Option B (LibMan):** Good for VS integration, limited to public libs. ⚠️ Acceptable alternative.
+   - **Option C (Extraction Tool):** PowerShell script reads `packages.config`, extracts `Content/` and `Scripts/` to `wwwroot/lib/`, suggests CDN for known OSS packages. ✅ **Recommended**.
+   - **Option D (npm):** Modern but requires Node.js toolchain. ⚠️ Good for teams with JS expertise.
+
+3. **Recommendation:** Implement **Option C (Hybrid)** — Extract custom/private packages, suggest CDN for known OSS (jQuery, Bootstrap, DataTables, Modernizr, SignalR, etc.), generate asset manifest + Blazor-compatible reference HTML.
+
+4. **Automation:** New `bwfc migrate-assets` command (PowerShell script `Migrate-NugetStaticAssets.ps1`):
+   - Input: `packages.config` + `/packages` folder
+   - Output: `wwwroot/lib/{PackageName}/`, `asset-manifest.json`, `AssetReferences.html`
+   - Strategy options: `extract` (all), `cdn` (known packages only), `hybrid` (default)
+
+5. **BundleConfig Translation:** Don't recreate bundling. Instead, teams can:
+   - Use manual `<link>` / `<script>` tags (works with HTTP/2)
+   - Integrate WebOptimizer or esbuild post-migration (optional)
+   - Avoid BundleConfig entirely (Blazor has no equivalent)
+
+6. **Deliverables Created:**
+   - Strategy document: `dev-docs/proposals/nuget-static-asset-migration.md` (29KB, 4 options analyzed, DepartmentPortal case study)
+   - Decision document: `.squad/decisions/inbox/forge-nuget-asset-strategy.md` (awaiting team approval)
+   - GitHub issue draft: Specifications complete, ready for Jeffrey T. Fritz to create upstream (personal token lacks write permissions on upstream repo, per M8 discovery)
+
+7. **Key Insight:** DepartmentPortal validates the minimal extraction case (custom CSS only). Enterprise Web Forms apps will likely have 10–50 NuGet packages — the hybrid approach scales to that complexity while remaining simple for small apps.
+
+8. **Timeline:** 6 weeks (extraction + toolkit integration + docs + hardening + GA)
+
 ### DepartmentPortal Migration Analysis & Upstream Issue Creation (2026-03-08)
 
 **Key Discovery:** DepartmentPortal migration exposed 5 critical BWFC gaps that block custom control migrations:
