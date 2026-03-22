@@ -11,9 +11,6 @@ namespace AfterDepartmentPortal.Components.Controls
         public string Title { get; set; } = string.Empty;
 
         [Parameter]
-        public new string CssClass { get; set; } = "section-panel";
-
-        [Parameter]
         public RenderFragment? HeaderTemplate { get; set; }
 
         [Parameter]
@@ -23,6 +20,15 @@ namespace AfterDepartmentPortal.Components.Controls
         public RenderFragment? FooterTemplate { get; set; }
 
         protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
+
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            if (string.IsNullOrEmpty(CssClass))
+            {
+                CssClass = "section-panel";
+            }
+        }
 
         protected override void Render(HtmlTextWriter writer)
         {
