@@ -611,3 +611,24 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
  **Team update (2026-03-20):** Analyzer architecture guide (579 lines) + expanded Analyzers.md (+363 lines). Deprecation Guidance docs (#438, 32 KB). BaseValidator/BaseCompareValidator base class docs. MkDocs strict build clean. PR #487 opened on upstream.  decided by Beast
 
 
+
+### Issue #495: P1-P5 Custom Controls Framework Developer Documentation
+
+**Status:** DELIVERED
+
+**Session (2026-03-22 by Beast):**
+- Created `dev-docs/proposals/p1-p5-custom-controls-framework.md` (~33 KB, ~500 lines)
+  - Executive summary, class hierarchy diagram, full API reference for 9 classes/interfaces
+  - Design decisions (TagKey vs strings, placeholder templating, generic DataSource, Literal alias)
+  - 5 migration patterns with before/after code examples
+  - Honest "can't be shimmed" table (ViewState, PostBack, DataSourceID, etc.)
+  - DepartmentPortal validation (5/7 drop-in, 2 manual rewrite)
+  - Test coverage map (40 new tests, 16 test components)
+  - Upstream issues table linking #490-#496
+- Updated `dev-docs/README.md` with proposals/ table entry
+
+**Key learnings:**
+- Reading actual source to verify API surfaces is critical  task description said 48 new tests but actual count is 40 in 4 new test files (plus 23 pre-existing across 3 files)
+- Enum counts from source: HtmlTextWriterTag=78, HtmlTextWriterAttribute=55, HtmlTextWriterStyle=77
+- `DataBoundWebControl<T>` design around Blazor's case-insensitive parameter matching is a subtle but important constraint worth documenting prominently
+- The placeholder approach (`<!--BWFC_TPL_N-->`) for template interleaving is novel and deserves detailed explanation for future contributors
