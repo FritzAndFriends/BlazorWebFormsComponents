@@ -13,20 +13,21 @@
 
 <div class="row">
     <div class="col-md-6">
-        @* TODO: SectionPanel (custom C# server control with ITemplate) — BWFC analysis target.
-           Do NOT scaffold here; this will become a BWFC component. *@
-        <h3>Recent Announcements</h3>
-        <RecentAnnouncements />
+        <SectionPanel Title="Recent Announcements">
+            <ContentTemplate>
+                <RecentAnnouncements />
+            </ContentTemplate>
+        </SectionPanel>
     </div>
     <div class="col-md-6">
-        @* TODO: SectionPanel (custom C# server control with ITemplate) — BWFC analysis target. *@
-        <h3>Upcoming Training</h3>
-        <UpcomingTraining />
+        <SectionPanel Title="Upcoming Training">
+            <ContentTemplate>
+                <UpcomingTraining />
+            </ContentTemplate>
+        </SectionPanel>
     </div>
 </div>
 
-@* TODO: PollQuestion (custom C# server control) — BWFC analysis target.
-   Original Dashboard.aspx included an employee satisfaction poll widget. *@
+<PollQuestion QuestionText="How satisfied are you with the department?" Options="Very Satisfied,Satisfied,Neutral,Dissatisfied" />
 
-@* TODO: NotificationBell (custom C# server control) — BWFC analysis target.
-   Original Site.Master included a notification bell in the navbar. *@
+<NotificationBell UnreadCount="3" />

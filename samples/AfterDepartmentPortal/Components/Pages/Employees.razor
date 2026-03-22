@@ -19,9 +19,15 @@
     </div>
 </div>
 
-@* TODO: EmployeeDataGrid (custom C# server control inheriting DataBoundControl) — BWFC analysis target.
-   Original used a custom data-bound grid with sorting, paging, and row templates.
-   For now, use the EmployeeList user control stub as a simpler placeholder. *@
-<EmployeeList />
+<EmployeeDataGrid DataSource="@employees" AllowSorting="true" AllowPaging="true" PageSize="10" AllowSearch="true" />
+
+@code {
+    private List<AfterDepartmentPortal.Models.Employee> employees = new()
+    {
+        new() { Id = 1, Name = "Alice Johnson", Title = "Software Engineer", Department = "Engineering" },
+        new() { Id = 2, Name = "Bob Smith", Title = "Project Manager", Department = "Operations" },
+        new() { Id = 3, Name = "Carol Davis", Title = "Designer", Department = "Creative" }
+    };
+}
 
 <Pager />
