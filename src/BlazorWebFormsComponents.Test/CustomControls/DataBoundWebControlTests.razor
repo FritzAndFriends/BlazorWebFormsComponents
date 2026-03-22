@@ -1,0 +1,130 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@using System.Collections.Generic
+@inherits BlazorWebFormsTestContext
+
+@code {
+	// ========== Non-Generic DataBoundWebControl ==========
+
+	[Fact]
+	public void DataBoundWebControl_WithDataSource_RendersItems()
+	{
+		var items = new List<string> { "Apple", "Banana", "Cherry" };
+		var cut = Render(@<SimpleDataList DataSource="@items" />);
+		var html = cut.Markup;
+		html.ShouldContain("<ul");
+		html.ShouldContain("<li>");
+		html.ShouldContain("Apple");
+		html.ShouldContain("Banana");
+		html.ShouldContain("Cherry");
+		html.ShouldContain("</li>");
+		html.ShouldContain("</ul>");
+	}
+
+	[Fact]
+	public void DataBoundWebControl_WithCssClass_AppliesClassToOuterTag()
+	{
+		var items = new List<string> { "Item1" };
+		var cut = Render(@<SimpleDataList DataSource="@items" CssClass="my-list" />);
+		cut.Markup.ShouldContain("class=\"my-list\"");
+		cut.Markup.ShouldContain("<ul");
+	}
+
+	[Fact]
+	public void DataBoundWebControl_WithId_AppliesIdToOuterTag()
+	{
+		var items = new List<string> { "Item1" };
+		var cut = Render(@<SimpleDataList DataSource="@items" ID="fruitList" />);
+		cut.Markup.ShouldContain("id=\"fruitList\"");
+	}
+
+	[Fact]
+	public void DataBoundWebControl_NullDataSource_RendersEmptyContainer()
+	{
+		var cut = Render(@<SimpleDataList />);
+		var html = cut.Markup;
+		html.ShouldContain("<ul");
+		html.ShouldContain("</ul>");
+		// Should have no <li> items
+		html.ShouldNotContain("<li>");
+	}
+
+	[Fact]
+	public void DataBoundWebControl_EmptyList_RendersEmptyContainer()
+	{
+		var items = new List<string>();
+		var cut = Render(@<SimpleDataList DataSource="@items" />);
+		var html = cut.Markup;
+		html.ShouldContain("<ul");
+		html.ShouldNotContain("<li>");
+	}
+
+	[Fact]
+	public void DataBoundWebControl_NotVisible_RendersNothing()
+	{
+		var items = new List<string> { "Apple" };
+		var cut = Render(@<SimpleDataList DataSource="@items" Visible="false" />);
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	// ========== Generic DataBoundWebControl<T> ==========
+
+	[Fact]
+	public void DataBoundWebControlT_WithTypedDataSource_RendersTypedItems()
+	{
+		var employees = new List<TestEmployee>
+		{
+			new TestEmployee { Name = "Alice", Department = "Engineering" },
+			new TestEmployee { Name = "Bob", Department = "Marketing" }
+		};
+		var cut = Render(@<TypedEmployeeTable DataSource="@employees" />);
+		var html = cut.Markup;
+		html.ShouldContain("<table");
+		html.ShouldContain("<tr>");
+		html.ShouldContain("<td>");
+		html.ShouldContain("Alice");
+		html.ShouldContain("Engineering");
+		html.ShouldContain("Bob");
+		html.ShouldContain("Marketing");
+		html.ShouldContain("</table>");
+	}
+
+	[Fact]
+	public void DataBoundWebControlT_WithCssClass_AppliesClassToTable()
+	{
+		var employees = new List<TestEmployee>
+		{
+			new TestEmployee { Name = "Alice", Department = "Eng" }
+		};
+		var cut = Render(@<TypedEmployeeTable DataSource="@employees" CssClass="employee-grid" />);
+		cut.Markup.ShouldContain("class=\"employee-grid\"");
+		cut.Markup.ShouldContain("<table");
+	}
+
+	[Fact]
+	public void DataBoundWebControlT_EmptyList_RendersEmptyTable()
+	{
+		var employees = new List<TestEmployee>();
+		var cut = Render(@<TypedEmployeeTable DataSource="@employees" />);
+		var html = cut.Markup;
+		html.ShouldContain("<table");
+		html.ShouldContain("</table>");
+		html.ShouldNotContain("<tr>");
+	}
+
+	// ========== OnDataBound Event ==========
+
+	[Fact]
+	public void DataBoundWebControl_OnDataBound_FiresWhenDataSourceSet()
+	{
+		var dataBoundFired = false;
+		var items = new List<string> { "Test" };
+		var cut = Render(
+			@<SimpleDataList DataSource="@items" OnDataBound="@((e) => { dataBoundFired = true; })" />
+		);
+		dataBoundFired.ShouldBeTrue();
+	}
+}

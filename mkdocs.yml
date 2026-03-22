@@ -172,11 +172,13 @@ nav:
       - Deprecation Guidance: Migration/DeprecationGuidance.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
+      - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
       - Deferred Controls: Migration/DeferredControls.md
       - Master Pages: Migration/MasterPages.md
+      - User Controls: Migration/User-Controls.md
+      - FindControl Migration: Migration/FindControl-Migration.md
       - .NET Standard to the Rescue: Migration/NET-Standard.md
       - Themes and Skins: Migration/ThemesAndSkins.md
-      - User Controls: Migration/User-Controls.md
       - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
       - Web Forms Application Migration Readiness: Migration/migration_readiness.md
   - Migration Tests:
