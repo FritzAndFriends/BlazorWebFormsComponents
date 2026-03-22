@@ -47,6 +47,14 @@ namespace BlazorWebFormsComponents.CustomControls
 		private readonly List<RenderFragment> _templateSlots = new();
 
 		/// <summary>
+		/// Captures any implicit content between named render fragment parameters.
+		/// This prevents Razor-generated whitespace from leaking into the rendered output.
+		/// Derived classes should use named RenderFragment parameters instead of ChildContent.
+		/// </summary>
+		[Parameter]
+		public RenderFragment ChildContent { get; set; }
+
+		/// <summary>
 		/// Inserts a RenderFragment template into the HtmlTextWriter output at the current position.
 		/// Call this from RenderContents or Render to place template content within the
 		/// HtmlTextWriter-generated structure.
