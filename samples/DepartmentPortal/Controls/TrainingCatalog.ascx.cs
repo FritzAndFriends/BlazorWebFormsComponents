@@ -26,13 +26,16 @@ namespace DepartmentPortal.Controls
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            LogActivity("TrainingCatalog rendered, ShowEnrolled=" + ShowEnrolled);
+        }
+
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
             if (Courses != null)
             {
                 rptCourses.DataSource = Courses.ToList();
                 rptCourses.DataBind();
             }
-
-            LogActivity("TrainingCatalog rendered, ShowEnrolled=" + ShowEnrolled);
         }
 
         protected void rptCourses_ItemCommand(object source, RepeaterCommandEventArgs e)

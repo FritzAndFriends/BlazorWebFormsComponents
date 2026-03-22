@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using DepartmentPortal.Models;
 
@@ -8,8 +9,7 @@ namespace DepartmentPortal
 {
     public partial class AnnouncementsPage : BasePage
     {
-        protected Repeater AnnouncementsRepeater;
-        protected Panel NoResultsPanel;
+        protected DepartmentPortal.Controls.SectionPanel AnnouncementsSectionPanel;
         private const int PageSize = 10;
         private int CurrentPageIndex
         {
@@ -23,24 +23,20 @@ namespace DepartmentPortal
             set { ViewState["SearchQuery"] = value; }
         }
 
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            if (!IsPostBack)
-            {
-                BindAnnouncements();
-            }
-        }
-        
         protected void SearchBoxControl_Search(object sender, SearchEventArgs e)
         {
             SearchQuery = e.SearchTerm;
             CurrentPageIndex = 0;
-            BindAnnouncements();
         }
         
         protected void PagerControl_PageChanged(object sender, int pageNumber)
         {
             CurrentPageIndex = pageNumber - 1;
+        }
+        
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
             BindAnnouncements();
         }
         
@@ -50,7 +46,6 @@ namespace DepartmentPortal
                 .Where(a => a.IsActive)
                 .OrderByDescending(a => a.PublishDate);
             
-            // Apply search filter
             var filteredAnnouncements = allAnnouncements.AsEnumerable();
             
             if (!string.IsNullOrWhiteSpace(SearchQuery))
@@ -63,31 +58,37 @@ namespace DepartmentPortal
             
             var announcementList = filteredAnnouncements.ToList();
             
-            // Set up pager
-            var pager = (DepartmentPortal.Controls.Pager)FindControl("PagerControl");
+            var pager = FindControl("PagerControl") as DepartmentPortal.Controls.Pager;
             if (pager != null)
             {
                 pager.TotalPages = (int)Math.Ceiling((double)announcementList.Count / PageSize);
                 pager.CurrentPage = CurrentPageIndex + 1;
             }
             
-            // Get page of announcements
             var pagedAnnouncements = announcementList
                 .Skip(CurrentPageIndex * PageSize)
                 .Take(PageSize)
                 .ToList();
             
-            if (pagedAnnouncements.Count > 0)
+            // Force SectionPanel to instantiate its templates before FindControl
+            AnnouncementsSectionPanel.EnsureChildControls();
+            var repeater = AnnouncementsSectionPanel.FindControl("AnnouncementsRepeater") as Repeater;
+            var noResults = AnnouncementsSectionPanel.FindControl("NoResultsPanel") as Panel;
+            
+            if (repeater != null)
             {
-                AnnouncementsRepeater.DataSource = pagedAnnouncements;
-                AnnouncementsRepeater.DataBind();
-                NoResultsPanel.Visible = false;
-            }
-            else
-            {
-                AnnouncementsRepeater.DataSource = null;
-                AnnouncementsRepeater.DataBind();
-                NoResultsPanel.Visible = true;
+                if (pagedAnnouncements.Count > 0)
+                {
+                    repeater.DataSource = pagedAnnouncements;
+                    repeater.DataBind();
+                    if (noResults != null) noResults.Visible = false;
+                }
+                else
+                {
+                    repeater.DataSource = null;
+                    repeater.DataBind();
+                    if (noResults != null) noResults.Visible = true;
+                }
             }
         }
     }

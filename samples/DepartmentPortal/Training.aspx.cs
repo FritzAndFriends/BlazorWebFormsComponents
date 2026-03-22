@@ -9,6 +9,9 @@ namespace DepartmentPortal
     public partial class TrainingPage : BasePage
     {
         protected Label EnrollmentCountLabel;
+        protected DepartmentPortal.Controls.TrainingCatalog TrainingCatalogControl;
+        protected DepartmentPortal.Controls.PollQuestion PollQuestionControl;
+
         private string SearchQuery
         {
             get { return ViewState["SearchQuery"] as string ?? string.Empty; }
@@ -31,24 +34,25 @@ namespace DepartmentPortal
         {
             if (!IsPostBack)
             {
-                BindTrainingCatalog();
-                UpdateEnrollmentCount();
                 SetupPoll();
             }
+        }
+        
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+            BindTrainingCatalog();
+            UpdateEnrollmentCount();
         }
         
         protected void SearchBoxControl_Search(object sender, SearchEventArgs e)
         {
             SearchQuery = e.SearchTerm;
-            BindTrainingCatalog();
         }
         
         protected void TrainingCatalogControl_EnrollmentRequested(object sender, int courseId)
         {
-            // In a real app, this would get the course ID from the event
-            // For now, just show a message
             ShowMessage("Successfully enrolled in course!");
-            UpdateEnrollmentCount();
         }
         
         protected void PollQuestionControl_AnswerSubmitted(object sender, DepartmentPortal.Controls.PollVoteEventArgs e)
@@ -60,7 +64,6 @@ namespace DepartmentPortal
         {
             var allCourses = PortalDataProvider.GetCourses();
             
-            // Apply search filter
             var filteredCourses = allCourses.AsEnumerable();
             
             if (!string.IsNullOrWhiteSpace(SearchQuery))
@@ -71,24 +74,25 @@ namespace DepartmentPortal
                     c.Description.IndexOf(SearchQuery, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             
-            var catalog = (DepartmentPortal.Controls.TrainingCatalog)FindControl("TrainingCatalogControl");
-            if (catalog != null)
+            if (TrainingCatalogControl != null)
             {
-                catalog.Courses = filteredCourses.ToList();
+                TrainingCatalogControl.Courses = filteredCourses.ToList();
             }
         }
         
         private void UpdateEnrollmentCount()
         {
-            EnrollmentCountLabel.Text = EnrolledCourses.Count.ToString();
+            if (EnrollmentCountLabel != null)
+            {
+                EnrollmentCountLabel.Text = EnrolledCourses.Count.ToString();
+            }
         }
         
         private void SetupPoll()
         {
-            var poll = (DepartmentPortal.Controls.PollQuestion)FindControl("PollQuestionControl");
-            if (poll != null)
+            if (PollQuestionControl != null)
             {
-                poll.Options = "In-person classroom,Live virtual sessions,Self-paced online,Hybrid (mix of all)";
+                PollQuestionControl.Options = "In-person classroom,Live virtual sessions,Self-paced online,Hybrid (mix of all)";
             }
         }
     }

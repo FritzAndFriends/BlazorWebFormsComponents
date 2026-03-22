@@ -5,6 +5,7 @@ using System.Web.UI.WebControls;
 
 namespace DepartmentPortal.Controls
 {
+    [ParseChildren(true)]
     public class SectionPanel : Control, INamingContainer
     {
         public string Title
@@ -81,6 +82,15 @@ namespace DepartmentPortal.Controls
             }
 
             Controls.Add(mainPanel);
+        }
+
+        /// <summary>
+        /// Forces template instantiation so FindControl works for template children.
+        /// Call before accessing controls inside ContentTemplate/HeaderTemplate/FooterTemplate.
+        /// </summary>
+        public new void EnsureChildControls()
+        {
+            base.EnsureChildControls();
         }
 
         protected override void Render(HtmlTextWriter writer)

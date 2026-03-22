@@ -33,7 +33,8 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
-                            <asp:LoginStatus ID="LoginStatusCtl" runat="server" />
+                            <asp:HyperLink ID="LoginLink" runat="server" NavigateUrl="~/Login.aspx" Text="Login" CssClass="navbar-text" />
+                            <asp:LinkButton ID="LogoutLink" runat="server" Text="Logout" OnClick="LogoutLink_Click" CssClass="navbar-text" Visible="false" />
                             <asp:Label ID="UserNameLabel" runat="server" CssClass="navbar-text" />
                         </li>
                     </ul>

@@ -31,6 +31,10 @@ namespace DepartmentPortal.Controls
         protected void Page_Load(object sender, EventArgs e)
         {
             gvEmployees.PageSize = PageSize;
+        }
+
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
             BindGrid();
         }
 
