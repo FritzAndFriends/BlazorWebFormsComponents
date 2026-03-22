@@ -15,6 +15,7 @@ extra:
 
 theme:
     name: material
+    custom_dir: docs/_overrides
     language: en
     palette:
       scheme: default
