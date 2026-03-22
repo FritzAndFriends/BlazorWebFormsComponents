@@ -551,21 +551,49 @@ public class SearchBox : CompositeControl
 
 ---
 
-## 6. What Can't Be Shimmed
+## 6. Shimming & Migration Compatibility
 
-The following Web Forms features have **no Blazor equivalent** and cannot be emulated by this framework:
+The BWFC framework achieves significant compatibility with Web Forms controls through both built-in shims and targeted migration tooling. This section clarifies what works today, what can be shimmed, and what requires architectural changes.
+
+### 6.1 What's Already Shimmed (Drop-In Compatible)
+
+The following Web Forms features are **fully shimmed and work today** with minimal or no code changes:
+
+| Feature | Implementation | Notes |
+|---------|-----------------|-------|
+| **ViewState** | `BaseWebFormsComponent.ViewState` dictionary property | `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` (lines 149–153). Syntax-compatible with Web Forms code; can retrieve/store objects. Marked `[Obsolete]` to encourage future use of Blazor patterns. |
+| **Server-Side Lifecycle Events** | `OnInit`, `OnLoad`, `OnPreRender`, `OnUnload`, `OnDisposed` mapped as `EventCallback<EventArgs>` parameters | `src/BlazorWebFormsComponents/BaseWebFormsComponent.cs` (lines 175–318). Events fire at equivalent points: `OnInitializedAsync()`, post-initialization, pre-render, cleanup, and component disposal. Drop-in compatible with Web Forms event syntax. |
+| **EnableTheming & SkinID** | Full theming system via `ThemeConfiguration`, `ControlSkin`, and `ThemeProvider` | `src/BlazorWebFormsComponents/Theming/` directory. Fluent `SkinBuilder` API and `CascadingValue` integration. `BaseWebFormsComponent` supports `EnableTheming` and `SkinID` parameters (lines 94–127); `BaseStyledComponent` applies theme skins with StyleSheetTheme semantics (explicit parameters override theme defaults). |
+
+### 6.2 What Can Be Shimmed (Implementation Ready)
+
+The following features have working patterns in the codebase and require only minor extensions:
+
+| Feature | Status | Implementation Path |
+|---------|--------|---------------------|
+| **Focus() method** | Ready to implement | JavaScript interop pattern already proven in validators (`src/BlazorWebFormsComponents/Validations/BaseValidator.razor.cs`, lines 126–129). Base class method can invoke `JsRuntime.InvokeVoidAsync("bwfc.SetFocus", elementRef)` for any control. `[Inject] IJSRuntime` available in `BaseWebFormsComponent` (line 221). |
+| **MailDefinition** | Design phase | Could be a no-op shim that logs a deprecation warning, delegating actual mail sending to injected `IEmailService` or similar. Low priority—primarily used in older login controls. |
+
+### 6.3 What Requires Manual Migration (No Shim Possible)
+
+Only the following features represent **true architectural mismatches** with Blazor and cannot be shimmed:
 
 | Feature | Why | Migration Path |
-|---------|-----|----------------|
-| **ViewState** | Blazor has no ViewState. Component state is managed via parameters, fields, and DI. | Use `[Parameter]` properties and component state fields. |
-| **PostBack** | No server-side form post model in Blazor. | Use `EventCallback<T>` and Blazor event binding (`@onclick`, `@onchange`). |
-| **DataSourceID binding** | Web Forms DataSource controls (`SqlDataSource`, `ObjectDataSource`) don't exist in Blazor. | Use `DataSource` parameter with injected services. The `DataSourceID` property is marked `[Obsolete]`. |
-| **Server-side events (OnInit, OnLoad, etc.)** | Web Forms page lifecycle doesn't exist. | Map to Blazor lifecycle: `OnInitialized`, `OnParametersSet`, `OnAfterRender`. |
-| **Focus() method** | Requires JS interop from server. | Use Blazor's `ElementReference.FocusAsync()`. |
-| **MailDefinition** | Email is a server concern, not a component concern. | Use a server-side email service injected via DI. |
-| **EnableTheming / SkinID** | ASP.NET Themes are obsolete. | Use CSS, CascadingValue `ThemeProvider`, or CSS variables. |
+|---------|-----|-----------------|
+| **PostBack model** | ASP.NET's server-side form post pipeline has no Blazor equivalent. | Replace with `EventCallback<T>` handlers and Blazor event binding (`@onclick`, `@onchange`, `@onsubmit`). |
+| **DataSourceID binding** | Web Forms `SqlDataSource` and `ObjectDataSource` controls don't exist in Blazor; the data-binding model is fundamentally different. | Use `DataSource` parameter with services injected via dependency injection. The `DataSourceID` property is marked `[Obsolete]`. |
 
-> **Diagnostic support:** The BWFC002 analyzer warns when code references `DataSourceID` or other unsupported patterns. See the analyzer documentation for details.
+### 6.4 Migration Tooling (Roslyn Analyzers)
+
+The BWFC suite includes **BWFC001–BWFC014 Roslyn analyzers and code fix providers** that automate common migration patterns:
+
+| Analyzer | Purpose | Code Fix |
+|----------|---------|----------|
+| **BWFC001** | Missing `[Parameter]` attribute on public properties | Auto-adds `[Parameter]` to public properties that should be Blazor parameters |
+| **BWFC002** | References to unsupported `DataSourceID` | Marks as `[Obsolete]`; suggests migration to `DataSource` |
+| **BWFC003–BWFC014** | Other common Web Forms patterns | One-click fixes for control attribute mappings, event binding patterns, and lifecycle hook usage |
+
+These analyzers run during compilation and offer inline code fixes in Visual Studio and VS Code, accelerating migration velocity.
 
 ---
 
