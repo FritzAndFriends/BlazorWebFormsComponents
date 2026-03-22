@@ -500,3 +500,7 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 ### CI Workflow: Analyzer Tests Added (2026-03-20)
 
 **Summary:** Updated .github/workflows/build.yml to restore, build, run, upload, and publish analyzer test results alongside the existing unit tests. Also replaced the squad-ci.yml placeholder with real dotnet restore/build/test commands covering both test suites, including setup-dotnet for .NET 10. YAML validated with Python yaml parser.
+
+### Focus() Method on BaseWebFormsComponent (2026-03-22)
+
+**Summary:** Added public virtual void Focus() to BaseWebFormsComponent matching the ASP.NET Web Forms Control.Focus() API. Uses fire-and-forget JS interop (_ = JsRuntime.InvokeVoidAsync("bwfc.Page.Focus", ClientID))  same discard pattern validators use. Null-guards JsRuntime for SSR pre-render safety. Added wfc.Page.Focus(elementId) JS function to both Basepage.js (IIFE global) and Basepage.module.js (ES module export + window binding). Build: 0 errors. CustomControl tests: 63/63 pass.
