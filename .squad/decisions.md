@@ -11975,3 +11975,32 @@ Once issues are created upstream, update this file with issue numbers and close 
 **What:** BWFC must adhere to 'drop-in replacement' tenet: shim and create objects that allow old Web Forms custom control code to 'just work' when pointed at BWFC's library. No rewriting required by the migrating developer.
 
 **Why:** Core design principle for P1-P5 feature gap work. Captured for team memory and decision guidance.
+
+
+### 2026-03-21: P1-P5 Developer Documentation Scope
+
+# Decision: P1-P5 Developer Documentation Scope
+
+**Decided by:** Beast  
+**Date:** 2026-03-21  
+**Scope:** Documentation
+
+## Decision
+
+The P1–P5 Custom Controls framework documentation was placed in `dev-docs/proposals/p1-p5-custom-controls-framework.md` as **internal contributor documentation**, not in `docs/` (user-facing MkDocs). This is because:
+
+1. The API reference covers `protected virtual` members and internal architecture — not relevant to library consumers who use the pre-built BWFC components.
+2. The migration patterns target developers building **new custom controls** on top of the framework, which is a contributor activity.
+3. User-facing migration guides (already in `docs/Migration/CustomControl-BaseClasses.md`) cover the end-user perspective.
+
+## Impact
+
+- Future documentation about the CustomControls namespace should go in `dev-docs/`, not `docs/`.
+- If the framework becomes a public extensibility point (users building custom controls against BWFC base classes), the API reference sections should be promoted to `docs/`.
+
+### 2026-03-22: User directive - Section 6 Shimming & Migration Compatibility
+
+### 2026-03-22T17-57-30Z: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Section 6 of dev-docs must not dismiss features as "can't be shimmed" when they already are or can be. ViewState has a Dictionary shim. Web Forms events map to Blazor lifecycle. Focus() should use JS interop. Theming (EnableTheming/SkinID) is active work and must not be listed as deferred.
+**Why:** User request  captured for team memory
