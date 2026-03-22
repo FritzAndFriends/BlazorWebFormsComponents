@@ -13,6 +13,32 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### DepartmentPortal Migration Analysis & Upstream Issue Creation (2026-03-08)
+
+**Key Discovery:** DepartmentPortal migration exposed 5 critical BWFC gaps that block custom control migrations:
+
+1. **DataBoundWebControl<T> gap** — `CustomControls.DataBoundControl` exists but doesn't integrate HtmlTextWriter rendering. Controls inheriting from DataBoundControl and overriding RenderContents(HtmlTextWriter) cannot migrate. EmployeeDataGrid is canonical example. Requires new base class bridging data binding + HtmlTextWriter rendering.
+
+2. **TagKey + AddAttributesToRender gap** — Web Forms WebControl auto-renders outer tag via TagKey property. BWFC WebControl lacks both, forcing manual tag management. StarRating (renders `<span>`) and NotificationBell (renders `<div>` with data-* attributes) cannot migrate cleanly.
+
+3. **HTML5 enum coverage gap** — HtmlTextWriterTag/Attribute/Style enums are .NET Framework 2.0 era. Missing: semantic tags (nav, section, article, header, footer, main, figure, details, summary), ARIA attributes (role, aria-*), HTML5 form attrs (placeholder, required, autofocus, pattern, min, max, step), modern CSS (flex, grid, gap, transform, transition, animation, opacity, box-shadow, border-radius). DepartmentPortal controls use all these extensively.
+
+4. **CompositeControl child rendering gap** — CompositeControl throws NotSupportedException for non-WebControl children. Web Forms allows LiteralControl, HtmlGenericControl, Panel, PlaceHolder, raw text. EmployeeCard is a CompositeControl with mixed children. Must support IComponent broadly.
+
+5. **ITemplate → RenderFragment bridging gap** — Controls with template properties use ITemplate. Critical discovery: Controls inheriting from Control (not WebControl) require [ParseChildren(true)] attribute to treat inner content as property assignments, not child controls. SectionPanel has HeaderTemplate and ContentTemplate properties that map to RenderFragment in Blazor. Need documented pattern + TemplatedControl base class.
+
+**Additional Discoveries:**
+- **FindControl architectural incompatibility:** Web Forms FindControl traverses naming container boundaries (INamingContainer). BWFC's flat search fails for Master.FindControl(), SectionPanel.FindControl() with templates, Page.FindControl() with ContentPlaceHolder. Migration guidance should favor @ref, CascadingParameter, EventCallback, DI instead of FindControl entirely.
+- **User-Controls documentation missing:** docs/Migration/User-Controls.md is empty. 12+ ASCX controls in DepartmentPortal need migration guide covering Register directive → _Imports.razor, code-behind → @code, data binding, FindControl → @ref, lifecycle mapping.
+
+**Upstream Issue Creation Status:** Attempted to create 7 GitHub issues on FritzAndFriends/BlazorWebFormsComponents (P1–P5 priorities + FindControl + User-Controls docs). **BLOCKED:** Personal auth token lacks write permissions on upstream repo. Issue specifications documented in `.squad/decisions/inbox/forge-upstream-issues.md` — requires manual creation by Jeffrey T. Fritz or org maintainer.
+
+**Learnings:**
+- DepartmentPortal is a "canary" migration that exposes real gaps in BWFC. Small app (12 ASCX, 4 custom controls, 3 data-bound grids) reveals architectural patterns missing from the base library.
+- P1–P2 are critical blockers (DataBoundWebControl<T>, TagKey) that should ship before next milestone to unblock data-heavy migrations.
+- Authentication barrier: Copilot's token doesn't have upstream write permissions. Document issue specs locally, require human (Jeffrey) to create on upstream.
+- Migration pattern discovery: ITemplate → RenderFragment + [ParseChildren(true)] is non-obvious but critical for templated controls.
+
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
 
 <!-- ⚠ Summarized 2026-03-06 by Scribe — older entries archived -->
@@ -547,3 +573,6 @@ Completed comprehensive migration analysis of DepartmentPortal's 12 ASCX + 7 cus
 Analysis written to `.squad/decisions/inbox/forge-departmentportal-migration-plan.md`.
 
  Team update (2026-03-22): DepartmentPortal migration analysis completed  12 ASCX + 7 custom controls assessed, BWFC gaps identified, improvement recommendations provided. Analysis logged to decisions.md for team review.  decided by Forge
+
+
+ Team update (2026-03-22): Upstream issue creation completed  7 GitHub issues created on FritzAndFriends/BlazorWebFormsComponents (#490 P1 DataBoundWebControl, #491 P4 CompositeControl, #492 P2 TagKey, #493 P3 HtmlTextWriter, #494 P5 ITemplate, #495 User Controls docs, #496 FindControl)  decided by Forge

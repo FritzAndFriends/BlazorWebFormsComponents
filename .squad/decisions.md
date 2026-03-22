@@ -11545,3 +11545,369 @@ Scaffolded `samples/AfterDepartmentPortal/` as the Blazor SSR migration target f
 
 5. **Project added to BlazorMeetsWebForms.sln** — Ensures solution-wide builds include the new project.
 
+
+
+# Beast Migration Documentation Decisions (2026-03-17)
+
+## Summary
+
+Beast completed three comprehensive migration documentation files:
+1. **User-Controls.md** — Updated from TODO
+2. **FindControl-Migration.md** — New guide
+3. **CustomControl-BaseClasses.md** — New guide with P1–P5 planned improvements
+
+## Key Decisions
+
+### 1. Structure and Ordering in mkdocs.yml
+
+**Decision:** Place the new guides in logical sequence following related docs.
+
+- **Custom Control Base Classes** placed immediately after "Custom Controls" (prerequisite knowledge)
+- **FindControl Migration** placed after "User Controls" (detailed deep-dive on a specific migration pattern)
+
+**Rationale:** Developers typically:
+1. Read Custom Controls for overview
+2. Read Custom Control Base Classes to understand what building blocks exist
+3. Read User Controls for ASCX migration specifics
+4. Read FindControl Migration when they encounter cross-boundary control access issues
+
+This ordering follows the natural discovery flow.
+
+### 2. DepartmentPortal as Reference
+
+**Decision:** Use DepartmentPortal custom controls as primary examples throughout all three documents.
+
+**Examples used:**
+- PageHeader (simple property-based control)
+- EmployeeList (data-bound with search)
+- SidebarNav (navigation with active state)
+- SectionPanel (template-based composite control)
+- EmployeeCard (mixed child control types)
+- EmployeeDataGrid (custom formatted table)
+- StarRating, NotificationBell (simple wrappers with attributes)
+
+**Rationale:** Real-world examples make concepts concrete. DepartmentPortal is a known reference in the team; developers can relate to the migration challenges described.
+
+### 3. P1–P5 Priorities and Implementation Order
+
+**Decision:** Recommend implementation order **P2 → P1 → P3 → P4 → P5**, not the original numbering.
+
+**Rationale:** P2 (TagKey + AddAttributesToRender) unblocks the most migrations with the least effort. It's the quick win that simplifies 80% of control migrations. P1 follows because the infrastructure is simpler after P2.
+
+**Dependency Matrix Created:**
+- P1: No dependencies (standalone feature)
+- P2: Moderate refactor of WebControl (isolated, low risk)
+- P3: Additive to enums (no breaking changes)
+- P4: Requires child type detection logic (moderate, builds on P2)
+- P5: Optional guidance + helper class (lowest priority; legacy pattern)
+
+### 4. Scope of FindControl Documentation
+
+**Decision:** Provide deep technical explanation of naming containers + real-world problem examples, not just a quick migration guide.
+
+**Rationale:** FindControl is the most frequently misunderstood Web Forms feature. Developers need to understand *why* it fails in certain scenarios (master page boundaries, template containers) to properly migrate away from it. A surface-level guide would leave them confused when their code doesn't work.
+
+**Included:**
+- Naming container concept and boundaries
+- Real DepartmentPortal examples showing the problem
+- Web Forms solution (public method on master/container)
+- Five Blazor patterns with trade-offs
+- BWFC's FindControl limitations and proper usage
+
+### 5. Documentation Completeness
+
+**Decision:** Keep each guide self-contained but cross-reference with "See Also" sections.
+
+**Rationale:** 
+- Developers may enter at any guide, so each must be complete
+- Cross-references help with discovery but don't create hard dependencies
+- Reduces content duplication while maintaining clarity
+
+**Links established:**
+- User-Controls.md ↔ FindControl-Migration.md ↔ Custom-Controls.md
+- CustomControl-BaseClasses.md ← Custom-Controls.md
+- All guides link to Deferred Controls for "what's not migrated"
+
+### 6. Code Examples: Readability vs. Completeness
+
+**Decision:** Show **functional examples** that omit boilerplate but include comments for key concepts.
+
+**Examples style:**
+- Show just enough code to understand the pattern
+- Use clear variable/method names (e.g., `FilteredEmployees`, `OnSearchClick`)
+- Include comments only where Blazor syntax differs from Web Forms
+- Full before/after in one section; shorter snippets in pattern tables
+
+**Rationale:** Web Forms developers know the boilerplate. They need to see the Blazor equivalent pattern clearly.
+
+### 7. Accessibility and ARIA in HtmlTextWriter Documentation
+
+**Decision:** Call out P3 (HTML5 enum expansion) as **critical for accessibility**, not just "modern markup".
+
+**Rationale:** ARIA attributes (role, aria-label, aria-hidden, etc.) are essential for inclusive design. Including them in the planned improvements documentation signals that BWFC team prioritizes accessibility in custom control migration.
+
+---
+
+## Outcomes
+
+✅ All three documents completed and integrated into mkdocs.yml
+✅ Beast's history.md updated with session summary
+✅ Established clear migration pathways for:
+  - Simple user controls (ASCX → .razor)
+  - Complex FindControl scenarios (cross-boundary problems)
+  - Custom control base classes (inventory + future roadmap)
+
+---
+
+## Open Questions / Future Work
+
+1. **P1–P5 Implementation Timeline:** No timeline set. These are roadmap items. Priority suggests P2 should be next initiative if resources available.
+
+2. **DepartmentPortal Documentation:** Should the actual DepartmentPortal source control examples be added to a companion page showing real migration progress?
+
+3. **Video/Interactive Examples:** FindControl guide is text-heavy. Consider short animated diagrams showing naming container boundaries in future iteration.
+
+4. **Analyzer Guidance for P2:** Once P2 (TagKey + AddAttributesToRender) is implemented, a Roslyn analyzer should be added to detect classes missing these patterns.
+
+---
+
+## Files Modified
+
+- `/docs/Migration/User-Controls.md` — Updated from TODO to full 9 KB guide
+- `/docs/Migration/FindControl-Migration.md` — New 16 KB guide
+- `/docs/Migration/CustomControl-BaseClasses.md` — New 23 KB guide with P1–P5 specifications
+- `/mkdocs.yml` — Added two nav entries under Migration section
+- `.squad/agents/beast/history.md` — Appended session summary
+
+---
+
+Decided by: Beast (Technical Writer)  
+Date: 2026-03-17
+
+
+# Forge: Upstream Issue Creation — Status Report
+
+**Date:** 2026-03-07  
+**Requested by:** Jeffrey T. Fritz  
+**Status:** ⚠️ **BLOCKED** — Token permission issue
+
+## Authentication Issue
+Attempted to create 7 GitHub issues on `FritzAndFriends/BlazorWebFormsComponents` using GitHub-issue_write tool.  
+**Error:** `403 Resource not accessible by personal access token`
+
+The current authentication token does not have write permissions on the upstream repository. Manual creation required by someone with upstream access (e.g., Jeffrey T. Fritz, org maintainer).
+
+---
+
+## Issue Specifications (Ready to Create)
+
+### Issue 1: P1 - Add DataBoundWebControl<T> base class
+**Labels:** `enhancement`
+
+Currently `CustomControls.DataBoundControl` exists but doesn't integrate with `HtmlTextWriter` rendering. Controls that inherit from `DataBoundControl` and override `RenderContents(HtmlTextWriter)` cannot be migrated to Blazor using current BWFC base classes.
+
+**Use Case:** DepartmentPortal's `EmployeeDataGrid` inherits from `DataBoundControl` and overrides `RenderContents(HtmlTextWriter)` to render custom HTML.
+
+**Solution:** Need a `DataBoundWebControl<T>` that combines:
+- Data binding: `PerformDataBinding()`, `DataSource`/`DataSourceID` properties, items collection
+- HtmlTextWriter rendering: `RenderContents(HtmlTextWriter)`, `TagKey` property
+- Web Forms hierarchy alignment: Mimics `DataBoundControl` → `BaseDataBoundControl` → `WebControl` → `Control`
+
+**Proposed API:**
+```csharp
+public abstract class DataBoundWebControl<T> : WebControl
+{
+    public virtual object DataSource { get; set; }
+    public virtual string DataSourceID { get; set; }
+    protected IEnumerable<T> DataItems { get; }
+    protected abstract void PerformDataBinding(IEnumerable data);
+    protected virtual void RenderContents(HtmlTextWriter writer);
+    // Auto-render outer tag in Render() using TagKey
+}
+```
+
+**Priority:** P1 — Unblocks most custom data control migrations (grids, lists, repeaters with custom rendering).
+
+---
+
+### Issue 2: P2 - Add TagKey + AddAttributesToRender to CustomControls.WebControl
+**Labels:** `enhancement`
+
+Web Forms `WebControl` has:
+- `TagKey` property (returns `HtmlTextWriterTag`) for the outer tag type
+- `AddAttributesToRender(HtmlTextWriter)` method to add custom attributes before rendering
+- Auto-rendering: `Render()` calls `RenderBeginTag(TagKey)`, then `RenderContents()`, then `RenderEndTag()`
+
+BWFC's `CustomControls.WebControl` doesn't have these — custom controls must manually render their entire tag structure.
+
+**Use Cases:**
+- **StarRating** control renders a `<span>` as outer element — needs `TagKey`
+- **NotificationBell** renders a `<div>` with `data-*` attributes — needs `TagKey` and `AddAttributesToRender`
+
+**Solution:** Extend `CustomControls.WebControl` with:
+- Virtual `TagKey` property (default: `HtmlTextWriterTag.Span`)
+- Virtual `AddAttributesToRender(HtmlTextWriter)` method for subclasses to add custom attributes
+- Auto-render outer tag in `Render()`:
+  ```csharp
+  RenderBeginTag(TagKey);
+  RenderContents(writer);
+  RenderEndTag();
+  ```
+
+**Priority:** P2 — Enables cleaner custom control code and reduces manual tag management.
+
+---
+
+### Issue 3: P3 - Expand HtmlTextWriter enum coverage for HTML5
+**Labels:** `enhancement`
+
+The `HtmlTextWriter` enums (`HtmlTextWriterTag`, `HtmlTextWriterAttribute`, `HtmlTextWriterStyle`) mirror .NET Framework 2.0 era HTML. Modern custom controls need HTML5 and CSS3 vocabulary.
+
+**Missing Elements:**
+
+**HtmlTextWriterTag:**
+`Nav`, `Section`, `Article`, `Header`, `Footer`, `Main`, `Figure`, `Figcaption`, `Details`, `Summary`, `Dialog`, `Template`
+
+**HtmlTextWriterAttribute:**
+`data-*` (pattern support needed), `aria-*` (ARIA attributes), `role`, `placeholder`, `required`, `autofocus`, `pattern`, `min`, `max`, `step`
+
+**HtmlTextWriterStyle:**
+Flexbox/Grid: `display: flex`, `display: grid`, `flex-direction`, `justify-content`, `align-items`, `gap`
+Visual: `transform`, `transition`, `animation`, `opacity`, `box-shadow`, `border-radius`
+
+**Use Case:** DepartmentPortal controls use `<nav>`, `<section>`, `<article>`, `data-*` attributes (e.g., `data-employee-id`), and modern CSS properties extensively.
+
+**Priority:** P3 — Enables modern HTML5/CSS3 custom controls without resorting to string literals.
+
+---
+
+### Issue 4: P4 - Fix CompositeControl child rendering for non-WebControl children
+**Labels:** `bug`, `enhancement`
+
+`CustomControls.CompositeControl` currently throws `NotSupportedException` when child controls are not `WebControl` derivatives. Web Forms `CompositeControl` can contain ANY `Control` derivative: `LiteralControl`, `HtmlGenericControl`, `Panel`, `PlaceHolder`, raw text nodes.
+
+**Use Case:** DepartmentPortal's `EmployeeCard` is a `CompositeControl` containing a mix of custom `WebControl` children and raw HTML via `HtmlGenericControl`.
+
+**Solution:**
+- Support `IComponent` children broadly
+- Render non-WebControl children via their own render methods:
+  - `LiteralControl` → render text directly
+  - `HtmlGenericControl` → call `Render(HtmlTextWriter)`
+  - Generic `Control` → delegate to control's rendering logic
+- Update `EnsureChildControls()` to not assume all children are `WebControl`
+
+**Priority:** P4 — Enables realistic composite control migrations with mixed child types.
+
+---
+
+### Issue 5: P5 - ITemplate → RenderFragment bridging pattern and TemplatedControl base class
+**Labels:** `enhancement`
+
+Web Forms uses `ITemplate` for template properties. Blazor uses `RenderFragment` / `RenderFragment<T>`.
+
+**Critical Discovery:** Controls inheriting from `Control` (not `WebControl`) require `[ParseChildren(true)]` for `ITemplate` properties — without it, ASP.NET treats inner content as child controls, not property assignments.
+
+**Use Case:** DepartmentPortal's `SectionPanel`:
+```csharp
+[ParseChildren(true)]
+public class SectionPanel : Control {
+    public ITemplate HeaderTemplate { get; set; }
+    public ITemplate ContentTemplate { get; set; }
+}
+```
+
+Should map to Blazor:
+```csharp
+public partial class SectionPanel {
+    [Parameter] public RenderFragment HeaderTemplate { get; set; }
+    [Parameter] public RenderFragment ContentTemplate { get; set; }
+}
+```
+
+**Solution:**
+1. Document the mapping from `ITemplate` → `RenderFragment` / `RenderFragment<TItem>` with examples
+2. Consider a `TemplatedControl` base class that:
+   - Inherits from `Control` with `[ParseChildren(true)]`
+   - Provides common template property patterns
+   - Guides developers on lifecycle/timing for instantiating template content
+
+**Priority:** P5 — Enables migration of sophisticated templated controls (master pages, repeaters, panels with headers/footers).
+
+---
+
+### Issue 6: FindControl - Improve naming container support and migration guidance
+**Labels:** `enhancement`, `documentation`
+
+`BaseWebFormsComponent.FindControl(string)` currently does a flat search. Web Forms `FindControl` traverses the control tree within naming container boundaries (`INamingContainer`).
+
+**DepartmentPortal Pain Points:**
+1. Master page search: `Master.FindControl("HeaderLogo")` fails silently
+2. Composite control templates: `SectionPanel.FindControl("RepeaterInTemplate")` doesn't find controls created in template
+3. ContentPlaceHolder: `Page.FindControl("X")` doesn't traverse into placeholder regions
+
+**Solution & Migration Guidance:**
+
+**Option A:** Enhance `FindControl` to support recursive search + naming container boundaries (more Web Forms compatible, but heavy)
+
+**Option B:** Guide users away from `FindControl` entirely:
+- Use `@ref` for direct component references
+- Use `CascadingParameter` for parent-child communication
+- Use `EventCallback` for sibling communication
+- Use dependency injection for cross-component access
+
+**Recommendation:** Document **Option B** as the Blazor-idiomatic approach. Consider whether BWFC's `FindControl` should support recursive search as a bridge pattern for legacy code.
+
+**Priority:** Medium — Important for understanding control tree architecture; migration docs prioritize modern patterns.
+
+---
+
+### Issue 7: User Controls migration documentation
+**Labels:** `documentation`
+
+`docs/Migration/User-Controls.md` is currently empty (just `_TODO_`).
+
+**Scope:** Comprehensive guide for migrating `.ascx` user controls to `.razor` components covering:
+
+1. **Register directive** → `_Imports.razor`
+2. **Code-behind** → `@code` block
+3. **Data binding expressions** (Old: `<%= Item.Name %>` → New: `@Item.Name`)
+4. **FindControl → @ref**
+5. **Page lifecycle → Component lifecycle** (`Page_Load()` → `OnInitialized()`)
+6. **Attributes and properties** (Old: auto-property → New: `[Parameter]`)
+7. **Events and callbacks** (`EventCallback<T>`)
+8. **Composite controls with templates** (`ITemplate` → `RenderFragment<T>`)
+
+**DepartmentPortal Examples:** 12+ ASCX controls available as migration examples:
+- `EmployeeList.ascx` → straightforward parameterized component
+- `EmployeeCard.ascx` → composite with template slots
+- `HeaderControl.ascx` → shared header with event callbacks
+
+**Deliverables:**
+- Step-by-step migration checklist
+- Before/after code examples
+- Common pitfalls and solutions
+- Links to relevant BWFC base classes and patterns
+
+**Priority:** High — User controls are the first thing developers encounter; strong migration docs unblock rapid adoption.
+
+---
+
+## Next Steps
+
+**For Jeffrey T. Fritz / Upstream Maintainer:**
+
+1. Create these 7 issues manually on `FritzAndFriends/BlazorWebFormsComponents` with the specifications above
+2. Note the issue numbers in the project tracking system
+3. Consider assigning P1–P2 to the next milestone; P3–P5 to backlog
+
+**For Copilot:**
+
+Once issues are created upstream, update this file with issue numbers and close this tracking document.
+
+---
+
+**Learnings for History:**
+- DepartmentPortal migration surfaced 5 critical BWFC gaps: `DataBoundWebControl<T>`, `TagKey/AddAttributesToRender`, HTML5 enum coverage, composite control children, `ITemplate` bridging
+- Authentication barrier: Copilot's token lacks upstream write permissions; manual creation required by org maintainers
+- `FindControl` discovery: Web Forms control tree traversal is incompatible with flat search; migration guidance should favor `@ref`/`CascadingParameter`/`EventCallback`
+

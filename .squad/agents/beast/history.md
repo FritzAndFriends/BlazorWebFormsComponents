@@ -1,4 +1,4 @@
-﻿# Project Context
+# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents — Blazor components emulating ASP.NET Web Forms controls for migration
@@ -10,6 +10,53 @@
 ## Learnings
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->
+
+### Issue #: Comprehensive Migration Documentation (User Controls, FindControl, Custom Control Base Classes)
+
+ **Status:**  DELIVERED
+
+**Session (2026-03-17 by Beast):**
+- Created/Updated 3 comprehensive migration guides covering 40+ KB of documentation
+- **docs/Migration/User-Controls.md** (Updated from TODO)  9 KB, ~300 lines
+  - Web Forms ASCX structure  Blazor .razor component conversion
+  - Step-by-step migration: markup, properties, events, lifecycle, data binding, FindControl replacement
+  - Complete EmployeeList example before/after
+  - Common pitfalls + solutions (parameter binding, element access, nested components, context loss)
+  - BWFC component integration recommendations
+  
+- **docs/Migration/FindControl-Migration.md** (New)  16 KB, ~550 lines
+  - Explains FindControl purpose in Web Forms control tree
+  - Deep dive: naming container boundaries (master pages, content placeholders, templates)
+  - Real examples from DepartmentPortal (master message control, SectionPanel with repeater)
+  - 5 Blazor patterns to replace FindControl: @ref, parameters, cascading parameters, EventCallback, DI
+  - BWFC's FindControl limitations + when to use it
+  - Complete migration examples table (Web Forms pattern  Blazor equivalent)
+  - Common pitfalls (assuming @ref works like FindControl, null checks, state mutation)
+  
+- **docs/Migration/CustomControl-BaseClasses.md** (New)  23 KB, ~800 lines
+  - Inventory of current BWFC base classes: BaseWebFormsComponent, BaseStyledComponent, DataBoundComponent<T>, WebControl, CompositeControl, DataBoundControl, HtmlTextWriter
+  - Web Forms  BWFC mapping table for all base class equivalents
+  - **5 Planned Improvements (P1P5) with full specification:**
+    - **P1: DataBoundWebControl<T>**  Bridges DataBoundControl + HtmlTextWriter rendering. EmployeeDataGrid use case.
+    - **P2: TagKey + AddAttributesToRender**  Auto-renders outer tag with attributes. StarRating, NotificationBell use cases. Simplifies 80% of migrations.
+    - **P3: HtmlTextWriter Enum Expansion**  HTML5 tags (Nav, Section, Article, etc.), ARIA/data attributes, modern CSS (flexbox, grid, transforms). Modern markup patterns.
+    - **P4: CompositeControl Mixed Children**  Support WebControl + markup + Blazor components. EmployeeCard complexity.
+    - **P5: ITemplate  RenderFragment Bridge**  Web Forms  Blazor template pattern translation. SectionPanel use case.
+  - Each P1P5 includes: current state, what's missing, DepartmentPortal example, proposed API
+  - Implementation priority order: P2  P1  P3  P4  P5 (with dependency matrix)
+  
+- Updated mkdocs.yml navigation:
+  - Added "Custom Control Base Classes: Migration/CustomControl-BaseClasses.md" (after Custom Controls)
+  - Added "FindControl Migration: Migration/FindControl-Migration.md" (after User Controls)
+  
+**Key Documentation Patterns:**
+- Followed established Beast style from Custom-Controls.md + MasterPages.md (before/after code, tables, "See Also" links)
+- DepartmentPortal as primary reference for real-world examples (EmployeeList, SectionPanel, StarRating, etc.)
+- Web Forms  Blazor mapping tables for quick translation reference
+- Pitfall sections with solutions for each guide
+- "See Also" cross-references between related guides
+
+
 
 <!-- ⚠ Summarized 2026-03-06 by Scribe — older entries archived -->
 
@@ -562,4 +609,5 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 
 
  **Team update (2026-03-20):** Analyzer architecture guide (579 lines) + expanded Analyzers.md (+363 lines). Deprecation Guidance docs (#438, 32 KB). BaseValidator/BaseCompareValidator base class docs. MkDocs strict build clean. PR #487 opened on upstream.  decided by Beast
+
 
