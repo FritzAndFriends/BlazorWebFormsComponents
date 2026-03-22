@@ -12004,3 +12004,67 @@ The P1–P5 Custom Controls framework documentation was placed in `dev-docs/prop
 **By:** Jeffrey T. Fritz (via Copilot)
 **What:** Section 6 of dev-docs must not dismiss features as "can't be shimmed" when they already are or can be. ViewState has a Dictionary shim. Web Forms events map to Blazor lifecycle. Focus() should use JS interop. Theming (EnableTheming/SkinID) is active work and must not be listed as deferred.
 **Why:** User request  captured for team memory
+
+
+# Decision: BWFC Analyzer Expansion — BWFC020-023 (Migration Category)
+
+**By:** Colossus (Integration Test Engineer, acting as Analyzer Expansion)
+**Date:** 2026-03-22
+
+## What
+
+Added 4 new Roslyn analyzers for custom control migration patterns:
+
+| ID | Name | Severity | Code Fix | Category |
+|----|------|----------|----------|----------|
+| BWFC020 | ViewStatePropertyPattern | Info | Yes — converts to [Parameter] auto-property | Migration |
+| BWFC021 | FindControlUsage | Warning | Yes — replaces with FindControlRecursive | Migration |
+| BWFC022 | PageClientScriptUsage | Warning | No | Migration |
+| BWFC023 | IPostBackEventHandlerUsage | Warning | No | Migration |
+
+## Technical Decisions
+
+1. **New "Migration" category**: BWFC020-023 use category `"Migration"` instead of `"Usage"` (used by BWFC001-014). This differentiates migration-pattern analyzers from general usage analyzers. The `AllAnalyzers_HaveValidCategory` integration test was updated to accept both categories.
+
+2. **Code fix approach for BWFC020**: Uses syntax tree manipulation (`WithAccessorList` + `AddAttributeLists`) without `NormalizeWhitespace()`. Previous attempts with `NormalizeWhitespace()` stripped indentation from the generated property. The pattern of modifying the existing node rather than building from scratch preserves whitespace correctly.
+
+3. **FindControl code fix scope**: BWFC021 code fix only renames `FindControl` → `FindControlRecursive`. It does not attempt to add `using` directives or verify the containing class inherits from `BaseWebFormsComponent`. This keeps the fix simple and safe.
+
+## Why This Matters
+
+These 4 patterns are among the most common migration blockers developers hit when porting Web Forms custom controls. Detecting them early with actionable messages saves significant manual review time during migration.
+
+
+### Focus() Method Added to BaseWebFormsComponent
+
+**By:** Cyclops (Component Dev)
+
+**What:** Added `public virtual void Focus()` to `BaseWebFormsComponent`, matching the ASP.NET Web Forms `Control.Focus()` signature. The method uses fire-and-forget JS interop (`_ = JsRuntime.InvokeVoidAsync(...)`) to call `bwfc.Page.Focus(clientId)` which does `document.getElementById(id).focus()`. Null-guards JsRuntime for SSR pre-render. Added the JS function to both `Basepage.js` and `Basepage.module.js`.
+
+**Why this matters for the team:**
+- Any component inheriting from `BaseWebFormsComponent` (or its subclasses) now has `Focus()` available — no per-component work needed.
+- Migration scripts can translate `control.Focus()` calls directly since the method signature matches Web Forms.
+- The existing `Validation.SetFocus` in validators is left untouched — it uses a different code path (field name, not ClientID).
+- The method is `virtual` so components with special focus needs (e.g., composite controls) can override it.
+
+
+### DepartmentPortal Custom Controls Migration Patterns
+
+**By:** Cyclops (Component Dev)
+
+**What:** Migrated all 7 DepartmentPortal custom controls to Blazor using BWFC CustomControls base classes. Established migration patterns for the three base class types.
+
+**Key decisions:**
+
+1. **CompositeControl → WebControl with RenderContents**: EmployeeCard originally used `CompositeControl.CreateChildControls()` with Panel/Label/Image child controls. Migrated to flat `RenderContents(HtmlTextWriter)` since BWFC's WebControl doesn't have a child control tree — all rendering is via HtmlTextWriter. This produces identical HTML output.
+
+2. **IPostBackEventHandler removal**: DepartmentBreadcrumb and PollQuestion both implemented `IPostBackEventHandler`. Replaced with `EventCallback<T>` parameters. PostBack JavaScript references removed entirely — Blazor handles interactivity natively.
+
+3. **ITemplate → RenderFragment via TemplatedWebControl**: SectionPanel used `ITemplate` properties with `InstantiateIn()`. Migrated to `RenderFragment` parameters with `RenderTemplate(writer, fragment)` helper from TemplatedWebControl base class.
+
+4. **EventArgs classes**: Created in the `AfterDepartmentPortal.Components.Controls` namespace (co-located with controls) rather than a separate Models folder, since they're tightly coupled to the controls.
+
+5. **HtmlEncode strategy**: Used `System.Net.WebUtility.HtmlEncode` instead of `System.Web.HttpUtility.HtmlEncode` since System.Web is not available in Blazor.
+
+**Why this matters:** These patterns are reusable for any future custom control migration. The three base class types (WebControl, DataBoundWebControl, TemplatedWebControl) cover the vast majority of Web Forms custom control inheritance patterns.
+
