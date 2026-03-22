@@ -1,4 +1,4 @@
-﻿# Project Context
+# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
@@ -504,3 +504,24 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 ### Focus() Method on BaseWebFormsComponent (2026-03-22)
 
 **Summary:** Added public virtual void Focus() to BaseWebFormsComponent matching the ASP.NET Web Forms Control.Focus() API. Uses fire-and-forget JS interop (_ = JsRuntime.InvokeVoidAsync("bwfc.Page.Focus", ClientID))  same discard pattern validators use. Null-guards JsRuntime for SSR pre-render safety. Added wfc.Page.Focus(elementId) JS function to both Basepage.js (IIFE global) and Basepage.module.js (ES module export + window binding). Build: 0 errors. CustomControl tests: 63/63 pass.
+
+### DepartmentPortal Custom Controls Migration (2026-03-22)
+
+**Summary:** Migrated all 7 custom controls from `samples/DepartmentPortal/Code/Controls/` to Blazor components in `samples/AfterDepartmentPortal/Components/Controls/`. Each control inherits from the appropriate BWFC CustomControls base class (WebControl, DataBoundWebControl, or TemplatedWebControl).
+
+**Controls migrated:**
+- **StarRating** (WebControl)  ViewState[Parameter], TagKey=Span, star rendering with color params
+- **NotificationBell** (WebControl)  TagKey=Div, EventCallback<NotificationEventArgs>, drawer rendering
+- **EmployeeCard** (WebControl)  CompositeControlflat RenderContents, photo/info/details link
+- **EmployeeDataGrid** (DataBoundWebControl)  PerformDataBinding override, paging/sorting/search
+- **DepartmentBreadcrumb** (WebControl)  IPostBackEventHandler removed, EventCallback<BreadcrumbEventArgs>
+- **PollQuestion** (WebControl)  IPostBackEventHandler removed, EventCallback<PollVoteEventArgs>, radio buttons
+- **SectionPanel** (TemplatedWebControl)  ITemplateRenderFragment, RenderTemplate() helper for header/content/footer
+
+**Also created:** BreadcrumbEventArgs.cs, NotificationEventArgs.cs, PollVoteEventArgs.cs
+
+**Pages updated:** Dashboard.razor (SectionPanel, PollQuestion, NotificationBell), Employees.razor (EmployeeDataGrid with sample data)
+
+**Key patterns applied:** var everywhere (IDE0007), WebUtility.HtmlEncode instead of HttpUtility, Blazor route URLs instead of .aspx, `new()` target-typed syntax.
+
+**Build:** 0 errors, 0 warnings (excluding pre-existing NU1510 from upstream deps).
