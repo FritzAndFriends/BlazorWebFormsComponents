@@ -114,26 +114,30 @@ namespace DepartmentPortal.Controls
 
             for (int i = startIndex; i < endIndex; i++)
             {
+                var item = dataItems[i];
+                var emp = item as DepartmentPortal.Models.Employee;
+
                 writer.RenderBeginTag(HtmlTextWriterTag.Tr);
                 
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
-                writer.Write(i + 1);
+                writer.Write(emp != null ? emp.Id.ToString() : (i + 1).ToString());
                 writer.RenderEndTag();
 
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
-                writer.Write("Employee " + (i + 1));
+                writer.Write(emp != null ? System.Web.HttpUtility.HtmlEncode(emp.Name) : "Employee " + (i + 1));
                 writer.RenderEndTag();
 
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
-                writer.Write("Title " + (i + 1));
+                writer.Write(emp != null ? System.Web.HttpUtility.HtmlEncode(emp.Title) : "Title " + (i + 1));
                 writer.RenderEndTag();
 
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
-                writer.Write("Department " + ((i % 3) + 1));
+                writer.Write(emp != null ? System.Web.HttpUtility.HtmlEncode(emp.Department) : "Department " + ((i % 3) + 1));
                 writer.RenderEndTag();
 
                 writer.RenderBeginTag(HtmlTextWriterTag.Td);
-                writer.Write("<a href='#'>View</a> | <a href='#'>Edit</a>");
+                var viewUrl = emp != null ? "EmployeeDetail.aspx?id=" + emp.Id : "#";
+                writer.Write("<a href='" + viewUrl + "'>View</a> | <a href='#'>Edit</a>");
                 writer.RenderEndTag();
 
                 writer.RenderEndTag(); // tr

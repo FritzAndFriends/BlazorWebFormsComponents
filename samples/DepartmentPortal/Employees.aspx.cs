@@ -9,7 +9,6 @@ namespace DepartmentPortal
     public partial class EmployeesPage : BasePage
     {
         protected Label EmployeeCountLabel;
-        protected DepartmentPortal.Controls.EmployeeList EmployeeListControl;
         protected DepartmentPortal.Controls.Pager PagerControl;
         protected DepartmentPortal.Controls.EmployeeDataGrid EmployeeDataGridControl;
         private const int PageSize = 12;
@@ -102,13 +101,7 @@ namespace DepartmentPortal
                 .Take(PageSize)
                 .ToList();
             
-            // Bind to employee list control
-            if (EmployeeListControl != null)
-            {
-                EmployeeListControl.Employees = pagedEmployees;
-            }
-            
-            // Also bind to data grid for demonstration
+            // Bind to custom EmployeeDataGrid control
             if (EmployeeDataGridControl != null)
             {
                 EmployeeDataGridControl.DataSource = pagedEmployees;
