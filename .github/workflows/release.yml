@@ -33,6 +33,12 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "Extracted version: $VERSION"
 
+      - name: Remove NBGV to prevent version conflicts
+        run: |
+          sed -i '/<PackageReference Include="Nerdbank.GitVersioning"/,/<\/PackageReference>/d' Directory.Build.props
+          echo "Directory.Build.props after NBGV removal:"
+          cat Directory.Build.props
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -45,13 +51,13 @@ jobs:
           dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
 
       - name: Build library
-        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore -p:NerdbankGitVersioningEnabled=false -p:Version=${{ env.VERSION }}
+        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore -p:Version=${{ env.VERSION }}
 
       - name: Build test project
-        run: dotnet build src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-restore -p:NerdbankGitVersioningEnabled=false -p:Version=${{ env.VERSION }}
+        run: dotnet build src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-restore -p:Version=${{ env.VERSION }}
 
       - name: Build server-side sample
-        run: dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --no-restore -p:NerdbankGitVersioningEnabled=false -p:Version=${{ env.VERSION }}
+        run: dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --no-restore -p:Version=${{ env.VERSION }}
 
       - name: Run tests
         run: dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --results-directory src/BlazorWebFormsComponents.Test/TestResults
@@ -95,6 +101,10 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "Extracted version: $VERSION"
 
+      - name: Remove NBGV to prevent version conflicts
+        run: |
+          sed -i '/<PackageReference Include="Nerdbank.GitVersioning"/,/<\/PackageReference>/d' Directory.Build.props
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -104,7 +114,7 @@ jobs:
         run: dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
 
       - name: Build
-        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore -p:NerdbankGitVersioningEnabled=false -p:Version=${{ env.VERSION }}
+        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore -p:Version=${{ env.VERSION }}
 
       - name: Run tests
         run: |
@@ -112,7 +122,7 @@ jobs:
           dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --verbosity normal
 
       - name: Pack
-        run: dotnet pack src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-build --output ./nupkg -p:NerdbankGitVersioningEnabled=false -p:PackageVersion=${{ env.VERSION }} -p:Version=${{ env.VERSION }}
+        run: dotnet pack src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-build --output ./nupkg -p:PackageVersion=${{ env.VERSION }} -p:Version=${{ env.VERSION }}
 
       - name: Push to GitHub Packages
         run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
