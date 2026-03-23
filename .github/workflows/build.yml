@@ -42,6 +42,8 @@ jobs:
           dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
           dotnet restore src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj
           dotnet restore samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj
+          dotnet restore src/BlazorWebFormsComponents.Analyzers.Test/BlazorWebFormsComponents.Analyzers.Test.csproj
+          dotnet restore scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj
 
       - name: Build library
         run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
@@ -49,11 +51,27 @@ jobs:
       - name: Build test project
         run: dotnet build src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-restore
 
+      - name: Build analyzer tests
+        run: dotnet build src/BlazorWebFormsComponents.Analyzers.Test/BlazorWebFormsComponents.Analyzers.Test.csproj --configuration Release --no-restore
+
       - name: Build server-side sample
         run: dotnet build samples/AfterBlazorServerSide/AfterBlazorServerSide.csproj --configuration Release --no-restore
 
       - name: Run tests
         run: dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --results-directory src/BlazorWebFormsComponents.Test/TestResults
+
+      - name: Run analyzer tests
+        run: dotnet test src/BlazorWebFormsComponents.Analyzers.Test/BlazorWebFormsComponents.Analyzers.Test.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=analyzer-test-results.trx" --results-directory src/BlazorWebFormsComponents.Analyzers.Test/TestResults
+
+      - name: Generate health snapshot
+        run: dotnet run --project scripts/GenerateHealthSnapshot/GenerateHealthSnapshot.csproj --configuration Release -- ${{ github.workspace }} ${{ github.workspace }}/health-snapshot.json
+
+      - name: Upload health snapshot
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: health-snapshot
+          path: health-snapshot.json
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -62,11 +80,27 @@ jobs:
           name: test-results
           path: src/BlazorWebFormsComponents.Test/TestResults/*.trx
 
+      - name: Upload analyzer test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: analyzer-test-results
+          path: src/BlazorWebFormsComponents.Analyzers.Test/TestResults/*.trx
+
       - name: Publish test results
         uses: dorny/test-reporter@v2
         if: always()
         with:
           name: Unit Test Results
           path: src/BlazorWebFormsComponents.Test/TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: true
+
+      - name: Publish analyzer test results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Analyzer Test Results
+          path: src/BlazorWebFormsComponents.Analyzers.Test/TestResults/*.trx
           reporter: dotnet-trx
           fail-on-error: true

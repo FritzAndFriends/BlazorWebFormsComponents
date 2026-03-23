@@ -25,12 +25,12 @@ Here are the mechanical changes required to migrate any `.ashx` handler to Blazo
 | 2. | `: IHttpHandler` | `: HttpHandlerBase` |
 | 3. | `ProcessRequest(HttpContext context)` | `ProcessRequestAsync(HttpHandlerContext context)` (async) |
 | 4. | `context.Response.End();` | `return;` (End is now [Obsolete]) |
-| 5. | Add `[HandlerRoute("/path.ashx")]` | Attribute declares handler path |
-| 6. | Delete `.ashx` markup file | No longer needed; registration is in Program.cs |
+| 5. | Register in `Program.cs` | `app.MapHandler<T>("/path.ashx")` declares handler route |
+| 6. | Delete `.ashx` markup file | No longer needed; handler is a plain C# class |
 
 **Before registering handlers in `Program.cs`, verify:**
 - Session state handlers → mark with `[RequiresSessionState]`
-- Complex paths → use explicit route attribute
+- Complex paths → use explicit route pattern in `MapHandler<T>()`
 
 ---
 
@@ -40,11 +40,10 @@ Here are the mechanical changes required to migrate any `.ashx` handler to Blazo
 
 ### Explicit Path Registration
 
-Register a handler at a specific path using the `[HandlerRoute]` attribute:
+Register a handler at a specific path using `MapHandler<T>()` in `Program.cs`:
 
 ```csharp
 // MyApp/FileDownloadHandler.cs
-[HandlerRoute("/Handlers/FileDownload.ashx")]
 public class FileDownloadHandler : HttpHandlerBase
 {
     public override async Task ProcessRequestAsync(HttpHandlerContext context)
@@ -58,16 +57,16 @@ var builder = WebApplication.CreateBuilder(args);
 // ... other registrations ...
 
 var app = builder.Build();
-app.MapBlazorWebFormsHandlers();  // Auto-discovers [HandlerRoute] attributes
+app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx");
 app.Run();
 ```
 
 ### Convention-Based Routing
 
-If you omit the attribute, the handler is registered at a derived path:
+If you omit the route pattern, the handler is registered at a derived path:
 
 ```csharp
-// MyApp/ProductApiHandler.cs (no [HandlerRoute] attribute)
+// MyApp/ProductApiHandler.cs
 public class ProductApiHandler : HttpHandlerBase
 {
     public override async Task ProcessRequestAsync(HttpHandlerContext context)
@@ -76,12 +75,14 @@ public class ProductApiHandler : HttpHandlerBase
     }
 }
 
+// Program.cs — convention-based registration (no explicit path)
+app.MapHandler<ProductApiHandler>();
 // Convention: /ProductApi.ashx (class name minus "Handler" suffix + .ashx)
 // Accessible at: http://yourapp.com/ProductApi.ashx
 ```
 
 !!!note
-    Convention-based routing derives the path from the class name. `FileDownloadHandler` → `/FileDownload.ashx`. Use `[HandlerRoute]` to override this behavior.
+    Convention-based routing derives the path from the class name. `FileDownloadHandler` → `/FileDownload.ashx`. Use `MapHandler<T>("/custom/path")` to override this behavior.
 
 ### Multiple Paths for a Single Handler
 
@@ -175,7 +176,6 @@ using System.Text.Json;
 
 namespace MyApp
 {
-    [HandlerRoute("/api/Products.ashx")]
     public class ProductApiHandler : HttpHandlerBase
     {
         public override async Task ProcessRequestAsync(HttpHandlerContext context)
@@ -217,7 +217,7 @@ namespace MyApp
 1. `using System.Web;` → `using BlazorWebFormsComponents;`
 2. `: IHttpHandler` → `: HttpHandlerBase`
 3. `ProcessRequest(HttpContext context)` → `async Task ProcessRequestAsync(HttpHandlerContext context)`
-4. Added `[HandlerRoute("/api/Products.ashx")]`
+4. Register with `app.MapHandler<ProductApiHandler>("/api/Products.ashx")` in `Program.cs`
 5. `JsonConvert` → `System.Text.Json.JsonSerializer` (separate migration)
 
 ---
@@ -282,7 +282,6 @@ using System.IO;
 
 namespace MyApp
 {
-    [HandlerRoute("/Handlers/FileDownload.ashx")]
     public class FileDownloadHandler : HttpHandlerBase
     {
         public override async Task ProcessRequestAsync(HttpHandlerContext context)
@@ -326,7 +325,7 @@ namespace MyApp
 2. `: IHttpHandler` → `: HttpHandlerBase`
 3. `ProcessRequest(HttpContext context)` → `async Task ProcessRequestAsync(HttpHandlerContext context)`
 4. Removed `context.Response.End();` — `return` statement is sufficient
-5. Added `[HandlerRoute("/Handlers/FileDownload.ashx")]`
+5. Register with `app.MapHandler<FileDownloadHandler>("/Handlers/FileDownload.ashx")` in `Program.cs`
 
 ---
 
@@ -405,7 +404,6 @@ using System.IO;
 
 namespace MyApp
 {
-    [HandlerRoute("/Handlers/Thumbnail.ashx")]
     public class ThumbnailHandler : HttpHandlerBase
     {
         public override async Task ProcessRequestAsync(HttpHandlerContext context)
@@ -459,7 +457,7 @@ namespace MyApp
 1. `using System.Web;` → `using BlazorWebFormsComponents;`
 2. `: IHttpHandler` → `: HttpHandlerBase`
 3. `ProcessRequest(HttpContext context)` → `async Task ProcessRequestAsync(HttpHandlerContext context)`
-4. Added `[HandlerRoute("/Handlers/Thumbnail.ashx")]`
+4. Register with `app.MapHandler<ThumbnailHandler>("/Handlers/Thumbnail.ashx")` in `Program.cs`
 
 !!!note
     Image generation logic transfers directly. No rewrite needed for `System.Drawing` code — the API is identical between Web Forms and Core.
@@ -675,7 +673,7 @@ var app = builder.Build();
 app.UseSession();
 
 // Register handlers (after UseSession)
-app.MapBlazorWebFormsHandlers();
+app.MapHandler<ShoppingCartHandler>("/Handlers/ShoppingCart.ashx");
 
 app.Run();
 ```
@@ -685,7 +683,6 @@ app.Run();
 Mark the handler with `[RequiresSessionState]`:
 
 ```csharp
-[HandlerRoute("/Handlers/ShoppingCart.ashx")]
 [RequiresSessionState]
 public class ShoppingCartHandler : HttpHandlerBase
 {
@@ -791,7 +788,6 @@ await handler.ProcessRequestAsync(context);
 // var count = (int)context.Application["RequestCount"];
 
 // Blazor: Use DI + singleton service
-[HandlerRoute("/api/Stats.ashx")]
 public class StatsHandler : HttpHandlerBase
 {
     private readonly AppStatisticsService _stats;
@@ -810,6 +806,8 @@ public class StatsHandler : HttpHandlerBase
 
 // Register in Program.cs
 builder.Services.AddSingleton<AppStatisticsService>();
+// ...
+app.MapHandler<StatsHandler>("/api/Stats.ashx");
 ```
 
 ---
@@ -825,7 +823,6 @@ builder.Services.AddSingleton<AppStatisticsService>();
 // var cached = context.Cache["key"];
 
 // Blazor: Inject IMemoryCache
-[HandlerRoute("/api/Data.ashx")]
 public class CachedDataHandler : HttpHandlerBase
 {
     private readonly IMemoryCache _cache;
@@ -850,6 +847,8 @@ public class CachedDataHandler : HttpHandlerBase
 
 // Register in Program.cs
 builder.Services.AddMemoryCache();
+// ...
+app.MapHandler<CachedDataHandler>("/api/Data.ashx");
 ```
 
 ---
@@ -898,8 +897,8 @@ var app = builder.Build();
 // Ashx middleware (returns 410 for unmigrated handlers)
 app.UseMiddleware<AshxHandlerMiddleware>();
 
-// Handler routing (takes precedence)
-app.MapBlazorWebFormsHandlers();
+// Handler routing (takes precedence over middleware for migrated handlers)
+app.MapHandler<ProductApiHandler>("/api/Products.ashx");
 
 // Other middleware...
 app.Run();
@@ -909,7 +908,7 @@ app.Run();
 1. Request arrives for `/api/Products.ashx`
 2. `AshxHandlerMiddleware` runs first, checks: "Is there a handler registered for this path?"
 3. Yes → middleware passes through (short-circuits)
-4. ASP.NET Core routing finds the registered handler and executes it
+4. ASP.NET Core routing finds the `MapHandler<T>()` endpoint and executes it
 5. If no handler found, middleware returns 410 Gone (old handlers are gone)
 
 This setup lets you migrate handlers incrementally: old ones return 410; new ones work normally.
@@ -921,12 +920,6 @@ This setup lets you migrate handlers incrementally: old ones return 410; new one
 Handlers support constructor injection. Register your services in `Program.cs` and they'll be available:
 
 ```csharp
-// Program.cs
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<ProductRepository>();
-
-// Handler.cs
-[HandlerRoute("/api/users.ashx")]
 public class UserApiHandler : HttpHandlerBase
 {
     private readonly UserRepository _repo;
@@ -943,6 +936,11 @@ public class UserApiHandler : HttpHandlerBase
         context.Response.Write(JsonSerializer.Serialize(users));
     }
 }
+
+// Program.cs
+builder.Services.AddScoped<UserRepository>();
+// ...
+app.MapHandler<UserApiHandler>("/api/users.ashx");
 ```
 
 ---
@@ -987,7 +985,6 @@ public async Task GetProducts_ReturnsJson()
 ### Example: JSON POST Handler with Form Data
 
 ```csharp
-[HandlerRoute("/api/Submit.ashx")]
 public class FormSubmitHandler : HttpHandlerBase
 {
     private readonly FormRepository _repo;
@@ -1023,12 +1020,14 @@ public class FormSubmitHandler : HttpHandlerBase
         context.Response.Write("{\"status\":\"submitted\"}");
     }
 }
+
+// Program.cs
+app.MapHandler<FormSubmitHandler>("/api/Submit.ashx");
 ```
 
 ### Example: Authenticated Handler (GET only)
 
 ```csharp
-[HandlerRoute("/secure/export.ashx")]
 public class ExportHandler : HttpHandlerBase
 {
     public override async Task ProcessRequestAsync(HttpHandlerContext context)
@@ -1061,7 +1060,7 @@ app.MapHandler<ExportHandler>("/secure/export.ashx")
 
 | Problem | Solution |
 |---------|----------|
-| **Handler returns 404** | Verify the route in `[HandlerRoute]` matches the request URL. Check `MapBlazorWebFormsHandlers()` is called. |
+| **Handler returns 404** | Verify the route pattern in `MapHandler<T>()` matches the request URL. Check that the `MapHandler` call exists in `Program.cs`. |
 | **Session state is null** | Add `[RequiresSessionState]` attribute. Ensure `app.UseSession()` is called in `Program.cs`. |
 | **"Response.End() was called" warning** | Remove `Response.End()` and use `return` instead. |
 | **Dependency injection fails** | Register services in `Program.cs` before `builder.Build()`. |
@@ -1077,7 +1076,7 @@ Migrating `.ashx` handlers to Blazor with `HttpHandlerBase` is straightforward:
 
 - **6 mechanical changes** per handler (shown in Quick Start)
 - **Familiar API surface** — `context.Request`, `context.Response`, `context.Server` work as in Web Forms
-- **Modern routing** — Use `[HandlerRoute]` and `MapHandler<T>()` in `Program.cs`
+- **Modern routing** — Use `MapHandler<T>()` in `Program.cs` for explicit route registration
 - **DI support** — Inject services via constructor
 - **Session state** — Mark with `[RequiresSessionState]`, configure in `Program.cs`
 - **What's unsupported** — `Response.End()`, `Server.Transfer()`, global state — listed with workarounds

@@ -38,6 +38,18 @@ namespace BlazorWebFormsComponents.Validations
 		[Parameter] public EnumParameter<ValidatorDisplay> Display { get; set; } = ValidatorDisplay.Static;
 		[Parameter] public bool SetFocusOnError { get; set; }
 
+		/// <summary>
+		/// Stub for Web Forms migration. Blazor validation is always client-side,
+		/// so this property is accepted but has no behavioral effect.
+		/// </summary>
+		[Parameter] public bool EnableClientScript { get; set; } = true;
+
+		/// <summary>
+		/// Gets or sets the ID of the control associated with this validator for accessibility linkage.
+		/// Migration stub — Web Forms uses this to render aria-describedby relationships.
+		/// </summary>
+		[Parameter] public string AssociatedControlID { get; set; }
+
 		public abstract bool Validate(string value);
 
 		protected string DisplayStyle => Display.Value switch

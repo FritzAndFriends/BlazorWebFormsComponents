@@ -113,6 +113,16 @@ namespace BlazorWebFormsComponents.LoginControls
 		[Parameter] public EventCallback<EventArgs> OnPreviousButtonClick { get; set; }
 		[Parameter] public EventCallback<EventArgs> OnFinishButtonClick { get; set; }
 
+		/// <summary>
+		/// Occurs when the control is about to send a mail message after user creation.
+		/// </summary>
+		[Parameter] public EventCallback<MailMessageEventArgs> OnSendingMail { get; set; }
+
+		/// <summary>
+		/// Occurs when an error happens while sending a mail message.
+		/// </summary>
+		[Parameter] public EventCallback<SendMailErrorEventArgs> OnSendMailError { get; set; }
+
 		#endregion
 
 		#region Templates

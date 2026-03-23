@@ -1,0 +1,157 @@
+@page "/ControlSamples/BulletedList/Selection"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>BulletedList Selection &amp; Events</PageTitle>
+
+<h2>BulletedList — Click Event Alias &amp; Migration Properties</h2>
+
+<p>The <code>Click</code> event alias and several selection properties support
+   Web Forms migration with minimal markup changes.</p>
+
+<hr />
+
+<h3>Click Event Alias (Interactive)</h3>
+<p>Both <code>OnClick</code> and <code>Click</code> can be used to handle item clicks in
+   <code>LinkButton</code> mode. <code>Click</code> matches the Web Forms event name for
+   easier migration. <strong>Click an item below to see it in action:</strong></p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-1">
+        <BulletedList ItemType="object"
+                      StaticItems="clickItems"
+                      DisplayMode="BulletedListDisplayMode.LinkButton"
+                      Click="HandleClick" />
+        <p class="mt-2 alert alert-info"><strong>Last click:</strong> @clickMessage</p>
+    </div>
+</div>
+
+<pre><code>&lt;BulletedList ItemType="object"
+              StaticItems="clickItems"
+              DisplayMode="BulletedListDisplayMode.LinkButton"
+              Click="HandleClick" /&gt;
+
+@@code {
+    private string clickMessage = "(none)";
+
+    private void HandleClick(BulletedListEventArgs e)
+    {
+        clickMessage = $"Clicked index {e.Index}: {clickItems[e.Index].Text}";
+    }
+}</code></pre>
+
+<hr />
+
+<h3>OnClick with SelectedIndex Tracking</h3>
+<p>Combine the <code>OnClick</code> event with <code>SelectedIndex</code> and
+   <code>SelectedValue</code> to track which item was last selected:</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-2">
+        <BulletedList ItemType="object"
+                      StaticItems="trackingItems"
+                      BulletStyle="BulletStyle.Disc"
+                      DisplayMode="BulletedListDisplayMode.LinkButton"
+                      OnClick="HandleTrackingClick" />
+        <p class="mt-2 alert alert-success">
+            <strong>SelectedIndex:</strong> @trackingIndex &nbsp;|&nbsp;
+            <strong>SelectedValue:</strong> @trackingValue
+        </p>
+    </div>
+</div>
+
+<pre><code>&lt;BulletedList ItemType="object"
+              StaticItems="trackingItems"
+              DisplayMode="BulletedListDisplayMode.LinkButton"
+              OnClick="HandleTrackingClick" /&gt;
+
+&lt;p&gt;SelectedIndex: @@trackingIndex | SelectedValue: @@trackingValue&lt;/p&gt;
+
+@@code {
+    private int trackingIndex = -1;
+    private string trackingValue = "(none)";
+
+    private void HandleTrackingClick(BulletedListEventArgs e)
+    {
+        trackingIndex = e.Index;
+        trackingValue = trackingItems[e.Index].Value;
+    }
+}</code></pre>
+
+<hr />
+
+<h3>Migration Compatibility Properties</h3>
+<p>The following properties are accepted for Web Forms markup compatibility. They allow
+   migrated markup to compile without changes, but do not produce visible behavior
+   in Blazor. This is by design — Blazor&rsquo;s event model replaces postback mechanics.</p>
+
+<div class="card mb-4">
+    <div class="card-body" data-audit-control="BulletedList-Selection-3">
+        <BulletedList ItemType="object"
+                      StaticItems="trackingItems"
+                      BulletStyle="BulletStyle.Numbered"
+                      AutoPostBack="true"
+                      Text="My Fruit List"
+                      SelectedIndex="1"
+                      SelectedValue="banana" />
+        <p class="text-muted mt-2"><em>All migration stubs accepted: AutoPostBack, Text, SelectedIndex, SelectedValue</em></p>
+    </div>
+</div>
+
+<pre><code>&lt;!-- These attributes compile cleanly after migration --&gt;
+&lt;BulletedList ItemType="object"
+              StaticItems="items"
+              AutoPostBack="true"
+              Text="My Fruit List"
+              SelectedIndex="1"
+              SelectedValue="banana"
+              SelectedIndexChanged="HandleChanged"
+              TextChanged="HandleTextChanged" /&gt;</code></pre>
+
+<hr />
+
+<h3>Properties Reference</h3>
+
+<table class="table table-bordered">
+    <thead><tr><th>Property / Event</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>Click</code></td><td>EventCallback&lt;BulletedListEventArgs&gt;</td><td>—</td><td>Web Forms event alias for <code>OnClick</code> — <strong>interactive</strong></td></tr>
+        <tr><td><code>SelectedIndex</code></td><td>int</td><td>-1</td><td>Index of the selected item (migration stub)</td></tr>
+        <tr><td><code>SelectedValue</code></td><td>string</td><td>null</td><td>Value of the selected item (migration stub)</td></tr>
+        <tr><td><code>AutoPostBack</code></td><td>bool</td><td>false</td><td>Migration stub — Blazor events fire immediately</td></tr>
+        <tr><td><code>Text</code></td><td>string</td><td>null</td><td>Text caption for the control (migration stub)</td></tr>
+        <tr><td><code>SelectedIndexChanged</code></td><td>EventCallback&lt;EventArgs&gt;</td><td>—</td><td>Migration stub — accepted but not fired</td></tr>
+        <tr><td><code>TextChanged</code></td><td>EventCallback&lt;EventArgs&gt;</td><td>—</td><td>Migration stub — accepted but not fired</td></tr>
+    </tbody>
+</table>
+
+@code {
+    private string clickMessage = "(none)";
+    private int trackingIndex = -1;
+    private string trackingValue = "(none)";
+
+    private ListItemCollection clickItems = new()
+    {
+        new ListItem("Apple", "apple"),
+        new ListItem("Banana", "banana"),
+        new ListItem("Cherry", "cherry"),
+        new ListItem("Date", "date")
+    };
+
+    private ListItemCollection trackingItems = new()
+    {
+        new ListItem("Apple", "apple"),
+        new ListItem("Banana", "banana"),
+        new ListItem("Cherry", "cherry")
+    };
+
+    private void HandleClick(BulletedListEventArgs e)
+    {
+        clickMessage = $"Clicked index {e.Index}: {clickItems[e.Index].Text}";
+    }
+
+    private void HandleTrackingClick(BulletedListEventArgs e)
+    {
+        trackingIndex = e.Index;
+        trackingValue = trackingItems[e.Index].Value;
+    }
+}

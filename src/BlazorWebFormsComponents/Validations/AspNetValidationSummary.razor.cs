@@ -22,6 +22,16 @@ namespace BlazorWebFormsComponents.Validations
 
 		[Parameter] public string ValidationGroup { get; set; }
 
+		/// <summary>
+		/// Gets or sets whether client-side validation is enabled. Stub for migration compatibility.
+		/// </summary>
+		[Parameter] public bool EnableClientScript { get; set; } = true;
+
+		/// <summary>
+		/// Gets or sets whether validation errors are shown in a message box. Stub for migration compatibility.
+		/// </summary>
+		[Parameter] public bool ShowMessageBox { get; set; }
+
 		public bool IsValid => FilteredMessages.Any();
 
 		public IEnumerable<string> ValidationMessages => FilteredMessages.Select(x =>

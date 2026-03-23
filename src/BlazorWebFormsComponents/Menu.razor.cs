@@ -50,7 +50,39 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public Items Items { get; set; }
 
+		/// <summary>
+		/// Gets or sets the horizontal offset (in pixels) for dynamic flyout submenus.
+		/// Applied as a CSS left offset on submenu containers.
+		/// </summary>
+		[Parameter]
+		public int DynamicHorizontalOffset { get; set; }
+
+		/// <summary>
+		/// Gets or sets the vertical offset (in pixels) for dynamic flyout submenus.
+		/// Applied as a CSS top offset on submenu containers.
+		/// </summary>
+		[Parameter]
+		public int DynamicVerticalOffset { get; set; }
+
 		#region WI-23: Core missing properties
+
+		/// <summary>
+		/// Gets or sets the text displayed for scrolling down in dynamic menus.
+		/// </summary>
+		[Parameter]
+		public string ScrollDownText { get; set; }
+
+		/// <summary>
+		/// Gets or sets the text displayed for scrolling up in dynamic menus.
+		/// </summary>
+		[Parameter]
+		public string ScrollUpText { get; set; }
+
+		/// <summary>
+		/// Gets or sets whether the menu renders an inline style block. Default is true.
+		/// </summary>
+		[Parameter]
+		public bool IncludeStyleBlock { get; set; } = true;
 
 		/// <summary>
 		/// Gets or sets the maximum number of dynamic menu levels to display.

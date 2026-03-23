@@ -17,12 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Build and test
         run: |
-          # TODO: Add your dotnet build/test commands here
-          # Go:            go test ./...
-          # Python:        pip install -r requirements.txt && pytest
-          # .NET:          dotnet test
-          # Java (Maven):  mvn test
-          # Java (Gradle): ./gradlew test
-          echo "No build commands configured — update squad-ci.yml"
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+          dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --no-build --verbosity normal
+          dotnet test src/BlazorWebFormsComponents.Analyzers.Test/BlazorWebFormsComponents.Analyzers.Test.csproj --configuration Release --no-build --verbosity normal

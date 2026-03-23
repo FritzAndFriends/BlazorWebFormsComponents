@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BlazorWebFormsComponents.Enums;
 
 using Microsoft.AspNetCore.Components;
@@ -85,10 +86,28 @@ namespace BlazorWebFormsComponents
 		public string CurrentUrl { get; set; }
 
 		/// <summary>
+		/// Gets or sets the text for the accessibility skip navigation link.
+		/// </summary>
+		[Parameter]
+		public string SkipLinkText { get; set; } = "Skip Navigation Links";
+
+		/// <summary>
 		/// Gets or sets custom child content (not typically used).
 		/// </summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
+
+		/// <summary>
+		/// Occurs when a node item is created during rendering.
+		/// </summary>
+		[Parameter]
+		public EventCallback<SiteMapNodeItemEventArgs> ItemCreated { get; set; }
+
+		/// <summary>
+		/// Occurs when a node item is data-bound during rendering.
+		/// </summary>
+		[Parameter]
+		public EventCallback<SiteMapNodeItemEventArgs> ItemDataBound { get; set; }
 
 		// Style properties for different node types
 		private CurrentNodeStyle _currentNodeStyle = new CurrentNodeStyle();
@@ -153,10 +172,35 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		protected List<SiteMapNode> NavigationPath { get; private set; } = new List<SiteMapNode>();
 
-		protected override void OnParametersSet()
+		private string _lastBuiltUrl;
+
+		protected override async Task OnParametersSetAsync()
 		{
-			base.OnParametersSet();
+			await base.OnParametersSetAsync();
 			BuildNavigationPath();
+
+			// Fire lifecycle events only when the URL changes
+			var url = CurrentUrl ?? string.Empty;
+			if (url != _lastBuiltUrl && NavigationPath.Count > 0)
+			{
+				_lastBuiltUrl = url;
+
+				if (ItemCreated.HasDelegate)
+				{
+					foreach (var node in NavigationPath)
+					{
+						await ItemCreated.InvokeAsync(new SiteMapNodeItemEventArgs(node));
+					}
+				}
+
+				if (ItemDataBound.HasDelegate)
+				{
+					foreach (var node in NavigationPath)
+					{
+						await ItemDataBound.InvokeAsync(new SiteMapNodeItemEventArgs(node));
+					}
+				}
+			}
 		}
 
 		private void BuildNavigationPath()

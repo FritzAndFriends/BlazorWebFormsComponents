@@ -1,0 +1,58 @@
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorWebFormsComponents.LoginControls;
+@using Moq;
+
+@code {
+	bool _sendingMailFired = false;
+	bool _sendMailErrorFired = false;
+
+	[Fact]
+	public void ChangePassword_OnSendingMail_ParameterAccepted()
+	{
+		SetupAuthServices();
+
+		var cut = Render(@<ChangePassword ID="cp1"
+			OnSendingMail="@((MailMessageEventArgs e) => { _sendingMailFired = true; })" />);
+
+		var instance = cut.FindComponent<ChangePassword>().Instance;
+		instance.OnSendingMail.HasDelegate.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ChangePassword_OnSendMailError_ParameterAccepted()
+	{
+		SetupAuthServices();
+
+		var cut = Render(@<ChangePassword ID="cp1"
+			OnSendMailError="@((SendMailErrorEventArgs e) => { _sendMailErrorFired = true; })" />);
+
+		var instance = cut.FindComponent<ChangePassword>().Instance;
+		instance.OnSendMailError.HasDelegate.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ChangePassword_MailEvents_DefaultHaveNoDelegate()
+	{
+		SetupAuthServices();
+
+		var cut = Render(@<ChangePassword ID="cp1" />);
+
+		var instance = cut.FindComponent<ChangePassword>().Instance;
+		instance.OnSendingMail.HasDelegate.ShouldBeFalse();
+		instance.OnSendMailError.HasDelegate.ShouldBeFalse();
+	}
+
+	private void SetupAuthServices()
+	{
+		var principal = new ClaimsPrincipal();
+		var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "TestUser") }, "Test");
+		principal.AddIdentity(identity);
+
+		var authMock = new Mock<AuthenticationStateProvider>();
+		authMock.Setup(x => x.GetAuthenticationStateAsync()).Returns(Task.FromResult(new AuthenticationState(principal)));
+
+		Services.AddSingleton<AuthenticationStateProvider>(authMock.Object);
+		Services.AddSingleton<NavigationManager>(new Mock<NavigationManager>().Object);
+	}
+}

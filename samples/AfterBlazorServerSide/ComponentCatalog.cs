@@ -9,9 +9,12 @@ public static class ComponentCatalog
     public static IReadOnlyList<ComponentInfo> Components { get; } = new List<ComponentInfo>
     {
         // Utility Controls
+        new("Content", "Utility", "/ControlSamples/Content", "Provides content to ContentPlaceHolder regions in master page layouts"),
+        new("ContentPlaceHolder", "Utility", "/ControlSamples/ContentPlaceHolder", "Defines replaceable content regions in master page layouts"),
         new("MasterPage", "Utility", "/control-samples/masterpage", "Master page template support for consistent layouts"),
         new("Localize", "Utility", "/ControlSamples/Localize", "Localization and resource string rendering"),
         new("MultiView", "Utility", "/ControlSamples/MultiView", "Container for multiple View controls with switching"),
+        new("View", "Utility", "/ControlSamples/View", "Container panel within a MultiView, visible one at a time"),
         new("PlaceHolder", "Utility", "/ControlSamples/PlaceHolder", "Container for dynamically added controls"),
         new("DataBinder", "Utility", "/ControlSamples/DataBinder", "Data binding helper with Eval() expressions",
             Keywords: new[] { "databind", "eval", "expression" }),
@@ -20,7 +23,9 @@ public static class ComponentCatalog
 
         // Editor Controls
         new("AdRotator", "Editor", "/ControlSamples/AdRotator", "Displays rotating advertisement images"),
-        new("BulletedList", "Editor", "/ControlSamples/BulletedList", "Displays items as a bulleted or numbered list"),
+        new("BulletedList", "Editor", "/ControlSamples/BulletedList", "Displays items as a bulleted or numbered list",
+            new[] { "Selection" },
+            new[] { "list", "bullet", "numbered" }),
         new("Button", "Editor", "/ControlSamples/Button", "Server-side button control with click events",
             new[] { "Style", "JavaScript", "CausesValidation", "ValidationGroup" },
             new[] { "submit", "click", "postback" }),
@@ -52,6 +57,8 @@ public static class ComponentCatalog
         new("Panel", "Editor", "/ControlSamples/Panel", "Container that renders as a div element",
             new[] { "BackImageUrl" },
             new[] { "container", "div", "group" }),
+        new("RadioButton", "Editor", "/ControlSamples/RadioButton", "Single radio button control for mutually exclusive selection",
+            Keywords: new[] { "radio", "option", "single" }),
         new("RadioButtonList", "Editor", "/ControlSamples/RadioButtonList", "List of mutually exclusive radio buttons",
             Keywords: new[] { "radio", "options", "select" }),
         new("Table", "Editor", "/ControlSamples/Table", "Programmatically created HTML table",
@@ -106,9 +113,10 @@ public static class ComponentCatalog
         new("Menu", "Navigation", "/ControlSamples/Menu/Selection", "Hierarchical menu navigation control",
             Keywords: new[] { "menu", "navigation", "horizontal", "vertical" }),
         new("SiteMapPath", "Navigation", "/ControlSamples/SiteMapPath", "Breadcrumb navigation based on site map",
-            Keywords: new[] { "breadcrumb", "path", "sitemap" }),
+            new[] { "Events" },
+            new[] { "breadcrumb", "path", "sitemap" }),
         new("TreeView", "Navigation", "/ControlSamples/TreeView", "Hierarchical tree navigation control",
-            new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
+            new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "ImageAndConfig", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
             new[] { "tree", "hierarchy", "expand", "collapse" }),
 
         // Login Controls
@@ -166,6 +174,8 @@ public static class ComponentCatalog
             Keywords: new[] { "showcase", "migration", "demo", "accordion", "tabs", "modal", "autocomplete", "calendar", "mask", "slider", "hover", "toolkit" }),
 
         // Migration Helpers
+        new("NamingContainer", "Migration Helpers", "/ControlSamples/NamingContainer", "Establishes naming scope for child components, equivalent to INamingContainer",
+            Keywords: new[] { "naming", "scope", "id", "prefix" }),
         new("ScriptManager", "Migration Helpers", "/ControlSamples/ScriptManager", "Migration stub for AJAX script management",
             Keywords: new[] { "ajax", "script", "migration", "stub" }),
         new("ScriptManagerProxy", "Migration Helpers", "/ControlSamples/ScriptManagerProxy", "Migration stub for content page script references",
@@ -191,7 +201,8 @@ public static class ComponentCatalog
         .AsReadOnly();
 
     public static IEnumerable<ComponentInfo> GetByCategory(string category) =>
-        Components.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+        Components.Where(c => c.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(c => c.Name);
 
     public static ComponentInfo? GetByRoute(string route) =>
         Components.FirstOrDefault(c => c.Route.Equals(route, StringComparison.OrdinalIgnoreCase));

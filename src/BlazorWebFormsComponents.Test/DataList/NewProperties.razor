@@ -1,0 +1,64 @@
+@code {
+
+	[Fact]
+	public void DataList_DataKeyField_DefaultIsNull()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		cut.FindComponent<DataList<Widget>>().Instance.DataKeyField.ShouldBeNull();
+	}
+
+	[Fact]
+	public void DataList_DataKeyField_AcceptsValue()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" DataKeyField="Id" Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		cut.FindComponent<DataList<Widget>>().Instance.DataKeyField.ShouldBe("Id");
+	}
+
+	[Fact]
+	public void DataList_EditItemIndex_DefaultIsNegativeOne()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		cut.FindComponent<DataList<Widget>>().Instance.EditItemIndex.ShouldBe(-1);
+	}
+
+	[Fact]
+	public void DataList_EditItemIndex_AcceptsValue()
+	{
+		var editIndex = 0;
+
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" EditItemIndex="editIndex" Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		cut.FindComponent<DataList<Widget>>().Instance.EditItemIndex.ShouldBe(0);
+	}
+
+	[Fact]
+	public void DataList_WithID_RendersIdOnTable()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" ID="myDataList" Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		cut.Find("table").GetAttribute("id").ShouldBe("myDataList");
+	}
+
+	[Fact]
+	public void DataList_WithoutID_NoIdOnTable()
+	{
+		var cut = Render(@<DataList Items="Widget.SimpleWidgetList" ItemType="Widget" RepeatLayout="Enums.RepeatLayout.Table" Context="Item">
+			<ItemTemplate>@Item.Name</ItemTemplate>
+		</DataList>);
+
+		cut.Find("table").HasAttribute("id").ShouldBeFalse();
+	}
+}

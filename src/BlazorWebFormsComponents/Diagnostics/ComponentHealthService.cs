@@ -24,8 +24,17 @@ namespace BlazorWebFormsComponents.Diagnostics
 		{
 			typeof(BaseWebFormsComponent),
 			typeof(BaseStyledComponent),
-			typeof(BaseDataBoundComponent),
-			typeof(DataBoundComponent<>)
+			typeof(BaseDataBoundComponent)
+		};
+
+		/// <summary>
+		/// Maps actual class names to their tracked component names when
+		/// the two differ (e.g. AspNetValidationSummary → ValidationSummary).
+		/// </summary>
+		private static readonly Dictionary<string, string> TypeAliases =
+			new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["AspNetValidationSummary"] = "ValidationSummary"
 		};
 
 		/// <summary>
@@ -244,8 +253,8 @@ namespace BlazorWebFormsComponents.Diagnostics
 					if (!HasParameterAttribute(prop))
 						continue;
 
-					if (HasObsoleteAttribute(prop))
-						continue;
+					// [Obsolete] properties are still counted — they represent
+					// migration-compatible implementations (Pattern B+).
 
 					if (HasCascadingParameterAttribute(prop))
 						continue;
@@ -327,6 +336,11 @@ namespace BlazorWebFormsComponents.Diagnostics
 			foreach (var type in allTypes)
 			{
 				var cleanName = StripGenericArity(type.Name);
+
+				// Resolve aliases for components whose class name differs from the tracked name
+				if (TypeAliases.TryGetValue(cleanName, out var alias))
+					cleanName = alias;
+
 				if (_trackedComponents.ContainsKey(cleanName) && !result.ContainsKey(cleanName))
 				{
 					result[cleanName] = type;

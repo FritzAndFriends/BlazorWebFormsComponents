@@ -89,3 +89,12 @@
  Team update (2026-03-06): Forge produced 8 script improvement recommendations (S1-S8) assigned to Bishop  S1: @inherits WebFormsPageBase in _Imports.razor, S2: AddHttpContextAccessor in Program.cs, S3: : Page  : WebFormsPageBase, S4: @using Enums, S5: Page_Load rename, S6: Cookie auth scaffold, S7: src~/action~ URL conversion, S8: Stub base class. Recommended Cycle 1: S1+S2+S3+S4  decided by Forge
  Team update (2026-03-06): LoginView is native BWFC  migration script must stop converting to AuthorizeView. Strip asp: prefix only, preserve template names  decided by Jeffrey T. Fritz, Forge
  Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+
+### RouteData → [Parameter] Bug Fix (Bishop)
+
+- **Bug:** `[RouteData]` on Web Forms method parameters was replaced with `[Parameter]` inline — but `[Parameter]` targets Properties only (CS0592). Also, using `//` TODO comments inline risked absorbing the closing `)` of method signatures.
+- **Root cause:** `[RouteData]` is a Web Forms model-binding attribute for method parameters. `[Parameter]` is a Blazor component attribute valid only on properties. No inline Blazor equivalent exists for method parameter route binding.
+- **Fix:** Changed regex to strip `[RouteData]` entirely from method parameters (not replace with `[Parameter]`). A `/* TODO */` block comment is placed on the preceding line directing Layer 2 to promote the value to a `[Parameter]` property on the component class. Block comment (`/* */`) used instead of line comment (`//`) to avoid absorbing trailing code.
+- **Regex change:** `([ \t]*)\[RouteData\]` → `([ \t]*)\[RouteData\]\s*` (also consumes trailing whitespace to keep formatting clean).
+- **L1 tests:** All 15 pass (100% pass rate, 100% line accuracy).
+- **Key pattern:** When a Web Forms attribute has no inline Blazor equivalent, strip it and leave a TODO for Layer 2 — never substitute an attribute that targets a different declaration type.

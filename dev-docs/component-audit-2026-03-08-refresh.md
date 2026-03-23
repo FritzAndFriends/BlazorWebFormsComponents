@@ -194,12 +194,12 @@ The WingtipToys source app uses **31 unique `asp:` controls**. After migration, 
 | **CompareValidator** | ManagePassword, Register, ResetPassword | ✅ Validation span | N/A | |
 | **Content** | All pages | ✅ Infrastructure | N/A | Blazor layout equivalent |
 | **ContentPlaceHolder** | Site.Master | ✅ Infrastructure | N/A | |
-| **DetailsView** | CheckoutReview | ✅ Table-based layout | — Needs ID | Single-record display |
-| **DropDownList** | Admin, 2FA | ✅ `<select>` element | — Needs ID | |
+| **DetailsView** | CheckoutReview | ✅ Table-based layout | ✅ Added | Single-record display |
+| **DropDownList** | Admin, 2FA | ✅ `<select>` element | ✅ Added | |
 | **FileUpload** | Admin | ✅ `<input type="file">` | ✅ Added | Uses InputFile internally |
-| **FormView** | ProductDetails | ✅ Table/no-table rendering | — Needs ID | Used in source; SSR workaround in AfterWingtipToys |
-| **GridView** | ShoppingCart, CheckoutReview | ✅ Table-based grid | — Needs ID | BoundField + TemplateField supported |
-| **HiddenField** | 2FA, VerifyPhone | ✅ `<input type="hidden">` | — | |
+| **FormView** | ProductDetails | ✅ Table/no-table rendering | ✅ Added | Used in source; SSR workaround in AfterWingtipToys |
+| **GridView** | ShoppingCart, CheckoutReview | ✅ Table-based grid | ✅ Added | BoundField + TemplateField supported |
+| **HiddenField** | 2FA, VerifyPhone | ✅ `<input type="hidden">` | ✅ Added | |
 | **HyperLink** | Confirm, ResetPwdConfirm, Manage | ✅ `<a>` tag | — | Migrated to native `<a>` |
 | **Image** | Site.Master | ✅ `<img>` tag | — | |
 | **ImageButton** | ShoppingCart | ✅ `<input type="image">` | — | |
@@ -300,7 +300,7 @@ This causes build failures in `ProductDetails.razor.cs:36` and `ProductList.razo
 | # | Priority | Area | Rationale | Effort |
 |---|----------|------|-----------|--------|
 | 1 | **Fix RouteData script bug** | Migration Script | Build-breaking bug discovered in Run 15. The `[Parameter] // TODO` comment absorbs closing parenthesis. Blocks clean automated builds. | 1 hour |
-| 2 | **Extend ID rendering to data controls** | HTML Fidelity | 9 of ~30+ controls now render `id`. DetailsView, GridView, DropDownList, FormView, DataList, DataGrid, ListView, HiddenField still need it. These are the WingtipToys-active controls most likely to be targeted by JS/CSS. | 4 hours |
+| 2 | ~~**Extend ID rendering to data controls**~~ | HTML Fidelity | ✅ **DONE** — All data controls (DetailsView, GridView, DropDownList, FormView, DataList, DataGrid, HiddenField) already render `id="@ClientID"`. ListView cannot render a root ID (uses user-provided LayoutTemplate). See [Known Fidelity Divergences](../docs/MigrationGuides/KnownFidelityDivergences.md). | — |
 | 3 | **Automate Layer 2 semantic transforms** | Migration Script | The 3 persistent Layer 2 fixes have been stable across 4 runs. A "Layer 2 script" or Copilot skill could automate ProductDetails/ProductList SSR rewrites and FormView SSR workarounds. Would eliminate ALL manual fixes. | 8 hours |
 | 4 | **ListView DOM fidelity** | HTML Fidelity | The only remaining 🔴 structural divergence. 158-line diff means existing CSS targeting ListView output will break. This is architecturally hard to fix (Blazor's component model vs Web Forms' control tree) but the most impactful remaining fidelity gap. | Complex |
 | 5 | **Style sub-component documentation** | Documentation | 66 style sub-components have zero standalone docs. A single "Styling Components" utility page explaining the cascading parameter pattern would help all users understand how to use `<HeaderStyle>`, `<RowStyle>`, etc. | 2 hours |

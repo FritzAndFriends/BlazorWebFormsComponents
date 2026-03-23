@@ -24,6 +24,12 @@ namespace BlazorWebFormsComponents
 		#region Properties
 
 		/// <summary>
+		/// Gets or sets the date to use as today's date. Defaults to DateTime.Today.
+		/// </summary>
+		[Parameter]
+		public DateTime TodaysDate { get; set; } = DateTime.Today;
+
+		/// <summary>
 		/// Gets or sets the selected date.
 		/// </summary>
 		[Parameter]

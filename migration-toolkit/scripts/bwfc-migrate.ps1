@@ -46,10 +46,19 @@
 
     Shows what transforms would be applied without creating any files.
 
+.PARAMETER Prescan
+    Scan source files for patterns matching BWFC analyzer rules and output a JSON summary. No migration is performed.
+
 .EXAMPLE
     .\bwfc-migrate.ps1 -Path .\LegacyApp -Output .\BlazorApp -SkipProjectScaffold -Verbose
 
     Transforms files with detailed logging, skipping project scaffold generation.
+
+.EXAMPLE
+    .\bwfc-migrate.ps1 -Path C:\src\MyWebFormsApp -Output . -Prescan
+
+    Scans MyWebFormsApp for migration patterns and outputs JSON summary.
+    The -Output parameter is required but unused in prescan mode (early return before output is written).
 #>
 
 [CmdletBinding(SupportsShouldProcess)]
@@ -61,7 +70,10 @@ param(
     [string]$Output,
 
     [Parameter(HelpMessage = "Skip creating .csproj, Program.cs, and _Imports.razor")]
-    [switch]$SkipProjectScaffold
+    [switch]$SkipProjectScaffold,
+
+    [Parameter(HelpMessage = "Scan source files for BWFC analyzer patterns and output JSON summary without migrating")]
+    [switch]$Prescan
 )
 
 Set-StrictMode -Version Latest
@@ -85,6 +97,106 @@ $StripAttributes = @(
 )
 
 #endregion
+
+#region --- Pre-Scan ---
+
+function Invoke-BwfcPrescan {
+    param(
+        [string]$SourcePath
+    )
+    
+    $results = @{
+        ScanDate = (Get-Date -Format 'o')
+        SourcePath = $SourcePath
+        Summary = @{}
+        Files = @()
+    }
+    
+    # Scan patterns matching BWFC analyzer rules
+    $patterns = @{
+        'BWFC001' = @{ Name = 'Missing [Parameter]'; Pattern = 'public\s+\w+\s+\w+\s*\{\s*get\s*;\s*set\s*;\s*\}'; Description = 'Public properties that may need [Parameter] attribute' }
+        'BWFC002' = @{ Name = 'ViewState Usage'; Pattern = 'ViewState\s*\['; Description = 'ViewState dictionary access' }
+        'BWFC003' = @{ Name = 'IsPostBack'; Pattern = '(Page\.)?IsPostBack'; Description = 'IsPostBack checks' }
+        'BWFC004' = @{ Name = 'Response.Redirect'; Pattern = 'Response\.Redirect\s*\('; Description = 'Response.Redirect calls' }
+        'BWFC005' = @{ Name = 'Session Usage'; Pattern = 'Session\s*\[|HttpContext\.Current\.Session'; Description = 'Session state access' }
+        'BWFC011' = @{ Name = 'Event Handler Signatures'; Pattern = '\(\s*object\s+\w+\s*,\s*EventArgs'; Description = 'Web Forms event handler signatures' }
+        'BWFC012' = @{ Name = 'runat="server"'; Pattern = 'runat\s*=\s*"server"'; Description = 'runat="server" artifacts in strings/comments' }
+        'BWFC013' = @{ Name = 'Response Object'; Pattern = 'Response\.(Write|WriteFile|Clear|Flush|End)\s*\('; Description = 'Response object method calls' }
+        'BWFC014' = @{ Name = 'Request Object'; Pattern = 'Request\.(Form|Cookies|Headers|Files|QueryString|ServerVariables)\s*[\[\.]'; Description = 'Request object property access' }
+    }
+    
+    $csFiles = Get-ChildItem -Path $SourcePath -Filter '*.cs' -Recurse -File
+    $totalMatches = 0
+    
+    foreach ($file in $csFiles) {
+        $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+        if (-not $content) { continue }
+        
+        $fileMatches = @()
+        foreach ($ruleId in $patterns.Keys) {
+            $rule = $patterns[$ruleId]
+            $matches = [regex]::Matches($content, $rule.Pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+            if ($matches.Count -gt 0) {
+                # Find line numbers
+                $lines = @()
+                foreach ($m in $matches) {
+                    $lineNum = ($content.Substring(0, $m.Index) -split "`n").Count
+                    $lines += $lineNum
+                }
+                $fileMatches += @{
+                    Rule = $ruleId
+                    Name = $rule.Name
+                    Count = $matches.Count
+                    Lines = $lines
+                }
+                
+                if (-not $results.Summary.ContainsKey($ruleId)) {
+                    $results.Summary[$ruleId] = @{ Name = $rule.Name; Description = $rule.Description; TotalHits = 0; FileCount = 0 }
+                }
+                $results.Summary[$ruleId].TotalHits += $matches.Count
+                $results.Summary[$ruleId].FileCount += 1
+                $totalMatches += $matches.Count
+            }
+        }
+        
+        if ($fileMatches.Count -gt 0) {
+            $relPath = $file.FullName.Substring($SourcePath.Length).TrimStart('\', '/')
+            $results.Files += @{
+                Path = $relPath
+                Matches = $fileMatches
+            }
+        }
+    }
+    
+    $results.TotalFiles = $csFiles.Count
+    $results.FilesWithMatches = $results.Files.Count
+    $results.TotalMatches = $totalMatches
+    
+    return $results
+}
+
+#endregion
+
+if ($Prescan) {
+    Write-Host "BWFC Pre-Scan: Analyzing $Path for migration patterns..." -ForegroundColor Cyan
+    $scanResults = Invoke-BwfcPrescan -SourcePath $Path
+    $json = $scanResults | ConvertTo-Json -Depth 10
+    Write-Output $json
+    
+    # Also write summary to stderr for human readability
+    Write-Host "`nPre-Scan Summary:" -ForegroundColor Green
+    Write-Host "  Files scanned: $($scanResults.TotalFiles)" 
+    Write-Host "  Files with matches: $($scanResults.FilesWithMatches)"
+    Write-Host "  Total pattern matches: $($scanResults.TotalMatches)"
+    if ($scanResults.Summary.Count -gt 0) {
+        Write-Host "`n  Rule breakdown:" -ForegroundColor Yellow
+        foreach ($ruleId in ($scanResults.Summary.Keys | Sort-Object)) {
+            $rule = $scanResults.Summary[$ruleId]
+            Write-Host "    $ruleId ($($rule.Name)): $($rule.TotalHits) hits in $($rule.FileCount) files"
+        }
+    }
+    return
+}
 
 #region --- Logging & Tracking ---
 
@@ -1721,14 +1833,17 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
         }
 
-        $rdRegex = [regex]'([ \t]*)\[RouteData\]'
+        # [RouteData] is a Web Forms model-binding attribute for method parameters.
+        # It has no inline Blazor equivalent — [Parameter] targets properties, not
+        # method parameters, so placing it here would cause CS0592.  Strip the
+        # attribute and leave a TODO for Layer 2 to promote the value to a
+        # [Parameter] property on the component class.
+        $rdRegex = [regex]'([ \t]*)\[RouteData\]\s*'
         $rdMatches = $rdRegex.Matches($annotatedContent)
         if ($rdMatches.Count -gt 0) {
-            # P0-2: Put TODO on a separate line ABOVE [Parameter] so it doesn't
-            # swallow the rest of the line (property type/name) into a comment.
-            $rdReplacement = '${1}// TODO: Verify RouteData → [Parameter] conversion — ensure @page route has matching {parameter}' + "`n" + '${1}[Parameter]'
+            $rdReplacement = '${1}/* TODO: RouteData parameter — add a [Parameter] property to the component class and remove from method signature */' + "`n" + '${1}'
             $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
-            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($rdMatches.Count) [RouteData] to [Parameter]"
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Stripped $($rdMatches.Count) [RouteData] attribute(s) — needs [Parameter] property in L2"
         }
 
         # --- Response.Redirect → NavigationManager.NavigateTo conversion ---

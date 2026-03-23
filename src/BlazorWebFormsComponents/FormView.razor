@@ -15,7 +15,7 @@
 
 @if (RenderOuterTable)
 {
-<table cellspacing="0" class="@CssClass" style="@GetCombinedTableStyle()" title="@ToolTip">
+<table id="@ClientID" cellpadding="@(CellPadding >= 0 ? CellPadding.ToString() : null)" cellspacing="@(CellSpacing >= 0 ? CellSpacing.ToString() : "0")" rules="@GetGridLinesRules()" border="@GetGridLinesBorder()" class="@CssClass" style="@GetCombinedTableStyle()" title="@ToolTip">
 	@if (!string.IsNullOrEmpty(Caption))
 	{
 		<caption style="@GetCaptionStyle()">@Caption</caption>
@@ -86,6 +86,8 @@
 				}
 			</td>
 		</tr>
+		@if (AllowPaging)
+		{
 		<tr style="@PagerStyle?.ToString()">
 			<td>
 				@if (PagerTemplate != null)
@@ -114,6 +116,7 @@
 				}
 			</td>
 		</tr>
+		}
 	}
 
 	@* Footer Row *@

@@ -178,4 +178,34 @@
 - **Key pattern:** `ComponentHealthService` is registered as singleton via `AddComponentHealthDashboard()` extension method. It takes `solutionRoot` path to locate `dev-docs/reference-baselines.json`, test files, docs, and `ComponentCatalog.cs`.
 - **Build verified:** 0 errors, all warnings pre-existing BL0005.
 
+### AfterBlazorServerSide Navigation UX Changes (2026-03-15)
+
+**Summary:** Two targeted changes to improve component catalog navigation in the sample app:
+
+1. **Alphabetized components in all categories** — Modified `ComponentCatalog.GetByCategory()` to add `.OrderBy(c => c.Name)` to the LINQ chain. This sorts components alphabetically within each category, fixing the out-of-order AJAX section and ensuring consistent organization across all categories.
+
+2. **AJAX category collapsed on desktop by default** — Modified `NavMenu.razor` method `CheckIfDesktopAndExpandCategories()` to exclude the AJAX category from automatic expansion on desktop. The AJAX section now starts collapsed (too many items), while all other categories expand normally. Mobile behavior unchanged (expands only the category containing the current page).
+
+**Why these changes matter:** The component catalog had grown to 20+ AJAX-related controls, making the desktop navigation cluttered. Alphabetization improves discoverability within each section. Collapsing AJAX by default on desktop keeps the nav compact while still maintaining full access (users can expand when needed).
+
+**Files modified:**
+- `samples/AfterBlazorServerSide/ComponentCatalog.cs` (line 193-195)
+- `samples/AfterBlazorServerSide/Components/Layout/NavMenu.razor` (line 86-93)
+
+**Build verification:** `dotnet build` completed with 0 errors, pre-existing warnings only.
+
+### Standalone Sample Pages for Content, ContentPlaceHolder, View (2026-03-19)
+
+- **Created 3 standalone sample pages** — each component now has its own route and dedicated page:
+  - `Components/Pages/ControlSamples/Content/Index.razor` — route `/ControlSamples/Content`. Demos: Web Forms before/after comparison, basic Content with ContentPlaceHolderID, multiple content regions, dynamic content with interactive button. 3 audit markers (Content-1, Content-2, Content-3).
+  - `Components/Pages/ControlSamples/ContentPlaceHolder/Index.razor` — route `/ControlSamples/ContentPlaceHolder`. Demos: default content (no override), content replacement, interactive toggle showing default vs override behavior. 3 audit markers (ContentPlaceHolder-1, ContentPlaceHolder-2, ContentPlaceHolder-3).
+  - `Components/Pages/ControlSamples/View/Index.razor` — route `/ControlSamples/View`. Demos: basic ActiveViewIndex navigation, wizard-style multi-step form, OnActivate/OnDeactivate events with tab UI. 3 audit markers (View-1, View-2, View-3).
+- **Updated ComponentCatalog.cs** — Content route changed from `/control-samples/masterpage` to `/ControlSamples/Content`, ContentPlaceHolder from `/control-samples/masterpage` to `/ControlSamples/ContentPlaceHolder`, View from `/ControlSamples/MultiView` to `/ControlSamples/View`.
+- **Convention:** All three pages use `@rendermode InteractiveServer` for interactive demos, include parameter reference tables, migration notes, and `data-audit-control` markers per project conventions.
+- **Build verified:** 0 errors.
+
+
+
+
+ **Team update (2026-03-20):** Navigation UX improvements (alphabetical sort, AJAX collapse on desktop) + standalone sample pages for Content, ContentPlaceHolder, View. ComponentCatalog updated.  decided by Jubilee
 

@@ -1,0 +1,57 @@
+@code {
+
+	[Fact]
+	public void ValidationSummary_EnableClientScript_DefaultIsTrue()
+	{
+		var cut = Render(
+			@<EditForm Model="@model">
+				<AspNetValidationSummary />
+			</EditForm>
+		);
+
+		cut.FindComponent<AspNetValidationSummary>().Instance.EnableClientScript.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ValidationSummary_EnableClientScript_CanBeSetToFalse()
+	{
+		var cut = Render(
+			@<EditForm Model="@model">
+				<AspNetValidationSummary EnableClientScript="false" />
+			</EditForm>
+		);
+
+		cut.FindComponent<AspNetValidationSummary>().Instance.EnableClientScript.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ValidationSummary_ShowMessageBox_DefaultIsFalse()
+	{
+		var cut = Render(
+			@<EditForm Model="@model">
+				<AspNetValidationSummary />
+			</EditForm>
+		);
+
+		cut.FindComponent<AspNetValidationSummary>().Instance.ShowMessageBox.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void ValidationSummary_ShowMessageBox_CanBeSetToTrue()
+	{
+		var cut = Render(
+			@<EditForm Model="@model">
+				<AspNetValidationSummary ShowMessageBox="true" />
+			</EditForm>
+		);
+
+		cut.FindComponent<AspNetValidationSummary>().Instance.ShowMessageBox.ShouldBeTrue();
+	}
+
+	private ExampleModel model = new ExampleModel();
+
+	public class ExampleModel
+	{
+		public string Name { get; set; }
+	}
+}

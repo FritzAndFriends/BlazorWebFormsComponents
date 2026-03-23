@@ -1,6 +1,6 @@
 # BlazorWebFormsComponents
 
-A collection of Blazor components that emulate the web forms components of the same name
+A collection of Blazor components that are drop-in replacements for the ASP.NET Web Forms control of the same name.  The library also includes some other shims and modules that make migrating to Blazor a smooth experience
 
 [![Build and Test](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml)  [![Integration Tests](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  [![docs](https://github.com/FritzAndFriends/BlazorWebFormsComponents/workflows/docs/badge.svg)](https://fritzandfriends.github.io/BlazorWebFormsComponents/)
 

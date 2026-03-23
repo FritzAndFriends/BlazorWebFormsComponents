@@ -94,8 +94,12 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Adds BlazorWebFormsComponents middleware to the application pipeline.
-    /// When <see cref="BlazorWebFormsComponentsOptions.EnableAspxUrlRewriting"/> is true (default),
-    /// requests ending in .aspx are permanently redirected (301) to clean Blazor URLs.
+    /// Configurable via <see cref="BlazorWebFormsComponentsOptions"/>:
+    /// <list type="bullet">
+    ///   <item><description>.aspx URL rewriting (301 redirect to clean Blazor URLs)</description></item>
+    ///   <item><description>.ashx handler interception (410 Gone or custom redirect)</description></item>
+    ///   <item><description>.axd resource interception (404 Not Found; 410 Gone for ChartImg.axd)</description></item>
+    /// </list>
     /// </summary>
     /// <param name="app">The application builder</param>
     /// <returns>The application builder for chaining</returns>
@@ -107,6 +111,16 @@ public static class ServiceCollectionExtensions
         if (options.EnableAspxUrlRewriting)
         {
             app.UseMiddleware<AspxRewriteMiddleware>();
+        }
+
+        if (options.EnableAshxHandling)
+        {
+            app.UseMiddleware<AshxHandlerMiddleware>();
+        }
+
+        if (options.EnableAxdHandling)
+        {
+            app.UseMiddleware<AxdHandlerMiddleware>();
         }
 
         return app;

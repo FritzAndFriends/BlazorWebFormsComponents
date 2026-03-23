@@ -1,0 +1,54 @@
+@code {
+
+	[Fact]
+	public void DropDownList_CausesValidation_DefaultIsTrue()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" />);
+
+		cut.FindComponent<DropDownList<object>>().Instance.CausesValidation.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void DropDownList_CausesValidation_CanBeSetToFalse()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" CausesValidation="false" />);
+
+		cut.FindComponent<DropDownList<object>>().Instance.CausesValidation.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void DropDownList_ValidationGroup_DefaultIsNull()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" />);
+
+		cut.FindComponent<DropDownList<object>>().Instance.ValidationGroup.ShouldBeNull();
+	}
+
+	[Fact]
+	public void DropDownList_ValidationGroup_AcceptsValue()
+	{
+		var items = new ListItemCollection
+		{
+			new ListItem("One", "1")
+		};
+
+		var cut = Render(@<DropDownList ItemType="object" StaticItems="items" ValidationGroup="Group1" />);
+
+		cut.FindComponent<DropDownList<object>>().Instance.ValidationGroup.ShouldBe("Group1");
+	}
+}

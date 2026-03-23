@@ -1,0 +1,83 @@
+@code {
+
+	[Fact]
+	public void Menu_DynamicHorizontalOffset_DefaultIsZero()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.DynamicHorizontalOffset.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Menu_DynamicHorizontalOffset_AcceptsNonDefaultValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu DynamicHorizontalOffset="15">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.DynamicHorizontalOffset.ShouldBe(15);
+	}
+
+	[Fact]
+	public void Menu_DynamicVerticalOffset_DefaultIsZero()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu>
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.DynamicVerticalOffset.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Menu_DynamicVerticalOffset_AcceptsNonDefaultValue()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu DynamicVerticalOffset="10">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.DynamicVerticalOffset.ShouldBe(10);
+	}
+
+	[Fact]
+	public void Menu_DynamicOffsets_BothAcceptNegativeValues()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var cut = Render(
+			@<Menu DynamicHorizontalOffset="-5" DynamicVerticalOffset="-3">
+				<Items>
+					<MenuItem Text="Home" Value="home" />
+				</Items>
+			</Menu>
+		);
+
+		cut.FindComponent<Menu>().Instance.DynamicHorizontalOffset.ShouldBe(-5);
+		cut.FindComponent<Menu>().Instance.DynamicVerticalOffset.ShouldBe(-3);
+	}
+}

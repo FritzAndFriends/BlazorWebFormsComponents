@@ -1,0 +1,24 @@
+@inherits BlazorWebFormsTestContext
+@using Shouldly
+
+@code {
+	[Fact]
+	public void Calendar_TodaysDate_DefaultIsToday()
+	{
+		var cut = Render(@<Calendar />);
+
+		var instance = cut.FindComponent<Calendar>().Instance;
+		instance.TodaysDate.Date.ShouldBe(DateTime.Today);
+	}
+
+	[Fact]
+	public void Calendar_TodaysDate_AcceptsCustomDate()
+	{
+		var customDate = new DateTime(2025, 12, 25);
+
+		var cut = Render(@<Calendar TodaysDate="customDate" />);
+
+		var instance = cut.FindComponent<Calendar>().Instance;
+		instance.TodaysDate.ShouldBe(customDate);
+	}
+}

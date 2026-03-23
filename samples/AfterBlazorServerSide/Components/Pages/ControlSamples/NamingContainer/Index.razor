@@ -1,0 +1,112 @@
+@page "/ControlSamples/NamingContainer"
+@using BlazorWebFormsComponents.Enums
+
+<h2>NamingContainer Component Samples</h2>
+
+<Nav></Nav>
+
+<h3>Basic NamingContainer</h3>
+<p>Child controls get IDs prefixed with the container's ID separated by underscores.</p>
+<div data-audit-control="NamingContainer-1">
+    <NamingContainer ID="SearchPanel">
+        <Label ID="lblQuery" Text="Search:"></Label>
+        <TextBox ID="txtQuery" />
+        <Button ID="btnSearch" Text="Search" />
+    </NamingContainer>
+</div>
+<p><em>Child IDs: SearchPanel_lblQuery, SearchPanel_txtQuery, SearchPanel_btnSearch</em></p>
+
+<h3>Nested NamingContainers</h3>
+<p>Multiple containers can be nested. Each level adds its ID as a prefix.</p>
+<div data-audit-control="NamingContainer-2">
+    <NamingContainer ID="MainLayout">
+        <NamingContainer ID="Sidebar">
+            <Label ID="lblFilter" Text="Filter:" />
+            <TextBox ID="txtFilter" />
+        </NamingContainer>
+        <NamingContainer ID="Content">
+            <Label ID="lblTitle" Text="Title:" />
+            <TextBox ID="txtTitle" />
+            <Button ID="btnSave" Text="Save" />
+        </NamingContainer>
+    </NamingContainer>
+</div>
+<p><em>Child IDs: MainLayout_Sidebar_lblFilter, MainLayout_Sidebar_txtFilter, MainLayout_Content_lblTitle, MainLayout_Content_txtTitle, MainLayout_Content_btnSave</em></p>
+
+<h3>NamingContainer with UseCtl00Prefix</h3>
+<p>For full Web Forms compatibility, enable UseCtl00Prefix to prepend "ctl00" to the naming hierarchy.</p>
+<div data-audit-control="NamingContainer-3">
+    <NamingContainer ID="MainContent" UseCtl00Prefix="true">
+        <Label ID="lblEmail" Text="Email:" />
+        <TextBox ID="txtEmail" />
+        <Button ID="btnRegister" Text="Register" />
+    </NamingContainer>
+</div>
+<p><em>Child IDs: ctl00_MainContent_lblEmail, ctl00_MainContent_txtEmail, ctl00_MainContent_btnRegister</em></p>
+
+<h3>NamingContainer with Visibility Control</h3>
+<p>NamingContainer supports Visible property to conditionally render child content.</p>
+<div data-audit-control="NamingContainer-4">
+    <div>
+        <CheckBox @bind-Checked="showOptional" Text="Show additional options" />
+    </div>
+    <NamingContainer ID="OptionalSection" Visible="showOptional">
+        <Label ID="lblAdvanced" Text="Advanced Option:" />
+        <TextBox ID="txtAdvanced" />
+    </NamingContainer>
+</div>
+<p><em>When checked, child IDs appear: OptionalSection_lblAdvanced, OptionalSection_txtAdvanced</em></p>
+
+<h3>NamingContainer with Multiple Sections</h3>
+<p>Use multiple NamingContainers to organize different form sections.</p>
+<div data-audit-control="NamingContainer-5">
+    <fieldset>
+        <legend>Personal Information</legend>
+        <NamingContainer ID="PersonalInfo">
+            <Label ID="lblName" Text="Name:" />
+            <TextBox ID="txtName" />
+            <br />
+            <Label ID="lblAge" Text="Age:" />
+            <TextBox ID="txtAge" />
+        </NamingContainer>
+    </fieldset>
+    <fieldset>
+        <legend>Contact Information</legend>
+        <NamingContainer ID="ContactInfo">
+            <Label ID="lblPhone" Text="Phone:" />
+            <TextBox ID="txtPhone" />
+            <br />
+            <Label ID="lblEmail" Text="Email:" />
+            <TextBox ID="txtEmail" />
+        </NamingContainer>
+    </fieldset>
+</div>
+<p><em>Section 1 IDs: PersonalInfo_lblName, PersonalInfo_txtName, PersonalInfo_lblAge, PersonalInfo_txtAge</em></p>
+<p><em>Section 2 IDs: ContactInfo_lblPhone, ContactInfo_txtPhone, ContactInfo_lblEmail, ContactInfo_txtEmail</em></p>
+
+<hr />
+
+<p>Code Examples:</p>
+<code>
+&lt;!-- Basic NamingContainer --&gt;<br/>
+&lt;NamingContainer ID="SearchPanel"&gt;<br/>
+&nbsp;&nbsp;&lt;Label ID="lblQuery" Text="Search:" /&gt;<br/>
+&nbsp;&nbsp;&lt;TextBox ID="txtQuery" /&gt;<br/>
+&nbsp;&nbsp;&lt;Button ID="btnSearch" Text="Search" /&gt;<br/>
+&lt;/NamingContainer&gt;<br/>
+<br/>
+&lt;!-- With UseCtl00Prefix for Web Forms compatibility --&gt;<br/>
+&lt;NamingContainer ID="MainContent" UseCtl00Prefix="true"&gt;<br/>
+&nbsp;&nbsp;&lt;TextBox ID="txtEmail" /&gt;<br/>
+&nbsp;&nbsp;&lt;Button ID="btnSubmit" Text="Submit" /&gt;<br/>
+&lt;/NamingContainer&gt;<br/>
+<br/>
+&lt;!-- With Visibility Control --&gt;<br/>
+&lt;NamingContainer ID="OptionalSection" Visible="showOptional"&gt;<br/>
+&nbsp;&nbsp;&lt;TextBox ID="txtAdvanced" /&gt;<br/>
+&lt;/NamingContainer&gt;
+</code>
+
+@code {
+    private bool showOptional = false;
+}

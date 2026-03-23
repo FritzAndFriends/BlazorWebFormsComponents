@@ -31,33 +31,38 @@
 - Run 9 Skill Fixes — 6 RF items across 4 skill files (2026-03-07)
 - Run 9 RCA Documentation — path preservation + CSS verification rules (2026-03-07)
 
-### Issue #438: Deprecation Guidance Docs (Latest)
+### Issue #438: Deprecation Guidance Docs
 
 📌 **Team update (2026-03-17):** #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100%. 2105 tests passing. — decided by Cyclops
 
-**Delivered:** Comprehensive deprecation guidance page (`docs/Migration/DeprecationGuidance.md`) covering Web Forms patterns with no Blazor equivalent.
+**✅ DELIVERED** — Comprehensive deprecation guidance page covering Web Forms patterns with no Blazor equivalent.
 
-**Content:**
-- `runat="server"` → Blazor native components
-- `ViewState` → Component fields + scoped services  
-- `UpdatePanel` → Blazor's incremental component rendering
-- `ScriptManager` → `IJSRuntime` + `HttpClient`
-- PostBack events → Component lifecycle + event handlers
-- Page lifecycle (`Page_Load`, `Page_Init`) → `OnInitializedAsync`, `OnParametersSetAsync`
-- `IsPostBack` → Removed (use `OnInitializedAsync`)
-- Server-side control properties → Declarative data binding
+**Session (2026-03-17 by Beast):**
+- Created `docs/Migration/DeprecationGuidance.md` — 32 KB, ~600 lines covering 8 deprecation patterns
+- Updated `mkdocs.yml` — added "Deprecation Guidance" to Migration navigation section (after "Automated Migration Guide")
+- Created decision record: `.squad/decisions/inbox/beast-deprecation-docs.md`
+
+**Content patterns documented:**
+- `runat="server"` — Scope marker; remove (Blazor components always server-side)
+- `ViewState` — Use component fields + scoped/singleton services instead
+- `UpdatePanel` — Blazor incremental rendering makes triggers obsolete; UpdatePanel is now just a CSS-compatible wrapper
+- `Page_Load` / `IsPostBack` → `OnInitializedAsync` + event handlers + lifecycle mapping table
+- `ScriptManager` — Stub for migration compat; replace with `IJSRuntime` + `HttpClient` + DI
+- Server control properties → Reactive data binding (fields, not imperative assignment)
 - Application/Session state → Singleton/scoped services
 - Data binding events (`ItemDataBound`) → Component templates with `@context`
 
-**Format:** Before/after tabbed code examples, migration checklist table, lifecycle mapping.
+**Format & Tone:**
+- Each pattern: "What It Was" → "Why Deprecated" → "What To Do Instead" + before/after code
+- Tabbed markdown for side-by-side comparison of Web Forms vs Blazor
+- Lifecycle mapping table (Page_Init → OnInitializedAsync, etc.)
+- Empathetic tone — acknowledges these are familiar patterns being left behind
+- Audience: Experienced Web Forms developers learning Blazor
 
-**Branch:** `squad/438-deprecation-docs` — pushed to FritzAndFriends upstream. Commit 5b17682b.
-
-**Files:** 
-- Created `docs/Migration/DeprecationGuidance.md` (23.3 KB, ~400 lines)
-- Updated `mkdocs.yml` — added to Migration section navigation
-
-**Design decision:** Placed after "Automated Migration Guide" in nav to catch developers early in their migration journey. Each section pairs Web Forms pattern with clear Blazor alternative, supporting the library's goal of enabling code reuse with minimal markup changes.
+**Design decision rationale:**
+- Placed after "Automated Migration Guide" in nav — developers run L1 automation first, then encounter these patterns; this doc is their reference
+- Each section pairs Web Forms pattern with clear Blazor alternative — supports library goal of enabling code reuse with minimal markup changes
+- Comprehensive coverage including derived patterns (e.g., application state → services)
 
 **Summary (2026-03-05 through 2026-03-07 pre-Run 11)
 
@@ -159,7 +164,7 @@ Captured three critical Run 22 learnings (39/40 tests passing) in migration skil
 1. **Overview** — What `.ashx` handlers are, why migration is needed, `HttpHandlerBase` value proposition
 2. **Quick Start** — 6-step migration checklist (mechanical changes)
 3. **Registration** — Four registration patterns:
-   - Explicit path via `[HandlerRoute]` attribute
+   - Explicit path via `MapHandler<T>("/path")` in `Program.cs`
    - Convention-based routing (derive from class name)
    - Multi-path registration with `MapHandler<T>()`
    - Chaining auth/CORS with `.RequireAuthorization()`, `.RequireCors()`
@@ -450,4 +455,111 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 
 
 
+
+
+## BaseValidator & BaseCompareValidator Documentation (2026-03-17)
+
+ **Session (2026-03-17 by Beast):**
+- Created docs/ValidationControls/BaseValidator.md  6.6 KB comprehensive base class docs covering:
+  - Abstract base class overview for all validators
+  - Shared properties: ControlToValidate, ControlRef, Display, Text, ErrorMessage, ValidationGroup, Enabled, style properties
+  - ForwardRef<InputBase<T>> pattern for Blazor-native field binding
+  - Validation lifecycle (EditContext integration, cascading context, registration/validation/cleanup)
+  - Child validator references (RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator)
+  - Web Forms  Blazor comparison with code examples
+
+- Created docs/ValidationControls/BaseCompareValidator.md  6.4 KB docs for comparison-based validators:
+  - Abstract base class extending BaseValidator with type conversion and comparison logic
+  - Type property with supported types table (String, Integer, Double, Date, Currency)
+  - CultureInvariantValues property explanation with practical examples
+  - Type conversion and comparison logic documentation
+  - Comprehensive examples (Integer, Date, Currency) with real code samples
+  - Web Forms  Blazor syntax comparison
+  - Child validator references (CompareValidator, RangeValidator)
+
+- Updated mkdocs.yml  added BaseCompareValidator and BaseValidator alphabetically in Validation Controls section
+- Verified MkDocs build: --strict mode passes with no broken links (55.59 seconds build time)
+
+**Pattern Consistency:**
+- Followed RequiredFieldValidator.md and CompareValidator.md formatting conventions
+- Maintained heading structure: Overview, Properties, Examples, Web Forms comparison, Child references
+- Used property tables for enums (Display, Type values)
+- Included Microsoft documentation links to original Web Forms classes
+- All Blazor code examples shown with EditForm context
+
+**Key Decisions:**
+- BaseValidator docs positioned as "framework for all validators" not a user-facing component
+- Emphasized ControlRef as Blazor-native approach; ControlToValidate as Web Forms migration bridge
+- Type conversion explanation in BaseCompareValidator targets developers migrating numeric/date comparisons
+- CultureInvariantValues documentation included practical locale examples (US "." vs European "," decimals)
+
+**Files:**
+- Created docs/ValidationControls/BaseValidator.md 
+- Created docs/ValidationControls/BaseCompareValidator.md
+- Updated mkdocs.yml (Validation Controls section)
+
+### Analyzer Architecture & Expansion Documentation (Feature/analyzer-sprint1)
+
+**Delivered:** Comprehensive analyzer contributor guide and expanded rule documentation for BWFC013 and BWFC014 rules.
+
+**Files created/updated:**
+1. **dev-docs/ANALYZER-ARCHITECTURE.md** (18.7 KB, new)  Contributor guide for developing new Roslyn analyzers
+2. **docs/Migration/Analyzers.md** (updated)  Added BWFC013 (Response Object Usage) and BWFC014 (Request Object Usage) rule documentation
+
+**ANALYZER-ARCHITECTURE.md content:**
+- **Project Layout**  File naming convention, rule ID assignment, directory structure (Analyzers/ and Analyzers.Test/)
+- **DiagnosticAnalyzer anatomy**  Minimum viable structure with DiagnosticDescriptor, Initialize(), SyntaxKind callbacks, SeverityLevels (Hidden/Info/Warning/Error)
+- **CodeFixProvider anatomy**  BatchFixer pattern, RegisterCodeFixesAsync, trivia preservation, async best practices
+- **Testing strategy**  CSharpAnalyzerTest/CSharpCodeFixTest patterns, stub types for external dependencies ({|#N:code|} markers), positive/negative/edge cases
+- **Common pitfalls**  Trivia handling (EndOfLine between comment/semicolon), null guards on ancestor traversal, SyntaxKind selection mistakes, string comparisons vs syntax API, message format arguments
+- **PR checklist**  Analyzer implementation (7 items), CodeFixProvider (8 items), Testing (6 items), Documentation (5 items), Integration (3 items)
+- **Reference implementation**  Points to ResponseRedirectAnalyzer as working example
+- **Build/test commands**  dotnet build, test, pack workflows
+
+**Analyzers.md updates:**
+- **Updated summary table**  Added BWFC013 and BWFC014 to rule matrix
+- **BWFC013: Response Object Usage**  Detects Response.Write(), WriteFile(), Clear(), Flush(), End()
+  - Mapping table: Web Forms method  Blazor equivalent (markup rendering, FileResult, not needed, not needed, early return)
+  - Before/after example: HTML export page  markup-based rendering
+  - Recommended patterns: component state + markup for write, minimal API endpoint with FileResult for writeFile
+- **BWFC014: Request Object Usage**  Detects Request.Form[], Cookies[], Headers[], Files, QueryString[], ServerVariables[]
+  - Mapping table: Request collection  Blazor equivalent (form binding, HttpContextAccessor, InputFile, nav params, etc.)
+  - Before/after example: Page_Load with multiple Request accesses  component with recommended patterns
+  - Recommended patterns: route parameters (QueryString), @bind (Form), HttpContextAccessor (Cookies/Headers for Blazor Server), InputFile (Files)
+- **"Using Analyzers in CI/CD" section** (new)  .editorconfig per-rule severity settings, dotnet build integration, grep for violations in CI scripts
+- **"Prioritization Guide: Which Rules to Fix First"** (new)  Phase 1 (Blocking: BWFC001, BWFC003, BWFC004, BWFC011), Phase 2 (Data: BWFC002, BWFC005, BWFC014), Phase 3 (Output: BWFC013, BWFC012, BWFC010)
+
+**Format & style:**
+- Analyzer guide written for experienced C# developers contributing new rules (Cyclops' audience)
+- Analyzers.md entries written for Web Forms developers learning to interpret/fix violations
+- All code examples are complete and compilable (test-driven)
+- Admonitions (!!! note, !!! warning, !!! tip) for actionable insights
+- Before/After pairs show real Web Forms patterns and Blazor migrations
+- Tables for quick reference (SyntaxKind callbacks, mapping tables, phase priorities)
+- Consistent with existing BWFC doc style (Deprecation Guidance, MigratingAshxHandlers)
+
+**MkDocs verification:**
+- Ran python -m mkdocs build --strict  0 errors, 54.08s build time
+- Unshipped analyzer notes already present in AnalyzerReleases.Unshipped.md (BWFC013, BWFC014 added by Cyclops in advance)
+- No documentation links or cross-references broken
+
+**Design decisions:**
+- ANALYZER-ARCHITECTURE.md placed in dev-docs/ (developer-only, not end-user docs) vs docs/ (migration user-facing)
+- Prioritization guide ordered by business impact (blocking patterns first) vs alphabetical, with rationale for each phase
+- CI/CD section emphasizes dotnet build + .editorconfig as the primary integration point, with note that detailed CI templates are "available separately"
+- Request.Form[]  @bind example is the most direct mapping; QueryString examples show both route parameters and NavigationManager.Uri approaches
+
+**Audience understanding:**
+- Analyzer rules address code-behind patterns (BWFC001BWFC005: property/state/event patterns; BWFC010BWFC014: specific object usage)
+- Developers see these rules in Visual Studio's Error List after L1 migration script + L2 Copilot transforms
+- Rules guide developers from "code compiles but behaves wrong" (blindspots) to "code compiles and works correctly" (full migration)
+- Prioritization guide helps developers allocate effort, fixing high-impact rules first to unblock testing/UAT
+
+**Branch:** eature/analyzer-sprint1  
+**Tests:** All analyzer tests in Analyzers.Test/ pass (no new analyzer implementations in this doc-only sprint)  
+**Verified:** MkDocs build passes strict mode, no broken links or syntax errors in markdown
+
+
+
+ **Team update (2026-03-20):** Analyzer architecture guide (579 lines) + expanded Analyzers.md (+363 lines). Deprecation Guidance docs (#438, 32 KB). BaseValidator/BaseCompareValidator base class docs. MkDocs strict build clean. PR #487 opened on upstream.  decided by Beast
 

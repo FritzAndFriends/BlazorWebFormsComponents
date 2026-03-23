@@ -21,5 +21,11 @@ namespace BlazorWebFormsComponents
 		[Parameter] 
 		public string Text { get; set; }
 
+		/// <summary>
+		/// Gets or sets the URL of an image to display in the HyperLink control instead of text.
+		/// </summary>
+		[Parameter]
+		public string ImageUrl { get; set; }
+
 	}
 }

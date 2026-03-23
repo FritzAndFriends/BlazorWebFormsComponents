@@ -15,6 +15,7 @@ extra:
 
 theme:
     name: material
+    custom_dir: docs/_overrides
     language: en
     palette:
       scheme: default
@@ -70,6 +71,8 @@ nav:
     - Calendar: EditorControls/Calendar.md
     - CheckBox: EditorControls/CheckBox.md
     - CheckBoxList: EditorControls/CheckBoxList.md
+    - Content: EditorControls/Content.md
+    - ContentPlaceHolder: EditorControls/ContentPlaceHolder.md
     - DropDownList: EditorControls/DropDownList.md
     - FileUpload: EditorControls/FileUpload.md
     - HiddenField: EditorControls/HiddenField.md
@@ -80,6 +83,7 @@ nav:
     - ListBox: EditorControls/ListBox.md
     - Literal: EditorControls/Literal.md
     - Localize: EditorControls/Localize.md
+    - MasterPage: EditorControls/MasterPage.md
     - MultiView: EditorControls/MultiView.md
     - Panel: EditorControls/Panel.md
     - PlaceHolder: EditorControls/PlaceHolder.md
@@ -87,6 +91,7 @@ nav:
     - RadioButtonList: EditorControls/RadioButtonList.md
     - Table: EditorControls/Table.md
     - TextBox: EditorControls/TextBox.md
+    - View: EditorControls/View.md
   - Data Controls:
     - Chart: DataControls/Chart.md
     - DataGrid: DataControls/DataGrid.md
@@ -99,6 +104,8 @@ nav:
     - PagerSettings: DataControls/PagerSettings.md
     - Repeater: DataControls/Repeater.md
   - Validation Controls:
+    - BaseCompareValidator: ValidationControls/BaseCompareValidator.md
+    - BaseValidator: ValidationControls/BaseValidator.md
     - CompareValidator: ValidationControls/CompareValidator.md
     - ControlToValidate: ValidationControls/ControlToValidate.md
     - CustomValidator: ValidationControls/CustomValidator.md
@@ -155,11 +162,15 @@ nav:
     - Page System: UtilityFeatures/PageService.md
     - Response.Redirect: UtilityFeatures/ResponseRedirect.md
     - Service Registration: UtilityFeatures/ServiceRegistration.md
+    - Styling Components: UtilityFeatures/StylingComponents.md
     - ViewState: UtilityFeatures/ViewState.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md
+      - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
       - Automated Migration Guide: Migration/AutomatedMigration.md
+      - Roslyn Analyzers: Migration/Analyzers.md
+      - Deprecation Guidance: Migration/DeprecationGuidance.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Deferred Controls: Migration/DeferredControls.md

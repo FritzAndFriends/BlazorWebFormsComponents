@@ -1,0 +1,18 @@
+@code {
+
+	[Fact]
+	public void HyperLink_ImageUrl_DefaultIsNull()
+	{
+		var cut = Render(@<HyperLink Text="Test" NavigateUrl="https://example.com" />);
+
+		cut.FindComponent<HyperLink>().Instance.ImageUrl.ShouldBeNull();
+	}
+
+	[Fact]
+	public void HyperLink_ImageUrl_AcceptsValue()
+	{
+		var cut = Render(@<HyperLink ImageUrl="/images/logo.png" NavigateUrl="https://example.com" Text="Logo" />);
+
+		cut.FindComponent<HyperLink>().Instance.ImageUrl.ShouldBe("/images/logo.png");
+	}
+}
