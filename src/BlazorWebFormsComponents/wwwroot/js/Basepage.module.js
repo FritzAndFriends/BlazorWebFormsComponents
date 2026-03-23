@@ -35,6 +35,13 @@ function formatClientClick() {
     }
 }
 
+export function focusElement(elementId) {
+    var el = document.getElementById(elementId);
+    if (el && typeof el.focus === 'function') {
+        el.focus();
+    }
+}
+
 // Also expose on window for backward compatibility
 if (typeof window !== 'undefined') {
     window.bwfc = window.bwfc ?? {};
@@ -42,6 +49,7 @@ if (typeof window !== 'undefined') {
         setTitle,
         getTitle,
         OnAfterRender: onAfterRender,
-        AddScriptElement: addScriptElement
+        AddScriptElement: addScriptElement,
+        Focus: focusElement
     };
 }

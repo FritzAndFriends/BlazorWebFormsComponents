@@ -162,6 +162,19 @@ namespace BlazorWebFormsComponents
 		public void DataBind() { }
 
 		/// <summary>
+		/// Sets input focus to the control. Matches the ASP.NET Web Forms Control.Focus() method.
+		/// Uses fire-and-forget JS interop to focus the element by its ClientID.
+		/// Gracefully no-ops during SSR pre-render when JsRuntime is unavailable.
+		/// </summary>
+		public virtual void Focus()
+		{
+			var id = ClientID;
+			if (JsRuntime is null || string.IsNullOrEmpty(id)) return;
+
+			_ = JsRuntime.InvokeVoidAsync("bwfc.Page.Focus", id);
+		}
+
+		/// <summary>
 		/// 🚨🚨 Placeholders are not available in Blazor 🚨🚨
 		/// </summary>
 		[Parameter, Obsolete("Placeholders are not available in Blazor")]
@@ -363,13 +376,28 @@ namespace BlazorWebFormsComponents
 		public List<BaseWebFormsComponent> Controls { get; set; } = new List<BaseWebFormsComponent>();
 
 		/// <summary>
-		/// Finds a child control by its ID
+		/// Searches this control and all descendants for a control with the specified ID.
+		/// Matches the ASP.NET Web Forms Control.FindControl API name for drop-in migration.
+		/// Checks direct children first, then recurses into the full component tree.
 		/// </summary>
-		/// <param name="controlId"> the ID of the child</param>
-		/// <returns></returns>
+		/// <param name="controlId">The ID of the control to find.</param>
+		/// <returns>The matching control, or null if not found.</returns>
 		public BaseWebFormsComponent FindControl(string controlId)
 		{
-			return Controls.Find(control => control.ID == controlId);
+			if (string.IsNullOrEmpty(controlId)) return null;
+
+			// Check direct children first
+			var found = Controls.Find(control => control.ID == controlId);
+			if (found != null) return found;
+
+			// Recurse into children
+			foreach (var child in Controls)
+			{
+				found = child.FindControl(controlId);
+				if (found != null) return found;
+			}
+
+			return null;
 		}
 
 		protected event EventHandler BubbledEvent;

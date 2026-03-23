@@ -1,0 +1,16 @@
+@* Migrated from: DepartmentPortal/AnnouncementDetail.aspx
+   Original: Single announcement detail page with full body text and author info.
+   Uses FormView-style display bound to PortalDataProvider. *@
+
+@page "/announcements/{Id:int}"
+
+<PageTitle>Announcement Detail - Department Portal</PageTitle>
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Announcements", "/announcements"), ("Detail", "") })" />
+
+<p><em>Announcement detail page — will display full announcement @Id when fully migrated.</em></p>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+}

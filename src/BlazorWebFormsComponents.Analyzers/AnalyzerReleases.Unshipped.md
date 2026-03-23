@@ -12,3 +12,7 @@ BWFC011 | Usage    | Info     | EventHandlerSignatureAnalyzer
 BWFC012 | Usage    | Warning  | RunatServerAnalyzer
 BWFC013 | Usage    | Warning  | ResponseObjectUsageAnalyzer
 BWFC014 | Usage    | Warning  | RequestObjectUsageAnalyzer
+BWFC020 | Migration | Info     | ViewStatePropertyPatternAnalyzer
+BWFC021 | Migration | Warning  | FindControlUsageAnalyzer
+BWFC022 | Migration | Warning  | PageClientScriptUsageAnalyzer
+BWFC023 | Migration | Warning  | IPostBackEventHandlerUsageAnalyzer

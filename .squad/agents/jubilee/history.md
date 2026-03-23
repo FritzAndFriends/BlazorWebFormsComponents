@@ -209,3 +209,158 @@
 
  **Team update (2026-03-20):** Navigation UX improvements (alphabetical sort, AJAX collapse on desktop) + standalone sample pages for Content, ContentPlaceHolder, View. ComponentCatalog updated.  decided by Jubilee
 
+
+
+### Phase 1 Foundation  DepartmentPortal Web Forms Project (2026-03-20)
+
+- **Created complete DepartmentPortal Web Application Project** at `samples/DepartmentPortal/`  .NET Framework 4.8, old-style .csproj, packages.config-based NuGet restore.
+- **28 files created:** .csproj, Web.config, packages.config, Global.asax/.cs, AssemblyInfo.cs, 6 model POCOs (Employee, Department, Announcement, TrainingCourse, Resource, Enrollment), PortalDataProvider (static in-memory data  5 depts, 20 employees, 10 announcements, 15 courses, 20 resources), 3 custom EventArgs (Search, Notification, Breadcrumb), 3 base classes (BasePage, BaseMasterPage, BaseUserControl) in App_Code/, Site.Master with Bootstrap 3 CDN + navbar, 3 pages (Default.aspx, Login.aspx, Dashboard.aspx) with code-behind, Content/Site.css.
+- **Build command:** `.\nuget.exe restore samples\DepartmentPortal\packages.config -PackagesDirectory packages -NonInteractive` then `& "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" samples\DepartmentPortal\DepartmentPortal.csproj /p:Configuration=Debug /verbosity:minimal /nologo`
+- **Build succeeded on first attempt**  zero errors.
+- **Key decisions:** No .designer.cs files (typed field declarations in code-behind partials). CodeFile directive in .aspx/.master (matching BeforeWebForms pattern). App_Code classes included as `<Compile>` items in .csproj. No Entity Framework  PortalDataProvider is static in-memory. Bootstrap 3 via CDN (no NuGet). Only Microsoft.CodeDom.Providers.DotNetCompilerPlatform in packages.config. CodeDom import target referencing `..\..\packages\` (repo-root packages folder).
+- **BasePage pattern:** OnPreInit sets MasterPageFile, OnInit checks Session["UserId"] and redirects to Login.aspx. Exposes CurrentUser (Employee) and IsAdmin properties. ShowMessage() helper writes to master page MessageLiteral.
+- **Login flow:** DropDownList populated from PortalDataProvider.GetEmployees(), sets Session["UserId"] + Session["UserName"], redirects to Dashboard.
+- **Default.aspx:** Does NOT inherit BasePage (public page). Shows different panels for logged-in vs guest visitors.
+## Phase 2  12 ASCX User Controls
+
+### Files Created (24 total)
+- Controls/Breadcrumb.ascx + .ascx.cs  nav breadcrumb with CurrentPath, ShowHomeLink
+- Controls/PageHeader.ascx + .ascx.cs  page header with Session["UserName"] access
+- Controls/Footer.ascx + .ascx.cs  site footer with ShowLinks, Year
+- Controls/AnnouncementCard.ascx + .ascx.cs  data-bound card with ViewState ShowFullText
+- Controls/EmployeeList.ascx + .ascx.cs  GridView with paging and DepartmentFilter
+- Controls/TrainingCatalog.ascx + .ascx.cs  Repeater with EnrollmentRequested event
+- Controls/SearchBox.ascx + .ascx.cs  TextBox + Button with SearchEventArgs event
+- Controls/DepartmentFilter.ascx + .ascx.cs  DropDownList loading from PortalDataProvider
+- Controls/Pager.ascx + .ascx.cs  custom pagination with PageChanged event
+- Controls/DashboardWidget.ascx + .ascx.cs  PlaceHolder-based widget container
+- Controls/ResourceBrowser.ascx + .ascx.cs  nested SearchBox + Breadcrumb controls
+- Controls/QuickStats.ascx + .ascx.cs  web.config-registered with tagPrefix "uc"
+
+## Learnings
+- **CodeFile vs CodeBehind:** This project uses CodeFile (not CodeBehind) in directives, matching its Website-like project pattern. No .designer.cs files; all server control fields are manually declared as protected in the code-behind partial class.
+- **HtmlGenericControl for runat=server divs:** HTML elements with unat="server" map to System.Web.UI.HtmlControls.HtmlGenericControl, not Panel or WebControl types.
+- **Nested ASCX controls:** ResourceBrowser uses <%@ Register Src %> directives and types the fields as the concrete ASCX class (e.g., protected SearchBox ctlSearchBox).
+- **Build result:** Build succeeded after fixing CodeFile directives and adding field declarations.
+
+## Phase 3  7 Custom Server Controls (2026-03-21)
+
+### Files Created (7 total .cs files in App_Code/Controls/)
+- **StarRating.cs**  WebControl-based star rating display. Properties: Rating (1-5), ReadOnly, StarColor, EmptyStarColor. Renders <span class="star-rating"> with individual <span class="star filled/empty"></span> elements.
+- **EmployeeCard.cs**  CompositeControl with programmatically created child controls (Image, Label, HyperLink). Properties: EmployeeId, EmployeeName, Title, Department, PhotoUrl, ShowContactInfo, EnableDetailsLink.
+- **SectionPanel.cs**  Templated control with HeaderTemplate, ContentTemplate, FooterTemplate. Implements INamingContainer. Properties: Title, CssClass. Instantiates templates into PlaceHolder containers.
+- **PollQuestion.cs**  IPostBackEventHandler control for interactive polls. Properties: QuestionText, Options (comma-separated), SelectedOption. Event: VoteSubmitted with PollVoteEventArgs inner class. Renders radio buttons + submit button.
+- **NotificationBell.cs**  WebControl for notification UI. Properties: UnreadCount, MaxNotifications, DrawerVisible. Events: NotificationClicked, NotificationDismissed (using existing NotificationEventArgs from Models).
+- **EmployeeDataGrid.cs**  DataBoundControl with search/sort/paging. Properties: SearchText, SortColumn, SortDirection, PageSize, AllowPaging, AllowSorting, AllowSearch, CurrentPageIndex. Renders HTML table via HtmlTextWriter.
+- **DepartmentBreadcrumb.cs**  Bare Control with IPostBackEventHandler for navigation breadcrumbs. Properties: OrganizationName, DivisionName, DepartmentName, DepartmentId, Separator, EnableLinks, LinkCssClass. Event: BreadcrumbItemClicked (using existing BreadcrumbEventArgs).
+
+### DepartmentPortal.csproj Updates
+- Added 7 <Compile Include="App_Code\Controls\*.cs" /> entries in the main ItemGroup.
+
+### Web.config Updates
+- Added <add tagPrefix="local" namespace="DepartmentPortal.Controls" assembly="DepartmentPortal" /> to allow pages to use <local:StarRating>, <local:EmployeeCard>, etc.
+
+### Build Result
+- **First attempt:** 8 errors  Server property not available in Control classes (only in Page/UserControl), HtmlTextWriterAttribute.Placeholder does not exist.
+- **Fixed:** Replaced Server.HtmlEncode() calls with System.Web.HttpUtility.HtmlEncode(), changed HtmlTextWriterAttribute.Placeholder to custom attribute string "placeholder".
+- **Second build:** **Succeeded with 0 errors**  DepartmentPortal.dll compiled successfully.
+
+### Key Patterns
+- **ViewState-backed properties:** get { return (type)ViewState["PropName"] ?? default; } set { ViewState["PropName"] = value; }
+- **Templated controls:** Use [TemplateContainer(typeof(...))] and [PersistenceMode(PersistenceMode.InnerProperty)] attributes. Instantiate templates via ITemplate.InstantiateIn(PlaceHolder).
+- **IPostBackEventHandler:** Implement RaisePostBackEvent(string) to handle postback arguments. Use Page.ClientScript.GetPostBackEventReference(this, eventArg) in Render method.
+- **HtmlTextWriter:** Render methods use writer.AddAttribute() + writer.RenderBeginTag() + writer.RenderEndTag() pattern.
+- **CompositeControl:** Override CreateChildControls() to build child control tree programmatically.
+- **DataBoundControl:** Override PerformDataBinding(IEnumerable) to load data, render in RenderContents().
+
+### Decisions Made
+- **No Server property in Control classes:** Must use System.Web.HttpUtility.HtmlEncode() directly (not Server.HtmlEncode()).
+- **Custom HTML attributes:** Use string overload writer.AddAttribute("placeholder", value) for non-standard attributes.
+- **PollVoteEventArgs inner class:** Defined directly in PollQuestion.cs as public nested class (not in Models namespace).
+- **Existing EventArgs reused:** NotificationEventArgs and BreadcrumbEventArgs already exist in Models/ namespace, referenced by NotificationBell and DepartmentBreadcrumb.
+
+
+## Phase 4  Created All Remaining ASPX Pages (2026-03-21)
+
+### Created Files
+**8 Public Pages:**
+- Employees.aspx + .cs  Employee directory with search, filtering, pagination
+- EmployeeDetail.aspx + .cs  Single employee view with EmployeeCard and StarRating
+- Announcements.aspx + .cs  Announcement listing with search, SectionPanel wrapper
+- AnnouncementDetail.aspx + .cs  Single announcement detail view
+- Training.aspx + .cs  Training catalog with PollQuestion widget
+- MyTraining.aspx + .cs  User's enrolled courses from Session
+- Resources.aspx + .cs  Resource library with SectionPanel categories
+- ResourceDetail.aspx + .cs  Single resource detail view
+
+**3 Admin Pages:**
+- Admin/ManageAnnouncements.aspx + .cs  GridView CRUD for announcements
+- Admin/ManageTraining.aspx + .cs  GridView CRUD for courses
+- Admin/ManageEmployees.aspx + .cs  EmployeeDataGrid + search for admin
+
+### Patterns Applied
+- **ASCX Control Registration:** Each page registers needed ASCX controls via @Register directive
+- **Custom Server Controls:** Used <local:...> prefix (already registered in Web.config)
+- **BasePage Inheritance:** All authenticated pages inherit BasePage for CurrentUser, IsAdmin, ShowMessage()
+- **Event Handlers:** SearchBox.Search, Pager.PageChanged, TrainingCatalog.EnrollmentRequested
+- **Session State:** Training pages store Session["EnrolledCourses"] as List<int>
+- **Admin Guard:** Admin pages check IsAdmin in Page_Load, redirect with ShowMessage() if not
+
+### Build Issues Fixed
+**Property Name Mismatches:**
+- SearchEventArgs.SearchQuery  SearchTerm
+- Employee.DepartmentId  Department (string)
+- Resource.Category  CategoryName
+- Resource.LastUpdated, FileSize  Not in model (set to N/A)
+- TrainingCourse.InstructorName  Instructor
+- TrainingCourse.IsAvailable  Not in model (default to true)
+- Pager.CurrentPageIndex  CurrentPage (1-indexed)
+- Pager.TotalItems  TotalPages (calculated)
+- PageHeader.Title  PageTitle
+- PollQuestion.Options  String (comma-delimited), not List<string>
+
+**Event Handler Signatures:**
+- Pager.PageChanged signature: EventHandler<int> (passes page number)
+- Fixed all SearchBoxControl_Search to use e.SearchTerm
+- Fixed PagerControl_PageChanged to use pageNumber parameter
+
+**Final Build Result:** **0 errors**  DepartmentPortal.dll compiled successfully.
+
+### Project File Updates
+- Added 11 .aspx files to Content ItemGroup
+- Added 11 .aspx.cs files to Compile ItemGroup with DependentUpon + SubType="ASPXCodeBehind"
+- Admin/ folder pages included in correct paths
+
+### Key Learnings
+- **Model First:** Always check model property names before writing code-behind
+- **Event Signature Contracts:** Custom controls define event handler signatures (e.g. EventHandler<int> vs EventHandler<EventArgs>)
+- **Pager Pattern:** 1-indexed CurrentPage for UI display, 0-indexed CurrentPageIndex for internal logic
+- **Department Lookup:** Employee.Department is string, requires join with PortalDataProvider.GetDepartments() to get ID
+- **Session State for Enrollment:** List<int> stored in Session["EnrolledCourses"], managed across Training.aspx and MyTraining.aspx
+- **ASPX Directive:** Use CodeFile (not CodeBehind) for Web Application Project pages
+
+### AfterDepartmentPortal Scaffold (2026-07-25)
+
+**Scaffolded `samples/AfterDepartmentPortal/`** — Blazor SSR (net10.0) migration target for `samples/DepartmentPortal/` (.NET Framework 4.8 Web Forms app). Added to `BlazorMeetsWebForms.sln`.
+
+**Structure:**
+- `AfterDepartmentPortal.csproj` — net10.0, ProjectReference to BWFC
+- `Program.cs` — `AddBlazorWebFormsComponents()`, `AddRazorComponents()`, `MapRazorComponents<App>()`
+- `Components/App.razor`, `Components/Routes.razor` — standard Blazor 8+ shell
+- `Components/Layout/MainLayout.razor` — migrated from Site.Master (nav links, footer, ContentPlaceHolder → @Body)
+- `_Imports.razor` — includes `@using BlazorWebFormsComponents`, `AfterDepartmentPortal.Models`, etc.
+
+**Models (7 files):** Employee, Announcement, TrainingCourse, Resource, Department, Enrollment, PortalDataProvider — identical data to DepartmentPortal with Blazor-friendly URLs (no `~/` prefix).
+
+**Pages (7 stubs):** Dashboard (/), Employees (/employees), EmployeeDetail (/employees/{id}), Announcements (/announcements), AnnouncementDetail (/announcements/{id}), Training (/training), Resources (/resources). Each has TODO comments for custom server controls (BWFC analysis targets).
+
+**Shared Components (12 ASCX stubs):** PageHeader, Breadcrumb, SearchBox, DepartmentFilter, EmployeeList, Pager, Footer, AnnouncementCard, TrainingCatalog, QuickStats, RecentAnnouncements, UpcomingTraining. Each annotated with original .ascx source.
+
+**Not scaffolded (by design):** 7 custom C# server controls (SectionPanel, EmployeeDataGrid, StarRating, EmployeeCard, PollQuestion, NotificationBell, DepartmentBreadcrumb) — these are BWFC analysis targets. TODO comments placed in pages where they'd be used.
+
+**Build:** `dotnet build` succeeds with 0 errors (warnings are pre-existing BWFC library warnings).
+
+
+ Team update (2026-03-22): AfterDepartmentPortal Blazor SSR scaffold completed and integrated into solution. 31 files, 7 pages, 12 shared components, 6 models. Project builds clean. Decisions merged to shared decisions.md.  decided by Jubilee
+
+**Runnable demo (2026-03-22):** Made AfterDepartmentPortal fully runnable. App.razor now uses Bootstrap 5.3.3 CDN + Bootstrap Icons CDN instead of missing local CSS. Site.css copied from DepartmentPortal source. Home.razor at /home provides navigation cards to all sections. Fixed SectionPanel duplicate CssClass parameter bug (`new` keyword shadowed base class `[Parameter]`, causing AmbiguousMatchException). Dashboard already owns `@page "/"` so Home lives at `/home`. All routes verified returning 200.

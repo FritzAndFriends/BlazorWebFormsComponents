@@ -1,0 +1,33 @@
+@* Migrated from: DepartmentPortal/Dashboard.aspx
+   Original: Main dashboard page with QuickStats, RecentAnnouncements, UpcomingTraining widgets.
+   Uses SectionPanel (custom server control — BWFC analysis target) for layout sections. *@
+
+@page "/dashboard"
+
+<PageTitle>Dashboard - Department Portal</PageTitle>
+
+<PageHeader Title="Dashboard" Subtitle="Welcome to the Department Portal" />
+
+@* TODO: QuickStats component — displays employee count, active announcements, upcoming trainings *@
+<QuickStats />
+
+<div class="row">
+    <div class="col-md-6">
+        <SectionPanel Title="Recent Announcements">
+            <ContentTemplate>
+                <RecentAnnouncements />
+            </ContentTemplate>
+        </SectionPanel>
+    </div>
+    <div class="col-md-6">
+        <SectionPanel Title="Upcoming Training">
+            <ContentTemplate>
+                <UpcomingTraining />
+            </ContentTemplate>
+        </SectionPanel>
+    </div>
+</div>
+
+<PollQuestion QuestionText="How satisfied are you with the department?" Options="Very Satisfied,Satisfied,Neutral,Dissatisfied" />
+
+<NotificationBell UnreadCount="3" />

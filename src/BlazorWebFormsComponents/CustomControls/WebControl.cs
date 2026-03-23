@@ -8,10 +8,11 @@ namespace BlazorWebFormsComponents.CustomControls
 	/// Provides a base class for custom controls that use HtmlTextWriter for rendering.
 	/// This class allows Web Forms custom controls to be migrated to Blazor by providing
 	/// a similar API surface to System.Web.UI.WebControls.WebControl.
-	/// Base attributes (ID, CssClass, Style) are automatically added to the HtmlTextWriter
-	/// before the Render method is called.
+	/// Attributes (ID, CssClass, Style, ToolTip, Enabled) are automatically added via
+	/// <see cref="AddAttributesToRender"/> before <see cref="Render"/> is called.
 	/// </summary>
 	/// <example>
+	/// Pattern 1 — Override Render for full control:
 	/// <code>
 	/// public class HelloLabel : WebControl
 	/// {
@@ -29,28 +30,80 @@ namespace BlazorWebFormsComponents.CustomControls
 	///     }
 	/// }
 	/// </code>
+	/// Pattern 2 — Override TagKey + RenderContents (Web Forms pipeline):
+	/// <code>
+	/// public class AlertDiv : WebControl
+	/// {
+	///     [Parameter]
+	///     public string Message { get; set; }
+	///     
+	///     protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
+	///     
+	///     protected override void RenderContents(HtmlTextWriter writer)
+	///     {
+	///         writer.Write(Message);
+	///     }
+	/// }
+	/// </code>
 	/// </example>
 	public abstract class WebControl : BaseStyledComponent
 	{
 		/// <summary>
+		/// Gets the HTML tag type for this control. The default is
+		/// <see cref="HtmlTextWriterTag.Span"/>. Subclasses override this to change
+		/// the outer tag (e.g., <c>HtmlTextWriterTag.Div</c>).
+		/// </summary>
+		protected virtual HtmlTextWriterTag TagKey => HtmlTextWriterTag.Span;
+
+		/// <summary>
+		/// Gets the string tag name derived from <see cref="TagKey"/>.
+		/// </summary>
+		public virtual string TagName => ResolveTagName(TagKey);
+
+		/// <summary>
 		/// Renders the control using the provided HtmlTextWriter.
-		/// Override this method to provide custom rendering logic for your control.
+		/// The default implementation calls <see cref="RenderBeginTag"/>,
+		/// <see cref="RenderContents"/>, and <see cref="RenderEndTag"/> to produce
+		/// the Web Forms rendering pipeline. Override this method to take full
+		/// control of the rendered output.
 		/// </summary>
 		/// <param name="writer">The HtmlTextWriter to write output to.</param>
 		protected virtual void Render(HtmlTextWriter writer)
 		{
-			// Default implementation writes nothing
+			RenderBeginTag(writer);
+			RenderContents(writer);
+			RenderEndTag(writer);
 		}
 
 		/// <summary>
 		/// Renders the contents of the control using the provided HtmlTextWriter.
 		/// Override this method if you only want to customize the inner content while
-		/// maintaining the default outer tag rendering.
+		/// maintaining the default outer tag rendering via <see cref="TagKey"/>.
 		/// </summary>
 		/// <param name="writer">The HtmlTextWriter to write output to.</param>
 		protected virtual void RenderContents(HtmlTextWriter writer)
 		{
 			// Default implementation writes nothing
+		}
+
+		/// <summary>
+		/// Renders the opening tag for the control using <see cref="TagKey"/>.
+		/// This method does not call <see cref="AddAttributesToRender"/> —
+		/// that is done by <see cref="BuildRenderTree"/> before <see cref="Render"/>.
+		/// </summary>
+		/// <param name="writer">The HtmlTextWriter to write output to.</param>
+		public virtual void RenderBeginTag(HtmlTextWriter writer)
+		{
+			writer.RenderBeginTag(TagKey);
+		}
+
+		/// <summary>
+		/// Renders the closing tag for the control.
+		/// </summary>
+		/// <param name="writer">The HtmlTextWriter to write output to.</param>
+		public virtual void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
 		}
 
 		/// <summary>
@@ -64,17 +117,17 @@ namespace BlazorWebFormsComponents.CustomControls
 		}
 
 		/// <summary>
-		/// Adds the base component attributes (ID, CssClass, Style) to the HtmlTextWriter.
-		/// This method is called automatically before Render(). 
-		/// Derived classes should not need to call this method directly.
+		/// Adds the base component attributes (ID, CssClass, Style, ToolTip, Enabled)
+		/// to the HtmlTextWriter. This method is called automatically by
+		/// <see cref="BuildRenderTree"/> before <see cref="Render"/>.
+		/// Override this method to add additional attributes before rendering.
 		/// </summary>
 		/// <param name="writer">The HtmlTextWriter to add attributes to.</param>
-		private void AddBaseAttributes(HtmlTextWriter writer)
+		protected virtual void AddAttributesToRender(HtmlTextWriter writer)
 		{
-			// Apply base styles if they exist
-			if (!string.IsNullOrEmpty(Style))
+			if (!string.IsNullOrEmpty(ID))
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Style, Style);
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, ClientID);
 			}
 
 			if (!string.IsNullOrEmpty(CssClass))
@@ -82,15 +135,26 @@ namespace BlazorWebFormsComponents.CustomControls
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, CssClass);
 			}
 
-			if (!string.IsNullOrEmpty(ID))
+			if (!string.IsNullOrEmpty(Style))
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, ClientID);
+				writer.AddAttribute(HtmlTextWriterAttribute.Style, Style);
+			}
+
+			if (!string.IsNullOrEmpty(ToolTip))
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, ToolTip);
+			}
+
+			if (!Enabled)
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
 			}
 		}
 
 		/// <summary>
-		/// Builds the render tree for the Blazor component by calling the Render method
-		/// and converting the HtmlTextWriter output to a RenderFragment.
+		/// Builds the render tree for the Blazor component by calling
+		/// <see cref="AddAttributesToRender"/> and <see cref="Render"/>,
+		/// then converting the HtmlTextWriter output to a RenderFragment.
 		/// </summary>
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
@@ -99,18 +163,46 @@ namespace BlazorWebFormsComponents.CustomControls
 
 			using (var writer = new HtmlTextWriter())
 			{
-				// Automatically add base attributes before calling user's Render method
-				AddBaseAttributes(writer);
-
-				// Call the custom render method
+				AddAttributesToRender(writer);
 				Render(writer);
-
-				// Get the rendered HTML
-				var html = writer.GetHtml();
-
-				// Add the HTML to the render tree
-				builder.AddMarkupContent(0, html);
+				builder.AddMarkupContent(0, writer.GetHtml());
 			}
+		}
+
+		/// <summary>
+		/// Maps an <see cref="HtmlTextWriterTag"/> enum value to its HTML tag name string.
+		/// </summary>
+		private static string ResolveTagName(HtmlTextWriterTag tag)
+		{
+			return tag switch
+			{
+				HtmlTextWriterTag.A => "a",
+				HtmlTextWriterTag.Button => "button",
+				HtmlTextWriterTag.Div => "div",
+				HtmlTextWriterTag.Span => "span",
+				HtmlTextWriterTag.Input => "input",
+				HtmlTextWriterTag.Label => "label",
+				HtmlTextWriterTag.P => "p",
+				HtmlTextWriterTag.Table => "table",
+				HtmlTextWriterTag.Tr => "tr",
+				HtmlTextWriterTag.Td => "td",
+				HtmlTextWriterTag.Th => "th",
+				HtmlTextWriterTag.Tbody => "tbody",
+				HtmlTextWriterTag.Thead => "thead",
+				HtmlTextWriterTag.Ul => "ul",
+				HtmlTextWriterTag.Li => "li",
+				HtmlTextWriterTag.Select => "select",
+				HtmlTextWriterTag.Option => "option",
+				HtmlTextWriterTag.Img => "img",
+				HtmlTextWriterTag.H1 => "h1",
+				HtmlTextWriterTag.H2 => "h2",
+				HtmlTextWriterTag.H3 => "h3",
+				HtmlTextWriterTag.H4 => "h4",
+				HtmlTextWriterTag.H5 => "h5",
+				HtmlTextWriterTag.H6 => "h6",
+				HtmlTextWriterTag.Form => "form",
+				_ => tag.ToString().ToLowerInvariant()
+			};
 		}
 	}
 }

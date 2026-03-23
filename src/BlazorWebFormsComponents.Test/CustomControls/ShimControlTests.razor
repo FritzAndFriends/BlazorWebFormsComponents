@@ -1,0 +1,66 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@inherits BlazorWebFormsTestContext
+
+@code {
+	// ========== LiteralControl ==========
+
+	[Fact]
+	public void LiteralControl_RendersTextOnly()
+	{
+		var cut = Render(@<LiteralControl Text="Hello World" />);
+		cut.Markup.ShouldBe("Hello World");
+	}
+
+	[Fact]
+	public void LiteralControl_WithHtmlContent_RendersRawHtml()
+	{
+		var cut = Render(@<LiteralControl Text="<strong>Bold</strong>" />);
+		cut.Markup.ShouldContain("<strong>Bold</strong>");
+	}
+
+	[Fact]
+	public void LiteralControl_EmptyText_RendersEmpty()
+	{
+		var cut = Render(@<LiteralControl />);
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void LiteralControl_NotVisible_RendersNothing()
+	{
+		var cut = Render(@<LiteralControl Text="hidden" Visible="false" />);
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	// ========== Literal (alias) ==========
+
+	[Fact]
+	public void Literal_RendersIdenticalToLiteralControl()
+	{
+		// Use fully qualified type to avoid ambiguity with BlazorWebFormsComponents.Literal
+		var cut = Render(@<BlazorWebFormsComponents.CustomControls.Literal Text="Alias test" />);
+		cut.Markup.ShouldBe("Alias test");
+	}
+
+	// ========== CompositeControl with shim children ==========
+
+	[Fact]
+	public void CompositeControl_WithLiteralChildren_RendersAll()
+	{
+		var cut = Render(@<PanelComposite Title="Test" Body="Content here" />);
+		var html = cut.Markup;
+		html.ShouldContain("<h3>Test</h3>");
+		html.ShouldContain("Content here");
+	}
+
+	[Fact]
+	public void CompositeControl_WithCssClass_AppliesClassToOuterTag()
+	{
+		var cut = Render(@<PanelComposite Title="Test" Body="Content" CssClass="panel-class" />);
+		cut.Markup.ShouldContain("class=\"panel-class\"");
+	}
+}

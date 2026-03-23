@@ -1,0 +1,144 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@inherits BlazorWebFormsTestContext
+
+@code {
+	// ========== Multi-Template ==========
+
+	[Fact]
+	public void TemplatedWebControl_HeaderAndContent_RendersTemplatesInStructure()
+	{
+		var cut = Render(
+			@<SimpleSectionPanel>
+				<HeaderTemplate>
+					<h1>My Header</h1>
+				</HeaderTemplate>
+				<ContentTemplate>
+					<p>My Content</p>
+				</ContentTemplate>
+			</SimpleSectionPanel>
+		);
+		var html = cut.Markup;
+		html.ShouldContain("<div");
+		html.ShouldContain("class=\"header\"");
+		html.ShouldContain("<h1>My Header</h1>");
+		html.ShouldContain("class=\"content\"");
+		html.ShouldContain("<p>My Content</p>");
+	}
+
+	[Fact]
+	public void TemplatedWebControl_AllThreeTemplates_RendersInOrder()
+	{
+		var cut = Render(
+			@<SimpleSectionPanel>
+				<HeaderTemplate>HEADER</HeaderTemplate>
+				<ContentTemplate>CONTENT</ContentTemplate>
+				<FooterTemplate>FOOTER</FooterTemplate>
+			</SimpleSectionPanel>
+		);
+		var html = cut.Markup;
+		html.ShouldContain("class=\"header\"");
+		html.ShouldContain("HEADER");
+		html.ShouldContain("class=\"content\"");
+		html.ShouldContain("CONTENT");
+		html.ShouldContain("class=\"footer\"");
+		html.ShouldContain("FOOTER");
+
+		// Verify order: header before content before footer
+		var headerIdx = html.IndexOf("HEADER");
+		var contentIdx = html.IndexOf("CONTENT");
+		var footerIdx = html.IndexOf("FOOTER");
+		headerIdx.ShouldBeLessThan(contentIdx);
+		contentIdx.ShouldBeLessThan(footerIdx);
+	}
+
+	[Fact]
+	public void TemplatedWebControl_NullFooter_OmitsFooterSection()
+	{
+		var cut = Render(
+			@<SimpleSectionPanel>
+				<HeaderTemplate>HEADER</HeaderTemplate>
+				<ContentTemplate>CONTENT</ContentTemplate>
+			</SimpleSectionPanel>
+		);
+		var html = cut.Markup;
+		html.ShouldContain("HEADER");
+		html.ShouldContain("CONTENT");
+		html.ShouldNotContain("class=\"footer\"");
+	}
+
+	[Fact]
+	public void TemplatedWebControl_WithCssClass_AppliesClassToOuterTag()
+	{
+		var cut = Render(
+			@<SimpleSectionPanel CssClass="section-panel">
+				<HeaderTemplate>H</HeaderTemplate>
+				<ContentTemplate>C</ContentTemplate>
+			</SimpleSectionPanel>
+		);
+		cut.Markup.ShouldContain("class=\"section-panel\"");
+	}
+
+	[Fact]
+	public void TemplatedWebControl_NotVisible_RendersNothing()
+	{
+		var cut = Render(
+			@<SimpleSectionPanel Visible="false">
+				<HeaderTemplate>H</HeaderTemplate>
+				<ContentTemplate>C</ContentTemplate>
+			</SimpleSectionPanel>
+		);
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	// ========== Single Template ==========
+
+	[Fact]
+	public void TemplatedWebControl_SingleTemplate_RendersWithHtmlTextWriterContent()
+	{
+		var cut = Render(
+			@<SingleTemplateControl Title="Products">
+				<ItemTemplate>
+					<ul><li>Widget</li><li>Gadget</li></ul>
+				</ItemTemplate>
+			</SingleTemplateControl>
+		);
+		var html = cut.Markup;
+		html.ShouldContain("<h2>");
+		html.ShouldContain("Products");
+		html.ShouldContain("</h2>");
+		html.ShouldContain("<ul>");
+		html.ShouldContain("Widget");
+		html.ShouldContain("Gadget");
+	}
+
+	[Fact]
+	public void TemplatedWebControl_NoTemplate_RendersHtmlTextWriterOnly()
+	{
+		var cut = Render(@<SingleTemplateControl Title="Empty" />);
+		var html = cut.Markup;
+		html.ShouldContain("<h2>");
+		html.ShouldContain("Empty");
+		html.ShouldContain("</h2>");
+	}
+
+	// ========== Template with Blazor Components ==========
+
+	[Fact]
+	public void TemplatedWebControl_TemplateWithNestedComponent_RendersCorrectly()
+	{
+		var cut = Render(
+			@<SingleTemplateControl Title="Nested">
+				<ItemTemplate>
+					<LiteralControl Text="From Blazor component" />
+				</ItemTemplate>
+			</SingleTemplateControl>
+		);
+		var html = cut.Markup;
+		html.ShouldContain("Nested");
+		html.ShouldContain("From Blazor component");
+	}
+}

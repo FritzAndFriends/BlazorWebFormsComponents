@@ -1,0 +1,16 @@
+@* Migrated from: DepartmentPortal/Controls/PageHeader.ascx
+   Original: Displays page title and subtitle with consistent styling across all pages.
+   Parameters mapped from UserControl public properties. *@
+
+<div class="page-header">
+    <h1>@Title</h1>
+    @if (!string.IsNullOrEmpty(Subtitle))
+    {
+        <p class="lead text-muted">@Subtitle</p>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+}

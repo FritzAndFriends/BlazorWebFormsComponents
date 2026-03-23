@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAjaxToolkitComponents
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WingtipToys.AcceptanceTests", "src\WingtipToys.AcceptanceTests\WingtipToys.AcceptanceTests.csproj", "{70142BE9-A3B0-4E6E-9A8B-0F20EADB875D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterDepartmentPortal", "samples\AfterDepartmentPortal\AfterDepartmentPortal.csproj", "{6E365818-871E-4FF9-A805-507C554C6FD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -217,6 +219,24 @@ Global
 		{70142BE9-A3B0-4E6E-9A8B-0F20EADB875D}.WebForms|x64.Build.0 = Debug|Any CPU
 		{70142BE9-A3B0-4E6E-9A8B-0F20EADB875D}.WebForms|x86.ActiveCfg = Debug|Any CPU
 		{70142BE9-A3B0-4E6E-9A8B-0F20EADB875D}.WebForms|x86.Build.0 = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Debug|x64.Build.0 = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Debug|x86.Build.0 = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Release|x64.ActiveCfg = Release|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Release|x64.Build.0 = Release|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Release|x86.ActiveCfg = Release|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.Release|x86.Build.0 = Release|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.WebForms|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.WebForms|Any CPU.Build.0 = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.WebForms|x64.ActiveCfg = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.WebForms|x64.Build.0 = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.WebForms|x86.ActiveCfg = Debug|Any CPU
+		{6E365818-871E-4FF9-A805-507C554C6FD6}.WebForms|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -230,6 +250,7 @@ Global
 		{E12935A8-C95C-4D67-A24B-A984A99AFE5F} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{3DD11336-7E0E-4A85-ACAA-6FD3A5D43F0D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{70142BE9-A3B0-4E6E-9A8B-0F20EADB875D} = {FD758025-7F6D-4EE8-9837-98C0E0BFCB6B}
+		{6E365818-871E-4FF9-A805-507C554C6FD6} = {240E45D9-B9FF-42E8-B0C1-332861E02DBF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E288F9FB-039F-4718-8AEB-85F89B29EB4E}

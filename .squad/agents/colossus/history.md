@@ -134,6 +134,25 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
 
+## Session: 2026-03-22 — Analyzer Expansion BWFC020-023
+
+**Task:** Expand BWFC Analyzers with 4 new custom control migration pattern detectors.
+
+**Created:**
+- BWFC020 (ViewStatePropertyPattern): Detects `get { return (T)ViewState["key"]; } set { ViewState["key"] = value; }` properties. Info severity. Code fix converts to `[Parameter] public T Name { get; set; }`.
+- BWFC021 (FindControlUsage): Detects `FindControl("id")` calls. Warning severity. Code fix replaces with `FindControlRecursive("id")`.
+- BWFC022 (PageClientScriptUsage): Detects `Page.ClientScript.*` usage. Warning severity. No code fix.
+- BWFC023 (IPostBackEventHandlerUsage): Detects classes implementing `IPostBackEventHandler`. Warning severity. No code fix.
+
+**Files created:** 6 analyzer source files, 4 test files. Updated `AnalyzerReleases.Unshipped.md` and `AllAnalyzersIntegrationTests.cs`.
+
+**Verification:** All 139 tests pass (was 130 before). Build clean.
+
+## Learnings
+
+- Text-based (`SourceText.Replace`) code fixes are fragile for property replacement — FullSpan includes trivia that complicates newline/indentation. Prefer the syntax tree approach: use `property.WithAccessorList()` + `AddAttributeLists()` without `NormalizeWhitespace()`. Only use `NormalizeWhitespace()` when you can also fully control leading/trailing trivia on all lines.
+- New "Migration" category introduced for BWFC020-023. Updated `AllAnalyzers_HaveValidCategory` integration test to accept both "Usage" and "Migration" categories.
+
 
 **Summary:** 40 tests total — 11 passed, 29 failed, 0 skipped (33.5s duration)
 

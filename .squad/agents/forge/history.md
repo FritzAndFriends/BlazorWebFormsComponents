@@ -13,6 +13,67 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### NuGet Static Asset Migration Strategy (2026-03-08)
+
+**Strategic Analysis Complete — Hybrid Option C Recommended**
+
+Analyzed how Web Forms apps reference static assets via NuGet packages (`packages.config` → `packages/` folder auto-extraction → `BundleConfig.cs` bundling). Discovered:
+
+1. **DepartmentPortal Pattern (Minimal Case):** Only custom `Content/Site.css`, no external NuGet libraries. Build tool (`Microsoft.CodeDom.Providers`) has no static assets. Validates extraction logic: custom CSS copied to `wwwroot/css/`, no external packages to map.
+
+2. **Four Migration Strategies Evaluated:**
+   - **Option A (CDN):** Simple but breaks for custom packages, internet-dependent. ❌ Insufficient for enterprise.
+   - **Option B (LibMan):** Good for VS integration, limited to public libs. ⚠️ Acceptable alternative.
+   - **Option C (Extraction Tool):** PowerShell script reads `packages.config`, extracts `Content/` and `Scripts/` to `wwwroot/lib/`, suggests CDN for known OSS packages. ✅ **Recommended**.
+   - **Option D (npm):** Modern but requires Node.js toolchain. ⚠️ Good for teams with JS expertise.
+
+3. **Recommendation:** Implement **Option C (Hybrid)** — Extract custom/private packages, suggest CDN for known OSS (jQuery, Bootstrap, DataTables, Modernizr, SignalR, etc.), generate asset manifest + Blazor-compatible reference HTML.
+
+4. **Automation:** New `bwfc migrate-assets` command (PowerShell script `Migrate-NugetStaticAssets.ps1`):
+   - Input: `packages.config` + `/packages` folder
+   - Output: `wwwroot/lib/{PackageName}/`, `asset-manifest.json`, `AssetReferences.html`
+   - Strategy options: `extract` (all), `cdn` (known packages only), `hybrid` (default)
+
+5. **BundleConfig Translation:** Don't recreate bundling. Instead, teams can:
+   - Use manual `<link>` / `<script>` tags (works with HTTP/2)
+   - Integrate WebOptimizer or esbuild post-migration (optional)
+   - Avoid BundleConfig entirely (Blazor has no equivalent)
+
+6. **Deliverables Created:**
+   - Strategy document: `dev-docs/proposals/nuget-static-asset-migration.md` (29KB, 4 options analyzed, DepartmentPortal case study)
+   - Decision document: `.squad/decisions/inbox/forge-nuget-asset-strategy.md` (awaiting team approval)
+   - GitHub issue draft: Specifications complete, ready for Jeffrey T. Fritz to create upstream (personal token lacks write permissions on upstream repo, per M8 discovery)
+
+7. **Key Insight:** DepartmentPortal validates the minimal extraction case (custom CSS only). Enterprise Web Forms apps will likely have 10–50 NuGet packages — the hybrid approach scales to that complexity while remaining simple for small apps.
+
+8. **Timeline:** 6 weeks (extraction + toolkit integration + docs + hardening + GA)
+
+### DepartmentPortal Migration Analysis & Upstream Issue Creation (2026-03-08)
+
+**Key Discovery:** DepartmentPortal migration exposed 5 critical BWFC gaps that block custom control migrations:
+
+1. **DataBoundWebControl<T> gap** — `CustomControls.DataBoundControl` exists but doesn't integrate HtmlTextWriter rendering. Controls inheriting from DataBoundControl and overriding RenderContents(HtmlTextWriter) cannot migrate. EmployeeDataGrid is canonical example. Requires new base class bridging data binding + HtmlTextWriter rendering.
+
+2. **TagKey + AddAttributesToRender gap** — Web Forms WebControl auto-renders outer tag via TagKey property. BWFC WebControl lacks both, forcing manual tag management. StarRating (renders `<span>`) and NotificationBell (renders `<div>` with data-* attributes) cannot migrate cleanly.
+
+3. **HTML5 enum coverage gap** — HtmlTextWriterTag/Attribute/Style enums are .NET Framework 2.0 era. Missing: semantic tags (nav, section, article, header, footer, main, figure, details, summary), ARIA attributes (role, aria-*), HTML5 form attrs (placeholder, required, autofocus, pattern, min, max, step), modern CSS (flex, grid, gap, transform, transition, animation, opacity, box-shadow, border-radius). DepartmentPortal controls use all these extensively.
+
+4. **CompositeControl child rendering gap** — CompositeControl throws NotSupportedException for non-WebControl children. Web Forms allows LiteralControl, HtmlGenericControl, Panel, PlaceHolder, raw text. EmployeeCard is a CompositeControl with mixed children. Must support IComponent broadly.
+
+5. **ITemplate → RenderFragment bridging gap** — Controls with template properties use ITemplate. Critical discovery: Controls inheriting from Control (not WebControl) require [ParseChildren(true)] attribute to treat inner content as property assignments, not child controls. SectionPanel has HeaderTemplate and ContentTemplate properties that map to RenderFragment in Blazor. Need documented pattern + TemplatedControl base class.
+
+**Additional Discoveries:**
+- **FindControl architectural incompatibility:** Web Forms FindControl traverses naming container boundaries (INamingContainer). BWFC's flat search fails for Master.FindControl(), SectionPanel.FindControl() with templates, Page.FindControl() with ContentPlaceHolder. Migration guidance should favor @ref, CascadingParameter, EventCallback, DI instead of FindControl entirely.
+- **User-Controls documentation missing:** docs/Migration/User-Controls.md is empty. 12+ ASCX controls in DepartmentPortal need migration guide covering Register directive → _Imports.razor, code-behind → @code, data binding, FindControl → @ref, lifecycle mapping.
+
+**Upstream Issue Creation Status:** Attempted to create 7 GitHub issues on FritzAndFriends/BlazorWebFormsComponents (P1–P5 priorities + FindControl + User-Controls docs). **BLOCKED:** Personal auth token lacks write permissions on upstream repo. Issue specifications documented in `.squad/decisions/inbox/forge-upstream-issues.md` — requires manual creation by Jeffrey T. Fritz or org maintainer.
+
+**Learnings:**
+- DepartmentPortal is a "canary" migration that exposes real gaps in BWFC. Small app (12 ASCX, 4 custom controls, 3 data-bound grids) reveals architectural patterns missing from the base library.
+- P1–P2 are critical blockers (DataBoundWebControl<T>, TagKey) that should ship before next milestone to unblock data-heavy migrations.
+- Authentication barrier: Copilot's token doesn't have upstream write permissions. Document issue specs locally, require human (Jeffrey) to create on upstream.
+- Migration pattern discovery: ITemplate → RenderFragment + [ParseChildren(true)] is non-obvious but critical for templated controls.
+
 <!-- Summarized 2026-03-02 by Scribe -- covers M17 gate review through Themes roadmap -->
 
 <!-- ⚠ Summarized 2026-03-06 by Scribe — older entries archived -->
@@ -267,6 +328,71 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 
 📌 Team update (2026-03-15): Component Health Dashboard scoring spec delivered to decisions inbox. 7 dimensions, weighted formula, reference data for 60+ components. Rogue implements as `scripts/Invoke-ComponentHealthScan.ps1` → `docs/component-health.md`. — decided by Forge
 
+### ASCX Sample Application Milestone (2026-03-12)
+
+**Task:** Design comprehensive milestone for a .NET Framework 4.8 sample app showcasing ASCX user controls and custom base classes (requested by Jeffrey T. Fritz).
+
+**Deliverable:** `planning-docs/ASCX-SAMPLE-MILESTONE.md` (28KB specification) + decision to inbox
+
+**Key design decisions:**
+
+1. **Application concept: DepartmentPortal** — Internal HR/IT portal for employees, announcements, training, resources. Real-world enterprise domain that naturally requires reusable UI components and shared page behaviors.
+
+2. **12 ASCX user controls spanning all patterns:**
+   - Simple display: Breadcrumb, PageHeader (Session access), Footer, QuickStats (web.config tagPrefix)
+   - Data-bound: AnnouncementCard (ViewState), EmployeeList (GridView + ViewState), TrainingCatalog (custom event)
+   - Input with events: SearchBox (custom SearchEventArgs), DepartmentFilter, Pager
+   - Complex: DashboardWidget (ITemplate pattern), ResourceBrowser (nested ASCX composition)
+
+3. **3 custom base classes:**
+   - `BasePage : System.Web.UI.Page` — auth check (Session redirect), audit logging (database), theme management, helper methods
+   - `BaseMasterPage : System.Web.UI.MasterPage` — menu population (database), UserDisplayName property, script injection
+   - `BaseUserControl : System.Web.UI.UserControl` — LogActivity(), cache helpers (CacheGet/CacheSet), common properties
+
+4. **14 pages:** 2 public (Default, Login), 9 authenticated (inherit BasePage), 3 admin (BasePage + admin check), 1 master (Site.Master inherits BaseMasterPage). Pages demonstrate template controls, Repeater with ASCX ItemTemplate, event handling, Session write/read, nested ASCX.
+
+5. **EF6 Database First with EDMX** — 6 entities (Employee, Department, Announcement, TrainingCourse, Resource, Enrollment). Tests toolkit's existing EDMX conversion.
+
+6. **Work breakdown:** Phase 1 (Foundation: project + data model + base classes), Phase 2 (ASCX controls), Phase 3 (Pages), Phase 4 (Smoke test + migration coverage analysis + documentation). Phases 1-3 = Jubilee, Phase 4.1 = Jubilee, 4.2 = Bishop (toolkit gaps), 4.3 = Beast (docs). Acceptance tests (Colossus) and unit tests (Rogue) DEFERRED until Blazor "After" version exists.
+
+7. **Timeline:** 7-11 days (1.5-2 weeks) for Phases 1-4.3. Deferred work TBD based on toolkit roadmap.
+
+**Gap analysis — current samples vs DepartmentPortal:**
+
+| Sample | .aspx Pages | .ascx Controls | Custom Base Classes | Patterns Exercised |
+|--------|-------------|----------------|---------------------|-------------------|
+| BeforeWebForms | 62 | 1 (trivial ViewSwitcher) | 0 | Control samples only |
+| WingtipToys | 28 | 2 (trivial) | 0 | E-commerce, basic ASCX |
+| ContosoUniversity | 5 | 0 | 0 | Education, minimal |
+| **DepartmentPortal** | **14** | **12 (diverse)** | **3 (Page/Master/UserControl)** | **ITemplate, nested ASCX, web.config tagPrefix, custom events, ViewState/Session in controls** |
+
+**High risks identified:**
+
+- **R1:** Migration toolkit may not support ASCX → Blazor (Mitigation: Document manual patterns, Owner: Bishop)
+- **R2:** Custom base classes have no Blazor equivalent (Mitigation: Design Blazor base component patterns, Owner: Forge + Cyclops)
+- **R3:** ITemplate pattern not supported in Blazor (Mitigation: Document RenderFragment approach, Owner: Beast)
+
+**Success criteria:**
+
+✅ MVP: .NET 4.8 app builds, all ASCX render, all base classes function, events fire, ViewState/Session work, nested controls render, web.config tagPrefix works, ITemplate works  
+✅ Migration coverage: Toolkit executed, gaps documented, backlog items created  
+✅ Documentation: DEPARTMENTPORTAL.md with ASCX migration notes and base class patterns  
+⏳ Full migration: Deferred until toolkit supports ASCX/base class conversion  
+
+**Learnings:**
+
+- **Enterprise Web Forms apps are ASCX-heavy.** Current samples (BeforeWebForms, WingtipToys, ContosoUniversity) have minimal ASCX usage, leaving the #1 reusability pattern untested by the migration toolkit.
+- **Custom base classes (BasePage, BaseMasterPage, BaseUserControl) are standard enterprise patterns** for shared auth, logging, theme, menu population, caching. Zero samples demonstrate these patterns, so toolkit coverage is unknown.
+- **ASCX patterns missing from toolkit scope:** Nested ASCX (controls containing other controls), ITemplate controls, web.config tagPrefix registration, custom event args, ViewState/Session in UserControl base class.
+- **DepartmentPortal targets 8-12 controls** because that's the sweet spot for testing diverse patterns without over-complexity. Each control exercises a different migration challenge.
+- **EF6 EDMX validation is bonus coverage.** ContosoUniversity already uses EDMX, but DepartmentPortal adds 6 entities vs 5, tests more FK relationships and cascade deletes.
+- **Phased approach critical:** Foundation → Controls → Pages → Testing. Can't test migration until the Web Forms app exists. Can't write Blazor tests until ASCX → Blazor conversion works.
+- **Deferred work (acceptance tests, unit tests) is CORRECT sequencing.** Playwright and bUnit tests require the Blazor "After" version. Creating those tests now would be speculative.
+
+**File paths:**
+- Milestone plan: `planning-docs/ASCX-SAMPLE-MILESTONE.md`
+- Decision: `.squad/decisions/inbox/forge-ascx-sample-milestone.md`
+
 ### Ajax Control Toolkit Extender Pattern Design (2026-03-15)
 
 **Task:** Design Blazor-native architecture for Ajax Control Toolkit extenders (#442, M24). This is the gating architecture decision for all 13+ ACT component implementations.
@@ -434,3 +560,81 @@ Jeff directed a design pivot: replace custom `[HandlerRoute]` attribute + `MapBl
 
  **Team update (2026-03-20):** Component audit recommendations merged (March 2026 prioritization guide). 52/54 components at 100% health (96.3%). Tier 1 quick wins identified: FileUpload properties, infrastructure docs, View docs, ScriptManager decision.  decided by Forge
 
+
+ **Team update (2026-03-21):** DepartmentPortal ASCX sample milestone plan created (28KB specification). 12 ASCX controls, 3 custom base classes, 14 pages designed to test migration toolkit coverage for enterprise Web Forms patterns. 4-phase work breakdown with 7-11 day timeline.  decided by Forge
+
+### Custom Server Controls Addition to DepartmentPortal Milestone (2026-03-21)
+
+DepartmentPortal scope expanded to include **6 custom server controls** covering Web Forms custom control patterns absent from ASCX-only test coverage:
+
+1. **StarRating : WebControl** — Simple property-driven rendering, `RenderContents()`, star HTML generation
+2. **EmployeeCard : CompositeControl** — Programmatic child control creation, `CreateChildControls()`, data binding to composite children
+3. **SectionPanel : Templated Control** — `ITemplate` properties, template instantiation, INamingContainer pattern
+4. **PollQuestion : IPostBackEventHandler** — ViewState for selected option, postback event routing, vote submission handling
+5. **NotificationBell : Custom Events** — Custom EventArgs classes, event delegates, UI state events
+6. **EmployeeDataGrid : DataBoundControl** — `PerformDataBinding()`, filtering/sorting, paging state in ViewState, child GridView binding
+
+**Rationale:** ASCX controls exercise 50% of Web Forms component patterns. Custom controls hit the other 50%: programmatic control creation (CompositeControl), template-driven rendering (ITemplate), postback handling (IPostBackEventHandler/IPostBackDataHandler), ViewState management at control level, custom events, and DataBoundControl patterns. These patterns appear frequently in enterprise Web Forms and require distinct migration logic.
+
+**Key migration challenge differences:**
+- ASCX: markup-defined child controls, declarative data binding, server-side include pattern
+- Custom controls: code-defined control tree (CreateChildControls), imperative binding (PerformDataBinding), postback events as method implementations
+
+**Architecture note:** Custom controls differ from ASCX in control tree construction (code vs markup) and event routing (method implementation vs page event handlers). The migration strategy must handle both patterns: ASCX→Blazor component markup, custom controls→Blazor component C# class with programmatic child binding.
+
+**File additions to planning doc:**
+- Section 3: Custom Server Controls (6 controls, 7 subsections, ~600 lines)
+- Updated Executive Summary (Purpose, Gap Analysis, Target reflect custom controls scope)
+- Renumbered Sections 4-14 (Custom Base Classes now §4, Page Inventory §5, etc.)
+- **Bare System.Web.UI.Control base class coverage added (3.7 DepartmentBreadcrumb):** Jeff requested explicit testing of the primitive Control base class (no WebControl wrapping, no built-in HTML element, no style properties). DepartmentBreadcrumb demonstrates pure `Render()` override, `IPostBackEventHandler` direct event handling, and zero ViewState usage—patterns distinct from WebControl/CompositeControl/DataBoundControl. Rounds out custom control pattern coverage for migration testing.
+
+**Decision:** Planning doc finalized. Custom controls scope is *designed, not implemented*. Implementation will verify these patterns execute on .NET Framework 4.8, render correct HTML, and exercise the code-based control creation patterns Blazor components must simulate. Approved for L1 scripting phase.
+
+### DepartmentPortal Migration Analysis (2026-07-25)
+
+Completed comprehensive migration analysis of DepartmentPortal's 12 ASCX + 7 custom controls against BWFC capabilities. Key findings:
+
+- **BWFC covers ~70% of migration patterns today.** ASCX controls (7 Easy, 4 Medium, 1 Hard) map well to existing BWFC components. Simple asp:Literal/TextBox/Button/Label/DropDownList/GridView conversions are well-supported.
+- **CustomControls/ namespace is the critical enabler** for custom C# server controls. `WebControl` + `HtmlTextWriter` bridge allows near-direct port of `RenderContents` code. `CompositeControl` supports `CreateChildControls` pattern.
+- **4 key gaps identified:**
+  1. No `DataBoundWebControl<T>` — controls inheriting `DataBoundControl` with custom `RenderContents` can't use a single base class (P1, HIGH)
+  2. No `TagKey` / `AddAttributesToRender` on `CustomControls.WebControl` — Web Forms auto-wraps outer tag, BWFC doesn't (P2, HIGH)
+  3. `HtmlTextWriter` enum coverage incomplete — missing Colspan, For, Checked, Nav, Footer, etc. (P3, MEDIUM)
+  4. `CompositeControl.RenderChildren` throws for non-WebControl children — can't add BWFC Label/Image/HyperLink as children (P4, MEDIUM)
+- **IPostBackEventHandler has no BWFC equivalent** and requires complete rewrite to EventCallback — this is by design (Blazor has no postback model).
+- **ITemplate → RenderFragment is conceptually clean** but has no documentation or helper in BWFC.
+- **BaseUserControl (logging + caching)** maps to standard .NET DI: `ILogger<T>` + `IMemoryCache`.
+
+Analysis written to `.squad/decisions/inbox/forge-departmentportal-migration-plan.md`.
+
+ Team update (2026-03-22): DepartmentPortal migration analysis completed  12 ASCX + 7 custom controls assessed, BWFC gaps identified, improvement recommendations provided. Analysis logged to decisions.md for team review.  decided by Forge
+
+
+ Team update (2026-03-22): Upstream issue creation completed  7 GitHub issues created on FritzAndFriends/BlazorWebFormsComponents (#490 P1 DataBoundWebControl, #491 P4 CompositeControl, #492 P2 TagKey, #493 P3 HtmlTextWriter, #494 P5 ITemplate, #495 User Controls docs, #496 FindControl)  decided by Forge
+
+### P1–P5 Drop-in Replacement Implementation Plan (2026-03-22)
+
+**Created comprehensive implementation plan** for addressing all 7 upstream issues (#490–#496) with drop-in replacement shimming. Key decisions:
+
+1. **Implementation order:** P2 (TagKey) → P3 (enums) → P1 (DataBoundWebControl) → P4 (CompositeControl) → P5 (TemplatedWebControl) → FindControl → Docs. P2 is foundation because Web Forms Render() pipeline depends on TagKey/AddAttributesToRender.
+
+2. **Namespace: `BlazorWebFormsComponents.CustomControls`** — NOT `System.Web.UI`. Avoids conflicts with any remaining Web Forms references during incremental migration.
+
+3. **WebControl.Render() breaking change accepted:** Default Render() changes from no-op to auto-rendering outer tag via TagKey. Matches Web Forms behavior. Controls overriding Render() unaffected.
+
+4. **Postback controls (DepartmentBreadcrumb, PollQuestion) cannot be shimmed** — IPostBackEventHandler/GetPostBackEventReference require manual rewrite to EventCallback/@onclick. Documented as migration pattern, not shim target.
+
+5. **ITemplate → RenderFragment is documentation + TemplatedWebControl base class** — no fake ITemplate interface. The paradigms are fundamentally different (imperative vs declarative).
+
+6. **FindControl: guidance-first with FindControlRecursive bridge** — existing FindControl compiles but doesn't traverse deep. Add opt-in recursive version, but document @ref/CascadingParameter/EventCallback as the real target.
+
+7. **4 new files, 4 modified files, ~9 days estimated effort.** Net-new: DataBoundWebControl.cs, LiteralControl.cs, ShimControls.cs, TemplatedWebControl.cs.
+
+**Learnings:**
+- Web Forms WebControl.Render() is NOT a blank canvas — it's a structured pipeline (AddAttributesToRender → RenderBeginTag → RenderContents → RenderEndTag). BWFC's current Render() as a virtual no-op is incorrect.
+- 5 of 7 DepartmentPortal custom controls can be drop-in shimmed; 2 (postback-based) require manual rewrite.
+- The DataBoundWebControl gap is the single biggest blocker — data-heavy migrations (grids, lists) all hit this.
+
+Plan written to session workspace plan.md. Architecture decisions written to `.squad/decisions/inbox/forge-p1p5-plan.md`.
+
+📡 Team update (2026-03-22): P1–P5 implementation plan completed — 6 phases, 4 new files, 4 modified files, ~9 days. Execution order: P2→P3→P1→P4→P5→FindControl. Key: WebControl gets proper Render pipeline, 4 new shim types, namespace stays in BWFC.CustomControls. ✅ decided by Forge

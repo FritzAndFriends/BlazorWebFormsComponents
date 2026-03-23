@@ -1,0 +1,13 @@
+@* Migrated from: DepartmentPortal/Controls/SearchBox.ascx
+   Original: Search input with submit button. Fires a server-side search event.
+   Will need @rendermode InteractiveServer for real-time search behavior. *@
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="@Placeholder" aria-label="Search" />
+    <button class="btn btn-outline-secondary" type="button">Search</button>
+</div>
+
+@code {
+    [Parameter] public string Placeholder { get; set; } = "Search...";
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+}

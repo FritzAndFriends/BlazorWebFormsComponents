@@ -1,0 +1,159 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using BlazorWebFormsComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@inherits BlazorWebFormsTestContext
+
+@code {
+	// ========== TagKey Default (Span) ==========
+
+	[Fact]
+	public void TagKey_DefaultSpan_RendersSpanTag()
+	{
+		var cut = Render(@<TagKeySpan Text="hello" />);
+		cut.Markup.ShouldContain("<span");
+		cut.Markup.ShouldContain("hello");
+		cut.Markup.ShouldContain("</span>");
+	}
+
+	[Fact]
+	public void TagKey_DefaultSpan_WithCssClass_AppliesClassToOuterTag()
+	{
+		var cut = Render(@<TagKeySpan Text="hello" CssClass="my-class" />);
+		cut.Markup.ShouldContain("class=\"my-class\"");
+		cut.Markup.ShouldContain("<span");
+	}
+
+	[Fact]
+	public void TagKey_DefaultSpan_WithId_AppliesIdToOuterTag()
+	{
+		var cut = Render(@<TagKeySpan Text="hello" ID="mySpan" />);
+		cut.Markup.ShouldContain("id=\"mySpan\"");
+	}
+
+	[Fact]
+	public void TagKey_DefaultSpan_WithForeColor_AppliesStyleToOuterTag()
+	{
+		// Style is a computed property (not a [Parameter]) built from ForeColor, BackColor, etc.
+		var cut = Render(@<TagKeySpan Text="hello" ForeColor="@WebColor.Blue" />);
+		cut.Markup.ShouldContain("style=");
+		cut.Markup.ShouldContain("color");
+	}
+
+	// ========== TagKey Override (Div) ==========
+
+	[Fact]
+	public void TagKey_OverrideDiv_RendersDivTag()
+	{
+		var cut = Render(@<TagKeyDiv Content="world" />);
+		cut.Markup.ShouldContain("<div");
+		cut.Markup.ShouldContain("world");
+		cut.Markup.ShouldContain("</div>");
+	}
+
+	[Fact]
+	public void TagKey_OverrideDiv_WithCssClass_AppliesClassToDivTag()
+	{
+		var cut = Render(@<TagKeyDiv Content="world" CssClass="container" />);
+		cut.Markup.ShouldContain("<div");
+		cut.Markup.ShouldContain("class=\"container\"");
+	}
+
+	// ========== TagKey Override (Table) ==========
+
+	[Fact]
+	public void TagKey_OverrideTable_RendersTableStructure()
+	{
+		var cut = Render(@<TagKeyTable CellContent="data" />);
+		var html = cut.Markup;
+		html.ShouldContain("<table");
+		html.ShouldContain("<tr>");
+		html.ShouldContain("<td>");
+		html.ShouldContain("data");
+		html.ShouldContain("</td>");
+		html.ShouldContain("</tr>");
+		html.ShouldContain("</table>");
+	}
+
+	[Fact]
+	public void TagKey_OverrideTable_WithId_AppliesIdToTableTag()
+	{
+		var cut = Render(@<TagKeyTable CellContent="data" ID="myTable" />);
+		cut.Markup.ShouldContain("<table");
+		cut.Markup.ShouldContain("id=\"myTable\"");
+	}
+
+	// ========== AddAttributesToRender Override ==========
+
+	[Fact]
+	public void AddAttributesToRender_CustomAttribute_AppliedToOuterTag()
+	{
+		var cut = Render(@<CustomAttributeControl Text="test" DataValue="42" />);
+		var html = cut.Markup;
+		html.ShouldContain("<div");
+		html.ShouldContain("data-value=\"42\"");
+		html.ShouldContain("test");
+	}
+
+	[Fact]
+	public void AddAttributesToRender_CustomAttribute_WithCssClass_BothApplied()
+	{
+		var cut = Render(@<CustomAttributeControl Text="test" DataValue="42" CssClass="special" />);
+		var html = cut.Markup;
+		html.ShouldContain("class=\"special\"");
+		html.ShouldContain("data-value=\"42\"");
+	}
+
+	// ========== ToolTip ==========
+
+	[Fact]
+	public void AddAttributesToRender_ToolTip_RendersAsTitleAttribute()
+	{
+		var cut = Render(@<TagKeySpan Text="hover me" ToolTip="tooltip text" />);
+		cut.Markup.ShouldContain("title=\"tooltip text\"");
+	}
+
+	// ========== Disabled ==========
+
+	[Fact]
+	public void AddAttributesToRender_Disabled_RendersDisabledAttribute()
+	{
+		var cut = Render(@<TagKeySpan Text="disabled" Enabled="false" />);
+		cut.Markup.ShouldContain("disabled=\"disabled\"");
+	}
+
+	// ========== Visibility ==========
+
+	[Fact]
+	public void TagKey_NotVisible_RendersNothing()
+	{
+		var cut = Render(@<TagKeyDiv Content="hidden" Visible="false" />);
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	// ========== Backward Compat: Render Override Still Works ==========
+
+	[Fact]
+	public void RenderOverride_HelloLabel_StillWorks()
+	{
+		// HelloLabel overrides Render() directly — must still work after P2 changes
+		var cut = Render(@<HelloLabel Text="World" Prefix="Hello" CssClass="label" />);
+		var html = cut.Markup;
+		html.ShouldContain("<span");
+		html.ShouldContain("class=\"label\"");
+		html.ShouldContain("Hello World");
+	}
+
+	[Fact]
+	public void RenderOverride_CustomButton_StillWorks()
+	{
+		// CustomButton overrides Render() directly — must still work
+		var cut = Render(@<CustomButton Text="Go" ButtonType="submit" />);
+		var html = cut.Markup;
+		html.ShouldContain("<button");
+		html.ShouldContain("type=\"submit\"");
+		html.ShouldContain("Go");
+	}
+}

@@ -1,0 +1,26 @@
+@* Migrated from: DepartmentPortal/Announcements.aspx
+   Original: Announcements listing page with AnnouncementCard repeater and Pager.
+   Used asp:Repeater bound to PortalDataProvider.GetAnnouncements(). *@
+
+@page "/announcements"
+
+<PageTitle>Announcements - Department Portal</PageTitle>
+
+<PageHeader Title="Announcements" Subtitle="Company news and updates" />
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Announcements", "") })" />
+
+<SearchBox Placeholder="Search announcements..." />
+
+@* TODO: Original used asp:Repeater with AnnouncementCard as ItemTemplate.
+   Migrate to BWFC Repeater or a foreach loop with AnnouncementCard. *@
+@foreach (var announcement in PortalDataProvider.GetAnnouncements().Where(a => a.IsActive))
+{
+    <AnnouncementCard AnnouncementId="@announcement.Id"
+                      Title="@announcement.Title"
+                      Summary="@announcement.Body"
+                      Author="@announcement.Author"
+                      PublishDate="@announcement.PublishDate" />
+}
+
+<Pager />

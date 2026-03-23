@@ -1,0 +1,14 @@
+@* Migrated from: DepartmentPortal/Controls/DashboardWidget.ascx (as UpcomingTraining)
+   Original: Dashboard widget showing upcoming training courses in a compact list.
+   Bound to PortalDataProvider.GetCourses() with category/date filtering. *@
+
+<div class="upcoming-training">
+    @foreach (var course in PortalDataProvider.GetCourses().Take(5))
+    {
+        <div class="mb-2">
+            <strong>@course.CourseName</strong>
+            <br />
+            <small class="text-muted">@course.Instructor — @course.DurationHours hrs (@course.Category)</small>
+        </div>
+    }
+</div>
