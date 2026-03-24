@@ -1,6 +1,8 @@
+# FormView
+
 The FormView component is meant to emulate the asp:FormView control in markup and is defined in the [System.Web.UI.WebControls.FormView class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.formview?view=netframework-4.8)
 
-## Features supported in Blazor
+## Features Supported in Blazor
 
   - Readonly Form
   - Numerical Pager
@@ -35,199 +37,201 @@ The FormView component is meant to emulate the asp:FormView control in markup an
 - **ID** - Use `@ref` instead of `ID` when referencing the component in code
 - **Template precedence** - When both a text property and its corresponding template are set, the template always takes precedence (e.g., `HeaderTemplate` overrides `HeaderText`)
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:FormView
-    AccessKey="string"
-    AllowPaging="True|False"
-    BackColor="color name|#dddddd"
-    BackImageUrl="uri"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    Caption="string"
-    CaptionAlign="NotSet|Top|Bottom|Left|Right"
-    CellPadding="integer"
-    CellSpacing="integer"
-    CssClass="string"
-    DataKeyNames="string"
-    DataMember="string"
-    DataSource="string"
-    DataSourceID="string"
-    DefaultMode="ReadOnly|Edit|Insert"
-    EmptyDataText="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    FooterText="string"
-    ForeColor="color name|#dddddd"
-    GridLines="None|Horizontal|Vertical|Both"
-    HeaderText="string"
-    Height="size"
-    HorizontalAlign="NotSet|Left|Center|Right|Justify"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDataBound="DataBound event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnItemCommand="ItemCommand event handler"
-    OnItemCreated="ItemCreated event handler"
-    OnItemDeleted="ItemDeleted event handler"
-    OnItemDeleting="ItemDeleting event handler"
-    OnItemInserted="ItemInserted event handler"
-    OnItemInserting="ItemInserting event handler"
-    OnItemUpdated="ItemUpdated event handler"
-    OnItemUpdating="ItemUpdating event handler"
-    OnLoad="Load event handler"
-    OnModeChanged="ModeChanged event handler"
-    OnModeChanging="ModeChanging event handler"
-    OnPageIndexChanged="PageIndexChanged event handler"
-    OnPageIndexChanging="PageIndexChanging event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    PageIndex="integer"
-    PagerSettings-FirstPageImageUrl="uri"
-    PagerSettings-FirstPageText="string"
-    PagerSettings-LastPageImageUrl="uri"
-    PagerSettings-LastPageText="string"
-    PagerSettings-Mode="NextPrevious|Numeric|NextPreviousFirstLast|
-        NumericFirstLast"
-    PagerSettings-NextPageImageUrl="uri"
-    PagerSettings-NextPageText="string"
-    PagerSettings-PageButtonCount="integer"
-    PagerSettings-Position="Bottom|Top|TopAndBottom"
-    PagerSettings-PreviousPageImageUrl="uri"
-    PagerSettings-PreviousPageText="string"
-    PagerSettings-Visible="True|False"
-    RenderTable="True|False"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
->
-        <EditItemTemplate>
-            <!-- child controls -->
-        </EditItemTemplate>
-        <EditRowStyle />
-        <EmptyDataRowStyle />
-        <EmptyDataTemplate>
-            <!-- child controls -->
-        </EmptyDataTemplate>
-        <FooterStyle />
-        <FooterTemplate>
-            <!-- child controls -->
-        </FooterTemplate>
-        <HeaderStyle />
+=== "Web Forms"
+
+    ```html
+    <asp:FormView
+        AccessKey="string"
+        AllowPaging="True|False"
+        BackColor="color name|#dddddd"
+        BackImageUrl="uri"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        Caption="string"
+        CaptionAlign="NotSet|Top|Bottom|Left|Right"
+        CellPadding="integer"
+        CellSpacing="integer"
+        CssClass="string"
+        DataKeyNames="string"
+        DataMember="string"
+        DataSource="string"
+        DataSourceID="string"
+        DefaultMode="ReadOnly|Edit|Insert"
+        EmptyDataText="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        FooterText="string"
+        ForeColor="color name|#dddddd"
+        GridLines="None|Horizontal|Vertical|Both"
+        HeaderText="string"
+        Height="size"
+        HorizontalAlign="NotSet|Left|Center|Right|Justify"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDataBound="DataBound event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnItemCommand="ItemCommand event handler"
+        OnItemCreated="ItemCreated event handler"
+        OnItemDeleted="ItemDeleted event handler"
+        OnItemDeleting="ItemDeleting event handler"
+        OnItemInserted="ItemInserted event handler"
+        OnItemInserting="ItemInserting event handler"
+        OnItemUpdated="ItemUpdated event handler"
+        OnItemUpdating="ItemUpdating event handler"
+        OnLoad="Load event handler"
+        OnModeChanged="ModeChanged event handler"
+        OnModeChanging="ModeChanging event handler"
+        OnPageIndexChanged="PageIndexChanged event handler"
+        OnPageIndexChanging="PageIndexChanging event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        PageIndex="integer"
+        PagerSettings-FirstPageImageUrl="uri"
+        PagerSettings-FirstPageText="string"
+        PagerSettings-LastPageImageUrl="uri"
+        PagerSettings-LastPageText="string"
+        PagerSettings-Mode="NextPrevious|Numeric|NextPreviousFirstLast|
+            NumericFirstLast"
+        PagerSettings-NextPageImageUrl="uri"
+        PagerSettings-NextPageText="string"
+        PagerSettings-PageButtonCount="integer"
+        PagerSettings-Position="Bottom|Top|TopAndBottom"
+        PagerSettings-PreviousPageImageUrl="uri"
+        PagerSettings-PreviousPageText="string"
+        PagerSettings-Visible="True|False"
+        RenderTable="True|False"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    >
+            <EditItemTemplate>
+                <!-- child controls -->
+            </EditItemTemplate>
+            <EditRowStyle />
+            <EmptyDataRowStyle />
+            <EmptyDataTemplate>
+                <!-- child controls -->
+            </EmptyDataTemplate>
+            <FooterStyle />
+            <FooterTemplate>
+                <!-- child controls -->
+            </FooterTemplate>
+            <HeaderStyle />
+            <HeaderTemplate>
+                <!-- child controls -->
+            </HeaderTemplate>
+            <InsertItemTemplate>
+                <!-- child controls -->
+            </InsertItemTemplate>
+            <InsertRowStyle />
+            <ItemTemplate>
+                <!-- child controls -->
+            </ItemTemplate>
+            <PagerSettings
+                FirstPageImageUrl="uri"
+                FirstPageText="string"
+                LastPageImageUrl="uri"
+                LastPageText="string"
+                Mode="NextPrevious|Numeric|NextPreviousFirstLast|
+                    NumericFirstLast"
+                NextPageImageUrl="uri"
+                NextPageText="string"
+                OnPropertyChanged="PropertyChanged event handler"
+                PageButtonCount="integer"
+                Position="Bottom|Top|TopAndBottom"
+                PreviousPageImageUrl="uri"
+                PreviousPageText="string"
+                Visible="True|False"
+            />
+            <PagerStyle />
+            <PagerTemplate>
+                <!-- child controls -->
+            </PagerTemplate>
+            <RowStyle />
+    </asp:FormView>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <FormView
+        DataSource=IEnumerable
+        DefaultMode="ReadOnly|Edit|Insert"
+        Caption=string
+        CaptionAlign="NotSet|Top|Bottom|Left|Right"
+        EmptyDataText=string
+        HeaderText=string
+        FooterText=string
+        ItemType=Type
+        ItemCommand=EventCallback<FormViewCommandEventArgs>
+        ItemCreated=EventCallback
+        ModeChanging=EventCallback<FormViewModeEventArgs>
+        ModeChanged=EventCallback<FormViewModeEventArgs>
+        OnDataBinding=EventCallBack
+        OnDataBound=EventCallBack
+        OnItemDeleting=EventCallBack<FormViewDeleteEventArgs>
+        OnItemDeleted=EventCallBack<FormViewDeletedEventArgs>
+        OnItemInserting=EventCallBack<FormViewInsertEventArgs>
+        OnItemInserted=EventCallBack<FormViewInsertEventArgs>
+        OnItemUpdating=EventCallBack<FormViewUpdateEventArgs>
+        OnItemUpdated=EventCallBack<FormViewUpdatedEventArgs>
+        PageIndexChanging=EventCallback<PageChangedEventArgs>
+        PageIndexChanged=EventCallback<PageChangedEventArgs>
+        SelectMethod=SelectHandler
+        Visible=bool
+    >
+        <PagerSettings Mode="PagerButtons.Numeric"
+                       NextPageText="string"
+                       PreviousPageText="string"
+                       Position="PagerPosition.Bottom" />
+        <RowStyle BackColor=string ForeColor=string CssClass=string ... />
+        <EditRowStyle BackColor=string ForeColor=string ... />
+        <InsertRowStyle BackColor=string ForeColor=string ... />
+        <HeaderStyle BackColor=string ForeColor=string ... />
+        <FooterStyle BackColor=string ForeColor=string ... />
+        <EmptyDataRowStyle BackColor=string ForeColor=string ... />
+        <PagerStyle BackColor=string ForeColor=string ... />
         <HeaderTemplate>
-            <!-- child controls -->
+            <!-- custom header content -->
         </HeaderTemplate>
-        <InsertItemTemplate>
-            <!-- child controls -->
-        </InsertItemTemplate>
-        <InsertRowStyle />
-        <ItemTemplate>
-            <!-- child controls -->
+        <ItemTemplate Context="Item">
+            <!-- read-only display -->
         </ItemTemplate>
-        <PagerSettings
-            FirstPageImageUrl="uri"
-            FirstPageText="string"
-            LastPageImageUrl="uri"
-            LastPageText="string"
-            Mode="NextPrevious|Numeric|NextPreviousFirstLast|
-                NumericFirstLast"
-            NextPageImageUrl="uri"
-            NextPageText="string"
-            OnPropertyChanged="PropertyChanged event handler"
-            PageButtonCount="integer"
-            Position="Bottom|Top|TopAndBottom"
-            PreviousPageImageUrl="uri"
-            PreviousPageText="string"
-            Visible="True|False"
-        />
-        <PagerStyle />
+        <EditItemTemplate Context="Item">
+            <!-- edit form -->
+        </EditItemTemplate>
+        <InsertItemTemplate Context="Item">
+            <!-- insert form -->
+        </InsertItemTemplate>
+        <EmptyDataTemplate>
+            <!-- content shown when data source is empty -->
+        </EmptyDataTemplate>
         <PagerTemplate>
-            <!-- child controls -->
+            <!-- custom pager content -->
         </PagerTemplate>
-        <RowStyle />
-</asp:FormView>
-```
-
-## Blazor Syntax
-
-``` razor
-<FormView
-    DataSource=IEnumerable
-    DefaultMode="ReadOnly|Edit|Insert"
-    Caption=string
-    CaptionAlign="NotSet|Top|Bottom|Left|Right"
-    EmptyDataText=string
-    HeaderText=string
-    FooterText=string
-    ItemType=Type
-    ItemCommand=EventCallback<FormViewCommandEventArgs>
-    ItemCreated=EventCallback
-    ModeChanging=EventCallback<FormViewModeEventArgs>
-    ModeChanged=EventCallback<FormViewModeEventArgs>
-    OnDataBinding=EventCallBack
-    OnDataBound=EventCallBack
-    OnItemDeleting=EventCallBack<FormViewDeleteEventArgs>
-    OnItemDeleted=EventCallBack<FormViewDeletedEventArgs>
-    OnItemInserting=EventCallBack<FormViewInsertEventArgs>
-    OnItemInserted=EventCallBack<FormViewInsertEventArgs>
-    OnItemUpdating=EventCallBack<FormViewUpdateEventArgs>
-    OnItemUpdated=EventCallBack<FormViewUpdatedEventArgs>
-    PageIndexChanging=EventCallback<PageChangedEventArgs>
-    PageIndexChanged=EventCallback<PageChangedEventArgs>
-    SelectMethod=SelectHandler
-    Visible=bool
->
-    <PagerSettings Mode="PagerButtons.Numeric"
-                   NextPageText="string"
-                   PreviousPageText="string"
-                   Position="PagerPosition.Bottom" />
-    <RowStyle BackColor=string ForeColor=string CssClass=string ... />
-    <EditRowStyle BackColor=string ForeColor=string ... />
-    <InsertRowStyle BackColor=string ForeColor=string ... />
-    <HeaderStyle BackColor=string ForeColor=string ... />
-    <FooterStyle BackColor=string ForeColor=string ... />
-    <EmptyDataRowStyle BackColor=string ForeColor=string ... />
-    <PagerStyle BackColor=string ForeColor=string ... />
-    <HeaderTemplate>
-        <!-- custom header content -->
-    </HeaderTemplate>
-    <ItemTemplate Context="Item">
-        <!-- read-only display -->
-    </ItemTemplate>
-    <EditItemTemplate Context="Item">
-        <!-- edit form -->
-    </EditItemTemplate>
-    <InsertItemTemplate Context="Item">
-        <!-- insert form -->
-    </InsertItemTemplate>
-    <EmptyDataTemplate>
-        <!-- content shown when data source is empty -->
-    </EmptyDataTemplate>
-    <PagerTemplate>
-        <!-- custom pager content -->
-    </PagerTemplate>
-    <FooterTemplate>
-        <!-- custom footer content -->
-    </FooterTemplate>
-</FormView>
-```
+        <FooterTemplate>
+            <!-- custom footer content -->
+        </FooterTemplate>
+    </FormView>
+    ```
 
 ## Style Sub-Components
 
@@ -339,66 +343,72 @@ Each style component accepts standard style properties: `BackColor`, `ForeColor`
 
 ### Migration Example: Header and Footer
 
-**Web Forms:**
-```aspx
-<asp:FormView ID="FormView1" runat="server"
+=== "Web Forms"
+
+    ```aspx
+    <asp:FormView ID="FormView1" runat="server"
+                  HeaderText="Customer Record"
+                  FooterText="End of record"
+                  EmptyDataText="No customer data available.">
+        <ItemTemplate>
+            <p><%# Eval("Name") %></p>
+        </ItemTemplate>
+    </asp:FormView>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <FormView DataSource="@Customers"
+              ItemType="Customer"
               HeaderText="Customer Record"
               FooterText="End of record"
               EmptyDataText="No customer data available.">
-    <ItemTemplate>
-        <p><%# Eval("Name") %></p>
-    </ItemTemplate>
-</asp:FormView>
-```
+        <ItemTemplate Context="Item">
+            <p>@Item.Name</p>
+        </ItemTemplate>
+    </FormView>
+    ```
 
-**Blazor:**
-```razor
-<FormView DataSource="@Customers"
-          ItemType="Customer"
-          HeaderText="Customer Record"
-          FooterText="End of record"
-          EmptyDataText="No customer data available.">
-    <ItemTemplate Context="Item">
-        <p>@Item.Name</p>
-    </ItemTemplate>
-</FormView>
-```
+The same example using explicit templates instead of text properties:
 
-**Web Forms (with templates):**
-```aspx
-<asp:FormView ID="FormView1" runat="server">
-    <HeaderTemplate>
-        <h3>Customer Record</h3>
-    </HeaderTemplate>
-    <ItemTemplate>
-        <p><%# Eval("Name") %></p>
-    </ItemTemplate>
-    <EmptyDataTemplate>
-        <p>No data found.</p>
-    </EmptyDataTemplate>
-    <FooterTemplate>
-        <small>End of record</small>
-    </FooterTemplate>
-</asp:FormView>
-```
+=== "Web Forms"
 
-**Blazor:**
-```razor
-<FormView DataSource="@Customers" ItemType="Customer">
-    <HeaderTemplate>
-        <h3>Customer Record</h3>
-    </HeaderTemplate>
-    <ItemTemplate Context="Item">
-        <p>@Item.Name</p>
-    </ItemTemplate>
-    <EmptyDataTemplate>
-        <p>No data found.</p>
-    </EmptyDataTemplate>
-    <FooterTemplate>
-        <small>End of record</small>
-    </FooterTemplate>
-</FormView>
-```
+    ```aspx
+    <asp:FormView ID="FormView1" runat="server">
+        <HeaderTemplate>
+            <h3>Customer Record</h3>
+        </HeaderTemplate>
+        <ItemTemplate>
+            <p><%# Eval("Name") %></p>
+        </ItemTemplate>
+        <EmptyDataTemplate>
+            <p>No data found.</p>
+        </EmptyDataTemplate>
+        <FooterTemplate>
+            <small>End of record</small>
+        </FooterTemplate>
+    </asp:FormView>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <FormView DataSource="@Customers" ItemType="Customer">
+        <HeaderTemplate>
+            <h3>Customer Record</h3>
+        </HeaderTemplate>
+        <ItemTemplate Context="Item">
+            <p>@Item.Name</p>
+        </ItemTemplate>
+        <EmptyDataTemplate>
+            <p>No data found.</p>
+        </EmptyDataTemplate>
+        <FooterTemplate>
+            <small>End of record</small>
+        </FooterTemplate>
+    </FormView>
+    ```
 
 ### CRUD Event Handling
 
