@@ -62,12 +62,29 @@ set => _pageService.MetaKeywords = value;
 }
 
 /// <summary>
-/// Always returns false. Blazor has no postback model.
-/// Exists so that if (!IsPostBack) { ... } compiles and executes correctly —
-/// the guarded block always runs, which is the correct behavior for
-/// OnInitialized (first-render) context.
+/// Returns <c>true</c> when the current request is a postback (form POST in SSR mode)
+/// or after the first initialization (in ServerInteractive mode).
+/// Matches the ASP.NET Web Forms <c>Page.IsPostBack</c> semantics:
+/// <list type="bullet">
+///   <item><description>SSR GET request → <c>false</c></description></item>
+///   <item><description>SSR POST request → <c>true</c></description></item>
+///   <item><description>ServerInteractive first render → <c>false</c></description></item>
+///   <item><description>ServerInteractive subsequent renders → <c>true</c></description></item>
+/// </list>
 /// </summary>
-public bool IsPostBack => false;
+public bool IsPostBack
+{
+	get
+	{
+		// SSR mode: HttpContext is available — check HTTP method
+		if (_httpContextAccessor?.HttpContext is { } context)
+			return HttpMethods.IsPost(context.Request.Method);
+
+		// ServerInteractive mode: track initialization state
+		return _hasInitialized;
+	}
+}
+private bool _hasInitialized;
 
 /// <summary>
 /// Returns this instance, enabling Page.Title, Page.MetaDescription,
@@ -95,12 +112,22 @@ protected RequestShim Request
 => new(_httpContextAccessor.HttpContext, _navigationManager, _logger);
 
 /// <summary>
-/// In-memory dictionary emulating Web Forms ViewState.
-/// Values do NOT survive navigation — they live only for the lifetime of
-/// the component instance (equivalent to private fields).
+/// Dictionary-based state storage emulating ASP.NET Web Forms ViewState.
+/// In ServerInteractive mode, persists for the component's lifetime (in-memory).
+/// In SSR mode, round-trips via a protected hidden form field.
+///
+/// <para><b>Migration note:</b> This enables Web Forms ViewState-backed property
+/// patterns to work unchanged. For new Blazor code, prefer [Parameter] properties
+/// and component fields.</para>
 /// </summary>
-[Obsolete("ViewState is in-memory only in Blazor. Values do not survive navigation.")]
-public Dictionary<string, object> ViewState { get; } = new();
+public ViewStateDictionary ViewState { get; } = new();
+
+/// <inheritdoc />
+protected override void OnInitialized()
+{
+	base.OnInitialized();
+	_hasInitialized = true;
+}
 
 /// <summary>
 /// Generates a URL for the named route with the specified parameters.

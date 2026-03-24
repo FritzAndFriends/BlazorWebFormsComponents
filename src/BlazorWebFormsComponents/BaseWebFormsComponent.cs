@@ -2,6 +2,7 @@
 using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.JSInterop;
@@ -146,11 +147,53 @@ namespace BlazorWebFormsComponents
 		public string ToolTip { get; set; }
 
 		/// <summary>
-		/// ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
+		/// Dictionary-based state storage emulating ASP.NET Web Forms ViewState.
+		/// In ServerInteractive mode, persists for the component's lifetime (in-memory).
+		/// In SSR mode, round-trips via a protected hidden form field.
+		///
+		/// <para><b>Migration note:</b> This enables Web Forms ViewState-backed property
+		/// patterns to work unchanged. For new Blazor code, prefer [Parameter] properties
+		/// and component fields.</para>
 		/// </summary>
-		/// <value></value>
-		[Obsolete("ViewState is supported for compatibility and is discouraged for future use")]
-		public Dictionary<string, object> ViewState { get; } = new Dictionary<string, object>();
+		public ViewStateDictionary ViewState { get; } = new();
+
+		/// <summary>
+		/// Returns <c>true</c> when the current request is a postback (form POST in SSR mode)
+		/// or after the first initialization (in ServerInteractive mode).
+		/// Matches the ASP.NET Web Forms <c>Page.IsPostBack</c> semantics.
+		/// </summary>
+		public bool IsPostBack
+		{
+			get
+			{
+				// SSR mode: HttpContext is available — check HTTP method
+				if (HttpContextAccessor?.HttpContext is { } context)
+					return HttpMethods.IsPost(context.Request.Method);
+
+				// ServerInteractive mode: track initialization state
+				return _hasInitialized;
+			}
+		}
+
+		/// <summary>
+		/// Detects the current rendering mode based on HttpContext availability.
+		/// </summary>
+		protected WebFormsRenderMode CurrentRenderMode
+			=> IsHttpContextAvailable ? WebFormsRenderMode.StaticSSR : WebFormsRenderMode.InteractiveServer;
+
+		/// <summary>
+		/// Returns <c>true</c> when an <see cref="HttpContext"/> is available
+		/// (SSR or pre-render), <c>false</c> during interactive WebSocket rendering.
+		/// </summary>
+		protected bool IsHttpContextAvailable
+			=> HttpContextAccessor?.HttpContext is not null;
+
+		/// <summary>
+		/// Optional data protection provider for ViewState encryption in SSR mode.
+		/// Null when not registered — ViewState serialization is skipped in that case.
+		/// </summary>
+		[Inject]
+		private IDataProtectionProvider DataProtectionProvider { get; set; }
 
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
@@ -211,6 +254,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public EventCallback<EventArgs> OnUnload { get; set; }
 		private bool _UnloadTriggered = false;
+		private bool _hasInitialized;
 
 		/// <summary>
 		/// Event handler to mimic the Web Forms OnDisposed handler and triggered in the Dispose method of this class
@@ -281,6 +325,32 @@ namespace BlazorWebFormsComponents
 		protected override async Task OnInitializedAsync()
 		{
 
+			// SSR mode: deserialize ViewState from form POST data
+			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR
+				&& DataProtectionProvider is not null)
+			{
+				var context = HttpContextAccessor.HttpContext!;
+				if (HttpMethods.IsPost(context.Request.Method)
+					&& context.Request.HasFormContentType)
+				{
+					var fieldName = $"__bwfc_viewstate_{ID}";
+					if (context.Request.Form.TryGetValue(fieldName, out var payload)
+						&& !string.IsNullOrEmpty(payload))
+					{
+						var protector = DataProtectionProvider.CreateProtector("BWFC.ViewState");
+						try
+						{
+							var deserialized = ViewStateDictionary.Deserialize(payload!, protector);
+							ViewState.LoadFrom(deserialized);
+						}
+						catch (System.Security.Cryptography.CryptographicException)
+						{
+							// Tampered or expired payload — fail-safe to empty ViewState
+						}
+					}
+				}
+			}
+
 			Parent?.Controls.Add(this);
 
 			if (OnInit.HasDelegate)
@@ -294,6 +364,7 @@ namespace BlazorWebFormsComponents
 			if (OnPreRender.HasDelegate)
 				await OnPreRender.InvokeAsync(EventArgs.Empty);
 
+			_hasInitialized = true;
 		}
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -328,6 +399,35 @@ namespace BlazorWebFormsComponents
 
 			}
 
+		}
+
+		/// <summary>
+		/// Renders a hidden form field containing the protected (encrypted + signed) ViewState
+		/// when running in SSR mode and the ViewState has been modified.
+		/// Call this from a component's <c>BuildRenderTree</c> to enable ViewState persistence
+		/// across form POSTs in static SSR mode.
+		/// </summary>
+		/// <param name="builder">The <see cref="RenderTreeBuilder"/> to emit the hidden field into.</param>
+		protected void RenderViewStateField(RenderTreeBuilder builder)
+		{
+			if (CurrentRenderMode != WebFormsRenderMode.StaticSSR
+				|| !ViewState.IsDirty
+				|| DataProtectionProvider is null)
+			{
+				return;
+			}
+
+			var protector = DataProtectionProvider.CreateProtector("BWFC.ViewState");
+			var payload = ViewState.Serialize(protector);
+			var fieldName = $"__bwfc_viewstate_{ID}";
+
+			builder.OpenElement(0, "input");
+			builder.AddAttribute(1, "type", "hidden");
+			builder.AddAttribute(2, "name", fieldName);
+			builder.AddAttribute(3, "value", payload);
+			builder.CloseElement();
+
+			ViewState.MarkClean();
 		}
 
 		protected virtual void HandleUnknownAttributes() { }
