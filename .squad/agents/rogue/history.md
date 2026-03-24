@@ -64,6 +64,8 @@
 ---
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-24):** ViewState Phase 1 test coverage complete — 73 contract tests written for ViewStateDictionary and IsPostBack behavior. 3 breaking changes identified in existing tests (expected); all 2588 tests now passing. InternalsVisibleTo added for test access, EphemeralDataProtectionProvider integration verified. Phase 2 test infrastructure ready. — decided by Rogue
+
 📌 **Team update (2026-03-17):** HttpHandlerBase handler tests validated — 94 tests passing, 1 test fixed (HttpMethod_DefaultIsGet bad assumption). No implementation bugs found; adapter architecture verified. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base. — decided by Rogue
 
 📌 **Team update (2026-03-17):** Rogue wrote 11 bUnit tests for GUID ID rendering (#471). New RadioButton/IDRendering.razor (6 tests), enhanced CheckBox/IDRendering.razor (+3 tests). All tests pass; integrated into regression suite. — decided by Rogue

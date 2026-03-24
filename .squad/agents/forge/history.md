@@ -5,9 +5,9 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
-## Core Context
+## Active Decisions & Alerts
 
-<!-- Summarized 2026-03-04 by Scribe — originals in history-archive.md -->
+📌 **Team update (2026-03-24):** ViewState Phase 1 architecture implemented — ViewStateDictionary (SSR + Interactive modes), mode-adaptive IsPostBack, hidden form field encryption, IDataProtectionProvider optional integration, CryptographicException fail-safe. Phase 2 (SSR persistence, AutoPostBack, analyzers, docs) planned for 7 weeks. Cyclops implementation validated; all 2588 tests pass. — decided by Forge
 
 M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2–M3 shipped (50/53 controls, 797 tests). Chart.js for Chart. DataBoundStyledComponent<T> recommended. Key patterns: Enums/ with int values, On-prefix events, feature branches→upstream/dev, ComponentCatalog.cs. Deployment: Docker+NBGV, dual NuGet, Azure webhook. M7–M14 milestone plans. HTML audit: 3 tiers, M11–M13. M15 fidelity: 132→131 divergences, 5 fixable bugs. Data controls: 90%+ sample parity, 4 remaining bugs. M17 AJAX: 6 controls shipped.
 

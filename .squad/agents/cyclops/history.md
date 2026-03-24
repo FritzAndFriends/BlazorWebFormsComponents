@@ -60,6 +60,8 @@
 ---
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-24):** ViewState Phase 1 implementation complete & merged — `feature/viewstate-postback-shim` ready. ViewStateDictionary core, mode-adaptive IsPostBack, SSR hidden field round-trip, IDataProtectionProvider integration, CryptographicException fallback. All 2588 tests pass (2 breaking contracts fixed by Coordinator). Phase 2 (SSR persistence integration) approved. — decided by Cyclops
+
 📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
 
 📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
