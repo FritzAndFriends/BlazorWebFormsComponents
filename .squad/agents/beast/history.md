@@ -8,6 +8,8 @@
 
 📌 Team update (2026-03-17): HttpHandlerBase implementation complete (7 files in Handlers/). Returns IEndpointConventionBuilder; Session markers added; build passes 0 errors. — decided by Cyclops
 
+📌 Team update (2026-03-24): Forge completed ASCX migration analysis (52KB) identifying 3-tier playbook and 8 BWFC gaps. Recommended User-Controls.md completion and Tier 1 automation script. Three-tier playbook proposed with documentation roadmap. See decisions.md for complete ASCX strategy and NuGet asset migration strategy. — decided by Forge
+
 ## Learnings
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->

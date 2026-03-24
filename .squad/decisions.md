@@ -4,6 +4,200 @@
 
 <!-- Decisions are appended below by the Scribe after merging from .ai-team/decisions/inbox/ -->
 
+### 2026-03-24: Documentation Quality Audit — 7 Prioritized Improvements (Beast)
+
+**By:** Beast (Technical Writer)
+
+**What:** Completed comprehensive audit of `docs/` directory (124 .md files, 10 component categories). Identified 7 prioritized improvements with clear effort estimates and rationale. Strengths include consistent component template, 35 strategic admonitions, 150+ properly-labeled code blocks. Critical gaps: 2 placeholder docs, 8 minimal stubs, README.md too thin (12 lines), 25+ component docs missing tabbed Web Forms vs Blazor comparison.
+
+**Key Findings:**
+1. **Placeholder docs** (RegularExpressionValidator, ValidationSummary) — Single line `_TODO_` or 6 empty lines
+2. **8 stubbed component docs** (<100 lines each) — LinkButton, ImageButton, Label, Literal, Repeater, ServiceRegistration, ViewState, NET-Standard
+3. **Landing page too thin** — README.md 12 lines, missing Quick Start, component overview, "Who this is for"
+4. **Tabbed Web Forms vs Blazor missing** — Extension enabled but used in only 4 files (should be 25+)
+5. **Cross-linking inconsistent** — 40% of docs lack "See Also" sections
+6. **Dense docs need collapsibles** — GridView, DataList, FormView, DetailsView, Analyzers 400+ lines each
+7. **Navigation category misalignment** — HyperLink and ImageMap listed as NavigationControls but implemented in EditorControls
+
+**Audit Quality:** Well-structured, mature foundations with execution gaps.
+
+**Recommended Work Plan:**
+- **Phase 1 (Critical, 1–2 weeks):** Complete placeholder docs, audit status.md, expand stubbed docs
+- **Phase 2 (High-Impact, 2–3 weeks):** Implement tabbed syntax 25+ files, enhance README.md, standardize cross-linking
+- **Phase 3 (Polish, 1–2 weeks):** Add collapsibles to dense docs, fix navigation categories
+
+**Effort:** ~20–30 hours Phase 1, ~25–40 hours Phase 2, ~10–15 hours Phase 3.
+
+**Reference:** Detailed audit report at `.squad/agents/beast/doc-audit-2026.md` (25+ KB, 10-section breakdown).
+
+### 2026-03-24: Documentation Refactor — 6 Executed Tasks (Beast)
+
+**By:** Beast (Technical Writer)
+
+**What:** Completed 6 high-impact documentation improvements:
+1. ✅ Expanded docs/README.md (12 → 70 lines) with 7-section landing page
+2. ✅ Converted 4 component docs to tabbed syntax (Button.md, Panel.md, CheckBox.md, +1)
+3. ✅ Added strategic admonitions (tips, notes, warnings)
+4. ✅ Fixed Strategies.md `INSERT LINK` placeholder → actual relative link
+5. ✅ Documented template patterns for future work
+6. ✅ Established tabbed syntax template for scalable application
+
+**Landing Page Strategy** (7 sections):
+- Section 1: "What is BlazorWebFormsComponents?" — Concise technical definition
+- Section 2: "Who This Is For" — Brown-field Web Forms developers
+- Section 3: "Quick Start" — 4-step path (Install → Register → Import → Use)
+- Section 4: "Component Overview" — 7 categories with quick links
+- Section 5: "Migration Resources" — Hierarchical guides
+- Section 6: "Key Features" — Bullet-point value props
+- Section 7: "What You Need to Know" — Compatibility caveats
+
+**Tabbed Syntax Pattern** (using `pymdownx.tabbed`):
+```markdown
+## Syntax
+=== "Web Forms"
+    [Full attribute documentation]
+=== "Blazor"
+    [Simplified property-based syntax]
+## Examples
+```
+
+**Admonition Placement Strategy:**
+- `!!! tip` — Blazor-specific patterns improving on Web Forms
+- `!!! note` — Rendering behavior differences
+- `!!! warning` — Security or unsupported features
+- Placement: After syntax tabs, before Examples, one per concern
+
+**Strategies.md Fix:** Replaced `**INSERT LINK**` with `/samples/AfterBlazorServerSide/Components/_Imports.razor`.
+
+**Success Criteria:** ✅ README.md expanded to 60–80 lines, ✅ 4+ component files converted, ✅ admonitions consistent, ✅ Strategies.md link functional, ✅ mkdocs build succeeds, ✅ patterns documented for future writers.
+
+### 2026-03-24: ASCX User Control Drop-In Replacement Strategy (Forge)
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**What:** Analyzed 12 ASCX controls from DepartmentPortal; identified 70% mechanical work vs 30% architectural work. Proposed three-tier migration playbook with clear effort estimates and tooling opportunity.
+
+**Three-Tier Playbook:**
+| Tier | Work Type | Automation | Time | Complexity |
+|------|-----------|-----------|------|-----------|
+| **Tier 1** | HTML tag replacement, @using, @foreach | ✅ Automatable | 5–10 min | Low |
+| **Tier 2** | ViewState → [Parameter], EventHandler → EventCallback, AutoPostBack removal | ⚠️ Semi-automated | 15–20 min | Medium |
+| **Tier 3** | Composite controls, data-bound controls, service integration, state patterns | ❌ Manual | 30–60 min | High |
+
+**Expected Outcome:** 2–3 hours per control (depending on complexity tier).
+
+**8 BWFC Gaps Identified with Workarounds:**
+1. No AutoPostBack equivalent → Parent provides `@onchange` handler
+2. ViewState persistence → Session storage or parameter-based state
+3. Nested control event subscription → Inversion of control pattern with EventCallback
+4. PlaceHolder content injection → @ChildContent RenderFragment
+5. Custom EventArgs types → Flatten to parameters or tuples
+6. Repeater ItemCommand pattern → @foreach + @onclick + closure capture
+7. Logging/activity tracking gap → ILogger injection
+8. Complex data filtering gap → Parent component or service layer
+
+**Documentation Roadmap:**
+- [ ] Create `docs/migration/user-controls.md` with DepartmentPortal case study
+- [ ] Add "Blazor Component Patterns" section to component documentation
+- [ ] Prototype Tier 1 Automation Script (PowerShell/C# tool)
+- [ ] Create Decision Tree for architectural choices
+
+**Vocabulary Update:**
+- ❌ Old: "ASCX controls are drop-in replacements"
+- ✅ New: "ASCX controls can be migrated following a three-tiered playbook. Tier 1 (mechanical) is 70% of work; Tiers 2–3 require Blazor architectural understanding."
+
+**Metrics for Adoption:**
+- # of developers using playbook
+- Time-to-migrate per control (target: 2–3 hours)
+- # of ASCX migration-related issues
+- Migration guide engagement
+
+### 2026-03-24: NuGet Static Asset Migration Strategy (Forge)
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**What:** Selected Option C (NuGet Extraction Tool + optional WebOptimizer) as default migration strategy for BWFC's `bwfc migrate-assets` command.
+
+**Approach:**
+1. **Primary Strategy:** PowerShell script that reads `packages.config`, extracts `Content/` and `Scripts/` folders from NuGet packages, places in `wwwroot/lib/`, generates Blazor-compatible asset references.
+2. **Intelligent CDN Mapping:** For known OSS packages (jQuery, Bootstrap, DataTables, Modernizr, SignalR, etc.), suggest CDN URLs instead of extraction.
+3. **Hybrid Default:** Extract custom/private packages, suggest CDN for OSS, output decision summary.
+4. **Optional Bundling:** Teams can integrate WebOptimizer post-migration (not required).
+
+**New Command:**
+```bash
+bwfc migrate-assets --source C:\MyWebFormsApp [--strategy hybrid|extract|cdn]
+```
+
+**Execution Flow:**
+1. Parse `packages.config` → extract package IDs + versions
+2. Scan `packages/` folder for `Content/` and `Scripts/` directories
+3. For each detected package:
+   - If known OSS (in CDN map) AND strategy allows: suggest CDN, skip extraction
+   - Else: extract to `wwwroot/lib/{PackageName}/`
+4. Generate `asset-manifest.json` (extraction summary)
+5. Generate `AssetReferences.html` (copy-paste snippet)
+
+**Rationale:**
+- Handles all scenarios (OSS, custom, mixed)
+- Automation-ready for `bwfc migrate-assets`
+- Low barrier (no Node.js, webpack)
+- Preserves fidelity (exact same assets as original app)
+- Auditable (manifest makes decisions transparent)
+
+**Implementation Timeline:**
+- Week 1–2: Implement script + CDN mappings
+- Week 2–3: Integrate into `bwfc-migrate.ps1` and CLI
+- Week 3–4: Documentation + guides
+- Week 4–5: Hardening + edge cases
+- Week 5–6: GA release
+
+### 2026-03-24: Documentation Organization & Structure Review (Forge)
+
+**By:** Forge (Lead / Web Forms Reviewer)
+
+**What:** Complete read-only audit of mkdocs.yml structure, component doc quality, and developer discovery. 54 fully-documented components but documentation discovery and organization don't optimize for Web Forms developer mental model.
+
+**Strengths:** ✅ Complete coverage (all 54 components documented), ✅ Status alignment (status.md ↔ mkdocs.yml accurate), ✅ Migration flow exemplary, ✅ Component doc quality high, ✅ Dashboard powerful but underutilized.
+
+**Critical Gaps:**
+1. **Home Page Doesn't Highlight Migration Path** — First-time visitor sees generic intro, no "Start Here" for migrating developers
+2. **Category Organization Misses Web Forms Mental Model** — "Container Controls" hidden in Editor Controls, "Display Controls" mixed with interactive controls, AJAX Controls nav shows wrong file paths
+3. **User-Controls.md Incomplete** — Template placeholder; ASCX→Component conversion is primary migration path but lacks documented pattern
+4. **Data Binding Integration Sparse** — Component docs explain properties/events but lack "integrate with your data layer" guidance
+5. **File Organization ≠ Nav Structure** — AJAX Controls category shows EditorControls paths instead of AjaxControls/
+
+**Recommended Priorities:**
+1. **Priority 1 (1 sprint, high impact):** Home page restructuring with 3 sections: "New Here? Pick Your Path", "Browse by Control Type", "Features & Infrastructure"
+2. **Priority 2 (1 sprint, high impact):** Complete User-Controls.md with step-by-step conversion, code-behind migration, dependency injection, template mapping
+3. **Priority 3 (1 sprint, medium impact):** Complete data binding integration examples (GridView, Repeater, ListView, FormView, Login)
+4. **Priority 4 (½ sprint, low effort):** Move AJAX control doc files to AjaxControls/ folder
+5. **Priority 5 (2 sprints, backlog):** Reorganize mkdocs.yml nav into 10 categories (Input, Display, Container, Data, Validation, Navigation, AJAX, Ajax Toolkit, Login, Utility, Migration)
+
+**Non-Recommendations:** ❌ Don't add tutorials/blogs to docs. ❌ Don't expand docs beyond migration context. ❌ Don't create separate "Beginner" vs "Expert" docs.
+
+**Implementation:** Priorities 1–4 can ship in parallel. Priority 5 is backlog. Update mkdocs.yml nav when implementing Priority 4.
+
+### 2026-03-22T16-22-17Z: User Directive — NuGet Asset Extraction Strategy (Copilot)
+
+**By:** Jeffrey T. Fritz (via Copilot CLI)
+
+**What:** Devise a strategy to extract CSS and JS content from NuGet packages using the old ASP.NET Web Forms BundleConfig pattern and place them in `wwwroot/` during migration. This handles the gap where Web Forms apps reference static assets via NuGet packages that get unpacked into Content/Scripts folders, and those references disappear when migrating to Blazor.
+
+**Why:** Real migration gap discovered during DepartmentPortal migration. CSS was identical but nobody thought to copy it because the delivery mechanism (NuGet + BundleConfig) is completely different in Blazor (wwwroot + CDN/libman).
+
+### 2026-03-23: AfterDepartmentPortal Runnable Demo Setup (Jubilee)
+
+**By:** Jubilee (Sample Writer)
+
+**What:** AfterDepartmentPortal built clean but couldn't render (missing CSS files, no home page). Implemented 4 decisions:
+1. **Bootstrap via CDN** — Used Bootstrap 5.3.3 and Bootstrap Icons from jsdelivr CDN instead of bundling local copies (keeps sample lightweight)
+2. **Home Page at /home** — Dashboard.razor already claimed `@page "/"`. Home.razor welcome page lives at `/home` instead
+3. **SectionPanel CssClass Fix** — Removed `new CssClass` property that shadowed base class `[Parameter]`. Used `OnInitialized()` to set default
+4. **Site.css Copied** — Preserved same CSS classes from DepartmentPortal for visual consistency
+
+**Why:** Enables runnable demo with working navigation, styling, and Home page routing without overriding existing Dashboard route.
+
 ### 2026-07-25: EDMX→EF Core — Standalone parser script (Option 1 execution)
 
 **By:** Cyclops (Component Dev)

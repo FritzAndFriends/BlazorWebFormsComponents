@@ -5,6 +5,8 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+📌 Team update (2026-03-24): Beast completed documentation audit (280+ lines) identifying 7 prioritized improvements with effort estimates. Beast also executed 6 refactor tasks (landing page expansion, tabbed syntax conversions, admonitions, Strategies.md fix). Beast's execution aligns with Forge's Priority 1–2 recommendations. See decisions.md for Beast's audit findings and refactor decisions. — decided by Beast
+
 ## Core Context
 
 <!-- Summarized 2026-03-04 by Scribe — originals in history-archive.md -->
@@ -197,6 +199,100 @@ Run 18 analysis: Test-UnconvertiblePage architecturally flawed (P0), [Parameter]
 - **Don't cache HttpContext:** Always access live via `_httpContextAccessor.HttpContext`. HttpContext exists during prerender, then disappears when the WebSocket circuit starts.
 - **Key files:** `src/BlazorWebFormsComponents/WebFormsPageBase.cs`, `src/BlazorWebFormsComponents/ResponseShim.cs`, `src/BlazorWebFormsComponents/Extensions/GetRouteUrlHelper.cs` (also vulnerable, P2 follow-up)
 - **Full decision written to:** `.ai-team/decisions/inbox/forge-render-mode-guards.md`
+
+### ASCX User Control Drop-In Replacement Strategy Analysis (2026-03-12)
+
+**Deep-dive case study on DepartmentPortal (12 ASCX controls) migration patterns to establish repeatable playbook.**
+
+**Analysis Scope:**
+- Read 12 ASCX controls + code-behinds (full source)
+- Read 8+ completed/partial Blazor equivalents
+- Map patterns: data binding, state (ViewState), events, composition, control references
+- Identify architectural gaps in BWFC for user control migration
+- Propose three-tiered playbook + tooling opportunities
+
+**Key Findings:**
+
+1. **Migration is 70% Mechanical, 30% Architectural**
+   - Tier 1 (Mechanical): HTML tag replacement, @using directives, @foreach loops → 5-10 min/control (candidate for automation)
+   - Tier 2 (Parameters/Events): ViewState → [Parameter], EventHandler → EventCallback<T> → 15-20 min/control (semi-automatable)
+   - Tier 3 (Compositional): Nested control coordination, PlaceHolder content injection, service integration → 30-60 min/control (manual, requires architectural thinking)
+
+2. **ViewState Dependency: All 8/12 Controls Use It**
+   - ASCX pattern: Property with `get/set ViewState["Key"]` backing
+   - Blazor equivalent: `[Parameter]` property + parent state management
+   - Gap: No built-in ViewState simulation; parent must track state or use service (decision needed)
+
+3. **Event Model Shift: Inversion of Control**
+   - ASCX pattern: Control declares `public event EventHandler`, parent subscribes via `+=`
+   - Blazor pattern: Parent passes `EventCallback<T>` parameter, child invokes via `await OnEvent.InvokeAsync(value)`
+   - Custom EventArgs lose fidelity: `SearchEventArgs { SearchTerm, Category }` → flattened parameters
+
+4. **Data Binding Paradigm Shift: Imperative → Declarative**
+   - ASCX pattern: `Page_Load` → `DataBind()` → `Repeater.ItemTemplate` with `<%# Eval() %>`
+   - Blazor pattern: `@foreach` in markup with direct C# expressions
+   - Impact: Logic moves from code-behind to view; some developers find this cleaner, others prefer separation
+
+5. **Composite Control Coordination: No FindControl Equivalent**
+   - ASCX pattern: Parent declares `protected ChildControl ctlChild`, subscribes to events in `OnInit`, accesses properties imperatively
+   - Blazor pattern: Parameters for data flow (top-down), EventCallback for events (bottom-up); no imperative access
+   - Gap: ResourceBrowser (nested SearchBox + Breadcrumb) requires architectural redesign; not a mechanical conversion
+
+6. **Control Feature Loss/Transformation**
+   - **AutoPostBack:** No equivalent (Blazor is inherently interactive); parent must provide `@onchange` handler
+   - **PlaceHolder Content Injection:** Imperative `.Controls.Add()` → Blazor `@ChildContent` RenderFragment (completely different model)
+   - **GridView/Repeater ItemTemplate:** `<%# %>` expressions → `@foreach` + closure capture
+   - **Conditional Visibility:** HtmlGenericControl.Visible → `@if` directives
+   - **Session Access:** `Session["Key"]` → Must inject IHttpContextAccessor + handle null during InteractiveServer
+
+7. **BWFC Coverage Assessment**
+   - ✅ All 8 Web Forms controls used in ASCX files are in BWFC (Button, TextBox, Label, Literal, LinkButton, Repeater, GridView, DropDownList)
+   - ❌ User control composition patterns NOT covered by BWFC (nested Register directives, event subscriptions, FindControl patterns)
+   - ❌ Paradigm shift from event-driven to parameter-driven is architectural, not a BWFC library issue
+
+8. **Identified Documentation/Tooling Gaps**
+   - No User-Controls.md guide (empty placeholder in docs)
+   - No guidance on AutoPostBack replacement, ViewState alternatives, PlaceHolder→@ChildContent mapping
+   - No Tier 1 automation script (straightforward opportunity: would save ~30-50% migration time per control)
+   - No decision tree for Tier 3 patterns (composite controls, data-bound grids, service coordination)
+
+9. **Control-by-Control Migration Status (from DepartmentPortal)**
+   - **100% Complete:** AnnouncementCard (parameter-driven display), Footer (simplified presentation)
+   - **~80% Complete:** Breadcrumb (lost Home link feature), PageHeader (lost user info section), QuickStats (lost visibility control)
+   - **~70% Complete:** DepartmentFilter (stub: missing data binding hook), SearchBox (stub: missing click handler binding)
+   - **~40% Complete:** Pager (skeleton HTML only; page list generation missing)
+   - **0% Complete (TODO):** EmployeeList (decision: BWFC GridView vs manual table?), TrainingCatalog (ItemCommand pattern unclear), DashboardWidget (PlaceHolder pattern), ResourceBrowser (nested coordination)
+
+10. **Strategic Insight: Messaging Problem**
+    - Current: "ASCX controls are drop-in replacements for Blazor components"
+    - Reality: 70% drop-in, 30% requires redesign
+    - Better messaging: "ASCX migration is a structured three-tiered process; Tier 1 is mechanical, Tier 3 requires architectural thinking"
+
+**Deliverables:**
+- **Analysis Document:** `dev-docs/analysis/ASCX-Migration-Drop-In-Strategy.md` (52KB comprehensive mapping, 8 sections, code snippets from all 12 controls)
+- **Decision Document:** `.squad/decisions/inbox/forge-ascx-drop-in-strategy.md` (recommended playbook, gaps, implementation plan, success criteria)
+
+**Playbook Proposed (7 Phases):**
+1. Assessment (30 min) — Identify dependencies, state, events, data binding
+2. Skeleton Creation (15 min) — Create .razor file, convert markup
+3. Property Conversion (20 min) — ViewState → [Parameter]
+4. Event Conversion (15 min) — EventHandler → EventCallback<T>
+5. Data Binding (20-30 min) — DataBind() → @foreach
+6. Composite Handling (30-60 min) — Parent-child coordination redesign
+7. Testing (20-30 min) — QA and browser testing
+**Expected:** 2-3 hours per control (depending on complexity tier)
+
+**Automation Opportunities (ROI High):**
+- ✅ Tier 1 script (Register → @using, ASCX controls → HTML, Repeater → @foreach) — 30-50% time savings
+- ⚠️ Tier 2 semi-automation (ViewState property extractor, EventHandler → EventCallback converter) — 20-30% savings
+- ❌ Tier 3 manual (composite coordination, data-bound controls) — requires human judgment
+
+**Next Steps (Recommended):**
+- [ ] Publish decision to team + share analysis with migration leads
+- [ ] Draft "ASCX User Control Migration Guide" (docs/) with worked examples (DepartmentPortal as case study)
+- [ ] Create Tier 3 decision tree (composite controls, state patterns, service integration)
+- [ ] Prototype Tier 1 automation script; test on DepartmentPortal (quick win: 4-6 controls in 30 min)
+- [ ] Plan ContosoUniversity large-scale migration (50+ controls) using playbook; document lessons learned
 
 
  Team update (2026-03-12): L2 automation consolidated  EnumParameter<T> (OPP-1) + WebFormsPageBase shims (OPP-2,3,5,6) all implemented. Rogue: 4 test files need .Value.ShouldBe() fix. Beast: L2 scripts can emit bare enum strings.  decided by Forge (analysis), Cyclops (implementation)
