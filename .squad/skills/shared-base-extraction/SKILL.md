@@ -1,3 +1,8 @@
+---
+name: shared-base-extraction
+description: "Extracts duplicated properties, methods, and logic from sibling Blazor components into a shared intermediate base class. Covers identification of duplicated surfaces, base class creation, member migration, and @inherits directive updates. Use when three or more components share copy-pasted Parameter declarations, consolidating shared helper methods, or refactoring component inheritance hierarchies."
+---
+
 # Skill: Extracting a Shared Base Class from Sibling Components
 
 **confidence:** low

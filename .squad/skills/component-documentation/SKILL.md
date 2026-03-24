@@ -1,3 +1,8 @@
+---
+name: component-documentation
+description: "Generates consistent documentation for BlazorWebFormsComponents following the standard section order: features, unsupported features, declarative syntax, Blazor syntax, HTML output, and migration notes. Handles category assignment and admonition conventions. Use when writing docs for a new BWFC component, documenting migration steps from ASP.NET Web Forms, or creating component reference pages for the documentation site."
+---
+
 # SKILL: Component Documentation
 
 ## When to Use

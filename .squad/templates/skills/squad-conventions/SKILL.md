@@ -1,6 +1,6 @@
 ---
 name: "squad-conventions"
-description: "Core conventions and patterns used in the Squad codebase"
+description: "Defines the core development conventions for the Squad CLI tool (create-squad), a zero-dependency Node.js package that adds AI agent teams to any project. Covers the zero-dependency constraint, Node.js built-in test runner usage, fatal() error handling pattern, ANSI color constants, .ai-team/ file structure, Windows-compatible path construction, and init idempotency. Use when modifying Squad source code, adding new CLI commands, writing tests with node:test, handling errors in user-facing flows, or ensuring cross-platform file path compatibility."
 domain: "project-conventions"
 confidence: "high"
 source: "manual"

@@ -1,3 +1,8 @@
+---
+name: reskill
+description: "Extracts procedural knowledge from agent charters into shared reusable skills to optimize context budget. Audits charters for step-by-step procedures and checklists, identifies duplicates across agents, and produces slimmed-down charters under 1.5KB. Use when agent charters are too large, consolidating duplicated procedures, or reducing token usage by converting inline instructions into shared skill references."
+---
+
 Objective: Optimize our context budget by extracting procedural knowledge from charters into shared skills.
 
 Process (follow .squad/skills/reskill/SKILL.md):

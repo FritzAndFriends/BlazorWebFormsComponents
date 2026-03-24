@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: Guidance for writing MkDocs documentation for BlazorWebFormsComponents. Use this when creating or updating component documentation, migration guides, or utility feature docs in the /docs folder.
+description: "Provides templates, style guidelines, and a complete workflow for writing MkDocs documentation, sample pages, and navigation updates for BlazorWebFormsComponents. Covers component doc structure with Web Forms vs Blazor syntax comparisons, migration guide templates, sample page creation in AfterBlazorServerSide with demo and source code sections, NavMenu.razor and ComponentList.razor updates, and README linking. Use when documenting a new or existing BWFC component, creating sample pages with escaped code blocks, updating mkdocs.yml navigation, or following the complete documentation workflow from docs to samples to README."
 ---
 
 # Documentation Skill for BlazorWebFormsComponents

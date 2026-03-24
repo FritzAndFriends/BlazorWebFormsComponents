@@ -1,6 +1,6 @@
 ---
 name: "sample-pages"
-description: "Pattern for creating component sample/demo pages in the BlazorWebFormsComponents sample app"
+description: "Defines the file location, page structure, content guidelines, and navigation update requirements for creating component sample and demo pages in the AfterBlazorServerSide sample app. Use when adding a new BWFC component sample page, updating NavMenu.razor or ComponentList.razor navigation, writing demo sections with escaped code blocks, or ensuring consistent sample page conventions across the project."
 domain: "sample-app"
 confidence: "high"
 source: "jubilee sprint-1"

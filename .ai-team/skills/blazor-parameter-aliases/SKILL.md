@@ -1,3 +1,8 @@
+---
+name: blazor-parameter-aliases
+description: "Implements the parameter alias pattern for Blazor components where multiple parameter names map to the same behavior. Covers independent auto-property declaration, invocation-site coalescing, and HasDelegate guard updates. Use when a Blazor component needs backward-compatible parameter names, supporting On-prefixed event aliases, or ensuring Web Forms markup migration works without breaking existing consumers."
+---
+
 # Blazor Parameter Aliases
 
 ## When to Use
