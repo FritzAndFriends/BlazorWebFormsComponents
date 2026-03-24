@@ -42,41 +42,41 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Automatic form submission - implement form handling in Blazor
 - Server-side file system access in WebAssembly - must send to API endpoint
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:FileUpload
-<asp:FileUpload
-    AccessKey="string"
-    AllowMultiple="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    Enabled="True|False"
-    Height="size"
-    ID="string"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-    runat="server" />
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:FileUpload
+    <asp:FileUpload
+        AccessKey="string"
+        AllowMultiple="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        Enabled="True|False"
+        Height="size"
+        ID="string"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+        runat="server" />
+    ```
 
-### Basic File Upload
+=== "Blazor"
 
-```razor
-<FileUpload OnFileSelected="HandleFileSelected" />
+    ```razor
+    <FileUpload OnFileSelected="HandleFileSelected" />
 
-@code {
-    void HandleFileSelected(InputFileChangeEventArgs args)
-    {
-        // File has been selected
+    @code {
+        void HandleFileSelected(InputFileChangeEventArgs args)
+        {
+            // File has been selected
+        }
     }
-}
-```
+    ```
 
 ### File Upload with Type Restriction
 

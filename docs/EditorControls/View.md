@@ -17,46 +17,46 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Command-based navigation (handled by parent MultiView)
 - `EnableTheming` / `SkinID` — theming not supported in Blazor
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
-    <asp:View ID="View1" runat="server">
-        <p>Content for View 1</p>
-    </asp:View>
-    <asp:View ID="View2" runat="server">
-        <p>Content for View 2</p>
-    </asp:View>
-</asp:MultiView>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
+        <asp:View ID="View1" runat="server">
+            <p>Content for View 1</p>
+        </asp:View>
+        <asp:View ID="View2" runat="server">
+            <p>Content for View 2</p>
+        </asp:View>
+    </asp:MultiView>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <MultiView ActiveViewIndex="@activeIndex" OnActiveViewChanged="ViewChanged">
+        <View>
+            <p>This is View 1</p>
+            <Button Text="Go to View 2" OnClick="() => activeIndex = 1" />
+        </View>
+        <View>
+            <p>This is View 2</p>
+            <Button Text="Go to View 1" OnClick="() => activeIndex = 0" />
+        </View>
+    </MultiView>
+
+    @code {
+        private int activeIndex = 0;
+
+        private void ViewChanged(EventArgs e)
+        {
+            // Handle view change
+        }
+    }
+    ```
 
 A View must always be a child of a MultiView component. Only the active View's content is rendered.
-
-### Basic View Within MultiView
-
-```razor
-<MultiView ActiveViewIndex="@activeIndex" OnActiveViewChanged="ViewChanged">
-    <View>
-        <p>This is View 1</p>
-        <Button Text="Go to View 2" OnClick="() => activeIndex = 1" />
-    </View>
-    <View>
-        <p>This is View 2</p>
-        <Button Text="Go to View 1" OnClick="() => activeIndex = 0" />
-    </View>
-</MultiView>
-
-@code {
-    private int activeIndex = 0;
-
-    private void ViewChanged(EventArgs e)
-    {
-        // Handle view change
-    }
-}
-```
 
 ### View with Event Callbacks
 

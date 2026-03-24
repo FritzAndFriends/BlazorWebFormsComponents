@@ -16,45 +16,45 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Master page file path resolution (handled by layout system in Blazor)
 - Multiple content sections in a single page (use separate MasterPage components instead)
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<!-- MyPage.aspx -->
-<%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
+=== "Web Forms"
 
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Welcome to my page!</h2>
-    <p>This is the page-specific content.</p>
-</asp:Content>
-```
+    ```html
+    <!-- MyPage.aspx -->
+    <%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
 
-## Blazor Syntax
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+        <h2>Welcome to my page!</h2>
+        <p>This is the page-specific content.</p>
+    </asp:Content>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <MasterPage>
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
+
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+
+            <div class="footer">
+                <p>&copy; 2024</p>
+            </div>
+        </ChildContent>
+        <Content ContentPlaceHolderID="MainContent">
+            <h2>Page Title</h2>
+            <p>This content replaces the MainContent placeholder.</p>
+        </Content>
+    </MasterPage>
+    ```
 
 Content controls are placed as children of a MasterPage component. They automatically register with their parent MasterPage.
-
-### Basic Content for a Placeholder
-
-```razor
-<MasterPage>
-    <ChildContent>
-        <div class="header">
-            <h1>My Website</h1>
-        </div>
-        
-        <ContentPlaceHolder ID="MainContent">
-            <p>Default content</p>
-        </ContentPlaceHolder>
-        
-        <div class="footer">
-            <p>&copy; 2024</p>
-        </div>
-    </ChildContent>
-    <Content ContentPlaceHolderID="MainContent">
-        <h2>Page Title</h2>
-        <p>This content replaces the MainContent placeholder.</p>
-    </Content>
-</MasterPage>
-```
 
 ### Multiple Content Sections
 

@@ -24,75 +24,75 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - AppendDataBoundItems is not implemented
 - DataSourceID is not supported - bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:ListBox
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    OnUnload="Unload event handler"
-    Rows="integer"
-    runat="server"
-    SelectionMode="Single|Multiple"
-    SelectedIndex="integer"
-    SelectedValue="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size">
-    
-    <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Display Text 2" />
-    
-</asp:ListBox>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:ListBox
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"
+        OnUnload="Unload event handler"
+        Rows="integer"
+        runat="server"
+        SelectionMode="Single|Multiple"
+        SelectedIndex="integer"
+        SelectedValue="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size">
 
-### Static Items (Single Selection)
+        <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
+        <asp:ListItem Value="value2" Text="Display Text 2" />
 
-```razor
-<ListBox TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
+    </asp:ListBox>
+    ```
 
-@code {
-    private string selectedValue = "";
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Apple", "1"),
-        new ListItem("Banana", "2"),
-        new ListItem("Cherry", "3"),
-        new ListItem("Date", "4")
-    };
-}
-```
+=== "Blazor"
+
+    ```razor
+    <ListBox TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
+
+    @code {
+        private string selectedValue = "";
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Apple", "1"),
+            new ListItem("Banana", "2"),
+            new ListItem("Cherry", "3"),
+            new ListItem("Date", "4")
+        };
+    }
+    ```
 
 ### Multiple Selection
 

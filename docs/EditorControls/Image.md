@@ -30,52 +30,52 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **EnableViewState** - Not needed; Blazor manages state differently
 - **Lifecycle events** (`OnDataBinding`, `OnInit`, `OnLoad`, etc.) - Not supported; use Blazor lifecycle methods instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Image
-    AccessKey="string"
-    AlternateText="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DescriptionUrl="uri"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ForeColor="color name|#dddddd"
-    GenerateEmptyAlternateText="True|False"
-    Height="size"
-    ID="string"
-    ImageAlign="NotSet|Left|Right|Baseline|Top|Middle|Bottom|
-        AbsBottom|AbsMiddle|TextTop"
-    ImageUrl="uri"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:Image
+        AccessKey="string"
+        AlternateText="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DescriptionUrl="uri"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ForeColor="color name|#dddddd"
+        GenerateEmptyAlternateText="True|False"
+        Height="size"
+        ID="string"
+        ImageAlign="NotSet|Left|Right|Baseline|Top|Middle|Bottom|
+            AbsBottom|AbsMiddle|TextTop"
+        ImageUrl="uri"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
 
-### Basic Image
+=== "Blazor"
 
-```razor
-<Image ImageUrl="/images/photo.jpg" AlternateText="A beautiful photo" />
-```
+    ```razor
+    <Image ImageUrl="/images/photo.jpg" AlternateText="A beautiful photo" />
+    ```
 
 ### Image with Tooltip
 
