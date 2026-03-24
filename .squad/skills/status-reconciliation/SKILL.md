@@ -1,3 +1,8 @@
+---
+name: status-reconciliation
+description: "Reconciles project status tracking documents against the actual codebase and git history to fix stale or inconsistent records. Verifies claimed statuses via filesystem checks, git log inspection, and downstream artifact audits. Use when planning a sprint, auditing project progress, fixing summary-detail count drift, or validating that status documents reflect merged PRs and completed work."
+---
+
 # SKILL: Status Reconciliation
 
 **Confidence:** low

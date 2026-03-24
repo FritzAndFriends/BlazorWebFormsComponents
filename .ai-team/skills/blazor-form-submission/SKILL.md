@@ -1,6 +1,6 @@
 ---
 name: "blazor-form-submission"
-description: "Form submission patterns in Blazor Server — workarounds for enhanced navigation stripping onclick"
+description: "Provides workaround patterns for Blazor Server enhanced navigation silently stripping onclick attributes from button elements, causing form submissions to fail. Covers anchor-based form submission for HTTP POST endpoints and EditForm for in-component handling. Use when a form submit button does nothing on click, when building auth forms that POST to minimal API endpoints, or when choosing between HTML form POST and Blazor EditForm for data entry pages."
 domain: "migration"
 confidence: "low"
 source: "earned"

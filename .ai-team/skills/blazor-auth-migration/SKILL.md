@@ -1,6 +1,6 @@
 ---
 name: "blazor-auth-migration"
-description: "Cookie-based authentication pattern for Blazor Server migration — scoped providers, not singletons"
+description: "Guides correct AuthenticationStateProvider registration when migrating ASP.NET Web Forms Identity/OWIN authentication to Blazor Server using scoped providers and cookie-based auth. Covers DI lifetime pitfalls (singleton vs scoped vs transient), minimal API auth endpoints, and integration with BWFC LoginView. Use when migrating authentication, fixing session bleed across browser tabs, debugging shared auth state in Playwright tests, or setting up cookie-based login and registration endpoints in a Blazor Server migration."
 domain: "migration"
 confidence: "medium"
 source: "earned"

@@ -1,3 +1,8 @@
+---
+name: blazor-eventcallback-aliases
+description: "Adds dual EventCallback parameter aliases (bare and On-prefixed) to Blazor components for Web Forms migration compatibility. Guides creation of EventArgs classes, coalescing invocation patterns, and HasDelegate guard checks. Use when adding new event parameters to a BWFC component, implementing Web Forms event naming conventions, or migrating ASP.NET Web Forms event handlers to Blazor."
+---
+
 # Adding EventCallback Aliases to BWFC Components
 
 ## When to Use

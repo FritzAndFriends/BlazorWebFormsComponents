@@ -1,6 +1,6 @@
 ---
 name: "webforms-html-audit"
-description: "Patterns for comparing Web Forms control HTML output against Blazor component output using Playwright"
+description: "Provides patterns for automated HTML fidelity comparison between ASP.NET Web Forms controls and their BWFC Blazor equivalents using Playwright. Covers marker-based control isolation with data-audit attributes, HTML normalization rules for stripping ViewState and naming-container IDs, and control classification by audit feasibility (Clean, Structural, JS-coupled, Divergent). Use when validating migration output fidelity, setting up Playwright-based HTML comparison tests, building an intentional divergence registry, or auditing whether migrated Blazor components render equivalent DOM structure."
 domain: "testing-and-validation"
 confidence: "low"
 source: "earned"

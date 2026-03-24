@@ -1,6 +1,6 @@
 ---
 name: component-development
-description: Guidance for creating Blazor components that emulate ASP.NET Web Forms controls. Use this when implementing new components or extending existing ones in the BlazorWebFormsComponents library.
+description: "Provides a step-by-step workflow for creating Blazor components that emulate ASP.NET Web Forms controls in the BlazorWebFormsComponents library. Covers base class selection (BaseWebFormsComponent, BaseStyledComponent, DataBoundComponent, BaseValidator), Web Forms property and event naming conventions, Playwright integration testing setup, and the complete checklist from component creation through documentation and navigation updates. Use when implementing a new BWFC component, choosing the correct base class for a control type, adding unit or integration tests, or extending an existing component with new Web Forms property support."
 ---
 
 # Component Development Skill

@@ -1,3 +1,8 @@
+---
+name: base-class-upgrade
+description: "Upgrades a Blazor component from BaseWebFormsComponent to BaseStyledComponent to gain IStyle properties like BackColor, CssClass, Font, and dimensions. Walks through base class changes, @inherits directives, style application, and duplicate property removal. Use when a component needs inline styling support, adding CSS class parameters, or migrating Web Forms style attributes to Blazor components."
+---
+
 # Skill: Upgrading a Control to BaseStyledComponent
 
 ## When to Use

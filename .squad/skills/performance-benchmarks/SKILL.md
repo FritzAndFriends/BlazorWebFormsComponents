@@ -1,6 +1,6 @@
 ---
 name: "performance-benchmarks"
-description: "Run and re-run .NET Framework vs .NET 10 performance benchmarks, diagnose failures, generate reports with SVG charts"
+description: "Guides running, diagnosing, and reporting on .NET Framework 4.5.2 vs .NET 10 Blazor performance benchmarks for the WingtipToys and ContosoUniversity sample apps. Covers the Run-Benchmarks.ps1 and Generate-BenchmarkReport.ps1 scripts, IIS Express pre-compilation, port cleanup, EF6/EF Core table conflict resolution, and metrics interpretation (cold start, warm average, P95). Use when running performance benchmarks, regenerating SVG chart reports, debugging IIS Express or LocalDB failures, or interpreting benchmark results for migration validation."
 domain: "performance-testing"
 confidence: "high"
 source: "earned"

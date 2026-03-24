@@ -1,6 +1,6 @@
 ---
 name: "migration-standards"
-description: "Canonical standards for migrating ASP.NET Web Forms applications to Blazor using BWFC"
+description: "Defines the canonical target architecture, BWFC control preservation rules, and migration patterns for converting ASP.NET Web Forms applications to Blazor Server on .NET 10. Covers asp: prefix stripping, event handler signature mapping, data control strategy, ListView template placeholders, session-to-scoped-service conversion, and Layer 1/Layer 2 boundaries. Use when running the bwfc-migrate.ps1 script, performing manual Layer 2 migration work, reviewing migrated Blazor pages for control flattening, or setting up Program.cs service registration for a BWFC project."
 domain: "migration"
 confidence: "high"
 source: "earned"
