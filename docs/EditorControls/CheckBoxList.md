@@ -22,51 +22,56 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `AutoPostBack` is not supported in Blazor - use `OnSelectedIndexChanged` event instead
 - `DataSourceID` is not supported - bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:CheckBoxList
-    ID="string"
-    runat="server"
-    AutoPostBack="True|False"
-    CellPadding="integer"
-    CellSpacing="integer"
-    CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    Enabled="True|False"
-    RepeatColumns="integer"
-    RepeatDirection="Horizontal|Vertical"
-    RepeatLayout="Table|Flow|OrderedList|UnorderedList"
-    TextAlign="Left|Right"
-    Visible="True|False"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler">
-    
-    <asp:ListItem Value="value1" Text="Option 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Option 2" />
-    
-</asp:CheckBoxList>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
+    ```html
+    <asp:CheckBoxList
+        ID="string"
+        runat="server"
+        AutoPostBack="True|False"
+        CellPadding="integer"
+        CellSpacing="integer"
+        CssClass="string"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        Enabled="True|False"
+        RepeatColumns="integer"
+        RepeatDirection="Horizontal|Vertical"
+        RepeatLayout="Table|Flow|OrderedList|UnorderedList"
+        TextAlign="Left|Right"
+        Visible="True|False"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler">
+        
+        <asp:ListItem Value="value1" Text="Option 1" Selected="True|False" />
+        <asp:ListItem Value="value2" Text="Option 2" />
+        
+    </asp:CheckBoxList>
+    ```
 
-### Static Items
+=== "Blazor (After)"
 
-```razor
-<CheckBoxList TItem="object" StaticItems="items" @bind-SelectedValues="selectedValues" />
+    ```razor
+    <CheckBoxList TItem="object" StaticItems="items" @bind-SelectedValues="selectedValues" />
 
-@code {
-    private List<string> selectedValues = new();
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Option One", "1"),
-        new ListItem("Option Two", "2"),
-        new ListItem("Option Three", "3")
-    };
-}
-```
+    @code {
+        private List<string> selectedValues = new();
+        
+        private ListItemCollection items = new()
+        {
+            new ListItem("Option One", "1"),
+            new ListItem("Option Two", "2"),
+            new ListItem("Option Three", "3")
+        };
+    }
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, drop `runat="server"`, and add the `TItem="object"` type parameter. Replace `<asp:ListItem>` tags with a `ListItemCollection` defined in your `@code` block. Use `@bind-SelectedValues` for two-way binding of multiple selections.
+
+## Blazor Usage Examples
 
 ### Data Binding
 
@@ -247,44 +252,49 @@ When migrating from Web Forms to Blazor:
 4. Use `@bind-SelectedValues` for two-way data binding
 5. Remove `<asp:ListItem>` tags and define items in code-behind as `ListItemCollection`
 
-### Before (Web Forms):
+### Before (Web Forms) / After (Blazor)
 
-```html
-<asp:CheckBoxList ID="cblCategories" 
-                  runat="server"
-                  RepeatDirection="Vertical"
-                  AutoPostBack="true"
-                  OnSelectedIndexChanged="Categories_Changed">
-    <asp:ListItem Value="1" Text="Electronics" />
-    <asp:ListItem Value="2" Text="Clothing" Selected="True" />
-    <asp:ListItem Value="3" Text="Books" />
-</asp:CheckBoxList>
-```
+=== "Web Forms (Before)"
 
-### After (Blazor):
+    ```html
+    <asp:CheckBoxList ID="cblCategories" 
+                      runat="server"
+                      RepeatDirection="Vertical"
+                      AutoPostBack="true"
+                      OnSelectedIndexChanged="Categories_Changed">
+        <asp:ListItem Value="1" Text="Electronics" />
+        <asp:ListItem Value="2" Text="Clothing" Selected="True" />
+        <asp:ListItem Value="3" Text="Books" />
+    </asp:CheckBoxList>
+    ```
 
-```razor
-<CheckBoxList TItem="object"
-              StaticItems="categoryItems"
-              @bind-SelectedValues="selectedCategories"
-              OnSelectedIndexChanged="HandleCategoryChange" />
+=== "Blazor (After)"
 
-@code {
-    private List<string> selectedCategories = new() { "2" };
-    
-    private ListItemCollection categoryItems = new()
-    {
-        new ListItem("Electronics", "1"),
-        new ListItem("Clothing", "2"),
-        new ListItem("Books", "3")
-    };
-    
-    private void HandleCategoryChange(ChangeEventArgs e)
-    {
-        // Handle the change
+    ```razor
+    <CheckBoxList TItem="object"
+                  StaticItems="categoryItems"
+                  @bind-SelectedValues="selectedCategories"
+                  OnSelectedIndexChanged="HandleCategoryChange" />
+
+    @code {
+        private List<string> selectedCategories = new() { "2" };
+        
+        private ListItemCollection categoryItems = new()
+        {
+            new ListItem("Electronics", "1"),
+            new ListItem("Clothing", "2"),
+            new ListItem("Books", "3")
+        };
+        
+        private void HandleCategoryChange(ChangeEventArgs e)
+        {
+            // Handle the change
+        }
     }
-}
-```
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, `AutoPostBack="true"` triggers a server round-trip on selection change. In Blazor, events fire immediately without a postback. Use the `OnSelectedIndexChanged` event handler for change notifications.
 
 ## See Also
 

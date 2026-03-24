@@ -49,6 +49,60 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Rows collection** - Use declarative child content instead
 - **Programmatic row generation** - Build rows in Blazor code
 
+## Syntax Comparison
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:Table
+        ID="Table1"
+        Caption="Product List"
+        CaptionAlign="Top"
+        CellPadding="5"
+        CellSpacing="0"
+        GridLines="Both"
+        HorizontalAlign="Center"
+        runat="server">
+        <asp:TableHeaderRow>
+            <asp:TableHeaderCell Scope="Column">Name</asp:TableHeaderCell>
+            <asp:TableHeaderCell Scope="Column">Price</asp:TableHeaderCell>
+        </asp:TableHeaderRow>
+        <asp:TableRow>
+            <asp:TableCell>Widget</asp:TableCell>
+            <asp:TableCell>$10.00</asp:TableCell>
+        </asp:TableRow>
+        <asp:TableFooterRow>
+            <asp:TableCell ColumnSpan="2">Total: $10.00</asp:TableCell>
+        </asp:TableFooterRow>
+    </asp:Table>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Table Caption="Product List"
+           CaptionAlign="TableCaptionAlign.Top"
+           CellPadding="5"
+           CellSpacing="0"
+           GridLines="GridLines.Both"
+           HorizontalAlign="HorizontalAlign.Center">
+        <TableHeaderRow>
+            <TableHeaderCell Scope="TableHeaderScope.Column">Name</TableHeaderCell>
+            <TableHeaderCell Scope="TableHeaderScope.Column">Price</TableHeaderCell>
+        </TableHeaderRow>
+        <TableRow>
+            <TableCell>Widget</TableCell>
+            <TableCell>$10.00</TableCell>
+        </TableRow>
+        <TableFooterRow>
+            <TableCell ColumnSpan="2">Total: $10.00</TableCell>
+        </TableFooterRow>
+    </Table>
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix and `runat="server"`, then update enum values to use fully-qualified syntax (e.g., `GridLines="Both"` becomes `GridLines="GridLines.Both"`). The child component names and structure remain the same.
+
 ## Web Forms Declarative Syntax
 
 ```html
@@ -227,23 +281,30 @@ When migrating from Web Forms to Blazor:
 3. Replace programmatic row generation with Blazor `@foreach` loops
 4. The component uses standard `<thead>`, `<tbody>`, `<tfoot>` sections
 
-### Before (Web Forms):
-```html
-<asp:Table ID="tblProducts" GridLines="Both" runat="server">
-    <asp:TableRow>
-        <asp:TableCell>Data</asp:TableCell>
-    </asp:TableRow>
-</asp:Table>
-```
+### Before / After
 
-### After (Blazor):
-```razor
-<Table GridLines="GridLines.Both">
-    <TableRow>
-        <TableCell>Data</TableCell>
-    </TableRow>
-</Table>
-```
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:Table ID="tblProducts" GridLines="Both" runat="server">
+        <asp:TableRow>
+            <asp:TableCell>Data</asp:TableCell>
+        </asp:TableRow>
+    </asp:Table>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Table GridLines="GridLines.Both">
+        <TableRow>
+            <TableCell>Data</TableCell>
+        </TableRow>
+    </Table>
+    ```
+
+!!! note "Key Difference"
+    Web Forms used simple string values for enums (e.g., `GridLines="Both"`). In Blazor, use fully-qualified enum types (e.g., `GridLines="GridLines.Both"`). Replace programmatic row generation with Blazor `@foreach` loops.
 
 ### Dynamic Rows
 

@@ -22,56 +22,59 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Automatic UpdatePanel association** — Does not automatically show/hide based on UpdatePanel async postback state; use Blazor component state instead
 - **ScriptManager integration** — Not applicable; Blazor does not use ScriptManager
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+=== "Web Forms (Before)"
 
-<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-    <ContentTemplate>
-        <!-- Content here -->
-    </ContentTemplate>
-</asp:UpdatePanel>
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-<asp:UpdateProgress
-    AssociatedUpdatePanelID="string"
-    DisplayAfter="integer"
-    DynamicLayout="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    Visible="True|False"
->
-    <ProgressTemplate>
-        <div>Loading, please wait...</div>
-    </ProgressTemplate>
-</asp:UpdateProgress>
-```
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <!-- Content here -->
+        </ContentTemplate>
+    </asp:UpdatePanel>
 
-## Blazor Razor Syntax
-
-### Basic Usage
-
-```razor
-@if (isLoading)
-{
-    <UpdateProgress>
+    <asp:UpdateProgress
+        AssociatedUpdatePanelID="string"
+        DisplayAfter="integer"
+        DynamicLayout="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        Visible="True|False"
+    >
         <ProgressTemplate>
             <div>Loading, please wait...</div>
         </ProgressTemplate>
-    </UpdateProgress>
-}
+    </asp:UpdateProgress>
+    ```
 
-@code {
-    private bool isLoading = false;
-}
-```
+=== "Blazor (After)"
+
+    ```razor
+    @if (isLoading)
+    {
+        <UpdateProgress>
+            <ProgressTemplate>
+                <div>Loading, please wait...</div>
+            </ProgressTemplate>
+        </UpdateProgress>
+    }
+
+    @code {
+        private bool isLoading = false;
+    }
+    ```
+
+!!! tip "Migration Tip"
+    In Blazor, you control UpdateProgress visibility explicitly with a `bool` flag and an `@if` block, rather than relying on automatic UpdatePanel association. This gives you more precise control over when loading indicators appear.
 
 ### With Properties (Migration)
 
@@ -121,74 +124,74 @@ When migrating from Web Forms to Blazor:
 !!! note "Key Difference"
     In Web Forms, UpdateProgress automatically detected when its associated UpdatePanel was performing an async postback and toggled visibility. In Blazor, **you control visibility explicitly** through component state. This gives you more precise control over when loading indicators appear.
 
-### Before (Web Forms)
+=== "Web Forms (Before)"
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-    <ContentTemplate>
-        <asp:GridView ID="GridView1" runat="server" />
-        <asp:Button ID="btnLoad" runat="server"
-                    Text="Load Data"
-                    OnClick="btnLoad_Click" />
-    </ContentTemplate>
-</asp:UpdatePanel>
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <asp:GridView ID="GridView1" runat="server" />
+            <asp:Button ID="btnLoad" runat="server"
+                        Text="Load Data"
+                        OnClick="btnLoad_Click" />
+        </ContentTemplate>
+    </asp:UpdatePanel>
 
-<asp:UpdateProgress ID="UpdateProgress1" runat="server"
-                    AssociatedUpdatePanelID="UpdatePanel1"
-                    DisplayAfter="300">
-    <ProgressTemplate>
-        <div class="loading">Loading data...</div>
-    </ProgressTemplate>
-</asp:UpdateProgress>
-```
-
-```csharp
-protected void btnLoad_Click(object sender, EventArgs e)
-{
-    System.Threading.Thread.Sleep(2000); // Simulate slow operation
-    GridView1.DataSource = GetData();
-    GridView1.DataBind();
-}
-```
-
-### After (Blazor)
-
-```razor
-<UpdatePanel>
-    @if (!isLoading)
-    {
-        <GridView DataSource="@data" AutoGenerateColumns="true" />
-    }
-    <Button Text="Load Data" OnClick="LoadData" />
-</UpdatePanel>
-
-@if (isLoading)
-{
-    <UpdateProgress AssociatedUpdatePanelID="UpdatePanel1"
-                    DisplayAfter="300">
+    <asp:UpdateProgress ID="UpdateProgress1" runat="server"
+                        AssociatedUpdatePanelID="UpdatePanel1"
+                        DisplayAfter="300">
         <ProgressTemplate>
             <div class="loading">Loading data...</div>
         </ProgressTemplate>
-    </UpdateProgress>
-}
+    </asp:UpdateProgress>
+    ```
 
-@code {
-    private List<DataItem> data = new();
-    private bool isLoading = false;
-
-    async Task LoadData()
+    ```csharp
+    protected void btnLoad_Click(object sender, EventArgs e)
     {
-        isLoading = true;
-        StateHasChanged();
-
-        data = await DataService.GetDataAsync();
-
-        isLoading = false;
+        System.Threading.Thread.Sleep(2000); // Simulate slow operation
+        GridView1.DataSource = GetData();
+        GridView1.DataBind();
     }
-}
-```
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <UpdatePanel>
+        @if (!isLoading)
+        {
+            <GridView DataSource="@data" AutoGenerateColumns="true" />
+        }
+        <Button Text="Load Data" OnClick="LoadData" />
+    </UpdatePanel>
+
+    @if (isLoading)
+    {
+        <UpdateProgress AssociatedUpdatePanelID="UpdatePanel1"
+                        DisplayAfter="300">
+            <ProgressTemplate>
+                <div class="loading">Loading data...</div>
+            </ProgressTemplate>
+        </UpdateProgress>
+    }
+
+    @code {
+        private List<DataItem> data = new();
+        private bool isLoading = false;
+
+        async Task LoadData()
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            data = await DataService.GetDataAsync();
+
+            isLoading = false;
+        }
+    }
+    ```
 
 ## Examples
 

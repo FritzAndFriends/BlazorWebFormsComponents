@@ -21,46 +21,48 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - **DataSourceID** - Not supported; bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:BulletedList
-    ID="string"
-    runat="server"
-    BulletImageUrl="uri"
-    BulletStyle="NotSet|Numbered|LowerAlpha|UpperAlpha|LowerRoman|UpperRoman|Disc|Circle|Square|CustomImage"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    DisplayMode="Text|HyperLink|LinkButton"
-    Enabled="True|False"
-    FirstBulletNumber="integer"
-    Target="string|_blank|_parent|_search|_self|_top"
-    Visible="True|False"
-    OnClick="Click event handler">
-    
-    <asp:ListItem Value="value1" Text="Item 1" />
-    <asp:ListItem Value="http://example.com" Text="Link" />
-    
-</asp:BulletedList>
-```
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:BulletedList
+        ID="string"
+        runat="server"
+        BulletImageUrl="uri"
+        BulletStyle="NotSet|Numbered|LowerAlpha|UpperAlpha|LowerRoman|UpperRoman|Disc|Circle|Square|CustomImage"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        DisplayMode="Text|HyperLink|LinkButton"
+        Enabled="True|False"
+        FirstBulletNumber="integer"
+        Target="string|_blank|_parent|_search|_self|_top"
+        Visible="True|False"
+        OnClick="Click event handler">
+        
+        <asp:ListItem Value="value1" Text="Item 1" />
+        <asp:ListItem Value="http://example.com" Text="Link" />
+        
+    </asp:BulletedList>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <BulletedList TItem="object" StaticItems="items" />
+
+    @code {
+        private ListItemCollection items = new()
+        {
+            new ListItem("First item", "1"),
+            new ListItem("Second item", "2"),
+            new ListItem("Third item", "3")
+        };
+    }
+    ```
 
 ## Blazor Syntax
-
-### Static Items (Text Mode)
-
-```razor
-<BulletedList TItem="object" StaticItems="items" />
-
-@code {
-    private ListItemCollection items = new()
-    {
-        new ListItem("First item", "1"),
-        new ListItem("Second item", "2"),
-        new ListItem("Third item", "3")
-    };
-}
-```
 
 ### Data Binding
 
@@ -286,38 +288,43 @@ When migrating from Web Forms to Blazor:
 5. Update enum references to Blazor syntax (e.g., `BulletStyle.Numbered`)
 6. `AutoPostBack`, `SelectedIndex`, `SelectedValue`, and `Text` are accepted for migration compatibility
 
-### Before (Web Forms):
+### Migration Example
 
-```html
-<asp:BulletedList ID="blLinks" 
-                  runat="server"
-                  BulletStyle="Numbered"
-                  DisplayMode="HyperLink"
-                  Target="_blank">
-    <asp:ListItem Value="https://microsoft.com" Text="Microsoft" />
-    <asp:ListItem Value="https://github.com" Text="GitHub" />
-    <asp:ListItem Value="https://azure.com" Text="Azure" />
-</asp:BulletedList>
-```
+=== "Web Forms (Before)"
 
-### After (Blazor):
+    ```html
+    <asp:BulletedList ID="blLinks" 
+                      runat="server"
+                      BulletStyle="Numbered"
+                      DisplayMode="HyperLink"
+                      Target="_blank">
+        <asp:ListItem Value="https://microsoft.com" Text="Microsoft" />
+        <asp:ListItem Value="https://github.com" Text="GitHub" />
+        <asp:ListItem Value="https://azure.com" Text="Azure" />
+    </asp:BulletedList>
+    ```
 
-```razor
-<BulletedList TItem="object"
-              StaticItems="links"
-              BulletStyle="BulletStyle.Numbered"
-              DisplayMode="BulletedListDisplayMode.HyperLink"
-              Target="_blank" />
+=== "Blazor (After)"
 
-@code {
-    private ListItemCollection links = new()
-    {
-        new ListItem("Microsoft", "https://microsoft.com"),
-        new ListItem("GitHub", "https://github.com"),
-        new ListItem("Azure", "https://azure.com")
-    };
-}
-```
+    ```razor
+    <BulletedList TItem="object"
+                  StaticItems="links"
+                  BulletStyle="BulletStyle.Numbered"
+                  DisplayMode="BulletedListDisplayMode.HyperLink"
+                  Target="_blank" />
+
+    @code {
+        private ListItemCollection links = new()
+        {
+            new ListItem("Microsoft", "https://microsoft.com"),
+            new ListItem("GitHub", "https://github.com"),
+            new ListItem("Azure", "https://azure.com")
+        };
+    }
+    ```
+
+!!! tip "Migration Tip"
+    Inline `<asp:ListItem>` tags must be converted to a `ListItemCollection` in the `@code` block. Add the `TItem="object"` type parameter and use `StaticItems` instead of child elements. Update enum references to use Blazor syntax (e.g., `BulletStyle.Numbered`, `BulletedListDisplayMode.HyperLink`).
 
 ## See Also
 

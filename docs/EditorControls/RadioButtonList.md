@@ -27,7 +27,56 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - DataSourceID is not supported - bind directly to collections via `Items` parameter
 - RepeatColumns is not fully implemented
 
-## WebForms Syntax
+## Syntax Comparison
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:RadioButtonList
+        ID="rbl1"
+        runat="server"
+        RepeatDirection="Vertical"
+        RepeatLayout="Table"
+        SelectedValue="M"
+        AutoPostBack="True"
+        OnSelectedIndexChanged="SelectedIndexChanged">
+        
+        <asp:ListItem Value="S" Text="Small" />
+        <asp:ListItem Value="M" Text="Medium" Selected="True" />
+        <asp:ListItem Value="L" Text="Large" />
+        
+    </asp:RadioButtonList>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <RadioButtonList TItem="object"
+                     StaticItems="items"
+                     @bind-SelectedValue="selectedSize"
+                     OnSelectedIndexChanged="HandleSelectionChanged" />
+
+    @code {
+        private string selectedSize = "M";
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Small", "S"),
+            new ListItem("Medium", "M"),
+            new ListItem("Large", "L")
+        };
+
+        private void HandleSelectionChanged(ChangeEventArgs e)
+        {
+            Console.WriteLine($"Selection changed to: {selectedSize}");
+        }
+    }
+    ```
+
+!!! tip "Migration Tip"
+    Replace `<asp:RadioButtonList>` with `<RadioButtonList TItem="object">`, move `<asp:ListItem>` tags into a `ListItemCollection` in code, and use `@bind-SelectedValue` instead of `AutoPostBack="true"` with a server-side event handler.
+
+## Web Forms Declarative Syntax
 
 ```html
 <asp:RadioButtonList
@@ -252,6 +301,46 @@ When migrating from Web Forms:
 5. Remove `runat="server"` attribute
 6. Remove `<asp:ListItem>` tags and define items in code-behind as `ListItemCollection`
 7. Update `RepeatLayout` and `RepeatDirection` to use the enum syntax (e.g., `RepeatLayout.Table`)
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:RadioButtonList ID="rbl1" runat="server"
+                         AutoPostBack="True"
+                         OnSelectedIndexChanged="rbl1_SelectedIndexChanged">
+        <asp:ListItem Value="S" Text="Small" />
+        <asp:ListItem Value="M" Text="Medium" Selected="True" />
+        <asp:ListItem Value="L" Text="Large" />
+    </asp:RadioButtonList>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <RadioButtonList TItem="object"
+                     StaticItems="items"
+                     @bind-SelectedValue="selectedSize"
+                     OnSelectedIndexChanged="HandleSelectionChanged" />
+
+    @code {
+        private string selectedSize = "M";
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Small", "S"),
+            new ListItem("Medium", "M"),
+            new ListItem("Large", "L")
+        };
+
+        private void HandleSelectionChanged(ChangeEventArgs e)
+        {
+            // Handle selection change
+        }
+    }
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, items are declared inline with `<asp:ListItem>` tags. In Blazor, define items as a `ListItemCollection` in your `@code` block and pass them via the `StaticItems` parameter. `AutoPostBack` is not needed — Blazor events fire immediately.
 
 ## See Also
 

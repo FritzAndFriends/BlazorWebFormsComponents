@@ -22,6 +22,48 @@ No features are actively supported. The component silently accepts its presence 
 - **Service references** (`Services` collection) — Use dependency injection and `HttpClient`
 - **AuthenticationService, ProfileService, RoleService** — Use ASP.NET Core Identity
 
+## Syntax Comparison
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:ScriptManagerProxy
+        ID="string"
+        runat="server"
+        Visible="True|False"
+    >
+        <Scripts>
+            <asp:ScriptReference Path="~/Scripts/custom.js" />
+        </Scripts>
+        <Services>
+            <asp:ServiceReference Path="~/WebServices/MyService.asmx" />
+        </Services>
+    </asp:ScriptManagerProxy>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    @inject IJSRuntime JS
+
+    @* ScriptManagerProxy included for migration, can be removed *@
+    <ScriptManagerProxy />
+
+    @code {
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                // Replace ScriptReference with IJSRuntime calls
+                await JS.InvokeVoidAsync("customInit");
+            }
+        }
+    }
+    ```
+
+!!! tip "Migration Tip"
+    ScriptManagerProxy was a workaround for Web Forms' single-ScriptManager-per-page limitation. Blazor has no such limitation — you can call `IJSRuntime` from any component. Remove ScriptManagerProxy as soon as your page compiles without it.
+
 ## Web Forms Declarative Syntax
 
 ```html
@@ -66,46 +108,48 @@ When migrating from Web Forms to Blazor:
 4. **Migrate service references** — Replace `<Services>` collections with dependency-injected services
 
 !!! tip "Best Practice"
-    ScriptManagerProxy was a workaround for Web Forms' single-ScriptManager-per-page limitation. Blazor has no such limitation — you can call `IJSRuntime` from any component. Remove ScriptManagerProxy as soon as your page compiles without it.
+    Treat ScriptManagerProxy as scaffolding during migration. Include it early to keep pages compiling, then remove it as part of your cleanup pass.
 
-### Before (Web Forms — Content Page)
+### Before / After
 
-```html
-<%@ Page Title="Dashboard" MasterPageFile="~/Site.Master" %>
+=== "Web Forms (Before)"
 
-<asp:Content ContentPlaceHolderID="MainContent" runat="server">
-    <asp:ScriptManagerProxy ID="ScriptManagerProxy1" runat="server">
-        <Scripts>
-            <asp:ScriptReference Path="~/Scripts/dashboard.js" />
-        </Scripts>
-    </asp:ScriptManagerProxy>
+    ```html
+    <%@ Page Title="Dashboard" MasterPageFile="~/Site.Master" %>
 
-    <asp:Label ID="lblStatus" runat="server" Text="Loading..." />
-</asp:Content>
-```
+    <asp:Content ContentPlaceHolderID="MainContent" runat="server">
+        <asp:ScriptManagerProxy ID="ScriptManagerProxy1" runat="server">
+            <Scripts>
+                <asp:ScriptReference Path="~/Scripts/dashboard.js" />
+            </Scripts>
+        </asp:ScriptManagerProxy>
 
-### After (Blazor)
+        <asp:Label ID="lblStatus" runat="server" Text="Loading..." />
+    </asp:Content>
+    ```
 
-```razor
-@inject IJSRuntime JS
+=== "Blazor (After)"
 
-@* ScriptManagerProxy included for migration, can be removed *@
-<ScriptManagerProxy />
+    ```razor
+    @inject IJSRuntime JS
 
-<Label Text="@status" />
+    @* ScriptManagerProxy included for migration, can be removed *@
+    <ScriptManagerProxy />
 
-@code {
-    private string status = "Loading...";
+    <Label Text="@status" />
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+    @code {
+        private string status = "Loading...";
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            await JS.InvokeVoidAsync("dashboardInit");
+            if (firstRender)
+            {
+                await JS.InvokeVoidAsync("dashboardInit");
+            }
         }
     }
-}
-```
+    ```
 
 ## See Also
 

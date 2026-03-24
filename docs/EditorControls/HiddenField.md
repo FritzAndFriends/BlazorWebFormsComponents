@@ -28,38 +28,41 @@ Unlike Web Forms, Blazor maintains component state automatically, so you may not
 - **OnDataBinding, OnDisposed, OnInit, OnLoad, OnPreRender, OnUnload** - Blazor component lifecycle is different; use Blazor lifecycle methods (`OnInitialized`, `OnParametersSet`, etc.)
 - **Visible** - Not applicable; use conditional rendering with `@if` instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:HiddenField
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    OnValueChanged="ValueChanged event handler"
-    runat="server"
-    SkinID="string"
-    Value="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms (Before)"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:HiddenField
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        OnValueChanged="ValueChanged event handler"
+        runat="server"
+        SkinID="string"
+        Value="string"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Usage
+=== "Blazor (After)"
 
-```razor
-<HiddenField ID="myHiddenField" Value="@secretValue" />
+    ```razor
+    <HiddenField ID="myHiddenField" Value="@secretValue" />
 
-@code {
-    private string secretValue = "stored-data-123";
-}
-```
+    @code {
+        private string secretValue = "stored-data-123";
+    }
+    ```
+
+!!! note "Key Difference"
+    In Blazor, the HiddenField component only requires the properties you actually use. Remove `runat="server"`, `EnableViewState`, `EnableTheming`, and lifecycle event attributes — Blazor handles these concerns differently.
 
 ### With Value Changed Event
 
@@ -101,8 +104,24 @@ When migrating from Web Forms to Blazor:
 4. **Consider alternatives** - For pure Blazor apps, you may not need HiddenField; use component state or `@bind` instead
 5. **JavaScript interop** - HiddenField is still useful when you need to exchange values with JavaScript
 
-!!! tip "Best Practice"
+!!! tip "Migration Tip"
     In new Blazor development, prefer using component fields and parameters over hidden fields. Only use HiddenField when migrating existing markup or when JavaScript interop requires a DOM element to read/write values.
+
+### Before / After
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:HiddenField ID="hfToken" Value="abc123" runat="server"
+        OnValueChanged="hfToken_ValueChanged" EnableViewState="true" />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <HiddenField ID="hfToken" Value="@tokenValue"
+        OnValueChanged="HandleTokenChanged" />
+    ```
 
 ## See Also
 

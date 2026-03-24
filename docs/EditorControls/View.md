@@ -17,46 +17,50 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Command-based navigation (handled by parent MultiView)
 - `EnableTheming` / `SkinID` — theming not supported in Blazor
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
-    <asp:View ID="View1" runat="server">
-        <p>Content for View 1</p>
-    </asp:View>
-    <asp:View ID="View2" runat="server">
-        <p>Content for View 2</p>
-    </asp:View>
-</asp:MultiView>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
+    ```html
+    <asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
+        <asp:View ID="View1" runat="server">
+            <p>Content for View 1</p>
+        </asp:View>
+        <asp:View ID="View2" runat="server">
+            <p>Content for View 2</p>
+        </asp:View>
+    </asp:MultiView>
+    ```
 
-A View must always be a child of a MultiView component. Only the active View's content is rendered.
+=== "Blazor (After)"
 
-### Basic View Within MultiView
+    ```razor
+    <MultiView ActiveViewIndex="@activeIndex" OnActiveViewChanged="ViewChanged">
+        <View>
+            <p>This is View 1</p>
+            <Button Text="Go to View 2" OnClick="() => activeIndex = 1" />
+        </View>
+        <View>
+            <p>This is View 2</p>
+            <Button Text="Go to View 1" OnClick="() => activeIndex = 0" />
+        </View>
+    </MultiView>
 
-```razor
-<MultiView ActiveViewIndex="@activeIndex" OnActiveViewChanged="ViewChanged">
-    <View>
-        <p>This is View 1</p>
-        <Button Text="Go to View 2" OnClick="() => activeIndex = 1" />
-    </View>
-    <View>
-        <p>This is View 2</p>
-        <Button Text="Go to View 1" OnClick="() => activeIndex = 0" />
-    </View>
-</MultiView>
+    @code {
+        private int activeIndex = 0;
 
-@code {
-    private int activeIndex = 0;
-
-    private void ViewChanged(EventArgs e)
-    {
-        // Handle view change
+        private void ViewChanged(EventArgs e)
+        {
+            // Handle view change
+        }
     }
-}
-```
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, `runat="server"`, and `ID` attributes. A View must always be a child of a MultiView component — only the active View's content is rendered.
+
+!!! note "Key Difference"
+    In Web Forms, View navigation used command-based buttons (`CommandName="NextView"`). In Blazor, you control navigation by directly setting the parent MultiView's `ActiveViewIndex` via event handlers.
 
 ### View with Event Callbacks
 
@@ -119,39 +123,39 @@ When migrating from Web Forms to Blazor:
 3. **Replace command navigation** — Change button command names (`NextView`, `PrevView`) to direct index binding
 4. **Use event callbacks** — Replace any View visibility logic with `OnActivate` and `OnDeactivate` callbacks
 
-### Before (Web Forms)
+=== "Web Forms (Before)"
 
-```html
-<asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
-    <asp:View ID="View1" runat="server">
-        <p>Step 1</p>
-        <asp:Button ID="btn1" CommandName="NextView" Text="Next" runat="server" />
-    </asp:View>
-    <asp:View ID="View2" runat="server">
-        <p>Step 2</p>
-        <asp:Button ID="btn2" CommandName="PrevView" Text="Previous" runat="server" />
-    </asp:View>
-</asp:MultiView>
-```
+    ```html
+    <asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
+        <asp:View ID="View1" runat="server">
+            <p>Step 1</p>
+            <asp:Button ID="btn1" CommandName="NextView" Text="Next" runat="server" />
+        </asp:View>
+        <asp:View ID="View2" runat="server">
+            <p>Step 2</p>
+            <asp:Button ID="btn2" CommandName="PrevView" Text="Previous" runat="server" />
+        </asp:View>
+    </asp:MultiView>
+    ```
 
-### After (Blazor)
+=== "Blazor (After)"
 
-```razor
-<MultiView ActiveViewIndex="@activeIndex">
-    <View>
-        <p>Step 1</p>
-        <Button Text="Next" OnClick="() => activeIndex = 1" />
-    </View>
-    <View>
-        <p>Step 2</p>
-        <Button Text="Previous" OnClick="() => activeIndex = 0" />
-    </View>
-</MultiView>
+    ```razor
+    <MultiView ActiveViewIndex="@activeIndex">
+        <View>
+            <p>Step 1</p>
+            <Button Text="Next" OnClick="() => activeIndex = 1" />
+        </View>
+        <View>
+            <p>Step 2</p>
+            <Button Text="Previous" OnClick="() => activeIndex = 0" />
+        </View>
+    </MultiView>
 
-@code {
-    private int activeIndex = 0;
-}
-```
+    @code {
+        private int activeIndex = 0;
+    }
+    ```
 
 ## See Also
 

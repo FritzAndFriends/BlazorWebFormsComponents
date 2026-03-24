@@ -16,54 +16,59 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Multiple master pages cascading placeholders (use nested layouts in Blazor instead)
 - Master page inheritance chains with placeholders
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<!-- Site.Master -->
-<%@ Master Language="C#" %>
-<html>
-<head>
-    <title><%: Page.Title %></title>
-</head>
-<body>
-    <div class="header">
-        <h1>My Website</h1>
-    </div>
-    
-    <asp:ContentPlaceHolder ID="MainContent" runat="server">
-        <p>Default content if no page overrides this placeholder</p>
-    </asp:ContentPlaceHolder>
-    
-    <div class="footer">
-        <p>&copy; 2024 My Company</p>
-    </div>
-</body>
-</html>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
-
-ContentPlaceHolder components are placed within the ChildContent of a MasterPage component. They automatically register with the parent MasterPage.
-
-### Basic ContentPlaceHolder with Default Content
-
-```razor
-<MasterPage>
-    <ChildContent>
+    ```html
+    <!-- Site.Master -->
+    <%@ Master Language="C#" %>
+    <html>
+    <head>
+        <title><%: Page.Title %></title>
+    </head>
+    <body>
         <div class="header">
             <h1>My Website</h1>
         </div>
         
-        <ContentPlaceHolder ID="MainContent">
-            <p>This is the default content for the main area.</p>
-        </ContentPlaceHolder>
+        <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            <p>Default content if no page overrides this placeholder</p>
+        </asp:ContentPlaceHolder>
         
         <div class="footer">
             <p>&copy; 2024 My Company</p>
         </div>
-    </ChildContent>
-</MasterPage>
-```
+    </body>
+    </html>
+    ```
+
+=== "Blazor (After)"
+
+    ContentPlaceHolder components are placed within the ChildContent of a MasterPage component. They automatically register with the parent MasterPage.
+
+    ```razor
+    <MasterPage>
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
+            
+            <ContentPlaceHolder ID="MainContent">
+                <p>This is the default content for the main area.</p>
+            </ContentPlaceHolder>
+            
+            <div class="footer">
+                <p>&copy; 2024 My Company</p>
+            </div>
+        </ChildContent>
+    </MasterPage>
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, drop `runat="server"`, and place `<ContentPlaceHolder>` inside a `<MasterPage>` component's `<ChildContent>`. The `ID` attribute works the same way to match with `<Content>` controls.
+
+## Blazor Usage Examples
 
 ### Multiple ContentPlaceHolders
 
@@ -182,78 +187,83 @@ When migrating from Web Forms to Blazor:
 3. **Place within MasterPage** — ContentPlaceHolder must be a child of a MasterPage component
 4. **Default content becomes ChildContent** — What was inside the Web Forms tag becomes the ChildContent of the component
 
-### Before (Web Forms)
+### Before (Web Forms) / After (Blazor)
 
-```html
-<!-- Site.Master -->
-<%@ Master Language="C#" %>
-<html>
-<body>
-    <div class="sidebar">
-        <asp:ContentPlaceHolder ID="SidebarContent" runat="server">
-            <p>Default sidebar</p>
-        </asp:ContentPlaceHolder>
-    </div>
-    
-    <div class="main">
-        <asp:ContentPlaceHolder ID="MainContent" runat="server">
-            <p>Default main area</p>
-        </asp:ContentPlaceHolder>
-    </div>
-</body>
-</html>
+=== "Web Forms (Before)"
 
-<!-- MyPage.aspx -->
-<%@ Page MasterPageFile="~/Site.Master" %>
-
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h1>My Page</h1>
-    <p>My content here</p>
-</asp:Content>
-```
-
-### After (Blazor)
-
-```razor
-<!-- MasterLayout.razor -->
-<MasterPage>
-    <ChildContent>
+    ```html
+    <!-- Site.Master -->
+    <%@ Master Language="C#" %>
+    <html>
+    <body>
         <div class="sidebar">
-            <ContentPlaceHolder ID="SidebarContent">
+            <asp:ContentPlaceHolder ID="SidebarContent" runat="server">
                 <p>Default sidebar</p>
-            </ContentPlaceHolder>
+            </asp:ContentPlaceHolder>
         </div>
         
         <div class="main">
-            <ContentPlaceHolder ID="MainContent">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
                 <p>Default main area</p>
-            </ContentPlaceHolder>
+            </asp:ContentPlaceHolder>
         </div>
-    </ChildContent>
-</MasterPage>
+    </body>
+    </html>
 
-<!-- MyPage.razor -->
-<MasterPage>
-    <ChildContent>
-        <div class="sidebar">
-            <ContentPlaceHolder ID="SidebarContent">
-                <p>Default sidebar</p>
-            </ContentPlaceHolder>
-        </div>
-        
-        <div class="main">
-            <ContentPlaceHolder ID="MainContent">
-                <p>Default main area</p>
-            </ContentPlaceHolder>
-        </div>
-    </ChildContent>
-    
-    <Content ContentPlaceHolderID="MainContent">
+    <!-- MyPage.aspx -->
+    <%@ Page MasterPageFile="~/Site.Master" %>
+
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
         <h1>My Page</h1>
         <p>My content here</p>
-    </Content>
-</MasterPage>
-```
+    </asp:Content>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <!-- MasterLayout.razor -->
+    <MasterPage>
+        <ChildContent>
+            <div class="sidebar">
+                <ContentPlaceHolder ID="SidebarContent">
+                    <p>Default sidebar</p>
+                </ContentPlaceHolder>
+            </div>
+            
+            <div class="main">
+                <ContentPlaceHolder ID="MainContent">
+                    <p>Default main area</p>
+                </ContentPlaceHolder>
+            </div>
+        </ChildContent>
+    </MasterPage>
+
+    <!-- MyPage.razor -->
+    <MasterPage>
+        <ChildContent>
+            <div class="sidebar">
+                <ContentPlaceHolder ID="SidebarContent">
+                    <p>Default sidebar</p>
+                </ContentPlaceHolder>
+            </div>
+            
+            <div class="main">
+                <ContentPlaceHolder ID="MainContent">
+                    <p>Default main area</p>
+                </ContentPlaceHolder>
+            </div>
+        </ChildContent>
+        
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>My Page</h1>
+            <p>My content here</p>
+        </Content>
+    </MasterPage>
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, master pages and content pages are separate `.master` and `.aspx` files. In Blazor, use `<MasterPage>`, `<ContentPlaceHolder>`, and `<Content>` components together, or leverage Blazor's native layout system for page-level separation.
 
 ## See Also
 

@@ -21,60 +21,72 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `InputAttributes` property is not implemented
 - `LabelAttributes` property is not implemented
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:CheckBox
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    Checked="True|False"
-    CssClass="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnCheckedChanged="CheckedChanged event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Text="string"
-    TextAlign="Left|Right"
-    ToolTip="string"
-    ValidationGroup="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:CheckBox
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        Checked="True|False"
+        CssClass="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnCheckedChanged="CheckedChanged event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Text="string"
+        TextAlign="Left|Right"
+        ToolTip="string"
+        ValidationGroup="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <CheckBox Text="I agree to the terms and conditions" />
+    ```
+
+    Two-way binding:
+
+    ```razor
+    <CheckBox Text="Subscribe to newsletter" @bind-Checked="isSubscribed" />
+
+    @code {
+        private bool isSubscribed = false;
+    }
+    ```
 
 ## Blazor Syntax
-
-### Basic CheckBox
-
-```razor
-<CheckBox Text="I agree to the terms and conditions" />
-```
 
 ### Pre-checked CheckBox
 
@@ -176,21 +188,26 @@ When migrating from Web Forms to Blazor:
 3. Use `@bind-Checked` for two-way data binding instead of reading `Checked` in code-behind
 4. The `ID` property is obsolete in Blazor; use `@ref` to get a reference to the component instance
 
-### Before (Web Forms):
-```html
-<asp:CheckBox ID="chkAgree" 
-              Text="I agree" 
-              AutoPostBack="true"
-              OnCheckedChanged="CheckBox_Changed" 
-              runat="server" />
-```
+=== "Web Forms (Before)"
 
-### After (Blazor):
-```razor
-<CheckBox Text="I agree" 
-          @bind-Checked="agreed"
-          OnCheckedChanged="HandleChange" />
-```
+    ```html
+    <asp:CheckBox ID="chkAgree" 
+                  Text="I agree" 
+                  AutoPostBack="true"
+                  OnCheckedChanged="CheckBox_Changed" 
+                  runat="server" />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <CheckBox Text="I agree" 
+              @bind-Checked="agreed"
+              OnCheckedChanged="HandleChange" />
+    ```
+
+!!! tip "Migration Tip"
+    Replace `AutoPostBack="true"` with `@bind-Checked` for two-way binding. Blazor events fire immediately without requiring a postback, so `AutoPostBack` is not needed.
 
 ## Live Sample
 

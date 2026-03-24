@@ -30,52 +30,55 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **EnableViewState** - Not needed; Blazor manages state differently
 - **Lifecycle events** (`OnDataBinding`, `OnInit`, `OnLoad`, etc.) - Not supported; use Blazor lifecycle methods instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Image
-    AccessKey="string"
-    AlternateText="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DescriptionUrl="uri"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ForeColor="color name|#dddddd"
-    GenerateEmptyAlternateText="True|False"
-    Height="size"
-    ID="string"
-    ImageAlign="NotSet|Left|Right|Baseline|Top|Middle|Bottom|
-        AbsBottom|AbsMiddle|TextTop"
-    ImageUrl="uri"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms (Before)"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:Image
+        AccessKey="string"
+        AlternateText="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DescriptionUrl="uri"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ForeColor="color name|#dddddd"
+        GenerateEmptyAlternateText="True|False"
+        Height="size"
+        ID="string"
+        ImageAlign="NotSet|Left|Right|Baseline|Top|Middle|Bottom|
+            AbsBottom|AbsMiddle|TextTop"
+        ImageUrl="uri"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
 
-### Basic Image
+=== "Blazor (After)"
 
-```razor
-<Image ImageUrl="/images/photo.jpg" AlternateText="A beautiful photo" />
-```
+    ```razor
+    <Image ImageUrl="/images/photo.jpg" AlternateText="A beautiful photo" />
+    ```
+
+!!! note "Key Difference"
+    The `ImageUrl` property maps to the HTML `src` attribute. In Blazor, place images in the `wwwroot` folder and reference them with a leading `/` (e.g., `/images/logo.png`). The `~` path prefix from Web Forms is not needed.
 
 ### Image with Tooltip
 
@@ -137,24 +140,29 @@ When migrating from Web Forms to Blazor:
 5. **Add `@using` for enums** - Add `@using BlazorWebFormsComponents.Enums` when using `ImageAlign`
 6. **Style properties** - Wrap the Image in a `<div>` or `<span>` and apply CSS for styling not yet supported
 
-### Before (Web Forms)
+### Before / After
 
-```html
-<asp:Image ID="imgLogo" 
-           ImageUrl="~/images/logo.png" 
-           AlternateText="Company Logo"
-           CssClass="logo-image"
-           runat="server" />
-```
+=== "Web Forms (Before)"
 
-### After (Blazor)
+    ```html
+    <asp:Image ID="imgLogo" 
+               ImageUrl="~/images/logo.png" 
+               AlternateText="Company Logo"
+               CssClass="logo-image"
+               runat="server" />
+    ```
 
-```razor
-<div class="logo-image">
-    <Image ImageUrl="/images/logo.png" 
-           AlternateText="Company Logo" />
-</div>
-```
+=== "Blazor (After)"
+
+    ```razor
+    <div class="logo-image">
+        <Image ImageUrl="/images/logo.png" 
+               AlternateText="Company Logo" />
+    </div>
+    ```
+
+!!! tip "Migration Tip"
+    Style properties like `CssClass`, `Width`, and `Height` are not yet supported directly on the Image component. Wrap the `<Image>` in a `<div>` or `<span>` and apply CSS to the wrapper element instead.
 
 ## Examples
 

@@ -42,41 +42,49 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Automatic form submission - implement form handling in Blazor
 - Server-side file system access in WebAssembly - must send to API endpoint
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:FileUpload
-<asp:FileUpload
-    AccessKey="string"
-    AllowMultiple="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    Enabled="True|False"
-    Height="size"
-    ID="string"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-    runat="server" />
-```
+=== "Web Forms (Before)"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:FileUpload
+        AccessKey="string"
+        AllowMultiple="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        Enabled="True|False"
+        Height="size"
+        ID="string"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+        runat="server" />
+    ```
 
-### Basic File Upload
+=== "Blazor (After)"
 
-```razor
-<FileUpload OnFileSelected="HandleFileSelected" />
+    ```razor
+    <FileUpload OnFileSelected="HandleFileSelected"
+                Accept=".jpg,.png,.gif"
+                AllowMultiple="false"
+                MaxFileSize="512000"
+                CssClass="string" />
 
-@code {
-    void HandleFileSelected(InputFileChangeEventArgs args)
-    {
-        // File has been selected
+    @code {
+        void HandleFileSelected(InputFileChangeEventArgs args)
+        {
+            // File has been selected
+        }
     }
-}
-```
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, drop `runat="server"`, and replace the `ID` attribute with `@ref` to get a component reference. Use `OnFileSelected` instead of relying on a separate Button's PostBack to trigger file processing.
+
+## Blazor Usage Examples
 
 ### File Upload with Type Restriction
 
@@ -222,54 +230,59 @@ When migrating from Web Forms to Blazor:
 5. **Replace `Server.MapPath`** — Use `IWebHostEnvironment.WebRootPath` or `ContentRootPath` for server paths
 6. **Use async methods** — Prefer `GetFileBytesAsync()` over `FileBytes` for better performance
 
-### Before (Web Forms)
+### Before (Web Forms) / After (Blazor)
 
-```html
-<asp:FileUpload ID="fileUpload1" runat="server" />
-<asp:Button ID="btnUpload" Text="Upload" OnClick="btnUpload_Click" runat="server" />
-<asp:Label ID="lblStatus" runat="server" />
-```
+=== "Web Forms (Before)"
 
-```csharp
-protected void btnUpload_Click(object sender, EventArgs e)
-{
-    if (fileUpload1.HasFile)
+    ```html
+    <asp:FileUpload ID="fileUpload1" runat="server" />
+    <asp:Button ID="btnUpload" Text="Upload" OnClick="btnUpload_Click" runat="server" />
+    <asp:Label ID="lblStatus" runat="server" />
+    ```
+
+    ```csharp
+    protected void btnUpload_Click(object sender, EventArgs e)
     {
-        string fileName = fileUpload1.FileName;
-        string savePath = Server.MapPath("~/uploads/") + fileName;
-        fileUpload1.SaveAs(savePath);
-        lblStatus.Text = "File uploaded: " + fileName;
-    }
-}
-```
-
-### After (Blazor)
-
-```razor
-@inject IWebHostEnvironment Environment
-
-<FileUpload @ref="fileUpload" OnFileSelected="HandleFile" />
-<Button Text="Upload" OnClick="Upload" />
-<Label Text="@statusMessage" />
-
-@code {
-    private FileUpload fileUpload;
-    private string statusMessage = "";
-
-    void HandleFile(InputFileChangeEventArgs args) { }
-
-    async Task Upload()
-    {
-        if (fileUpload.HasFile)
+        if (fileUpload1.HasFile)
         {
-            var fileName = fileUpload.FileName;
-            var savePath = Path.Combine(Environment.WebRootPath, "uploads", fileName);
-            await fileUpload.SaveAs(savePath);
-            statusMessage = "File uploaded: " + fileName;
+            string fileName = fileUpload1.FileName;
+            string savePath = Server.MapPath("~/uploads/") + fileName;
+            fileUpload1.SaveAs(savePath);
+            lblStatus.Text = "File uploaded: " + fileName;
         }
     }
-}
-```
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    @inject IWebHostEnvironment Environment
+
+    <FileUpload @ref="fileUpload" OnFileSelected="HandleFile" />
+    <Button Text="Upload" OnClick="Upload" />
+    <Label Text="@statusMessage" />
+
+    @code {
+        private FileUpload fileUpload;
+        private string statusMessage = "";
+
+        void HandleFile(InputFileChangeEventArgs args) { }
+
+        async Task Upload()
+        {
+            if (fileUpload.HasFile)
+            {
+                var fileName = fileUpload.FileName;
+                var savePath = Path.Combine(Environment.WebRootPath, "uploads", fileName);
+                await fileUpload.SaveAs(savePath);
+                statusMessage = "File uploaded: " + fileName;
+            }
+        }
+    }
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, `Server.MapPath` resolves server paths and file upload is triggered by a Button's PostBack. In Blazor, use `IWebHostEnvironment.WebRootPath` for path resolution and `@ref` with async `SaveAs` for file saving.
 
 !!! warning "Security Consideration"
     Always validate uploaded files on the server side. The `Accept` attribute only provides client-side filtering and can be bypassed. Validate file extensions, content types, and file sizes before saving. The `SaveAllFiles` method sanitizes filenames using `Path.GetFileName` to prevent directory traversal attacks, but additional validation is recommended.

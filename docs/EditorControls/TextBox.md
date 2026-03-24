@@ -26,71 +26,73 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **TextChanged server event** - Use `@bind-Text` or `@onchange` event in Blazor
 - **Wrap** - Use CSS styling instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:TextBox
-    AccessKey="string"
-    AutoCompleteType="None|Disabled|Search|FirstName|LastName|MiddleName|
-        NamePrefix|NameSuffix|FullName|Nickname|Email|HomePhone|WorkPhone|
-        CellPhone|HomeStreetAddress|HomeCity|HomeState|HomeZipCode|
-        HomeCountryRegion|WorkStreetAddress|WorkCity|WorkState|WorkZipCode|
-        WorkCountryRegion|Gender|Birthday|Occupation|BusinessUrl|
-        Company|Department|DisplayName|JobTitle|Notes"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    Columns="integer"
-    CssClass="string"
-    Enabled="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    MaxLength="integer"
-    OnTextChanged="TextChanged event handler"
-    Placeholder="string"
-    ReadOnly="True|False"
-    Rows="integer"
-    runat="server"
-    TabIndex="integer"
-    Text="string"
-    TextMode="SingleLine|MultiLine|Password|Color|Date|DateTime|
-        DateTimeLocal|Email|Month|Number|Range|Search|Phone|Time|Url|Week"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-    Wrap="True|False"
-/>
-```
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:TextBox
+        AccessKey="string"
+        AutoCompleteType="None|Disabled|Search|FirstName|LastName|MiddleName|
+            NamePrefix|NameSuffix|FullName|Nickname|Email|HomePhone|WorkPhone|
+            CellPhone|HomeStreetAddress|HomeCity|HomeState|HomeZipCode|
+            HomeCountryRegion|WorkStreetAddress|WorkCity|WorkState|WorkZipCode|
+            WorkCountryRegion|Gender|Birthday|Occupation|BusinessUrl|
+            Company|Department|DisplayName|JobTitle|Notes"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        Columns="integer"
+        CssClass="string"
+        Enabled="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        MaxLength="integer"
+        OnTextChanged="TextChanged event handler"
+        Placeholder="string"
+        ReadOnly="True|False"
+        Rows="integer"
+        runat="server"
+        TabIndex="integer"
+        Text="string"
+        TextMode="SingleLine|MultiLine|Password|Color|Date|DateTime|
+            DateTimeLocal|Email|Month|Number|Range|Search|Phone|Time|Url|Week"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+        Wrap="True|False"
+    />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <TextBox Text="Enter your name" CssClass="form-control" />
+    ```
+
+    Two-way data binding:
+
+    ```razor
+    <TextBox @bind-Text="userName" />
+
+    @code {
+        private string userName = "John Doe";
+    }
+    ```
 
 ## Blazor Razor Syntax
-
-### Single-Line Text Input
-
-```razor
-<TextBox Text="Enter your name" CssClass="form-control" />
-```
-
-### Two-Way Data Binding
-
-```razor
-<TextBox @bind-Text="userName" />
-
-@code {
-    private string userName = "John Doe";
-}
-```
 
 ### Password Input
 
@@ -195,6 +197,25 @@ When migrating from Web Forms to Blazor:
 3. **Replace `OnTextChanged` with `@bind-Text`** - For real-time updates
 4. **Update `TextMode` references** - Use `TextBoxMode.` enum prefix (e.g., `TextBoxMode.Password`)
 5. **Use HTML5 input types** - Take advantage of new types like Email, Number, Date, etc.
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:TextBox ID="txtName" Text="John" CssClass="form-control" runat="server" />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <TextBox @bind-Text="name" CssClass="form-control" />
+
+    @code {
+        private string name = "John";
+    }
+    ```
+
+!!! tip "Migration Tip"
+    Replace `AutoPostBack="true"` and `OnTextChanged` with `@bind-Text` for two-way data binding. Use `TextBoxMode.Password`, `TextBoxMode.MultiLine`, etc. instead of string-based `TextMode` values.
 
 ## See Also
 

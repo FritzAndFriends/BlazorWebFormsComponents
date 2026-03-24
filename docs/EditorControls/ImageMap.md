@@ -41,81 +41,86 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **ViewState** - Not needed; Blazor manages state differently
 - **Lifecycle Events** - OnDataBinding, OnInit, etc. not supported; use Blazor lifecycle methods
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```aspx
-<asp:ImageMap 
-    ID="ImageMap1"
-    ImageUrl="~/images/navigation.jpg"
-    HotSpotMode="Navigate|PostBack|Inactive"
-    Target="_blank"
-    AlternateText="Navigation Map"
-    OnClick="ImageMap1_Click"
-    runat="server">
-    
-    <asp:RectangleHotSpot 
-        Left="10" Top="10" Right="110" Bottom="60"
-        AlternateText="Home"
-        NavigateUrl="~/Default.aspx"
-        HotSpotMode="Navigate" />
+=== "Web Forms (Before)"
+
+    ```aspx
+    <asp:ImageMap 
+        ID="ImageMap1"
+        ImageUrl="~/images/navigation.jpg"
+        HotSpotMode="Navigate|PostBack|Inactive"
+        Target="_blank"
+        AlternateText="Navigation Map"
+        OnClick="ImageMap1_Click"
+        runat="server">
         
-    <asp:CircleHotSpot 
-        X="200" Y="35" Radius="25"
-        AlternateText="Products"
-        PostBackValue="Products"
-        HotSpotMode="PostBack" />
+        <asp:RectangleHotSpot 
+            Left="10" Top="10" Right="110" Bottom="60"
+            AlternateText="Home"
+            NavigateUrl="~/Default.aspx"
+            HotSpotMode="Navigate" />
+            
+        <asp:CircleHotSpot 
+            X="200" Y="35" Radius="25"
+            AlternateText="Products"
+            PostBackValue="Products"
+            HotSpotMode="PostBack" />
+            
+        <asp:PolygonHotSpot 
+            Coordinates="300,10,350,10,325,50"
+            AlternateText="Contact"
+            NavigateUrl="~/Contact.aspx" />
+    </asp:ImageMap>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <ImageMap 
+        ImageUrl="/images/navigation.jpg"
+        HotSpotMode="HotSpotMode.Navigate"
+        Target="_blank"
+        AlternateText="Navigation Map"
+        OnClick="HandleMapClick"
+        HotSpots="@hotSpotList">
+    </ImageMap>
+
+    @code {
+        private List<HotSpot> hotSpotList = new()
+        {
+            new RectangleHotSpot 
+            { 
+                Left = 10, Top = 10, Right = 110, Bottom = 60,
+                AlternateText = "Home",
+                NavigateUrl = "/",
+                HotSpotMode = HotSpotMode.Navigate
+            },
+            new CircleHotSpot 
+            { 
+                X = 200, Y = 35, Radius = 25,
+                AlternateText = "Products",
+                PostBackValue = "Products",
+                HotSpotMode = HotSpotMode.PostBack
+            },
+            new PolygonHotSpot 
+            { 
+                Coordinates = "300,10,350,10,325,50",
+                AlternateText = "Contact",
+                NavigateUrl = "/contact"
+            }
+        };
         
-    <asp:PolygonHotSpot 
-        Coordinates="300,10,350,10,325,50"
-        AlternateText="Contact"
-        NavigateUrl="~/Contact.aspx" />
-</asp:ImageMap>
-```
-
-## Blazor Syntax
-
-```razor
-<ImageMap 
-    ImageUrl="/images/navigation.jpg"
-    HotSpotMode="HotSpotMode.Navigate"
-    Target="_blank"
-    AlternateText="Navigation Map"
-    OnClick="HandleMapClick"
-    HotSpots="@hotSpotList">
-</ImageMap>
-
-@code {
-    private List<HotSpot> hotSpotList = new()
-    {
-        new RectangleHotSpot 
-        { 
-            Left = 10, Top = 10, Right = 110, Bottom = 60,
-            AlternateText = "Home",
-            NavigateUrl = "/",
-            HotSpotMode = HotSpotMode.Navigate
-        },
-        new CircleHotSpot 
-        { 
-            X = 200, Y = 35, Radius = 25,
-            AlternateText = "Products",
-            PostBackValue = "Products",
-            HotSpotMode = HotSpotMode.PostBack
-        },
-        new PolygonHotSpot 
-        { 
-            Coordinates = "300,10,350,10,325,50",
-            AlternateText = "Contact",
-            NavigateUrl = "/contact"
+        private void HandleMapClick(ImageMapEventArgs e)
+        {
+            // Handle postback - e.PostBackValue contains the clicked HotSpot's value
+            var clickedArea = e.PostBackValue;
         }
-    };
-    
-    private void HandleMapClick(ImageMapEventArgs e)
-    {
-        // Handle postback - e.PostBackValue contains the clicked HotSpot's value
-        var clickedArea = e.PostBackValue;
     }
-}
-```
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, HotSpots are declared as child XML elements inside the `<asp:ImageMap>` tag. In Blazor, HotSpots are defined as a `List<HotSpot>` collection in the `@code` block and passed via the `HotSpots` parameter. This makes dynamic addition and removal of regions straightforward.
 
 ## Usage Notes
 
@@ -313,7 +318,10 @@ new RectangleHotSpot
 }
 ```
 
-## Migration Tips
+## Migration Notes
+
+!!! tip "Migration Tip"
+    The biggest change when migrating ImageMap is converting declarative child `<asp:HotSpot>` elements into a C# `List<HotSpot>` collection. Extract coordinates and properties from the markup and create the corresponding objects in your `@code` block.
 
 1. **Convert Declarative HotSpots to Collection**: In Web Forms, HotSpots are declared as child elements. In Blazor, create a List<HotSpot> in your @code block.
 
@@ -322,6 +330,37 @@ new RectangleHotSpot
 3. **Coordinate Validation**: Consider validating HotSpot coordinates are within image bounds to prevent rendering issues.
 
 4. **Dynamic HotSpots**: In Blazor, you can easily add/remove HotSpots dynamically by modifying the List<HotSpot> and calling `StateHasChanged()`.
+
+### Before / After
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:ImageMap ID="map1" ImageUrl="~/images/nav.jpg"
+        OnClick="map1_Click" runat="server">
+        <asp:RectangleHotSpot Left="0" Top="0" Right="100" Bottom="50"
+            NavigateUrl="~/Home.aspx" AlternateText="Home" />
+    </asp:ImageMap>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <ImageMap ImageUrl="/images/nav.jpg"
+              OnClick="HandleClick"
+              HotSpots="@spots" />
+
+    @code {
+        private List<HotSpot> spots = new()
+        {
+            new RectangleHotSpot
+            {
+                Left = 0, Top = 0, Right = 100, Bottom = 50,
+                NavigateUrl = "/", AlternateText = "Home"
+            }
+        };
+    }
+    ```
 
 ## See Also
 

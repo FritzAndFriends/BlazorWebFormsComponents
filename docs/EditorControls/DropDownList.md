@@ -21,73 +21,78 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - AppendDataBoundItems is not implemented
 - DataSourceID is not supported - bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:DropDownList
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SelectedIndex="number"
-    SelectedValue="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size">
-    
-    <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Display Text 2" />
-    
-</asp:DropDownList>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
+    ```html
+    <asp:DropDownList
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SelectedIndex="number"
+        SelectedValue="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size">
+        
+        <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
+        <asp:ListItem Value="value2" Text="Display Text 2" />
+        
+    </asp:DropDownList>
+    ```
 
-### Static Items
+=== "Blazor (After)"
 
-```razor
-<DropDownList TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
+    ```razor
+    <DropDownList TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
 
-@code {
-    private string selectedValue = "";
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Select...", ""),
-        new ListItem("Option One", "1"),
-        new ListItem("Option Two", "2"),
-        new ListItem("Option Three", "3")
-    };
-}
-```
+    @code {
+        private string selectedValue = "";
+        
+        private ListItemCollection items = new()
+        {
+            new ListItem("Select...", ""),
+            new ListItem("Option One", "1"),
+            new ListItem("Option Two", "2"),
+            new ListItem("Option Three", "3")
+        };
+    }
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, drop `runat="server"`, and add the `TItem="object"` type parameter. Replace `<asp:ListItem>` tags with a `ListItemCollection` in your `@code` block. Use `@bind-SelectedValue` for two-way binding instead of `AutoPostBack`.
+
+## Blazor Usage Examples
 
 ### Data Binding
 
@@ -204,7 +209,7 @@ var text = selectedItem?.Text;
 var value = selectedItem?.Value;
 ```
 
-## Migration Tips
+## Migration Notes
 
 When migrating from Web Forms:
 
@@ -214,6 +219,51 @@ When migrating from Web Forms:
 4. Use `@bind-SelectedValue` instead of manually managing `SelectedValue`
 5. Remove `runat="server"` attribute
 6. Remove `<asp:ListItem>` tags and define items in code-behind as `ListItemCollection`
+
+### Before (Web Forms) / After (Blazor)
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:DropDownList ID="ddlProducts" 
+                      runat="server"
+                      AutoPostBack="true"
+                      OnSelectedIndexChanged="ddlProducts_Changed">
+        <asp:ListItem Value="" Text="-- Select --" />
+        <asp:ListItem Value="1" Text="Widget" />
+        <asp:ListItem Value="2" Text="Gadget" Selected="True" />
+        <asp:ListItem Value="3" Text="Gizmo" />
+    </asp:DropDownList>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <DropDownList TItem="object"
+                  StaticItems="productItems"
+                  @bind-SelectedValue="selectedProduct"
+                  OnSelectedIndexChanged="HandleProductChange" />
+
+    @code {
+        private string selectedProduct = "2";
+        
+        private ListItemCollection productItems = new()
+        {
+            new ListItem("-- Select --", ""),
+            new ListItem("Widget", "1"),
+            new ListItem("Gadget", "2"),
+            new ListItem("Gizmo", "3")
+        };
+        
+        private void HandleProductChange(ChangeEventArgs e)
+        {
+            // Handle the change
+        }
+    }
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, `AutoPostBack="true"` triggers a server round-trip on selection change. In Blazor, events fire immediately without a postback. Use `@bind-SelectedValue` for two-way binding and `OnSelectedIndexChanged` for change notifications.
 
 ## See Also
 

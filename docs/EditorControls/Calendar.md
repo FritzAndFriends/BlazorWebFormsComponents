@@ -52,83 +52,88 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 !!! note "Style Properties Migration"
     Individual style objects (`DayStyle`, `TitleStyle`, etc.) from Web Forms are now supported via **TableItemStyle sub-components** such as `<CalendarDayStyle>`, `<CalendarTitleStyle>`, etc. The older CSS string properties (`DayStyleCss`, `TitleStyleCss`, etc.) still work but are **deprecated**. See the [migration example](#migrating-from-css-string-properties-to-tableitemstyle) below.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Calendar
-    CellPadding="2"
-    CellSpacing="0"
-    DayNameFormat="Short|Full|FirstLetter|FirstTwoLetters|Shortest"
-    FirstDayOfWeek="Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Default"
-    ID="string"
-    NextMonthText="string"
-    NextPrevFormat="ShortMonth|FullMonth|CustomText"
-    OnDayRender="DayRenderEventHandler"
-    OnSelectionChanged="EventHandler"
-    OnVisibleMonthChanged="MonthChangedEventHandler"
-    PrevMonthText="string"
-    SelectedDate="DateTime"
-    SelectionMode="None|Day|DayWeek|DayWeekMonth"
-    SelectMonthText="string"
-    SelectWeekText="string"
-    ShowDayHeader="True|False"
-    ShowGridLines="True|False"
-    ShowNextPrevMonth="True|False"
-    ShowTitle="True|False"
-    TitleFormat="Month|MonthYear"
-    VisibleDate="DateTime"
-    runat="server">
-    <DayStyle />
-    <TodayDayStyle />
-    <SelectedDayStyle />
-    <OtherMonthDayStyle />
-    <WeekendDayStyle />
-    <TitleStyle />
-    <NextPrevStyle />
-    <DayHeaderStyle />
-    <SelectorStyle />
-</asp:Calendar>
-```
+=== "Web Forms (Before)"
 
-## Blazor Declarative Syntax
+    ```html
+    <asp:Calendar
+        CellPadding="2"
+        CellSpacing="0"
+        DayNameFormat="Short|Full|FirstLetter|FirstTwoLetters|Shortest"
+        FirstDayOfWeek="Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Default"
+        ID="string"
+        NextMonthText="string"
+        NextPrevFormat="ShortMonth|FullMonth|CustomText"
+        OnDayRender="DayRenderEventHandler"
+        OnSelectionChanged="EventHandler"
+        OnVisibleMonthChanged="MonthChangedEventHandler"
+        PrevMonthText="string"
+        SelectedDate="DateTime"
+        SelectionMode="None|Day|DayWeek|DayWeekMonth"
+        SelectMonthText="string"
+        SelectWeekText="string"
+        ShowDayHeader="True|False"
+        ShowGridLines="True|False"
+        ShowNextPrevMonth="True|False"
+        ShowTitle="True|False"
+        TitleFormat="Month|MonthYear"
+        VisibleDate="DateTime"
+        runat="server">
+        <DayStyle />
+        <TodayDayStyle />
+        <SelectedDayStyle />
+        <OtherMonthDayStyle />
+        <WeekendDayStyle />
+        <TitleStyle />
+        <NextPrevStyle />
+        <DayHeaderStyle />
+        <SelectorStyle />
+    </asp:Calendar>
+    ```
 
-```razor
-<Calendar
-    CellPadding="2"
-    CellSpacing="0"
-    DayNameFormat="Short|Full|FirstLetter|FirstTwoLetters|Shortest"
-    FirstDayOfWeek="Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday"
-    ID="string"
-    NextMonthText="string"
-    OnDayRender="DayRenderEventHandler"
-    OnSelectionChanged="EventHandler"
-    OnVisibleMonthChanged="MonthChangedEventHandler"
-    PrevMonthText="string"
-    @bind-SelectedDate="dateVariable"
-    SelectionMode="None|Day|DayWeek|DayWeekMonth"
-    SelectMonthText="string"
-    SelectWeekText="string"
-    ShowDayHeader="True|False"
-    ShowGridLines="True|False"
-    ShowNextPrevMonth="True|False"
-    ShowTitle="True|False"
-    TitleFormat="Month|MonthYear"
-    VisibleDate="DateTime"
-    CssClass="string">
+=== "Blazor (After)"
 
-    @* TableItemStyle sub-components (preferred) *@
-    <CalendarDayStyle CssClass="string" BackColor="string" ForeColor="string" />
-    <CalendarTitleStyle CssClass="string" BackColor="string" ForeColor="string" Font-Bold="true" />
-    <CalendarDayHeaderStyle CssClass="string" BackColor="string" ForeColor="string" />
-    <CalendarTodayDayStyle CssClass="string" BackColor="string" ForeColor="string" />
-    <CalendarSelectedDayStyle CssClass="string" BackColor="string" ForeColor="string" />
-    <CalendarOtherMonthDayStyle CssClass="string" ForeColor="string" />
-    <CalendarWeekendDayStyle CssClass="string" BackColor="string" />
-    <CalendarNextPrevStyle CssClass="string" ForeColor="string" />
-    <CalendarSelectorStyle CssClass="string" BackColor="string" />
+    ```razor
+    <Calendar
+        CellPadding="2"
+        CellSpacing="0"
+        DayNameFormat="Short|Full|FirstLetter|FirstTwoLetters|Shortest"
+        FirstDayOfWeek="Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday"
+        ID="string"
+        NextMonthText="string"
+        OnDayRender="DayRenderEventHandler"
+        OnSelectionChanged="EventHandler"
+        OnVisibleMonthChanged="MonthChangedEventHandler"
+        PrevMonthText="string"
+        @bind-SelectedDate="dateVariable"
+        SelectionMode="None|Day|DayWeek|DayWeekMonth"
+        SelectMonthText="string"
+        SelectWeekText="string"
+        ShowDayHeader="True|False"
+        ShowGridLines="True|False"
+        ShowNextPrevMonth="True|False"
+        ShowTitle="True|False"
+        TitleFormat="Month|MonthYear"
+        VisibleDate="DateTime"
+        CssClass="string">
 
-</Calendar>
-```
+        @* TableItemStyle sub-components (preferred) *@
+        <CalendarDayStyle CssClass="string" BackColor="string" ForeColor="string" />
+        <CalendarTitleStyle CssClass="string" BackColor="string" ForeColor="string" Font-Bold="true" />
+        <CalendarDayHeaderStyle CssClass="string" BackColor="string" ForeColor="string" />
+        <CalendarTodayDayStyle CssClass="string" BackColor="string" ForeColor="string" />
+        <CalendarSelectedDayStyle CssClass="string" BackColor="string" ForeColor="string" />
+        <CalendarOtherMonthDayStyle CssClass="string" ForeColor="string" />
+        <CalendarWeekendDayStyle CssClass="string" BackColor="string" />
+        <CalendarNextPrevStyle CssClass="string" ForeColor="string" />
+        <CalendarSelectorStyle CssClass="string" BackColor="string" />
+
+    </Calendar>
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, drop `runat="server"`, and replace `SelectedDate="DateTime"` with `@bind-SelectedDate="dateVariable"` for two-way binding. Style child elements like `<DayStyle />` become `<CalendarDayStyle />` sub-components.
 
 !!! warning "Deprecated CSS String Properties"
     The following properties still work but are deprecated. Use the TableItemStyle sub-components above instead:
@@ -303,65 +308,72 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ### From Web Forms to Blazor
 
-**Web Forms:**
-```aspx
-<asp:Calendar ID="Calendar1" 
-              runat="server" 
-              OnSelectionChanged="Calendar1_SelectionChanged">
-    <SelectedDayStyle BackColor="Blue" ForeColor="White" />
-</asp:Calendar>
-```
+=== "Web Forms (Before)"
 
-```csharp
-protected void Calendar1_SelectionChanged(object sender, EventArgs e)
-{
-    DateTime selected = Calendar1.SelectedDate;
-}
-```
+    ```aspx
+    <asp:Calendar ID="Calendar1" 
+                  runat="server" 
+                  OnSelectionChanged="Calendar1_SelectionChanged">
+        <SelectedDayStyle BackColor="Blue" ForeColor="White" />
+    </asp:Calendar>
+    ```
 
-**Blazor:**
-```razor
-<Calendar @bind-SelectedDate="selectedDate"
-          OnSelectionChanged="HandleSelectionChanged">
-    <CalendarSelectedDayStyle BackColor="Blue" ForeColor="White" />
-</Calendar>
-```
-
-```csharp
-@code {
-    private DateTime selectedDate = DateTime.Today;
-
-    private void HandleSelectionChanged()
+    ```csharp
+    protected void Calendar1_SelectionChanged(object sender, EventArgs e)
     {
-        // Date is available in selectedDate variable
+        DateTime selected = Calendar1.SelectedDate;
     }
-}
-```
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Calendar @bind-SelectedDate="selectedDate"
+              OnSelectionChanged="HandleSelectionChanged">
+        <CalendarSelectedDayStyle BackColor="Blue" ForeColor="White" />
+    </Calendar>
+    ```
+
+    ```csharp
+    @code {
+        private DateTime selectedDate = DateTime.Today;
+
+        private void HandleSelectionChanged()
+        {
+            // Date is available in selectedDate variable
+        }
+    }
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, the selected date is accessed via `Calendar1.SelectedDate` in the code-behind. In Blazor, use `@bind-SelectedDate` for two-way binding so the value is always available in your `@code` block variable.
 
 ### Migrating from CSS String Properties to TableItemStyle
 
 If you previously used the CSS string properties, migrate to the new sub-components:
 
-**Before (deprecated):**
-```razor
-<Calendar TitleStyleCss="calendar-title"
-          SelectedDayStyleCss="selected-date"
-          TodayDayStyleCss="today-date"
-          WeekendDayStyleCss="weekend-date"
-          DayHeaderStyleCss="header-style"
-          @bind-SelectedDate="selectedDate" />
-```
+=== "CSS String Properties (Deprecated)"
 
-**After (preferred):**
-```razor
-<Calendar @bind-SelectedDate="selectedDate">
-    <CalendarTitleStyle CssClass="calendar-title" />
-    <CalendarSelectedDayStyle CssClass="selected-date" />
-    <CalendarTodayDayStyle CssClass="today-date" />
-    <CalendarWeekendDayStyle CssClass="weekend-date" />
-    <CalendarDayHeaderStyle CssClass="header-style" />
-</Calendar>
-```
+    ```razor
+    <Calendar TitleStyleCss="calendar-title"
+              SelectedDayStyleCss="selected-date"
+              TodayDayStyleCss="today-date"
+              WeekendDayStyleCss="weekend-date"
+              DayHeaderStyleCss="header-style"
+              @bind-SelectedDate="selectedDate" />
+    ```
+
+=== "TableItemStyle Sub-Components (Preferred)"
+
+    ```razor
+    <Calendar @bind-SelectedDate="selectedDate">
+        <CalendarTitleStyle CssClass="calendar-title" />
+        <CalendarSelectedDayStyle CssClass="selected-date" />
+        <CalendarTodayDayStyle CssClass="today-date" />
+        <CalendarWeekendDayStyle CssClass="weekend-date" />
+        <CalendarDayHeaderStyle CssClass="header-style" />
+    </Calendar>
+    ```
 
 !!! tip "Best Practice"
     The TableItemStyle sub-components also support inline style properties like `BackColor`, `ForeColor`, and `Font-Bold` — matching the Web Forms `<DayStyle>`, `<TitleStyle>`, etc. child elements. This makes migration from Web Forms markup even more direct.

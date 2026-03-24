@@ -35,6 +35,50 @@ Since this is a stub component, **all features are effectively unsupported**. Th
 - **Error handling** (`AsyncPostBackError`) — Use Blazor's `ErrorBoundary` component
 - **Script combining/bundling** — Use standard ASP.NET Core bundling or a build tool
 
+## Syntax Comparison
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:ScriptManager
+        AsyncPostBackErrorMessage="string"
+        AsyncPostBackTimeout="integer"
+        EnableCdn="True|False"
+        EnablePageMethods="True|False"
+        EnablePartialRendering="True|False"
+        EnableScriptGlobalization="True|False"
+        EnableScriptLocalization="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnAsyncPostBackError="AsyncPostBackError event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        ScriptMode="Auto|Inherit|Debug|Release"
+        Visible="True|False"
+    />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    @* Include during migration to prevent compilation errors *@
+    <ScriptManager />
+
+    @* Or with properties (all are accepted but have no effect) *@
+    <ScriptManager EnablePartialRendering="true"
+                   EnablePageMethods="true"
+                   ScriptMode="ScriptMode.Release"
+                   AsyncPostBackTimeout="90" />
+    ```
+
+!!! tip "Migration Tip"
+    ScriptManager is a no-op stub in Blazor — it renders nothing. Keep it during initial migration to prevent compilation errors, then remove it once your page is stable.
+
 ## Web Forms Declarative Syntax
 
 ```html
@@ -96,59 +140,61 @@ When migrating from Web Forms to Blazor:
 !!! tip "Best Practice"
     Treat ScriptManager as scaffolding. Include it early in migration to keep pages compiling, then remove it as part of your cleanup pass. A page with `<ScriptManager />` works identically to one without it.
 
-### Before (Web Forms)
+### Before / After
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server"
-                   EnablePartialRendering="true"
-                   EnablePageMethods="true" />
+=== "Web Forms (Before)"
 
-<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-    <ContentTemplate>
-        <asp:Label ID="lblResult" runat="server" />
-        <asp:Button ID="btnLoad" runat="server"
-                    Text="Load Data"
-                    OnClick="btnLoad_Click" />
-    </ContentTemplate>
-</asp:UpdatePanel>
-```
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server"
+                       EnablePartialRendering="true"
+                       EnablePageMethods="true" />
 
-### After (Blazor)
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <asp:Label ID="lblResult" runat="server" />
+            <asp:Button ID="btnLoad" runat="server"
+                        Text="Load Data"
+                        OnClick="btnLoad_Click" />
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    ```
 
-```razor
-@* ScriptManager can be included during migration but is not needed *@
-<ScriptManager />
+=== "Blazor (After)"
 
-<Label Text="@result" />
-<Button Text="Load Data" OnClick="LoadData" />
+    ```razor
+    @* ScriptManager can be included during migration but is not needed *@
+    <ScriptManager />
 
-@code {
-    private string result = "";
+    <Label Text="@result" />
+    <Button Text="Load Data" OnClick="LoadData" />
 
-    void LoadData()
-    {
-        result = "Data loaded!";
+    @code {
+        private string result = "";
+
+        void LoadData()
+        {
+            result = "Data loaded!";
+        }
     }
-}
-```
+    ```
 
-### After (Blazor — Cleaned Up)
+=== "Blazor (Cleaned Up)"
 
-```razor
-@* ScriptManager removed — not needed in Blazor *@
+    ```razor
+    @* ScriptManager removed — not needed in Blazor *@
 
-<Label Text="@result" />
-<Button Text="Load Data" OnClick="LoadData" />
+    <Label Text="@result" />
+    <Button Text="Load Data" OnClick="LoadData" />
 
-@code {
-    private string result = "";
+    @code {
+        private string result = "";
 
-    void LoadData()
-    {
-        result = "Data loaded!";
+        void LoadData()
+        {
+            result = "Data loaded!";
+        }
     }
-}
-```
+    ```
 
 ## See Also
 

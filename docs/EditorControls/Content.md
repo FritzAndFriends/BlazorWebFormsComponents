@@ -16,45 +16,50 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Master page file path resolution (handled by layout system in Blazor)
 - Multiple content sections in a single page (use separate MasterPage components instead)
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<!-- MyPage.aspx -->
-<%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
+=== "Web Forms (Before)"
 
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Welcome to my page!</h2>
-    <p>This is the page-specific content.</p>
-</asp:Content>
-```
+    ```html
+    <!-- MyPage.aspx -->
+    <%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
 
-## Blazor Syntax
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+        <h2>Welcome to my page!</h2>
+        <p>This is the page-specific content.</p>
+    </asp:Content>
+    ```
 
-Content controls are placed as children of a MasterPage component. They automatically register with their parent MasterPage.
+=== "Blazor (After)"
 
-### Basic Content for a Placeholder
+    Content controls are placed as children of a MasterPage component. They automatically register with their parent MasterPage.
 
-```razor
-<MasterPage>
-    <ChildContent>
-        <div class="header">
-            <h1>My Website</h1>
-        </div>
-        
-        <ContentPlaceHolder ID="MainContent">
-            <p>Default content</p>
-        </ContentPlaceHolder>
-        
-        <div class="footer">
-            <p>&copy; 2024</p>
-        </div>
-    </ChildContent>
-    <Content ContentPlaceHolderID="MainContent">
-        <h2>Page Title</h2>
-        <p>This content replaces the MainContent placeholder.</p>
-    </Content>
-</MasterPage>
-```
+    ```razor
+    <MasterPage>
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
+            
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+            
+            <div class="footer">
+                <p>&copy; 2024</p>
+            </div>
+        </ChildContent>
+        <Content ContentPlaceHolderID="MainContent">
+            <h2>Page Title</h2>
+            <p>This content replaces the MainContent placeholder.</p>
+        </Content>
+    </MasterPage>
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, drop `runat="server"`, and remove the `<%@ Page %>` directive. In Blazor, `<Content>` controls must be nested inside a `<MasterPage>` component instead of referencing a master page file.
+
+## Blazor Usage Examples
 
 ### Multiple Content Sections
 
@@ -144,70 +149,75 @@ When migrating from Web Forms to Blazor:
 3. **Place within MasterPage** — Content controls must be children of a MasterPage component
 4. **Rename Master page reference** — Remove `MasterPageFile` directive; instead nest Content controls in the MasterPage component
 
-### Before (Web Forms)
+### Before (Web Forms) / After (Blazor)
 
-```html
-<!-- Site.Master -->
-<%@ Master Language="C#" %>
-<html>
-<body>
-    <header>
-        <h1>My Site</h1>
-    </header>
-    
-    <asp:ContentPlaceHolder ID="MainContent" runat="server">
-        <p>Default content</p>
-    </asp:ContentPlaceHolder>
-</body>
-</html>
-```
+=== "Web Forms (Before)"
 
-```html
-<!-- MyPage.aspx -->
-<%@ Page MasterPageFile="~/Site.Master" %>
-
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Welcome!</h2>
-    <p>Page content goes here.</p>
-</asp:Content>
-```
-
-### After (Blazor)
-
-```razor
-<!-- MasterLayout.razor -->
-<MasterPage>
-    <ChildContent>
+    ```html
+    <!-- Site.Master -->
+    <%@ Master Language="C#" %>
+    <html>
+    <body>
         <header>
             <h1>My Site</h1>
         </header>
         
-        <ContentPlaceHolder ID="MainContent">
+        <asp:ContentPlaceHolder ID="MainContent" runat="server">
             <p>Default content</p>
-        </ContentPlaceHolder>
-    </ChildContent>
-</MasterPage>
-```
+        </asp:ContentPlaceHolder>
+    </body>
+    </html>
+    ```
 
-```razor
-<!-- MyPage.razor -->
-<MasterPage>
-    <ChildContent>
-        <header>
-            <h1>My Site</h1>
-        </header>
-        
-        <ContentPlaceHolder ID="MainContent">
-            <p>Default content</p>
-        </ContentPlaceHolder>
-    </ChildContent>
-    
-    <Content ContentPlaceHolderID="MainContent">
+    ```html
+    <!-- MyPage.aspx -->
+    <%@ Page MasterPageFile="~/Site.Master" %>
+
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
         <h2>Welcome!</h2>
         <p>Page content goes here.</p>
-    </Content>
-</MasterPage>
-```
+    </asp:Content>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <!-- MasterLayout.razor -->
+    <MasterPage>
+        <ChildContent>
+            <header>
+                <h1>My Site</h1>
+            </header>
+            
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+        </ChildContent>
+    </MasterPage>
+    ```
+
+    ```razor
+    <!-- MyPage.razor -->
+    <MasterPage>
+        <ChildContent>
+            <header>
+                <h1>My Site</h1>
+            </header>
+            
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+        </ChildContent>
+        
+        <Content ContentPlaceHolderID="MainContent">
+            <h2>Welcome!</h2>
+            <p>Page content goes here.</p>
+        </Content>
+    </MasterPage>
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, the master page and content page are separate files linked by a `MasterPageFile` directive. In Blazor, the `<Content>` and `<ContentPlaceHolder>` are nested within the same `<MasterPage>` component, or use Blazor's layout system for page-level separation.
 
 ## See Also
 

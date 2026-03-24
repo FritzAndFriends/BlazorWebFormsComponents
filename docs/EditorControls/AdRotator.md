@@ -1,4 +1,6 @@
-The AdRotator component is meant to emulate the `asp:AdRotator` control in markup and is defined in the [System.Web.UI.WebControls.AdRotator class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.adrotator?view=netframework-4.8)
+# AdRotator
+
+The **AdRotator** component is meant to emulate the `asp:AdRotator` control in markup and is defined in the [System.Web.UI.WebControls.AdRotator class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.adrotator?view=netframework-4.8)
 
 ## Blazor Features Supported
 
@@ -150,9 +152,7 @@ Execute code after data binding:
 
 ## Notes
 
-- When both `DataSource` and `AdvertisementFile` are specified, `DataSource` takes priority.
 - The AdRotator randomly selects an advertisement from the available pool each time it renders.
-- The `Impressions` field in the XML affects the probability of an ad being shown (ads with higher impression values appear more frequently).
 - Custom field names can be specified using `AlternateTextField`, `ImageUrlField`, and `NavigateUrlField` properties.
 
 ## Web Forms Features NOT Supported
@@ -162,46 +162,90 @@ Execute code after data binding:
 - `EnableTheming` / `SkinID` - Blazor uses CSS for theming.
 - `EnableViewState` - Blazor doesn't use ViewState.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:AdRotator
-    AccessKey="string"
-    AdvertisementFile="uri"
-    AlternateTextField="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DataMember="string"
-    DataSource="string"
-    DataSourceID="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    ImageUrlField="string"
-    KeywordFilter="string"
-    NavigateUrlField="string"
-    OnAdCreated="AdCreated event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDataBound="DataBound event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Target="string|_blank|_parent|_search|_self|_top"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:AdRotator
+        AccessKey="string"
+        AdvertisementFile="uri"
+        AlternateTextField="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DataMember="string"
+        DataSource="string"
+        DataSourceID="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        ImageUrlField="string"
+        KeywordFilter="string"
+        NavigateUrlField="string"
+        OnAdCreated="AdCreated event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDataBound="DataBound event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Target="string|_blank|_parent|_search|_self|_top"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <AdRotator AdvertisementFile="Ads.xml" Target="_blank" />
+    ```
+
+    Or with data binding:
+
+    ```razor
+    <AdRotator DataSource="@_ads" Target="_blank" />
+    ```
+
+## Migration Notes
+
+When migrating from Web Forms to Blazor:
+
+1. **Remove `asp:` prefix** - Change `<asp:AdRotator>` to `<AdRotator>`
+2. **Remove `runat="server"`** - Not needed in Blazor
+3. **Replace `DataSourceID`** - Use the `DataSource` property to bind data programmatically
+4. **Keep XML file format** - The `AdvertisementFile` XML format is the same in Blazor
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:AdRotator ID="adBanner" 
+                   AdvertisementFile="Ads.xml" 
+                   Target="_blank"
+                   runat="server" />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <AdRotator AdvertisementFile="Ads.xml" Target="_blank" />
+    ```
+
+!!! tip "Migration Tip"
+    The XML advertisement file format is identical between Web Forms and Blazor. You can reuse your existing `Ads.xml` file without changes. Replace `DataSourceID` with the `DataSource` property and bind to a `List<Advertisment>` collection.
+
+!!! note "DataSource Priority"
+    When both `DataSource` and `AdvertisementFile` are specified, `DataSource` takes priority. The `Impressions` field in the XML affects the probability of an ad being shown.

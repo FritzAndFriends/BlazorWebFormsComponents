@@ -24,75 +24,80 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - AppendDataBoundItems is not implemented
 - DataSourceID is not supported - bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:ListBox
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    OnUnload="Unload event handler"
-    Rows="integer"
-    runat="server"
-    SelectionMode="Single|Multiple"
-    SelectedIndex="integer"
-    SelectedValue="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size">
-    
-    <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Display Text 2" />
-    
-</asp:ListBox>
-```
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:ListBox
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"
+        OnUnload="Unload event handler"
+        Rows="integer"
+        runat="server"
+        SelectionMode="Single|Multiple"
+        SelectedIndex="integer"
+        SelectedValue="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size">
+        
+        <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
+        <asp:ListItem Value="value2" Text="Display Text 2" />
+        
+    </asp:ListBox>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <ListBox TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
+
+    @code {
+        private string selectedValue = "";
+        
+        private ListItemCollection items = new()
+        {
+            new ListItem("Apple", "1"),
+            new ListItem("Banana", "2"),
+            new ListItem("Cherry", "3"),
+            new ListItem("Date", "4")
+        };
+    }
+    ```
+
+!!! note "Key Difference"
+    Blazor's `ListBox` requires a `TItem` type parameter and uses `StaticItems` for inline item collections instead of nested `<asp:ListItem>` tags. Use `@bind-SelectedValue` for two-way data binding, replacing the old `SelectedValue` property and `AutoPostBack` pattern.
 
 ## Blazor Syntax
-
-### Static Items (Single Selection)
-
-```razor
-<ListBox TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
-
-@code {
-    private string selectedValue = "";
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Apple", "1"),
-        new ListItem("Banana", "2"),
-        new ListItem("Cherry", "3"),
-        new ListItem("Date", "4")
-    };
-}
-```
 
 ### Multiple Selection
 
@@ -186,6 +191,9 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 4. **Events**: Use `OnSelectedIndexChanged` with `ChangeEventArgs` instead of specialized event args
 5. **No AutoPostBack**: Blazor's event model doesn't require postback; events fire immediately
 6. **Selection Mode Enum**: Use `ListSelectionMode.Single` or `ListSelectionMode.Multiple` from `BlazorWebFormsComponents.Enums`
+
+!!! tip "Selection Mode"
+    When migrating a multi-select ListBox, add `@using BlazorWebFormsComponents.Enums` and switch from `@bind-SelectedValue` to `@bind-SelectedValues` (plural) with a `List<string>` backing field.
 
 ## Key Differences from DropDownList
 
@@ -288,6 +296,55 @@ foreach (var item in listbox.SelectedItems)
 ```
 
 ## Migration Tips
+
+### Migration Example
+
+=== "Web Forms (Before)"
+
+    ```html
+    <asp:ListBox ID="lbFruits" runat="server" Rows="4"
+        AutoPostBack="True"
+        SelectionMode="Multiple"
+        OnSelectedIndexChanged="lbFruits_SelectedIndexChanged">
+        <asp:ListItem Value="1" Text="Apple" />
+        <asp:ListItem Value="2" Text="Banana" Selected="True" />
+        <asp:ListItem Value="3" Text="Cherry" />
+        <asp:ListItem Value="4" Text="Date" />
+    </asp:ListBox>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    @using BlazorWebFormsComponents.Enums
+
+    <ListBox TItem="object"
+             StaticItems="items"
+             Rows="4"
+             SelectionMode="ListSelectionMode.Multiple"
+             @bind-SelectedValues="selectedValues"
+             OnSelectedIndexChanged="HandleSelectionChanged" />
+
+    @code {
+        private List<string> selectedValues = new() { "2" };
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Apple", "1"),
+            new ListItem("Banana", "2"),
+            new ListItem("Cherry", "3"),
+            new ListItem("Date", "4")
+        };
+
+        private void HandleSelectionChanged(ChangeEventArgs e)
+        {
+            // Handle selection change
+        }
+    }
+    ```
+
+!!! tip "Migration Tip"
+    Remove `<asp:ListItem>` tags and define items in code-behind as a `ListItemCollection`. Replace `AutoPostBack="True"` with the `OnSelectedIndexChanged` event handler, and use `@bind-SelectedValue` or `@bind-SelectedValues` for two-way binding.
 
 When migrating from Web Forms:
 

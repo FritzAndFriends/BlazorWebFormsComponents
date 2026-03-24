@@ -24,42 +24,45 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **EnableViewState** - Blazor handles state differently; use component state instead
 - **OnDataBinding, OnDisposed, OnInit, OnLoad, OnPreRender, OnUnload** - Use Blazor lifecycle methods instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+=== "Web Forms (Before)"
 
-<asp:Timer
-    Enabled="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    Interval="integer"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnTick="Tick event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    Visible="True|False"
-/>
-```
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-## Blazor Razor Syntax
+    <asp:Timer
+        Enabled="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        Interval="integer"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnTick="Tick event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Timer
+=== "Blazor (After)"
 
-```razor
-<Timer Interval="5000" OnTick="HandleTick" />
+    ```razor
+    <Timer Interval="5000" OnTick="HandleTick" />
 
-@code {
-    void HandleTick()
-    {
-        // Called every 5 seconds
+    @code {
+        void HandleTick()
+        {
+            // Called every 5 seconds
+        }
     }
-}
-```
+    ```
+
+!!! tip "Migration Tip"
+    Remove the `asp:` prefix, `runat="server"`, and any `ID` attribute. Drop the ScriptManager requirement entirely — Blazor handles updates natively via SignalR.
 
 ### Timer with Enable/Disable
 
@@ -100,43 +103,43 @@ When migrating from Web Forms to Blazor:
 !!! note "Key Difference"
     In Web Forms, Timer triggers an async postback that refreshes an UpdatePanel region. In Blazor, the `OnTick` event handler runs server-side and Blazor's SignalR connection automatically pushes UI updates to the browser. The result is the same — periodic UI updates — but the mechanism is fundamentally different and more efficient.
 
-### Before (Web Forms)
+=== "Web Forms (Before)"
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-    <ContentTemplate>
-        <asp:Label ID="lblTime" runat="server" />
-        <asp:Timer ID="Timer1" runat="server"
-                   Interval="1000"
-                   OnTick="Timer1_Tick" />
-    </ContentTemplate>
-</asp:UpdatePanel>
-```
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <asp:Label ID="lblTime" runat="server" />
+            <asp:Timer ID="Timer1" runat="server"
+                       Interval="1000"
+                       OnTick="Timer1_Tick" />
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    ```
 
-```csharp
-protected void Timer1_Tick(object sender, EventArgs e)
-{
-    lblTime.Text = DateTime.Now.ToString("HH:mm:ss");
-}
-```
-
-### After (Blazor)
-
-```razor
-<Label Text="@currentTime" />
-<Timer Interval="1000" OnTick="HandleTick" />
-
-@code {
-    private string currentTime = DateTime.Now.ToString("HH:mm:ss");
-
-    void HandleTick()
+    ```csharp
+    protected void Timer1_Tick(object sender, EventArgs e)
     {
-        currentTime = DateTime.Now.ToString("HH:mm:ss");
+        lblTime.Text = DateTime.Now.ToString("HH:mm:ss");
     }
-}
-```
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Label Text="@currentTime" />
+    <Timer Interval="1000" OnTick="HandleTick" />
+
+    @code {
+        private string currentTime = DateTime.Now.ToString("HH:mm:ss");
+
+        void HandleTick()
+        {
+            currentTime = DateTime.Now.ToString("HH:mm:ss");
+        }
+    }
+    ```
 
 ## Examples
 

@@ -24,44 +24,47 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **ContentTemplate as a separate element** — Use `ChildContent` directly between tags
 - **ScriptManager dependency** — Not needed; Blazor manages updates natively
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+=== "Web Forms (Before)"
 
-<asp:UpdatePanel
-    ChildrenAsTriggers="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    RenderMode="Block|Inline"
-    runat="server"
-    UpdateMode="Always|Conditional"
-    Visible="True|False"
->
-    <ContentTemplate>
-        <!-- Content here -->
-    </ContentTemplate>
-    <Triggers>
-        <asp:AsyncPostBackTrigger ControlID="btnRefresh" EventName="Click" />
-    </Triggers>
-</asp:UpdatePanel>
-```
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-## Blazor Razor Syntax
+    <asp:UpdatePanel
+        ChildrenAsTriggers="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        RenderMode="Block|Inline"
+        runat="server"
+        UpdateMode="Always|Conditional"
+        Visible="True|False"
+    >
+        <ContentTemplate>
+            <!-- Content here -->
+        </ContentTemplate>
+        <Triggers>
+            <asp:AsyncPostBackTrigger ControlID="btnRefresh" EventName="Click" />
+        </Triggers>
+    </asp:UpdatePanel>
+    ```
 
-### Basic UpdatePanel
+=== "Blazor (After)"
 
-```razor
-<UpdatePanel>
-    <p>This content is wrapped in a div.</p>
-</UpdatePanel>
-```
+    ```razor
+    <UpdatePanel>
+        <p>This content is wrapped in a div.</p>
+    </UpdatePanel>
+    ```
+
+!!! tip "Migration Tip"
+    Remove `<ContentTemplate>` and `<Triggers>` wrappers — place content directly between `<UpdatePanel>` tags. Blazor's component model handles all incremental rendering automatically, so trigger-based updates are unnecessary.
 
 ### Inline Render Mode
 
@@ -137,50 +140,50 @@ When migrating from Web Forms to Blazor:
 !!! note "Key Difference"
     In Web Forms, UpdatePanel was essential for AJAX partial-page updates — without it, every server interaction caused a full page reload. In Blazor, **every component re-render is already a partial update** via SignalR. UpdatePanel in Blazor is purely a structural wrapper that preserves HTML output compatibility.
 
-### Before (Web Forms)
+=== "Web Forms (Before)"
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-<asp:UpdatePanel ID="UpdatePanel1" runat="server"
-                 UpdateMode="Conditional">
-    <ContentTemplate>
-        <asp:Label ID="lblStatus" runat="server" Text="Ready" />
-        <asp:Button ID="btnRefresh" runat="server"
-                    Text="Refresh"
-                    OnClick="btnRefresh_Click" />
-    </ContentTemplate>
-    <Triggers>
-        <asp:AsyncPostBackTrigger ControlID="btnRefresh"
-                                  EventName="Click" />
-    </Triggers>
-</asp:UpdatePanel>
-```
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server"
+                     UpdateMode="Conditional">
+        <ContentTemplate>
+            <asp:Label ID="lblStatus" runat="server" Text="Ready" />
+            <asp:Button ID="btnRefresh" runat="server"
+                        Text="Refresh"
+                        OnClick="btnRefresh_Click" />
+        </ContentTemplate>
+        <Triggers>
+            <asp:AsyncPostBackTrigger ControlID="btnRefresh"
+                                      EventName="Click" />
+        </Triggers>
+    </asp:UpdatePanel>
+    ```
 
-```csharp
-protected void btnRefresh_Click(object sender, EventArgs e)
-{
-    lblStatus.Text = $"Refreshed at {DateTime.Now:HH:mm:ss}";
-}
-```
-
-### After (Blazor)
-
-```razor
-<UpdatePanel UpdateMode="UpdatePanelUpdateMode.Conditional">
-    <Label Text="@status" />
-    <Button Text="Refresh" OnClick="HandleRefresh" />
-</UpdatePanel>
-
-@code {
-    private string status = "Ready";
-
-    void HandleRefresh()
+    ```csharp
+    protected void btnRefresh_Click(object sender, EventArgs e)
     {
-        status = $"Refreshed at {DateTime.Now:HH:mm:ss}";
+        lblStatus.Text = $"Refreshed at {DateTime.Now:HH:mm:ss}";
     }
-}
-```
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <UpdatePanel UpdateMode="UpdatePanelUpdateMode.Conditional">
+        <Label Text="@status" />
+        <Button Text="Refresh" OnClick="HandleRefresh" />
+    </UpdatePanel>
+
+    @code {
+        private string status = "Ready";
+
+        void HandleRefresh()
+        {
+            status = $"Refreshed at {DateTime.Now:HH:mm:ss}";
+        }
+    }
+    ```
 
 ## Examples
 

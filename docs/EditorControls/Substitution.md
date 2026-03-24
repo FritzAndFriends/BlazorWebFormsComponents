@@ -21,6 +21,44 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Post-cache substitution** — Blazor does not use output caching in the same way; all rendering is dynamic by default
 - **Static method resolution by name** — Use the `SubstitutionCallback` delegate parameter instead of relying on `MethodName` string resolution
 
+## Syntax Comparison
+
+=== "Web Forms (Before)"
+
+    ```html
+    <%@ OutputCache Duration="60" VaryByParam="none" %>
+
+    <asp:Substitution
+        ID="string"
+        MethodName="string"
+        runat="server"
+    />
+    ```
+
+    ```csharp
+    // Must be a public static method
+    public static string GetCurrentTime(HttpContext context)
+    {
+        return DateTime.Now.ToString("HH:mm:ss");
+    }
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Substitution SubstitutionCallback="GetCurrentTime" />
+
+    @code {
+        string GetCurrentTime(HttpContext context)
+        {
+            return DateTime.Now.ToString("HH:mm:ss");
+        }
+    }
+    ```
+
+!!! note "Key Difference"
+    In Web Forms, Substitution existed to inject dynamic content into an otherwise cached page. In Blazor, **every render is dynamic** — there is no output cache to punch holes in. Substitution simply calls your function and renders the result. The component exists for markup migration compatibility.
+
 ## Web Forms Declarative Syntax
 
 ```html
@@ -96,46 +134,45 @@ When migrating from Web Forms to Blazor:
 3. **Remove OutputCache directive** — Post-cache substitution is not needed; Blazor renders dynamically by default
 4. **Replace `MethodName` with `SubstitutionCallback`** — Pass the actual delegate instead of a string name
 
-!!! note "Key Difference"
-    In Web Forms, Substitution existed to solve a very specific problem: injecting dynamic content into an otherwise cached page. In Blazor, **every render is dynamic** — there is no output cache to punch holes in. Substitution in Blazor simply calls your function and renders the result, which is equivalent to calling a method in Razor directly (`@GetCurrentTime()`). The component exists for markup migration compatibility.
+### Before / After
 
-### Before (Web Forms)
+=== "Web Forms (Before)"
 
-```html
-<%@ OutputCache Duration="60" VaryByParam="none" %>
+    ```html
+    <%@ OutputCache Duration="60" VaryByParam="none" %>
 
-<p>This content is cached for 60 seconds.</p>
+    <p>This content is cached for 60 seconds.</p>
 
-<asp:Substitution ID="TimeStamp" runat="server"
-                  MethodName="GetCurrentTime" />
+    <asp:Substitution ID="TimeStamp" runat="server"
+                      MethodName="GetCurrentTime" />
 
-<p>This content is also cached.</p>
-```
+    <p>This content is also cached.</p>
+    ```
 
-```csharp
-// Must be a public static method
-public static string GetCurrentTime(HttpContext context)
-{
-    return DateTime.Now.ToString("HH:mm:ss");
-}
-```
-
-### After (Blazor)
-
-```razor
-<p>This content renders on every request.</p>
-
-<Substitution SubstitutionCallback="GetCurrentTime" />
-
-<p>This content also renders on every request.</p>
-
-@code {
-    string GetCurrentTime(HttpContext context)
+    ```csharp
+    // Must be a public static method
+    public static string GetCurrentTime(HttpContext context)
     {
         return DateTime.Now.ToString("HH:mm:ss");
     }
-}
-```
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <p>This content renders on every request.</p>
+
+    <Substitution SubstitutionCallback="GetCurrentTime" />
+
+    <p>This content also renders on every request.</p>
+
+    @code {
+        string GetCurrentTime(HttpContext context)
+        {
+            return DateTime.Now.ToString("HH:mm:ss");
+        }
+    }
+    ```
 
 !!! tip "Consider Native Blazor"
     For new Blazor development, you can replace `<Substitution>` with a simple Razor expression: `@DateTime.Now.ToString("HH:mm:ss")`. Use the Substitution component only when you want to preserve the original Web Forms markup structure during migration.
