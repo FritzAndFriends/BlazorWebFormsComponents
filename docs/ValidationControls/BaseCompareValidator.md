@@ -126,32 +126,32 @@ If either value cannot be converted to the specified type, validation fails (exc
 
 In a German locale, the UI shows "3,14" but validation parses both sides as "3.14" (US format) due to `CultureInvariantValues="true"`.
 
-## Web Forms → Blazor Comparison
+## Syntax Comparison
 
-### Web Forms Syntax
+=== "Web Forms"
 
-```html
-<asp:RangeValidator
-    ControlToValidate="AgeInput"
-    Type="Integer"
-    MinimumValue="18"
-    MaximumValue="120"
-    ErrorMessage="Age must be between 18 and 120"
-    Text="Invalid age"
-    runat="server" />
-```
+    ```html
+    <asp:RangeValidator
+        ControlToValidate="AgeInput"
+        Type="Integer"
+        MinimumValue="18"
+        MaximumValue="120"
+        ErrorMessage="Age must be between 18 and 120"
+        Text="Invalid age"
+        runat="server" />
+    ```
 
-### Blazor Syntax
+=== "Blazor"
 
-```razor
-<RangeValidator TValue="int"
-    ControlToValidate="Age"
-    Type="ValidationDataType.Integer"
-    MinimumValue="18"
-    MaximumValue="120"
-    ErrorMessage="Age must be between 18 and 120"
-    Text="Invalid age" />
-```
+    ```razor
+    <RangeValidator TValue="int"
+        ControlToValidate="Age"
+        Type="ValidationDataType.Integer"
+        MinimumValue="18"
+        MaximumValue="120"
+        ErrorMessage="Age must be between 18 and 120"
+        Text="Invalid age" />
+    ```
 
 **Key Differences:**
 

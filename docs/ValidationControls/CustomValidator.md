@@ -18,40 +18,42 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **ClientValidationFunction execution** - Blazor does not execute client-side JavaScript validation functions. The property is accepted for migration compatibility.
 - **ValidateOnLoad** - Not supported
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:CustomValidator
-    ID="CustomValidator1"
-    runat="server"
-    ControlToValidate="TextBox1"
-    ClientValidationFunction="validateLength"
-    ErrorMessage="Value must be at least 5 characters."
-    OnServerValidate="CustomValidator1_ServerValidate" />
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:CustomValidator
+        ID="CustomValidator1"
+        runat="server"
+        ControlToValidate="TextBox1"
+        ClientValidationFunction="validateLength"
+        ErrorMessage="Value must be at least 5 characters."
+        OnServerValidate="CustomValidator1_ServerValidate" />
+    ```
 
-```razor
-@using BlazorWebFormsComponents.Validations
+=== "Blazor"
 
-<EditForm Model="@model">
-    <InputText @ref="Input.Current" @bind-Value="model.Value" />
-    <CustomValidator ServerValidate="@ValidateLength"
-                     ControlRef="@Input"
-                     Text="Must be at least 5 characters."
-                     ErrorMessage="Value too short!" />
-</EditForm>
+    ```razor
+    @using BlazorWebFormsComponents.Validations
 
-@code {
-    ForwardRef<InputBase<string>> Input = new();
+    <EditForm Model="@model">
+        <InputText @ref="Input.Current" @bind-Value="model.Value" />
+        <CustomValidator ServerValidate="@ValidateLength"
+                         ControlRef="@Input"
+                         Text="Must be at least 5 characters."
+                         ErrorMessage="Value too short!" />
+    </EditForm>
 
-    private bool ValidateLength(string value)
-    {
-        return !string.IsNullOrEmpty(value) && value.Length >= 5;
+    @code {
+        ForwardRef<InputBase<string>> Input = new();
+
+        private bool ValidateLength(string value)
+        {
+            return !string.IsNullOrEmpty(value) && value.Length >= 5;
+        }
     }
-}
-```
+    ```
 
 ## Examples
 
@@ -130,6 +132,40 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 3. Replace `ControlToValidate="TextBox1"` with `ControlRef="@ref"` using `ForwardRef`
 4. `ClientValidationFunction` is accepted but has no effect in Blazor
 5. `IsValid` defaults to `true` — use it to programmatically indicate validation state
+
+### Migration Example
+
+=== "Web Forms"
+
+    ```html
+    <asp:TextBox ID="txtValue" runat="server" />
+    <asp:CustomValidator
+        ControlToValidate="txtValue"
+        OnServerValidate="Validate_ServerValidate"
+        ClientValidationFunction="validateOnClient"
+        ErrorMessage="Validation failed"
+        Text="Invalid"
+        runat="server" />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <InputText @ref="InputRef.Current" @bind-Value="model.Value" />
+    <CustomValidator ServerValidate="@ValidateValue"
+                     ControlRef="@InputRef"
+                     Text="Invalid"
+                     ErrorMessage="Validation failed" />
+
+    @code {
+        ForwardRef<InputBase<string>> InputRef = new();
+
+        private bool ValidateValue(string value)
+        {
+            return !string.IsNullOrEmpty(value) && value.Length >= 3;
+        }
+    }
+    ```
 
 ## See Also
 

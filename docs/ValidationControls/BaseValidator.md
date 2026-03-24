@@ -145,32 +145,32 @@ All validators require a cascading EditContext, typically provided by the EditFo
 
 The EditContext coordinates validation across all validators on the form.
 
-## Web Forms → Blazor Comparison
+## Syntax Comparison
 
-### Web Forms Syntax
+=== "Web Forms"
 
-```html
-<asp:RequiredFieldValidator
-    ControlToValidate="NameInput"
-    Display="Dynamic"
-    ErrorMessage="Name is required"
-    Text="Name is required"
-    ForeColor="Red"
-    ValidationGroup="Personal"
-    runat="server" />
-```
+    ```html
+    <asp:RequiredFieldValidator
+        ControlToValidate="NameInput"
+        Display="Dynamic"
+        ErrorMessage="Name is required"
+        Text="Name is required"
+        ForeColor="Red"
+        ValidationGroup="Personal"
+        runat="server" />
+    ```
 
-### Blazor Syntax
+=== "Blazor"
 
-```razor
-<RequiredFieldValidator
-    ControlToValidate="Name"
-    Display="ValidatorDisplay.Dynamic"
-    ErrorMessage="Name is required"
-    Text="Name is required"
-    ForeColor="Red"
-    ValidationGroup="Personal" />
-```
+    ```razor
+    <RequiredFieldValidator
+        ControlToValidate="Name"
+        Display="ValidatorDisplay.Dynamic"
+        ErrorMessage="Name is required"
+        Text="Name is required"
+        ForeColor="Red"
+        ValidationGroup="Personal" />
+    ```
 
 **Key Differences:**
 
