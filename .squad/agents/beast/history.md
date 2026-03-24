@@ -8,7 +8,41 @@
 
 📌 Team update (2026-03-17): HttpHandlerBase implementation complete (7 files in Handlers/). Returns IEndpointConventionBuilder; Session markers added; build passes 0 errors. — decided by Cyclops
 
-### Issue #506: ValidationControls Tabbed Syntax (ALREADY COMPLETED)
+## Core Context
+
+**Role:** Technical Writer & Documentation Lead  
+**Expertise:** Blazor documentation, Web Forms  Blazor migration patterns, component documentation, MkDocs
+
+### Key Documentation Standards
+- **Tabbed Syntax:** All control documentation uses pymdownx.tabbed format with === "Web Forms" / === "Blazor" tabs
+- **Code Examples:** Complete, runnable examples (not pseudocode); Web Forms tabs use \\\html, Blazor tabs use \\\azor
+- **Migration Guides:** Follow before/after pattern showing exact Web Forms  Blazor transformations
+- **Cross-Linking:** Decisions and documentation updates cross-linked in decisions.md and history.md
+
+### Areas Owned
+- Documentation for all 4 control categories: EditorControls, ValidationControls, DataControls, ASPXControls
+- Migration guides: User-Controls.md, MasterPages.md, ViewState/PostBack patterns
+- Utility feature documentation: ViewStateAndPostBack.md, ViewState.md, WebFormsPage.md
+
+### Recent Deliverables (2026-03 Milestone)
+- Issue #507: ValidationControls 3-file expansion (Label, ValidationSummary, RegularExpressionValidator; +697 lines)
+- Issue #508: ViewState/PostBack shim guide (477 lines, 4 examples, 2 docs updated, mkdocs.yml updated)
+- Issue #509: User-Controls.md expansion (928 lines, 5 sections, 48 code examples)
+- Issues #505-#506: DataControls & ValidationControls tabbed syntax verified (20 files total)
+- Issue #510: EditorControls tabbed syntax (32 files, including 5 Web Forms-only with inferred Blazor examples)
+
+### Decision Patterns
+1. **Web Forms-only docs:** If no Blazor example exists, infer from BWFC features and mark as reference-level
+2. **State management:** Use ViewStateDictionary + EventCallback<T> patterns for user control migration
+3. **API documentation:** Create single comprehensive guide with cross-links from focused docs (avoid duplication)
+
+### Quality Metrics
+- All examples tested for accuracy and completeness before merge
+- Cross-references verified to actual documentation files
+- mkdocs.yml navigation entries confirmed
+- No content reduction  only expansion and improvement
+
+---### Issue #506: ValidationControls Tabbed Syntax (ALREADY COMPLETED)
 
 **Status:** VERIFIED COMPLETE
 
@@ -972,3 +1006,4 @@ This wave establishes **documentation patterns** that will guide future control 
 - Alphabetical ordering within component sections improves discoverability and maintenance
 - Periodically auditing docs/ vs mkdocs.yml nav prevents doc fragmentation
 - Test artifacts (migration benchmark runs) should be excluded from main nav to reduce clutter  only index the summary report, not intermediate outputs
+

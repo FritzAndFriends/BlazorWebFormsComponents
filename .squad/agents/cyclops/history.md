@@ -5,6 +5,59 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Core Context
+
+**Role:** Component Developer & Lead Toolsmith  
+**Expertise:** Blazor component implementation, L1/L2 migration scripts, custom controls, data binding, Web Forms patterns
+
+### Key Responsibilities
+- Core component development and pattern establishment (BaseWebFormsComponent, DataBoundComponent, TemplatedWebControl)
+- Migration toolkit engineering (L1 script: bwfc-migrate.ps1; L2 transforms)
+- Custom control migration patterns (WebControl, DataBoundWebControl, TemplatedWebControl base classes)
+- EDMX parser integration for EF6  EF Core migrations
+
+### Active Projects
+- L1 Script (bwfc-migrate.ps1): 15/15 test suite (100%), covers 5 core patterns (GetRouteUrl, ContentWrappers, WebFormsAttributes, DataSourceID, Response.Redirect)
+- UpdatePanel enhancement: BaseStyledComponent with ContentTemplate RenderFragment, 24 tests, 0 warnings
+- Students GridView LEFT JOIN fix: Fixed data-loss bug in enrollment display
+- EDMXEF Core parser: Standalone script + L1 integration, handles Model1.edmx  5 entities, 4 FK relationships
+- HttpHandlerBase implementation: 7 files, IEndpointConventionBuilder pattern, 94 tests passing
+
+### Recent Deliverables (2026-03)
+- Issue #472: L1 Script bug fixes (3 bugs fixed, test suite 7/10  15/15)
+- Issue #451: UpdatePanel ContentTemplate feature
+- Issue #475: Students GridView LEFT JOIN fix
+- Issue #488: EDMXEF Core parser + L1 integration
+- HttpHandlerBase: 7-file Handlers/ structure, Session markers, build 0 errors
+
+### Pattern Standards
+1. **Component Base Classes:**
+   - BaseWebFormsComponent: Standard controls (properties, events)
+   - BaseStyledComponent: Style + CssClass support
+   - DataBoundComponent: Data binding (DataSource, DataBind(), ItemDataBound)
+   - TemplatedWebControl: RenderFragment templates (RenderTemplate helper)
+   - WebControl, DataBoundWebControl, TemplatedWebControl: Custom control base classes
+
+2. **L1 Script Architecture:**
+   - Modular conversion functions (scope-specific regexes)
+   - Lookahead validation to prevent false-positive conversions
+   - Test-driven bug fixes; new patterns need test case coverage
+   - ItemType standardization across all data-bound controls
+
+3. **EDMX Migration:**
+   - Parse 3 XML sections in order: C-S Mapping  CSDL  SSDL
+   - Generate entities with EF Core annotations ([Key], [Required], [MaxLength], etc.)
+   - Generate DbContext with OnModelCreating() fluent chains
+   - Skip-existing behavior for re-runs
+
+### Quality Metrics
+- 15/15 L1 tests (100% pass rate)
+- 94 migration tests passing across all runs
+- 0 build errors post-update
+- 24/24 UpdatePanel tests passing
+- Cross-browser acceptance tests (Playwright)
+
+---
 ## Active Decisions & Alerts
 
 📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
