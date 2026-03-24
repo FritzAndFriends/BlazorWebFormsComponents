@@ -58,133 +58,133 @@ void ItemDataBound(ListViewItemEventArgs e)
 
 ##### [Back to top](#listview)
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ListView  
-    ConvertEmptyStringToNull="True|False"  
-    DataKeyNames="string"  
-    DataMember="string"  
-    DataSource="string"  
-    DataSourceID="string"  
-    EditIndex="integer"  
-    Enabled="True|False"  
-    EnableTheming="True|False"  
-    EnableViewState="True|False"  
-    GroupPlaceholderID="string"  
-    GroupItemCount="integer"  
-    ID="string"  
-    InsertItemPosition="None|FirstItem|LastItem"  
-    ItemPlaceholderID="string"  
-    OnDataBinding="DataBinding event handler"  
-    OnDataBound="DataBound event handler"  
-    OnDisposed="Disposed event handler"  
-    OnInit="Init event handler"  
-    OnItemCanceling="ItemCanceling event handler"  
-    OnItemCommand="ItemCommand event handler"  
-    OnItemCreated="ItemCreated event handler"  
-    OnItemDataBound="ItemDataBound event handler"  
-    OnItemDeleted="ItemDeleted event handler"  
-    OnItemDeleting="ItemDeleting event handler"  
-    OnItemEditing="ItemEditing event handler"  
-    OnItemInserted="ItemInserted event handler"  
-    OnItemInserting="ItemInserting event handler"  
-    OnItemUpdated="ItemUpdated event handler"  
-    OnItemUpdating="ItemUpdating event handler"  
-    OnLayoutCreated="LayoutCreated event handler"  
-    OnLoad="Load event handler"  
-    OnPagePropertiesChanged="PagePropertiesChanged event handler"  
-    OnPagePropertiesChanging="PagePropertiesChanging event handler"  
-    OnPreRender="PreRender event handler"  
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"  
-    OnSelectedIndexChanging="SelectedIndexChanging event handler"  
-    OnSorted="Sorted event handler"  
-    OnSorting="Sorting event handler"  
-    OnUnload="Unload event handler"  
-    runat="server"  
-    SelectedIndex="integer"  
-    SkinID="string"  
-    Style="string"  
-    Visible="True|False">  
-    <AlternatingItemTemplate>  
-        <!-- child controls -->  
-    </AlternatingItemTemplate>  
-    <EditItemTemplate>  
-        <!-- child controls -->  
-    </EditItemTemplate>  
-    <EmptyDataTemplate>  
-        <!-- child controls -->  
-    </EmptyDataTemplate>  
-    <EmptyItemTemplate>  
-        <!-- child controls -->  
-    </EmptyItemTemplate>  
-    <GroupSeparatorTemplate>  
-        <!-- child controls -->  
-    </GroupSeparatorTemplate>  
-    <GroupTemplate>  
-        <!-- child controls -->  
-    </GroupTemplate>  
-    <InsertItemTemplate>  
-        <!-- child controls -->  
-    </InsertItemTemplate>  
-    <ItemSeparatorTemplate>  
-        <!-- child controls -->  
-    </ItemSeparatorTemplate>  
-    <ItemTemplate>  
-        <!-- child controls -->  
-    </ItemTemplate>  
-    <LayoutTemplate>  
+=== "Web Forms"
+
+    ```html
+    <asp:ListView  
+        ConvertEmptyStringToNull="True|False"  
+        DataKeyNames="string"  
+        DataMember="string"  
+        DataSource="string"  
+        DataSourceID="string"  
+        EditIndex="integer"  
+        Enabled="True|False"  
+        EnableTheming="True|False"  
+        EnableViewState="True|False"  
+        GroupPlaceholderID="string"  
+        GroupItemCount="integer"  
+        ID="string"  
+        InsertItemPosition="None|FirstItem|LastItem"  
+        ItemPlaceholderID="string"  
+        OnDataBinding="DataBinding event handler"  
+        OnDataBound="DataBound event handler"  
+        OnDisposed="Disposed event handler"  
+        OnInit="Init event handler"  
+        OnItemCanceling="ItemCanceling event handler"  
+        OnItemCommand="ItemCommand event handler"  
+        OnItemCreated="ItemCreated event handler"  
+        OnItemDataBound="ItemDataBound event handler"  
+        OnItemDeleted="ItemDeleted event handler"  
+        OnItemDeleting="ItemDeleting event handler"  
+        OnItemEditing="ItemEditing event handler"  
+        OnItemInserted="ItemInserted event handler"  
+        OnItemInserting="ItemInserting event handler"  
+        OnItemUpdated="ItemUpdated event handler"  
+        OnItemUpdating="ItemUpdating event handler"  
+        OnLayoutCreated="LayoutCreated event handler"  
+        OnLoad="Load event handler"  
+        OnPagePropertiesChanged="PagePropertiesChanged event handler"  
+        OnPagePropertiesChanging="PagePropertiesChanging event handler"  
+        OnPreRender="PreRender event handler"  
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"  
+        OnSelectedIndexChanging="SelectedIndexChanging event handler"  
+        OnSorted="Sorted event handler"  
+        OnSorting="Sorting event handler"  
+        OnUnload="Unload event handler"  
+        runat="server"  
+        SelectedIndex="integer"  
+        SkinID="string"  
+        Style="string"  
+        Visible="True|False">  
+        <AlternatingItemTemplate>  
             <!-- child controls -->  
-    </LayoutTemplate>  
-    <SelectedItemTemplate>  
-        <!-- child controls -->  
-    </SelectedItemTemplate>  
-</asp:ListView>
-```
+        </AlternatingItemTemplate>  
+        <EditItemTemplate>  
+            <!-- child controls -->  
+        </EditItemTemplate>  
+        <EmptyDataTemplate>  
+            <!-- child controls -->  
+        </EmptyDataTemplate>  
+        <EmptyItemTemplate>  
+            <!-- child controls -->  
+        </EmptyItemTemplate>  
+        <GroupSeparatorTemplate>  
+            <!-- child controls -->  
+        </GroupSeparatorTemplate>  
+        <GroupTemplate>  
+            <!-- child controls -->  
+        </GroupTemplate>  
+        <InsertItemTemplate>  
+            <!-- child controls -->  
+        </InsertItemTemplate>  
+        <ItemSeparatorTemplate>  
+            <!-- child controls -->  
+        </ItemSeparatorTemplate>  
+        <ItemTemplate>  
+            <!-- child controls -->  
+        </ItemTemplate>  
+        <LayoutTemplate>  
+                <!-- child controls -->  
+        </LayoutTemplate>  
+        <SelectedItemTemplate>  
+            <!-- child controls -->  
+        </SelectedItemTemplate>  
+    </asp:ListView>
+    ```
 
-##### [Back to top](#listview)
+=== "Blazor"
 
-## Blazor Syntax
-
-```razor
-<ListView Context="Item"
-          ItemType="Widget"
-          EditIndex="@editIndex"
-          InsertItemPosition="InsertItemPosition.LastItem"
-          ItemEditing="OnItemEditing"
-          ItemUpdating="OnItemUpdating"
-          ItemCanceling="OnItemCanceling"
-          ItemDeleting="OnItemDeleting"
-          ItemInserting="OnItemInserting">
-    <ItemTemplate>
-        <tr>
-            <td>@Item.Name</td>
-            <td>
-                <button @onclick="() => listView.HandleCommand("edit", null, index)">Edit</button>
-                <button @onclick="() => listView.HandleCommand("delete", null, index)">Delete</button>
-            </td>
-        </tr>
-    </ItemTemplate>
-    <EditItemTemplate>
-        <tr>
-            <td><input @bind="editName" /></td>
-            <td>
-                <button @onclick="() => listView.HandleCommand("update", null, editIndex)">Update</button>
-                <button @onclick="() => listView.HandleCommand("cancel", null, editIndex)">Cancel</button>
-            </td>
-        </tr>
-    </EditItemTemplate>
-    <InsertItemTemplate>
-        <tr>
-            <td><input @bind="newName" /></td>
-            <td>
-                <button @onclick="() => listView.HandleCommand("insert", null, 0)">Insert</button>
-            </td>
-        </tr>
-    </InsertItemTemplate>
-    <EmptyDataTemplate>No items available.</EmptyDataTemplate>
-</ListView>
-```
+    ```razor
+    <ListView Context="Item"
+              ItemType="Widget"
+              EditIndex="@editIndex"
+              InsertItemPosition="InsertItemPosition.LastItem"
+              ItemEditing="OnItemEditing"
+              ItemUpdating="OnItemUpdating"
+              ItemCanceling="OnItemCanceling"
+              ItemDeleting="OnItemDeleting"
+              ItemInserting="OnItemInserting">
+        <ItemTemplate>
+            <tr>
+                <td>@Item.Name</td>
+                <td>
+                    <button @onclick="() => listView.HandleCommand("edit", null, index)">Edit</button>
+                    <button @onclick="() => listView.HandleCommand("delete", null, index)">Delete</button>
+                </td>
+            </tr>
+        </ItemTemplate>
+        <EditItemTemplate>
+            <tr>
+                <td><input @bind="editName" /></td>
+                <td>
+                    <button @onclick="() => listView.HandleCommand("update", null, editIndex)">Update</button>
+                    <button @onclick="() => listView.HandleCommand("cancel", null, editIndex)">Cancel</button>
+                </td>
+            </tr>
+        </EditItemTemplate>
+        <InsertItemTemplate>
+            <tr>
+                <td><input @bind="newName" /></td>
+                <td>
+                    <button @onclick="() => listView.HandleCommand("insert", null, 0)">Insert</button>
+                </td>
+            </tr>
+        </InsertItemTemplate>
+        <EmptyDataTemplate>No items available.</EmptyDataTemplate>
+    </ListView>
+    ```
 
 ##### [Back to top](#listview)
 
@@ -214,63 +214,66 @@ The `InsertItemTemplate` renders an insert row when `InsertItemPosition` is set 
 
 ### Migration Example
 
-**Before (Web Forms):**
-```html
-<asp:ListView ID="lvItems" runat="server"
-    OnItemEditing="lvItems_ItemEditing"
-    OnItemUpdating="lvItems_ItemUpdating"
-    OnItemDeleting="lvItems_ItemDeleting"
-    OnItemInserting="lvItems_ItemInserting"
-    InsertItemPosition="LastItem">
-    <ItemTemplate>
-        <tr>
-            <td><%# Eval("Name") %></td>
-            <td>
-                <asp:Button runat="server" CommandName="Edit" Text="Edit" />
-                <asp:Button runat="server" CommandName="Delete" Text="Delete" />
-            </td>
-        </tr>
-    </ItemTemplate>
-    <EditItemTemplate>
-        <tr>
-            <td><asp:TextBox ID="txtName" runat="server" Text='<%# Bind("Name") %>' /></td>
-            <td>
-                <asp:Button runat="server" CommandName="Update" Text="Update" />
-                <asp:Button runat="server" CommandName="Cancel" Text="Cancel" />
-            </td>
-        </tr>
-    </EditItemTemplate>
-</asp:ListView>
-```
+=== "Web Forms"
 
-**After (Blazor):**
-```razor
-<ListView @ref="listView" Context="Item" ItemType="Widget"
-    EditIndex="@editIndex"
-    InsertItemPosition="InsertItemPosition.LastItem"
-    ItemEditing="OnItemEditing"
-    ItemUpdating="OnItemUpdating"
-    ItemDeleting="OnItemDeleting"
-    ItemInserting="OnItemInserting">
-    <ItemTemplate>
-        <tr>
-            <td>@Item.Name</td>
-            <td>
-                <button @onclick="() => listView.HandleCommand("edit", null, idx)">Edit</button>
-                <button @onclick="() => listView.HandleCommand("delete", null, idx)">Delete</button>
-            </td>
-        </tr>
-    </ItemTemplate>
-    <EditItemTemplate>
-        <tr>
-            <td><input @bind="editName" /></td>
-            <td>
-                <button @onclick="() => listView.HandleCommand("update", null, editIndex)">Update</button>
-                <button @onclick="() => listView.HandleCommand("cancel", null, editIndex)">Cancel</button>
-            </td>
-        </tr>
-    </EditItemTemplate>
-</ListView>
-```
+    ```html
+    <asp:ListView ID="lvItems" runat="server"
+        OnItemEditing="lvItems_ItemEditing"
+        OnItemUpdating="lvItems_ItemUpdating"
+        OnItemDeleting="lvItems_ItemDeleting"
+        OnItemInserting="lvItems_ItemInserting"
+        InsertItemPosition="LastItem">
+        <ItemTemplate>
+            <tr>
+                <td><%# Eval("Name") %></td>
+                <td>
+                    <asp:Button runat="server" CommandName="Edit" Text="Edit" />
+                    <asp:Button runat="server" CommandName="Delete" Text="Delete" />
+                </td>
+            </tr>
+        </ItemTemplate>
+        <EditItemTemplate>
+            <tr>
+                <td><asp:TextBox ID="txtName" runat="server" Text='<%# Bind("Name") %>' /></td>
+                <td>
+                    <asp:Button runat="server" CommandName="Update" Text="Update" />
+                    <asp:Button runat="server" CommandName="Cancel" Text="Cancel" />
+                </td>
+            </tr>
+        </EditItemTemplate>
+    </asp:ListView>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <ListView @ref="listView" Context="Item" ItemType="Widget"
+        EditIndex="@editIndex"
+        InsertItemPosition="InsertItemPosition.LastItem"
+        ItemEditing="OnItemEditing"
+        ItemUpdating="OnItemUpdating"
+        ItemDeleting="OnItemDeleting"
+        ItemInserting="OnItemInserting">
+        <ItemTemplate>
+            <tr>
+                <td>@Item.Name</td>
+                <td>
+                    <button @onclick="() => listView.HandleCommand("edit", null, idx)">Edit</button>
+                    <button @onclick="() => listView.HandleCommand("delete", null, idx)">Delete</button>
+                </td>
+            </tr>
+        </ItemTemplate>
+        <EditItemTemplate>
+            <tr>
+                <td><input @bind="editName" /></td>
+                <td>
+                    <button @onclick="() => listView.HandleCommand("update", null, editIndex)">Update</button>
+                    <button @onclick="() => listView.HandleCommand("cancel", null, editIndex)">Cancel</button>
+                </td>
+            </tr>
+        </EditItemTemplate>
+    </ListView>
+    ```
+
 
 ##### [Back to top](#listview)
