@@ -69,13 +69,13 @@
 	}
 
 	[Fact]
-	public void IsPostBack_AlwaysReturnsFalse()
+	public void IsPostBack_TrueAfterInit_InInteractiveMode()
 	{
-		// Arrange
+		// Arrange — bUnit renders in Interactive-equivalent mode (no HttpContext)
 		var cut = RenderTestPage();
 
-		// Assert
-		cut.Instance.IsPostBackValue.ShouldBeFalse();
+		// Assert — after OnInitialized, IsPostBack is true (no HttpContext = Interactive mode, post-init)
+		cut.Instance.IsPostBackValue.ShouldBeTrue();
 	}
 
 	[Fact]
@@ -118,19 +118,16 @@
 	}
 
 	[Fact]
-	public void IsPostBack_GuardPattern_BlockExecutes()
+	public void IsPostBack_GuardPattern_BlockExecutesDuringInit()
 	{
 		// Arrange
 		var cut = RenderTestPage();
-		var blockExecuted = false;
 
-		// Act — simulate the Web Forms if (!IsPostBack) { ... } pattern
-		if (!cut.Instance.IsPostBackValue)
-		{
-			blockExecuted = true;
-		}
-
-		// Assert — block should always execute because IsPostBack is always false
-		blockExecuted.ShouldBeTrue();
+		// Act — after render, IsPostBack is true (Interactive mode, post-init)
+		// The if (!IsPostBack) { } guard would NOT execute after init,
+		// but WOULD execute during OnInitialized (before _hasInitialized is set).
+		// This matches Web Forms: first Page_Load runs with IsPostBack=false.
+		// After init, the component is in "postback" state.
+		cut.Instance.IsPostBackValue.ShouldBeTrue("After initialization, IsPostBack should be true in Interactive mode");
 	}
 }

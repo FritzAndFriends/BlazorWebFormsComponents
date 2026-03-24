@@ -578,3 +578,17 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 **Key patterns applied:** var everywhere (IDE0007), WebUtility.HtmlEncode instead of HttpUtility, Blazor route URLs instead of .aspx, `new()` target-typed syntax.
 
 **Build:** 0 errors, 0 warnings (excluding pre-existing NU1510 from upstream deps).
+### ViewState + IsPostBack Phase 1 Core Infrastructure (2026-03-24)
+
+**Summary:** Implemented Phase 1 of the ViewState/PostBack shim per Forge's architecture proposal. Created ViewStateDictionary class implementing IDictionary<string, object?> with null-safe indexer (Web Forms compat), type-safe convenience methods, IsDirty tracking, and IDataProtector-based Serialize/Deserialize with JsonElement type coercion. Updated BaseWebFormsComponent: ViewState upgraded from Dictionary to ViewStateDictionary, [Obsolete] removed, IsPostBack with mode-adaptive logic (SSR checks HTTP method, Interactive tracks _hasInitialized), CurrentRenderMode/IsHttpContextAvailable, RenderViewStateField, IDataProtectionProvider injection, ViewState deserialization from form POST. Updated WebFormsPageBase similarly. Created WebFormsRenderMode enum.
+
+**Key decisions:**
+- IDataProtectionProvider is injected as nullable (null-safe)  backward compat for apps that don't register DataProtection
+- ViewState deserialization happens BEFORE OnInit/OnLoad events in OnInitializedAsync  matches Web Forms lifecycle
+- CryptographicException from tampered payloads silently fails to empty ViewState (fail-safe)
+- Component ID for hidden field uses the developer-set `ID` parameter (`__bwfc_viewstate_{ID}`)
+- `var` used everywhere per IDE0007 enforcement
+
+**Files created:** ViewStateDictionary.cs, WebFormsRenderMode.cs
+**Files modified:** BaseWebFormsComponent.cs, WebFormsPageBase.cs
+**Build:** 0 errors, 122 warnings (all pre-existing)

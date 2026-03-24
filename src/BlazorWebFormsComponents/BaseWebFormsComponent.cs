@@ -190,10 +190,23 @@ namespace BlazorWebFormsComponents
 
 		/// <summary>
 		/// Optional data protection provider for ViewState encryption in SSR mode.
-		/// Null when not registered — ViewState serialization is skipped in that case.
+		/// Resolved lazily from the service provider — null when not registered.
+		/// ViewState serialization is skipped when unavailable.
 		/// </summary>
-		[Inject]
-		private IDataProtectionProvider DataProtectionProvider { get; set; }
+		private IDataProtectionProvider _dataProtectionProvider;
+		private bool _dataProtectionResolved;
+		private IDataProtectionProvider DataProtectionProvider
+		{
+			get
+			{
+				if (!_dataProtectionResolved)
+				{
+					_dataProtectionProvider = ServiceProvider?.GetService(typeof(IDataProtectionProvider)) as IDataProtectionProvider;
+					_dataProtectionResolved = true;
+				}
+				return _dataProtectionProvider;
+			}
+		}
 
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
