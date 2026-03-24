@@ -198,6 +198,9 @@ When migrating from Web Forms to Blazor:
 
 ## See Also
 
-- [Label](Label.md) - Display static text
-- [Button](Button.md) - Trigger actions
-- [RequiredFieldValidator](../ValidationControls/RequiredFieldValidator.md) - Validate required fields
+- [Label](Label.md) — Display static text
+- [Button](Button.md) — Trigger actions
+- [DropDownList](DropDownList.md) — Select from a list
+- [ListBox](ListBox.md) — Multiple selection list
+- [RequiredFieldValidator](../ValidationControls/RequiredFieldValidator.md) — Validate required fields
+- [RegularExpressionValidator](../ValidationControls/RegularExpressionValidator.md) — Pattern validation

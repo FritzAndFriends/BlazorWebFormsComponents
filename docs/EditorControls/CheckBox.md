@@ -21,52 +21,60 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `InputAttributes` property is not implemented
 - `LabelAttributes` property is not implemented
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:CheckBox
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    Checked="True|False"
-    CssClass="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnCheckedChanged="CheckedChanged event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Text="string"
-    TextAlign="Left|Right"
-    ToolTip="string"
-    ValidationGroup="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:CheckBox
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        Checked="True|False"
+        CssClass="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnCheckedChanged="CheckedChanged event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Text="string"
+        TextAlign="Left|Right"
+        ToolTip="string"
+        ValidationGroup="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <CheckBox Text="I agree to the terms and conditions" />
+    ```
 
 ## Blazor Syntax
 
@@ -192,6 +200,10 @@ When migrating from Web Forms to Blazor:
           OnCheckedChanged="HandleChange" />
 ```
 
-## Live Sample
+## See Also
 
-See the CheckBox component in action on the [live samples site](https://blazorwebformscomponents.azurewebsites.net/ControlSamples/CheckBox).
+- [CheckBoxList](CheckBoxList.md) — Multiple selection variant of CheckBox
+- [RadioButton](RadioButton.md) — Individual radio button
+- [RadioButtonList](RadioButtonList.md) — Multiple radio buttons with single selection
+- [DropDownList](DropDownList.md) — Single selection dropdown
+- [ListBox](ListBox.md) — List-based selection control

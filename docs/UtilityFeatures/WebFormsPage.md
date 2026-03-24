@@ -112,6 +112,30 @@ When you only need ID mangling, omit the `Theme` parameter:
 | `NamingContainer` | Naming scope only | When you need nested naming scopes within a page |
 | `ThemeProvider` | Theme cascading only | When demonstrating theming in isolation |
 
+## IsPostBack Property
+
+The `WebFormsPageBase` class provides an `IsPostBack` property for Web Forms compatibility:
+
+```csharp
+public bool IsPostBack => false;  // Always false in page context
+```
+
+> **Important:** `IsPostBack` always returns `false` at the page level because Blazor pages don't have HTTP postback semantics. For component-level postback detection (in SSR or interactive modes), use `IsPostBack` on `BaseWebFormsComponent` instead.
+
+For page-level initialization patterns, use the Blazor lifecycle directly:
+
+```razor
+@inherits WebFormsPageBase
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Replaces if (!IsPostBack) pattern
+        LoadInitialData();
+    }
+}
+```
+
 ## Moving On
 
 As you refactor away from Web Forms patterns:
@@ -119,9 +143,11 @@ As you refactor away from Web Forms patterns:
 1. **ID Mangling** — Consider using Blazor's built-in `@ref` instead of string-based IDs for element references
 2. **Theming** — Consider migrating to CSS custom properties or a CSS framework for theming
 3. **ViewState** — Blazor preserves component state automatically in component fields; no hidden field serialization needed
+4. **Form Patterns** — For forms that need postback-like behavior in SSR, use ViewState and IsPostBack on components (see ViewStateAndPostBack.md)
 
 ## See Also
 
 - [ID Rendering](IDRendering.md) — How component IDs work in this library
 - [Themes and Skins](../Migration/ThemesAndSkins.md) — Migration guide for Web Forms themes
 - [ViewState](ViewState.md) — How ViewState is emulated
+- [ViewState and PostBack Shim](ViewStateAndPostBack.md) — Comprehensive guide to mode-adaptive PostBack detection and state persistence

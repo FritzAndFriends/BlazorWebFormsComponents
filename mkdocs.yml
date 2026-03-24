@@ -139,19 +139,31 @@ nav:
     - Overview: AjaxToolkit/index.md
     - Migration Guide: AjaxToolkit/migration-guide.md
     - Accordion: AjaxToolkit/Accordion.md
+    - AlwaysVisibleControlExtender: AjaxToolkit/AlwaysVisibleControlExtender.md
     - AutoCompleteExtender: AjaxToolkit/AutoCompleteExtender.md
+    - BalloonPopupExtender: AjaxToolkit/BalloonPopupExtender.md
     - CalendarExtender: AjaxToolkit/CalendarExtender.md
     - CollapsiblePanelExtender: AjaxToolkit/CollapsiblePanelExtender.md
     - ConfirmButtonExtender: AjaxToolkit/ConfirmButtonExtender.md
+    - DragPanelExtender: AjaxToolkit/DragPanelExtender.md
+    - DropShadowExtender: AjaxToolkit/DropShadowExtender.md
     - FilteredTextBoxExtender: AjaxToolkit/FilteredTextBoxExtender.md
     - HoverMenuExtender: AjaxToolkit/HoverMenuExtender.md
+    - ListSearchExtender: AjaxToolkit/ListSearchExtender.md
     - MaskedEditExtender: AjaxToolkit/MaskedEditExtender.md
     - ModalPopupExtender: AjaxToolkit/ModalPopupExtender.md
     - NumericUpDownExtender: AjaxToolkit/NumericUpDownExtender.md
+    - PasswordStrength: AjaxToolkit/PasswordStrength.md
     - PopupControlExtender: AjaxToolkit/PopupControlExtender.md
+    - ResizableControlExtender: AjaxToolkit/ResizableControlExtender.md
+    - RoundedCornersExtender: AjaxToolkit/RoundedCornersExtender.md
     - SliderExtender: AjaxToolkit/SliderExtender.md
+    - SlideShowExtender: AjaxToolkit/SlideShowExtender.md
     - TabContainer: AjaxToolkit/TabContainer.md
+    - TextBoxWatermarkExtender: AjaxToolkit/TextBoxWatermarkExtender.md
     - ToggleButtonExtender: AjaxToolkit/ToggleButtonExtender.md
+    - UpdatePanelAnimationExtender: AjaxToolkit/UpdatePanelAnimationExtender.md
+    - ValidatorCalloutExtender: AjaxToolkit/ValidatorCalloutExtender.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - EnumParameter: UtilityFeatures/EnumParameter.md
@@ -164,6 +176,7 @@ nav:
     - Service Registration: UtilityFeatures/ServiceRegistration.md
     - Styling Components: UtilityFeatures/StylingComponents.md
     - ViewState: UtilityFeatures/ViewState.md
+    - ViewState and PostBack Shim: UtilityFeatures/ViewStateAndPostBack.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting started: Migration/readme.md

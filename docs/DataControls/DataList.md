@@ -159,12 +159,10 @@ The **DataList** component emulates the ASP.NET Web Forms `asp:DataList` control
     </DataList>
     ```
 
-## Migration Notes
+## See Also
 
-1. **Remove the `asp:` prefix** — `<asp:DataList>` becomes `<DataList>`
-2. **Remove `runat="server"`** — Not needed in Blazor
-3. **Add `ItemType`** — The `ItemType` attribute is required in the Blazor version
-4. **Use `SelectMethod`** — Replace code-behind `DataSource`/`DataBind()` with `SelectMethod`
-5. **Use `Context="Item"`** — For Web Forms compatibility, use `Context="Item"` in templates to access the current item as `@Item`
-6. **Style sub-components** — `HeaderStyle`, `ItemStyle`, `AlternatingItemStyle`, `FooterStyle` work the same way
-7. **Layout properties** — `RepeatLayout`, `RepeatDirection`, and `RepeatColumns` map directly
+- [GridView](GridView.md) — The recommended data grid control for new projects
+- [DataGrid](DataGrid.md) — Legacy grid control
+- [Repeater](Repeater.md) — For lightweight data repetition
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DataPager](DataPager.md) — Shared paging for multiple controls

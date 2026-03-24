@@ -123,4 +123,5 @@ MultiView and View render **no wrapper HTML elements**. Only the active View's c
 
 ## See Also
 
-- [Panel](../EditorControls/Panel.md) — Another container component
+- [Panel](../EditorControls/Panel.md) — Div-based container
+- [View](View.md) — Individual view within a MultiView

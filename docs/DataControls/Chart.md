@@ -476,6 +476,8 @@ Stacks multiple series vertically within each category column. Use this when you
 
 - [GridView](GridView.md) — Data grid with row templates
 - [Repeater](Repeater.md) — Flexible data repeater
+- [DataList](DataList.md) — Repeating data with layout options
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DetailsView](DetailsView.md) — Single record display
+- [FormView](FormView.md) — Custom single record layout
 - [JavaScript Setup](../UtilityFeatures/JavaScriptSetup.md) — JavaScript configuration for the library
-- [Chart.js Documentation](https://www.chartjs.org/docs/) — The underlying charting library
-- [Microsoft Chart Class Reference](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.datavisualization.charting.chart?view=netframework-4.8)

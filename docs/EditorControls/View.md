@@ -156,5 +156,5 @@ When migrating from Web Forms to Blazor:
 ## See Also
 
 - [MultiView](MultiView.md) — Parent container for View components
-- [Panel](Panel.md) — Another container component
+- [Panel](Panel.md) — Div-based container
 - [PlaceHolder](PlaceHolder.md) — Container with no wrapper element

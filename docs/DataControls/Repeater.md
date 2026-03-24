@@ -207,5 +207,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 ## See Also
 
 - [DataList](DataList.md) — Repeating data with table/flow layout options
+- [DataGrid](DataGrid.md) — Legacy grid control
 - [ListView](ListView.md) — Full-featured list with CRUD, paging, and grouping
 - [GridView](GridView.md) — Tabular data grid
+- [DataPager](DataPager.md) — Shared paging for multiple controls

@@ -169,8 +169,9 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ## See Also
 
-- [RequiredFieldValidator](RequiredFieldValidator.md)
-- [CompareValidator](CompareValidator.md)
-- [RangeValidator](RangeValidator.md)
-- [RegularExpressionValidator](RegularExpressionValidator.md)
-- [ValidationSummary](ValidationSummary.md)
+- [RequiredFieldValidator](RequiredFieldValidator.md) — Validate required fields
+- [CompareValidator](CompareValidator.md) — Compare values
+- [RangeValidator](RangeValidator.md) — Validate value ranges
+- [RegularExpressionValidator](RegularExpressionValidator.md) — Pattern validation
+- [ValidationSummary](ValidationSummary.md) — Display validation errors
+- [BaseValidator](BaseValidator.md) — Base class for all validators

@@ -17,12 +17,12 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `ForeColor` — Text color for error messages
 - `Enabled` — Enable or disable the summary
 - `Visible` — Show or hide the component
+- All style properties (`BackColor`, `BorderColor`, `BorderStyle`, `BorderWidth`, `Width`, `Height`, `Font`)
 
 ## Web Forms Features NOT Supported
 
 - **ShowMessageBox** — JavaScript alert boxes are not supported; use inline display instead
-- **EnableClientScript** — Blazor uses its own validation model
-- **ShowValidationErrors** — Not implemented separately; controlled via `ShowSummary`
+- **EnableClientScript** — Blazor uses its own validation model (stub parameter exists for migration compatibility)
 
 ## Syntax Comparison
 
@@ -30,17 +30,25 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
     ```html
     <asp:ValidationSummary
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
         DisplayMode="BulletList|List|SingleParagraph"
         EnableClientScript="True|False"
         Enabled="True|False"
+        Font-Bold="True|False"
         ForeColor="color name|#dddddd"
         HeaderText="string"
+        Height="size"
         ID="string"
         runat="server"
         ShowMessageBox="True|False"
         ShowSummary="True|False"
         ValidationGroup="string"
         Visible="True|False"
+        Width="size"
     />
     ```
 
@@ -48,12 +56,18 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
     ```razor
     <AspNetValidationSummary
+        BackColor="WebColor.LightYellow"
+        BorderColor="WebColor.Red"
+        BorderStyle="BorderStyle.Solid"
+        CssClass="validation-summary"
         DisplayMode="ValidationSummaryDisplayMode.BulletList"
+        Enabled="true"
+        ForeColor="WebColor.Red"
         HeaderText="Please correct the following errors:"
         ShowSummary="true"
         ValidationGroup="MyGroup"
-        CssClass="validation-summary"
-        ForeColor="WebColor.Red" />
+        Visible="true"
+    />
     ```
 
 ## Properties
@@ -65,9 +79,18 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 | `ShowSummary` | `bool` | `true` | Whether to display the summary |
 | `ValidationGroup` | `string` | `null` | Filter errors by validation group |
 | `CssClass` | `string` | `null` | CSS class for the container |
-| `ForeColor` | `WebColor` | `Red` | Text color of error messages |
+| `ForeColor` | `WebColor` | `default` | Text color of error messages |
+| `BackColor` | `WebColor` | `default` | Background color |
+| `BorderColor` | `WebColor` | `default` | Border color |
+| `BorderStyle` | `BorderStyle` | `NotSet` | Border style |
+| `BorderWidth` | `Unit` | `default` | Border width |
+| `Width` | `Unit` | `default` | Container width |
+| `Height` | `Unit` | `default` | Container height |
+| `Font` | `FontInfo` | `new FontInfo()` | Font properties (Bold, Italic, etc.) |
 | `Enabled` | `bool` | `true` | Enable or disable the component |
 | `Visible` | `bool` | `true` | Show or hide the component |
+| `EnableClientScript` | `bool` | `true` | Stub for migration compatibility (no effect) |
+| `ShowMessageBox` | `bool` | `false` | Stub for migration compatibility (no effect) |
 
 ### DisplayMode Values
 
@@ -96,6 +119,15 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     <AspNetValidationSummary HeaderText="Please fix the following errors:" />
     <button type="submit">Submit</button>
 </EditForm>
+
+@code {
+    private var model = new FormModel();
+    
+    private void HandleSubmit()
+    {
+        // Process form submission
+    }
+}
 ```
 
 ### With ValidationGroup
@@ -119,29 +151,166 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
         <Button Text="Validate" ValidationGroup="Personal" />
     </EditForm>
 </ValidationGroupProvider>
+
+@code {
+    private var model = new FormModel();
+}
 ```
 
 ### Display Modes
 
 ```razor
 @* Bulleted list (default) *@
-<AspNetValidationSummary DisplayMode="ValidationSummaryDisplayMode.BulletList" />
+<AspNetValidationSummary 
+    HeaderText="Errors:"
+    DisplayMode="ValidationSummaryDisplayMode.BulletList" />
 
 @* Plain list *@
-<AspNetValidationSummary DisplayMode="ValidationSummaryDisplayMode.List" />
+<AspNetValidationSummary 
+    HeaderText="Errors:"
+    DisplayMode="ValidationSummaryDisplayMode.List" />
 
 @* Single paragraph *@
-<AspNetValidationSummary DisplayMode="ValidationSummaryDisplayMode.SingleParagraph" />
+<AspNetValidationSummary 
+    HeaderText="Errors:"
+    DisplayMode="ValidationSummaryDisplayMode.SingleParagraph" />
 ```
 
 ### Styled Summary
 
 ```razor
 <AspNetValidationSummary
-    HeaderText="Errors:"
+    HeaderText="Errors occurred:"
     CssClass="alert alert-danger"
     ForeColor="WebColor.DarkRed"
+    BackColor="WebColor.LightPink"
+    BorderColor="WebColor.Red"
+    BorderStyle="BorderStyle.Solid"
+    BorderWidth="1px"
     DisplayMode="ValidationSummaryDisplayMode.BulletList" />
+```
+
+### Multiple Validation Groups
+
+```razor
+@using BlazorWebFormsComponents.Validations
+
+<ValidationGroupProvider>
+    <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+        @* Personal Information Section *@
+        <h3>Personal Information</h3>
+        <InputText @bind-Value="model.FirstName" />
+        <RequiredFieldValidator ControlToValidate="FirstName"
+                                ErrorMessage="First name is required"
+                                ValidationGroup="Personal" />
+
+        <InputText @bind-Value="model.LastName" />
+        <RequiredFieldValidator ControlToValidate="LastName"
+                                ErrorMessage="Last name is required"
+                                ValidationGroup="Personal" />
+
+        <AspNetValidationSummary
+            HeaderText="Personal Info Errors:"
+            ValidationGroup="Personal"
+            CssClass="alert alert-danger" />
+
+        @* Business Information Section *@
+        <h3>Business Information</h3>
+        <InputText @bind-Value="model.Company" />
+        <RequiredFieldValidator ControlToValidate="Company"
+                                ErrorMessage="Company is required"
+                                ValidationGroup="Business" />
+
+        <InputText @bind-Value="model.JobTitle" />
+        <RequiredFieldValidator ControlToValidate="JobTitle"
+                                ErrorMessage="Job title is required"
+                                ValidationGroup="Business" />
+
+        <AspNetValidationSummary
+            HeaderText="Business Info Errors:"
+            ValidationGroup="Business"
+            CssClass="alert alert-danger" />
+
+        <Button Text="Validate Personal" ValidationGroup="Personal" />
+        <Button Text="Validate Business" ValidationGroup="Business" />
+        <Button Text="Submit All" CausesValidation="false" OnClick="HandleSubmit" />
+    </EditForm>
+</ValidationGroupProvider>
+
+@code {
+    private var model = new FormModel();
+    
+    private void HandleSubmit()
+    {
+        // Process form submission
+    }
+}
+```
+
+### With Multiple Validators
+
+```razor
+<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+    <div>
+        <Label Text="Email:" AssociatedControlID="email" />
+        <InputText id="email" @bind-Value="model.Email" />
+        <RequiredFieldValidator ControlToValidate="Email"
+                                ErrorMessage="Email is required"
+                                Text="*" />
+        <RegularExpressionValidator ControlToValidate="Email"
+                                    ValidationExpression="^[\w.-]+@[\w.-]+\.\w+$"
+                                    ErrorMessage="Email format is invalid"
+                                    Text="Invalid format" />
+    </div>
+
+    <AspNetValidationSummary
+        HeaderText="Please correct the following errors:"
+        DisplayMode="ValidationSummaryDisplayMode.BulletList"
+        CssClass="validation-summary alert alert-danger" />
+
+    <button type="submit">Submit</button>
+</EditForm>
+
+@code {
+    private var model = new FormModel();
+    
+    private void HandleSubmit()
+    {
+        // Form is valid and ready to submit
+    }
+}
+```
+
+## HTML Output
+
+**Bulleted List (default):**
+```html
+<!-- Blazor Input -->
+<AspNetValidationSummary 
+    HeaderText="Errors:"
+    DisplayMode="ValidationSummaryDisplayMode.BulletList" />
+
+<!-- Rendered HTML (with errors) -->
+<div title="">
+    <b>Errors:</b>
+    <ul>
+        <li>Name is required</li>
+        <li>Email format is invalid</li>
+    </ul>
+</div>
+```
+
+**Plain List:**
+```html
+<!-- Blazor Input -->
+<AspNetValidationSummary 
+    DisplayMode="ValidationSummaryDisplayMode.List" />
+
+<!-- Rendered HTML -->
+<div title="">
+    Name is required<br>
+    Email format is invalid<br>
+</div>
 ```
 
 ## Migration Notes
@@ -149,9 +318,10 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 1. **Change tag name** — Replace `<asp:ValidationSummary>` with `<AspNetValidationSummary>`
 2. **Remove `runat="server"`** — Not needed in Blazor
 3. **Remove `ShowMessageBox`** — JavaScript alert boxes are not supported in Blazor
-4. **Remove `EnableClientScript`** — Not applicable in Blazor
+4. **Remove `EnableClientScript`** — Not applicable in Blazor (though the parameter exists as a stub)
 5. **Update `DisplayMode` enum** — Change `DisplayMode="BulletList"` to `DisplayMode="ValidationSummaryDisplayMode.BulletList"`
-6. **`HeaderText` and `ForeColor` work the same** — These properties transfer directly
+6. **Colors use `WebColor` enum** — Instead of color name strings
+7. **Must be inside `<EditForm>`** — Requires a cascading `EditContext`
 
 ### Migration Example
 
@@ -188,4 +358,5 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - [RangeValidator](RangeValidator.md) — Validate value ranges
 - [RegularExpressionValidator](RegularExpressionValidator.md) — Pattern validation
 - [CustomValidator](CustomValidator.md) — Custom validation logic
+- [BaseValidator](BaseValidator.md) — Base class for all validators
 - [ControlToValidate](ControlToValidate.md) — Control reference patterns

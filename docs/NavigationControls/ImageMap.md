@@ -343,4 +343,6 @@ protected void imgMap1_Click(object sender, ImageMapEventArgs e)
 
 - [Image](../EditorControls/Image.md) — The basic Image component
 - [ImageButton](../EditorControls/ImageButton.md) — A clickable image button
-- [Microsoft Docs: ImageMap Control](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.imagemap?view=netframework-4.8)
+- [HyperLink](HyperLink.md) — Simple link navigation
+- [Menu](Menu.md) — Hierarchical navigation menu
+- [SiteMapPath](SiteMapPath.md) — Breadcrumb navigation path

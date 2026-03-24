@@ -374,4 +374,6 @@ The `Caption` and `CaptionAlign` properties render a `<caption>` element inside 
 - [FormView](FormView.md) — Similar single-record view with full template control
 - [GridView](GridView.md) — Multi-record tabular display with similar field types
 - [DataList](DataList.md) — Repeating data display
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DataPager](DataPager.md) — Shared paging for multiple controls
 - [PagerSettings](PagerSettings.md) — Shared pager configuration

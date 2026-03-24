@@ -452,7 +452,9 @@ Each style component accepts standard style properties: `BackColor`, `ForeColor`
 
 ## See Also
 
-- [GridView](GridView.md) - For tabular data display
-- [DetailsView](DetailsView.md) - Similar single-record display
-- [DataList](DataList.md) - For repeating data templates
-- [PagerSettings](PagerSettings.md) - Shared pager configuration
+- [GridView](GridView.md) — For tabular data display
+- [DetailsView](DetailsView.md) — Similar single-record display
+- [DataList](DataList.md) — For repeating data templates
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DataPager](DataPager.md) — Shared paging for multiple controls
+- [PagerSettings](PagerSettings.md) — Shared pager configuration

@@ -193,6 +193,8 @@ var pagedData = allData.Skip(dataPager.StartRowIndex).Take(dataPager.MaximumRows
 
 ## See Also
 
-- [ListView](../DataControls/ListView.md)
-- [GridView](../DataControls/GridView.md)
-- [Repeater](../DataControls/Repeater.md)
+- [ListView](ListView.md) — Full-featured list with built-in paging
+- [GridView](GridView.md) — Multi-record tabular display
+- [Repeater](Repeater.md) — For lightweight data repetition
+- [DataList](DataList.md) — For repeating data with layout options
+- [DetailsView](DetailsView.md) — Single record display

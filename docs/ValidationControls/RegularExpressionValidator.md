@@ -61,7 +61,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `ValidationExpression` | `string` | `null` | Regular expression pattern to validate against |
-| `MatchTimeout` | `TimeSpan?` | `null` | Timeout for regex evaluation (prevents ReDoS) |
+| `MatchTimeout` | `int?` | `null` | Timeout in milliseconds for regex evaluation (prevents ReDoS) |
 | `ControlToValidate` | `string` | `null` | Model property name to validate |
 | `ControlRef` | `ForwardRef<InputBase<T>>` | `null` | Typed reference to input control |
 | `Text` | `string` | `null` | Error text displayed inline |
@@ -69,8 +69,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 | `Display` | `ValidatorDisplay` | `Static` | How error message is displayed |
 | `ValidationGroup` | `string` | `null` | Selective validation group |
 | `Enabled` | `bool` | `true` | Enable or disable the validator |
-
-## Examples
+| `ForeColor` | `WebColor` | `Red` | Text color of error message |
 
 ### Email Validation
 
@@ -99,10 +98,10 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 ```razor
 <EditForm Model="@model">
-    <InputText @bind-Value="model.Phone" />
+    <InputText @bind-Value="model.Phone" placeholder="(555) 123-4567" />
     <RegularExpressionValidator
         ControlToValidate="Phone"
-        ValidationExpression="^\(\d{3}\)\s?\d{3}-\d{4}$"
+        ValidationExpression="^(\(\d{3}\)\s?)?\d{3}-\d{4}$"
         Text="Format: (555) 123-4567"
         ErrorMessage="Invalid phone number format" />
 </EditForm>
@@ -114,7 +113,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 @using BlazorWebFormsComponents.Validations
 
 <EditForm Model="@model">
-    <InputText @ref="ZipInput.Current" @bind-Value="model.ZipCode" />
+    <InputText @ref="ZipInput.Current" @bind-Value="model.ZipCode" placeholder="12345 or 12345-6789" />
     <RegularExpressionValidator
         ControlRef="@ZipInput"
         ValidationExpression="^\d{5}(-\d{4})?$"
@@ -134,13 +133,85 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 <RegularExpressionValidator
     ControlToValidate="Input"
     ValidationExpression="^(?:[a-z0-9]+\.)*[a-z0-9]+$"
-    MatchTimeout="@TimeSpan.FromSeconds(2)"
+    MatchTimeout="2000"
     Text="Invalid format"
     ErrorMessage="Input does not match the required pattern" />
 ```
 
+### Username Validation
+
+```razor
+<EditForm Model="@model">
+    <InputText @bind-Value="model.Username" placeholder="alphanumeric and underscore" />
+    <RegularExpressionValidator
+        ControlToValidate="Username"
+        ValidationExpression="^[a-zA-Z0-9_]{3,20}$"
+        Text="Username must be 3-20 characters (letters, numbers, underscore only)"
+        ErrorMessage="Username format is invalid" />
+</EditForm>
+```
+
+### URL Validation
+
+```razor
+<EditForm Model="@model">
+    <InputText @bind-Value="model.Website" placeholder="https://example.com" />
+    <RegularExpressionValidator
+        ControlToValidate="Website"
+        ValidationExpression="^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$"
+        Text="Please enter a valid URL"
+        ErrorMessage="The website URL is not valid" />
+</EditForm>
+```
+
+### Hexadecimal Color Code Validation
+
+```razor
+<EditForm Model="@model">
+    <InputText @bind-Value="model.Color" placeholder="#RRGGBB" />
+    <RegularExpressionValidator
+        ControlToValidate="Color"
+        ValidationExpression="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+        Text="Enter a valid hex color (e.g., #FF5733 or #F57)"
+        ErrorMessage="Invalid color format" />
+</EditForm>
+```
+
 !!! tip "Preventing ReDoS Attacks"
-    Use the `MatchTimeout` property when your regex pattern could be vulnerable to Regular Expression Denial of Service (ReDoS) attacks. This sets a timeout for the regex engine, preventing catastrophic backtracking on malicious input.
+    Use the `MatchTimeout` property when your regex pattern could be vulnerable to Regular Expression Denial of Service (ReDoS) attacks. This sets a timeout (in milliseconds) for the regex engine, preventing catastrophic backtracking on malicious input. For example, set `MatchTimeout="2000"` for a 2-second timeout.
+
+## HTML Output
+
+**Email Input with Validation:**
+```html
+<!-- Blazor Input -->
+<InputText @bind-Value="model.Email" />
+<RegularExpressionValidator
+    ControlToValidate="Email"
+    ValidationExpression="^[\w.-]+@[\w.-]+\.\w+$"
+    Text="Invalid email"
+    ErrorMessage="Email format is invalid" />
+
+<!-- Rendered HTML (valid input) -->
+<input type="text" value="user@example.com" />
+
+<!-- Rendered HTML (invalid input, Display=Dynamic) -->
+<input type="text" value="invalid-email" />
+<span style="color:Red;">Invalid email</span>
+```
+
+## Common Regular Expression Patterns
+
+| Pattern | Use Case | Example |
+|---------|----------|---------|
+| `^[\w.-]+@[\w.-]+\.\w+$` | Email address | user@example.com |
+| `^(\(\d{3}\)\s?)?\d{3}-\d{4}$` | US Phone | (555) 123-4567 |
+| `^\d{5}(-\d{4})?$` | US ZIP Code | 12345 or 12345-6789 |
+| `^[a-zA-Z0-9_]{3,20}$` | Username | john_doe, user123 |
+| `^https?://...` | URL | https://example.com |
+| `^#([A-Fa-f0-9]{6}\|[A-Fa-f0-9]{3})$` | Hex Color | #FF5733 or #F57 |
+| `^\d{3}-\d{2}-\d{4}$` | SSN | 123-45-6789 |
+| `^\d{4}[-/]\d{2}[-/]\d{2}$` | Date | 2023-12-25 or 2023/12/25 |
 
 ## Migration Notes
 

@@ -455,7 +455,10 @@ When migrating DataGrid from Web Forms to Blazor:
 
 ## See Also
 
-- [GridView](GridView.md) - The recommended data grid control for new projects
-- [DataList](DataList.md) - For custom layout of repeating data
-- [Repeater](Repeater.md) - For lightweight data repetition
-- [PagerSettings](PagerSettings.md) - Shared pager configuration (used by GridView, FormView, DetailsView)
+- [GridView](GridView.md) — The recommended data grid control for new projects
+- [DataList](DataList.md) — For custom layout of repeating data
+- [Repeater](Repeater.md) — For lightweight data repetition
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DetailsView](DetailsView.md) — Single record display
+- [FormView](FormView.md) — Custom single record layout
+- [DataPager](DataPager.md) — Shared paging for multiple controls
