@@ -6,6 +6,8 @@
 - **Created:** 2026-02-10
 
 
+📌 Team update (2026-03-24): Documentation task breakdown complete — 8 GitHub issues (#505–#512) created for component doc syntax conversions, ViewState/PostBack migration guide, and cross-linking. Issues labeled squad+type:docs. Coordinate with Forge for content review. #508 (ViewState docs) blocks on PR #503 merge. — decided by Forge
+
 📌 Team update (2026-03-17): HttpHandlerBase implementation complete (7 files in Handlers/). Returns IEndpointConventionBuilder; Session markers added; build passes 0 errors. — decided by Cyclops
 
 ## Core Context

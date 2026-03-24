@@ -12682,3 +12682,71 @@ These tests should be updated (not deleted) to reflect the new contract. My new 
 
 
 
+
+
+### 2026-03-24: Documentation Task Breakdown  8 GitHub Issues Created
+
+# Documentation Improvement Task Breakdown — Forge Decision
+
+**Date**: 2025-01-24  
+**Context**: Post-audit follow-up to comprehensive documentation review (Beast quality pass + Forge organization/structure review)  
+**Source**: PR #504 (tabbed syntax template) + PR #503 (ViewState Phase 1) + documentation audit findings
+
+## Summary
+
+Decomposed remaining documentation improvement work into 8 actionable, parallelizable GitHub issues. All issues labeled `squad` + `type:docs` for triage and visibility.
+
+## Issues Created
+
+| Issue | Title | Scope | Est. LOE |
+|-------|-------|-------|---------|
+| #505 | Convert DataControls docs to tabbed syntax | GridView, Repeater, DataGrid, DataList, ListView, DetailsView, FormView, Chart, DataPager, PagerSettings | High (complex components) |
+| #506 | Convert ValidationControls docs to tabbed syntax | BaseValidator, BaseCompareValidator, CompareValidator, RangeValidator, CustomValidator + expand stubs (RegularExpressionValidator, ValidationSummary) | Medium |
+| #507 | Expand stub documentation | RegularExpressionValidator (TODO → full doc), ValidationSummary (headers only → full doc), Label.md (incomplete) | Medium |
+| #508 | Document ViewState and PostBack shim features | Create ViewStateAndPostBack.md migration guide, document ViewStateDictionary, IsPostBack, hidden field persistence | Medium |
+| #509 | Complete User-Controls.md migration guide | Expand with ViewState patterns, state management, PostBack handling, working examples | Medium |
+| #510 | Convert EditorControls docs to tabbed syntax | RadioButton, TextBox, DropDownList, ListBox, CheckBoxList, RadioButtonList, LinkButton, ImageButton, FileUpload, HiddenField, Image, AdRotator, Calendar, BulletedList, Table, Literal, PlaceHolder, MultiView, View, Content, ContentPlaceHolder, Localize | High (large volume) |
+| #511 | Add cross-linking between related components | Validation controls ↔ each other, list controls ↔ variants, data controls ↔ each other | Low (mechanical) |
+| #512 | Update mkdocs.yml navigation | Add new migration guides, verify all docs indexed, no broken nav links | Low (configuration) |
+
+## Pattern Established
+
+All issues follow this template:
+- **Context**: Why this matters
+- **Scope**: Specific files/components affected
+- **Definition of Done**: Measurable completion criteria
+- **Notes**: Implementation guidance and gotchas
+
+## Key Decisions
+
+1. **Batch by component family** (EditorControls, DataControls, ValidationControls) for parallel work
+2. **Expand stubs as part of syntax conversion**, not as separate work
+3. **ViewState/PostBack as new migration guide**, separate from component docs
+4. **Cross-linking as low-priority cleanup** (can happen in parallel with syntax conversion)
+5. **mkdocs.yml kept separate** to avoid conflicts during other doc work
+
+## Next Steps (Team Action)
+
+1. Assign issues to squad members (`agent:beast` for content, `squad:forge` for review)
+2. Start with EditorControls + DataControls conversions (highest volume)
+3. Stub expansion (#507) can run in parallel once pattern is confirmed
+4. ViewState documentation (#508) depends on PR #503 being merged; post-merge priority
+5. Cross-linking (#510) is final-pass work; start after syntax conversions complete
+6. mkdocs.yml (#511) should be last to avoid navigation churn during other edits
+
+## Related Work
+
+- **PR #504**: Established tabbed syntax template (Button, Panel, CheckBox as reference implementations)
+- **PR #503**: ViewState Phase 1 — features now documented in #508
+- **Documentation Audit**: Identified 22+ inconsistent code blocks, missing side-by-sides, incomplete guides
+
+## Files Touched
+
+- `.squad/decisions/inbox/forge-doc-task-plan.md` (this file) — decision log
+- `.squad/agents/forge/history.md` — appended learnings
+
+---
+
+**Assigned to**: Forge (Lead Review)  
+**Status**: Issues created and triaged; awaiting team assignment
+
