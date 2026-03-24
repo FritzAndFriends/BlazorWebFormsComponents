@@ -15,6 +15,33 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### ViewState & PostBack Shim Architecture Proposal (2026-03-24)
+
+**Delivered architecture proposal for enhanced ViewState and PostBack shims at Jeffrey's request.**
+
+1. **ViewState current state:** `Dictionary<string, object>` on `BaseWebFormsComponent` (line 149-153) and `WebFormsPageBase` (lines 97-103), both marked `[Obsolete]`, in-memory only, no persistence in SSR mode.
+
+2. **IsPostBack current state:** Hardcoded `=> false` on `WebFormsPageBase` (lines 64-70). Always false — accidentally correct for `OnInitialized` but wrong for form POSTs in SSR.
+
+3. **AutoPostBack:** Present on 8 controls (DropDownList, CheckBox, TextBox, RadioButton, ListBox, RadioButtonList, CheckBoxList, BulletedList). All `[Obsolete]` except BulletedList (inconsistency). No actual behavior.
+
+4. **Key design decisions:**
+   - ViewState → `ViewStateDictionary` (implements `IDictionary<string, object>`) with mode-adaptive persistence (hidden field in SSR via `IDataProtector`, in-memory in Interactive)
+   - IsPostBack → mode-adaptive (HTTP method check in SSR, lifecycle tracking in Interactive)
+   - AutoPostBack → `onchange="this.form.submit()"` in SSR, already works in Interactive
+   - IPostBackEventHandler NOT shimmed (too deep in lifecycle)
+   - Analyzers BWFC002/003/020 updated, BWFC023 unchanged, new BWFC025
+
+5. **Rendering mode detection:** Uses existing `IsHttpContextAvailable` pattern (`IHttpContextAccessor.HttpContext is not null`). SSR = available, Interactive = null. Auto-detection, no configuration.
+
+6. **Key files:**
+   - Proposal: `dev-docs/architecture/ViewState-PostBack-Shim-Proposal.md`
+   - Decision: `.squad/decisions/inbox/forge-viewstate-postback-architecture.md`
+   - Analyzers: `src/BlazorWebFormsComponents.Analyzers/ViewStateUsageAnalyzer.cs` (BWFC002), `IsPostBackUsageAnalyzer.cs` (BWFC003), `ViewStatePropertyPatternAnalyzer.cs` (BWFC020), `IPostBackEventHandlerUsageAnalyzer.cs` (BWFC023)
+   - DepartmentFilter sample: `samples/DepartmentPortal/Controls/DepartmentFilter.ascx.cs` (canonical ViewState+PostBack example)
+
+7. **Jeffrey's intent:** Make ASCX user controls migrate with zero code-behind changes. ViewState-backed property pattern and `!IsPostBack` guard should work unchanged.
+
 ### Documentation Organization & Structure Audit (Current Session)
 
 **Complete read-only audit of mkdocs.yml nav structure, component docs quality, and developer journey mapping.**

@@ -45,7 +45,7 @@ This library is specifically designed for **brown-field application developers**
    ```razor
    @* Web Forms: <asp:Button ID="btnSave" Text="Save" runat="server" /> *@
    <Button Text="Save" OnClick="HandleSave" />
-   
+
    <TextBox @bind-Text="myValue" />
    <RequiredFieldValidator ControlToValidate="..." Text="Required" />
    ```
@@ -77,22 +77,22 @@ Visit the **[Live Sample Site](https://blazorwebformscomponents.azurewebsites.ne
 
 ## Key Features
 
-✅ **Same Names, Same Markup** — Use the exact same control names and properties  
-✅ **Identical HTML Output** — CSS and JavaScript integrations work unchanged  
-✅ **Event Bubbling** — Command events bubble through container components  
-✅ **Data Binding** — Familiar `@bind` syntax for two-way binding  
-✅ **Validation Integration** — Form validation with ValidationGroup support  
-✅ **Utility Helpers** — DataBinder, ViewState, ID rendering, and more  
+✅ **Same Names, Same Markup** — Use the exact same control names and properties
+✅ **Identical HTML Output** — CSS and JavaScript integrations work unchanged
+✅ **Event Bubbling** — Command events bubble through container components
+✅ **Data Binding** — Familiar `@bind` syntax for two-way binding
+✅ **Validation Integration** — Form validation with ValidationGroup support
+✅ **Utility Helpers** — DataBinder, ViewState, ID rendering, and more
 
 ## What You Need to Know
 
-This library prioritizes **compatibility** over modern best practices. Some behaviors and HTML structures follow Web Forms patterns for consistency. For applications that need a cleaner, more modern approach, consider a complete Blazor rewrite using native components.
+This library prioritizes **compatibility** over modern best practices. Some behaviors and HTML structures follow Web Forms patterns for consistency. Once your projects are running on the new version of .NET, you can consider adding modern coding techniques to improve performance and code readibility.
 
 The library supports **.NET 6+** as both a **Razor Class Library** and **static server-side rendering (SSR)** for Blazor Server and Blazor Web applications.
 
 ## See Also
 
 - [Component List](../README.md#blazor-components-for-controls) — Full catalog of available components
-- [Utility Features](UtilityFeatures/PageService.md) — Helpers like DataBinder, ViewState, and Page.IsPostBack  
+- [Utility Features](UtilityFeatures/PageService.md) — Helpers like DataBinder, ViewState, and Page.IsPostBack
 - [Custom Controls Migration](Migration/Custom-Controls.md) — Migrate your custom Web Forms controls
 - [API Reference](AjaxToolkit/index.md) — Detailed property and event documentation
