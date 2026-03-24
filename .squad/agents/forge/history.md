@@ -397,6 +397,39 @@ The current migration-toolkit is 100% EDMX-blind. Zero references to EDMX in scr
 
 **Task:** Design Blazor-native architecture for Ajax Control Toolkit extenders (#442, M24). This is the gating architecture decision for all 13+ ACT component implementations.
 
+---
+
+## Team Update: Documentation Fan-Out Wave 1 (2026-03-24)
+
+📌 **Session:** 2026-03-24T16:14:14Z-doc-fanout-wave1  
+**Initiated by:** Scribe (squad orchestration)
+
+### Coordination Summary
+
+Parallel fan-out of three documentation agents to standardize control library documentation:
+
+- **Beast:** 28 EditorControls files → tabbed syntax (PR #514, closes #510)
+- **Jubilee:** 20 DataControls + ValidationControls files → tabbed syntax (PR #515, closes #505, #506, #507) + AfterDepartmentPortal demo completed
+- **Forge (you):** ViewState.md rewritten (702 lines) + User-Controls.md expanded (626 lines) (PR #513, closes #508, #509) + NuGet asset migration strategy proposed
+
+### Key Decisions Merged into decisions.md
+
+1. **EditorControls Tabbed Syntax Standardization** (#510) — All EditorControls docs now use MkDocs interactive tabs for Web Forms ↔ Blazor comparison
+2. **DataControls + ValidationControls Tabbed Syntax** (#505, #506, #507) — 20 files standardized, stubs expanded to production quality
+3. **AfterDepartmentPortal Runnable Demo** — Bootstrap via CDN, CSS imported from before state, routing resolved
+4. **NuGet Static Asset Migration Strategy** — Option C hybrid approach: extraction for custom packages, CDN suggestions for OSS (awaiting approval)
+
+### Cross-Agent Context
+
+This wave establishes **documentation patterns** that will guide future control categories (NavigationControls, LoginControls). The tabbed syntax pattern enables better UX for migrating developers and maintains consistency across the library.
+
+### Next Phase
+
+- Merge PRs #513, #514, #515 after review
+- Implement NuGet asset migration tool (Forge's strategy, Issue #512)
+- Consider extending tabbed pattern to remaining control categories
+- Session log: `.squad/log/2026-03-24T16-14-14Z-doc-fanout-wave1.md`
+
 **Deliverable:** `.squad/decisions/inbox/forge-ajax-extender-pattern.md`
 
 **Key design decisions:**

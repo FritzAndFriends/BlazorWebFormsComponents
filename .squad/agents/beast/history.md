@@ -11,6 +11,24 @@
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->
 
+### Issue #510: EditorControls Documentation Conversion
+
+**Status:** DELIVERED
+
+**Session (2026-03-17 by Beast):**
+- Converted all 28 EditorControls documentation files to MkDocs tabbed syntax format
+- **Target:** Issue #510 requested tabbed Web Forms vs Blazor syntax conversions
+- **Pattern:** Followed ValidationControls/ControlToValidate.md as reference (===  tabs + !!! admonitions)
+- **Files Converted:** AdRotator, BulletedList, Button, Calendar, CheckBox, CheckBoxList, Content, ContentPlaceHolder, DropDownList, FileUpload, HiddenField, Image, ImageButton, ImageMap, Label, LinkButton, ListBox, Literal, RadioButtonList, ScriptManager, ScriptManagerProxy, Substitution, Table, TextBox, Timer, UpdatePanel, UpdateProgress, View
+- **Key Pattern:** 
+  - Extracted Web Forms declarative syntax → `=== "Web Forms (Before)"` tab
+  - Extracted Blazor syntax → `=== "Blazor (After)"` tab
+  - Added `!!! tip` / `!!! note` admonitions for migration guidance
+  - Maintained all existing examples and feature lists
+  - Preserved code examples using `var` syntax (IDE0007 compliance)
+- **PR Created:** #514 (squad/510-editor-controls-docs → dev branch)
+- **Learnings:** The tabbed syntax (`===`) improves readability significantly vs separate "Web Forms" and "Blazor" sections. MkDocs renders these as interactive tabs, making side-by-side comparison seamless for migrating developers.
+
 ### Issue #: Comprehensive Migration Documentation (User Controls, FindControl, Custom Control Base Classes)
 
  **Status:**  DELIVERED
@@ -477,6 +495,39 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 - Updated `migration-toolkit/skills/bwfc-migration/CONTROL-REFERENCE.md` — replaced "Not Covered" entry with new "Ajax Control Toolkit Extenders" section
 
 **Design Decisions:**
+
+---
+
+## Team Update: Documentation Fan-Out Wave 1 (2026-03-24)
+
+📌 **Session:** 2026-03-24T16:14:14Z-doc-fanout-wave1  
+**Initiated by:** Scribe (squad orchestration)
+
+### Coordination Summary
+
+Parallel fan-out of three documentation agents to standardize control library documentation:
+
+- **Beast (you):** 28 EditorControls files → tabbed syntax (PR #514, closes #510)
+- **Jubilee:** 20 DataControls + ValidationControls files → tabbed syntax (PR #515, closes #505, #506, #507) + AfterDepartmentPortal demo completed
+- **Forge:** ViewState.md rewritten (702 lines) + User-Controls.md expanded (626 lines) (PR #513, closes #508, #509) + NuGet asset migration strategy proposed
+
+### Key Decisions Merged into decisions.md
+
+1. **EditorControls Tabbed Syntax Standardization** (#510) — All EditorControls docs now use MkDocs interactive tabs for Web Forms ↔ Blazor comparison
+2. **DataControls + ValidationControls Tabbed Syntax** (#505, #506, #507) — 20 files standardized, stubs expanded to production quality
+3. **AfterDepartmentPortal Runnable Demo** — Bootstrap via CDN, CSS imported from before state, routing resolved
+4. **NuGet Static Asset Migration Strategy** — Option C hybrid approach: extraction for custom packages, CDN suggestions for OSS (awaiting approval)
+
+### Cross-Agent Context
+
+This wave establishes **documentation patterns** that will guide future control categories (NavigationControls, LoginControls). The tabbed syntax pattern enables better UX for migrating developers and maintains consistency across the library.
+
+### Next Phase
+
+- Merge PRs #513, #514, #515 after review
+- Implement NuGet asset migration tool (Forge's strategy, Issue #512)
+- Consider extending tabbed pattern to remaining control categories
+- Session log: `.squad/log/2026-03-24T16-14-14Z-doc-fanout-wave1.md`
 - **Format consistency:** Followed existing child doc format (header, parent skill reference, horizontal rule, then sections) to integrate seamlessly with CODE-TRANSFORMS.md and CONTROL-REFERENCE.md
 - **Target audience:** Layer 2 Copilot engineer migrating a real Web Forms app with ACT components. Assumes familiarity with bwfc-migration Layer 1/2 pipeline.
 - **Completeness:** Covered all 14 components (Accordion, AccordionPane, AutoCompleteExtender, CalendarExtender, CollapsiblePanelExtender, ConfirmButtonExtender, FilteredTextBoxExtender, HoverMenuExtender, MaskedEditExtender, ModalPopupExtender, NumericUpDownExtender, PopupControlExtender, SliderExtender, TabContainer, TabPanel, ToggleButtonExtender) with migration mechanics and before/after examples
