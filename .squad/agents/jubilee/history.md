@@ -364,3 +364,36 @@
  Team update (2026-03-22): AfterDepartmentPortal Blazor SSR scaffold completed and integrated into solution. 31 files, 7 pages, 12 shared components, 6 models. Project builds clean. Decisions merged to shared decisions.md.  decided by Jubilee
 
 **Runnable demo (2026-03-22):** Made AfterDepartmentPortal fully runnable. App.razor now uses Bootstrap 5.3.3 CDN + Bootstrap Icons CDN instead of missing local CSS. Site.css copied from DepartmentPortal source. Home.razor at /home provides navigation cards to all sections. Fixed SectionPanel duplicate CssClass parameter bug (`new` keyword shadowed base class `[Parameter]`, causing AmbiguousMatchException). Dashboard already owns `@page "/"` so Home lives at `/home`. All routes verified returning 200.
+
+### DataControls & ValidationControls Documentation Conversion (#505, #506, #507) (2026-03-XX)
+
+**Converted 20 documentation files to tabbed Web Forms vs Blazor syntax format:**
+
+**DataControls (10 files):** Chart, DataGrid, DataList, DataPager, DetailsView, FormView, GridView, ListView, PagerSettings, Repeater  each now has:
+- \=== "Web Forms"\ / \=== "Blazor"\ tabbed syntax blocks
+- Properties/features tables with consistent formatting
+- Migration notes showing before/after examples
+- Code examples using \ar\ keyword (not explicit types)
+- \!!! tip\ / \!!! note\ admonitions where applicable
+
+**ValidationControls (10 files):** BaseCompareValidator, BaseValidator, CompareValidator, CustomValidator, ModelErrorMessage, RangeValidator, RegularExpressionValidator, RequiredFieldValidator, ValidationSummary  same tabbed treatment.
+
+**Expanded stubs:**
+- **RegularExpressionValidator** (was \_TODO_\)  Full doc with ValidationExpression patterns, email/phone/postal code examples, MatchTimeout property, migration notes
+- **ValidationSummary** (was minimal stub)  Full feature set including DisplayMode enum values (BulletList, List, SingleParagraph), HeaderText property, ShowSummary behavior, migration examples
+- **Repeater**  Expanded from minimal to full doc with ItemType/Context attributes, complete template structure, data binding patterns
+
+**Key decisions:**
+- Pattern reference: \docs/EditorControls/Button.md\ established the tabbed syntax standard
+- MkDocs \===\ tabbed syntax used consistently (not HTML)
+- All C# code examples use \ar\ (ASP.NET convention matching existing BWFC samples)
+- Properties tables include Type, Default, Description for clarity
+- Each file now contains: Intro/Purpose, Features Supported, Web Forms Features NOT Supported, Syntax Comparison (tabs), Properties Reference, Examples, Migration Notes
+
+**Learnings:**
+- Tabbed syntax improves readability for migration comparisons
+- Stub docs (RegularExpressionValidator, ValidationSummary) needed practical examples to be useful
+- MkDocs \!!! note\ blocks help emphasize Web Forms  Blazor differences (e.g., ValidationSummary naming conflict)
+- Consistent pattern across all data/validation controls supports developer learning curve
+
+**PR:** #515 created, base=dev, head=squad/505-506-data-validation-docs
